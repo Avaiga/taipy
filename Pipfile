@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+pytest = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+pytest-cov = "*"
+tox = "*"
+mkdocs = "*"
+mkdocs-include-markdown-plugin = "*"
+mkdocs-material = "*"
+mkdocstrings = "*"
+mkdocs-material-extensions = "*"
+twine = "*"
+mkdocs-autorefs = "*"
+pre-commit = "*"
+toml = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
