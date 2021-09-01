@@ -1,0 +1,74 @@
+site_name: Taipy
+# site_url: http://www.jieyu.ai
+repo_url: https://github.com/avaiga/taipy
+repo_name: taipy
+#strict: true
+nav:
+  - home: index.md
+  - installation: installation.md
+  - usage: usage.md
+  - modules: api.md
+  - contributing: contributing.md
+  - authors: authors.md
+  - history: history.md
+theme:
+  name: material
+  language: en
+  #logo: assets/logo.png
+  palette:
+    primary: light blue
+  features:
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.instant
+    - navigation.tabs.sticky
+markdown_extensions:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tabbed
+  - attr_list
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.superfences
+  - pymdownx.details
+  - admonition
+  - toc:
+      baselevel: 2
+      permalink: true
+      slugify: !!python/name:pymdownx.slugs.uslugify
+  - meta
+plugins:
+  - include-markdown
+  - search:
+      lang: en
+  - mkdocstrings:
+      watch:
+        - taipy
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      # replace with your own tweet link below
+      link: http://www.jieyu.ai
+      name: Tweet
+    - icon: fontawesome/brands/facebook
+      # replace with your own facebook link below
+      link: http://www.jieyu.ai
+      name: Facebook
+    - icon: fontawesome/brands/github
+      link: https://github.com/avaiga/taipy
+      name: Github
+    - icon: material/email
+      link: "mailto:taipy.dev@avaiga.com"
+  # to enable disqus, uncomment the following and put your disqus id below
+  # disqus: disqus_id
+# uncomment the following and put your google tracking id below to enable GA
+#google_analytics:
+  #- UA-xxx
+  #- auto
