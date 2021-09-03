@@ -1,4 +1,4 @@
-from taipy.task.task import *
+from taipy.task.task import Task
 from taipy.task.types import TaskId
 
 
