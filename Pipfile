@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-tox = "==3.24.3"
 
 [dev-packages]
 pytest = "*"
@@ -22,6 +21,7 @@ twine = "*"
 mkdocs-autorefs = "*"
 pre-commit = "*"
 toml = "*"
+tox = "==3.24.3"
 
 [requires]
 python_version = "3"

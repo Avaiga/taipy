@@ -1,0 +1,1 @@
+from taipy.exceptions.data_source import MissingRequiredProperty
