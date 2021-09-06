@@ -77,7 +77,10 @@ def test_save_and_get_pipeline():
     pipeline_manager.save_pipeline(pipeline_3_with_same_id)
     assert len(pipeline_manager.get_pipelines()) == 2
     assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).name == pipeline_3_with_same_id.name
+    assert (
+        pipeline_manager.get_pipeline(pipeline_id_1).name
+        == pipeline_3_with_same_id.name
+    )
     assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).name == pipeline_2.name
@@ -94,9 +97,15 @@ def test_get_pipeline_schema():
 
     pipeline_id_2 = PipelineId("id2")
     input_2 = EmbeddedDataSource("input_id_2", "foo", Scope.PIPELINE, {"data": "bar"})
-    output_2_1 = EmbeddedDataSource("input_id_2_1", "foo", Scope.PIPELINE, {"data": "bar"})
-    output_2_2 = EmbeddedDataSource("input_id_2_2", "foo", Scope.PIPELINE, {"data": "bar"})
-    task_2 = Task(TaskId("task_id_2"), "task", [input_2], print, [output_2_1, output_2_2])
+    output_2_1 = EmbeddedDataSource(
+        "input_id_2_1", "foo", Scope.PIPELINE, {"data": "bar"}
+    )
+    output_2_2 = EmbeddedDataSource(
+        "input_id_2_2", "foo", Scope.PIPELINE, {"data": "bar"}
+    )
+    task_2 = Task(
+        TaskId("task_id_2"), "task", [input_2], print, [output_2_1, output_2_2]
+    )
     pipeline_2 = Pipeline(pipeline_id_2, "name_2", {}, [task_2])
     pipeline_manager.save_pipeline(pipeline_2)
 
@@ -109,4 +118,7 @@ def test_get_pipeline_schema():
     assert schema_2.id == pipeline_id_2
     assert schema_2.name == pipeline_2.name
     assert schema_2.properties == pipeline_2.properties
-    assert schema_2.dag == {input_2.id: [task_2.id], task_2.id: [output_2_1.id, output_2_2.id]}
+    assert schema_2.dag == {
+        input_2.id: [task_2.id],
+        task_2.id: [output_2_1.id, output_2_2.id],
+    }

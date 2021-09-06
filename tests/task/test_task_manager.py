@@ -25,7 +25,9 @@ def test_save_and_get_task():
     first_task = Task(task_id_1, "name_1", [], print, [])
     task_id_2 = TaskId("id2")
     second_task = Task(task_id_2, "name_2", [], print, [])
-    third_task_with_same_id_as_first_task = Task(task_id_1, "name_is_not_1_anymore", [], print, [])
+    third_task_with_same_id_as_first_task = Task(
+        task_id_1, "name_is_not_1_anymore", [], print, []
+    )
 
     # No task at initialization
     task_manager = TaskManager()

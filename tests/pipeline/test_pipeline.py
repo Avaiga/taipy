@@ -19,7 +19,9 @@ def test_check_consistency():
     pipeline_2 = Pipeline.create_pipeline("name_2", {}, [task_2])
     assert pipeline_2.is_acyclic
 
-    data_source_3 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "data_source_3_id", "bar")
+    data_source_3 = EmbeddedDataSource.create(
+        "foo", Scope.PIPELINE, "data_source_3_id", "bar"
+    )
     task_3 = Task(TaskId("task_id_3"), "foo", [data_source_3], print, [data_source_3])
     pipeline_3 = Pipeline.create_pipeline("name_3", {}, [task_3])
     assert not pipeline_3.is_acyclic
@@ -33,7 +35,9 @@ def test_check_consistency():
 
 
 def test_to_model():
-    input = EmbeddedDataSource.create("input", Scope.PIPELINE, "input_id", "this is some data")
+    input = EmbeddedDataSource.create(
+        "input", Scope.PIPELINE, "input_id", "this is some data"
+    )
     output = EmbeddedDataSource.create("output", Scope.PIPELINE, "output_id", "")
     task = Task(TaskId("task_id"), "task", [input], print, [output])
     pipeline = Pipeline.create_pipeline("name", {"foo": "bar"}, [task])

@@ -1,2 +1,1 @@
-from .task import Task
-from .task import TaskId
+from .task import Task, TaskId

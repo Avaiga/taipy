@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from taipy.exceptions import NonExistingTask
 from taipy.task.task import Task
@@ -8,10 +9,10 @@ from taipy.task.types import TaskId
 class TaskManager:
 
     # This represents the task database.
-    tasks: dict[(TaskId, Task)] = {}
+    tasks: Dict[(TaskId, Task)] = {}
 
     def delete_all(self):
-        self.tasks: dict[(TaskId, Task)] = {}
+        self.tasks: Dict[(TaskId, Task)] = {}
 
     def save_task(self, task: Task):
         logging.info(f"Task : {task.id} created or updated.")

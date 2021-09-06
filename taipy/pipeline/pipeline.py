@@ -4,11 +4,15 @@ More specific pipelines such as optimization pipeline, data preparation pipeline
 ML training pipeline, etc. should implement this generic pipeline entity
 """
 import uuid
+from collections import defaultdict
+from typing import Dict, List
+
+import networkx as nx
+
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.types import *
+from taipy.pipeline.types import Dag, PipelineId
 from taipy.task.task import Task
-import networkx as nx
-from collections import defaultdict
 
 
 class Pipeline:
@@ -16,11 +20,17 @@ class Pipeline:
     __ID_SEPARATOR = "_"
     id: PipelineId
     name: str
-    properties: dict
-    tasks: list[Task]
+    properties: Dict
+    tasks: List[Task]
     is_acyclic: bool = False
 
-    def __init__(self, pipeline_id: PipelineId, name: str, properties: dict[str, str], tasks: list[Task]):
+    def __init__(
+        self,
+        pipeline_id: PipelineId,
+        name: str,
+        properties: Dict[str, str],
+        tasks: List[Task],
+    ):
         self.id = pipeline_id
         self.name = name
         self.properties = properties
@@ -28,8 +38,18 @@ class Pipeline:
         self.__check_consistency()
 
     @classmethod
-    def create_pipeline(cls, name: str, properties: dict[str, str], tasks: list[Task]):
-        new_id = PipelineId(''.join([cls.__ID_PREFIX, cls.__ID_SEPARATOR, name, cls.__ID_SEPARATOR, str(uuid.uuid4())]))
+    def create_pipeline(cls, name: str, properties: Dict[str, str], tasks: List[Task]):
+        new_id = PipelineId(
+            "".join(
+                [
+                    cls.__ID_PREFIX,
+                    cls.__ID_SEPARATOR,
+                    name,
+                    cls.__ID_SEPARATOR,
+                    str(uuid.uuid4()),
+                ]
+            )
+        )
         pipeline = Pipeline(new_id, name, properties, tasks)
         return pipeline
 
@@ -50,4 +70,6 @@ class Pipeline:
                 source_task_edges[predecessor.id].append(task.id)
             for successor in task.output_data_sources:
                 task_source_edges[task.id].append(successor.id)
-        return PipelineModel(self.id, self.name, self.properties, source_task_edges, task_source_edges)
+        return PipelineModel(
+            self.id, self.name, self.properties, source_task_edges, task_source_edges
+        )

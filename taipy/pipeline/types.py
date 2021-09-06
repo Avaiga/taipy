@@ -1,5 +1,4 @@
-from typing import NewType
+from typing import Dict, List, NewType
 
-
-Dag = NewType("Dag", dict[str, list[str]])
+Dag = NewType("Dag", Dict[str, List[str]])
 PipelineId = NewType("PipelineId", str)
