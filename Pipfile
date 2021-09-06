@@ -22,6 +22,7 @@ mkdocs-autorefs = "*"
 pre-commit = "*"
 toml = "*"
 tox = "==3.24.3"
+networkx = "2.6.2"
 
 [requires]
 python_version = "3"
