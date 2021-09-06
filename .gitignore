@@ -104,6 +104,7 @@ ENV/
 # IDE settings
 .vscode/
 .idea/
+.DS_Store
 
 # mkdocs build dir
 site/
