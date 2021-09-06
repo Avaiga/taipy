@@ -1,7 +1,7 @@
 """ Generic pipeline.
-It just represents a descriptor of a DAG.
-It is made to be overridden by more specific pipelines such as optimization pipeline, data preparation pipeline,
-ML training pipeline, etc.
+It represents a descriptor of a DAG.
+More specific pipelines such as optimization pipeline, data preparation pipeline,
+ML training pipeline, etc. should implement this generic pipeline entity
 """
 import uuid
 from taipy.pipeline.pipeline_model import PipelineModel
@@ -12,13 +12,13 @@ from collections import defaultdict
 
 
 class Pipeline:
-    ID_PREFIX = "PIPELINE"
-    ID_SEPARATOR = "_"
+    __ID_PREFIX = "PIPELINE"
+    __ID_SEPARATOR = "_"
     id: PipelineId
     name: str
     properties: dict
     tasks: list[Task]
-    __is_acyclic: bool = False
+    is_acyclic: bool = False
 
     def __init__(self, pipeline_id: PipelineId, name: str, properties: dict[str, str], tasks: list[Task]):
         self.id = pipeline_id
@@ -29,7 +29,7 @@ class Pipeline:
 
     @classmethod
     def create_pipeline(cls, name: str, properties: dict[str, str], tasks: list[Task]):
-        new_id = PipelineId(''.join([cls.ID_PREFIX, cls.ID_SEPARATOR, name, cls.ID_SEPARATOR, str(uuid.uuid1())]))
+        new_id = PipelineId(''.join([cls.__ID_PREFIX, cls.__ID_SEPARATOR, name, cls.__ID_SEPARATOR, str(uuid.uuid4())]))
         pipeline = Pipeline(new_id, name, properties, tasks)
         return pipeline
 
@@ -40,7 +40,7 @@ class Pipeline:
                 graph.add_edges_from([(predecessor.id, task.id)])
             for successor in task.output_data_sources:
                 graph.add_edges_from([(task.id, successor.id)])
-        self.__is_acyclic = nx.is_directed_acyclic_graph(graph)
+        self.is_acyclic = nx.is_directed_acyclic_graph(graph)
 
     def to_model(self):
         source_task_edges: Dag = defaultdict(lambda: [])
