@@ -27,8 +27,8 @@ def test_save_and_get_pipeline():
     pipeline_1 = Pipeline(pipeline_id_1, "name_1", {}, [])
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "input_2_id", "bar")
+    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "output_2_id", "bar")
     task_2 = Task(TaskId("task_id_2"), "task", [input_2], print, [output_2])
     pipeline_2 = Pipeline(pipeline_id_2, "name_2", {}, [task_2])
 
