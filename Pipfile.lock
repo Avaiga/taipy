@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "383cd8bffd78c7f083041e5f709076e783710a7b791742292875f9392ac665c3"
+            "sha256": "81529a4759d79ee0b76f63eadd9669acecf89f0aaf23d8207e313ba66a5c48e2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,7 +15,16 @@
             }
         ]
     },
-    "default": {},
+    "default": {
+        "networkx": {
+            "hashes": [
+                "sha256:2306f1950ce772c5a59a57f5486d59bb9cab98497c45fc49cbc45ac0dec119bb",
+                "sha256:5fcb7004be69e8fbdf07dcb502efa5c77cadcaad6982164134eeb9721f826c2e"
+            ],
+            "index": "pypi",
+            "version": "==2.6.2"
+        }
+    },
     "develop": {
         "atomicwrites": {
             "hashes": [
@@ -368,14 +377,6 @@
                 "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"
             ],
             "version": "==0.4.3"
-        },
-        "networkx": {
-            "hashes": [
-                "sha256:2306f1950ce772c5a59a57f5486d59bb9cab98497c45fc49cbc45ac0dec119bb",
-                "sha256:5fcb7004be69e8fbdf07dcb502efa5c77cadcaad6982164134eeb9721f826c2e"
-            ],
-            "index": "pypi",
-            "version": "==2.6.2"
         },
         "nodeenv": {
             "hashes": [
