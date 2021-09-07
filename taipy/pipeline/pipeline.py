@@ -19,19 +19,12 @@ class Pipeline:
     __ID_PREFIX = "PIPELINE"
     __ID_SEPARATOR = "_"
 
-    def __init__(
-        self,
-        pipeline_id: PipelineId,
-        name: str,
-        properties: Dict[str, str],
-        tasks: List[Task],
-    ):
+    def __init__(self, pipeline_id: PipelineId, name: str, properties: Dict[str, str], tasks: List[Task]):
         self.id = pipeline_id
         self.name = name
         self.properties = properties
         self.tasks = tasks
-        self.graph = nx.DiGraph()
-        self.is_acyclic = self.__check_consistency()
+        self.is_acyclic = self.__is_acyclic()
 
     @classmethod
     def create_pipeline(cls, name: str, properties: Dict[str, str], tasks: List[Task]):
@@ -41,15 +34,16 @@ class Pipeline:
         pipeline = Pipeline(new_id, name, properties, tasks)
         return pipeline
 
-    def __check_consistency(self):
+    def __is_acyclic(self) -> bool:
+        graph = nx.DiGraph()
         for task in self.tasks:
             for predecessor in task.input_data_sources:
-                self.graph.add_edges_from([(predecessor.id, task.id)])
+                graph.add_edges_from([(predecessor.id, task.id)])
             for successor in task.output_data_sources:
-                self.graph.add_edges_from([(task.id, successor.id)])
-        return nx.is_directed_acyclic_graph(self.graph)
+                graph.add_edges_from([(task.id, successor.id)])
+        return nx.is_directed_acyclic_graph(graph)
 
-    def to_model(self):
+    def to_model(self) -> PipelineModel:
         source_task_edges: Dag = defaultdict(lambda: [])
         task_source_edges: Dag = defaultdict(lambda: [])
         for task in self.tasks:

@@ -61,3 +61,6 @@ class PipelineManager:
         return [
             self.get_pipeline(model.id) for model in list(self.__PIPELINE_DB.values())
         ]
+
+    def execute(self, pipeline_id: PipelineId):
+        pass
