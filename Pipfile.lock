@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "84735918d19364e8df72a77a2a3aaadac6b222ee0e87204f56161f2971d2d719"
+            "sha256": "81529a4759d79ee0b76f63eadd9669acecf89f0aaf23d8207e313ba66a5c48e2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -15,7 +15,16 @@
             }
         ]
     },
-    "default": {},
+    "default": {
+        "networkx": {
+            "hashes": [
+                "sha256:2306f1950ce772c5a59a57f5486d59bb9cab98497c45fc49cbc45ac0dec119bb",
+                "sha256:5fcb7004be69e8fbdf07dcb502efa5c77cadcaad6982164134eeb9721f826c2e"
+            ],
+            "index": "pypi",
+            "version": "==2.6.2"
+        }
+    },
     "develop": {
         "attrs": {
             "hashes": [
@@ -405,27 +414,27 @@
         },
         "mkdocs-include-markdown-plugin": {
             "hashes": [
-                "sha256:128731085dd5a8f19050a1df96b5dade549419548014101d4895ba29f5dab519",
-                "sha256:7f655798e20d70f112aa05dad6c9b4fef7bfcebc48420948cfabd29b44b51bce"
+                "sha256:14494c246259d5b58cc6d843ce81f9f2caaf732e25f7aba56038e10cccf54c66",
+                "sha256:c573b87e82d8d6c10ed09b809181efd91aa22fe251a82d01d4454783433069cc"
             ],
             "index": "pypi",
-            "version": "==3.2.1"
+            "version": "==3.2.2"
         },
         "mkdocs-material": {
             "hashes": [
-                "sha256:332bafc1584d2d229aa05f7894b4b0f62055fc0d05c96e6ef1785c86ef6e8f91",
-                "sha256:e2a3aa5e20fbdb260d22ec56c01247896c6ae743702e1cd9023fd149a4ae9890"
+                "sha256:4bdeff63904680865676ceb3193216934de0b33fa5b2446e0a84ade60929ee54",
+                "sha256:4c6939b9d7d5c6db948ab02df8525c64211828ddf33286acea8b9d2115cec369"
             ],
             "index": "pypi",
-            "version": "==7.2.5"
+            "version": "==7.2.6"
         },
         "mkdocs-material-extensions": {
             "hashes": [
-                "sha256:6947fb7f5e4291e3c61405bad3539d81e0b3cd62ae0d66ced018128af509c68f",
-                "sha256:d90c807a88348aa6d1805657ec5c0b2d8d609c110e62b9dce4daf7fa981fa338"
+                "sha256:a82b70e533ce060b2a5d9eb2bc2e1be201cf61f901f93704b4acf6e3d5983a44",
+                "sha256:bfd24dfdef7b41c312ede42648f9eb83476ea168ec163b613f9abd12bbfddba2"
             ],
             "index": "pypi",
-            "version": "==1.0.1"
+            "version": "==1.0.3"
         },
         "mkdocstrings": {
             "hashes": [
@@ -489,11 +498,11 @@
         },
         "pre-commit": {
             "hashes": [
-                "sha256:7977a3103927932d4823178cbe4719ab55bb336f42a9f3bb2776cff99007a117",
-                "sha256:a22d12a02da4d8df314187dfe7a61bda6291d57992060522feed30c8cd658b68"
+                "sha256:3c25add78dbdfb6a28a651780d5c311ac40dd17f160eb3954a0c59da40a505a7",
+                "sha256:a4ed01000afcb484d9eb8d504272e642c4c4099bbad3a6b27e519bd6a3e928a6"
             ],
             "index": "pypi",
-            "version": "==2.14.1"
+            "version": "==2.15.0"
         },
         "py": {
             "hashes": [
@@ -588,7 +597,7 @@
                 "sha256:1ec7e028fe8361acc1ce909ada4e6beabec28ef31e629618549109e1d58549f0",
                 "sha256:89ca4926d0acc266235beb24cb0b0591aa6bf7adedfae54bf9421d529d782c8d"
             ],
-            "markers": "python_version < '4.0' and python_full_version >= '3.6.1'",
+            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
             "version": "==0.11.1"
         },
         "pyyaml": {
@@ -785,7 +794,7 @@
                 "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
                 "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
             "version": "==1.26.6"
         },
         "virtualenv": {
