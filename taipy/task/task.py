@@ -36,15 +36,7 @@ class Task:
         function,
         output_data_sources: List[DataSource] = None,
     ):
-        taskId = TaskId(
-            "".join(
-                [
-                    cls.__ID_PREFIX,
-                    cls.__ID_SEPARATOR,
-                    name,
-                    cls.__ID_SEPARATOR,
-                    str(uuid.uuid4()),
-                ]
-            )
+        task_id = TaskId(
+            cls.__ID_SEPARATOR.join([cls.__ID_PREFIX, name, str(uuid.uuid4())])
         )
-        return Task(taskId, name, input_data_sources, function, output_data_sources)
+        return Task(task_id, name, input_data_sources, function, output_data_sources)
