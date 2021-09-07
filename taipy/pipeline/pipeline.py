@@ -40,7 +40,7 @@ class Pipeline:
     @classmethod
     def create_pipeline(cls, name: str, properties: Dict[str, str], tasks: List[Task]):
         new_id = PipelineId(
-            "".join(
+           f"{cls.__ID_PREFIX}{cls.__ID_SEPARATOR}{name}{cls.__ID_SEPARATOR}{uuid.uuid4()}"
                 [
                     cls.__ID_PREFIX,
                     cls.__ID_SEPARATOR,
