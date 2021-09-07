@@ -29,7 +29,7 @@ class Pipeline:
     @classmethod
     def create_pipeline(cls, name: str, properties: Dict[str, str], tasks: List[Task]):
         new_id = PipelineId(
-            cls.__ID_SEPARATOR.join([cls.__ID_PREFIX,name,str(uuid.uuid4())])
+            cls.__ID_SEPARATOR.join([cls.__ID_PREFIX, name, str(uuid.uuid4())])
         )
         pipeline = Pipeline(new_id, name, properties, tasks)
         return pipeline
@@ -51,6 +51,4 @@ class Pipeline:
                 source_task_edges[predecessor.id].append(task.id)
             for successor in task.output_data_sources:
                 task_source_edges[task.id].append(successor.id)
-        return PipelineModel(
-            self.id, self.name, self.properties, source_task_edges, task_source_edges
-        )
+        return PipelineModel(self.id, self.name, self.properties, source_task_edges, task_source_edges)
