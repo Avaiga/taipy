@@ -18,11 +18,6 @@ from taipy.task.task import Task
 class Pipeline:
     __ID_PREFIX = "PIPELINE"
     __ID_SEPARATOR = "_"
-    id: PipelineId
-    name: str
-    properties: Dict
-    tasks: List[Task]
-    is_acyclic: bool = False
 
     def __init__(
         self,
@@ -35,32 +30,24 @@ class Pipeline:
         self.name = name
         self.properties = properties
         self.tasks = tasks
-        self.__check_consistency()
+        self.graph = nx.DiGraph()
+        self.is_acyclic = self.__check_consistency()
 
     @classmethod
     def create_pipeline(cls, name: str, properties: Dict[str, str], tasks: List[Task]):
         new_id = PipelineId(
-            "".join(
-                [
-                    cls.__ID_PREFIX,
-                    cls.__ID_SEPARATOR,
-                    name,
-                    cls.__ID_SEPARATOR,
-                    str(uuid.uuid4()),
-                ]
-            )
+            f"{cls.__ID_PREFIX}{cls.__ID_SEPARATOR}{name}{cls.__ID_SEPARATOR}{str(uuid.uuid4())}"
         )
         pipeline = Pipeline(new_id, name, properties, tasks)
         return pipeline
 
     def __check_consistency(self):
-        graph = nx.DiGraph()
         for task in self.tasks:
             for predecessor in task.input_data_sources:
-                graph.add_edges_from([(predecessor.id, task.id)])
+                self.graph.add_edges_from([(predecessor.id, task.id)])
             for successor in task.output_data_sources:
-                graph.add_edges_from([(task.id, successor.id)])
-        self.is_acyclic = nx.is_directed_acyclic_graph(graph)
+                self.graph.add_edges_from([(task.id, successor.id)])
+        return nx.is_directed_acyclic_graph(self.graph)
 
     def to_model(self):
         source_task_edges: Dag = defaultdict(lambda: [])
