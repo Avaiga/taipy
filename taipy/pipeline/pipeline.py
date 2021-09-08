@@ -5,10 +5,10 @@ ML training pipeline, etc. should implement this generic pipeline entity
 """
 import uuid
 from collections import defaultdict
-from typing import Dict, List
 
 import networkx as nx
 
+from taipy.data.data_source import DataSource
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.types import *
 from taipy.pipeline.types import Dag, PipelineId
@@ -24,7 +24,7 @@ class Pipeline:
         self.name = name
         self.properties = properties
         self.tasks = tasks
-        self.is_acyclic = self.__is_acyclic()
+        self.is_consistent = self.__is_consistent()
 
     @classmethod
     def create_pipeline(cls, name: str, properties: Dict[str, str], tasks: List[Task]):
@@ -34,14 +34,26 @@ class Pipeline:
         pipeline = Pipeline(new_id, name, properties, tasks)
         return pipeline
 
-    def __is_acyclic(self) -> bool:
+    def __is_consistent(self) -> bool:
+        dag = self.__build_dag()
+        if not nx.is_directed_acyclic_graph(dag):
+            return False
+        expected_type = DataSource
+        for nodes in nx.topological_generations(dag):
+            for node in nodes:
+                if not isinstance(node, expected_type):
+                    return False
+            expected_type = Task if (expected_type == DataSource) else DataSource
+        return True
+
+    def __build_dag(self):
         graph = nx.DiGraph()
         for task in self.tasks:
             for predecessor in task.input_data_sources:
-                graph.add_edges_from([(predecessor.id, task.id)])
+                graph.add_edges_from([(predecessor, task)])
             for successor in task.output_data_sources:
-                graph.add_edges_from([(task.id, successor.id)])
-        return nx.is_directed_acyclic_graph(graph)
+                graph.add_edges_from([(task, successor)])
+        return graph
 
     def to_model(self) -> PipelineModel:
         source_task_edges: Dag = defaultdict(lambda: [])
@@ -52,3 +64,7 @@ class Pipeline:
             for successor in task.output_data_sources:
                 task_source_edges[task.id].append(successor.id)
         return PipelineModel(self.id, self.name, self.properties, source_task_edges, task_source_edges)
+
+    def get_sorted_tasks(self) -> List[List[Task]]:
+        dag = self.__build_dag()
+        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))

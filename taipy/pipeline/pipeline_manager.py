@@ -12,12 +12,15 @@ from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.pipeline_schema import PipelineSchema
 from taipy.pipeline.types import Dag, PipelineId
+from taipy.task import JobId
 from taipy.task.task_manager import TaskManager
+from taipy.task.scheduler.task_scheduler import TaskScheduler
 
 
 class PipelineManager:
     task_manager = TaskManager()
-    # This represents the pipeline database table.
+    task_scheduler = TaskScheduler()
+
     __PIPELINE_DB: Dict[PipelineId, PipelineModel] = {}
 
     def delete_all(self):
@@ -62,5 +65,8 @@ class PipelineManager:
             self.get_pipeline(model.id) for model in list(self.__PIPELINE_DB.values())
         ]
 
-    def execute(self, pipeline_id: PipelineId):
-        pass
+    def submit(self, pipeline_id: PipelineId):
+        pipeline_to_submit = self.get_pipeline(pipeline_id)
+        for tasks in pipeline_to_submit.get_sorted_tasks():
+            for task in tasks:
+                self.task_scheduler.submit(task)
