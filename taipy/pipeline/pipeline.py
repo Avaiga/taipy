@@ -9,12 +9,9 @@ from collections import defaultdict
 import networkx as nx
 
 from taipy.data.data_source import DataSource
-from taipy.pipeline.pipeline_model import PipelineModel
+from taipy.pipeline.pipeline_model import PipelineModel, PipelineId, Dag
 from taipy.task.task import Task
-from typing import Dict, List, NewType
-
-Dag = NewType("Dag", Dict[str, List[str]])
-PipelineId = NewType("PipelineId", str)
+from typing import Dict, List
 
 
 class Pipeline:
