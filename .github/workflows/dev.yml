@@ -20,8 +20,8 @@ jobs:
     # The type of runner that the job will run on
     strategy:
       matrix:
-        python-versions: [3.8, 3.9]
-        os: [ubuntu-18.04, macos-latest, windows-latest]
+        python-versions: [3.9]
+        os: [ubuntu-18.04]
     runs-on: ${{ matrix.os }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
@@ -37,7 +37,14 @@ jobs:
           python -m pip install --upgrade pipenv wheel
           pip install pytest pytest-cov tox tox-gh-actions
 
+      - id: cache-pipenv
+        uses: actions/cache@v1
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
       - name: Install dependencies
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: |
           pipenv install --deploy --dev
 
