@@ -2,8 +2,7 @@ import logging
 from typing import Dict
 
 from taipy.exceptions import NonExistingTask
-from taipy.task.task import Task
-from taipy.task.types import TaskId
+from taipy.task.task import Task, TaskId
 
 
 class TaskManager:

@@ -1,9 +1,10 @@
 import uuid
 from importlib import import_module
-from typing import List
+from typing import List, NewType
 
 from taipy.data.data_source import DataSource
-from taipy.task.types import TaskId
+
+TaskId = NewType("TaskId", str)
 
 
 class Task:

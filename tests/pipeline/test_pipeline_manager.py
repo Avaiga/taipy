@@ -1,11 +1,12 @@
 import pytest
 
-from taipy.data.data_source import EmbeddedDataSource
+from taipy.data.data_source import EmbeddedDataSource, DataSource
 from taipy.data.data_source.models import Scope
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineId
 from taipy.pipeline.pipeline_manager import PipelineManager
-from taipy.task import Task, TaskId
+from taipy.task import Task, TaskId, JobId
+from taipy.task.scheduler import TaskScheduler
 from taipy.task.task_manager import TaskManager
 
 
@@ -122,3 +123,38 @@ def test_get_pipeline_schema():
         input_2.id: [task_2.id],
         task_2.id: [output_2_1.id, output_2_2.id],
     }
+
+
+def test_submit():
+    data_source_1 = DataSource("foo", Scope.PIPELINE, "s1")
+    data_source_2 = DataSource("bar", Scope.PIPELINE, "s2")
+    data_source_3 = DataSource("baz", Scope.PIPELINE, "s3")
+    data_source_4 = DataSource("qux", Scope.PIPELINE, "s4")
+    data_source_5 = DataSource("quux", Scope.PIPELINE, "s5")
+    data_source_6 = DataSource("quuz", Scope.PIPELINE, "s6")
+    data_source_7 = DataSource("corge", Scope.PIPELINE, "s7")
+    task_1 = Task(TaskId("t1"), "grault", [data_source_1, data_source_2], print, [data_source_3, data_source_4])
+    task_2 = Task(TaskId("t2"), "garply", [data_source_3], print, [data_source_5])
+    task_3 = Task(TaskId("t3"), "waldo", [data_source_5, data_source_4], print, [data_source_6])
+    task_4 = Task(TaskId("t4"), "fred", [data_source_4], print, [data_source_7])
+    pipeline = Pipeline(PipelineId("p1"), "plugh", {}, [task_4, task_2, task_1, task_3])
+
+    pipeline_manager = PipelineManager()
+
+    class MockTaskScheduler(TaskScheduler):
+        submit_calls = []
+
+        def submit(self, task: Task):
+            self.submit_calls.append(task)
+            return super().submit(task)
+
+    pipeline_manager.task_scheduler = MockTaskScheduler()
+
+    # pipeline does not exists. We expect an exception to be raised
+    with pytest.raises(NonExistingPipeline):
+        pipeline_manager.submit(pipeline.id)
+
+    # pipeline does exist. we expect the tasks to be submitted in a specific order
+    pipeline_manager.save_pipeline(pipeline)
+    pipeline_manager.submit(pipeline.id)
+    assert (pipeline_manager.task_scheduler.submit_calls == [task_1, task_2, task_4, task_3])
