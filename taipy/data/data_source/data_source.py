@@ -2,7 +2,7 @@ import uuid
 from abc import abstractmethod
 
 
-class DataSource:
+class DataSourceEntity:
     """
     A class to represent a Data Source. A Data Source is an object that holds the name, scope and additional
     properties of the data source.

@@ -2,7 +2,7 @@ import uuid
 from importlib import import_module
 from typing import List, NewType
 
-from taipy.data.data_source import DataSource
+from taipy.data.data_source import DataSourceEntity
 
 TaskId = NewType("TaskId", str)
 
@@ -15,9 +15,9 @@ class Task:
         self,
         task_id: TaskId,
         name: str,
-        input_data_sources: List[DataSource],
+        input_data_sources: List[DataSourceEntity],
         function,
-        output_data_sources: List[DataSource] = None,
+        output_data_sources: List[DataSourceEntity] = None,
     ):
         if output_data_sources is None:
             output_data_sources = []
@@ -31,9 +31,9 @@ class Task:
     def create_task(
         cls,
         name: str,
-        input_data_sources: List[DataSource],
+        input_data_sources: List[DataSourceEntity],
         function,
-        output_data_sources: List[DataSource] = None,
+        output_data_sources: List[DataSourceEntity] = None,
     ):
         task_id = TaskId(
             cls.__ID_SEPARATOR.join([cls.__ID_PREFIX, name, str(uuid.uuid4())])

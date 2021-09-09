@@ -1,3 +1,3 @@
-from .csv import CSVDataSource
-from .data_source import DataSource
-from .embedded import EmbeddedDataSource
+from .csv import CSVDataSourceEntity
+from .data_source import DataSourceEntity
+from .embedded import EmbeddedDataSourceEntity

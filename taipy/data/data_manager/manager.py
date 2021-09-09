@@ -3,7 +3,11 @@ import uuid
 from itertools import count
 from typing import List
 
-from taipy.data.data_source import CSVDataSource, DataSource, EmbeddedDataSource
+from taipy.data.data_source import (
+    CSVDataSourceEntity,
+    DataSourceEntity,
+    EmbeddedDataSourceEntity,
+)
 from taipy.data.data_source.models import DataSourceModel, Scope
 
 """

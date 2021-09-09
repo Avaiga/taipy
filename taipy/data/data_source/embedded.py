@@ -2,10 +2,10 @@ from typing import Dict, Optional
 
 from taipy.exceptions import MissingRequiredProperty
 
-from .data_source import DataSource
+from .data_source import DataSourceEntity
 
 
-class EmbeddedDataSource(DataSource):
+class EmbeddedDataSourceEntity(DataSourceEntity):
     __REQUIRED_PROPERTIES = ["data"]
 
     def __init__(self, name: str, scope: int, id: Optional[str], properties):
@@ -17,7 +17,7 @@ class EmbeddedDataSource(DataSource):
 
     @classmethod
     def create(cls, name: str, scope: int, id: str, data: Dict):
-        return EmbeddedDataSource(name, scope, id, {"data": data})
+        return EmbeddedDataSourceEntity(name, scope, id, {"data": data})
 
     def preview(self):
         print(f"{self.properties.get('data')}", flush=True)

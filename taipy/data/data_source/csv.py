@@ -4,10 +4,10 @@ from typing import Dict, Optional
 
 from taipy.exceptions import MissingRequiredProperty
 
-from .data_source import DataSource
+from .data_source import DataSourceEntity
 
 
-class CSVDataSource(DataSource):
+class CSVDataSourceEntity(DataSourceEntity):
     """
     A class to represent a CSV Data Source.
 
@@ -44,8 +44,10 @@ class CSVDataSource(DataSource):
         path: str,
         has_header: bool = False,
         id: Optional[str] = None,
-    ) -> DataSource:
-        return CSVDataSource(name, scope, id, {"path": path, "has_header": has_header})
+    ) -> DataSourceEntity:
+        return CSVDataSourceEntity(
+            name, scope, id, {"path": path, "has_header": has_header}
+        )
 
     def preview(self):
         print("------------CSV Content------------")

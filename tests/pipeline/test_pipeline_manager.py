@@ -1,11 +1,11 @@
 import pytest
 
-from taipy.data.data_source import EmbeddedDataSource, DataSource
+from taipy.data.data_source import DataSourceEntity, EmbeddedDataSourceEntity
 from taipy.data.data_source.models import Scope
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineId
 from taipy.pipeline.pipeline_manager import PipelineManager
-from taipy.task import Task, TaskId, JobId
+from taipy.task import JobId, Task, TaskId
 from taipy.task.scheduler import TaskScheduler
 from taipy.task.task_manager import TaskManager
 
@@ -28,8 +28,12 @@ def test_save_and_get_pipeline():
     pipeline_1 = Pipeline(pipeline_id_1, "name_1", {}, [])
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "input_2_id", "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "output_2_id", "bar")
+    input_2 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "input_2_id", "bar"
+    )
+    output_2 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "output_2_id", "bar"
+    )
     task_2 = Task(TaskId("task_id_2"), "task", [input_2], print, [output_2])
     pipeline_2 = Pipeline(pipeline_id_2, "name_2", {}, [task_2])
 
@@ -97,11 +101,13 @@ def test_get_pipeline_schema():
     pipeline_manager.save_pipeline(pipeline_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSource("input_id_2", "foo", Scope.PIPELINE, {"data": "bar"})
-    output_2_1 = EmbeddedDataSource(
+    input_2 = EmbeddedDataSourceEntity(
+        "input_id_2", "foo", Scope.PIPELINE, {"data": "bar"}
+    )
+    output_2_1 = EmbeddedDataSourceEntity(
         "input_id_2_1", "foo", Scope.PIPELINE, {"data": "bar"}
     )
-    output_2_2 = EmbeddedDataSource(
+    output_2_2 = EmbeddedDataSourceEntity(
         "input_id_2_2", "foo", Scope.PIPELINE, {"data": "bar"}
     )
     task_2 = Task(
@@ -126,16 +132,24 @@ def test_get_pipeline_schema():
 
 
 def test_submit():
-    data_source_1 = DataSource("foo", Scope.PIPELINE, "s1")
-    data_source_2 = DataSource("bar", Scope.PIPELINE, "s2")
-    data_source_3 = DataSource("baz", Scope.PIPELINE, "s3")
-    data_source_4 = DataSource("qux", Scope.PIPELINE, "s4")
-    data_source_5 = DataSource("quux", Scope.PIPELINE, "s5")
-    data_source_6 = DataSource("quuz", Scope.PIPELINE, "s6")
-    data_source_7 = DataSource("corge", Scope.PIPELINE, "s7")
-    task_1 = Task(TaskId("t1"), "grault", [data_source_1, data_source_2], print, [data_source_3, data_source_4])
+    data_source_1 = DataSourceEntity("foo", Scope.PIPELINE, "s1")
+    data_source_2 = DataSourceEntity("bar", Scope.PIPELINE, "s2")
+    data_source_3 = DataSourceEntity("baz", Scope.PIPELINE, "s3")
+    data_source_4 = DataSourceEntity("qux", Scope.PIPELINE, "s4")
+    data_source_5 = DataSourceEntity("quux", Scope.PIPELINE, "s5")
+    data_source_6 = DataSourceEntity("quuz", Scope.PIPELINE, "s6")
+    data_source_7 = DataSourceEntity("corge", Scope.PIPELINE, "s7")
+    task_1 = Task(
+        TaskId("t1"),
+        "grault",
+        [data_source_1, data_source_2],
+        print,
+        [data_source_3, data_source_4],
+    )
     task_2 = Task(TaskId("t2"), "garply", [data_source_3], print, [data_source_5])
-    task_3 = Task(TaskId("t3"), "waldo", [data_source_5, data_source_4], print, [data_source_6])
+    task_3 = Task(
+        TaskId("t3"), "waldo", [data_source_5, data_source_4], print, [data_source_6]
+    )
     task_4 = Task(TaskId("t4"), "fred", [data_source_4], print, [data_source_7])
     pipeline = Pipeline(PipelineId("p1"), "plugh", {}, [task_4, task_2, task_1, task_3])
 
@@ -157,4 +171,9 @@ def test_submit():
     # pipeline does exist. we expect the tasks to be submitted in a specific order
     pipeline_manager.save_pipeline(pipeline)
     pipeline_manager.submit(pipeline.id)
-    assert (pipeline_manager.task_scheduler.submit_calls == [task_1, task_2, task_4, task_3])
+    assert pipeline_manager.task_scheduler.submit_calls == [
+        task_1,
+        task_2,
+        task_4,
+        task_3,
+    ]
