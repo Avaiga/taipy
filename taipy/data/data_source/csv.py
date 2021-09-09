@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from taipy.exceptions import MissingRequiredProperty
 
-from .data_source import DataSourceEntity
+from .data_source_entity import DataSourceEntity
 
 
 class CSVDataSourceEntity(DataSourceEntity):
