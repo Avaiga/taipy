@@ -1,10 +1,11 @@
 import csv
+import json
 from itertools import islice
 from typing import Dict, Optional
 
+from taipy.data.data_source.data_source_entity import DataSourceEntity
+from taipy.data.data_source.models import Scope
 from taipy.exceptions import MissingRequiredProperty
-
-from .data_source_entity import DataSourceEntity
 
 
 class CSVDataSourceEntity(DataSourceEntity):
@@ -23,10 +24,12 @@ class CSVDataSourceEntity(DataSourceEntity):
 
     __REQUIRED_PROPERTIES = ["path", "has_header"]
 
-    def __init__(self, name: str, scope: int, id: Optional[str], properties: Dict):
+    def __init__(
+        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
+    ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
-                f"The following properties {','.join(x for x in missing)} were not informed and are required"
+                f"The following properties {', '.join(x for x in missing)} were not informed and are required"
             )
         super().__init__(
             name,
@@ -40,7 +43,7 @@ class CSVDataSourceEntity(DataSourceEntity):
     def create(
         cls,
         name: str,
-        scope: int,
+        scope: Scope,
         path: str,
         has_header: bool = False,
         id: Optional[str] = None,
@@ -68,3 +71,23 @@ class CSVDataSourceEntity(DataSourceEntity):
     @property
     def path(self) -> str:
         return self.properties.get("path")
+
+    def to_json(self):
+        return json.dumps(
+            {
+                "name": self.name,
+                "type": "csv",
+                "scope": self.scope.name,
+                "path": self.path,
+                "has_header": self.has_header,
+            }
+        )
+
+    @staticmethod
+    def from_json(data_source_dict):
+        return CSVDataSourceEntity.create(
+            name=data_source_dict.get("name"),
+            scope=Scope[data_source_dict.get("scope")],
+            path=data_source_dict.get("path"),
+            has_header=data_source_dict.get("has_header"),
+        )

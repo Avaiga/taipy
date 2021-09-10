@@ -8,7 +8,7 @@ from taipy.data.data_source.models import Scope
 from taipy.exceptions import MissingRequiredProperty
 
 
-class TestCSVDataSource:
+class TestCSVDataSourceEntity:
     def test_create(self):
         ds = CSVDataSourceEntity.create("foo", Scope.PIPELINE, "data/source/path")
 
@@ -28,7 +28,7 @@ class TestCSVDataSource:
         ds.preview()
 
 
-class TestEmbeddedDataSource:
+class TestEmbeddedDataSourceEntity:
     def test_create(self):
         ds = EmbeddedDataSourceEntity.create(
             "foo", Scope.PIPELINE, "ds_id", {"data": "Embedded Data Source"}

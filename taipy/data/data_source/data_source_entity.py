@@ -39,3 +39,9 @@ class DataSourceEntity:
         Temporary function interface, will be remove
         """
         pass
+
+    def to_json(self):
+        pass
+
+    def from_json(self):
+        pass
