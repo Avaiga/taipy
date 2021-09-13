@@ -1,3 +1,3 @@
-from taipy.task.scheduler.job import JobId
-
-from .task import Task, TaskId
+from .task_entity import TaskEntity, TaskId
+from .task import Task
+from .scheduler.job import JobId

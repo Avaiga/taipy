@@ -1,120 +1,143 @@
 import pytest
 
-from taipy.data.data_source import DataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.data_source import EmbeddedDataSourceEntity, DataSourceEntity, DataSource
 from taipy.data.data_source.models import Scope
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.pipeline import Pipeline, PipelineId
+from taipy.pipeline import PipelineEntity, PipelineId, Pipeline
 from taipy.pipeline.pipeline_manager import PipelineManager
-from taipy.task import JobId, Task, TaskId
+from taipy.task import TaskEntity, TaskId, Task
 from taipy.task.scheduler import TaskScheduler
-from taipy.task.task_manager import TaskManager
 
 
-@pytest.fixture(scope="function", autouse=True)
-def run_before_and_after_tests():
-    pipeline_manager = PipelineManager()
-    task_manager = TaskManager()
-    task_manager.delete_all()
-    pipeline_manager.delete_all()
-    yield
-    pipeline_manager = PipelineManager()
-    pipeline_manager.delete_all()
-    task_manager = TaskManager()
-    task_manager.delete_all()
+def test_register_and_get_pipeline():
+    name_1 = "name_1"
+    pipeline_1 = Pipeline(name_1, [])
 
+    input_2 = DataSource("foo", "embedded", data="bar")
+    output_2 = DataSource("foo", "embedded", data="bar")
+    task_2 = Task("task", [input_2], print, [output_2])
+    name_2 = "name_2"
+    pipeline_2 = Pipeline(name_2, [task_2])
 
-def test_save_and_get_pipeline():
-    pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = Pipeline(pipeline_id_1, "name_1", {}, [])
-
-    pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_2_id", "bar"
-    )
-    output_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "output_2_id", "bar"
-    )
-    task_2 = Task(TaskId("task_id_2"), "task", [input_2], print, [output_2])
-    pipeline_2 = Pipeline(pipeline_id_2, "name_2", {}, [task_2])
-
-    pipeline_3_with_same_id = Pipeline(pipeline_id_1, "name_3", {}, [])
+    pipeline_3_with_same_name = Pipeline(name_1, [], description="my description")
 
     # No existing Pipeline
     pipeline_manager = PipelineManager()
     assert len(pipeline_manager.get_pipelines()) == 0
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_1)
+        pipeline_manager.get_pipeline(name_1)
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_2)
+        pipeline_manager.get_pipeline(name_2)
 
     # Save one pipeline. We expect to have only one pipeline stored
-    pipeline_manager.save_pipeline(pipeline_1)
+    pipeline_manager.register_pipeline(pipeline_1)
     assert len(pipeline_manager.get_pipelines()) == 1
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).name == pipeline_1.name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get_pipeline(name_1) == pipeline_1
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_2)
+        pipeline_manager.get_pipeline(name_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
-    pipeline_manager.save_pipeline(pipeline_2)
+    pipeline_manager.register_pipeline(pipeline_2)
     assert len(pipeline_manager.get_pipelines()) == 2
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).name == pipeline_1.name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).name == pipeline_2.name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.get_pipeline(name_1) == pipeline_1
+    assert pipeline_manager.get_pipeline(name_2) == pipeline_2
 
     # We save the first pipeline again. We expect nothing to change
-    pipeline_manager.save_pipeline(pipeline_1)
+    pipeline_manager.register_pipeline(pipeline_1)
     assert len(pipeline_manager.get_pipelines()) == 2
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).name == pipeline_1.name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).name == pipeline_2.name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.get_pipeline(name_1) == pipeline_1
+    assert pipeline_manager.get_pipeline(name_2) == pipeline_2
+    assert pipeline_manager.get_pipeline(name_1).properties.get("description") is None
 
     # We save a third pipeline with same id as the first one. We expect the first pipeline to be updated
-    pipeline_manager.save_pipeline(pipeline_3_with_same_id)
+    pipeline_manager.register_pipeline(pipeline_3_with_same_name)
     assert len(pipeline_manager.get_pipelines()) == 2
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get_pipeline(name_1) == pipeline_3_with_same_name
+    assert pipeline_manager.get_pipeline(name_2) == pipeline_2
+    assert pipeline_manager.get_pipeline(name_1).properties.get("description") == \
+           pipeline_3_with_same_name.properties.get("description")
+
+
+def test_save_and_get_pipeline_entity():
+    pipeline_id_1 = PipelineId("id1")
+    pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
+
+    pipeline_id_2 = PipelineId("id2")
+    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_2_id", "bar")
+    output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "output_2_id", "bar")
+    task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
+    pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
+
+    pipeline_3_with_same_id = PipelineEntity("name_3", {}, [],pipeline_id_1)
+
+    # No existing Pipeline
+    pipeline_manager = PipelineManager()
+    assert len(pipeline_manager.get_pipeline_entities()) == 0
+    with pytest.raises(NonExistingPipeline):
+        pipeline_manager.get_pipeline_entity(pipeline_id_1)
+    with pytest.raises(NonExistingPipeline):
+        pipeline_manager.get_pipeline_entity(pipeline_id_2)
+
+    # Save one pipeline. We expect to have only one pipeline stored
+    pipeline_manager.save_pipeline_entity(pipeline_1)
+    assert len(pipeline_manager.get_pipeline_entities()) == 1
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).name == pipeline_1.name
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_1).task_entities) == 0
+    with pytest.raises(NonExistingPipeline):
+        pipeline_manager.get_pipeline_entity(pipeline_id_2)
+
+    # Save a second pipeline. Now, we expect to have a total of two pipelines stored
+    pipeline_manager.save_pipeline_entity(pipeline_2)
+    assert len(pipeline_manager.get_pipeline_entities()) == 2
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).name == pipeline_1.name
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_1).task_entities) == 0
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_2).name == pipeline_2.name
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_2).task_entities) == 1
+    assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
+
+    # We save the first pipeline again. We expect nothing to change
+    pipeline_manager.save_pipeline_entity(pipeline_1)
+    assert len(pipeline_manager.get_pipeline_entities()) == 2
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).name == pipeline_1.name
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_1).task_entities) == 0
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_2).name == pipeline_2.name
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_2).task_entities) == 1
+    assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
+
+    # We save a third pipeline with same id as the first one. We expect the first pipeline to be updated
+    pipeline_manager.save_pipeline_entity(pipeline_3_with_same_id)
+    assert len(pipeline_manager.get_pipeline_entities()) == 2
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
     assert (
-        pipeline_manager.get_pipeline(pipeline_id_1).name
+        pipeline_manager.get_pipeline_entity(pipeline_id_1).name
         == pipeline_3_with_same_id.name
     )
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).name == pipeline_2.name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_1).task_entities) == 0
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_2).name == pipeline_2.name
+    assert len(pipeline_manager.get_pipeline_entity(pipeline_id_2).task_entities) == 1
+    assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
 
 
 def test_get_pipeline_schema():
     pipeline_manager = PipelineManager()
 
     pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = Pipeline(pipeline_id_1, "name_1", {}, [])
-    pipeline_manager.save_pipeline(pipeline_1)
+    pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
+    pipeline_manager.save_pipeline_entity(pipeline_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity(
-        "input_id_2", "foo", Scope.PIPELINE, {"data": "bar"}
-    )
-    output_2_1 = EmbeddedDataSourceEntity(
-        "input_id_2_1", "foo", Scope.PIPELINE, {"data": "bar"}
-    )
-    output_2_2 = EmbeddedDataSourceEntity(
-        "input_id_2_2", "foo", Scope.PIPELINE, {"data": "bar"}
-    )
-    task_2 = Task(
-        TaskId("task_id_2"), "task", [input_2], print, [output_2_1, output_2_2]
-    )
-    pipeline_2 = Pipeline(pipeline_id_2, "name_2", {}, [task_2])
-    pipeline_manager.save_pipeline(pipeline_2)
+    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_id_2", "bar")
+    output_2_1 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_id_2_1", "bar")
+    output_2_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_id_2_2", "bar")
+    task_2 = TaskEntity("task", [input_2], print, [output_2_1, output_2_2], TaskId("task_id_2"))
+    pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
+    pipeline_manager.save_pipeline_entity(pipeline_2)
 
     schema_1 = pipeline_manager.get_pipeline_schema(pipeline_id_1)
     assert schema_1.id == pipeline_id_1
@@ -139,26 +162,18 @@ def test_submit():
     data_source_5 = DataSourceEntity("quux", Scope.PIPELINE, "s5")
     data_source_6 = DataSourceEntity("quuz", Scope.PIPELINE, "s6")
     data_source_7 = DataSourceEntity("corge", Scope.PIPELINE, "s7")
-    task_1 = Task(
-        TaskId("t1"),
-        "grault",
-        [data_source_1, data_source_2],
-        print,
-        [data_source_3, data_source_4],
-    )
-    task_2 = Task(TaskId("t2"), "garply", [data_source_3], print, [data_source_5])
-    task_3 = Task(
-        TaskId("t3"), "waldo", [data_source_5, data_source_4], print, [data_source_6]
-    )
-    task_4 = Task(TaskId("t4"), "fred", [data_source_4], print, [data_source_7])
-    pipeline = Pipeline(PipelineId("p1"), "plugh", {}, [task_4, task_2, task_1, task_3])
+    task_1 = TaskEntity("grault", [data_source_1, data_source_2], print, [data_source_3, data_source_4], TaskId("t1"))
+    task_2 = TaskEntity("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
+    task_3 = TaskEntity("waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3"))
+    task_4 = TaskEntity("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
+    pipeline = PipelineEntity("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
 
     pipeline_manager = PipelineManager()
 
     class MockTaskScheduler(TaskScheduler):
         submit_calls = []
 
-        def submit(self, task: Task):
+        def submit(self, task: TaskEntity):
             self.submit_calls.append(task)
             return super().submit(task)
 
@@ -169,11 +184,6 @@ def test_submit():
         pipeline_manager.submit(pipeline.id)
 
     # pipeline does exist. we expect the tasks to be submitted in a specific order
-    pipeline_manager.save_pipeline(pipeline)
+    pipeline_manager.save_pipeline_entity(pipeline)
     pipeline_manager.submit(pipeline.id)
-    assert pipeline_manager.task_scheduler.submit_calls == [
-        task_1,
-        task_2,
-        task_4,
-        task_3,
-    ]
+    assert (pipeline_manager.task_scheduler.submit_calls == [task_1, task_2, task_4, task_3])
