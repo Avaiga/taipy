@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from taipy.exceptions import MissingRequiredProperty
 
@@ -20,7 +20,7 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
         super().__init__(name, scope, id, data=properties.get("data"))
 
     @classmethod
-    def create(cls, name: str, scope: Scope, id: str, data: Dict):
+    def create(cls, name: str, scope: Scope, id: str, data: Any):
         return EmbeddedDataSourceEntity(name, scope, id, {"data": data})
 
     def preview(self):
@@ -30,13 +30,13 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
         """
         Temporary function interface, will be remove
         """
-        return self.properties.get('data')
+        return self.properties.get("data")
 
     def write(self, data):
         """
         Temporary function interface, will be remove
         """
-        self.properties['data'] = data
+        self.properties["data"] = data
 
     @property
     def data(self):

@@ -7,6 +7,14 @@ from taipy.exceptions import InvalidDataSourceType
 
 
 class DataSource:
+    """
+    Instantiate a DataSource with basic parameters
+    >>> ds = DataSource(unique_name="foo", type="csv", path="foo", has_header=True)
+    The DataSource instance should return a CSVDataSourceEntity because of the parameter type
+    >>> assert isinstance(ds, CSVDataSourceEntity)
+    >>> print(ds.to_json())
+    """
+
     __ENTITY_MAP = {"csv": CSVDataSourceEntity, "embedded": EmbeddedDataSourceEntity}
 
     @classmethod
@@ -30,12 +38,3 @@ class DataSource:
     @classmethod
     def to_json(cls):
         return vars(cls)
-
-
-if __name__ == "__main__":
-    ds = DataSource(unique_name="foo", type="csv", path="foo", has_header=True)
-    print(ds.to_json())
-
-    ds2 = DataSource.from_json(json_path="/Users/qwerty/ds_descriptor.json")
-    print(ds2.to_json())
-    assert isinstance(ds2, CSVDataSourceEntity)

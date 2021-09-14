@@ -1,5 +1,8 @@
 import uuid
 from abc import abstractmethod
+from typing import Optional
+
+from taipy.data.data_source.models import Scope
 
 
 class DataSourceEntity:
@@ -19,7 +22,9 @@ class DataSourceEntity:
         list of additional arguments
     """
 
-    def __init__(self, name, scope, id=None, **kwargs):
+    def __init__(
+        self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
+    ):
         self.id = id or uuid.uuid4()
         self.name = name
         self.scope = scope

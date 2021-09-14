@@ -1,6 +1,6 @@
 import uuid
 from importlib import import_module
-from typing import List, NewType
+from typing import List, NewType, Optional
 
 from taipy.data.data_source import DataSourceEntity
 
@@ -17,7 +17,7 @@ class Task:
         name: str,
         input_data_sources: List[DataSourceEntity],
         function,
-        output_data_sources: List[DataSourceEntity] = None,
+        output_data_sources: Optional[List[DataSourceEntity]] = None,
     ):
         if output_data_sources is None:
             output_data_sources = []

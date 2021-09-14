@@ -1,9 +1,9 @@
-__all__ = ['Job', 'JobId']
+__all__ = ["Job", "JobId"]
 
 from dataclasses import dataclass
 from typing import NewType
 
-from taipy.task import TaskId
+from taipy.task.task import TaskId
 
 JobId = NewType("JobId", str)
 

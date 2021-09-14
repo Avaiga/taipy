@@ -64,12 +64,15 @@ class CSVDataSourceEntity(DataSourceEntity):
     def get(self, query):
         pass
 
+    def write(self, data):
+        pass
+
     @property
-    def has_header(self) -> bool:
+    def has_header(self) -> Optional[bool]:
         return self.properties.get("has_header")
 
     @property
-    def path(self) -> str:
+    def path(self) -> Optional[str]:
         return self.properties.get("path")
 
     def to_json(self):
