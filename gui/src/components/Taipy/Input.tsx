@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createSendUpdateAction } from "../../context/taipyReducers";
+import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { setValueForVarName, TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
@@ -16,7 +16,7 @@ const Input = (props: TaipyInputProps) => {
     }, [tp_varname, dispatch]);
 
     const handleClick = useCallback(() => {
-        dispatch(createSendUpdateAction(id, actionName));
+        dispatch(createSendActionNameAction(id, actionName));
     }, [id, actionName, dispatch]);
 
     const actions = {} as any;
