@@ -25,9 +25,7 @@ class Task:
         self.output_data_sources = output_data_sources
         self.name = name
         self.id = task_id
-        fct = (function.__module__, function.__name__) if function else function
-        self.module = import_module(fct[0])
-        self.function = getattr(self.module, fct[1])
+        self.function = function
 
     @classmethod
     def create_task(

@@ -23,4 +23,13 @@ class EmbeddedDataSource(DataSource):
         print(f"{self.properties.get('data')}", flush=True)
 
     def get(self, query):
-        pass
+        """
+        Temporary function interface, will be remove
+        """
+        return self.properties.get('data')
+
+    def write(self, data):
+        """
+        Temporary function interface, will be remove
+        """
+        self.properties['data'] = data

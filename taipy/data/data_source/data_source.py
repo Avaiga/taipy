@@ -32,3 +32,10 @@ class DataSource:
     @abstractmethod
     def get(self, query):
         pass
+
+    @abstractmethod
+    def write(self, data):
+        """
+        Temporary function interface, will be remove
+        """
+        pass
