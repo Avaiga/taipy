@@ -5,6 +5,13 @@ name = "pypi"
 
 [packages]
 networkx = "2.6.2"
+flask = "*"
+numpy = "*"
+markdown = "*"
+flask-socketio = "*"
+simple-websocket = "*"
+pandas = "*"
+flask-cors = "*"
 
 [dev-packages]
 pytest = "*"

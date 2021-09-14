@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+Pipfile.lock
 .Python
 env/
 build/
@@ -24,6 +25,8 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+# GUI generation
+taipy_webapp/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

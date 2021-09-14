@@ -25,3 +25,10 @@ AI Platform for Business Applications
 ## Features
 
 * TODO
+
+## Directory Structure
+
+The files needed to build _Taipy_ are located in sub-directories that
+store files as follows:
+- `taipy`: Python source files
+- `js`: JavaScript-related files
