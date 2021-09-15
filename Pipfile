@@ -30,6 +30,7 @@ mkdocs-autorefs = "*"
 pre-commit = "*"
 toml = "*"
 tox = "==3.24.3"
+mypy = "*"
 
 [requires]
 python_version = "3"

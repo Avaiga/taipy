@@ -1,6 +1,5 @@
 __all__ = ["FutureExecutor"]
 
-from concurrent import futures
 from concurrent.futures import Future
 
 
@@ -10,8 +9,8 @@ class FutureExecutor:
     """
 
     @staticmethod
-    def submit(fn, /, *args, **kwargs) -> futures:
-        future = Future()
+    def submit(fn, /, *args, **kwargs) -> Future:
+        future: Future = Future()
         future.set_result(fn(*args, **kwargs))
         return future
 
