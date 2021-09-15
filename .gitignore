@@ -112,3 +112,7 @@ ENV/
 
 # mkdocs build dir
 site/
+
+# Demo Testing File
+demo.py
+*.csv

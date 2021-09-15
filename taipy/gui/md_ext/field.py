@@ -46,7 +46,7 @@ class FieldPattern(InlineProcessor):
       el.set('type', 'text')
       el.set('value', str(value))
     else:
-      el = etree.Element("FieldTaipy")
+      el = etree.Element("Field")
       el.set('className', 'taipy-var ' + App._get_instance()._config.style_config["field"])
       el.set('value', str(value))
       el.set('dataType', getDataType(value))
