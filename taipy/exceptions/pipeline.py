@@ -6,6 +6,7 @@ class NonExistingPipelineEntity(Exception):
     def __init__(self, pipeline_id: str):
         self.message = f"Pipeline entity : {pipeline_id} does not exist."
 
+
 class NonExistingPipeline(Exception):
     """
     Exception raised if we request a pipeline not known by the task manager.

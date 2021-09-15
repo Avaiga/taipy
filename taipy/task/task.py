@@ -4,18 +4,20 @@ from taipy.data.data_source import DataSource
 
 
 class Task:
-
-    def __init__(self, name: str,
-                 inputs: Union[DataSource, List[DataSource]],
-                 function,
-                 outputs:  Union[DataSource, List[DataSource]]):
-        if isinstance(inputs, DataSource):
-            self.inputs = List[inputs]
+    def __init__(
+        self,
+        name: str,
+        input: Union[DataSource, List[DataSource]],
+        function,
+        output: Union[DataSource, List[DataSource]],
+    ):
+        if isinstance(input, DataSource):
+            self.input = [input]
         else:
-            self.inputs = inputs
-        if isinstance(outputs, DataSource):
-            self.outputs = List[outputs]
+            self.input = input
+        if isinstance(output, DataSource):
+            self.output = [output]
         else:
-            self.outputs = outputs
+            self.output = output
         self.name = name
         self.function = function

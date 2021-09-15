@@ -1,11 +1,15 @@
 import pytest
 
-from taipy.data.data_source import EmbeddedDataSourceEntity, DataSourceEntity, DataSource
+from taipy.data.data_source import (
+    DataSource,
+    DataSourceEntity,
+    EmbeddedDataSourceEntity,
+)
 from taipy.data.data_source.models import Scope
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.pipeline import PipelineEntity, PipelineId, Pipeline
+from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.pipeline_manager import PipelineManager
-from taipy.task import TaskEntity, TaskId, Task
+from taipy.task import Task, TaskEntity, TaskId
 from taipy.task.scheduler import TaskScheduler
 
 
@@ -54,8 +58,9 @@ def test_register_and_get_pipeline():
     assert len(pipeline_manager.get_pipelines()) == 2
     assert pipeline_manager.get_pipeline(name_1) == pipeline_3_with_same_name
     assert pipeline_manager.get_pipeline(name_2) == pipeline_2
-    assert pipeline_manager.get_pipeline(name_1).properties.get("description") == \
-           pipeline_3_with_same_name.properties.get("description")
+    assert pipeline_manager.get_pipeline(name_1).properties.get(
+        "description"
+    ) == pipeline_3_with_same_name.properties.get("description")
 
 
 def test_save_and_get_pipeline_entity():
@@ -63,12 +68,16 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_2_id", "bar")
-    output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "output_2_id", "bar")
+    input_2 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "input_2_id", "bar"
+    )
+    output_2 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "output_2_id", "bar"
+    )
     task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
 
-    pipeline_3_with_same_id = PipelineEntity("name_3", {}, [],pipeline_id_1)
+    pipeline_3_with_same_id = PipelineEntity("name_3", {}, [], pipeline_id_1)
 
     # No existing Pipeline
     pipeline_manager = PipelineManager()
@@ -132,10 +141,18 @@ def test_get_pipeline_schema():
     pipeline_manager.save_pipeline_entity(pipeline_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_id_2", "bar")
-    output_2_1 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_id_2_1", "bar")
-    output_2_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "input_id_2_2", "bar")
-    task_2 = TaskEntity("task", [input_2], print, [output_2_1, output_2_2], TaskId("task_id_2"))
+    input_2 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "input_id_2", "bar"
+    )
+    output_2_1 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "input_id_2_1", "bar"
+    )
+    output_2_2 = EmbeddedDataSourceEntity.create(
+        "foo", Scope.PIPELINE, "input_id_2_2", "bar"
+    )
+    task_2 = TaskEntity(
+        "task", [input_2], print, [output_2_1, output_2_2], TaskId("task_id_2")
+    )
     pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
     pipeline_manager.save_pipeline_entity(pipeline_2)
 
@@ -162,11 +179,21 @@ def test_submit():
     data_source_5 = DataSourceEntity("quux", Scope.PIPELINE, "s5")
     data_source_6 = DataSourceEntity("quuz", Scope.PIPELINE, "s6")
     data_source_7 = DataSourceEntity("corge", Scope.PIPELINE, "s7")
-    task_1 = TaskEntity("grault", [data_source_1, data_source_2], print, [data_source_3, data_source_4], TaskId("t1"))
+    task_1 = TaskEntity(
+        "grault",
+        [data_source_1, data_source_2],
+        print,
+        [data_source_3, data_source_4],
+        TaskId("t1"),
+    )
     task_2 = TaskEntity("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
-    task_3 = TaskEntity("waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3"))
+    task_3 = TaskEntity(
+        "waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3")
+    )
     task_4 = TaskEntity("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
-    pipeline = PipelineEntity("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
+    pipeline = PipelineEntity(
+        "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
+    )
 
     pipeline_manager = PipelineManager()
 
@@ -186,4 +213,9 @@ def test_submit():
     # pipeline does exist. we expect the tasks to be submitted in a specific order
     pipeline_manager.save_pipeline_entity(pipeline)
     pipeline_manager.submit(pipeline.id)
-    assert (pipeline_manager.task_scheduler.submit_calls == [task_1, task_2, task_4, task_3])
+    assert pipeline_manager.task_scheduler.submit_calls == [
+        task_1,
+        task_2,
+        task_4,
+        task_3,
+    ]

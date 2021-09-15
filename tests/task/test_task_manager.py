@@ -1,7 +1,7 @@
 import pytest
 
-from taipy.exceptions.task import NonExistingTaskEntity, NonExistingTask
-from taipy.task import TaskEntity, TaskId, Task
+from taipy.exceptions.task import NonExistingTask, NonExistingTaskEntity
+from taipy.task import Task, TaskEntity, TaskId
 from taipy.task.task_manager import TaskManager
 
 
@@ -55,7 +55,9 @@ def test_save_and_get_task_entity():
     first_task = TaskEntity("name_1", [], print, [], task_id_1)
     task_id_2 = TaskId("id2")
     second_task = TaskEntity("name_2", [], print, [], task_id_2)
-    third_task_with_same_id_as_first_task = TaskEntity("name_is_not_1_anymore", [], print, [], task_id_1)
+    third_task_with_same_id_as_first_task = TaskEntity(
+        "name_is_not_1_anymore", [], print, [], task_id_1
+    )
 
     # No task at initialization
     task_manager = TaskManager()
@@ -88,6 +90,8 @@ def test_save_and_get_task_entity():
     # We save a third task with same id as the first one. We expect the first task to be updated
     task_manager.save_task_entity(third_task_with_same_id_as_first_task)
     assert len(task_manager.task_entities) == 2
-    assert task_manager.get_task_entity(task_id_1) == third_task_with_same_id_as_first_task
+    assert (
+        task_manager.get_task_entity(task_id_1) == third_task_with_same_id_as_first_task
+    )
     assert task_manager.get_task_entity(task_id_1) != first_task
     assert task_manager.get_task_entity(task_id_2) == second_task

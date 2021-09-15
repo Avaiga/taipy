@@ -26,7 +26,7 @@ const DateSelector = (props: DateSelectorProps) => {
         setValueForVarName(tp_varname, props, v => setValue(new Date(v)))
     }, [tp_varname, props]);
 
-    return withTime && withTime.toLowerCase() === 'true' ? 
+    return withTime && withTime.toLowerCase() === 'true' ?
         <DateTimePicker onChange={handleChange} value={value} className={className} />
         :
         <DatePicker onChange={handleChange} value={value} className={className} />;

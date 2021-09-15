@@ -14,12 +14,14 @@ def test_scheduled_task():
         EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, "i1", data=21),
         EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, "i2", data=2),
     ]
-    output_ds = [EmbeddedDataSourceEntity.create("output1", Scope.PIPELINE, "o1", data=0)]
+    output_ds = [
+        EmbeddedDataSourceEntity.create("output1", Scope.PIPELINE, "o1", data=0)
+    ]
     task = TaskEntity(
         "task1",
-        inputs=input_ds,
+        input=input_ds,
         function=mult,
-        outputs=output_ds,
+        output=output_ds,
     )
     task_scheduler.submit(task)
     assert output_ds[0].get(None) == 42

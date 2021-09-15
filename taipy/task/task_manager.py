@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 from taipy.data.data_manager import DataManager
+from taipy.data.data_source import DataSource, DataSourceEntity
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.task import NonExistingTask
 from taipy.task import Task
@@ -33,15 +34,21 @@ class TaskManager:
     def save_task_entity(self, task: TaskEntity):
         logging.info(f"Task : {task.id} created or updated.")
         self.task_entities[task.id] = task
-        for datasource in task.inputs:
-            # self.data_manager.save_data_source(task)
+        for data_source in task.input:
+            # self.data_manager.save_data_source(data_source)
             ...
-        for datasource in task.outputs:
-            # self.data_manager.save_data_source(task)
+        for data_source in task.output:
+            # self.data_manager.save_data_source(data_source)
             ...
 
     def create_task_entity(self, task: Task) -> TaskEntity:
-        entity = TaskEntity(task.name, task.inputs, task.function, task.outputs)
+        # input_entities = list(
+        #     map(self.data_manager.create_data_source_entity, task.input)
+        # )
+        # output_entities = list(
+        #     map(self.data_manager.create_data_source_entity, task.output)
+        # )
+        entity = TaskEntity(task.name, [], task.function, [])
         self.save_task_entity(entity)
         return entity
 

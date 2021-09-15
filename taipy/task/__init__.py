@@ -1,3 +1,3 @@
-from .task_entity import TaskEntity, TaskId
-from .task import Task
 from .scheduler.job import JobId
+from .task import Task
+from .task_entity import TaskEntity, TaskId

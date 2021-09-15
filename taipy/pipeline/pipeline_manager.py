@@ -12,6 +12,7 @@ from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_entity import Dag, PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
 from taipy.pipeline.pipeline_schema import PipelineSchema
+from taipy.task import TaskId
 from taipy.task.scheduler.task_scheduler import TaskScheduler
 from taipy.task.task_manager import TaskManager
 
@@ -39,11 +40,16 @@ class PipelineManager:
             raise NonExistingPipeline(name)
 
     def get_pipelines(self) -> List[Pipeline]:
-        return [self.get_pipeline(pipeline.name) for pipeline in list(self.__PIPELINES.values())]
+        return [
+            self.get_pipeline(pipeline.name)
+            for pipeline in list(self.__PIPELINES.values())
+        ]
 
     def create_pipeline_entity(self, pipeline: Pipeline) -> PipelineEntity:
         task_entities = list(map(self.task_manager.create_task_entity, pipeline.tasks))
-        pipeline_entity = PipelineEntity(pipeline.name, pipeline.properties, task_entities)
+        pipeline_entity = PipelineEntity(
+            pipeline.name, pipeline.properties, task_entities
+        )
         self.save_pipeline_entity(pipeline_entity)
         return pipeline_entity
 
@@ -55,7 +61,10 @@ class PipelineManager:
     def get_pipeline_entity(self, pipeline_id: PipelineId) -> PipelineEntity:
         try:
             model = self.__PIPELINE_MODEL_DB[pipeline_id]
-            task_entities = list(map(self.task_manager.get_task_entity, model.task_source_edges.keys()))
+            task_entities = [
+                self.task_manager.get_task_entity(TaskId(task_id))
+                for task_id in model.task_source_edges.keys()
+            ]
             return PipelineEntity(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
             logging.error(
@@ -68,7 +77,8 @@ class PipelineManager:
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [
-            self.get_pipeline_entity(model.id) for model in self.__PIPELINE_MODEL_DB.values()
+            self.get_pipeline_entity(model.id)
+            for model in self.__PIPELINE_MODEL_DB.values()
         ]
 
     def get_pipeline_schema(self, pipeline_id: PipelineId) -> PipelineSchema:
@@ -86,7 +96,8 @@ class PipelineManager:
 
     def get_pipeline_schemas(self) -> List[PipelineSchema]:
         return [
-            self.get_pipeline_schema(model.id) for model in list(self.__PIPELINE_MODEL_DB.values())
+            self.get_pipeline_schema(model.id)
+            for model in list(self.__PIPELINE_MODEL_DB.values())
         ]
 
     def submit(self, pipeline_id: PipelineId):
