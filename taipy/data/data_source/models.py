@@ -36,5 +36,5 @@ class DataSourceModel:
     id: str
     name: str
     scope: Scope
-    implementation_class_name: str
+    type: str
     data_source_properties: Dict[str, Any]
