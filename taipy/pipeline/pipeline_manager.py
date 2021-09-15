@@ -68,7 +68,7 @@ class PipelineManager:
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [
-            self.get_pipeline_entity(model.id) for model in list(self.__PIPELINE_MODEL_DB.values())
+            self.get_pipeline_entity(model.id) for model in self.__PIPELINE_MODEL_DB.values()
         ]
 
     def get_pipeline_schema(self, pipeline_id: PipelineId) -> PipelineSchema:
