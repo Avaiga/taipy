@@ -159,11 +159,13 @@ class App(object, metaclass=Singleton):
         self._send_ws_update(var_name, {'value': newvalue})
 
     def _request_var(self, var_name, payload) -> None:
+        ret_payload = {}
         # Use custom attrgetter fuction to allow value binding for MapDictionary
         newvalue = attrgetter(var_name)(self._values)
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
         elif isinstance(newvalue, pd.DataFrame):
+            ret_payload['pagekey'] = payload['pagekey']
             start = int(payload['start']) if payload['start'] else 0
             end = int(payload['end']) if payload['end'] else len(newvalue)
             if start ==  -1:
@@ -179,7 +181,8 @@ class App(object, metaclass=Singleton):
             # here we'll deal with start and end values from payload if present
             pass
         # TODO: What if value == newvalue?
-        self._send_ws_update(var_name, {'value': newvalue})
+        ret_payload['value'] = newvalue
+        self._send_ws_update(var_name, ret_payload)
 
     def _send_ws_update(self, var_name, payload) -> None:
         try:
