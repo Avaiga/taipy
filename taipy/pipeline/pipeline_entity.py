@@ -48,7 +48,7 @@ class PipelineEntity:
         return graph
 
     def to_model(self) -> PipelineModel:
-        source_task_edges: Dag = defaultdict(lambda: [])
+        source_task_edges: Dag = defaultdict(list)
         task_source_edges: Dag = defaultdict(lambda: [])
         for task in self.task_entities:
             for predecessor in task.inputs:
