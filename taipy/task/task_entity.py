@@ -15,10 +15,8 @@ class TaskEntity:
                  outputs: List[DataSourceEntity] = None, id: TaskId = None):
         if outputs is None:
             outputs = []
-        self.input_data_sources = inputs
-        self.output_data_sources = outputs
+        self.inputs = inputs
+        self.outputs = outputs
         self.name = name
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())]))
-        fct = (function.__module__, function.__name__) if function else function
-        self.module = import_module(fct[0])
-        self.function = getattr(self.module, fct[1])
+        self.function = function

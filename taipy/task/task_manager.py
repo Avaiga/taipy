@@ -33,15 +33,15 @@ class TaskManager:
     def save_task_entity(self, task: TaskEntity):
         logging.info(f"Task : {task.id} created or updated.")
         self.task_entities[task.id] = task
-        for datasource in task.input_data_sources:
+        for datasource in task.inputs:
             # self.data_manager.save_data_source(task)
             ...
-        for datasource in task.output_data_sources:
+        for datasource in task.outputs:
             # self.data_manager.save_data_source(task)
             ...
 
     def create_task_entity(self, task: Task) -> TaskEntity:
-        entity = TaskEntity(task.name, task.input_data_sources, task.function, task.output_data_sources)
+        entity = TaskEntity(task.name, task.inputs, task.function, task.outputs)
         self.save_task_entity(entity)
         return entity
 

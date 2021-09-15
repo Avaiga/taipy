@@ -12,9 +12,9 @@ class Executor:
         self._executor = FutureExecutor()
 
     def submit(self, task):
-        future = self._executor.submit(task.function, *task.input_data_sources)
+        future = self._executor.submit(task.function, *task.inputs)
         future.add_done_callback(
-            functools.partial(self.set_output_data_sources, task.output_data_sources)
+            functools.partial(self.set_output_data_sources, task.outputs)
         )
 
     @staticmethod
