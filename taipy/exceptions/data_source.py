@@ -4,3 +4,11 @@ class MissingRequiredProperty(Exception):
     """
 
     pass
+
+
+class InvalidDataSourceType(Exception):
+    """
+    Exception raised if a data source entity does not exist
+    """
+
+    pass

@@ -1,4 +1,4 @@
-__all__ = ['FutureExecutor']
+__all__ = ["FutureExecutor"]
 
 from concurrent import futures
 from concurrent.futures import Future
@@ -8,12 +8,11 @@ class FutureExecutor:
     """
     Equivalence of Python standard Thread/Process Pool Executor but the function is executed directly
     """
+
     @staticmethod
     def submit(fn, /, *args, **kwargs) -> futures:
         future = Future()
-        future.set_result(
-            fn(*args, **kwargs)
-        )
+        future.set_result(fn(*args, **kwargs))
         return future
 
     @staticmethod

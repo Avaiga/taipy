@@ -1,0 +1,7 @@
+{
+    "name": "foo",
+    "type": "csv",
+    "scope": "PIPELINE",
+    "path": "foo",
+    "has_header": true
+}

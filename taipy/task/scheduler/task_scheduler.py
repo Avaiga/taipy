@@ -3,7 +3,8 @@ __all__ = ['TaskScheduler']
 import uuid
 import logging
 
-from taipy.task import Task
+from taipy.task.task import Task
+
 from .executor.executor import Executor
 from .job import JobId, Job
 

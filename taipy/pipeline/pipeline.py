@@ -5,20 +5,26 @@ ML training pipeline, etc. should implement this generic pipeline entity
 """
 import uuid
 from collections import defaultdict
+from typing import Any, Dict, List
 
 import networkx as nx
 
-from taipy.data.data_source import DataSource
-from taipy.pipeline.pipeline_model import PipelineModel, PipelineId, Dag
+from taipy.data.data_source import DataSourceEntity
+from taipy.pipeline.pipeline_model import Dag, PipelineId, PipelineModel
 from taipy.task.task import Task
-from typing import Dict, List
 
 
 class Pipeline:
     __ID_PREFIX = "PIPELINE"
     __ID_SEPARATOR = "_"
 
-    def __init__(self, pipeline_id: PipelineId, name: str, properties: Dict[str, str], tasks: List[Task]):
+    def __init__(
+        self,
+        pipeline_id: PipelineId,
+        name: str,
+        properties: Dict[str, str],
+        tasks: List[Task],
+    ):
         self.id = pipeline_id
         self.name = name
         self.properties = properties
@@ -37,12 +43,14 @@ class Pipeline:
         dag = self.__build_dag()
         if not nx.is_directed_acyclic_graph(dag):
             return False
-        expected_type = DataSource
+        expected_type: Any = DataSourceEntity
         for nodes in nx.topological_generations(dag):
             for node in nodes:
                 if not isinstance(node, expected_type):
                     return False
-            expected_type = Task if (expected_type == DataSource) else DataSource
+            expected_type = (
+                Task if (expected_type == DataSourceEntity) else DataSourceEntity
+            )
         return True
 
     def __build_dag(self):
@@ -62,8 +70,14 @@ class Pipeline:
                 source_task_edges[predecessor.id].append(task.id)
             for successor in task.output_data_sources:
                 task_source_edges[task.id].append(successor.id)
-        return PipelineModel(self.id, self.name, self.properties, source_task_edges, task_source_edges)
+        return PipelineModel(
+            self.id, self.name, self.properties, source_task_edges, task_source_edges
+        )
 
     def get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
-        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
+        return list(
+            nodes
+            for nodes in nx.topological_generations(dag)
+            if (Task in (type(node) for node in nodes))
+        )

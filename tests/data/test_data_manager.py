@@ -1,5 +1,5 @@
 from taipy.data.data_manager import DataManager
-from taipy.data.data_source import EmbeddedDataSource
+from taipy.data.data_source import EmbeddedDataSourceEntity
 
 
 class TestDataManager:
@@ -8,13 +8,13 @@ class TestDataManager:
         dm.create_data_source(
             "ds_id",
             "test_data_source",
-            "EmbeddedDataSource",
+            "EmbeddedDataSourceEntity",
             {"data": "Embedded Data Source"},
         )
 
         ds = dm.fetch_data_source("ds_id")
 
-        assert isinstance(ds, EmbeddedDataSource)
+        assert isinstance(ds, EmbeddedDataSourceEntity)
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()

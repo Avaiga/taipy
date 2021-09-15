@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from taipy.pipeline.pipeline_model import PipelineId, Dag
+from taipy.pipeline.pipeline_model import Dag, PipelineId
 
 
 @dataclass

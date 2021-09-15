@@ -1,8 +1,9 @@
 import functools
 from concurrent.futures import Future
-from typing import NoReturn, Iterable
+from typing import Iterable, NoReturn
 
-from taipy.data.data_source import DataSource
+from taipy.data.data_source import DataSourceEntity
+
 from .future import FutureExecutor
 
 
@@ -17,6 +18,8 @@ class Executor:
         )
 
     @staticmethod
-    def set_output_data_sources(output_data_sources: Iterable[DataSource], future: Future) -> NoReturn:
+    def set_output_data_sources(
+        output_data_sources: Iterable[DataSourceEntity], future: Future
+    ) -> NoReturn:
         for ds in output_data_sources:
             ds.write(future.result())

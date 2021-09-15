@@ -8,12 +8,12 @@ from typing import Dict, List
 
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.pipeline.pipeline import Pipeline, Dag
+from taipy.pipeline import PipelineId
+from taipy.pipeline.pipeline import Dag, Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.pipeline_schema import PipelineSchema
-from taipy.pipeline import PipelineId
-from taipy.task.task_manager import TaskManager
 from taipy.task.scheduler.task_scheduler import TaskScheduler
+from taipy.task.task_manager import TaskManager
 
 
 class PipelineManager:

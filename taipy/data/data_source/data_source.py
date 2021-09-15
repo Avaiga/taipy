@@ -1,41 +1,40 @@
-import uuid
-from abc import abstractmethod
+import json
+
+from taipy.data.data_source.csv import CSVDataSourceEntity
+from taipy.data.data_source.embedded import EmbeddedDataSourceEntity
+from taipy.data.data_source.models import Scope
+from taipy.exceptions import InvalidDataSourceType
 
 
 class DataSource:
     """
-    A class to represent a Data Source. A Data Source is an object that holds the name, scope and additional
-    properties of the data source.
-
-    Attributes
-    ----------
-    id: str
-        unique identifier of the data source
-    name: str
-        name that identifies the data source
-    scope: int
-        number that refers to the scope of usage of the data source
-    properties: list
-        list of additional arguments
+    Instantiate a DataSource with basic parameters
+    >>> ds = DataSource(unique_name="foo", type="csv", path="foo", has_header=True)
+    The DataSource instance should return a CSVDataSourceEntity because of the parameter type
+    >>> assert isinstance(ds, CSVDataSourceEntity)
+    >>> print(ds.to_json())
     """
 
-    def __init__(self, name, scope, id=None, **kwargs):
-        self.id = id or uuid.uuid4()
-        self.name = name
-        self.scope = scope
-        self.properties = kwargs
+    __ENTITY_MAP = {"csv": CSVDataSourceEntity, "embedded": EmbeddedDataSourceEntity}
 
-    @abstractmethod
-    def preview(self):
-        pass
+    @classmethod
+    def __get_entity(cls, type: str):
+        ds_entity = cls.__ENTITY_MAP.get(type)
+        if ds_entity is None:
+            raise InvalidDataSourceType(f"{type} is not a valid Data Source Type")
+        return ds_entity
 
-    @abstractmethod
-    def get(self, query):
-        pass
+    def __new__(cls, unique_name: str, type: str, **kwargs):
+        ds_entity = cls.__get_entity(type)
+        return ds_entity(name=unique_name, scope=Scope.PIPELINE, properties=kwargs)
 
-    @abstractmethod
-    def write(self, data):
-        """
-        Temporary function interface, will be remove
-        """
-        pass
+    @classmethod
+    def from_json(cls, json_path):
+        with open(json_path) as j:
+            ds_dict = json.load(j)
+
+        return cls.__get_entity(ds_dict.get("type")).from_json(ds_dict)
+
+    @classmethod
+    def to_json(cls):
+        return vars(cls)
