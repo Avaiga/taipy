@@ -1,6 +1,6 @@
 class NonExistingPipelineEntity(Exception):
     """
-    Exception raised if we request a pipeline entity not known by the task manager.
+    Exception raised if we request a pipeline entity not known by the pipeline manager.
     """
 
     def __init__(self, pipeline_id: str):
