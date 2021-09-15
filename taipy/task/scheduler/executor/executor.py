@@ -20,6 +20,6 @@ class Executor:
     @staticmethod
     def set_output_data_sources(
         output_data_sources: Iterable[DataSourceEntity], future: Future
-    ) -> NoReturn:
+    ):
         for ds in output_data_sources:
             ds.write(future.result())
