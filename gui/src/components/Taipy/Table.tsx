@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
 
 import { setValueForVarName, TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
-import { useWhyDidYouUpdate } from "../../utils/hooks";
+//import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 interface TableProps extends TaipyBaseProps {
     pageSize?: number;
@@ -14,15 +14,19 @@ const Table = (props: TableProps) => {
     const [value, setValue] = useState<Record<string, any>>({});
     const [startIndex, setStartIndex] = useState(0);
     const { dispatch } = useContext(TaipyContext);
+    const pageKey = useRef('no-page');
 
-    useWhyDidYouUpdate('TaipyTable', props);
+//    useWhyDidYouUpdate('TaipyTable', props);
 
     useEffect(() => {
-        setValueForVarName(tp_varname, props, setValue);
+        setValueForVarName([tp_varname, pageKey.current], props, setValue);
     }, [tp_varname, props]);
 
     useEffect(() => {
-        dispatch(createRequestTableUpdateAction(tp_varname, id, startIndex, startIndex + pageSize));
+        pageKey.current = `${startIndex}-${startIndex + pageSize}`;
+        if (!setValueForVarName([tp_varname, pageKey.current], props, setValue)) {
+            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + pageSize));
+        }
     }, [startIndex, tp_varname, id, dispatch, pageSize]);
 
     const otherPage = useCallback(e => {
@@ -50,6 +54,7 @@ const Table = (props: TableProps) => {
 
     return <>
         <table className={className} id={id}>
+            <tbody>
             {
                 Object.keys(value).map((rowKey: string) => <tr><td>{rowKey}</td>{
                     typeof value[rowKey] === 'object' ?
@@ -58,6 +63,7 @@ const Table = (props: TableProps) => {
                         <td>{value[rowKey]}</td>
                 }</tr>)
             }
+            </tbody>
         </table>
         <div>
             <a href="/" id={id + '-top'} onClick={otherPage}>Top Page</a>
