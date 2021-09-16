@@ -4,3 +4,4 @@ from .datatype import getDataType
 from .date import ISOToDate, dateToISO
 from .MapDictionary import MapDictionary
 from .Singleton import Singleton
+from .clientvarname import get_client_var_name

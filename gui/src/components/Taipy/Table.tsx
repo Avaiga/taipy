@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
 
-import { setValueForVarName, TaipyBaseProps } from "./utils";
+import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 interface TableProps extends TaipyBaseProps {
     pageSize?: number;
+    value: Record<string, Record<string, any>>
 }
 
 const Table = (props: TableProps) => {
@@ -19,14 +20,18 @@ const Table = (props: TableProps) => {
 //    useWhyDidYouUpdate('TaipyTable', props);
 
     useEffect(() => {
-        setValueForVarName([tp_varname, pageKey.current], props, setValue);
-    }, [tp_varname, props]);
+        if (props.value && typeof props.value[pageKey.current] !== 'undefined') {
+            setValue(props.value[pageKey.current])
+        }
+    }, [props.value]);
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
         pageKey.current = `${startIndex}-${startIndex + pageSize}`;
-        if (!setValueForVarName([tp_varname, pageKey.current], props, setValue)) {
+        if (!props.value || typeof props.value[pageKey.current] === 'undefined') {
             dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + pageSize));
+        } else {
+            setValue(props.value[pageKey.current])
         }
     }, [startIndex, tp_varname, id, dispatch, pageSize]);
 
@@ -50,7 +55,7 @@ const Table = (props: TableProps) => {
             }
         })
         e.preventDefault();
-        return false;
+        e.stopPropagation();
     }, [value, pageSize]);
 
     return <>

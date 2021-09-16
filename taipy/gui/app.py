@@ -13,7 +13,7 @@ from .config import default_config
 from .md_ext import *
 from .Page import Page
 from .server import Server
-from .utils import ISOToDate, MapDictionary, Singleton, attrsetter, dateToISO
+from .utils import ISOToDate, MapDictionary, Singleton, attrsetter, dateToISO, get_client_var_name
 
 
 class App(object, metaclass=Singleton):
@@ -222,7 +222,7 @@ class App(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name, payload) -> None:
         try:
-            self._server._ws.send({"type": "U", "name": var_name, "payload": payload})
+            self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
         except Exception as e:
             print(e)
 

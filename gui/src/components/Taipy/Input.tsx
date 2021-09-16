@@ -2,10 +2,10 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { setValueForVarName, TaipyInputProps } from "./utils";
+import { TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
-    const [value, setValue] = useState(props.value);
+    const [value, setValue] = useState(props.defaultvalue);
     const { dispatch } = useContext(TaipyContext);
 
     const { className, type, id, tp_varname, actionName } = props;
@@ -22,18 +22,21 @@ const Input = (props: TaipyInputProps) => {
     const actions = {} as Record<string, unknown>;
     if (type === 'button') {
         actions.onClick = handleClick;
+    } else {
+        actions.onChange= hanldeInput;
     }
 
     useEffect(() => {
-        setValueForVarName(tp_varname, props, setValue)
-    }, [tp_varname, props]);
+        if (typeof props.value !== 'undefined') {
+            setValue(props.value);
+        }
+    }, [props.value]);
 
     return <input
             value={value}
             className={className}
             type={type}
             id={id}
-            onChange={hanldeInput}
             {...actions}
         />
 }
