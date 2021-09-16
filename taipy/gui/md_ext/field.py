@@ -1,6 +1,7 @@
 from markdown.inlinepatterns import InlineProcessor
 from .builder import MarkdownBuilder
 
+
 # The field pattern also handles the [<var>] construct
 
 

@@ -1,12 +1,6 @@
-import markdown
-from markdown import Markdown
 from markdown.inlinepatterns import InlineProcessor
-from markdown.util import etree
-from markdown.extensions import Extension
-from operator import attrgetter
-from ..app import App
-from .parse_attributes import parse_attributes
 from .builder import MarkdownBuilder
+
 
 # The table pattern also handles the [<var>] construct
 class TablePattern(InlineProcessor):

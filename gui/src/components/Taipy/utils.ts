@@ -1,12 +1,17 @@
 import { formatWSValue } from "../../utils/index";
 
-export const setValueForVarName = (varName: string, props: Record<string, any>, setVal: (a: any) => void, dataType?: string) => {
+export const setValueForVarName = (varName: string | string[], props: Record<string, any>, setVal: (a: any) => void, dataType?: string) => {
     if (varName) {
-        const fullKey = "tp_" + varName.replaceAll(".", "__");
-        if (typeof props[fullKey] !== "undefined") {
-            setVal(dataType ? formatWSValue(props[fullKey], dataType): props[fullKey]);
+        if (!Array.isArray(varName)) {
+            varName = [varName];
+        }
+        const value = varName.map((n, idx) => idx === 0 ? "tp_" + n.replaceAll(".", "__") : n).reduce((obj: any, n: string) => obj && obj[n], props);
+        if (typeof value !== "undefined") {
+            setVal(dataType ? formatWSValue(value, dataType): value);
+            return true;
         }
     }
+    return false;
 };
 
 export interface TaipyBaseProps {

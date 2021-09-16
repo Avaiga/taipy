@@ -4,7 +4,7 @@ class AppConfig(object):
         self.routes = []
         self.app_config = {}
         self.style_config = {}
-    
-    def load_config(self, app_config = {}, style_config = {}):
+
+    def load_config(self, app_config={}, style_config={}):
         self.app_config.update(app_config)
         self.style_config.update(style_config)
