@@ -1,13 +1,15 @@
+from datetime import datetime
+from operator import attrgetter
+
 import markdown
 from markdown import Markdown
+from markdown.extensions import Extension
 from markdown.inlinepatterns import InlineProcessor
 from markdown.util import etree
-from markdown.extensions import Extension
-from operator import attrgetter
-from datetime import datetime
+
 from ..app import App
+from ..utils import dateToISO, is_boolean_true
 from .parse_attributes import parse_attributes
-from ..utils import is_boolean_true, dateToISO
 
 
 class DateSelectorPattern(InlineProcessor):
@@ -19,8 +21,9 @@ class DateSelectorPattern(InlineProcessor):
 
     @staticmethod
     def extendMarkdown(md):
-        md.inlinePatterns['taipy-date-selector'] = DateSelectorPattern(
-            DateSelectorPattern._PATTERN, md)
+        md.inlinePatterns["taipy-date-selector"] = DateSelectorPattern(
+            DateSelectorPattern._PATTERN, md
+        )
 
     # TODO: Attributes:
     #   on_update=<func>
@@ -35,17 +38,27 @@ class DateSelectorPattern(InlineProcessor):
         except:
             value = datetime.fromtimestamp(0)
 
-        el = etree.Element('DateSelector')
-        el.set('className', 'taipy-date-selector ' +
-               App._get_instance()._config.style_config["date_selector"])
+        el = etree.Element("DateSelector")
+        el.set(
+            "className",
+            "taipy-date-selector "
+            + App._get_instance()._config.style_config["date_selector"],
+        )
         if var_name:
-            el.set('key', var_name + '_' + str(var_id))
-            el.set('tp_' + var_name.replace('.', '__'), '{!' + var_name.replace('.', '__') + '!}')
-            el.set('tp_varname', var_name)
-        el.set('value', dateToISO(value))
+            el.set("key", var_name + "_" + str(var_id))
+            el.set(
+                "tp_" + var_name.replace(".", "__"),
+                "{!" + var_name.replace(".", "__") + "!}",
+            )
+            el.set("tp_varname", var_name)
+        el.set("value", dateToISO(value))
 
         attributes = parse_attributes(m.group(3))
-        if attributes and 'with_time' in attributes and is_boolean_true(attributes['with_time']):
-            el.set('withTime', str(True))
+        if (
+            attributes
+            and "with_time" in attributes
+            and is_boolean_true(attributes["with_time"])
+        ):
+            el.set("withTime", str(True))
 
         return el, m.start(0), m.end(0)

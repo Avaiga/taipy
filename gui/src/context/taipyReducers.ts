@@ -18,13 +18,7 @@ export interface TaipyState {
 export interface TaipyAction {
     type: Types;
     name: string;
-    value: string;
-}
-
-export interface TaipyTableAction extends TaipyAction {
-    id: string;
-    start?: number;
-    end?: number;
+    payload: any;
 }
 
 export const taipyInitialize = (initialState: TaipyState) => ({
@@ -46,7 +40,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         // handle message data from backend
         socket.on('message', (message: WsMessage) => {
             if (message.type && message.type == 'U' && message.name) { // interestingly we can't use === for message.type here 8-|
-                dispatch(createUpdateAction(message.name, message.payload.value))
+                dispatch(createUpdateAction(message.name, message.payload))
             }
         });
     }
@@ -56,46 +50,48 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
 export const taipyReducer = (state: TaipyState, action: TaipyAction) => {
     switch (action.type) {
         case Types.Update:
-            return {...state, data: { ...state.data, [action.name]: action.value}};
+            return {...state, data: { ...state.data, [action.name]: action.payload.pagekey ? {...state.data[action.name], [action.payload.pagekey]: action.payload.value} : action.payload.value}};
         case Types.SendUpdate:
-            sendWsMessage(state.socket, 'U', action.name, {value: action.value});
+            sendWsMessage(state.socket, 'U', action.name, action.payload.value);
             break;
         case Types.Action:
-            sendWsMessage(state.socket, 'A', action.name, {action: action.value});
+            sendWsMessage(state.socket, 'A', action.name, action.payload.value);
             break;
         case Types.RequestTableUpdate:
-            const tAction = action as TaipyTableAction;
-            sendWsMessage(state.socket, 'T', action.name, {id: tAction.id, start: tAction.start, end: tAction.end});
+            sendWsMessage(state.socket, 'T', action.name, action.payload);
             break;
     }
     return state;
 }
 
-export const createUpdateAction = (name: string, value: any) => ({
+export const createUpdateAction = (name: string, payload: any) => ({
     type: Types.Update,
     name: name.replaceAll('.', '__'),
-    value: value
+    payload: payload
 } as TaipyAction)
 
 export const createSendUpdateAction = (name: string, value: any) => ({
     type: Types.SendUpdate,
     name: name,
-    value: value
+    payload: {value: value}
 } as TaipyAction)
 
 export const createSendActionNameAction = (name: string, value: any) => ({
     type: Types.Action,
     name: name,
-    value: value
+    payload: {value: value}
 } as TaipyAction)
 
-export const createRequestTableUpdateAction = (name: string, id: string, start?: number, end?: number) => ({
+export const createRequestTableUpdateAction = (name: string, id: string, pageKey: string, start?: number, end?: number) => ({
     type: Types.RequestTableUpdate,
     name: name,
-    id: id,
-    start: start,
-    end: end
-} as TaipyTableAction)
+    payload: {
+        id: id,
+        pagekey: pageKey,
+        start: start,
+        end: end
+    }
+} as TaipyAction)
 
 type WsMessageType = "A" | "U" | "T";
 
@@ -109,4 +105,3 @@ const sendWsMessage = (socket: Socket | undefined, type: WsMessageType, name: st
     const msg: WsMessage = {type: type, name: name, payload: payload};
     socket?.emit("message", msg);
 };
-
