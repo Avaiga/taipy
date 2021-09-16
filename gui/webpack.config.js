@@ -12,9 +12,9 @@ module.exports = (env, options) => ({
         "./src/index.tsx"
     ],
     output: {
-        filename: "taipy-gui.js",
+        filename: "taipy.js",
         path: path.resolve(__dirname, '../taipy_webapp'),
-        library: "TaipyGui",
+        library: "Taipy",
         libraryTarget: "umd", //"var" "commonjs" "umd"
     },
 
