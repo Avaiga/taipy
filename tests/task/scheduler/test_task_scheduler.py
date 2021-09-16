@@ -1,5 +1,6 @@
 from taipy.data.data_source import DataSourceEntity, EmbeddedDataSourceEntity
-from taipy.task import Task
+from taipy.data.data_source.models import Scope
+from taipy.task import Task, TaskEntity
 from taipy.task.scheduler import TaskScheduler
 
 
@@ -10,15 +11,17 @@ def mult(nb1: DataSourceEntity, nb2: DataSourceEntity):
 def test_scheduled_task():
     task_scheduler = TaskScheduler()
     input_ds = [
-        EmbeddedDataSourceEntity("input1", 0, None, {"data": 21}),
-        EmbeddedDataSourceEntity("input2", 0, None, {"data": 2}),
+        EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, "i1", data=21),
+        EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, "i2", data=2),
     ]
-    output_ds = [EmbeddedDataSourceEntity("output1", 0, None, {"data": 0})]
-    task = Task.create_task(
+    output_ds = [
+        EmbeddedDataSourceEntity.create("output1", Scope.PIPELINE, "o1", data=0)
+    ]
+    task = TaskEntity(
         "task1",
-        input_data_sources=input_ds,
+        input=input_ds,
         function=mult,
-        output_data_sources=output_ds,
+        output=output_ds,
     )
     task_scheduler.submit(task)
     assert output_ds[0].get(None) == 42

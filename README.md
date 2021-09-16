@@ -15,7 +15,7 @@
 </p>
 
 
-AI Platform for Business Applications
+AI Business Application Builder
 
 
 * Free software: MIT
