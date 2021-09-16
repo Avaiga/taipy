@@ -51,10 +51,10 @@ class Server(Flask):
                     print(message['status'])
                 elif message['type'] == 'U':
                     self._app._update_var(
-                        message['name'], message['payload']['value'])
+                        message['name'], message['payload'])
                 elif message['type'] == 'A':
                     self._app._on_action(
-                        message['name'], message['payload']['action'])
+                        message['name'], message['payload'])
                 elif message['type'] == 'T':
                     self._app._request_var(message['name'], message['payload'])
             except TypeError as te:  
