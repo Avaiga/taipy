@@ -46,7 +46,7 @@ class PipelineManager:
         ]
 
     def create_pipeline_entity(self, pipeline: Pipeline) -> PipelineEntity:
-        task_entities = list(map(self.task_manager.create_task_entity, pipeline.tasks))
+        task_entities = [self.task_manager.create_task_entity(task) for task in pipeline.tasks]
         pipeline_entity = PipelineEntity(
             pipeline.name, pipeline.properties, task_entities
         )
