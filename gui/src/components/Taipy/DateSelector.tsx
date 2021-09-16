@@ -23,7 +23,7 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [tp_varname, dispatch]);
 
     useEffect(() => {
-        setValueForVarName(tp_varname, props, v => setValue(new Date(v)))
+        setValueForVarName(tp_varname, props, (v: unknown) => setValue(new Date(v as string)));
     }, [tp_varname, props]);
 
     return withTime && withTime.toLowerCase() === 'true' ?
