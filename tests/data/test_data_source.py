@@ -27,16 +27,16 @@ class TestDataSource:
         ],
     )
     def test_create_ds(self, name, type, properties, expected_instance):
-        ds = DataSource(unique_name=name, type=type, **properties)
+        ds = DataSource(name=name, type=type, **properties)
         assert isinstance(ds, expected_instance)
 
     def test_invalid_ds_type(self):
         with pytest.raises(InvalidDataSourceType):
-            DataSource(unique_name="foo", type="invalid")
+            DataSource(name="foo", type="invalid")
 
     def test_init_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
-            DataSource(unique_name="csv_ds", type="csv")
+            DataSource(name="csv_ds", type="csv")
 
     @pytest.mark.parametrize(
         "name,type,properties",
@@ -46,7 +46,7 @@ class TestDataSource:
         ],
     )
     def test_to_json(self, name, type, properties):
-        ds = DataSource(unique_name=name, type=type, **properties)
+        ds = DataSource(name=name, type=type, **properties)
         ds_json = ds.to_json()
 
         expected_json = {"name": name, "type": type, "scope": "PIPELINE"}

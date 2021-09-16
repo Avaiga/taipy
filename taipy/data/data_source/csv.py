@@ -21,7 +21,7 @@ class CSVDataSourceEntity(DataSourceEntity):
     properties: list
         list of additional arguments
     """
-    __TYPE = "embedded"
+    TYPE = "embedded"
     __REQUIRED_PROPERTIES = ["path", "has_header"]
 
     def __init__(

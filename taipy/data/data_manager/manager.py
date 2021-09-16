@@ -20,8 +20,8 @@ class DataManager:
     # This represents a database table that maintains our DataSource References.
     __DATA_SOURCE_MODEL_DB: List[DataSourceModel] = []
     __DATA_SOURCE_DB: List[DataSource] = []
-    __ENTITIES = [CSVDataSourceEntity, EmbeddedDataSourceEntity]
-    __ENTITY_MAP = {v.__TYPE: v for v in __ENTITIES}
+    __ENTITIES = {EmbeddedDataSourceEntity, CSVDataSourceEntity}
+    __ENTITY_MAP = {v.TYPE: v for v in __ENTITIES}
 
     def register_data_source(self, data_source: DataSource):
         self.__DATA_SOURCE_DB.append(data_source)
