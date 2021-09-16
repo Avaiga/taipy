@@ -21,6 +21,7 @@ class CSVDataSourceEntity(DataSourceEntity):
     properties: list
         list of additional arguments
     """
+
     TYPE = "csv"
     __REQUIRED_PROPERTIES = ["path", "has_header"]
 

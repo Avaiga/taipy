@@ -5,8 +5,9 @@ from typing import List
 
 from taipy.data.data_source import (
     CSVDataSourceEntity,
+    DataSource,
     DataSourceEntity,
-    EmbeddedDataSourceEntity, DataSource,
+    EmbeddedDataSourceEntity,
 )
 from taipy.data.data_source.models import DataSourceModel, Scope
 
@@ -37,9 +38,9 @@ class DataManager:
         return data_source
 
     def create_data_source_entity(self, data_source: DataSource) -> DataSourceEntity:
-        data_source_entity = self.__ENTITY_CLASS_MAP[data_source.type](data_source.name,
-                                                                       data_source.scope,
-                                                                       **data_source.properties)
+        data_source_entity = self.__ENTITY_CLASS_MAP[data_source.type](
+            data_source.name, data_source.scope, **data_source.properties
+        )
         self.save_data_source_entity(data_source_entity)
         return data_source_entity
 
@@ -48,13 +49,18 @@ class DataManager:
             data_source_entity.id,
             data_source_entity.name,
             data_source_entity.type,
-            data_source_entity.properties
+            data_source_entity.properties,
         )
 
     def get_data_source_entity(self, data_source_id: str) -> DataSourceEntity:
         model = self.fetch_data_source_model(data_source_id)
-        return model.implementation_class_name(model.name, model.implementation_class_name, model.scope, model.id,
-                                               model.properties)
+        return model.implementation_class_name(
+            model.name,
+            model.implementation_class_name,
+            model.scope,
+            model.id,
+            model.properties,
+        )
 
     def create_data_source_model(
         self, id: str, name: str, data_source_class: str, properties: dict
@@ -76,9 +82,7 @@ class DataManager:
             # Not sure if we need to handle missing DataSource here or in the function that
             # calls fetch_data_source. Something to consider in the near future.
             if ds.id == id:
-                data_source_class = getattr(
-                    sys.modules[__name__], ds.type
-                )
+                data_source_class = getattr(sys.modules[__name__], ds.type)
                 data_source = data_source_class(
                     ds.id, ds.name, ds.scope, ds.data_source_properties
                 )

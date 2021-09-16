@@ -21,6 +21,7 @@ class DataSourceEntity:
     properties: list
         list of additional arguments
     """
+
     TYPE = None
 
     def __init__(

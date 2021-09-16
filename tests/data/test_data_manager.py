@@ -1,5 +1,5 @@
-from taipy.data.data_manager import DataManager
 from taipy.data.data_source import EmbeddedDataSourceEntity
+from taipy.data.manager import DataManager
 
 
 class TestDataManager:
