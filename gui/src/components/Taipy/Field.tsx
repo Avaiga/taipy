@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
 
-import { setValueForVarName, TaipyFieldProps } from "./utils";
+import { TaipyFieldProps } from "./utils";
 import { formatWSValue } from "../../utils";
 
 const Field = (props: TaipyFieldProps) => {
-    const { className, id, tp_varname, dataType } = props;
-    const [value, setValue] = useState(() => formatWSValue(props.value, dataType));
+    const { className, id, dataType } = props;
+    const [value, setValue] = useState(() => formatWSValue(props.defaultvalue, dataType));
 
     useEffect(() => {
-        setValueForVarName(tp_varname, props, setValue, dataType);
-    }, [tp_varname, props, dataType]);
+        if (typeof props.value !== 'undefined') {
+            setValue(dataType ? formatWSValue(props.value, dataType) : props.value)
+        }
+    }, [props.value, dataType]);
 
     return (
         <span className={className} id={id}>

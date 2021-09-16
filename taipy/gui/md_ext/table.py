@@ -1,7 +1,6 @@
 from markdown.inlinepatterns import InlineProcessor
 from .builder import MarkdownBuilder
 
-
 # The table pattern also handles the [<var>] construct
 class TablePattern(InlineProcessor):
 
@@ -23,7 +22,6 @@ class TablePattern(InlineProcessor):
                 el_element_name="Table",
                 has_attribute=True,
                 attributes_val=4,
-                default_value="<empty>",
             )
             .set_varname()
             .set_className(class_name="taipy-table", config_class="table")

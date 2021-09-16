@@ -65,7 +65,7 @@ export const taipyReducer = (state: TaipyState, action: TaipyAction): TaipyState
 
 export const createUpdateAction = (name: string, payload: Record<string, unknown>): TaipyAction => ({
     type: Types.Update,
-    name: name.replaceAll('.', '__'),
+    name: name,
     payload: payload
 })
 

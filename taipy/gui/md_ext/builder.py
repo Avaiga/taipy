@@ -1,13 +1,13 @@
 from markdown.util import etree
 from operator import attrgetter
 from .parse_attributes import parse_attributes
-from ..utils import is_boolean_true, dateToISO, getDataType
+from ..utils import is_boolean_true, dateToISO, getDataType, get_client_var_name
 from ..app import App
 
 
 class MarkdownBuilder:
     def __init__(
-        self, m, el_element_name, default_value, has_attribute=False, attributes_val=3
+        self, m, el_element_name, default_value='<Empty>', has_attribute=False, attributes_val=3
     ):
         self.m = m
         self.el_element_name = el_element_name
@@ -41,15 +41,15 @@ class MarkdownBuilder:
         if self.var_name:
             self.set_attribute("key", self.var_name + "_" + str(self.var_id))
             self.set_attribute(
-                "tp_" + self.var_name.replace(".", "__"),
-                "{!" + self.var_name.replace(".", "__") + "!}",
+                "value",
+                "{!" + get_client_var_name(self.var_name) + "!}",
             )
             self.set_attribute("tp_varname", self.var_name)
         return self
 
-    def set_value(self):
+    def set_default_value(self):
         if self.el_element_name == "DateSelector":
-            self.set_attribute("value", dateToISO(self.value))
+            self.set_attribute("defaultvalue", dateToISO(self.value))
         if self.el_element_name == "Input" and self.type_name == "button":
             self.set_attribute(
                 "value",
@@ -58,7 +58,7 @@ class MarkdownBuilder:
                 else str(self.value),
             )
         else:
-            self.set_attribute("value", str(self.value))
+            self.set_attribute("defaultvalue", str(self.value))
         return self
 
     def set_className(self, class_name="", config_class="input"):

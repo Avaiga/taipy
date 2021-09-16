@@ -4,7 +4,7 @@ import DateTimePicker from "react-datetime-picker";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { setValueForVarName, TaipyInputProps } from "./utils";
+import { TaipyInputProps } from "./utils";
 
 interface DateSelectorProps extends TaipyInputProps {
     withTime?: string;
@@ -12,7 +12,7 @@ interface DateSelectorProps extends TaipyInputProps {
 }
 
 const DateSelector = (props: DateSelectorProps) => {
-    const [value, setValue] = useState(() => new Date(props.value));
+    const [value, setValue] = useState(() => new Date(props.defaultvalue));
     const { dispatch } = useContext(TaipyContext);
 
     const { className, tp_varname, withTime } = props;
@@ -23,8 +23,10 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [tp_varname, dispatch]);
 
     useEffect(() => {
-        setValueForVarName(tp_varname, props, (v: unknown) => setValue(new Date(v as string)));
-    }, [tp_varname, props]);
+        if (typeof props.value !== 'undefined') {
+            setValue(new Date(props.value))
+        }
+    }, [props.value]);
 
     return withTime && withTime.toLowerCase() === 'true' ?
         <DateTimePicker onChange={handleChange} value={value} className={className} />
