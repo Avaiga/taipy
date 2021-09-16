@@ -8,7 +8,7 @@ from .models import Scope
 
 
 class EmbeddedDataSourceEntity(DataSourceEntity):
-    TYPE = "csv"
+    TYPE = "embedded"
     __REQUIRED_PROPERTIES = ["data"]
 
     def __init__(

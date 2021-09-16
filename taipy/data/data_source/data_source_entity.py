@@ -21,7 +21,7 @@ class DataSourceEntity:
     properties: list
         list of additional arguments
     """
-    __TYPE = None
+    TYPE = None
 
     def __init__(
         self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
@@ -33,7 +33,7 @@ class DataSourceEntity:
 
     @property
     def type(self):
-        return self.__TYPE
+        return self.TYPE
 
     @abstractmethod
     def preview(self):
