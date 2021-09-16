@@ -16,7 +16,7 @@ class TaskEntity:
         name: str,
         input: List[DataSourceEntity],
         function,
-        output: List[DataSourceEntity] = None,
+        output: Optional[List[DataSourceEntity]],
         id: TaskId = None,
     ):
         if output is None:
