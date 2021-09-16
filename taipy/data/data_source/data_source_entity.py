@@ -23,7 +23,7 @@ class DataSourceEntity:
     """
 
     def __init__(
-        self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
+        self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = str(uuid.uuid4()), **kwargs
     ):
         self.id = id or str(uuid.uuid4())
         self.name = name
