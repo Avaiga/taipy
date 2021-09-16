@@ -22,8 +22,6 @@ class DataSourceEntity:
         list of additional arguments
     """
 
-    TYPE = None
-
     def __init__(
         self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = str(uuid.uuid4()), **kwargs
     ):
@@ -32,24 +30,24 @@ class DataSourceEntity:
         self.scope = scope
         self.properties = kwargs
 
-    @property
-    def type(self):
-        return self.TYPE
+    @abstractmethod
+    def type(self) -> str:
+        return NotImplemented
 
     @abstractmethod
     def preview(self):
-        pass
+        return NotImplemented
 
     @abstractmethod
     def get(self, query):
-        pass
+        return NotImplemented
 
     @abstractmethod
     def write(self, data):
         """
         Temporary function interface, will be remove
         """
-        pass
+        return NotImplemented
 
     def to_json(self):
         pass

@@ -22,7 +22,6 @@ class CSVDataSourceEntity(DataSourceEntity):
         list of additional arguments
     """
 
-    TYPE = "csv"
     __REQUIRED_PROPERTIES = ["path", "has_header"]
 
     def __init__(
@@ -52,6 +51,10 @@ class CSVDataSourceEntity(DataSourceEntity):
         return CSVDataSourceEntity(
             name, scope, id, {"path": path, "has_header": has_header}
         )
+
+    @property
+    def type(self) -> str:
+        return "csv"
 
     def preview(self):
         print("------------CSV Content------------")

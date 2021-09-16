@@ -22,7 +22,7 @@ class DataManager:
     __DATA_SOURCE_MODEL_DB: List[DataSourceModel] = []
     __DATA_SOURCE_DB: List[DataSource] = []
     __ENTITY_CLASSES = {EmbeddedDataSourceEntity, CSVDataSourceEntity}
-    __ENTITY_CLASS_MAP = {v.TYPE: v for v in __ENTITY_CLASSES}
+    __ENTITY_CLASS_MAP = {v.type: v for v in __ENTITY_CLASSES}
 
     def register_data_source(self, data_source: DataSource):
         self.__DATA_SOURCE_DB.append(data_source)
