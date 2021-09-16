@@ -19,11 +19,11 @@ class Server(Flask):
         app,
         import_name: str,
         static_url_path: t.Optional[str] = None,
-        static_folder: t.Optional[str] = "taipy_webapp",
+        static_folder: t.Optional[str] = "",
         static_host: t.Optional[str] = None,
         host_matching: bool = False,
         subdomain_matching: bool = False,
-        template_folder: t.Optional[str] = "taipy_webapp",
+        template_folder: t.Optional[str] = "",
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
@@ -47,30 +47,13 @@ class Server(Flask):
         CORS(self)
 
         # Serve static react build
-        @self.route("/favicon.ico")
-        def send_favicon():
-            return send_from_directory(self.static_folder + "/", "favicon.ico")
-
-        @self.route("/logo192.png")
-        def send_logo():
-            return send_from_directory(self.static_folder + "/", "logo192.png")
-
-        @self.route("/manifest.json")
-        def send_manifest():
-            return send_from_directory(self.static_folder + "/", "manifest.json")
-
         @self.route("/", defaults={"path": ""})
         @self.route("/<path:path>")
         def my_index(path):
-            return render_template("index.html", flask_url=request.url_root)
-
-        @self.route("/static/css/<path:path>")
-        def send_static_css(path):
-            return send_from_directory(self.static_folder + "/css/", path)
-
-        @self.route("/static/js/<path:path>")
-        def send_static_js(path):
-            return send_from_directory(self.static_folder + "/js/", path)
+            if path == "" or "." not in path:
+                return render_template("index.html", flask_url=request.url_root)
+            else:
+                return send_from_directory(self.static_folder + os.path.sep, path)
 
         # Websocket (handle json message)
         @self._ws.on("message")
@@ -79,13 +62,13 @@ class Server(Flask):
                 if "status" in message:
                     print(message["status"])
                 elif message["type"] == "U":
-                    self._app._update_var(message["name"], message["payload"]["value"])
+                    self._app._update_var(message["name"], message["payload"])
                 elif message["type"] == "A":
-                    self._app._on_action(message["name"], message["payload"]["action"])
+                    self._app._on_action(message["name"], message["payload"])
                 elif message["type"] == "T":
                     self._app._request_var(message["name"], message["payload"])
             except TypeError as te:
-                print("Decoding Message has failed: " + str(message) + "\n " + str(te))
+                print("Decoding Message has failed: " + str(message) + "\n " +str(te))
             except KeyError as ke:
                 print("Can't access: " + message + "\n" + str(ke))
 
