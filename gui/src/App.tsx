@@ -1,17 +1,18 @@
-import React, { useEffect, useReducer, useState, useRef } from "react";
+import React, { useEffect, useReducer, useState, useRef, ComponentType } from "react";
 import JsxParser from "react-jsx-parser";
 import axios from "axios";
 
 import { ENDPOINT } from "./utils";
 import { TaipyContext } from "./context/taipyContext";
-import { initializeWebSocket, taipyInitialize, taipyReducer } from "./context/taipyReducers";
+import { initializeWebSocket, INITIAL_STATE, taipyInitialize, taipyReducer } from "./context/taipyReducers";
 import { JSXReactRouterComponents, JSXRouterBindings } from "./components/Taipy";
 
 
 const App = () => {
     const hasMounted = useRef(false);
-    const [state, dispatch] = useReducer(taipyReducer, { data: {} }, taipyInitialize);
+    const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
     const [routerJSX, setrouterJSX] = useState("");
+    
     useEffect(() => {
         // Fetch Flask Rendered JSX React Router
         axios
@@ -39,7 +40,7 @@ const App = () => {
 
     return (
         <TaipyContext.Provider value={{ state, dispatch }}>
-            <JsxParser disableKeyGeneration={true} bindings={JSXRouterBindings} components={JSXReactRouterComponents} jsx={routerJSX} />
+            <JsxParser disableKeyGeneration={true} bindings={JSXRouterBindings} components={JSXReactRouterComponents as Record<string, ComponentType>} jsx={routerJSX} />
         </TaipyContext.Provider>
     );
 };

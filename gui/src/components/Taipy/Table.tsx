@@ -11,7 +11,7 @@ interface TableProps extends TaipyBaseProps {
 
 const Table = (props: TableProps) => {
     const { className, id, tp_varname, pageSize = 100 } = props;
-    const [value, setValue] = useState<Record<string, any>>({});
+    const [value, setValue] = useState<Record<string, Record<string, unknown>>>({});
     const [startIndex, setStartIndex] = useState(0);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef('no-page');
@@ -22,6 +22,7 @@ const Table = (props: TableProps) => {
         setValueForVarName([tp_varname, pageKey.current], props, setValue);
     }, [tp_varname, props]);
 
+    /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
         pageKey.current = `${startIndex}-${startIndex + pageSize}`;
         if (!setValueForVarName([tp_varname, pageKey.current], props, setValue)) {
@@ -56,9 +57,9 @@ const Table = (props: TableProps) => {
         <table className={className} id={id}>
             <tbody>
             {
-                Object.keys(value).map((rowKey: string) => <tr><td>{rowKey}</td>{
+                Object.keys(value).map((rowKey: string) => <tr key={rowKey}><td>{rowKey}</td>{
                     typeof value[rowKey] === 'object' ?
-                        Object.keys(value[rowKey]).map((colKey: string) => <td>{value[rowKey][colKey]}</td>)
+                        Object.keys(value[rowKey]).map((colKey: string) => <td key={colKey}>{value[rowKey][colKey] as string}</td>)
                         :
                         <td>{value[rowKey]}</td>
                 }</tr>)

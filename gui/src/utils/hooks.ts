@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export const useWhyDidYouUpdate = (name: string, props: any) => {
+export const useWhyDidYouUpdate = (name: string, props: any): void => {
     // Get a mutable ref object where we can store props ...
     // ... for comparison next time this hook runs.
     const previousProps = useRef({} as Record<string, any>);

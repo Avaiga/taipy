@@ -19,7 +19,7 @@ const Input = (props: TaipyInputProps) => {
         dispatch(createSendActionNameAction(id, actionName));
     }, [id, actionName, dispatch]);
 
-    const actions = {} as any;
+    const actions = {} as Record<string, unknown>;
     if (type === 'button') {
         actions.onClick = handleClick;
     }
