@@ -105,4 +105,3 @@ const sendWsMessage = (socket: Socket | undefined, type: WsMessageType, name: st
     const msg: WsMessage = {type: type, name: name, payload: payload};
     socket?.emit("message", msg);
 };
-

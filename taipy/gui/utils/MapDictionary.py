@@ -35,6 +35,5 @@ class MapDictionary(dict):
     def get_dict(self):
         def without_keys(d, keys):
             return {x: d[x] for x in d if x not in keys}
+
         return without_keys(self.__dict__, {"_ws"})
-    
-    
