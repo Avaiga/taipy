@@ -20,8 +20,8 @@ class DataManager:
     # This represents a database table that maintains our DataSource References.
     __DATA_SOURCE_MODEL_DB: List[DataSourceModel] = []
     __DATA_SOURCE_DB: List[DataSource] = []
-    __ENTITIES = {EmbeddedDataSourceEntity, CSVDataSourceEntity}
-    __ENTITY_MAP = {v.TYPE: v for v in __ENTITIES}
+    __ENTITY_CLASSES = {EmbeddedDataSourceEntity, CSVDataSourceEntity}
+    __ENTITY_CLASS_MAP = {v.TYPE: v for v in __ENTITY_CLASSES}
 
     def register_data_source(self, data_source: DataSource):
         self.__DATA_SOURCE_DB.append(data_source)
@@ -37,9 +37,9 @@ class DataManager:
         return data_source
 
     def create_data_source_entity(self, data_source: DataSource) -> DataSourceEntity:
-        data_source_entity = self.__ENTITY_MAP[data_source.type](data_source.name,
-                                                                 data_source.scope,
-                                                                 **data_source.properties)
+        data_source_entity = self.__ENTITY_CLASS_MAP[data_source.type](data_source.name,
+                                                                       data_source.scope,
+                                                                       **data_source.properties)
         self.save_data_source_entity(data_source_entity)
         return data_source_entity
 
