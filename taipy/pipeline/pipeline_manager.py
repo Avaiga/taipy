@@ -42,7 +42,7 @@ class PipelineManager:
     def get_pipelines(self) -> List[Pipeline]:
         return [
             self.get_pipeline(pipeline.name)
-            for pipeline in list(self.__PIPELINES.values())
+            for pipeline in self.__PIPELINES.values()
         ]
 
     def create_pipeline_entity(self, pipeline: Pipeline) -> PipelineEntity:
