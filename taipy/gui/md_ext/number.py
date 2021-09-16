@@ -1,12 +1,5 @@
-from operator import attrgetter
-
-import markdown
-from markdown import Markdown
-from markdown.extensions import Extension
 from markdown.inlinepatterns import InlineProcessor
-from markdown.util import etree
-
-from ..app import App
+from .builder import MarkdownBuilder
 
 
 class NumberPattern(InlineProcessor):
@@ -22,34 +15,18 @@ class NumberPattern(InlineProcessor):
     def extendMarkdown(md):
         md.inlinePatterns["taipy-number"] = NumberPattern(NumberPattern._PATTERN, md)
 
-    # TODO: Attributes:
-    #   on_update=<func>
     def handleMatch(self, m, data):
-        """Handle the match."""
-
-        var_name = m.group(1)
-        var_id = m.group(2)
-        try:
-            App._get_instance().bind_var(var_name.split(sep=".")[0])
-            value = attrgetter(var_name)(App._get_instance()._values)
-        except:
-            value = "[Undefined: " + var_name + "]"
-
-        el = etree.Element("Input")
-        el.set(
-            "className",
-            "taipy-number " + App._get_instance()._config.style_config["input"],
-        )
-        if var_name:
-            el.set("key", var_name + "_" + str(var_id))
-            # TODO: or oninput (continuous updates)
-            el.set("onchange", "onUpdate(this.id, this.value)")
-            el.set(
-                "tp_" + var_name.replace(".", "__"),
-                "{!" + var_name.replace(".", "__") + "!}",
+        return (
+            MarkdownBuilder(
+                m=m,
+                el_element_name="Input",
+                has_attribute=False,
+                default_value=0,
             )
-            el.set("tp_varname", var_name)
-        el.set("type", "number")
-        el.set("value", str(value))
-
-        return el, m.start(0), m.end(0)
+            .set_type("number")
+            .get_app_value(fallback_value=0)
+            .set_varname()
+            .set_value()
+            .set_className(class_name="taipy-number", config_class="input")
+            .build()
+        )

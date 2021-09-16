@@ -1,14 +1,5 @@
-from operator import attrgetter
-
-import markdown
-from markdown import Markdown
-from markdown.extensions import Extension
 from markdown.inlinepatterns import InlineProcessor
-from markdown.util import etree
-
-from ..app import App
-from ..utils import is_boolean_true
-from .parse_attributes import parse_attributes
+from .builder import MarkdownBuilder
 
 
 class SliderPattern(InlineProcessor):
@@ -24,47 +15,20 @@ class SliderPattern(InlineProcessor):
     def extendMarkdown(md):
         md.inlinePatterns["taipy-slider"] = SliderPattern(SliderPattern._PATTERN, md)
 
-    # TODO: Attributes:
-    #   min=<value>
-    #   max=<value>
-    #   continous=<true/false>
-    #   on_update=<func>
     def handleMatch(self, m, data):
-        """Handle the match."""
-
-        value = 0
-        var_name = m.group(1)
-        var_id = m.group(2)
-        if var_name:
-            try:
-                App._get_instance().bind_var(var_name.split(sep=".")[0])
-                value = attrgetter(var_name)(App._get_instance()._values)
-            except:
-                pass
-
-        attributes = parse_attributes(m.group(3))
-        el = etree.Element("Input")
-        el.set(
-            "class",
-            "taipy-slider " + App._get_instance()._config.style_config["slider"],
-        )
-        if var_name:
-            el.set("key", var_name + "_" + str(var_id))
-            el.set("tp_varname", var_name)
-            el.set(
-                "tp_" + var_name.replace(".", "__"),
-                "{!" + var_name.replace(".", "__") + "!}",
+        return (
+            MarkdownBuilder(
+                m=m,
+                el_element_name="Input",
+                has_attribute=False,
+                default_value=0,
             )
-        el.set("type", "range")
-        el.set("value", str(value))
-        el.set("min", "1")  # TODO: customize
-        el.set("max", "100")  # TODO: customize
-        # TODO: or oninput (continuous updates)
-        continuous = (
-            attributes
-            and "continous" in attributes
-            and is_boolean_true(attributes["continous"])
+            .set_type("range")
+            .get_app_value(fallback_value=0)
+            .set_varname()
+            .set_value()
+            .set_className(class_name="taipy-slider", config_class="slider")
+            .set_attribute("min", "1")
+            .set_attribute("max", "100")
+            .build()
         )
-        el.set("oninput" if continuous else "onchange", "onUpdate(this.id, this.value)")
-
-        return el, m.start(0), m.end(0)

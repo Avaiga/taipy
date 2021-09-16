@@ -1,11 +1,5 @@
-import re
-
-import markdown
-from markdown import Markdown
-from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
-from markdown.util import etree
-
+import re
 from ..app import App
 
 
