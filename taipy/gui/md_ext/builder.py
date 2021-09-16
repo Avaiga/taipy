@@ -92,7 +92,6 @@ class MarkdownBuilder:
         if self.el_element_name != "Input" or self.type_name != "button":
             return self
         if self.attributes and "id" in self.attributes:
-            print(self.attributes["id"])
             self.set_attribute("id", self.attributes["id"])
             self.set_attribute("key", self.attributes["id"])
         elif self.var_name:
@@ -104,14 +103,14 @@ class MarkdownBuilder:
             self.set_attribute("actionName", "")
         return self
 
-    def set_table_pagesize(self):
+    def set_table_pagesize(self, default_size = 100):
         if self.el_element_name != "Table":
             return self
         page_size = (
             self.attributes
             and "page_size" in self.attributes
             and self.attributes["page_size"]
-        ) or "100"
+        ) or default_size
         self.set_attribute("pageSize", "{!" + page_size + "!}")
         return self
 
