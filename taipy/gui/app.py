@@ -140,13 +140,13 @@ class App(object, metaclass=Singleton):
         if not re.match("^[a-zA-Z][a-zA-Z_$0-9]*$", name):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            prop = MapDictionary(self._server._ws, value)
+            prop = MapDictionary(value, lambda s, v: self._update_var(name+'.'+s, v))
             setattr(App, name, prop)
             setattr(self._values, name, prop)
         else:
             prop = property(
                 lambda s: getattr(s._values, name),  # Getter
-                lambda s, v: self._update_var(name, v),  # Setter
+                lambda s, v: s._update_var(name, v),  # Setter
             )
             setattr(App, name, prop)
             setattr(self._values, name, value)
@@ -181,8 +181,18 @@ class App(object, metaclass=Singleton):
 
     def _update_var(self, var_name, value) -> None:
         # Check if Variable is type datetime
-        if isinstance(attrgetter(var_name)(self._values), datetime.datetime):
-            value = ISOToDate(value)
+        currentvalue = attrgetter(var_name)(self._values)
+        if isinstance(value, str):
+            if isinstance(currentvalue, datetime.datetime):
+                value = ISOToDate(value)
+            elif isinstance(currentvalue, int):
+                value = int(value)
+            elif isinstance(currentvalue, float):
+                value = float(value)
+            elif isinstance(currentvalue, complex):
+                value = complex(value)
+            elif isinstance(currentvalue, bool):
+                value = bool(value)
         # Use custom attrsetter fuction to allow value binding for MapDictionary
         attrsetter(self._values, var_name, value)
         # TODO: what if _update_function changes 'var_name'... infinite loop?

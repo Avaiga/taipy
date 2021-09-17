@@ -7,6 +7,7 @@ import { createRequestTableUpdateAction } from "../../context/taipyReducers";
 
 interface TableProps extends TaipyBaseProps {
     pageSize?: number;
+    /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     value: Record<string, Record<string, any>>
 }
 

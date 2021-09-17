@@ -1,39 +1,93 @@
-class MapDictionary(dict):
+class MapDictionary(object):
     """
     Provide class binding, can utilize getattr, setattr functionality
-    Also perform ws (websocket) operation
+    Also perform update operation
     """
 
-    def __init__(self, ws, dict_import):
+    local_vars = ('_dict', '_update_var', '_no_update')
+
+    def __init__(self, dict_import, app_update_var):
+        self._dict = dict_import
+        # Bind app update var function
+        self._update_var = app_update_var
+        self._no_update = False
         # Verify if dict_import is a dictionary
-        if isinstance(dict_import, dict):
-            super(MapDictionary, self).__init__(dict_import)
-            for k, v in dict_import.items():
-                self[k] = v
-        else:
-            super(MapDictionary, self).__init__()
-        # Bind websocket
-        self._ws = ws
+        if not isinstance(dict_import, dict):
+            raise TypeError('should have a dict')
 
-    def __getattr__(self, attr):
-        return self.get(attr)
+    def set_no_update(self):
+        self._no_update = True
 
-    def __setattr__(self, key, value):
-        self.__setitem__(key, value)
+    def __len__(self):
+        return self._dict.__len__()
+
+    def __length_hint__(self):
+        return self._dict.__length_hint__()
+
+    def __getitem__(self, key):
+        value = self._dict.__getitem__(key)
+        if isinstance(value, dict):
+            return MapDictionary(value, lambda s, v: self._update_var(key+'.'+s, v))
+        return value
 
     def __setitem__(self, key, value):
-        super(MapDictionary, self).__setitem__(key, value)
-        self.__dict__.update({key: value})
-
-    def __delattr__(self, item):
-        self.__delitem__(item)
+        self._dict.__setitem__(key, value)
+        if not self._no_update and self._update_var:
+            self._update_var(key, value)
+        self._no_update = False
 
     def __delitem__(self, key):
-        super(MapDictionary, self).__delitem__(key)
-        del self.__dict__[key]
+        self._dict.__delitem__(key)
 
-    def get_dict(self):
-        def without_keys(d, keys):
-            return {x: d[x] for x in d if x not in keys}
+    def __missing__(self, key):
+        return self._dict.__missing__(key)
 
-        return without_keys(self.__dict__, {"_ws"})
+    def __iter__(self):
+        return self._dict.__iter__()
+
+    def __reversed__(self):
+        return self._dict.__reversed__()
+
+    def __contains__(self, item):
+        return self._dict.__contains__(item)
+
+    # to be able to use getattr
+    def __getattr__(self, attr):
+        return self._dict.get(attr)
+
+    def __setattr__(self, attr, value):
+        if attr in MapDictionary.local_vars:
+            super().__setattr__(attr, value)
+        else:
+            self.__setitem__(attr, value)
+
+
+    def keys(self):
+        return self._dict.keys()
+    
+    def values(self):
+        return self._dict.values()
+    
+    def items(self):
+        return self._dict.items()
+    
+    def get(self):
+        return self._dict.get()
+    
+    def clear(self):
+        return self._dict.clear()
+    
+    def setdefault(self):
+        return self._dict.setdefault()
+    
+    def pop(self):
+        return self._dict.pop()
+    
+    def popitem(self):
+        return self._dict.popitem()
+    
+    def copy(self):
+        return MapDictionary(self._dict.copy(), self._update_var)
+    
+    def update(self):
+        return self._dict.update()
