@@ -202,7 +202,7 @@ def test_submit():
 
         def submit(self, task: TaskEntity):
             self.submit_calls.append(task)
-            return super().submit(task)
+            return None
 
     pipeline_manager.task_scheduler = MockTaskScheduler()
 
