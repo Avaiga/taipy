@@ -53,6 +53,10 @@ class CSVDataSourceEntity(DataSourceEntity):
             name, scope, id, {"path": path, "has_header": has_header}
         )
 
+    @property
+    def type(self) -> str:
+        return "csv"
+
     def preview(self):
         print("------------CSV Content------------")
         path = self.properties.get("path")

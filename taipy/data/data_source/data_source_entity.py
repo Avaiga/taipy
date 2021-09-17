@@ -31,19 +31,23 @@ class DataSourceEntity:
         self.properties = kwargs
 
     @abstractmethod
+    def type(self) -> str:
+        return NotImplemented
+
+    @abstractmethod
     def preview(self):
-        pass
+        return NotImplemented
 
     @abstractmethod
     def get(self, query):
-        pass
+        return NotImplemented
 
     @abstractmethod
     def write(self, data):
         """
         Temporary function interface, will be remove
         """
-        pass
+        return NotImplemented
 
     def to_json(self):
         pass

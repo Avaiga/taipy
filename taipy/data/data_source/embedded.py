@@ -23,6 +23,10 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
     def create(cls, name: str, scope: Scope, id: str, data: Any):
         return EmbeddedDataSourceEntity(name, scope, id, {"data": data})
 
+    @property
+    def type(self) -> str:
+        return "embedded"
+
     def preview(self):
         print(f"{self.properties.get('data')}", flush=True)
 
