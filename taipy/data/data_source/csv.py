@@ -1,4 +1,5 @@
 import csv
+import pandas as pd
 import json
 from itertools import islice
 from typing import Dict, Optional
@@ -62,7 +63,7 @@ class CSVDataSourceEntity(DataSourceEntity):
         print("     ...")
 
     def get(self, query):
-        pass
+        return pd.read_csv(self.properties["path"],index_col='DATE')
 
     def write(self, data):
         pass
