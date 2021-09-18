@@ -140,9 +140,8 @@ class App(object, metaclass=Singleton):
         if not re.match("^[a-zA-Z][a-zA-Z_$0-9]*$", name):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            prop = MapDictionary(value, lambda s, v: self._update_var(name+'.'+s, v))
-            setattr(App, name, prop)
-            setattr(self._values, name, prop)
+            setattr(App, name, MapDictionary(value, lambda s, v: self._update_var(name+'.'+s, v)))
+            setattr(self._values, name, MapDictionary(value))
         else:
             prop = property(
                 lambda s: getattr(s._values, name),  # Getter

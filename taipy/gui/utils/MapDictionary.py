@@ -4,19 +4,15 @@ class MapDictionary(object):
     Also perform update operation
     """
 
-    local_vars = ('_dict', '_update_var', '_no_update')
+    local_vars = ('_dict', '_update_var')
 
-    def __init__(self, dict_import, app_update_var):
+    def __init__(self, dict_import, app_update_var = None):
         self._dict = dict_import
         # Bind app update var function
         self._update_var = app_update_var
-        self._no_update = False
         # Verify if dict_import is a dictionary
         if not isinstance(dict_import, dict):
             raise TypeError('should have a dict')
-
-    def set_no_update(self):
-        self._no_update = True
 
     def __len__(self):
         return self._dict.__len__()
@@ -27,14 +23,16 @@ class MapDictionary(object):
     def __getitem__(self, key):
         value = self._dict.__getitem__(key)
         if isinstance(value, dict):
-            return MapDictionary(value, lambda s, v: self._update_var(key+'.'+s, v))
+            if self._update_var:
+                return MapDictionary(value, lambda s, v: self._update_var(key+'.'+s, v))
+            else:
+                return MapDictionary(value)
         return value
 
     def __setitem__(self, key, value):
         self._dict.__setitem__(key, value)
-        if not self._no_update and self._update_var:
+        if self._update_var:
             self._update_var(key, value)
-        self._no_update = False
 
     def __delitem__(self, key):
         self._dict.__delitem__(key)

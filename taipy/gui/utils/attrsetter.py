@@ -6,6 +6,4 @@ def attrsetter(obj: object, attr_str: str, value: object) -> None:
     for i in range(len(var_name_split) - 1):
         sub_name = var_name_split[i]
         obj = getattr(obj, sub_name)
-    if isinstance(obj, MapDictionary):
-        obj.set_no_update()
     setattr(obj, var_name_split[-1], value)
