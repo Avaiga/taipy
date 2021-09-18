@@ -1,9 +1,9 @@
 __all__ = ["FutureExecutor"]
 
-from concurrent.futures import Future
+from concurrent.futures import Future, Executor
 
 
-class FutureExecutor:
+class FutureExecutor(Executor):
     """
     Equivalence of Python standard Thread/Process Pool Executor but the function is executed directly
     """
@@ -13,17 +13,3 @@ class FutureExecutor:
         future: Future = Future()
         future.set_result(fn(*args, **kwargs))
         return future
-
-    @staticmethod
-    def map(func, *iterables, timeout=None, chunksize=1):
-        raise NotImplementedError
-
-    @staticmethod
-    def shutdown(wait=True, *, cancel_futures=False):
-        raise NotImplementedError
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        return False

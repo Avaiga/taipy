@@ -12,6 +12,3 @@ JobId = NewType("JobId", str)
 class Job:
     id: JobId
     task_id: TaskId
-
-    def __hash__(self):
-        return hash(self.id)

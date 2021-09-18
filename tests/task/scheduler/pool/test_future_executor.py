@@ -1,5 +1,3 @@
-import pytest
-
 from taipy.task.scheduler.executor.future import FutureExecutor
 
 
@@ -25,8 +23,3 @@ def test_submit_two_arguments_in_context_manager():
     with FutureExecutor() as pool:
         res = pool.submit(mult, 21, 4)
         assert res.result() == 84
-
-
-def test_shutdown_not_implemented():
-    with pytest.raises(NotImplementedError):
-        FutureExecutor.shutdown()
