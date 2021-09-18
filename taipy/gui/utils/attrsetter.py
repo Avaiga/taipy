@@ -1,6 +1,3 @@
-from taipy.gui.utils.MapDictionary import MapDictionary
-
-
 def attrsetter(obj: object, attr_str: str, value: object) -> None:
     var_name_split = attr_str.split(sep=".")
     for i in range(len(var_name_split) - 1):
