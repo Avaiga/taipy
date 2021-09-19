@@ -41,13 +41,9 @@ class TaskManager:
             ...
 
     def create_task_entity(self, task: Task) -> TaskEntity:
-        # input_entities = list(
-        #     map(self.data_manager.create_data_source_entity, task.input)
-        # )
-        # output_entities = list(
-        #     map(self.data_manager.create_data_source_entity, task.output)
-        # )
-        entity = TaskEntity(task.name, [], task.function, [])
+        input_entities = [self.data_manager.create_data_source_entity(input) for input in task.input]
+        output_entities = [self.data_manager.create_data_source_entity(output) for output in task.output]
+        entity = TaskEntity(task.name, input_entities, task.function, output_entities)
         self.save_task_entity(entity)
         return entity
 
