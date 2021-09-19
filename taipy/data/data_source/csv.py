@@ -67,7 +67,7 @@ class CSVDataSourceEntity(DataSourceEntity):
         print("     ...")
 
     def get(self, query=None):
-        return pd.read_csv(self.properties["path"],index_col='DATE')
+        return pd.read_csv(self.properties["path"])
 
     def write(self, data):
         pass
