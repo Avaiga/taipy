@@ -14,17 +14,17 @@ def test_check_consistency():
     assert pipeline_1.is_consistent
 
     input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_id_2", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     output_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "output_id_2", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     task_2 = TaskEntity("foo", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_2])
     assert pipeline_2.is_consistent
 
     data_source_3 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "data_source_3_id", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     task_3 = TaskEntity(
         "foo", [data_source_3], print, [data_source_3], TaskId("task_id_3")
@@ -33,10 +33,10 @@ def test_check_consistency():
     assert not pipeline_3.is_consistent
 
     input_4 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_4_id", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     output_4 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "output_4_id", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     task_4_1 = TaskEntity("foo", [input_4], print, [output_4], TaskId("task_id_4_1"))
     task_4_2 = TaskEntity("foo", [output_4], print, [input_4], TaskId("task_id_4_2"))
@@ -53,9 +53,9 @@ def test_check_consistency():
 
 def test_to_model():
     input = EmbeddedDataSourceEntity.create(
-        "input", Scope.PIPELINE, "input_id", "this is some data"
+        "input", Scope.PIPELINE, "this is some data"
     )
-    output = EmbeddedDataSourceEntity.create("output", Scope.PIPELINE, "output_id", "")
+    output = EmbeddedDataSourceEntity.create("output", Scope.PIPELINE, "")
     task = TaskEntity("task", [input], print, [output], TaskId("task_id"))
     pipeline = PipelineEntity("name", {"foo": "bar"}, [task])
     model = pipeline.to_model()

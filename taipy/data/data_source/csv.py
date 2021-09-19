@@ -24,9 +24,10 @@ class CSVDataSourceEntity(DataSourceEntity):
     """
 
     __REQUIRED_PROPERTIES = ["path", "has_header"]
+    __TYPE = "csv"
 
     def __init__(
-        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
+        self, name: str, scope: Scope, id: Optional[str]=None, properties: Dict = {}
     ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
@@ -47,15 +48,14 @@ class CSVDataSourceEntity(DataSourceEntity):
         scope: Scope,
         path: str,
         has_header: bool = False,
-        id: Optional[str] = None,
     ) -> DataSourceEntity:
         return CSVDataSourceEntity(
-            name, scope, id, {"path": path, "has_header": has_header}
+            name, scope, None, {"path": path, "has_header": has_header}
         )
 
-    @property
-    def type(self) -> str:
-        return "csv"
+    @classmethod
+    def type(cls) -> str:
+        return cls.__TYPE
 
     def preview(self):
         print("------------CSV Content------------")

@@ -69,10 +69,10 @@ def test_save_and_get_pipeline_entity():
 
     pipeline_id_2 = PipelineId("id2")
     input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_2_id", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     output_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "output_2_id", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
@@ -142,13 +142,13 @@ def test_get_pipeline_schema():
 
     pipeline_id_2 = PipelineId("id2")
     input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_id_2", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     output_2_1 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_id_2_1", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     output_2_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "input_id_2_2", "bar"
+        "foo", Scope.PIPELINE, "bar"
     )
     task_2 = TaskEntity(
         "task", [input_2], print, [output_2_1, output_2_2], TaskId("task_id_2")

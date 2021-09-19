@@ -83,11 +83,11 @@ def _create_task(function):
     task_name = str(uuid.uuid4())
     output_name = str(uuid.uuid4())
     input_ds = [
-        EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, "i1", data=21),
-        EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, "i2", data=2),
+        EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, data=21),
+        EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, data=2),
     ]
     output_ds = [
-        EmbeddedDataSourceEntity.create(output_name, Scope.PIPELINE, "o1", data=0)
+        EmbeddedDataSourceEntity.create(output_name, Scope.PIPELINE, data=0)
     ]
     return TaskEntity(
         task_name,

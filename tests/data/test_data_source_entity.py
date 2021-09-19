@@ -15,7 +15,7 @@ class TestCSVDataSourceEntity:
         assert isinstance(ds, CSVDataSourceEntity)
         assert ds.has_header is False
         assert ds.path == "data/source/path"
-        assert ds.type == "csv"
+        assert ds.type() == "csv"
 
     def test_init_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
@@ -32,14 +32,14 @@ class TestCSVDataSourceEntity:
 class TestEmbeddedDataSourceEntity:
     def test_create(self):
         ds = EmbeddedDataSourceEntity.create(
-            "foo", Scope.PIPELINE, "ds_id", {"data": "Embedded Data Source"}
+            "foo", Scope.PIPELINE, data="Embedded Data Source"
         )
         assert isinstance(ds, EmbeddedDataSourceEntity)
-        assert ds.type == "embedded"
+        assert ds.type() == "embedded"
 
     def test_preview(self):
         ds = EmbeddedDataSourceEntity.create(
-            "foo", Scope.PIPELINE, "ds_id", {"data": "Embedded Data Source"}
+            "foo", Scope.PIPELINE, data="Embedded Data Source"
         )
         ds.preview()
 
