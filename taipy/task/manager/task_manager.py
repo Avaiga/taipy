@@ -4,7 +4,7 @@ from typing import Dict
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.task import NonExistingTask
-from taipy.task import Task
+from taipy.task.task import Task
 from taipy.task.task_entity import TaskEntity, TaskId
 
 

@@ -3,7 +3,8 @@ from concurrent.futures import Future
 from time import sleep
 from typing import Optional
 
-from taipy.data.entity import DataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.entity import EmbeddedDataSourceEntity
+from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.scope import Scope
 from taipy.task import TaskEntity
 from taipy.task.scheduler import TaskScheduler

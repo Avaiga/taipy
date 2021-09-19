@@ -1,14 +1,11 @@
 import sys
 from typing import List
 
-from taipy.data.entity import (
-    CSVDataSourceEntity,
-    DataSource,
-    DataSourceEntity,
-    EmbeddedDataSourceEntity,
-)
-from taipy.data.data_source_model import DataSourceModel
+from taipy.data.data_source import DataSource
+from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.scope import Scope
+from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.data_source_model import DataSourceModel
 
 """
 A Data Manager is entity responsible for keeping track and retrieving Taipy DataSources. The Data Manager will

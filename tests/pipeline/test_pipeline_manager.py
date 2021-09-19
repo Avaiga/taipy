@@ -1,10 +1,8 @@
 import pytest
 
-from taipy.data.entity import (
-    DataSource,
-    DataSourceEntity,
-    EmbeddedDataSourceEntity,
-)
+from taipy.data import DataSource
+from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId

@@ -1,4 +1,5 @@
-from taipy.data.entity import DataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.pipeline import PipelineEntity, PipelineId
 from taipy.task import TaskEntity, TaskId

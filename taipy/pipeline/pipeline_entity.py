@@ -8,7 +8,7 @@ from typing import Dict, List
 
 import networkx as nx
 
-from taipy.data.entity import DataSourceEntity
+from taipy.data import DataSourceEntity
 from taipy.pipeline.pipeline_model import Dag, PipelineId, PipelineModel
 from taipy.task.task_entity import TaskEntity
 
