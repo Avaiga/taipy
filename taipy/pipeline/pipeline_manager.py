@@ -52,8 +52,10 @@ class PipelineManager:
     def create_pipeline_entity(self, pipeline: Pipeline) -> PipelineEntity:
         all_ds: set[DataSource] = set()
         for task in pipeline.tasks:
-            all_ds.add(*task.input)
-            all_ds.add(*task.output)
+            for ds in task.input:
+                all_ds.add(ds)
+            for ds in task.output:
+                all_ds.add(ds)
         ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in all_ds}
         task_entities = [self.task_manager.create_task_entity(task, ds_entities) for task in pipeline.tasks]
         pipeline_entity = PipelineEntity(
