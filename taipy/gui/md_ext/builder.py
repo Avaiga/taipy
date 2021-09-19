@@ -1,22 +1,41 @@
 from markdown.util import etree
 from operator import attrgetter
 from .parse_attributes import parse_attributes
-from ..utils import is_boolean_true, dateToISO, getDataType, get_client_var_name
+from ..utils import is_boolean_true, dateToISO, getDataType, get_client_var_name, MapDictionary
 from ..app import App
 
 
 class MarkdownBuilder:
     def __init__(
-        self, m, el_element_name, default_value='<Empty>', has_attribute=False, attributes_val=3
+        self,
+        m,
+        el_element_name,
+        default_value="<Empty>",
+        has_attribute=False,
+        attributes_val=3,
+        allow_properties_config=False,
     ):
         self.m = m
         self.el_element_name = el_element_name
         self.value = default_value
+        self.has_attribute = has_attribute
+        # Allow property configuration by passing in dictionary
+        self.allow_properties_config = allow_properties_config
         self.var_name = m.group(1)
         self.var_id = m.group(2)
         self.el = etree.Element(el_element_name)
         if has_attribute:
-            self.attributes = parse_attributes(m.group(attributes_val))
+            self.attributes = parse_attributes(m.group(attributes_val)) or {}
+            # bind properties dicitonary to attributes if condition is matched
+            if allow_properties_config and "properties" in self.attributes:
+                properties_dict_name = self.attributes["properties"]
+                App._get_instance().bind_var(properties_dict_name)
+                properties_dict = getattr(App._get_instance(), properties_dict_name)
+                if not isinstance(properties_dict, MapDictionary):
+                    raise Exception(f"Can't find properties configuration dictionary for {str(m)}! Please review your app templates!")
+                # Interate through properties_dict and append to self.attributes
+                for k, v in properties_dict._dict.items():
+                    self.attributes[k] = v
         if self.var_name:
             try:
                 # Bind variable name (var_name string split in case var_name is a dictionary)
@@ -103,7 +122,7 @@ class MarkdownBuilder:
             self.set_attribute("actionName", "")
         return self
 
-    def set_table_pagesize(self, default_size = 100):
+    def set_table_pagesize(self, default_size=100):
         if self.el_element_name != "Table":
             return self
         page_size = (

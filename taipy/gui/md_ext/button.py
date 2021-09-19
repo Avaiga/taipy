@@ -21,7 +21,8 @@ class ButtonPattern(InlineProcessor):
                 m=m,
                 el_element_name="Input",
                 has_attribute=True,
-                default_value="<empty>"
+                default_value="<empty>",
+                allow_properties_config=True,
             )
             .set_type("button")
             .get_app_value()
