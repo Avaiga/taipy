@@ -6,7 +6,7 @@ from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
-from taipy.pipeline.pipeline_manager import PipelineManager
+from taipy.pipeline.manager.pipeline_manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId
 from taipy.task.scheduler import TaskScheduler
 
