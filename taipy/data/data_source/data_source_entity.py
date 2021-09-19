@@ -40,7 +40,7 @@ class DataSourceEntity:
         return NotImplemented
 
     @abstractmethod
-    def get(self, query):
+    def get(self, query=None):
         return NotImplemented
 
     @abstractmethod

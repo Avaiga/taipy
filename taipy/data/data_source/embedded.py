@@ -31,7 +31,7 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
     def preview(self):
         print(f"{self.properties.get('data')}", flush=True)
 
-    def get(self, query):
+    def get(self, query=None):
         """
         Temporary function interface, will be remove
         """
