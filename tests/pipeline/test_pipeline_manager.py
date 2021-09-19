@@ -6,11 +6,14 @@ from taipy.data.data_source import (
     EmbeddedDataSourceEntity,
 )
 from taipy.data.data_source.models import Scope
+from taipy.data.manager import DataManager
+from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId
 from taipy.task.scheduler import TaskScheduler
+from taipy.task.task_manager import TaskManager
 
 
 def test_register_and_get_pipeline():
@@ -81,6 +84,7 @@ def test_save_and_get_pipeline_entity():
 
     # No existing Pipeline
     pipeline_manager = PipelineManager()
+    task_manager = TaskManager()
     assert len(pipeline_manager.get_pipeline_entities()) == 0
     with pytest.raises(NonExistingPipeline):
         pipeline_manager.get_pipeline_entity(pipeline_id_1)
@@ -97,6 +101,7 @@ def test_save_and_get_pipeline_entity():
         pipeline_manager.get_pipeline_entity(pipeline_id_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
+    task_manager.save_task_entity(task_2)
     pipeline_manager.save_pipeline_entity(pipeline_2)
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
@@ -191,11 +196,13 @@ def test_submit():
         "waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3")
     )
     task_4 = TaskEntity("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
-    pipeline = PipelineEntity(
+    pipeline_entity = PipelineEntity(
         "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
     )
 
     pipeline_manager = PipelineManager()
+    data_manager = DataManager()
+    task_manager = TaskManager()
 
     class MockTaskScheduler(TaskScheduler):
         submit_calls = []
@@ -208,14 +215,68 @@ def test_submit():
 
     # pipeline does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.submit(pipeline.id)
+        pipeline_manager.submit(pipeline_entity.id)
 
-    # pipeline does exist. we expect the tasks to be submitted in a specific order
-    pipeline_manager.save_pipeline_entity(pipeline)
-    pipeline_manager.submit(pipeline.id)
+    # pipeline does exist, but tasks does not exist. We expect an exception to be raised
+    pipeline_manager.save_pipeline_entity(pipeline_entity)
+    with pytest.raises(NonExistingTaskEntity):
+        pipeline_manager.submit(pipeline_entity.id)
+
+    # pipeline, and tasks does exist. We expect the tasks to be submitted in a specific order
+    task_manager.save_task_entity(task_1)
+    task_manager.save_task_entity(task_2)
+    task_manager.save_task_entity(task_3)
+    task_manager.save_task_entity(task_4)
+
+    pipeline_manager.submit(pipeline_entity.id)
     assert pipeline_manager.task_scheduler.submit_calls == [
         task_1,
         task_2,
         task_4,
         task_3,
     ]
+
+
+def mult_by_2(nb: int):
+    return nb * 2
+
+
+def mult_by_3(nb: int):
+    return nb * 3
+
+
+def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    ds_1 = DataSource("foo", "embedded", Scope.PIPELINE, data=1)
+    ds_2 = DataSource("bar", "embedded", Scope.PIPELINE, data=0)
+    ds_6 = DataSource("baz", "embedded", Scope.PIPELINE, data=0)
+
+    task_mult_by_2 = Task("mult by 2", [ds_1], mult_by_2, ds_2)
+    task_mult_by_3 = Task("mult by 3", [ds_2], mult_by_3, ds_6)
+    pipeline = Pipeline("by 6", [task_mult_by_2, task_mult_by_3])
+    pipeline_manager.register_pipeline(pipeline)
+    # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
+
+    assert len(data_manager.get_data_source_entities()) == 0
+    assert len(task_manager.task_entities) == 0
+
+    pipeline_entity = pipeline_manager.create_pipeline_entity(pipeline)
+
+    assert len(data_manager.get_data_source_entities()) == 3
+    assert len(task_manager.task_entities) == 2
+    assert len(pipeline_entity.get_sorted_task_entities()) == 2
+    assert pipeline_entity.get_sorted_task_entities()[0][0].name == task_mult_by_2.name
+    assert pipeline_entity.get_sorted_task_entities()[0][0].output[0].get() == 0
+    assert pipeline_entity.get_sorted_task_entities()[1][0].output[0].get() == 0
+    assert pipeline_entity.get_sorted_task_entities()[1][0].name == task_mult_by_3.name
+
+    pipeline_manager.submit(pipeline_entity.id)
+
+    assert pipeline_entity.get_sorted_task_entities()[0][0].output[0].get() == 2
+    assert pipeline_entity.get_sorted_task_entities()[1][0].output[0].get() == 6

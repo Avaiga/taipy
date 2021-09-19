@@ -1,8 +1,5 @@
 import logging
-import sys
-import uuid
-from itertools import count
-from typing import List
+from typing import List, Dict
 
 from taipy.data.data_source import (
     CSVDataSourceEntity,
@@ -21,23 +18,20 @@ facilitate data access between Taipy Modules.
 
 class DataManager:
     # This represents a database table that maintains our DataSource References.
-    __DATA_SOURCE_MODEL_DB: List[DataSourceModel] = []
-    __DATA_SOURCE_DB: List[DataSource] = []
+    __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
+    __DATA_SOURCE_DB: Dict[str, DataSource] = {}
     __ENTITY_CLASSES = {EmbeddedDataSourceEntity, CSVDataSourceEntity}
     __ENTITY_CLASS_MAP = {v.type(): v for v in __ENTITY_CLASSES}
 
+    def delete_all(self):
+        self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
+        self.__DATA_SOURCE_DB: Dict[str, DataSource] = {}
+
     def register_data_source(self, data_source: DataSource):
-        self.__DATA_SOURCE_DB.append(data_source)
+        self.__DATA_SOURCE_DB[data_source.name] = data_source
 
     def get_data_source(self, name) -> DataSource:
-        data_source = None
-        for ds in self.__DATA_SOURCE_DB:
-            # Not sure if we need to handle missing DataSource here or in the function that
-            # calls fetch_data_source. Something to consider in the near future.
-            if ds.name == name:
-                data_source = ds
-                break
-        return data_source
+        return self.__DATA_SOURCE_DB[name]
 
     def create_data_source_entity(self, data_source: DataSource) -> DataSourceEntity:
         try:
@@ -68,23 +62,22 @@ class DataManager:
             properties=model.data_source_properties
         )
 
+    def get_data_source_entities(self) -> List[DataSourceEntity]:
+        return [
+            self.get_data_source_entity(model.id)
+            for model in self.__DATA_SOURCE_MODEL_DB.values()
+        ]
+
     def create_data_source_model(
         self, id: str, name: str, scope: Scope, type: str, properties: dict
     ):
-        self.__DATA_SOURCE_MODEL_DB.append(
-            DataSourceModel(
+        self.__DATA_SOURCE_MODEL_DB[id] = DataSourceModel(
                 id,
                 name,
                 scope,
                 type,
                 properties,
             )
-        )
 
     def fetch_data_source_model(self, id) -> DataSourceModel:
-        for ds in self.__DATA_SOURCE_MODEL_DB:
-            # Not sure if we need to handle missing DataSource here or in the function that
-            # calls fetch_data_source. Something to consider in the near future.
-            if ds.id == id:
-                return ds
-        return None
+        return self.__DATA_SOURCE_MODEL_DB[id]

@@ -6,6 +6,8 @@ This is the entry point for operations (such as creating, reading, updating, del
 import logging
 from typing import Dict, List
 
+from taipy.data.data_source import DataSource
+from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
 from taipy.pipeline.pipeline import Pipeline
@@ -19,6 +21,7 @@ from taipy.task.task_manager import TaskManager
 
 class PipelineManager:
     task_manager = TaskManager()
+    data_manager = task_manager.data_manager
     task_scheduler = TaskScheduler()
 
     __PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
@@ -30,6 +33,7 @@ class PipelineManager:
         self.__PIPELINES: Dict[str, Pipeline] = {}
 
     def register_pipeline(self, pipeline: Pipeline):
+        [self.task_manager.register_task(task) for task in pipeline.tasks]
         self.__PIPELINES[pipeline.name] = pipeline
 
     def get_pipeline(self, name: str) -> Pipeline:
@@ -46,7 +50,12 @@ class PipelineManager:
         ]
 
     def create_pipeline_entity(self, pipeline: Pipeline) -> PipelineEntity:
-        task_entities = [self.task_manager.create_task_entity(task) for task in pipeline.tasks]
+        all_ds: set[DataSource] = set()
+        for task in pipeline.tasks:
+            all_ds.add(*task.input)
+            all_ds.add(*task.output)
+        ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in all_ds}
+        task_entities = [self.task_manager.create_task_entity(task, ds_entities) for task in pipeline.tasks]
         pipeline_entity = PipelineEntity(
             pipeline.name, pipeline.properties, task_entities
         )
@@ -54,8 +63,6 @@ class PipelineManager:
         return pipeline_entity
 
     def save_pipeline_entity(self, pipeline_entity: PipelineEntity):
-        for task in pipeline_entity.task_entities:
-            self.task_manager.save_task_entity(task)
         self.__PIPELINE_MODEL_DB[pipeline_entity.id] = pipeline_entity.to_model()
 
     def get_pipeline_entity(self, pipeline_id: PipelineId) -> PipelineEntity:

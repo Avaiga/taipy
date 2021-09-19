@@ -90,4 +90,9 @@ def test_get_sorted_tasks():
     pipeline = PipelineEntity(
         "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
     )
+    # s1 ---             ---> s3 ---> t2 ---> s5 ----
+    #       |           |                           |
+    #       |---> t1 ---|      -------------------------> t3 ---> s6
+    #       |           |      |
+    # s2 ---             ---> s4 ---> t4 ---> s7
     assert pipeline.get_sorted_task_entities() == [[task_1], [task_2, task_4], [task_3]]

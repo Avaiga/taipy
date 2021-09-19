@@ -51,6 +51,5 @@ class TestDataManager:
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()
-        ds = dm.fetch_data_source_model("test_data_source_2")
-
-        assert ds is None
+        with pytest.raises(KeyError):
+            dm.fetch_data_source_model("test_data_source_2")
