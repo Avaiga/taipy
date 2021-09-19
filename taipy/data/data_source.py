@@ -1,4 +1,4 @@
-from taipy.data.data_source.models import Scope
+from taipy.data.scope import Scope
 
 
 class DataSource:

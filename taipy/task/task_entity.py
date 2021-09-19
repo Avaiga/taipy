@@ -2,7 +2,7 @@ import uuid
 from importlib import import_module
 from typing import List, NewType, Optional
 
-from taipy.data.data_source import DataSourceEntity
+from taipy.data.entity import DataSourceEntity
 
 TaskId = NewType("TaskId", str)
 

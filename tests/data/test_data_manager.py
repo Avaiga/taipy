@@ -1,4 +1,4 @@
-from taipy.data.data_source import EmbeddedDataSourceEntity
+from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.manager import DataManager
 
 

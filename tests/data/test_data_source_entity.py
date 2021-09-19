@@ -3,18 +3,18 @@ import pathlib
 
 import pytest
 
-from taipy.data.data_source import CSVDataSourceEntity, EmbeddedDataSourceEntity
-from taipy.data.data_source.models import Scope
+from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 
 
 class TestCSVDataSourceEntity:
     def test_create(self):
-        ds = CSVDataSourceEntity.create("foo", Scope.PIPELINE, "data/source/path")
+        ds = CSVDataSourceEntity.create("foo", Scope.PIPELINE, "data/entity/path")
 
         assert isinstance(ds, CSVDataSourceEntity)
         assert ds.has_header is False
-        assert ds.path == "data/source/path"
+        assert ds.path == "data/entity/path"
         assert ds.type == "csv"
 
     def test_init_missing_parameters(self):

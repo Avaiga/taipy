@@ -14,7 +14,7 @@ from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
 from taipy.pipeline.pipeline_schema import PipelineSchema
 from taipy.task import TaskId
 from taipy.task.scheduler.task_scheduler import TaskScheduler
-from taipy.task.task_manager import TaskManager
+from taipy.task.manager.task_manager import TaskManager
 
 
 class PipelineManager:
