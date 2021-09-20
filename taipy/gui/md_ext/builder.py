@@ -26,14 +26,14 @@ class MarkdownBuilder:
         self.el = etree.Element(el_element_name)
         if has_attribute:
             self.attributes = parse_attributes(m.group(attributes_val)) or {}
-            # bind properties dictionary to attributes if condition is matched
+            # Bind properties dictionary to attributes if condition is matched
             if allow_properties_config and "properties" in self.attributes:
                 properties_dict_name = self.attributes["properties"]
                 App._get_instance().bind_var(properties_dict_name)
                 properties_dict = getattr(App._get_instance(), properties_dict_name)
                 if not isinstance(properties_dict, MapDictionary):
                     raise Exception(f"Can't find properties configuration dictionary for {str(m)}! Please review your app templates!")
-                # Interate through properties_dict and append to self.attributes
+                # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
                     self.attributes[k] = v
         if self.var_name:
