@@ -5,8 +5,8 @@ import pathlib
 import pandas
 import pytest
 
-from taipy.data.data_source import CSVDataSourceEntity, EmbeddedDataSourceEntity
-from taipy.data.data_source.models import Scope
+from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 
 

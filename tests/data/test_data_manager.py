@@ -1,7 +1,8 @@
 import pytest
 
-from taipy.data.data_source import EmbeddedDataSourceEntity, DataSource
-from taipy.data.data_source.models import Scope, DataSourceModel
+from taipy.data import DataSource
+from taipy.data import Scope
+from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType
 

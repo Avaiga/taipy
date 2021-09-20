@@ -2,7 +2,7 @@ import pytest
 
 from taipy.exceptions.task import NonExistingTask, NonExistingTaskEntity
 from taipy.task import Task, TaskEntity, TaskId
-from taipy.task.task_manager import TaskManager
+from taipy.task.manager.task_manager import TaskManager
 
 
 def test_register_and_get_task():

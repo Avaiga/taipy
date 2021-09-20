@@ -2,22 +2,22 @@ import uuid
 from abc import abstractmethod
 from typing import Optional
 
-from taipy.data.data_source.models import Scope
+from taipy.data.scope import Scope
 
 
 class DataSourceEntity:
     """
     A class to represent a Data Source. A Data Source is an object that holds the name, scope and additional
-    properties of the data source.
+    properties of the data entity.
 
     Attributes
     ----------
     id: str
-        unique identifier of the data source
+        unique identifier of the data entity
     name: str
-        name that identifies the data source
+        name that identifies the data entity
     scope: int
-        number that refers to the scope of usage of the data source
+        number that refers to the scope of usage of the data entity
     properties: list
         list of additional arguments
     """

@@ -3,8 +3,8 @@ from typing import Any, Dict, Optional
 
 from taipy.exceptions import MissingRequiredProperty
 
-from .data_source_entity import DataSourceEntity
-from .models import Scope
+from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.scope import Scope
 
 
 class EmbeddedDataSourceEntity(DataSourceEntity):

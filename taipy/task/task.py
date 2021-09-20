@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from taipy.data.data_source import DataSource
+from taipy.data import DataSource
 
 
 class Task:

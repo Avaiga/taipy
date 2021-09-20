@@ -1,11 +1,12 @@
 import logging
 from typing import Dict
 
-from taipy.data.data_source import DataSourceEntity, DataSource
+from taipy.data import DataSourceEntity
+from taipy.data.data_source import DataSource
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.task import NonExistingTask
-from taipy.task import Task
+from taipy.task.task import Task
 from taipy.task.task_entity import TaskEntity, TaskId
 
 

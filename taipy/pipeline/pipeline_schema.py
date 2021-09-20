@@ -9,7 +9,7 @@ class PipelineSchema:
     name: str
     properties: dict
     dag: Dag
-    # The dag dictionary represents the successors of each node (data source or task),
+    # The dag dictionary represents the successors of each node (data entity or task),
     # including the leaf nodes without successors.
     #
     # dag_example = { data_source_id_1: [task_id_A],

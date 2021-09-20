@@ -1,19 +1,15 @@
 import pytest
 
-from taipy.data.data_source import (
-    DataSource,
-    DataSourceEntity,
-    EmbeddedDataSourceEntity,
-)
-from taipy.data.data_source.models import Scope
-from taipy.data.manager import DataManager
+from taipy.data import DataSource, DataManager
+from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.entity import EmbeddedDataSourceEntity
+from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
-from taipy.pipeline.pipeline_manager import PipelineManager
-from taipy.task import Task, TaskEntity, TaskId
+from taipy.pipeline.manager import PipelineManager
+from taipy.task import Task, TaskEntity, TaskId, TaskManager
 from taipy.task.scheduler import TaskScheduler
-from taipy.task.task_manager import TaskManager
 
 
 def test_register_and_get_pipeline():

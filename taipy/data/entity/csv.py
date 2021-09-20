@@ -4,8 +4,8 @@ import json
 from itertools import islice
 from typing import Dict, Optional
 
-from taipy.data.data_source.data_source_entity import DataSourceEntity
-from taipy.data.data_source.models import Scope
+from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 
 
@@ -16,9 +16,9 @@ class CSVDataSourceEntity(DataSourceEntity):
     Attributes
     ----------
     name: str
-        name that identifies the data source
+        name that identifies the data entity
     scope: int
-        number that refers to the scope of usage of the data source
+        number that refers to the scope of usage of the data entity
     properties: list
         list of additional arguments
     """

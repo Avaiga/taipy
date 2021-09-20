@@ -1,13 +1,11 @@
 import logging
 from typing import List, Dict
 
-from taipy.data.data_source import (
-    CSVDataSourceEntity,
-    DataSource,
-    DataSourceEntity,
-    EmbeddedDataSourceEntity,
-)
-from taipy.data.data_source.models import DataSourceModel, Scope
+from taipy.data.data_source import DataSource
+from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.scope import Scope
+from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.data_source_model import DataSourceModel
 from taipy.exceptions import InvalidDataSourceType
 
 """

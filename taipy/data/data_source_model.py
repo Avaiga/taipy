@@ -1,17 +1,7 @@
 from dataclasses import dataclass
-from enum import Enum
 from typing import Any, Dict
 
-
-class Scope(Enum):
-    """
-    Class to represent the scope of usage of a Data Source
-    """
-
-    GLOBAL = 1
-    TIME_BUCKET = 2
-    SCENARIO = 3
-    PIPELINE = 4
+from taipy.data.scope import Scope
 
 
 @dataclass
@@ -25,7 +15,7 @@ class DataSourceModel:
         identifier of a DataSource
     name: int
         name of the DataSource
-    scope: Scope
+    scope: taipy.data.source.scope.Scope
         scope of usage of a DataSource
     type: str
         name of the class that represents a DataSource
