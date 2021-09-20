@@ -17,7 +17,7 @@ class DataSourceModel:
         name of the DataSource
     scope: taipy.data.source.scope.Scope
         scope of usage of a DataSource
-    implementation_class_name: str
+    type: str
         name of the class that represents a DataSource
     data_source_properties: Dict[str, Any]
         extra properties of a DataSource

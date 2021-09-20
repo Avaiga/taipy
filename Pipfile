@@ -5,13 +5,13 @@ name = "pypi"
 
 [packages]
 networkx = "2.6.2"
-flask = "*"
+flask = ">=2.0"
 numpy = "*"
-markdown = "*"
-flask-socketio = "*"
-simple-websocket = "*"
+markdown = ">=3.3"
+flask-socketio = ">=5.1"
+simple-websocket = ">=0.3"
 pandas = "*"
-flask-cors = "*"
+flask-cors = ">=3.0"
 
 [dev-packages]
 pytest = "*"

@@ -51,39 +51,39 @@ Ready to contribute? Here's how to set up `taipy` for local development.
 1. Fork the `taipy` repo on GitHub.
 2. Clone your fork locally
 
-```
+    ```
     $ git clone git@github.com:your_name_here/taipy.git
-```
+    ```
 
 3. Ensure [pipenv](https://pipenv.pypa.io/en/latest/) is installed.
 4. Install dependencies:
 
-```
+    ```
     $ pipenv install --dev
-```
+    ```
 
 5. Create a branch for local development:
 
-```
+    ```
     $ git checkout -b name-of-your-bugfix-or-feature
-```
+    ```
 
    Now you can make your changes locally.
 
 6. When you're done making changes, check that your changes pass the
-   tests, including testing other Python versions, with tox:
+   tests, including testing other Python versions, with `tox`:
 
-```
+    ```
     $ tox
-```
+    ```
 
 7. Commit your changes and push your branch to GitHub:
 
-```
+    ```
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
-```
+    ```
 
 8. Submit a pull request through the GitHub website.
 

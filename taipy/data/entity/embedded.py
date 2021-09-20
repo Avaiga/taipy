@@ -9,9 +9,10 @@ from taipy.data.scope import Scope
 
 class EmbeddedDataSourceEntity(DataSourceEntity):
     __REQUIRED_PROPERTIES = ["data"]
+    __TYPE = "embedded"
 
     def __init__(
-        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
+        self, name: str, scope: Scope, id: Optional[str]=None, properties: Dict = {}
     ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
@@ -20,17 +21,17 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
         super().__init__(name, scope, id, data=properties.get("data"))
 
     @classmethod
-    def create(cls, name: str, scope: Scope, id: str, data: Any):
-        return EmbeddedDataSourceEntity(name, scope, id, {"data": data})
+    def create(cls, name: str, scope: Scope, data: Any):
+        return EmbeddedDataSourceEntity(name, scope, None, {"data": data})
 
-    @property
-    def type(self) -> str:
-        return "embedded"
+    @classmethod
+    def type(cls) -> str:
+        return cls.__TYPE
 
     def preview(self):
         print(f"{self.properties.get('data')}", flush=True)
 
-    def get(self, query):
+    def get(self, query=None):
         """
         Temporary function interface, will be remove
         """

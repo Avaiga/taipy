@@ -1,27 +1,41 @@
 site_name: Taipy
-# site_url: http://www.jieyu.ai
+# site_url: http://www.avaiga.com
 repo_url: https://github.com/avaiga/taipy
 repo_name: taipy
 #strict: true
+copyright: 2021 Avaiga
 nav:
-  - home: index.md
-  - installation: installation.md
-  - usage: usage.md
-  - modules: api.md
-  - contributing: contributing.md
-  - authors: authors.md
-  - history: history.md
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Modules: api.md
+  - Contributing: contributing.md
+  - Authors: authors.md
+  - History: history.md
 theme:
   name: material
   language: en
-  #logo: assets/logo.png
+  custom_dir: tools/mkdocs
+  logo: assets/images/logo.png
   palette:
-    primary: light blue
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+#293183
   features:
     - navigation.indexes
     - navigation.tabs
     - navigation.instant
     - navigation.tabs.sticky
+extra_css:
+  - assets/stylesheets/avaiga.css
 markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
@@ -55,11 +69,11 @@ extra:
   social:
     - icon: fontawesome/brands/twitter
       # replace with your own tweet link below
-      link: http://www.jieyu.ai
+      link: http://www.avaiga.com
       name: Tweet
     - icon: fontawesome/brands/facebook
       # replace with your own facebook link below
-      link: http://www.jieyu.ai
+      link: http://www.avaiga.com
       name: Facebook
     - icon: fontawesome/brands/github
       link: https://github.com/avaiga/taipy
@@ -68,6 +82,7 @@ extra:
       link: "mailto:taipy.dev@avaiga.com"
   # to enable disqus, uncomment the following and put your disqus id below
   # disqus: disqus_id
+  generator: false
 # uncomment the following and put your google tracking id below to enable GA
 #google_analytics:
   #- UA-xxx

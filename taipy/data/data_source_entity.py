@@ -23,15 +23,16 @@ class DataSourceEntity:
     """
 
     def __init__(
-        self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = str(uuid.uuid4()), **kwargs
+        self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
     ):
-        self.id = id
+        self.id = id or str(uuid.uuid4())
         self.name = name
         self.scope = scope
         self.properties = kwargs
 
+    @classmethod
     @abstractmethod
-    def type(self) -> str:
+    def type(cls) -> str:
         return NotImplemented
 
     @abstractmethod
@@ -39,7 +40,7 @@ class DataSourceEntity:
         return NotImplemented
 
     @abstractmethod
-    def get(self, query):
+    def get(self, query=None):
         return NotImplemented
 
     @abstractmethod

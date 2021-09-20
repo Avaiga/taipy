@@ -38,7 +38,6 @@ class TaskScheduler:
 
     @staticmethod
     def __execute_function_and_write_outputs(function, inputs, outputs):
-        r = function(*inputs)
-
+        r = function(*[i.get() for i in inputs])
         for o in outputs:
             o.write(r)

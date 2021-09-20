@@ -10,8 +10,8 @@ from taipy.task import TaskEntity
 from taipy.task.scheduler import TaskScheduler
 
 
-def mult(nb1: DataSourceEntity, nb2: DataSourceEntity):
-    return nb1.get(None) * nb2.get(None)
+def mult(nb1: float, nb2: float):
+    return nb1 * nb2
 
 
 class WaitingMult:
@@ -20,18 +20,18 @@ class WaitingMult:
     The TaskScheduler will call the `__call__` function which will block until the main thread calls the `unblock` method
     """
     def __init__(self):
-        self._nb1: Optional[DataSourceEntity] = None
-        self._nb2: Optional[DataSourceEntity] = None
+        self._nb1: Optional[float] = None
+        self._nb2: Optional[float] = None
         self.future = Future()
 
-    def __call__(self, nb1: DataSourceEntity, nb2: DataSourceEntity):
+    def __call__(self, nb1: float, nb2: float):
         self._nb1 = nb1
         self._nb2 = nb2
         return self.future.result()
 
     def unblock(self):
         self.future.set_result(
-            self._nb1.get(None) * self._nb2.get(None)
+            self._nb1 * self._nb2
         )
         sleep(0.1)  # Wait end of callback
 
@@ -84,11 +84,11 @@ def _create_task(function):
     task_name = str(uuid.uuid4())
     output_name = str(uuid.uuid4())
     input_ds = [
-        EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, "i1", data=21),
-        EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, "i2", data=2),
+        EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, data=21),
+        EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, data=2),
     ]
     output_ds = [
-        EmbeddedDataSourceEntity.create(output_name, Scope.PIPELINE, "o1", data=0)
+        EmbeddedDataSourceEntity.create(output_name, Scope.PIPELINE, data=0)
     ]
     return TaskEntity(
         task_name,
