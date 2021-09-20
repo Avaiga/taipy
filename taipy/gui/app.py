@@ -3,6 +3,7 @@ import re
 import typing as t
 from operator import attrgetter
 from types import SimpleNamespace
+import numpy as np
 
 import pandas as pd
 from flask import jsonify, request
@@ -236,8 +237,21 @@ class App(object, metaclass=Singleton):
                 end = None
             if end and end >= len(newvalue):
                 end = len(newvalue) - 1
-            newvalue = newvalue.iloc[slice(start, end)]
-            newvalue = newvalue.to_dict(orient="index")
+            rowcount = len(newvalue)
+            coltypes = newvalue.dtypes.apply(lambda x: {'type': x.name}).to_dict()
+            datecols = newvalue.select_dtypes(include=['datetime64']).columns.tolist()
+            for col in datecols:
+                if col + '__str' not in newvalue.columns:
+                    newvalue[col + '__str'] = newvalue[col].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ').astype("string")
+                coltypes[col + '__str'] = coltypes.pop(col)
+                coltypes[col + '__str']['label'] = col
+                coltypes[col + '__str']['format'] = 'eeee dd MMMM yyyy'
+            newvalue = newvalue.drop(datecols, axis=1).iloc[slice(start, end)]
+            dictret = {}
+            dictret['data'] = newvalue.to_dict(orient="index")
+            dictret['rowcount'] = rowcount
+            dictret['coltypes'] = coltypes
+            newvalue = dictret
             # here we'll deal with start and end values from payload if present
             pass
         # TODO: What if value == newvalue?

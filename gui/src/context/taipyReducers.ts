@@ -1,3 +1,4 @@
+import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -13,6 +14,7 @@ export enum Types {
 export interface TaipyState {
     socket?: Socket;
     data: Record<string, unknown>;
+    theme: Theme
 }
 
 export interface TaipyAction {
@@ -21,7 +23,18 @@ export interface TaipyAction {
     payload: Record<string, unknown>;
 }
 
-export const INITIAL_STATE: TaipyState = { data: {}};
+export const INITIAL_STATE: TaipyState = { data: {}, theme: createTheme({
+    components: {
+      MuiTimeline: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'red',
+          },
+        }
+      },
+    },
+  })
+};
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,

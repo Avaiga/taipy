@@ -1,11 +1,12 @@
 import { ComponentType } from "react";
-import { BrowserRouter as Router, Route, Switch, Redirect, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import Input from "./Input";
 import Field from "./Field";
 import DateSelector from "./DateSelector";
 import Table from "./Table";
 import TaipyRendered from "../pages/TaipyRendered";
 import NotFound404 from "../pages/NotFound404";
+import Link from "./Link";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {

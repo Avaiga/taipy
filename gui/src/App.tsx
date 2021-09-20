@@ -1,6 +1,8 @@
 import React, { useEffect, useReducer, useState, useRef, ComponentType } from "react";
 import JsxParser from "react-jsx-parser";
 import axios from "axios";
+import type {} from '@mui/lab/themeAugmentation';
+import { ThemeProvider } from "@mui/material/styles";
 
 import { ENDPOINT } from "./utils";
 import { TaipyContext } from "./context/taipyContext";
@@ -40,7 +42,9 @@ const App = () => {
 
     return (
         <TaipyContext.Provider value={{ state, dispatch }}>
-            <JsxParser disableKeyGeneration={true} bindings={JSXRouterBindings} components={JSXReactRouterComponents as Record<string, ComponentType>} jsx={routerJSX} />
+            <ThemeProvider theme={state.theme}>
+                <JsxParser disableKeyGeneration={true} bindings={JSXRouterBindings} components={JSXReactRouterComponents as Record<string, ComponentType>} jsx={routerJSX} />
+            </ThemeProvider>
         </TaipyContext.Provider>
     );
 };

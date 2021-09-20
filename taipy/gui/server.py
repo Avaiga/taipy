@@ -51,7 +51,7 @@ class Server(Flask):
         @self.route("/<path:path>")
         def my_index(path):
             if path == "" or "." not in path:
-                return render_template("index.html", flask_url=request.url_root)
+                return render_template("index.html", flask_url=request.url_root, title=self._app.title if hasattr(self._app, "title") else "Taipy App")
             else:
                 return send_from_directory(self.static_folder + os.path.sep, path)
 
