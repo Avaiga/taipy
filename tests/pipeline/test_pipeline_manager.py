@@ -5,7 +5,7 @@ from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId, TaskManager
@@ -82,9 +82,9 @@ def test_save_and_get_pipeline_entity():
     pipeline_manager = PipelineManager()
     task_manager = TaskManager()
     assert len(pipeline_manager.get_pipeline_entities()) == 0
-    with pytest.raises(NonExistingPipeline):
+    with pytest.raises(NonExistingPipelineEntity):
         pipeline_manager.get_pipeline_entity(pipeline_id_1)
-    with pytest.raises(NonExistingPipeline):
+    with pytest.raises(NonExistingPipelineEntity):
         pipeline_manager.get_pipeline_entity(pipeline_id_2)
 
     # Save one pipeline. We expect to have only one pipeline stored
@@ -93,7 +93,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
     assert pipeline_manager.get_pipeline_entity(pipeline_id_1).name == pipeline_1.name
     assert len(pipeline_manager.get_pipeline_entity(pipeline_id_1).task_entities) == 0
-    with pytest.raises(NonExistingPipeline):
+    with pytest.raises(NonExistingPipelineEntity):
         pipeline_manager.get_pipeline_entity(pipeline_id_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
@@ -210,7 +210,7 @@ def test_submit():
     pipeline_manager.task_scheduler = MockTaskScheduler()
 
     # pipeline does not exists. We expect an exception to be raised
-    with pytest.raises(NonExistingPipeline):
+    with pytest.raises(NonExistingPipelineEntity):
         pipeline_manager.submit(pipeline_entity.id)
 
     # pipeline does exist, but tasks does not exist. We expect an exception to be raised
@@ -269,8 +269,8 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert len(pipeline_entity.get_sorted_task_entities()) == 2
     assert pipeline_entity.get_sorted_task_entities()[0][0].name == task_mult_by_2.name
     assert pipeline_entity.get_sorted_task_entities()[0][0].output[0].get() == 0
-    assert pipeline_entity.get_sorted_task_entities()[1][0].output[0].get() == 0
     assert pipeline_entity.get_sorted_task_entities()[1][0].name == task_mult_by_3.name
+    assert pipeline_entity.get_sorted_task_entities()[1][0].output[0].get() == 0
 
     pipeline_manager.submit(pipeline_entity.id)
 

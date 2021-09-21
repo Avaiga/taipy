@@ -6,6 +6,7 @@ This is the entry point for operations (such as creating, reading, updating, del
 import logging
 from typing import Dict, List
 
+from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
@@ -49,15 +50,16 @@ class PipelineManager:
             for pipeline in self.__PIPELINES.values()
         ]
 
-    def create_pipeline_entity(self, pipeline: Pipeline) -> PipelineEntity:
-        all_ds: set[DataSource] = set()
-        for task in pipeline.tasks:
-            for ds in task.input:
-                all_ds.add(ds)
-            for ds in task.output:
-                all_ds.add(ds)
-        ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in all_ds}
-        task_entities = [self.task_manager.create_task_entity(task, ds_entities) for task in pipeline.tasks]
+    def create_pipeline_entity(self, pipeline: Pipeline, data_source_entities: Dict[DataSource, DataSourceEntity] = None) -> PipelineEntity:
+        if data_source_entities is None:
+            all_ds: set[DataSource] = set()
+            for task in pipeline.tasks:
+                for ds in task.input:
+                    all_ds.add(ds)
+                for ds in task.output:
+                    all_ds.add(ds)
+            data_source_entities = {ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds}
+        task_entities = [self.task_manager.create_task_entity(task, data_source_entities) for task in pipeline.tasks]
         pipeline_entity = PipelineEntity(
             pipeline.name, pipeline.properties, task_entities
         )
@@ -77,12 +79,12 @@ class PipelineManager:
             return PipelineEntity(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
             logging.error(
-                f"Task : {err.task_id} from pipeline {pipeline_id} does not exist."
+                f"Task entity : {err.task_id} from pipeline entity {pipeline_id} does not exist."
             )
             raise err
         except KeyError:
-            logging.error(f"Pipeline : {pipeline_id} does not exist.")
-            raise NonExistingPipeline(pipeline_id)
+            logging.error(f"Pipeline entity : {pipeline_id} does not exist.")
+            raise NonExistingPipelineEntity(pipeline_id)
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [
