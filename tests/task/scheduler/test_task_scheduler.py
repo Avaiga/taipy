@@ -3,7 +3,6 @@ from concurrent.futures import Future
 from time import sleep
 from typing import Optional
 
-from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.task import TaskEntity
@@ -17,7 +16,8 @@ def mult(nb1: float, nb2: float):
 class WaitingMult:
     """
     This class emulates a time-consuming calculation task
-    The TaskScheduler will call the `__call__` function which will block until the main thread calls the `unblock` method
+    The TaskScheduler will call the `__call__` function which will block until the main
+    thread calls the `unblock` method
     """
 
     def __init__(self):

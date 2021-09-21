@@ -5,7 +5,8 @@ from concurrent.futures import Executor, Future
 
 class FutureExecutor(Executor):
     """
-    Equivalence of Python standard Thread/Process Pool Executor but the function is executed directly
+    Equivalence of Python standard Thread/Process Pool Executor but
+    the function is executed directly
     """
 
     @staticmethod

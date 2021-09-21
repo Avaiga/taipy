@@ -32,7 +32,8 @@ class CSVDataSourceEntity(DataSourceEntity):
     ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
-                f"The following properties {', '.join(x for x in missing)} were not informed and are required"
+                f"The following properties "
+                f"{', '.join(x for x in missing)} were not informed and are required"
             )
         super().__init__(
             name,

@@ -41,14 +41,16 @@ class MarkdownBuilder:
                 properties_dict = getattr(App._get_instance(), properties_dict_name)
                 if not isinstance(properties_dict, MapDictionary):
                     raise Exception(
-                        f"Can't find properties configuration dictionary for {str(m)}! Please review your app templates!"
+                        f"Can't find properties configuration dictionary for {str(m)}!"
+                        f" Please review your app templates!"
                     )
                 # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
                     self.attributes[k] = v
         if self.var_name:
             try:
-                # Bind variable name (var_name string split in case var_name is a dictionary)
+                # Bind variable name (var_name string split in case
+                # var_name is a dictionary)
                 App._get_instance().bind_var(self.var_name.split(sep=".")[0])
             except:
                 print("error")

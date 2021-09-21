@@ -10,7 +10,7 @@ class DateSelectorPattern(InlineProcessor):
     # group(1): var_name
     # group(2): var_id
     # group(3): attributes
-    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*))\{(\d+)\}date_selector\s*(?:\:\s*(.*?))?\s*\]"
+    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*))\{(\d+)\}date_selector\s*(?:\:\s*(.*?))?\s*\]"  # noqa
 
     @staticmethod
     def extendMarkdown(md):

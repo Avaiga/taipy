@@ -97,7 +97,8 @@ class App(object, metaclass=Singleton):
                 400,
                 {"Content-Type": "application/json; charset=utf-8"},
             )
-        # Render template (for redundancy, not necessary 'cause it has already been rendered in self.run function)
+        # Render template (for redundancy, not necessary 'cause it has already
+        # been rendered in self.run function)
         if not page.index_html:
             if page.md_template:
                 page.index_html = self._parse_markdown(page.md_template)
@@ -127,7 +128,8 @@ class App(object, metaclass=Singleton):
             raise Exception("page_route is required for add_page function!")
         if not re.match(r"^[\w-]+$", name):
             raise SyntaxError(
-                f"Page route '{name}' is not valid! Can only contain alphabet letters, numbers, dash (-), and underscore (_)"
+                f"Page route '{name}' is not valid! Can only contain alphabet "
+                f"letters, numbers, dash (-), and underscore (_)"
             )
         # Init a new page
         new_page = Page()
@@ -269,16 +271,18 @@ class App(object, metaclass=Singleton):
         self._config.load_config(app_config=app_config, style_config=style_config)
 
     def run(self, host=None, port=None, debug=None, load_dotenv=True, bind_locals=None):
-        # Check with default config, overide only if parameter is not passed directly into the run function
+        # Check with default config, override only if parameter
+        # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
             host = self._config.app_config["host"]
         if port is None and self._config.app_config["port"] is not None:
             port = self._config.app_config["port"]
         if debug is None and self._config.app_config["debug"] is not None:
             debug = self._config.app_config["debug"]
-        # Save all availbale variables in locals
+        # Save all available variables in locals
         self._dict_bind_locals = bind_locals
-        # Run parse markdown to force variables binding at runtime (save rendered html to page.index_html for optimization)
+        # Run parse markdown to force variables binding at runtime
+        # (save rendered html to page.index_html for optimization)
         for page_i in self._config.pages:
             if page_i.md_template:
                 page_i.index_html = self._parse_markdown(page_i.md_template)

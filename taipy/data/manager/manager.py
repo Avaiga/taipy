@@ -9,8 +9,8 @@ from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 
 """
-A Data Manager is entity responsible for keeping track and retrieving Taipy DataSources. The Data Manager will
-facilitate data access between Taipy Modules.
+A Data Manager is entity responsible for keeping track and retrieving Taipy DataSources.
+The Data Manager will facilitate data access between Taipy Modules.
 """
 
 
@@ -40,7 +40,8 @@ class DataManager:
             )
         except KeyError:
             logging.error(
-                f"Cannot create Data source entity. Type {data_source.type} does not exist."
+                f"Cannot create Data source entity. "
+                f"Type {data_source.type} does not exist."
             )
             raise InvalidDataSourceType(data_source.type)
         self.save_data_source_entity(data_source_entity)

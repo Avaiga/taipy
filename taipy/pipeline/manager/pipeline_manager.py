@@ -1,6 +1,7 @@
 """
 Pipeline Manager is responsible for managing the pipelines.
-This is the entry point for operations (such as creating, reading, updating, deleting, duplicating, executing) related
+This is the entry point for operations (such as creating, reading, updating,
+deleting, duplicating, executing) related
  to pipelines.
 """
 import logging
@@ -45,11 +46,14 @@ class PipelineManager:
 
     def get_pipelines(self) -> List[Pipeline]:
         return [
-            self.get_pipeline(pipeline.name)
-            for pipeline in self.__PIPELINES.values()
+            self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()
         ]
 
-    def create_pipeline_entity(self, pipeline: Pipeline, data_source_entities: Dict[DataSource, DataSourceEntity] = None) -> PipelineEntity:
+    def create_pipeline_entity(
+        self,
+        pipeline: Pipeline,
+        data_source_entities: Dict[DataSource, DataSourceEntity] = None,
+    ) -> PipelineEntity:
         if data_source_entities is None:
             all_ds: set[DataSource] = set()
             for task in pipeline.tasks:
@@ -57,8 +61,13 @@ class PipelineManager:
                     all_ds.add(ds)
                 for ds in task.output:
                     all_ds.add(ds)
-            data_source_entities = {ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds}
-        task_entities = [self.task_manager.create_task_entity(task, data_source_entities) for task in pipeline.tasks]
+            data_source_entities = {
+                ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds
+            }
+        task_entities = [
+            self.task_manager.create_task_entity(task, data_source_entities)
+            for task in pipeline.tasks
+        ]
         pipeline_entity = PipelineEntity(
             pipeline.name, pipeline.properties, task_entities
         )

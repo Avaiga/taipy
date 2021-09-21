@@ -20,7 +20,8 @@ class TestDataManager:
             == csv_entity_1.properties
         )
 
-        # Test we can instantiate a EmbeddedDataSourceEntity from DataSource with type embedded
+        # Test we can instantiate a EmbeddedDataSourceEntity from DataSource
+        # with type embedded
         embedded_ds = DataSource(name="foo", type="embedded", data="bar")
         embedded_entity = dm.create_data_source_entity(embedded_ds)
         assert dm.get_data_source_entity(embedded_entity.id).id == embedded_entity.id
@@ -40,7 +41,8 @@ class TestDataManager:
         with pytest.raises(InvalidDataSourceType):
             dm.create_data_source_entity(wrong_type_ds)
 
-        # Test that each time we ask for a data source entity creation from the same data source, a new id is created
+        # Test that each time we ask for a data source entity creation from the same
+        # data source, a new id is created
         csv_entity_2 = dm.create_data_source_entity(csv_ds)
         assert csv_entity_2.id != csv_entity_1.id
 
