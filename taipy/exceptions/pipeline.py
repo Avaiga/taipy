@@ -13,7 +13,6 @@ class NonExistingPipelineEntity(Exception):
     """
 
     def __init__(self, pipeline_id: str):
-        self.pipeline_id = pipeline_id
         self.message = f"Pipeline entity : {pipeline_id} does not exist."
 
 

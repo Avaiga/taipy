@@ -77,7 +77,7 @@ class PipelineManager:
             ]
             return PipelineEntity(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
-            logging.error(f"Task entity : {err.task_id} from pipeline entity {pipeline_id} does not exist.")
+            logging.error(err.message)
             raise err
         except KeyError:
             err = NonExistingPipelineEntity(pipeline_id)
