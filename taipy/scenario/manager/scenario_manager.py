@@ -45,8 +45,10 @@ class ScenarioManager:
             all_ds: set[DataSource] = set()
             for pipeline in scenario.pipelines:
                 for task in pipeline.tasks:
-                        all_ds.extend(task.input)
-                        all_ds.extend(task.output)
+                    for ds in task.input:
+                        all_ds.add(ds)
+                    for ds in task.output:
+                        all_ds.add(ds)
             ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in all_ds}
         p_entities = [self.pipeline_manager.create_pipeline_entity(pipeline, ds_entities) for pipeline in scenario.pipelines]
         scenario_entity = ScenarioEntity(scenario.name, p_entities, scenario.properties)
