@@ -8,16 +8,14 @@ from typing import Dict, List
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
-from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_entity import Dag, PipelineEntity
+from taipy.pipeline.pipeline_entity import PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
-from taipy.pipeline.pipeline_schema import PipelineSchema
 from taipy.task import TaskId
-from taipy.task.scheduler.task_scheduler import TaskScheduler
 from taipy.task.manager.task_manager import TaskManager
+from taipy.task.scheduler.task_scheduler import TaskScheduler
 
 
 class PipelineManager:
@@ -90,25 +88,6 @@ class PipelineManager:
         return [
             self.get_pipeline_entity(model.id)
             for model in self.__PIPELINE_MODEL_DB.values()
-        ]
-
-    def get_pipeline_schema(self, pipeline_id: PipelineId) -> PipelineSchema:
-        try:
-            model = self.__PIPELINE_MODEL_DB[pipeline_id]
-            return PipelineSchema(
-                model.id,
-                model.name,
-                model.properties,
-                Dag({**model.source_task_edges, **model.task_source_edges}),
-            )
-        except KeyError:
-            logging.error(f"Pipeline entity : {pipeline_id} does not exist.")
-            raise NonExistingPipelineEntity(pipeline_id)
-
-    def get_pipeline_schemas(self) -> List[PipelineSchema]:
-        return [
-            self.get_pipeline_schema(model.id)
-            for model in list(self.__PIPELINE_MODEL_DB.values())
         ]
 
     def submit(self, pipeline_id: PipelineId):

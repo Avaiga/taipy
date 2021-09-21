@@ -134,44 +134,6 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
 
 
-def test_get_pipeline_schema():
-    pipeline_manager = PipelineManager()
-
-    pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
-    pipeline_manager.save_pipeline_entity(pipeline_1)
-
-    pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2_1 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    task_2 = TaskEntity(
-        "task", [input_2], print, [output_2_1, output_2_2], TaskId("task_id_2")
-    )
-    pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
-    pipeline_manager.save_pipeline_entity(pipeline_2)
-
-    schema_1 = pipeline_manager.get_pipeline_schema(pipeline_id_1)
-    assert schema_1.id == pipeline_id_1
-    assert schema_1.name == pipeline_1.name
-    assert schema_1.properties == pipeline_1.properties
-    assert schema_1.dag == {}
-    schema_2 = pipeline_manager.get_pipeline_schema(pipeline_id_2)
-    assert schema_2.id == pipeline_id_2
-    assert schema_2.name == pipeline_2.name
-    assert schema_2.properties == pipeline_2.properties
-    assert schema_2.dag == {
-        input_2.id: [task_2.id],
-        task_2.id: [output_2_1.id, output_2_2.id],
-    }
-
-
 def test_submit():
     data_source_1 = DataSourceEntity("foo", Scope.PIPELINE, "s1")
     data_source_2 = DataSourceEntity("bar", Scope.PIPELINE, "s2")
