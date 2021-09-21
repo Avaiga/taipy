@@ -28,7 +28,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const renderInput = useCallback((params) => <TextField {...params} />, []);
 
     useEffect(() => {
-        if (typeof props.value !== 'undefined') {
+        if (props.value !== undefined) {
             setValue(new Date(props.value))
         }
     }, [props.value]);

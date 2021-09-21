@@ -22,7 +22,7 @@ const Input = (props: TaipyInputProps) => {
     }, [id, actionName, dispatch]);
 
     useEffect(() => {
-        if (typeof props.value !== 'undefined') {
+        if (props.value !== undefined) {
             setValue(props.value);
         }
     }, [props.value]);

@@ -100,14 +100,16 @@ export const createSendActionNameAction = (name: string, value: unknown): TaipyA
     payload: {value: value}
 })
 
-export const createRequestTableUpdateAction = (name: string, id: string, pageKey: string, start?: number, end?: number): TaipyAction => ({
+export const createRequestTableUpdateAction = (name: string, id: string, pageKey: string, start?: number, end?: number, orderBy?: string, sort?: string): TaipyAction => ({
     type: Types.RequestTableUpdate,
     name: name,
     payload: {
         id: id,
         pagekey: pageKey,
         start: start,
-        end: end
+        end: end,
+        orderby: orderBy,
+        sort: sort
     }
 })
 

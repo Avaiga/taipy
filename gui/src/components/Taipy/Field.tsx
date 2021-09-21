@@ -9,7 +9,7 @@ const Field = (props: TaipyFieldProps) => {
     const [value, setValue] = useState(() => formatWSValue(props.defaultvalue, dataType));
 
     useEffect(() => {
-        if (typeof props.value !== 'undefined') {
+        if (props.value !== undefined) {
             setValue(dataType ? formatWSValue(props.value, dataType) : props.value)
         }
     }, [props.value, dataType]);

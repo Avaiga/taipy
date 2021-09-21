@@ -8,16 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FilterListIcon from '@mui/icons-material/FilterList';
 import { visuallyHidden } from '@mui/utils';
 import { format } from 'date-fns';
 
@@ -27,30 +18,32 @@ import { createRequestTableUpdateAction } from "../../context/taipyReducers";
 
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
+interface ColumnDesc {
+    dfid: string;
+    type: string; 
+    format: string; 
+    title?: string; 
+    index: number;
+}
+
 interface TableProps extends TaipyBaseProps {
     pageSize?: number;
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
-    value: Record<string, Record<string, any>>
+    value: Record<string, Record<string, any>>;
+    columns: string;
 }
 
 type Order = 'asc' | 'desc';
 
-const descendingComparator = (a: any, b: any, orderBy: string) => {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  }
-  
-const  getComparator = (
-    order: Order,
-    orderBy: string,
-  ) => (a: any, b: any) => order === 'desc'
-      ? descendingComparator(a, b, orderBy)
-      : -descendingComparator(a, b, orderBy);
+const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
+    if (cols[key1].index < cols[key2].index) {
+        return -1;
+      }
+      if (cols[key1].index > cols[key2].index) {
+        return 1;
+      }
+      return 0;
+}
 
 const defaultDateFormat = "yyyy/MM/dd";
 
@@ -77,6 +70,7 @@ const Table = (props: TableProps) => {
     const { className, id, tp_varname, pageSize = 100 } = props;
     const [value, setValue] = useState<Record<string, Record<string, unknown>>>({});
     const [startIndex, setStartIndex] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef('no-page');
     const [orderBy, setOrderBy] = useState('');
@@ -85,44 +79,20 @@ const Table = (props: TableProps) => {
 //    useWhyDidYouUpdate('TaipyTable', props);
 
     useEffect(() => {
-        if (props.value && typeof props.value[pageKey.current] !== 'undefined') {
+        if (props.value && props.value[pageKey.current] !== undefined) {
             setValue(props.value[pageKey.current])
         }
     }, [props.value]);
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
-        pageKey.current = `${startIndex}-${startIndex + pageSize}`;
-        if (!props.value || typeof props.value[pageKey.current] === 'undefined') {
-            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + pageSize));
+        pageKey.current = `${startIndex}-${startIndex + pageSize}-${orderBy}-${order}`;
+        if (!props.value || props.value[pageKey.current] === undefined) {
+            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + pageSize, orderBy, order));
         } else {
-            // {columns: [], data: [][], index: []}
             setValue(props.value[pageKey.current])
         }
-    }, [startIndex, tp_varname, id, dispatch, pageSize]);
-
-    const otherPage = useCallback(e => {
-        setStartIndex(si => {
-            if (si === -1) {
-                si = Number(Object.keys(value)[0]);
-            }
-            const [id] = e.target.id.split('-').slice(-1);
-            switch (id) {
-                case 'top':
-                    return 0;
-                case 'bot':
-                    return -1;
-                case 'prev':
-                    return si - pageSize > 0 ? si - pageSize : 0;
-                case 'next':
-                    return si + pageSize;
-                default:
-                    return si;
-            }
-        })
-        e.preventDefault();
-        e.stopPropagation();
-    }, [value, pageSize]);
+    }, [startIndex, order, orderBy, tp_varname, id, dispatch, pageSize]);
 
     const handleRequestSort = useCallback((
         event: React.MouseEvent<unknown>,
@@ -138,15 +108,22 @@ const Table = (props: TableProps) => {
     }, [handleRequestSort]);
 
     const handleChangePage = useCallback((event: unknown, newPage: number) => {
-        setStartIndex(newPage * pageSize);
-    }, [pageSize]);
+        setStartIndex(newPage * rowsPerPage);
+    }, [rowsPerPage]);
 
-    const {rows, cols, rowCount} = useMemo(() => {
-        const ret = {rows: [], cols: {}, rowCount: 0} as {rows: any[], cols: any, rowCount: number};
+    const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setStartIndex(0);
+    }, []);
+
+    const [colsOrder, columns] = useMemo(() =>{
+        const columns = JSON.parse(props.columns);
+        return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+    }, [props.columns]);
+
+    const {rows, rowCount} = useMemo(() => {
+        const ret = {rows: [], rowCount: 0} as {rows: any[], rowCount: number};
         if (value) {
-            if (value.coltypes) {
-                ret.cols = value.coltypes;
-            }
             if (value.data) {
                 ret.rows = Object.keys(value.data).map(key => value.data[key]);
             }
@@ -169,16 +146,16 @@ const Table = (props: TableProps) => {
         <TableHead>
             <TableRow>
                 {
-                    Object.keys(cols).map((key, idx) => <TableCell 
-                        key={'col'+idx} 
-                        sortDirection={orderBy === key && order}>
+                    colsOrder.map((col, idx) => <TableCell 
+                        key={col + idx} 
+                        sortDirection={orderBy === columns[col].dfid && order}>
                             <TableSortLabel
-                                active={orderBy === key}
-                                direction={orderBy === key ? order : 'asc'}
-                                onClick={createSortHandler(key)}
+                                active={orderBy === columns[col].dfid}
+                                direction={orderBy === columns[col].dfid ? order : 'asc'}
+                                onClick={createSortHandler(columns[col].dfid)}
                                 >
-                            {cols[key].label || key}
-                            {orderBy === key ? (
+                            {columns[col].title || columns[col].dfid}
+                            {orderBy === columns[col].dfid ? (
                                 <Box component="span" sx={visuallyHidden}>
                                 {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
                                 </Box>
@@ -190,8 +167,7 @@ const Table = (props: TableProps) => {
         </TableHead>
         <TableBody>
             {
-            rows.slice().sort(getComparator(order, orderBy))
-                .map((row, index) => {
+            rows.map((row, index) => {
                   const isItemSelected = false;
                   return (
                     <TableRow
@@ -200,7 +176,7 @@ const Table = (props: TableProps) => {
                       key={'row' + index}
                       selected={isItemSelected}
                     >
-                      {Object.keys(row).map((key, cidx) => <TableCell key={'val'+index + '-'+ cidx} {...alignCell(cols[key])}>{formatValue(row[key], cols[key])}</TableCell>)}
+                      {colsOrder.map((col, cidx) => <TableCell key={'val'+index + '-'+ cidx} {...alignCell(columns[col])}>{formatValue(row[col], columns[col])}</TableCell>)}
                     </TableRow>
                   );
                 })
@@ -212,9 +188,10 @@ const Table = (props: TableProps) => {
           rowsPerPageOptions={[pageSize]}
           component="div"
           count={rowCount}
-          rowsPerPage={pageSize}
           page={startIndex / pageSize}
           onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
       </Box>
