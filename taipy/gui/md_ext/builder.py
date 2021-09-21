@@ -189,6 +189,19 @@ class MarkdownBuilder:
         self.set_attribute("pageSize", "{!" + str(page_size) + "!}")
         return self
 
+    def set_table_pagesize_options(self, default_size=[50, 100, 500]):
+        if self.el_element_name != "Table":
+            return self
+        page_size_options = (
+            self.attributes
+            and "page_size_options" in self.attributes
+            and self.attributes["page_size_options"]
+        ) or default_size
+        if isinstance(page_size_options, str):
+            page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
+        self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+        return self
+
     def set_attribute(self, name, value):
         self.el.set(name, value)
         return self

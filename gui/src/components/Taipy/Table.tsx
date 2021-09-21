@@ -31,6 +31,7 @@ interface TableProps extends TaipyBaseProps {
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     value: Record<string, Record<string, any>>;
     columns: string;
+    pageSizeOptions: number[];
 }
 
 type Order = 'asc' | 'desc';
@@ -66,8 +67,10 @@ const alignCell = (col: any): Partial<TableCellProps> => {
     }
 }
 
+const rowsPerPageOptions = [10, 50, 100, 500];
+
 const Table = (props: TableProps) => {
-    const { className, id, tp_varname, pageSize = 100 } = props;
+    const { className, id, tp_varname, pageSize = 100, pageSizeOptions = rowsPerPageOptions } = props;
     const [value, setValue] = useState<Record<string, Record<string, unknown>>>({});
     const [startIndex, setStartIndex] = useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
@@ -86,13 +89,13 @@ const Table = (props: TableProps) => {
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
-        pageKey.current = `${startIndex}-${startIndex + pageSize}-${orderBy}-${order}`;
+        pageKey.current = `${startIndex}-${startIndex + rowsPerPage}-${orderBy}-${order}`;
         if (!props.value || props.value[pageKey.current] === undefined) {
-            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + pageSize, orderBy, order));
+            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + rowsPerPage, orderBy, order));
         } else {
             setValue(props.value[pageKey.current])
         }
-    }, [startIndex, order, orderBy, tp_varname, id, dispatch, pageSize]);
+    }, [startIndex, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
     const handleRequestSort = useCallback((
         event: React.MouseEvent<unknown>,
@@ -142,6 +145,7 @@ const Table = (props: TableProps) => {
             sx={{ minWidth: 750 }}
             aria-labelledby="tableTitle"
             size={'medium'}
+            className={className}
           >
         <TableHead>
             <TableRow>
@@ -185,13 +189,15 @@ const Table = (props: TableProps) => {
         </MuiTable>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[pageSize]}
           component="div"
           count={rowCount}
-          page={startIndex / pageSize}
+          page={startIndex / rowsPerPage}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          showFirstButton={true}
+          showLastButton={true}
+          rowsPerPageOptions={pageSizeOptions}
         />
       </Paper>
       </Box>
