@@ -14,7 +14,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Field: Field as ComponentType,
     DateSelector: DateSelector as ComponentType,
     Table: Table as ComponentType,
-    Link: Link as ComponentType,
+    a: Link as ComponentType,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)
@@ -23,10 +23,10 @@ export const JSXReactRouterComponents: Record<string, unknown> = {
     Route: Route,
     Router: Router,
     Redirect: Redirect,
+    NotFound404: NotFound404,
+    TaipyRendered: TaipyRendered,
 };
 
 // for JSXParser in app.tsx
 export const JSXRouterBindings: Record<string, ComponentType> = {
-    NotFound404: NotFound404,
-    TaipyRendered: TaipyRendered,
 };
