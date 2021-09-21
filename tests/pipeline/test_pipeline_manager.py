@@ -279,5 +279,5 @@ def test_get_set_data():
     with pytest.raises(NonExistingDataSourceEntity):
         pipeline_manager.set_data("WRONG DATA SOURCE NAME", pipeline_entity.id, 7)
 
-    with pytest.raises(NonExistingPipeline):
+    with pytest.raises(NonExistingPipelineEntity):
         pipeline_manager.set_data("foo", PipelineId("WRONG PIPELINE ID"), 7)

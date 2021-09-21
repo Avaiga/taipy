@@ -80,8 +80,9 @@ class PipelineManager:
             logging.error(f"Task entity : {err.task_id} from pipeline entity {pipeline_id} does not exist.")
             raise err
         except KeyError:
-            logging.error(f"Pipeline entity : {pipeline_id} does not exist.")
-            raise NonExistingPipelineEntity(pipeline_id)
+            err = NonExistingPipelineEntity(pipeline_id)
+            logging.error(err.message)
+            raise err
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [
