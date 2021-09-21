@@ -28,11 +28,6 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-      - uses: ricardochaves/python-lint@v1.4.0
-        with:
-          python-root-list: "taipy tests"
-          use-pylint: false
-          extra-pycodestyle-options: "--max-line-length=88 --ignore=E203,E266,E501,E722,W503,F403,F401"
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
@@ -52,6 +47,12 @@ jobs:
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: |
           pipenv install --deploy --dev
+      - id: code-quality
+        uses: ricardochaves/python-lint@v1.4.0
+        with:
+            python-root-list: "taipy tests"
+            use-pylint: false
+            extra-pycodestyle-options: "--max-line-length=88 --ignore=E203,E266,E501,E722,W503,F403,F401"
 
       - name: test with tox
         run:
