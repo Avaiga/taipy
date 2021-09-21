@@ -8,7 +8,7 @@ class MissingRequiredProperty(Exception):
 
 class InvalidDataSourceType(Exception):
     """
-    Exception raised if a data entity entity does not exist
+    Exception raised if a data entity does not exist
     """
 
     pass
