@@ -53,7 +53,7 @@ jobs:
             python-root-list: "taipy tests"
             use-pylint: false
             extra-pycodestyle-options: "--max-line-length=88 --ignore=E203,E266,E501,E722,W503,F403,F401"
-
+            extra-mypy-options: "--ignore-missing-imports"
       - name: test with tox
         run:
           tox
