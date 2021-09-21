@@ -97,33 +97,23 @@ class PipelineManager:
                 self.task_scheduler.submit(task)
 
     def get_data(self, data_source_name: str, pipeline_id: PipelineId):
-        try:
-            pipeline_entity = self.get_pipeline_entity(pipeline_id)
-            for task in pipeline_entity.task_entities:
-                for ds_entity in task.input:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.get()
-                for ds_entity in task.output:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.get()
-            raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
-        except KeyError:
-            err = NonExistingPipelineEntity(pipeline_id)
-            logging.error(err.message)
-            raise err
+        pipeline_entity = self.get_pipeline_entity(pipeline_id)
+        for task in pipeline_entity.task_entities:
+            for ds_entity in task.input:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.get()
+            for ds_entity in task.output:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.get()
+        raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
 
     def set_data(self, data_source_name: str, pipeline_id: PipelineId, data):
-        try:
-            pipeline_entity = self.get_pipeline_entity(pipeline_id)
-            for task in pipeline_entity.task_entities:
-                for ds_entity in task.input:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.write(data)
-                for ds_entity in task.output:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.write(data)
-            raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
-        except KeyError:
-            err = NonExistingPipelineEntity(pipeline_id)
-            logging.error(err.message)
-            raise err
+        pipeline_entity = self.get_pipeline_entity(pipeline_id)
+        for task in pipeline_entity.task_entities:
+            for ds_entity in task.input:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.write(data)
+            for ds_entity in task.output:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.write(data)
+        raise NonExistingDataSourceEntity(pipeline_id, data_source_name)

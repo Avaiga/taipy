@@ -4,7 +4,7 @@ from typing import Dict, List
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity
+from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity, NonExistingDataSourceEntity
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
 from taipy.scenario import ScenarioId, Scenario, ScenarioEntity
@@ -40,7 +40,8 @@ class ScenarioManager:
             for scenario in self.__SCENARIOS.values()
         ]
 
-    def create_scenario_entity(self, scenario: Scenario, ds_entities: Dict[DataSource, DataSourceEntity] = None) -> ScenarioEntity:
+    def create_scenario_entity(self, scenario: Scenario,
+                               ds_entities: Dict[DataSource, DataSourceEntity] = None) -> ScenarioEntity:
         if ds_entities is None:
             all_ds: set[DataSource] = set()
             for pipeline in scenario.pipelines:
@@ -49,8 +50,10 @@ class ScenarioManager:
                         all_ds.add(ds)
                     for ds in task.output:
                         all_ds.add(ds)
-            ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in all_ds}
-        p_entities = [self.pipeline_manager.create_pipeline_entity(pipeline, ds_entities) for pipeline in scenario.pipelines]
+            ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in
+                           all_ds}
+        p_entities = [self.pipeline_manager.create_pipeline_entity(pipeline, ds_entities) for pipeline in
+                      scenario.pipelines]
         scenario_entity = ScenarioEntity(scenario.name, p_entities, scenario.properties)
         self.save_scenario_entity(scenario_entity)
         return scenario_entity
@@ -83,3 +86,27 @@ class ScenarioManager:
         scenario_entity_to_submit = self.get_scenario_entity(scenario_id)
         for pipeline in scenario_entity_to_submit.pipeline_entities:
             self.pipeline_manager.submit(pipeline.id)
+
+    def get_data(self, data_source_name: str, scenario_id: ScenarioId):
+        scenario_entity = self.get_scenario_entity(scenario_id)
+        for pipeline_entity in scenario_entity.pipeline_entities:
+            for task_entity in pipeline_entity.task_entities:
+                for ds_entity in task_entity.input:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.get()
+                for ds_entity in task_entity.output:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.get()
+        raise NonExistingDataSourceEntity(scenario_id, data_source_name)
+
+    def set_data(self, data_source_name: str, scenario_id: ScenarioId, data):
+        scenario_entity = self.get_scenario_entity(scenario_id)
+        for pipeline_entity in scenario_entity.pipeline_entities:
+            for task in pipeline_entity.task_entities:
+                for ds_entity in task.input:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.write(data)
+                for ds_entity in task.output:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.write(data)
+            raise NonExistingDataSourceEntity(scenario_id, data_source_name)
