@@ -1,11 +1,11 @@
 import logging
-from typing import List, Dict
+from typing import Dict, List
 
 from taipy.data.data_source import DataSource
 from taipy.data.data_source_entity import DataSourceEntity
-from taipy.data.scope import Scope
-from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
 from taipy.data.data_source_model import DataSourceModel
+from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 
 """
@@ -34,10 +34,14 @@ class DataManager:
     def create_data_source_entity(self, data_source: DataSource) -> DataSourceEntity:
         try:
             data_source_entity = self.__ENTITY_CLASS_MAP[data_source.type](
-                name=data_source.name, scope=data_source.scope, properties=data_source.properties
+                name=data_source.name,
+                scope=data_source.scope,
+                properties=data_source.properties,
             )
         except KeyError:
-            logging.error(f"Cannot create Data source entity. Type {data_source.type} does not exist.")
+            logging.error(
+                f"Cannot create Data source entity. Type {data_source.type} does not exist."
+            )
             raise InvalidDataSourceType(data_source.type)
         self.save_data_source_entity(data_source_entity)
         return data_source_entity
@@ -57,7 +61,7 @@ class DataManager:
             name=model.name,
             scope=model.scope,
             id=model.id,
-            properties=model.data_source_properties
+            properties=model.data_source_properties,
         )
 
     def get_data_source_entities(self) -> List[DataSourceEntity]:
@@ -70,12 +74,12 @@ class DataManager:
         self, id: str, name: str, scope: Scope, type: str, properties: dict
     ):
         self.__DATA_SOURCE_MODEL_DB[id] = DataSourceModel(
-                id,
-                name,
-                scope,
-                type,
-                properties,
-            )
+            id,
+            name,
+            scope,
+            type,
+            properties,
+        )
 
     def fetch_data_source_model(self, id) -> DataSourceModel:
         return self.__DATA_SOURCE_MODEL_DB[id]

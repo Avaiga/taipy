@@ -1,8 +1,16 @@
-from markdown.util import etree
 from operator import attrgetter
-from .parse_attributes import parse_attributes
-from ..utils import is_boolean_true, dateToISO, getDataType, get_client_var_name, MapDictionary
+
+from markdown.util import etree
+
 from ..app import App
+from ..utils import (
+    MapDictionary,
+    dateToISO,
+    get_client_var_name,
+    getDataType,
+    is_boolean_true,
+)
+from .parse_attributes import parse_attributes
 
 
 class MarkdownBuilder:
@@ -32,7 +40,9 @@ class MarkdownBuilder:
                 App._get_instance().bind_var(properties_dict_name)
                 properties_dict = getattr(App._get_instance(), properties_dict_name)
                 if not isinstance(properties_dict, MapDictionary):
-                    raise Exception(f"Can't find properties configuration dictionary for {str(m)}! Please review your app templates!")
+                    raise Exception(
+                        f"Can't find properties configuration dictionary for {str(m)}! Please review your app templates!"
+                    )
                 # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
                     self.attributes[k] = v

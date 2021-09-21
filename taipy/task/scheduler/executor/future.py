@@ -1,6 +1,6 @@
 __all__ = ["FutureExecutor"]
 
-from concurrent.futures import Future, Executor
+from concurrent.futures import Executor, Future
 
 
 class FutureExecutor(Executor):

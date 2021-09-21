@@ -1,4 +1,5 @@
 from markdown.inlinepatterns import InlineProcessor
+
 from .builder import MarkdownBuilder
 
 

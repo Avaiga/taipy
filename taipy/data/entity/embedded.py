@@ -1,10 +1,9 @@
 import json
 from typing import Any, Dict, Optional
 
-from taipy.exceptions import MissingRequiredProperty
-
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.scope import Scope
+from taipy.exceptions import MissingRequiredProperty
 
 
 class EmbeddedDataSourceEntity(DataSourceEntity):
@@ -12,7 +11,7 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
     __TYPE = "embedded"
 
     def __init__(
-        self, name: str, scope: Scope, id: Optional[str]=None, properties: Dict = {}
+        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
     ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(

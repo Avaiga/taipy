@@ -1,12 +1,11 @@
 import pytest
 
-from taipy.data import DataSource, DataManager
+from taipy.data import DataManager, DataSource
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingDataSourceEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity, NonExistingDataSourceEntity
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId, TaskManager
@@ -68,12 +67,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
+    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
+    output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
 
@@ -160,7 +155,6 @@ def test_submit():
     )
 
     pipeline_manager = PipelineManager()
-    data_manager = DataManager()
     task_manager = TaskManager()
 
     class MockTaskScheduler(TaskScheduler):

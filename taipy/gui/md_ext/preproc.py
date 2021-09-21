@@ -1,5 +1,7 @@
-from markdown.preprocessors import Preprocessor
 import re
+
+from markdown.preprocessors import Preprocessor
+
 from ..app import App
 
 

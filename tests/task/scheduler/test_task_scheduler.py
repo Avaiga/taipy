@@ -3,8 +3,8 @@ from concurrent.futures import Future
 from time import sleep
 from typing import Optional
 
-from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.task import TaskEntity
 from taipy.task.scheduler import TaskScheduler
@@ -19,6 +19,7 @@ class WaitingMult:
     This class emulates a time-consuming calculation task
     The TaskScheduler will call the `__call__` function which will block until the main thread calls the `unblock` method
     """
+
     def __init__(self):
         self._nb1: Optional[float] = None
         self._nb2: Optional[float] = None
@@ -30,9 +31,7 @@ class WaitingMult:
         return self.future.result()
 
     def unblock(self):
-        self.future.set_result(
-            self._nb1 * self._nb2
-        )
+        self.future.set_result(self._nb1 * self._nb2)
         sleep(0.1)  # Wait end of callback
 
 
@@ -87,9 +86,7 @@ def _create_task(function):
         EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, data=21),
         EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, data=2),
     ]
-    output_ds = [
-        EmbeddedDataSourceEntity.create(output_name, Scope.PIPELINE, data=0)
-    ]
+    output_ds = [EmbeddedDataSourceEntity.create(output_name, Scope.PIPELINE, data=0)]
     return TaskEntity(
         task_name,
         input=input_ds,

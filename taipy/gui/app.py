@@ -13,7 +13,14 @@ from .config import default_config
 from .md_ext import *
 from .Page import Page
 from .server import Server
-from .utils import ISOToDate, MapDictionary, Singleton, attrsetter, dateToISO, get_client_var_name
+from .utils import (
+    ISOToDate,
+    MapDictionary,
+    Singleton,
+    attrsetter,
+    dateToISO,
+    get_client_var_name,
+)
 
 
 class App(object, metaclass=Singleton):
@@ -140,7 +147,11 @@ class App(object, metaclass=Singleton):
         if not re.match("^[a-zA-Z][a-zA-Z_$0-9]*$", name):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(App, name, MapDictionary(value, lambda s, v: self._update_var(name+'.'+s, v)))
+            setattr(
+                App,
+                name,
+                MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)),
+            )
             setattr(self._values, name, MapDictionary(value))
         else:
             prop = property(
@@ -213,8 +224,8 @@ class App(object, metaclass=Singleton):
             ret_payload["pagekey"] = payload["pagekey"]
             start = int(payload["start"]) if payload["start"] else 0
             end = int(payload["end"]) if payload["end"] else len(newvalue)
-            if start ==  -1:
-                start = - end - 1
+            if start == -1:
+                start = -end - 1
                 end = None
             elif start >= len(newvalue):
                 start = -end + start
@@ -231,7 +242,9 @@ class App(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name, payload) -> None:
         try:
-            self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
+            self._server._ws.send(
+                {"type": "U", "name": get_client_var_name(var_name), "payload": payload}
+            )
         except Exception as e:
             print(e)
 

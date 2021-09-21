@@ -68,7 +68,7 @@ class Server(Flask):
                 elif message["type"] == "T":
                     self._app._request_var(message["name"], message["payload"])
             except TypeError as te:
-                print("Decoding Message has failed: " + str(message) + "\n " +str(te))
+                print("Decoding Message has failed: " + str(message) + "\n " + str(te))
             except KeyError as ke:
                 print("Can't access: " + message + "\n" + str(ke))
 

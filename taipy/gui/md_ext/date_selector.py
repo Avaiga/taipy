@@ -1,5 +1,7 @@
-from markdown.inlinepatterns import InlineProcessor
 from datetime import datetime
+
+from markdown.inlinepatterns import InlineProcessor
+
 from .builder import MarkdownBuilder
 
 

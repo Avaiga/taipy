@@ -1,5 +1,7 @@
 from markdown.inlinepatterns import InlineProcessor
+
 from .builder import MarkdownBuilder
+
 
 # The table pattern also handles the [<var>] construct
 class TablePattern(InlineProcessor):

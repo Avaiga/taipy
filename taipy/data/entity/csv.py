@@ -1,8 +1,9 @@
 import csv
-import pandas as pd
 import json
 from itertools import islice
 from typing import Dict, Optional
+
+import pandas as pd
 
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.scope import Scope
@@ -27,7 +28,7 @@ class CSVDataSourceEntity(DataSourceEntity):
     __TYPE = "csv"
 
     def __init__(
-        self, name: str, scope: Scope, id: Optional[str]=None, properties: Dict = {}
+        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
     ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
