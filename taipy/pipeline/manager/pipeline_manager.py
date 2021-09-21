@@ -5,7 +5,7 @@ deleting, duplicating, executing) related
  to pipelines.
 """
 import logging
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
@@ -55,7 +55,7 @@ class PipelineManager:
         data_source_entities: Dict[DataSource, DataSourceEntity] = None,
     ) -> PipelineEntity:
         if data_source_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for task in pipeline.tasks:
                 for ds in task.input:
                     all_ds.add(ds)

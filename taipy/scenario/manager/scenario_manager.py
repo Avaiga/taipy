@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
@@ -46,7 +46,7 @@ class ScenarioManager:
         self, scenario: Scenario, ds_entities: Dict[DataSource, DataSourceEntity] = None
     ) -> ScenarioEntity:
         if ds_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for pipeline in scenario.pipelines:
                 for task in pipeline.tasks:
                     for ds in task.input:

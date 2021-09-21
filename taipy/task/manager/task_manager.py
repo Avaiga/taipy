@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
@@ -49,7 +49,7 @@ class TaskManager:
         self, task: Task, data_source_entities: Dict[DataSource, DataSourceEntity]
     ) -> TaskEntity:
         if data_source_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for ds in task.input:
                 all_ds.add(ds)
             for ds in task.output:

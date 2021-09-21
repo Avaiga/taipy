@@ -34,7 +34,7 @@ class App(object, metaclass=Singleton):
         static_host: t.Optional[str] = None,
         host_matching: bool = False,
         subdomain_matching: bool = False,
-        template_folder: t.Optional[str] = "taipy_webapp",
+        template_folder: str = "taipy_webapp",
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
@@ -64,7 +64,7 @@ class App(object, metaclass=Singleton):
         #   Key = variable name
         #   Value = next id (starting at 0)
         # This is filled when creating the controls, using add_control()
-        self._control_ids = {}
+        self._control_ids: t.Dict[str, int] = {}
         self._markdown = Markdown(
             extensions=[
                 "taipy.gui",
@@ -84,7 +84,7 @@ class App(object, metaclass=Singleton):
     def _parse_markdown(self, text: str) -> str:
         return self._markdown.convert(text)
 
-    def _render_page(self) -> None:
+    def _render_page(self) -> t.Any:
         page = None
         # Get page instance
         for page_i in self._config.pages:
@@ -225,7 +225,9 @@ class App(object, metaclass=Singleton):
         elif isinstance(newvalue, pd.DataFrame):
             ret_payload["pagekey"] = payload["pagekey"]
             start = int(payload["start"]) if payload["start"] else 0
-            end = int(payload["end"]) if payload["end"] else len(newvalue)
+            # Can't set type as Optional[int] because Optional does not
+            # support unary operations. Maybe should review None assignment to end
+            end: t.Any = int(payload["end"]) if payload["end"] else len(newvalue)
             if start == -1:
                 start = -end - 1
                 end = None

@@ -10,7 +10,7 @@ class FutureExecutor(Executor):
     """
 
     @staticmethod
-    def submit(fn, /, *args, **kwargs) -> Future:
+    def submit(fn, /, *args, **kwargs):
         future: Future = Future()
         future.set_result(fn(*args, **kwargs))
         return future
