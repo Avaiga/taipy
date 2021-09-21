@@ -9,7 +9,7 @@ from typing import Dict, List
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingDataSourceEntity, NonExistingPipelineEntity
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_entity import PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
@@ -39,8 +39,9 @@ class PipelineManager:
         try:
             return self.__PIPELINES[name]
         except KeyError:
-            logging.error(f"Pipeline : {name} does not exist.")
-            raise NonExistingPipeline(name)
+            err = NonExistingPipeline(name)
+            logging.error(err.message)
+            raise err
 
     def get_pipelines(self) -> List[Pipeline]:
         return [
@@ -76,9 +77,7 @@ class PipelineManager:
             ]
             return PipelineEntity(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
-            logging.error(
-                f"Task entity : {err.task_id} from pipeline entity {pipeline_id} does not exist."
-            )
+            logging.error(f"Task entity : {err.task_id} from pipeline entity {pipeline_id} does not exist.")
             raise err
         except KeyError:
             logging.error(f"Pipeline entity : {pipeline_id} does not exist.")
@@ -95,3 +94,35 @@ class PipelineManager:
         for tasks in pipeline_entity_to_submit.get_sorted_task_entities():
             for task in tasks:
                 self.task_scheduler.submit(task)
+
+    def get_data(self, data_source_name: str, pipeline_id: PipelineId):
+        try:
+            pipeline_entity = self.get_pipeline_entity(pipeline_id)
+            for task in pipeline_entity.task_entities:
+                for ds_entity in task.input:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.get()
+                for ds_entity in task.output:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.get()
+            raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
+        except KeyError:
+            err = NonExistingPipelineEntity(pipeline_id)
+            logging.error(err.message)
+            raise err
+
+    def set_data(self, data_source_name: str, pipeline_id: PipelineId, data):
+        try:
+            pipeline_entity = self.get_pipeline_entity(pipeline_id)
+            for task in pipeline_entity.task_entities:
+                for ds_entity in task.input:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.write(data)
+                for ds_entity in task.output:
+                    if ds_entity.name == data_source_name:
+                        return ds_entity.write(data)
+            raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
+        except KeyError:
+            err = NonExistingPipelineEntity(pipeline_id)
+            logging.error(err.message)
+            raise err
