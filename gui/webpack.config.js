@@ -13,7 +13,7 @@ module.exports = (env, options) => ({
     ],
     output: {
         filename: "taipy.js",
-        path: path.resolve(__dirname, '../taipy_webapp'),
+        path: path.resolve(__dirname, '../taipy/gui/webapp'),
         library: "Taipy",
         libraryTarget: "umd", //"var" "commonjs" "umd"
     },
