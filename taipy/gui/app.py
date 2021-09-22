@@ -3,6 +3,7 @@ import re
 import typing as t
 from operator import attrgetter
 from types import SimpleNamespace
+import numpy as np
 
 import pandas as pd
 from flask import jsonify, request
@@ -15,7 +16,7 @@ from .Page import Page
 from .server import Server
 from .utils import (
     ISOToDate,
-    MapDictionary,
+    _MapDictionary,
     Singleton,
     attrsetter,
     dateToISO,
@@ -152,9 +153,9 @@ class App(object, metaclass=Singleton):
             setattr(
                 App,
                 name,
-                MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)),
+                _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)),
             )
-            setattr(self._values, name, MapDictionary(value))
+            setattr(self._values, name, _MapDictionary(value))
         else:
             prop = property(
                 lambda s: getattr(s._values, name),  # Getter
@@ -223,12 +224,15 @@ class App(object, metaclass=Singleton):
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
         elif isinstance(newvalue, pd.DataFrame):
-            ret_payload["pagekey"] = payload["pagekey"]
-            start = int(payload["start"]) if payload["start"] else 0
+            keys = payload.keys()
+            ret_payload["pagekey"] = (
+                payload["pagekey"] if "pagekey" in keys else "unknown page"
+            )
+            start = int(payload["start"]) if "start" in keys else 0
             # Can't set type as Optional[int] because Optional does not
             # support unary operations. Maybe should review None assignment to end
-            end: t.Any = int(payload["end"]) if payload["end"] else len(newvalue)
-            if start == -1:
+            end: t.Any = int(payload["end"]) if "end" in keys else len(newvalue)
+            if start < 0:
                 start = -end - 1
                 end = None
             elif start >= len(newvalue):
@@ -236,8 +240,38 @@ class App(object, metaclass=Singleton):
                 end = None
             if end and end >= len(newvalue):
                 end = len(newvalue) - 1
-            newvalue = newvalue.iloc[slice(start, end)]
-            newvalue = newvalue.to_dict(orient="index")
+            rowcount = len(newvalue)
+            datecols = newvalue.select_dtypes(include=["datetime64"]).columns.tolist()
+            if len(datecols) != 0:
+                newvalue = (
+                    newvalue.copy()
+                )  # copy the df so that we don't "mess" with the user's data
+                for col in datecols:
+                    if col + "__str" not in newvalue.columns:
+                        newvalue[col + "__str"] = (
+                            newvalue[col]
+                            .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                            .astype("string")
+                        )
+            if "orderby" in keys and len(payload["orderby"]):
+                ascending = payload["sort"] == "asc" if "sort" in keys else True
+                if len(datecols) != 0:
+                    newvalue.sort_values(
+                        by=payload["orderby"], ascending=ascending, inplace=True
+                    )  # copy only if we haven't already
+                else:
+                    newvalue = newvalue.sort_values(
+                        by=payload["orderby"], ascending=ascending, inplace=False
+                    )
+            if len(datecols) != 0:
+                newvalue.drop(
+                    datecols, axis=1, inplace=True
+                )  # we already copied the df
+            newvalue = newvalue.iloc[slice(start, end)]  # returns a view
+            dictret = {}
+            dictret["data"] = newvalue.to_dict(orient="index")
+            dictret["rowcount"] = rowcount
+            newvalue = dictret
             # here we'll deal with start and end values from payload if present
             pass
         # TODO: What if value == newvalue?

@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import DatePicker from "react-date-picker";
-import DateTimePicker from "react-datetime-picker";
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import DatePicker from "@mui/lab/DatePicker";
+import DateTimePicker from "@mui/lab/DateTimePicker";
+import TextField from "@mui/material/TextField";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -22,16 +25,31 @@ const DateSelector = (props: DateSelectorProps) => {
         dispatch(createSendUpdateAction(tp_varname, v.toISOString()));
     }, [tp_varname, dispatch]);
 
+    const renderInput = useCallback((params) => <TextField {...params} />, []);
+
     useEffect(() => {
-        if (typeof props.value !== 'undefined') {
+        if (props.value !== undefined) {
             setValue(new Date(props.value))
         }
     }, [props.value]);
 
-    return withTime && withTime.toLowerCase() === 'true' ?
-        <DateTimePicker onChange={handleChange} value={value} className={className} />
-        :
-        <DatePicker onChange={handleChange} value={value} className={className} />;
+    return <LocalizationProvider dateAdapter={AdapterDateFns}>
+        {withTime && withTime.toLowerCase() === 'true' ?
+            <DateTimePicker 
+                onChange={handleChange} 
+                renderInput={renderInput}
+                value={value} 
+                className={className}
+            />
+            :
+            <DatePicker
+                value={value}
+                onChange={handleChange}
+                renderInput={renderInput}
+                className={className}
+            />
+}
+        </LocalizationProvider>;
 }
 
 export default DateSelector
