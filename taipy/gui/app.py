@@ -240,20 +240,13 @@ class App(object, metaclass=Singleton):
                 end = len(newvalue) - 1
             rowcount = len(newvalue)
             datecols = newvalue.select_dtypes(include=['datetime64']).columns.tolist()
-            if len(datecols) != 0:
-                newvalue = newvalue.copy() # copy the df so that we don't "mess" with the user's data
-                for col in datecols:
-                    if col + '__str' not in newvalue.columns:
-                        newvalue[col + '__str'] = newvalue[col].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ').astype("string")
             if 'orderby' in keys and len(payload['orderby']):
                 ascending = payload['sort'] == 'asc' if 'sort' in keys else True
-                if len(datecols) != 0:
-                    newvalue.sort_values(by=payload["orderby"], ascending=ascending, inplace=True) # copy only if we haven't already
-                else:
-                    newvalue = newvalue.sort_values(by=payload["orderby"], ascending=ascending, inplace=False)
-            if len(datecols) != 0:
-                newvalue.drop(datecols, axis=1, inplace=True) # we already copied the df
-            newvalue = newvalue.iloc[slice(start, end)] # returns a view
+                newvalue = newvalue.sort_values(by=payload["orderby"], ascending=ascending)
+            newvalue = newvalue.drop(datecols, axis=1).iloc[slice(start, end)]
+            for col in datecols:
+                if col + '__str' not in newvalue.columns:
+                    newvalue[col + '__str'] = newvalue[col].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ').astype("string")
             dictret = {}
             dictret['data'] = newvalue.to_dict(orient="index")
             dictret['rowcount'] = rowcount
