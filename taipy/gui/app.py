@@ -4,7 +4,6 @@ import re
 import typing as t
 from operator import attrgetter
 from types import SimpleNamespace
-import numpy as np
 
 import pandas as pd
 from flask import jsonify, request
@@ -32,11 +31,9 @@ class App(object, metaclass=Singleton):
         self,
         import_name: str,
         static_url_path: t.Optional[str] = None,
-        static_folder: t.Optional[str] = "/webapp",
         static_host: t.Optional[str] = None,
         host_matching: bool = False,
         subdomain_matching: bool = False,
-        template_folder: t.Optional[str] = "/webapp",
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
@@ -46,11 +43,11 @@ class App(object, metaclass=Singleton):
             self,
             import_name=import_name,
             static_url_path=static_url_path,
-            static_folder=app_absolute_path + str(static_folder),
+            static_folder=f"{app_absolute_path}/webapp",
             static_host=static_host,
             host_matching=host_matching,
             subdomain_matching=subdomain_matching,
-            template_folder=app_absolute_path + str(template_folder),
+            template_folder=f"{app_absolute_path}/webapp",
             instance_path=instance_path,
             instance_relative_config=instance_relative_config,
             root_path=root_path,
@@ -270,9 +267,7 @@ class App(object, metaclass=Singleton):
                     datecols, axis=1, inplace=True
                 )  # we already copied the df
             newvalue = newvalue.iloc[slice(start, end)]  # returns a view
-            dictret = {}
-            dictret["data"] = newvalue.to_dict(orient="index")
-            dictret["rowcount"] = rowcount
+            dictret = {"data": newvalue.to_dict(orient="index"), "rowcount": rowcount}
             newvalue = dictret
             # here we'll deal with start and end values from payload if present
             pass
