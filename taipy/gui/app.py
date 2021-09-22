@@ -33,16 +33,16 @@ class App(object, metaclass=Singleton):
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
     ):
-        app_absulute_path = str(pathlib.Path(__file__).parent.resolve())
+        app_absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
             import_name=import_name,
             static_url_path=static_url_path,
-            static_folder= app_absulute_path + static_folder,
+            static_folder= app_absolute_path + static_folder,
             static_host=static_host,
             host_matching=host_matching,
             subdomain_matching=subdomain_matching,
-            template_folder= app_absulute_path + template_folder,
+            template_folder= app_absolute_path + template_folder,
             instance_path=instance_path,
             instance_relative_config=instance_relative_config,
             root_path=root_path,
