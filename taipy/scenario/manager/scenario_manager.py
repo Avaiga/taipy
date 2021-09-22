@@ -67,9 +67,7 @@ class ScenarioManager:
             ]
             return ScenarioEntity(model.name, pipeline_entities, model.properties, model.id)
         except NonExistingPipelineEntity as err:
-            logging.error(
-                f"Pipeline entity : {err.pipeline_id} from scenario entity {scenario_id} does not exist."
-            )
+            logging.error(err.message)
             raise err
         except KeyError:
             logging.error(f"Scenario entity : {scenario_id} does not exist.")
