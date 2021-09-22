@@ -1,5 +1,5 @@
-from taipy.data import Scope
 from taipy.data.entity import EmbeddedDataSourceEntity
+from taipy.data import Scope
 from taipy.pipeline import PipelineEntity, PipelineId
 from taipy.scenario import ScenarioEntity, ScenarioId
 from taipy.task import TaskEntity, TaskId
