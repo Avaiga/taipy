@@ -1,83 +1,206 @@
-import React, { useState, useEffect, useContext, useCallback, useRef } from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef, useMemo } from "react";
+import Box from '@mui/material/Box';
+import MuiTable from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { TableCellProps } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Paper from '@mui/material/Paper';
+import { visuallyHidden } from '@mui/utils';
+import { format } from 'date-fns';
 
 import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
+
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
+
+interface ColumnDesc {
+    dfid: string;
+    type: string; 
+    format: string; 
+    title?: string; 
+    index: number;
+}
 
 interface TableProps extends TaipyBaseProps {
     pageSize?: number;
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
-    value: Record<string, Record<string, any>>
+    value: Record<string, Record<string, any>>;
+    columns: string;
+    pageSizeOptions: number[];
 }
 
+type Order = 'asc' | 'desc';
+
+const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
+    if (cols[key1].index < cols[key2].index) {
+        return -1;
+      }
+      if (cols[key1].index > cols[key2].index) {
+        return 1;
+      }
+      return 0;
+}
+
+const defaultDateFormat = "yyyy/MM/dd";
+
+const formatValue = (val: any, col: any) => {
+    switch (col.type) {
+        case "datetime64[ns]":
+            return format(new Date(val), col.format || defaultDateFormat);
+        default:
+            return val;
+    }
+}
+
+const alignCell = (col: any): Partial<TableCellProps> => {
+    switch (col.type) {
+        case "int64":
+        case "float64":
+            return {align: "right"};
+        default:
+            return {};
+    }
+}
+
+const rowsPerPageOptions = [10, 50, 100, 500];
+
 const Table = (props: TableProps) => {
-    const { className, id, tp_varname, pageSize = 100 } = props;
+    const { className, id, tp_varname, pageSize = 100, pageSizeOptions = rowsPerPageOptions } = props;
     const [value, setValue] = useState<Record<string, Record<string, unknown>>>({});
     const [startIndex, setStartIndex] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef('no-page');
+    const [orderBy, setOrderBy] = useState('');
+    const [order, setOrder] = useState<Order>('asc');
 
 //    useWhyDidYouUpdate('TaipyTable', props);
 
     useEffect(() => {
-        if (props.value && typeof props.value[pageKey.current] !== 'undefined') {
+        if (props.value && props.value[pageKey.current] !== undefined) {
             setValue(props.value[pageKey.current])
         }
     }, [props.value]);
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
-        pageKey.current = `${startIndex}-${startIndex + pageSize}`;
-        if (!props.value || typeof props.value[pageKey.current] === 'undefined') {
-            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + pageSize));
+        pageKey.current = `${startIndex}-${startIndex + rowsPerPage}-${orderBy}-${order}`;
+        if (!props.value || props.value[pageKey.current] === undefined) {
+            dispatch(createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, startIndex + rowsPerPage, orderBy, order));
         } else {
             setValue(props.value[pageKey.current])
         }
-    }, [startIndex, tp_varname, id, dispatch, pageSize]);
+    }, [startIndex, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
-    const otherPage = useCallback(e => {
-        setStartIndex(si => {
-            if (si === -1) {
-                si = Number(Object.keys(value)[0]);
+    const handleRequestSort = useCallback((
+        event: React.MouseEvent<unknown>,
+        col: string,
+      ) => {
+        const isAsc = orderBy === col && order === 'asc';
+        setOrder(isAsc ? 'desc' : 'asc');
+        setOrderBy(col);
+      }, [orderBy, order]);
+
+    const createSortHandler = useCallback((col: string) => (event: React.MouseEvent<unknown>) => {
+        handleRequestSort(event, col);
+    }, [handleRequestSort]);
+
+    const handleChangePage = useCallback((event: unknown, newPage: number) => {
+        setStartIndex(newPage * rowsPerPage);
+    }, [rowsPerPage]);
+
+    const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setStartIndex(0);
+    }, []);
+
+    const [colsOrder, columns] = useMemo(() =>{
+        const columns = JSON.parse(props.columns);
+        return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+    }, [props.columns]);
+
+    const {rows, rowCount} = useMemo(() => {
+        const ret = {rows: [], rowCount: 0} as {rows: any[], rowCount: number};
+        if (value) {
+            if (value.data) {
+                ret.rows = Object.keys(value.data).map(key => value.data[key]);
             }
-            const [id] = e.target.id.split('-').slice(-1);
-            switch (id) {
-                case 'top':
-                    return 0;
-                case 'bot':
-                    return -1;
-                case 'prev':
-                    return si - pageSize > 0 ? si - pageSize : 0;
-                case 'next':
-                    return si + pageSize;
-                default:
-                    return si;
+            if (value.rowcount) {
+                ret.rowCount = value.rowcount as unknown as number;
             }
-        })
-        e.preventDefault();
-        e.stopPropagation();
-    }, [value, pageSize]);
+        }
+        return ret;
+    }, [value]);
 
     return <>
-        <table className={className} id={id}>
-            <tbody>
+        <Box sx={{ width: '100%' }}>
+            <Paper sx={{ width: '100%', mb: 2 }}>
+        <TableContainer>
+          <MuiTable
+            sx={{ minWidth: 750 }}
+            aria-labelledby="tableTitle"
+            size={'medium'}
+            className={className}
+          >
+        <TableHead>
+            <TableRow>
+                {
+                    colsOrder.map((col, idx) => <TableCell 
+                        key={col + idx} 
+                        sortDirection={orderBy === columns[col].dfid && order}>
+                            <TableSortLabel
+                                active={orderBy === columns[col].dfid}
+                                direction={orderBy === columns[col].dfid ? order : 'asc'}
+                                onClick={createSortHandler(columns[col].dfid)}
+                                >
+                            {columns[col].title || columns[col].dfid}
+                            {orderBy === columns[col].dfid ? (
+                                <Box component="span" sx={visuallyHidden}>
+                                {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                </Box>
+                            ) : null}
+                            </TableSortLabel>
+                        </TableCell>)
+                }
+            </TableRow>
+        </TableHead>
+        <TableBody>
             {
-                Object.keys(value).map((rowKey: string) => <tr key={rowKey}><td>{rowKey}</td>{
-                    typeof value[rowKey] === 'object' ?
-                        Object.keys(value[rowKey]).map((colKey: string) => <td key={colKey}>{value[rowKey][colKey] as string}</td>)
-                        :
-                        <td>{value[rowKey]}</td>
-                }</tr>)
+            rows.map((row, index) => {
+                  const isItemSelected = false;
+                  return (
+                    <TableRow
+                      hover
+                      tabIndex={-1}
+                      key={'row' + index}
+                      selected={isItemSelected}
+                    >
+                      {colsOrder.map((col, cidx) => <TableCell key={'val'+index + '-'+ cidx} {...alignCell(columns[col])}>{formatValue(row[col], columns[col])}</TableCell>)}
+                    </TableRow>
+                  );
+                })
             }
-            </tbody>
-        </table>
-        <div>
-            <a href="/" id={id + '-top'} onClick={otherPage}>Top Page</a>
-            <a href="/" id={id + '-prev'} onClick={otherPage}>Prev Page</a>
-            <a href="/" id={id + '-next'} onClick={otherPage}>Next Page</a>
-            <a href="/" id={id + '-bot'} onClick={otherPage}>Bottom Page</a>
-        </div>
+        </TableBody>
+        </MuiTable>
+        </TableContainer>
+        <TablePagination
+          component="div"
+          count={rowCount}
+          page={startIndex / rowsPerPage}
+          onPageChange={handleChangePage}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          showFirstButton={true}
+          showLastButton={true}
+          rowsPerPageOptions={pageSizeOptions}
+        />
+      </Paper>
+      </Box>
     </>
 };
 

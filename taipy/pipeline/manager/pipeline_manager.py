@@ -1,23 +1,26 @@
 """
 Pipeline Manager is responsible for managing the pipelines.
-This is the entry point for operations (such as creating, reading, updating, deleting, duplicating, executing) related
+This is the entry point for operations (such as creating, reading, updating,
+deleting, duplicating, executing) related
  to pipelines.
 """
 import logging
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
-from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import (
+    NonExistingDataSourceEntity,
+    NonExistingPipeline,
+    NonExistingPipelineEntity,
+)
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_entity import Dag, PipelineEntity
+from taipy.pipeline.pipeline_entity import PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
-from taipy.pipeline.pipeline_schema import PipelineSchema
 from taipy.task import TaskId
-from taipy.task.scheduler.task_scheduler import TaskScheduler
 from taipy.task.manager.task_manager import TaskManager
+from taipy.task.scheduler.task_scheduler import TaskScheduler
 
 
 class PipelineManager:
@@ -41,25 +44,34 @@ class PipelineManager:
         try:
             return self.__PIPELINES[name]
         except KeyError:
-            logging.error(f"Pipeline : {name} does not exist.")
-            raise NonExistingPipeline(name)
+            err = NonExistingPipeline(name)
+            logging.error(err.message)
+            raise err
 
     def get_pipelines(self) -> List[Pipeline]:
         return [
-            self.get_pipeline(pipeline.name)
-            for pipeline in self.__PIPELINES.values()
+            self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()
         ]
 
-    def create_pipeline_entity(self, pipeline: Pipeline, data_source_entities: Dict[DataSource, DataSourceEntity] = None) -> PipelineEntity:
+    def create_pipeline_entity(
+        self,
+        pipeline: Pipeline,
+        data_source_entities: Dict[DataSource, DataSourceEntity] = None,
+    ) -> PipelineEntity:
         if data_source_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for task in pipeline.tasks:
                 for ds in task.input:
                     all_ds.add(ds)
                 for ds in task.output:
                     all_ds.add(ds)
-            data_source_entities = {ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds}
-        task_entities = [self.task_manager.create_task_entity(task, data_source_entities) for task in pipeline.tasks]
+            data_source_entities = {
+                ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds
+            }
+        task_entities = [
+            self.task_manager.create_task_entity(task, data_source_entities)
+            for task in pipeline.tasks
+        ]
         pipeline_entity = PipelineEntity(
             pipeline.name, pipeline.properties, task_entities
         )
@@ -78,13 +90,12 @@ class PipelineManager:
             ]
             return PipelineEntity(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
-            logging.error(
-                f"Task entity : {err.task_id} from pipeline entity {pipeline_id} does not exist."
-            )
+            logging.error(err.message)
             raise err
         except KeyError:
-            logging.error(f"Pipeline entity : {pipeline_id} does not exist.")
-            raise NonExistingPipelineEntity(pipeline_id)
+            pipeline_err = NonExistingPipelineEntity(pipeline_id)
+            logging.error(pipeline_err.message)
+            raise pipeline_err
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [
@@ -92,27 +103,30 @@ class PipelineManager:
             for model in self.__PIPELINE_MODEL_DB.values()
         ]
 
-    def get_pipeline_schema(self, pipeline_id: PipelineId) -> PipelineSchema:
-        try:
-            model = self.__PIPELINE_MODEL_DB[pipeline_id]
-            return PipelineSchema(
-                model.id,
-                model.name,
-                model.properties,
-                Dag({**model.source_task_edges, **model.task_source_edges}),
-            )
-        except KeyError:
-            logging.error(f"Pipeline entity : {pipeline_id} does not exist.")
-            raise NonExistingPipelineEntity(pipeline_id)
-
-    def get_pipeline_schemas(self) -> List[PipelineSchema]:
-        return [
-            self.get_pipeline_schema(model.id)
-            for model in list(self.__PIPELINE_MODEL_DB.values())
-        ]
-
     def submit(self, pipeline_id: PipelineId):
         pipeline_entity_to_submit = self.get_pipeline_entity(pipeline_id)
         for tasks in pipeline_entity_to_submit.get_sorted_task_entities():
             for task in tasks:
                 self.task_scheduler.submit(task)
+
+    def get_data(self, data_source_name: str, pipeline_id: PipelineId):
+        pipeline_entity = self.get_pipeline_entity(pipeline_id)
+        for task in pipeline_entity.task_entities:
+            for ds_entity in task.input:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.get()
+            for ds_entity in task.output:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.get()
+        raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
+
+    def set_data(self, data_source_name: str, pipeline_id: PipelineId, data):
+        pipeline_entity = self.get_pipeline_entity(pipeline_id)
+        for task in pipeline_entity.task_entities:
+            for ds_entity in task.input:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.write(data)
+            for ds_entity in task.output:
+                if ds_entity.name == data_source_name:
+                    return ds_entity.write(data)
+        raise NonExistingDataSourceEntity(pipeline_id, data_source_name)

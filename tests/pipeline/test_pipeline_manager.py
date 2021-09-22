@@ -1,11 +1,15 @@
 import pytest
 
-from taipy.data import DataSource, DataManager
+from taipy.data import DataManager, DataSource
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import (
+    NonExistingDataSourceEntity,
+    NonExistingPipeline,
+    NonExistingPipelineEntity,
+)
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId, TaskManager
@@ -52,7 +56,8 @@ def test_register_and_get_pipeline():
     assert pipeline_manager.get_pipeline(name_2) == pipeline_2
     assert pipeline_manager.get_pipeline(name_1).properties.get("description") is None
 
-    # We save a third pipeline with same id as the first one. We expect the first pipeline to be updated
+    # We save a third pipeline with same id as the first one.
+    # We expect the first pipeline to be updated
     pipeline_manager.register_pipeline(pipeline_3_with_same_name)
     assert len(pipeline_manager.get_pipelines()) == 2
     assert pipeline_manager.get_pipeline(name_1) == pipeline_3_with_same_name
@@ -67,12 +72,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
+    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
+    output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
 
@@ -119,7 +120,8 @@ def test_save_and_get_pipeline_entity():
     assert len(pipeline_manager.get_pipeline_entity(pipeline_id_2).task_entities) == 1
     assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
 
-    # We save a third pipeline with same id as the first one. We expect the first pipeline to be updated
+    # We save a third pipeline with same id as the first one.
+    # We expect the first pipeline to be updated
     pipeline_manager.save_pipeline_entity(pipeline_3_with_same_id)
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
@@ -132,44 +134,6 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline_entity(pipeline_id_2).name == pipeline_2.name
     assert len(pipeline_manager.get_pipeline_entity(pipeline_id_2).task_entities) == 1
     assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
-
-
-def test_get_pipeline_schema():
-    pipeline_manager = PipelineManager()
-
-    pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
-    pipeline_manager.save_pipeline_entity(pipeline_1)
-
-    pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2_1 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    task_2 = TaskEntity(
-        "task", [input_2], print, [output_2_1, output_2_2], TaskId("task_id_2")
-    )
-    pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
-    pipeline_manager.save_pipeline_entity(pipeline_2)
-
-    schema_1 = pipeline_manager.get_pipeline_schema(pipeline_id_1)
-    assert schema_1.id == pipeline_id_1
-    assert schema_1.name == pipeline_1.name
-    assert schema_1.properties == pipeline_1.properties
-    assert schema_1.dag == {}
-    schema_2 = pipeline_manager.get_pipeline_schema(pipeline_id_2)
-    assert schema_2.id == pipeline_id_2
-    assert schema_2.name == pipeline_2.name
-    assert schema_2.properties == pipeline_2.properties
-    assert schema_2.dag == {
-        input_2.id: [task_2.id],
-        task_2.id: [output_2_1.id, output_2_2.id],
-    }
 
 
 def test_submit():
@@ -197,7 +161,6 @@ def test_submit():
     )
 
     pipeline_manager = PipelineManager()
-    data_manager = DataManager()
     task_manager = TaskManager()
 
     class MockTaskScheduler(TaskScheduler):
@@ -218,7 +181,8 @@ def test_submit():
     with pytest.raises(NonExistingTaskEntity):
         pipeline_manager.submit(pipeline_entity.id)
 
-    # pipeline, and tasks does exist. We expect the tasks to be submitted in a specific order
+    # pipeline, and tasks does exist. We expect the tasks to be submitted
+    # in a specific order
     task_manager.save_task_entity(task_1)
     task_manager.save_task_entity(task_2)
     task_manager.save_task_entity(task_3)
@@ -267,12 +231,54 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert len(data_manager.get_data_source_entities()) == 3
     assert len(task_manager.task_entities) == 2
     assert len(pipeline_entity.get_sorted_task_entities()) == 2
+    assert pipeline_manager.get_data("foo", pipeline_entity.id) == 1
+    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 0
+    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 0
     assert pipeline_entity.get_sorted_task_entities()[0][0].name == task_mult_by_2.name
-    assert pipeline_entity.get_sorted_task_entities()[0][0].output[0].get() == 0
     assert pipeline_entity.get_sorted_task_entities()[1][0].name == task_mult_by_3.name
-    assert pipeline_entity.get_sorted_task_entities()[1][0].output[0].get() == 0
+
+
+def test_get_set_data():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    ds_1 = DataSource("foo", "embedded", Scope.PIPELINE, data=1)
+    ds_2 = DataSource("bar", "embedded", Scope.PIPELINE, data=0)
+    ds_6 = DataSource("baz", "embedded", Scope.PIPELINE, data=0)
+
+    task_mult_by_2 = Task("mult by 2", [ds_1], mult_by_2, ds_2)
+    task_mult_by_3 = Task("mult by 3", [ds_2], mult_by_3, ds_6)
+    pipeline = Pipeline("by 6", [task_mult_by_2, task_mult_by_3])
+    pipeline_manager.register_pipeline(pipeline)
+    # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
+
+    pipeline_entity = pipeline_manager.create_pipeline_entity(pipeline)
+
+    assert pipeline_manager.get_data("foo", pipeline_entity.id) == 1
+    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 0
+    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 0
 
     pipeline_manager.submit(pipeline_entity.id)
+    assert pipeline_manager.get_data("foo", pipeline_entity.id) == 1
+    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 2
+    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 6
 
-    assert pipeline_entity.get_sorted_task_entities()[0][0].output[0].get() == 2
-    assert pipeline_entity.get_sorted_task_entities()[1][0].output[0].get() == 6
+    pipeline_manager.set_data("foo", pipeline_entity.id, "new data value")
+    assert pipeline_manager.get_data("foo", pipeline_entity.id) == "new data value"
+    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 2
+    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 6
+
+    pipeline_manager.set_data("bar", pipeline_entity.id, 7)
+    assert pipeline_manager.get_data("foo", pipeline_entity.id) == "new data value"
+    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 7
+    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 6
+
+    with pytest.raises(NonExistingDataSourceEntity):
+        pipeline_manager.set_data("WRONG DATA SOURCE NAME", pipeline_entity.id, 7)
+
+    with pytest.raises(NonExistingPipelineEntity):
+        pipeline_manager.set_data("foo", PipelineId("WRONG PIPELINE ID"), 7)

@@ -23,7 +23,7 @@ class Server(Flask):
         static_host: t.Optional[str] = None,
         host_matching: bool = False,
         subdomain_matching: bool = False,
-        template_folder: t.Optional[str] = "",
+        template_folder: str = "",
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
@@ -51,7 +51,13 @@ class Server(Flask):
         @self.route("/<path:path>")
         def my_index(path):
             if path == "" or "." not in path:
-                return render_template("index.html", flask_url=request.url_root)
+                return render_template(
+                    "index.html",
+                    flask_url=request.url_root,
+                    title=self._app.title
+                    if hasattr(self._app, "title")
+                    else "Taipy App",
+                )
             else:
                 return send_from_directory(self.static_folder + os.path.sep, path)
 
@@ -68,7 +74,7 @@ class Server(Flask):
                 elif message["type"] == "T":
                     self._app._request_var(message["name"], message["payload"])
             except TypeError as te:
-                print("Decoding Message has failed: " + str(message) + "\n " +str(te))
+                print("Decoding Message has failed: " + str(message) + "\n " + str(te))
             except KeyError as ke:
                 print("Can't access: " + message + "\n" + str(ke))
 
@@ -77,28 +83,30 @@ class Server(Flask):
         template_str = render_template_string(html_fragment)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
-        template_str = template_str.replace("<a href=", "<Link to=")
-        template_str = template_str.replace("</a>", "</Link>")
         data = {
             "jsx": template_str,
             "style": ((style + os.linesep) if style else ""),
             "darkMode": dark_mode,
         }
-        return (jsonify(data), 200, {"Content-Type": "application/json; charset=utf-8"})
+        return jsonify(data)
 
     def render_react_route(self, routes):
         # Generate router
-        router = "<Router><Switch>"
+        router = '<Router key="Router"><Switch>'
         for route in routes:
-            router += '<Route path="/' + route + '" exact component={TaipyRendered} />'
-        router += (
-            '<Route path="/404" exact component={NotFound404} /><Redirect to="/'
-            + routes[0]
-            + '" /></Switch></Router>'
-        )
+            router += (
+                '<Route path="/'
+                + route
+                + '" exact key="/'
+                + route
+                + '" ><TaipyRendered/></Route>'
+            )
+        router += '<Route path="/404" exact key="/404" ><NotFound404 /></Route>'
+        router += '<Redirect to="/' + routes[0] + '" key="Redirect" />'
+        router += "</Switch></Router>"
 
-        data = {"router": router}
-        return (jsonify(data), 200, {"Content-Type": "application/json; charset=utf-8"})
+        data = {"router": router, "routes": routes}
+        return jsonify(data)
 
     def runWithWS(self, host=None, port=None, debug=None, load_dotenv=True):
         self._ws.run(self, host=host, port=port, debug=debug)

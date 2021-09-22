@@ -41,7 +41,8 @@ def test_register_and_get_task():
     assert task_manager.get_task(name_1) == first_task
     assert task_manager.get_task(name_2) == second_task
 
-    # We save a third task with same name as the first one. We expect the first task to be updated
+    # We save a third task with same name as the first one.
+    # We expect the first task to be updated
     task_manager.register_task(third_task_with_same_name_as_first_task)
     assert len(task_manager.get_tasks()) == 2
     assert task_manager.get_task(name_1) == third_task_with_same_name_as_first_task
@@ -87,7 +88,8 @@ def test_save_and_get_task_entity():
     assert task_manager.get_task_entity(task_id_1) == first_task
     assert task_manager.get_task_entity(task_id_2) == second_task
 
-    # We save a third task with same id as the first one. We expect the first task to be updated
+    # We save a third task with same id as the first one.
+    # We expect the first task to be updated
     task_manager.save_task_entity(third_task_with_same_id_as_first_task)
     assert len(task_manager.task_entities) == 2
     assert (

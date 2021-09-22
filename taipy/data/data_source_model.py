@@ -7,7 +7,8 @@ from taipy.data.scope import Scope
 @dataclass
 class DataSourceModel:
     """
-    Class to hold a model of a DataSource. A model refers to the structure of a Data Source stored in a database.
+    Class to hold a model of a DataSource. A model refers to the structure of a
+    Data Source stored in a database.
 
     Attributes
     ----------

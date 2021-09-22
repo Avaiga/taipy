@@ -4,7 +4,6 @@ class NonExistingTaskEntity(Exception):
     """
 
     def __init__(self, task_id: str):
-        self.task_id = task_id
         self.message = f"Task entity : {task_id} does not exist."
 
 

@@ -1,3 +1,4 @@
+import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -7,12 +8,15 @@ export enum Types {
     Update = 'UPDATE',
     SendUpdate = 'SEND_UPDATE_ACTION',
     Action = 'SEND_ACTION_ACTION',
-    RequestTableUpdate = 'REQUEST_TABLE_UPDATE'
+    RequestTableUpdate = 'REQUEST_TABLE_UPDATE',
+    SetRoutes = 'SET_ROUTES'
 }
 
 export interface TaipyState {
     socket?: Socket;
     data: Record<string, unknown>;
+    theme: Theme;
+    routes: string[];
 }
 
 export interface TaipyAction {
@@ -21,7 +25,19 @@ export interface TaipyAction {
     payload: Record<string, unknown>;
 }
 
-export const INITIAL_STATE: TaipyState = { data: {}};
+export const INITIAL_STATE: TaipyState = { data: {}, theme: createTheme({
+    components: {
+      MuiTimeline: {
+        styleOverrides: {
+          root: {
+            backgroundColor: 'red',
+          },
+        }
+      },
+    },
+  }),
+  routes: []
+};
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
@@ -59,6 +75,9 @@ export const taipyReducer = (state: TaipyState, action: TaipyAction): TaipyState
         case Types.RequestTableUpdate:
             sendWsMessage(state.socket, 'T', action.name, action.payload);
             break;
+        case Types.SetRoutes:
+            state.routes = action.payload.value as string[];
+            break;
     }
     return state;
 }
@@ -81,15 +100,23 @@ export const createSendActionNameAction = (name: string, value: unknown): TaipyA
     payload: {value: value}
 })
 
-export const createRequestTableUpdateAction = (name: string, id: string, pageKey: string, start?: number, end?: number): TaipyAction => ({
+export const createRequestTableUpdateAction = (name: string, id: string, pageKey: string, start?: number, end?: number, orderBy?: string, sort?: string): TaipyAction => ({
     type: Types.RequestTableUpdate,
     name: name,
     payload: {
         id: id,
         pagekey: pageKey,
         start: start,
-        end: end
+        end: end,
+        orderby: orderBy,
+        sort: sort
     }
+})
+
+export const createSetRoutesAction = (routes: string[]): TaipyAction => ({
+    type: Types.SetRoutes,
+    name: 'routes',
+    payload: {value: routes}
 })
 
 type WsMessageType = "A" | "U" | "T";

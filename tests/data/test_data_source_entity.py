@@ -47,8 +47,9 @@ class TestEmbeddedDataSourceEntity:
         embedded_int = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, 197)
         assert isinstance(embedded_int.get(), int)
         assert embedded_int.get() == 197
-        embedded_dict = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE,
-                                                        {"bar": 12, "baz": "qux", "quux": [13]})
+        embedded_dict = EmbeddedDataSourceEntity.create(
+            "foo", Scope.PIPELINE, {"bar": 12, "baz": "qux", "quux": [13]}
+        )
         assert isinstance(embedded_dict.get(), dict)
         assert embedded_dict.get() == {"bar": 12, "baz": "qux", "quux": [13]}
 

@@ -1,6 +1,6 @@
 from markdown.inlinepatterns import InlineProcessor
-from .builder import MarkdownBuilder
 
+from .builder import MarkdownBuilder
 
 # The field pattern also handles the [<var>] construct
 
@@ -11,7 +11,7 @@ class FieldPattern(InlineProcessor):
     # group(2): var_id
     # group(3): field+attributes
     # group(4): attributes
-    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*)\{(\d+)\})?(field\s*(?:\:\s*(.*?))?)?\s*\]"
+    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*)\{(\d+)\})?(field\s*(?:\:\s*(.*?))?)?\s*\]"  # noqa
 
     @staticmethod
     def extendMarkdown(md):

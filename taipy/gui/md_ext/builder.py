@@ -1,8 +1,23 @@
-from markdown.util import etree
 from operator import attrgetter
+from markdown.util import etree
+import pandas as pd
+import json
+
 from .parse_attributes import parse_attributes
-from ..utils import is_boolean_true, dateToISO, getDataType, get_client_var_name, MapDictionary
 from ..app import App
+from ..utils import (
+    _MapDictionary,
+    dateToISO,
+    get_client_var_name,
+    getDataType,
+    is_boolean_true,
+)
+
+
+def _add_to_dict_and_get(dico, key, value):
+    if key not in dico.keys():
+        dico[key] = value
+    return dico[key]
 
 
 class MarkdownBuilder:
@@ -31,14 +46,18 @@ class MarkdownBuilder:
                 properties_dict_name = self.attributes["properties"]
                 App._get_instance().bind_var(properties_dict_name)
                 properties_dict = getattr(App._get_instance(), properties_dict_name)
-                if not isinstance(properties_dict, MapDictionary):
-                    raise Exception(f"Can't find properties configuration dictionary for {str(m)}! Please review your app templates!")
+                if not isinstance(properties_dict, _MapDictionary):
+                    raise Exception(
+                        f"Can't find properties configuration dictionary for {str(m)}!"
+                        f" Please review your app templates!"
+                    )
                 # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
                     self.attributes[k] = v
         if self.var_name:
             try:
-                # Bind variable name (var_name string split in case var_name is a dictionary)
+                # Bind variable name (var_name string split in case
+                # var_name is a dictionary)
                 App._get_instance().bind_var(self.var_name.split(sep=".")[0])
             except:
                 print("error")
@@ -54,6 +73,50 @@ class MarkdownBuilder:
                     if fallback_value is not None
                     else "[Undefined: " + self.var_name + "]"
                 )
+        return self
+
+    def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
+        if isinstance(self.value, pd.DataFrame):
+            attributes = self.attributes or {}
+            columns = _add_to_dict_and_get(attributes, "columns", {})
+            coltypes = self.value.dtypes.apply(lambda x: x.name).to_dict()
+            if isinstance(columns, str):
+                columns = [s.strip() for s in columns.split(";")]
+            if isinstance(columns, list) or isinstance(columns, tuple):
+                coldict = {}
+                idx = 0
+                for col in columns:
+                    if col not in coltypes.keys():
+                        print(
+                            'Error column "'
+                            + col
+                            + '" is not present in the dataframe "'
+                            + self.var_name
+                            + '"'
+                        )
+                    else:
+                        coldict[col] = {"index": idx}
+                        idx += 1
+                columns = coldict
+            if not isinstance(columns, dict):
+                print("Error columns attributes should be a list, a tuple or a dict")
+            if len(columns) == 0:
+                idx = 0
+                for col in coltypes.keys():
+                    columns[col] = {"index": idx}
+                    idx += 1
+            date_format = _add_to_dict_and_get(attributes, "date_format", date_format)
+            idx = 0
+            for col, type in coltypes.items():
+                if col in columns.keys():
+                    columns[col]["type"] = type
+                    _add_to_dict_and_get(columns[col], "dfid", col)
+                    idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
+                    if type.startswith("datetime64"):
+                        _add_to_dict_and_get(columns[col], "format", date_format)
+                        columns[col + "__str"] = columns.pop(col)
+            attributes["columns"] = columns
+            self.set_attribute("columns", json.dumps(columns))
         return self
 
     def set_varname(self):
@@ -130,7 +193,22 @@ class MarkdownBuilder:
             and "page_size" in self.attributes
             and self.attributes["page_size"]
         ) or default_size
-        self.set_attribute("pageSize", "{!" + page_size + "!}")
+        self.set_attribute("pageSize", "{!" + str(page_size) + "!}")
+        return self
+
+    def set_table_pagesize_options(self, default_size=[50, 100, 500]):
+        if self.el_element_name != "Table":
+            return self
+        page_size_options = (
+            self.attributes
+            and "page_size_options" in self.attributes
+            and self.attributes["page_size_options"]
+        ) or default_size
+        if isinstance(page_size_options, str):
+            page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
+        self.set_attribute(
+            "pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}"
+        )
         return self
 
     def set_attribute(self, name, value):

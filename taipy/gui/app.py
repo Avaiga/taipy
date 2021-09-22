@@ -4,6 +4,7 @@ import re
 import typing as t
 from operator import attrgetter
 from types import SimpleNamespace
+import numpy as np
 
 import pandas as pd
 from flask import jsonify, request
@@ -14,7 +15,14 @@ from .config import default_config
 from .md_ext import *
 from .Page import Page
 from .server import Server
-from .utils import ISOToDate, MapDictionary, Singleton, attrsetter, dateToISO, get_client_var_name
+from .utils import (
+    ISOToDate,
+    _MapDictionary,
+    Singleton,
+    attrsetter,
+    dateToISO,
+    get_client_var_name,
+)
 
 
 class App(object, metaclass=Singleton):
@@ -59,7 +67,7 @@ class App(object, metaclass=Singleton):
         #   Key = variable name
         #   Value = next id (starting at 0)
         # This is filled when creating the controls, using add_control()
-        self._control_ids = {}
+        self._control_ids: t.Dict[str, int] = {}
         self._markdown = Markdown(
             extensions=[
                 "taipy.gui",
@@ -79,7 +87,7 @@ class App(object, metaclass=Singleton):
     def _parse_markdown(self, text: str) -> str:
         return self._markdown.convert(text)
 
-    def _render_page(self) -> None:
+    def _render_page(self) -> t.Any:
         page = None
         # Get page instance
         for page_i in self._config.pages:
@@ -92,7 +100,8 @@ class App(object, metaclass=Singleton):
                 400,
                 {"Content-Type": "application/json; charset=utf-8"},
             )
-        # Render template (for redundancy, not necessary 'cause it has already been rendered in self.run function)
+        # Render template (for redundancy, not necessary 'cause it has already
+        # been rendered in self.run function)
         if not page.index_html:
             if page.md_template:
                 page.index_html = self._parse_markdown(page.md_template)
@@ -122,7 +131,8 @@ class App(object, metaclass=Singleton):
             raise Exception("page_route is required for add_page function!")
         if not re.match(r"^[\w-]+$", name):
             raise SyntaxError(
-                f"Page route '{name}' is not valid! Can only contain alphabet letters, numbers, dash (-), and underscore (_)"
+                f"Page route '{name}' is not valid! Can only contain alphabet "
+                f"letters, numbers, dash (-), and underscore (_)"
             )
         # Init a new page
         new_page = Page()
@@ -142,8 +152,12 @@ class App(object, metaclass=Singleton):
         if not re.match("^[a-zA-Z][a-zA-Z_$0-9]*$", name):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(App, name, MapDictionary(value, lambda s, v: self._update_var(name+'.'+s, v)))
-            setattr(self._values, name, MapDictionary(value))
+            setattr(
+                App,
+                name,
+                _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)),
+            )
+            setattr(self._values, name, _MapDictionary(value))
         else:
             prop = property(
                 lambda s: getattr(s._values, name),  # Getter
@@ -212,19 +226,54 @@ class App(object, metaclass=Singleton):
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
         elif isinstance(newvalue, pd.DataFrame):
-            ret_payload["pagekey"] = payload["pagekey"]
-            start = int(payload["start"]) if payload["start"] else 0
-            end = int(payload["end"]) if payload["end"] else len(newvalue)
-            if start ==  -1:
-                start = - end - 1
+            keys = payload.keys()
+            ret_payload["pagekey"] = (
+                payload["pagekey"] if "pagekey" in keys else "unknown page"
+            )
+            start = int(payload["start"]) if "start" in keys else 0
+            # Can't set type as Optional[int] because Optional does not
+            # support unary operations. Maybe should review None assignment to end
+            end: t.Any = int(payload["end"]) if "end" in keys else len(newvalue)
+            if start < 0:
+                start = -end - 1
                 end = None
             elif start >= len(newvalue):
                 start = -end + start
                 end = None
             if end and end >= len(newvalue):
                 end = len(newvalue) - 1
-            newvalue = newvalue.iloc[slice(start, end)]
-            newvalue = newvalue.to_dict(orient="index")
+            rowcount = len(newvalue)
+            datecols = newvalue.select_dtypes(include=["datetime64"]).columns.tolist()
+            if len(datecols) != 0:
+                newvalue = (
+                    newvalue.copy()
+                )  # copy the df so that we don't "mess" with the user's data
+                for col in datecols:
+                    if col + "__str" not in newvalue.columns:
+                        newvalue[col + "__str"] = (
+                            newvalue[col]
+                            .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                            .astype("string")
+                        )
+            if "orderby" in keys and len(payload["orderby"]):
+                ascending = payload["sort"] == "asc" if "sort" in keys else True
+                if len(datecols) != 0:
+                    newvalue.sort_values(
+                        by=payload["orderby"], ascending=ascending, inplace=True
+                    )  # copy only if we haven't already
+                else:
+                    newvalue = newvalue.sort_values(
+                        by=payload["orderby"], ascending=ascending, inplace=False
+                    )
+            if len(datecols) != 0:
+                newvalue.drop(
+                    datecols, axis=1, inplace=True
+                )  # we already copied the df
+            newvalue = newvalue.iloc[slice(start, end)]  # returns a view
+            dictret = {}
+            dictret["data"] = newvalue.to_dict(orient="index")
+            dictret["rowcount"] = rowcount
+            newvalue = dictret
             # here we'll deal with start and end values from payload if present
             pass
         # TODO: What if value == newvalue?
@@ -233,7 +282,9 @@ class App(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name, payload) -> None:
         try:
-            self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
+            self._server._ws.send(
+                {"type": "U", "name": get_client_var_name(var_name), "payload": payload}
+            )
         except Exception as e:
             print(e)
 
@@ -258,16 +309,18 @@ class App(object, metaclass=Singleton):
         self._config.load_config(app_config=app_config, style_config=style_config)
 
     def run(self, host=None, port=None, debug=None, load_dotenv=True, bind_locals=None):
-        # Check with default config, overide only if parameter is not passed directly into the run function
+        # Check with default config, override only if parameter
+        # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
             host = self._config.app_config["host"]
         if port is None and self._config.app_config["port"] is not None:
             port = self._config.app_config["port"]
         if debug is None and self._config.app_config["debug"] is not None:
             debug = self._config.app_config["debug"]
-        # Save all availbale variables in locals
+        # Save all available variables in locals
         self._dict_bind_locals = bind_locals
-        # Run parse markdown to force variables binding at runtime (save rendered html to page.index_html for optimization)
+        # Run parse markdown to force variables binding at runtime
+        # (save rendered html to page.index_html for optimization)
         for page_i in self._config.pages:
             if page_i.md_template:
                 page_i.index_html = self._parse_markdown(page_i.md_template)

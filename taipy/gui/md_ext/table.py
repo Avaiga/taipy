@@ -1,5 +1,7 @@
 from markdown.inlinepatterns import InlineProcessor
+
 from .builder import MarkdownBuilder
+
 
 # The table pattern also handles the [<var>] construct
 class TablePattern(InlineProcessor):
@@ -8,7 +10,7 @@ class TablePattern(InlineProcessor):
     # group(2): var_id
     # group(3): table+attributes
     # group(4): attributes
-    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*)\{(\d+)\})?(table\s*(?:\:\s*(.*?))?)?\s*\]"
+    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*)\{(\d+)\})?(table\s*(?:\:\s*(.*?))?)?\s*\]"  # noqa
 
     @staticmethod
     def extendMarkdown(md):
@@ -25,6 +27,9 @@ class TablePattern(InlineProcessor):
             )
             .set_varname()
             .set_className(class_name="taipy-table", config_class="table")
+            .get_app_value()
+            .get_dataframe_attributes()
             .set_table_pagesize()
+            .set_table_pagesize_options()
             .build()
         )
