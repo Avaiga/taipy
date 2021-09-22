@@ -10,7 +10,11 @@ from typing import Dict, List, Set
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingDataSourceEntity, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import (
+    NonExistingDataSourceEntity,
+    NonExistingPipeline,
+    NonExistingPipelineEntity,
+)
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_entity import PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
@@ -89,9 +93,9 @@ class PipelineManager:
             logging.error(err.message)
             raise err
         except KeyError:
-            err = NonExistingPipelineEntity(pipeline_id)
-            logging.error(err.message)
-            raise err
+            pipeline_err = NonExistingPipelineEntity(pipeline_id)
+            logging.error(pipeline_err.message)
+            raise pipeline_err
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [

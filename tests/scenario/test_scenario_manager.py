@@ -4,7 +4,11 @@ from taipy.data import DataSource, DataSourceEntity, Scope
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity, NonExistingDataSourceEntity
+from taipy.exceptions.scenario import (
+    NonExistingDataSourceEntity,
+    NonExistingScenario,
+    NonExistingScenarioEntity,
+)
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.scenario import Scenario, ScenarioEntity, ScenarioId, ScenarioManager
 from taipy.task import Task, TaskEntity, TaskId, TaskScheduler
@@ -294,9 +298,19 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert scenario_manager.get_data("bar", scenario_entity.id) == 0
     assert scenario_manager.get_data("baz", scenario_entity.id) == 0
     assert scenario_manager.get_data("qux", scenario_entity.id) == 0
-    assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[0][0].name == task_mult_by_2.name
-    assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[1][0].name == task_mult_by_3.name
-    assert scenario_entity.pipeline_entities[1].get_sorted_task_entities()[0][0].name == task_mult_by_4.name
+    assert (
+        scenario_entity.pipeline_entities[0].get_sorted_task_entities()[0][0].name
+        == task_mult_by_2.name
+    )
+    assert (
+        scenario_entity.pipeline_entities[0].get_sorted_task_entities()[1][0].name
+        == task_mult_by_3.name
+    )
+    assert (
+        scenario_entity.pipeline_entities[1].get_sorted_task_entities()[0][0].name
+        == task_mult_by_4.name
+    )
+
 
 def test_get_set_data():
     scenario_manager = ScenarioManager()

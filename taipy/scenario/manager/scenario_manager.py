@@ -4,7 +4,11 @@ from typing import Dict, List, Set
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity, NonExistingDataSourceEntity
+from taipy.exceptions.scenario import (
+    NonExistingDataSourceEntity,
+    NonExistingScenario,
+    NonExistingScenarioEntity,
+)
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
 from taipy.scenario import Scenario, ScenarioEntity, ScenarioId

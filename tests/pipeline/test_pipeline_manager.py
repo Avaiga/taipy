@@ -5,7 +5,11 @@ from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity, NonExistingDataSourceEntity
+from taipy.exceptions.pipeline import (
+    NonExistingDataSourceEntity,
+    NonExistingPipeline,
+    NonExistingPipelineEntity,
+)
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId, TaskManager
