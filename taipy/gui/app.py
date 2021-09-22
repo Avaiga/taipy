@@ -240,13 +240,13 @@ class App(object, metaclass=Singleton):
                 end = len(newvalue) - 1
             rowcount = len(newvalue)
             datecols = newvalue.select_dtypes(include=['datetime64']).columns.tolist()
+            for col in datecols:
+                if col + '__str' not in newvalue.columns:
+                    newvalue[col + '__str'] = newvalue[col].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ').astype("string")
             if 'orderby' in keys and len(payload['orderby']):
                 ascending = payload['sort'] == 'asc' if 'sort' in keys else True
                 newvalue = newvalue.sort_values(by=payload["orderby"], ascending=ascending)
             newvalue = newvalue.drop(datecols, axis=1).iloc[slice(start, end)]
-            for col in datecols:
-                if col + '__str' not in newvalue.columns:
-                    newvalue[col + '__str'] = newvalue[col].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ').astype("string")
             dictret = {}
             dictret['data'] = newvalue.to_dict(orient="index")
             dictret['rowcount'] = rowcount
