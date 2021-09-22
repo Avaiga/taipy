@@ -75,10 +75,10 @@ class MarkdownBuilder:
                 )
         return self
 
-    def get_dataframe_attributes(self, date_format='MM/dd/yyyy'):
+    def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
             attributes = self.attributes or {}
-            columns = _add_to_dict_and_get(attributes, 'columns', {})
+            columns = _add_to_dict_and_get(attributes, "columns", {})
             coltypes = self.value.dtypes.apply(lambda x: x.name).to_dict()
             if isinstance(columns, str):
                 columns = [s.strip() for s in columns.split(";")]
@@ -87,7 +87,13 @@ class MarkdownBuilder:
                 idx = 0
                 for col in columns:
                     if col not in coltypes.keys():
-                        print("Error column \"" + col + "\" is not present in the dataframe \"" + self.var_name + "\"")
+                        print(
+                            'Error column "'
+                            + col
+                            + '" is not present in the dataframe "'
+                            + self.var_name
+                            + '"'
+                        )
                     else:
                         coldict[col] = {"index": idx}
                         idx += 1
@@ -97,19 +103,19 @@ class MarkdownBuilder:
             if len(columns) == 0:
                 idx = 0
                 for col in coltypes.keys():
-                    columns[col] = {'index' : idx}
+                    columns[col] = {"index": idx}
                     idx += 1
-            date_format = _add_to_dict_and_get(attributes, 'date_format', date_format)
+            date_format = _add_to_dict_and_get(attributes, "date_format", date_format)
             idx = 0
             for col, type in coltypes.items():
                 if col in columns.keys():
-                    columns[col]['type'] = type
-                    _add_to_dict_and_get(columns[col], 'dfid', col)
-                    idx = _add_to_dict_and_get(columns[col], 'index', idx) + 1
+                    columns[col]["type"] = type
+                    _add_to_dict_and_get(columns[col], "dfid", col)
+                    idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
                     if type.startswith("datetime64"):
-                        _add_to_dict_and_get(columns[col], 'format', date_format)
-                        columns[col + '__str'] = columns.pop(col)
-            attributes['columns'] = columns
+                        _add_to_dict_and_get(columns[col], "format", date_format)
+                        columns[col + "__str"] = columns.pop(col)
+            attributes["columns"] = columns
             self.set_attribute("columns", json.dumps(columns))
         return self
 
@@ -200,7 +206,9 @@ class MarkdownBuilder:
         ) or default_size
         if isinstance(page_size_options, str):
             page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
-        self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+        self.set_attribute(
+            "pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}"
+        )
         return self
 
     def set_attribute(self, name, value):

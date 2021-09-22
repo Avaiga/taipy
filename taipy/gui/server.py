@@ -51,7 +51,13 @@ class Server(Flask):
         @self.route("/<path:path>")
         def my_index(path):
             if path == "" or "." not in path:
-                return render_template("index.html", flask_url=request.url_root, title=self._app.title if hasattr(self._app, "title") else "Taipy App")
+                return render_template(
+                    "index.html",
+                    flask_url=request.url_root,
+                    title=self._app.title
+                    if hasattr(self._app, "title")
+                    else "Taipy App",
+                )
             else:
                 return send_from_directory(self.static_folder + os.path.sep, path)
 
@@ -88,10 +94,16 @@ class Server(Flask):
         # Generate router
         router = '<Router key="Router"><Switch>'
         for route in routes:
-            router += '<Route path="/' + route + '" exact key="/' + route + '" ><TaipyRendered/></Route>'
+            router += (
+                '<Route path="/'
+                + route
+                + '" exact key="/'
+                + route
+                + '" ><TaipyRendered/></Route>'
+            )
         router += '<Route path="/404" exact key="/404" ><NotFound404 /></Route>'
         router += '<Redirect to="/' + routes[0] + '" key="Redirect" />'
-        router += '</Switch></Router>'
+        router += "</Switch></Router>"
 
         data = {"router": router, "routes": routes}
         return jsonify(data)

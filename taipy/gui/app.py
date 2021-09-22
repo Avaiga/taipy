@@ -225,7 +225,9 @@ class App(object, metaclass=Singleton):
             newvalue = dateToISO(newvalue)
         elif isinstance(newvalue, pd.DataFrame):
             keys = payload.keys()
-            ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
+            ret_payload["pagekey"] = (
+                payload["pagekey"] if "pagekey" in keys else "unknown page"
+            )
             start = int(payload["start"]) if "start" in keys else 0
             # Can't set type as Optional[int] because Optional does not
             # support unary operations. Maybe should review None assignment to end
@@ -239,24 +241,36 @@ class App(object, metaclass=Singleton):
             if end and end >= len(newvalue):
                 end = len(newvalue) - 1
             rowcount = len(newvalue)
-            datecols = newvalue.select_dtypes(include=['datetime64']).columns.tolist()
+            datecols = newvalue.select_dtypes(include=["datetime64"]).columns.tolist()
             if len(datecols) != 0:
-                newvalue = newvalue.copy()  # copy the df so that we don't "mess" with the user's data
+                newvalue = (
+                    newvalue.copy()
+                )  # copy the df so that we don't "mess" with the user's data
                 for col in datecols:
-                    if col + '__str' not in newvalue.columns:
-                        newvalue[col + '__str'] = newvalue[col].dt.strftime('%Y-%m-%dT%H:%M:%S.%fZ').astype("string")
-            if 'orderby' in keys and len(payload['orderby']):
-                ascending = payload['sort'] == 'asc' if 'sort' in keys else True
+                    if col + "__str" not in newvalue.columns:
+                        newvalue[col + "__str"] = (
+                            newvalue[col]
+                            .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                            .astype("string")
+                        )
+            if "orderby" in keys and len(payload["orderby"]):
+                ascending = payload["sort"] == "asc" if "sort" in keys else True
                 if len(datecols) != 0:
-                    newvalue.sort_values(by=payload["orderby"], ascending=ascending, inplace=True)  # copy only if we haven't already
+                    newvalue.sort_values(
+                        by=payload["orderby"], ascending=ascending, inplace=True
+                    )  # copy only if we haven't already
                 else:
-                    newvalue = newvalue.sort_values(by=payload["orderby"], ascending=ascending, inplace=False)
+                    newvalue = newvalue.sort_values(
+                        by=payload["orderby"], ascending=ascending, inplace=False
+                    )
             if len(datecols) != 0:
-                newvalue.drop(datecols, axis=1, inplace=True)  # we already copied the df
+                newvalue.drop(
+                    datecols, axis=1, inplace=True
+                )  # we already copied the df
             newvalue = newvalue.iloc[slice(start, end)]  # returns a view
             dictret = {}
-            dictret['data'] = newvalue.to_dict(orient="index")
-            dictret['rowcount'] = rowcount
+            dictret["data"] = newvalue.to_dict(orient="index")
+            dictret["rowcount"] = rowcount
             newvalue = dictret
             # here we'll deal with start and end values from payload if present
             pass
