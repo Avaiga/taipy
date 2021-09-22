@@ -1,3 +1,4 @@
+import pathlib
 import datetime
 import re
 import typing as t
@@ -23,24 +24,25 @@ class App(object, metaclass=Singleton):
         self,
         import_name: str,
         static_url_path: t.Optional[str] = None,
-        static_folder: t.Optional[str] = "taipy_webapp",
+        static_folder: t.Optional[str] = "/webapp",
         static_host: t.Optional[str] = None,
         host_matching: bool = False,
         subdomain_matching: bool = False,
-        template_folder: t.Optional[str] = "taipy_webapp",
+        template_folder: t.Optional[str] = "/webapp",
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
     ):
+        app_absulute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
             import_name=import_name,
             static_url_path=static_url_path,
-            static_folder=static_folder,
+            static_folder= app_absulute_path + static_folder,
             static_host=static_host,
             host_matching=host_matching,
             subdomain_matching=subdomain_matching,
-            template_folder=template_folder,
+            template_folder= app_absulute_path + template_folder,
             instance_path=instance_path,
             instance_relative_config=instance_relative_config,
             root_path=root_path,
