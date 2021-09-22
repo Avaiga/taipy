@@ -99,7 +99,10 @@ class MarkdownBuilder:
                         idx += 1
                 columns = coldict
             if not isinstance(columns, dict):
-                print("Error columns attributes should be a list, a tuple or a dict")
+                print(
+                    "Error: columns attributes should be a string, list, tuple or dict"
+                )
+                columns = {}
             if len(columns) == 0:
                 idx = 0
                 for col in coltypes.keys():
