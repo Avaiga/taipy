@@ -14,10 +14,12 @@ from ..utils import (
 )
 from .parse_attributes import parse_attributes
 
+
 def _add_to_dict_and_get(dico, key, value):
     if key not in dico.keys():
         dico[key] = value
     return dico[key]
+
 
 class MarkdownBuilder:
     def __init__(
