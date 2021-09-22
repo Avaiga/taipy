@@ -4,7 +4,7 @@ from taipy.data import DataSource, Scope, DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity
+from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity, NonExistingDataSourceEntity
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.scenario import Scenario, ScenarioManager, ScenarioId, ScenarioEntity
 from taipy.task import Task, TaskEntity, TaskId, TaskScheduler
@@ -250,15 +250,66 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert len(task_manager.task_entities) == 3
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert len(scenario_manager.get_scenario_entities()) == 1
+    assert scenario_manager.get_data("foo", scenario_entity.id) == 1
+    assert scenario_manager.get_data("bar", scenario_entity.id) == 0
+    assert scenario_manager.get_data("baz", scenario_entity.id) == 0
+    assert scenario_manager.get_data("qux", scenario_entity.id) == 0
     assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[0][0].name == task_mult_by_2.name
-    assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[0][0].output[0].get() == 0
     assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[1][0].name == task_mult_by_3.name
-    assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[1][0].output[0].get() == 0
     assert scenario_entity.pipeline_entities[1].get_sorted_task_entities()[0][0].name == task_mult_by_4.name
-    assert scenario_entity.pipeline_entities[1].get_sorted_task_entities()[0][0].output[0].get() == 0
+
+def test_get_set_data():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    ds_1 = DataSource("foo", "embedded", Scope.PIPELINE, data=1)
+    ds_2 = DataSource("bar", "embedded", Scope.SCENARIO, data=0)
+    ds_6 = DataSource("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_4 = DataSource("qux", "embedded", Scope.PIPELINE, data=0)
+
+    task_mult_by_2 = Task("mult by 2", [ds_1], mult_by_2, ds_2)
+    task_mult_by_3 = Task("mult by 3", [ds_2], mult_by_3, ds_6)
+    task_mult_by_4 = Task("mult by 4", [ds_1], mult_by_4, ds_4)
+    pipeline_1 = Pipeline("by 6", [task_mult_by_2, task_mult_by_3])
+    # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
+    pipeline_2 = Pipeline("by 4", [task_mult_by_4])
+    # ds_1 ---> mult by 4 ---> ds_4
+    scenario = Scenario("Awesome scenario", [pipeline_1, pipeline_2])
+    scenario_manager.register_scenario(scenario)
+
+    scenario_entity = scenario_manager.create_scenario_entity(scenario)
+
+    assert scenario_manager.get_data("foo", scenario_entity.id) == 1
+    assert scenario_manager.get_data("bar", scenario_entity.id) == 0
+    assert scenario_manager.get_data("baz", scenario_entity.id) == 0
+    assert scenario_manager.get_data("qux", scenario_entity.id) == 0
 
     scenario_manager.submit(scenario_entity.id)
+    assert scenario_manager.get_data("foo", scenario_entity.id) == 1
+    assert scenario_manager.get_data("bar", scenario_entity.id) == 2
+    assert scenario_manager.get_data("baz", scenario_entity.id) == 6
+    assert scenario_manager.get_data("qux", scenario_entity.id) == 4
 
-    assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[0][0].output[0].get() == 2
-    assert scenario_entity.pipeline_entities[0].get_sorted_task_entities()[1][0].output[0].get() == 6
-    assert scenario_entity.pipeline_entities[1].get_sorted_task_entities()[0][0].output[0].get() == 4
+    scenario_manager.set_data("foo", scenario_entity.id, "new data value")
+    assert scenario_manager.get_data("foo", scenario_entity.id) == "new data value"
+    assert scenario_manager.get_data("bar", scenario_entity.id) == 2
+    assert scenario_manager.get_data("baz", scenario_entity.id) == 6
+    assert scenario_manager.get_data("qux", scenario_entity.id) == 4
+
+    scenario_manager.set_data("baz", scenario_entity.id, 158)
+    assert scenario_manager.get_data("foo", scenario_entity.id) == "new data value"
+    assert scenario_manager.get_data("bar", scenario_entity.id) == 2
+    assert scenario_manager.get_data("baz", scenario_entity.id) == 158
+    assert scenario_manager.get_data("qux", scenario_entity.id) == 4
+
+    with pytest.raises(NonExistingDataSourceEntity):
+        scenario_manager.set_data("WRONG DATA SOURCE NAME", scenario_entity.id, 7)
+
+    with pytest.raises(NonExistingScenarioEntity):
+        scenario_manager.set_data("foo", ScenarioId("WRONG SCENARIO ID"), 7)
