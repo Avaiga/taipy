@@ -12,7 +12,6 @@ from ..utils import (
     getDataType,
     is_boolean_true,
 )
-from .parse_attributes import parse_attributes
 
 
 def _add_to_dict_and_get(dico, key, value):
