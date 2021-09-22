@@ -23,7 +23,7 @@ class Server(Flask):
         static_host: t.Optional[str] = None,
         host_matching: bool = False,
         subdomain_matching: bool = False,
-        template_folder: t.Optional[str] = "",
+        template_folder: str = "",
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
@@ -68,7 +68,7 @@ class Server(Flask):
                 elif message["type"] == "T":
                     self._app._request_var(message["name"], message["payload"])
             except TypeError as te:
-                print("Decoding Message has failed: " + str(message) + "\n " +str(te))
+                print("Decoding Message has failed: " + str(message) + "\n " + str(te))
             except KeyError as ke:
                 print("Can't access: " + message + "\n" + str(ke))
 

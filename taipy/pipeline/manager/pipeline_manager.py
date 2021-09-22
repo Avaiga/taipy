@@ -1,15 +1,20 @@
 """
 Pipeline Manager is responsible for managing the pipelines.
-This is the entry point for operations (such as creating, reading, updating, deleting, duplicating, executing) related
+This is the entry point for operations (such as creating, reading, updating,
+deleting, duplicating, executing) related
  to pipelines.
 """
 import logging
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingDataSourceEntity, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import (
+    NonExistingDataSourceEntity,
+    NonExistingPipeline,
+    NonExistingPipelineEntity,
+)
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_entity import PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
@@ -45,20 +50,28 @@ class PipelineManager:
 
     def get_pipelines(self) -> List[Pipeline]:
         return [
-            self.get_pipeline(pipeline.name)
-            for pipeline in self.__PIPELINES.values()
+            self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()
         ]
 
-    def create_pipeline_entity(self, pipeline: Pipeline, data_source_entities: Dict[DataSource, DataSourceEntity] = None) -> PipelineEntity:
+    def create_pipeline_entity(
+        self,
+        pipeline: Pipeline,
+        data_source_entities: Dict[DataSource, DataSourceEntity] = None,
+    ) -> PipelineEntity:
         if data_source_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for task in pipeline.tasks:
                 for ds in task.input:
                     all_ds.add(ds)
                 for ds in task.output:
                     all_ds.add(ds)
-            data_source_entities = {ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds}
-        task_entities = [self.task_manager.create_task_entity(task, data_source_entities) for task in pipeline.tasks]
+            data_source_entities = {
+                ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds
+            }
+        task_entities = [
+            self.task_manager.create_task_entity(task, data_source_entities)
+            for task in pipeline.tasks
+        ]
         pipeline_entity = PipelineEntity(
             pipeline.name, pipeline.properties, task_entities
         )
@@ -80,9 +93,9 @@ class PipelineManager:
             logging.error(err.message)
             raise err
         except KeyError:
-            err = NonExistingPipelineEntity(pipeline_id)
-            logging.error(err.message)
-            raise err
+            pipeline_err = NonExistingPipelineEntity(pipeline_id)
+            logging.error(pipeline_err.message)
+            raise pipeline_err
 
     def get_pipeline_entities(self) -> List[PipelineEntity]:
         return [

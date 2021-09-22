@@ -4,15 +4,15 @@ class MapDictionary(object):
     Also perform update operation
     """
 
-    local_vars = ('_dict', '_update_var')
+    local_vars = ("_dict", "_update_var")
 
-    def __init__(self, dict_import, app_update_var = None):
+    def __init__(self, dict_import, app_update_var=None):
         self._dict = dict_import
         # Bind app update var function
         self._update_var = app_update_var
         # Verify if dict_import is a dictionary
         if not isinstance(dict_import, dict):
-            raise TypeError('should have a dict')
+            raise TypeError("should have a dict")
 
     def __len__(self):
         return self._dict.__len__()
@@ -24,7 +24,9 @@ class MapDictionary(object):
         value = self._dict.__getitem__(key)
         if isinstance(value, dict):
             if self._update_var:
-                return MapDictionary(value, lambda s, v: self._update_var(key+'.'+s, v))
+                return MapDictionary(
+                    value, lambda s, v: self._update_var(key + "." + s, v)
+                )
             else:
                 return MapDictionary(value)
         return value
@@ -59,33 +61,32 @@ class MapDictionary(object):
         else:
             self.__setitem__(attr, value)
 
-
     def keys(self):
         return self._dict.keys()
-    
+
     def values(self):
         return self._dict.values()
-    
+
     def items(self):
         return self._dict.items()
-    
+
     def get(self):
         return self._dict.get()
-    
+
     def clear(self):
         return self._dict.clear()
-    
+
     def setdefault(self):
         return self._dict.setdefault()
-    
+
     def pop(self):
         return self._dict.pop()
-    
+
     def popitem(self):
         return self._dict.popitem()
-    
+
     def copy(self):
         return MapDictionary(self._dict.copy(), self._update_var)
-    
+
     def update(self):
         return self._dict.update()

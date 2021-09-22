@@ -1,8 +1,8 @@
 __all__ = ["TaskScheduler"]
 
 import uuid
-from typing import Dict
 from concurrent.futures import ThreadPoolExecutor
+from typing import Dict
 
 from taipy.task.task_entity import TaskEntity
 
@@ -17,7 +17,9 @@ class TaskScheduler:
 
     def __init__(self, parallel_execution=False):
         self.__jobs: Dict[JobId, Job] = {}
-        self.__executor = FutureExecutor() if not parallel_execution else ThreadPoolExecutor()
+        self.__executor = (
+            FutureExecutor() if not parallel_execution else ThreadPoolExecutor()
+        )
 
     def submit(self, task: TaskEntity) -> JobId:
         """
@@ -27,7 +29,7 @@ class TaskScheduler:
             self.__execute_function_and_write_outputs,
             task.function,
             task.input,
-            task.output
+            task.output,
         )
         return self.__create_job(task)
 

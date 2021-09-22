@@ -28,11 +28,19 @@ def test_create_scenario_entity():
 
 
 def test_to_model():
-    input_ds = EmbeddedDataSourceEntity("input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"})
-    output = EmbeddedDataSourceEntity("output_name", Scope.PIPELINE, "output_id", {"data": ""})
+    input_ds = EmbeddedDataSourceEntity(
+        "input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"}
+    )
+    output = EmbeddedDataSourceEntity(
+        "output_name", Scope.PIPELINE, "output_id", {"data": ""}
+    )
     task = TaskEntity("task", [input_ds], print, [output], TaskId("task_id"))
-    pipeline_entity = PipelineEntity("pipeline_name", {"big_pty": "big value"}, [task], PipelineId("pipeline_id"))
-    scenario_entity = ScenarioEntity("scenario_name", [pipeline_entity], {"key": "value"}, ScenarioId("scenario_id"))
+    pipeline_entity = PipelineEntity(
+        "pipeline_name", {"big_pty": "big value"}, [task], PipelineId("pipeline_id")
+    )
+    scenario_entity = ScenarioEntity(
+        "scenario_name", [pipeline_entity], {"key": "value"}, ScenarioId("scenario_id")
+    )
 
     model = scenario_entity.to_model()
     assert model.id == "scenario_id"

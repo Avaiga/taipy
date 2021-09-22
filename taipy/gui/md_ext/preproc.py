@@ -1,5 +1,7 @@
-from markdown.preprocessors import Preprocessor
 import re
+
+from markdown.preprocessors import Preprocessor
+
 from ..app import App
 
 
@@ -13,10 +15,10 @@ class TaipyPreprocessor(Preprocessor):
             last_index = 0
             for m in self._VAR_RE.finditer(line):
                 variable_name = m.group(1)
+                _instance = str(App._get_instance()._add_control(variable_name))
                 new_line = (
-                    new_line
-                    + line[last_index : m.start()]
-                    + f"[TaIpY{variable_name}{{{str(App._get_instance()._add_control(variable_name))}}}"
+                    new_line + line[last_index : m.start()] + f"[TaIpY"
+                    f"{variable_name}{{{_instance}}}"
                 )
                 if m.group(2):
                     new_line += m.group(3)

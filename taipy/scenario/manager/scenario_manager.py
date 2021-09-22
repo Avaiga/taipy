@@ -1,13 +1,17 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity, NonExistingDataSourceEntity
+from taipy.exceptions.scenario import (
+    NonExistingDataSourceEntity,
+    NonExistingScenario,
+    NonExistingScenarioEntity,
+)
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
-from taipy.scenario import ScenarioId, Scenario, ScenarioEntity
+from taipy.scenario import Scenario, ScenarioEntity, ScenarioId
 from taipy.scenario.scenario_model import ScenarioModel
 
 
@@ -24,7 +28,10 @@ class ScenarioManager:
         self.__SCENARIOS: Dict[str, Scenario] = {}
 
     def register_scenario(self, scenario: Scenario):
-        [self.pipeline_manager.register_pipeline(pipeline) for pipeline in scenario.pipelines]
+        [
+            self.pipeline_manager.register_pipeline(pipeline)
+            for pipeline in scenario.pipelines
+        ]
         self.__SCENARIOS[scenario.name] = scenario
 
     def get_scenario(self, name: str) -> Scenario:
@@ -36,24 +43,28 @@ class ScenarioManager:
 
     def get_scenarios(self) -> List[Scenario]:
         return [
-            self.get_scenario(scenario.name)
-            for scenario in self.__SCENARIOS.values()
+            self.get_scenario(scenario.name) for scenario in self.__SCENARIOS.values()
         ]
 
-    def create_scenario_entity(self, scenario: Scenario,
-                               ds_entities: Dict[DataSource, DataSourceEntity] = None) -> ScenarioEntity:
+    def create_scenario_entity(
+        self, scenario: Scenario, ds_entities: Dict[DataSource, DataSourceEntity] = None
+    ) -> ScenarioEntity:
         if ds_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for pipeline in scenario.pipelines:
                 for task in pipeline.tasks:
                     for ds in task.input:
                         all_ds.add(ds)
                     for ds in task.output:
                         all_ds.add(ds)
-            ds_entities = {data_source: self.data_manager.create_data_source_entity(data_source) for data_source in
-                           all_ds}
-        p_entities = [self.pipeline_manager.create_pipeline_entity(pipeline, ds_entities) for pipeline in
-                      scenario.pipelines]
+            ds_entities = {
+                data_source: self.data_manager.create_data_source_entity(data_source)
+                for data_source in all_ds
+            }
+        p_entities = [
+            self.pipeline_manager.create_pipeline_entity(pipeline, ds_entities)
+            for pipeline in scenario.pipelines
+        ]
         scenario_entity = ScenarioEntity(scenario.name, p_entities, scenario.properties)
         self.save_scenario_entity(scenario_entity)
         return scenario_entity
@@ -68,7 +79,9 @@ class ScenarioManager:
                 self.pipeline_manager.get_pipeline_entity(PipelineId(pipeline_id))
                 for pipeline_id in model.pipelines
             ]
-            return ScenarioEntity(model.name, pipeline_entities, model.properties, model.id)
+            return ScenarioEntity(
+                model.name, pipeline_entities, model.properties, model.id
+            )
         except NonExistingPipelineEntity as err:
             logging.error(err.message)
             raise err

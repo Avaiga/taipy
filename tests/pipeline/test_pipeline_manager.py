@@ -1,12 +1,15 @@
 import pytest
 
-from taipy.data import DataSource, DataManager
+from taipy.data import DataManager, DataSource
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingDataSourceEntity
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
+from taipy.exceptions.pipeline import (
+    NonExistingDataSourceEntity,
+    NonExistingPipeline,
+    NonExistingPipelineEntity,
+)
 from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskEntity, TaskId, TaskManager
@@ -53,7 +56,8 @@ def test_register_and_get_pipeline():
     assert pipeline_manager.get_pipeline(name_2) == pipeline_2
     assert pipeline_manager.get_pipeline(name_1).properties.get("description") is None
 
-    # We save a third pipeline with same id as the first one. We expect the first pipeline to be updated
+    # We save a third pipeline with same id as the first one.
+    # We expect the first pipeline to be updated
     pipeline_manager.register_pipeline(pipeline_3_with_same_name)
     assert len(pipeline_manager.get_pipelines()) == 2
     assert pipeline_manager.get_pipeline(name_1) == pipeline_3_with_same_name
@@ -68,12 +72,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
-    output_2 = EmbeddedDataSourceEntity.create(
-        "foo", Scope.PIPELINE, "bar"
-    )
+    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
+    output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
 
@@ -120,7 +120,8 @@ def test_save_and_get_pipeline_entity():
     assert len(pipeline_manager.get_pipeline_entity(pipeline_id_2).task_entities) == 1
     assert pipeline_manager.task_manager.get_task_entity(task_2.id) == task_2
 
-    # We save a third pipeline with same id as the first one. We expect the first pipeline to be updated
+    # We save a third pipeline with same id as the first one.
+    # We expect the first pipeline to be updated
     pipeline_manager.save_pipeline_entity(pipeline_3_with_same_id)
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
@@ -160,7 +161,6 @@ def test_submit():
     )
 
     pipeline_manager = PipelineManager()
-    data_manager = DataManager()
     task_manager = TaskManager()
 
     class MockTaskScheduler(TaskScheduler):
@@ -181,7 +181,8 @@ def test_submit():
     with pytest.raises(NonExistingTaskEntity):
         pipeline_manager.submit(pipeline_entity.id)
 
-    # pipeline, and tasks does exist. We expect the tasks to be submitted in a specific order
+    # pipeline, and tasks does exist. We expect the tasks to be submitted
+    # in a specific order
     task_manager.save_task_entity(task_1)
     task_manager.save_task_entity(task_2)
     task_manager.save_task_entity(task_3)

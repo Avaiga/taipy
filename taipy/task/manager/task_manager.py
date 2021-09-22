@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Set
 
 from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
@@ -21,8 +21,14 @@ class TaskManager:
         self.__TASKS: Dict[(str, Task)] = {}
 
     def register_task(self, task: Task):
-        [self.data_manager.register_data_source(data_source) for data_source in task.input]
-        [self.data_manager.register_data_source(data_source) for data_source in task.output]
+        [
+            self.data_manager.register_data_source(data_source)
+            for data_source in task.input
+        ]
+        [
+            self.data_manager.register_data_source(data_source)
+            for data_source in task.output
+        ]
         self.__TASKS[task.name] = task
 
     def get_task(self, name: str) -> Task:
@@ -39,17 +45,23 @@ class TaskManager:
         logging.info(f"Task : {task.id} created or updated.")
         self.task_entities[task.id] = task
 
-    def create_task_entity(self, task: Task, data_source_entities: Dict[DataSource, DataSourceEntity]) -> TaskEntity:
+    def create_task_entity(
+        self, task: Task, data_source_entities: Dict[DataSource, DataSourceEntity]
+    ) -> TaskEntity:
         if data_source_entities is None:
-            all_ds: set[DataSource] = set()
+            all_ds: Set[DataSource] = set()
             for ds in task.input:
                 all_ds.add(ds)
             for ds in task.output:
                 all_ds.add(ds)
-            data_source_entities = {ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds}
+            data_source_entities = {
+                ds: self.data_manager.create_data_source_entity(ds) for ds in all_ds
+            }
         input_entities = [data_source_entities[input] for input in task.input]
         output_entities = [data_source_entities[output] for output in task.output]
-        task_entity = TaskEntity(task.name, input_entities, task.function, output_entities)
+        task_entity = TaskEntity(
+            task.name, input_entities, task.function, output_entities
+        )
         self.save_task_entity(task_entity)
         return task_entity
 

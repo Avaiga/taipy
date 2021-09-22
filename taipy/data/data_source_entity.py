@@ -7,8 +7,8 @@ from taipy.data.scope import Scope
 
 class DataSourceEntity:
     """
-    A class to represent a Data Source. A Data Source is an object that holds the name, scope and additional
-    properties of the data entity.
+    A class to represent a Data Source. A Data Source is an object that holds the name,
+    scope and additional properties of the data entity.
 
     Attributes
     ----------

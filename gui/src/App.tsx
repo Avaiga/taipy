@@ -12,7 +12,7 @@ const App = () => {
     const hasMounted = useRef(false);
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
     const [routerJSX, setrouterJSX] = useState("");
-    
+
     useEffect(() => {
         // Fetch Flask Rendered JSX React Router
         axios
