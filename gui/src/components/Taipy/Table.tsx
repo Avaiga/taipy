@@ -71,7 +71,7 @@ const rowsPerPageOptions = [10, 50, 100, 500];
 
 const Table = (props: TableProps) => {
     const { className, id, tp_varname, pageSize = 100, pageSizeOptions = rowsPerPageOptions } = props;
-    const [value, setValue] = useState<Record<string, Record<string, unknown>>>({});
+    const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
     const { dispatch } = useContext(TaipyContext);
@@ -128,7 +128,7 @@ const Table = (props: TableProps) => {
         const ret = {rows: [], rowCount: 0} as {rows: any[], rowCount: number};
         if (value) {
             if (value.data) {
-                ret.rows = Object.keys(value.data).map(key => value.data[key]);
+                ret.rows = value.data as any[];
             }
             if (value.rowcount) {
                 ret.rowCount = value.rowcount as unknown as number;

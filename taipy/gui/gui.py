@@ -23,6 +23,7 @@ from .utils import (
     attrsetter,
     dateToISO,
     get_client_var_name,
+    get_date_col_str_name,
 )
 
 
@@ -207,6 +208,9 @@ class Gui(object, metaclass=Singleton):
                 value = complex(value)
             elif isinstance(currentvalue, bool):
                 value = bool(value)
+            elif isinstance(currentvalue, pd.DataFrame):
+                print("Error: cannot update value for dataframe: " + var_name)
+                return
         # Use custom attrsetter fuction to allow value binding for MapDictionary
         attrsetter(self._values, var_name, value)
         # TODO: what if _update_function changes 'var_name'... infinite loop?
@@ -229,48 +233,59 @@ class Gui(object, metaclass=Singleton):
             ret_payload["pagekey"] = (
                 payload["pagekey"] if "pagekey" in keys else "unknown page"
             )
-            start = int(payload["start"]) if "start" in keys else 0
-            # Can't set type as Optional[int] because Optional does not
-            # support unary operations. Maybe should review None assignment to end
-            end: t.Any = int(payload["end"]) if "end" in keys else len(newvalue)
-            if start < 0:
-                start = -end - 1
-                end = None
-            elif start >= len(newvalue):
-                start = -end + start
-                end = None
-            if end and end >= len(newvalue):
-                end = len(newvalue) - 1
+            if isinstance(payload["start"], int):
+                start = int(payload["start"])
+            else:
+                try:
+                    start = int(str(payload["start"]), base=10)
+                except Exception as e:
+                    print(e)
+                    start = 0
+            if isinstance(payload["end"], int):
+                end = int(payload["end"])
+            else:
+                try:
+                    end = int(str(payload["end"]), base=10)
+                except Exception:
+                    end = -1
             rowcount = len(newvalue)
-            datecols = newvalue.select_dtypes(include=["datetime64"]).columns.tolist()
+            if start < 0 or start >= rowcount:
+                start = 0
+            if end < 0 or end >= rowcount:
+                end = rowcount - 1
+            datecols = newvalue.dtypes[
+                newvalue.dtypes.astype("string").str.startswith("datetime")
+            ].index.tolist()
             if len(datecols) != 0:
                 # copy the df so that we don't "mess" with the user's data
                 newvalue = newvalue.copy()
                 for col in datecols:
-                    if col + "__str" not in newvalue.columns:
-                        newvalue[col + "__str"] = (
-                            newvalue[col]
-                            .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-                            .astype("string")
-                        )
-            if "orderby" in keys and len(payload["orderby"]):
-                ascending = payload["sort"] == "asc" if "sort" in keys else True
-                if len(datecols) != 0:
-                    # copy only if we haven't already
-                    newvalue.sort_values(
-                        by=payload["orderby"], ascending=ascending, inplace=True
+                    newcol = get_date_col_str_name(newvalue, col)
+                    newvalue[newcol] = (
+                        newvalue[col]
+                        .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                        .astype("string")
                     )
-                else:
-                    newvalue = newvalue.sort_values(
-                        by=payload["orderby"], ascending=ascending, inplace=False
-                    )
-            if len(datecols) != 0:
-                # we already copied the df
-                newvalue.drop(datecols, axis=1, inplace=True)
-            newvalue = newvalue.iloc[slice(start, end)]  # returns a view
-            dictret = {"data": newvalue.to_dict(orient="index"), "rowcount": rowcount}
-            newvalue = dictret
+            if (
+                "orderby" in keys
+                and isinstance(payload["orderby"], str)
+                and len(payload["orderby"])
+            ):
+                new_indexes = newvalue[payload["orderby"]].values.argsort(axis=0)
+                if "sort" in keys and payload["sort"] == "desc":
+                    # reverse order
+                    new_indexes = new_indexes[::-1]
+                new_indexes = new_indexes[slice(start, end)]
+            else:
+                new_indexes = slice(start, end)
             # here we'll deal with start and end values from payload if present
+            newvalue = newvalue.iloc[new_indexes]  # returns a view
+            if len(datecols) != 0:
+                # remove the date columns from the list of columnss
+                cols = list(set(newvalue.columns.tolist()) - set(datecols))
+                newvalue = newvalue.loc[:, cols]  # view without the date columns
+            dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount}
+            newvalue = dictret
             pass
         # TODO: What if value == newvalue?
         ret_payload["value"] = newvalue
