@@ -244,7 +244,9 @@ class Gui(object, metaclass=Singleton):
                 end = -1
             if end == -1 or end >= rowcount:
                 end = rowcount - 1
-            datecols = newvalue.select_dtypes(include=["datetime64"]).columns.tolist()
+            datecols = newvalue.dtypes[
+                newvalue.dtypes.astype("string").str.startswith("datetime")
+            ].index.tolist()
             if len(datecols) != 0:
                 # copy the df so that we don't "mess" with the user's data
                 newvalue = newvalue.copy()
@@ -268,8 +270,8 @@ class Gui(object, metaclass=Singleton):
             if len(datecols) != 0:
                 # remove the date columns from the list of columnss
                 cols = list(set(newvalue.columns.tolist()) - set(datecols))
-                newvalue = newvalue.loc[:, cols] # view without the date columns
-            dictret = {"data": newvalue.to_dict(orient="index"), "rowcount": rowcount}
+                newvalue = newvalue.loc[:, cols]  # view without the date columns
+            dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount}
             newvalue = dictret
             pass
         # TODO: What if value == newvalue?

@@ -1,15 +1,16 @@
+import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 
 import { ENDPOINT } from "../utils";
 
-export enum Types {
+enum Types {
     Update = 'UPDATE',
     SendUpdate = 'SEND_UPDATE_ACTION',
     Action = 'SEND_ACTION_ACTION',
     RequestTableUpdate = 'REQUEST_TABLE_UPDATE',
-    SetRoutes = 'SET_ROUTES'
+    SetRoutes = 'SET_ROUTES',
 }
 
 export interface TaipyState {
@@ -26,15 +27,9 @@ export interface TaipyAction {
 }
 
 export const INITIAL_STATE: TaipyState = { data: {}, theme: createTheme({
-    components: {
-      MuiTimeline: {
-        styleOverrides: {
-          root: {
-            backgroundColor: 'red',
-          },
-        }
-      },
-    },
+    palette: {
+        mode: "light",
+      }
   }),
   routes: []
 };
