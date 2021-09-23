@@ -31,5 +31,6 @@ class TablePattern(InlineProcessor):
             .get_dataframe_attributes()
             .set_table_pagesize()
             .set_table_pagesize_options()
+            .set_allow_all_rows()
             .build()
         )

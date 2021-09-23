@@ -225,6 +225,19 @@ class MarkdownBuilder:
         )
         return self
 
+    def set_allow_all_rows(self, default_value=False):
+        if self.el_element_name != "Table":
+            return self
+        allow_all_rows = (
+            self.attributes
+            and "allow_all_rows" in self.attributes
+            and self.attributes["allow_all_rows"]
+        ) or default_value
+        if isinstance(allow_all_rows, str):
+            allow_all_rows = is_boolean_true(allow_all_rows)
+        self.set_attribute("allowAllRows", "{!" + str(allow_all_rows).lower() + "!}")
+        return self
+
     def set_attribute(self, name, value):
         self.el.set(name, value)
         return self
