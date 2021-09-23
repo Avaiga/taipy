@@ -27,7 +27,7 @@ class TablePattern(InlineProcessor):
             )
             .set_varname()
             .set_className(class_name="taipy-table", config_class="table")
-            .get_app_value()
+            .get_gui_value()
             .get_dataframe_attributes()
             .set_table_pagesize()
             .set_table_pagesize_options()

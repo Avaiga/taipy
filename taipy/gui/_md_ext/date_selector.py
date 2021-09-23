@@ -26,7 +26,7 @@ class DateSelectorPattern(InlineProcessor):
                 has_attribute=True,
                 default_value="",
             )
-            .get_app_value(fallback_value=datetime.fromtimestamp(0))
+            .get_gui_value(fallback_value=datetime.fromtimestamp(0))
             .set_varname()
             .set_default_value()
             .set_className(

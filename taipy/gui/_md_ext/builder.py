@@ -5,7 +5,6 @@ import json
 import datetime
 
 from .parse_attributes import parse_attributes
-from ..app import App
 from ..utils import (
     _MapDictionary,
     dateToISO,
@@ -44,13 +43,15 @@ class MarkdownBuilder:
             self.attributes = parse_attributes(m.group(attributes_val)) or {}
             # Bind properties dictionary to attributes if condition is matched
             if allow_properties_config and "properties" in self.attributes:
+                from ..gui import Gui
+
                 properties_dict_name = self.attributes["properties"]
-                App._get_instance().bind_var(properties_dict_name)
-                properties_dict = getattr(App._get_instance(), properties_dict_name)
+                Gui._get_instance().bind_var(properties_dict_name)
+                properties_dict = getattr(Gui._get_instance(), properties_dict_name)
                 if not isinstance(properties_dict, _MapDictionary):
                     raise Exception(
                         f"Can't find properties configuration dictionary for {str(m)}!"
-                        f" Please review your app templates!"
+                        f" Please review your GUI templates!"
                     )
                 # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
@@ -59,16 +60,20 @@ class MarkdownBuilder:
             try:
                 # Bind variable name (var_name string split in case
                 # var_name is a dictionary)
-                App._get_instance().bind_var(self.var_name.split(sep=".")[0])
-            except:
-                print("error")
+                from ..gui import Gui
 
-    def get_app_value(self, fallback_value=None):
+                Gui._get_instance().bind_var(self.var_name.split(sep=".")[0])
+            except Exception:
+                print(f"Couldn't bind variable '{self.var_name}'")
+
+    def get_gui_value(self, fallback_value=None):
         if self.var_name:
             try:
-                self.value = attrgetter(self.var_name)(App._get_instance()._values)
-            except:
-                print("Error getting app value of " + self.var_name)
+                from ..gui import Gui
+
+                self.value = attrgetter(self.var_name)(Gui._get_instance()._values)
+            except Exception:
+                print(f"WARNING: variable {self.var_name} doesn't exist")
                 self.value = (
                     fallback_value
                     if fallback_value is not None
@@ -148,9 +153,11 @@ class MarkdownBuilder:
         return self
 
     def set_className(self, class_name="", config_class="input"):
+        from ..gui import Gui
+
         self.set_attribute(
             "className",
-            class_name + " " + App._get_instance()._config.style_config[config_class],
+            class_name + " " + Gui._get_instance()._config.style_config[config_class],
         )
         return self
 

@@ -1,5 +1,7 @@
 import pathlib
 import datetime
+import inspect
+import os
 import re
 import typing as t
 from operator import attrgetter
@@ -9,9 +11,9 @@ import pandas as pd
 from flask import jsonify, request
 from markdown import Markdown
 
-from .AppConfig import AppConfig
-from .config import default_config
-from .md_ext import *
+from .config import GuiConfig
+from ._default_config import default_config
+from ._md_ext import *
 from .Page import Page
 from .server import Server
 from .utils import (
@@ -24,7 +26,7 @@ from .utils import (
 )
 
 
-class App(object, metaclass=Singleton):
+class Gui(object, metaclass=Singleton):
     """The class that handles the Graphical User Interface."""
 
     def __init__(
@@ -38,22 +40,22 @@ class App(object, metaclass=Singleton):
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
     ):
-        app_absolute_path = str(pathlib.Path(__file__).parent.resolve())
+        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
             import_name=import_name,
             static_url_path=static_url_path,
-            static_folder=f"{app_absolute_path}/webapp",
+            static_folder=f"{_absolute_path}{os.path.sep}webapp",
             static_host=static_host,
             host_matching=host_matching,
             subdomain_matching=subdomain_matching,
-            template_folder=f"{app_absolute_path}/webapp",
+            template_folder=f"{_absolute_path}{os.path.sep}webapp",
             instance_path=instance_path,
             instance_relative_config=instance_relative_config,
             root_path=root_path,
         )
-        self._config = AppConfig()
-        # Load deafult config
+        self._config = GuiConfig()
+        # Load default config
         self._config.load_config(
             default_config["app_config"], default_config["style_config"]
         )
@@ -79,7 +81,7 @@ class App(object, metaclass=Singleton):
 
     @staticmethod
     def _get_instance():
-        return App._instances[App]
+        return Gui._instances[Gui]
 
     def _parse_markdown(self, text: str) -> str:
         return self._markdown.convert(text)
@@ -150,7 +152,7 @@ class App(object, metaclass=Singleton):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
             setattr(
-                App,
+                Gui,
                 name,
                 _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)),
             )
@@ -160,7 +162,7 @@ class App(object, metaclass=Singleton):
                 lambda s: getattr(s._values, name),  # Getter
                 lambda s, v: s._update_var(name, v),  # Setter
             )
-            setattr(App, name, prop)
+            setattr(Gui, name, prop)
             setattr(self._values, name, value)
 
     # Main binding method (bind in markdown declaration)
@@ -294,7 +296,7 @@ class App(object, metaclass=Singleton):
                 action_function = getattr(self, action)
                 action_function(self, id)
                 return
-            except:
+            except Exception:
                 pass
         if self._action_function:
             self._action_function(self, id, action)
@@ -302,7 +304,7 @@ class App(object, metaclass=Singleton):
     def load_config(self, app_config={}, style_config={}):
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def run(self, host=None, port=None, debug=None, load_dotenv=True, bind_locals=None):
+    def run(self, host=None, port=None, debug=None, load_dotenv=True):
         # Check with default config, override only if parameter
         # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
@@ -311,8 +313,8 @@ class App(object, metaclass=Singleton):
             port = self._config.app_config["port"]
         if debug is None and self._config.app_config["debug"] is not None:
             debug = self._config.app_config["debug"]
-        # Save all available variables in locals
-        self._dict_bind_locals = bind_locals
+        # Save all local variables of the parent frame (usually __main__)
+        self._dict_bind_locals = inspect.currentframe().f_back.f_locals
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.index_html for optimization)
         for page_i in self._config.pages:

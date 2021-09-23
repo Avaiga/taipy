@@ -1,4 +1,5 @@
-from .md_ext import makeTaipyExtension
+from .gui import Gui
+from ._md_ext import makeTaipyExtension
 
 
 def makeExtension(*args, **kwargs):

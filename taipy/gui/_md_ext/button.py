@@ -25,7 +25,7 @@ class ButtonPattern(InlineProcessor):
                 default_value="<empty>",
             )
             .set_type("button")
-            .get_app_value()
+            .get_gui_value()
             .set_varname()
             .set_default_value()
             .set_className(class_name="taipy-button", config_class="button")

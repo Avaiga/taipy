@@ -28,7 +28,7 @@ class FieldPattern(InlineProcessor):
                     default_value="<empty>",
                 )
                 .set_type("text")
-                .get_app_value()
+                .get_gui_value()
                 .set_varname()
                 .set_default_value()
                 .set_className(class_name="taipy-field", config_class="input")
@@ -42,7 +42,7 @@ class FieldPattern(InlineProcessor):
                 has_attribute=False,
                 default_value="<empty>",
             )
-            .get_app_value()
+            .get_gui_value()
             .set_varname()
             .set_default_value()
             .set_className(class_name="taipy-var", config_class="field")
