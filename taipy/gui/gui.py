@@ -233,8 +233,21 @@ class Gui(object, metaclass=Singleton):
             ret_payload["pagekey"] = (
                 payload["pagekey"] if "pagekey" in keys else "unknown page"
             )
-            start = int(payload["start"]) if "start" in keys else 0
-            end = int(payload["end"]) if "end" in keys else -1
+            if isinstance(payload["start"], int):
+                start = int(payload["start"])
+            else:
+                try:
+                    start = int(str(payload["start"]), base=10)
+                except Exception as e:
+                    print(e)
+                    start = 0
+            if isinstance(payload["end"], int):
+                end = int(payload["end"])
+            else:
+                try:
+                    end = int(str(payload["end"]), base=10)
+                except Exception:
+                    end = -1
             rowcount = len(newvalue)
             if start < 0 or start >= rowcount:
                 start = 0
@@ -253,7 +266,7 @@ class Gui(object, metaclass=Singleton):
                         .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                         .astype("string")
                     )
-            if "orderby" in keys and len(payload["orderby"]):
+            if "orderby" in keys and isinstance(payload["orderby"], str) and len(payload["orderby"]):
                 new_indexes = newvalue[payload["orderby"]].values.argsort(axis=0)
                 if "sort" in keys and payload["sort"] == "desc":
                     # reverse order
