@@ -2,6 +2,7 @@ from operator import attrgetter
 from markdown.util import etree
 import pandas as pd
 import json
+import datetime
 
 from .parse_attributes import parse_attributes
 from ..app import App
@@ -133,8 +134,6 @@ class MarkdownBuilder:
         return self
 
     def set_default_value(self):
-        if self.el_element_name == "DateSelector":
-            self.set_attribute("defaultvalue", dateToISO(self.value))
         if self.el_element_name == "Input" and self.type_name == "button":
             self.set_attribute(
                 "value",
@@ -142,6 +141,8 @@ class MarkdownBuilder:
                 if self.attributes and "label" in self.attributes
                 else str(self.value),
             )
+        elif isinstance(self.value, datetime.datetime):
+            self.set_attribute("defaultvalue", dateToISO(self.value))
         else:
             self.set_attribute("defaultvalue", str(self.value))
         return self
