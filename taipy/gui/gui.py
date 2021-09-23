@@ -266,7 +266,11 @@ class Gui(object, metaclass=Singleton):
                         .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                         .astype("string")
                     )
-            if "orderby" in keys and isinstance(payload["orderby"], str) and len(payload["orderby"]):
+            if (
+                "orderby" in keys
+                and isinstance(payload["orderby"], str)
+                and len(payload["orderby"])
+            ):
                 new_indexes = newvalue[payload["orderby"]].values.argsort(axis=0)
                 if "sort" in keys and payload["sort"] == "desc":
                     # reverse order
