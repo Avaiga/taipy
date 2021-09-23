@@ -236,13 +236,9 @@ class Gui(object, metaclass=Singleton):
             start = int(payload["start"]) if "start" in keys else 0
             end = int(payload["end"]) if "end" in keys else -1
             rowcount = len(newvalue)
-            if start < 0:
-                start = -end - 1
-                end = -1
-            elif start >= rowcount:
-                start = -end + start
-                end = -1
-            if end == -1 or end >= rowcount:
+            if start < 0 or start >= rowcount:
+                start = 0
+            if end < 0 or end >= rowcount:
                 end = rowcount - 1
             datecols = newvalue.dtypes[
                 newvalue.dtypes.astype("string").str.startswith("datetime")
