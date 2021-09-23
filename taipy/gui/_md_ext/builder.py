@@ -11,7 +11,7 @@ from ..utils import (
     get_client_var_name,
     getDataType,
     is_boolean_true,
-    get_date_col_str_name
+    get_date_col_str_name,
 )
 
 
@@ -124,7 +124,9 @@ class MarkdownBuilder:
                     idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
                     if type.startswith("datetime64"):
                         _add_to_dict_and_get(columns[col], "format", date_format)
-                        columns[get_date_col_str_name(self.value, col)] = columns.pop(col)
+                        columns[get_date_col_str_name(self.value, col)] = columns.pop(
+                            col
+                        )
             attributes["columns"] = columns
             self.set_attribute("columns", json.dumps(columns))
         return self
