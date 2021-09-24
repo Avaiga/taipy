@@ -20,7 +20,7 @@ class Server(Flask):
         import_name: str,
         static_folder: t.Optional[str] = "",
         template_folder: str = "",
-        path_mapping: dict = {},
+        path_mapping: t.Optional[dict] = {},
     ):
         super().__init__(
             import_name=import_name,
