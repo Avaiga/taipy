@@ -18,27 +18,21 @@ class Server(Flask):
         self,
         app,
         import_name: str,
-        static_url_path: t.Optional[str] = None,
         static_folder: t.Optional[str] = "",
-        static_host: t.Optional[str] = None,
-        host_matching: bool = False,
-        subdomain_matching: bool = False,
         template_folder: str = "",
-        instance_path: t.Optional[str] = None,
-        instance_relative_config: bool = False,
-        root_path: t.Optional[str] = None,
+        path_mapping: dict = {},
     ):
         super().__init__(
             import_name=import_name,
-            static_url_path=static_url_path,
+            static_url_path=None,
             static_folder=static_folder,
-            static_host=static_host,
-            host_matching=host_matching,
-            subdomain_matching=subdomain_matching,
+            static_host=None,
+            host_matching=False,
+            subdomain_matching=False,
             template_folder=template_folder,
-            instance_path=instance_path,
-            instance_relative_config=instance_relative_config,
-            root_path=root_path,
+            instance_path=None,
+            instance_relative_config=False,
+            root_path=None,
         )
         self._app = app
         self.config["SECRET_KEY"] = "TaIpY"
@@ -59,6 +53,7 @@ class Server(Flask):
                     else "Taipy App",
                 )
             else:
+                # TODO use the path mapping to detect and find resources
                 return send_from_directory(self.static_folder + os.path.sep, path)
 
         # Websocket (handle json message)
@@ -83,12 +78,13 @@ class Server(Flask):
         template_str = render_template_string(html_fragment)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
-        data = {
-            "jsx": template_str,
-            "style": ((style + os.linesep) if style else ""),
-            "darkMode": dark_mode,
-        }
-        return self._direct_render_json(data)
+        return self._direct_render_json(
+            {
+                "jsx": template_str,
+                "style": ((style + os.linesep) if style else ""),
+                "darkMode": dark_mode,
+            }
+        )
 
     def _direct_render_json(self, data):
         return jsonify(data)
