@@ -1,4 +1,3 @@
-import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
