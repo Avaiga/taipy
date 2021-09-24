@@ -11,7 +11,7 @@ class FieldPattern(InlineProcessor):
     # group(2): var_id
     # group(3): field+attributes
     # group(4): attributes
-    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*)\{(\d+)\})?(field\s*(?:\:\s*(.*?))?)?\s*\]"  # noqa
+    _PATTERN = r"\[(?:TaIpY([a-zA-Z][\.a-zA-Z_$0-9]*)\{(\d+)\})?(field\s*(?:\:\s*(.*?))?)?((?:\:\s*(.*?))?)?\s*\]"  # noqa
 
     @staticmethod
     def extendMarkdown(md):
@@ -39,7 +39,8 @@ class FieldPattern(InlineProcessor):
             MarkdownBuilder(
                 m=m,
                 el_element_name="Field",
-                has_attribute=False,
+                has_attribute=True,
+                attributes_val=6,
                 default_value="<empty>",
             )
             .get_gui_value()
@@ -47,5 +48,6 @@ class FieldPattern(InlineProcessor):
             .set_default_value()
             .set_className(class_name="taipy-var", config_class="field")
             .set_dataType()
+            .set_format()
             .build()
         )

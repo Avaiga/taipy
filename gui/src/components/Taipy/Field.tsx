@@ -5,14 +5,14 @@ import { TaipyFieldProps } from "./utils";
 import { formatWSValue } from "../../utils";
 
 const Field = (props: TaipyFieldProps) => {
-    const { className, id, dataType } = props;
-    const [value, setValue] = useState(() => formatWSValue(props.defaultvalue, dataType));
+    const { className, id, dataType, format } = props;
+    const [value, setValue] = useState(() => formatWSValue(props.defaultvalue, dataType, format));
 
     useEffect(() => {
         if (props.value !== undefined) {
-            setValue(dataType ? formatWSValue(props.value, dataType) : props.value)
+            setValue(formatWSValue(props.value, dataType, format))
         }
-    }, [props.value, dataType]);
+    }, [props.value, dataType, format]);
 
     return (
         <Typography className={className} id={id} component="span">
