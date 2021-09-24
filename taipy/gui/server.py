@@ -88,24 +88,9 @@ class Server(Flask):
             "style": ((style + os.linesep) if style else ""),
             "darkMode": dark_mode,
         }
-        return jsonify(data)
+        return self._direct_render_json(data)
 
-    def render_react_route(self, routes):
-        # Generate router
-        router = '<Router key="Router"><Switch>'
-        for route in routes:
-            router += (
-                '<Route path="/'
-                + route
-                + '" exact key="/'
-                + route
-                + '" ><TaipyRendered/></Route>'
-            )
-        router += '<Route path="/404" exact key="/404" ><NotFound404 /></Route>'
-        router += '<Redirect to="/' + routes[0] + '" key="Redirect" />'
-        router += "</Switch></Router>"
-
-        data = {"router": router, "routes": routes}
+    def _direct_render_json(self, data):
         return jsonify(data)
 
     def runWithWS(self, host=None, port=None, debug=None, load_dotenv=True):

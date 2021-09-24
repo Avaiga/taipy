@@ -9,22 +9,25 @@ import { taipyComponents } from "../Taipy";
 
 const TaipyRendered = () => {
     const location = useLocation();
-    const [templateJSX, setTemplateJSX] = useState("");
+    const [JSX, setJSX] = useState("");
     const { state } = useContext(TaipyContext);
+
+    const path = (state.locations && state.locations[location.pathname]) || location.pathname;
+
     useEffect(() => {
         // Fetch JSX Flask Backend Render
         axios
-            .get(`${ENDPOINT}/flask-jsx${location.pathname}`)
+            .get(`${ENDPOINT}/flask-jsx${path}`)
             .then((result) => {
                 // set rendered JSX and CSS style from fetch result
-                setTemplateJSX(result.data.jsx);
+                setJSX(result.data.jsx);
                 setStyle(result.data.style);
                 setDarkMode(result.data.darkMode);
             })
-            .catch((error) => setTemplateJSX("<h1>No data fetched from backend</h1><br></br>" + error));
-    }, [location.pathname]);
+            .catch((error) => setJSX("<h1>No data fetched from backend</h1><br></br>" + error));
+    }, [path]);
 
-    return <JsxParser disableKeyGeneration={true} bindings={state.data} components={taipyComponents} jsx={templateJSX} />;
+    return <JsxParser disableKeyGeneration={true} bindings={state.data} components={taipyComponents} jsx={JSX} />;
 };
 
 export default TaipyRendered;

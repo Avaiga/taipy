@@ -10,7 +10,7 @@ interface LinkProps {
 
 const Link = (props: LinkProps) => {
     const {state} = useContext(TaipyContext);
-    if (state.routes.some(route => props.href === '/' + route)) {
+    if (Object.keys(state.locations).some(route => props.href === route)) {
         return <MuiLink to={props.href} component={RouterLink}>{props.children}</MuiLink>
     }
     return <MuiLink {...props} />

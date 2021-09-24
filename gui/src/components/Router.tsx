@@ -1,35 +1,45 @@
 import React, { useEffect, useReducer, useState, ComponentType } from "react";
 import JsxParser from "react-jsx-parser";
 import axios from "axios";
-import type {} from '@mui/lab/themeAugmentation';
+import type {} from "@mui/lab/themeAugmentation";
 import { ThemeProvider } from "@mui/material/styles";
 
-import { ENDPOINT } from "./utils";
-import { TaipyContext } from "./context/taipyContext";
-import { createSetRoutesAction, initializeWebSocket, INITIAL_STATE, taipyInitialize, taipyReducer } from "./context/taipyReducers";
-import { JSXReactRouterComponents, JSXRouterBindings } from "./components/Taipy";
+import { ENDPOINT } from "../utils";
+import { TaipyContext } from "../context/taipyContext";
+import {
+    createSetLocationsAction,
+    initializeWebSocket,
+    INITIAL_STATE,
+    taipyInitialize,
+    taipyReducer,
+} from "../context/taipyReducers";
+import { JSXReactRouterComponents } from "./Taipy";
 
-
-const App = () => {
+const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
-    const [routerJSX, setrouterJSX] = useState("");
+    const [JSX, setJSX] = useState("");
+    const refresh = !!JSX;
 
     useEffect(() => {
+        if (refresh) {
+            // no need to access the backend again, the routes are static
+            return;
+        }
         // Fetch Flask Rendered JSX React Router
         axios
             .get(`${ENDPOINT}/react-router/`)
             .then((result) => {
-                setrouterJSX(result.data.router);
-                dispatch(createSetRoutesAction(result.data.routes));
+                setJSX(result.data.router);
+                dispatch(createSetLocationsAction(result.data.locations));
             })
             .catch((error) => {
                 // Fallback router if there is any error
-                setrouterJSX(
+                setJSX(
                     '<Router><Switch><Route path="/404" exact component={NotFound404} /><Redirect to="/404" /></Switch></Router>'
                 );
                 console.log(error);
             });
-    }, []);
+    }, [refresh]);
 
     useEffect(() => {
         initializeWebSocket(state.socket, dispatch);
@@ -38,10 +48,16 @@ const App = () => {
     return (
         <TaipyContext.Provider value={{ state, dispatch }}>
             <ThemeProvider theme={state.theme}>
-                <JsxParser disableKeyGeneration={true} bindings={JSXRouterBindings} components={JSXReactRouterComponents as Record<string, ComponentType>} jsx={routerJSX} />
+                <JsxParser
+                    disableKeyGeneration={true}
+                    components={
+                        JSXReactRouterComponents as Record<string, ComponentType>
+                    }
+                    jsx={JSX}
+                />
             </ThemeProvider>
         </TaipyContext.Provider>
     );
 };
 
-export default App;
+export default Router;

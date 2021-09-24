@@ -9,14 +9,14 @@ enum Types {
     SendUpdate = 'SEND_UPDATE_ACTION',
     Action = 'SEND_ACTION_ACTION',
     RequestTableUpdate = 'REQUEST_TABLE_UPDATE',
-    SetRoutes = 'SET_ROUTES',
+    SetLocations = 'SET_LOCATIONS',
 }
 
 export interface TaipyState {
     socket?: Socket;
     data: Record<string, unknown>;
     theme: Theme;
-    routes: string[];
+    locations: Record<string, string>;
 }
 
 export interface TaipyAction {
@@ -30,7 +30,7 @@ export const INITIAL_STATE: TaipyState = { data: {}, theme: createTheme({
         mode: "light",
       }
   }),
-  routes: []
+  locations: {}
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -69,9 +69,8 @@ export const taipyReducer = (state: TaipyState, action: TaipyAction): TaipyState
         case Types.RequestTableUpdate:
             sendWsMessage(state.socket, 'T', action.name, action.payload);
             break;
-        case Types.SetRoutes:
-            state.routes = action.payload.value as string[];
-            break;
+        case Types.SetLocations:
+            return {...state, locations: action.payload.value as Record<string, string>};
     }
     return state;
 }
@@ -107,10 +106,10 @@ export const createRequestTableUpdateAction = (name: string, id: string, pageKey
     }
 })
 
-export const createSetRoutesAction = (routes: string[]): TaipyAction => ({
-    type: Types.SetRoutes,
-    name: 'routes',
-    payload: {value: routes}
+export const createSetLocationsAction = (locations: Record<string, string>): TaipyAction => ({
+    type: Types.SetLocations,
+    name: 'locations',
+    payload: {value: locations}
 })
 
 type WsMessageType = "A" | "U" | "T";

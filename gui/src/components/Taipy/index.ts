@@ -27,6 +27,3 @@ export const JSXReactRouterComponents: Record<string, unknown> = {
     TaipyRendered: TaipyRendered,
 };
 
-// for JSXParser in app.tsx
-export const JSXRouterBindings: Record<string, ComponentType> = {
-};

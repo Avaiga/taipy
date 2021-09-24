@@ -30,6 +30,8 @@ from .utils import (
 class Gui(object, metaclass=Singleton):
     """The class that handles the Graphical User Interface."""
 
+    __root_page_name = "TaiPy_root_page"
+
     def __init__(
         self,
         import_name: str,
@@ -40,6 +42,8 @@ class Gui(object, metaclass=Singleton):
         instance_path: t.Optional[str] = None,
         instance_relative_config: bool = False,
         root_path: t.Optional[str] = None,
+        markdown_string: t.Optional[str] = None,
+        pages: t.Optional[dict] = None,
     ):
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
@@ -79,6 +83,13 @@ class Gui(object, metaclass=Singleton):
                 "attr_list",
             ]
         )
+        if markdown_string:
+            self.add_page(name=Gui.__root_page_name, markdown_string=markdown_string)
+        if pages:
+            for k, v in pages.items():
+                if k == "/":
+                    k = Gui.__root_page_name
+                self.add_page(name=k, markdown_string=str(v))
 
     @staticmethod
     def _get_instance():
@@ -116,29 +127,63 @@ class Gui(object, metaclass=Singleton):
         else:
             return "No page template"
 
-    def _render_route(self) -> None:
-        return self._server.render_react_route(self._config.routes)
+    def __render_route(self):
+        # Generate router
+        routes = self._config.routes
+        locations = {}
+        router = '<Router key="Router"><Switch>'
+        for route in routes:
+            router += (
+                '<Route path="/'
+                + (route if route != Gui.__root_page_name else "")
+                + '" exact key="'
+                + route
+                + '" ><TaipyRendered/></Route>'
+            )
+            locations["/" + (route if route != Gui.__root_page_name else "")] = (
+                "/" + route
+            )
+        if Gui.__root_page_name not in routes:
+            router += (
+                '<Route path="/" exact key="'
+                + Gui.__root_page_name
+                + '" ><TaipyRendered/></Route>'
+            )
+            locations["/"] = "/" + routes[0]
+
+        router += '<Route path="/404" exact key="404" ><NotFound404 /></Route>'
+        router += '<Redirect to="/' + routes[0] + '" key="Redirect" />'
+        router += "</Switch></Router>"
+
+        return self._server._direct_render_json(
+            {"router": router, "locations": locations}
+        )
 
     def add_page(
         self,
         name: str,
-        markdown_template: t.Optional[str] = None,
-        markdown_template_file: t.Optional[str] = None,
+        markdown_string: t.Optional[str] = None,
+        markdown_file_name: t.Optional[str] = None,
         style: t.Optional[str] = "",
     ) -> None:
-        # Validate page_route
+        # Validate name
         if name is None:
-            raise Exception("page_route is required for add_page function!")
+            raise Exception("name is required for add_page function!")
         if not re.match(r"^[\w-]+$", name):
             raise SyntaxError(
-                f"Page route '{name}' is not valid! Can only contain alphabet "
-                f"letters, numbers, dash (-), and underscore (_)"
+                f"Page route '{name}' is not valid! Can only contain letters, digits, dashes (-) and underscores (_)"
+            )
+        if name in self._config.routes:
+            raise Exception(
+                'page name "'
+                + (name if name != Gui.__root_page_name else "/")
+                + '" is already defined'
             )
         # Init a new page
         new_page = Page()
         new_page.route = name
-        new_page.md_template = markdown_template
-        new_page.md_template_file = markdown_template_file
+        new_page.md_template = markdown_string
+        new_page.md_template_file = markdown_file_name
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)
@@ -215,7 +260,7 @@ class Gui(object, metaclass=Singleton):
         attrsetter(self._values, var_name, value)
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
-            self._update_function(var_name, value)
+            self._update_function(self, var_name, value)
         newvalue = attrgetter(var_name)(self._values)
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
@@ -342,8 +387,10 @@ class Gui(object, metaclass=Singleton):
             self._server.add_url_rule(
                 f"/flask-jsx/{page_i.route}/", view_func=self._render_page
             )
+        # define a root page if needed
+
         # server URL Rule for flask rendered react-router
-        self._server.add_url_rule("/react-router/", view_func=self._render_route)
+        self._server.add_url_rule("/react-router/", view_func=self.__render_route)
 
         # Start Flask Server
         self._server.runWithWS(
