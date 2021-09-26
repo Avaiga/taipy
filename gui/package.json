@@ -15,7 +15,8 @@
     "react-dom": "^17.0.2",
     "react-jsx-parser": "^1.28.4",
     "react-router-dom": "^5.2.0",
-    "socket.io-client": "^4.1.3"
+    "socket.io-client": "^4.1.3",
+    "sprintf-js": "^1.1.2"
   },
   "scripts": {
     "start": "echo no start see python",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@types/react-router-dom": "^5.1.9",
+    "@types/sprintf-js": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "autoprefixer": "^10.3.4",

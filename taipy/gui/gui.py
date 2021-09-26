@@ -35,29 +35,18 @@ class Gui(object, metaclass=Singleton):
     def __init__(
         self,
         import_name: str,
-        static_url_path: t.Optional[str] = None,
-        static_host: t.Optional[str] = None,
-        host_matching: bool = False,
-        subdomain_matching: bool = False,
-        instance_path: t.Optional[str] = None,
-        instance_relative_config: bool = False,
-        root_path: t.Optional[str] = None,
-        markdown_string: t.Optional[str] = None,
+        markdown: t.Optional[str] = None,
+        markdown_file: t.Optional[str] = None,
         pages: t.Optional[dict] = None,
+        path_mapping: t.Optional[dict] = {},
     ):
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
             import_name=import_name,
-            static_url_path=static_url_path,
             static_folder=f"{_absolute_path}{os.path.sep}webapp",
-            static_host=static_host,
-            host_matching=host_matching,
-            subdomain_matching=subdomain_matching,
             template_folder=f"{_absolute_path}{os.path.sep}webapp",
-            instance_path=instance_path,
-            instance_relative_config=instance_relative_config,
-            root_path=root_path,
+            path_mapping=path_mapping,
         )
         self._config = GuiConfig()
         # Load default config
@@ -83,13 +72,19 @@ class Gui(object, metaclass=Singleton):
                 "attr_list",
             ]
         )
-        if markdown_string:
-            self.add_page(name=Gui.__root_page_name, markdown_string=markdown_string)
+        if markdown:
+            self.add_page(name=Gui.__root_page_name, markdown=markdown)
+        if markdown_file:
+            if markdown:
+                raise Exception(
+                    "Cannot specify a markdown_file and a mrkdown string at the same time. Consider using the pages parameter."
+                )
+            self.add_page(name=Gui.__root_page_name, markdown_file=markdown_file)
         if pages:
             for k, v in pages.items():
                 if k == "/":
                     k = Gui.__root_page_name
-                self.add_page(name=k, markdown_string=str(v))
+                self.add_page(name=k, markdown=str(v))
 
     @staticmethod
     def _get_instance():
@@ -162,8 +157,8 @@ class Gui(object, metaclass=Singleton):
     def add_page(
         self,
         name: str,
-        markdown_string: t.Optional[str] = None,
-        markdown_file_name: t.Optional[str] = None,
+        markdown: t.Optional[str] = None,
+        markdown_file: t.Optional[str] = None,
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -171,7 +166,7 @@ class Gui(object, metaclass=Singleton):
             raise Exception("name is required for add_page function!")
         if not re.match(r"^[\w-]+$", name):
             raise SyntaxError(
-                f"Page route '{name}' is not valid! Can only contain letters, digits, dashes (-) and underscores (_)"
+                f'page name "{name}" is not valid! Can only contain letters, digits, dashes (-) and underscores (_).'
             )
         if name in self._config.routes:
             raise Exception(
@@ -182,8 +177,8 @@ class Gui(object, metaclass=Singleton):
         # Init a new page
         new_page = Page()
         new_page.route = name
-        new_page.md_template = markdown_string
-        new_page.md_template_file = markdown_file_name
+        new_page.md_template = markdown
+        new_page.md_template_file = markdown_file
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)

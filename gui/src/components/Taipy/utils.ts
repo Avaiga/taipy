@@ -9,6 +9,7 @@ export interface TaipyBaseProps {
 export interface TaipyFieldProps extends TaipyBaseProps {
     dataType: string;
     value: string;
+    format: string;
 }
 
 export interface TaipyInputProps extends TaipyBaseProps {

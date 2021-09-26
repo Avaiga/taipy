@@ -238,6 +238,16 @@ class MarkdownBuilder:
         self.set_attribute("allowAllRows", "{!" + str(allow_all_rows).lower() + "!}")
         return self
 
+    def set_format(self):
+        format = (
+            self.attributes
+            and "format" in self.attributes
+            and self.attributes["format"]
+        )
+        if format:
+            self.set_attribute("format", format)
+        return self
+
     def set_attribute(self, name, value):
         self.el.set(name, value)
         return self
