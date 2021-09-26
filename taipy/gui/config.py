@@ -1,5 +1,7 @@
 import tzlocal
 import pytz
+
+
 class GuiConfig(object):
     def __init__(self):
         self.pages = []
@@ -14,10 +16,7 @@ class GuiConfig(object):
         self.get_timezone()
 
     def get_timezone(self) -> str:
-        if (
-            "timezone" not in self.app_config
-            or self.app_config["timezone"] == "client"
-        ):
+        if "timezone" not in self.app_config or self.app_config["timezone"] == "client":
             return "client"
         if self.app_config["timezone"] == "server":
             # return python tzlocal IANA Timezone

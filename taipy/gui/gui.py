@@ -117,7 +117,10 @@ class Gui(object, metaclass=Singleton):
         # Return jsx page
         if page.index_html:
             return self._server.render(
-                page.index_html, page.style, self._config.get_timezone(), self._config.app_config["dark_mode"]
+                page.index_html,
+                page.style,
+                self._config.get_timezone(),
+                self._config.app_config["dark_mode"],
             )
         else:
             return "No page template"
