@@ -349,7 +349,13 @@ class Gui(object, metaclass=Singleton):
         if action:
             try:
                 action_function = getattr(self, action)
-                action_function(self, id)
+                argcount = action_function.__code__.co_argcount
+                if argcount == 0:
+                    action_function()
+                elif argcount == 1:
+                    action_function(self)
+                elif argcount == 2:
+                    action_function(self, id)
                 return
             except Exception:
                 pass
