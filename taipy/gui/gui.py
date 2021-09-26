@@ -5,7 +5,7 @@ import os
 import re
 import typing as t
 from operator import attrgetter
-from types import SimpleNamespace
+from types import SimpleNamespace, FunctionType
 
 import pandas as pd
 from flask import jsonify, request
@@ -24,7 +24,6 @@ from .utils import (
     dateToISO,
     get_client_var_name,
     get_date_col_str_name,
-    getDataType,
 )
 
 
@@ -390,7 +389,7 @@ class Gui(object, metaclass=Singleton):
 
         # Bind all available function with specified prefix in parent frame
         for k, v in self._dict_bind_locals.items():
-            if getDataType(v) == "function" and k.startswith(
+            if isinstance(v, FunctionType) and k.startswith(
                 self._config.app_config["function_prefix"]
             ):
                 setattr(self, k, v)
