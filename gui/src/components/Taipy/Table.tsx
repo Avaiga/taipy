@@ -19,11 +19,11 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import CircularProgress from "@mui/material/CircularProgress";
 import { visuallyHidden } from "@mui/utils";
-import { format } from "date-fns";
 
 import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
+import { getDateTimeString } from "../../utils/index"
 
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
@@ -67,7 +67,7 @@ const defaultDateFormat = "yyyy/MM/dd";
 const formatValue = (val: any, col: any) => {
     switch (col.type) {
         case "datetime64[ns]":
-            return format(new Date(val), col.format || defaultDateFormat);
+            return getDateTimeString(val, col.format || defaultDateFormat);
         default:
             return val;
     }

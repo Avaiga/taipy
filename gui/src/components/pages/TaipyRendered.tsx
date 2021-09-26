@@ -3,7 +3,7 @@ import axios from "axios";
 import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router-dom";
 
-import { setStyle, setDarkMode, ENDPOINT } from "../../utils";
+import { setStyle, setDarkMode, ENDPOINT, setTimezone } from "../../utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
 
@@ -23,6 +23,7 @@ const TaipyRendered = () => {
                 setJSX(result.data.jsx);
                 setStyle(result.data.style);
                 setDarkMode(result.data.darkMode);
+                setTimezone(result.data.timezone);
             })
             .catch((error) => setJSX("<h1>No data fetched from backend</h1><br></br>" + error));
     }, [path]);

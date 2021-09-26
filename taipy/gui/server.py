@@ -79,7 +79,7 @@ class Server(Flask):
                 print("Can't access: " + message + "\n" + str(ke))
 
     # Update to render as JSX
-    def render(self, html_fragment, style, dark_mode):
+    def render(self, html_fragment, style, timezone, dark_mode):
         template_str = render_template_string(html_fragment)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
@@ -87,6 +87,7 @@ class Server(Flask):
             "jsx": template_str,
             "style": ((style + os.linesep) if style else ""),
             "darkMode": dark_mode,
+            "timezone": timezone,
         }
         return self._direct_render_json(data)
 
