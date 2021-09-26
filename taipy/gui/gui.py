@@ -24,6 +24,7 @@ from .utils import (
     dateToISO,
     get_client_var_name,
     get_date_col_str_name,
+    getDataType,
 )
 
 
@@ -386,6 +387,11 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/react-router/", view_func=self.__render_route)
+
+        # Bind all available function with specified prefix in parent frame
+        for k, v in self._dict_bind_locals.items():
+            if getDataType(v) == "function" and k.startswith(self._config.app_config["function_prefix"]):
+                setattr(self, k, v)
 
         # Start Flask Server
         self._server.runWithWS(
