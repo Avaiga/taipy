@@ -41,8 +41,12 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
     dataType = dataType || typeof value;
     switch (dataType) {
         case "datetime.datetime":
-            if (dataFormat) {
-                return getDateTimeString(value.toString(), dataFormat);
+            try {
+                if (dataFormat) {
+                    return getDateTimeString(value.toString(), dataFormat);
+                } 
+            } catch (e) {
+                console.error(`wrong dateformat "${dataFormat}"`);
             }
             return getDateTimeString(value.toString(), getDateTimeFormat());
         case "int":

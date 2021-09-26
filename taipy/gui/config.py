@@ -20,7 +20,7 @@ class GuiConfig(object):
             return "client"
         if self.app_config["timezone"] == "server":
             # return python tzlocal IANA Timezone
-            return tzlocal.get_localzone()
+            return str(tzlocal.get_localzone())
         # Verify user defined IANA Timezone is valid
         if self.app_config["timezone"] not in pytz.all_timezones_set:
             raise Exception("User defined IANA timezone configuration is not valid!")
