@@ -24,17 +24,12 @@ class TestDataManager:
         # with type embedded
         embedded_ds = DataSource(name="foo", type="embedded", data="bar")
         embedded_entity = dm.create_data_source_entity(embedded_ds)
-        assert dm.get_data_source_entity(embedded_entity.id).id == embedded_entity.id
-        assert (
-            dm.get_data_source_entity(embedded_entity.id).name == embedded_entity.name
-        )
-        assert (
-            dm.get_data_source_entity(embedded_entity.id).scope == embedded_entity.scope
-        )
-        assert (
-            dm.get_data_source_entity(embedded_entity.id).properties
-            == embedded_entity.properties
-        )
+        fetched_entity = dm.get_data_source_entity(embedded_entity.id)
+
+        assert fetched_entity.id == embedded_entity.id
+        assert fetched_entity.name == embedded_entity.name
+        assert fetched_entity.scope == embedded_entity.scope
+        assert fetched_entity.properties == embedded_entity.properties
 
         # Test an exception is raised if the type provided to the data source is wrong
         wrong_type_ds = DataSource(name="foo", type="bar")
