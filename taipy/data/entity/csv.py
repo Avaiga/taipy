@@ -1,7 +1,5 @@
-import csv
 import json
-from itertools import islice
-from typing import Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
@@ -60,19 +58,18 @@ class CSVDataSourceEntity(DataSourceEntity):
         return cls.__TYPE
 
     def preview(self):
-        print("------------CSV Content------------")
-        path = self.properties.get("path")
-        with open(path) as csv_file:
-            reader = csv.DictReader(csv_file)
-            for row in islice(reader, 5):
-                print(f"     {row}")
-        print("     ...")
+        df = pd.read_csv(self.path)
+        print(df.head())
 
     def get(self, query=None):
         return pd.read_csv(self.properties["path"])
 
-    def write(self, data):
-        pass
+    def write(self, data: Any, columns: List[str] = []):
+        if not columns:
+            df = pd.DataFrame(data)
+        else:
+            df = pd.DataFrame(data, columns=columns)
+        df.to_csv(self.path, index=False)
 
     @property
     def has_header(self) -> Optional[bool]:
