@@ -219,8 +219,8 @@ class Gui(object, metaclass=Singleton):
 
     def bind_func(self, func_name):
         if (
-            not hasattr(self, func_name)
-            and isinstance(func_name, str)
+            isinstance(func_name, str)
+            and not hasattr(self, func_name)
             and func_name in (bind_locals := self._get_instance()._dict_bind_locals)
             and isinstance((func := bind_locals[func_name]), FunctionType)
         ):
