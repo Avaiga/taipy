@@ -5,7 +5,6 @@ from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
 from taipy.exceptions.scenario import (
-    NonExistingDataSourceEntity,
     NonExistingScenario,
     NonExistingScenarioEntity,
 )
@@ -75,8 +74,9 @@ def test_save_and_get_scenario_entity():
     output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     task_name = "task"
     task_2 = TaskEntity(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
+    pipeline_name_2 = "pipeline_name_2"
     pipeline_entity_2 = PipelineEntity(
-        "pipeline_name_2", {}, [task_2], PipelineId("pipeline_id_2")
+        pipeline_name_2, {}, [task_2], PipelineId("pipeline_id_2")
     )
     scenario_id_2 = ScenarioId("scenario_id_2")
     scenario_2 = ScenarioEntity(
@@ -144,7 +144,7 @@ def test_save_and_get_scenario_entity():
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
     scenario_manager.pipeline_manager.task_manager.save_task_entity(
-        scenario_2.pipeline_entities[0].task_entities[task_name]
+        scenario_2.pipeline_entities[pipeline_name_2].task_entities[task_name]
     )
     scenario_manager.pipeline_manager.save_pipeline_entity(pipeline_entity_3)
     scenario_manager.save_scenario_entity(scenario_3_with_same_id)
@@ -295,20 +295,20 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert len(task_manager.task_entities) == 3
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert len(scenario_manager.get_scenario_entities()) == 1
-    assert scenario_manager.get_data("foo", scenario_entity.id) == 1
-    assert scenario_manager.get_data("bar", scenario_entity.id) == 0
-    assert scenario_manager.get_data("baz", scenario_entity.id) == 0
-    assert scenario_manager.get_data("qux", scenario_entity.id) == 0
+    assert scenario_entity.foo.get() == 1
+    assert scenario_entity.bar.get() == 0
+    assert scenario_entity.baz.get() == 0
+    assert scenario_entity.qux.get() == 0
     assert (
-        scenario_entity.pipeline_entities[0].get_sorted_task_entities()[0][0].name
+        scenario_entity.by_6.get_sorted_task_entities()[0][0].name
         == task_mult_by_2.name
     )
     assert (
-        scenario_entity.pipeline_entities[0].get_sorted_task_entities()[1][0].name
+        scenario_entity.by_6.get_sorted_task_entities()[1][0].name
         == task_mult_by_3.name
     )
     assert (
-        scenario_entity.pipeline_entities[1].get_sorted_task_entities()[0][0].name
+        scenario_entity.by_4.get_sorted_task_entities()[0][0].name
         == task_mult_by_4.name
     )
 
@@ -340,31 +340,25 @@ def test_get_set_data():
 
     scenario_entity = scenario_manager.create_scenario_entity(scenario)
 
-    assert scenario_manager.get_data("foo", scenario_entity.id) == 1
-    assert scenario_manager.get_data("bar", scenario_entity.id) == 0
-    assert scenario_manager.get_data("baz", scenario_entity.id) == 0
-    assert scenario_manager.get_data("qux", scenario_entity.id) == 0
+    assert scenario_entity.foo.get() == 1
+    assert scenario_entity.bar.get() == 0
+    assert scenario_entity.baz.get() == 0
+    assert scenario_entity.qux.get() == 0
 
     scenario_manager.submit(scenario_entity.id)
-    assert scenario_manager.get_data("foo", scenario_entity.id) == 1
-    assert scenario_manager.get_data("bar", scenario_entity.id) == 2
-    assert scenario_manager.get_data("baz", scenario_entity.id) == 6
-    assert scenario_manager.get_data("qux", scenario_entity.id) == 4
+    assert scenario_entity.foo.get() == 1
+    assert scenario_entity.bar.get() == 2
+    assert scenario_entity.baz.get() == 6
+    assert scenario_entity.qux.get() == 4
 
-    scenario_manager.set_data("foo", scenario_entity.id, "new data value")
-    assert scenario_manager.get_data("foo", scenario_entity.id) == "new data value"
-    assert scenario_manager.get_data("bar", scenario_entity.id) == 2
-    assert scenario_manager.get_data("baz", scenario_entity.id) == 6
-    assert scenario_manager.get_data("qux", scenario_entity.id) == 4
+    scenario_entity.foo.write("new data value")
+    assert scenario_entity.foo.get() == "new data value"
+    assert scenario_entity.bar.get() == 2
+    assert scenario_entity.baz.get() == 6
+    assert scenario_entity.qux.get() == 4
 
-    scenario_manager.set_data("baz", scenario_entity.id, 158)
-    assert scenario_manager.get_data("foo", scenario_entity.id) == "new data value"
-    assert scenario_manager.get_data("bar", scenario_entity.id) == 2
-    assert scenario_manager.get_data("baz", scenario_entity.id) == 158
-    assert scenario_manager.get_data("qux", scenario_entity.id) == 4
-
-    with pytest.raises(NonExistingDataSourceEntity):
-        scenario_manager.set_data("WRONG DATA SOURCE NAME", scenario_entity.id, 7)
-
-    with pytest.raises(NonExistingScenarioEntity):
-        scenario_manager.set_data("foo", ScenarioId("WRONG SCENARIO ID"), 7)
+    scenario_entity.baz.write(158)
+    assert scenario_entity.foo.get() == "new data value"
+    assert scenario_entity.bar.get() == 2
+    assert scenario_entity.baz.get() == 158
+    assert scenario_entity.qux.get() == 4

@@ -43,7 +43,7 @@ class PipelineEntity:
                 return task.input[attribute_name]
             if attribute_name in task.output:
                 return task.output[attribute_name]
-        logging.error(f"{attribute_name} is not an attribute of task {self.id}")
+        logging.error(f"{attribute_name} is not an attribute of pipeline {self.id}")
         raise AttributeError
 
     def __is_consistent(self) -> bool:
