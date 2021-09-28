@@ -21,6 +21,8 @@ requirements: List[str] = [
     "simple-websocket",
     "pandas",
     "flask-cors",
+    "tzlocal",
+    "pytz",
 ]
 
 test_requirements = [

@@ -6,6 +6,7 @@ default_config = {
         "dark_mode": True,
         "debug": True,
         "host": "127.0.0.1",
+        "time_zone": "client",
     },
     "style_config": {
         "button": "px-2 py-1 rounded border border-gray-300 bg-gray-200 hover:bg-gray-300 hover:bg-gray-300 dark:bg-gray-800 dark:border-gray-900 dark:text-white dark:hover:bg-gray-900 cursor-pointer",  # noqa

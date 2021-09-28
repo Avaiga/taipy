@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
+import { getDateTime, getClientServerTimeZoneOffset } from "../../utils/index"
 
 interface DateSelectorProps extends TaipyInputProps {
     withTime?: string;
@@ -15,21 +16,27 @@ interface DateSelectorProps extends TaipyInputProps {
 }
 
 const DateSelector = (props: DateSelectorProps) => {
-    const [value, setValue] = useState(() => new Date(props.defaultvalue));
+    const [value, setValue] = useState(() => getDateTime(props.defaultvalue));
     const { dispatch } = useContext(TaipyContext);
 
     const { className, tp_varname, withTime } = props;
 
     const handleChange = useCallback(v => {
         setValue(v);
-        dispatch(createSendUpdateAction(tp_varname, v.toISOString()));
+        // dispatch new date which offset by the timeZone differences between client and server
+        const hours = getClientServerTimeZoneOffset() / 60;
+        const minutes = getClientServerTimeZoneOffset() % 60;
+        const newDate = new Date(v);
+        newDate.setHours(newDate.getHours() + hours);
+        newDate.setMinutes(newDate.getMinutes() + minutes);
+        dispatch(createSendUpdateAction(tp_varname, newDate.toISOString()));
     }, [tp_varname, dispatch]);
 
     const renderInput = useCallback((params) => <TextField {...params} />, []);
 
     useEffect(() => {
         if (props.value !== undefined) {
-            setValue(new Date(props.value))
+            setValue(getDateTime(props.value))
         }
     }, [props.value]);
 
