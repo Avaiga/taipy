@@ -5,7 +5,7 @@ import os
 import re
 import typing as t
 from operator import attrgetter
-from types import SimpleNamespace
+from types import SimpleNamespace, FunctionType
 
 import pandas as pd
 from flask import jsonify, request
@@ -210,6 +210,15 @@ class Gui(object, metaclass=Singleton):
     def bind_var(self, var_name):
         if not hasattr(self, var_name) and var_name in self._dict_bind_locals:
             self.bind(var_name, self._dict_bind_locals[var_name])
+
+    def bind_func(self, func_name):
+        if (
+            not hasattr(self, func_name)
+            and isinstance(func_name, str)
+            and func_name in (bind_locals := self._get_instance()._dict_bind_locals)
+            and isinstance((func := bind_locals[func_name]), FunctionType)
+        ):
+            setattr(self, func_name, func)
 
     # Backup Binding Method
     def _bind_all(self):
