@@ -4,7 +4,7 @@ import axios from "axios";
 import type {} from "@mui/lab/themeAugmentation";
 import { ThemeProvider } from "@mui/material/styles";
 
-import { ENDPOINT } from "../utils";
+import { setDarkMode, ENDPOINT, setTimeZone } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
 import {
     createSetLocationsAction,
@@ -27,9 +27,11 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get(`${ENDPOINT}/react-router/`)
+            .get(`${ENDPOINT}/initialize/`)
             .then((result) => {
                 setJSX(result.data.router);
+                setDarkMode(result.data.darkMode);
+                setTimeZone(result.data.timeZone);
                 dispatch(createSetLocationsAction(result.data.locations));
             })
             .catch((error) => {

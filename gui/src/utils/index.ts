@@ -15,27 +15,27 @@ export const setDarkMode = (isDarkMode: boolean): void => {
     localStorage.setItem("theme", mode);
 };
 
-export const setTimezone = (timezone: string): void => {
-    if(!timezone || timezone === "client") {
-        return localStorage.setItem("timezone", TIMEZONE_CLIENT)
+export const setTimeZone = (timeZone: string): void => {
+    if(!timeZone || timeZone === "client") {
+        return localStorage.setItem("timeZone", TIMEZONE_CLIENT)
     }
-    localStorage.setItem("timezone", timezone)
+    localStorage.setItem("timeZone", timeZone)
 }
 
 export const setDateTimeFormat = (datetimeformat: string): void => {
     localStorage.setItem("datetimeformat", datetimeformat)
 } 
 
-export const getTimezone = (): string => localStorage.getItem("timezone") || TIMEZONE_CLIENT;
+export const getTimeZone = (): string => localStorage.getItem("timeZone") || TIMEZONE_CLIENT;
 
-// return client server timezone offset in minutes
-export const getClientServerTimezoneOffset = (): number => (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(getTimezone())) / 60000;
+// return client server timeZone offset in minutes
+export const getClientServerTimeZoneOffset = (): number => (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(getTimeZone())) / 60000;
 
 export const getDateTimeFormat = (): string => localStorage.getItem("datetimeformat") || DEFAULT_DATETIME_FORMAT;
 
-export const getDateTime = (value: string): Date => utcToZonedTime(value, getTimezone());
+export const getDateTime = (value: string): Date => utcToZonedTime(value, getTimeZone());
 
-export const getDateTimeString = (value: string, datetimeformat: string): string => format(getDateTime(value), datetimeformat,  { timeZone: getTimezone()})
+export const getDateTimeString = (value: string, datetimeformat: string): string => format(getDateTime(value), datetimeformat,  { timeZone: getTimeZone()})
 
 export const formatWSValue = (value: string | number, dataType?: string, dataFormat?: string): string => {
     dataType = dataType || typeof value;

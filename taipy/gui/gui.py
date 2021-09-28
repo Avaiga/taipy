@@ -119,8 +119,6 @@ class Gui(object, metaclass=Singleton):
             return self._server.render(
                 page.index_html,
                 page.style,
-                self._config.get_timezone(),
-                self._config.app_config["dark_mode"],
             )
         else:
             return "No page template"
@@ -154,7 +152,12 @@ class Gui(object, metaclass=Singleton):
         router += "</Switch></Router>"
 
         return self._server._direct_render_json(
-            {"router": router, "locations": locations}
+            {
+                "router": router,
+                "locations": locations,
+                "timeZone": self._config.get_time_zone(),
+                "darkMode": self._config.app_config["dark_mode"],
+            }
         )
 
     def add_page(
@@ -388,7 +391,7 @@ class Gui(object, metaclass=Singleton):
         # define a root page if needed
 
         # server URL Rule for flask rendered react-router
-        self._server.add_url_rule("/react-router/", view_func=self.__render_route)
+        self._server.add_url_rule("/initialize/", view_func=self.__render_route)
 
         # Start Flask Server
         self._server.runWithWS(

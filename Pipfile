@@ -12,8 +12,8 @@ flask-socketio = ">=5.1"
 simple-websocket = ">=0.3"
 pandas = "*"
 flask-cors = ">=3.0"
-tzlocal = "*"
-pytz = "*"
+tzlocal = ">=3.0"
+pytz = ">=2021.1"
 
 [dev-packages]
 pytest = "*"

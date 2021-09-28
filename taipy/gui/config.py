@@ -12,17 +12,22 @@ class GuiConfig(object):
     def load_config(self, app_config={}, style_config={}) -> None:
         self.app_config.update(app_config)
         self.style_config.update(style_config)
-        # Run get_timezone to veriy user predefined IANA timezone if available
-        self.get_timezone()
+        # Run get_time_zone to verify user predefined IANA time_zone if available
+        self.get_time_zone()
 
-    def get_timezone(self) -> str:
-        if "timezone" not in self.app_config or self.app_config["timezone"] == "client":
+    def get_time_zone(self) -> str:
+        if (
+            "time_zone" not in self.app_config
+            or self.app_config["time_zone"] == "client"
+        ):
             return "client"
-        if self.app_config["timezone"] == "server":
-            # return python tzlocal IANA Timezone
+        if self.app_config["time_zone"] == "server":
+            # return python tzlocal IANA Time Zone
             return str(tzlocal.get_localzone())
-        # Verify user defined IANA Timezone is valid
-        if self.app_config["timezone"] not in pytz.all_timezones_set:
-            raise Exception("User defined IANA timezone configuration is not valid!")
-        # return user defined IANA Timezone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-        return self.app_config["timezone"]
+        # Verify user defined IANA Time Zone is valid
+        if self.app_config["time_zone"] not in pytz.all_timezones_set:
+            raise Exception(
+                "Time Zone configuration is not valid! Mistyped 'server', 'client' options of invalid IANA Time Zone!"
+            )
+        # return user defined IANA Time Zone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
+        return self.app_config["time_zone"]
