@@ -32,13 +32,10 @@ class DataSourceEntity:
         self.properties = kwargs
 
     def __getattr__(self, attribute_name):
-        try:
-            prop = self.properties[attribute_name]
-            if prop is not None:
-                return prop
-        except KeyError:
-            logging.error(f"{attribute_name} is not an attribute of data source {self.id}")
-            raise AttributeError
+        if attribute_name in self.properties:
+            return self.properties[attribute_name]
+        logging.error(f"{attribute_name} is not an attribute of data source {self.id}")
+        raise AttributeError
 
     @classmethod
     @abstractmethod

@@ -30,15 +30,9 @@ class TaskEntity:
         self.function = function
 
     def __getattr__(self, attribute_name):
-        try:
-            ds = self.input[attribute_name]
-            if ds is not None:
-                return ds
-        except KeyError:
-            try:
-                ds = self.ouput[attribute_name]
-                if ds is not None:
-                    return ds
-            except KeyError:
-                logging.error(f"{attribute_name} is not a data source of task {self.id}")
-                raise AttributeError
+        if attribute_name in self.input:
+            return self.input[attribute_name]
+        if attribute_name in self.output:
+            return self.output[attribute_name]
+        logging.error(f"{attribute_name} is not a data source of task {self.id}")
+        raise AttributeError

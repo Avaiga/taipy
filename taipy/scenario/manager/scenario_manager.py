@@ -103,7 +103,7 @@ class ScenarioManager:
     def get_data(self, data_source_name: str, scenario_id: ScenarioId):
         scenario_entity = self.get_scenario_entity(scenario_id)
         for pipeline_entity in scenario_entity.pipeline_entities:
-            for task_entity in pipeline_entity.task_entities:
+            for task_entity in pipeline_entity.task_entities.values():
                 for ds_entity in task_entity.input.values():
                     if ds_entity.name == data_source_name:
                         return ds_entity.get()
@@ -115,7 +115,7 @@ class ScenarioManager:
     def set_data(self, data_source_name: str, scenario_id: ScenarioId, data):
         scenario_entity = self.get_scenario_entity(scenario_id)
         for pipeline_entity in scenario_entity.pipeline_entities:
-            for task in pipeline_entity.task_entities:
+            for task in pipeline_entity.task_entities.values():
                 for ds_entity in task.input.values():
                     if ds_entity.name == data_source_name:
                         return ds_entity.write(data)

@@ -2,6 +2,7 @@
 More specific pipelines such as optimization pipeline, data preparation pipeline,
 ML training pipeline, etc. should implement this generic pipeline entity
 """
+import logging
 import uuid
 from collections import defaultdict
 from typing import Dict, List
@@ -29,8 +30,21 @@ class PipelineEntity:
             self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
         )
         self.properties = properties
-        self.task_entities = task_entities
+        self.task_entities = {task.name: task for task in task_entities}
         self.is_consistent = self.__is_consistent()
+
+    def __getattr__(self, attribute_name):
+        if attribute_name in self.properties:
+            return self.properties[attribute_name]
+        if attribute_name in self.task_entities:
+            return self.task_entities[attribute_name]
+        for task in self.task_entities.values():
+            if attribute_name in task.input:
+                return task.input[attribute_name]
+            if attribute_name in task.output:
+                return task.output[attribute_name]
+        logging.error(f"{attribute_name} is not an attribute of task {self.id}")
+        raise AttributeError
 
     def __is_consistent(self) -> bool:
         dag = self.__build_dag()
@@ -48,7 +62,7 @@ class PipelineEntity:
 
     def __build_dag(self):
         graph = nx.DiGraph()
-        for task in self.task_entities:
+        for task in self.task_entities.values():
             for predecessor in task.input.values():
                 graph.add_edges_from([(predecessor, task)])
             for successor in task.output.values():
@@ -58,7 +72,7 @@ class PipelineEntity:
     def to_model(self) -> PipelineModel:
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(lambda: [])
-        for task in self.task_entities:
+        for task in self.task_entities.values():
             for predecessor in task.input.values():
                 source_task_edges[predecessor.id].append(str(task.id))
             for successor in task.output.values():

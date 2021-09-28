@@ -73,7 +73,8 @@ def test_save_and_get_scenario_entity():
 
     input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
-    task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
+    task_name = "task"
+    task_2 = TaskEntity(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_entity_2 = PipelineEntity(
         "pipeline_name_2", {}, [task_2], PipelineId("pipeline_id_2")
     )
@@ -143,7 +144,7 @@ def test_save_and_get_scenario_entity():
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
     scenario_manager.pipeline_manager.task_manager.save_task_entity(
-        scenario_2.pipeline_entities[0].task_entities[0]
+        scenario_2.pipeline_entities[0].task_entities[task_name]
     )
     scenario_manager.pipeline_manager.save_pipeline_entity(pipeline_entity_3)
     scenario_manager.save_scenario_entity(scenario_3_with_same_id)
