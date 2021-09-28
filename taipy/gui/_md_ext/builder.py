@@ -57,6 +57,9 @@ class MarkdownBuilder:
                 # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
                     self.attributes[k] = v
+                    # Bind potential function
+                    Gui._get_instance().bind_func(v)
+
         if self.var_name:
             try:
                 # Bind variable name (var_name string split in case
@@ -89,7 +92,7 @@ class MarkdownBuilder:
             coltypes = self.value.dtypes.apply(lambda x: x.name).to_dict()
             if isinstance(columns, str):
                 columns = [s.strip() for s in columns.split(";")]
-            if isinstance(columns, list) or isinstance(columns, tuple):
+            if isinstance(columns, (list, tuple)):
                 coldict = {}
                 idx = 0
                 for col in columns:

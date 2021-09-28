@@ -211,6 +211,15 @@ class Gui(object, metaclass=Singleton):
         if not hasattr(self, var_name) and var_name in self._dict_bind_locals:
             self.bind(var_name, self._dict_bind_locals[var_name])
 
+    def bind_func(self, func_name):
+        if (
+            not hasattr(self, func_name)
+            and isinstance(func_name, str)
+            and func_name in (bind_locals := self._get_instance()._dict_bind_locals)
+            and isinstance((func := bind_locals[func_name]), FunctionType)
+        ):
+            setattr(self, func_name, func)
+
     # Backup Binding Method
     def _bind_all(self):
         exclusion_list = [
@@ -386,13 +395,6 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/react-router/", view_func=self.__render_route)
-
-        # Bind all available function with specified prefix in parent frame
-        for k, v in self._dict_bind_locals.items():
-            if isinstance(v, FunctionType) and k.startswith(
-                self._config.app_config["function_prefix"]
-            ):
-                setattr(self, k, v)
 
         # Start Flask Server
         self._server.runWithWS(
