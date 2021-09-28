@@ -216,6 +216,8 @@ class Gui(object, metaclass=Singleton):
     def bind_var(self, var_name):
         if not hasattr(self, var_name) and var_name in self._dict_bind_locals:
             self.bind(var_name, self._dict_bind_locals[var_name])
+            return True
+        return False
 
     def bind_func(self, func_name):
         if (

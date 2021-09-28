@@ -11,14 +11,8 @@ from ..utils import (
     get_client_var_name,
     getDataType,
     is_boolean_true,
-    get_date_col_str_name,
 )
-
-
-def _add_to_dict_and_get(dico, key, value):
-    if key not in dico.keys():
-        dico[key] = value
-    return dico[key]
+from .utils import _add_to_dict_and_get, _get_columns_dict
 
 
 class MarkdownBuilder:
@@ -57,8 +51,9 @@ class MarkdownBuilder:
                 # Iterate through properties_dict and append to self.attributes
                 for k, v in properties_dict.items():
                     self.attributes[k] = v
-                    # Bind potential function
-                    Gui._get_instance().bind_func(v)
+                    if isinstance(v, str):
+                        # Bind potential function
+                        Gui._get_instance().bind_func(v)
 
         if self.var_name:
             try:
@@ -88,48 +83,11 @@ class MarkdownBuilder:
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
             attributes = self.attributes or {}
-            columns = _add_to_dict_and_get(attributes, "columns", {})
-            coltypes = self.value.dtypes.apply(lambda x: x.name).to_dict()
-            if isinstance(columns, str):
-                columns = [s.strip() for s in columns.split(";")]
-            if isinstance(columns, (list, tuple)):
-                coldict = {}
-                idx = 0
-                for col in columns:
-                    if col not in coltypes.keys():
-                        print(
-                            'Error column "'
-                            + col
-                            + '" is not present in the dataframe "'
-                            + self.var_name
-                            + '"'
-                        )
-                    else:
-                        coldict[col] = {"index": idx}
-                        idx += 1
-                columns = coldict
-            if not isinstance(columns, dict):
-                print(
-                    "Error: columns attributes should be a string, list, tuple or dict"
-                )
-                columns = {}
-            if len(columns) == 0:
-                idx = 0
-                for col in coltypes.keys():
-                    columns[col] = {"index": idx}
-                    idx += 1
-            date_format = _add_to_dict_and_get(attributes, "date_format", date_format)
-            idx = 0
-            for col, type in coltypes.items():
-                if col in columns.keys():
-                    columns[col]["type"] = type
-                    columns[col]["dfid"] = col
-                    idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
-                    if type.startswith("datetime64"):
-                        _add_to_dict_and_get(columns[col], "format", date_format)
-                        columns[get_date_col_str_name(self.value, col)] = columns.pop(
-                            col
-                        )
+            columns = _get_columns_dict(
+                self.value,
+                _add_to_dict_and_get(attributes, "columns", {}),
+                _add_to_dict_and_get(attributes, "date_format", date_format),
+            )
             attributes["columns"] = columns
             self.set_attribute("columns", json.dumps(columns))
         return self
