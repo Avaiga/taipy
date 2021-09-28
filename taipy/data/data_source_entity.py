@@ -26,9 +26,16 @@ class DataSourceEntity:
         self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
     ):
         self.id = id or str(uuid.uuid4())
-        self.name = name
+        self.name = name.strip().lower().replace(' ', '_')
         self.scope = scope
         self.properties = kwargs
+
+    def __getattr__(self, attribute_name):
+        property = self.properties[attribute_name]
+        if property:
+            return property
+        else:
+            return self.__getattr__(attribute_name)
 
     @classmethod
     @abstractmethod

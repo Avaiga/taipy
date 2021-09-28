@@ -1,13 +1,19 @@
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
-from taipy.pipeline import PipelineEntity, PipelineId
+from taipy.pipeline import PipelineEntity, PipelineId, Pipeline
 from taipy.task import TaskEntity, TaskId
 
 
+def test_create_pipeline():
+    pipeline = Pipeline("  nAmE 1 ", [])
+    assert pipeline.name == "name_1"
+
+
 def test_create_pipeline_entity():
-    pipeline = PipelineEntity("name_1", {}, [])
+    pipeline = PipelineEntity("nAmE 1 ", {}, [])
     assert pipeline.id is not None
+    assert pipeline.name == "name_1"
 
 
 def test_check_consistency():

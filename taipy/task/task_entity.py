@@ -22,7 +22,7 @@ class TaskEntity:
             output = []
         self.input = input
         self.output = output
-        self.name = name
+        self.name = name.strip().lower().replace(' ', '_')
         self.id = id or TaskId(
             self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
         )

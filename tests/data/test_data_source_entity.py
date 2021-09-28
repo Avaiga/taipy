@@ -39,12 +39,14 @@ class TestCSVDataSourceEntity:
         assert np.array_equal(csv.get().values, df.values)
 
     def test_create(self):
-        ds = CSVDataSourceEntity.create("foo", Scope.PIPELINE, "data/source/path")
+        ds = CSVDataSourceEntity.create("fOo BAr", Scope.PIPELINE, "data/source/path")
 
         assert isinstance(ds, CSVDataSourceEntity)
+        assert ds.name == "foo_bar"
         assert ds.has_header is False
         assert ds.path == "data/source/path"
         assert ds.type() == "csv"
+        assert ds.id is not None
 
     def test_init_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
@@ -69,9 +71,11 @@ class TestEmbeddedDataSourceEntity:
         assert embedded_dict.get() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
-        ds = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, data="Embedded Data Source")
+        ds = EmbeddedDataSourceEntity.create("foobar BaZ", Scope.PIPELINE, data="Embedded Data Source")
+        assert ds.name == "foobar_baz"
         assert isinstance(ds, EmbeddedDataSourceEntity)
         assert ds.type() == "embedded"
+        assert ds.id is not None
 
     def test_preview(self):
         ds = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, data="Embedded Data Source")

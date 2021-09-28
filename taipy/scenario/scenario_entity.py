@@ -20,10 +20,10 @@ class ScenarioEntity:
         properties: Dict[str, str],
         scenario_id: ScenarioId = None,
     ):
+        self.name = name.strip().lower().replace(' ', '_')
         self.id: ScenarioId = scenario_id or ScenarioId(
             self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
         )
-        self.name = name
         self.pipeline_entities = pipeline_entities
         self.properties = properties
 

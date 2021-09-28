@@ -24,10 +24,10 @@ class PipelineEntity:
         task_entities: List[TaskEntity],
         pipeline_id: PipelineId = None,
     ):
+        self.name = name.strip().lower().replace(' ', '_')
         self.id: PipelineId = pipeline_id or PipelineId(
             self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
         )
-        self.name = name
         self.properties = properties
         self.task_entities = task_entities
         self.is_consistent = self.__is_consistent()
