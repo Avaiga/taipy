@@ -49,9 +49,9 @@ class PipelineEntity:
     def __build_dag(self):
         graph = nx.DiGraph()
         for task in self.task_entities:
-            for predecessor in task.input:
+            for predecessor in task.input.values():
                 graph.add_edges_from([(predecessor, task)])
-            for successor in task.output:
+            for successor in task.output.values():
                 graph.add_edges_from([(task, successor)])
         return graph
 
@@ -59,9 +59,9 @@ class PipelineEntity:
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(lambda: [])
         for task in self.task_entities:
-            for predecessor in task.input:
+            for predecessor in task.input.values():
                 source_task_edges[predecessor.id].append(str(task.id))
-            for successor in task.output:
+            for successor in task.output.values():
                 task_source_edges[str(task.id)].append(successor.id)
         return PipelineModel(
             self.id,

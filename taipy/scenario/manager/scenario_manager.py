@@ -104,10 +104,10 @@ class ScenarioManager:
         scenario_entity = self.get_scenario_entity(scenario_id)
         for pipeline_entity in scenario_entity.pipeline_entities:
             for task_entity in pipeline_entity.task_entities:
-                for ds_entity in task_entity.input:
+                for ds_entity in task_entity.input.values():
                     if ds_entity.name == data_source_name:
                         return ds_entity.get()
-                for ds_entity in task_entity.output:
+                for ds_entity in task_entity.output.values():
                     if ds_entity.name == data_source_name:
                         return ds_entity.get()
         raise NonExistingDataSourceEntity(scenario_id, data_source_name)
@@ -116,10 +116,10 @@ class ScenarioManager:
         scenario_entity = self.get_scenario_entity(scenario_id)
         for pipeline_entity in scenario_entity.pipeline_entities:
             for task in pipeline_entity.task_entities:
-                for ds_entity in task.input:
+                for ds_entity in task.input.values():
                     if ds_entity.name == data_source_name:
                         return ds_entity.write(data)
-                for ds_entity in task.output:
+                for ds_entity in task.output.values():
                     if ds_entity.name == data_source_name:
                         return ds_entity.write(data)
             raise NonExistingDataSourceEntity(scenario_id, data_source_name)
