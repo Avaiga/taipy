@@ -7,17 +7,11 @@ from taipy.exceptions import MissingRequiredProperty
 
 
 class EmbeddedDataSourceEntity(DataSourceEntity):
-    __REQUIRED_PROPERTIES = ["data"]
     __TYPE = "embedded"
 
     def __init__(
         self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
     ):
-        if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
-            raise MissingRequiredProperty(
-                f"The following properties [{','.join(x for x in missing)}] "
-                f"were not informed and are required"
-            )
         super().__init__(name, scope, id, data=properties.get("data"))
 
     @classmethod
