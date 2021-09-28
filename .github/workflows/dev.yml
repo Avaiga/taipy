@@ -48,12 +48,13 @@ jobs:
         run: |
           pipenv install --deploy --dev
       - id: code-quality
+        if: matrix.os == 'ubuntu-latest'
         uses: ricardochaves/python-lint@v1.4.0
         with:
             python-root-list: "taipy tests"
             use-pylint: false
             use-isort: false
-            extra-pycodestyle-options: "--max-line-length=88 --ignore=E203,E266,E501,E722,W503,F403,F401"
+            extra-pycodestyle-options: "--max-line-length=120 --ignore=E203,E266,E501,E722,W503,F403,F401"
             extra-mypy-options: "--ignore-missing-imports"
       - name: test with tox
         run:
