@@ -1,3 +1,4 @@
+import logging
 import uuid
 from abc import abstractmethod
 from typing import Optional
@@ -31,11 +32,13 @@ class DataSourceEntity:
         self.properties = kwargs
 
     def __getattr__(self, attribute_name):
-        property = self.properties[attribute_name]
-        if property:
-            return property
-        else:
-            return self.__getattr__(attribute_name)
+        try:
+            prop = self.properties[attribute_name]
+            if prop is not None:
+                return prop
+        except KeyError:
+            logging.error(f"{attribute_name} is not an attribute of data source {self.id}")
+            raise AttributeError
 
     @classmethod
     @abstractmethod

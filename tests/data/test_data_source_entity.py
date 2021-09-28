@@ -14,6 +14,7 @@ class TestCSVDataSourceEntity:
     def test_get(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         csv = CSVDataSourceEntity.create("foo", Scope.PIPELINE, path)
+        assert csv.path == path
         data = csv.get()
         assert isinstance(data, pd.DataFrame)
 
@@ -47,6 +48,8 @@ class TestCSVDataSourceEntity:
         assert ds.path == "data/source/path"
         assert ds.type() == "csv"
         assert ds.id is not None
+        with pytest.raises(AttributeError):
+            ds.foo
 
     def test_init_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
@@ -63,6 +66,7 @@ class TestEmbeddedDataSourceEntity:
         embedded_str = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
         assert isinstance(embedded_str.get(), str)
         assert embedded_str.get() == "bar"
+        assert embedded_str.data == "bar"
         embedded_int = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, 197)
         assert isinstance(embedded_int.get(), int)
         assert embedded_int.get() == 197
