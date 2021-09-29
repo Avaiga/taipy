@@ -22,6 +22,7 @@ export interface TaipyState {
 export interface TaipyAction {
     type: Types;
     name: string;
+    propagate?: boolean;
     payload: Record<string, unknown>;
 }
 
@@ -81,9 +82,10 @@ export const createUpdateAction = (name: string, payload: Record<string, unknown
     payload: payload
 })
 
-export const createSendUpdateAction = (name: string, value: unknown): TaipyAction => ({
+export const createSendUpdateAction = (name: string, value: unknown, propagate = true): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
+    propagate: propagate,
     payload: {value: value}
 })
 

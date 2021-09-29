@@ -127,14 +127,16 @@ class Gui(object, metaclass=Singleton):
         # Generate router
         routes = self._config.routes
         locations = {}
-        router = '<Router key="Router"><Switch>'
+        router = '<Router key="router"><Switch key="switch">'
         for route in routes:
             router += (
                 '<Route path="/'
                 + (route if route != Gui.__root_page_name else "")
                 + '" exact key="'
                 + route
-                + '" ><TaipyRendered/></Route>'
+                + '" ><TaipyRendered key="tr'
+                + route
+                + '"/></Route>'
             )
             locations["/" + (route if route != Gui.__root_page_name else "")] = (
                 "/" + route
@@ -143,11 +145,15 @@ class Gui(object, metaclass=Singleton):
             router += (
                 '<Route path="/" exact key="'
                 + Gui.__root_page_name
-                + '" ><TaipyRendered/></Route>'
+                + '" ><TaipyRendered key="tr'
+                + Gui.__root_page_name
+                + '"/></Route>'
             )
             locations["/"] = "/" + routes[0]
 
-        router += '<Route path="/404" exact key="404" ><NotFound404 /></Route>'
+        router += (
+            '<Route path="/404" exact key="404" ><NotFound404 key="tr404" /></Route>'
+        )
         router += '<Redirect to="/' + routes[0] + '" key="Redirect" />'
         router += "</Switch></Router>"
 
@@ -251,7 +257,7 @@ class Gui(object, metaclass=Singleton):
         self._control_ids[variable_name] = id + 1
         return id
 
-    def _update_var(self, var_name, value) -> None:
+    def _update_var(self, var_name, value, propagate=True) -> None:
         # Check if Variable is type datetime
         currentvalue = attrgetter(var_name)(self._values)
         if isinstance(value, str):
@@ -269,7 +275,8 @@ class Gui(object, metaclass=Singleton):
                 print("Error: cannot update value for dataframe: " + var_name)
                 return
         # Use custom attrsetter fuction to allow value binding for MapDictionary
-        attrsetter(self._values, var_name, value)
+        if propagate:
+            attrsetter(self._values, var_name, value)
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, var_name, value)

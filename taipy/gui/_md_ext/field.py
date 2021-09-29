@@ -32,6 +32,7 @@ class FieldPattern(InlineProcessor):
                 .set_varname()
                 .set_default_value()
                 .set_className(class_name="taipy-field", config_class="input")
+                .set_propagate()
                 .build()
             )
         # else Field

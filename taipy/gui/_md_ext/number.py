@@ -29,5 +29,6 @@ class NumberPattern(InlineProcessor):
             .set_varname()
             .set_default_value()
             .set_className(class_name="taipy-number", config_class="input")
+            .set_propagate()
             .build()
         )

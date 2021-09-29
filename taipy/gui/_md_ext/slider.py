@@ -31,5 +31,6 @@ class SliderPattern(InlineProcessor):
             .set_className(class_name="taipy-slider", config_class="slider")
             .set_attribute("min", "1")
             .set_attribute("max", "100")
+            .set_propagate()
             .build()
         )

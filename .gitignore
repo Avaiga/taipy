@@ -116,3 +116,4 @@ site/
 # Demo Testing File
 demo.py
 *.csv
+demo.css
