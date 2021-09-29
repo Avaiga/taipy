@@ -58,7 +58,7 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemPr
 );
 
 const Selector = (props: SelectorProps) => {
-    const { defaultvalue, tp_varname, lov, filter, multiple } = props;
+    const { defaultvalue, tp_varname, lov, filter, multiple, className } = props;
     const [selectedValue, setSelectedValue] = useState<string[]>(() => (defaultvalue ? [defaultvalue] : []));
     const [searchValue, setSearchValue] = useState("");
     const { dispatch } = useContext(TaipyContext);
@@ -72,7 +72,7 @@ const Selector = (props: SelectorProps) => {
                     if (p === -1) {
                         newKeys.push(key);
                     } else {
-                        newKeys.splice(p);
+                        newKeys.splice(p, 1);
                     }
                     dispatch(createSendUpdateAction(tp_varname, newKeys));
                     return newKeys;
@@ -92,7 +92,7 @@ const Selector = (props: SelectorProps) => {
     }, []);
 
     return (
-        <Box sx={boxSx}>
+        <Box sx={boxSx} className={className}>
             <Paper sx={paperSx}>
                 {filter && (
                     <TextField margin="dense" placeholder="Search field" value={searchValue} onChange={handleInput} />
