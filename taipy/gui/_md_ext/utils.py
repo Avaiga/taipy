@@ -54,6 +54,7 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
                     columns[get_date_col_str_name(value, col)] = columns.pop(col)
     return columns
 
+
 def _to_camel_case(value):
     if isinstance(value, str):
         if len(value) > 1:

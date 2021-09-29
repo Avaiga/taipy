@@ -31,46 +31,27 @@ interface ItemProps {
 }
 
 const SingleItem = ({ value, createClickHandler, selectedValue, item }: ItemProps) => (
-    <ListItemButton
-        onClick={createClickHandler(value)}
-        selected={selectedValue.indexOf(value) !== -1}
-    >
+    <ListItemButton onClick={createClickHandler(value)} selected={selectedValue.indexOf(value) !== -1}>
         {typeof item === "string" ? (
             <ListItemText primary={item} />
         ) : (
             <ListItemAvatar>
-                <Avatar
-                    alt={(item as TaipyImage).text || value}
-                    src={(item as TaipyImage).path}
-                />
+                <Avatar alt={(item as TaipyImage).text || value} src={(item as TaipyImage).path} />
             </ListItemAvatar>
         )}
     </ListItemButton>
 );
 
-const MultipleItem = ({
-    value,
-    createClickHandler,
-    selectedValue,
-    item,
-}: ItemProps) => (
+const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemProps) => (
     <ListItemButton onClick={createClickHandler(value)} dense>
         <ListItemIcon>
-            <Checkbox
-                edge="start"
-                checked={selectedValue.indexOf(value) !== -1}
-                tabIndex={-1}
-                disableRipple
-            />
+            <Checkbox edge="start" checked={selectedValue.indexOf(value) !== -1} tabIndex={-1} disableRipple />
         </ListItemIcon>
         {typeof item === "string" ? (
             <ListItemText primary={item} />
         ) : (
             <ListItemAvatar>
-                <Avatar
-                    alt={(item as TaipyImage).text || value}
-                    src={(item as TaipyImage).path}
-                />
+                <Avatar alt={(item as TaipyImage).text || value} src={(item as TaipyImage).path} />
             </ListItemAvatar>
         )}
     </ListItemButton>
@@ -78,9 +59,7 @@ const MultipleItem = ({
 
 const Selector = (props: SelectorProps) => {
     const { defaultvalue, tp_varname, lov, filter, multiple } = props;
-    const [selectedValue, setSelectedValue] = useState<string[]>(() =>
-        defaultvalue ? [defaultvalue] : []
-    );
+    const [selectedValue, setSelectedValue] = useState<string[]>(() => (defaultvalue ? [defaultvalue] : []));
     const [searchValue, setSearchValue] = useState("");
     const { dispatch } = useContext(TaipyContext);
 
@@ -106,10 +85,7 @@ const Selector = (props: SelectorProps) => {
         [tp_varname, dispatch, multiple]
     );
 
-    const createClickHandler = useCallback(
-        (key: string) => () => clickHandler(key),
-        [clickHandler]
-    );
+    const createClickHandler = useCallback((key: string) => () => clickHandler(key), [clickHandler]);
 
     const handleInput = useCallback((e) => {
         setSearchValue(e.target.value);
@@ -119,16 +95,9 @@ const Selector = (props: SelectorProps) => {
         <Box sx={boxSx}>
             <Paper sx={paperSx}>
                 {filter && (
-                    <TextField
-                        margin="dense"
-                        placeholder="Search field"
-                        value={searchValue}
-                        onChange={handleInput}
-                    />
+                    <TextField margin="dense" placeholder="Search field" value={searchValue} onChange={handleInput} />
                 )}
-                <List
-                    sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-                >
+                <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
                     {lov &&
                         Object.keys(lov)
                             .filter(

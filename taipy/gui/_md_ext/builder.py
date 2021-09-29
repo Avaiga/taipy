@@ -12,11 +12,7 @@ from ..utils import (
     getDataType,
     is_boolean_true,
 )
-from .utils import (
-    _add_to_dict_and_get,
-    _get_columns_dict,
-    _to_camel_case
-)
+from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
 
 class MarkdownBuilder:
@@ -209,27 +205,25 @@ class MarkdownBuilder:
         return self.__set_list_of_("lov")
 
     def __set_list_of_(self, name):
-        lof = (
-            self.attributes
-            and name in self.attributes
-            and self.attributes[name]
-        )
+        lof = self.attributes and name in self.attributes and self.attributes[name]
         if isinstance(lof, str):
             lof = {s.strip(): s for s in lof.split(";")}
         if not isinstance(lof, dict):
-            print(f"Error: on component {self.el_element_name} parameter {name} should be a string or a dict")
+            print(
+                f"Error: on component {self.el_element_name} parameter {name} should be a string or a dict"
+            )
             return self
         return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
 
     def __set_boolean_attribute(self, name, default_value=False):
         boolattr = (
-            self.attributes
-            and name in self.attributes
-            and self.attributes[name]
+            self.attributes and name in self.attributes and self.attributes[name]
         ) or default_value
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
-        return self.set_attribute(_to_camel_case(name), "{!" + str(boolattr).lower() + "!}")
+        return self.set_attribute(
+            _to_camel_case(name), "{!" + str(boolattr).lower() + "!}"
+        )
 
     def set_attribute(self, name, value):
         self.el.set(name, value)

@@ -14,7 +14,9 @@ class SelectorPattern(InlineProcessor):
 
     @staticmethod
     def extendMarkdown(md):
-        md.inlinePatterns["taipy-selector"] = SelectorPattern(SelectorPattern._PATTERN, md)
+        md.inlinePatterns["taipy-selector"] = SelectorPattern(
+            SelectorPattern._PATTERN, md
+        )
 
     def handleMatch(self, m, data):
         """Handle the match."""

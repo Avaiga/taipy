@@ -59,9 +59,10 @@ class Server(Flask):
                     return send_from_directory(self.static_folder + os.path.sep, path)
                 # use the path mapping to detect and find resources
                 for k, v in self.__path_mapping.items():
-                    if path.startswith(k+"/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
-                        return send_from_directory(v + os.path.sep, path[len(k) + 1:])
-
+                    if path.startswith(k + "/") and os.path.isfile(
+                        v + os.path.sep + path[len(k) + 1 :]
+                    ):
+                        return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
 
         # Websocket (handle json message)
         @self._ws.on("message")
