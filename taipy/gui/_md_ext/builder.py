@@ -112,8 +112,10 @@ class MarkdownBuilder:
             )
         elif isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
+        elif isinstance(self.value, str):
+            self.set_attribute("defaultvalue", self.value)
         else:
-            self.set_attribute("defaultvalue", str(self.value))
+            self.set_attribute("defaultvalue", "{!" + str(self.value) + "!}")
         return self
 
     def set_className(self, class_name="", config_class="input"):

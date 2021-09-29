@@ -14,12 +14,6 @@ import { TaipyImage, TaipyInputProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 
-interface SelectorProps extends TaipyInputProps {
-    lov: Record<string, string | TaipyImage>;
-    filter: boolean;
-    multiple: boolean;
-}
-
 const boxSx = { width: "100%" };
 const paperSx = { width: "100%", mb: 2 };
 
@@ -57,9 +51,20 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemPr
     </ListItemButton>
 );
 
+interface SelectorProps extends TaipyInputProps {
+    lov: Record<string, string | TaipyImage>;
+    filter: boolean;
+    multiple: boolean;
+}
+
 const Selector = (props: SelectorProps) => {
     const { defaultvalue, tp_varname, lov, filter, multiple, className } = props;
-    const [selectedValue, setSelectedValue] = useState<string[]>(() => (defaultvalue ? [defaultvalue] : []));
+    const [selectedValue, setSelectedValue] = useState<string[]>(() => {
+        if (multiple && Array.isArray(defaultvalue)) {
+            return defaultvalue;
+        }
+        return defaultvalue ? [defaultvalue] : [];
+    });
     const [searchValue, setSearchValue] = useState("");
     const { dispatch } = useContext(TaipyContext);
 

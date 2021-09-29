@@ -33,5 +33,6 @@ class SelectorPattern(InlineProcessor):
             .set_lov()
             .set_filter()
             .set_multiple()
+            .set_default_value()
             .build()
         )
