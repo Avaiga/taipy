@@ -12,7 +12,7 @@ from ..utils import (
     getDataType,
     is_boolean_true,
 )
-from .utils import _add_to_dict_and_get, _get_columns_dict
+from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
 
 class MarkdownBuilder:
@@ -112,8 +112,10 @@ class MarkdownBuilder:
             )
         elif isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
+        elif isinstance(self.value, str):
+            self.set_attribute("defaultvalue", self.value)
         else:
-            self.set_attribute("defaultvalue", str(self.value))
+            self.set_attribute("defaultvalue", "{!" + str(self.value) + "!}")
         return self
 
     def set_className(self, class_name="", config_class="input"):
@@ -128,13 +130,7 @@ class MarkdownBuilder:
     def set_withTime(self):
         if self.el_element_name != "DateSelector":
             return self
-        if (
-            self.attributes
-            and "with_time" in self.attributes
-            and is_boolean_true(self.attributes["with_time"])
-        ):
-            self.set_attribute("withTime", str(True))
-        return self
+        return self.__set_boolean_attribute("with_time")
 
     def set_type(self, type_name=None):
         self.type_name = type_name
@@ -189,15 +185,7 @@ class MarkdownBuilder:
     def set_allow_all_rows(self, default_value=False):
         if self.el_element_name != "Table":
             return self
-        allow_all_rows = (
-            self.attributes
-            and "allow_all_rows" in self.attributes
-            and self.attributes["allow_all_rows"]
-        ) or default_value
-        if isinstance(allow_all_rows, str):
-            allow_all_rows = is_boolean_true(allow_all_rows)
-        self.set_attribute("allowAllRows", "{!" + str(allow_all_rows).lower() + "!}")
-        return self
+        return self.__set_boolean_attribute("allow_all_rows", default_value)
 
     def set_format(self):
         format = (
@@ -208,6 +196,36 @@ class MarkdownBuilder:
         if format:
             self.set_attribute("format", format)
         return self
+
+    def set_filter(self, default_value=False):
+        return self.__set_boolean_attribute("filter", default_value)
+
+    def set_multiple(self, default_value=False):
+        return self.__set_boolean_attribute("multiple", default_value)
+
+    def set_lov(self):
+        return self.__set_list_of_("lov")
+
+    def __set_list_of_(self, name):
+        lof = self.attributes and name in self.attributes and self.attributes[name]
+        if isinstance(lof, str):
+            lof = {s.strip(): s for s in lof.split(";")}
+        if not isinstance(lof, dict):
+            print(
+                f"Error: on component {self.el_element_name} parameter {name} should be a string or a dict"
+            )
+            return self
+        return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
+
+    def __set_boolean_attribute(self, name, default_value=False):
+        boolattr = (
+            self.attributes and name in self.attributes and self.attributes[name]
+        ) or default_value
+        if isinstance(boolattr, str):
+            boolattr = is_boolean_true(boolattr)
+        return self.set_attribute(
+            _to_camel_case(name), "{!" + str(boolattr).lower() + "!}"
+        )
 
     def set_attribute(self, name, value):
         self.el.set(name, value)

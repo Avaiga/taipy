@@ -17,3 +17,8 @@ export interface TaipyInputProps extends TaipyBaseProps {
     actionName: string;
     value: string;
 }
+
+export interface TaipyImage {
+    path: string;
+    text: string;
+}

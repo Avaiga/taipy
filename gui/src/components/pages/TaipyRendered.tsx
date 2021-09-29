@@ -6,15 +6,14 @@ import { useLocation } from "react-router-dom";
 import { setStyle, ENDPOINT } from "../../utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
-import { unknownRender, renderError } from "../Taipy/UnknownComp";
+import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 
 const TaipyRendered = () => {
     const location = useLocation();
     const [JSX, setJSX] = useState("");
     const { state } = useContext(TaipyContext);
 
-    const path =
-        (state.locations && state.locations[location.pathname]) || location.pathname;
+    const path = (state.locations && state.locations[location.pathname]) || location.pathname;
 
     useEffect(() => {
         // Fetch JSX Flask Backend Render
@@ -27,9 +26,7 @@ const TaipyRendered = () => {
                     setStyle(result.data.style);
                 }
             })
-            .catch((error) =>
-                setJSX("<h1>No data fetched from backend</h1><br></br>" + error)
-            );
+            .catch((error) => setJSX("<h1>No data fetched from backend</h1><br></br>" + error));
     }, [path]);
 
     return (
@@ -38,7 +35,7 @@ const TaipyRendered = () => {
             bindings={state.data}
             components={taipyComponents}
             jsx={JSX}
-            renderUnrecognized={unknownRender}
+            renderUnrecognized={unregisteredRender}
             allowUnknownElements={false}
             renderError={renderError}
         />

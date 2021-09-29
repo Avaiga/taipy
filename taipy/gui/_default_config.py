@@ -15,5 +15,6 @@ default_config = {
         "slider": "appearance-none rounded-lg overflow-hidden dark:bg-gray-600 ring-lime-400",  # noqa
         "date_selector": "",
         "table": "",
+        "selector": "",
     },
 }

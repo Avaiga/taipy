@@ -1,12 +1,4 @@
-import React, {
-    useState,
-    useEffect,
-    useContext,
-    useCallback,
-    useRef,
-    useMemo,
-    CSSProperties,
-} from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties } from "react";
 import Box from "@mui/material/Box";
 import MuiTable from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -17,13 +9,13 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
-import CircularProgress from "@mui/material/CircularProgress";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
 import { getDateTimeString } from "../../utils/index";
+import { Skeleton } from "@mui/material";
 
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
@@ -52,16 +44,15 @@ interface TableProps extends TaipyBaseProps {
 
 type Order = "asc" | "desc";
 
-const getsortByIndex =
-    (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
-        if (cols[key1].index < cols[key2].index) {
-            return -1;
-        }
-        if (cols[key1].index > cols[key2].index) {
-            return 1;
-        }
-        return 0;
-    };
+const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
+    if (cols[key1].index < cols[key2].index) {
+        return -1;
+    }
+    if (cols[key1].index > cols[key2].index) {
+        return 1;
+    }
+    return 0;
+};
 
 const defaultDateFormat = "yyyy/MM/dd";
 
@@ -84,7 +75,7 @@ const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-const loadingStyle: CSSProperties = { position: "absolute", left: "50%", top: "50%" };
+const loadingStyle: CSSProperties = { position: "absolute", left: 0, top: 0 };
 
 const rowsPerPageOptions = [10, 50, 100, 500];
 
@@ -122,9 +113,7 @@ const Table = (props: TableProps) => {
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
-        pageKey.current = `${startIndex}-${
-            startIndex + rowsPerPage
-        }-${orderBy}-${order}`;
+        pageKey.current = `${startIndex}-${startIndex + rowsPerPage}-${orderBy}-${order}`;
         if (!props.value || props.value[pageKey.current] === undefined) {
             setLoading(true);
             dispatch(
@@ -167,21 +156,15 @@ const Table = (props: TableProps) => {
         [rowsPerPage]
     );
 
-    const handleChangeRowsPerPage = useCallback(
-        (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-            setRowsPerPage(parseInt(event.target.value, 10));
-            setStartIndex(0);
-            setLoading(true);
-        },
-        []
-    );
+    const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setLoading(true);
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setStartIndex(0);
+    }, []);
 
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
-            const columns =
-                typeof props.columns === "string"
-                    ? JSON.parse(props.columns)
-                    : props.columns;
+            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
             return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
         }
         return [[], {}];
@@ -211,7 +194,7 @@ const Table = (props: TableProps) => {
         <>
             <Box sx={boxSx}>
                 <Paper sx={paperSx}>
-                    {loading && <CircularProgress style={loadingStyle} />}
+                    {loading && <Skeleton style={loadingStyle} width="100%" height="100%" />}
                     <TableContainer sx={tcSx}>
                         <MuiTable
                             sx={tableSx}
@@ -225,31 +208,17 @@ const Table = (props: TableProps) => {
                                     {colsOrder.map((col, idx) => (
                                         <TableCell
                                             key={col + idx}
-                                            sortDirection={
-                                                orderBy === columns[col].dfid && order
-                                            }
+                                            sortDirection={orderBy === columns[col].dfid && order}
                                         >
                                             <TableSortLabel
                                                 active={orderBy === columns[col].dfid}
-                                                direction={
-                                                    orderBy === columns[col].dfid
-                                                        ? order
-                                                        : "asc"
-                                                }
-                                                onClick={createSortHandler(
-                                                    columns[col].dfid
-                                                )}
+                                                direction={orderBy === columns[col].dfid ? order : "asc"}
+                                                onClick={createSortHandler(columns[col].dfid)}
                                             >
-                                                {columns[col].title ||
-                                                    columns[col].dfid}
+                                                {columns[col].title || columns[col].dfid}
                                                 {orderBy === columns[col].dfid ? (
-                                                    <Box
-                                                        component="span"
-                                                        sx={visuallyHidden}
-                                                    >
-                                                        {order === "desc"
-                                                            ? "sorted descending"
-                                                            : "sorted ascending"}
+                                                    <Box component="span" sx={visuallyHidden}>
+                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
                                                     </Box>
                                                 ) : null}
                                             </TableSortLabel>
@@ -261,21 +230,13 @@ const Table = (props: TableProps) => {
                                 {rows.map((row, index) => {
                                     const isItemSelected = false;
                                     return (
-                                        <TableRow
-                                            hover
-                                            tabIndex={-1}
-                                            key={"row" + index}
-                                            selected={isItemSelected}
-                                        >
+                                        <TableRow hover tabIndex={-1} key={"row" + index} selected={isItemSelected}>
                                             {colsOrder.map((col, cidx) => (
                                                 <TableCell
                                                     key={"val" + index + "-" + cidx}
                                                     {...alignCell(columns[col])}
                                                 >
-                                                    {formatValue(
-                                                        row[col],
-                                                        columns[col]
-                                                    )}
+                                                    {formatValue(row[col], columns[col])}
                                                 </TableCell>
                                             ))}
                                         </TableRow>
