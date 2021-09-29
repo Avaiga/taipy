@@ -53,3 +53,13 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
                     _add_to_dict_and_get(columns[col], "format", date_format)
                     columns[get_date_col_str_name(value, col)] = columns.pop(col)
     return columns
+
+def _to_camel_case(value):
+    if isinstance(value, str):
+        if len(value) > 1:
+            value = value.replace("_", " ").title().replace(" ", "")
+            return value[0].lower() + value[1:]
+        else:
+            return value.lower()
+    else:
+        raise Exception("_to_camel_case allows only string parameter")

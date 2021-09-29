@@ -40,6 +40,8 @@ class Server(Flask):
         self._ws = SocketIO(self, async_mode=None, cors_allowed_origins="*")
         CORS(self)
 
+        self.__path_mapping = path_mapping
+
         # Serve static react build
         @self.route("/", defaults={"path": ""})
         @self.route("/<path:path>")
@@ -53,8 +55,13 @@ class Server(Flask):
                     else "Taipy App",
                 )
             else:
-                # TODO use the path mapping to detect and find resources
-                return send_from_directory(self.static_folder + os.path.sep, path)
+                if os.path.isfile(self.static_folder + os.path.sep + path):
+                    return send_from_directory(self.static_folder + os.path.sep, path)
+                # use the path mapping to detect and find resources
+                for k, v in self.__path_mapping.items():
+                    if path.startswith(k+"/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
+                        return send_from_directory(v + os.path.sep, path[len(k) + 1:])
+
 
         # Websocket (handle json message)
         @self._ws.on("message")

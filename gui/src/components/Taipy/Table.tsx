@@ -17,13 +17,13 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
-import CircularProgress from "@mui/material/CircularProgress";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
 import { getDateTimeString } from "../../utils/index";
+import { Skeleton } from "@mui/material";
 
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
@@ -84,7 +84,7 @@ const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-const loadingStyle: CSSProperties = { position: "absolute", left: "50%", top: "50%" };
+const loadingStyle: CSSProperties = { position: "absolute", left: 0, top: 0 };
 
 const rowsPerPageOptions = [10, 50, 100, 500];
 
@@ -169,9 +169,9 @@ const Table = (props: TableProps) => {
 
     const handleChangeRowsPerPage = useCallback(
         (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+            setLoading(true);
             setRowsPerPage(parseInt(event.target.value, 10));
             setStartIndex(0);
-            setLoading(true);
         },
         []
     );
@@ -211,7 +211,7 @@ const Table = (props: TableProps) => {
         <>
             <Box sx={boxSx}>
                 <Paper sx={paperSx}>
-                    {loading && <CircularProgress style={loadingStyle} />}
+                    {loading && <Skeleton style={loadingStyle} width="100%" height="100%" />}
                     <TableContainer sx={tcSx}>
                         <MuiTable
                             sx={tableSx}

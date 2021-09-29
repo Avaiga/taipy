@@ -11,7 +11,7 @@ import { TaipyInputProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils/index"
 
 interface DateSelectorProps extends TaipyInputProps {
-    withTime?: string;
+    withTime?: boolean;
     format?: string;
 }
 
@@ -41,7 +41,7 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [props.value]);
 
     return <LocalizationProvider dateAdapter={AdapterDateFns}>
-        {withTime && withTime.toLowerCase() === 'true' ?
+        {withTime ?
             <DateTimePicker 
                 onChange={handleChange} 
                 renderInput={renderInput}
@@ -55,7 +55,7 @@ const DateSelector = (props: DateSelectorProps) => {
                 renderInput={renderInput}
                 className={className}
             />
-}
+        }
         </LocalizationProvider>;
 }
 
