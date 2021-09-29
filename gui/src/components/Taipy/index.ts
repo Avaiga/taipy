@@ -15,7 +15,6 @@ export const taipyComponents: Record<string, ComponentType> = {
     DateSelector: DateSelector as ComponentType,
     Table: Table as ComponentType,
     a: Link as ComponentType,
-    Link: Link as ComponentType,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)

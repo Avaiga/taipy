@@ -6,7 +6,7 @@ import { useLocation } from "react-router-dom";
 import { setStyle, ENDPOINT } from "../../utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
-import { unrecognizedRender, renderError } from "../Taipy/UnrecognizedComp";
+import { unknownRender, renderError } from "../Taipy/UnknownComp";
 
 const TaipyRendered = () => {
     const location = useLocation();
@@ -38,7 +38,7 @@ const TaipyRendered = () => {
             bindings={state.data}
             components={taipyComponents}
             jsx={JSX}
-            renderUnrecognized={unrecognizedRender}
+            renderUnrecognized={unknownRender}
             allowUnknownElements={false}
             renderError={renderError}
         />
