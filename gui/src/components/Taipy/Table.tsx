@@ -23,7 +23,7 @@ import { visuallyHidden } from "@mui/utils";
 import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
-import { getDateTimeString } from "../../utils/index"
+import { getDateTimeString } from "../../utils/index";
 
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
@@ -40,7 +40,8 @@ interface TableProps extends TaipyBaseProps {
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     value: Record<string, Record<string, any>>;
     columns: string;
-    pageSizeOptions: (number
+    pageSizeOptions: (
+        | number
         | {
               value: number;
               label: string;
@@ -86,6 +87,11 @@ const alignCell = (col: any): Partial<TableCellProps> => {
 const loadingStyle: CSSProperties = { position: "absolute", left: "50%", top: "50%" };
 
 const rowsPerPageOptions = [10, 50, 100, 500];
+
+const boxSx = { width: "100%" };
+const paperSx = { width: "100%", mb: 2 };
+const tableSx = { minWidth: 750 };
+const tcSx = { maxHeight: "80vh" };
 
 const Table = (props: TableProps) => {
     const {
@@ -134,6 +140,7 @@ const Table = (props: TableProps) => {
             );
         } else {
             setValue(props.value[pageKey.current]);
+            setLoading(false);
         }
     }, [startIndex, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
@@ -164,13 +171,20 @@ const Table = (props: TableProps) => {
         (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
             setRowsPerPage(parseInt(event.target.value, 10));
             setStartIndex(0);
+            setLoading(true);
         },
         []
     );
 
     const [colsOrder, columns] = useMemo(() => {
-        const columns = JSON.parse(props.columns);
-        return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+        if (props.columns) {
+            const columns =
+                typeof props.columns === "string"
+                    ? JSON.parse(props.columns)
+                    : props.columns;
+            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+        }
+        return [[], {}];
     }, [props.columns]);
 
     const pso = useMemo(() => {
@@ -195,15 +209,16 @@ const Table = (props: TableProps) => {
 
     return (
         <>
-            <Box sx={{ width: "100%" }}>
-                <Paper sx={{ width: "100%", mb: 2 }}>
+            <Box sx={boxSx}>
+                <Paper sx={paperSx}>
                     {loading && <CircularProgress style={loadingStyle} />}
-                    <TableContainer>
+                    <TableContainer sx={tcSx}>
                         <MuiTable
-                            sx={{ minWidth: 750 }}
+                            sx={tableSx}
                             aria-labelledby="tableTitle"
                             size={"medium"}
                             className={className}
+                            stickyHeader={true}
                         >
                             <TableHead>
                                 <TableRow>

@@ -71,7 +71,7 @@ class Server(Flask):
             except TypeError as te:
                 print("Decoding Message has failed: " + str(message) + "\n " + str(te))
             except KeyError as ke:
-                print("Can't access: " + message + "\n" + str(ke))
+                print("Can't access: " + str(message) + "\n" + str(ke))
 
     # Update to render as JSX
     def render(self, html_fragment, style):

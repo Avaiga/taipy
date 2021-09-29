@@ -26,4 +26,3 @@ export const JSXReactRouterComponents: Record<string, unknown> = {
     NotFound404: NotFound404,
     TaipyRendered: TaipyRendered,
 };
-

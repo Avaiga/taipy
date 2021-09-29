@@ -9,6 +9,7 @@ from .number import NumberPattern
 from .preproc import TaipyPreprocessor
 from .slider import SliderPattern
 from .table import TablePattern
+from .taipyTreeProcessor import TaipyTreeprocessor
 
 __all__ = ["makeTaipyExtension"]
 
@@ -23,6 +24,7 @@ class TaipyExtension(Extension):
         ButtonPattern.extendMarkdown(md)
         DateSelectorPattern.extendMarkdown(md)
         TablePattern.extendMarkdown(md)
+        TaipyTreeprocessor.extendMarkdown_i(md)
 
 
 def makeTaipyExtension(*args: Any, **kwargs: Any) -> Extension:
