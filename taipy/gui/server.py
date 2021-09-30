@@ -51,7 +51,7 @@ class Server(Flask):
                 return render_template(
                     "index.html",
                     flask_url=request.url_root,
-                    app_css="/" + os.path.splitext(os.path.basename(__main__.__file__))[0] + ".css",
+                    app_css="/" + import_name + ".css",
                     title=self._app.title
                     if hasattr(self._app, "title")
                     else "Taipy App",

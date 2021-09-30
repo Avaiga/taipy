@@ -1,3 +1,4 @@
+import __main__
 import pathlib
 import datetime
 import inspect
@@ -34,7 +35,7 @@ class Gui(object, metaclass=Singleton):
 
     def __init__(
         self,
-        import_name: str,
+        import_name: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0],
         markdown: t.Optional[str] = None,
         markdown_file: t.Optional[str] = None,
         pages: t.Optional[dict] = None,
