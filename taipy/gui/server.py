@@ -18,13 +18,13 @@ class Server(Flask):
     def __init__(
         self,
         app,
-        import_name: str,
+        css_file: str,
         static_folder: t.Optional[str] = "",
         template_folder: str = "",
         path_mapping: t.Optional[dict] = {},
     ):
         super().__init__(
-            import_name=import_name,
+            import_name="Taipy",
             static_url_path=None,
             static_folder=static_folder,
             static_host=None,
@@ -51,7 +51,7 @@ class Server(Flask):
                 return render_template(
                     "index.html",
                     flask_url=request.url_root,
-                    app_css="/" + import_name + ".css",
+                    app_css="/" + css_file + ".css",
                     title=self._app.title
                     if hasattr(self._app, "title")
                     else "Taipy App",

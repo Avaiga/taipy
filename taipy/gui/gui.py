@@ -35,7 +35,7 @@ class Gui(object, metaclass=Singleton):
 
     def __init__(
         self,
-        import_name: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0],
+        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0],
         markdown: t.Optional[str] = None,
         markdown_file: t.Optional[str] = None,
         pages: t.Optional[dict] = None,
@@ -44,7 +44,7 @@ class Gui(object, metaclass=Singleton):
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
-            import_name=import_name,
+            css_file=css_file,
             static_folder=f"{_absolute_path}{os.path.sep}webapp",
             template_folder=f"{_absolute_path}{os.path.sep}webapp",
             path_mapping=path_mapping,
