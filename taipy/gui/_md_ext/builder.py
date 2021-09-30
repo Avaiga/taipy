@@ -225,8 +225,14 @@ class MarkdownBuilder:
         return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
 
     def __set_boolean_attribute(self, name, default_value=False):
-        boolattr = self.attributes[name] if hasattr(self, "attributes") and self.attributes and name in self.attributes else None
-        if boolattr is None :
+        boolattr = (
+            self.attributes[name]
+            if hasattr(self, "attributes")
+            and self.attributes
+            and name in self.attributes
+            else None
+        )
+        if boolattr is None:
             boolattr = default_value
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
