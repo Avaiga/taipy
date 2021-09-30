@@ -206,6 +206,13 @@ class MarkdownBuilder:
     def set_lov(self):
         return self.__set_list_of_("lov")
 
+    def set_propagate(self):
+        from ..gui import Gui
+
+        return self.__set_boolean_attribute(
+            "propagate", Gui._get_instance()._config.app_config["propagate"]
+        )
+
     def __set_list_of_(self, name):
         lof = self.attributes and name in self.attributes and self.attributes[name]
         if isinstance(lof, str):
@@ -219,8 +226,14 @@ class MarkdownBuilder:
 
     def __set_boolean_attribute(self, name, default_value=False):
         boolattr = (
-            self.attributes and name in self.attributes and self.attributes[name]
-        ) or default_value
+            self.attributes[name]
+            if hasattr(self, "attributes")
+            and self.attributes
+            and name in self.attributes
+            else None
+        )
+        if boolattr is None:
+            boolattr = default_value
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
         return self.set_attribute(

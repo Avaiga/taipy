@@ -1,3 +1,4 @@
+import __main__
 import os
 import typing as t
 
@@ -17,13 +18,13 @@ class Server(Flask):
     def __init__(
         self,
         app,
-        import_name: str,
+        css_file: str,
         static_folder: t.Optional[str] = "",
         template_folder: str = "",
         path_mapping: t.Optional[dict] = {},
     ):
         super().__init__(
-            import_name=import_name,
+            import_name="Taipy",
             static_url_path=None,
             static_folder=static_folder,
             static_host=None,
@@ -50,6 +51,7 @@ class Server(Flask):
                 return render_template(
                     "index.html",
                     flask_url=request.url_root,
+                    app_css="/" + css_file + ".css",
                     title=self._app.title
                     if hasattr(self._app, "title")
                     else "Taipy App",
@@ -63,6 +65,8 @@ class Server(Flask):
                         v + os.path.sep + path[len(k) + 1 :]
                     ):
                         return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
+                if os.path.isfile(os.path.dirname(__main__.__file__) + os.path.sep + path):
+                    return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
 
         # Websocket (handle json message)
         @self._ws.on("message")
@@ -71,7 +75,11 @@ class Server(Flask):
                 if "status" in message:
                     print(message["status"])
                 elif message["type"] == "U":
-                    self._app._update_var(message["name"], message["payload"])
+                    self._app._update_var(
+                        message["name"],
+                        message["payload"],
+                        message["propagate"] if "message" in message else True,
+                    )
                 elif message["type"] == "A":
                     self._app._on_action(message["name"], message["payload"])
                 elif message["type"] == "T":

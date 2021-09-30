@@ -51,7 +51,7 @@ const Router = () => {
         <TaipyContext.Provider value={{ state, dispatch }}>
             <ThemeProvider theme={state.theme}>
                 <JsxParser
-                    disableKeyGeneration={true}
+                    disableKeyGeneration={false}
                     components={
                         JSXReactRouterComponents as Record<string, ComponentType>
                     }

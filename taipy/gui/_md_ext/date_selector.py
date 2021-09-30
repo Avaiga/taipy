@@ -33,5 +33,6 @@ class DateSelectorPattern(InlineProcessor):
                 class_name="taipy-date-selector", config_class="date_selector"
             )
             .set_withTime()
+            .set_propagate()
             .build()
         )

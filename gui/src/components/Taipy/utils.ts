@@ -4,6 +4,7 @@ export interface TaipyBaseProps {
     tp_varname: string;
     className?: string;
     value: unknown;
+    propagate: boolean;
 }
 
 export interface TaipyFieldProps extends TaipyBaseProps {
