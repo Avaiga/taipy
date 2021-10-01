@@ -47,11 +47,10 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
 
 
 def _to_camel_case(value):
-    if isinstance(value, str):
-        if len(value) > 1:
-            value = value.replace("_", " ").title().replace(" ", "")
-            return value[0].lower() + value[1:]
-        else:
-            return value.lower()
-    else:
+    if not isinstance(value, str):
         raise Exception("_to_camel_case allows only string parameter")
+
+    if len(value) <= 1:
+        return value.lower()
+    value = value.replace("_", " ").title().replace(" ", "")
+    return value[0].lower() + value[1:]

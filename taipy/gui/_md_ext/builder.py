@@ -17,16 +17,10 @@ class Builder:
         element_name,
         attributes,
         default_value="<Empty>",
-        has_attribute=False,
-        attributes_val=3,
-        allow_properties_config=True,
     ):
         self.element_name = element_name
         self.attributes = attributes
         self.value = default_value
-        self.has_attribute = has_attribute
-        # Allow property configuration by passing in dictionary
-        self.allow_properties_config = allow_properties_config
         # --------------------------------------------
         # TODO - Retrieve var and var_id from default property
         # This is obviously wrong and should have been done at
@@ -48,25 +42,24 @@ class Builder:
                 self.var_id = var_match.group(2)
         # --------------------------------------------
         self.el = etree.Element(element_name)
-        if has_attribute:
-            # Bind properties dictionary to attributes if condition is matched
-            if allow_properties_config and "properties" in self.attributes:
-                from ..gui import Gui
+        # Bind properties dictionary to attributes if condition is matched
+        if "properties" in self.attributes:
+            from ..gui import Gui
 
-                properties_dict_name = self.attributes["properties"]
-                Gui._get_instance().bind_var(properties_dict_name)
-                properties_dict = getattr(Gui._get_instance(), properties_dict_name)
-                if not isinstance(properties_dict, _MapDictionary):
-                    raise Exception(
-                        f"Can't find properties configuration dictionary {properties_dict_name}!"
-                        f" Please review your GUI templates!"
-                    )
-                # Iterate through properties_dict and append to self.attributes
-                for k, v in properties_dict.items():
-                    self.attributes[k] = v
-                    if isinstance(v, str):
-                        # Bind potential function
-                        Gui._get_instance().bind_func(v)
+            properties_dict_name = self.attributes["properties"]
+            Gui._get_instance().bind_var(properties_dict_name)
+            properties_dict = getattr(Gui._get_instance(), properties_dict_name)
+            if not isinstance(properties_dict, _MapDictionary):
+                raise Exception(
+                    f"Can't find properties configuration dictionary {properties_dict_name}!"
+                    f" Please review your GUI templates!"
+                )
+            # Iterate through properties_dict and append to self.attributes
+            for k, v in properties_dict.items():
+                self.attributes[k] = v
+                if isinstance(v, str):
+                    # Bind potential function
+                    Gui._get_instance().bind_func(v)
 
         if self.var_name:
             try:

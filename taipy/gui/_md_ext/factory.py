@@ -22,8 +22,6 @@ class Factory:
             control_type=control_type,
             element_name="Field",
             attributes=attrs,
-            has_attribute=True,
-            attributes_val=6,
             default_value="<empty>",
         )
         .get_gui_value()
@@ -36,7 +34,6 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=True,
             default_value="<empty>",
         )
         .set_type("button")
@@ -49,7 +46,6 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=False,
             default_value="<empty>",
         )
         .set_type("text")
@@ -62,7 +58,6 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=False,
             default_value=0,
         )
         .set_type("number")
@@ -75,7 +70,6 @@ class Factory:
             control_type=control_type,
             element_name="DateSelector",
             attributes=attrs,
-            has_attribute=True,
             default_value="",
         )
         .get_gui_value(fallback_value=datetime.fromtimestamp(0))
@@ -88,7 +82,6 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=False,
             default_value=0,
         )
         .set_type("range")
@@ -103,8 +96,6 @@ class Factory:
             control_type=control_type,
             element_name="Selector",
             attributes=attrs,
-            has_attribute=True,
-            attributes_val=4,
         )
         .set_varname()
         .set_className(class_name="taipy-selector", config_class="selector")
@@ -118,8 +109,6 @@ class Factory:
             control_type=control_type,
             element_name="Table",
             attributes=attrs,
-            has_attribute=True,
-            attributes_val=4,
         )
         .set_varname()
         .set_className(class_name="taipy-table", config_class="table")
