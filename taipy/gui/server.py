@@ -1,15 +1,8 @@
-import __main__
 import os
 import typing as t
 
-from flask import (
-    Flask,
-    jsonify,
-    render_template,
-    render_template_string,
-    request,
-    send_from_directory,
-)
+import __main__
+from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -52,18 +45,14 @@ class Server(Flask):
                     "index.html",
                     flask_url=request.url_root,
                     app_css="/" + css_file + ".css",
-                    title=self._app.title
-                    if hasattr(self._app, "title")
-                    else "Taipy App",
+                    title=self._app.title if hasattr(self._app, "title") else "Taipy App",
                 )
             else:
                 if os.path.isfile(self.static_folder + os.path.sep + path):
                     return send_from_directory(self.static_folder + os.path.sep, path)
                 # use the path mapping to detect and find resources
                 for k, v in self.__path_mapping.items():
-                    if path.startswith(k + "/") and os.path.isfile(
-                        v + os.path.sep + path[len(k) + 1 :]
-                    ):
+                    if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
                         return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
                 if os.path.isfile(os.path.dirname(__main__.__file__) + os.path.sep + path):
                     return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)

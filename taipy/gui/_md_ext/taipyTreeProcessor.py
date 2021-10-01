@@ -1,11 +1,11 @@
-from operator import attrgetter
-from markdown.treeprocessors import Treeprocessor
-import xml.etree.ElementTree as ET
 import re
+import xml.etree.ElementTree as ET
+from operator import attrgetter
+
+from markdown.treeprocessors import Treeprocessor
 
 from ..utils import _MapDictionary
 from .utils import _get_columns_dict
-
 
 pattern = re.compile("(<Taipy.*/>|<Taipy.*</Taipy.*>)")
 
@@ -49,12 +49,8 @@ class TaipyTreeprocessor(Treeprocessor):
                         # Iterate through properties_dict and append to self.attributes
                         prop_dict["columns"] = _get_columns_dict(
                             value,
-                            prop_dict["columns"]
-                            if "columns" in prop_dict
-                            else html.get("columns"),
-                            prop_dict["date_format"]
-                            if "date_format" in prop_dict
-                            else html.get("date_format"),
+                            prop_dict["columns"] if "columns" in prop_dict else html.get("columns"),
+                            prop_dict["date_format"] if "date_format" in prop_dict else html.get("date_format"),
                         )
                         for k, v in prop_dict.items():
                             if isinstance(v, bool):

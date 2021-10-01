@@ -1,26 +1,26 @@
+import __main__
+import pathlib
 import datetime
 import inspect
 import os
-import pathlib
 import re
 import typing as t
 from operator import attrgetter
-from types import FunctionType, SimpleNamespace
+from types import SimpleNamespace, FunctionType
 
-import __main__
 import pandas as pd
 from flask import jsonify, request
 from markdown import Markdown
 
+from .config import GuiConfig
 from ._default_config import default_config
 from ._md_ext import *
-from .config import GuiConfig
 from .Page import Page
 from .server import Server
 from .utils import (
     ISOToDate,
-    Singleton,
     _MapDictionary,
+    Singleton,
     attrsetter,
     dateToISO,
     get_client_var_name,
@@ -42,16 +42,15 @@ class Gui(object, metaclass=Singleton):
         path_mapping: t.Optional[dict] = {},
     ):
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
-        self._server = Server(
-            self,
-            css_file=css_file,
-            static_folder=f"{_absolute_path}{os.path.sep}webapp",
-            template_folder=f"{_absolute_path}{os.path.sep}webapp",
-            path_mapping=path_mapping,
-        )
+        self._server = Server(self,
+                              css_file=css_file,
+                              static_folder=f"{_absolute_path}{os.path.sep}webapp",
+                              template_folder=f"{_absolute_path}{os.path.sep}webapp",
+                              path_mapping=path_mapping)
         self._config = GuiConfig()
         # Load default config
-        self._config.load_config(default_config["app_config"], default_config["style_config"])
+        self._config.load_config(default_config["app_config"],
+                                 default_config["style_config"])
         self._values = SimpleNamespace()
         self._update_function = None
         self._action_function = None
@@ -60,9 +59,15 @@ class Gui(object, metaclass=Singleton):
         #   Value = next id (starting at 0)
         # This is filled when creating the controls, using add_control()
         self._control_ids: t.Dict[str, int] = {}
-        self._markdown = Markdown(
-            extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
-        )
+        self._markdown = Markdown(extensions=[
+            "taipy.gui",
+            "fenced_code",
+            "meta",
+            "admonition",
+            "sane_lists",
+            "tables",
+            "attr_list"
+        ])
         if markdown:
             self.add_page(name=Gui.__root_page_name, markdown=markdown)
         if markdown_file:
@@ -92,7 +97,10 @@ class Gui(object, metaclass=Singleton):
                 page = page_i
         # Make sure that there is a page instace found
         if page is None:
-            return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+            return (jsonify({"error": "Page doesn't exist!"}),
+                    400,
+                    {"Content-Type": "application/json; charset=utf-8"}
+            )
         # Render template (for redundancy, not necessary 'cause it has already
         # been rendered in self.run function)
         if not page.index_html:
@@ -124,7 +132,7 @@ class Gui(object, metaclass=Singleton):
                 + '" ><TaipyRendered key="tr'
                 + route
                 + '"/></Route>'
-            )
+                )
             locations["/" + (route if route != Gui.__root_page_name else "")] = "/" + route
         if Gui.__root_page_name not in routes:
             router += (
@@ -133,7 +141,7 @@ class Gui(object, metaclass=Singleton):
                 + '" ><TaipyRendered key="tr'
                 + Gui.__root_page_name
                 + '"/></Route>'
-            )
+                )
             locations["/"] = "/" + routes[0]
 
         router += '<Route path="/404" exact key="404" ><NotFound404 key="tr404" /></Route>'
@@ -160,11 +168,11 @@ class Gui(object, metaclass=Singleton):
         if name is None:
             raise Exception("name is required for add_page function!")
         if not re.match(r"^[\w-]+$", name):
-            raise SyntaxError(
-                f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.'
-            )
+            raise SyntaxError(f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.')
         if name in self._config.routes:
-            raise Exception('Page name "' + (name if name != Gui.__root_page_name else "/") + '" is already defined')
+            raise Exception('Page name "'
+                            + (name if name != Gui.__root_page_name else "/")
+                            + '" is already defined')
         # Init a new page
         new_page = Page()
         new_page.route = name
@@ -183,7 +191,9 @@ class Gui(object, metaclass=Singleton):
         if not re.match("^[a-zA-Z][a-zA-Z_$0-9]*$", name):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(Gui, name, _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)))
+            setattr(Gui,
+                    name,
+                    _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)))
             setattr(self._values, name, _MapDictionary(value))
         else:
             prop = property(
@@ -201,12 +211,10 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def bind_func(self, func_name):
-        if (
-            isinstance(func_name, str)
+        if (isinstance(func_name, str)
             and not hasattr(self, func_name)
             and func_name in (bind_locals := self._get_instance()._dict_bind_locals)
-            and isinstance((func := bind_locals[func_name]), FunctionType)
-        ):
+            and isinstance((func := bind_locals[func_name]), FunctionType)):
             setattr(self, func_name, func)
 
     # Backup Binding Method
@@ -269,7 +277,9 @@ class Gui(object, metaclass=Singleton):
             newvalue = dateToISO(newvalue)
         elif isinstance(newvalue, pd.DataFrame):
             keys = payload.keys()
-            ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
+            ret_payload["pagekey"] = (
+                payload["pagekey"] if "pagekey" in keys else "unknown page"
+            )
             if isinstance(payload["start"], int):
                 start = int(payload["start"])
             else:
@@ -290,14 +300,24 @@ class Gui(object, metaclass=Singleton):
                 start = 0
             if end < 0 or end >= rowcount:
                 end = rowcount - 1
-            datecols = newvalue.dtypes[newvalue.dtypes.astype("string").str.startswith("datetime")].index.tolist()
+            datecols = newvalue.dtypes[
+                newvalue.dtypes.astype("string").str.startswith("datetime")
+            ].index.tolist()
             if len(datecols) != 0:
                 # copy the df so that we don't "mess" with the user's data
                 newvalue = newvalue.copy()
                 for col in datecols:
                     newcol = get_date_col_str_name(newvalue, col)
-                    newvalue[newcol] = newvalue[col].dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ").astype("string")
-            if "orderby" in keys and isinstance(payload["orderby"], str) and len(payload["orderby"]):
+                    newvalue[newcol] = (
+                        newvalue[col]
+                        .dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                        .astype("string")
+                    )
+            if (
+                "orderby" in keys
+                and isinstance(payload["orderby"], str)
+                and len(payload["orderby"])
+            ):
                 new_indexes = newvalue[payload["orderby"]].values.argsort(axis=0)
                 if "sort" in keys and payload["sort"] == "desc":
                     # reverse order
@@ -320,7 +340,9 @@ class Gui(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name, payload) -> None:
         try:
-            self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
+            self._server._ws.send(
+                {"type": "U", "name": get_client_var_name(var_name), "payload": payload}
+            )
         except Exception as e:
             print(e)
 
@@ -370,11 +392,15 @@ class Gui(object, metaclass=Singleton):
                 with open(page_i.md_template_file, "r") as f:
                     page_i.index_html = self._parse_markdown(f.read())
             # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{page_i.route}/", view_func=self._render_page)
+            self._server.add_url_rule(
+                f"/flask-jsx/{page_i.route}/", view_func=self._render_page
+            )
         # define a root page if needed
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/initialize/", view_func=self.__render_route)
 
         # Start Flask Server
-        self._server.runWithWS(host=host, port=port, debug=debug, load_dotenv=load_dotenv)
+        self._server.runWithWS(
+            host=host, port=port, debug=debug, load_dotenv=load_dotenv
+        )

@@ -1,41 +1,54 @@
-from operator import attrgetter
-from markdown.util import etree
-import pandas as pd
-import json
 import datetime
+import json
+import re
+from operator import attrgetter
 
-from .parse_attributes import parse_attributes
-from ..utils import (
-    _MapDictionary,
-    dateToISO,
-    get_client_var_name,
-    getDataType,
-    is_boolean_true,
-)
+import pandas as pd
+from markdown.util import etree
+
+from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
 
-class MarkdownBuilder:
+class Builder:
     def __init__(
         self,
-        m,
-        el_element_name,
+        control_type,
+        element_name,
+        attributes,
         default_value="<Empty>",
         has_attribute=False,
         attributes_val=3,
         allow_properties_config=True,
     ):
-        self.m = m
-        self.el_element_name = el_element_name
+        self.element_name = element_name
+        self.attributes = attributes
         self.value = default_value
         self.has_attribute = has_attribute
         # Allow property configuration by passing in dictionary
         self.allow_properties_config = allow_properties_config
-        self.var_name = m.group(1)
-        self.var_id = m.group(2)
-        self.el = etree.Element(el_element_name)
+        # --------------------------------------------
+        # TODO - Retrieve var and var_id from default property
+        # This is obviously wrong and should have been done at
+        # the preprocessor level.
+        # At this point, the default property should be set to a
+        # string of the form: var_name(var_index)
+        # TODO - Here is also the place where function names
+        # should be checked for a potential binding to the application
+        # code, using Gui._get_instance().bind_func(property_value)
+        from .factory import Factory
+
+        default_property_value = attributes.get(Factory.get_default_property_name(control_type))
+        # Check if we have a variable
+        self.var_name = None
+        if default_property_value:
+            var_match = re.match(r"{([a-zA-Z][\.a-zA-Z_$0-9]*)\((\d+)\)}", default_property_value)
+            if var_match:
+                self.var_name = var_match.group(1)
+                self.var_id = var_match.group(2)
+        # --------------------------------------------
+        self.el = etree.Element(element_name)
         if has_attribute:
-            self.attributes = parse_attributes(m.group(attributes_val)) or {}
             # Bind properties dictionary to attributes if condition is matched
             if allow_properties_config and "properties" in self.attributes:
                 from ..gui import Gui
@@ -45,7 +58,7 @@ class MarkdownBuilder:
                 properties_dict = getattr(Gui._get_instance(), properties_dict_name)
                 if not isinstance(properties_dict, _MapDictionary):
                     raise Exception(
-                        f"Can't find properties configuration dictionary for {str(m)}!"
+                        f"Can't find properties configuration dictionary {properties_dict_name}!"
                         f" Please review your GUI templates!"
                     )
                 # Iterate through properties_dict and append to self.attributes
@@ -63,7 +76,7 @@ class MarkdownBuilder:
 
                 Gui._get_instance().bind_var(self.var_name.split(sep=".")[0])
             except Exception:
-                print(f"Couldn't bind variable '{self.var_name}'")
+                print(f"Couldn't bind variable '{self.var_name}'", flush=True)
 
     def get_gui_value(self, fallback_value=None):
         if self.var_name:
@@ -72,12 +85,8 @@ class MarkdownBuilder:
 
                 self.value = attrgetter(self.var_name)(Gui._get_instance()._values)
             except Exception:
-                print(f"WARNING: variable {self.var_name} doesn't exist")
-                self.value = (
-                    fallback_value
-                    if fallback_value is not None
-                    else "[Undefined: " + self.var_name + "]"
-                )
+                print(f"WARNING: variable {self.var_name} doesn't exist", flush=True)
+                self.value = fallback_value if fallback_value is not None else "[Undefined: " + self.var_name + "]"
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
@@ -103,12 +112,10 @@ class MarkdownBuilder:
         return self
 
     def set_default_value(self):
-        if self.el_element_name == "Input" and self.type_name == "button":
+        if self.element_name == "Input" and self.type_name == "button":
             self.set_attribute(
                 "value",
-                self.attributes["label"]
-                if self.attributes and "label" in self.attributes
-                else str(self.value),
+                self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
             )
         elif isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
@@ -128,7 +135,7 @@ class MarkdownBuilder:
         return self
 
     def set_withTime(self):
-        if self.el_element_name != "DateSelector":
+        if self.element_name != "DateSelector":
             return self
         return self.__set_boolean_attribute("with_time")
 
@@ -142,7 +149,7 @@ class MarkdownBuilder:
         return self
 
     def set_button_attribute(self):
-        if self.el_element_name != "Input" or self.type_name != "button":
+        if self.element_name != "Input" or self.type_name != "button":
             return self
         if self.attributes and "id" in self.attributes:
             self.set_attribute("id", self.attributes["id"])
@@ -157,42 +164,32 @@ class MarkdownBuilder:
         return self
 
     def set_table_pagesize(self, default_size=100):
-        if self.el_element_name != "Table":
+        if self.element_name != "Table":
             return self
         page_size = (
-            self.attributes
-            and "page_size" in self.attributes
-            and self.attributes["page_size"]
+            self.attributes and "page_size" in self.attributes and self.attributes["page_size"]
         ) or default_size
         self.set_attribute("pageSize", "{!" + str(page_size) + "!}")
         return self
 
     def set_table_pagesize_options(self, default_size=[50, 100, 500]):
-        if self.el_element_name != "Table":
+        if self.element_name != "Table":
             return self
         page_size_options = (
-            self.attributes
-            and "page_size_options" in self.attributes
-            and self.attributes["page_size_options"]
+            self.attributes and "page_size_options" in self.attributes and self.attributes["page_size_options"]
         ) or default_size
         if isinstance(page_size_options, str):
             page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
-        self.set_attribute(
-            "pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}"
-        )
+        self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
         return self
 
     def set_allow_all_rows(self, default_value=False):
-        if self.el_element_name != "Table":
+        if self.element_name != "Table":
             return self
         return self.__set_boolean_attribute("allow_all_rows", default_value)
 
     def set_format(self):
-        format = (
-            self.attributes
-            and "format" in self.attributes
-            and self.attributes["format"]
-        )
+        format = self.attributes and "format" in self.attributes and self.attributes["format"]
         if format:
             self.set_attribute("format", format)
         return self
@@ -209,9 +206,7 @@ class MarkdownBuilder:
     def set_propagate(self):
         from ..gui import Gui
 
-        return self.__set_boolean_attribute(
-            "propagate", Gui._get_instance()._config.app_config["propagate"]
-        )
+        return self.__set_boolean_attribute("propagate", Gui._get_instance()._config.app_config["propagate"])
 
     def __set_list_of_(self, name):
         lof = self.attributes and name in self.attributes and self.attributes[name]
@@ -219,7 +214,8 @@ class MarkdownBuilder:
             lof = {s.strip(): s for s in lof.split(";")}
         if not isinstance(lof, dict):
             print(
-                f"Error: on component {self.el_element_name} parameter {name} should be a string or a dict"
+                f"Error: Property {name} of component {self.element_name} should be a string or a dict",
+                flush=True,
             )
             return self
         return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
@@ -227,18 +223,14 @@ class MarkdownBuilder:
     def __set_boolean_attribute(self, name, default_value=False):
         boolattr = (
             self.attributes[name]
-            if hasattr(self, "attributes")
-            and self.attributes
-            and name in self.attributes
+            if hasattr(self, "attributes") and self.attributes and name in self.attributes
             else None
         )
         if boolattr is None:
             boolattr = default_value
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
-        return self.set_attribute(
-            _to_camel_case(name), "{!" + str(boolattr).lower() + "!}"
-        )
+        return self.set_attribute(_to_camel_case(name), "{!" + str(boolattr).lower() + "!}")
 
     def set_attribute(self, name, value):
         self.el.set(name, value)

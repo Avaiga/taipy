@@ -1,9 +1,6 @@
 import pandas as pd
 
-from ..utils import (
-    _MapDictionary,
-    get_date_col_str_name,
-)
+from ..utils import _MapDictionary, get_date_col_str_name
 
 
 def _add_to_dict_and_get(dico, key, value):
@@ -22,13 +19,7 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
             idx = 0
             for col in columns:
                 if col not in coltypes.keys():
-                    print(
-                        'Error column "'
-                        + col
-                        + '" is not present in the dataframe "'
-                        + value.Name
-                        + '"'
-                    )
+                    print('Error column "' + col + '" is not present in the dataframe "' + value.Name + '"', flush=True)
                 else:
                     coldict[col] = {"index": idx}
                     idx += 1

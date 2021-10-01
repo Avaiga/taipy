@@ -24,7 +24,7 @@ export const setTimeZone = (timeZone: string): void => {
 
 export const setDateTimeFormat = (datetimeformat: string): void => {
     localStorage.setItem("datetimeformat", datetimeformat)
-} 
+}
 
 export const getTimeZone = (): string => localStorage.getItem("timeZone") || TIMEZONE_CLIENT;
 
@@ -44,7 +44,7 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
             try {
                 if (dataFormat) {
                     return getDateTimeString(value.toString(), dataFormat);
-                } 
+                }
             } catch (e) {
                 console.error(`wrong dateformat "${dataFormat}"`);
             }

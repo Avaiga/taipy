@@ -1,7 +1,7 @@
 from datetime import datetime
-from pytz import utc
 
 from dateutil import parser
+from pytz import utc
 
 
 def dateToISO(date: datetime) -> str:

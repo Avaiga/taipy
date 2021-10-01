@@ -24,9 +24,7 @@ class _MapDictionary(object):
         value = self._dict.__getitem__(key)
         if isinstance(value, dict):
             if self._update_var:
-                return _MapDictionary(
-                    value, lambda s, v: self._update_var(key + "." + s, v)
-                )
+                return _MapDictionary(value, lambda s, v: self._update_var(key + "." + s, v))
             else:
                 return _MapDictionary(value)
         return value
