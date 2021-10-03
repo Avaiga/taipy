@@ -24,9 +24,10 @@ class Preprocessor(MdPreprocessor):
             else:
                 new_lines.append(new_line + line[last_index:])
         return new_lines
-    
+
     def process_line_iter(self, m):
         from ..gui import Gui
+
         fragments = Preprocessor._SPLIT_RE.split(m.group(1))
         control_name = None
         default_prop_name = None

@@ -24,10 +24,10 @@ class Builder:
         self.element_name = element_name
         self.attributes = attributes
         self.value = default_value
-        self.var_name = None 
+        self.var_name = None
         # Whether this object has been evaluated (by expression) in preprocessor
         self.has_evaluated = False
-        
+
         default_property_value = attributes.get(Factory.get_default_property_name(control_type))
         if default_property_value:
             self.value = default_property_value
@@ -50,7 +50,7 @@ class Builder:
             # Iterate through properties_dict and append to self.attributes
             for k, v in properties_dict.items():
                 self.attributes[k] = v
-        
+
         # Bind potential function in self.attributes
         for k, v in self.attributes.items():
             if isinstance(v, str):

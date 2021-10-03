@@ -150,7 +150,7 @@ class Gui(object, metaclass=Singleton):
                 "darkMode": self._config.app_config["dark_mode"],
             }
         )
-    
+
     # TODO: Check name value to avoid conflicting with Flask,
     # or, simply, compose with Flask instead of inherit from it.
     def _bind(self, name: str, value: t.Any) -> None:
@@ -259,7 +259,7 @@ class Gui(object, metaclass=Singleton):
             self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
         except Exception as e:
             print(e)
-    
+
     def _on_action(self, id, action):
         if action:
             try:
@@ -309,7 +309,7 @@ class Gui(object, metaclass=Singleton):
             self._bind(var_name, self._locals_bind[var_name])
             return True
         return False
-    
+
     def bind_var_val(self, var_name: str, value: t.Any) -> bool:
         if not hasattr(self, var_name):
             self._bind(var_name, value)
@@ -340,18 +340,24 @@ class Gui(object, metaclass=Singleton):
                     self.bind_var(var_name)
                     var_list.append(var_name)
                     var_val[var_name] = attrgetter(var_name)(self._values)
-        expr_string = 'f"' + expr.replace("\"", "\\\"") + '"'
+        expr_string = 'f"' + expr.replace('"', '\\"') + '"'
+        # simplify expression if it only contains var_name
         if len(var_list) == 1 and "{" + var_list[0] + "}" == expr:
             expr = expr_hash = var_list[0]
+        # validate whether expression has already been evaluated
         if expr in self._expr_hash:
             if re_evaluated:
                 return getattr(self, self._expr_hash[expr]), self._expr_hash[expr]
             else:
                 return getattr(self, self._expr_hash[expr])
-        expr_evaluated = eval(expr_string, {}, var_val)
+        # evaluate expressions
+        expr_evaluated = eval(expr_string, {}, var_val) if expr != expr_hash else eval(expr, {}, var_val)
+        # save the expression if it needs to be re-evaluated
         if re_evaluated:
             if expr_hash is None:
                 expr_hash = self._expr_hash[expr] = "tp_" + hashlib.md5(expr.encode()).hexdigest()
+            else:
+                self._expr_hash[expr] = expr
             self._hash_expr[expr_hash] = expr
             for var in var_val:
                 if var not in self._var_expr:
@@ -368,7 +374,7 @@ class Gui(object, metaclass=Singleton):
     def on_action(self, f) -> None:
         self._action_function = f
 
-    def load_config(self, app_config: t.Optional[dict]={}, style_config: t.Optional[dict]={}) -> None:
+    def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
     def run(self, host=None, port=None, debug=None, load_dotenv=True) -> None:
