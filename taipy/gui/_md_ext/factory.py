@@ -130,21 +130,15 @@ class Factory:
         .set_allow_all_rows(),
     }
 
-    _PROPERTY_RE = re.compile(r"([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
-    # Same as Preprocessor._SPLIT_RE. TODO: share or move to utils?
-    _SPLIT_RE = re.compile(r"(?<!\\\\)\|")
+    # TODO: process \" in property value
+    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*)=\"(.*?)\"")
 
     @staticmethod
-    def create(control_type: str, properties_fragment: str) -> str:
-        # Create properties dict from properties_fragment
-        attributes = {}
-        for property in Factory._SPLIT_RE.split(properties_fragment):
-            prop_match = Factory._PROPERTY_RE.match(property)
-            if prop_match:
-                attributes[prop_match.group(1)] = prop_match.group(2)
-            else:
-                raise ValueError(f"Invalid property syntax: '{property}'")
-        builder = Factory.CONTROL_BUILDERS[control_type](control_type, attributes)
+    def create(control_type: str, all_properties: str) -> str:
+        # Create properties dict from all_properties
+        property_pairs = Factory._PROPERTY_RE.findall(all_properties)
+        properties = {property[0]: property[1] for property in property_pairs}
+        builder = Factory.CONTROL_BUILDERS[control_type](control_type, properties)
         if builder:
             return builder.el
         else:

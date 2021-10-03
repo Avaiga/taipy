@@ -28,7 +28,7 @@ class Builder:
         # Allow property configuration by passing in dictionary
         self.allow_properties_config = allow_properties_config
         # --------------------------------------------
-        # TODO - Retrieve var and var_id from default property
+        # TODO - Retrieve var_name from default property
         # This is obviously wrong and should have been done at
         # the preprocessor level.
         # At this point, the default property should be set to a
@@ -42,10 +42,9 @@ class Builder:
         # Check if we have a variable
         self.var_name = None
         if default_property_value:
-            var_match = re.match(r"{([a-zA-Z][\.a-zA-Z_$0-9]*)\((\d+)\)}", default_property_value)
+            var_match = re.match(r"{([a-zA-Z][\.a-zA-Z_$0-9]*)}", default_property_value)
             if var_match:
                 self.var_name = var_match.group(1)
-                self.var_id = var_match.group(2)
         # --------------------------------------------
         self.el = etree.Element(element_name)
         if has_attribute:
@@ -103,7 +102,7 @@ class Builder:
 
     def set_varname(self):
         if self.var_name:
-            self.set_attribute("key", self.var_name + "_" + str(self.var_id))
+            self.set_attribute("key", self.var_name)
             self.set_attribute(
                 "value",
                 "{!" + get_client_var_name(self.var_name) + "!}",
