@@ -356,6 +356,7 @@ class Gui(object, metaclass=Singleton):
         if re_evaluated:
             if expr_hash is None:
                 expr_hash = self._expr_hash[expr] = "tp_" + hashlib.md5(expr.encode()).hexdigest()
+                self.bind_var_val(expr_hash, expr_evaluated)
             else:
                 self._expr_hash[expr] = expr
             self._hash_expr[expr_hash] = expr
@@ -364,7 +365,6 @@ class Gui(object, metaclass=Singleton):
                     self._var_expr[var] = [expr]
                 else:
                     self._var_expr[var].append(expr)
-            self.bind_var_val(expr_hash, expr_evaluated)
             return expr_evaluated, expr_hash
         return expr_evaluated
 
