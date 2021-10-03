@@ -24,8 +24,7 @@ class Factory:
             attributes=attrs,
             default_value="<empty>",
         )
-        .get_gui_value()
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
@@ -37,8 +36,7 @@ class Factory:
             default_value="<empty>",
         )
         .set_type("button")
-        .get_gui_value()
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-button", config_class="button")
         .set_button_attribute(),
@@ -49,8 +47,7 @@ class Factory:
             default_value="<empty>",
         )
         .set_type("text")
-        .get_gui_value()
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_propagate()
         .set_className(class_name="taipy-input", config_class="input"),
@@ -61,8 +58,7 @@ class Factory:
             default_value=0,
         )
         .set_type("number")
-        .get_gui_value(fallback_value=0)
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-number", config_class="input")
         .set_propagate(),
@@ -70,10 +66,9 @@ class Factory:
             control_type=control_type,
             element_name="DateSelector",
             attributes=attrs,
-            default_value="",
+            default_value=datetime.fromtimestamp(0),
         )
-        .get_gui_value(fallback_value=datetime.fromtimestamp(0))
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
         .set_withTime()
@@ -85,8 +80,7 @@ class Factory:
             default_value=0,
         )
         .set_type("range")
-        .get_gui_value(fallback_value=0)
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-slider", config_class="slider")
         .set_attribute("min", "1")
@@ -97,9 +91,8 @@ class Factory:
             element_name="Selector",
             attributes=attrs,
         )
-        .set_varname()
+        .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
-        .get_gui_value()
         .set_lov()
         .set_filter()
         .set_multiple()
@@ -110,9 +103,8 @@ class Factory:
             element_name="Table",
             attributes=attrs,
         )
-        .set_varname()
+        .set_expresion_hash()
         .set_className(class_name="taipy-table", config_class="table")
-        .get_gui_value()
         .get_dataframe_attributes()
         .set_table_pagesize()
         .set_table_pagesize_options()

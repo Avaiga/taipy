@@ -4,6 +4,8 @@ import os
 import pathlib
 import re
 import typing as t
+import hashlib
+import ast
 from operator import attrgetter
 from types import FunctionType, SimpleNamespace
 
@@ -32,6 +34,8 @@ class Gui(object, metaclass=Singleton):
     """The class that handles the Graphical User Interface."""
 
     __root_page_name = "TaiPy_root_page"
+    # Regex to separate content from inside curly braces when evaluating f string expressions
+    __EXPR_RE = re.compile(r"\{(.*?)\}")
 
     def __init__(
         self,
@@ -55,11 +59,9 @@ class Gui(object, metaclass=Singleton):
         self._values = SimpleNamespace()
         self._update_function = None
         self._action_function = None
-        # Control identifiers:
-        #   Key = variable name
-        #   Value = next id (starting at 0)
-        # This is filled when creating the controls, using add_control()
-        self._control_ids: t.Dict[str, int] = {}
+        self._expr_hash = {}
+        self._hash_expr = {}
+        self._var_expr = {}
         self._markdown = Markdown(
             extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
         )
@@ -110,7 +112,7 @@ class Gui(object, metaclass=Singleton):
         else:
             return "No page template"
 
-    def __render_route(self):
+    def _render_route(self):
         # Generate router
         routes = self._config.routes
         locations = {}
@@ -148,39 +150,13 @@ class Gui(object, metaclass=Singleton):
                 "darkMode": self._config.app_config["dark_mode"],
             }
         )
-
-    def add_page(
-        self,
-        name: str,
-        markdown: t.Optional[str] = None,
-        markdown_file: t.Optional[str] = None,
-        style: t.Optional[str] = "",
-    ) -> None:
-        # Validate name
-        if name is None:
-            raise Exception("name is required for add_page function!")
-        if not re.match(r"^[\w-]+$", name):
-            raise SyntaxError(
-                f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.'
-            )
-        if name in self._config.routes:
-            raise Exception('Page name "' + (name if name != Gui.__root_page_name else "/") + '" is already defined')
-        # Init a new page
-        new_page = Page()
-        new_page.route = name
-        new_page.md_template = markdown
-        new_page.md_template_file = markdown_file
-        new_page.style = style
-        # Append page to _config
-        self._config.pages.append(new_page)
-        self._config.routes.append(name)
-
+    
     # TODO: Check name value to avoid conflicting with Flask,
     # or, simply, compose with Flask instead of inherit from it.
-    def bind(self, name, value):
+    def _bind(self, name: str, value: t.Any) -> None:
         if hasattr(self, name):
             raise ValueError(f"Variable '{name}' is already bound")
-        if not re.match("^[a-zA-Z][a-zA-Z_$0-9]*$", name):
+        if not name.isidentifier():
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
             setattr(Gui, name, _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)))
@@ -192,45 +168,6 @@ class Gui(object, metaclass=Singleton):
             )
             setattr(Gui, name, prop)
             setattr(self._values, name, value)
-
-    # Main binding method (bind in markdown declaration)
-    def bind_var(self, var_name):
-        if not hasattr(self, var_name) and var_name in self._dict_bind_locals:
-            self.bind(var_name, self._dict_bind_locals[var_name])
-            return True
-        return False
-
-    def bind_func(self, func_name):
-        if (
-            isinstance(func_name, str)
-            and not hasattr(self, func_name)
-            and func_name in (bind_locals := self._get_instance()._dict_bind_locals)
-            and isinstance((func := bind_locals[func_name]), FunctionType)
-        ):
-            setattr(self, func_name, func)
-
-    # Backup Binding Method
-    def _bind_all(self):
-        exclusion_list = [
-            "__name__",
-            "__doc__",
-            "__package__",
-            "__loader__",
-            "__spec__",
-            "__annotations__",
-            "__builtins__",
-            "__file__",
-        ]
-        for k, v in self._dict_bind_locals.items():
-            if k not in exclusion_list and type(v) in (int, float, bool, str, dict):
-                self.bind(k, v)
-
-    def _add_control(self, variable_name) -> int:
-        id = 0
-        if variable_name in self._control_ids:
-            id = self._control_ids[variable_name]
-        self._control_ids[variable_name] = id + 1
-        return id
 
     def _update_var(self, var_name, value, propagate=True) -> None:
         # Check if Variable is type datetime
@@ -249,7 +186,7 @@ class Gui(object, metaclass=Singleton):
             elif isinstance(currentvalue, pd.DataFrame):
                 print("Error: cannot update value for dataframe: " + var_name)
                 return
-        # Use custom attrsetter fuction to allow value binding for MapDictionary
+        # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
             attrsetter(self._values, var_name, value)
         # TODO: what if _update_function changes 'var_name'... infinite loop?
@@ -263,7 +200,7 @@ class Gui(object, metaclass=Singleton):
 
     def _request_var(self, var_name, payload) -> None:
         ret_payload = {}
-        # Use custom attrgetter fuction to allow value binding for MapDictionary
+        # Use custom attrgetter function to allow value binding for MapDictionary
         newvalue = attrgetter(var_name)(self._values)
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
@@ -308,12 +245,11 @@ class Gui(object, metaclass=Singleton):
             # here we'll deal with start and end values from payload if present
             newvalue = newvalue.iloc[new_indexes]  # returns a view
             if len(datecols) != 0:
-                # remove the date columns from the list of columnss
+                # remove the date columns from the list of columns
                 cols = list(set(newvalue.columns.tolist()) - set(datecols))
                 newvalue = newvalue.loc[:, cols]  # view without the date columns
             dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount}
             newvalue = dictret
-            pass
         # TODO: What if value == newvalue?
         ret_payload["value"] = newvalue
         self._send_ws_update(var_name, ret_payload)
@@ -323,13 +259,7 @@ class Gui(object, metaclass=Singleton):
             self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
         except Exception as e:
             print(e)
-
-    def on_update(self, f):
-        self._update_function = f
-
-    def on_action(self, f):
-        self._action_function = f
-
+    
     def _on_action(self, id, action):
         if action:
             try:
@@ -347,10 +277,101 @@ class Gui(object, metaclass=Singleton):
         if self._action_function:
             self._action_function(self, id, action)
 
-    def load_config(self, app_config={}, style_config={}):
+    def add_page(
+        self,
+        name: str,
+        markdown: t.Optional[str] = None,
+        markdown_file: t.Optional[str] = None,
+        style: t.Optional[str] = "",
+    ) -> None:
+        # Validate name
+        if name is None:
+            raise Exception("name is required for add_page function!")
+        if not re.match(r"^[\w-]+$", name):
+            raise SyntaxError(
+                f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.'
+            )
+        if name in self._config.routes:
+            raise Exception('Page name "' + (name if name != Gui.__root_page_name else "/") + '" is already defined')
+        # Init a new page
+        new_page = Page()
+        new_page.route = name
+        new_page.md_template = markdown
+        new_page.md_template_file = markdown_file
+        new_page.style = style
+        # Append page to _config
+        self._config.pages.append(new_page)
+        self._config.routes.append(name)
+
+    # Main binding method (bind in markdown declaration)
+    def bind_var(self, var_name: str) -> bool:
+        if not hasattr(self, var_name) and var_name in self._locals_bind:
+            self._bind(var_name, self._locals_bind[var_name])
+            return True
+        return False
+    
+    def bind_var_val(self, var_name: str, value: t.Any) -> bool:
+        if not hasattr(self, var_name):
+            self._bind(var_name, value)
+            return True
+        return False
+
+    def bind_func(self, func_name: str) -> bool:
+        if (
+            isinstance(func_name, str)
+            and not hasattr(self, func_name)
+            and func_name in (bind_locals := self._get_instance()._locals_bind)
+            and isinstance((func := bind_locals[func_name]), FunctionType)
+        ):
+            setattr(self, func_name, func)
+            return True
+        return False
+
+    def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> str:
+        var_val = {}
+        var_list = []
+        expr_hash = None
+        # Get A list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
+        for e in self.__EXPR_RE.findall(expr):
+            st = ast.parse(e)
+            for node in ast.walk(st):
+                if type(node) is ast.Name:
+                    var_name = node.id.split(sep=".")[0]
+                    self.bind_var(var_name)
+                    var_list.append(var_name)
+                    var_val[var_name] = attrgetter(var_name)(self._values)
+        expr_string = 'f"' + expr.replace("\"", "\\\"") + '"'
+        if len(var_list) == 1 and "{" + var_list[0] + "}" == expr:
+            expr = expr_hash = var_list[0]
+        if expr in self._expr_hash:
+            if re_evaluated:
+                return getattr(self, self._expr_hash[expr]), self._expr_hash[expr]
+            else:
+                return getattr(self, self._expr_hash[expr])
+        expr_evaluated = eval(expr_string, {}, var_val)
+        if re_evaluated:
+            if expr_hash is None:
+                expr_hash = self._expr_hash[expr] = "tp_" + hashlib.md5(expr.encode()).hexdigest()
+            self._hash_expr[expr_hash] = expr
+            for var in var_val:
+                if var not in self._var_expr:
+                    self._var_expr[var] = [expr]
+                else:
+                    self._var_expr[var].append(expr)
+            self.bind_var_val(expr_hash, expr_evaluated)
+            return expr_evaluated, expr_hash
+        return expr_evaluated
+
+    def on_update(self, f) -> None:
+        self._update_function = f
+
+    def on_action(self, f) -> None:
+        self._action_function = f
+
+    def load_config(self, app_config: t.Optional[dict]={}, style_config: t.Optional[dict]={}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def run(self, host=None, port=None, debug=None, load_dotenv=True):
+    def run(self, host=None, port=None, debug=None, load_dotenv=True) -> None:
         # Check with default config, override only if parameter
         # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
@@ -360,7 +381,7 @@ class Gui(object, metaclass=Singleton):
         if debug is None and self._config.app_config["debug"] is not None:
             debug = self._config.app_config["debug"]
         # Save all local variables of the parent frame (usually __main__)
-        self._dict_bind_locals = inspect.currentframe().f_back.f_locals
+        self._locals_bind = inspect.currentframe().f_back.f_locals
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.index_html for optimization)
         for page_i in self._config.pages:
@@ -374,7 +395,7 @@ class Gui(object, metaclass=Singleton):
         # define a root page if needed
 
         # server URL Rule for flask rendered react-router
-        self._server.add_url_rule("/initialize/", view_func=self.__render_route)
+        self._server.add_url_rule("/initialize/", view_func=self._render_route)
 
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug, load_dotenv=load_dotenv)

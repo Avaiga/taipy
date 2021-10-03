@@ -18,34 +18,27 @@ class Builder:
         attributes,
         default_value="<Empty>",
     ):
+        from .factory import Factory
+        from ..gui import Gui
+
         self.element_name = element_name
         self.attributes = attributes
         self.value = default_value
-        # --------------------------------------------
-        # TODO - Retrieve var and var_id from default property
-        # This is obviously wrong and should have been done at
-        # the preprocessor level.
-        # At this point, the default property should be set to a
-        # string of the form: var_name(var_index)
-        # TODO - Here is also the place where function names
-        # should be checked for a potential binding to the application
-        # code, using Gui._get_instance().bind_func(property_value)
-        from .factory import Factory
-
+        self.var_name = None 
+        # Whether this object has been evaluated (by expression) in preprocessor
+        self.has_evaluated = False
+        
         default_property_value = attributes.get(Factory.get_default_property_name(control_type))
-        # Check if we have a variable
-        self.var_name = None
         if default_property_value:
-            var_match = re.match(r"{([a-zA-Z][\.a-zA-Z_$0-9]*)\((\d+)\)}", default_property_value)
-            if var_match:
-                self.var_name = var_match.group(1)
-                self.var_id = var_match.group(2)
-        # --------------------------------------------
-        self.el = etree.Element(element_name)
-        # Bind properties dictionary to attributes if condition is matched
-        if "properties" in self.attributes:
-            from ..gui import Gui
+            self.value = default_property_value
+            self.expr_hash = self.attributes["expr_hash"]
+            self.expr = Gui._get_instance()._hash_expr[self.expr_hash]
+            self.has_evaluated = True
 
+        self.el = etree.Element(element_name)
+
+        # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
+        if "properties" in self.attributes:
             properties_dict_name = self.attributes["properties"]
             Gui._get_instance().bind_var(properties_dict_name)
             properties_dict = getattr(Gui._get_instance(), properties_dict_name)
@@ -57,30 +50,12 @@ class Builder:
             # Iterate through properties_dict and append to self.attributes
             for k, v in properties_dict.items():
                 self.attributes[k] = v
-                if isinstance(v, str):
-                    # Bind potential function
-                    Gui._get_instance().bind_func(v)
-
-        if self.var_name:
-            try:
-                # Bind variable name (var_name string split in case
-                # var_name is a dictionary)
-                from ..gui import Gui
-
-                Gui._get_instance().bind_var(self.var_name.split(sep=".")[0])
-            except Exception:
-                print(f"Couldn't bind variable '{self.var_name}'", flush=True)
-
-    def get_gui_value(self, fallback_value=None):
-        if self.var_name:
-            try:
-                from ..gui import Gui
-
-                self.value = attrgetter(self.var_name)(Gui._get_instance()._values)
-            except Exception:
-                print(f"WARNING: variable {self.var_name} doesn't exist", flush=True)
-                self.value = fallback_value if fallback_value is not None else "[Undefined: " + self.var_name + "]"
-        return self
+        
+        # Bind potential function in self.attributes
+        for k, v in self.attributes.items():
+            if isinstance(v, str):
+                # Bind potential function
+                Gui._get_instance().bind_func(v)
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
@@ -94,14 +69,14 @@ class Builder:
             self.set_attribute("columns", json.dumps(columns))
         return self
 
-    def set_varname(self):
-        if self.var_name:
-            self.set_attribute("key", self.var_name + "_" + str(self.var_id))
+    def set_expresion_hash(self):
+        if self.has_evaluated:
+            self.set_attribute("key", self.expr_hash)
             self.set_attribute(
                 "value",
-                "{!" + get_client_var_name(self.var_name) + "!}",
+                "{!" + self.expr_hash + "!}",
             )
-            self.set_attribute("tp_varname", self.var_name)
+            self.set_attribute("tp_varname", self.expr)
         return self
 
     def set_default_value(self):
