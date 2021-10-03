@@ -40,7 +40,7 @@ class Preprocessor(MdPreprocessor):
             elif control_name is None and default_prop_value is None:
                 # Handle First Expression Fragment
                 default_prop_value, expr_hash = Gui._get_instance().evaluate_expr(fragment)
-                properties += "|" + f"expr_hash={expr_hash}"
+                default_prop_value = expr_hash
             else:
                 properties += "|" + fragment
         if control_name is None:

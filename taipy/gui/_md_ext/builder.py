@@ -25,14 +25,15 @@ class Builder:
         self.attributes = attributes
         self.value = default_value
         self.var_name = None
+        self._gui = Gui._get_instance()
         # Whether this object has been evaluated (by expression) in preprocessor
         self.has_evaluated = False
 
         default_property_value = attributes.get(Factory.get_default_property_name(control_type))
         if default_property_value:
-            self.value = default_property_value
-            self.expr_hash = self.attributes["expr_hash"]
-            self.expr = Gui._get_instance()._hash_expr[self.expr_hash]
+            self.value = attrgetter(default_property_value)(self._gui._values)
+            self.expr_hash = default_property_value
+            self.expr = self._gui._hash_expr[self.expr_hash]
             self.has_evaluated = True
 
         self.el = etree.Element(element_name)
@@ -40,8 +41,8 @@ class Builder:
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.attributes:
             properties_dict_name = self.attributes["properties"]
-            Gui._get_instance().bind_var(properties_dict_name)
-            properties_dict = getattr(Gui._get_instance(), properties_dict_name)
+            self._gui.bind_var(properties_dict_name)
+            properties_dict = getattr(self._gui, properties_dict_name)
             if not isinstance(properties_dict, _MapDictionary):
                 raise Exception(
                     f"Can't find properties configuration dictionary {properties_dict_name}!"
@@ -55,7 +56,7 @@ class Builder:
         for k, v in self.attributes.items():
             if isinstance(v, str):
                 # Bind potential function
-                Gui._get_instance().bind_func(v)
+                self._gui.bind_func(v)
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
@@ -98,7 +99,7 @@ class Builder:
 
         self.set_attribute(
             "className",
-            class_name + " " + Gui._get_instance()._config.style_config[config_class],
+            class_name + " " + self._gui._config.style_config[config_class],
         )
         return self
 
@@ -174,7 +175,7 @@ class Builder:
     def set_propagate(self):
         from ..gui import Gui
 
-        return self.__set_boolean_attribute("propagate", Gui._get_instance()._config.app_config["propagate"])
+        return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
 
     def __set_list_of_(self, name):
         lof = self.attributes and name in self.attributes and self.attributes[name]
