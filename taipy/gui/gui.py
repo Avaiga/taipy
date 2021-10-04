@@ -62,6 +62,7 @@ class Gui(object, metaclass=Singleton):
         self._expr_hash = {}
         self._hash_expr = {}
         self._var_expr = {}
+        self._expr_var = {}
         self._markdown = Markdown(
             extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
         )
@@ -169,8 +170,10 @@ class Gui(object, metaclass=Singleton):
             setattr(Gui, name, prop)
             setattr(self._values, name, value)
 
-    def _update_var(self, var_name, value, propagate=True) -> None:
+    def _update_var(self, var_name: str, value, propagate=True) -> None:
         # Check if Variable is type datetime
+        expr = var_name
+        hash_expr = var_name = self._expr_hash[var_name]
         currentvalue = attrgetter(var_name)(self._values)
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
@@ -189,6 +192,9 @@ class Gui(object, metaclass=Singleton):
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
             attrsetter(self._values, var_name, value)
+            # In case expression == hash (which is when there is only a single variable in expression)
+            if expr == hash_expr:
+                self._re_evaluate_expr(expr)
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, var_name, value)
@@ -276,6 +282,25 @@ class Gui(object, metaclass=Singleton):
                 pass
         if self._action_function:
             self._action_function(self, id, action)
+    
+    def _re_evaluate_expr(self, var_name: str) -> None:
+        """
+        This function will execute when the _update_var function is handling 
+        an expression with only a single variable
+        """
+        for expr in self._var_expr[var_name]:
+            hash_expr = self._expr_hash[expr]
+            expr_var_list = self._expr_var[expr]
+            eval_dict = {
+                v: attrgetter(v)(self._values)
+                for v in expr_var_list
+            }
+            expr_string = 'f"' + expr.replace('"', '\\"') + '"'
+            if hash_expr == expr:
+                expr_string = expr
+            expr_evaluated = eval(expr_string, {}, eval_dict)
+            attrsetter(self._values, hash_expr, expr_evaluated)
+            self._send_ws_update(hash_expr, {"value": expr_evaluated})
 
     def add_page(
         self,
@@ -365,6 +390,8 @@ class Gui(object, metaclass=Singleton):
                     self._var_expr[var] = [expr]
                 else:
                     self._var_expr[var].append(expr)
+            if expr not in self._expr_var:
+                self._expr_var[expr] = var_list
             return expr_evaluated, expr_hash
         return expr_evaluated
 
