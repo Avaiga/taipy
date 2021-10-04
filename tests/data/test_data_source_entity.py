@@ -1,11 +1,9 @@
-import dataclasses
 import os
 import pathlib
 
 import numpy as np
 import pandas as pd
 import pytest
-from pandas.util.testing import assert_frame_equal
 
 from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
@@ -14,9 +12,7 @@ from taipy.exceptions import MissingRequiredProperty
 
 class TestCSVDataSourceEntity:
     def test_get(self):
-        path = os.path.join(
-            pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv"
-        )
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         csv = CSVDataSourceEntity.create("foo", Scope.PIPELINE, path)
         data = csv.get()
         assert isinstance(data, pd.DataFrame)
@@ -55,9 +51,7 @@ class TestCSVDataSourceEntity:
             CSVDataSourceEntity("foo", Scope.PIPELINE, "ds_id", {})
 
     def test_preview(self):
-        path = os.path.join(
-            pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv"
-        )
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         ds = CSVDataSourceEntity.create("foo", Scope.PIPELINE, path)
         ds.preview()
 
@@ -70,23 +64,17 @@ class TestEmbeddedDataSourceEntity:
         embedded_int = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, 197)
         assert isinstance(embedded_int.get(), int)
         assert embedded_int.get() == 197
-        embedded_dict = EmbeddedDataSourceEntity.create(
-            "foo", Scope.PIPELINE, {"bar": 12, "baz": "qux", "quux": [13]}
-        )
+        embedded_dict = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, {"bar": 12, "baz": "qux", "quux": [13]})
         assert isinstance(embedded_dict.get(), dict)
         assert embedded_dict.get() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
-        ds = EmbeddedDataSourceEntity.create(
-            "foo", Scope.PIPELINE, data="Embedded Data Source"
-        )
+        ds = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, data="Embedded Data Source")
         assert isinstance(ds, EmbeddedDataSourceEntity)
         assert ds.type() == "embedded"
 
     def test_preview(self):
-        ds = EmbeddedDataSourceEntity.create(
-            "foo", Scope.PIPELINE, data="Embedded Data Source"
-        )
+        ds = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, data="Embedded Data Source")
         ds.preview()
 
     def test_init_missing_parameters(self):
