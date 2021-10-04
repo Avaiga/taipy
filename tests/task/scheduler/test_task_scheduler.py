@@ -24,7 +24,7 @@ def test_scheduled_task():
     task = _create_task_entity(mult)
 
     task_scheduler.submit(task)
-    assert task.output["output1"].get(None) == 42
+    assert task.output["output0"].get(None) == 42
 
 
 def test_scheduled_task_that_return_multiple_outputs():
