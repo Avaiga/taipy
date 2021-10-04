@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+tox = "==3.24.3"
 networkx = "2.6.2"
 flask = ">=2.0"
 numpy = "*"
@@ -12,6 +13,7 @@ flask-socketio = ">=5.1"
 simple-websocket = ">=0.3"
 pandas = "*"
 flask-cors = ">=3.0"
+toml = "0.10.2"
 tzlocal = ">=3.0"
 pytz = ">=2021.1"
 
@@ -33,6 +35,7 @@ pre-commit = "*"
 toml = "*"
 tox = "==3.24.3"
 mypy = "*"
+types-toml = "0.10.0"
 
 [requires]
 python_version = "3"

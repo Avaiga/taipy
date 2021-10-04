@@ -3,6 +3,7 @@ import uuid
 from functools import partial
 from time import sleep
 
+from taipy.configuration import ConfigurationManager
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.task import TaskEntity
@@ -65,10 +66,11 @@ def test_error_during_writing_data_source_dont_stop_writing_on_other_data_source
 
 
 def test_scheduled_task_in_parallel():
-    task_scheduler = TaskScheduler(parallel_execution=True)
+    ConfigurationManager.task_scheduler_configuration.parallel_execution = True
     m = multiprocessing.Manager()
     lock = m.Lock()
 
+    task_scheduler = TaskScheduler()
     task = _create_task(partial(lock_mult, lock))
 
     with lock:
@@ -79,8 +81,10 @@ def test_scheduled_task_in_parallel():
     assert task.output[0].get(None) == 42
 
 
-def test_scheduled_task_in_parallel_on_multiple_task():
-    task_scheduler = TaskScheduler(parallel_execution=True)
+def test_scheduled_task_multithreading_multiple_task():
+    ConfigurationManager.task_scheduler_configuration.parallel_execution = True
+
+    task_scheduler = TaskScheduler()
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()

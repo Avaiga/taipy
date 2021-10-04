@@ -1,17 +1,18 @@
 __all__ = ["TaskScheduler"]
 
-import collections
 import logging
 import uuid
+from collections import abc
 from concurrent.futures import Future, ProcessPoolExecutor
 from functools import partial
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from taipy.task.task_entity import TaskEntity
 
 from ...data import DataSourceEntity
 from .executor import FutureExecutor
 from .job import Job, JobId
+from taipy.configuration import ConfigurationManager
 
 
 class TaskScheduler:
@@ -19,11 +20,9 @@ class TaskScheduler:
     Create and schedule Jobs from Task and keep their states
     """
 
-    def __init__(self, parallel_execution=False):
+    def __init__(self):
         self.__jobs: Dict[JobId, Job] = {}
-        self.__executor = (
-            FutureExecutor() if not parallel_execution else ProcessPoolExecutor()
-        )
+        self.__executor = self.__create_executor()
 
     def submit(self, task: TaskEntity) -> JobId:
         """
@@ -49,6 +48,14 @@ class TaskScheduler:
         future = self.__executor.submit(task.function, *[i.get() for i in task.input])
         future.add_done_callback(partial(_WriteResultInDataSource.write, task.output))
 
+    @staticmethod
+    def __create_executor():
+        if ConfigurationManager.task_scheduler_configuration.parallel_execution:
+            return ProcessPoolExecutor(
+                ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution
+            )
+        return FutureExecutor()
+
 
 class _WriteResultInDataSource:
     @classmethod
@@ -72,6 +79,6 @@ class _WriteResultInDataSource:
             logging.error(f"Error on writing output {e}")
 
     @staticmethod
-    def __unwrap_task_output(future: Future) -> collections.Iterable[Any]:
+    def __unwrap_task_output(future: Future) -> Union[List, abc.Iterable]:
         result = future.result()
-        return result if isinstance(result, collections.Iterable) else [result]
+        return result if isinstance(result, abc.Iterable) else [result]
