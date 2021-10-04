@@ -1,11 +1,15 @@
 __all__ = ["TaskScheduler"]
 
+import collections
+import logging
 import uuid
-from concurrent.futures import ThreadPoolExecutor
-from typing import Dict
+from concurrent.futures import Future, ProcessPoolExecutor
+from functools import partial
+from typing import Any, Dict, List
 
 from taipy.task.task_entity import TaskEntity
 
+from ...data import DataSourceEntity
 from .executor import FutureExecutor
 from .job import Job, JobId
 
@@ -18,19 +22,22 @@ class TaskScheduler:
     def __init__(self, parallel_execution=False):
         self.__jobs: Dict[JobId, Job] = {}
         self.__executor = (
-            FutureExecutor() if not parallel_execution else ThreadPoolExecutor()
+            FutureExecutor() if not parallel_execution else ProcessPoolExecutor()
         )
 
     def submit(self, task: TaskEntity) -> JobId:
         """
-        Submit a task that should be executed as a Job
+        Submit a task that should be executed as a Job and return its JobId
+
+        The result of the Task executed is provided to its output data source
+        by mapping each element with each output data source of the Task.
+        If the number of output data sources is
+        different to the number of Task results, we do nothing
+
+        If an error happens when the result is provided to a data source, we ignore it
+        and continue to the next data source
         """
-        self.__executor.submit(
-            self.__execute_function_and_write_outputs,
-            task.function,
-            task.input,
-            task.output,
-        )
+        self.__execute_function_and_write_outputs(task)
         return self.__create_job(task)
 
     def __create_job(self, task: TaskEntity) -> JobId:
@@ -38,8 +45,33 @@ class TaskScheduler:
         self.__jobs[job.id] = job
         return job.id
 
+    def __execute_function_and_write_outputs(self, task):
+        future = self.__executor.submit(task.function, *[i.get() for i in task.input])
+        future.add_done_callback(partial(_WriteResultInDataSource.write, task.output))
+
+
+class _WriteResultInDataSource:
+    @classmethod
+    def write(cls, outputs: List[DataSourceEntity], future: Future):
+        results = cls.__unwrap_task_output(future)
+        cls._write(results, outputs)
+
+    @classmethod
+    def _write(cls, results, outputs):
+        if len(results) == len(outputs):
+            for res, output in zip(results, outputs):
+                cls._write_result_in_output(res, output)
+        else:
+            logging.error("Error, wrong number of result or task output")
+
     @staticmethod
-    def __execute_function_and_write_outputs(function, inputs, outputs):
-        r = function(*[i.get() for i in inputs])
-        for o in outputs:
-            o.write(r)
+    def _write_result_in_output(result: Any, output: DataSourceEntity):
+        try:
+            output.write(result)
+        except Exception as e:
+            logging.error(f"Error on writing output {e}")
+
+    @staticmethod
+    def __unwrap_task_output(future: Future) -> collections.Iterable[Any]:
+        result = future.result()
+        return result if isinstance(result, collections.Iterable) else [result]
