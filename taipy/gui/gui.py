@@ -282,19 +282,16 @@ class Gui(object, metaclass=Singleton):
                 pass
         if self._action_function:
             self._action_function(self, id, action)
-    
+
     def _re_evaluate_expr(self, var_name: str) -> None:
         """
-        This function will execute when the _update_var function is handling 
+        This function will execute when the _update_var function is handling
         an expression with only a single variable
         """
         for expr in self._var_expr[var_name]:
             hash_expr = self._expr_hash[expr]
             expr_var_list = self._expr_var[expr]
-            eval_dict = {
-                v: attrgetter(v)(self._values)
-                for v in expr_var_list
-            }
+            eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
             expr_string = 'f"' + expr.replace('"', '\\"') + '"'
             if hash_expr == expr:
                 expr_string = expr
