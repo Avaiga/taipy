@@ -27,13 +27,18 @@ class DataSourceEntity:
         self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
     ):
         self.id = id or str(uuid.uuid4())
-        self.name = name.strip().lower().replace(' ', '_')
+        self.name = self.__protect_name(name)
         self.scope = scope
         self.properties = kwargs
 
+    @staticmethod
+    def __protect_name(name):
+        return name.strip().lower().replace(' ', '_')
+
     def __getattr__(self, attribute_name):
-        if attribute_name in self.properties:
-            return self.properties[attribute_name]
+        protected_attribute_name = self.__protect_name(attribute_name)
+        if protected_attribute_name in self.properties:
+            return self.properties[protected_attribute_name]
         logging.error(f"{attribute_name} is not an attribute of data source {self.id}")
         raise AttributeError
 
