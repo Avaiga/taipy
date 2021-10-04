@@ -197,7 +197,7 @@ class Gui(object, metaclass=Singleton):
                 self._re_evaluate_expr(expr)
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
-            self._update_function(self, var_name, value)
+            self._update_function(self, expr, value)
         newvalue = attrgetter(var_name)(self._values)
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
@@ -352,7 +352,7 @@ class Gui(object, metaclass=Singleton):
             return True
         return False
 
-    def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> str:
+    def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
         var_val = {}
         var_list = []
         expr_hash = None

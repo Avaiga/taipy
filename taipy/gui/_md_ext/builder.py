@@ -57,6 +57,9 @@ class Builder:
             if isinstance(v, str):
                 # Bind potential function
                 self._gui.bind_func(v)
+            # Try to evaluate as expressions
+            if v is not None:
+                self.attributes[k] = self._gui.evaluate_expr(expr=v, re_evaluated=False)
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
@@ -84,7 +87,8 @@ class Builder:
         if self.element_name == "Input" and self.type_name == "button":
             self.set_attribute(
                 "value",
-                self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
+                str(self.value)
+                # self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
             )
         elif isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
@@ -123,9 +127,9 @@ class Builder:
         if self.attributes and "id" in self.attributes:
             self.set_attribute("id", self.attributes["id"])
             self.set_attribute("key", self.attributes["id"])
-        elif self.var_name:
-            self.set_attribute("id", self.var_name + "_" + str(self.var_id))
-            self.set_attribute("key", self.var_name + "_" + str(self.var_id))
+        elif self.has_evaluated:
+            self.set_attribute("id", self.expr_hash)
+            self.set_attribute("key", self.expr_hash)
         if self.attributes and "on_action" in self.attributes:
             self.set_attribute("actionName", self.attributes["on_action"])
         else:
