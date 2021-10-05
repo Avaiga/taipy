@@ -197,20 +197,23 @@ class Gui(object, metaclass=Singleton):
             elif isinstance(currentvalue, pd.DataFrame):
                 print("Error: cannot update value for dataframe: " + var_name)
                 return
+        modified_vars = [var_name]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
             attrsetter(self._values, var_name, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if expr == hash_expr:
-                self._re_evaluate_expr(expr)
+                modified_vars.extend(self._re_evaluate_expr(expr))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, expr, value)
-        newvalue = attrgetter(var_name)(self._values)
-        if isinstance(newvalue, datetime.datetime):
-            newvalue = dateToISO(newvalue)
-        # TODO: What if value == newvalue?
-        self._send_ws_update(var_name, {"value": newvalue})
+        for _var in modified_vars:
+            newvalue = attrgetter(_var)(self._values)
+            if isinstance(newvalue, datetime.datetime):
+                newvalue = dateToISO(newvalue)
+            # TODO would be nice to group update in one WS message (see _send_ws_update with dict)
+            # TODO: What if value == newvalue?
+            self._send_ws_update(_var, {"value": newvalue})
 
     def _request_var(self, var_name, payload) -> None:
         ret_payload = {}
@@ -268,9 +271,18 @@ class Gui(object, metaclass=Singleton):
         ret_payload["value"] = newvalue
         self._send_ws_update(var_name, ret_payload)
 
-    def _send_ws_update(self, var_name, payload) -> None:
+    def _send_ws_update(self, var_name: str, payload: dict) -> None:
         try:
             self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
+        except Exception as e:
+            print(e)
+
+    def _send_ws_update_with_dict(self, modified_values: dict) -> None:
+        payload = []
+        for k, v in modified_values.items():
+            payload.append({"name": get_client_var_name(k), "payload": {"value": v}})
+        try:
+            self._server._ws.send({"type": "U", "payload": payload})
         except Exception as e:
             print(e)
 
@@ -286,17 +298,21 @@ class Gui(object, metaclass=Singleton):
                 elif argcount == 2:
                     action_function(self, id)
                 return
-            except Exception:
+            except Exception as e:
+                print(f"on action exception: {e}")
                 pass
         if self._action_function:
             self._action_function(self, id, action)
 
-    def _re_evaluate_expr(self, var_name: str) -> None:
+    def _re_evaluate_expr(self, var_name: str) -> t.List:
         """
         This function will execute when the _update_var function is handling
         an expression with only a single variable
         """
+        modified_vars = []
         for expr in self._var_to_expr_list[var_name]:
+            if expr == var_name:
+                continue
             hash_expr = self._expr_to_hash[expr]
             expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
             eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
@@ -305,7 +321,8 @@ class Gui(object, metaclass=Singleton):
                 expr_string = expr
             expr_evaluated = eval(expr_string, {}, eval_dict)
             attrsetter(self._values, hash_expr, expr_evaluated)
-            self._send_ws_update(hash_expr, {"value": expr_evaluated})
+            modified_vars.append(var_name)
+        return modified_vars
 
     def add_page(
         self,
