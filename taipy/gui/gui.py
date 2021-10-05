@@ -70,7 +70,7 @@ class Gui(object, metaclass=Singleton):
         self._var_to_expr_list = {}
         # key = expression, value = list of related variables
         # "{x + y}": ["x", "y"]
-        self._expr_to_var_list = {} 
+        self._expr_to_var_list = {}
         self._markdown = Markdown(
             extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
         )
@@ -298,7 +298,7 @@ class Gui(object, metaclass=Singleton):
         """
         for expr in self._var_to_expr_list[var_name]:
             hash_expr = self._expr_to_hash[expr]
-            expr_var_list = self._expr_to_var_list[expr] # ["x", "y"]
+            expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
             eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
             expr_string = 'f"' + expr.replace('"', '\\"') + '"'
             if hash_expr == expr:
