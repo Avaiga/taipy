@@ -221,6 +221,7 @@ class Gui(object, metaclass=Singleton):
     def _request_var(self, var_name, payload) -> None:
         ret_payload = {}
         # Use custom attrgetter function to allow value binding for MapDictionary
+        var_name = self._expr_to_hash[var_name]
         newvalue = attrgetter(var_name)(self._values)
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
@@ -389,6 +390,7 @@ class Gui(object, metaclass=Singleton):
         var_val = {}
         var_list = []
         expr_hash = None
+        is_edge_case = False
         # Get A list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
         for e in self._fetch_expression_list(expr):
             st = ast.parse(e)
@@ -404,11 +406,12 @@ class Gui(object, metaclass=Singleton):
         if m := self.__EXPR_IS_EDGE_CASE.match(expr):
             expr = m.group(1)
             expr_hash = expr if self.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
+            is_edge_case = True
         # validate whether expression has already been evaluated
         if expr in self._expr_to_hash:
             return "{" + self._expr_to_hash[expr] + "}"
         # evaluate expressions
-        expr_evaluated = eval(expr_string, {}, var_val) if expr != expr_hash else eval(expr, {}, var_val)
+        expr_evaluated = eval(expr_string, {}, var_val) if not is_edge_case else eval(expr, {}, var_val)
         # save the expression if it needs to be re-evaluated
         if re_evaluated:
             if expr_hash is None:
