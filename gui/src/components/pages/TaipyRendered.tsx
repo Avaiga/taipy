@@ -8,25 +8,27 @@ import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 
-const TaipyRendered = () => {
+interface TaipyRenderedProps {
+    path?: string;
+}
+
+const TaipyRendered = (props: TaipyRenderedProps) => {
     const location = useLocation();
     const [JSX, setJSX] = useState("");
     const { state } = useContext(TaipyContext);
 
-    const path = (state.locations && state.locations[location.pathname]) || location.pathname;
+    const path = props.path || (state.locations && state.locations[location.pathname]) || location.pathname;
 
     useEffect(() => {
         // Fetch JSX Flask Backend Render
         axios
             .get(`${ENDPOINT}/flask-jsx${path}`)
             .then((result) => {
-                if (result?.data?.jsx) {
-                    // set rendered JSX and CSS style from fetch result
-                    setJSX(result.data.jsx);
-                    setStyle(result.data.style);
-                }
+                // set rendered JSX and CSS style from fetch result
+                result?.data?.jsx && setJSX(result.data.jsx);
+                result?.data?.style && setStyle(result.data.style);
             })
-            .catch((error) => setJSX("<h1>No data fetched from backend</h1><br></br>" + error));
+            .catch((error) => setJSX(`<h1>No data fetched from backend from ${path}</h1><br></br>${error}`));
     }, [path]);
 
     return (

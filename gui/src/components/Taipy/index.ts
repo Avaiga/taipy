@@ -8,6 +8,7 @@ import TaipyRendered from "../pages/TaipyRendered";
 import NotFound404 from "../pages/NotFound404";
 import Link from "./Link";
 import Selector from "./Selector";
+import Dialog from "./Dialog";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
@@ -17,6 +18,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Table: Table as ComponentType,
     a: Link as ComponentType,
     Selector: Selector as ComponentType,
+    Dialog: Dialog as ComponentType,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)
