@@ -1,23 +1,57 @@
 import re
-from typing import List
+from typing import List, Tuple, Any
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
-from .factory import Factory
-
 
 class Preprocessor(MdPreprocessor):
+    # ----------------------------------------------------------------------
+    # Finds, in the Mardwodn text, control declaration constructs:
+    #     <|<some value>|>
+    # or
+    #     <|<some value>|<control_type>|>
+    # or
+    #     <|<some value>|<control_type>|<prop_name[=propvalue]>>
+    # or
+    #     <|<control_type>|<prop_name[=propvalue]>>
+    # 
+    # These constructs are converted a fragment that the ControlPattern
+    # processes to create the components that get generated.
+    #     <control_type> prop_name="prop_value" ...
+    # Note that if a value is provided before the control_type, it is set
+    # as the default property value for that control type.
+    # The default control type is 'field'.
+    # ----------------------------------------------------------------------
+    # Control in Markdown
     _CONTROL_RE = re.compile(r"<\|(.*?)\|>")
+    # Split properties and control type
     _SPLIT_RE = re.compile(r"(?<!\\\\)\|")
+    # Property syntax: '<prop_name>[=<prop_value>]'
+    #   If <prop_value> is ommitted:
+    #     '<prop_name>' is equivalent to '<prop_name>=true'
+    #     'not <prop_name>' is equivalent to '<prop_name>=false'
+    #  Note 1: 'not <prop_name>=<prop_value>' is an invalid syntax
+    #  Note 2: Space characters after the equal sign are significative
+    _PROPERTY_RE = re.compile(r"(not\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
+
+    def _make_prop_pair(self, prop_name: str, prop_value: str) -> tuple[str, str]:
+        # Un-escape pipe character in property value
+        return (prop_name, prop_value.replace("\\|", "|"))
 
     def run(self, lines: List[str]) -> List[str]:
+        line_count = 0
         new_lines = []
         for line in lines:
+            line_count += 1
             new_line = ""
             last_index = 0
             for m in Preprocessor._CONTROL_RE.finditer(line):
-                control_name, properties = self.process_line_iter(m)
-                new_line += line[last_index : m.start()] + f"<|taipy.{control_name}{properties}|>"
+                control_name, properties = self._process_control(m, line_count)
+                new_line += line[last_index : m.start()] + "TaIpY:" + control_name
+                for property in properties:
+                    prop_value = property[1].replace("\"", "\\\"")
+                    new_line += f" {property[0]}=\"{prop_value}\""
+                new_line += ":tAiPy"
                 last_index = m.end()
             if last_index == 0:
                 new_lines.append(line)
@@ -25,27 +59,37 @@ class Preprocessor(MdPreprocessor):
                 new_lines.append(new_line + line[last_index:])
         return new_lines
 
-    def process_line_iter(self, m):
-        from ..gui import Gui
-
+    def _process_control(self, m: re.Match, line_count: int) -> Tuple[str, Any]:
         fragments = Preprocessor._SPLIT_RE.split(m.group(1))
         control_name = None
         default_prop_name = None
         default_prop_value = None
         expr_hash = None
-        properties = ""
+        properties = []
         for fragment in fragments:
+            from .factory import Factory
+
             if control_name is None and Factory.get_default_property_name(fragment):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:
+                from ..gui import Gui
+
                 # Handle First Expression Fragment
                 default_prop_value, expr_hash = Gui._get_instance().evaluate_expr(fragment)
                 default_prop_value = expr_hash
             else:
-                properties += "|" + fragment
+                prop_match = Preprocessor._PROPERTY_RE.match(fragment)
+                if not prop_match or (prop_match.group(1) and prop_match.group(3)):
+                    print(f"Bad Taipy property format at line {line_count}: '{fragment}'", flush=True)
+                elif prop_match.group(1):
+                    properties.append(self._make_prop_pair(prop_match.group(2), 'false'))
+                elif prop_match.group(3):
+                    properties.append(self._make_prop_pair(prop_match.group(2), prop_match.group(3)))
+                else:
+                   properties.append(self._make_prop_pair(prop_match.group(2), 'true'))
         if control_name is None:
             control_name = "field"
-        default_prop_name = Factory.get_default_property_name(control_name)
         if default_prop_value is not None:
-            properties = f"|{default_prop_name}={default_prop_value}" + properties
+            default_prop_name = Factory.get_default_property_name(control_name)
+            properties.insert(0, self._make_prop_pair(default_prop_name, default_prop_value))
         return control_name, properties

@@ -28,14 +28,12 @@ class Builder:
         self._gui = Gui._get_instance()
         # Whether this object has been evaluated (by expression) in preprocessor
         self.has_evaluated = False
-
         default_property_value = attributes.get(Factory.get_default_property_name(control_type))
         if default_property_value:
             self.value = attrgetter(default_property_value)(self._gui._values)
             self.expr_hash = default_property_value
-            self.expr = self._gui._hash_expr[self.expr_hash]
+            self.expr = self._gui._hash_to_expr[self.expr_hash]
             self.has_evaluated = True
-
         self.el = etree.Element(element_name)
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )

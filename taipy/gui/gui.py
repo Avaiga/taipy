@@ -66,10 +66,10 @@ class Gui(object, metaclass=Singleton):
         # key = variable name of the expression, key = list of related expressions
         # ex: {x + y}
         # "x": ["{x + y}"],
-        # "y"; ["{x + y}"],
+        # "y": ["{x + y}"],
         self._var_to_expr_list = {}
         # key = expression, value = list of related variables
-        # "{x + y}" : ["x", "y"]
+        # "{x + y}": ["x", "y"]
         self._expr_to_var_list = {} 
         self._markdown = Markdown(
             extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
