@@ -5,7 +5,6 @@ from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
 from taipy.exceptions.scenario import (
-    NonExistingDataSourceEntity,
     NonExistingScenario,
     NonExistingScenarioEntity,
 )
@@ -97,29 +96,5 @@ class ScenarioManager:
 
     def submit(self, scenario_id: ScenarioId):
         scenario_entity_to_submit = self.get_scenario_entity(scenario_id)
-        for pipeline in scenario_entity_to_submit.pipeline_entities:
+        for pipeline in scenario_entity_to_submit.pipeline_entities.values():
             self.pipeline_manager.submit(pipeline.id)
-
-    def get_data(self, data_source_name: str, scenario_id: ScenarioId):
-        scenario_entity = self.get_scenario_entity(scenario_id)
-        for pipeline_entity in scenario_entity.pipeline_entities:
-            for task_entity in pipeline_entity.task_entities:
-                for ds_entity in task_entity.input:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.get()
-                for ds_entity in task_entity.output:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.get()
-        raise NonExistingDataSourceEntity(scenario_id, data_source_name)
-
-    def set_data(self, data_source_name: str, scenario_id: ScenarioId, data):
-        scenario_entity = self.get_scenario_entity(scenario_id)
-        for pipeline_entity in scenario_entity.pipeline_entities:
-            for task in pipeline_entity.task_entities:
-                for ds_entity in task.input:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.write(data)
-                for ds_entity in task.output:
-                    if ds_entity.name == data_source_name:
-                        return ds_entity.write(data)
-            raise NonExistingDataSourceEntity(scenario_id, data_source_name)

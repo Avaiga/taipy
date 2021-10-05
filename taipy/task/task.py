@@ -19,5 +19,5 @@ class Task:
             self.output = [output]
         else:
             self.output = output
-        self.name = name
+        self.name = name.strip().lower().replace(' ', '_')
         self.function = function

@@ -45,8 +45,8 @@ class TaskScheduler:
         return job.id
 
     def __execute_function_and_write_outputs(self, task):
-        future = self.__executor.submit(task.function, *[i.get() for i in task.input])
-        future.add_done_callback(partial(_WriteResultInDataSource.write, task.output))
+        future = self.__executor.submit(task.function, *[i.get() for i in task.input.values()])
+        future.add_done_callback(partial(_WriteResultInDataSource.write, task.output.values()))
 
     @staticmethod
     def __create_executor():

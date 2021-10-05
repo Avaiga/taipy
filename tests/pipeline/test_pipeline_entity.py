@@ -1,13 +1,30 @@
+import pytest
+
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
-from taipy.pipeline import PipelineEntity, PipelineId
+from taipy.pipeline import PipelineEntity, PipelineId, Pipeline
 from taipy.task import TaskEntity, TaskId
 
 
+def test_create_pipeline():
+    pipeline = Pipeline("  nAmE 1 ", [])
+    assert pipeline.name == "name_1"
+
+
 def test_create_pipeline_entity():
-    pipeline = PipelineEntity("name_1", {}, [])
+    input = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "data")
+    output = EmbeddedDataSourceEntity.create("bar", Scope.PIPELINE, "other data")
+    task = TaskEntity("baz", [input], print, [output], TaskId("task_id"))
+    pipeline = PipelineEntity("nAmE 1 ", {"description": "description"}, [task])
     assert pipeline.id is not None
+    assert pipeline.name == "name_1"
+    assert pipeline.description == "description"
+    assert pipeline.foo == input
+    assert pipeline.bar == output
+    assert pipeline.baz == task
+    with pytest.raises(AttributeError):
+        pipeline.qux
 
 
 def test_check_consistency():
@@ -25,19 +42,19 @@ def test_check_consistency():
         "foo", [data_source_3], print, [data_source_3], TaskId("task_id_3")
     )
     pipeline_3 = PipelineEntity("name_3", {}, [task_3])
-    assert not pipeline_3.is_consistent
+    assert not pipeline_3.is_consistent # Not a dag
 
     input_4 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     output_4 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     task_4_1 = TaskEntity("foo", [input_4], print, [output_4], TaskId("task_id_4_1"))
-    task_4_2 = TaskEntity("foo", [output_4], print, [input_4], TaskId("task_id_4_2"))
+    task_4_2 = TaskEntity("bar", [output_4], print, [input_4], TaskId("task_id_4_2"))
     pipeline_4 = PipelineEntity("name_4", {}, [task_4_1, task_4_2])
-    assert not pipeline_4.is_consistent
+    assert not pipeline_4.is_consistent # Not a Dag
 
     input_5 = DataSourceEntity("foo", Scope.PIPELINE, "input_id_5")
     output_5 = DataSourceEntity("foo", Scope.PIPELINE, "output_id_5")
     task_5_1 = TaskEntity("foo", [input_5], print, [output_5], TaskId("task_id_5_1"))
-    task_5_2 = TaskEntity("foo", [output_5], print, [task_5_1], TaskId("task_id_5_2"))
+    task_5_2 = TaskEntity("bar", [output_5], print, [task_5_1], TaskId("task_id_5_2"))
     pipeline_2 = PipelineEntity("name_2", {}, [task_5_1, task_5_2])
     assert not pipeline_2.is_consistent
 

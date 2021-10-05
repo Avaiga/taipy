@@ -1,12 +1,11 @@
 import pytest
 
-from taipy.data import DataManager, DataSource
+from taipy.data import DataSource
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import (
-    NonExistingDataSourceEntity,
     NonExistingPipeline,
     NonExistingPipelineEntity,
 )
@@ -231,9 +230,9 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert len(data_manager.get_data_source_entities()) == 3
     assert len(task_manager.task_entities) == 2
     assert len(pipeline_entity.get_sorted_task_entities()) == 2
-    assert pipeline_manager.get_data("foo", pipeline_entity.id) == 1
-    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 0
-    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 0
+    assert pipeline_entity.foo.get() == 1
+    assert pipeline_entity.bar.get() == 0
+    assert pipeline_entity.baz.get() == 0
     assert pipeline_entity.get_sorted_task_entities()[0][0].name == task_mult_by_2.name
     assert pipeline_entity.get_sorted_task_entities()[1][0].name == task_mult_by_3.name
 
@@ -258,27 +257,24 @@ def test_get_set_data():
 
     pipeline_entity = pipeline_manager.create_pipeline_entity(pipeline)
 
-    assert pipeline_manager.get_data("foo", pipeline_entity.id) == 1
-    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 0
-    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 0
+    assert pipeline_entity.foo.get() == 1
+    assert pipeline_entity.bar.get() == 0
+    assert pipeline_entity.baz.get() == 0
 
     pipeline_manager.submit(pipeline_entity.id)
-    assert pipeline_manager.get_data("foo", pipeline_entity.id) == 1
-    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 2
-    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 6
+    assert pipeline_entity.foo.get() == 1
+    assert pipeline_entity.bar.get() == 2
+    assert pipeline_entity.baz.get() == 6
 
-    pipeline_manager.set_data("foo", pipeline_entity.id, "new data value")
-    assert pipeline_manager.get_data("foo", pipeline_entity.id) == "new data value"
-    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 2
-    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 6
+    pipeline_entity.foo.write("new data value")
+    assert pipeline_entity.foo.get() == "new data value"
+    assert pipeline_entity.bar.get() == 2
+    assert pipeline_entity.baz.get() == 6
 
-    pipeline_manager.set_data("bar", pipeline_entity.id, 7)
-    assert pipeline_manager.get_data("foo", pipeline_entity.id) == "new data value"
-    assert pipeline_manager.get_data("bar", pipeline_entity.id) == 7
-    assert pipeline_manager.get_data("baz", pipeline_entity.id) == 6
+    pipeline_entity.bar.write(7)
+    assert pipeline_entity.foo.get() == "new data value"
+    assert pipeline_entity.bar.get() == 7
+    assert pipeline_entity.baz.get() == 6
 
-    with pytest.raises(NonExistingDataSourceEntity):
-        pipeline_manager.set_data("WRONG DATA SOURCE NAME", pipeline_entity.id, 7)
-
-    with pytest.raises(NonExistingPipelineEntity):
-        pipeline_manager.set_data("foo", PipelineId("WRONG PIPELINE ID"), 7)
+    with pytest.raises(AttributeError):
+        pipeline_entity.WRONG.write(7)

@@ -14,6 +14,7 @@ class TestCSVDataSourceEntity:
     def test_get(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         csv = CSVDataSourceEntity.create("foo", Scope.PIPELINE, path)
+        assert csv.path == path
         data = csv.get()
         assert isinstance(data, pd.DataFrame)
 
@@ -39,12 +40,16 @@ class TestCSVDataSourceEntity:
         assert np.array_equal(csv.get().values, df.values)
 
     def test_create(self):
-        ds = CSVDataSourceEntity.create("foo", Scope.PIPELINE, "data/source/path")
+        ds = CSVDataSourceEntity.create("fOo BAr", Scope.PIPELINE, "data/source/path")
 
         assert isinstance(ds, CSVDataSourceEntity)
+        assert ds.name == "foo_bar"
         assert ds.has_header is False
         assert ds.path == "data/source/path"
         assert ds.type() == "csv"
+        assert ds.id is not None
+        with pytest.raises(AttributeError):
+            ds.foo
 
     def test_init_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
@@ -61,6 +66,7 @@ class TestEmbeddedDataSourceEntity:
         embedded_str = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
         assert isinstance(embedded_str.get(), str)
         assert embedded_str.get() == "bar"
+        assert embedded_str.data == "bar"
         embedded_int = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, 197)
         assert isinstance(embedded_int.get(), int)
         assert embedded_int.get() == 197
@@ -69,9 +75,11 @@ class TestEmbeddedDataSourceEntity:
         assert embedded_dict.get() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
-        ds = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, data="Embedded Data Source")
+        ds = EmbeddedDataSourceEntity.create("foobar BaZ", Scope.PIPELINE, data="Embedded Data Source")
+        assert ds.name == "foobar_baz"
         assert isinstance(ds, EmbeddedDataSourceEntity)
         assert ds.type() == "embedded"
+        assert ds.id is not None
 
     def test_preview(self):
         ds = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, data="Embedded Data Source")

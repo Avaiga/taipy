@@ -37,10 +37,6 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
         """
         self.properties["data"] = data
 
-    @property
-    def data(self):
-        return self.properties.get("data")
-
     def to_json(self):
         return json.dumps(
             {

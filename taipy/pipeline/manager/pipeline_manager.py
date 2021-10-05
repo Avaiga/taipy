@@ -11,7 +11,6 @@ from taipy.data import DataSourceEntity
 from taipy.data.data_source import DataSource
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import (
-    NonExistingDataSourceEntity,
     NonExistingPipeline,
     NonExistingPipelineEntity,
 )
@@ -108,25 +107,3 @@ class PipelineManager:
         for tasks in pipeline_entity_to_submit.get_sorted_task_entities():
             for task in tasks:
                 self.task_scheduler.submit(task)
-
-    def get_data(self, data_source_name: str, pipeline_id: PipelineId):
-        pipeline_entity = self.get_pipeline_entity(pipeline_id)
-        for task in pipeline_entity.task_entities:
-            for ds_entity in task.input:
-                if ds_entity.name == data_source_name:
-                    return ds_entity.get()
-            for ds_entity in task.output:
-                if ds_entity.name == data_source_name:
-                    return ds_entity.get()
-        raise NonExistingDataSourceEntity(pipeline_id, data_source_name)
-
-    def set_data(self, data_source_name: str, pipeline_id: PipelineId, data):
-        pipeline_entity = self.get_pipeline_entity(pipeline_id)
-        for task in pipeline_entity.task_entities:
-            for ds_entity in task.input:
-                if ds_entity.name == data_source_name:
-                    return ds_entity.write(data)
-            for ds_entity in task.output:
-                if ds_entity.name == data_source_name:
-                    return ds_entity.write(data)
-        raise NonExistingDataSourceEntity(pipeline_id, data_source_name)

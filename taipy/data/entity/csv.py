@@ -71,14 +71,6 @@ class CSVDataSourceEntity(DataSourceEntity):
             df = pd.DataFrame(data, columns=columns)
         df.to_csv(self.path, index=False)
 
-    @property
-    def has_header(self) -> Optional[bool]:
-        return self.properties.get("has_header")
-
-    @property
-    def path(self) -> Optional[str]:
-        return self.properties.get("path")
-
     def to_json(self):
         return json.dumps(
             {
