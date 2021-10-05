@@ -24,21 +24,31 @@ class Builder:
         self.element_name = element_name
         self.attributes = attributes
         self.value = default_value
-        self.var_name = None
+        self.el = etree.Element(element_name)
         self._gui = Gui._get_instance()
         # Whether this object has been evaluated (by expression) in preprocessor
         self.has_evaluated = False
-        default_property_value = attributes.get(Factory.get_default_property_name(control_type))
+        default_property_name = Factory.get_default_property_name(control_type)
+        default_property_value = attributes.get(default_property_name)
         if default_property_value:
-            self.value = attrgetter(default_property_value)(self._gui._values)
-            self.expr_hash = default_property_value
-            self.expr = self._gui._hash_to_expr[self.expr_hash]
             self.has_evaluated = True
-        self.el = etree.Element(element_name)
-
+            if self._gui._is_expression(default_property_value):
+                default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
+                self.value = attrgetter(default_property_value)(self._gui._values)
+                self.expr_hash = default_property_value
+                self.expr = self._gui._hash_to_expr[self.expr_hash]
+            else:
+                self.value = self.expr_hash = self.expr = default_property_value
+        
+        def parse_attribute_value(value):
+            if v is not None and self._gui._is_expression(value):
+                hash_value = self._gui._fetch_expression_list(value)[0]
+                return attrgetter(hash_value)(self._gui._values)
+            return value
+            
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.attributes:
-            properties_dict_name = self.attributes["properties"]
+            properties_dict_name = parse_attribute_value(self.attributes["properties"])
             self._gui.bind_var(properties_dict_name)
             properties_dict = getattr(self._gui, properties_dict_name)
             if not isinstance(properties_dict, _MapDictionary):
@@ -52,12 +62,13 @@ class Builder:
 
         # Bind potential function in self.attributes
         for k, v in self.attributes.items():
+            v = parse_attribute_value(v)
             if isinstance(v, str):
                 # Bind potential function
                 self._gui.bind_func(v)
             # Try to evaluate as expressions
             if v is not None:
-                self.attributes[k] = self._gui.evaluate_expr(expr=v, re_evaluated=False)
+                self.attributes[k] = v
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):

@@ -36,6 +36,7 @@ class Gui(object, metaclass=Singleton):
     __root_page_name = "TaiPy_root_page"
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
+    __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
 
     def __init__(
         self,
@@ -324,6 +325,12 @@ class Gui(object, metaclass=Singleton):
             modified_vars.append(var_name)
         return modified_vars
 
+    def _is_expression(self, expr: str) -> bool:
+        return len(self.__EXPR_IS_EXPR.findall(expr)) != 0
+
+    def _fetch_expression_list(self, expr: str) -> t.List:
+        return self.__EXPR_RE.findall(expr)
+    
     def add_page(
         self,
         name: str,
@@ -375,11 +382,13 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+        if not self._is_expression(expr):
+            return expr
         var_val = {}
         var_list = []
         expr_hash = None
         # Get A list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
-        for e in self.__EXPR_RE.findall(expr):
+        for e in self._fetch_expression_list(expr):
             st = ast.parse(e)
             for node in ast.walk(st):
                 if type(node) is ast.Name:
@@ -394,7 +403,7 @@ class Gui(object, metaclass=Singleton):
             expr = expr_hash = var_list[0]
         # validate whether expression has already been evaluated
         if expr in self._expr_to_hash:
-            return getattr(self, self._expr_to_hash[expr]), self._expr_to_hash[expr]
+            return "{" + self._expr_to_hash[expr] + "}"
         # evaluate expressions
         expr_evaluated = eval(expr_string, {}, var_val) if expr != expr_hash else eval(expr, {}, var_val)
         # save the expression if it needs to be re-evaluated
@@ -412,7 +421,7 @@ class Gui(object, metaclass=Singleton):
                     self._var_to_expr_list[var].append(expr)
             if expr not in self._expr_to_var_list:
                 self._expr_to_var_list[expr] = var_list
-            return expr_evaluated, expr_hash
+            return "{" + expr_hash + "}"
         return expr_evaluated
 
     def on_update(self, f) -> None:
