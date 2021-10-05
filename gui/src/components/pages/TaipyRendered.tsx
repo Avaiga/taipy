@@ -31,7 +31,7 @@ const TaipyRendered = () => {
 
     return (
         <JsxParser
-            disableKeyGeneration={false}
+            disableKeyGeneration={true}
             bindings={state.data}
             components={taipyComponents}
             jsx={JSX}

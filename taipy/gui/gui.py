@@ -187,11 +187,11 @@ class Gui(object, metaclass=Singleton):
             if isinstance(currentvalue, datetime.datetime):
                 value = ISOToDate(value)
             elif isinstance(currentvalue, int):
-                value = int(value)
+                value = int(value) if value else 0
             elif isinstance(currentvalue, float):
-                value = float(value)
+                value = float(value) if value else 0.0
             elif isinstance(currentvalue, complex):
-                value = complex(value)
+                value = complex(value) if value else 0
             elif isinstance(currentvalue, bool):
                 value = bool(value)
             elif isinstance(currentvalue, pd.DataFrame):

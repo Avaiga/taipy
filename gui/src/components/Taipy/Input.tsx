@@ -7,15 +7,17 @@ import { createSendActionNameAction, createSendUpdateAction } from "../../contex
 import { TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
+    const { className, type, id, tp_varname, actionName } = props;
     const [value, setValue] = useState(props.defaultvalue);
     const { dispatch } = useContext(TaipyContext);
 
-    const { className, type, id, tp_varname, actionName } = props;
-
-    const handleInput = useCallback(e => {
-        setValue(e.target.value);
-        dispatch(createSendUpdateAction(tp_varname, e.target.value));
-    }, [tp_varname, dispatch]);
+    const handleInput = useCallback(
+        (e) => {
+            setValue(e.target.value);
+            dispatch(createSendUpdateAction(tp_varname, e.target.value));
+        },
+        [tp_varname, dispatch]
+    );
 
     const handleClick = useCallback(() => {
         dispatch(createSendActionNameAction(id, actionName));
@@ -23,21 +25,21 @@ const Input = (props: TaipyInputProps) => {
 
     useEffect(() => {
         if (props.value !== undefined) {
-            setValue(props.value);
+            if (value !== props.value) {
+                setValue(props.value);
+            }
         }
-    }, [props.value]);
+    }, [props.value, value]);
 
-    if (type === 'button') {
-        return <Button
-            id={id}
-            variant="outlined"
-            className={className}
-            onClick={handleClick}
-            >
+    if (type === "button") {
+        return (
+            <Button id={id} variant="outlined" className={className} onClick={handleClick}>
                 {value}
             </Button>
+        );
     }
-    return <TextField
+    return (
+        <TextField
             margin="dense"
             hiddenLabel
             value={value}
@@ -46,6 +48,7 @@ const Input = (props: TaipyInputProps) => {
             id={id}
             onChange={handleInput}
         />
-}
+    );
+};
 
-export default Input
+export default Input;
