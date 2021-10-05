@@ -3,7 +3,7 @@ import pytest
 from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.entity import EmbeddedDataSourceEntity
 from taipy.data.scope import Scope
-from taipy.pipeline import PipelineEntity, PipelineId, Pipeline
+from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
 from taipy.task import TaskEntity, TaskId
 
 
@@ -38,18 +38,16 @@ def test_check_consistency():
     assert pipeline_2.is_consistent
 
     data_source_3 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
-    task_3 = TaskEntity(
-        "foo", [data_source_3], print, [data_source_3], TaskId("task_id_3")
-    )
+    task_3 = TaskEntity("foo", [data_source_3], print, [data_source_3], TaskId("task_id_3"))
     pipeline_3 = PipelineEntity("name_3", {}, [task_3])
-    assert not pipeline_3.is_consistent # Not a dag
+    assert not pipeline_3.is_consistent  # Not a dag
 
     input_4 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     output_4 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
     task_4_1 = TaskEntity("foo", [input_4], print, [output_4], TaskId("task_id_4_1"))
     task_4_2 = TaskEntity("bar", [output_4], print, [input_4], TaskId("task_id_4_2"))
     pipeline_4 = PipelineEntity("name_4", {}, [task_4_1, task_4_2])
-    assert not pipeline_4.is_consistent # Not a Dag
+    assert not pipeline_4.is_consistent  # Not a Dag
 
     input_5 = DataSourceEntity("foo", Scope.PIPELINE, "input_id_5")
     output_5 = DataSourceEntity("foo", Scope.PIPELINE, "output_id_5")
@@ -60,9 +58,7 @@ def test_check_consistency():
 
 
 def test_to_model():
-    input = EmbeddedDataSourceEntity.create(
-        "input", Scope.PIPELINE, "this is some data"
-    )
+    input = EmbeddedDataSourceEntity.create("input", Scope.PIPELINE, "this is some data")
     output = EmbeddedDataSourceEntity.create("output", Scope.PIPELINE, "")
     task = TaskEntity("task", [input], print, [output], TaskId("task_id"))
     pipeline = PipelineEntity("name", {"foo": "bar"}, [task])
@@ -91,13 +87,9 @@ def test_get_sorted_tasks():
         TaskId("t1"),
     )
     task_2 = TaskEntity("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
-    task_3 = TaskEntity(
-        "waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3")
-    )
+    task_3 = TaskEntity("waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3"))
     task_4 = TaskEntity("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
-    pipeline = PipelineEntity(
-        "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
-    )
+    pipeline = PipelineEntity("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     # s1 ---             ---> s3 ---> t2 ---> s5 ----
     #       |           |                           |
     #       |---> t1 ---|      -------------------------> t3 ---> s6

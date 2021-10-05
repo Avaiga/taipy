@@ -1,6 +1,7 @@
 import logging
 import uuid
-from typing import List, NewType, Optional
+from collections.abc import Iterable
+from typing import Dict, NewType, Optional
 
 from taipy.data.data_source_entity import DataSourceEntity
 
@@ -14,24 +15,28 @@ class TaskEntity:
     def __init__(
         self,
         name: str,
-        input: List[DataSourceEntity],
+        input: Iterable[DataSourceEntity],
         function,
-        output: Optional[List[DataSourceEntity]],
+        output: Optional[Iterable[DataSourceEntity]] = None,
         id: TaskId = None,
     ):
-        if output is None:
-            output = []
-        self.input = {ds.name: ds for ds in input}
-        self.output = {ds.name: ds for ds in output}
+        self.__input = {ds.name: ds for ds in input}
+        self.__output = {ds.name: ds for ds in output or []}
         self.name = self.__protect_name(name)
-        self.id = id or TaskId(
-            self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
-        )
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())]))
         self.function = function
+
+    @property
+    def output(self) -> Dict[str, DataSourceEntity]:
+        return self.__output
+
+    @property
+    def input(self) -> Dict[str, DataSourceEntity]:
+        return self.__input
 
     @staticmethod
     def __protect_name(name):
-        return name.strip().lower().replace(' ', '_')
+        return name.strip().lower().replace(" ", "_")
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
