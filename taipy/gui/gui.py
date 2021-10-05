@@ -37,6 +37,8 @@ class Gui(object, metaclass=Singleton):
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
+    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
+    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
     def __init__(
         self,
@@ -399,8 +401,9 @@ class Gui(object, metaclass=Singleton):
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
-        if len(var_list) == 1 and "{" + var_list[0] + "}" == expr:
-            expr = expr_hash = var_list[0]
+        if m := self.__EXPR_IS_EDGE_CASE.match(expr):
+            expr = m.group(1)
+            expr_hash = expr if self.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
         # validate whether expression has already been evaluated
         if expr in self._expr_to_hash:
             return "{" + self._expr_to_hash[expr] + "}"
