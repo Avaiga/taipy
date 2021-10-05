@@ -39,13 +39,13 @@ class Builder:
                 self.expr = self._gui._hash_to_expr[self.expr_hash]
             else:
                 self.value = self.expr_hash = self.expr = default_property_value
-        
+
         def parse_attribute_value(value):
             if v is not None and self._gui._is_expression(value):
                 hash_value = self._gui._fetch_expression_list(value)[0]
                 return attrgetter(hash_value)(self._gui._values)
             return value
-            
+
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.attributes:
             properties_dict_name = parse_attribute_value(self.attributes["properties"])

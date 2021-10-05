@@ -333,7 +333,7 @@ class Gui(object, metaclass=Singleton):
 
     def _fetch_expression_list(self, expr: str) -> t.List:
         return self.__EXPR_RE.findall(expr)
-    
+
     def add_page(
         self,
         name: str,
