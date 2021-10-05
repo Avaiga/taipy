@@ -1,6 +1,6 @@
 from typing import Dict
 
-import toml
+import toml  # type: ignore
 
 
 class TomlSerializer:
