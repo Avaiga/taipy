@@ -59,10 +59,18 @@ class Gui(object, metaclass=Singleton):
         self._values = SimpleNamespace()
         self._update_function = None
         self._action_function = None
-        self._expr_hash = {}
-        self._hash_expr = {}
-        self._var_expr = {}
-        self._expr_var = {}
+        # key = expression, value = hashed value of the expression
+        self._expr_to_hash = {}
+        # key = hashed value of the expression, value = expression
+        self._hash_to_expr = {}
+        # key = variable name of the expression, key = list of related expressions
+        # ex: {x + y}
+        # "x": ["{x + y}"],
+        # "y"; ["{x + y}"],
+        self._var_to_expr_list = {}
+        # key = expression, value = list of related variables
+        # "{x + y}" : ["x", "y"]
+        self._expr_to_var_list = {} 
         self._markdown = Markdown(
             extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
         )
@@ -173,7 +181,7 @@ class Gui(object, metaclass=Singleton):
     def _update_var(self, var_name: str, value, propagate=True) -> None:
         # Check if Variable is type datetime
         expr = var_name
-        hash_expr = var_name = self._expr_hash[var_name]
+        hash_expr = var_name = self._expr_to_hash[var_name]
         currentvalue = attrgetter(var_name)(self._values)
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
@@ -288,9 +296,9 @@ class Gui(object, metaclass=Singleton):
         This function will execute when the _update_var function is handling
         an expression with only a single variable
         """
-        for expr in self._var_expr[var_name]:
-            hash_expr = self._expr_hash[expr]
-            expr_var_list = self._expr_var[expr]
+        for expr in self._var_to_expr_list[var_name]:
+            hash_expr = self._expr_to_hash[expr]
+            expr_var_list = self._expr_to_var_list[expr] # ["x", "y"]
             eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
             expr_string = 'f"' + expr.replace('"', '\\"') + '"'
             if hash_expr == expr:
@@ -362,33 +370,31 @@ class Gui(object, metaclass=Singleton):
                     self.bind_var(var_name)
                     var_list.append(var_name)
                     var_val[var_name] = attrgetter(var_name)(self._values)
+        # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
         if len(var_list) == 1 and "{" + var_list[0] + "}" == expr:
             expr = expr_hash = var_list[0]
         # validate whether expression has already been evaluated
-        if expr in self._expr_hash:
-            if re_evaluated:
-                return getattr(self, self._expr_hash[expr]), self._expr_hash[expr]
-            else:
-                return getattr(self, self._expr_hash[expr])
+        if expr in self._expr_to_hash:
+            return getattr(self, self._expr_to_hash[expr]), self._expr_to_hash[expr]
         # evaluate expressions
         expr_evaluated = eval(expr_string, {}, var_val) if expr != expr_hash else eval(expr, {}, var_val)
         # save the expression if it needs to be re-evaluated
         if re_evaluated:
             if expr_hash is None:
-                expr_hash = self._expr_hash[expr] = "tp_" + hashlib.md5(expr.encode()).hexdigest()
+                expr_hash = self._expr_to_hash[expr] = "tp_" + hashlib.md5(expr.encode()).hexdigest()
                 self.bind_var_val(expr_hash, expr_evaluated)
             else:
-                self._expr_hash[expr] = expr
-            self._hash_expr[expr_hash] = expr
+                self._expr_to_hash[expr] = expr
+            self._hash_to_expr[expr_hash] = expr
             for var in var_val:
-                if var not in self._var_expr:
-                    self._var_expr[var] = [expr]
+                if var not in self._var_to_expr_list:
+                    self._var_to_expr_list[var] = [expr]
                 else:
-                    self._var_expr[var].append(expr)
-            if expr not in self._expr_var:
-                self._expr_var[expr] = var_list
+                    self._var_to_expr_list[var].append(expr)
+            if expr not in self._expr_to_var_list:
+                self._expr_to_var_list[expr] = var_list
             return expr_evaluated, expr_hash
         return expr_evaluated
 
