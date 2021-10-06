@@ -9,6 +9,7 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyBaseProps } from "./utils";
@@ -76,7 +77,7 @@ const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-const loadingStyle: CSSProperties = { position: "absolute", left: 0, top: 0 };
+const loadingStyle: CSSProperties = { height:"52px", textAlign:"right", verticalAlign:"center" };
 
 const rowsPerPageOptions = [10, 50, 100, 500];
 
@@ -197,7 +198,6 @@ const Table = (props: TableProps) => {
         <>
             <Box sx={boxSx}>
                 <Paper sx={paperSx}>
-                    {loading && <Skeleton style={loadingStyle} width="100%" height="100%" />}
                     <TableContainer sx={tcSx}>
                         <MuiTable
                             sx={tableSx}
@@ -248,17 +248,17 @@ const Table = (props: TableProps) => {
                             </TableBody>
                         </MuiTable>
                     </TableContainer>
-                    {!showAll && (
+                    {!showAll && (loading ? <Skeleton width="100%" style={loadingStyle} ><Typography>Loading...</Typography></Skeleton> : 
                         <TablePagination
                             component="div"
                             count={rowCount}
                             page={startIndex / rowsPerPage}
-                            onPageChange={handleChangePage}
                             rowsPerPage={rowsPerPage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
                             showFirstButton={true}
                             showLastButton={true}
                             rowsPerPageOptions={pso}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
                         />
                     )}
                 </Paper>
