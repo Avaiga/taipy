@@ -1,4 +1,5 @@
 import re
+import warnings
 from typing import List, Tuple, Any
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
@@ -78,7 +79,7 @@ class Preprocessor(MdPreprocessor):
             else:
                 prop_match = Preprocessor._PROPERTY_RE.match(fragment)
                 if not prop_match or (prop_match.group(1) and prop_match.group(3)):
-                    print(f"Bad Taipy property format at line {line_count}: '{fragment}'", flush=True)
+                    warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
                 else:
                     from ..gui import Gui
 

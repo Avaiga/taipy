@@ -6,6 +6,7 @@ import re
 import typing as t
 import hashlib
 import ast
+import warnings
 from operator import attrgetter
 from types import FunctionType, SimpleNamespace
 
@@ -198,7 +199,7 @@ class Gui(object, metaclass=Singleton):
             elif isinstance(currentvalue, bool):
                 value = bool(value)
             elif isinstance(currentvalue, pd.DataFrame):
-                print("Error: cannot update value for dataframe: " + var_name)
+                warnings.warn("Error: cannot update value for dataframe: " + var_name)
                 return
         modified_vars = [var_name]
         # Use custom attrsetter function to allow value binding for MapDictionary
@@ -234,7 +235,7 @@ class Gui(object, metaclass=Singleton):
                 try:
                     start = int(str(payload["start"]), base=10)
                 except Exception as e:
-                    print(e)
+                    warnings.warn(f'strat should be an int value {payload["start"]}')
                     start = 0
             if isinstance(payload["end"], int):
                 end = int(payload["end"])
@@ -279,7 +280,7 @@ class Gui(object, metaclass=Singleton):
         try:
             self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
         except Exception as e:
-            print(e)
+            warnings.warn(f"Web Socket communication error {e}")
 
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = []
@@ -288,7 +289,7 @@ class Gui(object, metaclass=Singleton):
         try:
             self._server._ws.send({"type": "U", "payload": payload})
         except Exception as e:
-            print(e)
+            warnings.warn(f"Web Socket communication error {e}")
 
     def _on_action(self, id, action):
         if action:
@@ -303,7 +304,7 @@ class Gui(object, metaclass=Singleton):
                     action_function(self, id)
                 return
             except Exception as e:
-                print(f"on action exception: {e}")
+                warnings.warn(f"on action exception: {e}")
                 pass
         if self._action_function:
             self._action_function(self, id, action)

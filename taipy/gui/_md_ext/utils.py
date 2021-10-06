@@ -1,4 +1,5 @@
 import pandas as pd
+import warnings
 
 from ..utils import _MapDictionary, get_date_col_str_name
 
@@ -19,7 +20,7 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
             idx = 0
             for col in columns:
                 if col not in coltypes.keys():
-                    print('Error column "' + col + '" is not present in the dataframe "' + value.Name + '"', flush=True)
+                    warnings.warn(f'Error column "{col}" is not present in the dataframe "{value.head(0)}"')
                 else:
                     coldict[col] = {"index": idx}
                     idx += 1
@@ -27,7 +28,7 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
         if isinstance(columns, _MapDictionary):
             columns = columns._dict
         if not isinstance(columns, dict):
-            print("Error: columns attributes should be a string, list, tuple or dict")
+            warnings.warn("Error: columns attributes should be a string, list, tuple or dict")
             columns = {}
         if len(columns) == 0:
             idx = 0
