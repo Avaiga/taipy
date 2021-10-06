@@ -1,4 +1,5 @@
 import os
+import warnings
 import typing as t
 
 import __main__
@@ -74,9 +75,9 @@ class Server(Flask):
                 elif message["type"] == "T":
                     self._app._request_var(message["name"], message["payload"])
             except TypeError as te:
-                print("Decoding Message has failed: " + str(message) + "\n " + str(te))
+                warnings.warn(f"Decoding Message has failed: {message}\n{te}")
             except KeyError as ke:
-                print("Can't access: " + str(message) + "\n" + str(ke))
+                warnings.warn(f"Can't access: {message}\n{ke}")
 
     # Update to render as JSX
     def render(self, html_fragment, style):

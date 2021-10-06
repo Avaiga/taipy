@@ -1,6 +1,6 @@
 import datetime
 import json
-import re
+import warnings
 from operator import attrgetter
 
 import pandas as pd
@@ -17,77 +17,58 @@ class Builder:
         element_name,
         attributes,
         default_value="<Empty>",
-        has_attribute=False,
-        attributes_val=3,
-        allow_properties_config=True,
     ):
+        from .factory import Factory
+        from ..gui import Gui
+
         self.element_name = element_name
         self.attributes = attributes
         self.value = default_value
-        self.has_attribute = has_attribute
-        # Allow property configuration by passing in dictionary
-        self.allow_properties_config = allow_properties_config
-        # --------------------------------------------
-        # TODO - Retrieve var and var_id from default property
-        # This is obviously wrong and should have been done at
-        # the preprocessor level.
-        # At this point, the default property should be set to a
-        # string of the form: var_name(var_index)
-        # TODO - Here is also the place where function names
-        # should be checked for a potential binding to the application
-        # code, using Gui._get_instance().bind_func(property_value)
-        from .factory import Factory
-
-        default_property_value = attributes.get(Factory.get_default_property_name(control_type))
-        # Check if we have a variable
-        self.var_name = None
-        if default_property_value:
-            var_match = re.match(r"{([a-zA-Z][\.a-zA-Z_$0-9]*)\((\d+)\)}", default_property_value)
-            if var_match:
-                self.var_name = var_match.group(1)
-                self.var_id = var_match.group(2)
-        # --------------------------------------------
         self.el = etree.Element(element_name)
-        if has_attribute:
-            # Bind properties dictionary to attributes if condition is matched
-            if allow_properties_config and "properties" in self.attributes:
-                from ..gui import Gui
+        self._gui = Gui._get_instance()
+        # Whether this object has been evaluated (by expression) in preprocessor
+        self.has_evaluated = False
+        default_property_name = Factory.get_default_property_name(control_type)
+        default_property_value = attributes.get(default_property_name)
+        if default_property_value:
+            self.has_evaluated = True
+            if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
+                default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
+                self.value = attrgetter(default_property_value)(self._gui._values)
+                self.expr_hash = default_property_value
+                self.expr = self._gui._hash_to_expr[self.expr_hash]
+            else:
+                self.value = self.expr_hash = self.expr = default_property_value
 
-                properties_dict_name = self.attributes["properties"]
-                Gui._get_instance().bind_var(properties_dict_name)
-                properties_dict = getattr(Gui._get_instance(), properties_dict_name)
-                if not isinstance(properties_dict, _MapDictionary):
-                    raise Exception(
-                        f"Can't find properties configuration dictionary {properties_dict_name}!"
-                        f" Please review your GUI templates!"
-                    )
-                # Iterate through properties_dict and append to self.attributes
-                for k, v in properties_dict.items():
-                    self.attributes[k] = v
-                    if isinstance(v, str):
-                        # Bind potential function
-                        Gui._get_instance().bind_func(v)
+        # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
+        if "properties" in self.attributes:
+            properties_dict_name = self.__parse_attribute_value(self.attributes["properties"])
+            self._gui.bind_var(properties_dict_name)
+            properties_dict = getattr(self._gui, properties_dict_name)
+            if not isinstance(properties_dict, _MapDictionary):
+                raise Exception(
+                    f"Can't find properties configuration dictionary {properties_dict_name}!"
+                    f" Please review your GUI templates!"
+                )
+            # Iterate through properties_dict and append to self.attributes
+            for k, v in properties_dict.items():
+                self.attributes[k] = v
 
-        if self.var_name:
-            try:
-                # Bind variable name (var_name string split in case
-                # var_name is a dictionary)
-                from ..gui import Gui
+        # Bind potential function in self.attributes
+        for k, v in self.attributes.items():
+            v = self.__parse_attribute_value(v)
+            if isinstance(v, str):
+                # Bind potential function
+                self._gui.bind_func(v)
+            # Try to evaluate as expressions
+            if v is not None:
+                self.attributes[k] = v
 
-                Gui._get_instance().bind_var(self.var_name.split(sep=".")[0])
-            except Exception:
-                print(f"Couldn't bind variable '{self.var_name}'", flush=True)
-
-    def get_gui_value(self, fallback_value=None):
-        if self.var_name:
-            try:
-                from ..gui import Gui
-
-                self.value = attrgetter(self.var_name)(Gui._get_instance()._values)
-            except Exception:
-                print(f"WARNING: variable {self.var_name} doesn't exist", flush=True)
-                self.value = fallback_value if fallback_value is not None else "[Undefined: " + self.var_name + "]"
-        return self
+    def __parse_attribute_value(self, value):
+        if isinstance(value, str) and self._gui._is_expression(value):
+            hash_value = self._gui._fetch_expression_list(value)[0]
+            return attrgetter(hash_value)(self._gui._values)
+        return value
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
@@ -101,21 +82,22 @@ class Builder:
             self.set_attribute("columns", json.dumps(columns))
         return self
 
-    def set_varname(self):
-        if self.var_name:
-            self.set_attribute("key", self.var_name + "_" + str(self.var_id))
+    def set_expresion_hash(self):
+        if self.has_evaluated:
+            self.set_attribute("key", self.expr_hash)
             self.set_attribute(
                 "value",
-                "{!" + get_client_var_name(self.var_name) + "!}",
+                "{!" + get_client_var_name(self.expr_hash) + "!}",
             )
-            self.set_attribute("tp_varname", self.var_name)
+            self.set_attribute("tp_varname", self.expr)
         return self
 
     def set_default_value(self):
         if self.element_name == "Input" and self.type_name == "button":
             self.set_attribute(
                 "value",
-                self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
+                str(self.value)
+                # self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
             )
         elif isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
@@ -130,7 +112,7 @@ class Builder:
 
         self.set_attribute(
             "className",
-            class_name + " " + Gui._get_instance()._config.style_config[config_class],
+            class_name + " " + self._gui._config.style_config[config_class],
         )
         return self
 
@@ -154,9 +136,9 @@ class Builder:
         if self.attributes and "id" in self.attributes:
             self.set_attribute("id", self.attributes["id"])
             self.set_attribute("key", self.attributes["id"])
-        elif self.var_name:
-            self.set_attribute("id", self.var_name + "_" + str(self.var_id))
-            self.set_attribute("key", self.var_name + "_" + str(self.var_id))
+        elif self.has_evaluated:
+            self.set_attribute("id", self.expr_hash)
+            self.set_attribute("key", self.expr_hash)
         if self.attributes and "on_action" in self.attributes:
             self.set_attribute("actionName", self.attributes["on_action"])
         else:
@@ -179,14 +161,25 @@ class Builder:
             self.attributes and "page_size_options" in self.attributes and self.attributes["page_size_options"]
         ) or default_size
         if isinstance(page_size_options, str):
-            page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
-        self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+            try:
+                page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
+            except Exception as e:
+                warnings.warn(f"page_size_options: invalid value {page_size_options}\n{e}")
+        if isinstance(page_size_options, list):
+            self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+        else:
+            warnings.warn("page_size_options should be a list")
         return self
 
     def set_allow_all_rows(self, default_value=False):
         if self.element_name != "Table":
             return self
         return self.__set_boolean_attribute("allow_all_rows", default_value)
+
+    def set_show_all(self, default_value=False):
+        if self.element_name != "Table":
+            return self
+        return self.__set_boolean_attribute("show_all", default_value)
 
     def set_format(self):
         format = self.attributes and "format" in self.attributes and self.attributes["format"]
@@ -206,17 +199,14 @@ class Builder:
     def set_propagate(self):
         from ..gui import Gui
 
-        return self.__set_boolean_attribute("propagate", Gui._get_instance()._config.app_config["propagate"])
+        return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
 
     def __set_list_of_(self, name):
         lof = self.attributes and name in self.attributes and self.attributes[name]
         if isinstance(lof, str):
             lof = {s.strip(): s for s in lof.split(";")}
         if not isinstance(lof, dict):
-            print(
-                f"Error: Property {name} of component {self.element_name} should be a string or a dict",
-                flush=True,
-            )
+            warnings.warn(f"Error: Property {name} of component {self.element_name} should be a string or a dict")
             return self
         return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
 

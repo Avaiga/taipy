@@ -6,7 +6,7 @@ from .factory import Factory
 
 class ControlPattern(InlineProcessor):
 
-    _PATTERN = r"<\|taipy\.(.*?)\|(.*?)\|>"
+    _PATTERN = r"TaIpY:([a-zA-Z][\.a-zA-Z_$0-9]*)(.*?):tAiPy"
 
     @staticmethod
     def extendMarkdown(md):

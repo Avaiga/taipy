@@ -22,12 +22,9 @@ class Factory:
             control_type=control_type,
             element_name="Field",
             attributes=attrs,
-            has_attribute=True,
-            attributes_val=6,
             default_value="<empty>",
         )
-        .get_gui_value()
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
@@ -36,12 +33,10 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=True,
             default_value="<empty>",
         )
         .set_type("button")
-        .get_gui_value()
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-button", config_class="button")
         .set_button_attribute(),
@@ -49,12 +44,10 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=False,
             default_value="<empty>",
         )
         .set_type("text")
-        .get_gui_value()
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_propagate()
         .set_className(class_name="taipy-input", config_class="input"),
@@ -62,12 +55,10 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=False,
             default_value=0,
         )
         .set_type("number")
-        .get_gui_value(fallback_value=0)
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-number", config_class="input")
         .set_propagate(),
@@ -75,11 +66,9 @@ class Factory:
             control_type=control_type,
             element_name="DateSelector",
             attributes=attrs,
-            has_attribute=True,
-            default_value="",
+            default_value=datetime.fromtimestamp(0),
         )
-        .get_gui_value(fallback_value=datetime.fromtimestamp(0))
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
         .set_withTime()
@@ -88,12 +77,10 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            has_attribute=False,
             default_value=0,
         )
         .set_type("range")
-        .get_gui_value(fallback_value=0)
-        .set_varname()
+        .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-slider", config_class="slider")
         .set_attribute("min", "1")
@@ -103,12 +90,9 @@ class Factory:
             control_type=control_type,
             element_name="Selector",
             attributes=attrs,
-            has_attribute=True,
-            attributes_val=4,
         )
-        .set_varname()
+        .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
-        .get_gui_value()
         .set_lov()
         .set_filter()
         .set_multiple()
@@ -118,33 +102,25 @@ class Factory:
             control_type=control_type,
             element_name="Table",
             attributes=attrs,
-            has_attribute=True,
-            attributes_val=4,
         )
-        .set_varname()
+        .set_expresion_hash()
         .set_className(class_name="taipy-table", config_class="table")
-        .get_gui_value()
         .get_dataframe_attributes()
         .set_table_pagesize()
         .set_table_pagesize_options()
-        .set_allow_all_rows(),
+        .set_allow_all_rows()
+        .set_show_all(),
     }
 
-    _PROPERTY_RE = re.compile(r"([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
-    # Same as Preprocessor._SPLIT_RE. TODO: share or move to utils?
-    _SPLIT_RE = re.compile(r"(?<!\\\\)\|")
+    # TODO: process \" in property value
+    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
-    def create(control_type: str, properties_fragment: str) -> str:
-        # Create properties dict from properties_fragment
-        attributes = {}
-        for property in Factory._SPLIT_RE.split(properties_fragment):
-            prop_match = Factory._PROPERTY_RE.match(property)
-            if prop_match:
-                attributes[prop_match.group(1)] = prop_match.group(2)
-            else:
-                raise ValueError(f"Invalid property syntax: '{property}'")
-        builder = Factory.CONTROL_BUILDERS[control_type](control_type, attributes)
+    def create(control_type: str, all_properties: str) -> str:
+        # Create properties dict from all_properties
+        property_pairs = Factory._PROPERTY_RE.findall(all_properties)
+        properties = {property[0]: property[1] for property in property_pairs}
+        builder = Factory.CONTROL_BUILDERS[control_type](control_type, properties)
         if builder:
             return builder.el
         else:
