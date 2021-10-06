@@ -1,6 +1,7 @@
 import datetime
 import json
 import warnings
+import typing as t
 from operator import attrgetter
 
 import pandas as pd
@@ -133,16 +134,22 @@ class Builder:
     def set_button_attribute(self):
         if self.element_name != "Input" or self.type_name != "button":
             return self
+        self.set_id()
         if self.attributes and "id" in self.attributes:
-            self.set_attribute("id", self.attributes["id"])
             self.set_attribute("key", self.attributes["id"])
         elif self.has_evaluated:
-            self.set_attribute("id", self.expr_hash)
             self.set_attribute("key", self.expr_hash)
         if self.attributes and "on_action" in self.attributes:
             self.set_attribute("actionName", self.attributes["on_action"])
         else:
             self.set_attribute("actionName", "")
+        return self
+
+    def set_id(self):
+        if self.attributes and "id" in self.attributes:
+            self.set_attribute("id", self.attributes["id"])
+        elif self.has_evaluated:
+            self.set_attribute("id", self.expr_hash)
         return self
 
     def set_table_pagesize(self, default_size=100):
@@ -206,6 +213,27 @@ class Builder:
 
         return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
 
+    def set_title(self):
+        return self.__set_string_attribute("title")
+
+    def set_open(self):
+        return self.__set_boolean_attribute("open")
+
+    def set_cancel_action(self):
+        return self.__set_string_attribute("cancel_action")
+
+    def set_validate_action(self):
+        return self.__set_string_attribute("validate_action", "validate")
+
+    def set_cancel_action_text(self):
+        return self.__set_string_attribute("cancel_action_text", "Cancel")
+
+    def set_validate_action_text(self):
+        return self.__set_string_attribute("validate_action_text", "Validate")
+
+    def set_page_id(self):
+        return self.__set_string_attribute("page_id", optional=False)
+
     def __set_list_of_(self, name):
         lof = self.attributes and name in self.attributes and self.attributes[name]
         if isinstance(lof, str):
@@ -214,6 +242,20 @@ class Builder:
             warnings.warn(f"Error: Property {name} of component {self.element_name} should be a string or a dict")
             return self
         return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
+
+    def __set_string_attribute(
+        self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
+    ):
+        strattr = (
+            self.attributes[name]
+            if hasattr(self, "attributes") and self.attributes and name in self.attributes
+            else default_value
+        )
+        if not strattr:
+            if not optional:
+                warnings.warn(f"property {name} is required for component {self.control_type}")
+            return self
+        return self.set_attribute(_to_camel_case(name), strattr)
 
     def __set_boolean_attribute(self, name, default_value=False):
         boolattr = (

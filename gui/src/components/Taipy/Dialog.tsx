@@ -12,11 +12,10 @@ import { SxProps } from "@mui/system";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
+import { TaipyBaseProps } from "./utils";
 
-interface DialogProps {
-    id: string;
+interface DialogProps extends TaipyBaseProps {
     title: string;
-    open: boolean;
     cancelAction: string;
     validateAction: string;
     cancelActionText: string;
@@ -36,7 +35,8 @@ const Dialog = (props: DialogProps) => {
     const {
         id,
         title,
-        open,
+        value,
+        defaultvalue,
         cancelAction,
         validateAction,
         pageId,
@@ -54,7 +54,7 @@ const Dialog = (props: DialogProps) => {
     }, [dispatch]);
 
     return (
-        <MuiDialog onClose={handleClose} open={open}>
+        <MuiDialog onClose={handleClose} open={value === undefined ? !!defaultvalue : !!value}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton aria-label="close" onClick={handleClose} sx={closeSx} title={cancelActionText}>
@@ -63,10 +63,10 @@ const Dialog = (props: DialogProps) => {
             </DialogTitle>
 
             <DialogContent dividers>
-                <TaipyRendered path={pageId} />
+                <TaipyRendered path={"/" + pageId} />
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose}>{cancelActionText}</Button>
+                {cancelAction && <Button onClick={handleClose}>{cancelActionText}</Button>}
                 <Button onClick={handleValidate} autoFocus>
                     {validateActionText}
                 </Button>

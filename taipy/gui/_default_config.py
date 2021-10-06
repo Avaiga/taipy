@@ -17,5 +17,6 @@ default_config = {
         "date_selector": "",
         "table": "",
         "selector": "",
+        "dialog": "",
     },
 }
