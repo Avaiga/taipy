@@ -315,6 +315,8 @@ class Gui(object, metaclass=Singleton):
         an expression with only a single variable
         """
         modified_vars = []
+        if not var_name in self._var_to_expr_list.keys():
+            return modified_vars
         for expr in self._var_to_expr_list[var_name]:
             if expr == var_name:
                 continue
@@ -330,10 +332,10 @@ class Gui(object, metaclass=Singleton):
         return modified_vars
 
     def _is_expression(self, expr: str) -> bool:
-        return len(self.__EXPR_IS_EXPR.findall(expr)) != 0
+        return len(Gui.__EXPR_IS_EXPR.findall(expr)) != 0
 
     def _fetch_expression_list(self, expr: str) -> t.List:
-        return self.__EXPR_RE.findall(expr)
+        return Gui.__EXPR_RE.findall(expr)
 
     def add_page(
         self,
@@ -404,9 +406,9 @@ class Gui(object, metaclass=Singleton):
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
-        if m := self.__EXPR_IS_EDGE_CASE.match(expr):
+        if m := Gui.__EXPR_IS_EDGE_CASE.match(expr):
             expr = m.group(1)
-            expr_hash = expr if self.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
+            expr_hash = expr if Gui.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
         # validate whether expression has already been evaluated
         if expr in self._expr_to_hash:

@@ -32,7 +32,7 @@ class Builder:
         default_property_value = attributes.get(default_property_name)
         if default_property_value:
             self.has_evaluated = True
-            if self._gui._is_expression(default_property_value):
+            if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
                 default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
                 self.value = attrgetter(default_property_value)(self._gui._values)
                 self.expr_hash = default_property_value
@@ -40,15 +40,9 @@ class Builder:
             else:
                 self.value = self.expr_hash = self.expr = default_property_value
 
-        def parse_attribute_value(value):
-            if v is not None and self._gui._is_expression(value):
-                hash_value = self._gui._fetch_expression_list(value)[0]
-                return attrgetter(hash_value)(self._gui._values)
-            return value
-
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.attributes:
-            properties_dict_name = parse_attribute_value(self.attributes["properties"])
+            properties_dict_name = self.__parse_attribute_value(self.attributes["properties"])
             self._gui.bind_var(properties_dict_name)
             properties_dict = getattr(self._gui, properties_dict_name)
             if not isinstance(properties_dict, _MapDictionary):
@@ -62,13 +56,19 @@ class Builder:
 
         # Bind potential function in self.attributes
         for k, v in self.attributes.items():
-            v = parse_attribute_value(v)
+            v = self.__parse_attribute_value(v)
             if isinstance(v, str):
                 # Bind potential function
                 self._gui.bind_func(v)
             # Try to evaluate as expressions
             if v is not None:
                 self.attributes[k] = v
+
+    def __parse_attribute_value(self, value):
+        if isinstance(value, str) and self._gui._is_expression(value):
+            hash_value = self._gui._fetch_expression_list(value)[0]
+            return attrgetter(hash_value)(self._gui._values)
+        return value
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
@@ -87,7 +87,7 @@ class Builder:
             self.set_attribute("key", self.expr_hash)
             self.set_attribute(
                 "value",
-                "{!" + self.expr_hash + "!}",
+                "{!" + get_client_var_name(self.expr_hash) + "!}",
             )
             self.set_attribute("tp_varname", self.expr)
         return self
