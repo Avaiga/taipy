@@ -13,16 +13,17 @@ with open("HISTORY.md") as history_file:
     history = history_file.read()
 
 requirements: List[str] = [
-    "networkx",
     "flask>=2.0",
-    "numpy",
-    "markdown",
-    "flask-socketio",
-    "simple-websocket",
-    "pandas",
     "flask-cors",
-    "tzlocal",
+    "flask-socketio",
+    "markdown",
+    "networkx",
+    "numpy",
+    "pandas",
     "pytz",
+    "simple-websocket",
+    "toml",
+    "tzlocal",
 ]
 
 test_requirements = [
