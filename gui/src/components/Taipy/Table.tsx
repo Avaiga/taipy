@@ -9,6 +9,7 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyBaseProps } from "./utils";
@@ -40,6 +41,7 @@ interface TableProps extends TaipyBaseProps {
           }
     )[];
     allowAllRows: boolean;
+    showAll: boolean;
 }
 
 type Order = "asc" | "desc";
@@ -75,7 +77,7 @@ const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-const loadingStyle: CSSProperties = { position: "absolute", left: 0, top: 0 };
+const loadingStyle: CSSProperties = { height:"52px", textAlign:"right", verticalAlign:"center" };
 
 const rowsPerPageOptions = [10, 50, 100, 500];
 
@@ -92,6 +94,7 @@ const Table = (props: TableProps) => {
         pageSize = 100,
         pageSizeOptions = rowsPerPageOptions,
         allowAllRows = false,
+        showAll = false,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -113,7 +116,8 @@ const Table = (props: TableProps) => {
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
-        pageKey.current = `${startIndex}-${startIndex + rowsPerPage}-${orderBy}-${order}`;
+        const endIndex = showAll ? -1 : startIndex + rowsPerPage;
+        pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}`;
         if (!props.value || props.value[pageKey.current] === undefined) {
             setLoading(true);
             dispatch(
@@ -122,7 +126,7 @@ const Table = (props: TableProps) => {
                     id,
                     pageKey.current,
                     startIndex,
-                    startIndex + rowsPerPage,
+                    endIndex,
                     orderBy,
                     order
                 )
@@ -131,7 +135,7 @@ const Table = (props: TableProps) => {
             setValue(props.value[pageKey.current]);
             setLoading(false);
         }
-    }, [startIndex, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
+    }, [startIndex, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -194,7 +198,6 @@ const Table = (props: TableProps) => {
         <>
             <Box sx={boxSx}>
                 <Paper sx={paperSx}>
-                    {loading && <Skeleton style={loadingStyle} width="100%" height="100%" />}
                     <TableContainer sx={tcSx}>
                         <MuiTable
                             sx={tableSx}
@@ -245,17 +248,19 @@ const Table = (props: TableProps) => {
                             </TableBody>
                         </MuiTable>
                     </TableContainer>
-                    <TablePagination
-                        component="div"
-                        count={rowCount}
-                        page={startIndex / rowsPerPage}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        showFirstButton={true}
-                        showLastButton={true}
-                        rowsPerPageOptions={pso}
-                    />
+                    {!showAll && (loading ? <Skeleton width="100%" style={loadingStyle} ><Typography>Loading...</Typography></Skeleton> : 
+                        <TablePagination
+                            component="div"
+                            count={rowCount}
+                            page={startIndex / rowsPerPage}
+                            rowsPerPage={rowsPerPage}
+                            showFirstButton={true}
+                            showLastButton={true}
+                            rowsPerPageOptions={pso}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
+                    )}
                 </Paper>
             </Box>
         </>
