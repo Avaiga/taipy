@@ -28,6 +28,18 @@ def test_create_scenario_entity():
     assert scenario_entity_3.properties == {}
 
 
+def test_add_property_to_scenario():
+    scenario_1 = Scenario("foo", [], {"key": "value"})
+    assert scenario_1.properties == {"key": "value"}
+    assert scenario_1.key == "value"
+
+    scenario_1.properties["new_key"] = "new_value"
+
+    assert scenario_1.properties == {'key': 'value', 'new_key': 'new_value'}
+    assert scenario_1.key == "value"
+    assert scenario_1.new_key == "new_value"
+
+
 def test_to_model():
     input_ds = EmbeddedDataSource(
         "input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"}
