@@ -3,12 +3,12 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
-from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 
 
-class CSVDataSourceEntity(DataSourceEntity):
+class CSVDataSource(DataSource):
     """
     A class to represent a CSV Data Source.
 
@@ -48,8 +48,8 @@ class CSVDataSourceEntity(DataSourceEntity):
         scope: Scope,
         path: str,
         has_header: bool = False,
-    ) -> DataSourceEntity:
-        return CSVDataSourceEntity(
+    ) -> DataSource:
+        return CSVDataSource(
             name, scope, None, {"path": path, "has_header": has_header}
         )
 
@@ -84,7 +84,7 @@ class CSVDataSourceEntity(DataSourceEntity):
 
     @staticmethod
     def from_json(data_source_dict):
-        return CSVDataSourceEntity.create(
+        return CSVDataSource.create(
             name=data_source_dict.get("name"),
             scope=Scope[data_source_dict.get("scope")],
             path=data_source_dict.get("path"),

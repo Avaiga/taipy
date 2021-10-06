@@ -1,31 +1,31 @@
 import pytest
 
-from taipy.data import DataSource
-from taipy.data.data_source_entity import DataSourceEntity
-from taipy.data.entity import EmbeddedDataSourceEntity
+from taipy.data import DataSourceConfig
+from taipy.data.data_source import DataSource
+from taipy.data import EmbeddedDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import (
     NonExistingPipeline,
     NonExistingPipelineEntity,
 )
-from taipy.pipeline import Pipeline, PipelineEntity, PipelineId
+from taipy.pipeline import PipelineConfig, Pipeline, PipelineId
 from taipy.pipeline.manager import PipelineManager
-from taipy.task import Task, TaskEntity, TaskId, TaskManager
+from taipy.task import TaskConfig, Task, TaskId, TaskManager
 from taipy.task.scheduler import TaskScheduler
 
 
 def test_register_and_get_pipeline():
     name_1 = "name_1"
-    pipeline_1 = Pipeline(name_1, [])
+    pipeline_1 = PipelineConfig(name_1, [])
 
-    input_2 = DataSource("foo", "embedded", data="bar")
-    output_2 = DataSource("foo", "embedded", data="bar")
-    task_2 = Task("task", [input_2], print, [output_2])
+    input_2 = DataSourceConfig("foo", "embedded", data="bar")
+    output_2 = DataSourceConfig("foo", "embedded", data="bar")
+    task_2 = TaskConfig("task", [input_2], print, [output_2])
     name_2 = "name_2"
-    pipeline_2 = Pipeline(name_2, [task_2])
+    pipeline_2 = PipelineConfig(name_2, [task_2])
 
-    pipeline_3_with_same_name = Pipeline(name_1, [], description="my description")
+    pipeline_3_with_same_name = PipelineConfig(name_1, [], description="my description")
 
     # No existing Pipeline
     pipeline_manager = PipelineManager()
@@ -68,15 +68,15 @@ def test_register_and_get_pipeline():
 
 def test_save_and_get_pipeline_entity():
     pipeline_id_1 = PipelineId("id1")
-    pipeline_1 = PipelineEntity("name_1", {}, [], pipeline_id_1)
+    pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSourceEntity.create("foo", Scope.PIPELINE, "bar")
-    task_2 = TaskEntity("task", [input_2], print, [output_2], TaskId("task_id_2"))
-    pipeline_2 = PipelineEntity("name_2", {}, [task_2], pipeline_id_2)
+    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
+    pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
-    pipeline_3_with_same_id = PipelineEntity("name_3", {}, [], pipeline_id_1)
+    pipeline_3_with_same_id = Pipeline("name_3", {}, [], pipeline_id_1)
 
     # No existing Pipeline
     pipeline_manager = PipelineManager()
@@ -136,26 +136,26 @@ def test_save_and_get_pipeline_entity():
 
 
 def test_submit():
-    data_source_1 = DataSourceEntity("foo", Scope.PIPELINE, "s1")
-    data_source_2 = DataSourceEntity("bar", Scope.PIPELINE, "s2")
-    data_source_3 = DataSourceEntity("baz", Scope.PIPELINE, "s3")
-    data_source_4 = DataSourceEntity("qux", Scope.PIPELINE, "s4")
-    data_source_5 = DataSourceEntity("quux", Scope.PIPELINE, "s5")
-    data_source_6 = DataSourceEntity("quuz", Scope.PIPELINE, "s6")
-    data_source_7 = DataSourceEntity("corge", Scope.PIPELINE, "s7")
-    task_1 = TaskEntity(
+    data_source_1 = DataSource("foo", Scope.PIPELINE, "s1")
+    data_source_2 = DataSource("bar", Scope.PIPELINE, "s2")
+    data_source_3 = DataSource("baz", Scope.PIPELINE, "s3")
+    data_source_4 = DataSource("qux", Scope.PIPELINE, "s4")
+    data_source_5 = DataSource("quux", Scope.PIPELINE, "s5")
+    data_source_6 = DataSource("quuz", Scope.PIPELINE, "s6")
+    data_source_7 = DataSource("corge", Scope.PIPELINE, "s7")
+    task_1 = Task(
         "grault",
         [data_source_1, data_source_2],
         print,
         [data_source_3, data_source_4],
         TaskId("t1"),
     )
-    task_2 = TaskEntity("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
-    task_3 = TaskEntity(
+    task_2 = Task("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
+    task_3 = Task(
         "waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3")
     )
-    task_4 = TaskEntity("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
-    pipeline_entity = PipelineEntity(
+    task_4 = Task("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
+    pipeline_entity = Pipeline(
         "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
     )
 
@@ -165,7 +165,7 @@ def test_submit():
     class MockTaskScheduler(TaskScheduler):
         submit_calls = []
 
-        def submit(self, task: TaskEntity):
+        def submit(self, task: Task):
             self.submit_calls.append(task)
             return None
 
@@ -212,13 +212,13 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSource("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSource("bar", "embedded", Scope.PIPELINE, data=0)
-    ds_6 = DataSource("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0)
+    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
 
-    task_mult_by_2 = Task("mult by 2", [ds_1], mult_by_2, ds_2)
-    task_mult_by_3 = Task("mult by 3", [ds_2], mult_by_3, ds_6)
-    pipeline = Pipeline("by 6", [task_mult_by_2, task_mult_by_3])
+    task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
+    task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
+    pipeline = PipelineConfig("by 6", [task_mult_by_2, task_mult_by_3])
     pipeline_manager.register_pipeline(pipeline)
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
@@ -245,13 +245,13 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSource("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSource("bar", "embedded", Scope.PIPELINE, data=0)
-    ds_6 = DataSource("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0)
+    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
 
-    task_mult_by_2 = Task("mult by 2", [ds_1], mult_by_2, ds_2)
-    task_mult_by_3 = Task("mult by 3", [ds_2], mult_by_3, ds_6)
-    pipeline = Pipeline("by 6", [task_mult_by_2, task_mult_by_3])
+    task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
+    task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
+    pipeline = PipelineConfig("by 6", [task_mult_by_2, task_mult_by_3])
     pipeline_manager.register_pipeline(pipeline)
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 

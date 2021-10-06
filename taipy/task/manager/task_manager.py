@@ -2,31 +2,31 @@ import itertools
 import logging
 from typing import Dict, Optional
 
-from taipy.data import DataSourceEntity
-from taipy.data.data_source import DataSource
+from taipy.data import DataSource
+from taipy.data.data_source_config import DataSourceConfig
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.task import NonExistingTask
-from taipy.task.task import Task
-from taipy.task.task_entity import TaskEntity, TaskId
+from taipy.task.task_config import TaskConfig
+from taipy.task.task import Task, TaskId
 
 
 class TaskManager:
     # This represents the task database.
-    task_entities: Dict[(TaskId, TaskEntity)] = {}
-    __TASKS: Dict[(str, Task)] = {}
+    task_entities: Dict[(TaskId, Task)] = {}
+    __TASKS: Dict[(str, TaskConfig)] = {}
     data_manager = DataManager()
 
     def delete_all(self):
-        self.task_entities: Dict[(TaskId, TaskEntity)] = {}
-        self.__TASKS: Dict[(str, Task)] = {}
+        self.task_entities: Dict[(TaskId, Task)] = {}
+        self.__TASKS: Dict[(str, TaskConfig)] = {}
 
-    def register_task(self, task: Task):
+    def register_task(self, task: TaskConfig):
         [self.data_manager.register_data_source(data_source) for data_source in task.input]
         [self.data_manager.register_data_source(data_source) for data_source in task.output]
         self.__TASKS[task.name] = task
 
-    def get_task(self, name: str) -> Task:
+    def get_task(self, name: str) -> TaskConfig:
         try:
             return self.__TASKS[name]
         except KeyError:
@@ -36,13 +36,13 @@ class TaskManager:
     def get_tasks(self):
         return self.__TASKS
 
-    def save_task_entity(self, task: TaskEntity):
+    def save_task_entity(self, task: Task):
         logging.info(f"Task : {task.id} created or updated.")
         self.task_entities[task.id] = task
 
     def create_task_entity(
-        self, task: Task, data_source_entities: Optional[Dict[DataSource, DataSourceEntity]] = None
-    ) -> TaskEntity:
+        self, task: TaskConfig, data_source_entities: Optional[Dict[DataSourceConfig, DataSource]] = None
+    ) -> Task:
         if data_source_entities is None:
             data_source_entities = {
                 ds: self.data_manager.create_data_source_entity(ds)
@@ -50,11 +50,11 @@ class TaskManager:
             }
         input_entities = [data_source_entities[input] for input in task.input]
         output_entities = [data_source_entities[output] for output in task.output]
-        task_entity = TaskEntity(task.name, input_entities, task.function, output_entities)
+        task_entity = Task(task.name, input_entities, task.function, output_entities)
         self.save_task_entity(task_entity)
         return task_entity
 
-    def get_task_entity(self, task_id: TaskId) -> TaskEntity:
+    def get_task_entity(self, task_id: TaskId) -> Task:
         try:
             return self.task_entities[task_id]
         except KeyError:

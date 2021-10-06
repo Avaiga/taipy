@@ -1,6 +1,6 @@
 import pytest
 
-from taipy.data import DataSource, Scope
+from taipy.data import DataSourceConfig, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType
@@ -10,7 +10,7 @@ class TestDataManager:
     def test_create_data_source_entity(self):
         dm = DataManager()
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
-        csv_ds = DataSource(name="foo", type="csv", path="bar", has_header=True)
+        csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
         csv_entity_1 = dm.create_data_source_entity(csv_ds)
         assert dm.get_data_source_entity(csv_entity_1.id).id == csv_entity_1.id
         assert dm.get_data_source_entity(csv_entity_1.id).name == csv_entity_1.name
@@ -22,7 +22,7 @@ class TestDataManager:
 
         # Test we can instantiate a EmbeddedDataSourceEntity from DataSource
         # with type embedded
-        embedded_ds = DataSource(name="foo", type="embedded", data="bar")
+        embedded_ds = DataSourceConfig(name="foo", type="embedded", data="bar")
         embedded_entity = dm.create_data_source_entity(embedded_ds)
         fetched_entity = dm.get_data_source_entity(embedded_entity.id)
 
@@ -32,7 +32,7 @@ class TestDataManager:
         assert fetched_entity.properties == embedded_entity.properties
 
         # Test an exception is raised if the type provided to the data source is wrong
-        wrong_type_ds = DataSource(name="foo", type="bar")
+        wrong_type_ds = DataSourceConfig(name="foo", type="bar")
         with pytest.raises(InvalidDataSourceType):
             dm.create_data_source_entity(wrong_type_ds)
 

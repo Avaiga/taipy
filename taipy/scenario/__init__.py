@@ -1,4 +1,4 @@
 from .scenario_model import ScenarioId
+from .scenario_config import ScenarioConfig
 from .scenario import Scenario
-from .scenario_entity import ScenarioEntity
 from .manager import ScenarioManager

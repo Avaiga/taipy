@@ -7,9 +7,9 @@ from concurrent.futures import Future, ProcessPoolExecutor
 from functools import partial
 from typing import Any, Dict, List, Union
 
-from taipy.task.task_entity import TaskEntity
+from taipy.task.task import Task
 
-from ...data import DataSourceEntity
+from ...data import DataSource
 from .executor import FutureExecutor
 from .job import Job, JobId
 from taipy.configuration import ConfigurationManager
@@ -24,7 +24,7 @@ class TaskScheduler:
         self.__jobs: Dict[JobId, Job] = {}
         self.__executor = self.__create_executor()
 
-    def submit(self, task: TaskEntity) -> JobId:
+    def submit(self, task: Task) -> JobId:
         """
         Submit a task that should be executed as a Job and return its JobId
 
@@ -39,7 +39,7 @@ class TaskScheduler:
         self.__execute_function_and_write_outputs(task)
         return self.__create_job(task)
 
-    def __create_job(self, task: TaskEntity) -> JobId:
+    def __create_job(self, task: Task) -> JobId:
         job = Job(id=JobId(f"job_id_{task.id}_{uuid.uuid4()}"), task_id=task.id)
         self.__jobs[job.id] = job
         return job.id
@@ -59,7 +59,7 @@ class TaskScheduler:
 
 class _WriteResultInDataSource:
     @classmethod
-    def write(cls, outputs: List[DataSourceEntity], future: Future):
+    def write(cls, outputs: List[DataSource], future: Future):
         results = cls.__unwrap_task_output(future)
         cls._write(results, outputs)
 
@@ -72,7 +72,7 @@ class _WriteResultInDataSource:
             logging.error("Error, wrong number of result or task output")
 
     @staticmethod
-    def _write_result_in_output(result: Any, output: DataSourceEntity):
+    def _write_result_in_output(result: Any, output: DataSource):
         try:
             output.write(result)
         except Exception as e:

@@ -1,12 +1,12 @@
 import json
 from typing import Any, Dict, Optional
 
-from taipy.data.data_source_entity import DataSourceEntity
+from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 
 
-class EmbeddedDataSourceEntity(DataSourceEntity):
+class EmbeddedDataSource(DataSource):
     __TYPE = "embedded"
 
     def __init__(
@@ -16,7 +16,7 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
 
     @classmethod
     def create(cls, name: str, scope: Scope, data: Any):
-        return EmbeddedDataSourceEntity(name, scope, None, {"data": data})
+        return EmbeddedDataSource(name, scope, None, {"data": data})
 
     @classmethod
     def type(cls) -> str:
@@ -49,7 +49,7 @@ class EmbeddedDataSourceEntity(DataSourceEntity):
 
     @staticmethod
     def from_json(data_source_dict):
-        return EmbeddedDataSourceEntity.create(
+        return EmbeddedDataSource.create(
             name=data_source_dict.get("name"),
             scope=Scope[data_source_dict.get("scope")],
             data=data_source_dict.get("data"),

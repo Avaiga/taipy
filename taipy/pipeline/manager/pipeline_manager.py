@@ -7,15 +7,15 @@ deleting, duplicating, executing) related
 import logging
 from typing import Dict, List, Set
 
-from taipy.data import DataSourceEntity
-from taipy.data.data_source import DataSource
+from taipy.data import DataSource
+from taipy.data.data_source_config import DataSourceConfig
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import (
     NonExistingPipeline,
     NonExistingPipelineEntity,
 )
+from taipy.pipeline.pipeline_config import PipelineConfig
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_entity import PipelineEntity
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
 from taipy.task import TaskId
 from taipy.task.manager.task_manager import TaskManager
@@ -29,17 +29,17 @@ class PipelineManager:
 
     __PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
 
-    __PIPELINES: Dict[str, Pipeline] = {}
+    __PIPELINES: Dict[str, PipelineConfig] = {}
 
     def delete_all(self):
         self.__PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
-        self.__PIPELINES: Dict[str, Pipeline] = {}
+        self.__PIPELINES: Dict[str, PipelineConfig] = {}
 
-    def register_pipeline(self, pipeline: Pipeline):
+    def register_pipeline(self, pipeline: PipelineConfig):
         [self.task_manager.register_task(task) for task in pipeline.tasks]
         self.__PIPELINES[pipeline.name] = pipeline
 
-    def get_pipeline(self, name: str) -> Pipeline:
+    def get_pipeline(self, name: str) -> PipelineConfig:
         try:
             return self.__PIPELINES[name]
         except KeyError:
@@ -47,18 +47,18 @@ class PipelineManager:
             logging.error(err.message)
             raise err
 
-    def get_pipelines(self) -> List[Pipeline]:
+    def get_pipelines(self) -> List[PipelineConfig]:
         return [
             self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()
         ]
 
     def create_pipeline_entity(
         self,
-        pipeline: Pipeline,
-        data_source_entities: Dict[DataSource, DataSourceEntity] = None,
-    ) -> PipelineEntity:
+        pipeline: PipelineConfig,
+        data_source_entities: Dict[DataSourceConfig, DataSource] = None,
+    ) -> Pipeline:
         if data_source_entities is None:
-            all_ds: Set[DataSource] = set()
+            all_ds: Set[DataSourceConfig] = set()
             for task in pipeline.tasks:
                 for ds in task.input:
                     all_ds.add(ds)
@@ -71,23 +71,23 @@ class PipelineManager:
             self.task_manager.create_task_entity(task, data_source_entities)
             for task in pipeline.tasks
         ]
-        pipeline_entity = PipelineEntity(
+        pipeline_entity = Pipeline(
             pipeline.name, pipeline.properties, task_entities
         )
         self.save_pipeline_entity(pipeline_entity)
         return pipeline_entity
 
-    def save_pipeline_entity(self, pipeline_entity: PipelineEntity):
+    def save_pipeline_entity(self, pipeline_entity: Pipeline):
         self.__PIPELINE_MODEL_DB[pipeline_entity.id] = pipeline_entity.to_model()
 
-    def get_pipeline_entity(self, pipeline_id: PipelineId) -> PipelineEntity:
+    def get_pipeline_entity(self, pipeline_id: PipelineId) -> Pipeline:
         try:
             model = self.__PIPELINE_MODEL_DB[pipeline_id]
             task_entities = [
                 self.task_manager.get_task_entity(TaskId(task_id))
                 for task_id in model.task_source_edges.keys()
             ]
-            return PipelineEntity(model.name, model.properties, task_entities, model.id)
+            return Pipeline(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
             logging.error(err.message)
             raise err
@@ -96,7 +96,7 @@ class PipelineManager:
             logging.error(pipeline_err.message)
             raise pipeline_err
 
-    def get_pipeline_entities(self) -> List[PipelineEntity]:
+    def get_pipeline_entities(self) -> List[Pipeline]:
         return [
             self.get_pipeline_entity(model.id)
             for model in self.__PIPELINE_MODEL_DB.values()

@@ -1,10 +1,10 @@
 import logging
 from typing import Dict, List
 
+from taipy.data.data_source_config import DataSourceConfig
 from taipy.data.data_source import DataSource
-from taipy.data.data_source_entity import DataSourceEntity
 from taipy.data.data_source_model import DataSourceModel
-from taipy.data.entity import CSVDataSourceEntity, EmbeddedDataSourceEntity
+from taipy.data import CSVDataSource, EmbeddedDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 
@@ -17,21 +17,21 @@ The Data Manager will facilitate data access between Taipy Modules.
 class DataManager:
     # This represents a database table that maintains our DataSource References.
     __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
-    __DATA_SOURCE_DB: Dict[str, DataSource] = {}
-    __ENTITY_CLASSES = {EmbeddedDataSourceEntity, CSVDataSourceEntity}
+    __DATA_SOURCE_DB: Dict[str, DataSourceConfig] = {}
+    __ENTITY_CLASSES = {EmbeddedDataSource, CSVDataSource}
     __ENTITY_CLASS_MAP = {v.type(): v for v in __ENTITY_CLASSES}
 
     def delete_all(self):
         self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
-        self.__DATA_SOURCE_DB: Dict[str, DataSource] = {}
+        self.__DATA_SOURCE_DB: Dict[str, DataSourceConfig] = {}
 
-    def register_data_source(self, data_source: DataSource):
+    def register_data_source(self, data_source: DataSourceConfig):
         self.__DATA_SOURCE_DB[data_source.name] = data_source
 
-    def get_data_source(self, name) -> DataSource:
+    def get_data_source(self, name) -> DataSourceConfig:
         return self.__DATA_SOURCE_DB[name]
 
-    def create_data_source_entity(self, data_source: DataSource) -> DataSourceEntity:
+    def create_data_source_entity(self, data_source: DataSourceConfig) -> DataSource:
         try:
             data_source_entity = self.__ENTITY_CLASS_MAP[data_source.type](
                 name=data_source.name,
@@ -56,7 +56,7 @@ class DataManager:
             data_source_entity.properties,
         )
 
-    def get_data_source_entity(self, data_source_id: str) -> DataSourceEntity:
+    def get_data_source_entity(self, data_source_id: str) -> DataSource:
         model = self.fetch_data_source_model(data_source_id)
         return self.__ENTITY_CLASS_MAP[model.type](
             name=model.name,
@@ -65,7 +65,7 @@ class DataManager:
             properties=model.data_source_properties,
         )
 
-    def get_data_source_entities(self) -> List[DataSourceEntity]:
+    def get_data_source_entities(self) -> List[DataSource]:
         return [
             self.get_data_source_entity(model.id)
             for model in self.__DATA_SOURCE_MODEL_DB.values()

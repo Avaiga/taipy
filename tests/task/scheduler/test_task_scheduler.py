@@ -4,9 +4,9 @@ from functools import partial
 from time import sleep
 
 from taipy.configuration import ConfigurationManager
-from taipy.data.entity import EmbeddedDataSourceEntity
+from taipy.data import EmbeddedDataSource
 from taipy.data.scope import Scope
-from taipy.task import TaskEntity
+from taipy.task import Task
 from taipy.task.scheduler import TaskScheduler
 
 
@@ -113,14 +113,14 @@ def test_scheduled_task_multithreading_multiple_task():
 def _create_task_entity(function, nb_outputs=1):
     task_name = str(uuid.uuid4())
     input_ds = [
-        EmbeddedDataSourceEntity.create("input1", Scope.PIPELINE, data=21),
-        EmbeddedDataSourceEntity.create("input2", Scope.PIPELINE, data=2),
+        EmbeddedDataSource.create("input1", Scope.PIPELINE, data=21),
+        EmbeddedDataSource.create("input2", Scope.PIPELINE, data=2),
     ]
     output_ds = [
-        EmbeddedDataSourceEntity.create(f"output{i}", Scope.PIPELINE, data=0)
+        EmbeddedDataSource.create(f"output{i}", Scope.PIPELINE, data=0)
         for i in range(nb_outputs)
     ]
-    return TaskEntity(
+    return Task(
         task_name,
         input=input_ds,
         function=function,

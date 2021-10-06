@@ -1,19 +1,19 @@
 import pytest
 
-from taipy.data import DataSource, Scope
-from taipy.data.entity import EmbeddedDataSourceEntity
+from taipy.data import DataSourceConfig, Scope
+from taipy.data import EmbeddedDataSource
 from taipy.exceptions.task import NonExistingTask, NonExistingTaskEntity
-from taipy.task import Task, TaskEntity, TaskId
+from taipy.task import TaskConfig, Task, TaskId
 from taipy.task.manager.task_manager import TaskManager
 
 
 def test_register_and_get_task():
 
     name_1 = "name_1"
-    first_task = Task(name_1, [], print, [])
+    first_task = TaskConfig(name_1, [], print, [])
     name_2 = "name_2"
-    second_task = Task(name_2, [], print, [])
-    third_task_with_same_name_as_first_task = Task(name_1, [], len, [])
+    second_task = TaskConfig(name_2, [], print, [])
+    third_task_with_same_name_as_first_task = TaskConfig(name_1, [], len, [])
 
     # No task at initialization
     task_manager = TaskManager()
@@ -55,10 +55,10 @@ def test_register_and_get_task():
 def test_save_and_get_task_entity():
 
     task_id_1 = TaskId("id1")
-    first_task = TaskEntity("name_1", [], print, [], task_id_1)
+    first_task = Task("name_1", [], print, [], task_id_1)
     task_id_2 = TaskId("id2")
-    second_task = TaskEntity("name_2", [], print, [], task_id_2)
-    third_task_with_same_id_as_first_task = TaskEntity("name_is_not_1_anymore", [], print, [], task_id_1)
+    second_task = Task("name_2", [], print, [], task_id_2)
+    third_task_with_same_id_as_first_task = Task("name_is_not_1_anymore", [], print, [], task_id_1)
 
     # No task at initialization
     task_manager = TaskManager()
@@ -101,29 +101,29 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_entity_creation():
     task_manager = TaskManager()
     task_manager.delete_all()
 
-    embedded_1 = DataSource("embedded_1", "embedded")
-    embedded_2 = DataSource("embedded_2", "embedded")
-    embedded_3 = DataSource("a_embedded_3", "embedded")
-    embedded_4 = DataSource("embedded_4", "embedded")
-    embedded_5 = DataSource("1_embedded_4", "embedded")
+    embedded_1 = DataSourceConfig("embedded_1", "embedded")
+    embedded_2 = DataSourceConfig("embedded_2", "embedded")
+    embedded_3 = DataSourceConfig("a_embedded_3", "embedded")
+    embedded_4 = DataSourceConfig("embedded_4", "embedded")
+    embedded_5 = DataSourceConfig("1_embedded_4", "embedded")
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
-    task = Task("name_1", input, print, output)
+    task = TaskConfig("name_1", input, print, output)
     task_entity = task_manager.create_task_entity(task, None)
 
     assert [i.name for i in task_entity.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
     assert [o.name for o in task_entity.output.values()] == [embedded_4.name, embedded_5.name]
 
     data_source_entities = {
-        embedded_1: EmbeddedDataSourceEntity(embedded_1.name, Scope.PIPELINE),
-        embedded_2: EmbeddedDataSourceEntity(embedded_2.name, Scope.PIPELINE),
-        embedded_3: EmbeddedDataSourceEntity(embedded_3.name, Scope.PIPELINE),
-        embedded_4: EmbeddedDataSourceEntity(embedded_4.name, Scope.PIPELINE),
-        embedded_5: EmbeddedDataSourceEntity(embedded_5.name, Scope.PIPELINE),
+        embedded_1: EmbeddedDataSource(embedded_1.name, Scope.PIPELINE),
+        embedded_2: EmbeddedDataSource(embedded_2.name, Scope.PIPELINE),
+        embedded_3: EmbeddedDataSource(embedded_3.name, Scope.PIPELINE),
+        embedded_4: EmbeddedDataSource(embedded_4.name, Scope.PIPELINE),
+        embedded_5: EmbeddedDataSource(embedded_5.name, Scope.PIPELINE),
     }
 
-    task = Task("name_2", input, print, output)
+    task = TaskConfig("name_2", input, print, output)
     task_entity = task_manager.create_task_entity(task, data_source_entities)
 
     assert [i.name for i in task_entity.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
