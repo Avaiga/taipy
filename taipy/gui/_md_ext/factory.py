@@ -108,7 +108,8 @@ class Factory:
         .get_dataframe_attributes()
         .set_table_pagesize()
         .set_table_pagesize_options()
-        .set_allow_all_rows(),
+        .set_allow_all_rows()
+        .set_show_all(),
     }
 
     # TODO: process \" in property value

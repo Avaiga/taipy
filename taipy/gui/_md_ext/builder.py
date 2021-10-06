@@ -1,6 +1,6 @@
 import datetime
 import json
-import re
+import warnings
 from operator import attrgetter
 
 import pandas as pd
@@ -150,14 +150,25 @@ class Builder:
             self.attributes and "page_size_options" in self.attributes and self.attributes["page_size_options"]
         ) or default_size
         if isinstance(page_size_options, str):
-            page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
-        self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+            try:
+                page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
+            except Exception as e:
+                warnings.warn(f"page_size_options: invalid value {page_size_options}\n{e}")
+        if isinstance(page_size_options, list):
+            self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+        else:
+            warnings.warn("page_size_options should be a list")
         return self
 
     def set_allow_all_rows(self, default_value=False):
         if self.element_name != "Table":
             return self
         return self.__set_boolean_attribute("allow_all_rows", default_value)
+
+    def set_show_all(self, default_value=False):
+        if self.element_name != "Table":
+            return self
+        return self.__set_boolean_attribute("show_all", default_value)
 
     def set_format(self):
         format = self.attributes and "format" in self.attributes and self.attributes["format"]
@@ -184,10 +195,7 @@ class Builder:
         if isinstance(lof, str):
             lof = {s.strip(): s for s in lof.split(";")}
         if not isinstance(lof, dict):
-            print(
-                f"Error: Property {name} of component {self.element_name} should be a string or a dict",
-                flush=True,
-            )
+            warnings.warn(f"Error: Property {name} of component {self.element_name} should be a string or a dict")
             return self
         return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
 
