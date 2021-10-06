@@ -43,21 +43,12 @@ class Gui(object, metaclass=Singleton):
 
     def __init__(
         self,
-        css_file: t.Optional[str] = None,
+        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0] if hasattr(__main__, "__file__") else "Taipy",
         markdown: t.Optional[str] = None,
         markdown_file: t.Optional[str] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
     ):
-        if not css_file:
-            try:
-                css_file = (
-                    os.path.splitext(os.path.basename(__main__.__file__))[0]
-                    if __main__ and hasattr(__main__, "__file__")
-                    else "taipy"
-                )
-            except Exception as e:
-                print(e)
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
