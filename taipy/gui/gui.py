@@ -235,7 +235,7 @@ class Gui(object, metaclass=Singleton):
                 try:
                     start = int(str(payload["start"]), base=10)
                 except Exception as e:
-                    warnings.warn(f'strat should be an int value {payload["start"]}')
+                    warnings.warn(f'start should be an int value {payload["start"]}')
                     start = 0
             if isinstance(payload["end"], int):
                 end = int(payload["end"])
@@ -283,9 +283,10 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f"Web Socket communication error {e}")
 
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
-        payload = []
-        for k, v in modified_values.items():
-            payload.append({"name": get_client_var_name(k), "payload": {"value": v}})
+        payload = [
+            {"name": get_client_var_name(k), "payload": {"value": v}}
+            for k, v in modified_values.items()
+        ]
         try:
             self._server._ws.send({"type": "U", "payload": payload})
         except Exception as e:
@@ -315,10 +316,10 @@ class Gui(object, metaclass=Singleton):
         an expression with only a single variable
         """
         modified_vars = []
-        if not var_name in self._var_to_expr_list.keys():
+        if var_name not in self._var_to_expr_list.keys():
             return modified_vars
         for expr in self._var_to_expr_list[var_name]:
-            if expr == var_name:
+            if expr == var_name or not self._is_expression(expr):
                 continue
             hash_expr = self._expr_to_hash[expr]
             expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
@@ -328,6 +329,7 @@ class Gui(object, metaclass=Singleton):
                 expr_string = expr
             expr_evaluated = eval(expr_string, {}, eval_dict)
             attrsetter(self._values, hash_expr, expr_evaluated)
+            self._send_ws_update(hash_expr, {"value": expr_evaluated})
             modified_vars.append(var_name)
         return modified_vars
 
