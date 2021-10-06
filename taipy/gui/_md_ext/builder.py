@@ -181,6 +181,11 @@ class Builder:
             return self
         return self.__set_boolean_attribute("show_all", default_value)
 
+    def set_auto_loading(self, default_value=False):
+        if self.element_name != "Table":
+            return self
+        return self.__set_boolean_attribute("auto_loading", default_value)
+
     def set_format(self):
         format = self.attributes and "format" in self.attributes and self.attributes["format"]
         if format:

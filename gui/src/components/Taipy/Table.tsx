@@ -1,7 +1,7 @@
 import React from "react";
 import AutoLoadingTable from "./AutoLoadingTable";
 import PaginatedTable from "./PaginatedTable";
-import { TaipyPaginatedTableProps } from "./TableUtils";
+import { TaipyPaginatedTableProps } from "./tableUtils";
 
 interface TableProps extends TaipyPaginatedTableProps {
     autoLoading: boolean;

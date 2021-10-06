@@ -13,19 +13,9 @@ import { FixedSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import { Skeleton } from "@mui/material";
 
-import { TaipyBaseProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
-import { getDateTimeString } from "../../utils/index";
-
-interface ColumnDesc {
-    dfid: string;
-    type: string;
-    format: string;
-    title?: string;
-    index: number;
-    width?: number;
-}
+import { ColumnDesc, alignCell, formatValue, getsortByIndex, Order, TaipyTableProps, boxSx, paperSx, tcSx, tableSx } from "./tableUtils";
 
 interface RowData {
     colsOrder: string[];
@@ -34,45 +24,6 @@ interface RowData {
     classes: any;
     cellStyles: CSSProperties[];
 }
-
-interface TableProps extends TaipyBaseProps {
-    /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
-    value: Record<string, Record<string, any>>;
-    columns: string;
-}
-
-type Order = "asc" | "desc";
-
-const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
-    if (cols[key1].index < cols[key2].index) {
-        return -1;
-    }
-    if (cols[key1].index > cols[key2].index) {
-        return 1;
-    }
-    return 0;
-};
-
-const defaultDateFormat = "yyyy/MM/dd";
-
-const formatValue = (val: any, col: any) => {
-    switch (col.type) {
-        case "datetime64[ns]":
-            return getDateTimeString(val, col.format || defaultDateFormat);
-        default:
-            return val;
-    }
-};
-
-const alignCell = (col: any): Partial<TableCellProps> => {
-    switch (col.type) {
-        case "int64":
-        case "float64":
-            return { align: "right" };
-        default:
-            return {};
-    }
-};
 
 const Row = ({
     index,
@@ -111,11 +62,6 @@ const Row = ({
     );
 };
 
-const boxSx = { width: "100%" };
-const paperSx = { width: "100%", mb: 2 };
-const tableSx = { minWidth: 750 };
-const tcSx = { maxHeight: "80vh" };
-
 interface PromiseProps {
     resolve: () => void;
     reject: () => void;
@@ -129,7 +75,7 @@ interface key2Rows {
 const ROW_HEIGHT = 65;
 const PAGE_SIZE = 100;
 
-const AutoLoadingTable = (props: TableProps) => {
+const AutoLoadingTable = (props: TaipyTableProps) => {
     const { className, id, tp_varname } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader

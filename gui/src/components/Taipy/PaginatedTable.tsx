@@ -15,7 +15,7 @@ import { visuallyHidden } from "@mui/utils";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
-import { alignCell, boxSx, formatValue, getsortByIndex, Order, paperSx, tableSx, TaipyPaginatedTableProps, tcSx } from "./TableUtils";
+import { alignCell, boxSx, formatValue, getsortByIndex, Order, paperSx, tableSx, TaipyPaginatedTableProps, tcSx } from "./tableUtils";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { height:"52px", textAlign:"right", verticalAlign:"center" };

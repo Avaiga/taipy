@@ -109,7 +109,8 @@ class Factory:
         .set_table_pagesize()
         .set_table_pagesize_options()
         .set_allow_all_rows()
-        .set_show_all(),
+        .set_show_all()
+        .set_auto_loading(),
     }
 
     # TODO: process \" in property value
