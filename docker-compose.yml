@@ -1,0 +1,25 @@
+version: '3.7'
+
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - taipy
+    ports:
+      - "4000:4000"
+  taipy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - taipy-network
+    expose:
+      - "5000"
+    tty: true
+    volumes:
+      - .:/app
+
+networks:
+  taipy-network:
