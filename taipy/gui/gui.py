@@ -37,6 +37,9 @@ class Gui(object, metaclass=Singleton):
     __root_page_name = "TaiPy_root_page"
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
+    __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
+    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
+    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
     def __init__(
         self,
@@ -219,6 +222,7 @@ class Gui(object, metaclass=Singleton):
     def _request_var(self, var_name, payload) -> None:
         ret_payload = {}
         # Use custom attrgetter function to allow value binding for MapDictionary
+        var_name = self._expr_to_hash[var_name]
         newvalue = attrgetter(var_name)(self._values)
         if isinstance(newvalue, datetime.datetime):
             newvalue = dateToISO(newvalue)
@@ -325,6 +329,12 @@ class Gui(object, metaclass=Singleton):
             modified_vars.append(var_name)
         return modified_vars
 
+    def _is_expression(self, expr: str) -> bool:
+        return len(self.__EXPR_IS_EXPR.findall(expr)) != 0
+
+    def _fetch_expression_list(self, expr: str) -> t.List:
+        return self.__EXPR_RE.findall(expr)
+
     def add_page(
         self,
         name: str,
@@ -376,11 +386,14 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+        if not self._is_expression(expr):
+            return expr
         var_val = {}
         var_list = []
         expr_hash = None
+        is_edge_case = False
         # Get A list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
-        for e in self.__EXPR_RE.findall(expr):
+        for e in self._fetch_expression_list(expr):
             st = ast.parse(e)
             for node in ast.walk(st):
                 if type(node) is ast.Name:
@@ -391,13 +404,15 @@ class Gui(object, metaclass=Singleton):
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
-        if len(var_list) == 1 and "{" + var_list[0] + "}" == expr:
-            expr = expr_hash = var_list[0]
+        if m := self.__EXPR_IS_EDGE_CASE.match(expr):
+            expr = m.group(1)
+            expr_hash = expr if self.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
+            is_edge_case = True
         # validate whether expression has already been evaluated
         if expr in self._expr_to_hash:
-            return getattr(self, self._expr_to_hash[expr]), self._expr_to_hash[expr]
+            return "{" + self._expr_to_hash[expr] + "}"
         # evaluate expressions
-        expr_evaluated = eval(expr_string, {}, var_val) if expr != expr_hash else eval(expr, {}, var_val)
+        expr_evaluated = eval(expr_string, {}, var_val) if not is_edge_case else eval(expr, {}, var_val)
         # save the expression if it needs to be re-evaluated
         if re_evaluated:
             if expr_hash is None:
@@ -413,7 +428,7 @@ class Gui(object, metaclass=Singleton):
                     self._var_to_expr_list[var].append(expr)
             if expr not in self._expr_to_var_list:
                 self._expr_to_var_list[expr] = var_list
-            return expr_evaluated, expr_hash
+            return "{" + expr_hash + "}"
         return expr_evaluated
 
     def on_update(self, f) -> None:

@@ -65,7 +65,6 @@ class Preprocessor(MdPreprocessor):
         control_name = None
         default_prop_name = None
         default_prop_value = None
-        expr_hash = None
         properties = []
         for fragment in fragments:
             from .factory import Factory
@@ -76,8 +75,7 @@ class Preprocessor(MdPreprocessor):
                 from ..gui import Gui
 
                 # Handle First Expression Fragment
-                default_prop_value, expr_hash = Gui._get_instance().evaluate_expr(fragment)
-                default_prop_value = expr_hash
+                default_prop_value = Gui._get_instance().evaluate_expr(fragment)
             else:
                 prop_match = Preprocessor._PROPERTY_RE.match(fragment)
                 if not prop_match or (prop_match.group(1) and prop_match.group(3)):
@@ -90,8 +88,8 @@ class Preprocessor(MdPreprocessor):
                         prop_value = "False"
                     elif prop_match.group(3):
                         prop_value = prop_match.group(3)
-                    prop_value, expr_hash = Gui._get_instance().evaluate_expr(prop_value)
-                    properties.append(self._make_prop_pair(prop_match.group(2), expr_hash))
+                    prop_value = Gui._get_instance().evaluate_expr(prop_value)
+                    properties.append(self._make_prop_pair(prop_match.group(2), prop_value))
         if control_name is None:
             control_name = "field"
         if default_prop_value is not None:
