@@ -15,10 +15,20 @@ import { visuallyHidden } from "@mui/utils";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction } from "../../context/taipyReducers";
-import { alignCell, boxSx, formatValue, getsortByIndex, Order, paperSx, tableSx, TaipyPaginatedTableProps, tcSx } from "./tableUtils";
+import {
+    alignCell,
+    boxSx,
+    formatValue,
+    getsortByIndex,
+    Order,
+    paperSx,
+    tableSx,
+    TaipyPaginatedTableProps,
+    tcSx,
+} from "./tableUtils";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
-const loadingStyle: CSSProperties = { height:"52px", textAlign:"right", verticalAlign:"center" };
+const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
 
 const rowsPerPageOptions = [10, 50, 100, 500];
 
@@ -57,15 +67,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         if (!props.value || props.value[pageKey.current] === undefined) {
             setLoading(true);
             dispatch(
-                createRequestTableUpdateAction(
-                    tp_varname,
-                    id,
-                    pageKey.current,
-                    startIndex,
-                    endIndex,
-                    orderBy,
-                    order
-                )
+                createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, endIndex, orderBy, order)
             );
         } else {
             setValue(props.value[pageKey.current]);
@@ -181,22 +183,38 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         </TableRow>
                                     );
                                 })}
+                                {rows.length == 0 &&
+                                    loading &&
+                                    Array.from(Array(30).keys(), (v, idx) => (
+                                        <TableRow hover key={"rowskel" + idx}>
+                                            {colsOrder.map((col, cidx) => (
+                                                <TableCell key={"skel" + cidx}>
+                                                    <Skeleton width="100%" height="3rem" />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    {!showAll && (loading ? <Skeleton width="100%" style={loadingStyle} ><Typography>Loading...</Typography></Skeleton> : 
-                        <TablePagination
-                            component="div"
-                            count={rowCount}
-                            page={startIndex / rowsPerPage}
-                            rowsPerPage={rowsPerPage}
-                            showFirstButton={true}
-                            showLastButton={true}
-                            rowsPerPageOptions={pso}
-                            onPageChange={handleChangePage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                        />
-                    )}
+                    {!showAll &&
+                        (loading ? (
+                            <Skeleton width="100%" style={loadingStyle}>
+                                <Typography>Loading...</Typography>
+                            </Skeleton>
+                        ) : (
+                            <TablePagination
+                                component="div"
+                                count={rowCount}
+                                page={startIndex / rowsPerPage}
+                                rowsPerPage={rowsPerPage}
+                                showFirstButton={true}
+                                showLastButton={true}
+                                rowsPerPageOptions={pso}
+                                onPageChange={handleChangePage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                            />
+                        ))}
                 </Paper>
             </Box>
         </>
