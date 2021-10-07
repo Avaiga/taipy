@@ -276,11 +276,23 @@ class Builder:
                     warnings.warn(f"Component {self.element_name} Attribute label_getter: function raised an exception {e}")
             self.attributes["lov"] = ret_dict
             if not isinstance(self.value, str):
-                try:
-                    ret = self.__get_id_label(self.value, lov_label_fn, len(ret_dict))
-                    self.set_attribute("defaultvalue", ret[0])
-                except Exception as e:
-                    warnings.warn(f"Component {self.element_name} Attribute label_getter: function raised an exception {e}")
+                ret_list = []
+                if isinstance(self.value, list):
+                    val_list = self.value
+                else:
+                    val_list = [self.value]
+                for val in val_list:
+                    if isinstance(val, str):
+                        ret_list.append(val)
+                    else:
+                        try:
+                            ret_list.append(str(self.__get_id_label(val, lov_label_fn, -1)[0]))
+                        except Exception as e:
+                            warnings.warn(f"Component {self.element_name} Attribute label_getter: function raised an exception {e}")
+                if len(ret_list) > 1:
+                    self.__set_react_attribute("defaultvalue", ret_list)
+                else:
+                    self.set_attribute("defaultvalue", ret_list[0] if len(ret_list) > 0 else "")
         return self
             
 
