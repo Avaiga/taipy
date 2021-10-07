@@ -47,17 +47,22 @@ const Dialog = (props: DialogProps) => {
 
     const handleClose = useCallback(() => {
         dispatch(createSendActionNameAction(id, cancelAction || validateAction));
-    }, [dispatch]);
+    }, [dispatch, id, cancelAction, validateAction]);
 
     const handleValidate = useCallback(() => {
         dispatch(createSendActionNameAction(id, validateAction));
-    }, [dispatch]);
+    }, [dispatch, id, validateAction]);
 
     return (
         <MuiDialog onClose={handleClose} open={value === undefined ? !!defaultvalue : !!value}>
             <DialogTitle sx={titleSx}>
                 {title}
-                <IconButton aria-label="close" onClick={handleClose} sx={closeSx} title={cancelAction ? cancelActionText : validateActionText}>
+                <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                    sx={closeSx}
+                    title={cancelAction ? cancelActionText : validateActionText}
+                >
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties } from "react";
 import Box from "@mui/material/Box";
 import MuiTable from "@mui/material/Table";
-import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
@@ -15,13 +15,24 @@ import { Skeleton } from "@mui/material";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
-import { ColumnDesc, alignCell, formatValue, getsortByIndex, Order, TaipyTableProps, boxSx, paperSx, tcSx, tableSx } from "./tableUtils";
+import {
+    ColumnDesc,
+    alignCell,
+    formatValue,
+    getsortByIndex,
+    Order,
+    TaipyTableProps,
+    boxSx,
+    paperSx,
+    tcSx,
+    tableSx,
+} from "./tableUtils";
 
 interface RowData {
     colsOrder: string[];
     columns: Record<string, ColumnDesc>;
     rows: Record<string, unknown>[];
-    classes: any;
+    classes: Record<string, string>;
     cellStyles: CSSProperties[];
 }
 
@@ -164,7 +175,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             colsOrder: colsOrder,
             columns: columns,
             rows: rows,
-            classes: undefined,
+            classes: {},
             cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
         }),
         [colsOrder, columns, rows]
