@@ -86,9 +86,9 @@ class Builder:
     def set_expresion_hash(self):
         if self.has_evaluated:
             self.set_attribute("key", self.expr_hash)
-            self.set_attribute(
+            self.__set_react_attribute(
                 "value",
-                "{!" + get_client_var_name(self.expr_hash) + "!}",
+                get_client_var_name(self.expr_hash),
             )
             self.set_attribute("tp_varname", self.expr)
         return self
@@ -105,7 +105,7 @@ class Builder:
         elif isinstance(self.value, str):
             self.set_attribute("defaultvalue", self.value)
         else:
-            self.set_attribute("defaultvalue", "{!" + str(self.value) + "!}")
+            self.__set_react_attribute("defaultvalue", self.value)
         return self
 
     def set_className(self, class_name="", config_class="input"):
@@ -158,7 +158,7 @@ class Builder:
         page_size = (
             self.attributes and "page_size" in self.attributes and self.attributes["page_size"]
         ) or default_size
-        self.set_attribute("pageSize", "{!" + str(page_size) + "!}")
+        self.__set_react_attribute("pageSize", page_size)
         return self
 
     def set_table_pagesize_options(self, default_size=[50, 100, 500]):
@@ -173,7 +173,7 @@ class Builder:
             except Exception as e:
                 warnings.warn(f"page_size_options: invalid value {page_size_options}\n{e}")
         if isinstance(page_size_options, list):
-            self.set_attribute("pageSizeOptions", "{!" + json.dumps(page_size_options) + "!}")
+            self.__set_react_attribute("pageSizeOptions", page_size_options)
         else:
             warnings.warn("page_size_options should be a list")
         return self
@@ -241,7 +241,11 @@ class Builder:
         if not isinstance(lof, dict):
             warnings.warn(f"Error: Property {name} of component {self.element_name} should be a string or a dict")
             return self
-        return self.set_attribute(_to_camel_case(name), "{!" + str(lof) + "!}")
+        return self.__set_react_attribute(_to_camel_case(name), lof)
+
+
+    def __set_react_attribute(self, name, value):
+        return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
     def __set_string_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
@@ -267,7 +271,7 @@ class Builder:
             boolattr = default_value
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
-        return self.set_attribute(_to_camel_case(name), "{!" + str(boolattr).lower() + "!}")
+        return self.__set_react_attribute(_to_camel_case(name), boolattr)
 
     def set_attribute(self, name, value):
         self.el.set(name, value)

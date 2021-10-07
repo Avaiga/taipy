@@ -38,7 +38,7 @@ const Dialog = (props: DialogProps) => {
         value,
         defaultvalue,
         cancelAction,
-        validateAction,
+        validateAction = "ValidateAction",
         pageId,
         cancelActionText = "Cancel",
         validateActionText = "Validate",
@@ -46,7 +46,7 @@ const Dialog = (props: DialogProps) => {
     const { dispatch } = useContext(TaipyContext);
 
     const handleClose = useCallback(() => {
-        dispatch(createSendActionNameAction(id, cancelAction));
+        dispatch(createSendActionNameAction(id, cancelAction || validateAction));
     }, [dispatch]);
 
     const handleValidate = useCallback(() => {
@@ -57,7 +57,7 @@ const Dialog = (props: DialogProps) => {
         <MuiDialog onClose={handleClose} open={value === undefined ? !!defaultvalue : !!value}>
             <DialogTitle sx={titleSx}>
                 {title}
-                <IconButton aria-label="close" onClick={handleClose} sx={closeSx} title={cancelActionText}>
+                <IconButton aria-label="close" onClick={handleClose} sx={closeSx} title={cancelAction ? cancelActionText : validateActionText}>
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
