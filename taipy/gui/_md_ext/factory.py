@@ -15,6 +15,7 @@ class Factory:
         "slider": "value",
         "selector": "value",
         "table": "data",
+        "dialog": "open",
     }
 
     CONTROL_BUILDERS = {
@@ -110,7 +111,23 @@ class Factory:
         .set_table_pagesize_options()
         .set_allow_all_rows()
         .set_show_all()
-        .set_auto_loading(),
+        .set_auto_loading()
+        .set_show_all(),
+        "dialog": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Dialog",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_id()
+        .set_className(class_name="taipy-dialog", config_class="dialog")
+        .set_title()
+        .set_default_value()
+        .set_cancel_action()
+        .set_validate_action()
+        .set_cancel_action_text()
+        .set_validate_action_text()
+        .set_page_id(),
     }
 
     # TODO: process \" in property value

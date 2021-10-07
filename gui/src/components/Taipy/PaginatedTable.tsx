@@ -119,6 +119,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return pageSizeOptions;
     }, [pageSizeOptions, allowAllRows]);
 
+    /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     const { rows, rowCount } = useMemo(() => {
         const ret = { rows: [], rowCount: 0 } as { rows: any[]; rowCount: number };
         if (value) {
