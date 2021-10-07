@@ -1,5 +1,6 @@
 import datetime
 import json
+from types import FunctionType
 import warnings
 import typing as t
 from operator import attrgetter
@@ -245,12 +246,56 @@ class Builder:
     def set_page_id(self):
         return self.__set_string_attribute("page_id", optional=False)
 
-    def __set_list_of_(self, name):
+    def __get_id_label(self, elt, getter, idx):
+            ret = getter(elt)
+            if isinstance(ret, (list, tuple)) and len(ret) >= 2:
+                return ret
+            else:
+                elt_id = elt.id if hasattr(elt, "id") else None
+                if not elt_id and isinstance(elt, dict) and "id" in elt:
+                    elt_id = elt["id"]
+                if not elt_id:
+                    elt_id = idx
+                return (elt_id, ret)
+
+    def get_lov_label_getter(self):
+        lov = self.__get_list_of_("lov")
+        if isinstance(lov, list):
+            lov_label_fn = self.attributes and "label_getter" in self.attributes and self.attributes["label_getter"]
+            if not lov_label_fn:
+                lov_label_fn = lambda x : str(x)
+            if not isinstance(lov_label_fn, FunctionType):
+                warnings.warn(f"Component Selector Attribute ")
+                lov_label_fn = lambda x : str(x)
+            ret_dict = {}
+            for elt in lov:
+                try:
+                    ret = self.__get_id_label(elt, lov_label_fn, len(ret_dict))
+                    ret_dict[str(ret[0])] = str(ret[1])
+                except Exception as e:
+                    warnings.warn(f"Component {self.element_name} Attribute label_getter: function raised an exception {e}")
+            self.attributes["lov"] = ret_dict
+            if not isinstance(self.value, str):
+                try:
+                    ret = self.__get_id_label(self.value, lov_label_fn, len(ret_dict))
+                    self.set_attribute("defaultvalue", ret[0])
+                except Exception as e:
+                    warnings.warn(f"Component {self.element_name} Attribute label_getter: function raised an exception {e}")
+        return self
+            
+
+    def __get_list_of_(self, name):
         lof = self.attributes and name in self.attributes and self.attributes[name]
         if isinstance(lof, str):
             lof = {s.strip(): s for s in lof.split(";")}
+        if isinstance(lof, _MapDictionary):
+            lof = lof._dict
+        return lof
+
+    def __set_list_of_(self, name):
+        lof = self.__get_list_of_(name)
         if not isinstance(lof, dict):
-            warnings.warn(f"Error: Property {name} of component {self.element_name} should be a string or a dict")
+            warnings.warn(f"Component {self.element_name} Attribute {name}: should be a string or a dict")
             return self
         return self.__set_react_attribute(_to_camel_case(name), lof)
 

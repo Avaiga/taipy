@@ -92,12 +92,13 @@ class Factory:
             element_name="Selector",
             attributes=attrs,
         )
+        .set_default_value()
         .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
+        .get_lov_label_getter()  # need to be called before set_lov
         .set_lov()
         .set_filter()
         .set_multiple()
-        .set_default_value()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,

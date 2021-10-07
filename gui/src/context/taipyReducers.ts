@@ -109,7 +109,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
         case Types.SendUpdate:
-            sendWsMessage(state.socket, "U", action.name, action.payload.value);
+            sendWsMessage(state.socket, "U", action.name, action.payload.value, action.propagate);
             break;
         case Types.Action:
             sendWsMessage(state.socket, "A", action.name, action.payload.value);
@@ -202,14 +202,16 @@ interface WsMessage {
     type: WsMessageType;
     name: string;
     payload: Record<string, unknown> | unknown;
+    propagate: boolean;
 }
 
 const sendWsMessage = (
     socket: Socket | undefined,
     type: WsMessageType,
     name: string,
-    payload: Record<string, unknown> | unknown
+    payload: Record<string, unknown> | unknown,
+    propagate = true
 ): void => {
-    const msg: WsMessage = { type: type, name: name, payload: payload };
+    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate };
     socket?.emit("message", msg);
 };
