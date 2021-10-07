@@ -1,0 +1,242 @@
+import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties } from "react";
+import Box from "@mui/material/Box";
+import MuiTable from "@mui/material/Table";
+import TableCell, { TableCellProps } from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TableSortLabel from "@mui/material/TableSortLabel";
+import Paper from "@mui/material/Paper";
+import { visuallyHidden } from "@mui/utils";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { FixedSizeList as List } from "react-window";
+import InfiniteLoader from "react-window-infinite-loader";
+import { Skeleton } from "@mui/material";
+
+import { TaipyContext } from "../../context/taipyContext";
+import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
+import { ColumnDesc, alignCell, formatValue, getsortByIndex, Order, TaipyTableProps, boxSx, paperSx, tcSx, tableSx } from "./tableUtils";
+
+interface RowData {
+    colsOrder: string[];
+    columns: Record<string, ColumnDesc>;
+    rows: Record<string, unknown>[];
+    classes: any;
+    cellStyles: CSSProperties[];
+}
+
+const Row = ({
+    index,
+    style,
+    data: { colsOrder, columns, rows, classes, cellStyles },
+}: {
+    index: number;
+    style: CSSProperties;
+    data: RowData;
+}) => {
+    const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
+    return isItemLoaded(index) ? (
+        <TableRow
+            hover
+            tabIndex={-1}
+            key={"row" + index}
+            component="div"
+            style={style}
+            className={classes && classes.row}
+            data-index={index}
+        >
+            {colsOrder.map((col, cidx) => (
+                <TableCell
+                    component="div"
+                    variant="body"
+                    key={"val" + index + "-" + cidx}
+                    {...alignCell(columns[col])}
+                    style={cellStyles[cidx]}
+                >
+                    {formatValue(rows[index][col], columns[col])}
+                </TableCell>
+            ))}
+        </TableRow>
+    ) : (
+        <Skeleton style={style} key={"Skeleton" + index} />
+    );
+};
+
+interface PromiseProps {
+    resolve: () => void;
+    reject: () => void;
+}
+
+interface key2Rows {
+    key: string;
+    promises: Record<number, PromiseProps>;
+}
+
+const ROW_HEIGHT = 65;
+const PAGE_SIZE = 100;
+
+const AutoLoadingTable = (props: TaipyTableProps) => {
+    const { className, id, tp_varname } = props;
+    const [rows, setRows] = useState<Record<string, unknown>[]>([]);
+    const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
+    const { dispatch } = useContext(TaipyContext);
+    const page = useRef<key2Rows>({ key: "", promises: {} });
+    const [orderBy, setOrderBy] = useState("");
+    const [order, setOrder] = useState<Order>("asc");
+    const infiniteLoaderRef = useRef<InfiniteLoader>(null);
+    const headerRow = useRef<HTMLTableRowElement>(null);
+
+    useEffect(() => {
+        if (props.value && page.current.key && props.value[page.current.key] !== undefined) {
+            const newValue = props.value[page.current.key];
+            console.log("loadMoreItems: Response", newValue.start);
+            const promise = page.current.promises[newValue.start];
+            setRowCount(newValue.rowcount);
+            const nr = newValue.data as Record<string, unknown>[];
+            if (Array.isArray(nr) && nr.length > newValue.start) {
+                setRows(nr);
+                promise && promise.resolve();
+            } else {
+                promise && promise.reject();
+            }
+            delete page.current.promises[newValue.start];
+        }
+    }, [props.value]);
+
+    const handleRequestSort = useCallback(
+        (event: React.MouseEvent<unknown>, col: string) => {
+            const isAsc = orderBy === col && order === "asc";
+            setOrder(isAsc ? "desc" : "asc");
+            setOrderBy(col);
+            setRows([]);
+            setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+        },
+        [orderBy, order]
+    );
+
+    const createSortHandler = useCallback(
+        (col: string) => (event: React.MouseEvent<unknown>) => {
+            handleRequestSort(event, col);
+        },
+        [handleRequestSort]
+    );
+
+    const [colsOrder, columns] = useMemo(() => {
+        if (props.columns) {
+            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+        }
+        return [[], {}];
+    }, [props.columns]);
+
+    useEffect(() => {
+        if (headerRow.current) {
+            Array.from(headerRow.current.cells).forEach((cell, idx) => {
+                columns[colsOrder[idx]].width = cell.offsetWidth;
+            });
+        }
+    }, [columns, colsOrder]);
+
+    const loadMoreItems = useCallback(
+        (startIndex: number, stopIndex: number) => {
+            console.log("loadMoreItems: Request", startIndex, stopIndex);
+            if (page.current.promises[startIndex]) {
+                page.current.promises[startIndex].reject();
+            }
+            return new Promise<void>((resolve, reject) => {
+                const key = `Infinite-${orderBy}-${order}`;
+                page.current = {
+                    key: key,
+                    promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
+                };
+                dispatch(
+                    createRequestInfiniteTableUpdateAction(tp_varname, id, key, startIndex, stopIndex, orderBy, order)
+                );
+            });
+        },
+        [tp_varname, id, orderBy, order, dispatch]
+    );
+
+    const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
+
+    const rowData: RowData = useMemo(
+        () => ({
+            colsOrder: colsOrder,
+            columns: columns,
+            rows: rows,
+            classes: undefined,
+            cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
+        }),
+        [colsOrder, columns, rows]
+    );
+
+    return (
+        <Box sx={boxSx}>
+            <Paper sx={paperSx}>
+                <TableContainer sx={tcSx}>
+                    <MuiTable
+                        sx={tableSx}
+                        aria-labelledby="tableTitle"
+                        size={"medium"}
+                        className={className}
+                        stickyHeader={true}
+                    >
+                        <TableHead>
+                            <TableRow ref={headerRow}>
+                                {colsOrder.map((col, idx) => (
+                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
+                                        <TableSortLabel
+                                            active={orderBy === columns[col].dfid}
+                                            direction={orderBy === columns[col].dfid ? order : "asc"}
+                                            onClick={createSortHandler(columns[col].dfid)}
+                                        >
+                                            {columns[col].title || columns[col].dfid}
+                                            {orderBy === columns[col].dfid ? (
+                                                <Box component="span" sx={visuallyHidden}>
+                                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
+                                                </Box>
+                                            ) : null}
+                                        </TableSortLabel>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                    </MuiTable>
+                    <div style={{ height: "60vh" }}>
+                        <AutoSizer>
+                            {({ height, width }) => {
+                                return (
+                                    <InfiniteLoader
+                                        ref={infiniteLoaderRef}
+                                        isItemLoaded={isItemLoaded}
+                                        itemCount={rowCount}
+                                        loadMoreItems={loadMoreItems}
+                                        minimumBatchSize={PAGE_SIZE}
+                                    >
+                                        {({ onItemsRendered, ref }) => {
+                                            return (
+                                                <List
+                                                    height={height}
+                                                    width={width}
+                                                    itemCount={rowCount}
+                                                    itemSize={ROW_HEIGHT}
+                                                    onItemsRendered={onItemsRendered}
+                                                    ref={ref}
+                                                    itemData={rowData}
+                                                >
+                                                    {Row}
+                                                </List>
+                                            );
+                                        }}
+                                    </InfiniteLoader>
+                                );
+                            }}
+                        </AutoSizer>
+                    </div>
+                </TableContainer>
+            </Paper>
+        </Box>
+    );
+};
+
+export default AutoLoadingTable;

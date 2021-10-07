@@ -43,12 +43,21 @@ class Gui(object, metaclass=Singleton):
 
     def __init__(
         self,
-        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0],
+        css_file: t.Optional[str] = None,
         markdown: t.Optional[str] = None,
         markdown_file: t.Optional[str] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
     ):
+        if not css_file:
+            try:
+                css_file = (
+                    os.path.splitext(os.path.basename(__main__.__file__))[0]
+                    if __main__ and hasattr(__main__, "__file__")
+                    else "taipy"
+                )
+            except Exception as e:
+                print(e)
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,
@@ -229,6 +238,8 @@ class Gui(object, metaclass=Singleton):
         elif isinstance(newvalue, pd.DataFrame):
             keys = payload.keys()
             ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
+            if "infinite" in keys:
+                ret_payload["infinite"] = payload["infinite"]
             if isinstance(payload["start"], int):
                 start = int(payload["start"])
             else:
@@ -270,7 +281,7 @@ class Gui(object, metaclass=Singleton):
                 # remove the date columns from the list of columns
                 cols = list(set(newvalue.columns.tolist()) - set(datecols))
                 newvalue = newvalue.loc[:, cols]  # view without the date columns
-            dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount}
+            dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount, "start": start}
             newvalue = dictret
         # TODO: What if value == newvalue?
         ret_payload["value"] = newvalue
