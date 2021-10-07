@@ -7,6 +7,7 @@ from operator import attrgetter
 import pandas as pd
 from markdown.util import etree
 
+from ..Partial import Partial
 from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
@@ -127,6 +128,16 @@ class Builder:
         self.set_attribute("type", type_name)
         return self
 
+    def set_partial(self):
+        if self.element_name != "Dialog":
+            return self
+        if "partial" in self.attributes and self.attributes["partial"]:
+            if "page_id" in self.attributes and self.attributes["page_id"]:
+                warnings.warn(f"Dialog component: page_id and partial should not be defined at the same time")
+            if isinstance(self.attributes["partial"], Partial):
+                self.attributes["page_id"] = self.attributes["partial"].route
+        return self
+
     def set_dataType(self):
         self.set_attribute("dataType", getDataType(self.value))
         return self
@@ -242,7 +253,6 @@ class Builder:
             warnings.warn(f"Error: Property {name} of component {self.element_name} should be a string or a dict")
             return self
         return self.__set_react_attribute(_to_camel_case(name), lof)
-
 
     def __set_react_attribute(self, name, value):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")

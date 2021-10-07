@@ -127,6 +127,7 @@ class Factory:
         .set_validate_action()
         .set_cancel_action_text()
         .set_validate_action_text()
+        .set_partial()  # partial should be set before page_id
         .set_page_id(),
     }
 

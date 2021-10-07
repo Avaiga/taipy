@@ -6,6 +6,8 @@ class GuiConfig(object):
     def __init__(self):
         self.pages = []
         self.routes = []
+        self.partials = []
+        self.partial_routes = []
         self.app_config = {}
         self.style_config = {}
 

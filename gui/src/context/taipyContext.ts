@@ -1,9 +1,9 @@
 import { createContext, Dispatch } from "react";
-import { TaipyAction, TaipyState } from "./taipyReducers";
+import { TaipyBaseAction, TaipyState } from "./taipyReducers";
 
 export interface TaipyStore {
     state: TaipyState;
-    dispatch: Dispatch<TaipyAction>;
+    dispatch: Dispatch<TaipyBaseAction>;
 }
 
 export const TaipyContext = createContext<TaipyStore>({state: {data: {}} as TaipyState, dispatch: () => null});

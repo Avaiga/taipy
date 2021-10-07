@@ -15,11 +15,13 @@ import pandas as pd
 from flask import jsonify, request
 from markdown import Markdown
 
+from .Partial import Partial
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
 from .Page import Page
 from .server import Server
+from .wstype import WsType
 from .utils import (
     ISOToDate,
     Singleton,
@@ -43,7 +45,9 @@ class Gui(object, metaclass=Singleton):
 
     def __init__(
         self,
-        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0] if hasattr(__main__, "__file__") else "Taipy",
+        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0]
+        if hasattr(__main__, "__file__")
+        else "Taipy",
         markdown: t.Optional[str] = None,
         markdown_file: t.Optional[str] = None,
         pages: t.Optional[dict] = None,
@@ -105,7 +109,12 @@ class Gui(object, metaclass=Singleton):
         for page_i in self._config.pages:
             if page_i.route in request.path:
                 page = page_i
-        # Make sure that there is a page instace found
+        # try partials
+        if page is None:
+            for partial in self._config.partials:
+                if partial.route in request.path:
+                    page = partial
+        # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         # Render template (for redundancy, not necessary 'cause it has already
@@ -120,7 +129,7 @@ class Gui(object, metaclass=Singleton):
         if page.index_html:
             return self._server.render(
                 page.index_html,
-                page.style,
+                page.style if hasattr(page, "style") else "",
             )
         else:
             return "No page template"
@@ -211,13 +220,14 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, expr, value)
+        ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._values)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
-            # TODO would be nice to group update in one WS message (see _send_ws_update with dict)
-            # TODO: What if value == newvalue?
-            self._send_ws_update(_var, {"value": newvalue})
+            ws_dict[_var] = newvalue
+        # TODO: What if value == newvalue?
+        self._send_ws_update_with_dict(ws_dict)
 
     def _request_var(self, var_name, payload) -> None:
         ret_payload = {}
@@ -280,17 +290,16 @@ class Gui(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
         try:
-            self._server._ws.send({"type": "U", "name": get_client_var_name(var_name), "payload": payload})
+            self._server._ws.send(
+                {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload}
+            )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
-        payload = [
-            {"name": get_client_var_name(k), "payload": {"value": v}}
-            for k, v in modified_values.items()
-        ]
+        payload = [{"name": get_client_var_name(k), "payload": {"value": v}} for k, v in modified_values.items()]
         try:
-            self._server._ws.send({"type": "U", "payload": payload})
+            self._server._ws.send({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
@@ -356,7 +365,7 @@ class Gui(object, metaclass=Singleton):
                 f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.'
             )
         if name in self._config.routes:
-            raise Exception('Page name "' + (name if name != Gui.__root_page_name else "/") + '" is already defined')
+            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
         # Init a new page
         new_page = Page()
         new_page.route = name
@@ -366,6 +375,21 @@ class Gui(object, metaclass=Singleton):
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
+
+    def add_partial(
+        self,
+        markdown: t.Optional[str] = None,
+        markdown_file: t.Optional[str] = None,
+    ) -> Partial:
+        # Init a new partial
+        new_partial = Partial(markdown=markdown, markdown_file=markdown_file)
+        # Validate name
+        if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
+            warnings.warn(f'Partial name "{new_partial.route}" is already defined')
+        # Append partial to _config
+        self._config.partials.append(new_partial)
+        self._config.partial_routes.append(new_partial.route)
+        return new_partial
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:
@@ -467,7 +491,14 @@ class Gui(object, metaclass=Singleton):
                     page_i.index_html = self._parse_markdown(f.read())
             # Server URL Rule for each page jsx
             self._server.add_url_rule(f"/flask-jsx/{page_i.route}/", view_func=self._render_page)
-        # define a root page if needed
+        for partial in self._config.partials:
+            if partial.md_template:
+                partial.index_html = self._parse_markdown(partial.md_template)
+            elif partial.md_template_file:
+                with open(partial.md_template_file, "r") as f:
+                    partial.index_html = self._parse_markdown(f.read())
+            # Server URL Rule for each page jsx
+            self._server.add_url_rule(f"/flask-jsx/{partial.route}/", view_func=self._render_page)
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/initialize/", view_func=self._render_route)
