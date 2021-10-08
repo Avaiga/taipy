@@ -6,6 +6,7 @@ import { ENDPOINT } from "../utils";
 
 enum Types {
     Update = "UPDATE",
+    MultipleUpdate = "MULTIPLE_UPDATE",
     SendUpdate = "SEND_UPDATE_ACTION",
     Action = "SEND_ACTION_ACTION",
     RequestTableUpdate = "REQUEST_TABLE_UPDATE",
@@ -19,11 +20,21 @@ export interface TaipyState {
     locations: Record<string, string>;
 }
 
-export interface TaipyAction {
+export interface TaipyBaseAction {
     type: Types;
+}
+
+interface NamePayload {
     name: string;
-    propagate?: boolean;
     payload: Record<string, unknown>;
+}
+
+interface TaipyAction extends NamePayload, TaipyBaseAction {
+    propagate?: boolean;
+}
+
+interface TaipyMultipleAction extends TaipyBaseAction {
+    payload: NamePayload[];
 }
 
 export const INITIAL_STATE: TaipyState = {
@@ -41,7 +52,7 @@ export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     socket: io(ENDPOINT),
 });
 
-export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyAction>): void => {
+export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
         // Websocket confirm successful initialization
         socket.on("connect", () => {
@@ -52,9 +63,13 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         });
         // handle message data from backend
         socket.on("message", (message: WsMessage) => {
-            if (message.type && message.type == "U" && message.name) {
-                // interestingly we can't use === for message.type here 8-|
-                dispatch(createUpdateAction(message.name, message.payload as Record<string, unknown>));
+            if (message.type) {
+                if (message.type === "U" && message.name) {
+                    // interestingly we can't use === for message.type here 8-|
+                    dispatch(createUpdateAction(message.name, message.payload as Record<string, unknown>));
+                } else if (message.type === "MU" && Array.isArray(message.payload)) {
+                    dispatch(createMultipleUpdateAction(message.payload as NamePayload[]));
+                }
             }
         });
     }
@@ -66,7 +81,8 @@ const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string
         return arr;
     }, previousRows.concat([]));
 
-export const taipyReducer = (state: TaipyState, action: TaipyAction): TaipyState => {
+export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
+    const action = baseAction as TaipyAction;
     switch (action.type) {
         case Types.Update:
             const newValue = action.payload.value as Record<string, unknown>;
@@ -89,8 +105,11 @@ export const taipyReducer = (state: TaipyState, action: TaipyAction): TaipyState
                         : newValue,
                 },
             };
+        case Types.MultipleUpdate:
+            const mAction = baseAction as TaipyMultipleAction;
+            return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
         case Types.SendUpdate:
-            sendWsMessage(state.socket, "U", action.name, action.payload.value);
+            sendWsMessage(state.socket, "U", action.name, action.payload.value, action.propagate);
             break;
         case Types.Action:
             sendWsMessage(state.socket, "A", action.name, action.payload.value);
@@ -104,9 +123,14 @@ export const taipyReducer = (state: TaipyState, action: TaipyAction): TaipyState
     return state;
 };
 
-export const createUpdateAction = (name: string, payload: Record<string, unknown>): TaipyAction => ({
+const createUpdateAction = (name: string, payload: Record<string, unknown>): TaipyAction => ({
     type: Types.Update,
     name: name,
+    payload: payload,
+});
+
+const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
+    type: Types.MultipleUpdate,
     payload: payload,
 });
 
@@ -172,20 +196,22 @@ export const createSetLocationsAction = (locations: Record<string, string>): Tai
     payload: { value: locations },
 });
 
-type WsMessageType = "A" | "U" | "T";
+type WsMessageType = "A" | "U" | "T" | "MU";
 
 interface WsMessage {
     type: WsMessageType;
     name: string;
     payload: Record<string, unknown> | unknown;
+    propagate: boolean;
 }
 
 const sendWsMessage = (
     socket: Socket | undefined,
     type: WsMessageType,
     name: string,
-    payload: Record<string, unknown> | unknown
+    payload: Record<string, unknown> | unknown,
+    propagate = true
 ): void => {
-    const msg: WsMessage = { type: type, name: name, payload: payload };
+    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate };
     socket?.emit("message", msg);
 };

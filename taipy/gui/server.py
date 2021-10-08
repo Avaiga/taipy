@@ -7,6 +7,8 @@ from flask import Flask, jsonify, render_template, render_template_string, reque
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
+from .wstype import WsType
+
 
 class Server(Flask):
     def __init__(
@@ -55,7 +57,9 @@ class Server(Flask):
                 for k, v in self.__path_mapping.items():
                     if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
                         return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
-                if hasattr(__main__, "__file__") and os.path.isfile(os.path.dirname(__main__.__file__) + os.path.sep + path):
+                if hasattr(__main__, "__file__") and os.path.isfile(
+                    os.path.dirname(__main__.__file__) + os.path.sep + path
+                ):
                     return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
 
         # Websocket (handle json message)
@@ -64,15 +68,15 @@ class Server(Flask):
             try:
                 if "status" in message:
                     print(message["status"])
-                elif message["type"] == "U":
+                elif message["type"] == WsType.UPDATE.value:
                     self._app._update_var(
                         message["name"],
                         message["payload"],
-                        message["propagate"] if "message" in message else True,
+                        message["propagate"] if "propagate" in message else True,
                     )
-                elif message["type"] == "A":
+                elif message["type"] == WsType.ACTION.value:
                     self._app._on_action(message["name"], message["payload"])
-                elif message["type"] == "T":
+                elif message["type"] == WsType.TABLE_UPDATE.value:
                     self._app._request_var(message["name"], message["payload"])
             except TypeError as te:
                 warnings.warn(f"Decoding Message has failed: {message}\n{te}")

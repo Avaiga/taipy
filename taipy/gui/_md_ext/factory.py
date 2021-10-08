@@ -92,12 +92,13 @@ class Factory:
             element_name="Selector",
             attributes=attrs,
         )
+        .set_default_value()
         .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
+        .get_lov_label_getter()  # need to be called before set_lov
         .set_lov()
         .set_filter()
         .set_multiple()
-        .set_default_value()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -127,6 +128,7 @@ class Factory:
         .set_validate_action()
         .set_cancel_action_text()
         .set_validate_action_text()
+        .set_partial()  # partial should be set before page_id
         .set_page_id(),
     }
 

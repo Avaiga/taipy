@@ -58,7 +58,7 @@ interface SelectorProps extends TaipyInputProps {
 }
 
 const Selector = (props: SelectorProps) => {
-    const { defaultvalue, tp_varname, lov, filter, multiple, className } = props;
+    const { defaultvalue, tp_varname, lov, filter, multiple, className, propagate } = props;
     const [selectedValue, setSelectedValue] = useState<string[]>(() => {
         if (multiple && Array.isArray(defaultvalue)) {
             return defaultvalue;
@@ -79,15 +79,15 @@ const Selector = (props: SelectorProps) => {
                     } else {
                         newKeys.splice(p, 1);
                     }
-                    dispatch(createSendUpdateAction(tp_varname, newKeys));
+                    dispatch(createSendUpdateAction(tp_varname, newKeys, propagate));
                     return newKeys;
                 } else {
-                    dispatch(createSendUpdateAction(tp_varname, key));
+                    dispatch(createSendUpdateAction(tp_varname, key, propagate));
                     return [key];
                 }
             });
         },
-        [tp_varname, dispatch, multiple]
+        [tp_varname, dispatch, multiple, propagate]
     );
 
     const createClickHandler = useCallback((key: string) => () => clickHandler(key), [clickHandler]);
