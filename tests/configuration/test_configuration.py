@@ -1,3 +1,4 @@
+import copy
 import os
 import tempfile
 
@@ -11,9 +12,11 @@ from taipy.exceptions.configuration import LoadingError
 
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
+    _env = copy.deepcopy(os.environ)
     yield
     ConfigurationManager.data_manager_configuration = DataManagerConfiguration()
     ConfigurationManager.task_scheduler_configuration = TaskSchedulerConfiguration()
+    os.environ = _env
 
 
 def test_default_configuration():
@@ -145,6 +148,31 @@ max_number_of_parallel_execution = 10
 
     assert ConfigurationManager.task_scheduler_configuration.parallel_execution is False
     assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution is None
+
+
+def test_load_from_environment_overwrite_load_from_filename():
+    config_from_filename = NamedTemporaryFile(
+        """
+[TASK]
+parallel_execution = true
+max_number_of_parallel_execution = 10
+    """
+    )
+    config_from_environment = NamedTemporaryFile(
+        """
+[TASK]
+max_number_of_parallel_execution = 21
+    """
+    )
+
+    assert ConfigurationManager.task_scheduler_configuration.parallel_execution is False
+    assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution is None
+
+    os.environ[ConfigurationManager.ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH] = config_from_environment.filename
+    ConfigurationManager.load(config_from_filename.filename)
+
+    assert ConfigurationManager.task_scheduler_configuration.parallel_execution is True
+    assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution == 21
 
 
 class NamedTemporaryFile:
