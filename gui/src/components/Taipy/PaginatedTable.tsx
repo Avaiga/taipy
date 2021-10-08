@@ -41,15 +41,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         pageSizeOptions = rowsPerPageOptions,
         allowAllRows = false,
         showAll = false,
+        refresh = false,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(pageSize);
+    const [rowsPerPage, setRowsPerPage] = useState(pageSize);
+    const [order, setOrder] = useState<Order>("asc");
+    const [orderBy, setOrderBy] = useState("");
+    const [loading, setLoading] = useState(true);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
-    const [orderBy, setOrderBy] = useState("");
-    const [order, setOrder] = useState<Order>("asc");
-    const [loading, setLoading] = useState(true);
 
     //    useWhyDidYouUpdate('TaipyTable', props);
 
@@ -64,7 +65,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     useEffect(() => {
         const endIndex = showAll ? -1 : startIndex + rowsPerPage;
         pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}`;
-        if (!props.value || props.value[pageKey.current] === undefined) {
+        if (!props.value || props.value[pageKey.current] === undefined || !!refresh) {
             setLoading(true);
             dispatch(
                 createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, endIndex, orderBy, order)
@@ -73,7 +74,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             setValue(props.value[pageKey.current]);
             setLoading(false);
         }
-    }, [startIndex, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
+    }, [startIndex, refresh, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {

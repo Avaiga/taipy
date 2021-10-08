@@ -108,6 +108,7 @@ class Factory:
         .set_expresion_hash()
         .set_className(class_name="taipy-table", config_class="table")
         .get_dataframe_attributes()
+        .set_refresh()
         .set_table_pagesize()
         .set_table_pagesize_options()
         .set_allow_all_rows()

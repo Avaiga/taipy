@@ -225,7 +225,10 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._values)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
-            ws_dict[_var] = newvalue
+            if isinstance(newvalue, pd.DataFrame):
+                ws_dict[_var + ".refresh"] = True
+            else:
+                ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
@@ -286,7 +289,7 @@ class Gui(object, metaclass=Singleton):
             newvalue = dictret
         # TODO: What if value == newvalue?
         ret_payload["value"] = newvalue
-        self._send_ws_update(var_name, ret_payload)
+        self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
         try:
@@ -297,7 +300,10 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f"Web Socket communication error {e}")
 
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
-        payload = [{"name": get_client_var_name(k), "payload": {"value": v}} for k, v in modified_values.items()]
+        payload = [
+            {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) else {"value": v})}
+            for k, v in modified_values.items()
+        ]
         try:
             self._server._ws.send({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
         except Exception as e:
