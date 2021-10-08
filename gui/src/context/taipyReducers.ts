@@ -10,6 +10,7 @@ enum Types {
     SendUpdate = "SEND_UPDATE_ACTION",
     Action = "SEND_ACTION_ACTION",
     RequestTableUpdate = "REQUEST_TABLE_UPDATE",
+    RequestUpdate = "REQUEST_UPDATE",
     SetLocations = "SET_LOCATIONS",
 }
 
@@ -105,6 +106,8 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                         : newValue,
                 },
             };
+        case Types.SetLocations:
+            return { ...state, locations: action.payload.value as Record<string, string> };
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -117,8 +120,9 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.RequestTableUpdate:
             sendWsMessage(state.socket, "T", action.name, action.payload);
             break;
-        case Types.SetLocations:
-            return { ...state, locations: action.payload.value as Record<string, string> };
+        case Types.RequestUpdate:
+            sendWsMessage(state.socket, "RU", action.name, action.payload);
+            break;
     }
     return state;
 };
@@ -168,6 +172,36 @@ export const createRequestTableUpdateAction = (
     },
 });
 
+export const createRequestUpdateAction = (id: string, names: string[]): TaipyAction => ({
+    type: Types.RequestUpdate,
+    name: "",
+    payload: {
+        id: id,
+        names: names,
+    },
+});
+
+export const createRequestSelectorUpdateAction = (
+    name: string,
+    id: string,
+    pageKey: string,
+    start?: number,
+    end?: number,
+    orderBy?: string,
+    sort?: string
+): TaipyAction => ({
+    type: Types.RequestTableUpdate,
+    name: name,
+    payload: {
+        id: id,
+        pagekey: pageKey,
+        start: start,
+        end: end,
+        orderby: orderBy,
+        sort: sort,
+    },
+});
+
 export const createRequestInfiniteTableUpdateAction = (
     name: string,
     id: string,
@@ -196,7 +230,7 @@ export const createSetLocationsAction = (locations: Record<string, string>): Tai
     payload: { value: locations },
 });
 
-type WsMessageType = "A" | "U" | "T" | "MU";
+type WsMessageType = "A" | "U" | "T" | "MU" | "RU";
 
 interface WsMessage {
     type: WsMessageType;

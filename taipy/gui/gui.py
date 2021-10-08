@@ -65,6 +65,7 @@ class Gui(object, metaclass=Singleton):
         # Load default config
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
+        self._object_to_ui = {}
         self._update_function = None
         self._action_function = None
         # key = expression, value = hashed value of the expression
@@ -220,6 +221,9 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, expr, value)
+        self.__send_var_list_update(modified_vars)
+
+    def __send_var_list_update(self, modified_vars: list):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._values)
@@ -228,6 +232,15 @@ class Gui(object, metaclass=Singleton):
             if isinstance(newvalue, pd.DataFrame):
                 ws_dict[_var + ".refresh"] = True
             else:
+                if isinstance(newvalue, list):
+                    new_list = []
+                    for elt in newvalue:
+                        new_list.append(self._run_object_to_ui(_var, elt))
+                    newvalue = new_list
+                elif isinstance(newvalue, _MapDictionary):
+                    newvalue = self._run_object_to_ui(_var, newvalue)
+                    if isinstance(newvalue, _MapDictionary):
+                        continue  # this var has no transformer
                 ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
@@ -290,6 +303,10 @@ class Gui(object, metaclass=Singleton):
         # TODO: What if value == newvalue?
         ret_payload["value"] = newvalue
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
+
+    def _request_var_update(self, payload):
+        if "names" in payload and isinstance(payload["names"], list):
+            self.__send_var_list_update(payload["names"])
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
         try:
@@ -396,6 +413,17 @@ class Gui(object, metaclass=Singleton):
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(new_partial.route)
         return new_partial
+
+    def add_object_to_ui(self, var_name: str, fn: FunctionType) -> None:
+        self._object_to_ui[var_name] = fn
+
+    def _run_object_to_ui(self, var_name, object):
+        if var_name in self._object_to_ui and self._object_to_ui[var_name]:
+            try:
+                return self._object_to_ui[var_name](object)
+            except Exception as e:
+                warnings.warn(f"Can't run object to ui for {var_name}: {e}")
+        return object
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:

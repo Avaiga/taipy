@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback } from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
@@ -12,7 +12,7 @@ import TextField from "@mui/material/TextField";
 
 import { TaipyImage, TaipyInputProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
-import { createSendUpdateAction } from "../../context/taipyReducers";
+import { createRequestUpdateAction, createSendUpdateAction } from "../../context/taipyReducers";
 
 const boxSx = { width: "100%" };
 const paperSx = { width: "100%", mb: 2 };
@@ -51,14 +51,31 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemPr
     </ListItemButton>
 );
 
+interface LovItem {
+    id: string;
+    item: string | TaipyImage;
+}
+
 interface SelectorProps extends TaipyInputProps {
     lov: Record<string, string | TaipyImage>;
     filter: boolean;
     multiple: boolean;
+    tp_lov: [string, string | TaipyImage][];
 }
 
 const Selector = (props: SelectorProps) => {
-    const { defaultvalue, tp_varname, lov, filter, multiple, className, propagate } = props;
+    const {
+        id,
+        defaultvalue,
+        tp_varname,
+        lov,
+        filter,
+        multiple,
+        className,
+        propagate,
+        tp_lov,
+        tp_updatevars = "",
+    } = props;
     const [selectedValue, setSelectedValue] = useState<string[]>(() => {
         if (multiple && Array.isArray(defaultvalue)) {
             return defaultvalue;
@@ -66,7 +83,20 @@ const Selector = (props: SelectorProps) => {
         return defaultvalue ? [defaultvalue] : [];
     });
     const [searchValue, setSearchValue] = useState("");
+    const [lovList, setLovList] = useState<LovItem[]>([]);
     const { dispatch } = useContext(TaipyContext);
+
+    useEffect(() => {
+        dispatch(createRequestUpdateAction(id, [tp_varname, ...tp_updatevars.split(";").filter((name) => name)]));
+    }, [tp_updatevars]);
+
+    useEffect(() => {
+        if (tp_lov) {
+            setLovList(tp_lov.map((elt) => ({ id: elt[0], item: elt[1] || elt[0] })));
+        } else {
+            setLovList(Object.keys(lov).map((key) => ({ id: key, item: lov[key] })));
+        }
+    }, [tp_lov, lov]);
 
     const clickHandler = useCallback(
         (key: string) => {
@@ -103,38 +133,37 @@ const Selector = (props: SelectorProps) => {
                     <TextField margin="dense" placeholder="Search field" value={searchValue} onChange={handleInput} />
                 )}
                 <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
-                    {lov &&
-                        Object.keys(lov)
-                            .filter(
-                                (key) =>
-                                    !filter ||
-                                    (
-                                        (typeof lov[key] === "string"
-                                            ? (lov[key] as string)
-                                            : (lov[key] as TaipyImage).text) || key
-                                    )
-                                        .toLowerCase()
-                                        .indexOf(searchValue.toLowerCase()) > -1
-                            )
-                            .map((key) =>
-                                multiple ? (
-                                    <MultipleItem
-                                        key={key}
-                                        value={key}
-                                        item={lov[key]}
-                                        selectedValue={selectedValue}
-                                        createClickHandler={createClickHandler}
-                                    />
-                                ) : (
-                                    <SingleItem
-                                        key={key}
-                                        value={key}
-                                        item={lov[key]}
-                                        selectedValue={selectedValue}
-                                        createClickHandler={createClickHandler}
-                                    />
+                    {lovList
+                        .filter(
+                            (elt) =>
+                                !filter ||
+                                (
+                                    (typeof elt.item === "string"
+                                        ? (elt.item as string)
+                                        : (elt.item as TaipyImage).text) || elt.id
                                 )
-                            )}
+                                    .toLowerCase()
+                                    .indexOf(searchValue.toLowerCase()) > -1
+                        )
+                        .map((elt) =>
+                            multiple ? (
+                                <MultipleItem
+                                    key={elt.id}
+                                    value={elt.id}
+                                    item={elt.item}
+                                    selectedValue={selectedValue}
+                                    createClickHandler={createClickHandler}
+                                />
+                            ) : (
+                                <SingleItem
+                                    key={elt.id}
+                                    value={elt.id}
+                                    item={elt.item}
+                                    selectedValue={selectedValue}
+                                    createClickHandler={createClickHandler}
+                                />
+                            )
+                        )}
                 </List>
             </Paper>
         </Box>
