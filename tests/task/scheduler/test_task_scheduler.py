@@ -10,59 +10,79 @@ from taipy.task import Task
 from taipy.task.scheduler import TaskScheduler
 
 
-def mult(nb1: float, nb2: float):
+def multiply(nb1: float, nb2: float):
     return nb1 * nb2
 
 
-def lock_mult(lock, nb1: float, nb2: float):
+def lock_multiply(lock, nb1: float, nb2: float):
     with lock:
-        return mult(nb1, nb2)
+        return multiply(nb1, nb2)
 
 
 def test_scheduled_task():
     task_scheduler = TaskScheduler()
-    task = _create_task_entity(mult)
+    task = _create_task_entity(multiply)
 
     task_scheduler.submit(task)
-    assert task.output["output0"].get(None) == 42
+    assert task.output0.get() == 42
 
 
 def test_scheduled_task_that_return_multiple_outputs():
-    def return_tuple(nb1, nb2):
-        return mult(nb1, nb2), mult(nb1, nb2) / 2
+    def return_2tuple(nb1, nb2):
+        return multiply(nb1, nb2), multiply(nb1, nb2) / 2
 
     def return_list(nb1, nb2):
-        return [mult(nb1, nb2), mult(nb1, nb2) / 2]
+        return [multiply(nb1, nb2), multiply(nb1, nb2) / 2]
 
     task_scheduler = TaskScheduler()
 
-    with_tuple = _create_task_entity(return_tuple, 2)
+    with_tuple = _create_task_entity(return_2tuple, 2)
     with_list = _create_task_entity(return_list, 2)
 
     task_scheduler.submit(with_tuple)
     task_scheduler.submit(with_list)
 
-    assert with_tuple.output["output0"].get(None) == with_list.output["output0"].get(None) == 42
-    assert with_tuple.output["output1"].get(None) == with_list.output["output1"].get(None) == 21
+    assert with_tuple.output0.get() == with_list.output0.get() == 42
+    assert with_tuple.output1.get() == with_list.output1.get() == 21
 
 
-def test_un_writing_data_source_due_difference_between_nb_results_and_nb_data_sources():
+def test_scheduled_task_returns_single_iterable_output():
+    def return_2tuple(nb1, nb2):
+        return multiply(nb1, nb2), multiply(nb1, nb2) / 2
+
+    def return_list(nb1, nb2):
+        return [multiply(nb1, nb2), multiply(nb1, nb2) / 2]
+
     task_scheduler = TaskScheduler()
-    task = _create_task_entity(lambda nb1, nb2: (mult(nb1, nb2), mult(nb1, nb2) / 2))
+    task_with_tuple = _create_task_entity(return_2tuple, 1)
+    task_with_list = _create_task_entity(return_list, 1)
+
+    task_scheduler.submit(task_with_tuple)
+    assert task_with_tuple.output0.get() == (42, 21)
+    task_scheduler.submit(task_with_list)
+    assert task_with_list.output0.get() == [42, 21]
+
+
+def test_data_source_not_written_due_to_wrong_result_nb():
+    def return_2tuple():
+        return lambda nb1, nb2: (multiply(nb1, nb2), multiply(nb1, nb2) / 2)
+
+    task_scheduler = TaskScheduler()
+    task = _create_task_entity(return_2tuple(), 3)
 
     task_scheduler.submit(task)
-    assert task.output["output0"].get(None) == 0
+    assert task.output0.get() == 0
 
 
-def test_error_during_writing_data_source_dont_stop_writing_on_other_data_source():
+def test_error_during_writing_data_source_don_t_stop_writing_on_other_data_source():
     task_scheduler = TaskScheduler()
 
     task = _create_task_entity(lambda nb1, nb2: (42, 21), 2)
-    task.output["output0"].write = None
+    task.output0.write = None
     task_scheduler.submit(task)
 
-    assert task.output["output0"].get(None) == 0
-    assert task.output["output1"].get(None) == 21
+    assert task.output0.get() == 0
+    assert task.output1.get() == 21
 
 
 def test_scheduled_task_in_parallel():
@@ -71,14 +91,14 @@ def test_scheduled_task_in_parallel():
     lock = m.Lock()
 
     task_scheduler = TaskScheduler()
-    task = _create_task_entity(partial(lock_mult, lock))
+    task = _create_task_entity(partial(lock_multiply, lock))
 
     with lock:
         task_scheduler.submit(task)
-        assert task.output["output0"].get(None) == 0
+        assert task.output0.get() == 0
 
     sleep(1)
-    assert task.output["output0"].get(None) == 42
+    assert task.output0.get() == 42
 
 
 def test_scheduled_task_multithreading_multiple_task():
@@ -90,24 +110,24 @@ def test_scheduled_task_multithreading_multiple_task():
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    task_1 = _create_task_entity(partial(lock_mult, lock_1))
-    task_2 = _create_task_entity(partial(lock_mult, lock_2))
+    task_1 = _create_task_entity(partial(lock_multiply, lock_1))
+    task_2 = _create_task_entity(partial(lock_multiply, lock_2))
 
     with lock_1:
         with lock_2:
             task_scheduler.submit(task_1)
             task_scheduler.submit(task_2)
 
-            assert task_1.output["output0"].get(None) == 0
-            assert task_2.output["output0"].get(None) == 0
+            assert task_1.output0.get() == 0
+            assert task_2.output0.get() == 0
 
         sleep(1)
-        assert task_1.output["output0"].get(None) == 0
-        assert task_2.output["output0"].get(None) == 42
+        assert task_1.output0.get() == 0
+        assert task_2.output0.get() == 42
 
     sleep(1)
-    assert task_1.output["output0"].get(None) == 42
-    assert task_2.output["output0"].get(None) == 42
+    assert task_1.output0.get() == 42
+    assert task_2.output0.get() == 42
 
 
 def _create_task_entity(function, nb_outputs=1):
