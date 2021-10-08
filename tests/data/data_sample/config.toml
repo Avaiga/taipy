@@ -1,0 +1,5 @@
+[DATA_MANAGER.default]
+has_header = false
+
+[DATA_MANAGER.foo]
+path = "path_from_config_file"

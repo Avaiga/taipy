@@ -1,6 +1,10 @@
+import os
+import pathlib
+
 import pytest
 
-from taipy.data import DataSourceConfig, Scope
+from taipy.configuration import ConfigurationManager
+from taipy.data import CSVDataSource, DataSourceConfig, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType
@@ -15,10 +19,7 @@ class TestDataManager:
         assert dm.get_data_source_entity(csv_entity_1.id).id == csv_entity_1.id
         assert dm.get_data_source_entity(csv_entity_1.id).name == csv_entity_1.name
         assert dm.get_data_source_entity(csv_entity_1.id).scope == csv_entity_1.scope
-        assert (
-            dm.get_data_source_entity(csv_entity_1.id).properties
-            == csv_entity_1.properties
-        )
+        assert dm.get_data_source_entity(csv_entity_1.id).properties == csv_entity_1.properties
 
         # Test we can instantiate a EmbeddedDataSourceEntity from DataSource
         # with type embedded
@@ -40,6 +41,24 @@ class TestDataManager:
         # data source, a new id is created
         csv_entity_2 = dm.create_data_source_entity(csv_ds)
         assert csv_entity_2.id != csv_entity_1.id
+
+    def test_create_data_source_with_config_file(self):
+        ConfigurationManager.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
+
+        dm = DataManager()
+        csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
+        csv = dm.create_data_source_entity(csv_ds)
+        assert csv.name == "foo"
+        assert isinstance(csv, CSVDataSource)
+        assert csv.path == "path_from_config_file"
+        assert csv.has_header is False
+
+        csv_ds = DataSourceConfig(name="bar", type="csv", path="bar", has_header=True)
+        csv = dm.create_data_source_entity(csv_ds)
+        assert csv.name == "bar"
+        assert isinstance(csv, CSVDataSource)
+        assert csv.path == "bar"
+        assert csv.has_header is False
 
     def test_create_and_fetch(self):
         dm = DataManager()

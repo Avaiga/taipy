@@ -1,10 +1,11 @@
 import logging
 from typing import Dict, List
 
-from taipy.data.data_source_config import DataSourceConfig
-from taipy.data.data_source import DataSource
-from taipy.data.data_source_model import DataSourceModel
+from taipy.configuration import ConfigurationManager
 from taipy.data import CSVDataSource, EmbeddedDataSource
+from taipy.data.data_source import DataSource
+from taipy.data.data_source_config import DataSourceConfig
+from taipy.data.data_source_model import DataSourceModel
 from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 
@@ -32,6 +33,7 @@ class DataManager:
         return self.__DATA_SOURCE_DB[name]
 
     def create_data_source_entity(self, data_source: DataSourceConfig) -> DataSource:
+        data_source &= ConfigurationManager.data_manager_configuration
         try:
             data_source_entity = self.__ENTITY_CLASS_MAP[data_source.type](
                 name=data_source.name,
@@ -39,10 +41,7 @@ class DataManager:
                 properties=data_source.properties,
             )
         except KeyError:
-            logging.error(
-                f"Cannot create Data source entity. "
-                f"Type {data_source.type} does not exist."
-            )
+            logging.error(f"Cannot create Data source entity. " f"Type {data_source.type} does not exist.")
             raise InvalidDataSourceType(data_source.type)
         self.save_data_source_entity(data_source_entity)
         return data_source_entity
@@ -66,14 +65,9 @@ class DataManager:
         )
 
     def get_data_source_entities(self) -> List[DataSource]:
-        return [
-            self.get_data_source_entity(model.id)
-            for model in self.__DATA_SOURCE_MODEL_DB.values()
-        ]
+        return [self.get_data_source_entity(model.id) for model in self.__DATA_SOURCE_MODEL_DB.values()]
 
-    def create_data_source_model(
-        self, id: str, name: str, scope: Scope, type: str, properties: dict
-    ):
+    def create_data_source_model(self, id: str, name: str, scope: Scope, type: str, properties: dict):
         self.__DATA_SOURCE_MODEL_DB[id] = DataSourceModel(
             id,
             name,

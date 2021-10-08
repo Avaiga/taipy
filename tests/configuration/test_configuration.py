@@ -34,18 +34,15 @@ def test_override_default_configuration():
         """
 [TASK]
 parallel_execution = true
-[DATA_MANAGER]
-path = "/data/csv"
+[DATA_MANAGER.default]
 """
     )
 
-    assert ConfigurationManager.data_manager_configuration.path is None
     assert ConfigurationManager.task_scheduler_configuration.parallel_execution is False
     assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution is None
 
     ConfigurationManager.load(tf.filename)
 
-    assert ConfigurationManager.data_manager_configuration.path == "/data/csv"
     assert ConfigurationManager.task_scheduler_configuration.parallel_execution is True
     assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution is None
 
@@ -53,24 +50,26 @@ path = "/data/csv"
 def test_override_default_configuration_with_multiple_configuration():
     config = NamedTemporaryFile(
         """
-[DATA_MANAGER]
+[DATA_MANAGER.default]
+has_header = true
+[DATA_MANAGER.my_datasource]
 path = "/data/csv"
-type = "csv"
+
 [TASK]
 parallel_execution = true
 max_number_of_parallel_execution = 10
     """
     )
 
-    assert ConfigurationManager.data_manager_configuration.path is None
-    assert ConfigurationManager.data_manager_configuration.type is None
     assert ConfigurationManager.task_scheduler_configuration.parallel_execution is False
     assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution is None
 
     ConfigurationManager.load(config.filename)
 
-    assert ConfigurationManager.data_manager_configuration.type == "csv"
-    assert ConfigurationManager.data_manager_configuration.path == "/data/csv"
+    assert ConfigurationManager.data_manager_configuration["my_datasource"]["has_header"] is True
+    assert ConfigurationManager.data_manager_configuration["my_datasource"]["path"] == "/data/csv"
+    with pytest.raises(KeyError):
+        assert ConfigurationManager.data_manager_configuration["my_datasource"]["not_defined"]
     assert ConfigurationManager.task_scheduler_configuration.parallel_execution is True
     assert ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution == 10
 
@@ -81,10 +80,6 @@ def test_node_can_not_appears_twice():
 [TASK]
 parallel_execution = false
 max_number_of_parallel_execution = 40
-
-[DATA_MANAGER]
-path = "/data/csv"
-type = "csv"
 
 [TASK]
 parallel_execution = true
@@ -98,13 +93,11 @@ max_number_of_parallel_execution = 10
 
 def test_write_configuration_file():
     default_config = """
-[DATA_MANAGER]
-path = ""
-type = ""
-
 [TASK]
 parallel_execution = false
 max_number_of_parallel_execution = -1
+
+[DATA_MANAGER.default]
 """.strip()
     tf = NamedTemporaryFile()
 
@@ -112,20 +105,29 @@ max_number_of_parallel_execution = -1
     assert tf.read().strip() == default_config
 
     updated_config = """
-[DATA_MANAGER]
-path = "/data/csv"
-type = ""
-
 [TASK]
 parallel_execution = true
 max_number_of_parallel_execution = -1
+
+[DATA_MANAGER.my_datasource]
+has_header = true
 """.strip()
 
-    ConfigurationManager.data_manager_configuration._path = "/data/csv"
-    ConfigurationManager.task_scheduler_configuration.parallel_execution = True
+    updated_config_exported = """
+[TASK]
+parallel_execution = true
+max_number_of_parallel_execution = -1
+
+[DATA_MANAGER.default]
+
+[DATA_MANAGER.my_datasource]
+has_header = true
+    """.strip()
+
+    ConfigurationManager.load(NamedTemporaryFile(updated_config))
     ConfigurationManager.export(tf.filename)
 
-    assert tf.read().strip() == updated_config
+    assert tf.read().strip() == updated_config_exported
 
 
 def test_configuration_should_be_in_a_node():

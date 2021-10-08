@@ -1,28 +1,26 @@
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from .interface import Configurable
 
 
 @dataclass
 class DataManagerConfiguration(Configurable):
-    _path: str = field(default="")
-    _type: str = field(default="")
+    default_node = "default"
+    properties: Dict[str, Any] = field(default_factory=dict)
+    default_properties: Dict[str, Any] = field(default_factory=dict)
 
-    @property
-    def path(self) -> Optional[str]:
-        return self._path or None
+    def __getitem__(self, node: str) -> Optional[Any]:
+        return self.properties.get(node) or self.default_properties
 
-    @property
-    def type(self) -> Optional[str]:
-        return self._type or None
-
-    def update(self, config):
-        self._path = config.get("path", self._path)
-        self._type = config.get("type", self._type)
+    def update(self, config: Dict):
+        self.default_properties = config.pop(self.default_node, self.default_properties)
+        self.properties = config
+        self.__add_default_values_to_properties()
 
     def export(self):
-        return {
-            "path": self._path,
-            "type": self._type,
-        }
+        return {self.default_node: self.default_properties, **self.properties}
+
+    def __add_default_values_to_properties(self):
+        for k, v in self.properties.items():
+            self.properties[k] = {**self.default_properties, **v}
