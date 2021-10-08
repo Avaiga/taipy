@@ -87,7 +87,7 @@ const ROW_HEIGHT = 65;
 const PAGE_SIZE = 100;
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
-    const { className, id, tp_varname } = props;
+    const { className, id, tp_varname, refresh = false } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
@@ -124,6 +124,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         },
         [orderBy, order]
     );
+
+    useEffect(() => {
+        setRows([]);
+        setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+    }, [refresh]);
 
     const createSortHandler = useCallback(
         (col: string) => (event: React.MouseEvent<unknown>) => {

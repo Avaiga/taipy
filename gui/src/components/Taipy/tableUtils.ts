@@ -49,6 +49,7 @@ export interface TaipyTableProps extends TaipyBaseProps {
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     value: Record<string, Record<string, any>>;
     columns: string;
+    refresh: boolean;
 }
 
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
@@ -64,10 +65,7 @@ export interface TaipyPaginatedTableProps extends TaipyTableProps {
     showAll: boolean;
 }
 
-
-
 export const boxSx = { width: "100%" };
 export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 750 };
 export const tcSx = { maxHeight: "80vh" };
-
