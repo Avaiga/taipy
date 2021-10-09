@@ -22,8 +22,8 @@ class TaskManager:
         self.__TASKS: Dict[(str, TaskConfig)] = {}
 
     def register_task(self, task: TaskConfig):
-        [self.data_manager.register_data_source(data_source) for data_source in task.input]
-        [self.data_manager.register_data_source(data_source) for data_source in task.output]
+        [self.data_manager.register_data_source_config(data_source) for data_source in task.input]
+        [self.data_manager.register_data_source_config(data_source) for data_source in task.output]
         self.__TASKS[task.name] = task
 
     def get_task(self, name: str) -> TaskConfig:
@@ -45,7 +45,7 @@ class TaskManager:
     ) -> Task:
         if data_source_entities is None:
             data_source_entities = {
-                ds: self.data_manager.create_data_source_entity(ds)
+                ds: self.data_manager.create_data_source(ds)
                 for ds in set(itertools.chain(task.input, task.output))
             }
         input_entities = [data_source_entities[input] for input in task.input]
