@@ -60,7 +60,7 @@ class TaskScheduler:
 class _WriteResultInDataSource:
     @classmethod
     def write(cls, outputs: List[DataSource], future: Future):
-        results = cls.__unwrap_task_output(future)
+        results = [future.result()] if len(outputs) == 1 else future.result()
         cls._write(results, outputs)
 
     @classmethod
@@ -77,8 +77,3 @@ class _WriteResultInDataSource:
             output.write(result)
         except Exception as e:
             logging.error(f"Error on writing output {e}")
-
-    @staticmethod
-    def __unwrap_task_output(future: Future) -> Union[List, abc.Iterable]:
-        result = future.result()
-        return result if isinstance(result, abc.Iterable) else [result]
