@@ -31,9 +31,10 @@ class Preprocessor(MdPreprocessor):
     #   If <prop_value> is ommitted:
     #     '<prop_name>' is equivalent to '<prop_name>=true'
     #     'not <prop_name>' is equivalent to '<prop_name>=false'
+    #       'not', 'dont', 'don't' are equivalent in this context
     #  Note 1: 'not <prop_name>=<prop_value>' is an invalid syntax
     #  Note 2: Space characters after the equal sign are significative
-    _PROPERTY_RE = re.compile(r"(not\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
+    _PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
 
     def _make_prop_pair(self, prop_name: str, prop_value: str) -> tuple[str, str]:
         # Un-escape pipe character in property value

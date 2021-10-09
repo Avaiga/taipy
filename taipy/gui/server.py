@@ -3,7 +3,7 @@ import warnings
 import typing as t
 
 import __main__
-from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory
+from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory, abort
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -61,6 +61,7 @@ class Server(Flask):
                     os.path.dirname(__main__.__file__) + os.path.sep + path
                 ):
                     return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
+                abort(404)
 
         # Websocket (handle json message)
         @self._ws.on("message")
