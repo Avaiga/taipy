@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import typing as t
 
 
 class Partial(object):
 
-    __partials = {}
+    __partials: t.Dict[str, Partial] = {}
 
     def __init__(self, markdown: t.Optional[str] = None, markdown_file: t.Optional[str] = None):
         self.index_html = None

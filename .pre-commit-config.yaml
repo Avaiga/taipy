@@ -3,6 +3,12 @@ repos:
     rev: 'v0.910'  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
+        additional_dependencies: [
+                'types-Markdown',
+                'types-python-dateutil',
+                'types-pytz',
+                'types-tzlocal',
+        ]
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.1.10
     hooks:

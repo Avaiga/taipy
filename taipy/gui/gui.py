@@ -1,27 +1,26 @@
+import ast
 import datetime
+import hashlib
 import inspect
 import os
 import pathlib
 import re
 import typing as t
-import hashlib
-import ast
 import warnings
 from operator import attrgetter
-from types import FunctionType, SimpleNamespace
+from types import FrameType, FunctionType, SimpleNamespace
 
 import __main__
 import pandas as pd
 from flask import jsonify, request
 from markdown import Markdown
 
-from .Partial import Partial
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
 from .Page import Page
+from .Partial import Partial
 from .server import Server
-from .wstype import WsType
 from .utils import (
     ISOToDate,
     Singleton,
@@ -31,6 +30,7 @@ from .utils import (
     get_client_var_name,
     get_date_col_str_name,
 )
+from .wstype import WsType
 
 
 class Gui(object, metaclass=Singleton):
@@ -45,7 +45,7 @@ class Gui(object, metaclass=Singleton):
 
     def __init__(
         self,
-        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0]
+        css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
         markdown: t.Optional[str] = None,
@@ -68,17 +68,17 @@ class Gui(object, metaclass=Singleton):
         self._update_function = None
         self._action_function = None
         # key = expression, value = hashed value of the expression
-        self._expr_to_hash = {}
+        self._expr_to_hash: t.Dict[str, str] = {}
         # key = hashed value of the expression, value = expression
-        self._hash_to_expr = {}
+        self._hash_to_expr: t.Dict[str, str] = {}
         # key = variable name of the expression, key = list of related expressions
         # ex: {x + y}
         # "x": ["{x + y}"],
         # "y": ["{x + y}"],
-        self._var_to_expr_list = {}
+        self._var_to_expr_list: t.Dict[str, t.List[str]] = {}
         # key = expression, value = list of related variables
         # "{x + y}": ["x", "y"]
-        self._expr_to_var_list = {}
+        self._expr_to_var_list: t.Dict[str, t.List[str]] = {}
         self._markdown = Markdown(
             extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
         )
@@ -249,7 +249,7 @@ class Gui(object, metaclass=Singleton):
             else:
                 try:
                     start = int(str(payload["start"]), base=10)
-                except Exception as e:
+                except Exception:
                     warnings.warn(f'start should be an int value {payload["start"]}')
                     start = 0
             if isinstance(payload["end"], int):
@@ -323,7 +323,6 @@ class Gui(object, metaclass=Singleton):
                 return
             except Exception as e:
                 warnings.warn(f"on action exception: {e}")
-                pass
         if self._action_function:
             self._action_function(self, id, action)
 
@@ -332,7 +331,7 @@ class Gui(object, metaclass=Singleton):
         This function will execute when the _update_var function is handling
         an expression with only a single variable
         """
-        modified_vars = []
+        modified_vars: t.List[str] = []
         if var_name not in self._var_to_expr_list.keys():
             return modified_vars
         for expr in self._var_to_expr_list[var_name]:
@@ -476,7 +475,7 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def run(self, host=None, port=None, debug=None, load_dotenv=True) -> None:
+    def run(self, host=None, port=None, debug=None) -> None:
         # Check with default config, override only if parameter
         # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
@@ -486,7 +485,9 @@ class Gui(object, metaclass=Singleton):
         if debug is None and self._config.app_config["debug"] is not None:
             debug = self._config.app_config["debug"]
         # Save all local variables of the parent frame (usually __main__)
-        self._locals_bind = inspect.currentframe().f_back.f_locals
+        self._locals_bind: t.Dict[str, t.Any] = t.cast(
+            FrameType, t.cast(FrameType, inspect.currentframe()).f_back
+        ).f_locals
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.index_html for optimization)
         for page_i in self._config.pages:
@@ -510,4 +511,4 @@ class Gui(object, metaclass=Singleton):
         self._server.add_url_rule("/initialize/", view_func=self._render_route)
 
         # Start Flask Server
-        self._server.runWithWS(host=host, port=port, debug=debug, load_dotenv=load_dotenv)
+        self._server.runWithWS(host=host, port=port, debug=debug)

@@ -1,9 +1,9 @@
 import os
-import warnings
 import typing as t
+import warnings
 
 import __main__
-from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory, abort
+from flask import Flask, abort, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -50,18 +50,17 @@ class Server(Flask):
                     app_css="/" + css_file + ".css",
                     title=self._app.title if hasattr(self._app, "title") else "Taipy App",
                 )
-            else:
-                if os.path.isfile(self.static_folder + os.path.sep + path):
-                    return send_from_directory(self.static_folder + os.path.sep, path)
-                # use the path mapping to detect and find resources
-                for k, v in self.__path_mapping.items():
-                    if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
-                        return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
-                if hasattr(__main__, "__file__") and os.path.isfile(
-                    os.path.dirname(__main__.__file__) + os.path.sep + path
-                ):
-                    return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
-                abort(404)
+            if os.path.isfile(self.static_folder + os.path.sep + path):
+                return send_from_directory(self.static_folder + os.path.sep, path)
+            # use the path mapping to detect and find resources
+            for k, v in self.__path_mapping.items():
+                if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
+            if hasattr(__main__, "__file__") and os.path.isfile(
+                os.path.dirname(__main__.__file__) + os.path.sep + path
+            ):
+                return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
+            abort(404)
 
         # Websocket (handle json message)
         @self._ws.on("message")
@@ -99,5 +98,5 @@ class Server(Flask):
     def _direct_render_json(self, data):
         return jsonify(data)
 
-    def runWithWS(self, host=None, port=None, debug=None, load_dotenv=True):
+    def runWithWS(self, host=None, port=None, debug=None):
         self._ws.run(self, host=host, port=port, debug=debug)

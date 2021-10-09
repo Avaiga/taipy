@@ -1,6 +1,7 @@
 import re
+import typing as t
 import warnings
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
@@ -36,15 +37,13 @@ class Preprocessor(MdPreprocessor):
     #  Note 2: Space characters after the equal sign are significative
     _PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
 
-    def _make_prop_pair(self, prop_name: str, prop_value: str) -> tuple[str, str]:
+    def _make_prop_pair(self, prop_name: t.Optional[str], prop_value: str) -> tuple[t.Optional[str], str]:
         # Un-escape pipe character in property value
         return (prop_name, prop_value.replace("\\|", "|"))
 
     def run(self, lines: List[str]) -> List[str]:
-        line_count = 0
         new_lines = []
-        for line in lines:
-            line_count += 1
+        for line_count, line in enumerate(lines, start=1):
             new_line = ""
             last_index = 0
             for m in Preprocessor._CONTROL_RE.finditer(line):

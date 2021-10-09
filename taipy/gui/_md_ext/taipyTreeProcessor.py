@@ -31,13 +31,12 @@ class TaipyTreeprocessor(Treeprocessor):
                     html.tag = html.tag[5:]
                     var_name = html.get("value")
                     value = None
-                    if var_name:
-                        if Gui._get_instance().bind_var(var_name.split(sep=".")[0]):
-                            html.set("value", "{!" + var_name.replace(".", "__") + "!}")
-                            html.set("tp_varname", var_name.replace(".", "__"))
-                            _instance = str(Gui._get_instance()._add_control(var_name))
-                            html.set("key", var_name + str(_instance))
-                            value = attrgetter(var_name)(Gui._get_instance()._values)
+                    if var_name and Gui._get_instance().bind_var(var_name.split(sep=".")[0]):
+                        html.set("value", "{!" + var_name.replace(".", "__") + "!}")
+                        html.set("tp_varname", var_name.replace(".", "__"))
+                        _instance = str(Gui._get_instance()._add_control(var_name))
+                        html.set("key", var_name + str(_instance))
+                        value = attrgetter(var_name)(Gui._get_instance()._values)
                     prop = html.get("properties")
                     if prop and Gui._get_instance().bind_var(prop):
                         prop_dict = getattr(Gui._get_instance(), prop)
