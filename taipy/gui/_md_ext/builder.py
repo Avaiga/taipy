@@ -8,7 +8,7 @@ from types import FunctionType
 import pandas as pd
 from markdown.util import etree
 
-from ..Partial import Partial
+from ..page import Partial
 from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
