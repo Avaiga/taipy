@@ -67,6 +67,7 @@ const Selector = (props: SelectorProps) => {
     const {
         id,
         defaultvalue,
+        value,
         tp_varname,
         lov,
         filter,
@@ -97,6 +98,12 @@ const Selector = (props: SelectorProps) => {
             setLovList(Object.keys(lov).map((key) => ({ id: key, item: lov[key] })));
         }
     }, [tp_lov, lov]);
+
+    useEffect(() => {
+        if (value !== undefined) {
+            setSelectedValue(Array.isArray(value) ? value : [value]);
+        }
+    }, [value]);
 
     const clickHandler = useCallback(
         (key: string) => {

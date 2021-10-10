@@ -237,11 +237,12 @@ class Gui(object, metaclass=Singleton):
                     for elt in newvalue:
                         new_list.append(self._run_object_to_ui(_var, elt))
                     newvalue = new_list
-                elif isinstance(newvalue, _MapDictionary):
+                else:
                     newvalue = self._run_object_to_ui(_var, newvalue)
                     if isinstance(newvalue, _MapDictionary):
                         continue  # this var has no transformer
                 ws_dict[_var] = newvalue
+
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
@@ -420,7 +421,7 @@ class Gui(object, metaclass=Singleton):
     def _run_object_to_ui(self, var_name, object):
         if var_name in self._object_to_ui and self._object_to_ui[var_name]:
             try:
-                return self._object_to_ui[var_name](object)
+                return self._object_to_ui[var_name](object if not isinstance(object, _MapDictionary) else object._dict)
             except Exception as e:
                 warnings.warn(f"Can't run object to ui for {var_name}: {e}")
         return object
@@ -442,10 +443,10 @@ class Gui(object, metaclass=Singleton):
         if (
             isinstance(func_name, str)
             and not hasattr(self, func_name)
-            and func_name in (bind_locals: = self._get_instance()._locals_bind)
-            and isinstance((func: = bind_locals[func_name]), FunctionType)
+            and func_name in (self._get_instance()._locals_bind)
+            and isinstance((self._get_instance()._locals_bind[func_name]), FunctionType)
         ):
-            setattr(self, func_name, func)
+            setattr(self, func_name, self._get_instance()._locals_bind[func_name])
             return True
         return False
 
@@ -468,8 +469,8 @@ class Gui(object, metaclass=Singleton):
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
+        m = Gui.__EXPR_IS_EDGE_CASE.match(expr)
         if m:
-            = Gui.__EXPR_IS_EDGE_CASE.match(expr):
             expr = m.group(1)
             expr_hash = expr if Gui.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
