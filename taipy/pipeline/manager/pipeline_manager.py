@@ -14,8 +14,8 @@ from taipy.exceptions.pipeline import (
     NonExistingPipeline,
     NonExistingPipelineEntity,
 )
-from taipy.pipeline.pipeline_config import PipelineConfig
 from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_config import PipelineConfig
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
 from taipy.task import TaskId
 from taipy.task.manager.task_manager import TaskManager
@@ -48,9 +48,7 @@ class PipelineManager:
             raise err
 
     def get_pipelines(self) -> List[PipelineConfig]:
-        return [
-            self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()
-        ]
+        return [self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()]
 
     def create_pipeline_entity(
         self,
@@ -64,16 +62,9 @@ class PipelineManager:
                     all_ds.add(ds)
                 for ds in task.output:
                     all_ds.add(ds)
-            data_source_entities = {
-                ds: self.data_manager.create_data_source(ds) for ds in all_ds
-            }
-        task_entities = [
-            self.task_manager.create_task_entity(task, data_source_entities)
-            for task in pipeline.tasks
-        ]
-        pipeline_entity = Pipeline(
-            pipeline.name, pipeline.properties, task_entities
-        )
+            data_source_entities = {ds: self.data_manager.create_data_source(ds) for ds in all_ds}
+        task_entities = [self.task_manager.create_task_entity(task, data_source_entities) for task in pipeline.tasks]
+        pipeline_entity = Pipeline(pipeline.name, pipeline.properties, task_entities)
         self.save_pipeline_entity(pipeline_entity)
         return pipeline_entity
 
@@ -84,8 +75,7 @@ class PipelineManager:
         try:
             model = self.__PIPELINE_MODEL_DB[pipeline_id]
             task_entities = [
-                self.task_manager.get_task_entity(TaskId(task_id))
-                for task_id in model.task_source_edges.keys()
+                self.task_manager.get_task_entity(TaskId(task_id)) for task_id in model.task_source_edges.keys()
             ]
             return Pipeline(model.name, model.properties, task_entities, model.id)
         except NonExistingTaskEntity as err:
@@ -97,10 +87,7 @@ class PipelineManager:
             raise pipeline_err
 
     def get_pipeline_entities(self) -> List[Pipeline]:
-        return [
-            self.get_pipeline_entity(model.id)
-            for model in self.__PIPELINE_MODEL_DB.values()
-        ]
+        return [self.get_pipeline_entity(model.id) for model in self.__PIPELINE_MODEL_DB.values()]
 
     def submit(self, pipeline_id: PipelineId):
         pipeline_entity_to_submit = self.get_pipeline_entity(pipeline_id)

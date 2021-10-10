@@ -1,7 +1,8 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from taipy.configuration import ConfigurationManager
+
 from taipy.data import CSVDataSource, EmbeddedDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.data_source_config import DataSourceConfig
@@ -10,7 +11,7 @@ from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 
 """
-A Data Manager is responsible for keeping track and retrieving Taipy DataSources.
+A Data Manager is entity responsible for keeping track and retrieving Taipy DataSources.
 The Data Manager will facilitate data access between Taipy Modules.
 """
 
@@ -22,31 +23,48 @@ class DataManager:
     __DATA_SOURCE_CLASSES = {EmbeddedDataSource, CSVDataSource}
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}
 
+    def __fetch_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
+        data_source_config &= ConfigurationManager.data_manager_configuration
+        return self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](
+            name=data_source_config.name,
+            scope=data_source_config.scope,
+            properties=data_source_config.properties,
+        )
+
+    def __persist_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
+        try:
+            data_source = self.__fetch_data_source(data_source_config)
+        except KeyError:
+            logging.error(f"Cannot create Data source entity. " f"Type {data_source_config.type} does not exist.")
+            raise InvalidDataSourceType(data_source_config.type)
+        self.save_data_source(data_source)
+        self.register_data_source_config(data_source_config)
+        return data_source
+
+    def get_all(self) -> Dict[str, DataSourceConfig]:
+        return self.__DATA_SOURCE_CONFIG_DB
+
     def delete_all(self):
         self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
         self.__DATA_SOURCE_CONFIG_DB: Dict[str, DataSourceConfig] = {}
 
-    def register_data_source_config(self, data_source_config: DataSourceConfig):
-        self.__DATA_SOURCE_CONFIG_DB[data_source_config.name] = data_source_config
+    def register_data_source_config(self, data_source: DataSourceConfig):
+        self.__DATA_SOURCE_CONFIG_DB[data_source.name] = data_source
 
-    def get_data_source_config(self, name) -> DataSourceConfig:
-        return self.__DATA_SOURCE_CONFIG_DB[name]
+    def get_data_source_config(self, name) -> Optional[DataSourceConfig]:
+        return self.__DATA_SOURCE_CONFIG_DB.get(name)
+
+    def get_or_create(self, data_source_config: DataSourceConfig) -> DataSource:
+        ds = self.get_data_source_config(data_source_config.name)
+        if ds is not None and ds.scope > Scope.PIPELINE:
+            return self.__fetch_data_source(data_source_config)
+
+        return self.__persist_data_source(data_source_config)
 
     def create_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
-        data_source_config &= ConfigurationManager.data_manager_configuration
-        try:
-            data_source = self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](
-                name=data_source_config.name,
-                scope=data_source_config.scope,
-                properties=data_source_config.properties,
-            )
-        except KeyError:
-            logging.error(f"Cannot create Data source. " f"Type {data_source_config.type} does not exist.")
-            raise InvalidDataSourceType(data_source_config.type)
-        self.save_data_source(data_source)
-        return data_source
+        return self.__persist_data_source(data_source_config)
 
-    def save_data_source(self, data_source: DataSource):
+    def save_data_source(self, data_source):
         self.create_data_source_model(
             data_source.id,
             data_source.name,

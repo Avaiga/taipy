@@ -1,17 +1,13 @@
 import pytest
 
-from taipy.data import DataSourceConfig
+from taipy.data import DataSourceConfig, EmbeddedDataSource
 from taipy.data.data_source import DataSource
-from taipy.data import EmbeddedDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import (
-    NonExistingPipeline,
-    NonExistingPipelineEntity,
-)
-from taipy.pipeline import PipelineConfig, Pipeline, PipelineId
+from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineEntity
+from taipy.pipeline import Pipeline, PipelineConfig, PipelineId
 from taipy.pipeline.manager import PipelineManager
-from taipy.task import TaskConfig, Task, TaskId, TaskManager
+from taipy.task import Task, TaskConfig, TaskId, TaskManager
 from taipy.task.scheduler import TaskScheduler
 
 
@@ -124,10 +120,7 @@ def test_save_and_get_pipeline_entity():
     pipeline_manager.save_pipeline_entity(pipeline_3_with_same_id)
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert pipeline_manager.get_pipeline_entity(pipeline_id_1).id == pipeline_1.id
-    assert (
-        pipeline_manager.get_pipeline_entity(pipeline_id_1).name
-        == pipeline_3_with_same_id.name
-    )
+    assert pipeline_manager.get_pipeline_entity(pipeline_id_1).name == pipeline_3_with_same_id.name
     assert len(pipeline_manager.get_pipeline_entity(pipeline_id_1).task_entities) == 0
     assert pipeline_manager.get_pipeline_entity(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline_entity(pipeline_id_2).name == pipeline_2.name
@@ -151,13 +144,9 @@ def test_submit():
         TaskId("t1"),
     )
     task_2 = Task("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
-    task_3 = Task(
-        "waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3")
-    )
+    task_3 = Task("waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3"))
     task_4 = Task("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
-    pipeline_entity = Pipeline(
-        "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
-    )
+    pipeline_entity = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
 
     pipeline_manager = PipelineManager()
     task_manager = TaskManager()

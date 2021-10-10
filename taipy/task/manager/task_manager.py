@@ -7,8 +7,8 @@ from taipy.data.data_source_config import DataSourceConfig
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.task import NonExistingTask
-from taipy.task.task_config import TaskConfig
 from taipy.task.task import Task, TaskId
+from taipy.task.task_config import TaskConfig
 
 
 class TaskManager:
@@ -41,15 +41,14 @@ class TaskManager:
         self.task_entities[task.id] = task
 
     def create_task_entity(
-        self, task: TaskConfig, data_source_entities: Optional[Dict[DataSourceConfig, DataSource]] = None
+        self, task: TaskConfig, data_sources: Optional[Dict[DataSourceConfig, DataSource]] = None
     ) -> Task:
-        if data_source_entities is None:
-            data_source_entities = {
-                ds: self.data_manager.create_data_source(ds)
-                for ds in set(itertools.chain(task.input, task.output))
+        if data_sources is None:
+            data_sources = {
+                ds: self.data_manager.get_or_create(ds) for ds in set(itertools.chain(task.input, task.output))
             }
-        input_entities = [data_source_entities[input] for input in task.input]
-        output_entities = [data_source_entities[output] for output in task.output]
+        input_entities = [data_sources[input] for input in task.input]
+        output_entities = [data_sources[output] for output in task.output]
         task_entity = Task(task.name, input_entities, task.function, output_entities)
         self.save_task_entity(task_entity)
         return task_entity
