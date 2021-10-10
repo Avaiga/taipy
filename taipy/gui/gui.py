@@ -289,9 +289,9 @@ class Gui(object, metaclass=Singleton):
                 if "sort" in keys and payload["sort"] == "desc":
                     # reverse order
                     new_indexes = new_indexes[::-1]
-                new_indexes = new_indexes[slice(start, end)]
+                new_indexes = new_indexes[slice(start, end + 1)]
             else:
-                new_indexes = slice(start, end)
+                new_indexes = slice(start, end + 1)
             # here we'll deal with start and end values from payload if present
             newvalue = newvalue.iloc[new_indexes]  # returns a view
             if len(datecols) != 0:
@@ -442,8 +442,8 @@ class Gui(object, metaclass=Singleton):
         if (
             isinstance(func_name, str)
             and not hasattr(self, func_name)
-            and func_name in (bind_locals := self._get_instance()._locals_bind)
-            and isinstance((func := bind_locals[func_name]), FunctionType)
+            and func_name in (bind_locals: = self._get_instance()._locals_bind)
+            and isinstance((func: = bind_locals[func_name]), FunctionType)
         ):
             setattr(self, func_name, func)
             return True
@@ -468,7 +468,8 @@ class Gui(object, metaclass=Singleton):
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
-        if m := Gui.__EXPR_IS_EDGE_CASE.match(expr):
+        if m:
+            = Gui.__EXPR_IS_EDGE_CASE.match(expr):
             expr = m.group(1)
             expr_hash = expr if Gui.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
