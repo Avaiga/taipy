@@ -100,13 +100,7 @@ class Builder:
         return self
 
     def set_default_value(self):
-        if self.element_name == "Input" and self.type_name == "button":
-            self.set_attribute(
-                "value",
-                str(self.value)
-                # self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
-            )
-        elif isinstance(self.value, datetime.datetime):
+        if isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
         elif isinstance(self.value, str):
             self.set_attribute("defaultvalue", self.value)
