@@ -230,7 +230,7 @@ class Builder:
             return self
         if "partial" in self.attributes and self.attributes["partial"]:
             if "page_id" in self.attributes and self.attributes["page_id"]:
-                warnings.warn("Dialog component: page_id and partial should not be defined at the same time")
+                warnings.warn("Dialog control: page_id and partial should not be defined at the same time")
             if isinstance(self.attributes["partial"], Partial):
                 self.attributes["page_id"] = self.attributes["partial"].route
         return self

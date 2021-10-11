@@ -21,7 +21,7 @@ from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
 from .page import Page, Partial
-from .renderer import TemplateRenderer
+from .renderers import PageRenderer
 from .server import Server
 from .utils import (
     ISOToDate,
@@ -33,10 +33,6 @@ from .utils import (
     get_date_col_str_name,
 )
 from .wstype import WsType
-
-# Only import during runtime type checking
-if t.TYPE_CHECKING:
-    from .renderer import Html, Markdown
 
 
 class Gui(object, metaclass=Singleton):
@@ -57,7 +53,7 @@ class Gui(object, metaclass=Singleton):
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        default_page_renderer: t.Optional[t.Union[Html, Markdown]] = None,
+        default_page_renderer: t.Optional[PageRenderer] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
     ):
@@ -114,6 +110,8 @@ class Gui(object, metaclass=Singleton):
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+        if page.rendered_jsx is None:
+            page.render()
         # Return jsx page
         if page.rendered_jsx:
             return self._server.render(
@@ -364,7 +362,7 @@ class Gui(object, metaclass=Singleton):
     def add_page(
         self,
         name: str,
-        renderer: t.Optional[t.Union[Html, Markdown]] = None,
+        renderer: t.Optional[PageRenderer] = None,
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -376,8 +374,8 @@ class Gui(object, metaclass=Singleton):
             )
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
-        if not isinstance(renderer, TemplateRenderer):
-            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid renderer type!')
+        if not isinstance(renderer, PageRenderer):
+            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid PageRenderer')
         # Init a new page
         new_page = Page()
         new_page.route = name
@@ -389,15 +387,15 @@ class Gui(object, metaclass=Singleton):
 
     def add_partial(
         self,
-        renderer: t.Optional[t.Union[Html, Markdown]] = None,
+        renderer: t.Optional[PageRenderer] = None,
     ) -> Partial:
         # Init a new partial
         new_partial = Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
-        if not isinstance(renderer, TemplateRenderer):
-            raise Exception(f'Partial name "{new_partial.route}" has invalid renderer type!')
+        if not isinstance(renderer, PageRenderer):
+            raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
         new_partial.template_renderer = renderer
         # Append partial to _config
         self._config.partials.append(new_partial)
@@ -512,14 +510,12 @@ class Gui(object, metaclass=Singleton):
         ).f_locals
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.rendered_jsx for optimization)
-        for page_i in self._config.pages:
-            page_i.render()
+        for page in self._config.pages:
             # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{page_i.route}/", view_func=self._render_page)
-        for partial_i in self._config.partials:
-            partial_i.render()
+            self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
+        for partial in self._config.partials:
             # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{partial_i.route}/", view_func=self._render_page)
+            self._server.add_url_rule(f"/flask-jsx/{partial.route}/", view_func=self._render_page)
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/initialize/", view_func=self._render_route)
