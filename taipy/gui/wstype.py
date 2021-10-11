@@ -6,3 +6,4 @@ class WsType(Enum):
     MULTIPLE_UPDATE = "MU"
     ACTION = "A"
     TABLE_UPDATE = "T"
+    REQUEST_UPDATE = "RU"

@@ -100,6 +100,7 @@ class Factory:
         .set_lov()
         .set_filter()
         .set_multiple()
+        .set_refresh_on_update("lov")
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,

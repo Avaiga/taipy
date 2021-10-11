@@ -78,6 +78,8 @@ class Server(Flask):
                     self._app._on_action(message["name"], message["payload"])
                 elif message["type"] == WsType.TABLE_UPDATE.value:
                     self._app._request_var(message["name"], message["payload"])
+                elif message["type"] == WsType.REQUEST_UPDATE.value:
+                    self._app._request_var_update(message["payload"])
             except TypeError as te:
                 warnings.warn(f"Decoding Message has failed: {message}\n{te}")
             except KeyError as ke:

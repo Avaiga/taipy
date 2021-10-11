@@ -27,6 +27,7 @@ class Builder:
         self.control_type = control_type
         self.element_name = element_name
         self.attributes = attributes
+        self.__hashes = {}
         self.value = default_value
         self.el = etree.Element(element_name)
         self._gui = Gui._get_instance()
@@ -46,7 +47,7 @@ class Builder:
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.attributes:
-            properties_dict_name = self.__parse_attribute_value(self.attributes["properties"])
+            (properties_dict_name, _) = self.__parse_attribute_value(self.attributes["properties"])
             self._gui.bind_var(properties_dict_name)
             properties_dict = getattr(self._gui, properties_dict_name)
             if not isinstance(properties_dict, _MapDictionary):
@@ -60,23 +61,26 @@ class Builder:
 
         # Bind potential function in self.attributes
         for k, v in self.attributes.items():
-            v = self.__parse_attribute_value(v)
-            if isinstance(v, str):
+            (val, hashname) = self.__parse_attribute_value(v)
+            if isinstance(val, str):
                 # Bind potential function
-                self._gui.bind_func(v)
+                self._gui.bind_func(val)
             # Try to evaluate as expressions
-            if v is not None:
-                self.attributes[k] = v
+            if val is not None:
+                self.attributes[k] = val
+            if hashname:
+                self.__hashes[k] = hashname
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
         return str(x)
 
-    def __parse_attribute_value(self, value):
+    def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self._gui._is_expression(value):
             hash_value = self._gui._fetch_expression_list(value)[0]
-            return attrgetter(hash_value)(self._gui._values)
-        return value
+            self._gui.bind_var(hash_value)
+            return (attrgetter(hash_value)(self._gui._values), hash_value)
+        return (value, None)
 
     def __get_id_label(self, elt, getter, idx):
         ret = getter(elt)
@@ -194,13 +198,7 @@ class Builder:
         return self
 
     def set_default_value(self):
-        if self.element_name == "Input" and self.type_name == "button":
-            self.set_attribute(
-                "value",
-                str(self.value)
-                # self.attributes["label"] if self.attributes and "label" in self.attributes else str(self.value),
-            )
-        elif isinstance(self.value, datetime.datetime):
+        if isinstance(self.value, datetime.datetime):
             self.set_attribute("defaultvalue", dateToISO(self.value))
         elif isinstance(self.value, str):
             self.set_attribute("defaultvalue", self.value)
@@ -331,6 +329,19 @@ class Builder:
 
     def set_open(self):
         return self.__set_boolean_attribute("open")
+
+    def set_refresh_on_update(self, name=None):
+        if name:
+            if not isinstance(name, (tuple, list)):
+                name = [name]
+            name_list = []
+            for nm in name:
+                varname = self.__hashes[nm] if nm in self.__hashes else None
+                if varname:
+                    name_list.append(varname)
+                self.__set_react_attribute("tp_" + nm, varname)
+            self.set_attribute("tp_updatevars", ";".join(name_list))
+        return self
 
     def set_cancel_action(self):
         return self.__set_string_attribute("cancel_action")

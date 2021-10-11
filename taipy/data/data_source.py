@@ -9,16 +9,16 @@ from taipy.data.scope import Scope
 class DataSource:
     """
     A class to represent a Data Source. A Data Source is an object that holds the name,
-    scope and additional properties of the data entity.
+    scope and additional properties of the data.
 
     Attributes
     ----------
     id: str
-        unique identifier of the data entity
+        unique identifier of the data source
     name: str
-        name that identifies the data entity
+        name that identifies the data source
     scope: int
-        number that refers to the scope of usage of the data entity
+        number that refers to the scope of usage of the data source
     properties: list
         list of additional arguments
     """
@@ -57,9 +57,6 @@ class DataSource:
 
     @abstractmethod
     def write(self, data):
-        """
-        Temporary function interface, will be remove
-        """
         return NotImplemented
 
     def to_json(self):

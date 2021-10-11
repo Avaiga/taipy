@@ -15,9 +15,9 @@ class CSVDataSource(DataSource):
     Attributes
     ----------
     name: str
-        name that identifies the data entity
+        name that identifies the data source config
     scope: int
-        number that refers to the scope of usage of the data entity
+        number that refers to the scope of usage of the data source
     properties: list
         list of additional arguments
     """

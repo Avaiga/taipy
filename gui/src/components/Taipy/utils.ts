@@ -5,6 +5,7 @@ export interface TaipyBaseProps {
     className?: string;
     value: unknown;
     propagate: boolean;
+    tp_updatevars: string;
 }
 
 export interface TaipyFieldProps extends TaipyBaseProps {

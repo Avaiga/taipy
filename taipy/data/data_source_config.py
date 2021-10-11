@@ -1,4 +1,3 @@
-from taipy.configuration import ConfigurationManager
 from taipy.configuration.data_manager_configuration import DataManagerConfiguration
 from taipy.data.scope import Scope
 

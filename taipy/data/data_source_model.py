@@ -15,7 +15,7 @@ class DataSourceModel:
     id: int
         identifier of a DataSource
     name: int
-        name of the DataSource
+        name of the DataSourceConfig
     scope: taipy.data.source.scope.Scope
         scope of usage of a DataSource
     type: str

@@ -57,7 +57,7 @@ class ScenarioManager:
                     for ds in task.output:
                         all_ds.add(ds)
             ds_entities = {
-                data_source: self.data_manager.create_data_source_entity(data_source)
+                data_source: self.data_manager.create_data_source(data_source)
                 for data_source in all_ds
             }
         p_entities = [

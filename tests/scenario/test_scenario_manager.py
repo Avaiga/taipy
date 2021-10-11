@@ -284,14 +284,14 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     scenario = ScenarioConfig("Awesome scenario", [pipeline_1, pipeline_2])
     scenario_manager.register_scenario(scenario)
 
-    assert len(data_manager.get_data_source_entities()) == 0
+    assert len(data_manager.get_data_sources()) == 0
     assert len(task_manager.task_entities) == 0
     assert len(pipeline_manager.get_pipeline_entities()) == 0
     assert len(scenario_manager.get_scenario_entities()) == 0
 
     scenario_entity = scenario_manager.create_scenario_entity(scenario)
 
-    assert len(data_manager.get_data_source_entities()) == 4
+    assert len(data_manager.get_data_sources()) == 4
     assert len(task_manager.task_entities) == 3
     assert len(pipeline_manager.get_pipeline_entities()) == 2
     assert len(scenario_manager.get_scenario_entities()) == 1

@@ -3,7 +3,6 @@ from typing import Any, Dict, Optional
 
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
-from taipy.exceptions import MissingRequiredProperty
 
 
 class EmbeddedDataSource(DataSource):
