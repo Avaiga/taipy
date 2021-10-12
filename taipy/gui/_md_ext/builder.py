@@ -75,11 +75,17 @@ class Builder:
             if hashname:
                 self.__hashes[k] = hashname
         # define a unique key
-        self.__set_key()
+        self.set_attribute("key", Builder._get_key(self.expr))
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
         return str(x)
+
+    @staticmethod
+    def _get_key(name: str) -> str:
+        key_index = _get_dict_value(Builder.__keys, name)
+        Builder.__keys[name] = (key_index if key_index else 0) + 1
+        return name + "." + (str(key_index) if key_index else "0")
 
     def __get_list_of_(self, name: str):
         lof = _get_dict_value(self.attributes, name)
@@ -109,11 +115,6 @@ class Builder:
 
     def __set_json_attribute(self, name, value):
         return self.set_attribute(name, json.dumps(value, cls=TaipyJsonEncoder))
-
-    def __set_key(self):
-        key_index = _get_dict_value(Builder.__keys, self.expr)
-        self.set_attribute("key", self.expr + "." + (str(key_index) if key_index else "0"))
-        Builder.__keys[self.expr] = (key_index if key_index else 0) + 1
 
     def __set_list_of_(self, name: str):
         lof = self.__get_list_of_(name)

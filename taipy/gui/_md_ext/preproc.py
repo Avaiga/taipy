@@ -5,6 +5,8 @@ from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
+from .builder import Builder
+
 
 class Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
@@ -26,6 +28,8 @@ class Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
     # Control in Markdown
     _CONTROL_RE = re.compile(r"<\|(.*?)\|>")
+    # Link in Markdown
+    _LINK_RE = re.compile(r"(\[[^\]]*?\]\([^\)]*?\))")
     # Split properties and control type
     _SPLIT_RE = re.compile(r"(?<!\\\\)\|")
     # Property syntax: '<prop_name>[=<prop_value>]'
@@ -55,9 +59,21 @@ class Preprocessor(MdPreprocessor):
                 new_line += ":tAiPy"
                 last_index = m.end()
             if last_index == 0:
-                new_lines.append(line)
+                new_line = line
             else:
-                new_lines.append(new_line + line[last_index:])
+                new_line = new_line + line[last_index:]
+            line = new_line
+            new_line = ""
+            last_index = 0
+            for m in Preprocessor._LINK_RE.finditer(line):
+                new_line += line[last_index : m.end()]
+                new_line += "{: key=" + Builder._get_key("link") + "}"
+                last_index = m.end()
+            if last_index == 0:
+                new_line = line
+            else:
+                new_line = new_line + line[last_index:]
+            new_lines.append(new_line)
         return new_lines
 
     def _process_control(self, m: re.Match, line_count: int) -> Tuple[str, Any]:
