@@ -48,7 +48,7 @@ class Gui(object, metaclass=Singleton):
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
-    _markdown = md_lib.Markdown(extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"])
+    _markdown = md_lib.Markdown(extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"])
 
     def __init__(
         self,
