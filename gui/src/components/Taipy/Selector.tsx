@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
+import React, { useState, useContext, useCallback, useEffect, useMemo } from "react";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
@@ -57,53 +57,66 @@ interface LovItem {
 }
 
 interface SelectorProps extends TaipyInputProps {
-    lov: Record<string, string | TaipyImage>;
+    defaultLov: string;
     filter: boolean;
     multiple: boolean;
-    tp_lov: [string, string | TaipyImage][];
+    lov: [string, string | TaipyImage][];
 }
 
 const Selector = (props: SelectorProps) => {
     const {
         id,
-        defaultvalue,
+        defaultValue,
         value,
         tp_varname,
-        lov,
+        defaultLov,
         filter,
         multiple,
         className,
         propagate,
-        tp_lov,
+        lov,
         tp_updatevars = "",
     } = props;
-    const [selectedValue, setSelectedValue] = useState<string[]>(() => {
-        if (multiple && Array.isArray(defaultvalue)) {
-            return defaultvalue;
-        }
-        return defaultvalue ? [defaultvalue] : [];
-    });
     const [searchValue, setSearchValue] = useState("");
-    const [lovList, setLovList] = useState<LovItem[]>([]);
+    const [selectedValue, setSelectedValue] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
 
     useEffect(() => {
         dispatch(createRequestUpdateAction(id, [tp_varname, ...tp_updatevars.split(";").filter((name) => name)]));
-    }, [tp_updatevars]);
+    }, [tp_updatevars, dispatch, id, tp_varname]);
 
-    useEffect(() => {
-        if (tp_lov) {
-            setLovList(tp_lov.map((elt) => ({ id: elt[0], item: elt[1] || elt[0] })));
-        } else {
-            setLovList(Object.keys(lov).map((key) => ({ id: key, item: lov[key] })));
+    const lovList: LovItem[] = useMemo(() => {
+        if (lov) {
+            if (lov.length && lov[0][0] === undefined) {
+                console.debug("Selector tp_lov wrong format ", lov);
+                return [];
+            }
+            return lov.map((elt) => ({ id: elt[0], item: elt[1] || elt[0] }));
+        } else if (defaultLov) {
+            let parsedLov;
+            try {
+                parsedLov = JSON.parse(defaultLov);
+            } catch (e) {
+                parsedLov = lov as unknown as string[];
+            }
+            return parsedLov.map((elt: [string, string | TaipyImage]) => ({ id: elt[0], item: elt[1] || elt[0] }));
         }
-    }, [tp_lov, lov]);
+        return [];
+    }, [defaultLov, lov]);
 
     useEffect(() => {
         if (value !== undefined) {
             setSelectedValue(Array.isArray(value) ? value : [value]);
+        } else if (defaultValue) {
+            let parsedValue;
+            try {
+                parsedValue = JSON.parse(defaultValue);
+            } catch (e) {
+                parsedValue = defaultValue;
+            }
+            setSelectedValue(Array.isArray(parsedValue) ? parsedValue : [parsedValue]);
         }
-    }, [value]);
+    }, [defaultValue, value]);
 
     const clickHandler = useCallback(
         (key: string) => {

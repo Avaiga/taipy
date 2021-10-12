@@ -23,6 +23,7 @@ from .config import GuiConfig
 from .page import Page, Partial
 from .renderers import PageRenderer
 from .server import Server
+from .taipyimage import TaipyImage
 from .utils import (
     ISOToDate,
     Singleton,
@@ -31,6 +32,7 @@ from .utils import (
     dateToISO,
     get_client_var_name,
     get_date_col_str_name,
+    _get_dict_value,
 )
 from .wstype import WsType
 
@@ -69,7 +71,9 @@ class Gui(object, metaclass=Singleton):
         # Load default config
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
-        self._object_to_ui: t.Dict[t.Any, t.Any] = {}
+        self._adapter_for_type: dict(str, FunctionType) = {}
+        self._type_for_variable: dict(str, str) = {}
+        self._list_for_variable: dict(str, str) = {}
         self._update_function = None
         self._action_function = None
         # key = expression, value = hashed value of the expression
@@ -220,11 +224,11 @@ class Gui(object, metaclass=Singleton):
             else:
                 if isinstance(newvalue, list):
                     new_list = []
-                    for elt in newvalue:
-                        new_list.append(self._run_object_to_ui(_var, elt))
+                    for idx, elt in enumerate(newvalue):
+                        new_list.append(self._run_adapter_for_var(_var, elt, idx))
                     newvalue = new_list
                 else:
-                    newvalue = self._run_object_to_ui(_var, newvalue)
+                    newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
                     if isinstance(newvalue, _MapDictionary):
                         continue  # this var has no transformer
                 ws_dict[_var] = newvalue
@@ -402,16 +406,80 @@ class Gui(object, metaclass=Singleton):
         self._config.partial_routes.append(new_partial.route)
         return new_partial
 
-    def add_object_to_ui(self, var_name: str, fn: FunctionType) -> None:
-        self._object_to_ui[var_name] = fn
+    def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
+        self._list_for_variable[var_name] = list_name
 
-    def _run_object_to_ui(self, var_name, object):
-        if var_name in self._object_to_ui and self._object_to_ui[var_name]:
-            try:
-                return self._object_to_ui[var_name](object if not isinstance(object, _MapDictionary) else object._dict)
-            except Exception as e:
-                warnings.warn(f"Can't run object to ui for {var_name}: {e}")
-        return object
+    def add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
+        self._adapter_for_type[type_name] = adapter
+
+    def add_type_for_var(self, var_name: str, type_name: str) -> None:
+        self._type_for_variable[var_name] = type_name
+
+    def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
+        return _get_dict_value(self._adapter_for_type, type_name)
+
+    def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[int] = None, id_only=False) -> t.Any:
+        adapter = None
+        type_name = _get_dict_value(self._type_for_variable, var_name)
+        if not isinstance(type_name, str):
+            adapter = _get_dict_value(self._adapter_for_type, var_name)
+            if isinstance(adapter, FunctionType):
+                type_name = var_name
+            else:
+                type_name = type(value).__name__
+        if adapter is None:
+            adapter = _get_dict_value(self._adapter_for_type, type_name)
+        if isinstance(adapter, FunctionType):
+            ret = self._run_adapter(adapter, value, var_name, index, id_only)
+            if ret is not None:
+                return ret
+        return value
+
+    def _run_adapter(
+        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[int], id_only=False
+    ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
+        try:
+            result = adapter(value if not isinstance(value, _MapDictionary) else value._dict)
+            result = self._get_valid_adapter_result(result, index, id_only)
+            if result is None:
+                warnings.warn(
+                    f"Adapter for {var_name} does not return a valid result. It should return a type (id, label) or a label with label being a string or a TaipyImage instance"
+                )
+            else:
+                return result
+        except Exception as e:
+            warnings.warn(f"Can't run adapter for {var_name}: {e}")
+        return None
+
+    def _get_valid_adapter_result(
+        self, value: t.Any, index: t.Optional[int], id_only=False
+    ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
+        if (
+            isinstance(value, tuple)
+            and len(value) == 2
+            and isinstance(value[0], str)
+            and isinstance(value[1], (str, TaipyImage))
+        ):
+            if id_only:
+                return value[0]
+            else:
+                return (value[0], TaipyImage.get_dict_or(value[1]))
+        elif isinstance(value, (str, TaipyImage)):
+            if id_only:
+                return self._get_id(value, index)
+            else:
+                return (self._get_id(value, index), TaipyImage.get_dict_or(value))
+        return None
+
+    def _get_id(self, value: t.Any, index: t.Optional[int]) -> str:
+        if hasattr(value, "id"):
+            return str(value.id)
+        elif hasattr(value, "__getitem__") and "id" in value:
+            return str(value["id"])
+        elif index is not None:
+            return str(index)
+        else:
+            return id(value)
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:

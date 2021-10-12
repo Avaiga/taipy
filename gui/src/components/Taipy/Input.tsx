@@ -8,7 +8,7 @@ import { TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
     const { className, type, id, tp_varname, actionName } = props;
-    const [value, setValue] = useState(props.defaultvalue);
+    const [value, setValue] = useState(props.defaultValue);
     const { dispatch } = useContext(TaipyContext);
 
     const handleInput = useCallback(
@@ -20,7 +20,7 @@ const Input = (props: TaipyInputProps) => {
     );
 
     const handleClick = useCallback(() => {
-        dispatch(createSendActionNameAction(id, actionName));
+        dispatch(createSendActionNameAction(id || "", actionName));
     }, [id, actionName, dispatch]);
 
     useEffect(() => {
