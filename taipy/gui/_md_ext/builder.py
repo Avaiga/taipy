@@ -15,6 +15,9 @@ from .jsonencoder import TaipyJsonEncoder
 
 
 class Builder:
+
+    __keys: dict[str, int] = {}
+
     def __init__(
         self,
         control_type,
@@ -71,6 +74,8 @@ class Builder:
                 self.attributes[k] = val
             if hashname:
                 self.__hashes[k] = hashname
+        # define a unique key
+        self.__set_key()
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
@@ -79,7 +84,8 @@ class Builder:
     def __get_list_of_(self, name: str):
         lof = _get_dict_value(self.attributes, name)
         if isinstance(lof, str):
-            lof = [(s.strip(), s) for s in lof.split(";")]
+            self.from_string = True
+            lof = [(s, s) for s in lof.split(";")]
         return lof
 
     def __parse_attribute_value(self, value) -> t.Tuple:
@@ -103,6 +109,11 @@ class Builder:
 
     def __set_json_attribute(self, name, value):
         return self.set_attribute(name, json.dumps(value, cls=TaipyJsonEncoder))
+
+    def __set_key(self):
+        key_index = _get_dict_value(Builder.__keys, self.expr)
+        self.set_attribute("key", self.expr + "." + (str(key_index) if key_index else "0"))
+        Builder.__keys[self.expr] = (key_index if key_index else 0) + 1
 
     def __set_list_of_(self, name: str):
         lof = self.__get_list_of_(name)
@@ -130,6 +141,7 @@ class Builder:
 
     def get_adapter(self, property_name: str):
         lov = self.__get_list_of_(property_name)
+        from_string = hasattr(self, "from_string") and self.from_string
         if isinstance(lov, list):
             adapter = self.attributes and _get_dict_value(self.attributes, "adapter")
             if not isinstance(adapter, FunctionType):
@@ -150,28 +162,28 @@ class Builder:
                 else:
                     elt = lov[0]
                 var_type = type(elt).__name__ if elt is not None else None
-            if var_type in ("str", "int", "dict", "float", "list", "tuple", "bool", "complex", "range"):
-                warnings.warn("Selector adapter needs a type parameter")
-            else:
+            if adapter is None:
+                adapter = self._gui._get_adapter_for_type(var_type)
+            lov_name = _get_dict_value(self.__hashes, property_name)
+            if lov_name:
                 if adapter is None:
-                    adapter = self._gui._get_adapter_for_type(var_type)
-                lov_name = _get_dict_value(self.__hashes, property_name)
-                if lov_name:
-                    if adapter is None:
-                        adapter = self._gui._get_adapter_for_type(lov_name)
-                    else:
-                        self._gui.add_type_for_var(lov_name, var_type)
-                value_name = _get_dict_value(self.__hashes, "value")
-                if value_name:
-                    if adapter is None:
-                        adapter = self._gui._get_adapter_for_type(value_name)
-                    else:
-                        self._gui.add_type_for_var(value_name, var_type)
-                if adapter is not None:
-                    self._gui.add_adapter_for_type(var_type, adapter)
+                    adapter = self._gui._get_adapter_for_type(lov_name)
+                else:
+                    self._gui.add_type_for_var(lov_name, var_type)
+            value_name = _get_dict_value(self.__hashes, "value")
+            if value_name:
+                if adapter is None:
+                    adapter = self._gui._get_adapter_for_type(value_name)
+                else:
+                    self._gui.add_type_for_var(value_name, var_type)
+            if adapter is not None:
+                self._gui.add_adapter_for_type(var_type, adapter)
 
             if adapter is None:
-                adapter = lambda x: str(x)
+                if from_string:
+                    adapter = lambda x: (x, x)
+                else:
+                    adapter = lambda x: str(x)
 
             ret_list = []
             if len(lov) > 0:
@@ -185,20 +197,16 @@ class Builder:
                     ret_list = lov
             self.attributes["default_lov"] = ret_list
 
-            if not isinstance(self.value, str):
-                ret_list = []
-                if isinstance(self.value, list):
-                    val_list = self.value
-                else:
-                    val_list = [self.value]
-                for val in val_list:
-                    if isinstance(val, str):
-                        ret_list.append(val)
-                    else:
-                        ret = self._gui._run_adapter(adapter, val, adapter.__name__, -1, id_only=True)
-                        if ret is not None:
-                            ret_list.append(ret)
-                self.set_default_value(ret_list)
+            ret_list = []
+            if isinstance(self.value, list):
+                val_list = self.value
+            else:
+                val_list = [self.value]
+            for val in val_list:
+                ret = self._gui._run_adapter(adapter, val, adapter.__name__, -1, id_only=True)
+                if ret is not None:
+                    ret_list.append(ret)
+            self.set_default_value(ret_list)
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
@@ -227,10 +235,6 @@ class Builder:
         if self.element_name != "Input" or self.type_name != "button":
             return self
         self.set_id()
-        if self.attributes and "id" in self.attributes:
-            self.set_attribute("key", self.attributes["id"])
-        elif self.has_evaluated:
-            self.set_attribute("key", self.expr_hash)
         if self.attributes and "on_action" in self.attributes:
             self.set_attribute("actionName", self.attributes["on_action"])
         else:
@@ -272,7 +276,6 @@ class Builder:
 
     def set_expresion_hash(self):
         if self.has_evaluated:
-            self.set_attribute("key", self.expr_hash)
             self.__set_react_attribute(
                 "value",
                 get_client_var_name(self.expr_hash),

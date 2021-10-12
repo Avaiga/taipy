@@ -172,15 +172,23 @@ class Gui(object, metaclass=Singleton):
         if not name.isidentifier():
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(Gui, name, _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)))
             setattr(self._values, name, _MapDictionary(value))
         else:
-            prop = property(
-                lambda s: getattr(s._values, name),  # Getter
-                lambda s, v: s._update_var(name, v),  # Setter
-            )
-            setattr(Gui, name, prop)
             setattr(self._values, name, value)
+        prop = property(
+            lambda s: getattr(s._values, name),  # Getter
+            self.__value_setter(name),  # Setter
+        )
+        setattr(Gui, name, prop)
+
+    def __value_setter(self, name):
+        def __setter(elt: Gui, value: t.Any)->None:
+            if isinstance(value, dict):
+                elt._update_var(name, _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)))
+            else:
+                elt._update_var(name, value)
+        return __setter
+
 
     def _update_var(self, var_name: str, value, propagate=True) -> None:
         # Check if Variable is type datetime
