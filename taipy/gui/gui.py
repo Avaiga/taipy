@@ -1,27 +1,28 @@
+from __future__ import annotations
+
+import ast
 import datetime
+import hashlib
 import inspect
 import os
 import pathlib
 import re
 import typing as t
-import hashlib
-import ast
 import warnings
 from operator import attrgetter
-from types import FunctionType, SimpleNamespace
+from types import FrameType, FunctionType, SimpleNamespace
 
 import __main__
+import markdown as md_lib
 import pandas as pd
 from flask import jsonify, request
-from markdown import Markdown
 
-from .Partial import Partial
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
-from .Page import Page
+from .page import Page, Partial
+from .renderers import PageRenderer
 from .server import Server
-from .wstype import WsType
 from .utils import (
     ISOToDate,
     Singleton,
@@ -31,6 +32,7 @@ from .utils import (
     get_client_var_name,
     get_date_col_str_name,
 )
+from .wstype import WsType
 
 
 class Gui(object, metaclass=Singleton):
@@ -43,13 +45,15 @@ class Gui(object, metaclass=Singleton):
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
+    # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
+    _markdown = md_lib.Markdown(extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"])
+
     def __init__(
         self,
-        css_file: t.Optional[str] = os.path.splitext(os.path.basename(__main__.__file__))[0]
+        css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        markdown: t.Optional[str] = None,
-        markdown_file: t.Optional[str] = None,
+        default_page_renderer: t.Optional[PageRenderer] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
     ):
@@ -65,44 +69,32 @@ class Gui(object, metaclass=Singleton):
         # Load default config
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
-        self._object_to_ui = {}
+        self._object_to_ui: t.Dict[t.Any, t.Any] = {}
         self._update_function = None
         self._action_function = None
         # key = expression, value = hashed value of the expression
-        self._expr_to_hash = {}
+        self._expr_to_hash: t.Dict[str, str] = {}
         # key = hashed value of the expression, value = expression
-        self._hash_to_expr = {}
+        self._hash_to_expr: t.Dict[str, str] = {}
         # key = variable name of the expression, key = list of related expressions
         # ex: {x + y}
         # "x": ["{x + y}"],
         # "y": ["{x + y}"],
-        self._var_to_expr_list = {}
+        self._var_to_expr_list: t.Dict[str, t.List[str]] = {}
         # key = expression, value = list of related variables
         # "{x + y}": ["x", "y"]
-        self._expr_to_var_list = {}
-        self._markdown = Markdown(
-            extensions=["taipy.gui", "fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list"]
-        )
-        if markdown:
-            self.add_page(name=Gui.__root_page_name, markdown=markdown)
-        if markdown_file:
-            if markdown:
-                raise Exception(
-                    "Cannot specify both markdown and markdown_file parameters. Consider using the pages parameter."
-                )
-            self.add_page(name=Gui.__root_page_name, markdown_file=markdown_file)
+        self._expr_to_var_list: t.Dict[str, t.List[str]] = {}
+        if default_page_renderer:
+            self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
         if pages:
             for k, v in pages.items():
                 if k == "/":
                     k = Gui.__root_page_name
-                self.add_page(name=k, markdown=str(v))
+                self.add_page(name=k, renderer=v)
 
     @staticmethod
-    def _get_instance():
+    def _get_instance() -> Gui:
         return Gui._instances[Gui]
-
-    def _parse_markdown(self, text: str) -> str:
-        return self._markdown.convert(text)
 
     def _render_page(self) -> t.Any:
         page = None
@@ -118,24 +110,18 @@ class Gui(object, metaclass=Singleton):
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-        # Render template (for redundancy, not necessary 'cause it has already
-        # been rendered in self.run function)
-        if not page.index_html:
-            if page.md_template:
-                page.index_html = self._parse_markdown(page.md_template)
-            elif page.md_template_file:
-                with open(page.md_template_file, "r") as f:
-                    page.index_html = self._parse_markdown(f.read())
+        if page.rendered_jsx is None:
+            page.render()
         # Return jsx page
-        if page.index_html:
+        if page.rendered_jsx:
             return self._server.render(
-                page.index_html,
+                page.rendered_jsx,
                 page.style if hasattr(page, "style") else "",
             )
         else:
             return "No page template"
 
-    def _render_route(self):
+    def _render_route(self) -> t.Any:
         # Generate router
         routes = self._config.routes
         locations = {}
@@ -246,7 +232,7 @@ class Gui(object, metaclass=Singleton):
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
-    def _request_var(self, var_name, payload) -> None:
+    def _request_var(self, var_name: str, payload: t.Any) -> None:
         ret_payload = {}
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._expr_to_hash[var_name]
@@ -263,7 +249,7 @@ class Gui(object, metaclass=Singleton):
             else:
                 try:
                     start = int(str(payload["start"]), base=10)
-                except Exception as e:
+                except Exception:
                     warnings.warn(f'start should be an int value {payload["start"]}')
                     start = 0
             if isinstance(payload["end"], int):
@@ -327,7 +313,7 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
-    def _on_action(self, id, action):
+    def _on_action(self, id: t.Optional[str], action: str) -> None:
         if action:
             try:
                 action_function = getattr(self, action)
@@ -341,7 +327,6 @@ class Gui(object, metaclass=Singleton):
                 return
             except Exception as e:
                 warnings.warn(f"on action exception: {e}")
-                pass
         if self._action_function:
             self._action_function(self, id, action)
 
@@ -350,7 +335,7 @@ class Gui(object, metaclass=Singleton):
         This function will execute when the _update_var function is handling
         an expression with only a single variable
         """
-        modified_vars = []
+        modified_vars: t.List[str] = []
         if var_name not in self._var_to_expr_list.keys():
             return modified_vars
         for expr in self._var_to_expr_list[var_name]:
@@ -377,8 +362,7 @@ class Gui(object, metaclass=Singleton):
     def add_page(
         self,
         name: str,
-        markdown: t.Optional[str] = None,
-        markdown_file: t.Optional[str] = None,
+        renderer: t.Optional[PageRenderer] = None,
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -390,11 +374,12 @@ class Gui(object, metaclass=Singleton):
             )
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
+        if not isinstance(renderer, PageRenderer):
+            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid PageRenderer')
         # Init a new page
         new_page = Page()
         new_page.route = name
-        new_page.md_template = markdown
-        new_page.md_template_file = markdown_file
+        new_page.template_renderer = renderer
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)
@@ -402,14 +387,16 @@ class Gui(object, metaclass=Singleton):
 
     def add_partial(
         self,
-        markdown: t.Optional[str] = None,
-        markdown_file: t.Optional[str] = None,
+        renderer: t.Optional[PageRenderer] = None,
     ) -> Partial:
         # Init a new partial
-        new_partial = Partial(markdown=markdown, markdown_file=markdown_file)
+        new_partial = Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
+        if not isinstance(renderer, PageRenderer):
+            raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
+        new_partial.template_renderer = renderer
         # Append partial to _config
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(new_partial.route)
@@ -506,7 +493,7 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def run(self, host=None, port=None, debug=None, load_dotenv=True) -> None:
+    def run(self, host=None, port=None, debug=None) -> None:
         # Check with default config, override only if parameter
         # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
@@ -515,24 +502,18 @@ class Gui(object, metaclass=Singleton):
             port = self._config.app_config["port"]
         if debug is None and self._config.app_config["debug"] is not None:
             debug = self._config.app_config["debug"]
+        # Register taipy.gui markdown extensions for Markdown renderer
+        Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
         # Save all local variables of the parent frame (usually __main__)
-        self._locals_bind = inspect.currentframe().f_back.f_locals
+        self._locals_bind: t.Dict[str, t.Any] = t.cast(
+            FrameType, t.cast(FrameType, inspect.currentframe()).f_back
+        ).f_locals
         # Run parse markdown to force variables binding at runtime
-        # (save rendered html to page.index_html for optimization)
-        for page_i in self._config.pages:
-            if page_i.md_template:
-                page_i.index_html = self._parse_markdown(page_i.md_template)
-            elif page_i.md_template_file:
-                with open(page_i.md_template_file, "r") as f:
-                    page_i.index_html = self._parse_markdown(f.read())
+        # (save rendered html to page.rendered_jsx for optimization)
+        for page in self._config.pages:
             # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{page_i.route}/", view_func=self._render_page)
+            self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
         for partial in self._config.partials:
-            if partial.md_template:
-                partial.index_html = self._parse_markdown(partial.md_template)
-            elif partial.md_template_file:
-                with open(partial.md_template_file, "r") as f:
-                    partial.index_html = self._parse_markdown(f.read())
             # Server URL Rule for each page jsx
             self._server.add_url_rule(f"/flask-jsx/{partial.route}/", view_func=self._render_page)
 
@@ -540,4 +521,4 @@ class Gui(object, metaclass=Singleton):
         self._server.add_url_rule("/initialize/", view_func=self._render_route)
 
         # Start Flask Server
-        self._server.runWithWS(host=host, port=port, debug=debug, load_dotenv=load_dotenv)
+        self._server.runWithWS(host=host, port=port, debug=debug)

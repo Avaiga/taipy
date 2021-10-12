@@ -1,15 +1,19 @@
+import typing as t
+
 import pytz
 import tzlocal
+
+from .page import Page, Partial
 
 
 class GuiConfig(object):
     def __init__(self):
-        self.pages = []
-        self.routes = []
-        self.partials = []
-        self.partial_routes = []
-        self.app_config = {}
-        self.style_config = {}
+        self.pages: t.List[Page] = []
+        self.routes: t.List[str] = []
+        self.partials: t.List[Partial] = []
+        self.partial_routes: t.List[str] = []
+        self.app_config: t.Dict = {}
+        self.style_config: t.Dict = {}
 
     def load_config(self, app_config={}, style_config={}) -> None:
         self.app_config.update(app_config)

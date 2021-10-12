@@ -1,4 +1,5 @@
 import re
+import typing as t
 from datetime import datetime
 
 from .builder import Builder
@@ -149,5 +150,5 @@ class Factory:
             return f"<|INVALID SYNTAX - Control is '{control_type}'|>"
 
     @staticmethod
-    def get_default_property_name(control_name: str) -> str:
+    def get_default_property_name(control_name: str) -> t.Optional[str]:
         return Factory.CONTROL_DEFAULT_PROP_NAME.get(control_name)
