@@ -9,11 +9,15 @@ import pandas as pd
 from markdown.util import etree
 
 from ..page import Partial
-from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
+from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true, _get_dict_value
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
+from .jsonencoder import TaipyJsonEncoder
 
 
 class Builder:
+
+    __keys: dict[str, int] = {}
+
     def __init__(
         self,
         control_type,
@@ -36,8 +40,8 @@ class Builder:
         default_property_name = Factory.get_default_property_name(control_type)
         default_property_value = attributes.get(default_property_name)
         if default_property_value:
-            self.has_evaluated = True
             if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
+                self.has_evaluated = True
                 default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
                 self.value = attrgetter(default_property_value)(self._gui._values)
                 self.expr_hash = default_property_value
@@ -70,10 +74,19 @@ class Builder:
                 self.attributes[k] = val
             if hashname:
                 self.__hashes[k] = hashname
+        # define a unique key
+        self.__set_key()
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
         return str(x)
+
+    def __get_list_of_(self, name: str):
+        lof = _get_dict_value(self.attributes, name)
+        if isinstance(lof, str):
+            self.from_string = True
+            lof = [(s, s) for s in lof.split(";")]
+        return lof
 
     def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self._gui._is_expression(value):
@@ -82,34 +95,32 @@ class Builder:
             return (attrgetter(hash_value)(self._gui._values), hash_value)
         return (value, None)
 
-    def __get_id_label(self, elt, getter, idx):
-        ret = getter(elt)
-        if isinstance(ret, (list, tuple)) and len(ret) >= 2:
-            return ret
-        elt_id = elt.id if hasattr(elt, "id") else None
-        if not elt_id and isinstance(elt, dict) and "id" in elt:
-            elt_id = elt["id"]
-        if not elt_id:
-            elt_id = idx
-        return (elt_id, ret)
+    def __set_boolean_attribute(self, name: str, default_value=False):
+        boolattr = (
+            self.attributes[name]
+            if hasattr(self, "attributes") and self.attributes and name in self.attributes
+            else None
+        )
+        if boolattr is None:
+            boolattr = default_value
+        if isinstance(boolattr, str):
+            boolattr = is_boolean_true(boolattr)
+        return self.__set_react_attribute(_to_camel_case(name), boolattr)
 
-    def __get_list_of_(self, name):
-        lof = self.attributes and name in self.attributes and self.attributes[name]
-        if isinstance(lof, str):
-            lof = {s.strip(): s for s in lof.split(";")}
-        if isinstance(lof, _MapDictionary):
-            lof = lof._dict
-        return lof
+    def __set_json_attribute(self, name, value):
+        return self.set_attribute(name, json.dumps(value, cls=TaipyJsonEncoder))
 
-    def __set_list_of_(self, name):
+    def __set_key(self):
+        key_index = _get_dict_value(Builder.__keys, self.expr)
+        self.set_attribute("key", self.expr + "." + (str(key_index) if key_index else "0"))
+        Builder.__keys[self.expr] = (key_index if key_index else 0) + 1
+
+    def __set_list_of_(self, name: str):
         lof = self.__get_list_of_(name)
-        if not isinstance(lof, dict):
-            warnings.warn(f"Component {self.element_name} Attribute {name}: should be a string or a dict")
+        if not isinstance(lof, (list, tuple)):
+            warnings.warn(f"Component {self.element_name} Attribute {name}: should be a string or a list")
             return self
-        return self.__set_react_attribute(_to_camel_case(name), lof)
-
-    def __set_react_attribute(self, name, value):
-        return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
+        return self.__set_json_attribute(_to_camel_case(name), lof)
 
     def __set_string_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
@@ -125,17 +136,78 @@ class Builder:
             return self
         return self.set_attribute(_to_camel_case(name), strattr)
 
-    def __set_boolean_attribute(self, name, default_value=False):
-        boolattr = (
-            self.attributes[name]
-            if hasattr(self, "attributes") and self.attributes and name in self.attributes
-            else None
-        )
-        if boolattr is None:
-            boolattr = default_value
-        if isinstance(boolattr, str):
-            boolattr = is_boolean_true(boolattr)
-        return self.__set_react_attribute(_to_camel_case(name), boolattr)
+    def __set_react_attribute(self, name: str, value: t.Any):
+        return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
+
+    def get_adapter(self, property_name: str):
+        lov = self.__get_list_of_(property_name)
+        from_string = hasattr(self, "from_string") and self.from_string
+        if isinstance(lov, list):
+            adapter = self.attributes and _get_dict_value(self.attributes, "adapter")
+            if not isinstance(adapter, FunctionType):
+                if adapter:
+                    warnings.warn(f"Component Selector Attribute Adapter is invalid")
+                adapter = None
+            var_type = _get_dict_value(self.attributes, "type")
+            if isinstance(var_type, t.Type):
+                var_type = var_type.__name__
+            if not isinstance(var_type, str):
+                elt = None
+                if len(lov) == 0:
+                    if isinstance(self.value, list):
+                        if len(self.value) > 0:
+                            elt = self.value[0]
+                    else:
+                        elt = self.value
+                else:
+                    elt = lov[0]
+                var_type = type(elt).__name__ if elt is not None else None
+            if adapter is None:
+                adapter = self._gui._get_adapter_for_type(var_type)
+            lov_name = _get_dict_value(self.__hashes, property_name)
+            if lov_name:
+                if adapter is None:
+                    adapter = self._gui._get_adapter_for_type(lov_name)
+                else:
+                    self._gui.add_type_for_var(lov_name, var_type)
+            value_name = _get_dict_value(self.__hashes, "value")
+            if value_name:
+                if adapter is None:
+                    adapter = self._gui._get_adapter_for_type(value_name)
+                else:
+                    self._gui.add_type_for_var(value_name, var_type)
+            if adapter is not None:
+                self._gui.add_adapter_for_type(var_type, adapter)
+
+            if adapter is None:
+                if from_string:
+                    adapter = lambda x: (x, x)
+                else:
+                    adapter = lambda x: str(x)
+
+            ret_list = []
+            if len(lov) > 0:
+                ret = self._gui._get_valid_adapter_result(lov[0], index=0)
+                if ret is None:  # lov list is not a list of tuple(id, label)
+                    for idx, elt in enumerate(lov):
+                        ret = self._gui._run_adapter(adapter, elt, adapter.__name__, idx)
+                        if ret is not None:
+                            ret_list.append(ret)
+                else:
+                    ret_list = lov
+            self.attributes["default_lov"] = ret_list
+
+            ret_list = []
+            if isinstance(self.value, list):
+                val_list = self.value
+            else:
+                val_list = [self.value]
+            for val in val_list:
+                ret = self._gui._run_adapter(adapter, val, adapter.__name__, -1, id_only=True)
+                if ret is not None:
+                    ret_list.append(ret)
+            self.set_default_value(ret_list)
+        return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy"):
         if isinstance(self.value, pd.DataFrame):
@@ -146,65 +218,34 @@ class Builder:
                 _add_to_dict_and_get(attributes, "date_format", date_format),
             )
             attributes["columns"] = columns
-            self.set_attribute("columns", json.dumps(columns))
+            self.__set_json_attribute("columns", columns)
         return self
 
-    def get_lov_label_getter(self):
-        lov = self.__get_list_of_("lov")
-        if isinstance(lov, list):
-            lov_label_fn = self.attributes and "label_getter" in self.attributes and self.attributes["label_getter"]
-            if not lov_label_fn:
-                lov_label_fn = Builder.__to_string
-            if not isinstance(lov_label_fn, FunctionType):
-                warnings.warn("Component Selector Attribute ")
-                lov_label_fn = Builder.__to_string
-            ret_dict = {}
-            for elt in lov:
-                try:
-                    ret = self.__get_id_label(elt, lov_label_fn, len(ret_dict))
-                    ret_dict[str(ret[0])] = str(ret[1])
-                except Exception as e:
-                    warnings.warn(
-                        f"Component {self.element_name} Attribute label_getter: function raised an exception {e}"
-                    )
-            self.attributes["lov"] = ret_dict
-            if not isinstance(self.value, str):
-                ret_list = []
-                val_list = self.value if isinstance(self.value, list) else [self.value]
-                for val in val_list:
-                    if isinstance(val, str):
-                        ret_list.append(val)
-                    else:
-                        try:
-                            ret_list.append(str(self.__get_id_label(val, lov_label_fn, -1)[0]))
-                        except Exception as e:
-                            warnings.warn(
-                                f"Component {self.element_name} Attribute label_getter: function raised an exception {e}"
-                            )
-                if len(ret_list) > 1:
-                    self.__set_react_attribute("defaultvalue", ret_list)
-                else:
-                    self.set_attribute("defaultvalue", ret_list[0] if ret_list else "")
-        return self
+    def set_auto_loading(self, default_value=False):
+        if self.element_name != "Table":
+            return self
+        return self.__set_boolean_attribute("auto_loading", default_value)
 
-    def set_expresion_hash(self):
-        if self.has_evaluated:
-            self.set_attribute("key", self.expr_hash)
-            self.__set_react_attribute(
-                "value",
-                get_client_var_name(self.expr_hash),
-            )
-            self.set_attribute("tp_varname", self.expr)
-        return self
+    def set_allow_all_rows(self, default_value=False):
+        if self.element_name != "Table":
+            return self
+        return self.__set_boolean_attribute("allow_all_rows", default_value)
 
-    def set_default_value(self):
-        if isinstance(self.value, datetime.datetime):
-            self.set_attribute("defaultvalue", dateToISO(self.value))
-        elif isinstance(self.value, str):
-            self.set_attribute("defaultvalue", self.value)
+    def set_button_attribute(self):
+        if self.element_name != "Input" or self.type_name != "button":
+            return self
+        self.set_id()
+        if self.attributes and "on_action" in self.attributes:
+            self.set_attribute("actionName", self.attributes["on_action"])
         else:
-            self.__set_react_attribute("defaultvalue", self.value)
+            self.set_attribute("actionName", "")
         return self
+
+    def set_cancel_action(self):
+        return self.__set_string_attribute("cancel_action")
+
+    def set_cancel_action_text(self):
+        return self.__set_string_attribute("cancel_action_text", "Cancel")
 
     def set_className(self, class_name="", config_class="input"):
         from ..gui import Gui
@@ -215,15 +256,59 @@ class Builder:
         )
         return self
 
-    def set_withTime(self):
-        if self.element_name != "DateSelector":
-            return self
-        return self.__set_boolean_attribute("with_time")
-
-    def set_type(self, type_name=None):
-        self.type_name = type_name
-        self.set_attribute("type", type_name)
+    def set_dataType(self):
+        self.set_attribute("dataType", getDataType(self.value))
         return self
+
+    def set_default_lov(self):
+        return self.__set_list_of_("default_lov")
+
+    def set_default_value(self, value: t.Optional[t.Any] = None):
+        if value is None:
+            value = self.value
+        if isinstance(value, datetime.datetime):
+            self.set_attribute("defaultValue", dateToISO(value))
+        elif isinstance(value, str):
+            self.set_attribute("defaultValue", value)
+        else:
+            self.__set_json_attribute("defaultValue", value)
+        return self
+
+    def set_expresion_hash(self):
+        if self.has_evaluated:
+            self.__set_react_attribute(
+                "value",
+                get_client_var_name(self.expr_hash),
+            )
+            self.set_attribute("tp_varname", self.expr)
+        else:
+            self.set_attribute("value", self.value)
+        return self
+
+    def set_filter(self, default_value=False):
+        return self.__set_boolean_attribute("filter", default_value)
+
+    def set_format(self):
+        format = self.attributes and "format" in self.attributes and self.attributes["format"]
+        if format:
+            self.set_attribute("format", format)
+        return self
+
+    def set_id(self):
+        if self.attributes and "id" in self.attributes:
+            self.set_attribute("id", self.attributes["id"])
+        elif self.has_evaluated:
+            self.set_attribute("id", self.expr_hash)
+        return self
+
+    def set_multiple(self, default_value=False):
+        return self.__set_boolean_attribute("multiple", default_value)
+
+    def set_open(self):
+        return self.__set_boolean_attribute("open")
+
+    def set_page_id(self):
+        return self.__set_string_attribute("page_id", optional=False)
 
     def set_partial(self):
         if self.element_name != "Dialog":
@@ -235,30 +320,31 @@ class Builder:
                 self.attributes["page_id"] = self.attributes["partial"].route
         return self
 
-    def set_dataType(self):
-        self.set_attribute("dataType", getDataType(self.value))
+    def set_propagate(self):
+        from ..gui import Gui
+
+        return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
+
+    def set_refresh(self):
+        return self.__set_react_attribute("refresh", get_client_var_name(self.expr_hash + ".refresh"))
+
+    def set_refresh_on_update(self, name=None):
+        if name:
+            if not isinstance(name, (tuple, list)):
+                name = [name]
+            name_list = []
+            for nm in name:
+                varname = _get_dict_value(self.__hashes, nm)
+                if varname:
+                    name_list.append(varname)
+                self.__set_react_attribute(nm, varname)
+            self.set_attribute("tp_updatevars", ";".join(name_list))
         return self
 
-    def set_button_attribute(self):
-        if self.element_name != "Input" or self.type_name != "button":
+    def set_show_all(self, default_value=False):
+        if self.element_name != "Table":
             return self
-        self.set_id()
-        if self.attributes and "id" in self.attributes:
-            self.set_attribute("key", self.attributes["id"])
-        elif self.has_evaluated:
-            self.set_attribute("key", self.expr_hash)
-        if self.attributes and "on_action" in self.attributes:
-            self.set_attribute("actionName", self.attributes["on_action"])
-        else:
-            self.set_attribute("actionName", "")
-        return self
-
-    def set_id(self):
-        if self.attributes and "id" in self.attributes:
-            self.set_attribute("id", self.attributes["id"])
-        elif self.has_evaluated:
-            self.set_attribute("id", self.expr_hash)
-        return self
+        return self.__set_boolean_attribute("show_all", default_value)
 
     def set_table_pagesize(self, default_size=100):
         if self.element_name != "Table":
@@ -286,77 +372,24 @@ class Builder:
             warnings.warn("page_size_options should be a list")
         return self
 
-    def set_allow_all_rows(self, default_value=False):
-        if self.element_name != "Table":
-            return self
-        return self.__set_boolean_attribute("allow_all_rows", default_value)
-
-    def set_show_all(self, default_value=False):
-        if self.element_name != "Table":
-            return self
-        return self.__set_boolean_attribute("show_all", default_value)
-
-    def set_auto_loading(self, default_value=False):
-        if self.element_name != "Table":
-            return self
-        return self.__set_boolean_attribute("auto_loading", default_value)
-
-    def set_format(self):
-        format = self.attributes and "format" in self.attributes and self.attributes["format"]
-        if format:
-            self.set_attribute("format", format)
-        return self
-
-    def set_filter(self, default_value=False):
-        return self.__set_boolean_attribute("filter", default_value)
-
-    def set_multiple(self, default_value=False):
-        return self.__set_boolean_attribute("multiple", default_value)
-
-    def set_lov(self):
-        return self.__set_list_of_("lov")
-
-    def set_propagate(self):
-        from ..gui import Gui
-
-        return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
-
-    def set_refresh(self):
-        return self.__set_react_attribute("refresh", get_client_var_name(self.expr_hash + ".refresh"))
-
     def set_title(self):
         return self.__set_string_attribute("title")
 
-    def set_open(self):
-        return self.__set_boolean_attribute("open")
-
-    def set_refresh_on_update(self, name=None):
-        if name:
-            if not isinstance(name, (tuple, list)):
-                name = [name]
-            name_list = []
-            for nm in name:
-                varname = self.__hashes[nm] if nm in self.__hashes else None
-                if varname:
-                    name_list.append(varname)
-                self.__set_react_attribute("tp_" + nm, varname)
-            self.set_attribute("tp_updatevars", ";".join(name_list))
+    def set_type(self, type_name=None):
+        self.type_name = type_name
+        self.set_attribute("type", type_name)
         return self
-
-    def set_cancel_action(self):
-        return self.__set_string_attribute("cancel_action")
 
     def set_validate_action(self):
         return self.__set_string_attribute("validate_action", "validate")
 
-    def set_cancel_action_text(self):
-        return self.__set_string_attribute("cancel_action_text", "Cancel")
-
     def set_validate_action_text(self):
         return self.__set_string_attribute("validate_action_text", "Validate")
 
-    def set_page_id(self):
-        return self.__set_string_attribute("page_id", optional=False)
+    def set_withTime(self):
+        if self.element_name != "DateSelector":
+            return self
+        return self.__set_boolean_attribute("with_time")
 
     def set_attribute(self, name, value):
         self.el.set(name, value)

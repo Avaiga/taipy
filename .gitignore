@@ -117,3 +117,4 @@ site/
 demo.py
 *.csv
 demo.css
+object_selection.py

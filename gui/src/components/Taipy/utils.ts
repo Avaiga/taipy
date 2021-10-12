@@ -1,6 +1,6 @@
 export interface TaipyBaseProps {
     id: string;
-    defaultvalue: string;
+    defaultValue: string;
     tp_varname: string;
     className?: string;
     value: unknown;

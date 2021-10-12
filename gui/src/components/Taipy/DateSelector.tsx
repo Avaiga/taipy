@@ -16,7 +16,7 @@ interface DateSelectorProps extends TaipyInputProps {
 }
 
 const DateSelector = (props: DateSelectorProps) => {
-    const [value, setValue] = useState(() => getDateTime(props.defaultvalue));
+    const [value, setValue] = useState(() => getDateTime(props.defaultValue));
     const { dispatch } = useContext(TaipyContext);
 
     const { className, tp_varname, withTime } = props;
