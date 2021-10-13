@@ -1,6 +1,6 @@
 import { TableCellProps } from "@mui/material/TableCell";
 
-import { getDateTimeString } from "../../utils/index";
+import { getDateTimeString, getNumberString } from "../../utils/index";
 import { TaipyBaseProps } from "./utils";
 
 export interface ColumnDesc {
@@ -30,6 +30,9 @@ export const formatValue = (val: any, col: any) => {
     switch (col.type) {
         case "datetime64[ns]":
             return getDateTimeString(val, col.format || defaultDateFormat);
+        case "int64":
+        case "float64":
+            return getNumberString(val, col.format);
         default:
             return val;
     }
@@ -52,15 +55,17 @@ export interface TaipyTableProps extends TaipyBaseProps {
     refresh: boolean;
 }
 
+export type PageSizeOptionsType = (
+    | number
+    | {
+          value: number;
+          label: string;
+      }
+)[];
+
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
     pageSize?: number;
-    pageSizeOptions: (
-        | number
-        | {
-              value: number;
-              label: string;
-          }
-    )[];
+    pageSizeOptions: string;
     allowAllRows: boolean;
     showAll: boolean;
 }

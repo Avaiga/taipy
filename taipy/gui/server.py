@@ -8,6 +8,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from .wstype import WsType
+from .utils import _get_dict_value
 
 
 class Server(Flask):
@@ -69,13 +70,13 @@ class Server(Flask):
                 if "status" in message:
                     print(message["status"])
                 elif message["type"] == WsType.UPDATE.value:
-                    self._app._update_var(
+                    self._app._front_end_update(
                         message["name"],
                         message["payload"],
                         message["propagate"] if "propagate" in message else True,
                     )
                 elif message["type"] == WsType.ACTION.value:
-                    self._app._on_action(message["name"], message["payload"])
+                    self._app._on_action(_get_dict_value(message, "name"), message["payload"])
                 elif message["type"] == WsType.TABLE_UPDATE.value:
                     self._app._request_var(message["name"], message["payload"])
                 elif message["type"] == WsType.REQUEST_UPDATE.value:

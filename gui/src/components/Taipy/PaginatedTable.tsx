@@ -21,6 +21,7 @@ import {
     formatValue,
     getsortByIndex,
     Order,
+    PageSizeOptionsType,
     paperSx,
     tableSx,
     TaipyPaginatedTableProps,
@@ -30,7 +31,7 @@ import {
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
 
-const rowsPerPageOptions = [10, 50, 100, 500];
+const rowsPerPageOptions:PageSizeOptionsType = [10, 50, 100, 500];
 
 const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const {
@@ -38,7 +39,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         id,
         tp_varname,
         pageSize = 100,
-        pageSizeOptions = rowsPerPageOptions,
+        pageSizeOptions,
         allowAllRows = false,
         showAll = false,
         refresh = false,
@@ -114,10 +115,18 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [props.columns]);
 
     const pso = useMemo(() => {
-        if (allowAllRows) {
-            return pageSizeOptions.concat([{ value: -1, label: "All" }]);
+        let psOptions = rowsPerPageOptions;
+        if (pageSizeOptions) {
+            try {
+                psOptions = JSON.parse(pageSizeOptions)
+            } catch (e) {
+                console.log("PaginatedTable pageSizeOptions is wrong ", pageSizeOptions, e);
+            }
         }
-        return pageSizeOptions;
+        if (allowAllRows) {
+            return psOptions.concat([{ value: -1, label: "All" }]);
+        }
+        return psOptions;
     }, [pageSizeOptions, allowAllRows]);
 
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */

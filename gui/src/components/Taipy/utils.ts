@@ -16,7 +16,7 @@ export interface TaipyFieldProps extends TaipyBaseProps {
 
 export interface TaipyInputProps extends TaipyBaseProps {
     type: string;
-    actionName: string;
+    tp_onAction: string;
     value: string;
 }
 

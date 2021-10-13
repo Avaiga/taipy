@@ -7,7 +7,7 @@ import { createSendActionNameAction, createSendUpdateAction } from "../../contex
 import { TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
-    const { className, type, id, tp_varname, actionName } = props;
+    const { className, type, id, tp_varname, tp_onAction } = props;
     const [value, setValue] = useState(props.defaultValue);
     const { dispatch } = useContext(TaipyContext);
 
@@ -20,8 +20,8 @@ const Input = (props: TaipyInputProps) => {
     );
 
     const handleClick = useCallback(() => {
-        dispatch(createSendActionNameAction(id || "", actionName));
-    }, [id, actionName, dispatch]);
+        dispatch(createSendActionNameAction(id, tp_onAction));
+    }, [id, tp_onAction, dispatch]);
 
     useEffect(() => {
         if (props.value !== undefined) {
