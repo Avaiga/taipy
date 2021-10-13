@@ -2,6 +2,7 @@ import re
 import typing as t
 from datetime import datetime
 
+from ..wstype import AttributeType
 from .builder import Builder
 
 
@@ -30,7 +31,7 @@ class Factory:
         .set_default_value()
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
-        .set_format(),
+        .set_attributes([("format")]),
         "button": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -41,7 +42,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-button", config_class="button")
-        .set_button_attribute(),
+        .set_attributes([("id"), ("on_action", AttributeType.string, "")]),
         "input": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -73,7 +74,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
-        .set_withTime()
+        .set_attributes([("with_time", AttributeType.boolean)])
         .set_propagate(),
         "slider": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -85,8 +86,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-slider", config_class="slider")
-        .set_attribute("min", "1")
-        .set_attribute("max", "100")
+        .set_attributes([("min", AttributeType.string, "1"), ("max", AttributeType.string, "100")])
         .set_propagate(),
         "selector": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -97,8 +97,7 @@ class Factory:
         .set_className(class_name="taipy-selector", config_class="selector")
         .get_adapter("lov")  # need to be called before set_default_lov
         .set_default_lov()
-        .set_filter()
-        .set_multiple()
+        .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean)])
         .set_refresh_on_update("lov")
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
@@ -109,27 +108,35 @@ class Factory:
         .set_expresion_hash()
         .set_className(class_name="taipy-table", config_class="table")
         .get_dataframe_attributes()
+        .set_attributes(
+            [
+                ("page_size", AttributeType.react, 100),
+                ("allow_all_rows", AttributeType.boolean),
+                ("show_all", AttributeType.boolean),
+                ("auto_loading", AttributeType.boolean),
+            ]
+        )
         .set_refresh()
-        .set_table_pagesize()
-        .set_table_pagesize_options()
-        .set_allow_all_rows()
-        .set_show_all()
-        .set_auto_loading()
-        .set_show_all(),
+        .set_table_pagesize_options(),
         "dialog": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Dialog",
             attributes=attrs,
         )
         .set_expresion_hash()
-        .set_id()
         .set_className(class_name="taipy-dialog", config_class="dialog")
-        .set_title()
+        .set_attributes(
+            [
+                ("id"),
+                ("title"),
+                ("cancel_action"),
+                ("cancel_action_text", AttributeType.string, "Cancel"),
+                ("validate_action", AttributeType.string, "validate"),
+                ("validate_action_text", AttributeType.string, "Validate"),
+                ("open", AttributeType.boolean),
+            ]
+        )
         .set_default_value()
-        .set_cancel_action()
-        .set_validate_action()
-        .set_cancel_action_text()
-        .set_validate_action_text()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
     }

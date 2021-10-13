@@ -2,6 +2,7 @@ import pandas as pd
 import warnings
 
 from ..utils import _MapDictionary, get_date_col_str_name
+from ..wstype import NumberTypes
 
 
 def _add_to_dict_and_get(dico, key, value):
@@ -10,7 +11,7 @@ def _add_to_dict_and_get(dico, key, value):
     return dico[key]
 
 
-def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
+def _get_columns_dict(value, columns, date_format="MM/dd/yyyy", number_format=None):
     if isinstance(value, pd.DataFrame):
         coltypes = value.dtypes.apply(lambda x: x.name).to_dict()
         if isinstance(columns, str):
@@ -44,6 +45,9 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy"):
                 if type.startswith("datetime64"):
                     _add_to_dict_and_get(columns[col], "format", date_format)
                     columns[get_date_col_str_name(value, col)] = columns.pop(col)
+                elif number_format and type in NumberTypes:
+                    _add_to_dict_and_get(columns[col], "format", number_format)
+
     return columns
 
 

@@ -48,7 +48,9 @@ class Gui(object, metaclass=Singleton):
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
-    _markdown = md_lib.Markdown(extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"])
+    _markdown = md_lib.Markdown(
+        extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"]
+    )
 
     def __init__(
         self,
@@ -175,26 +177,22 @@ class Gui(object, metaclass=Singleton):
             setattr(self._values, name, _MapDictionary(value))
         else:
             setattr(self._values, name, value)
-        prop = property(
-            lambda s: getattr(s._values, name),  # Getter
-            self.__value_setter(name),  # Setter
-        )
+        prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter  # Setter
         setattr(Gui, name, prop)
 
-    def __value_setter(self, name):
-        def __setter(elt: Gui, value: t.Any)->None:
-            if isinstance(value, dict):
-                elt._update_var(name, _MapDictionary(value, lambda s, v: self._update_var(name + "." + s, v)))
+    def __value_getter(self, name):
+        def __getter(elt: Gui) -> t.Any:
+            value = getattr(elt._values, name)
+            if isinstance(value, _MapDictionary):
+                return _MapDictionary(value._dict, lambda s, v: elt._update_var(name + "." + s, v))
             else:
-                elt._update_var(name, value)
-        return __setter
+                return value
 
+        return __getter
 
-    def _update_var(self, var_name: str, value, propagate=True) -> None:
+    def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
-        expr = var_name
-        hash_expr = var_name = self._expr_to_hash[var_name]
-        currentvalue = attrgetter(var_name)(self._values)
+        currentvalue = attrgetter(self._expr_to_hash[var_name])(self._values)
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
                 value = ISOToDate(value)
@@ -209,16 +207,20 @@ class Gui(object, metaclass=Singleton):
             elif isinstance(currentvalue, pd.DataFrame):
                 warnings.warn("Error: cannot update value for dataframe: " + var_name)
                 return
-        modified_vars = [var_name]
+        self._update_var(var_name, value, propagate)
+
+    def _update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
+        hash_expr = self._expr_to_hash[var_name]
+        modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
-            attrsetter(self._values, var_name, value)
+            attrsetter(self._values, hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
-            if expr == hash_expr:
-                modified_vars.extend(self._re_evaluate_expr(expr))
+            if var_name == hash_expr:
+                modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
-            self._update_function(self, expr, value)
+            self._update_function(self, var_name, value)
         self.__send_var_list_update(modified_vars)
 
     def __send_var_list_update(self, modified_vars: list):
