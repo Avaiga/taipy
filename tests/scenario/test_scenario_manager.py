@@ -1,16 +1,12 @@
 import pytest
 
-from taipy.data import DataSourceConfig, DataSource, Scope
-from taipy.data import EmbeddedDataSource
+from taipy.data import DataSource, DataSourceConfig, EmbeddedDataSource, Scope
 from taipy.exceptions import NonExistingTaskEntity
 from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import (
-    NonExistingScenario,
-    NonExistingScenarioEntity,
-)
-from taipy.pipeline import PipelineConfig, Pipeline, PipelineId
-from taipy.scenario import ScenarioConfig, Scenario, ScenarioId, ScenarioManager
-from taipy.task import TaskConfig, Task, TaskId, TaskScheduler
+from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity
+from taipy.pipeline import Pipeline, PipelineConfig, PipelineId
+from taipy.scenario import Scenario, ScenarioConfig, ScenarioId, ScenarioManager
+from taipy.task import Task, TaskConfig, TaskId, TaskScheduler
 
 
 def test_register_and_get_scenario():
@@ -61,9 +57,9 @@ def test_register_and_get_scenario():
     assert len(scenario_manager.get_scenarios()) == 2
     assert scenario_manager.get_scenario(name_1) == scenario_3_with_same_name
     assert scenario_manager.get_scenario(name_2) == scenario_2
-    assert scenario_manager.get_scenario(name_1).properties.get(
+    assert scenario_manager.get_scenario(name_1).properties.get("title") == scenario_3_with_same_name.properties.get(
         "title"
-    ) == scenario_3_with_same_name.properties.get("title")
+    )
 
 
 def test_save_and_get_scenario_entity():
@@ -75,20 +71,12 @@ def test_save_and_get_scenario_entity():
     task_name = "task"
     task_2 = Task(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
-    pipeline_entity_2 = Pipeline(
-        pipeline_name_2, {}, [task_2], PipelineId("pipeline_id_2")
-    )
+    pipeline_entity_2 = Pipeline(pipeline_name_2, {}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
-    scenario_2 = Scenario(
-        "scenario_name_2", [pipeline_entity_2], {}, scenario_id_2
-    )
+    scenario_2 = Scenario("scenario_name_2", [pipeline_entity_2], {}, scenario_id_2)
 
-    pipeline_entity_3 = Pipeline(
-        "pipeline_name_3", {}, [], PipelineId("pipeline_id_3")
-    )
-    scenario_3_with_same_id = Scenario(
-        "scenario_name_3", [pipeline_entity_3], {}, scenario_id_1
-    )
+    pipeline_entity_3 = Pipeline("pipeline_name_3", {}, [], PipelineId("pipeline_id_3"))
+    scenario_3_with_same_id = Scenario("scenario_name_3", [pipeline_entity_3], {}, scenario_id_1)
 
     # No existing scenario entity
     scenario_manager = ScenarioManager()
@@ -103,9 +91,7 @@ def test_save_and_get_scenario_entity():
     assert len(scenario_manager.get_scenario_entities()) == 1
     assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_1.name
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
-    )
+    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
     with pytest.raises(NonExistingScenarioEntity):
         scenario_manager.get_scenario_entity(scenario_id_2)
 
@@ -116,14 +102,10 @@ def test_save_and_get_scenario_entity():
     assert len(scenario_manager.get_scenario_entities()) == 2
     assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_1.name
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
-    )
+    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
     assert scenario_manager.get_scenario_entity(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario_entity(scenario_id_2).name == scenario_2.name
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
-    )
+    assert len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
     assert scenario_manager.task_manager.get_task_entity(task_2.id) == task_2
 
     # We save the first scenario again. We expect nothing to change
@@ -131,14 +113,10 @@ def test_save_and_get_scenario_entity():
     assert len(scenario_manager.get_scenario_entities()) == 2
     assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_1.name
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
-    )
+    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
     assert scenario_manager.get_scenario_entity(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario_entity(scenario_id_2).name == scenario_2.name
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
-    )
+    assert len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
     assert scenario_manager.task_manager.get_task_entity(task_2.id) == task_2
 
     # We save a third scenario with same id as the first one.
@@ -150,18 +128,11 @@ def test_save_and_get_scenario_entity():
     scenario_manager.save_scenario_entity(scenario_3_with_same_id)
     assert len(scenario_manager.get_scenario_entities()) == 2
     assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
-    assert (
-        scenario_manager.get_scenario_entity(scenario_id_1).name
-        == scenario_3_with_same_id.name
-    )
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 1
-    )
+    assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_3_with_same_id.name
+    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 1
     assert scenario_manager.get_scenario_entity(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario_entity(scenario_id_2).name == scenario_2.name
-    assert (
-        len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
-    )
+    assert len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
     assert scenario_manager.task_manager.get_task_entity(task_2.id) == task_2
 
 
@@ -182,14 +153,10 @@ def test_submit():
         TaskId("t1"),
     )
     task_2 = Task("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
-    task_3 = Task(
-        "waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3")
-    )
+    task_3 = Task("waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3"))
     task_4 = Task("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
     task_5 = Task("thud", [data_source_6], print, [data_source_8], TaskId("t5"))
-    pipeline_entity_1 = Pipeline(
-        "plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1")
-    )
+    pipeline_entity_1 = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     pipeline_entity_2 = Pipeline("xyzzy", {}, [task_5], PipelineId("p2"))
 
     scenario_entity = Scenario(
@@ -299,18 +266,9 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert scenario_entity.bar.get() == 0
     assert scenario_entity.baz.get() == 0
     assert scenario_entity.qux.get() == 0
-    assert (
-        scenario_entity.by_6.get_sorted_task_entities()[0][0].name
-        == task_mult_by_2.name
-    )
-    assert (
-        scenario_entity.by_6.get_sorted_task_entities()[1][0].name
-        == task_mult_by_3.name
-    )
-    assert (
-        scenario_entity.by_4.get_sorted_task_entities()[0][0].name
-        == task_mult_by_4.name
-    )
+    assert scenario_entity.by_6.get_sorted_task_entities()[0][0].name == task_mult_by_2.name
+    assert scenario_entity.by_6.get_sorted_task_entities()[1][0].name == task_mult_by_3.name
+    assert scenario_entity.by_4.get_sorted_task_entities()[0][0].name == task_mult_by_4.name
 
 
 def test_get_set_data():

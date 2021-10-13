@@ -3,6 +3,7 @@ import pathlib
 
 import pytest
 
+from taipy.data import DataSource, DataSourceConfig, Scope
 from taipy.configuration import ConfigurationManager
 from taipy.data import CSVDataSource, DataSourceConfig, Scope
 from taipy.data.data_source_model import DataSourceModel
@@ -11,7 +12,7 @@ from taipy.exceptions import InvalidDataSourceType
 
 
 class TestDataManager:
-    def test_create_data_source_entity(self):
+    def test_create_data_source(self):
         dm = DataManager()
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
         csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
@@ -78,3 +79,29 @@ class TestDataManager:
         dm = DataManager()
         with pytest.raises(KeyError):
             dm.fetch_data_source_model("test_data_source_2")
+
+    def test_get_or_create(self):
+        dm = DataManager()
+        dm.delete_all()
+
+        assert len(dm.get_all()) == 0
+        global_ds_config = DataSourceConfig(
+            name="test_data_source", type="embedded", scope=Scope.GLOBAL, data="Embedded Data Source"
+        )
+        pipeline_ds_config = DataSourceConfig(
+            name="test_data_source2", type="embedded", scope=Scope.PIPELINE, data="Embedded Data Source"
+        )
+
+        global_ds = dm.get_or_create(global_ds_config)
+        pipeline_ds = dm.get_or_create(pipeline_ds_config)
+
+        assert len(dm.get_all()) == 2
+        pipeline_ds_config.name = "test_data_source3"
+        pipeline_ds2 = dm.get_or_create(pipeline_ds_config)
+
+        assert len(dm.get_all()) == 3
+        assert pipeline_ds.id != pipeline_ds2.id
+
+        global_ds2 = dm.get_or_create(global_ds_config)
+        assert len(dm.get_all()) == 3
+        assert global_ds.name == global_ds2.name
