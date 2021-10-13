@@ -1,9 +1,9 @@
-__all__ = ["FutureExecutor"]
+__all__ = ["Synchronous"]
 
 from concurrent.futures import Executor, Future
 
 
-class FutureExecutor(Executor):
+class Synchronous(Executor):
     """
     Equivalence of Python standard Thread/Process Pool Executor but
     the function is executed directly

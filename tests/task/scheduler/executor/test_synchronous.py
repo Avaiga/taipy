@@ -1,4 +1,4 @@
-from taipy.task.scheduler.executor.future import FutureExecutor
+from taipy.task.scheduler.executor.synchronous import Synchronous
 
 
 def mult(nb1, nb2):
@@ -10,16 +10,16 @@ def mult_by_two(nb):
 
 
 def test_submit_one_argument():
-    res = FutureExecutor().submit(mult_by_two, 21)
+    res = Synchronous().submit(mult_by_two, 21)
     assert res.result() == 42
 
 
 def test_submit_two_arguments():
-    res = FutureExecutor().submit(mult, 21, 4)
+    res = Synchronous().submit(mult, 21, 4)
     assert res.result() == 84
 
 
 def test_submit_two_arguments_in_context_manager():
-    with FutureExecutor() as pool:
+    with Synchronous() as pool:
         res = pool.submit(mult, 21, 4)
         assert res.result() == 84
