@@ -1,4 +1,5 @@
 import multiprocessing
+from datetime import datetime
 from functools import partial
 from time import sleep
 
@@ -29,8 +30,7 @@ def test_can_execute_parallel():
         executor.execute(job)
         assert not executor.can_execute()
 
-    sleep(1)
-    assert executor.can_execute()
+    assert_true_after_10_second_max(lambda: executor.can_execute())
 
 
 def test_can_execute_parallel_multiple_submit():
@@ -61,3 +61,11 @@ def test_can_execute_synchronous():
     assert executor.can_execute()
     executor.execute(job)
     assert executor.can_execute()
+
+
+def assert_true_after_10_second_max(assertion):
+    start = datetime.now()
+    while (datetime.now() - start).seconds < 10:
+        if assertion():
+            return
+    assert assertion()
