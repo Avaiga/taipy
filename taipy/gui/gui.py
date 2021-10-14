@@ -47,6 +47,8 @@ class Gui(object, metaclass=Singleton):
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
+    _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
         extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"]
@@ -177,7 +179,7 @@ class Gui(object, metaclass=Singleton):
             setattr(self._values, name, _MapDictionary(value))
         else:
             setattr(self._values, name, value)
-        prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter  # Setter
+        prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter, Setter
         setattr(Gui, name, prop)
 
     def __value_getter(self, name):
@@ -189,6 +191,27 @@ class Gui(object, metaclass=Singleton):
                 return value
 
         return __getter
+
+    def _manage_message(self, msg_type: WsType, message: dict) -> None:
+        try:
+            if msg_type == WsType.UPDATE.value:
+                self._front_end_update(
+                    message["name"],
+                    message["payload"],
+                    message["propagate"] if "propagate" in message else True,
+                )
+            elif msg_type == WsType.ACTION.value:
+                self._on_action(_get_dict_value(message, "name"), message["payload"])
+            elif msg_type == WsType.TABLE_UPDATE.value:
+                self._request_table_update(message["name"], message["payload"])
+            elif msg_type == WsType.REQUEST_UPDATE.value:
+                self._request_var_update(message["payload"])
+            elif msg_type == WsType.CHART_UPDATE.value:
+                self._request_chart_update(message["name"], message["payload"])
+        except TypeError as te:
+            warnings.warn(f"Decoding Message has failed: {message}\n{te}")
+        except KeyError as ke:
+            warnings.warn(f"Can't access: {message}\n{ke}")
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
@@ -246,14 +269,15 @@ class Gui(object, metaclass=Singleton):
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
-    def _request_var(self, var_name: str, payload: t.Any) -> None:
+    def _request_table_update(self, var_name: str, payload: t.Any) -> None:
         ret_payload = {}
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._expr_to_hash[var_name]
         newvalue = attrgetter(var_name)(self._values)
-        if isinstance(newvalue, datetime.datetime):
-            newvalue = dateToISO(newvalue)
-        elif isinstance(newvalue, pd.DataFrame):
+        if isinstance(newvalue, pd.DataFrame):
+            cols = _get_dict_value(payload, "columns")
+            if not isinstance(cols, list):
+                cols = newvalue.dtypes.apply(lambda x: x.name).to_dict().keys()
             keys = payload.keys()
             ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
             if "infinite" in keys:
@@ -284,7 +308,7 @@ class Gui(object, metaclass=Singleton):
                 newvalue = newvalue.copy()
                 for col in datecols:
                     newcol = get_date_col_str_name(newvalue, col)
-                    newvalue[newcol] = newvalue[col].dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ").astype("string")
+                    newvalue[newcol] = newvalue[col].dt.strftime(Gui._WS_DATE_FORMAT).astype("string")
             if "orderby" in keys and isinstance(payload["orderby"], str) and len(payload["orderby"]):
                 new_indexes = newvalue[payload["orderby"]].values.argsort(axis=0)
                 if "sort" in keys and payload["sort"] == "desc":
@@ -301,7 +325,33 @@ class Gui(object, metaclass=Singleton):
                 newvalue = newvalue.loc[:, cols]  # view without the date columns
             dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount, "start": start}
             newvalue = dictret
-        # TODO: What if value == newvalue?
+        ret_payload["value"] = newvalue
+        self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
+
+    def _request_chart_update(self, var_name: str, payload: t.Any) -> None:
+        ret_payload = {}
+        # Use custom attrgetter function to allow value binding for MapDictionary
+        var_name = self._expr_to_hash[var_name]
+        newvalue = attrgetter(var_name)(self._values)
+        if isinstance(newvalue, pd.DataFrame):
+            cols = _get_dict_value(payload, "columns")
+            if isinstance(cols, list) and len(cols):
+                col_types = newvalue.dtypes[newvalue.dtypes.index.isin(cols)]
+            else:
+                col_types = newvalue.dtypes
+            cols = col_types.index.tolist()
+            datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
+            if len(datecols) != 0:
+                # copy the df so that we don't "mess" with the user's data
+                newvalue = newvalue.copy()
+                for col in datecols:
+                    newcol = get_date_col_str_name(newvalue, col)
+                    cols.append(newcol)
+                    newvalue[newcol] = newvalue[col].dt.strftime(Gui._WS_DATE_FORMAT).astype("string")
+                # remove the date columns from the list of columns
+                cols = list(set(cols) - set(datecols))
+            newvalue = newvalue.loc[:, cols]  # view without the date columns
+            newvalue = newvalue.to_dict(orient="list")
         ret_payload["value"] = newvalue
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 

@@ -18,6 +18,7 @@ class Factory:
         "selector": "value",
         "table": "data",
         "dialog": "open",
+        "chart": "data",
     }
 
     CONTROL_BUILDERS = {
@@ -139,6 +140,26 @@ class Factory:
         .set_default_value()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
+        "chart": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Chart",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_className(class_name="taipy-chart", config_class="chart")
+        .set_attributes(
+            [
+                ("id"),
+                ("title"),
+                ("label"),
+                ("width", AttributeType.string_or_number, "100vw"),
+                ("height", AttributeType.string_or_number, "100vh"),
+                ("type", AttributeType.string, "scatter"),
+                ("mode", AttributeType.string, "lines+markers"),
+            ]
+        )
+        .get_chart_attributes()
+        .set_refresh(),
     }
 
     # TODO: process \" in property value
