@@ -165,12 +165,22 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
                 };
+                const cols = colsOrder.map((col) => columns[col].dfid);
                 dispatch(
-                    createRequestInfiniteTableUpdateAction(tp_varname, id, key, startIndex, stopIndex, orderBy, order)
+                    createRequestInfiniteTableUpdateAction(
+                        tp_varname,
+                        id,
+                        cols,
+                        key,
+                        startIndex,
+                        stopIndex,
+                        orderBy,
+                        order
+                    )
                 );
             });
         },
-        [tp_varname, id, orderBy, order, dispatch]
+        [tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);

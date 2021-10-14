@@ -2,6 +2,7 @@ import datetime
 import json
 import typing as t
 import warnings
+import numbers
 from operator import attrgetter
 from types import FunctionType
 
@@ -134,6 +135,15 @@ class Builder:
             return self
         return self.set_attribute(_to_camel_case(name), strattr)
 
+    def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
+        attr = self.__get_property(name, default_value)
+        if attr is None:
+            return self
+        if isinstance(attr, numbers.Number):
+            return self.__set_react_attribute(_to_camel_case(name), attr)
+        else:
+            return self.set_attribute(_to_camel_case(name), attr)
+
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
@@ -218,6 +228,20 @@ class Builder:
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self
+
+    def get_chart_attributes(self):
+        label = self.__get_property("label")
+        if label:
+            columns = self.__get_property("columns", {})
+            if isinstance(columns, str):
+                columns = [s.strip() for s in columns.split(";")]
+            if isinstance(columns, (list, tuple)):
+                if label not in columns and len(columns):
+                    if isinstance(columns, tuple):
+                        columns = list(columns)
+                    columns.append(label)
+            self.attributes["columns"] = columns
+        return self.get_dataframe_attributes()
 
     def set_className(self, class_name="", config_class="input"):
         from ..gui import Gui
@@ -325,6 +349,8 @@ class Builder:
                 self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
             elif type == AttributeType.react:
                 self.__set_react_attribute(attr[0], _get_val(attr, 2, None))
+            elif type == AttributeType.string_or_number:
+                self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
         return self
 
     def set_attribute(self, name, value):

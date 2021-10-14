@@ -7,9 +7,6 @@ from flask import Flask, abort, jsonify, render_template, render_template_string
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
-from .wstype import WsType
-from .utils import _get_dict_value
-
 
 class Server(Flask):
     def __init__(
@@ -66,25 +63,10 @@ class Server(Flask):
         # Websocket (handle json message)
         @self._ws.on("message")
         def handle_message(message) -> None:
-            try:
-                if "status" in message:
-                    print(message["status"])
-                elif message["type"] == WsType.UPDATE.value:
-                    self._app._front_end_update(
-                        message["name"],
-                        message["payload"],
-                        message["propagate"] if "propagate" in message else True,
-                    )
-                elif message["type"] == WsType.ACTION.value:
-                    self._app._on_action(_get_dict_value(message, "name"), message["payload"])
-                elif message["type"] == WsType.TABLE_UPDATE.value:
-                    self._app._request_var(message["name"], message["payload"])
-                elif message["type"] == WsType.REQUEST_UPDATE.value:
-                    self._app._request_var_update(message["payload"])
-            except TypeError as te:
-                warnings.warn(f"Decoding Message has failed: {message}\n{te}")
-            except KeyError as ke:
-                warnings.warn(f"Can't access: {message}\n{ke}")
+            if "status" in message:
+                print(message["status"])
+            elif "type" in message.keys():
+                self._app._manage_message(message["type"], message)
 
     # Update to render as JSX
     def render(self, html_fragment, style):

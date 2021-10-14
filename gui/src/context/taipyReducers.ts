@@ -10,6 +10,7 @@ enum Types {
     SendUpdate = "SEND_UPDATE_ACTION",
     Action = "SEND_ACTION_ACTION",
     RequestTableUpdate = "REQUEST_TABLE_UPDATE",
+    RequestChartUpdate = "REQUEST_CHART_UPDATE",
     RequestUpdate = "REQUEST_UPDATE",
     SetLocations = "SET_LOCATIONS",
 }
@@ -120,6 +121,9 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.RequestTableUpdate:
             sendWsMessage(state.socket, "T", action.name, action.payload);
             break;
+        case Types.RequestChartUpdate:
+            sendWsMessage(state.socket, "CU", action.name, action.payload);
+            break;
         case Types.RequestUpdate:
             sendWsMessage(state.socket, "RU", action.name, action.payload);
             break;
@@ -154,6 +158,7 @@ export const createSendActionNameAction = (name: string, value: unknown): TaipyA
 export const createRequestTableUpdateAction = (
     name: string,
     id: string,
+    columns: string[],
     pageKey: string,
     start?: number,
     end?: number,
@@ -164,11 +169,21 @@ export const createRequestTableUpdateAction = (
     name: name,
     payload: {
         id: id,
+        columns: columns,
         pagekey: pageKey,
         start: start,
         end: end,
         orderby: orderBy,
         sort: sort,
+    },
+});
+
+export const createRequestChartUpdateAction = (name: string, id: string, columns: string[]): TaipyAction => ({
+    type: Types.RequestChartUpdate,
+    name: name,
+    payload: {
+        id: id,
+        columns: columns,
     },
 });
 
@@ -205,6 +220,7 @@ export const createRequestSelectorUpdateAction = (
 export const createRequestInfiniteTableUpdateAction = (
     name: string,
     id: string,
+    columns: string[],
     pageKey: string,
     start?: number,
     end?: number,
@@ -221,6 +237,7 @@ export const createRequestInfiniteTableUpdateAction = (
         end: end,
         orderby: orderBy,
         sort: sort,
+        columns: columns,
     },
 });
 
@@ -230,7 +247,7 @@ export const createSetLocationsAction = (locations: Record<string, string>): Tai
     payload: { value: locations },
 });
 
-type WsMessageType = "A" | "U" | "T" | "MU" | "RU";
+type WsMessageType = "A" | "U" | "T" | "MU" | "RU" | "CU";
 
 interface WsMessage {
     type: WsMessageType;
