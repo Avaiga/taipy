@@ -27,12 +27,12 @@ from .taipyimage import TaipyImage
 from .utils import (
     ISOToDate,
     Singleton,
+    _get_dict_value,
     _MapDictionary,
     attrsetter,
     dateToISO,
     get_client_var_name,
     get_date_col_str_name,
-    _get_dict_value,
 )
 from .wstype import WsType
 
@@ -73,9 +73,9 @@ class Gui(object, metaclass=Singleton):
         # Load default config
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
-        self._adapter_for_type: dict(str, FunctionType) = {}
-        self._type_for_variable: dict(str, str) = {}
-        self._list_for_variable: dict(str, str) = {}
+        self._adapter_for_type: t.Dict[str, FunctionType] = {}
+        self._type_for_variable: t.Dict[str, str] = {}
+        self._list_for_variable: t.Dict[str, str] = {}
         self._update_function = None
         self._action_function = None
         # key = expression, value = hashed value of the expression
@@ -233,9 +233,7 @@ class Gui(object, metaclass=Singleton):
                 ws_dict[_var + ".refresh"] = True
             else:
                 if isinstance(newvalue, list):
-                    new_list = []
-                    for idx, elt in enumerate(newvalue):
-                        new_list.append(self._run_adapter_for_var(_var, elt, idx))
+                    new_list = [self._run_adapter_for_var(_var, elt, idx) for idx, elt in enumerate(newvalue)]
                     newvalue = new_list
                 else:
                     newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
@@ -473,12 +471,12 @@ class Gui(object, metaclass=Singleton):
             if id_only:
                 return value[0]
             else:
-                return (value[0], TaipyImage.get_dict_or(value[1]))
+                return (value[0], TaipyImage.get_dict_or(value[1]))  # type: ignore
         elif isinstance(value, (str, TaipyImage)):
             if id_only:
                 return self._get_id(value, index)
             else:
-                return (self._get_id(value, index), TaipyImage.get_dict_or(value))
+                return (self._get_id(value, index), TaipyImage.get_dict_or(value))  # type: ignore
         return None
 
     def _get_id(self, value: t.Any, index: t.Optional[int]) -> str:
@@ -489,7 +487,7 @@ class Gui(object, metaclass=Singleton):
         elif index is not None:
             return str(index)
         else:
-            return id(value)
+            return id(value)  # type: ignore
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:
