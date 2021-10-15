@@ -12,5 +12,10 @@ class Synchronous(Executor):
     @staticmethod
     def submit(fn, /, *args, **kwargs):
         future: Future = Future()
-        future.set_result(fn(*args, **kwargs))
+
+        try:
+            future.set_result(fn(*args, **kwargs))
+        except Exception as e:
+            future.set_exception(e)
+
         return future

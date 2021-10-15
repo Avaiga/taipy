@@ -74,7 +74,6 @@ class TaskScheduler:
     def __execute_jobs(self):
         while not self.jobs_to_run.empty() and self.__executor.can_execute():
             job_to_run = self.jobs_to_run.get()
-            job_to_run.running()
             self.__executor.execute(job_to_run)
 
     def __job_finished(self, job: Job):

@@ -15,3 +15,10 @@ class NonExistingJob(RuntimeError):
     def __init__(self, job_id: str):
         self.message = f"Job : {job_id} does not exist."
 
+
+class DataSourceWritingError(RuntimeError):
+    """
+    Exception raised if an error happen during the writing in a datasource
+    """
+
+    pass

@@ -17,12 +17,15 @@ class Executor:
         return self.__nb_worker_available > 0
 
     def execute(self, job: Job):
-        self.__nb_worker_available -= 1
-        future = self.__executor.submit(job.to_execute())
-        future.add_done_callback(self._job_finished)
-        future.add_done_callback(lambda ft: job.write(ft.result()))
+        job.execute(self.__run_job)
 
-    def _job_finished(self, _):
+    def __run_job(self, fct):
+        self.__nb_worker_available -= 1
+        future = self.__executor.submit(fct)
+        future.add_done_callback(self.__job_finished)
+        return future
+
+    def __job_finished(self, _):
         self.__nb_worker_available += 1
 
     @staticmethod

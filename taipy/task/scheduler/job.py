@@ -1,11 +1,12 @@
 __all__ = ["Job", "JobId"]
 
 import logging
+from concurrent.futures import Future
 from datetime import datetime
 from functools import partial
 from typing import Any, Callable, List, NewType
 
-from taipy.data import DataSource
+from taipy.exceptions.job import DataSourceWritingError
 from taipy.task.scheduler.status import Status
 from taipy.task.task import Task
 
@@ -27,6 +28,7 @@ class Job:
         self.creation_date = datetime.now()
         self._subscribers: List[Callable] = []
         self.__task = task
+        self.__reasons: List[Exception] = []
         self.__status = Status.SUBMITTED
 
     def __contains__(self, task: Task):
@@ -46,6 +48,10 @@ class Job:
 
     def __eq__(self, other):
         return self.id == other.id
+
+    @property
+    def reasons(self) -> List[Exception]:
+        return self.__reasons
 
     @_run_callbacks
     def blocked(self):
@@ -101,30 +107,41 @@ class Job:
         if self.__status != Status.SUBMITTED:
             function(self)
 
-    def to_execute(self) -> partial:
+    def execute(self, executor: Callable[[partial], Future]):
         self.running()
-        return partial(self.__task.function, *[i.get() for i in self.__task.input.values()])
+        ft = executor(partial(self.__task.function, *[i.get() for i in self.__task.input.values()]))
+        ft.add_done_callback(self.__write)
 
-    def write(self, result: Any):
-        results = [result] if len(self.__task.output) == 1 else result
-        if self._write(results, self.__task.output):
-            self.completed()
-        else:
-            self.failed()
-
-    @classmethod
-    def _write(cls, results, outputs) -> bool:
-        if len(results) == len(outputs):
-            return all([cls._write_result_in_output(res, output) for res, output in zip(results, outputs.values())])
-        else:
-            logging.error("Error, wrong number of result or task output")
-            return False
-
-    @staticmethod
-    def _write_result_in_output(result: Any, output: DataSource):
+    def __write(self, ft: Future):
         try:
-            output.write(result)
-            return True
+            results = self.__extract_results(ft)
+            self.__write_results_in_output(results)
         except Exception as e:
-            logging.error(f"Error on writing output {e}")
-            return False
+            self.__reasons.append(e)
+        finally:
+            self.__update_status()
+
+    def __extract_results(self, ft: Future) -> List[Any]:
+        results = [ft.result()] if len(self.__task.output) == 1 else ft.result()
+
+        if len(results) != len(self.__task.output):
+            logging.error("Error, wrong number of result or task output")
+            raise DataSourceWritingError("Error, wrong number of result or task output")
+
+        return results
+
+    def __write_results_in_output(self, results: List[Any]):
+        for res, output in zip(results, self.__task.output.values()):
+            try:
+                output.write(res)
+            except Exception as e:
+                self.__reasons.append(
+                    DataSourceWritingError(f"Error on writing in datasource {output.config_name}: {e}")
+                )
+                logging.error(f"Error on writing output {e}")
+
+    def __update_status(self):
+        if self.__reasons:
+            self.failed()
+        else:
+            self.completed()

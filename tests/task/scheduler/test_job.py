@@ -1,3 +1,4 @@
+from concurrent.futures import Future
 from time import sleep
 from unittest.mock import MagicMock
 
@@ -8,14 +9,22 @@ from taipy.task.scheduler.job import Job, JobId
 
 
 @pytest.fixture
-def task():
-    task_id = TaskId("task_id1")
+def task_id():
+    return TaskId("task_id1")
+
+
+@pytest.fixture
+def task(task_id):
     return Task(config_name="name", input=[], function=print, output=[], id=task_id)
 
 
 @pytest.fixture
-def job(task):
-    job_id = JobId("id1")
+def job_id():
+    return JobId("id1")
+
+
+@pytest.fixture
+def job(task, job_id):
     return Job(job_id, task)
 
 
@@ -76,3 +85,42 @@ def test_notification_job(job):
 
     job.completed()
     subscribe.assert_called_once_with(job)
+
+
+def test_handle_exception_in_user_function(task_id, job_id):
+    f = Future()
+    task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
+    job = Job(job_id, task)
+
+    job.execute(lambda r: _runner(r, f))
+    assert job.is_failed()
+    assert "Something bad has happened" == str(job.reasons[0])
+
+    with pytest.raises(RuntimeError):
+        f.result()
+
+
+def test_handle_exception_when_writing_datasource(task_id, job_id):
+    output = MagicMock()
+    output.config_name = "my_raising_datasource"
+    output.write.side_effect = ValueError()
+    task = Task(config_name="name", input=[], function=print, output=[output], id=task_id)
+    job = Job(job_id, task)
+
+    job.execute(_runner)
+    assert job.is_failed()
+    stack_trace = str(job.reasons[0])
+    assert "my_raising_datasource" in stack_trace
+
+
+def _error():
+    raise RuntimeError("Something bad has happened")
+
+
+def _runner(fct, future=None):
+    f = future or Future()
+    try:
+        f.set_result(fct())
+    except Exception as e:
+        f.set_exception(e)
+    return f
