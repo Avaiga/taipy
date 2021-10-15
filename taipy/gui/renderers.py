@@ -3,6 +3,8 @@ from __future__ import annotations
 import typing as t
 from abc import ABC, abstractmethod
 
+from ._html_ext import TaipyHTMLParser
+
 
 class PageRenderer(ABC):
     def __init__(self, content: t.Optional[str], filename: t.Optional[str]) -> None:
@@ -39,4 +41,6 @@ class Html(PageRenderer):
 
     # Generate JSX from HTML
     def render(self) -> str:
-        return ""
+        parser = TaipyHTMLParser()
+        parser.feed(t.cast(str, self._content))
+        return parser.get_jsx()

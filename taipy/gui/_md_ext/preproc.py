@@ -58,10 +58,7 @@ class Preprocessor(MdPreprocessor):
                     new_line += f' {property[0]}="{prop_value}"'
                 new_line += ":tAiPy"
                 last_index = m.end()
-            if last_index == 0:
-                new_line = line
-            else:
-                new_line = new_line + line[last_index:]
+            new_line = line if last_index == 0 else new_line + line[last_index:]
             line = new_line
             new_line = ""
             last_index = 0
@@ -69,10 +66,7 @@ class Preprocessor(MdPreprocessor):
                 new_line += line[last_index : m.end()]
                 new_line += "{: key=" + Builder._get_key("link") + "}"
                 last_index = m.end()
-            if last_index == 0:
-                new_line = line
-            else:
-                new_line = new_line + line[last_index:]
+            new_line = line if last_index == 0 else new_line + line[last_index:]
             new_lines.append(new_line)
         return new_lines
 

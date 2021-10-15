@@ -9,10 +9,10 @@ import pandas as pd
 from markdown.util import etree
 
 from ..page import Partial
-from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true, _get_dict_value
+from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from ..wstype import AttributeType
-from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 from .jsonencoder import TaipyJsonEncoder
+from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
 
 class Builder:
@@ -85,7 +85,7 @@ class Builder:
     @staticmethod
     def _get_key(name: str) -> str:
         key_index = _get_dict_value(Builder.__keys, name)
-        Builder.__keys[name] = (key_index if key_index else 0) + 1
+        Builder.__keys[name] = (key_index or 0) + 1
         return name + "." + (str(key_index) if key_index else "0")
 
     def __get_list_of_(self, name: str):
@@ -137,17 +137,17 @@ class Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def get_adapter(self, property_name: str):
+    def get_adapter(self, property_name: str):  # noqa: C901
         lov = self.__get_list_of_(property_name)
         from_string = hasattr(self, "from_string") and self.from_string
         if isinstance(lov, list):
             adapter = self.__get_property("adapter")
             if not isinstance(adapter, FunctionType):
                 if adapter:
-                    warnings.warn(f"Component Selector Attribute Adapter is invalid")
+                    warnings.warn("Component Selector Attribute Adapter is invalid")
                 adapter = None
             var_type = self.__get_property("type")
-            if isinstance(var_type, t.Type):
+            if isinstance(var_type, t.Type):  # type: ignore
                 var_type = var_type.__name__
             if not isinstance(var_type, str):
                 elt = None
@@ -178,11 +178,7 @@ class Builder:
                 self._gui.add_adapter_for_type(var_type, adapter)
 
             if adapter is None:
-                if from_string:
-                    adapter = lambda x: (x, x)
-                else:
-                    adapter = lambda x: str(x)
-
+                adapter = (lambda x: (x, x)) if from_string else (lambda x: str(x))  # type: ignore
             ret_list = []
             if len(lov) > 0:
                 ret = self._gui._get_valid_adapter_result(lov[0], index=0)
@@ -196,10 +192,7 @@ class Builder:
             self.attributes["default_lov"] = ret_list
 
             ret_list = []
-            if isinstance(self.value, list):
-                val_list = self.value
-            else:
-                val_list = [self.value]
+            val_list = self.value if isinstance(self.value, list) else [self.value]
             for val in val_list:
                 ret = self._gui._run_adapter(adapter, val, adapter.__name__, -1, id_only=True)
                 if ret is not None:
@@ -335,3 +328,9 @@ class Builder:
 
     def build(self):
         return self.el, self.m.start(0), self.m.end(0)
+
+    def build_to_string(self):
+        el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))
+        el_str = el_str.replace("<?xml version='1.0' encoding='utf8'?>\n", "")
+        el_str = el_str.replace("/>", ">")
+        return el_str, self.element_name

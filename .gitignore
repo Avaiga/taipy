@@ -114,7 +114,7 @@ ENV/
 site/
 
 # Demo Testing File
-demo.py
+demo*.py
 *.csv
 demo.css
 object_selection.py
