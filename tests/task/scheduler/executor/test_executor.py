@@ -19,7 +19,7 @@ def test_can_execute_parallel():
     lock = m.Lock()
 
     task_id = TaskId("task_id1")
-    task = Task(name="name", input=[], function=partial(execute, lock), output=[], id=task_id)
+    task = Task(config_name="name", input=[], function=partial(execute, lock), output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task)
 
@@ -38,7 +38,7 @@ def test_can_execute_parallel_multiple_submit():
     lock = m.Lock()
 
     task_id = TaskId("task_id1")
-    task = Task(name="name", input=[], function=partial(execute, lock), output=[], id=task_id)
+    task = Task(config_name="name", input=[], function=partial(execute, lock), output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task)
 
@@ -52,7 +52,7 @@ def test_can_execute_parallel_multiple_submit():
 
 def test_can_execute_synchronous():
     task_id = TaskId("task_id1")
-    task = Task(name="name", input=[], function=print, output=[], id=task_id)
+    task = Task(config_name="name", input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task)
 

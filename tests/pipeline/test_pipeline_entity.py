@@ -18,7 +18,7 @@ def test_create_pipeline_entity():
     task = Task("baz", [input], print, [output], TaskId("task_id"))
     pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
     assert pipeline.id is not None
-    assert pipeline.name == "name_1"
+    assert pipeline.config_name == "name_1"
     assert pipeline.description == "description"
     assert pipeline.foo == input
     assert pipeline.bar == output
@@ -49,10 +49,12 @@ def test_check_consistency():
     pipeline_4 = Pipeline("name_4", {}, [task_4_1, task_4_2])
     assert not pipeline_4.is_consistent  # Not a Dag
 
+    class FakeDataSource:
+        config_name = "config_name_of_a_fake_DS"
     input_5 = DataSource("foo", Scope.PIPELINE, "input_id_5")
     output_5 = DataSource("foo", Scope.PIPELINE, "output_id_5")
     task_5_1 = Task("foo", [input_5], print, [output_5], TaskId("task_id_5_1"))
-    task_5_2 = Task("bar", [output_5], print, [task_5_1], TaskId("task_id_5_2"))
+    task_5_2 = Task("bar", [output_5], print, [FakeDataSource()], TaskId("task_id_5_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_5_1, task_5_2])
     assert not pipeline_2.is_consistent
 
@@ -95,4 +97,4 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -------------------------> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert pipeline.get_sorted_task_entities() == [[task_1], [task_2, task_4], [task_3]]
+    assert pipeline.get_sorted_tasks() == [[task_1], [task_2, task_4], [task_3]]

@@ -1,61 +1,61 @@
 import itertools
 import logging
-from typing import Dict, Optional
+from typing import Dict, Optional, Iterable
 
 from taipy.data import DataSource
 from taipy.data.data_source_config import DataSourceConfig
 from taipy.data.manager import DataManager
-from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.task import NonExistingTask
+from taipy.exceptions import NonExistingTask
+from taipy.exceptions.task import NonExistingTaskConfig
 from taipy.task.task import Task, TaskId
 from taipy.task.task_config import TaskConfig
 
 
 class TaskManager:
     # This represents the task database.
-    task_entities: Dict[(TaskId, Task)] = {}
-    __TASKS: Dict[(str, TaskConfig)] = {}
+    tasks: Dict[(TaskId, Task)] = {}
+    __TASK_CONFIGS: Dict[(str, TaskConfig)] = {}
     data_manager = DataManager()
 
     def delete_all(self):
-        self.task_entities: Dict[(TaskId, Task)] = {}
-        self.__TASKS: Dict[(str, TaskConfig)] = {}
+        self.tasks: Dict[(TaskId, Task)] = {}
+        self.__TASK_CONFIGS: Dict[(str, TaskConfig)] = {}
 
-    def register_task(self, task: TaskConfig):
-        [self.data_manager.register_data_source_config(data_source) for data_source in task.input]
-        [self.data_manager.register_data_source_config(data_source) for data_source in task.output]
-        self.__TASKS[task.name] = task
+    def register(self, task_config: TaskConfig):
+        [self.data_manager.register(data_source_config) for data_source_config in task_config.input]
+        [self.data_manager.register(data_source_config) for data_source_config in task_config.output]
+        self.__TASK_CONFIGS[task_config.name] = task_config
 
-    def get_task(self, name: str) -> TaskConfig:
+    def get_task_config(self, name: str) -> TaskConfig:
         try:
-            return self.__TASKS[name]
+            return self.__TASK_CONFIGS[name]
         except KeyError:
-            logging.error(f"Task : {name} does not exist.")
-            raise NonExistingTask(name)
+            logging.error(f"Task config : {name} does not exist.")
+            raise NonExistingTaskConfig(name)
 
-    def get_tasks(self):
-        return self.__TASKS
+    def get_task_configs(self) -> Iterable[TaskConfig]:
+        return self.__TASK_CONFIGS.values()
 
-    def save_task_entity(self, task: Task):
+    def save(self, task: Task):
         logging.info(f"Task : {task.id} created or updated.")
-        self.task_entities[task.id] = task
+        self.tasks[task.id] = task
 
-    def create_task_entity(
-        self, task: TaskConfig, data_sources: Optional[Dict[DataSourceConfig, DataSource]] = None
+    def create(
+        self, task_config: TaskConfig, data_sources: Optional[Dict[DataSourceConfig, DataSource]] = None
     ) -> Task:
         if data_sources is None:
             data_sources = {
-                ds: self.data_manager.get_or_create(ds) for ds in set(itertools.chain(task.input, task.output))
+                ds_config: self.data_manager.get_or_create(ds_config) for ds_config in set(itertools.chain(task_config.input, task_config.output))
             }
-        input_entities = [data_sources[input] for input in task.input]
-        output_entities = [data_sources[output] for output in task.output]
-        task_entity = Task(task.name, input_entities, task.function, output_entities)
-        self.save_task_entity(task_entity)
-        return task_entity
+        inputs = [data_sources[input_config] for input_config in task_config.input]
+        outputs = [data_sources[output_config] for output_config in task_config.output]
+        task = Task(task_config.name, inputs, task_config.function, outputs)
+        self.save(task)
+        return task
 
-    def get_task_entity(self, task_id: TaskId) -> Task:
+    def get_task(self, task_id: TaskId) -> Task:
         try:
-            return self.task_entities[task_id]
+            return self.tasks[task_id]
         except KeyError:
-            logging.error(f"Task entity : {task_id} does not exist.")
-            raise NonExistingTaskEntity(task_id)
+            logging.error(f"Task : {task_id} does not exist.")
+            raise NonExistingTask(task_id)

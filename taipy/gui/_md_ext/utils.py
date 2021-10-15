@@ -13,7 +13,7 @@ def _add_to_dict_and_get(dico, key, value):
 
 def _get_columns_dict(value, columns, date_format="MM/dd/yyyy", number_format=None):
     if isinstance(value, pd.DataFrame):
-        coltypes = value.dtypes.apply(lambda x: x.name).to_dict()
+        coltypes = value.dtypes.apply(lambda x: x.config_name).to_dict()
         if isinstance(columns, str):
             columns = [s.strip() for s in columns.split(";")]
         if isinstance(columns, (list, tuple)):

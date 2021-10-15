@@ -20,17 +20,17 @@ class Pipeline:
 
     def __init__(
         self,
-        name: str,
+        config_name: str,
         properties: Dict[str, str],
-        task_entities: List[Task],
+        tasks: List[Task],
         pipeline_id: PipelineId = None,
     ):
-        self.name = self.__protect_name(name)
+        self.config_name = self.__protect_name(config_name)
         self.id: PipelineId = pipeline_id or PipelineId(
-            self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
+            self.__ID_SEPARATOR.join([self.__ID_PREFIX, config_name, str(uuid.uuid4())])
         )
         self.properties = properties
-        self.task_entities = {task.name: task for task in task_entities}
+        self.tasks = {task.config_name: task for task in tasks}
         self.is_consistent = self.__is_consistent()
 
     @staticmethod
@@ -41,9 +41,9 @@ class Pipeline:
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
-        if protected_attribute_name in self.task_entities:
-            return self.task_entities[protected_attribute_name]
-        for task in self.task_entities.values():
+        if protected_attribute_name in self.tasks:
+            return self.tasks[protected_attribute_name]
+        for task in self.tasks.values():
             if protected_attribute_name in task.input:
                 return task.input[protected_attribute_name]
             if protected_attribute_name in task.output:
@@ -67,7 +67,7 @@ class Pipeline:
 
     def __build_dag(self):
         graph = nx.DiGraph()
-        for task in self.task_entities.values():
+        for task in self.tasks.values():
             for predecessor in task.input.values():
                 graph.add_edges_from([(predecessor, task)])
             for successor in task.output.values():
@@ -77,20 +77,20 @@ class Pipeline:
     def to_model(self) -> PipelineModel:
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(lambda: [])
-        for task in self.task_entities.values():
+        for task in self.tasks.values():
             for predecessor in task.input.values():
                 source_task_edges[predecessor.id].append(str(task.id))
             for successor in task.output.values():
                 task_source_edges[str(task.id)].append(successor.id)
         return PipelineModel(
             self.id,
-            self.name,
+            self.config_name,
             self.properties,
             Dag(source_task_edges),
             Dag(task_source_edges),
         )
 
-    def get_sorted_task_entities(self) -> List[List[Task]]:
+    def get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
         return list(
             nodes

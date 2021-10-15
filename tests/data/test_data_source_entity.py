@@ -43,7 +43,7 @@ class TestCSVDataSourceEntity:
         ds = CSVDataSource.create("fOo BAr", Scope.PIPELINE, "data/source/path")
 
         assert isinstance(ds, CSVDataSource)
-        assert ds.name == "foo_bar"
+        assert ds.config_name == "foo_bar"
         assert ds.has_header is False
         assert ds.path == "data/source/path"
         assert ds.type() == "csv"
@@ -76,7 +76,7 @@ class TestEmbeddedDataSourceEntity:
 
     def test_create(self):
         ds = EmbeddedDataSource.create("foobar BaZ", Scope.PIPELINE, data="Embedded Data Source")
-        assert ds.name == "foobar_baz"
+        assert ds.config_name == "foobar_baz"
         assert isinstance(ds, EmbeddedDataSource)
         assert ds.type() == "embedded"
         assert ds.id is not None

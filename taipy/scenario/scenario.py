@@ -16,32 +16,32 @@ class Scenario:
 
     def __init__(
         self,
-        name: str,
-        pipeline_entities: List[Pipeline],
+        config_name: str,
+        pipelines: List[Pipeline],
         properties: Dict[str, str],
         scenario_id: ScenarioId = None,
     ):
-        self.name = self.__protect_name(name)
+        self.config_name = self.__protect_name(config_name)
         self.id: ScenarioId = scenario_id or ScenarioId(
-            self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
+            self.__ID_SEPARATOR.join([self.__ID_PREFIX, config_name, str(uuid.uuid4())])
         )
-        self.pipeline_entities = {p.name: p for p in pipeline_entities}
+        self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
 
     @staticmethod
-    def __protect_name(name):
-        return name.strip().lower().replace(' ', '_')
+    def __protect_name(config_name):
+        return config_name.strip().lower().replace(' ', '_')
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
-        if protected_attribute_name in self.pipeline_entities:
-            return self.pipeline_entities[protected_attribute_name]
-        for pipeline in self.pipeline_entities.values():
-            if protected_attribute_name in pipeline.task_entities:
-                return pipeline.task_entities[protected_attribute_name]
-            for task in pipeline.task_entities.values():
+        if protected_attribute_name in self.pipelines:
+            return self.pipelines[protected_attribute_name]
+        for pipeline in self.pipelines.values():
+            if protected_attribute_name in pipeline.tasks:
+                return pipeline.tasks[protected_attribute_name]
+            for task in pipeline.tasks.values():
                 if protected_attribute_name in task.input:
                     return task.input[protected_attribute_name]
                 if protected_attribute_name in task.output:
@@ -52,7 +52,7 @@ class Scenario:
     def to_model(self) -> ScenarioModel:
         return ScenarioModel(
             self.id,
-            self.name,
-            [entity.id for entity in self.pipeline_entities.values()],
+            self.config_name,
+            [pipeline.id for pipeline in self.pipelines.values()],
             self.properties,
         )

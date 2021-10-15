@@ -8,22 +8,22 @@ from taipy.task import Task, TaskId
 def test_create_scenario_entity():
     scenario_entity_1 = Scenario("fOo ", [], {"key": "value"})
     assert scenario_entity_1.id is not None
-    assert scenario_entity_1.name == "foo"
-    assert scenario_entity_1.pipeline_entities == {}
+    assert scenario_entity_1.config_name == "foo"
+    assert scenario_entity_1.pipelines == {}
     assert scenario_entity_1.properties == {"key": "value"}
     assert scenario_entity_1.key == "value"
 
     scenario_entity_2 = Scenario("   bar   ", [], {}, ScenarioId("baz"))
     assert scenario_entity_2.id == "baz"
-    assert scenario_entity_2.name == "bar"
-    assert scenario_entity_2.pipeline_entities == {}
+    assert scenario_entity_2.config_name == "bar"
+    assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
 
     pipeline_entity = Pipeline("qux", {}, [])
     scenario_entity_3 = Scenario("quux", [pipeline_entity], {})
     assert scenario_entity_3.id is not None
-    assert scenario_entity_3.name == "quux"
-    assert len(scenario_entity_3.pipeline_entities) == 1
+    assert scenario_entity_3.config_name == "quux"
+    assert len(scenario_entity_3.pipelines) == 1
     assert scenario_entity_3.qux == pipeline_entity
     assert scenario_entity_3.properties == {}
 

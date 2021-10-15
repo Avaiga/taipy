@@ -14,7 +14,7 @@ class CSVDataSource(DataSource):
 
     Attributes
     ----------
-    name: str
+    config_name: str
         name that identifies the data source config
     scope: int
         number that refers to the scope of usage of the data source
@@ -26,7 +26,7 @@ class CSVDataSource(DataSource):
     __TYPE = "csv"
 
     def __init__(
-        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
+        self, config_name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
     ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
@@ -34,7 +34,7 @@ class CSVDataSource(DataSource):
                 f"{', '.join(x for x in missing)} were not informed and are required"
             )
         super().__init__(
-            name,
+            config_name,
             scope,
             id,
             path=properties.get("path"),
@@ -44,13 +44,13 @@ class CSVDataSource(DataSource):
     @classmethod
     def create(
         cls,
-        name: str,
+        config_name: str,
         scope: Scope,
         path: str,
         has_header: bool = False,
     ) -> DataSource:
         return CSVDataSource(
-            name, scope, None, {"path": path, "has_header": has_header}
+            config_name, scope, None, {"path": path, "has_header": has_header}
         )
 
     @classmethod
@@ -74,7 +74,7 @@ class CSVDataSource(DataSource):
     def to_json(self):
         return json.dumps(
             {
-                "name": self.name,
+                "config_name": self.config_name,
                 "type": "csv",
                 "scope": self.scope.name,
                 "path": self.path,
@@ -85,7 +85,7 @@ class CSVDataSource(DataSource):
     @staticmethod
     def from_json(data_source_dict):
         return CSVDataSource.create(
-            name=data_source_dict.get("name"),
+            config_name=data_source_dict.get("config_name"),
             scope=Scope[data_source_dict.get("scope")],
             path=data_source_dict.get("path"),
             has_header=data_source_dict.get("has_header"),

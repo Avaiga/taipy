@@ -18,7 +18,7 @@ class TestDataManager:
         csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
         csv_entity_1 = dm.create_data_source(csv_ds)
         assert dm.get_data_source(csv_entity_1.id).id == csv_entity_1.id
-        assert dm.get_data_source(csv_entity_1.id).name == csv_entity_1.name
+        assert dm.get_data_source(csv_entity_1.id).config_name == csv_entity_1.config_name
         assert dm.get_data_source(csv_entity_1.id).scope == csv_entity_1.scope
         assert dm.get_data_source(csv_entity_1.id).properties == csv_entity_1.properties
 
@@ -29,7 +29,7 @@ class TestDataManager:
         fetched_entity = dm.get_data_source(embedded_entity.id)
 
         assert fetched_entity.id == embedded_entity.id
-        assert fetched_entity.name == embedded_entity.name
+        assert fetched_entity.config_name == embedded_entity.config_name
         assert fetched_entity.scope == embedded_entity.scope
         assert fetched_entity.properties == embedded_entity.properties
 
@@ -49,14 +49,14 @@ class TestDataManager:
         dm = DataManager()
         csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
         csv = dm.create_data_source(csv_ds)
-        assert csv.name == "foo"
+        assert csv.config_name == "foo"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "path_from_config_file"
         assert csv.has_header is False
 
         csv_ds = DataSourceConfig(name="bar", type="csv", path="bar", has_header=True)
         csv = dm.create_data_source(csv_ds)
-        assert csv.name == "bar"
+        assert csv.config_name == "bar"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "bar"
         assert csv.has_header is False
@@ -104,4 +104,4 @@ class TestDataManager:
 
         global_ds2 = dm.get_or_create(global_ds_config)
         assert len(dm.get_all()) == 3
-        assert global_ds.name == global_ds2.name
+        assert global_ds.config_name == global_ds2.config_name

@@ -26,7 +26,7 @@ class DataManager:
         data_source_config &= ConfigurationManager.data_manager_configuration
         try:
             return self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](
-                name=data_source_config.name,
+                config_name=data_source_config.name,
                 scope=data_source_config.scope,
                 properties=data_source_config.properties,
             )
@@ -36,7 +36,7 @@ class DataManager:
 
     def __persist_data_source(self, data_source_config: DataSourceConfig, data_source: DataSource):
         self.save_data_source(data_source)
-        self.register_data_source_config(data_source_config)
+        self.register(data_source_config)
 
     def get_all(self) -> Dict[str, DataSourceConfig]:
         return self.__DATA_SOURCE_CONFIG_DB
@@ -45,7 +45,7 @@ class DataManager:
         self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
         self.__DATA_SOURCE_CONFIG_DB: Dict[str, DataSourceConfig] = {}
 
-    def register_data_source_config(self, data_source_config: DataSourceConfig):
+    def register(self, data_source_config: DataSourceConfig):
         self.__DATA_SOURCE_CONFIG_DB[data_source_config.name] = data_source_config
 
     def get_data_source_config(self, name) -> Optional[DataSourceConfig]:
@@ -67,7 +67,7 @@ class DataManager:
     def save_data_source(self, data_source: DataSource):
         self.create_data_source_model(
             data_source.id,
-            data_source.name,
+            data_source.config_name,
             data_source.scope,
             data_source.type(),
             data_source.properties,
@@ -76,7 +76,7 @@ class DataManager:
     def get_data_source(self, data_source_id: str) -> DataSource:
         model = self.fetch_data_source_model(data_source_id)
         return self.__DATA_SOURCE_CLASS_MAP[model.type](
-            name=model.name,
+            config_name=model.name,
             scope=model.scope,
             id=model.id,
             properties=model.data_source_properties,

@@ -1,9 +1,9 @@
 import pytest
 
 from taipy.data import DataSource, DataSourceConfig, EmbeddedDataSource, Scope
-from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity
+from taipy.exceptions import NonExistingTask
+from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.exceptions.scenario import NonExistingScenarioConfig, NonExistingScenario
 from taipy.pipeline import Pipeline, PipelineConfig, PipelineId
 from taipy.scenario import Scenario, ScenarioConfig, ScenarioId, ScenarioManager
 from taipy.task import Task, TaskConfig, TaskId, TaskScheduler
@@ -25,39 +25,39 @@ def test_register_and_get_scenario():
 
     # No existing Scenario
     scenario_manager = ScenarioManager()
-    assert len(scenario_manager.get_scenarios()) == 0
-    with pytest.raises(NonExistingScenario):
-        scenario_manager.get_scenario(name_1)
-    with pytest.raises(NonExistingScenario):
-        scenario_manager.get_scenario(name_2)
+    assert len(scenario_manager.get_scenario_configs()) == 0
+    with pytest.raises(NonExistingScenarioConfig):
+        scenario_manager.get_scenario_config(name_1)
+    with pytest.raises(NonExistingScenarioConfig):
+        scenario_manager.get_scenario_config(name_2)
 
     # Save one scenario. We expect to have only one scenario stored
-    scenario_manager.register_scenario(scenario_1)
-    assert len(scenario_manager.get_scenarios()) == 1
-    assert scenario_manager.get_scenario(name_1) == scenario_1
-    with pytest.raises(NonExistingScenario):
-        scenario_manager.get_scenario(name_2)
+    scenario_manager.register(scenario_1)
+    assert len(scenario_manager.get_scenario_configs()) == 1
+    assert scenario_manager.get_scenario_config(name_1) == scenario_1
+    with pytest.raises(NonExistingScenarioConfig):
+        scenario_manager.get_scenario_config(name_2)
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
-    scenario_manager.register_scenario(scenario_2)
-    assert len(scenario_manager.get_scenarios()) == 2
-    assert scenario_manager.get_scenario(name_1) == scenario_1
-    assert scenario_manager.get_scenario(name_2) == scenario_2
+    scenario_manager.register(scenario_2)
+    assert len(scenario_manager.get_scenario_configs()) == 2
+    assert scenario_manager.get_scenario_config(name_1) == scenario_1
+    assert scenario_manager.get_scenario_config(name_2) == scenario_2
 
     # We save the first scenario again. We expect nothing to change.
-    scenario_manager.register_scenario(scenario_1)
-    assert len(scenario_manager.get_scenarios()) == 2
-    assert scenario_manager.get_scenario(name_1) == scenario_1
-    assert scenario_manager.get_scenario(name_2) == scenario_2
-    assert scenario_manager.get_scenario(name_1).properties.get("title") is None
+    scenario_manager.register(scenario_1)
+    assert len(scenario_manager.get_scenario_configs()) == 2
+    assert scenario_manager.get_scenario_config(name_1) == scenario_1
+    assert scenario_manager.get_scenario_config(name_2) == scenario_2
+    assert scenario_manager.get_scenario_config(name_1).properties.get("title") is None
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
-    scenario_manager.register_scenario(scenario_3_with_same_name)
-    assert len(scenario_manager.get_scenarios()) == 2
-    assert scenario_manager.get_scenario(name_1) == scenario_3_with_same_name
-    assert scenario_manager.get_scenario(name_2) == scenario_2
-    assert scenario_manager.get_scenario(name_1).properties.get("title") == scenario_3_with_same_name.properties.get(
+    scenario_manager.register(scenario_3_with_same_name)
+    assert len(scenario_manager.get_scenario_configs()) == 2
+    assert scenario_manager.get_scenario_config(name_1) == scenario_3_with_same_name
+    assert scenario_manager.get_scenario_config(name_2) == scenario_2
+    assert scenario_manager.get_scenario_config(name_1).properties.get("title") == scenario_3_with_same_name.properties.get(
         "title"
     )
 
@@ -80,60 +80,60 @@ def test_save_and_get_scenario_entity():
 
     # No existing scenario entity
     scenario_manager = ScenarioManager()
-    assert len(scenario_manager.get_scenario_entities()) == 0
-    with pytest.raises(NonExistingScenarioEntity):
-        scenario_manager.get_scenario_entity(scenario_id_1)
-    with pytest.raises(NonExistingScenarioEntity):
-        scenario_manager.get_scenario_entity(scenario_id_2)
+    assert len(scenario_manager.get_scenarios()) == 0
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.get_scenario(scenario_id_1)
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.get_scenario(scenario_id_2)
 
     # Save one scenario. We expect to have only one scenario stored
-    scenario_manager.save_scenario_entity(scenario_1)
-    assert len(scenario_manager.get_scenario_entities()) == 1
-    assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
-    assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_1.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
-    with pytest.raises(NonExistingScenarioEntity):
-        scenario_manager.get_scenario_entity(scenario_id_2)
+    scenario_manager.save(scenario_1)
+    assert len(scenario_manager.get_scenarios()) == 1
+    assert scenario_manager.get_scenario(scenario_id_1).id == scenario_1.id
+    assert scenario_manager.get_scenario(scenario_id_1).config_name == scenario_1.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_1).pipelines) == 0
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.get_scenario(scenario_id_2)
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
-    scenario_manager.pipeline_manager.task_manager.save_task_entity(task_2)
-    scenario_manager.pipeline_manager.save_pipeline_entity(pipeline_entity_2)
-    scenario_manager.save_scenario_entity(scenario_2)
-    assert len(scenario_manager.get_scenario_entities()) == 2
-    assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
-    assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_1.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
-    assert scenario_manager.get_scenario_entity(scenario_id_2).id == scenario_2.id
-    assert scenario_manager.get_scenario_entity(scenario_id_2).name == scenario_2.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
-    assert scenario_manager.task_manager.get_task_entity(task_2.id) == task_2
+    scenario_manager.pipeline_manager.task_manager.save(task_2)
+    scenario_manager.pipeline_manager.save(pipeline_entity_2)
+    scenario_manager.save(scenario_2)
+    assert len(scenario_manager.get_scenarios()) == 2
+    assert scenario_manager.get_scenario(scenario_id_1).id == scenario_1.id
+    assert scenario_manager.get_scenario(scenario_id_1).config_name == scenario_1.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_1).pipelines) == 0
+    assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
+    assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
+    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
 
     # We save the first scenario again. We expect nothing to change
-    scenario_manager.save_scenario_entity(scenario_1)
-    assert len(scenario_manager.get_scenario_entities()) == 2
-    assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
-    assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_1.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 0
-    assert scenario_manager.get_scenario_entity(scenario_id_2).id == scenario_2.id
-    assert scenario_manager.get_scenario_entity(scenario_id_2).name == scenario_2.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
-    assert scenario_manager.task_manager.get_task_entity(task_2.id) == task_2
+    scenario_manager.save(scenario_1)
+    assert len(scenario_manager.get_scenarios()) == 2
+    assert scenario_manager.get_scenario(scenario_id_1).id == scenario_1.id
+    assert scenario_manager.get_scenario(scenario_id_1).config_name == scenario_1.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_1).pipelines) == 0
+    assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
+    assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
+    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
-    scenario_manager.pipeline_manager.task_manager.save_task_entity(
-        scenario_2.pipeline_entities[pipeline_name_2].task_entities[task_name]
+    scenario_manager.pipeline_manager.task_manager.save(
+        scenario_2.pipelines[pipeline_name_2].tasks[task_name]
     )
-    scenario_manager.pipeline_manager.save_pipeline_entity(pipeline_entity_3)
-    scenario_manager.save_scenario_entity(scenario_3_with_same_id)
-    assert len(scenario_manager.get_scenario_entities()) == 2
-    assert scenario_manager.get_scenario_entity(scenario_id_1).id == scenario_1.id
-    assert scenario_manager.get_scenario_entity(scenario_id_1).name == scenario_3_with_same_id.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_1).pipeline_entities) == 1
-    assert scenario_manager.get_scenario_entity(scenario_id_2).id == scenario_2.id
-    assert scenario_manager.get_scenario_entity(scenario_id_2).name == scenario_2.name
-    assert len(scenario_manager.get_scenario_entity(scenario_id_2).pipeline_entities) == 1
-    assert scenario_manager.task_manager.get_task_entity(task_2.id) == task_2
+    scenario_manager.pipeline_manager.save(pipeline_entity_3)
+    scenario_manager.save(scenario_3_with_same_id)
+    assert len(scenario_manager.get_scenarios()) == 2
+    assert scenario_manager.get_scenario(scenario_id_1).id == scenario_1.id
+    assert scenario_manager.get_scenario(scenario_id_1).config_name == scenario_3_with_same_id.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_1).pipelines) == 1
+    assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
+    assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
+    assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
+    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
 
 
 def test_submit():
@@ -180,30 +180,30 @@ def test_submit():
     pipeline_manager.task_scheduler = MockTaskScheduler()
 
     # scenario does not exists. We expect an exception to be raised
-    with pytest.raises(NonExistingScenarioEntity):
+    with pytest.raises(NonExistingScenario):
         scenario_manager.submit(scenario_entity.id)
 
     # scenario does exist, but pipeline does not exist.
     # We expect an exception to be raised
-    scenario_manager.save_scenario_entity(scenario_entity)
-    with pytest.raises(NonExistingPipelineEntity):
+    scenario_manager.save(scenario_entity)
+    with pytest.raises(NonExistingPipeline):
         scenario_manager.submit(scenario_entity.id)
 
     # scenario and pipeline do exist, but tasks does not exist.
     # We expect an exception to be raised
-    pipeline_manager.save_pipeline_entity(pipeline_entity_1)
-    pipeline_manager.save_pipeline_entity(pipeline_entity_2)
-    with pytest.raises(NonExistingTaskEntity):
+    pipeline_manager.save(pipeline_entity_1)
+    pipeline_manager.save(pipeline_entity_2)
+    with pytest.raises(NonExistingTask):
         scenario_manager.submit(scenario_entity.id)
 
     # scenario, pipeline, and tasks do exist.
     # We expect all the tasks to be submitted once,
     # and respecting specific constraints on the order
-    task_manager.save_task_entity(task_1)
-    task_manager.save_task_entity(task_2)
-    task_manager.save_task_entity(task_3)
-    task_manager.save_task_entity(task_4)
-    task_manager.save_task_entity(task_5)
+    task_manager.save(task_1)
+    task_manager.save(task_2)
+    task_manager.save(task_3)
+    task_manager.save(task_4)
+    task_manager.save(task_5)
     scenario_manager.submit(scenario_entity.id)
     submit_calls = pipeline_manager.task_scheduler.submit_calls
     assert len(submit_calls) == 5
@@ -249,26 +249,26 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     pipeline_2 = PipelineConfig("by 4", [task_mult_by_4])
     # ds_1 ---> mult by 4 ---> ds_4
     scenario = ScenarioConfig("Awesome scenario", [pipeline_1, pipeline_2])
-    scenario_manager.register_scenario(scenario)
+    scenario_manager.register(scenario)
 
     assert len(data_manager.get_data_sources()) == 0
-    assert len(task_manager.task_entities) == 0
-    assert len(pipeline_manager.get_pipeline_entities()) == 0
-    assert len(scenario_manager.get_scenario_entities()) == 0
+    assert len(task_manager.tasks) == 0
+    assert len(pipeline_manager.get_pipelines()) == 0
+    assert len(scenario_manager.get_scenarios()) == 0
 
-    scenario_entity = scenario_manager.create_scenario_entity(scenario)
+    scenario_entity = scenario_manager.create(scenario)
 
     assert len(data_manager.get_data_sources()) == 4
-    assert len(task_manager.task_entities) == 3
-    assert len(pipeline_manager.get_pipeline_entities()) == 2
-    assert len(scenario_manager.get_scenario_entities()) == 1
+    assert len(task_manager.tasks) == 3
+    assert len(pipeline_manager.get_pipelines()) == 2
+    assert len(scenario_manager.get_scenarios()) == 1
     assert scenario_entity.foo.get() == 1
     assert scenario_entity.bar.get() == 0
     assert scenario_entity.baz.get() == 0
     assert scenario_entity.qux.get() == 0
-    assert scenario_entity.by_6.get_sorted_task_entities()[0][0].name == task_mult_by_2.name
-    assert scenario_entity.by_6.get_sorted_task_entities()[1][0].name == task_mult_by_3.name
-    assert scenario_entity.by_4.get_sorted_task_entities()[0][0].name == task_mult_by_4.name
+    assert scenario_entity.by_6.get_sorted_tasks()[0][0].config_name == task_mult_by_2.name
+    assert scenario_entity.by_6.get_sorted_tasks()[1][0].config_name == task_mult_by_3.name
+    assert scenario_entity.by_4.get_sorted_tasks()[0][0].config_name == task_mult_by_4.name
 
 
 def test_get_set_data():
@@ -294,9 +294,9 @@ def test_get_set_data():
     pipeline_2 = PipelineConfig("by 4", [task_mult_by_4])
     # ds_1 ---> mult by 4 ---> ds_4
     scenario = ScenarioConfig("Awesome scenario", [pipeline_1, pipeline_2])
-    scenario_manager.register_scenario(scenario)
+    scenario_manager.register(scenario)
 
-    scenario_entity = scenario_manager.create_scenario_entity(scenario)
+    scenario_entity = scenario_manager.create(scenario)
 
     assert scenario_entity.foo.get() == 1
     assert scenario_entity.bar.get() == 0

@@ -1,10 +1,10 @@
 import logging
-from typing import Dict, List, Set
+from typing import Dict, List, Set, Iterable
 
 from taipy.data import DataSource
 from taipy.data.data_source_config import DataSourceConfig
-from taipy.exceptions.pipeline import NonExistingPipelineEntity
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioEntity
+from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.exceptions.scenario import NonExistingScenarioConfig, NonExistingScenario
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
 from taipy.scenario import Scenario, ScenarioConfig, ScenarioId
@@ -17,66 +17,63 @@ class ScenarioManager:
     data_manager = pipeline_manager.data_manager
 
     __SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
-    __SCENARIOS: Dict[str, ScenarioConfig] = {}
+    __SCENARIO_CONFIG_DB: Dict[str, ScenarioConfig] = {}
 
     def delete_all(self):
         self.__SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
-        self.__SCENARIOS: Dict[str, ScenarioConfig] = {}
+        self.__SCENARIO_CONFIG_DB: Dict[str, ScenarioConfig] = {}
 
-    def register_scenario(self, scenario: ScenarioConfig):
-        [self.pipeline_manager.register_pipeline(pipeline) for pipeline in scenario.pipelines]
-        self.__SCENARIOS[scenario.name] = scenario
+    def register(self, scenario_config: ScenarioConfig):
+        [self.pipeline_manager.register(pipeline) for pipeline in scenario_config.pipelines]
+        self.__SCENARIO_CONFIG_DB[scenario_config.name] = scenario_config
 
-    def get_scenario(self, name: str) -> ScenarioConfig:
+    def get_scenario_config(self, config_name: str) -> ScenarioConfig:
         try:
-            return self.__SCENARIOS[name]
+            return self.__SCENARIO_CONFIG_DB[config_name]
         except KeyError:
-            logging.error(f"Scenario : {name} does not exist.")
-            raise NonExistingScenario(name)
+            logging.error(f"Scenario : {config_name} does not exist.")
+            raise NonExistingScenarioConfig(config_name)
 
-    def get_scenarios(self) -> List[ScenarioConfig]:
-        return [self.get_scenario(scenario.name) for scenario in self.__SCENARIOS.values()]
+    def get_scenario_configs(self) -> Iterable[ScenarioConfig]:
+        return self.__SCENARIO_CONFIG_DB.values()
 
-    def create_scenario_entity(
-        self, scenario: ScenarioConfig, ds_entities: Dict[DataSourceConfig, DataSource] = None
-    ) -> Scenario:
-        if ds_entities is None:
-            all_ds: Set[DataSourceConfig] = set()
-            for pipeline in scenario.pipelines:
-                for task in pipeline.tasks:
-                    for ds in task.input:
-                        all_ds.add(ds)
-                    for ds in task.output:
-                        all_ds.add(ds)
-            ds_entities = {data_source: self.data_manager.create_data_source(data_source) for data_source in all_ds}
-        p_entities = [
-            self.pipeline_manager.create_pipeline_entity(pipeline, ds_entities) for pipeline in scenario.pipelines
-        ]
-        scenario_entity = Scenario(scenario.name, p_entities, scenario.properties)
-        self.save_scenario_entity(scenario_entity)
-        return scenario_entity
+    def create(self,
+               scenario_config: ScenarioConfig,
+               data_sources: Dict[DataSourceConfig, DataSource] = None
+               ) -> Scenario:
+        if data_sources is None:
+            all_ds_configs: Set[DataSourceConfig] = set()
+            for pipeline_configs in scenario_config.pipelines:
+                for task_config in pipeline_configs.tasks:
+                    for ds_config in task_config.input:
+                        all_ds_configs.add(ds_config)
+                    for ds_config in task_config.output:
+                        all_ds_configs.add(ds_config)
+            data_sources = {ds_config: self.data_manager.create_data_source(ds_config) for ds_config in all_ds_configs}
+        pipelines = [self.pipeline_manager.create(p_config, data_sources) for p_config in scenario_config.pipelines]
+        scenario = Scenario(scenario_config.name, pipelines, scenario_config.properties)
+        self.save(scenario)
+        return scenario
 
-    def save_scenario_entity(self, scenario_entity: Scenario):
-        self.__SCENARIO_MODEL_DB[scenario_entity.id] = scenario_entity.to_model()
+    def save(self, scenario: Scenario):
+        self.__SCENARIO_MODEL_DB[scenario.id] = scenario.to_model()
 
-    def get_scenario_entity(self, scenario_id: ScenarioId) -> Scenario:
+    def get_scenario(self, scenario_id: ScenarioId) -> Scenario:
         try:
             model = self.__SCENARIO_MODEL_DB[scenario_id]
-            pipeline_entities = [
-                self.pipeline_manager.get_pipeline_entity(PipelineId(pipeline_id)) for pipeline_id in model.pipelines
-            ]
-            return Scenario(model.name, pipeline_entities, model.properties, model.id)
-        except NonExistingPipelineEntity as err:
+            pipelines = [self.pipeline_manager.get_pipeline(PipelineId(pipeline_id)) for pipeline_id in model.pipelines]
+            return Scenario(model.name, pipelines, model.properties, model.id)
+        except NonExistingPipeline as err:
             logging.error(err.message)
             raise err
         except KeyError:
             logging.error(f"Scenario entity : {scenario_id} does not exist.")
-            raise NonExistingScenarioEntity(scenario_id)
+            raise NonExistingScenario(scenario_id)
 
-    def get_scenario_entities(self) -> List[Scenario]:
-        return [self.get_scenario_entity(model.id) for model in self.__SCENARIO_MODEL_DB.values()]
+    def get_scenarios(self) -> Iterable[Scenario]:
+        return [self.get_scenario(model.id) for model in self.__SCENARIO_MODEL_DB.values()]
 
     def submit(self, scenario_id: ScenarioId):
-        scenario_entity_to_submit = self.get_scenario_entity(scenario_id)
-        for pipeline in scenario_entity_to_submit.pipeline_entities.values():
+        scenario_to_submit = self.get_scenario(scenario_id)
+        for pipeline in scenario_to_submit.pipelines.values():
             self.pipeline_manager.submit(pipeline.id)

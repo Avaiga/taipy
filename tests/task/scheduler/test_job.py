@@ -10,7 +10,7 @@ from taipy.task.scheduler.job import Job, JobId
 @pytest.fixture
 def task():
     task_id = TaskId("task_id1")
-    return Task(name="name", input=[], function=print, output=[], id=task_id)
+    return Task(config_name="name", input=[], function=print, output=[], id=task_id)
 
 
 @pytest.fixture

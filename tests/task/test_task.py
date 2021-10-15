@@ -19,7 +19,7 @@ def test_create_task():
     name = "name_1"
     task = Task(name, [], print, [])
     assert f"TASK_{name}_" in task.id
-    assert task.name == "name_1"
+    assert task.config_name == "name_1"
 
 
 def test_can_not_change_task_entity_output(output):
@@ -81,7 +81,7 @@ def test_create_task_entity():
     path = "my/csv/path"
     foo_ds = CSVDataSource.create("foo", scope=Scope.PIPELINE, path=path)
     task = Task("namE 1", [foo_ds], print, [])
-    assert task.name == "name_1"
+    assert task.config_name == "name_1"
     assert task.id is not None
     assert task.foo == foo_ds
     assert task.foo.path == path

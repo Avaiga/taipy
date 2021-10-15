@@ -9,13 +9,13 @@ class EmbeddedDataSource(DataSource):
     __TYPE = "embedded"
 
     def __init__(
-        self, name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
+        self, config_name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
     ):
-        super().__init__(name, scope, id, data=properties.get("data"))
+        super().__init__(config_name, scope, id, data=properties.get("data"))
 
     @classmethod
-    def create(cls, name: str, scope: Scope, data: Any):
-        return EmbeddedDataSource(name, scope, None, {"data": data})
+    def create(cls, config_name: str, scope: Scope, data: Any):
+        return EmbeddedDataSource(config_name, scope, None, {"data": data})
 
     @classmethod
     def type(cls) -> str:
@@ -39,7 +39,7 @@ class EmbeddedDataSource(DataSource):
     def to_json(self):
         return json.dumps(
             {
-                "name": self.name,
+                "config_name": self.config_name,
                 "type": "embedded",
                 "scope": self.scope.name,
                 "data": self.data,
@@ -49,7 +49,7 @@ class EmbeddedDataSource(DataSource):
     @staticmethod
     def from_json(data_source_dict):
         return EmbeddedDataSource.create(
-            name=data_source_dict.get("name"),
+            config_name=data_source_dict.get("config_name"),
             scope=Scope[data_source_dict.get("scope")],
             data=data_source_dict.get("data"),
         )
