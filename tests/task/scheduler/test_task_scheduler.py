@@ -13,6 +13,7 @@ from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
 from taipy.task import JobId, Task
 from taipy.task.scheduler import TaskScheduler
+from tests.task.scheduler.lock_data_source import LockDataSource
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -27,7 +28,7 @@ def multiply(nb1: float, nb2: float):
 
 def lock_multiply(lock, nb1: float, nb2: float):
     with lock:
-        return multiply(nb1, nb2)
+        return multiply(nb1, nb2), None
 
 
 def test_scheduled_task():
@@ -102,7 +103,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
     lock = m.Lock()
 
     task_scheduler = TaskScheduler()
-    task = _create_task(partial(lock_multiply, lock))
+    task = _create_task(partial(lock_multiply, lock, parallel_execution=True))
 
     with lock:
         job = task_scheduler.submit(task)
@@ -176,14 +177,14 @@ def test_scheduled_task_in_parallel():
     lock = m.Lock()
 
     task_scheduler = TaskScheduler()
-    task = _create_task(partial(lock_multiply, lock))
+    task = _create_task(partial(lock_multiply, lock), parallel_execution=True)
 
     with lock:
         job = task_scheduler.submit(task)
         assert task.output0.get() == 0
         assert job.is_running()
 
-    assert_true_after_10_second_max(lambda: task.output0.get() == 42)
+    task.lock_output.get()
     assert job.is_completed()
 
 
@@ -196,8 +197,8 @@ def test_scheduled_task_multithreading_multiple_task():
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    task_1 = _create_task(partial(lock_multiply, lock_1))
-    task_2 = _create_task(partial(lock_multiply, lock_2))
+    task_1 = _create_task(partial(lock_multiply, lock_1), parallel_execution=True)
+    task_2 = _create_task(partial(lock_multiply, lock_2), parallel_execution=True)
 
     with lock_1:
         with lock_2:
@@ -209,23 +210,15 @@ def test_scheduled_task_multithreading_multiple_task():
             assert job_1.is_running()
             assert job_2.is_running()
 
-        assert_true_after_10_second_max(lambda: task_2.output["output0"].get(None) == 42)
+        task_2.lock_output.get()
         assert task_1.output["output0"].get(None) == 0
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    assert_true_after_10_second_max(lambda: task_1.output["output0"].get(None) == 42)
+    task_1.lock_output.get()
     assert task_2.output["output0"].get(None) == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
-
-
-def assert_true_after_10_second_max(assertion):
-    start = datetime.now()
-    while (datetime.now() - start).seconds < 10:
-        if assertion():
-            return
-    assert assertion()
 
 
 def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
@@ -238,8 +231,8 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    task_1 = _create_task(partial(lock_multiply, lock_1))
-    task_2 = _create_task(partial(lock_multiply, lock_2))
+    task_1 = _create_task(partial(lock_multiply, lock_1), parallel_execution=True)
+    task_2 = _create_task(partial(lock_multiply, lock_2), parallel_execution=True)
 
     with lock_1:
         with lock_2:
@@ -251,24 +244,28 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
             assert job_1.is_running()
             assert job_2.is_pending()
 
-        assert_true_after_10_second_max(lambda: task_2.output0.get() == 42)
+        task_2.lock_output.get()
         assert task_1.output0.get() == 0
         assert job_1.is_completed()
         assert job_2.is_running()
 
-    assert_true_after_10_second_max(lambda: task_1.output0.get() == 42)
+    task_1.lock_output.get()
     assert task_2.output0.get() == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
 
 
-def _create_task(function, nb_outputs=1):
+def _create_task(function, nb_outputs=1, parallel_execution=False):
     task_name = str(uuid.uuid4())
     input_ds = [
         EmbeddedDataSource.create("input1", Scope.PIPELINE, data=21),
         EmbeddedDataSource.create("input2", Scope.PIPELINE, data=2),
     ]
     output_ds = [EmbeddedDataSource.create(f"output{i}", Scope.PIPELINE, data=0) for i in range(nb_outputs)]
+
+    if parallel_execution:
+        output_ds.append(LockDataSource("lock_output"))
+
     return Task(
         task_name,
         input=input_ds,
