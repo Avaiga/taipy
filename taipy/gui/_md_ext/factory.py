@@ -151,19 +151,16 @@ class Factory:
             [
                 ("id"),
                 ("title"),
-                ("label"),
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
-                ("type", AttributeType.string, "scatter"),
-                ("mode", AttributeType.string, "lines+markers"),
             ]
         )
-        .get_chart_attributes()
+        .get_chart_attributes("scatter", "lines+markers")
         .set_refresh(),
     }
 
     # TODO: process \" in property value
-    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9\[\]]*)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
     def create(control_type: str, all_properties: str) -> str:

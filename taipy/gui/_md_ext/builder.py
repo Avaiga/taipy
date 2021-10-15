@@ -102,6 +102,10 @@ class Builder:
             prop = default_value
         return prop
 
+    def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
+        names = [n if index is None else (n + "[" + str(index) + "]") for n in names]
+        return [self.__get_property(name) for name in names]
+
     def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self._gui._is_expression(value):
             hash_value = self._gui._fetch_expression_list(value)[0]
@@ -229,19 +233,45 @@ class Builder:
             self.__set_json_attribute("columns", columns)
         return self
 
-    def get_chart_attributes(self):
-        label = self.__get_property("label")
-        if label:
-            columns = self.__get_property("columns", {})
-            if isinstance(columns, str):
-                columns = [s.strip() for s in columns.split(";")]
-            if isinstance(columns, (list, tuple)):
-                if label not in columns and len(columns):
-                    if isinstance(columns, tuple):
-                        columns = list(columns)
-                    columns.append(label)
+    def get_chart_attributes(self, default_type="scatter", default_mode="lines+markers"):
+        names = ("x", "y", "z", "label", "mode", "type", "color")
+        trace = self.__get_multiple_indexed_attributes(names)
+        if not trace[4]:
+            trace[4] = default_mode
+        if not trace[5]:
+            trace[5] = default_type
+        traces = []
+        idx = 1
+        indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        while len([x for x in indexed_trace if x]):
+            traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
+            idx += 1
+            indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        # filter traces where we don't have at least x and y
+        traces = [t for t in traces if t[0] and t[1]]
+        if not len(traces) and trace[0] and trace[1]:
+            traces.append(trace)
+
+        # configure columns
+        columns = set()
+        for trace in traces:
+            columns.update([t for t in trace[0:4] if t])
+        if isinstance(self.value, pd.DataFrame):
+            columns = _get_columns_dict(self.value, list(columns))
             self.attributes["columns"] = columns
-        return self.get_dataframe_attributes()
+            self.__set_json_attribute("columns", columns)
+
+        reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
+
+        labels = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
+        if len(labels):
+            self.__set_json_attribute("labels", labels)
+        self.__set_json_attribute("modes", [t[4] for t in traces])
+        self.__set_json_attribute("types", [t[5] for t in traces])
+        self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
+        traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
+        self.__set_json_attribute("traces", traces)
+        return self
 
     def set_className(self, class_name="", config_class="input"):
         from ..gui import Gui
