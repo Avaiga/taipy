@@ -19,6 +19,7 @@ class Factory:
         "table": "data",
         "dialog": "open",
         "chart": "data",
+        "status": "value"
     }
 
     CONTROL_BUILDERS = {
@@ -157,6 +158,19 @@ class Factory:
         )
         .get_chart_attributes("scatter", "lines+markers")
         .set_refresh(),
+        "status": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Status",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_default_value()
+        .set_className(class_name="taipy-status", config_class="status")
+        .set_attributes(
+            [
+                ("id"),
+            ]
+        ),
     }
 
     # TODO: process \" in property value

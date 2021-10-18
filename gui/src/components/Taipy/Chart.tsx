@@ -97,7 +97,7 @@ const Chart = (props: ChartProp) => {
                         traces.length == 1 && traces[0].length > 1 && columns[traces[0][1]]
                             ? columns[traces[0][1]].dfid
                             : undefined,
-                },
+                }
             } as Layout),
         [title, columns, traces]
     );
@@ -114,10 +114,11 @@ const Chart = (props: ChartProp) => {
                     ({
                         type: types[idx],
                         mode: modes[idx],
-                        name: columns[traces[0][1]] ? columns[trace[1]].dfid : undefined,
+                        name: columns[trace[1]] ? columns[trace[1]].dfid : undefined,
                         marker: idx < markers.length ? markers[idx] : {},
                         x: value && trace.length ? value[trace[0]] : [],
                         y: value && trace.length > 1 ? value[trace[1]] : [],
+                        z: value && trace.length > 2 ? value[trace[2]] : [],
                         hovertext: value && idx < labels.length ? value[labels[idx]] : [],
                     } as Data)
             ),

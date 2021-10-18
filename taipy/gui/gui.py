@@ -285,7 +285,7 @@ class Gui(object, metaclass=Singleton):
 
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
-            {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) else {"value": v})}
+            {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
             for k, v in modified_values.items()
         ]
         try:
