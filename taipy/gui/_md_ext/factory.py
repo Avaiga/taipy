@@ -160,7 +160,7 @@ class Factory:
     }
 
     # TODO: process \" in property value
-    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9\[\]]*)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
     def create(control_type: str, all_properties: str) -> str:

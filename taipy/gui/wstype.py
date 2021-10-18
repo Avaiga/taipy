@@ -3,10 +3,9 @@ from enum import Enum
 
 class WsType(Enum):
     ACTION = "A"
-    CHART_UPDATE = "CU"
     MULTIPLE_UPDATE = "MU"
     REQUEST_UPDATE = "RU"
-    TABLE_UPDATE = "T"
+    DATA_UPDATE = "DU"
     UPDATE = "U"
 
 
