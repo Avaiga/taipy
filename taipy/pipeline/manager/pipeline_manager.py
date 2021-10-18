@@ -39,7 +39,7 @@ class PipelineManager:
                     all_ds_configs.add(ds_config)
                 for ds_config in task_config.output:
                     all_ds_configs.add(ds_config)
-            data_sources = {ds_config: self.data_manager.create_data_source(ds_config) for ds_config in all_ds_configs}
+            data_sources = {ds_config: self.data_manager._create_and_save_data_source(ds_config, None) for ds_config in all_ds_configs}
         tasks = [self.task_manager.create(task_config, data_sources) for task_config in pipeline_config.tasks]
         pipeline = Pipeline(pipeline_config.name, pipeline_config.properties, tasks)
         self.save(pipeline)

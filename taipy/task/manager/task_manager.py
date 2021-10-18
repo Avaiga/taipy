@@ -21,12 +21,12 @@ class TaskManager:
         logging.info(f"Task : {task.id} created or updated.")
         self.tasks[task.id] = task
 
-    def create(
-        self, task_config: TaskConfig, data_sources: Optional[Dict[DataSourceConfig, DataSource]] = None
-    ) -> Task:
+    def create(self,
+               task_config: TaskConfig,
+               data_sources: Optional[Dict[DataSourceConfig, DataSource]] = None) -> Task:
         if data_sources is None:
             data_sources = {
-                ds_config: self.data_manager.get_or_create(ds_config)
+                ds_config: self.data_manager.get_or_create(ds_config, None)
                 for ds_config in set(itertools.chain(task_config.input, task_config.output))
             }
         inputs = [data_sources[input_config] for input_config in task_config.input]

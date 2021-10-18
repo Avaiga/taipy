@@ -54,7 +54,7 @@ class ScenarioManager:
                         all_ds_configs.add(ds_config)
                     for ds_config in task_config.output:
                         all_ds_configs.add(ds_config)
-            data_sources = {ds_config: self.data_manager.create_data_source(ds_config) for ds_config in all_ds_configs}
+            data_sources = {ds_config: self.data_manager._create_and_save_data_source(ds_config, None) for ds_config in all_ds_configs}
         pipelines = [self.pipeline_manager.create(p_config, data_sources) for p_config in scenario_config.pipelines]
         scenario = Scenario(scenario_config.name, pipelines, scenario_config.properties)
         self.save(scenario)

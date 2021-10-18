@@ -158,12 +158,12 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     pipeline = PipelineConfig("by 6", [task_mult_by_2, task_mult_by_3])
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
-    assert len(data_manager.get_data_sources()) == 0
+    assert len(data_manager.get_all()) == 0
     assert len(task_manager.tasks) == 0
 
     pipeline_entity = pipeline_manager.create(pipeline)
 
-    assert len(data_manager.get_data_sources()) == 3
+    assert len(data_manager.get_all()) == 3
     assert len(task_manager.tasks) == 2
     assert len(pipeline_entity.get_sorted_tasks()) == 2
     assert pipeline_entity.foo.get() == 1
