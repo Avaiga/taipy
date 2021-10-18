@@ -6,7 +6,6 @@ import numbers
 from operator import attrgetter
 from types import FunctionType
 
-import pandas as pd
 from markdown.util import etree
 
 from ..page import Partial
@@ -215,13 +214,14 @@ class Builder:
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
-        if isinstance(self.value, pd.DataFrame):
-            columns = _get_columns_dict(
-                self.value,
-                _add_to_dict_and_get(self.attributes, "columns", {}),
-                _add_to_dict_and_get(self.attributes, "date_format", date_format),
-                _add_to_dict_and_get(self.attributes, "number_format", number_format),
-            )
+        columns = _get_columns_dict(
+            self.value,
+            _add_to_dict_and_get(self.attributes, "columns", {}),
+            self._gui._data_registry._get_col_types("", self.value),
+            _add_to_dict_and_get(self.attributes, "date_format", date_format),
+            _add_to_dict_and_get(self.attributes, "number_format", number_format),
+        )
+        if columns is not None:
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self
@@ -249,21 +249,21 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:4] if t])
-        if isinstance(self.value, pd.DataFrame):
-            columns = _get_columns_dict(self.value, list(columns))
+        columns = _get_columns_dict(self.value, list(columns), self._gui._data_registry._get_col_types("", self.value))
+        if columns is not None:
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
 
-        reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
+            reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
 
-        labels = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
-        if len(labels):
-            self.__set_json_attribute("labels", labels)
-        self.__set_json_attribute("modes", [t[4] for t in traces])
-        self.__set_json_attribute("types", [t[5] for t in traces])
-        self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
-        traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
-        self.__set_json_attribute("traces", traces)
+            labels = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
+            if len(labels):
+                self.__set_json_attribute("labels", labels)
+            self.__set_json_attribute("modes", [t[4] for t in traces])
+            self.__set_json_attribute("types", [t[5] for t in traces])
+            self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
+            traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
+            self.__set_json_attribute("traces", traces)
         return self
 
     def set_className(self, class_name="", config_class="input"):

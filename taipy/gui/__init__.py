@@ -3,6 +3,7 @@ from ._md_ext import makeTaipyExtension
 from .gui import Gui
 from .renderers import Html, Markdown
 from .taipyimage import TaipyImage
+from .data import DataAccessAbstract
 
 
 def makeExtension(*args, **kwargs):
