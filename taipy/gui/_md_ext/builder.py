@@ -2,6 +2,7 @@ import datetime
 import json
 import typing as t
 import warnings
+import numbers
 from operator import attrgetter
 from types import FunctionType
 
@@ -101,6 +102,10 @@ class Builder:
             prop = default_value
         return prop
 
+    def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
+        names = [n if index is None else (n + "[" + str(index) + "]") for n in names]
+        return [self.__get_property(name) for name in names]
+
     def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self._gui._is_expression(value):
             hash_value = self._gui._fetch_expression_list(value)[0]
@@ -133,6 +138,15 @@ class Builder:
                 warnings.warn(f"property {name} is required for component {self.control_type}")
             return self
         return self.set_attribute(_to_camel_case(name), strattr)
+
+    def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
+        attr = self.__get_property(name, default_value)
+        if attr is None:
+            return self
+        if isinstance(attr, numbers.Number):
+            return self.__set_react_attribute(_to_camel_case(name), attr)
+        else:
+            return self.set_attribute(_to_camel_case(name), attr)
 
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
@@ -210,6 +224,46 @@ class Builder:
             )
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
+        return self
+
+    def get_chart_attributes(self, default_type="scatter", default_mode="lines+markers"):
+        names = ("x", "y", "z", "label", "mode", "type", "color")
+        trace = self.__get_multiple_indexed_attributes(names)
+        if not trace[4]:
+            trace[4] = default_mode
+        if not trace[5]:
+            trace[5] = default_type
+        traces = []
+        idx = 1
+        indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        while len([x for x in indexed_trace if x]):
+            traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
+            idx += 1
+            indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        # filter traces where we don't have at least x and y
+        traces = [t for t in traces if t[0] and t[1]]
+        if not len(traces) and trace[0] and trace[1]:
+            traces.append(trace)
+
+        # configure columns
+        columns = set()
+        for trace in traces:
+            columns.update([t for t in trace[0:4] if t])
+        if isinstance(self.value, pd.DataFrame):
+            columns = _get_columns_dict(self.value, list(columns))
+            self.attributes["columns"] = columns
+            self.__set_json_attribute("columns", columns)
+
+        reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
+
+        labels = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
+        if len(labels):
+            self.__set_json_attribute("labels", labels)
+        self.__set_json_attribute("modes", [t[4] for t in traces])
+        self.__set_json_attribute("types", [t[5] for t in traces])
+        self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
+        traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
+        self.__set_json_attribute("traces", traces)
         return self
 
     def set_className(self, class_name="", config_class="input"):
@@ -318,6 +372,8 @@ class Builder:
                 self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
             elif type == AttributeType.react:
                 self.__set_react_attribute(attr[0], _get_val(attr, 2, None))
+            elif type == AttributeType.string_or_number:
+                self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
         return self
 
     def set_attribute(self, name, value):

@@ -11,9 +11,11 @@
     "axios": "^0.21.1",
     "date-fns": "^2.24.0",
     "date-fns-tz": "^1.1.6",
+    "plotly.js": "^2.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-jsx-parser": "^1.28.4",
+    "react-plotly.js": "^2.5.1",
     "react-router-dom": "^5.2.0",
     "react-virtualized-auto-sizer": "^1.0.6",
     "react-window": "^1.8.6",
@@ -52,6 +54,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-plotly.js": "^2.5.0",
     "@types/react-router-dom": "^5.1.9",
     "@types/react-virtualized-auto-sizer": "^1.0.1",
     "@types/react-window": "^1.8.5",

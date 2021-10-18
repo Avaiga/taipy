@@ -18,6 +18,7 @@ class Factory:
         "selector": "value",
         "table": "data",
         "dialog": "open",
+        "chart": "data",
     }
 
     CONTROL_BUILDERS = {
@@ -139,10 +140,27 @@ class Factory:
         .set_default_value()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
+        "chart": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Chart",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_className(class_name="taipy-chart", config_class="chart")
+        .set_attributes(
+            [
+                ("id"),
+                ("title"),
+                ("width", AttributeType.string_or_number, "100vw"),
+                ("height", AttributeType.string_or_number, "100vh"),
+            ]
+        )
+        .get_chart_attributes("scatter", "lines+markers")
+        .set_refresh(),
     }
 
     # TODO: process \" in property value
-    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
     def create(control_type: str, all_properties: str) -> str:

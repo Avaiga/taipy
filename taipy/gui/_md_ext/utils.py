@@ -1,17 +1,23 @@
 import pandas as pd
 import warnings
+import typing as t
 
 from ..utils import _MapDictionary, get_date_col_str_name
 from ..wstype import NumberTypes
 
 
-def _add_to_dict_and_get(dico, key, value):
+def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:
     if key not in dico.keys():
         dico[key] = value
     return dico[key]
 
 
-def _get_columns_dict(value, columns, date_format="MM/dd/yyyy", number_format=None):
+def _get_columns_dict(
+    value: t.Any,
+    columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDictionary],
+    date_format: t.Optional[str] = None,
+    number_format: t.Optional[str] = None,
+):
     if isinstance(value, pd.DataFrame):
         coltypes = value.dtypes.apply(lambda x: x.config_name).to_dict()
         if isinstance(columns, str):
@@ -43,7 +49,8 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy", number_format=No
                 columns[col]["dfid"] = col
                 idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
                 if type.startswith("datetime64"):
-                    _add_to_dict_and_get(columns[col], "format", date_format)
+                    if date_format:
+                        _add_to_dict_and_get(columns[col], "format", date_format)
                     columns[get_date_col_str_name(value, col)] = columns.pop(col)
                 elif number_format and type in NumberTypes:
                     _add_to_dict_and_get(columns[col], "format", number_format)
@@ -51,7 +58,7 @@ def _get_columns_dict(value, columns, date_format="MM/dd/yyyy", number_format=No
     return columns
 
 
-def _to_camel_case(value):
+def _to_camel_case(value: str) -> str:
     if not isinstance(value, str):
         raise Exception("_to_camel_case allows only string parameter")
 

@@ -47,6 +47,8 @@ class Gui(object, metaclass=Singleton):
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
 
+    _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
+
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
         extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"]
@@ -177,7 +179,7 @@ class Gui(object, metaclass=Singleton):
             setattr(self._values, name, _MapDictionary(value))
         else:
             setattr(self._values, name, value)
-        prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter  # Setter
+        prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter, Setter
         setattr(Gui, name, prop)
 
     def __value_getter(self, name):
@@ -189,6 +191,25 @@ class Gui(object, metaclass=Singleton):
                 return value
 
         return __getter
+
+    def _manage_message(self, msg_type: WsType, message: dict) -> None:
+        try:
+            if msg_type == WsType.UPDATE.value:
+                self._front_end_update(
+                    message["name"],
+                    message["payload"],
+                    message["propagate"] if "propagate" in message else True,
+                )
+            elif msg_type == WsType.ACTION.value:
+                self._on_action(_get_dict_value(message, "name"), message["payload"])
+            elif msg_type == WsType.DATA_UPDATE.value:
+                self._request_data_update(message["name"], message["payload"])
+            elif msg_type == WsType.REQUEST_UPDATE.value:
+                self._request_var_update(message["payload"])
+        except TypeError as te:
+            warnings.warn(f"Decoding Message has failed: {message}\n{te}")
+        except KeyError as ke:
+            warnings.warn(f"Can't access: {message}\n{ke}")
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
@@ -244,62 +265,76 @@ class Gui(object, metaclass=Singleton):
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
-    def _request_var(self, var_name: str, payload: t.Any) -> None:
+    def _request_data_update(self, var_name: str, payload: t.Any) -> None:
         ret_payload = {}
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._expr_to_hash[var_name]
         newvalue = attrgetter(var_name)(self._values)
-        if isinstance(newvalue, datetime.datetime):
-            newvalue = dateToISO(newvalue)
-        elif isinstance(newvalue, pd.DataFrame):
-            keys = payload.keys()
-            ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
-            if "infinite" in keys:
-                ret_payload["infinite"] = payload["infinite"]
-            if isinstance(payload["start"], int):
-                start = int(payload["start"])
+        if isinstance(newvalue, pd.DataFrame):
+            paged = not _get_dict_value(payload, "alldata")
+            if paged:
+                keys = payload.keys()
+                ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
+                if "infinite" in keys:
+                    ret_payload["infinite"] = payload["infinite"]
             else:
-                try:
-                    start = int(str(payload["start"]), base=10)
-                except Exception:
-                    warnings.warn(f'start should be an int value {payload["start"]}')
-                    start = 0
-            if isinstance(payload["end"], int):
-                end = int(payload["end"])
+                ret_payload["alldata"] = payload["alldata"]
+            # deal with columns
+            cols = _get_dict_value(payload, "columns")
+            if isinstance(cols, list) and len(cols):
+                col_types = newvalue.dtypes[newvalue.dtypes.index.isin(cols)]
             else:
-                try:
-                    end = int(str(payload["end"]), base=10)
-                except Exception:
-                    end = -1
-            rowcount = len(newvalue)
-            if start < 0 or start >= rowcount:
-                start = 0
-            if end < 0 or end >= rowcount:
-                end = rowcount - 1
-            datecols = newvalue.dtypes[newvalue.dtypes.astype("string").str.startswith("datetime")].index.tolist()
+                col_types = newvalue.dtypes
+            cols = col_types.index.tolist()
+            # deal with dates
+            datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
             if len(datecols) != 0:
                 # copy the df so that we don't "mess" with the user's data
                 newvalue = newvalue.copy()
                 for col in datecols:
                     newcol = get_date_col_str_name(newvalue, col)
-                    newvalue[newcol] = newvalue[col].dt.strftime("%Y-%m-%dT%H:%M:%S.%fZ").astype("string")
-            if "orderby" in keys and isinstance(payload["orderby"], str) and len(payload["orderby"]):
-                new_indexes = newvalue[payload["orderby"]].values.argsort(axis=0)
-                if "sort" in keys and payload["sort"] == "desc":
-                    # reverse order
-                    new_indexes = new_indexes[::-1]
-                new_indexes = new_indexes[slice(start, end + 1)]
-            else:
-                new_indexes = slice(start, end + 1)
-            # here we'll deal with start and end values from payload if present
-            newvalue = newvalue.iloc[new_indexes]  # returns a view
-            if len(datecols) != 0:
+                    cols.append(newcol)
+                    newvalue[newcol] = newvalue[col].dt.strftime(Gui._WS_DATE_FORMAT).astype("string")
                 # remove the date columns from the list of columns
-                cols = list(set(newvalue.columns.tolist()) - set(datecols))
-                newvalue = newvalue.loc[:, cols]  # view without the date columns
-            dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount, "start": start}
-            newvalue = dictret
-        # TODO: What if value == newvalue?
+                cols = list(set(cols) - set(datecols))
+            if paged:
+                rowcount = len(newvalue)
+                # here we'll deal with start and end values from payload if present
+                if isinstance(payload["start"], int):
+                    start = int(payload["start"])
+                else:
+                    try:
+                        start = int(str(payload["start"]), base=10)
+                    except Exception:
+                        warnings.warn(f'start should be an int value {payload["start"]}')
+                        start = 0
+                if isinstance(payload["end"], int):
+                    end = int(payload["end"])
+                else:
+                    try:
+                        end = int(str(payload["end"]), base=10)
+                    except Exception:
+                        end = -1
+                if start < 0 or start >= rowcount:
+                    start = 0
+                if end < 0 or end >= rowcount:
+                    end = rowcount - 1
+                # deal with sort 
+                order_by = _get_dict_value(payload, "orderby")
+                if isinstance(order_by, str) and len(order_by):
+                    new_indexes = newvalue[order_by].values.argsort(axis=0)
+                    if _get_dict_value(payload, "sort") == "desc":
+                        # reverse order
+                        new_indexes = new_indexes[::-1]
+                    new_indexes = new_indexes[slice(start, end + 1)]
+                else:
+                    new_indexes = slice(start, end + 1)
+                newvalue = newvalue.loc[:, cols].iloc[new_indexes]  # returns a view
+                dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount, "start": start}
+                newvalue = dictret
+            if not paged:
+                # view with the requested columns
+                newvalue = newvalue.loc[:, cols].to_dict(orient="list")
         ret_payload["value"] = newvalue
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 

@@ -31,7 +31,7 @@ import {
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
 
-const rowsPerPageOptions:PageSizeOptionsType = [10, 50, 100, 500];
+const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
 const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const {
@@ -55,6 +55,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     //    useWhyDidYouUpdate('TaipyTable', props);
 
+    const [colsOrder, columns] = useMemo(() => {
+        if (props.columns) {
+            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+        }
+        return [[], {}];
+    }, [props.columns]);
+
     useEffect(() => {
         if (props.value && props.value[pageKey.current] !== undefined) {
             setValue(props.value[pageKey.current]);
@@ -68,14 +76,24 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}`;
         if (!props.value || props.value[pageKey.current] === undefined || !!refresh) {
             setLoading(true);
+            const cols = colsOrder.map((col) => columns[col].dfid);
             dispatch(
-                createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, endIndex, orderBy, order)
+                createRequestTableUpdateAction(
+                    tp_varname,
+                    id,
+                    cols,
+                    pageKey.current,
+                    startIndex,
+                    endIndex,
+                    orderBy,
+                    order
+                )
             );
         } else {
             setValue(props.value[pageKey.current]);
             setLoading(false);
         }
-    }, [startIndex, refresh, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
+    }, [startIndex, refresh, colsOrder, columns, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -106,19 +124,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         setStartIndex(0);
     }, []);
 
-    const [colsOrder, columns] = useMemo(() => {
-        if (props.columns) {
-            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
-        }
-        return [[], {}];
-    }, [props.columns]);
-
     const pso = useMemo(() => {
         let psOptions = rowsPerPageOptions;
         if (pageSizeOptions) {
             try {
-                psOptions = JSON.parse(pageSizeOptions)
+                psOptions = JSON.parse(pageSizeOptions);
             } catch (e) {
                 console.log("PaginatedTable pageSizeOptions is wrong ", pageSizeOptions, e);
             }
