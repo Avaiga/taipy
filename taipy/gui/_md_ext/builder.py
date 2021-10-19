@@ -217,7 +217,7 @@ class Builder:
         columns = _get_columns_dict(
             self.value,
             _add_to_dict_and_get(self.attributes, "columns", {}),
-            self._gui._data_registry._get_col_types("", self.value),
+            self._gui._data_accessors._get_col_types("", self.value),
             _add_to_dict_and_get(self.attributes, "date_format", date_format),
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
@@ -249,7 +249,7 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:4] if t])
-        columns = _get_columns_dict(self.value, list(columns), self._gui._data_registry._get_col_types("", self.value))
+        columns = _get_columns_dict(self.value, list(columns), self._gui._data_accessors._get_col_types("", self.value))
         if columns is not None:
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)

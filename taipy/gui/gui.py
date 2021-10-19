@@ -16,7 +16,7 @@ import __main__
 import markdown as md_lib
 from flask import jsonify, request
 
-from .data.dataaccessregistry import _DataAccessRegistry
+from .data.data_accessor import _DataAccessors
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
@@ -70,7 +70,7 @@ class Gui(object, metaclass=Singleton):
         )
         self._config = GuiConfig()
         # Data Registry
-        self._data_registry = _DataAccessRegistry()
+        self._data_accessors = _DataAccessors()
 
         # Load default config
         self._config.load_config(default_config["app_config"], default_config["style_config"])
@@ -225,7 +225,7 @@ class Gui(object, metaclass=Singleton):
                 value = complex(value) if value else 0
             elif isinstance(currentvalue, bool):
                 value = bool(value)
-            elif self._data_registry._cast_string_value(var_name, currentvalue) is None:
+            elif self._data_accessors._cast_string_value(var_name, currentvalue) is None:
                 return
         self._update_var(var_name, value, propagate)
 
@@ -249,7 +249,7 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._values)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
-            if self._data_registry._is_data_access(_var, newvalue):
+            if self._data_accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
                 if isinstance(newvalue, list):
@@ -268,7 +268,7 @@ class Gui(object, metaclass=Singleton):
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._expr_to_hash[var_name]
         newvalue = attrgetter(var_name)(self._values)
-        ret_payload = self._data_registry._get_data(var_name, newvalue, payload)
+        ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
     def _request_var_update(self, payload):
@@ -567,5 +567,5 @@ class Gui(object, metaclass=Singleton):
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)
 
-    def register_data_access(self, data_access_class: t.Callable) -> None:
-        self._data_registry.register(data_access_class)
+    def register_data_accessor(self, data_accessor_class: t.Callable) -> None:
+        self._data_accessors.register(data_accessor_class)

@@ -1,1 +1,1 @@
-from .dataaccessregistry import DataAccessAbstract
+from .data_accessor import DataAccessor

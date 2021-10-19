@@ -4,10 +4,10 @@ import typing as t
 import pandas as pd
 
 from ..utils import _get_dict_value, _get_date_col_str_name
-from .dataaccessregistry import DataAccessAbstract
+from .data_accessor import DataAccessor
 
 
-class PandasAccess(DataAccessAbstract):
+class PandasDataAccessor(DataAccessor):
     @staticmethod
     def get_supported_classes() -> t.Callable:
         return pd.DataFrame
@@ -47,7 +47,7 @@ class PandasAccess(DataAccessAbstract):
                 for col in datecols:
                     newcol = _get_date_col_str_name(cols, col)
                     cols.append(newcol)
-                    newvalue[newcol] = newvalue[col].dt.strftime(DataAccessAbstract._WS_DATE_FORMAT).astype("string")
+                    newvalue[newcol] = newvalue[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
                 # remove the date columns from the list of columns
                 cols = list(set(cols) - set(datecols))
             if paged:

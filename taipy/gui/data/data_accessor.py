@@ -6,7 +6,7 @@ import inspect
 from ..utils import _get_dict_value
 
 
-class DataAccessAbstract(ABC):
+class DataAccessor(ABC):
 
     _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
@@ -32,17 +32,17 @@ class DataAccessAbstract(ABC):
         return {}
 
 
-class _DataAccessRegistry(object):
+class _DataAccessors(object):
     def __init__(self) -> None:
         self.__access_4_type: t.Dict[t.Callable, t.Callable] = {}
 
-        from .pandasaccess import PandasAccess
+        from .pandas_data_accessor import PandasDataAccessor
 
-        self._register(PandasAccess)
+        self._register(PandasDataAccessor)
 
     def _register(self, cls: t.Callable) -> None:
         if inspect.isclass(cls):
-            if issubclass(cls, DataAccessAbstract):
+            if issubclass(cls, DataAccessor):
                 names = cls.get_supported_classes()
                 if not names:
                     raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
@@ -60,7 +60,7 @@ class _DataAccessRegistry(object):
         else:
             raise AttributeError(f"The argument of 'DataAccessRegistry.register' should be a class")
 
-    def __get_instance(self, value: t.Any) -> DataAccessAbstract:
+    def __get_instance(self, value: t.Any) -> DataAccessor:
         try:
             return self.__access_4_type[value.__class__]
         except Exception as e:
