@@ -1,13 +1,19 @@
-import React, { useMemo } from "react";
+import React, { MouseEvent, ReactNode, useMemo } from "react";
 import Chip from "@mui/material/Chip";
 import Avatar from "@mui/material/Avatar";
-import { Theme } from "@mui/material";
 
 import { getInitials } from "../../utils";
-import { TaipyBaseProps } from "./utils";
 
-interface StatusProps extends TaipyBaseProps {
-    value: { status: string; message: string };
+export interface StatusType {
+    status: string;
+    message: string;
+}
+
+interface StatusProps {
+    id: string;
+    value: StatusType;
+    onClose?: (evt: MouseEvent) => void;
+    icon?: ReactNode;
 }
 
 const status2Color = (status: string): "error" | "info" | "success" | "warning" => {
@@ -24,19 +30,23 @@ const status2Color = (status: string): "error" | "info" | "success" | "warning" 
     return "info";
 };
 
-const status2ThemeColor = (status: string) => (theme: Theme) => theme.palette[status2Color(status)].main;
-
 const Status = (props: StatusProps) => {
-    const value = useMemo(() => {
-        if (props.value === undefined) {
-            return JSON.parse(props.defaultValue);
-        } else {
-            return props.value;
+    const {value} = props;
+
+    const chipProps = useMemo(() => {
+        const cp: Record<string, unknown> = {};
+        cp.color = status2Color(value.status);
+        cp.avatar = <Avatar sx={{ bgcolor: `${cp.color}.main` }}>{getInitials(value.status)}</Avatar>;
+        if (props.onClose) {
+            cp.onDelete = props.onClose;
         }
-    }, [props.value, props.defaultValue]);
-    const sxA = useMemo(() => ({bgcolor: status2ThemeColor(value.status)}), [value.status])
-    const avatar = useMemo(() => <Avatar sx={sxA}>{getInitials(value.status)}</Avatar>, [value.status, sxA]);
-    return <Chip variant="outlined" color={status2Color(value.status)} avatar={avatar} label={value.message} />;
+        if (props.icon) {
+            cp.deleteIcon = props.icon;
+        }
+        return cp;
+    }, [value.status, props.onClose, props.icon]);
+
+    return <Chip variant="outlined" {...chipProps} label={value.message} sx={{alignSelf: "flex-start"}} />;
 };
 
 export default Status;
