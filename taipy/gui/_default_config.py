@@ -19,5 +19,6 @@ default_config = {
         "selector": "",
         "dialog": "",
         "chart": "",
+        "status": "",
     },
 }

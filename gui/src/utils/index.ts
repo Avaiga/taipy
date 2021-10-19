@@ -67,6 +67,13 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
     return value.toString();
 };
 
+export const getInitials = (value: string, max = 2): string =>
+    (value || "")
+        .split(" ", max)
+        .map((word) => (word.length ? word.charAt(0) : ""))
+        .join("")
+        .toUpperCase();
+
 /* eslint @typescript-eslint/no-explicit-any: "off", curly: "error" */
 export const ENDPOINT =
     !process.env.NODE_ENV || process.env.NODE_ENV === "development"

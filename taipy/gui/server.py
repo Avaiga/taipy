@@ -58,7 +58,11 @@ class Server(Flask):
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):
                 return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
-            abort(404)
+            return ('', 404)
+
+        @self.errorhandler(404)
+        def page_not_found(e):
+            return "{}, {}".format(e.message, e.description)
 
         # Websocket (handle json message)
         @self._ws.on("message")
