@@ -324,7 +324,7 @@ class Gui(object, metaclass=Singleton):
             hash_expr = self._expr_to_hash[expr]
             expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
             eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
-            
+
             if self._is_expression(expr):
                 expr_string = 'f"' + expr.replace('"', '\\"') + '"'
             else:
