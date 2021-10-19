@@ -319,7 +319,7 @@ class Gui(object, metaclass=Singleton):
         if var_name not in self._var_to_expr_list.keys():
             return modified_vars
         for expr in self._var_to_expr_list[var_name]:
-            if expr == var_name: # or not self._is_expression(expr):
+            if expr == var_name:
                 continue
             hash_expr = self._expr_to_hash[expr]
             expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
@@ -332,7 +332,6 @@ class Gui(object, metaclass=Singleton):
 
             expr_evaluated = eval(expr_string, {}, eval_dict)
             attrsetter(self._values, hash_expr, expr_evaluated)
-            # self._send_ws_update(hash_expr, {"value": expr_evaluated})
             modified_vars.append(hash_expr)
         return modified_vars
 
