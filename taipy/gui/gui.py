@@ -14,9 +14,9 @@ from types import FrameType, FunctionType, SimpleNamespace
 
 import __main__
 import markdown as md_lib
-import pandas as pd
 from flask import jsonify, request
 
+from .data.data_accessor import _DataAccessors
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
@@ -32,7 +32,6 @@ from .utils import (
     attrsetter,
     dateToISO,
     get_client_var_name,
-    get_date_col_str_name,
 )
 from .wstype import WsType
 
@@ -46,8 +45,6 @@ class Gui(object, metaclass=Singleton):
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
-
-    _WS_DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
@@ -72,6 +69,9 @@ class Gui(object, metaclass=Singleton):
             path_mapping=path_mapping,
         )
         self._config = GuiConfig()
+        # Data Registry
+        self._data_accessors = _DataAccessors()
+
         # Load default config
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
@@ -225,8 +225,7 @@ class Gui(object, metaclass=Singleton):
                 value = complex(value) if value else 0
             elif isinstance(currentvalue, bool):
                 value = bool(value)
-            elif isinstance(currentvalue, pd.DataFrame):
-                warnings.warn("Error: cannot update value for dataframe: " + var_name)
+            elif self._data_accessors._cast_string_value(var_name, currentvalue) is None:
                 return
         self._update_var(var_name, value, propagate)
 
@@ -250,7 +249,7 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._values)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
-            if isinstance(newvalue, pd.DataFrame):
+            if self._data_accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
                 if isinstance(newvalue, list):
@@ -266,76 +265,10 @@ class Gui(object, metaclass=Singleton):
         self._send_ws_update_with_dict(ws_dict)
 
     def _request_data_update(self, var_name: str, payload: t.Any) -> None:
-        ret_payload = {}
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._expr_to_hash[var_name]
         newvalue = attrgetter(var_name)(self._values)
-        if isinstance(newvalue, pd.DataFrame):
-            paged = not _get_dict_value(payload, "alldata")
-            if paged:
-                keys = payload.keys()
-                ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
-                if "infinite" in keys:
-                    ret_payload["infinite"] = payload["infinite"]
-            else:
-                ret_payload["alldata"] = payload["alldata"]
-            # deal with columns
-            cols = _get_dict_value(payload, "columns")
-            if isinstance(cols, list) and len(cols):
-                col_types = newvalue.dtypes[newvalue.dtypes.index.isin(cols)]
-            else:
-                col_types = newvalue.dtypes
-            cols = col_types.index.tolist()
-            # deal with dates
-            datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
-            if len(datecols) != 0:
-                # copy the df so that we don't "mess" with the user's data
-                newvalue = newvalue.copy()
-                for col in datecols:
-                    newcol = get_date_col_str_name(newvalue, col)
-                    cols.append(newcol)
-                    newvalue[newcol] = newvalue[col].dt.strftime(Gui._WS_DATE_FORMAT).astype("string")
-                # remove the date columns from the list of columns
-                cols = list(set(cols) - set(datecols))
-            if paged:
-                rowcount = len(newvalue)
-                # here we'll deal with start and end values from payload if present
-                if isinstance(payload["start"], int):
-                    start = int(payload["start"])
-                else:
-                    try:
-                        start = int(str(payload["start"]), base=10)
-                    except Exception:
-                        warnings.warn(f'start should be an int value {payload["start"]}')
-                        start = 0
-                if isinstance(payload["end"], int):
-                    end = int(payload["end"])
-                else:
-                    try:
-                        end = int(str(payload["end"]), base=10)
-                    except Exception:
-                        end = -1
-                if start < 0 or start >= rowcount:
-                    start = 0
-                if end < 0 or end >= rowcount:
-                    end = rowcount - 1
-                # deal with sort 
-                order_by = _get_dict_value(payload, "orderby")
-                if isinstance(order_by, str) and len(order_by):
-                    new_indexes = newvalue[order_by].values.argsort(axis=0)
-                    if _get_dict_value(payload, "sort") == "desc":
-                        # reverse order
-                        new_indexes = new_indexes[::-1]
-                    new_indexes = new_indexes[slice(start, end + 1)]
-                else:
-                    new_indexes = slice(start, end + 1)
-                newvalue = newvalue.loc[:, cols].iloc[new_indexes]  # returns a view
-                dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount, "start": start}
-                newvalue = dictret
-            if not paged:
-                # view with the requested columns
-                newvalue = newvalue.loc[:, cols].to_dict(orient="list")
-        ret_payload["value"] = newvalue
+        ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
     def _request_var_update(self, payload):
@@ -633,3 +566,6 @@ class Gui(object, metaclass=Singleton):
 
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)
+
+    def register_data_accessor(self, data_accessor_class: t.Callable) -> None:
+        self._data_accessors.register(data_accessor_class)
