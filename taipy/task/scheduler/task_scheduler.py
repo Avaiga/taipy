@@ -4,7 +4,7 @@ import logging
 import uuid
 from multiprocessing import Lock
 from queue import Queue
-from typing import Dict, List
+from typing import Callable, Dict, Iterable, List, Optional
 
 from taipy.task.task import Task
 
@@ -28,7 +28,7 @@ class TaskScheduler:
         )
         self.lock = Lock()
 
-    def submit(self, task: Task) -> Job:
+    def submit(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
         """
         Submit a task that should be executed as a Job
 
@@ -40,7 +40,7 @@ class TaskScheduler:
         If an error happens when the result is provided to a data source, we ignore it
         and continue to the next data source
         """
-        job = self.__create_job(task)
+        job = self.__create_job(task, callbacks or [])
         self.jobs_to_run.put(job)
         job.pending()
         self.__run()
@@ -86,8 +86,8 @@ class TaskScheduler:
                 finally:
                     self.lock.release()
 
-    def __create_job(self, task: Task) -> Job:
+    def __create_job(self, task: Task, callbacks: Iterable[Callable]) -> Job:
         job = Job(id=JobId(f"job_id_{task.id}_{uuid.uuid4()}"), task=task)
         self.__JOBS[job.id] = job
-        job.on_status_change(self.__job_finished)
+        job.on_status_change(self.__job_finished, *callbacks)
         return job

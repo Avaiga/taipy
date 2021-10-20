@@ -1,10 +1,11 @@
 __all__ = ["Job", "JobId"]
 
+import collections
 import logging
 from concurrent.futures import Future
 from datetime import datetime
-from functools import partial
-from typing import Any, Callable, List, NewType
+from functools import partial, singledispatchmethod
+from typing import Any, Callable, Iterable, List, NewType
 
 from taipy.exceptions.job import DataSourceWritingError
 from taipy.task.scheduler.status import Status
@@ -101,11 +102,14 @@ class Job:
     def is_finished(self) -> bool:
         return self.is_completed() or self.is_failed() or self.is_cancelled()
 
-    def on_status_change(self, function: Callable):
+    def on_status_change(self, function, *functions):
         self._subscribers.append(function)
 
         if self.__status != Status.SUBMITTED:
             function(self)
+
+        if functions:
+            self.on_status_change(*functions)
 
     def execute(self, executor: Callable[[partial], Future]):
         self.running()

@@ -28,9 +28,12 @@ class Scenario:
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     @staticmethod
     def __protect_name(config_name):
-        return config_name.strip().lower().replace(' ', '_')
+        return config_name.strip().lower().replace(" ", "_")
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
