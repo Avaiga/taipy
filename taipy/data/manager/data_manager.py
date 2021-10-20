@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List
 
 from taipy.config import Config, DataSourceConfig
-from taipy.data import CSVDataSource, EmbeddedDataSource
+from taipy.data import CSVDataSource, EmbeddedDataSource, repository
 from taipy.data.data_source import DataSource
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.scope import Scope
