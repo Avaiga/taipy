@@ -1,6 +1,6 @@
 """ Generic pipeline.
 More specific pipelines such as optimization pipeline, data preparation pipeline,
-ML training pipeline, etc. should implement this generic pipeline entity
+ML training pipeline, etc. could implement this generic pipeline
 """
 import logging
 import uuid
@@ -10,13 +10,14 @@ from typing import Dict, List
 import networkx as nx
 
 from taipy.data import DataSource
-from taipy.pipeline.pipeline_model import Dag, PipelineId, PipelineModel
+from taipy.pipeline.pipeline_model import PipelineModel
+from taipy.common.alias import PipelineId, Dag
 from taipy.task.task import Task
 
 
 class Pipeline:
     __ID_PREFIX = "PIPELINE"
-    __ID_SEPARATOR = "_"
+    __SEPARATOR = "_"
 
     def __init__(
         self,
@@ -26,9 +27,7 @@ class Pipeline:
         pipeline_id: PipelineId = None,
     ):
         self.config_name = self.__protect_name(config_name)
-        self.id: PipelineId = pipeline_id or PipelineId(
-            self.__ID_SEPARATOR.join([self.__ID_PREFIX, config_name, str(uuid.uuid4())])
-        )
+        self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
         self.properties = properties
         self.tasks = {task.config_name: task for task in tasks}
         self.is_consistent = self.__is_consistent()
@@ -36,6 +35,12 @@ class Pipeline:
     @staticmethod
     def __protect_name(name):
         return name.strip().lower().replace(' ', '_')
+
+    @staticmethod
+    def new_id(config_name: str) -> PipelineId:
+        return PipelineId(
+            Pipeline.__SEPARATOR.join([Pipeline.__ID_PREFIX, Pipeline.__protect_name(config_name), str(uuid.uuid4())])
+        )
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)

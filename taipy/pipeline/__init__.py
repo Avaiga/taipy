@@ -1,2 +1,3 @@
 from .manager import PipelineManager
-from .pipeline import Pipeline, PipelineId
+from .pipeline import Pipeline
+from ..common.alias import PipelineId

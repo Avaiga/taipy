@@ -5,14 +5,15 @@ deleting, duplicating, executing) related to pipelines.
 """
 import logging
 from typing import Callable, Dict, Iterable, List, Optional, Set
+from typing import Dict, Iterable, Optional
 
 from taipy.config import DataSourceConfig, PipelineConfig
 from taipy.data import DataSource
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
-from taipy.task import TaskId
+from taipy.pipeline.pipeline_model import PipelineModel
+from taipy.common.alias import PipelineId, TaskId
 from taipy.task.manager.task_manager import TaskManager
 from taipy.task.scheduler.task_scheduler import TaskScheduler
 
@@ -27,21 +28,10 @@ class PipelineManager:
     def delete_all(self):
         self.__PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
 
-    def create(
-        self,
-        pipeline_config: PipelineConfig,
-        data_sources: Dict[DataSourceConfig, DataSource] = None,
-    ) -> Pipeline:
-        if data_sources is None:
-            all_ds_configs: Set[DataSourceConfig] = set()
-            for task_config in pipeline_config.tasks:
-                for ds_config in task_config.input:
-                    all_ds_configs.add(ds_config)
-                for ds_config in task_config.output:
-                    all_ds_configs.add(ds_config)
-            data_sources = {ds_config: self.data_manager._create_and_save_data_source(ds_config, None) for ds_config in all_ds_configs}
-        tasks = [self.task_manager.create(task_config, data_sources) for task_config in pipeline_config.tasks]
-        pipeline = Pipeline(pipeline_config.name, pipeline_config.properties, tasks)
+    def create(self, config: PipelineConfig, scenario_id: Optional[str] = None) -> Pipeline:
+        pipeline_id = Pipeline.new_id(config.name)
+        tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks]
+        pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id)
         self.save(pipeline)
         return pipeline
 
@@ -51,7 +41,7 @@ class PipelineManager:
     def get_pipeline(self, pipeline_id: PipelineId) -> Pipeline:
         try:
             model = self.__PIPELINE_MODEL_DB[pipeline_id]
-            tasks = [self.task_manager.get_task(TaskId(task_id)) for task_id in model.task_source_edges.keys()]
+            tasks = [self.task_manager.get(TaskId(task_id)) for task_id in model.task_source_edges.keys()]
             return Pipeline(model.name, model.properties, tasks, model.id)
         except NonExistingTask as err:
             logging.error(err.message)

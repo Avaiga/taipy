@@ -3,7 +3,8 @@ import pytest
 from taipy.config import DataSourceConfig, TaskConfig
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions.task import NonExistingTask
-from taipy.task import Task, TaskId
+from taipy.task import Task
+from taipy.common.alias import TaskId
 from taipy.task.manager.task_manager import TaskManager
 
 
@@ -20,36 +21,36 @@ def test_save_and_get_task_entity():
     task_manager.delete_all()
     assert len(task_manager.tasks) == 0
     with pytest.raises(NonExistingTask):
-        task_manager.get_task(task_id_1)
+        task_manager.get(task_id_1)
     with pytest.raises(NonExistingTask):
-        task_manager.get_task(task_id_2)
+        task_manager.get(task_id_2)
 
     # Save one task. We expect to have only one task stored
     task_manager.save(first_task)
     assert len(task_manager.tasks) == 1
-    assert task_manager.get_task(task_id_1) == first_task
+    assert task_manager.get(task_id_1) == first_task
     with pytest.raises(NonExistingTask):
-        task_manager.get_task(task_id_2)
+        task_manager.get(task_id_2)
 
     # Save a second task. Now, we expect to have a total of two tasks stored
     task_manager.save(second_task)
     assert len(task_manager.tasks) == 2
-    assert task_manager.get_task(task_id_1) == first_task
-    assert task_manager.get_task(task_id_2) == second_task
+    assert task_manager.get(task_id_1) == first_task
+    assert task_manager.get(task_id_2) == second_task
 
     # We save the first task again. We expect nothing to change
     task_manager.save(first_task)
     assert len(task_manager.tasks) == 2
-    assert task_manager.get_task(task_id_1) == first_task
-    assert task_manager.get_task(task_id_2) == second_task
+    assert task_manager.get(task_id_1) == first_task
+    assert task_manager.get(task_id_2) == second_task
 
     # We save a third task with same id as the first one.
     # We expect the first task to be updated
     task_manager.save(third_task_with_same_id_as_first_task)
     assert len(task_manager.tasks) == 2
-    assert task_manager.get_task(task_id_1) == third_task_with_same_id_as_first_task
-    assert task_manager.get_task(task_id_1) != first_task
-    assert task_manager.get_task(task_id_2) == second_task
+    assert task_manager.get(task_id_1) == third_task_with_same_id_as_first_task
+    assert task_manager.get(task_id_1) != first_task
+    assert task_manager.get(task_id_2) == second_task
 
 
 def test_ensure_conservation_of_order_of_data_sources_on_task_entity_creation():

@@ -1,8 +1,9 @@
 from taipy.data import Scope
 from taipy.data.in_memory import InMemoryDataSource
-from taipy.pipeline import Pipeline, PipelineId
-from taipy.scenario import Scenario, ScenarioId
-from taipy.task import Task, TaskId
+from taipy.pipeline import Pipeline
+from taipy.common.alias import PipelineId, ScenarioId, TaskId
+from taipy.scenario import Scenario
+from taipy.task import Task
 
 
 def test_create_scenario_entity():

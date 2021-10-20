@@ -5,7 +5,8 @@ from time import sleep
 
 import pytest
 
-from taipy.task import Job, JobId, Task, TaskId
+from taipy.task import Job, JobId, Task
+from taipy.common.alias import TaskId
 from taipy.task.scheduler.executor.executor import Executor
 from tests.task.scheduler.lock_data_source import LockDataSource
 

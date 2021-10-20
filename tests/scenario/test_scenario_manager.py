@@ -54,7 +54,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id) == task_2
 
     # We save the first scenario again. We expect nothing to change
     scenario_manager.save(scenario_1)
@@ -65,7 +65,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id) == task_2
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
@@ -79,7 +79,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id) == task_2
 
 
 def test_submit():

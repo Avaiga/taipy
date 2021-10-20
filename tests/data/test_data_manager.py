@@ -3,6 +3,8 @@ import pathlib
 
 import pytest
 
+from taipy.configuration import ConfigurationManager
+from taipy.data import CSVDataSource, DataSourceConfig, Scope
 from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, Scope
 from taipy.data.data_source_model import DataSourceModel

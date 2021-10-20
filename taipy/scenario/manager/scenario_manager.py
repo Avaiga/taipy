@@ -1,4 +1,5 @@
 import logging
+from typing import Dict, Iterable
 from functools import partial
 from typing import Callable, Dict, List, Set
 
@@ -8,7 +9,8 @@ from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
-from taipy.scenario import Scenario, ScenarioId
+from taipy.scenario import Scenario
+from taipy.common.alias import PipelineId, ScenarioId
 from taipy.scenario.scenario_model import ScenarioModel
 from taipy.task import Job
 
@@ -43,20 +45,20 @@ class ScenarioManager:
     def delete_all(self):
         self.__SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
 
-    def create(
-        self, scenario_config: ScenarioConfig, data_sources: Dict[DataSourceConfig, DataSource] = None
-    ) -> Scenario:
-        if data_sources is None:
-            all_ds_configs: Set[DataSourceConfig] = set()
-            for pipeline_configs in scenario_config.pipelines:
-                for task_config in pipeline_configs.tasks:
-                    for ds_config in task_config.input:
-                        all_ds_configs.add(ds_config)
-                    for ds_config in task_config.output:
-                        all_ds_configs.add(ds_config)
-            data_sources = {ds_config: self.data_manager._create_and_save_data_source(ds_config, None) for ds_config in all_ds_configs}
-        pipelines = [self.pipeline_manager.create(p_config, data_sources) for p_config in scenario_config.pipelines]
-        scenario = Scenario(scenario_config.name, pipelines, scenario_config.properties)
+    def get_scenario_config(self, config_name: str) -> ScenarioConfig:
+        try:
+            return self.__SCENARIO_CONFIG_DB[config_name]
+        except KeyError:
+            logging.error(f"Scenario : {config_name} does not exist.")
+            raise NonExistingScenarioConfig(config_name)
+
+    def get_scenario_configs(self) -> Iterable[ScenarioConfig]:
+        return self.__SCENARIO_CONFIG_DB.values()
+
+    def create(self, config: ScenarioConfig) -> Scenario:
+        scenario_id = Scenario.new_id(config.name)
+        pipelines = [self.pipeline_manager.create(p_config, scenario_id) for p_config in config.pipelines]
+        scenario = Scenario(config.name, pipelines, config.properties, scenario_id)
         self.save(scenario)
         return scenario
 

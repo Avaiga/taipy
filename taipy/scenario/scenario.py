@@ -7,12 +7,13 @@ import uuid
 from typing import Dict, List
 
 from taipy.pipeline import Pipeline
-from taipy.scenario.scenario_model import ScenarioId, ScenarioModel
+from taipy.scenario.scenario_model import ScenarioModel
+from taipy.common.alias import ScenarioId
 
 
 class Scenario:
     __ID_PREFIX = "SCENARIO"
-    __ID_SEPARATOR = "_"
+    __SEPARATOR = "_"
 
     def __init__(
         self,
@@ -22,9 +23,7 @@ class Scenario:
         scenario_id: ScenarioId = None,
     ):
         self.config_name = self.__protect_name(config_name)
-        self.id: ScenarioId = scenario_id or ScenarioId(
-            self.__ID_SEPARATOR.join([self.__ID_PREFIX, config_name, str(uuid.uuid4())])
-        )
+        self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
 
@@ -34,6 +33,12 @@ class Scenario:
     @staticmethod
     def __protect_name(config_name):
         return config_name.strip().lower().replace(" ", "_")
+
+    @staticmethod
+    def new_id(config_name: str) -> ScenarioId:
+        return ScenarioId(
+            Scenario.__SEPARATOR.join([Scenario.__ID_PREFIX, Scenario.__protect_name(config_name), str(uuid.uuid4())])
+        )
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)

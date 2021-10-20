@@ -44,8 +44,6 @@ class DataManager:
         if ds is not None and ds.scope > Scope.PIPELINE:
             return self.__create_data_source(data_source_config)
 
-    ###########
-
     def get_or_create(self,
                       data_source_config: DataSourceConfig,
                       scenario_id: Optional[str] = None,
@@ -63,6 +61,7 @@ class DataManager:
             return self._create_and_save_data_source(data_source_config, parent_id)
 
     def save(self, data_source: DataSource):
+        # TODO Check if we should create the model or if it already exist
         self._create_data_source_model(
             data_source.id,
             data_source.config_name,

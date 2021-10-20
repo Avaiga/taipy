@@ -8,9 +8,13 @@ from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
+from taipy.exceptions.pipeline import NonExistingPipelineConfig, NonExistingPipeline
+from taipy.pipeline import Pipeline, PipelineConfig
+from taipy.common.alias import PipelineId, TaskId
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline, PipelineId
 from taipy.pipeline.manager import PipelineManager
+from taipy.task import Task, TaskConfig, TaskManager
 from taipy.task import Task, TaskId, TaskManager
 from taipy.task.scheduler import TaskScheduler
 
@@ -52,7 +56,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id) == task_2
 
     # We save the first pipeline again. We expect nothing to change
     pipeline_manager.save(pipeline_1)
@@ -62,7 +66,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id) == task_2
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
@@ -73,7 +77,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id) == task_2
 
 
 def test_submit():
