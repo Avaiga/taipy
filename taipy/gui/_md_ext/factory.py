@@ -19,7 +19,7 @@ class Factory:
         "table": "data",
         "dialog": "open",
         "chart": "data",
-        "status": "value"
+        "status": "value",
     }
 
     CONTROL_BUILDERS = {
@@ -157,6 +157,7 @@ class Factory:
             ]
         )
         .get_chart_attributes("scatter", "lines+markers")
+        .set_chart_layout()
         .set_refresh(),
         "status": lambda control_type, attrs: Builder(
             control_type=control_type,

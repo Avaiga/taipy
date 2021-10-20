@@ -1,6 +1,7 @@
-import React, { CSSProperties, useContext, useEffect, useMemo } from "react";
+import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import Plot from "react-plotly.js";
-import { Data, Layout, PlotMarker } from "plotly.js";
+import { Data, Layout, PlotMarker, PlotRelayoutEvent } from "plotly.js";
+import Skeleton from "@mui/material/Skeleton";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestChartUpdateAction } from "../../context/taipyReducers";
@@ -19,6 +20,8 @@ interface ChartProp extends TaipyBaseProps {
     labels: string;
     colors: string;
     traces: string;
+    axis: string;
+    layout: string;
 }
 
 type TraceValueType = Record<string, (string | number)[]>;
@@ -37,8 +40,9 @@ const Chart = (props: ChartProp) => {
         value,
     } = props;
     const { dispatch } = useContext(TaipyContext);
+    const [loading, setLoading] = useState(false);
 
-    const { columns, labels, modes, types, markers, traces } = useMemo(() => {
+    const { columns, labels, modes, types, markers, traces, axis } = useMemo(() => {
         const ret = {
             columns: {} as Record<string, ColumnDesc>,
             labels: [],
@@ -46,6 +50,7 @@ const Chart = (props: ChartProp) => {
             types: [],
             markers: [],
             traces: [],
+            axis: [],
         } as {
             columns: Record<string, ColumnDesc>;
             labels: string[];
@@ -53,6 +58,7 @@ const Chart = (props: ChartProp) => {
             types: string[];
             markers: Partial<PlotMarker>[];
             traces: string[][];
+            axis: string[][];
         };
         if (props.columns) {
             ret.columns = JSON.parse(props.columns) as Record<string, ColumnDesc>;
@@ -71,41 +77,47 @@ const Chart = (props: ChartProp) => {
                 color ? { color: color } : ({} as Partial<PlotMarker>)
             );
         }
+        if (props.axis) {
+            ret.axis = JSON.parse(props.axis) as string[][];
+        }
         if (props.traces) {
             ret.traces = JSON.parse(props.traces);
         }
         return ret;
-    }, [props.columns, props.labels, props.types, props.modes, props.colors, props.traces]);
+    }, [props.columns, props.labels, props.types, props.modes, props.colors, props.traces, props.axis]);
 
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
         if (!props.value || !!refresh) {
+            setLoading(true);
             const back_cols = Object.keys(columns).map((col) => columns[col].dfid);
             dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols));
         }
     }, [refresh, columns, tp_varname, id, dispatch]);
 
-    const layout = useMemo(
-        () =>
-            ({
-                title: title,
-                xaxis: {
-                    title: traces.length && traces[0].length && traces[0][0] ? columns[traces[0][0]].dfid : undefined,
-                },
-                yaxis: {
-                    title:
-                        traces.length == 1 && traces[0].length > 1 && columns[traces[0][1]]
-                            ? columns[traces[0][1]].dfid
-                            : undefined,
-                }
-            } as Layout),
-        [title, columns, traces]
-    );
+    const layout = useMemo(() => {
+        const playout = props.layout ? JSON.parse(props.layout) : {};
+        return {
+            ...playout,
+            title: title,
+            xaxis: {
+                title: traces.length && traces[0].length && traces[0][0] ? columns[traces[0][0]].dfid : undefined,
+            },
+            yaxis: {
+                title:
+                    traces.length == 1 && traces[0].length > 1 && columns[traces[0][1]]
+                        ? columns[traces[0][1]].dfid
+                        : undefined,
+            },
+        } as Layout;
+    }, [title, columns, traces, props.layout]);
 
     const style = useMemo(
         () => ({ ...defaultStyle, width: width, height: height } as CSSProperties),
         [defaultStyle, width, height]
     );
+
+    const divStyle = useMemo(() => (loading ? { display: "none" } : {}), [loading]);
 
     const data = useMemo(
         () =>
@@ -119,13 +131,36 @@ const Chart = (props: ChartProp) => {
                         x: value && trace.length ? value[trace[0]] : [],
                         y: value && trace.length > 1 ? value[trace[1]] : [],
                         z: value && trace.length > 2 ? value[trace[2]] : [],
+                        xaxis: axis[idx][0],
+                        yaxis: axis[idx][1],
                         hovertext: value && idx < labels.length ? value[labels[idx]] : [],
                     } as Data)
             ),
         [value, traces, types, modes, markers, labels, columns]
     );
 
-    return <Plot data={data} layout={layout} className={className} style={style} />;
+    const onRelayout = useCallback(
+        (eventData: PlotRelayoutEvent) => console.log("plotly_relayout Event data:", eventData),
+        []
+    );
+
+    const onAfterPlot = useCallback(() => setLoading(false), []);
+
+    return (
+        <>
+            {loading ? <Skeleton key="skeleton" sx={style} /> : null}
+            <div style={divStyle} key="div">
+                <Plot
+                    data={data}
+                    layout={layout}
+                    className={className}
+                    style={style}
+                    onRelayout={onRelayout}
+                    onAfterPlot={onAfterPlot}
+                />
+            </div>
+        </>
+    );
 };
 
 export default Chart;

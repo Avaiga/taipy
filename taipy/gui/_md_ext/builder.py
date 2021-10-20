@@ -109,7 +109,10 @@ class Builder:
         if isinstance(value, str) and self._gui._is_expression(value):
             hash_value = self._gui._fetch_expression_list(value)[0]
             self._gui.bind_var(hash_value)
-            return (attrgetter(hash_value)(self._gui._values), hash_value)
+            try:
+                return (attrgetter(hash_value)(self._gui._values), hash_value)
+            except AttributeError as ae:
+                warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
 
     def __set_boolean_attribute(self, name: str, default_value=False):
@@ -227,12 +230,20 @@ class Builder:
         return self
 
     def get_chart_attributes(self, default_type="scatter", default_mode="lines+markers"):
-        names = ("x", "y", "z", "label", "mode", "type", "color")
+        names = ("x", "y", "z", "label", "mode", "type", "color", "xaxis", "yaxis")
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[4]:
+            # mode
             trace[4] = default_mode
         if not trace[5]:
+            # type
             trace[5] = default_type
+        if not trace[7]:
+            # xaxis
+            trace[7] = "x"
+        if not trace[8]:
+            # yaxis
+            trace[8] = "y"
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -262,8 +273,19 @@ class Builder:
             self.__set_json_attribute("modes", [t[4] for t in traces])
             self.__set_json_attribute("types", [t[5] for t in traces])
             self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
+            self.__set_json_attribute("axis", [(t[7], t[8]) for t in traces])
             traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
             self.__set_json_attribute("traces", traces)
+        return self
+
+    def set_chart_layout(self):
+        layout = _get_dict_value(self.attributes, "layout")
+        if layout:
+            if isinstance(layout, (dict, _MapDictionary)):
+                self.__set_json_attribute("layout", layout)
+            else:
+                warnings.warn(f"Chart: layout attribute should be a dict\n'{str(layout)}'")
+
         return self
 
     def set_className(self, class_name="", config_class="input"):
