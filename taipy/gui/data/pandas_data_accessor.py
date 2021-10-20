@@ -43,15 +43,15 @@ class PandasDataAccessor(DataAccessor):
             datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
             if len(datecols) != 0:
                 # copy the df so that we don't "mess" with the user's data
-                newvalue = value.copy()
+                value = value.copy()
                 for col in datecols:
                     newcol = _get_date_col_str_name(cols, col)
                     cols.append(newcol)
-                    newvalue[newcol] = newvalue[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
+                    value[newcol] = value[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
                 # remove the date columns from the list of columns
                 cols = list(set(cols) - set(datecols))
             if paged:
-                rowcount = len(newvalue)
+                rowcount = len(value)
                 # here we'll deal with start and end values from payload if present
                 if isinstance(payload["start"], int):
                     start = int(payload["start"])
@@ -75,20 +75,20 @@ class PandasDataAccessor(DataAccessor):
                 # deal with sort
                 order_by = _get_dict_value(payload, "orderby")
                 if isinstance(order_by, str) and len(order_by):
-                    new_indexes = newvalue[order_by].values.argsort(axis=0)
+                    new_indexes = value[order_by].values.argsort(axis=0)
                     if _get_dict_value(payload, "sort") == "desc":
                         # reverse order
                         new_indexes = new_indexes[::-1]
                     new_indexes = new_indexes[slice(start, end + 1)]
                 else:
                     new_indexes = slice(start, end + 1)
-                newvalue = newvalue.loc[:, cols].iloc[new_indexes]  # returns a view
-                dictret = {"data": newvalue.to_dict(orient="records"), "rowcount": rowcount, "start": start}
-                newvalue = dictret
+                value = value.loc[:, cols].iloc[new_indexes]  # returns a view
+                dictret = {"data": value.to_dict(orient="records"), "rowcount": rowcount, "start": start}
+                value = dictret
             if not paged:
                 # view with the requested columns
-                newvalue = newvalue.loc[:, cols].to_dict(orient="list")
-            ret_payload["value"] = newvalue
+                value = value.loc[:, cols].to_dict(orient="list")
+            ret_payload["value"] = value
         return ret_payload
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
