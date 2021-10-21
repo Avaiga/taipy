@@ -14,21 +14,30 @@ class TaipyHTMLParser(HTMLParser):
     def __init__(self):
         super().__init__()
         self.body = ""
-        self.head = ""
+        self.head = []
         self.taipy_tag = None
         self.tag_mapping = {}
         self.is_body = True
+        self.head_tag = None
 
     # @override
     def handle_starttag(self, tag, props) -> None:
         if tag == "html":
             return
+        if self.head_tag is not None:
+            self.head.append(self.head_tag)
+            self.head_tag = None
+        if self.taipy_tag is not None:
+            self.parse_taipy_tag()
         if tag == "head":
             self.is_body = False
         elif tag == "body":
             self.is_body = True
         elif m := self.__TAIPY_NAMESPACE_RE.match(tag):
             self.taipy_tag = TaipyTag(m.group(1), props)
+        elif not self.is_body:
+            head_props = {prop[0]: prop[1] for prop in props}
+            self.head_tag = {"tag": tag, "props": head_props, "content": ""}
         else:
             self.append_data(str(self.get_starttag_text()))
 
@@ -37,6 +46,8 @@ class TaipyHTMLParser(HTMLParser):
         data = data.strip()
         if data and self.taipy_tag is not None and self.taipy_tag.set_value(data):
             self.parse_taipy_tag()
+        elif not self.is_body and self.head_tag is not None:
+            self.head_tag["content"] = data
         else:
             self.append_data(data)
 
@@ -44,9 +55,12 @@ class TaipyHTMLParser(HTMLParser):
     def handle_endtag(self, tag) -> None:
         if tag in ["head", "body", "html"]:
             return
-        if self.taipy_tag:
+        if self.taipy_tag is not None:
             self.parse_taipy_tag()
-        if tag in self.tag_mapping:
+        if not self.is_body:
+            self.head.append(self.head_tag)
+            self.head_tag = None
+        elif tag in self.tag_mapping:
             self.append_data(f"</{self.tag_mapping[tag]}>")
         else:
             self.append_data(f"</{tag}>")
@@ -54,8 +68,6 @@ class TaipyHTMLParser(HTMLParser):
     def append_data(self, data: str) -> None:
         if self.is_body:
             self.body += data
-        else:
-            self.head += data
 
     def parse_taipy_tag(self) -> None:
         tp_string, tp_element_name = self.taipy_tag.parse()
@@ -64,7 +76,6 @@ class TaipyHTMLParser(HTMLParser):
         self.taipy_tag = None
 
     def get_jsx(self) -> str:
-        print(self.body)
         return self.body
 
 

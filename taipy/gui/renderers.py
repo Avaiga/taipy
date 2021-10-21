@@ -2,22 +2,20 @@ from __future__ import annotations
 
 import typing as t
 from abc import ABC, abstractmethod
+from ast import parse
+from os import path
 
 from ._html_ext import TaipyHTMLParser
 
 
 class PageRenderer(ABC):
-    def __init__(self, content: t.Optional[str], filename: t.Optional[str]) -> None:
+    def __init__(self, content: str) -> None:
         self._content = None
-        if content is None and filename is None:
-            raise RuntimeError("Missing `content` and `filename`")
-        elif content is not None and filename is not None:
-            raise RuntimeError("Can only contain either `content` or `filename`")
-        elif content is not None:
-            self._content = content
-        else:
-            with open(t.cast(str, filename), "r") as f:
+        if path.exists(content) and path.isfile(content):
+            with open(t.cast(str, content), "r") as f:
                 self._content = f.read()
+        else:
+            self._content = content
 
     @abstractmethod
     def render(self) -> str:
@@ -25,8 +23,8 @@ class PageRenderer(ABC):
 
 
 class Markdown(PageRenderer):
-    def __init__(self, content: t.Optional[str] = None, filename: t.Optional[str] = None) -> None:
-        super().__init__(content, filename)
+    def __init__(self, content: str) -> None:
+        super().__init__(content)
 
     # Generate JSX from Markdown
     def render(self) -> str:
@@ -36,11 +34,17 @@ class Markdown(PageRenderer):
 
 
 class Html(PageRenderer):
-    def __init__(self, content: t.Optional[str] = None, filename: t.Optional[str] = None) -> None:
-        super().__init__(content, filename)
+    def __init__(self, content: str) -> None:
+        super().__init__(content)
+        self.head = None
+
+    # Modify path routes
+    def modify_taipy_base_url(self, base_url):
+        self._content = str(self._content).replace("{{taipy_base_url}}", f"/{base_url}")
 
     # Generate JSX from HTML
     def render(self) -> str:
         parser = TaipyHTMLParser()
         parser.feed(t.cast(str, self._content))
+        self.head = parser.head
         return parser.get_jsx()

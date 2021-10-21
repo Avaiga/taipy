@@ -14,25 +14,17 @@ from types import FrameType, FunctionType, SimpleNamespace
 
 import __main__
 import markdown as md_lib
-from flask import jsonify, request
+from flask import Blueprint, jsonify, request
 
-from .data.data_accessor import _DataAccessors
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
+from .data.data_accessor import _DataAccessors
 from .page import Page, Partial
 from .renderers import PageRenderer
 from .server import Server
 from .taipyimage import TaipyImage
-from .utils import (
-    ISOToDate,
-    Singleton,
-    _get_dict_value,
-    _MapDictionary,
-    attrsetter,
-    dateToISO,
-    get_client_var_name,
-)
+from .utils import ISOToDate, Singleton, _get_dict_value, _MapDictionary, attrsetter, dateToISO, get_client_var_name
 from .wstype import WsType
 
 
@@ -45,6 +37,9 @@ class Gui(object, metaclass=Singleton):
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
+    __RE_HTML = re.compile(r"(.*?)\.html")
+    __RE_MD = re.compile(r"(.*?)\.md")
+    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*?)/")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
@@ -73,6 +68,7 @@ class Gui(object, metaclass=Singleton):
         self._data_accessors = _DataAccessors()
 
         # Load default config
+        self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
         self._adapter_for_type: t.Dict[str, FunctionType] = {}
@@ -94,26 +90,26 @@ class Gui(object, metaclass=Singleton):
         self._expr_to_var_list: t.Dict[str, t.List[str]] = {}
         if default_page_renderer:
             self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
-        if pages:
-            for k, v in pages.items():
-                if k == "/":
-                    k = Gui.__root_page_name
-                self.add_page(name=k, renderer=v)
+        if pages is not None:
+            self.add_pages(pages)
 
     @staticmethod
     def _get_instance() -> Gui:
         return Gui._instances[Gui]
 
+    def _get_render_path_name(self):
+        return Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)
+
     def _render_page(self) -> t.Any:
         page = None
         # Get page instance
         for page_i in self._config.pages:
-            if page_i.route in request.path:
+            if page_i.route == self._get_render_path_name():
                 page = page_i
         # try partials
         if page is None:
             for partial in self._config.partials:
-                if partial.route in request.path:
+                if partial.route == self._get_render_path_name():
                     page = partial
         # Make sure that there is a page instance found
         if page is None:
@@ -122,10 +118,7 @@ class Gui(object, metaclass=Singleton):
             page.render()
         # Return jsx page
         if page.rendered_jsx:
-            return self._server.render(
-                page.rendered_jsx,
-                page.style if hasattr(page, "style") else "",
-            )
+            return self._server.render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
         else:
             return "No page template"
 
@@ -344,7 +337,7 @@ class Gui(object, metaclass=Singleton):
     def add_page(
         self,
         name: str,
-        renderer: t.Optional[PageRenderer] = None,
+        renderer: PageRenderer,
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -367,9 +360,40 @@ class Gui(object, metaclass=Singleton):
         self._config.pages.append(new_page)
         self._config.routes.append(name)
 
+    def add_pages(self, pages: t.Union[dict[str, PageRenderer], str] = None):
+        if isinstance(pages, dict):
+            for k, v in pages.items():
+                if k == "/":
+                    k = Gui.__root_page_name
+                self.add_page(name=k, renderer=v)
+        elif isinstance(folder_name := pages, str):
+            if not hasattr(self, "_root_dir"):
+                self._root_dir = os.path.dirname(
+                    inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
+                )
+            folder_path = os.path.join(self._root_dir, folder_name)
+            list_of_files = os.listdir(folder_path)
+            for file_name in list_of_files:
+                from .renderers import Html, Markdown
+
+                if re_match := Gui.__RE_HTML.match(file_name):
+                    renderers = Html(os.path.join(folder_path, file_name))
+                    renderers.modify_taipy_base_url(folder_name)
+                    self.add_page(name=re_match.group(1), renderer=renderers)
+                elif re_match := Gui.__RE_MD.match(file_name):
+                    renderers_md = Markdown(os.path.join(folder_path, file_name))
+                    self.add_page(name=re_match.group(1), renderer=renderers_md)
+                elif os.path.isdir(assets_folder := os.path.join(folder_path, file_name)):
+                    assets_dir_name = f"{folder_name}/{file_name}"
+                    self._flask_blueprint.append(
+                        Blueprint(
+                            assets_dir_name, __name__, static_folder=assets_folder, url_prefix=f"/{assets_dir_name}"
+                        )
+                    )
+
     def add_partial(
         self,
-        renderer: t.Optional[PageRenderer] = None,
+        renderer: PageRenderer,
     ) -> Partial:
         # Init a new partial
         new_partial = Partial()
@@ -565,6 +589,10 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/initialize/", view_func=self._render_route)
+
+        # Register Flask Blueprint if available
+        for bp in self._flask_blueprint:
+            self._server.register_blueprint(bp)
 
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)

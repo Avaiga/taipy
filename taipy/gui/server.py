@@ -58,7 +58,7 @@ class Server(Flask):
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):
                 return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
-            return ('', 404)
+            return ("", 404)
 
         @self.errorhandler(404)
         def page_not_found(e):
@@ -73,14 +73,15 @@ class Server(Flask):
                 self._app._manage_message(message["type"], message)
 
     # Update to render as JSX
-    def render(self, html_fragment, style):
+    def render(self, html_fragment, style, head):
         template_str = render_template_string(html_fragment)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
         return self._direct_render_json(
             {
                 "jsx": template_str,
-                "style": ((style + os.linesep) if style else ""),
+                "style": (style + os.linesep) if style else "",
+                "head": head or "",
             }
         )
 
