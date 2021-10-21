@@ -10,11 +10,14 @@ class Page(object):
         self.template_renderer = None
         self.style = None
         self.route = None
+        self.head = None
 
     def render(self):
         if self.template_renderer is None:
             raise RuntimeError(f"Can't render JSX for {self.route} due to missing template_renderer!")
         self.rendered_jsx = self.template_renderer.render()
+        if hasattr(self.template_renderer, "head"):
+            self.head = self.template_renderer.head
 
 
 class Partial(Page):
