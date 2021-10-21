@@ -26,14 +26,14 @@ def _run_callbacks(fn):
 class Job:
     def __init__(self, id: JobId, task: Task):
         self.id = id
+        self.task = task
+        self.status = Status.SUBMITTED
         self.creation_date = datetime.now()
         self._subscribers: List[Callable] = []
-        self.__task = task
         self.__reasons: List[Exception] = []
-        self.__status = Status.SUBMITTED
 
     def __contains__(self, task: Task):
-        return self.__task.id == task.id
+        return self.task.id == task.id
 
     def __lt__(self, other):
         return self.creation_date.timestamp() < other.creation_date.timestamp()
@@ -56,48 +56,48 @@ class Job:
 
     @_run_callbacks
     def blocked(self):
-        self.__status = Status.BLOCKED
+        self.status = Status.BLOCKED
 
     @_run_callbacks
     def pending(self):
-        self.__status = Status.PENDING
+        self.status = Status.PENDING
 
     @_run_callbacks
     def running(self):
-        self.__status = Status.RUNNING
+        self.status = Status.RUNNING
 
     @_run_callbacks
     def cancelled(self):
-        self.__status = Status.CANCELLED
+        self.status = Status.CANCELLED
 
     @_run_callbacks
     def failed(self):
-        self.__status = Status.FAILED
+        self.status = Status.FAILED
 
     @_run_callbacks
     def completed(self):
-        self.__status = Status.COMPLETED
+        self.status = Status.COMPLETED
 
     def is_failed(self) -> bool:
-        return self.__status == Status.FAILED
+        return self.status == Status.FAILED
 
     def is_blocked(self) -> bool:
-        return self.__status == Status.BLOCKED
+        return self.status == Status.BLOCKED
 
     def is_cancelled(self) -> bool:
-        return self.__status == Status.CANCELLED
+        return self.status == Status.CANCELLED
 
     def is_submitted(self) -> bool:
-        return self.__status == Status.SUBMITTED
+        return self.status == Status.SUBMITTED
 
     def is_completed(self) -> bool:
-        return self.__status == Status.COMPLETED
+        return self.status == Status.COMPLETED
 
     def is_running(self) -> bool:
-        return self.__status == Status.RUNNING
+        return self.status == Status.RUNNING
 
     def is_pending(self) -> bool:
-        return self.__status == Status.PENDING
+        return self.status == Status.PENDING
 
     def is_finished(self) -> bool:
         return self.is_completed() or self.is_failed() or self.is_cancelled()
@@ -105,7 +105,7 @@ class Job:
     def on_status_change(self, function, *functions):
         self._subscribers.append(function)
 
-        if self.__status != Status.SUBMITTED:
+        if self.status != Status.SUBMITTED:
             function(self)
 
         if functions:
@@ -113,7 +113,7 @@ class Job:
 
     def execute(self, executor: Callable[[partial], Future]):
         self.running()
-        ft = executor(partial(self.__task.function, *[i.get() for i in self.__task.input.values()]))
+        ft = executor(partial(self.task.function, *[i.get() for i in self.task.input.values()]))
         ft.add_done_callback(self.__write)
 
     def __write(self, ft: Future):
@@ -126,16 +126,16 @@ class Job:
             self.__update_status()
 
     def __extract_results(self, ft: Future) -> List[Any]:
-        results = [ft.result()] if len(self.__task.output) == 1 else ft.result()
+        results = [ft.result()] if len(self.task.output) == 1 else ft.result()
 
-        if len(results) != len(self.__task.output):
+        if len(results) != len(self.task.output):
             logging.error("Error, wrong number of result or task output")
             raise DataSourceWritingError("Error, wrong number of result or task output")
 
         return results
 
     def __write_results_in_output(self, results: List[Any]):
-        for res, output in zip(results, self.__task.output.values()):
+        for res, output in zip(results, self.task.output.values()):
             try:
                 output.write(res)
             except Exception as e:
