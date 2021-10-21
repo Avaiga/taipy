@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import datetime
-import hashlib
 import inspect
 import os
 import pathlib
@@ -27,6 +26,7 @@ from .taipyimage import TaipyImage
 from .utils import (
     ISOToDate,
     Singleton,
+    _get_expr_var_name,
     _get_dict_value,
     _MapDictionary,
     attrsetter,
@@ -497,8 +497,11 @@ class Gui(object, metaclass=Singleton):
                 if type(node) is ast.Name:
                     var_name = node.id.split(sep=".")[0]
                     self.bind_var(var_name)
-                    var_list.append(var_name)
-                    var_val[var_name] = attrgetter(var_name)(self._values)
+                    try:
+                        var_val[var_name] = attrgetter(var_name)(self._values)
+                        var_list.append(var_name)
+                    except AttributeError as ae:
+                        warnings.warn(f"Variable '{var_name}' is not defined")
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
@@ -510,12 +513,16 @@ class Gui(object, metaclass=Singleton):
         # validate whether expression has already been evaluated
         if expr in self._expr_to_hash:
             return "{" + self._expr_to_hash[expr] + "}"
-        # evaluate expressions
-        expr_evaluated = eval(expr_string, {}, var_val) if not is_edge_case else eval(expr, {}, var_val)
+        try:
+            # evaluate expressions
+            expr_evaluated = eval(expr_string if not is_edge_case else expr, {}, var_val)
+        except Exception as e:
+            warnings.warn(f"Cannot evaluate expression '{expr if is_edge_case else expr_string}'")
+            expr_evaluated = None
         # save the expression if it needs to be re-evaluated
         if re_evaluated:
             if expr_hash is None:
-                expr_hash = self._expr_to_hash[expr] = "tp_" + hashlib.md5(expr.encode()).hexdigest()
+                expr_hash = self._expr_to_hash[expr] = _get_expr_var_name(expr)
                 self.bind_var_val(expr_hash, expr_evaluated)
             else:
                 self._expr_to_hash[expr] = expr
