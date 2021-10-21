@@ -5,6 +5,7 @@ from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, PickleDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.data_source_model import DataSourceModel
+from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 
@@ -17,7 +18,7 @@ The Data Manager will facilitate data access between Taipy Modules.
 class DataManager:
     # This represents a database table that maintains our DataSource References.
     __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
-    __DATA_SOURCE_CLASSES = {PickleDataSource, CSVDataSource}
+    __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource}
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}
 
     def __create_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
