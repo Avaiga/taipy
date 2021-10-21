@@ -25,7 +25,6 @@ import {
     paperSx,
     tableSx,
     TaipyPaginatedTableProps,
-    tcSx,
 } from "./tableUtils";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
@@ -43,6 +42,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         allowAllRows = false,
         showAll = false,
         refresh = false,
+        height,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -52,6 +52,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [loading, setLoading] = useState(true);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
+    const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
 
     //    useWhyDidYouUpdate('TaipyTable', props);
 
@@ -62,6 +63,20 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         }
         return [[], {}];
     }, [props.columns]);
+
+    const selected = useMemo(
+        () => (props.selected === undefined ? (JSON.parse(props.defaultSelected) as number[]) : props.selected),
+        [props.defaultSelected, props.selected]
+    );
+
+    useEffect(() => {
+        if (selected.length) {
+            if (selected[0] < startIndex || selected[0] > startIndex + rowsPerPage) {
+                setLoading(true);
+                setStartIndex(rowsPerPage * Math.floor(selected[0] / rowsPerPage));
+            }
+        }
+    }, [selected, startIndex, rowsPerPage]);
 
     useEffect(() => {
         if (props.value && props.value[pageKey.current] !== undefined) {
@@ -124,6 +139,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         setStartIndex(0);
     }, []);
 
+    const tableContainertSx = useMemo(() => ({ maxHeight: height }), [height]);
+
     const pso = useMemo(() => {
         let psOptions = rowsPerPageOptions;
         if (pageSizeOptions) {
@@ -157,7 +174,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         <>
             <Box sx={boxSx}>
                 <Paper sx={paperSx}>
-                    <TableContainer sx={tcSx}>
+                    <TableContainer sx={tableContainertSx}>
                         <Table
                             sx={tableSx}
                             aria-labelledby="tableTitle"
@@ -190,9 +207,21 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                             </TableHead>
                             <TableBody>
                                 {rows.map((row, index) => {
-                                    const isItemSelected = false;
+                                    const sel = selected.indexOf(index + startIndex);
+                                    if (sel == 0) {
+                                        setTimeout(
+                                            () => selectedRowRef.current?.scrollIntoView({ block: "center" }),
+                                            1
+                                        );
+                                    }
                                     return (
-                                        <TableRow hover tabIndex={-1} key={"row" + index} selected={isItemSelected}>
+                                        <TableRow
+                                            hover
+                                            tabIndex={-1}
+                                            key={"row" + index}
+                                            selected={sel > -1}
+                                            ref={sel == 0 ? selectedRowRef : undefined}
+                                        >
                                             {colsOrder.map((col, cidx) => (
                                                 <TableCell
                                                     key={"val" + index + "-" + cidx}

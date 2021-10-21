@@ -8,6 +8,11 @@ export interface TaipyBaseProps {
     tp_updatevars: string;
 }
 
+export interface TaipyMultiSelect {
+    defaultSelected: string;
+    selected: number[];
+}
+
 export interface TaipyFieldProps extends TaipyBaseProps {
     dataType: string;
     value: string;

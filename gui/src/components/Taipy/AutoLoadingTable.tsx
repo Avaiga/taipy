@@ -24,7 +24,6 @@ import {
     TaipyTableProps,
     boxSx,
     paperSx,
-    tcSx,
     tableSx,
 } from "./tableUtils";
 
@@ -34,18 +33,19 @@ interface RowData {
     rows: Record<string, unknown>[];
     classes: Record<string, string>;
     cellStyles: CSSProperties[];
+    isItemLoaded: (index: number) => boolean;
+    selecteds: number[];
 }
 
 const Row = ({
     index,
     style,
-    data: { colsOrder, columns, rows, classes, cellStyles },
+    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selecteds },
 }: {
     index: number;
     style: CSSProperties;
     data: RowData;
 }) => {
-    const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
     return isItemLoaded(index) ? (
         <TableRow
             hover
@@ -55,6 +55,7 @@ const Row = ({
             style={style}
             className={classes && classes.row}
             data-index={index}
+            selected={selecteds.indexOf(index) > -1}
         >
             {colsOrder.map((col, cidx) => (
                 <TableCell
@@ -87,7 +88,7 @@ const ROW_HEIGHT = 65;
 const PAGE_SIZE = 100;
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
-    const { className, id, tp_varname, refresh = false } = props;
+    const { className, id, tp_varname, refresh = false, height } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
@@ -145,6 +146,20 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
+    const tableContainertSx = useMemo(() => ({ maxHeight: height }), [height]);
+
+    const selected = useMemo(
+        () => (props.selected === undefined ? (JSON.parse(props.defaultSelected) as number[]) : props.selected),
+        [props.defaultSelected, props.selected]
+    );
+
+    useEffect(() => {
+        /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
+        selected.length &&
+            infiniteLoaderRef.current &&
+            (infiniteLoaderRef.current as any)._listRef.scrollToItem(selected[0]);
+    }, [selected]);
+
     useEffect(() => {
         if (headerRow.current) {
             Array.from(headerRow.current.cells).forEach((cell, idx) => {
@@ -192,14 +207,16 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             rows: rows,
             classes: {},
             cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
+            isItemLoaded: isItemLoaded,
+            selecteds: selected,
         }),
-        [colsOrder, columns, rows]
+        [rows, isItemLoaded, colsOrder, columns, selected]
     );
 
     return (
         <Box sx={boxSx}>
             <Paper sx={paperSx}>
-                <TableContainer sx={tcSx}>
+                <TableContainer sx={tableContainertSx}>
                     <MuiTable
                         sx={tableSx}
                         aria-labelledby="tableTitle"

@@ -19,3 +19,4 @@ class AttributeType(Enum):
     boolean = "boolean"
     json = "json"
     react = "react"
+    dict = "dict"
