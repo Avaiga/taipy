@@ -79,7 +79,7 @@ def test_can_not_update_task_input_values(input):
 
 def test_create_task_entity():
     path = "my/csv/path"
-    foo_ds = CSVDataSource.create("foo", scope=Scope.PIPELINE, path=path)
+    foo_ds = CSVDataSource.create("foo", Scope.PIPELINE, None, path=path)
     task = Task("namE 1", [foo_ds], print, [])
     assert task.config_name == "name_1"
     assert task.id is not None

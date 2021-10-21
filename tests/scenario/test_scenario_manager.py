@@ -14,8 +14,8 @@ def test_save_and_get_scenario_entity():
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
     task_name = "task"
     task_2 = Task(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"

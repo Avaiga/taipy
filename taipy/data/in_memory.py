@@ -11,16 +11,22 @@ class InMemoryDataSource(DataSource):
     __TYPE = "in_memory"
     __DEFAULT_DATA_VALUE = "data"
 
-    def __init__(self, config_name: str, scope: Scope, id: Optional[str] = None, properties=None):
+    def __init__(self,
+                 config_name: str,
+                 scope: Scope,
+                 id: Optional[str] = None,
+                 parent_id: Optional[str] = None,
+                 properties=None
+                 ):
         if properties is None:
             properties = {}
-        super().__init__(config_name, scope, id, **properties)
+        super().__init__(config_name, scope, id, parent_id or None, **properties)
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None:
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
     @classmethod
-    def create(cls, config_name: str, scope: Scope, data: Any = None):
-        return InMemoryDataSource(config_name, scope, None, {cls.__DEFAULT_DATA_VALUE: data})
+    def create(cls, config_name: str, scope: Scope, parent_id: Optional[str], data: Any = None):
+        return InMemoryDataSource(config_name, scope, None, parent_id, {cls.__DEFAULT_DATA_VALUE: data})
 
     @classmethod
     def type(cls) -> str:

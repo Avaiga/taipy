@@ -257,10 +257,10 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
 def _create_task(function, nb_outputs=1, parallel_execution=False):
     task_name = str(uuid.uuid4())
     input_ds = [
-        InMemoryDataSource.create("input1", Scope.PIPELINE, data=21),
-        InMemoryDataSource.create("input2", Scope.PIPELINE, data=2),
+        InMemoryDataSource.create("input1", Scope.PIPELINE, None, data=21),
+        InMemoryDataSource.create("input2", Scope.PIPELINE, None, data=2),
     ]
-    output_ds = [InMemoryDataSource.create(f"output{i}", Scope.PIPELINE, data=0) for i in range(nb_outputs)]
+    output_ds = [InMemoryDataSource.create(f"output{i}", Scope.PIPELINE, None, data=0) for i in range(nb_outputs)]
 
     if parallel_execution:
         output_ds.append(LockDataSource("lock_output"))

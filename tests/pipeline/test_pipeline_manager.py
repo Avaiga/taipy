@@ -20,8 +20,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
     task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 

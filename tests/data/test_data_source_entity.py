@@ -14,7 +14,7 @@ from taipy.exceptions import MissingRequiredProperty
 class TestCSVDataSourceEntity:
     def test_get(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        csv = CSVDataSource.create("foo", Scope.PIPELINE, path)
+        csv = CSVDataSource.create("foo", Scope.PIPELINE, None, path)
         assert csv.path == path
         data = csv.get()
         assert isinstance(data, pd.DataFrame)
@@ -28,7 +28,7 @@ class TestCSVDataSourceEntity:
         ],
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
-        csv = CSVDataSource.create("foo", Scope.PIPELINE, csv_file)
+        csv = CSVDataSource.create("foo", Scope.PIPELINE, None, csv_file)
         assert np.array_equal(csv.get().values, default_data_frame.values)
 
         if not columns:
@@ -41,7 +41,7 @@ class TestCSVDataSourceEntity:
         assert np.array_equal(csv.get().values, df.values)
 
     def test_create(self):
-        ds = CSVDataSource.create("fOo BAr", Scope.PIPELINE, "data/source/path")
+        ds = CSVDataSource.create("fOo BAr", Scope.PIPELINE, None, "data/source/path")
 
         assert isinstance(ds, CSVDataSource)
         assert ds.config_name == "foo_bar"
@@ -58,7 +58,7 @@ class TestCSVDataSourceEntity:
 
     def test_preview(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        ds = CSVDataSource.create("foo", Scope.PIPELINE, path)
+        ds = CSVDataSource.create("foo", Scope.PIPELINE, None, path)
         ds.preview()
 
 
@@ -73,19 +73,19 @@ class TestPickleDataSourceEntity:
             os.remove(f)
 
     def test_get(self):
-        embedded_str = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+        embedded_str = PickleDataSource.create("foo", Scope.PIPELINE, None, "bar")
         assert isinstance(embedded_str.get(), str)
         assert embedded_str.get() == "bar"
         assert embedded_str.data == "bar"
-        embedded_int = PickleDataSource.create("foo", Scope.PIPELINE, 197)
+        embedded_int = PickleDataSource.create("foo", Scope.PIPELINE, None, 197)
         assert isinstance(embedded_int.get(), int)
         assert embedded_int.get() == 197
-        embedded_dict = PickleDataSource.create("foo", Scope.PIPELINE, {"bar": 12, "baz": "qux", "quux": [13]})
+        embedded_dict = PickleDataSource.create("foo", Scope.PIPELINE, None, {"bar": 12, "baz": "qux", "quux": [13]})
         assert isinstance(embedded_dict.get(), dict)
         assert embedded_dict.get() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
-        ds = PickleDataSource.create("foobar BaZ", Scope.PIPELINE, data="Embedded Data Source")
+        ds = PickleDataSource.create("foobar BaZ", Scope.PIPELINE, None, data="Embedded Data Source")
         assert ds.config_name == "foobar_baz"
         assert isinstance(ds, PickleDataSource)
         assert ds.type() == "embedded"
@@ -93,7 +93,7 @@ class TestPickleDataSourceEntity:
         assert ds.get() == "Embedded Data Source"
 
     def test_preview(self):
-        ds = PickleDataSource.create("foo", Scope.PIPELINE, data="Embedded Data Source")
+        ds = PickleDataSource.create("foo", Scope.PIPELINE, None, data="Embedded Data Source")
         ds.preview()
         import os
         os.remove(f"{ds.id}.p")
