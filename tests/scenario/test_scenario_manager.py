@@ -1,7 +1,7 @@
 import pytest
 
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
-from taipy.data import DataSource, PickleDataSource, Scope
+from taipy.data import DataSource, InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
@@ -14,8 +14,8 @@ def test_save_and_get_scenario_entity():
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
     task_name = "task"
     task_2 = Task(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
@@ -182,10 +182,10 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
-    ds_4 = DataSourceConfig("qux", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -226,10 +226,10 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
-    ds_4 = DataSourceConfig("qux", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -309,9 +309,9 @@ def test_notification():
                 [
                     TaskConfig(
                         "mult by 2",
-                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0),
                     )
                 ],
             )
@@ -349,9 +349,9 @@ def test_notification_subscribe_unsubscribe():
                 [
                     TaskConfig(
                         "mult by 2",
-                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0),
                     )
                 ],
             )
@@ -395,9 +395,9 @@ def test_notification_subscribe_only_on_new_jobs():
                 [
                     TaskConfig(
                         "mult by 2",
-                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0),
                     )
                 ],
             )

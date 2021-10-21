@@ -3,8 +3,9 @@ from unittest import mock
 import pytest
 
 from taipy.config import DataSourceConfig, PipelineConfig, TaskConfig
-from taipy.data import PickleDataSource
+from taipy.data import InMemoryDataSource
 from taipy.data.data_source import DataSource
+from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
@@ -19,8 +20,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, "bar")
     task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
@@ -148,9 +149,9 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -172,7 +173,7 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert pipeline_entity.get_sorted_tasks()[1][0].config_name == task_mult_by_3.name
 
 
-def test_get_set_data(remove_pickle_files):
+def test_get_set_data():
     pipeline_manager = PipelineManager()
     task_manager = pipeline_manager.task_manager
     data_manager = task_manager.data_manager
@@ -180,9 +181,9 @@ def test_get_set_data(remove_pickle_files):
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -227,9 +228,9 @@ def test_subscription():
         [
             TaskConfig(
                 "mult by 2",
-                [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                 mult_by_2,
-                DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0),
+                DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0),
             )
         ],
     )
