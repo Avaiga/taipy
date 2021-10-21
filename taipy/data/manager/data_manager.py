@@ -1,10 +1,9 @@
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-from taipy.configuration import ConfigurationManager
+from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, EmbeddedDataSource
 from taipy.data.data_source import DataSource
-from taipy.data.data_source_config import DataSourceConfig
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
@@ -18,12 +17,10 @@ The Data Manager will facilitate data access between Taipy Modules.
 class DataManager:
     # This represents a database table that maintains our DataSource References.
     __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
-    __DATA_SOURCE_CONFIG_DB: Dict[str, DataSourceConfig] = {}
     __DATA_SOURCE_CLASSES = {EmbeddedDataSource, CSVDataSource}
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}
 
     def __create_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
-        data_source_config &= ConfigurationManager.data_manager_configuration
         try:
             return self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](
                 config_name=data_source_config.name,
@@ -36,23 +33,12 @@ class DataManager:
 
     def __persist_data_source(self, data_source_config: DataSourceConfig, data_source: DataSource):
         self.save_data_source(data_source)
-        self.register(data_source_config)
-
-    def get_all(self) -> Dict[str, DataSourceConfig]:
-        return self.__DATA_SOURCE_CONFIG_DB
 
     def delete_all(self):
         self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
-        self.__DATA_SOURCE_CONFIG_DB: Dict[str, DataSourceConfig] = {}
-
-    def register(self, data_source_config: DataSourceConfig):
-        self.__DATA_SOURCE_CONFIG_DB[data_source_config.name] = data_source_config
-
-    def get_data_source_config(self, name) -> Optional[DataSourceConfig]:
-        return self.__DATA_SOURCE_CONFIG_DB.get(name)
 
     def get_or_create(self, data_source_config: DataSourceConfig) -> DataSource:
-        ds = self.get_data_source_config(data_source_config.name)
+        ds = Config.data_source_configs.get(data_source_config.name)
         if ds is not None and ds.scope > Scope.PIPELINE:
             return self.__create_data_source(data_source_config)
 

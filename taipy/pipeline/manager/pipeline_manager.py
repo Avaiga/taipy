@@ -6,12 +6,11 @@ deleting, duplicating, executing) related to pipelines.
 import logging
 from typing import Callable, Dict, Iterable, List, Optional, Set
 
+from taipy.config import DataSourceConfig, PipelineConfig
 from taipy.data import DataSource
-from taipy.data.data_source_config import DataSourceConfig
 from taipy.exceptions import NonExistingTask
-from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineConfig
+from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_config import PipelineConfig
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
 from taipy.task import TaskId
 from taipy.task.manager.task_manager import TaskManager
@@ -24,26 +23,9 @@ class PipelineManager:
     task_scheduler = TaskScheduler()
 
     __PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
-    __PIPELINE_CONFIGS_DB: Dict[str, PipelineConfig] = {}
 
     def delete_all(self):
         self.__PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
-        self.__PIPELINE_CONFIGS_DB: Dict[str, PipelineConfig] = {}
-
-    def register(self, pipeline_config: PipelineConfig):
-        [self.task_manager.register(task_config) for task_config in pipeline_config.tasks]
-        self.__PIPELINE_CONFIGS_DB[pipeline_config.name] = pipeline_config
-
-    def get_pipeline_config(self, config_name: str) -> PipelineConfig:
-        try:
-            return self.__PIPELINE_CONFIGS_DB[config_name]
-        except KeyError:
-            err = NonExistingPipelineConfig(config_name)
-            logging.error(err.message)
-            raise err
-
-    def get_pipeline_configs(self) -> Iterable[PipelineConfig]:
-        return self.__PIPELINE_CONFIGS_DB.values()
 
     def create(
         self,

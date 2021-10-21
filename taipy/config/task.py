@@ -1,7 +1,8 @@
 from copy import copy
 from typing import List, Union
 
-from taipy.data import DataSourceConfig
+from taipy.config import DataSourceConfig
+from taipy.config.interface import ConfigRepository
 
 
 class TaskConfig:
@@ -20,7 +21,7 @@ class TaskConfig:
             self.__output = [output]
         else:
             self.__output = copy(output)
-        self.name = name.strip().lower().replace(' ', '_')
+        self.name = name.strip().lower().replace(" ", "_")
         self.function = function
 
     @property
@@ -30,3 +31,16 @@ class TaskConfig:
     @property
     def input(self) -> List:
         return list(self.__input)
+
+
+class TasksRepository(ConfigRepository):
+    def create(  # type: ignore
+        self,
+        name: str,
+        input: Union[DataSourceConfig, List[DataSourceConfig]],
+        function,
+        output: Union[DataSourceConfig, List[DataSourceConfig]],
+    ):
+        task_config = TaskConfig(name, input, function, output)
+        self._data[name] = task_config
+        return task_config

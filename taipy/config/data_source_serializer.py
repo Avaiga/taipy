@@ -5,7 +5,7 @@ from .interface import Configurable
 
 
 @dataclass
-class DataManagerConfiguration(Configurable):
+class DataSourceSerializer(Configurable):
     default_node = "default"
     properties: Dict[str, Any] = field(default_factory=dict)
     default_properties: Dict[str, Any] = field(default_factory=dict)

@@ -6,10 +6,10 @@ from multiprocessing import Lock
 from queue import Queue
 from typing import Callable, Dict, Iterable, List, Optional
 
-from taipy.task.task import Task
+from taipy.config import Config
+from taipy.exceptions import JobNotDeletedException, NonExistingJob
+from taipy.task import Task
 
-from ...configuration import ConfigurationManager
-from ...exceptions.job import JobNotDeletedException, NonExistingJob
 from .executor.executor import Executor
 from .job import Job, JobId
 
@@ -23,8 +23,8 @@ class TaskScheduler:
         self.__JOBS: Dict[JobId, Job] = {}
         self.jobs_to_run = Queue()
         self.__executor = Executor(
-            ConfigurationManager.task_scheduler_configuration.parallel_execution,
-            ConfigurationManager.task_scheduler_configuration.max_number_of_parallel_execution,
+            Config.task_scheduler_configs.parallel_execution,
+            Config.task_scheduler_configs.max_number_of_parallel_execution,
         )
         self.lock = Lock()
 

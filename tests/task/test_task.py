@@ -1,8 +1,8 @@
 import pytest
 
-from taipy.data import DataSourceConfig, DataSource, Scope
-from taipy.data import CSVDataSource
-from taipy.task import TaskConfig, Task
+from taipy.config import DataSourceConfig, TaskConfig
+from taipy.data import CSVDataSource, DataSource, Scope
+from taipy.task import Task
 
 
 @pytest.fixture

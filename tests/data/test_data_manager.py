@@ -3,9 +3,8 @@ import pathlib
 
 import pytest
 
-from taipy.data import DataSource, DataSourceConfig, Scope
-from taipy.configuration import ConfigurationManager
-from taipy.data import CSVDataSource, DataSourceConfig, Scope
+from taipy.config import Config, DataSourceConfig
+from taipy.data import CSVDataSource, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType
@@ -44,17 +43,17 @@ class TestDataManager:
         assert csv_entity_2.id != csv_entity_1.id
 
     def test_create_data_source_with_config_file(self):
-        ConfigurationManager.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
+        Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         dm = DataManager()
-        csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
+        csv_ds = Config.data_source_configs.create(name="foo", type="csv", path="bar", has_header=True)
         csv = dm.create_data_source(csv_ds)
         assert csv.config_name == "foo"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "path_from_config_file"
         assert csv.has_header is False
 
-        csv_ds = DataSourceConfig(name="bar", type="csv", path="bar", has_header=True)
+        csv_ds = Config.data_source_configs.create(name="bar", type="csv", path="bar", has_header=True)
         csv = dm.create_data_source(csv_ds)
         assert csv.config_name == "bar"
         assert isinstance(csv, CSVDataSource)
@@ -84,7 +83,6 @@ class TestDataManager:
         dm = DataManager()
         dm.delete_all()
 
-        assert len(dm.get_all()) == 0
         global_ds_config = DataSourceConfig(
             name="test_data_source", type="embedded", scope=Scope.GLOBAL, data="Embedded Data Source"
         )
@@ -95,13 +93,10 @@ class TestDataManager:
         global_ds = dm.get_or_create(global_ds_config)
         pipeline_ds = dm.get_or_create(pipeline_ds_config)
 
-        assert len(dm.get_all()) == 2
         pipeline_ds_config.name = "test_data_source3"
         pipeline_ds2 = dm.get_or_create(pipeline_ds_config)
 
-        assert len(dm.get_all()) == 3
         assert pipeline_ds.id != pipeline_ds2.id
 
         global_ds2 = dm.get_or_create(global_ds_config)
-        assert len(dm.get_all()) == 3
         assert global_ds.config_name == global_ds2.config_name

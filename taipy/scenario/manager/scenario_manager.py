@@ -1,14 +1,14 @@
 import logging
 from functools import partial
-from typing import Callable, Dict, Iterable, List, Set
+from typing import Callable, Dict, List, Set
 
+from taipy.config import DataSourceConfig, ScenarioConfig
 from taipy.data import DataSource
-from taipy.data.data_source_config import DataSourceConfig
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioConfig
+from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
-from taipy.scenario import Scenario, ScenarioConfig, ScenarioId
+from taipy.scenario import Scenario, ScenarioId
 from taipy.scenario.scenario_model import ScenarioModel
 from taipy.task import Job
 
@@ -42,21 +42,6 @@ class ScenarioManager:
 
     def delete_all(self):
         self.__SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
-        self.__SCENARIO_CONFIG_DB: Dict[str, ScenarioConfig] = {}
-
-    def register(self, scenario_config: ScenarioConfig):
-        [self.pipeline_manager.register(pipeline) for pipeline in scenario_config.pipelines]
-        self.__SCENARIO_CONFIG_DB[scenario_config.name] = scenario_config
-
-    def get_scenario_config(self, config_name: str) -> ScenarioConfig:
-        try:
-            return self.__SCENARIO_CONFIG_DB[config_name]
-        except KeyError:
-            logging.error(f"Scenario : {config_name} does not exist.")
-            raise NonExistingScenarioConfig(config_name)
-
-    def get_scenario_configs(self) -> Iterable[ScenarioConfig]:
-        return self.__SCENARIO_CONFIG_DB.values()
 
     def create(
         self, scenario_config: ScenarioConfig, data_sources: Dict[DataSourceConfig, DataSource] = None
@@ -90,7 +75,7 @@ class ScenarioManager:
             logging.error(f"Scenario entity : {scenario_id} does not exist.")
             raise NonExistingScenario(scenario_id)
 
-    def get_scenarios(self) -> Iterable[Scenario]:
+    def get_scenarios(self) -> List[Scenario]:
         return [self.get_scenario(model.id) for model in self.__SCENARIO_MODEL_DB.values()]
 
     def submit(self, scenario_id: ScenarioId):

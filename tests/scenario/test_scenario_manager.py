@@ -1,65 +1,13 @@
 import pytest
 
-from taipy.data import DataSource, DataSourceConfig, EmbeddedDataSource, Scope
+from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from taipy.data import DataSource, EmbeddedDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioConfig
-from taipy.pipeline import Pipeline, PipelineConfig, PipelineId
-from taipy.scenario import Scenario, ScenarioConfig, ScenarioId, ScenarioManager
-from taipy.task import Task, TaskConfig, TaskId, TaskScheduler
-
-
-def test_register_and_get_scenario():
-    name_1 = "scenario_name_1"
-    scenario_1 = ScenarioConfig(name_1, [])
-
-    input_2 = DataSourceConfig("foo", "embedded", data="bar")
-    output_2 = DataSourceConfig("foo", "embedded", data="bar")
-    task_2 = TaskConfig("task", [input_2], print, [output_2])
-    pipeline_name_2 = "pipeline_name_2"
-    pipeline_2 = PipelineConfig(pipeline_name_2, [task_2])
-    name_2 = "scenario_name_2"
-    scenario_2 = ScenarioConfig(name_2, [pipeline_2])
-
-    scenario_3_with_same_name = ScenarioConfig(name_1, [], title="my description")
-
-    # No existing Scenario
-    scenario_manager = ScenarioManager()
-    assert len(scenario_manager.get_scenario_configs()) == 0
-    with pytest.raises(NonExistingScenarioConfig):
-        scenario_manager.get_scenario_config(name_1)
-    with pytest.raises(NonExistingScenarioConfig):
-        scenario_manager.get_scenario_config(name_2)
-
-    # Save one scenario. We expect to have only one scenario stored
-    scenario_manager.register(scenario_1)
-    assert len(scenario_manager.get_scenario_configs()) == 1
-    assert scenario_manager.get_scenario_config(name_1) == scenario_1
-    with pytest.raises(NonExistingScenarioConfig):
-        scenario_manager.get_scenario_config(name_2)
-
-    # Save a second scenario. Now, we expect to have a total of two scenarios stored
-    scenario_manager.register(scenario_2)
-    assert len(scenario_manager.get_scenario_configs()) == 2
-    assert scenario_manager.get_scenario_config(name_1) == scenario_1
-    assert scenario_manager.get_scenario_config(name_2) == scenario_2
-
-    # We save the first scenario again. We expect nothing to change.
-    scenario_manager.register(scenario_1)
-    assert len(scenario_manager.get_scenario_configs()) == 2
-    assert scenario_manager.get_scenario_config(name_1) == scenario_1
-    assert scenario_manager.get_scenario_config(name_2) == scenario_2
-    assert scenario_manager.get_scenario_config(name_1).properties.get("title") is None
-
-    # We save a third pipeline with same id as the first one.
-    # We expect the first pipeline to be updated
-    scenario_manager.register(scenario_3_with_same_name)
-    assert len(scenario_manager.get_scenario_configs()) == 2
-    assert scenario_manager.get_scenario_config(name_1) == scenario_3_with_same_name
-    assert scenario_manager.get_scenario_config(name_2) == scenario_2
-    assert scenario_manager.get_scenario_config(name_1).properties.get(
-        "title"
-    ) == scenario_3_with_same_name.properties.get("title")
+from taipy.exceptions.scenario import NonExistingScenario
+from taipy.pipeline import Pipeline, PipelineId
+from taipy.scenario import Scenario, ScenarioId, ScenarioManager
+from taipy.task import Task, TaskId, TaskScheduler
 
 
 def test_save_and_get_scenario_entity():
@@ -246,8 +194,7 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
     pipeline_2 = PipelineConfig("by 4", [task_mult_by_4])
     # ds_1 ---> mult by 4 ---> ds_4
-    scenario = ScenarioConfig("Awesome scenario", [pipeline_1, pipeline_2])
-    scenario_manager.register(scenario)
+    scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2])
 
     assert len(data_manager.get_data_sources()) == 0
     assert len(task_manager.tasks) == 0
@@ -291,8 +238,7 @@ def test_get_set_data():
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
     pipeline_2 = PipelineConfig("by 4", [task_mult_by_4])
     # ds_1 ---> mult by 4 ---> ds_4
-    scenario = ScenarioConfig("Awesome scenario", [pipeline_1, pipeline_2])
-    scenario_manager.register(scenario)
+    scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2])
 
     scenario_entity = scenario_manager.create(scenario)
 
@@ -371,7 +317,6 @@ def test_notification():
             )
         ],
     )
-    scenario_manager.register(scenario_config)
     scenario = scenario_manager.create(scenario_config)
 
     notify_1 = NotifyMock(scenario)
@@ -412,7 +357,6 @@ def test_notification_subscribe_unsubscribe():
             )
         ],
     )
-    scenario_manager.register(scenario_config)
 
     scenario = scenario_manager.create(scenario_config)
 
@@ -459,7 +403,6 @@ def test_notification_subscribe_only_on_new_jobs():
             )
         ],
     )
-    scenario_manager.register(scenario_config)
 
     scenario = scenario_manager.create(scenario_config)
 

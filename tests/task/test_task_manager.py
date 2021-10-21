@@ -1,55 +1,10 @@
 import pytest
 
-from taipy.data import DataSourceConfig, Scope
-from taipy.data import EmbeddedDataSource
-from taipy.exceptions.task import NonExistingTaskConfig, NonExistingTask
-from taipy.task import TaskConfig, Task, TaskId
+from taipy.config import DataSourceConfig, TaskConfig
+from taipy.data import EmbeddedDataSource, Scope
+from taipy.exceptions.task import NonExistingTask
+from taipy.task import Task, TaskId
 from taipy.task.manager.task_manager import TaskManager
-
-
-def test_register_and_get_task():
-
-    name_1 = "name_1"
-    first_task = TaskConfig(name_1, [], print, [])
-    name_2 = "name_2"
-    second_task = TaskConfig(name_2, [], print, [])
-    third_task_with_same_name_as_first_task = TaskConfig(name_1, [], len, [])
-
-    # No task at initialization
-    task_manager = TaskManager()
-    task_manager.delete_all()
-    assert len(task_manager.get_task_configs()) == 0
-    with pytest.raises(NonExistingTaskConfig):
-        task_manager.get_task_config(name_1)
-    with pytest.raises(NonExistingTaskConfig):
-        task_manager.get_task_config(name_2)
-
-    # Save one task. We expect to have only one task stored
-    task_manager.register(first_task)
-    assert len(task_manager.get_task_configs()) == 1
-    assert task_manager.get_task_config(name_1) == first_task
-    with pytest.raises(NonExistingTaskConfig):
-        task_manager.get_task_config(name_2)
-
-    # Save a second task. Now, we expect to have a total of two tasks stored
-    task_manager.register(second_task)
-    assert len(task_manager.get_task_configs()) == 2
-    assert task_manager.get_task_config(name_1) == first_task
-    assert task_manager.get_task_config(name_2) == second_task
-
-    # We save the first task again. We expect nothing to change
-    task_manager.register(first_task)
-    assert len(task_manager.get_task_configs()) == 2
-    assert task_manager.get_task_config(name_1) == first_task
-    assert task_manager.get_task_config(name_2) == second_task
-
-    # We save a third task with same name as the first one.
-    # We expect the first task to be updated
-    task_manager.register(third_task_with_same_name_as_first_task)
-    assert len(task_manager.get_task_configs()) == 2
-    assert task_manager.get_task_config(name_1) == third_task_with_same_name_as_first_task
-    assert task_manager.get_task_config(name_1) != first_task
-    assert task_manager.get_task_config(name_2) == second_task
 
 
 def test_save_and_get_task_entity():

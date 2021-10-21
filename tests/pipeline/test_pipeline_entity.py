@@ -1,14 +1,15 @@
 import pytest
 
-from taipy.data.data_source import DataSource
+from taipy.config import Config
 from taipy.data import EmbeddedDataSource
+from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
-from taipy.pipeline import PipelineConfig, Pipeline, PipelineId
+from taipy.pipeline import Pipeline, PipelineId
 from taipy.task import Task, TaskId
 
 
 def test_create_pipeline():
-    pipeline = PipelineConfig("  nAmE 1 ", [])
+    pipeline = Config.pipeline_configs.create("  nAmE 1 ", [])
     assert pipeline.name == "name_1"
 
 
@@ -51,6 +52,7 @@ def test_check_consistency():
 
     class FakeDataSource:
         config_name = "config_name_of_a_fake_DS"
+
     input_5 = DataSource("foo", Scope.PIPELINE, "input_id_5")
     output_5 = DataSource("foo", Scope.PIPELINE, "output_id_5")
     task_5_1 = Task("foo", [input_5], print, [output_5], TaskId("task_id_5_1"))

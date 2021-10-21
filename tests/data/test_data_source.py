@@ -1,4 +1,5 @@
-from taipy.data import DataSourceConfig, Scope
+from taipy.config import DataSourceConfig
+from taipy.data import Scope
 
 
 class TestDataSource:
