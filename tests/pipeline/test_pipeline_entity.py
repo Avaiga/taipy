@@ -1,7 +1,7 @@
 import pytest
 
 from taipy.config import Config
-from taipy.data import EmbeddedDataSource
+from taipy.data import PickleDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.pipeline import Pipeline, PipelineId
@@ -14,8 +14,8 @@ def test_create_pipeline():
 
 
 def test_create_pipeline_entity():
-    input = EmbeddedDataSource.create("foo", Scope.PIPELINE, "data")
-    output = EmbeddedDataSource.create("bar", Scope.PIPELINE, "other data")
+    input = PickleDataSource.create("foo", Scope.PIPELINE, "data")
+    output = PickleDataSource.create("bar", Scope.PIPELINE, "other data")
     task = Task("baz", [input], print, [output], TaskId("task_id"))
     pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
     assert pipeline.id is not None
@@ -32,19 +32,19 @@ def test_check_consistency():
     pipeline_1 = Pipeline("name_1", {}, [])
     assert pipeline_1.is_consistent
 
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
     task_2 = Task("foo", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2])
     assert pipeline_2.is_consistent
 
-    data_source_3 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    data_source_3 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
     task_3 = Task("foo", [data_source_3], print, [data_source_3], TaskId("task_id_3"))
     pipeline_3 = Pipeline("name_3", {}, [task_3])
     assert not pipeline_3.is_consistent  # Not a dag
 
-    input_4 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_4 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_4 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_4 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
     task_4_1 = Task("foo", [input_4], print, [output_4], TaskId("task_id_4_1"))
     task_4_2 = Task("bar", [output_4], print, [input_4], TaskId("task_id_4_2"))
     pipeline_4 = Pipeline("name_4", {}, [task_4_1, task_4_2])
@@ -62,8 +62,8 @@ def test_check_consistency():
 
 
 def test_to_model():
-    input = EmbeddedDataSource.create("input", Scope.PIPELINE, "this is some data")
-    output = EmbeddedDataSource.create("output", Scope.PIPELINE, "")
+    input = PickleDataSource.create("input", Scope.PIPELINE, "this is some data")
+    output = PickleDataSource.create("output", Scope.PIPELINE, "")
     task = Task("task", [input], print, [output], TaskId("task_id"))
     pipeline = Pipeline("name", {"foo": "bar"}, [task])
     model = pipeline.to_model()

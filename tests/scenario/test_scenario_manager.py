@@ -1,7 +1,7 @@
 import pytest
 
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
-from taipy.data import DataSource, EmbeddedDataSource, Scope
+from taipy.data import DataSource, PickleDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
@@ -14,8 +14,8 @@ def test_save_and_get_scenario_entity():
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
     task_name = "task"
     task_2 = Task(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"

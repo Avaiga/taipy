@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from taipy.config import DataSourceConfig, PipelineConfig, TaskConfig
-from taipy.data import EmbeddedDataSource
+from taipy.data import PickleDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
@@ -19,8 +19,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
+    output_2 = PickleDataSource.create("foo", Scope.PIPELINE, "bar")
     task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
@@ -172,7 +172,7 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert pipeline_entity.get_sorted_tasks()[1][0].config_name == task_mult_by_3.name
 
 
-def test_get_set_data():
+def test_get_set_data(remove_pickle_files):
     pipeline_manager = PipelineManager()
     task_manager = pipeline_manager.task_manager
     data_manager = task_manager.data_manager
@@ -191,9 +191,9 @@ def test_get_set_data():
 
     pipeline_entity = pipeline_manager.create(pipeline)
 
-    assert pipeline_entity.foo.get() == 1
-    assert pipeline_entity.bar.get() == 0
-    assert pipeline_entity.baz.get() == 0
+    assert pipeline_entity.foo.get() == 1  # Default values
+    assert pipeline_entity.bar.get() == 0  # Default values
+    assert pipeline_entity.baz.get() == 0  # Default values
 
     pipeline_manager.submit(pipeline_entity.id)
     assert pipeline_entity.foo.get() == 1
