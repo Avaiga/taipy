@@ -4,15 +4,12 @@ This is the entry point for operations (such as creating, reading, updating,
 deleting, duplicating, executing) related to pipelines.
 """
 import logging
-from typing import Dict, List, Set, Iterable
+from typing import Callable, Dict, Iterable, List, Optional, Set
 
 from taipy.data import DataSource
 from taipy.data.data_source_config import DataSourceConfig
 from taipy.exceptions import NonExistingTask
-from taipy.exceptions.pipeline import (
-    NonExistingPipelineConfig,
-    NonExistingPipeline,
-)
+from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineConfig
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_config import PipelineConfig
 from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
@@ -85,8 +82,8 @@ class PipelineManager:
     def get_pipelines(self) -> Iterable[Pipeline]:
         return [self.get_pipeline(model.id) for model in self.__PIPELINE_MODEL_DB.values()]
 
-    def submit(self, pipeline_id: PipelineId):
+    def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
         pipeline_to_submit = self.get_pipeline(pipeline_id)
         for tasks in pipeline_to_submit.get_sorted_tasks():
             for task in tasks:
-                self.task_scheduler.submit(task)
+                self.task_scheduler.submit(task, callbacks)

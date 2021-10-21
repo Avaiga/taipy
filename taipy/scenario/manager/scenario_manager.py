@@ -1,14 +1,16 @@
 import logging
-from typing import Dict, List, Set, Iterable
+from functools import partial
+from typing import Callable, Dict, Iterable, List, Set
 
 from taipy.data import DataSource
 from taipy.data.data_source_config import DataSourceConfig
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.exceptions.scenario import NonExistingScenarioConfig, NonExistingScenario
+from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioConfig
 from taipy.pipeline import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineId
 from taipy.scenario import Scenario, ScenarioConfig, ScenarioId
 from taipy.scenario.scenario_model import ScenarioModel
+from taipy.task import Job
 
 
 class ScenarioManager:
@@ -16,8 +18,27 @@ class ScenarioManager:
     task_manager = pipeline_manager.task_manager
     data_manager = pipeline_manager.data_manager
 
+    __status_notifier: Set[Callable] = set()
     __SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
     __SCENARIO_CONFIG_DB: Dict[str, ScenarioConfig] = {}
+
+    def subscribe(self, callback: Callable[[Scenario, Job], None]):
+        """
+        Subscribe a function to be called when the status of a Job changes
+
+        Note:
+            - Notification will be available only for Jobs created after this subscription
+        """
+        self.__status_notifier.add(callback)
+
+    def unsubscribe(self, callback: Callable[[Scenario, Job], None]):
+        """
+        Unsubscribe a function called when the status of a Job changes
+
+        Note:
+            - The function will continue to be called for ongoing Jobs
+        """
+        self.__status_notifier.remove(callback)
 
     def delete_all(self):
         self.__SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
@@ -37,10 +58,9 @@ class ScenarioManager:
     def get_scenario_configs(self) -> Iterable[ScenarioConfig]:
         return self.__SCENARIO_CONFIG_DB.values()
 
-    def create(self,
-               scenario_config: ScenarioConfig,
-               data_sources: Dict[DataSourceConfig, DataSource] = None
-               ) -> Scenario:
+    def create(
+        self, scenario_config: ScenarioConfig, data_sources: Dict[DataSourceConfig, DataSource] = None
+    ) -> Scenario:
         if data_sources is None:
             all_ds_configs: Set[DataSourceConfig] = set()
             for pipeline_configs in scenario_config.pipelines:
@@ -75,5 +95,11 @@ class ScenarioManager:
 
     def submit(self, scenario_id: ScenarioId):
         scenario_to_submit = self.get_scenario(scenario_id)
+        callbacks = self.__get_status_notifier_callbacks(scenario_to_submit)
         for pipeline in scenario_to_submit.pipelines.values():
-            self.pipeline_manager.submit(pipeline.id)
+            self.pipeline_manager.submit(pipeline.id, callbacks)
+
+    def __get_status_notifier_callbacks(self, scenario: Scenario) -> List:
+        if self.__status_notifier:
+            return [partial(c, scenario) for c in self.__status_notifier]
+        return []

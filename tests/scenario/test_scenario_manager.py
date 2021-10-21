@@ -3,7 +3,7 @@ import pytest
 from taipy.data import DataSource, DataSourceConfig, EmbeddedDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.exceptions.scenario import NonExistingScenarioConfig, NonExistingScenario
+from taipy.exceptions.scenario import NonExistingScenario, NonExistingScenarioConfig
 from taipy.pipeline import Pipeline, PipelineConfig, PipelineId
 from taipy.scenario import Scenario, ScenarioConfig, ScenarioId, ScenarioManager
 from taipy.task import Task, TaskConfig, TaskId, TaskScheduler
@@ -57,9 +57,9 @@ def test_register_and_get_scenario():
     assert len(scenario_manager.get_scenario_configs()) == 2
     assert scenario_manager.get_scenario_config(name_1) == scenario_3_with_same_name
     assert scenario_manager.get_scenario_config(name_2) == scenario_2
-    assert scenario_manager.get_scenario_config(name_1).properties.get("title") == scenario_3_with_same_name.properties.get(
+    assert scenario_manager.get_scenario_config(name_1).properties.get(
         "title"
-    )
+    ) == scenario_3_with_same_name.properties.get("title")
 
 
 def test_save_and_get_scenario_entity():
@@ -121,9 +121,7 @@ def test_save_and_get_scenario_entity():
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
-    scenario_manager.pipeline_manager.task_manager.save(
-        scenario_2.pipelines[pipeline_name_2].tasks[task_name]
-    )
+    scenario_manager.pipeline_manager.task_manager.save(scenario_2.pipelines[pipeline_name_2].tasks[task_name])
     scenario_manager.pipeline_manager.save(pipeline_entity_3)
     scenario_manager.save(scenario_3_with_same_id)
     assert len(scenario_manager.get_scenarios()) == 2
@@ -173,9 +171,9 @@ def test_submit():
     class MockTaskScheduler(TaskScheduler):
         submit_calls = []
 
-        def submit(self, task: Task):
+        def submit(self, task: Task, callbacks=None):
             self.submit_calls.append(task)
-            return super().submit(task)
+            return super().submit(task, callbacks)
 
     pipeline_manager.task_scheduler = MockTaskScheduler()
 
@@ -320,3 +318,167 @@ def test_get_set_data():
     assert scenario_entity.bar.get() == 2
     assert scenario_entity.baz.get() == 158
     assert scenario_entity.qux.get() == 4
+
+
+class NotifyMock:
+    def __init__(self, scenario):
+        self.scenario = scenario
+        self.nb_called = 0
+
+    def __call__(self, scenario, job):
+        assert scenario == self.scenario
+        if self.nb_called == 0:
+            assert job.is_pending()
+        if self.nb_called == 1:
+            assert job.is_running()
+        if self.nb_called == 2:
+            assert job.is_finished()
+        self.nb_called += 1
+
+    def assert_called_3_times(self):
+        assert self.nb_called == 3
+
+    def assert_not_called(self):
+        assert self.nb_called == 0
+
+    def reset(self):
+        self.nb_called = 0
+
+
+def test_notification():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    scenario_config = ScenarioConfig(
+        "Awesome scenario",
+        [
+            PipelineConfig(
+                "by 6",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                    )
+                ],
+            )
+        ],
+    )
+    scenario_manager.register(scenario_config)
+    scenario = scenario_manager.create(scenario_config)
+
+    notify_1 = NotifyMock(scenario)
+    notify_2 = NotifyMock(scenario)
+    scenario_manager.subscribe(notify_1)
+    scenario_manager.subscribe(notify_2)
+
+    scenario_manager.submit(scenario.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_called_3_times()
+    scenario_manager.unsubscribe(notify_1)
+    scenario_manager.unsubscribe(notify_2)
+
+
+def test_notification_subscribe_unsubscribe():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    scenario_config = ScenarioConfig(
+        "Awesome scenario",
+        [
+            PipelineConfig(
+                "by 6",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                    )
+                ],
+            )
+        ],
+    )
+    scenario_manager.register(scenario_config)
+
+    scenario = scenario_manager.create(scenario_config)
+
+    notify_1 = NotifyMock(scenario)
+    notify_2 = NotifyMock(scenario)
+
+    scenario_manager.subscribe(notify_1)
+    scenario_manager.subscribe(notify_2)
+
+    scenario_manager.unsubscribe(notify_2)
+    scenario_manager.submit(scenario.id)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+    scenario_manager.unsubscribe(notify_1)
+
+    with pytest.raises(KeyError):
+        scenario_manager.unsubscribe(notify_2)
+
+
+def test_notification_subscribe_only_on_new_jobs():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    scenario_config = ScenarioConfig(
+        "Awesome scenario",
+        [
+            PipelineConfig(
+                "by 6",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                    )
+                ],
+            )
+        ],
+    )
+    scenario_manager.register(scenario_config)
+
+    scenario = scenario_manager.create(scenario_config)
+
+    notify_1 = NotifyMock(scenario)
+    notify_2 = NotifyMock(scenario)
+    scenario_manager.subscribe(notify_1)
+
+    scenario_manager.submit(scenario.id)
+
+    scenario_manager.subscribe(notify_2)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+
+    notify_1.reset()
+
+    scenario_manager.submit(scenario.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_called_3_times()
+
+    scenario_manager.unsubscribe(notify_1)
+    scenario_manager.unsubscribe(notify_2)

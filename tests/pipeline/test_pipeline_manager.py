@@ -1,10 +1,12 @@
+from unittest import mock
+
 import pytest
 
 from taipy.data import DataSourceConfig, EmbeddedDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
-from taipy.exceptions.pipeline import NonExistingPipelineConfig, NonExistingPipeline
+from taipy.exceptions.pipeline import NonExistingPipeline, NonExistingPipelineConfig
 from taipy.pipeline import Pipeline, PipelineConfig, PipelineId
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskConfig, TaskId, TaskManager
@@ -154,7 +156,7 @@ def test_submit():
     class MockTaskScheduler(TaskScheduler):
         submit_calls = []
 
-        def submit(self, task: Task):
+        def submit(self, task: Task, callbacks=None):
             self.submit_calls.append(task)
             return None
 
@@ -267,3 +269,31 @@ def test_get_set_data():
 
     with pytest.raises(AttributeError):
         pipeline_entity.WRONG.write(7)
+
+
+def test_subscription():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+    pipeline_manager.register(pipeline_config)
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    callback = mock.MagicMock()
+    pipeline_manager.submit(pipeline.id, [callback])
+    callback.assert_called()
