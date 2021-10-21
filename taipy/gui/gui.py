@@ -501,7 +501,7 @@ class Gui(object, metaclass=Singleton):
                         var_val[var_name] = attrgetter(var_name)(self._values)
                         var_list.append(var_name)
                     except AttributeError as ae:
-                        warnings.warn(f"Variable '{var_name}' is not available")
+                        warnings.warn(f"Variable '{var_name}' is not defined")
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
