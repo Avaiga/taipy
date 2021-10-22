@@ -33,11 +33,11 @@ class DataManager:
             logging.error(f"Cannot create Data source. " f"Type {data_source_config.type} does not exist.")
             raise InvalidDataSourceType(data_source_config.type)
 
-    def __persist_data_source(self, data_source_config: DataSourceConfig, data_source: DataSource):
+    def __persist_data_source(self, data_source: DataSource):
         self.save_data_source(data_source)
 
     def delete_all(self):
-        return
+        self.repository.delete_all()
 
     def get_or_create(self, data_source_config: DataSourceConfig) -> DataSource:
         ds = Config.data_source_configs.get(data_source_config.name)
@@ -48,7 +48,7 @@ class DataManager:
 
     def create_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
         data_source = self.__create_data_source(data_source_config)
-        self.__persist_data_source(data_source_config, data_source)
+        self.__persist_data_source(data_source)
 
         return data_source
 

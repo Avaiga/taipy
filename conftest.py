@@ -1,3 +1,6 @@
+import os
+import shutil
+
 import pandas as pd
 import pytest
 
@@ -13,3 +16,9 @@ def csv_file(tmpdir_factory):
 @pytest.fixture(scope="session")
 def default_data_frame():
     return pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+
+
+@pytest.fixture(autouse=True)
+def cleanup_files():
+    if os.path.exists(".data"):
+        shutil.rmtree(".data")
