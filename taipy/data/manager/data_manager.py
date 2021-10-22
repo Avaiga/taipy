@@ -95,7 +95,7 @@ class DataManager:
             name,
             scope,
             type,
-            parent_id or None,
+            parent_id,
             properties,
         )
 
