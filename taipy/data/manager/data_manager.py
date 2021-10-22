@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, PickleDataSource
@@ -33,16 +33,8 @@ class DataManager:
             logging.error(f"Cannot create Data source. " f"Type {data_source_config.type} does not exist.")
             raise InvalidDataSourceType(data_source_config.type)
 
-    def __persist_data_source(self, data_source_config: DataSourceConfig, data_source: DataSource):
-        self.save_data_source(data_source)
-
     def delete_all(self):
         self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
-
-    def get_or_create(self, data_source_config: DataSourceConfig) -> DataSource:
-        ds = Config.data_source_configs.get(data_source_config.name)
-        if ds is not None and ds.scope > Scope.PIPELINE:
-            return self.__create_data_source(data_source_config)
 
     def get_or_create(self,
                       data_source_config: DataSourceConfig,
@@ -113,7 +105,6 @@ class DataManager:
         return data_source
 
     def __create_data_source(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
-        data_source_config &= ConfigurationManager.data_manager_configuration
         try:
             return self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](
                 config_name=data_source_config.name,

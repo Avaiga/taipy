@@ -3,8 +3,6 @@ import pathlib
 
 import pytest
 
-from taipy.configuration import ConfigurationManager
-from taipy.data import CSVDataSource, DataSourceConfig, Scope
 from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, Scope
 from taipy.data.data_source_model import DataSourceModel
@@ -17,7 +15,7 @@ class TestDataManager:
         dm = DataManager()
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
         csv_ds_config = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
-        csv_1 = dm._create_and_save_data_source(csv_ds_config)
+        csv_1 = dm._create_and_save_data_source(csv_ds_config, None)
         assert dm.get(csv_1.id).id == csv_1.id
         assert dm.get(csv_1.id).config_name == csv_1.config_name
         assert dm.get(csv_1.id).scope == csv_1.scope
@@ -50,14 +48,14 @@ class TestDataManager:
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         dm = DataManager()
-        csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
+        csv_ds = Config.data_source_configs.create(name="foo", type="csv", path="bar", has_header=True)
         csv = dm._create_and_save_data_source(csv_ds, None)
         assert csv.config_name == "foo"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "path_from_config_file"
         assert csv.has_header is False
 
-        csv_ds = DataSourceConfig(name="bar", type="csv", path="bar", has_header=True)
+        csv_ds = Config.data_source_configs.create(name="bar", type="csv", path="bar", has_header=True)
         csv = dm._create_and_save_data_source(csv_ds, None)
         assert csv.config_name == "bar"
         assert isinstance(csv, CSVDataSource)
@@ -88,14 +86,17 @@ class TestDataManager:
         dm = DataManager()
         dm.delete_all()
 
-        global_ds_config = DataSourceConfig(name="test_data_source", type="in_memory", scope=Scope.GLOBAL,
-                                            data="In memory Data Source")
-        scenario_ds_config = DataSourceConfig(name="test_data_source2", type="in_memory", scope=Scope.SCENARIO,
-                                              data="In memory scenario")
-        pipeline_ds_config = DataSourceConfig(name="test_data_source2", type="in_memory", scope=Scope.PIPELINE,
-                                              data="In memory pipeline")
+        global_ds_config = Config.data_source_configs.create(name="test_data_source", type="in_memory",
+                                                             scope=Scope.GLOBAL,
+                                                             data="In memory Data Source")
+        scenario_ds_config = Config.data_source_configs.create(name="test_data_source2", type="in_memory",
+                                                               scope=Scope.SCENARIO,
+                                                               data="In memory scenario")
+        pipeline_ds_config = Config.data_source_configs.create(name="test_data_source2", type="in_memory",
+                                                               scope=Scope.PIPELINE,
+                                                               data="In memory pipeline")
 
-        assert len(dm.get_all()) == 1
+        assert len(dm.get_all()) == 0
         global_ds = dm.get_or_create(global_ds_config, None, None)
         assert len(dm.get_all()) == 1
         global_ds_bis = dm.get_or_create(global_ds_config, None)
@@ -124,7 +125,6 @@ class TestDataManager:
         pipeline_ds_quater = dm.get_or_create(pipeline_ds_config, None)
         assert len(dm.get_all()) == 6
         assert pipeline_ds.id == pipeline_ds_bis.id
-        assert pipeline_ds_bis.id != pipeline_ds_ter
-        assert pipeline_ds_bis.id != pipeline_ds_quater
-        assert pipeline_ds_ter.id != pipeline_ds_quater
-
+        assert pipeline_ds_bis.id != pipeline_ds_ter.id
+        assert pipeline_ds_bis.id != pipeline_ds_quater.id
+        assert pipeline_ds_ter.id != pipeline_ds_quater.id

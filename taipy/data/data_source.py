@@ -32,6 +32,18 @@ class DataSource:
         self.scope = scope
         self.properties = kwargs
 
+    def __eq__(self, other):
+        if self.id == other.id:
+            return True
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self.id)
+
     @staticmethod
     def __protect_name(config_name: str):
         return config_name.strip().lower().replace(' ', '_')

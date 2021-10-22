@@ -67,8 +67,8 @@ def test_can_not_update_task_output_values(output):
 
 
 def test_can_not_update_task_input_values(input):
-    data_source = DataSourceConfig("data_source", "in_memory")
-    task = TaskConfig("name_1", input, print, data_source)
+    data_source = DataSource("data_source")
+    task = TaskConfig("name_1", input, print, [])
 
     task.input.append(data_source)
     assert task.input == input

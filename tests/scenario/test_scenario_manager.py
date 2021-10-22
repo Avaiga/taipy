@@ -1,12 +1,13 @@
 import pytest
 
+from taipy.common.alias import ScenarioId, PipelineId
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.data import DataSource, InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
-from taipy.pipeline import Pipeline, PipelineId
-from taipy.scenario import Scenario, ScenarioId, ScenarioManager
+from taipy.pipeline import Pipeline
+from taipy.scenario import Scenario, ScenarioManager
 from taipy.task import Task, TaskId, TaskScheduler
 
 
@@ -182,10 +183,10 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0)
-    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
-    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.SCENARIO, data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_4 = Config.data_source_configs.create("qux", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -203,7 +204,7 @@ def test_scenario_manager_only_creates_data_source_entity_once():
 
     scenario_entity = scenario_manager.create(scenario)
 
-    assert len(data_manager.get_all()) == 4
+    assert len(data_manager.get_all()) == 5
     assert len(task_manager.tasks) == 3
     assert len(pipeline_manager.get_pipelines()) == 2
     assert len(scenario_manager.get_scenarios()) == 1

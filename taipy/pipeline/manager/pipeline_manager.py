@@ -4,16 +4,15 @@ This is the entry point for operations (such as creating, reading, updating,
 deleting, duplicating, executing) related to pipelines.
 """
 import logging
-from typing import Callable, Dict, Iterable, List, Optional, Set
+from typing import Callable, List
 from typing import Dict, Iterable, Optional
 
-from taipy.config import DataSourceConfig, PipelineConfig
-from taipy.data import DataSource
+from taipy.common.alias import PipelineId, TaskId
+from taipy.config import PipelineConfig
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
-from taipy.common.alias import PipelineId, TaskId
 from taipy.task.manager.task_manager import TaskManager
 from taipy.task.scheduler.task_scheduler import TaskScheduler
 

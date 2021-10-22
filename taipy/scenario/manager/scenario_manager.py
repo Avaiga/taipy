@@ -1,16 +1,13 @@
 import logging
-from typing import Dict, Iterable
 from functools import partial
 from typing import Callable, Dict, List, Set
 
-from taipy.config import DataSourceConfig, ScenarioConfig
-from taipy.data import DataSource
+from taipy.common.alias import PipelineId, ScenarioId
+from taipy.config import ScenarioConfig
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import PipelineManager
-from taipy.pipeline.pipeline_model import PipelineId
 from taipy.scenario import Scenario
-from taipy.common.alias import PipelineId, ScenarioId
 from taipy.scenario.scenario_model import ScenarioModel
 from taipy.task import Job
 
@@ -44,16 +41,6 @@ class ScenarioManager:
 
     def delete_all(self):
         self.__SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
-
-    def get_scenario_config(self, config_name: str) -> ScenarioConfig:
-        try:
-            return self.__SCENARIO_CONFIG_DB[config_name]
-        except KeyError:
-            logging.error(f"Scenario : {config_name} does not exist.")
-            raise NonExistingScenarioConfig(config_name)
-
-    def get_scenario_configs(self) -> Iterable[ScenarioConfig]:
-        return self.__SCENARIO_CONFIG_DB.values()
 
     def create(self, config: ScenarioConfig) -> Scenario:
         scenario_id = Scenario.new_id(config.name)

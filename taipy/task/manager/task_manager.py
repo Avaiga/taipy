@@ -2,12 +2,11 @@ import itertools
 import logging
 from typing import Dict, Optional
 
-from taipy.config import DataSourceConfig, TaskConfig
-from taipy.data import DataSource
+from taipy.common.alias import TaskId
+from taipy.config import TaskConfig
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTask
 from taipy.task.task import Task
-from taipy.common.alias import TaskId
 
 
 class TaskManager:

@@ -2,19 +2,15 @@ from unittest import mock
 
 import pytest
 
+from taipy.common.alias import PipelineId
 from taipy.config import DataSourceConfig, PipelineConfig, TaskConfig
-from taipy.data import InMemoryDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
-from taipy.exceptions.pipeline import NonExistingPipelineConfig, NonExistingPipeline
-from taipy.pipeline import Pipeline, PipelineConfig
-from taipy.common.alias import PipelineId, TaskId
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.pipeline import Pipeline, PipelineId
+from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
-from taipy.task import Task, TaskConfig, TaskManager
 from taipy.task import Task, TaskId, TaskManager
 from taipy.task.scheduler import TaskScheduler
 
