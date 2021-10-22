@@ -105,19 +105,17 @@ class Gui(object, metaclass=Singleton):
     def _get_instance() -> Gui:
         return Gui._instances[Gui]
 
-    def _get_render_path_name(self):
-        return Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)
-
     def _render_page(self) -> t.Any:
         page = None
+        render_path_name = Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)
         # Get page instance
         for page_i in self._config.pages:
-            if page_i.route == self._get_render_path_name():
+            if page_i.route == render_path_name:
                 page = page_i
         # try partials
         if page is None:
             for partial in self._config.partials:
-                if partial.route == self._get_render_path_name():
+                if partial.route == render_path_name:
                     page = partial
         # Make sure that there is a page instance found
         if page is None:
