@@ -16,7 +16,6 @@ The Data Manager will facilitate data access between Taipy Modules.
 
 class DataManager:
     # This represents a database table that maintains our DataSource References.
-    __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
     __DATA_SOURCE_CLASSES = {EmbeddedDataSource, CSVDataSource}
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}
 
@@ -38,7 +37,7 @@ class DataManager:
         self.save_data_source(data_source)
 
     def delete_all(self):
-        self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
+        return
 
     def get_or_create(self, data_source_config: DataSourceConfig) -> DataSource:
         ds = Config.data_source_configs.get(data_source_config.name)
@@ -72,7 +71,7 @@ class DataManager:
         )
 
     def get_data_sources(self) -> List[DataSource]:
-        return [self.get_data_source(model.id) for model in self.__DATA_SOURCE_MODEL_DB.values()]
+        return self.repository.get_all()
 
     def create_data_source_model(self, id: str, name: str, scope: Scope, type: str, properties: dict):
         model = DataSourceModel(
@@ -82,10 +81,6 @@ class DataManager:
             type,
             properties,
         )
-        # Old in memory storage system
-        self.__DATA_SOURCE_MODEL_DB[id] = model
-
-        # New Storage
         self.repository.save(model)
 
     def fetch_data_source_model(self, id) -> DataSourceModel:

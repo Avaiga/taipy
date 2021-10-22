@@ -59,9 +59,10 @@ class FileSystemRepository(Generic[ModelType]):
     def get_all(self) -> List[ModelType]:
         models = []
         directory = path.join(self.base_path, self.dir_name)
-        for filename in listdir(directory):
-            if filename.endswith(".json"):
-                models.append(self._build_model(self.__load_json_file(path.join(directory, filename))))
+        if path.exists(directory):
+            for filename in listdir(directory):
+                if filename.endswith(".json"):
+                    models.append(self._build_model(self.__load_json_file(path.join(directory, filename))))
         return models
 
     def save(self, model: Type[ModelType]):
