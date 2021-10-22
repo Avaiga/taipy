@@ -26,5 +26,5 @@ class Partial(Page):
 
     def __init__(self):
         super().__init__()
-        self.route = "/partials/tp_" + str(len(Partial.__partials))
+        self.route = "TaiPy_partials_" + str(len(Partial.__partials))
         Partial.__partials[self.route] = self
