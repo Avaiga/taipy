@@ -1,16 +1,25 @@
 import json
-from dataclasses import dataclass
-from os import listdir, path
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
-
-from typing_extensions import Protocol
+from enum import Enum
+from os import listdir, makedirs, path
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from taipy.exceptions import ModelNotFound
 
 ModelType = TypeVar("ModelType")
+Json = Union[dict, list, str, int, float, bool, None]
 
 
-class FileSystemStorage(Generic[ModelType]):
+class EnumEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Json:
+        result: Json
+        if isinstance(o, Enum):
+            result = o.value
+        else:
+            result = json.JSONEncoder.default(self, o)
+        return result
+
+
+class FileSystemRepository(Generic[ModelType]):
     """ """
 
     def __init__(self, model: Type[ModelType], dir_name: str, base_path: str = ".data"):
@@ -22,22 +31,27 @@ class FileSystemStorage(Generic[ModelType]):
         with open(filepath, "r") as f:
             return json.load(f)
 
+    def _build_model(self, model_data: Dict) -> ModelType:
+        return self.model.from_dict(model_data)  # type: ignore
+
     def get(self, model_id: str) -> Optional[ModelType]:
         try:
-            filepath = path.join(self.base_path, self.dir_name, model_id)
-            return self.__load_json_file(filepath)
+            filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
+            return self._build_model(self.__load_json_file(filepath))
         except FileNotFoundError:
             raise ModelNotFound(self.dir_name, model_id)
 
-    def get_all(self) -> List[Dict[Any, Any]]:
+    def get_all(self) -> List[ModelType]:
         models = []
         directory = path.join(self.base_path, self.dir_name)
         for filename in listdir(directory):
             if filename.endswith(".json"):
-                models.append(self.__load_json_file(path.join(directory, filename)))
+                models.append(self._build_model(self.__load_json_file(path.join(directory, filename))))
         return models
 
-    def save(self):
+    def save(self, model: Type[ModelType]):
         directory = path.join(self.base_path, self.dir_name)
-        with open(path.join(directory, self.model.id), "w") as f:
-            json.dump(self.model.to_json(), f, ensure_ascii=False, indent=4)
+        if not path.exists(directory):
+            makedirs(directory)
+        with open(path.join(directory, f"{model.id}.json"), "w") as f:  # type: ignore
+            json.dump(model.to_dict(), f, ensure_ascii=False, indent=4, cls=EnumEncoder)  # type: ignore

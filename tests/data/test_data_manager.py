@@ -7,19 +7,22 @@ from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
-from taipy.exceptions import InvalidDataSourceType
+from taipy.exceptions import InvalidDataSourceType, ModelNotFound
 
 
 class TestDataManager:
-    def test_create_data_source(self):
+    def test_create_data_source(self, tmpdir):
         dm = DataManager()
+        dm.repository.base_path = tmpdir
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
         csv_ds = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
         csv_entity_1 = dm.create_data_source(csv_ds)
-        assert dm.get_data_source(csv_entity_1.id).id == csv_entity_1.id
-        assert dm.get_data_source(csv_entity_1.id).config_name == csv_entity_1.config_name
-        assert dm.get_data_source(csv_entity_1.id).scope == csv_entity_1.scope
-        assert dm.get_data_source(csv_entity_1.id).properties == csv_entity_1.properties
+        fetched_ds = dm.get_data_source(csv_entity_1.id)
+
+        assert fetched_ds.id == csv_entity_1.id
+        assert fetched_ds.config_name == csv_entity_1.config_name
+        assert fetched_ds.scope == csv_entity_1.scope
+        assert fetched_ds.properties == csv_entity_1.properties
 
         # Test we can instantiate a EmbeddedDataSourceEntity from DataSource
         # with type embedded
@@ -60,8 +63,9 @@ class TestDataManager:
         assert csv.path == "bar"
         assert csv.has_header is False
 
-    def test_create_and_fetch(self):
+    def test_create_and_fetch(self, tmpdir):
         dm = DataManager()
+        dm.repository.base_path = tmpdir
         dm.create_data_source_model(
             "ds_id",
             "test_data_source",
@@ -76,7 +80,7 @@ class TestDataManager:
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()
-        with pytest.raises(KeyError):
+        with pytest.raises(ModelNotFound):
             dm.fetch_data_source_model("test_data_source_2")
 
     def test_get_or_create(self):

@@ -1,10 +1,6 @@
-from taipy.repository import FileSystemStorage
+from taipy.data.data_source_model import DataSourceModel
+from taipy.repository import FileSystemRepository
 
-from .data_source_model import DataSourceModel
 
-
-class DataRepository(FileSystemStorage[DataSourceModel]):
+class DataRepository(FileSystemRepository[DataSourceModel]):
     pass
-
-
-repository = DataRepository(DataSourceModel, dir_name=".data")

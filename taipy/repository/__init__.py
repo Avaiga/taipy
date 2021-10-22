@@ -1,1 +1,1 @@
-from .fs_base import FileSystemStorage
+from .fs_base import FileSystemRepository

@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List
 
 from taipy.config import Config, DataSourceConfig
-from taipy.data import CSVDataSource, EmbeddedDataSource, repository
+from taipy.data import CSVDataSource, DataRepository, EmbeddedDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.scope import Scope
@@ -19,6 +19,9 @@ class DataManager:
     __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
     __DATA_SOURCE_CLASSES = {EmbeddedDataSource, CSVDataSource}
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}
+
+    def __init__(self):
+        self.repository = DataRepository(model=DataSourceModel, dir_name="sources")
 
     def __create_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
         try:
@@ -72,13 +75,18 @@ class DataManager:
         return [self.get_data_source(model.id) for model in self.__DATA_SOURCE_MODEL_DB.values()]
 
     def create_data_source_model(self, id: str, name: str, scope: Scope, type: str, properties: dict):
-        self.__DATA_SOURCE_MODEL_DB[id] = DataSourceModel(
+        model = DataSourceModel(
             id,
             name,
             scope,
             type,
             properties,
         )
+        # Old in memory storage system
+        self.__DATA_SOURCE_MODEL_DB[id] = model
+
+        # New Storage
+        self.repository.save(model)
 
     def fetch_data_source_model(self, id) -> DataSourceModel:
-        return self.__DATA_SOURCE_MODEL_DB[id]
+        return self.repository.get(id)
