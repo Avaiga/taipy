@@ -20,7 +20,22 @@ class EnumEncoder(json.JSONEncoder):
 
 
 class FileSystemRepository(Generic[ModelType]):
-    """ """
+    """
+    This class holds common methods to be used and extended when a functionality of saving
+    dataclasses as JSON files in local storage emerges.
+
+    Some lines have type: ignore because MyPy won't recognize some generic attributes. This
+    should be revised in the future.
+
+    Attributes
+    ----------
+    model: ModelType
+        Generic dataclass
+    dir_name: str
+        Folder that will hold the files for this dataclass model
+    base_path: str
+        Main folder that will hold the directories of all dataclass models
+    """
 
     def __init__(self, model: Type[ModelType], dir_name: str, base_path: str = ".data"):
         self.model = model
