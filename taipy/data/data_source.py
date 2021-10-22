@@ -33,11 +33,7 @@ class DataSource:
         self.properties = kwargs
 
     def __eq__(self, other):
-        if self.id == other.id:
-            return True
-        else:
-            return False
-
+        return self.id == other.id
     def __ne__(self, other):
         return not self.__eq__(other)
 
