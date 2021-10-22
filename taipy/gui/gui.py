@@ -294,22 +294,47 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
-    def _on_action(self, id: t.Optional[str], action: str) -> None:
-        if action:
+    def _on_action(self, id: t.Optional[str], payload: t.any) -> None:
+        if isinstance(payload, dict):
+            action = _get_dict_value(payload, "action")
+        else:
+            action = str(payload)
+        if action and hasattr(self, action):
+            if self.__call_function_with_args(action_function=getattr(self, action), id=id, payload=payload):
+                return
+        if self._action_function:
+            self.__call_function_with_args(action_function=self._action_function, id=id, payload=payload, action=action)
+
+    def __call_function_with_args(*args, **kwargs):
+        action_function = _get_dict_value(kwargs, "action_function")
+        id = _get_dict_value(kwargs, "id")
+        action = _get_dict_value(kwargs, "action")
+        payload = _get_dict_value(kwargs, "payload")
+        pself = args[0]
+
+        if isinstance(action_function, FunctionType):
             try:
-                action_function = getattr(self, action)
                 argcount = action_function.__code__.co_argcount
                 if argcount == 0:
                     action_function()
                 elif argcount == 1:
-                    action_function(self)
+                    action_function(pself)
                 elif argcount == 2:
-                    action_function(self, id)
-                return
+                    action_function(pself, id)
+                elif argcount == 3:
+                    if action is not None:
+                        action_function(pself, id, action)
+                    else:
+                        action_function(pself, id, payload)
+                elif argcount == 4 and action is not None:
+                    action_function(pself, id, action, payload)
+                else:
+                    warnings.warn(f"Wrong signature for action '{action_function.__name__}'")
+                    return False
+                return True
             except Exception as e:
-                warnings.warn(f"on action exception: {e}")
-        if self._action_function:
-            self._action_function(self, id, action)
+                warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
+        return False
 
     def _re_evaluate_expr(self, var_name: str) -> t.List:
         """

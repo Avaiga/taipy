@@ -121,6 +121,15 @@ class Builder:
             boolattr = is_boolean_true(boolattr)
         return self.__set_react_attribute(_to_camel_case(name), boolattr)
 
+    def __set_dict_attribute(self, name: str):
+        dict_attr = _get_dict_value(self.attributes, name)
+        if dict_attr:
+            if isinstance(dict_attr, (dict, _MapDictionary)):
+                self.__set_json_attribute(_to_camel_case(name), dict_attr)
+            else:
+                warnings.warn(f"{self.element_name}: {name} attribute should be a dict\n'{str(dict_attr)}'")
+        return self
+
     def __set_json_attribute(self, name, value):
         return self.set_attribute(name, json.dumps(value, cls=TaipyJsonEncoder))
 
@@ -229,8 +238,26 @@ class Builder:
             self.__set_json_attribute("columns", columns)
         return self
 
+    def __check_dict(self, values: t.List[t.Any], index: int, names: t.Tuple[str]) -> None:
+        if values[index] is not None and not isinstance(values[index], (dict, _MapDictionary)):
+            warnings.warn(f"{self.element_name} {names[index]} should be a dict")
+            values[index] = None
+
     def get_chart_attributes(self, default_type="scatter", default_mode="lines+markers"):
-        names = ("x", "y", "z", "label", "mode", "type", "color", "xaxis", "yaxis")
+        names = (
+            "x",
+            "y",
+            "z",
+            "label",
+            "mode",
+            "type",
+            "color",
+            "xaxis",
+            "yaxis",
+            "selected_color",
+            "marker",
+            "selected_marker",
+        )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[4]:
             # mode
@@ -244,10 +271,14 @@ class Builder:
         if not trace[8]:
             # yaxis
             trace[8] = "y"
+        self.__check_dict(trace, 10, names)
+        self.__check_dict(trace, 11, names)
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         while len([x for x in indexed_trace if x]):
+            self.__check_dict(indexed_trace, 10, names)
+            self.__check_dict(indexed_trace, 11, names)
             traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
             idx += 1
             indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -263,30 +294,37 @@ class Builder:
         columns = _get_columns_dict(self.value, list(columns), self._gui._data_accessors._get_col_types("", self.value))
         if columns is not None:
             self.attributes["columns"] = columns
-            self.__set_json_attribute("columns", columns)
-
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
 
-            labels = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
-            if len(labels):
-                self.__set_json_attribute("labels", labels)
-            self.__set_json_attribute("modes", [t[4] for t in traces])
-            self.__set_json_attribute("types", [t[5] for t in traces])
-            self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
-            self.__set_json_attribute("axis", [(t[7], t[8]) for t in traces])
-            traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
-            self.__set_json_attribute("traces", traces)
+            ret_dict = {}
+            ret_dict["columns"] = columns
+            ret_dict["labels"] = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
+            ret_dict["modes"] = [t[4] for t in traces]
+            ret_dict["types"] = [t[5] for t in traces]
+            ret_dict["xaxis"] = [t[7] for t in traces]
+            ret_dict["yaxis"] = [t[8] for t in traces]
+            ret_dict["markers"] = [t[10] if t[10] else {"color": t[6]} if t[6] else None for t in traces]
+            ret_dict["selectedMarkers"] = [t[11] if t[11] else {"color": t[9]} if t[9] else None for t in traces]
+            ret_dict["traces"] = [
+                [reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces
+            ]
+            self.__set_json_attribute("config", ret_dict)
         return self
 
-    def set_chart_layout(self):
-        layout = _get_dict_value(self.attributes, "layout")
-        if layout:
-            if isinstance(layout, (dict, _MapDictionary)):
-                self.__set_json_attribute("layout", layout)
+    def get_list_attribute(self, name: str, list_type: AttributeType):
+        list_val = self.__get_property(name)
+        if isinstance(list_val, str):
+            list_val = [s for s in list_val.split(";")]
+        if isinstance(list_val, list):
+            # TODO catch the cast exception
+            if list_type.value == AttributeType.number.value:
+                list_val = [int(v) for v in list_val]
             else:
-                warnings.warn(f"Chart: layout attribute should be a dict\n'{str(layout)}'")
-
-        return self
+                list_val = [int(v) for v in list_val]
+        else:
+            warnings.warn(f"{self.element_name} {name} should be a list")
+            list_val = []
+        return self.__set_json_attribute(_to_camel_case("default_" + name), list_val)
 
     def set_className(self, class_name="", config_class="input"):
         from ..gui import Gui
@@ -396,6 +434,8 @@ class Builder:
                 self.__set_react_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
+            elif type == AttributeType.dict:
+                self.__set_dict_attribute(attr[0])
         return self
 
     def set_attribute(self, name, value):
