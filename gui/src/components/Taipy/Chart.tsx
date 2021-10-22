@@ -4,15 +4,16 @@ import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotMouseEvent, PlotSelect
 import Skeleton from "@mui/material/Skeleton";
 
 import { TaipyContext } from "../../context/taipyContext";
+import { getArrayValue, getUpdateVar, getUpdateVars, TaipyBaseProps } from "./utils";
 import {
     createRequestChartUpdateAction,
+    createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
 } from "../../context/taipyReducers";
-import { getArrayValue, TaipyBaseProps, TaipyMultiSelect } from "./utils";
 import { ColumnDesc } from "./tableUtils";
 
-interface ChartProp extends TaipyBaseProps, TaipyMultiSelect {
+interface ChartProp extends TaipyBaseProps {
     title: string;
     width: string | number;
     height: string | number;
@@ -21,6 +22,7 @@ interface ChartProp extends TaipyBaseProps, TaipyMultiSelect {
     refresh: boolean;
     layout: string;
     rangeChange: string;
+    //[key: `selected_${number}`]: number[];
 }
 
 interface ChartConfig {
@@ -43,11 +45,13 @@ const getValue = <T extends unknown>(values: TraceValueType, arr: T[], idx: numb
     if (values) {
         const confValue = getArrayValue(arr, idx) as string;
         if (confValue) {
-            return values[confValue];
+            return values[confValue] || [];
         }
     }
     return [];
 };
+
+const selectedPropRe = /selected(\d+)/;
 
 const Chart = (props: ChartProp) => {
     const {
@@ -65,6 +69,42 @@ const Chart = (props: ChartProp) => {
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [loading, setLoading] = useState(false);
+    const [selected, setSelected] = useState<number[][]>([]);
+
+    // get props.selected[i] values
+    useEffect(() => {
+        setSelected((sel) => {
+            Object.keys(props).forEach((key) => {
+                const res = selectedPropRe.exec(key);
+                if (res && res.length == 2) {
+                    const idx = parseInt(res[1], 10);
+                    let val = (props as unknown as Record<string, number[]>)[key];
+                    if (val !== undefined) {
+                        if (typeof val === "string") {
+                            try {
+                                val = JSON.parse(val) as number[];
+                            } catch (e) {
+                                // too bad
+                                val = [];
+                            }
+                        }
+                        if (!Array.isArray(val)) {
+                            val = [];
+                        }
+                        if (
+                            idx >= sel.length ||
+                            val.length !== sel[idx].length ||
+                            val.some((v, i) => sel[idx][i] != v)
+                        ) {
+                            sel = sel.concat();
+                            sel[idx] = val;
+                        }
+                    }
+                }
+            });
+            return sel;
+        });
+    }, [props]);
 
     const config = useMemo(() => {
         if (props.config) {
@@ -84,11 +124,6 @@ const Chart = (props: ChartProp) => {
         }
     }, [props.config]);
 
-    const selected = useMemo(
-        () => (props.selected === undefined ? (JSON.parse(props.defaultSelected) as number[]) : props.selected),
-        [props.defaultSelected, props.selected]
-    );
-
     /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
         if (!props.value || !!refresh) {
@@ -96,7 +131,12 @@ const Chart = (props: ChartProp) => {
             const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
             dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols));
         }
-    }, [refresh, config.columns, tp_varname, id, dispatch]);
+    }, [refresh, dispatch, config.columns, tp_varname, id]);
+
+    useEffect(() => {
+        const updateVars = getUpdateVars(tp_updatevars);
+        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
+    }, [dispatch, tp_updatevars, id]);
 
     const layout = useMemo(() => {
         const playout = props.layout ? JSON.parse(props.layout) : {};
@@ -140,7 +180,7 @@ const Chart = (props: ChartProp) => {
                     xaxis: config.xaxis[idx],
                     yaxis: config.yaxis[idx],
                     hovertext: getValue(value, config.labels, idx),
-                    selectedpoints: selected,
+                    selectedpoints: getArrayValue(selected, idx, []),
                 } as Record<string, unknown>;
                 const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
@@ -162,14 +202,18 @@ const Chart = (props: ChartProp) => {
     const onSelect = useCallback(
         (evt?: PlotMouseEvent | PlotSelectionEvent) => {
             const points = evt?.points || [];
-            if (points && tp_updatevars) {
-                dispatch(
-                    createSendUpdateAction(
-                        tp_updatevars,
-                        points.map((pt) => pt.pointIndex),
-                        propagate
-                    )
-                );
+            if (points.length && tp_updatevars) {
+                const traces = points.reduce((tr, pt) => {
+                    tr[pt.curveNumber] = tr[pt.curveNumber] || [];
+                    tr[pt.curveNumber].push(pt.pointIndex);
+                    return tr;
+                }, [] as number[][]);
+                traces.forEach((tr, idx) => {
+                    const upvar = getUpdateVar(tp_updatevars, `selected${idx}`);
+                    if (upvar && tr && tr.length) {
+                        dispatch(createSendUpdateAction(upvar, tr, propagate));
+                    }
+                });
             }
         },
         [tp_updatevars, propagate]

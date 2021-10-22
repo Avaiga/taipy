@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestTableUpdateAction } from "../../context/taipyReducers";
+import { createRequestTableUpdateAction, createRequestUpdateAction } from "../../context/taipyReducers";
 import {
     alignCell,
     boxSx,
@@ -26,6 +26,7 @@ import {
     tableSx,
     TaipyPaginatedTableProps,
 } from "./tableUtils";
+import { getUpdateVars } from "./utils";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
@@ -43,6 +44,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         showAll = false,
         refresh = false,
         height,
+        selected = [],
+        tp_updatevars,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -54,8 +57,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const pageKey = useRef("no-page");
     const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
 
-    //    useWhyDidYouUpdate('TaipyTable', props);
-
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
@@ -64,10 +65,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
-    const selected = useMemo(
-        () => (props.selected === undefined ? (JSON.parse(props.defaultSelected) as number[]) : props.selected),
-        [props.defaultSelected, props.selected]
-    );
+    useEffect(() => {
+        const updateVars = getUpdateVars(tp_updatevars);
+        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
+    }, [tp_updatevars, dispatch, id, tp_varname]);
 
     useEffect(() => {
         if (selected.length) {

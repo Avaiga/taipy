@@ -97,10 +97,10 @@ class Factory:
         )
         .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
-        .get_adapter("lov")  # need to be called before set_default_lov
-        .set_default_lov()
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
         .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean)])
-        .set_refresh_on_update("lov")
+        .set_refresh_on_update()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -123,7 +123,7 @@ class Factory:
         .set_refresh()
         .set_propagate()
         .get_list_attribute("selected", AttributeType.number)
-        .set_refresh_on_update("selected")
+        .set_refresh_on_update()
         .set_table_pagesize_options(),
         "dialog": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -164,10 +164,9 @@ class Factory:
                 ("range_change"),
             ]
         )
-        .get_list_attribute("selected", AttributeType.number)
-        .set_refresh_on_update("selected")
-        .get_chart_attributes("scatter", "lines+markers")
+        .get_chart_config("scatter", "lines+markers")
         .set_propagate()
+        .set_refresh_on_update()
         .set_refresh(),
         "status": lambda control_type, attrs: Builder(
             control_type=control_type,

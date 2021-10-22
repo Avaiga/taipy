@@ -10,7 +10,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 
-import { TaipyImage, TaipyInputProps } from "./utils";
+import { getUpdateVars, TaipyImage, TaipyInputProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestUpdateAction, createSendUpdateAction } from "../../context/taipyReducers";
 
@@ -82,7 +82,7 @@ const Selector = (props: SelectorProps) => {
     const { dispatch } = useContext(TaipyContext);
 
     useEffect(() => {
-        dispatch(createRequestUpdateAction(id, [tp_varname, ...tp_updatevars.split(";").filter((name) => name)]));
+        dispatch(createRequestUpdateAction(id, [tp_varname, ...getUpdateVars(tp_updatevars)]));
     }, [tp_updatevars, dispatch, id, tp_varname]);
 
     const lovList: LovItem[] = useMemo(() => {

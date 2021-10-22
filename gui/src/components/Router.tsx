@@ -15,6 +15,13 @@ import {
 } from "../context/taipyReducers";
 import { JSXReactRouterComponents } from "./Taipy";
 
+interface AxiosRouter {
+    router: string;
+    darkMode: boolean;
+    timeZone: string;
+    locations: Record<string, string>;
+}
+
 const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
     const [JSX, setJSX] = useState("");
@@ -27,7 +34,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get(`${ENDPOINT}/initialize/`)
+            .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
             .then((result) => {
                 setJSX(result.data.router);
                 setDarkMode(result.data.darkMode);
@@ -52,9 +59,7 @@ const Router = () => {
             <ThemeProvider theme={state.theme}>
                 <JsxParser
                     disableKeyGeneration={true}
-                    components={
-                        JSXReactRouterComponents as Record<string, ComponentType>
-                    }
+                    components={JSXReactRouterComponents as Record<string, ComponentType>}
                     jsx={JSX}
                 />
             </ThemeProvider>
