@@ -9,7 +9,7 @@ import {
     createSendActionNameAction,
     createSendUpdateAction,
 } from "../../context/taipyReducers";
-import { TaipyBaseProps, TaipyMultiSelect } from "./utils";
+import { getArrayValue, TaipyBaseProps, TaipyMultiSelect } from "./utils";
 import { ColumnDesc } from "./tableUtils";
 
 interface ChartProp extends TaipyBaseProps, TaipyMultiSelect {
@@ -39,11 +39,9 @@ type TraceValueType = Record<string, (string | number)[]>;
 
 const defaultStyle = { position: "relative", display: "inline-block" };
 
-const getConfigValue = <T extends unknown>(arr: T[], idx: number, defVal?: T): T | undefined =>
-    (arr && idx < arr.length && arr[idx]) || defVal;
 const getValue = <T extends unknown>(values: TraceValueType, arr: T[], idx: number): (string | number)[] => {
     if (values) {
-        const confValue = getConfigValue(arr, idx) as string;
+        const confValue = getArrayValue(arr, idx) as string;
         if (confValue) {
             return values[confValue];
         }
@@ -135,7 +133,7 @@ const Chart = (props: ChartProp) => {
                     type: config.types[idx],
                     mode: config.modes[idx],
                     name: config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined,
-                    marker: getConfigValue(config.markers, idx, {}),
+                    marker: getArrayValue(config.markers, idx, {}),
                     x: getValue(value, trace, 0),
                     y: getValue(value, trace, 1),
                     z: getValue(value, trace, 2),
@@ -144,7 +142,7 @@ const Chart = (props: ChartProp) => {
                     hovertext: getValue(value, config.labels, idx),
                     selectedpoints: selected,
                 } as Record<string, unknown>;
-                const selectedMarker = getConfigValue(config.selectedMarkers, idx);
+                const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
                     ret.selected = { marker: selectedMarker };
                 }

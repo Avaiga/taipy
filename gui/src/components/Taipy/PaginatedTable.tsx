@@ -139,7 +139,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         setStartIndex(0);
     }, []);
 
-    const tableContainertSx = useMemo(() => ({ maxHeight: height }), [height]);
+    const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const pso = useMemo(() => {
         let psOptions = rowsPerPageOptions;
@@ -174,7 +174,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         <>
             <Box sx={boxSx}>
                 <Paper sx={paperSx}>
-                    <TableContainer sx={tableContainertSx}>
+                    <TableContainer sx={tableContainerSx}>
                         <Table
                             sx={tableSx}
                             aria-labelledby="tableTitle"

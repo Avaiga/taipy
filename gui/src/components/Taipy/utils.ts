@@ -29,3 +29,6 @@ export interface TaipyImage {
     path: string;
     text: string;
 }
+
+export const getArrayValue = <T extends unknown>(arr: T[], idx: number, defVal?: T): T | undefined =>
+    (arr && idx < arr.length && arr[idx]) || defVal;

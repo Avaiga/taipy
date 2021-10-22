@@ -34,13 +34,13 @@ interface RowData {
     classes: Record<string, string>;
     cellStyles: CSSProperties[];
     isItemLoaded: (index: number) => boolean;
-    selecteds: number[];
+    selection: number[];
 }
 
 const Row = ({
     index,
     style,
-    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selecteds },
+    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selection },
 }: {
     index: number;
     style: CSSProperties;
@@ -55,7 +55,7 @@ const Row = ({
             style={style}
             className={classes && classes.row}
             data-index={index}
-            selected={selecteds.indexOf(index) > -1}
+            selected={selection.indexOf(index) > -1}
         >
             {colsOrder.map((col, cidx) => (
                 <TableCell
@@ -146,7 +146,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
-    const tableContainertSx = useMemo(() => ({ maxHeight: height }), [height]);
+    const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const selected = useMemo(
         () => (props.selected === undefined ? (JSON.parse(props.defaultSelected) as number[]) : props.selected),
@@ -208,7 +208,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             classes: {},
             cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
             isItemLoaded: isItemLoaded,
-            selecteds: selected,
+            selection: selected,
         }),
         [rows, isItemLoaded, colsOrder, columns, selected]
     );
@@ -216,7 +216,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     return (
         <Box sx={boxSx}>
             <Paper sx={paperSx}>
-                <TableContainer sx={tableContainertSx}>
+                <TableContainer sx={tableContainerSx}>
                     <MuiTable
                         sx={tableSx}
                         aria-labelledby="tableTitle"
