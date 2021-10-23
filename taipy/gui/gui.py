@@ -47,7 +47,7 @@ class Gui(object, metaclass=Singleton):
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
-    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*?)/")
+    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
@@ -374,10 +374,12 @@ class Gui(object, metaclass=Singleton):
         # Validate name
         if name is None:
             raise Exception("name is required for add_page function!")
-        if not re.match(r"^[\w-]+$", name):
+        if not re.match(r"^[\w\-\/]+$", name):
             raise SyntaxError(
-                f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.'
+                f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
             )
+        if name.startswith("/"):
+            raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character')
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
         if not isinstance(renderer, PageRenderer):
