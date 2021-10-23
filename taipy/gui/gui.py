@@ -126,7 +126,7 @@ class Gui(object, metaclass=Singleton):
         if page.rendered_jsx:
             return self._server.render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
         else:
-            return "No page template"
+            return ("No page template", 404)
 
     def _render_route(self) -> t.Any:
         # Generate router

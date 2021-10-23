@@ -14,7 +14,7 @@ import InfiniteLoader from "react-window-infinite-loader";
 import { Skeleton } from "@mui/material";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
+import { createRequestInfiniteTableUpdateAction, createRequestUpdateAction } from "../../context/taipyReducers";
 import {
     ColumnDesc,
     alignCell,
@@ -26,6 +26,7 @@ import {
     paperSx,
     tableSx,
 } from "./tableUtils";
+import { getUpdateVars } from "./utils";
 
 interface RowData {
     colsOrder: string[];
@@ -88,7 +89,7 @@ const ROW_HEIGHT = 65;
 const PAGE_SIZE = 100;
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
-    const { className, id, tp_varname, refresh = false, height } = props;
+    const { className, id, tp_varname, refresh = false, height, tp_updatevars, selected = [] } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
@@ -114,6 +115,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             delete page.current.promises[newValue.start];
         }
     }, [props.value]);
+
+    useEffect(() => {
+        const updateVars = getUpdateVars(tp_updatevars);
+        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
+    }, [tp_updatevars, dispatch, id, tp_varname]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -147,11 +153,6 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     }, [props.columns]);
 
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
-
-    const selected = useMemo(
-        () => (props.selected === undefined ? (JSON.parse(props.defaultSelected) as number[]) : props.selected),
-        [props.defaultSelected, props.selected]
-    );
 
     useEffect(() => {
         /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
