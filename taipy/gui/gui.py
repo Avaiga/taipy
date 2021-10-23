@@ -408,7 +408,7 @@ class Gui(object, metaclass=Singleton):
             if not os.path.isdir(folder_path):
                 raise RuntimeError(f"Path {folder_path} is not a valid directory")
             if folder_name in self._directory_name_of_pages:
-                raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique!")
+                raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
             self._directory_name_of_pages.append(folder_name)
             list_of_files = os.listdir(folder_path)
             for file_name in list_of_files:
