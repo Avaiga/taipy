@@ -1,4 +1,5 @@
 from .csv import CSVDataSource
-from .embedded import EmbeddedDataSource
 from .data_source import DataSource
+from .embedded import EmbeddedDataSource
+from .repository import DataRepository
 from .scope import Scope
