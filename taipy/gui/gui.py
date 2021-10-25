@@ -18,7 +18,7 @@ from flask import Blueprint, jsonify, request
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
-from .data.data_accessor import _DataAccessors
+from .data.data_accessor import _DataAccessors, DataAccessor
 from .page import Page, Partial
 from .renderers import PageRenderer
 from .server import Server
@@ -26,8 +26,8 @@ from .taipyimage import TaipyImage
 from .utils import (
     ISOToDate,
     Singleton,
-    _get_expr_var_name,
     _get_dict_value,
+    _get_expr_var_name,
     _MapDictionary,
     attrsetter,
     dateToISO,
@@ -47,7 +47,8 @@ class Gui(object, metaclass=Singleton):
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
-    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*?)/")
+    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
+    __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
@@ -76,6 +77,7 @@ class Gui(object, metaclass=Singleton):
         self._data_accessors = _DataAccessors()
 
         # Load default config
+        self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
@@ -105,19 +107,17 @@ class Gui(object, metaclass=Singleton):
     def _get_instance() -> Gui:
         return Gui._instances[Gui]
 
-    def _get_render_path_name(self):
-        return Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)
-
     def _render_page(self) -> t.Any:
         page = None
+        render_path_name = Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)
         # Get page instance
         for page_i in self._config.pages:
-            if page_i.route == self._get_render_path_name():
+            if page_i.route == render_path_name:
                 page = page_i
         # try partials
         if page is None:
             for partial in self._config.partials:
-                if partial.route == self._get_render_path_name():
+                if partial.route == render_path_name:
                     page = partial
         # Make sure that there is a page instance found
         if page is None:
@@ -128,7 +128,7 @@ class Gui(object, metaclass=Singleton):
         if page.rendered_jsx:
             return self._server.render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
         else:
-            return "No page template"
+            return ("No page template", 404)
 
     def _render_route(self) -> t.Any:
         # Generate router
@@ -294,22 +294,47 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
-    def _on_action(self, id: t.Optional[str], action: str) -> None:
-        if action:
+    def _on_action(self, id: t.Optional[str], payload: t.any) -> None:
+        if isinstance(payload, dict):
+            action = _get_dict_value(payload, "action")
+        else:
+            action = str(payload)
+        if action and hasattr(self, action):
+            if self.__call_function_with_args(action_function=getattr(self, action), id=id, payload=payload):
+                return
+        if self._action_function:
+            self.__call_function_with_args(action_function=self._action_function, id=id, payload=payload, action=action)
+
+    def __call_function_with_args(*args, **kwargs):
+        action_function = _get_dict_value(kwargs, "action_function")
+        id = _get_dict_value(kwargs, "id")
+        action = _get_dict_value(kwargs, "action")
+        payload = _get_dict_value(kwargs, "payload")
+        pself = args[0]
+
+        if isinstance(action_function, FunctionType):
             try:
-                action_function = getattr(self, action)
                 argcount = action_function.__code__.co_argcount
                 if argcount == 0:
                     action_function()
                 elif argcount == 1:
-                    action_function(self)
+                    action_function(pself)
                 elif argcount == 2:
-                    action_function(self, id)
-                return
+                    action_function(pself, id)
+                elif argcount == 3:
+                    if action is not None:
+                        action_function(pself, id, action)
+                    else:
+                        action_function(pself, id, payload)
+                elif argcount == 4 and action is not None:
+                    action_function(pself, id, action, payload)
+                else:
+                    warnings.warn(f"Wrong signature for action '{action_function.__name__}'")
+                    return False
+                return True
             except Exception as e:
-                warnings.warn(f"on action exception: {e}")
-        if self._action_function:
-            self._action_function(self, id, action)
+                warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
+        return False
 
     def _re_evaluate_expr(self, var_name: str) -> t.List:
         """
@@ -351,10 +376,12 @@ class Gui(object, metaclass=Singleton):
         # Validate name
         if name is None:
             raise Exception("name is required for add_page function!")
-        if not re.match(r"^[\w-]+$", name):
+        if not Gui.__RE_PAGE_NAME.match(name):
             raise SyntaxError(
-                f'Page name "{name}" is invalid. It must contain only letters, digits, dash (-) and underscore (_) characters.'
+                f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
             )
+        if name.startswith("/"):
+            raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character')
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
         if not isinstance(renderer, PageRenderer):
@@ -368,7 +395,7 @@ class Gui(object, metaclass=Singleton):
         self._config.pages.append(new_page)
         self._config.routes.append(name)
 
-    def add_pages(self, pages: t.Union[dict[str, PageRenderer], str] = None):
+    def add_pages(self, pages: t.Union[dict[str, PageRenderer], str] = None) -> None:
         if isinstance(pages, dict):
             for k, v in pages.items():
                 if k == "/":
@@ -379,7 +406,13 @@ class Gui(object, metaclass=Singleton):
                 self._root_dir = os.path.dirname(
                     inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
                 )
-            folder_path = os.path.join(self._root_dir, folder_name)
+            folder_path = os.path.join(self._root_dir, folder_name) if not os.path.isabs(folder_name) else folder_name
+            folder_name = os.path.basename(folder_path)
+            if not os.path.isdir(folder_path):
+                raise RuntimeError(f"Path {folder_path} is not a valid directory")
+            if folder_name in self._directory_name_of_pages:
+                raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
+            self._directory_name_of_pages.append(folder_name)
             list_of_files = os.listdir(folder_path)
             for file_name in list_of_files:
                 from .renderers import Html, Markdown
@@ -612,5 +645,5 @@ class Gui(object, metaclass=Singleton):
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)
 
-    def register_data_accessor(self, data_accessor_class: t.Callable) -> None:
+    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors.register(data_accessor_class)

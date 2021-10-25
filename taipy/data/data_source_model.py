@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from dataclasses_json import dataclass_json
+
 from taipy.data.scope import Scope
 
 
+@dataclass_json
 @dataclass
 class DataSourceModel:
     """

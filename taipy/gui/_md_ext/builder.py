@@ -33,6 +33,7 @@ class Builder:
         self.element_name = element_name
         self.attributes = attributes or {}
         self.__hashes = {}
+        self.__update_vars = []
         self.value = default_value
         self.el = etree.Element(element_name)
         self._gui = Gui._get_instance()
@@ -102,7 +103,7 @@ class Builder:
         return prop
 
     def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
-        names = [n if index is None else (n + "[" + str(index) + "]") for n in names]
+        names = [n if index is None else f"{n}[{index}]" for n in names]
         return [self.__get_property(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:
@@ -121,13 +122,22 @@ class Builder:
             boolattr = is_boolean_true(boolattr)
         return self.__set_react_attribute(_to_camel_case(name), boolattr)
 
+    def __set_dict_attribute(self, name: str):
+        dict_attr = _get_dict_value(self.attributes, name)
+        if dict_attr:
+            if isinstance(dict_attr, (dict, _MapDictionary)):
+                self.__set_json_attribute(_to_camel_case(name), dict_attr)
+            else:
+                warnings.warn(f"{self.element_name} {name} should be a dict\n'{str(dict_attr)}'")
+        return self
+
     def __set_json_attribute(self, name, value):
         return self.set_attribute(name, json.dumps(value, cls=TaipyJsonEncoder))
 
     def __set_list_of_(self, name: str):
         lof = self.__get_list_of_(name)
         if not isinstance(lof, (list, tuple)):
-            warnings.warn(f"Component {self.element_name} Attribute {name}: should be a string or a list")
+            warnings.warn(f"{self.element_name} {name} should be a list")
             return self
         return self.__set_json_attribute(_to_camel_case(name), lof)
 
@@ -229,8 +239,26 @@ class Builder:
             self.__set_json_attribute("columns", columns)
         return self
 
-    def get_chart_attributes(self, default_type="scatter", default_mode="lines+markers"):
-        names = ("x", "y", "z", "label", "mode", "type", "color", "xaxis", "yaxis")
+    def __check_dict(self, values: t.List[t.Any], index: int, names: t.Tuple[str]) -> None:
+        if values[index] is not None and not isinstance(values[index], (dict, _MapDictionary)):
+            warnings.warn(f"{self.element_name} {names[index]} should be a dict")
+            values[index] = None
+
+    def get_chart_config(self, default_type="scatter", default_mode="lines+markers"):
+        names = (
+            "x",
+            "y",
+            "z",
+            "label",
+            "mode",
+            "type",
+            "color",
+            "xaxis",
+            "yaxis",
+            "selected_color",
+            "marker",
+            "selected_marker",
+        )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[4]:
             # mode
@@ -244,10 +272,14 @@ class Builder:
         if not trace[8]:
             # yaxis
             trace[8] = "y"
+        self.__check_dict(trace, 10, names)
+        self.__check_dict(trace, 11, names)
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         while len([x for x in indexed_trace if x]):
+            self.__check_dict(indexed_trace, 10, names)
+            self.__check_dict(indexed_trace, 11, names)
             traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
             idx += 1
             indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -263,19 +295,22 @@ class Builder:
         columns = _get_columns_dict(self.value, list(columns), self._gui._data_accessors._get_col_types("", self.value))
         if columns is not None:
             self.attributes["columns"] = columns
-            self.__set_json_attribute("columns", columns)
-
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
 
-            labels = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
-            if len(labels):
-                self.__set_json_attribute("labels", labels)
-            self.__set_json_attribute("modes", [t[4] for t in traces])
-            self.__set_json_attribute("types", [t[5] for t in traces])
-            self.__set_json_attribute("colors", [(t[6] or "") for t in traces])
-            self.__set_json_attribute("axis", [(t[7], t[8]) for t in traces])
-            traces = [[reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces]
-            self.__set_json_attribute("traces", traces)
+            ret_dict = {}
+            ret_dict["columns"] = columns
+            ret_dict["labels"] = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
+            ret_dict["modes"] = [t[4] for t in traces]
+            ret_dict["types"] = [t[5] for t in traces]
+            ret_dict["xaxis"] = [t[7] for t in traces]
+            ret_dict["yaxis"] = [t[8] for t in traces]
+            ret_dict["markers"] = [t[10] if t[10] else {"color": t[6]} if t[6] else None for t in traces]
+            ret_dict["selectedMarkers"] = [t[11] if t[11] else {"color": t[9]} if t[9] else None for t in traces]
+            ret_dict["traces"] = [
+                [reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces
+            ]
+            self.__set_json_attribute("config", ret_dict)
+            self.set_chart_selected(max=len(traces))
         return self
 
     def set_chart_layout(self):
@@ -286,6 +321,57 @@ class Builder:
             else:
                 warnings.warn(f"Chart: layout attribute should be a dict\n'{str(layout)}'")
 
+    def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any) -> t.List[str]:
+        if not hash_name and isinstance(val, str):
+            val = [int(t.strip()) for t in val.split(";")]
+        if isinstance(val, list):
+            if hash_name:
+                self.__set_react_attribute(name, hash_name)
+                return [f"{name}={hash_name}"]
+            else:
+                self.__set_json_attribute(name, val)
+        else:
+            warnings.warn(f"{self.element_name} {name} should be a list of int")
+        return []
+
+    def set_chart_selected(self, max=0):
+        name = "selected"
+        default_sel = self.__get_property(name)
+        idx = 1
+        name_idx = f"{name}[{idx}]"
+        sel = self.__get_property(name_idx)
+        while idx <= max:
+            if sel is not None or default_sel is not None:
+                self.__update_vars.extend(
+                    self.__set_list_attribute(
+                        f"{name}{idx - 1}",
+                        _get_dict_value(self.__hashes, name_idx if sel is not None else name),
+                        sel if sel is not None else default_sel,
+                    )
+                )
+            idx += 1
+            name_idx = f"{name}[{idx}]"
+            sel = self.__get_property(name_idx)
+
+    def get_list_attribute(self, name: str, list_type: AttributeType):
+        varname = _get_dict_value(self.__hashes, name)
+        if varname is None:
+            list_val = self.__get_property(name)
+            if isinstance(list_val, str):
+                list_val = [s for s in list_val.split(";")]
+            if isinstance(list_val, list):
+                # TODO catch the cast exception
+                if list_type.value == AttributeType.number.value:
+                    list_val = [int(v) for v in list_val]
+                else:
+                    list_val = [int(v) for v in list_val]
+            else:
+                if list_val is not None:
+                    warnings.warn(f"{self.element_name} {name} should be a list")
+                list_val = []
+            self.__set_react_attribute(_to_camel_case(name), list_val)
+        else:
+            self.__set_react_attribute(_to_camel_case(name), varname)
         return self
 
     def set_className(self, class_name="", config_class="input"):
@@ -301,8 +387,13 @@ class Builder:
         self.set_attribute("dataType", getDataType(self.value))
         return self
 
-    def set_default_lov(self):
-        return self.__set_list_of_("default_lov")
+    def set_lov(self):
+        self.__set_list_of_("default_lov")
+        hash_name = _get_dict_value(self.__hashes, "lov")
+        if hash_name:
+            self.__update_vars.append(f"lov={hash_name}")
+            self.__set_react_attribute("lov", hash_name)
+        return self
 
     def set_default_value(self, value: t.Optional[t.Any] = None):
         if value is None:
@@ -349,17 +440,9 @@ class Builder:
     def set_refresh(self):
         return self.__set_react_attribute("refresh", get_client_var_name(self.expr_hash + ".refresh"))
 
-    def set_refresh_on_update(self, name=None):
-        if name:
-            if not isinstance(name, (tuple, list)):
-                name = [name]
-            name_list = []
-            for nm in name:
-                varname = _get_dict_value(self.__hashes, nm)
-                if varname:
-                    name_list.append(varname)
-                self.__set_react_attribute(nm, varname)
-            self.set_attribute("tp_updatevars", ";".join(name_list))
+    def set_refresh_on_update(self):
+        if len(self.__update_vars):
+            self.set_attribute("tp_updatevars", ";".join(self.__update_vars))
         return self
 
     def set_table_pagesize_options(self, default_size=[50, 100, 500]):
@@ -368,11 +451,11 @@ class Builder:
             try:
                 page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
             except Exception as e:
-                warnings.warn(f"page_size_options: invalid value {page_size_options}\n{e}")
+                warnings.warn(f"{self.element_name} page_size_options: invalid value {page_size_options}\n{e}")
         if isinstance(page_size_options, list):
             self.__set_json_attribute("pageSizeOptions", page_size_options)
         else:
-            warnings.warn("page_size_options should be a list")
+            warnings.warn(f"{self.element_name} page_size_options should be a list")
         return self
 
     def set_type(self, type_name: str):
@@ -396,6 +479,8 @@ class Builder:
                 self.__set_react_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
+            elif type == AttributeType.dict:
+                self.__set_dict_attribute(attr[0])
         return self
 
     def set_attribute(self, name, value):

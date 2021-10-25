@@ -14,7 +14,7 @@ import InfiniteLoader from "react-window-infinite-loader";
 import { Skeleton } from "@mui/material";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
+import { createRequestInfiniteTableUpdateAction, createRequestUpdateAction } from "../../context/taipyReducers";
 import {
     ColumnDesc,
     alignCell,
@@ -24,9 +24,9 @@ import {
     TaipyTableProps,
     boxSx,
     paperSx,
-    tcSx,
     tableSx,
 } from "./tableUtils";
+import { getUpdateVars } from "./utils";
 
 interface RowData {
     colsOrder: string[];
@@ -34,18 +34,19 @@ interface RowData {
     rows: Record<string, unknown>[];
     classes: Record<string, string>;
     cellStyles: CSSProperties[];
+    isItemLoaded: (index: number) => boolean;
+    selection: number[];
 }
 
 const Row = ({
     index,
     style,
-    data: { colsOrder, columns, rows, classes, cellStyles },
+    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selection },
 }: {
     index: number;
     style: CSSProperties;
     data: RowData;
 }) => {
-    const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
     return isItemLoaded(index) ? (
         <TableRow
             hover
@@ -55,6 +56,7 @@ const Row = ({
             style={style}
             className={classes && classes.row}
             data-index={index}
+            selected={selection.indexOf(index) > -1}
         >
             {colsOrder.map((col, cidx) => (
                 <TableCell
@@ -87,7 +89,7 @@ const ROW_HEIGHT = 65;
 const PAGE_SIZE = 100;
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
-    const { className, id, tp_varname, refresh = false } = props;
+    const { className, id, tp_varname, refresh = false, height, tp_updatevars, selected = [] } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
@@ -113,6 +115,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             delete page.current.promises[newValue.start];
         }
     }, [props.value]);
+
+    useEffect(() => {
+        const updateVars = getUpdateVars(tp_updatevars);
+        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
+    }, [tp_updatevars, dispatch, id, tp_varname]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -144,6 +151,15 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         }
         return [[], {}];
     }, [props.columns]);
+
+    const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
+
+    useEffect(() => {
+        /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
+        selected.length &&
+            infiniteLoaderRef.current &&
+            (infiniteLoaderRef.current as any)._listRef.scrollToItem(selected[0]);
+    }, [selected]);
 
     useEffect(() => {
         if (headerRow.current) {
@@ -192,14 +208,16 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             rows: rows,
             classes: {},
             cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
+            isItemLoaded: isItemLoaded,
+            selection: selected,
         }),
-        [colsOrder, columns, rows]
+        [rows, isItemLoaded, colsOrder, columns, selected]
     );
 
     return (
         <Box sx={boxSx}>
             <Paper sx={paperSx}>
-                <TableContainer sx={tcSx}>
+                <TableContainer sx={tableContainerSx}>
                     <MuiTable
                         sx={tableSx}
                         aria-labelledby="tableTitle"

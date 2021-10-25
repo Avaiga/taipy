@@ -16,6 +16,7 @@ flask-cors = ">=3.0"
 toml = "0.10.2"
 tzlocal = ">=3.0"
 pytz = ">=2021.1"
+dataclasses-json = "==0.5.6"
 
 [dev-packages]
 pytest = "*"

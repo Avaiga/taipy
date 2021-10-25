@@ -2,7 +2,7 @@ import logging
 from typing import Dict, List, Optional
 
 from taipy.config import Config, DataSourceConfig
-from taipy.data import CSVDataSource, PickleDataSource
+from taipy.data import CSVDataSource, PickleDataSource, DataRepository, EmbeddedDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.in_memory import InMemoryDataSource
@@ -17,10 +17,11 @@ The Data Manager will facilitate data access between Taipy Modules.
 
 
 class DataManager:
-    # This represents a database table that maintains our DataSource References.
-    __DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
     __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource}
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}
+
+    def __init__(self):
+        self.repository = DataRepository(model=DataSourceModel, dir_name="sources")
 
     def __create_data_source(self, data_source_config: DataSourceConfig) -> DataSource:
         try:
@@ -34,7 +35,7 @@ class DataManager:
             raise InvalidDataSourceType(data_source_config.type)
 
     def delete_all(self):
-        self.__DATA_SOURCE_MODEL_DB: Dict[str, DataSourceModel] = {}
+        self.repository.delete_all()
 
     def get_or_create(self,
                       data_source_config: DataSourceConfig,
@@ -74,14 +75,14 @@ class DataManager:
         )
 
     def get_all(self) -> List[DataSource]:
-        return [self.get(model.id) for model in self.__DATA_SOURCE_MODEL_DB.values()]
+        return self.repository.get_all()
 
     def _find_by_config_name(self, config_name: str) -> List[DataSource]:
         return [self.get(model.id) for model in self.__DATA_SOURCE_MODEL_DB.values()
                 if model.config_name == config_name]
 
     def _fetch_data_source_model(self, id) -> DataSourceModel:
-        return self.__DATA_SOURCE_MODEL_DB[id]
+        return self.repository.get(id)
 
     def _create_data_source_model(self,
                                   id: str,
@@ -90,7 +91,8 @@ class DataManager:
                                   type: str,
                                   parent_id: Optional[str],
                                   properties: dict):
-        self.__DATA_SOURCE_MODEL_DB[id] = DataSourceModel(
+        model = DataSourceModel(
+
             id,
             name,
             scope,
@@ -98,6 +100,7 @@ class DataManager:
             parent_id,
             properties,
         )
+        self.repository.save(model)
 
     def _create_and_save_data_source(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
         data_source = self.__create_data_source(data_source_config, parent_id)

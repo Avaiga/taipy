@@ -34,13 +34,13 @@ class DataAccessor(ABC):
 
 class _DataAccessors(object):
     def __init__(self) -> None:
-        self.__access_4_type: t.Dict[t.Callable, t.Callable] = {}
+        self.__access_4_type: t.Dict[str, DataAccessor] = {}
 
         from .pandas_data_accessor import PandasDataAccessor
 
         self._register(PandasDataAccessor)
 
-    def _register(self, cls: t.Callable) -> None:
+    def _register(self, cls: t.Type[DataAccessor]) -> None:
         if inspect.isclass(cls):
             if issubclass(cls, DataAccessor):
                 names = cls.get_supported_classes()

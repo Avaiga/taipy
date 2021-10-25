@@ -97,10 +97,10 @@ class Factory:
         )
         .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
-        .get_adapter("lov")  # need to be called before set_default_lov
-        .set_default_lov()
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
         .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean)])
-        .set_refresh_on_update("lov")
+        .set_refresh_on_update()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -116,9 +116,14 @@ class Factory:
                 ("allow_all_rows", AttributeType.boolean),
                 ("show_all", AttributeType.boolean),
                 ("auto_loading", AttributeType.boolean),
+                ("width", AttributeType.string_or_number, "100vw"),
+                ("height", AttributeType.string_or_number, "100vh"),
             ]
         )
         .set_refresh()
+        .set_propagate()
+        .get_list_attribute("selected", AttributeType.number)
+        .set_refresh_on_update()
         .set_table_pagesize_options(),
         "dialog": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -139,6 +144,7 @@ class Factory:
             ]
         )
         .set_default_value()
+        .set_propagate()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
         "chart": lambda control_type, attrs: Builder(
@@ -154,10 +160,13 @@ class Factory:
                 ("title"),
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
+                ("layout", AttributeType.dict),
+                ("range_change"),
             ]
         )
-        .get_chart_attributes("scatter", "lines+markers")
-        .set_chart_layout()
+        .get_chart_config("scatter", "lines+markers")
+        .set_propagate()
+        .set_refresh_on_update()
         .set_refresh(),
         "status": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -167,6 +176,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-status", config_class="status")
+        .set_propagate()
         .set_attributes(
             [
                 ("id"),

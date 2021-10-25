@@ -7,22 +7,26 @@ from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
-from taipy.exceptions import InvalidDataSourceType
+from taipy.exceptions import InvalidDataSourceType, ModelNotFound
 
 
 class TestDataManager:
-    def test_create_data_source(self):
+    def test_create_data_source(self, tmpdir):
         dm = DataManager()
+        dm.repository.base_path = tmpdir
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
         csv_ds_config = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
-        csv_1 = dm._create_and_save_data_source(csv_ds_config, None)
-        assert dm.get(csv_1.id).id == csv_1.id
-        assert dm.get(csv_1.id).config_name == csv_1.config_name
-        assert dm.get(csv_1.id).scope == csv_1.scope
-        assert dm.get(csv_1.id).parent_id is None
-        assert dm.get(csv_1.id).properties == csv_1.properties
+        csv_entity_1 = dm._create_and_save_data_source(csv_ds_config, None)
+        fetched_ds = dm.get_data_source(csv_entity_1.id)
+      
+        assert dm.get(csv_entity_1.id).id == csv_entity_1.id
+        assert dm.get(csv_entity_1.id).config_name == csv_entity_1.config_name
+        assert dm.get(csv_entity_1.id).scope == csv_entity_1.scope
+        assert dm.get(csv_entity_1.id).parent_id is None
+        assert dm.get(csv_entity_1.id).properties == csv_entity_1.properties
 
         # Test we can instantiate a EmbeddedDataSource from DataSourceConfig
+
         # with type embedded
         in_memory_ds_config = DataSourceConfig(name="foo", type="in_memory", scope=Scope.SCENARIO, data="bar")
         in_mem_ds = dm._create_and_save_data_source(in_memory_ds_config, "Scenario_id")
@@ -62,9 +66,10 @@ class TestDataManager:
         assert csv.path == "bar"
         assert csv.has_header is False
 
-    def test_create_and_fetch(self):
+    def test_create_and_fetch(self, tmpdir):
         dm = DataManager()
-        dm._create_data_source_model(
+        dm.repository.base_path = tmpdir
+        dm.create_data_source_model(
             "ds_id",
             "test_data_source",
             Scope.PIPELINE,
@@ -79,8 +84,9 @@ class TestDataManager:
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()
-        with pytest.raises(KeyError):
-            dm._fetch_data_source_model("test_data_source_2")
+        with pytest.raises(ModelNotFound):
+            dm.fetch_data_source_model("test_data_source_2")
+
 
     def test_get_or_create(self):
         dm = DataManager()
