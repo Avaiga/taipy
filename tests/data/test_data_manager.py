@@ -16,14 +16,14 @@ class TestDataManager:
         dm.repository.base_path = tmpdir
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
         csv_ds_config = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
-        csv_entity_1 = dm._create_and_save_data_source(csv_ds_config, None)
-        fetched_ds = dm.get_data_source(csv_entity_1.id)
-      
-        assert dm.get(csv_entity_1.id).id == csv_entity_1.id
-        assert dm.get(csv_entity_1.id).config_name == csv_entity_1.config_name
-        assert dm.get(csv_entity_1.id).scope == csv_entity_1.scope
-        assert dm.get(csv_entity_1.id).parent_id is None
-        assert dm.get(csv_entity_1.id).properties == csv_entity_1.properties
+        csv_1 = dm._create_and_save_data_source(csv_ds_config, None)
+        fetched_ds = dm.get(csv_1.id)
+
+        assert dm.get(csv_1.id).id == csv_1.id
+        assert dm.get(csv_1.id).config_name == csv_1.config_name
+        assert dm.get(csv_1.id).scope == csv_1.scope
+        assert dm.get(csv_1.id).parent_id is None
+        assert dm.get(csv_1.id).properties == csv_1.properties
 
         # Test we can instantiate a EmbeddedDataSource from DataSourceConfig
 
@@ -69,23 +69,24 @@ class TestDataManager:
     def test_create_and_fetch(self, tmpdir):
         dm = DataManager()
         dm.repository.base_path = tmpdir
-        dm.create_data_source_model(
-            "ds_id",
-            "test_data_source",
-            Scope.PIPELINE,
-            "in_memory",
-            None,
-            {"data": "In Memory Data Source"},
+        dm.repository.save(
+            DataSourceModel(
+                "ds_id",
+                "test_data_source",
+                Scope.PIPELINE,
+                "in_memory",
+                None,
+                {"data": "In Memory Data Source"},
+            )
         )
-
-        ds = dm._fetch_data_source_model("ds_id")
+        ds = dm.repository.get("ds_id")
 
         assert isinstance(ds, DataSourceModel)
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()
         with pytest.raises(ModelNotFound):
-            dm.fetch_data_source_model("test_data_source_2")
+            dm.repository.get("test_data_source_2")
 
 
     def test_get_or_create(self):

@@ -5,7 +5,7 @@ import shutil
 from enum import Enum
 from functools import partial
 from os import listdir, makedirs, path
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Iterable
 
 from taipy.exceptions import ModelNotFound
 
@@ -87,3 +87,11 @@ class FileSystemRepository(Generic[ModelType]):
                 model = m
                 break
         return model
+
+    def search_all(self, attribute: str, value: str) -> List[ModelType]:
+        models = []
+        for filename in pathlib.Path(self.directory).glob("*.json"):
+            m = self._build_model(self.__load_json_file(filename))
+            if hasattr(m, attribute) and getattr(m, attribute) == value:
+                models.append(m)
+        return models
