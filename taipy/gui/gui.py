@@ -26,8 +26,8 @@ from .taipyimage import TaipyImage
 from .utils import (
     ISOToDate,
     Singleton,
-    _get_expr_var_name,
     _get_dict_value,
+    _get_expr_var_name,
     _MapDictionary,
     attrsetter,
     dateToISO,
@@ -48,6 +48,7 @@ class Gui(object, metaclass=Singleton):
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
+    __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     _markdown = md_lib.Markdown(
@@ -374,7 +375,7 @@ class Gui(object, metaclass=Singleton):
         # Validate name
         if name is None:
             raise Exception("name is required for add_page function!")
-        if not re.match(r"^[\w\-\/]+$", name):
+        if not Gui.__RE_PAGE_NAME.match(name):
             raise SyntaxError(
                 f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
             )
