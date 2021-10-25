@@ -77,6 +77,7 @@ class Gui(object, metaclass=Singleton):
         self._data_accessors = _DataAccessors()
 
         # Load default config
+        self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
         self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(default_config["app_config"], default_config["style_config"])
@@ -412,6 +413,8 @@ class Gui(object, metaclass=Singleton):
                 raise RuntimeError(f"Path {folder_path} is not a valid directory")
             if folder_name in self._directory_name_of_pages:
                 raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
+            if folder_name in self._reserved_routes:
+                raise Exception(f"Invalid directory. Directory {folder_name} is a reserved route")
             self._directory_name_of_pages.append(folder_name)
             list_of_files = os.listdir(folder_path)
             for file_name in list_of_files:
