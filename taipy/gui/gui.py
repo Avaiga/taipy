@@ -18,7 +18,7 @@ from flask import Blueprint, jsonify, request
 from ._default_config import default_config
 from ._md_ext import *
 from .config import GuiConfig
-from .data.data_accessor import _DataAccessors
+from .data.data_accessor import _DataAccessors, DataAccessor
 from .page import Page, Partial
 from .renderers import PageRenderer
 from .server import Server
@@ -645,5 +645,5 @@ class Gui(object, metaclass=Singleton):
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)
 
-    def register_data_accessor(self, data_accessor_class: t.Callable) -> None:
+    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors.register(data_accessor_class)
