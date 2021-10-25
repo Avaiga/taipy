@@ -76,6 +76,7 @@ class Gui(object, metaclass=Singleton):
         self._data_accessors = _DataAccessors()
 
         # Load default config
+        self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(default_config["app_config"], default_config["style_config"])
         self._values = SimpleNamespace()
@@ -391,7 +392,7 @@ class Gui(object, metaclass=Singleton):
         self._config.pages.append(new_page)
         self._config.routes.append(name)
 
-    def add_pages(self, pages: t.Union[dict[str, PageRenderer], str] = None):
+    def add_pages(self, pages: t.Union[dict[str, PageRenderer], str] = None) -> None:
         if isinstance(pages, dict):
             for k, v in pages.items():
                 if k == "/":
@@ -402,7 +403,13 @@ class Gui(object, metaclass=Singleton):
                 self._root_dir = os.path.dirname(
                     inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
                 )
-            folder_path = os.path.join(self._root_dir, folder_name)
+            folder_path = os.path.join(self._root_dir, folder_name) if not os.path.isabs(folder_name) else folder_name
+            folder_name = os.path.basename(folder_path)
+            if not os.path.isdir(folder_path):
+                raise RuntimeError(f"Path {folder_path} is not a valid directory")
+            if folder_name in self._directory_name_of_pages:
+                raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
+            self._directory_name_of_pages.append(folder_name)
             list_of_files = os.listdir(folder_path)
             for file_name in list_of_files:
                 from .renderers import Html, Markdown
