@@ -10,7 +10,7 @@ from .builder import Builder
 
 class Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
-    # Finds, in the Mardwodn text, control declaration constructs:
+    # Finds, in the Markdown text, control declaration constructs:
     #     <|<some value>|>
     # or
     #     <|<some value>|<control_type>|>

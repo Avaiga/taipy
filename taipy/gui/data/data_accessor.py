@@ -12,27 +12,28 @@ class DataAccessor(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_supported_classes() -> t.Union[t.Callable, t.List[t.Callable], t.Tuple[t.Callable]]:
-        return None
+    def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
+        pass
 
     @abstractmethod
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
-        return value
+        pass
 
     @abstractmethod
     def is_data_access(self, var_name: str, value: t.Any) -> bool:
-        return False
+        pass
 
     @abstractmethod
     def get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
-        return payload
+        pass
 
     @abstractmethod
     def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
-        return {}
+        pass
 
 
 class _DataAccessors(object):
+
     def __init__(self) -> None:
         self.__access_4_type: t.Dict[str, DataAccessor] = {}
 
@@ -58,12 +59,12 @@ class _DataAccessors(object):
             else:
                 raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessAbstract")
         else:
-            raise AttributeError(f"The argument of 'DataAccessRegistry.register' should be a class")
+            raise AttributeError("The argument of 'DataAccessRegistry.register' should be a class")
 
     def __get_instance(self, value: t.Any) -> DataAccessor:
         try:
             return self.__access_4_type[value.__class__]
-        except Exception as e:
+        except Exception:
             warnings.warn(f"Can't find Data Accessor for type {value.__class__}")
 
     def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:

@@ -112,7 +112,7 @@ class Builder:
             self._gui.bind_var(hash_value)
             try:
                 return (attrgetter(hash_value)(self._gui._values), hash_value)
-            except AttributeError as ae:
+            except AttributeError:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
 

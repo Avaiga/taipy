@@ -21,7 +21,7 @@ class PandasDataAccessor(DataAccessor):
     def is_data_access(self, var_name: str, value: t.Any) -> bool:
         return isinstance(value, pd.DataFrame)
 
-    def get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+    def get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:  # noqa: C901
         ret_payload = {}
         if isinstance(value, pd.DataFrame):
             paged = not _get_dict_value(payload, "alldata")

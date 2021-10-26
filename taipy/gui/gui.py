@@ -568,7 +568,7 @@ class Gui(object, metaclass=Singleton):
                     try:
                         var_val[var_name] = attrgetter(var_name)(self._values)
                         var_list.append(var_name)
-                    except AttributeError as ae:
+                    except AttributeError:
                         warnings.warn(f"Variable '{var_name}' is not defined")
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
@@ -584,7 +584,7 @@ class Gui(object, metaclass=Singleton):
         try:
             # evaluate expressions
             expr_evaluated = eval(expr_string if not is_edge_case else expr, {}, var_val)
-        except Exception as e:
+        except Exception:
             warnings.warn(f"Cannot evaluate expression '{expr if is_edge_case else expr_string}'")
             expr_evaluated = None
         # save the expression if it needs to be re-evaluated
