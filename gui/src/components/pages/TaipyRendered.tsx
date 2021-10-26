@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router-dom";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 import { setStyle, ENDPOINT } from "../../utils";
 import { TaipyContext } from "../../context/taipyContext";
@@ -48,12 +48,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
 
     return (
         <>
-            <Helmet>
-                {head &&
-                    head.map((v) => {
-                        return React.createElement(v.tag, v.props, v.content);
-                    })}
-            </Helmet>
+            <Helmet>{head ? head.map((v) => React.createElement(v.tag, v.props, v.content)) : null}</Helmet>
             <JsxParser
                 disableKeyGeneration={true}
                 bindings={state.data}
