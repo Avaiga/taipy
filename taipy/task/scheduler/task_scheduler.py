@@ -10,6 +10,7 @@ from taipy.config import Config
 from taipy.exceptions import JobNotDeletedException, NonExistingJob
 from taipy.task import Task
 
+from ...config.task_scheduler import TaskSchedulerConfig
 from .executor.executor import Executor
 from .job import Job, JobId
 
@@ -19,12 +20,11 @@ class TaskScheduler:
     Create and schedule Jobs from Task and keep their states
     """
 
-    def __init__(self):
+    def __init__(self, task_scheduler_config: TaskSchedulerConfig = Config.task_scheduler_configs.create()):
         self.__JOBS: Dict[JobId, Job] = {}
-        self.jobs_to_run = Queue()
+        self.jobs_to_run: Queue[Job] = Queue()
         self.__executor = Executor(
-            Config.task_scheduler_configs.parallel_execution,
-            Config.task_scheduler_configs.max_number_of_parallel_execution,
+            task_scheduler_config.parallel_execution, task_scheduler_config.max_number_of_parallel_execution
         )
         self.lock = Lock()
 

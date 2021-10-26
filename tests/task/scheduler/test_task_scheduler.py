@@ -6,7 +6,9 @@ from time import sleep
 import pytest
 
 from taipy.config import Config
-from taipy.config.task_scheduler import TaskScheduler as TaskSchedulerConfig
+from taipy.config.task_scheduler import TaskSchedulersRepository
+from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
+from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer as TaskSchedulerConfig
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
@@ -18,7 +20,8 @@ from tests.task.scheduler.lock_data_source import LockDataSource
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
     yield
-    Config.task_scheduler_configs = TaskSchedulerConfig()
+    Config._task_scheduler_serializer = TaskSchedulerSerializer()
+    Config.task_scheduler_configs = TaskSchedulersRepository(Config._task_scheduler_serializer)
 
 
 def multiply(nb1: float, nb2: float):
@@ -96,12 +99,10 @@ def test_delete_job():
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    Config.task_scheduler_configs.parallel_execution = True
-
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    task_scheduler = TaskScheduler()
+    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
     task = _create_task(partial(lock_multiply, lock, parallel_execution=True))
 
     with lock:
@@ -171,11 +172,10 @@ def test_error_during_writing_data_source_don_t_stop_writing_on_other_data_sourc
 
 
 def test_scheduled_task_in_parallel():
-    Config.task_scheduler_configs.parallel_execution = True
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    task_scheduler = TaskScheduler()
+    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
     task = _create_task(partial(lock_multiply, lock), parallel_execution=True)
 
     with lock:
@@ -188,9 +188,7 @@ def test_scheduled_task_in_parallel():
 
 
 def test_scheduled_task_multithreading_multiple_task():
-    Config.task_scheduler_configs.parallel_execution = True
-
-    task_scheduler = TaskScheduler()
+    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -221,10 +219,9 @@ def test_scheduled_task_multithreading_multiple_task():
 
 
 def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    Config.task_scheduler_configs.parallel_execution = True
-    Config.task_scheduler_configs._max_number_of_parallel_execution = 1
-
-    task_scheduler = TaskScheduler()
+    task_scheduler = TaskScheduler(
+        Config.task_scheduler_configs.create(parallel_execution=True, max_number_of_parallel_execution=1)
+    )
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()

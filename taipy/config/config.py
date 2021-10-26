@@ -8,7 +8,8 @@ from .data_source_serializer import DataSourceSerializer
 from .pipeline import PipelinesRepository
 from .scenario import ScenariosRepository
 from .task import TasksRepository
-from .task_scheduler import TaskScheduler
+from .task_scheduler import TaskSchedulersRepository
+from .task_scheduler_serializer import TaskSchedulerSerializer
 from .toml_serializer import TomlSerializer
 
 
@@ -19,11 +20,12 @@ class Config:
     DATA_SOURCE_CONFIGURATION_NODE_NAME = "DATA_SOURCE"
 
     _data_source_serializer = DataSourceSerializer()
+    _task_scheduler_serializer = TaskSchedulerSerializer()
 
-    task_scheduler_configs = TaskScheduler()
+    data_source_configs = DataSourcesRepository(_data_source_serializer)
+    task_scheduler_configs = TaskSchedulersRepository(_task_scheduler_serializer)
     scenario_configs = ScenariosRepository()
     pipeline_configs = PipelinesRepository()
-    data_source_configs = DataSourcesRepository(_data_source_serializer)
     task_configs = TasksRepository()
 
     __serializer = TomlSerializer()
@@ -45,7 +47,7 @@ class Config:
         """
         config = {
             cls.DATA_SOURCE_CONFIGURATION_NODE_NAME: cls._data_source_serializer.export(),
-            cls.TASK_SCHEDULER_CONFIGURATION_NODE_NAME: cls.task_scheduler_configs.export(),
+            cls.TASK_SCHEDULER_CONFIGURATION_NODE_NAME: cls._task_scheduler_serializer.export(),
         }
         cls.__serializer.write(config, filename)
 
@@ -60,7 +62,7 @@ class Config:
         logging.info(f"Loading configuration filename '{filename}'")
         config = cls.__serializer.read(filename)
         cls._data_source_serializer.update(config.get(cls.DATA_SOURCE_CONFIGURATION_NODE_NAME, {}))
-        cls.task_scheduler_configs.update(config.get(cls.TASK_SCHEDULER_CONFIGURATION_NODE_NAME, {}))
+        cls._task_scheduler_serializer.update(config.get(cls.TASK_SCHEDULER_CONFIGURATION_NODE_NAME, {}))
         logging.info(f"Successful loaded configuration filename '{filename}'")
 
 

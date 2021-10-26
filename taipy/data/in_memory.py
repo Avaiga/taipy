@@ -1,23 +1,19 @@
 import json
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 
-in_memory_storage = {}
+in_memory_storage: Dict[str, Any] = {}
 
 
 class InMemoryDataSource(DataSource):
     __TYPE = "in_memory"
     __DEFAULT_DATA_VALUE = "data"
 
-    def __init__(self,
-                 config_name: str,
-                 scope: Scope,
-                 id: Optional[str] = None,
-                 parent_id: Optional[str] = None,
-                 properties=None
-                 ):
+    def __init__(
+        self, config_name: str, scope: Scope, id: Optional[str] = None, parent_id: Optional[str] = None, properties=None
+    ):
         if properties is None:
             properties = {}
         super().__init__(config_name, scope, id, parent_id or None, **properties)

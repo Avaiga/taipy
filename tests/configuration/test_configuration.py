@@ -5,9 +5,11 @@ import tempfile
 import pytest
 
 from taipy.config import Config
+from taipy.config.data_source import DataSourcesRepository
 from taipy.config.data_source_serializer import DataSourceSerializer
 from taipy.config.scenario import ScenariosRepository
-from taipy.config.task_scheduler import TaskScheduler
+from taipy.config.task_scheduler import TaskSchedulersRepository
+from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
 from taipy.exceptions.configuration import LoadingError
 
 
@@ -16,7 +18,9 @@ def reset_configuration_singleton():
     _env = copy.deepcopy(os.environ)
     yield
     Config._data_source_serializer = DataSourceSerializer()
-    Config.task_scheduler_configs = TaskScheduler()
+    Config._task_scheduler_serializer = TaskSchedulerSerializer()
+    Config.data_source_configs = DataSourcesRepository(Config._data_source_serializer)
+    Config.task_scheduler_configs = TaskSchedulersRepository(Config._task_scheduler_serializer)
     Config.scenario_configs = ScenariosRepository()
     os.environ = _env
 
@@ -24,14 +28,18 @@ def reset_configuration_singleton():
 def test_default_configuration():
     tf = NamedTemporaryFile()
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
+    task_scheduler_configs = Config.task_scheduler_configs.create()
+
+    assert task_scheduler_configs.parallel_execution is False
+    assert task_scheduler_configs.max_number_of_parallel_execution is None
 
     # Load an empty file
     Config.load(tf.filename)
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
+    task_scheduler_configs = Config.task_scheduler_configs.create()
+
+    assert task_scheduler_configs.parallel_execution is False
+    assert task_scheduler_configs.max_number_of_parallel_execution is None
 
 
 def test_override_default_configuration():
@@ -43,13 +51,12 @@ parallel_execution = true
 """
     )
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
-
     Config.load(tf.filename)
 
-    assert Config.task_scheduler_configs.parallel_execution is True
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
+    task_scheduler_configs = Config.task_scheduler_configs.create()
+
+    assert task_scheduler_configs.parallel_execution is True
+    assert task_scheduler_configs.max_number_of_parallel_execution is None
 
 
 def test_override_default_configuration_with_multiple_configuration():
@@ -66,17 +73,21 @@ max_number_of_parallel_execution = 10
     """
     )
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
+    task_scheduler_config = Config.task_scheduler_configs.create()
+
+    assert task_scheduler_config.parallel_execution is False
+    assert task_scheduler_config.max_number_of_parallel_execution is None
 
     Config.load(config.filename)
+
+    task_scheduler_config = Config.task_scheduler_configs.create()
 
     assert Config._data_source_serializer["my_datasource"]["has_header"] is True
     assert Config._data_source_serializer["my_datasource"]["path"] == "/data/csv"
     with pytest.raises(KeyError):
         assert Config._data_source_serializer["my_datasource"]["not_defined"]
-    assert Config.task_scheduler_configs.parallel_execution is True
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution == 10
+    assert task_scheduler_config.parallel_execution is True
+    assert task_scheduler_config.max_number_of_parallel_execution == 10
 
 
 def test_node_can_not_appears_twice():
@@ -143,13 +154,12 @@ max_number_of_parallel_execution = 10
     """
     )
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
-
     Config.load(config.filename)
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
+    task_scheduler_configs = Config.task_scheduler_configs.create()
+
+    assert task_scheduler_configs.parallel_execution is False
+    assert task_scheduler_configs.max_number_of_parallel_execution is None
 
 
 def test_load_from_environment_overwrite_load_from_filename():
@@ -167,14 +177,30 @@ max_number_of_parallel_execution = 21
     """
     )
 
-    assert Config.task_scheduler_configs.parallel_execution is False
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution is None
-
     os.environ[Config.ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH] = config_from_environment.filename
     Config.load(config_from_filename.filename)
 
-    assert Config.task_scheduler_configs.parallel_execution is True
-    assert Config.task_scheduler_configs.max_number_of_parallel_execution == 21
+    task_scheduler_configs = Config.task_scheduler_configs.create()
+
+    assert task_scheduler_configs.parallel_execution is True
+    assert task_scheduler_configs.max_number_of_parallel_execution == 21
+
+
+def test_can_not_override_conf_with_code():
+    config_from_filename = NamedTemporaryFile(
+        """
+[TASK]
+parallel_execution = true
+    """
+    )
+    Config.load(config_from_filename.filename)
+
+    task_scheduler_configs = Config.task_scheduler_configs.create(
+        parallel_execution=False, max_number_of_parallel_execution=21
+    )
+
+    assert task_scheduler_configs.parallel_execution is True
+    assert task_scheduler_configs.max_number_of_parallel_execution == 21
 
 
 class NamedTemporaryFile:

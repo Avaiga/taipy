@@ -1,6 +1,6 @@
 import pytest
 
-from taipy.common.alias import ScenarioId, PipelineId
+from taipy.common.alias import PipelineId, ScenarioId
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.data import DataSource, InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from dataclasses_json import dataclass_json
 
@@ -33,5 +33,5 @@ class DataSourceModel:
     config_name: str
     scope: Scope
     type: str
-    parent_id: str
+    parent_id: Optional[str]
     data_source_properties: Dict[str, Any]
