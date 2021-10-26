@@ -3,6 +3,7 @@ import JsxParser from "react-jsx-parser";
 import axios from "axios";
 import type {} from "@mui/lab/themeAugmentation";
 import { ThemeProvider } from "@mui/material/styles";
+import { HelmetProvider } from 'react-helmet-async';
 
 import { setDarkMode, ENDPOINT, setTimeZone } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
@@ -56,13 +57,15 @@ const Router = () => {
 
     return (
         <TaipyContext.Provider value={{ state, dispatch }}>
-            <ThemeProvider theme={state.theme}>
-                <JsxParser
-                    disableKeyGeneration={true}
-                    components={JSXReactRouterComponents as Record<string, ComponentType>}
-                    jsx={JSX}
-                />
-            </ThemeProvider>
+            <HelmetProvider>
+                <ThemeProvider theme={state.theme}>
+                    <JsxParser
+                        disableKeyGeneration={true}
+                        components={JSXReactRouterComponents as Record<string, ComponentType>}
+                        jsx={JSX}
+                    />
+                </ThemeProvider>
+            </HelmetProvider>
         </TaipyContext.Provider>
     );
 };

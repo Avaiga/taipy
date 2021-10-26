@@ -77,7 +77,7 @@ class Builder:
             if hashname:
                 self.__hashes[k] = hashname
         # define a unique key
-        self.set_attribute("key", Builder._get_key(self.expr))
+        self.set_attribute("key", Builder._get_key(self.element_name))
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
