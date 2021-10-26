@@ -13,6 +13,9 @@
 # production
 /build
 
+# docs
+/generateddoc
+
 # misc
 .DS_Store
 .env.local
