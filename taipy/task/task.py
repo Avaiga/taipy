@@ -1,11 +1,10 @@
 import logging
 import uuid
 from collections.abc import Iterable
-from typing import Dict, NewType, Optional
+from typing import Dict, Optional
 
+from taipy.common.alias import TaskId
 from taipy.data.data_source import DataSource
-
-TaskId = NewType("TaskId", str)
 
 
 class Task:
@@ -23,7 +22,7 @@ class Task:
         self.__input = {ds.config_name: ds for ds in input}
         self.__output = {ds.config_name: ds for ds in output or []}
         self.config_name = self.__protect_name(config_name)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, config_name, str(uuid.uuid4())]))
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.function = function
 
     @property

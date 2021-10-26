@@ -4,7 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from taipy.task import Task, TaskId
+from taipy.task import Task
+from taipy.common.alias import TaskId
 from taipy.task.scheduler.job import Job, JobId
 
 

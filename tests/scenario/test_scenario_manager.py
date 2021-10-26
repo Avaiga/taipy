@@ -1,12 +1,13 @@
 import pytest
 
+from taipy.common.alias import ScenarioId, PipelineId
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
-from taipy.data import DataSource, EmbeddedDataSource, Scope
+from taipy.data import DataSource, InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
-from taipy.pipeline import Pipeline, PipelineId
-from taipy.scenario import Scenario, ScenarioId, ScenarioManager
+from taipy.pipeline import Pipeline
+from taipy.scenario import Scenario, ScenarioManager
 from taipy.task import Task, TaskId, TaskScheduler
 
 
@@ -14,8 +15,8 @@ def test_save_and_get_scenario_entity():
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
     task_name = "task"
     task_2 = Task(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
@@ -54,7 +55,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id) == task_2
 
     # We save the first scenario again. We expect nothing to change
     scenario_manager.save(scenario_1)
@@ -65,7 +66,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id) == task_2
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
@@ -79,7 +80,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get_task(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id) == task_2
 
 
 def test_submit():
@@ -182,10 +183,10 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
-    ds_4 = DataSourceConfig("qux", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.SCENARIO, data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_4 = Config.data_source_configs.create("qux", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -196,14 +197,14 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     # ds_1 ---> mult by 4 ---> ds_4
     scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2])
 
-    assert len(data_manager.get_data_sources()) == 0
+    assert len(data_manager.get_all()) == 0
     assert len(task_manager.tasks) == 0
     assert len(pipeline_manager.get_pipelines()) == 0
     assert len(scenario_manager.get_scenarios()) == 0
 
     scenario_entity = scenario_manager.create(scenario)
 
-    assert len(data_manager.get_data_sources()) == 4
+    assert len(data_manager.get_all()) == 5
     assert len(task_manager.tasks) == 3
     assert len(pipeline_manager.get_pipelines()) == 2
     assert len(scenario_manager.get_scenarios()) == 1
@@ -226,10 +227,10 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
-    ds_4 = DataSourceConfig("qux", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -309,9 +310,9 @@ def test_notification():
                 [
                     TaskConfig(
                         "mult by 2",
-                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0),
                     )
                 ],
             )
@@ -349,9 +350,9 @@ def test_notification_subscribe_unsubscribe():
                 [
                     TaskConfig(
                         "mult by 2",
-                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0),
                     )
                 ],
             )
@@ -395,9 +396,9 @@ def test_notification_subscribe_only_on_new_jobs():
                 [
                     TaskConfig(
                         "mult by 2",
-                        [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "embedded", Scope.SCENARIO, data=0),
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0),
                     )
                 ],
             )

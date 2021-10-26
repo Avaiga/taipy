@@ -1,9 +1,7 @@
 from dataclasses import dataclass
-from typing import List, NewType
+from typing import List
 
-from taipy.pipeline import PipelineId
-
-ScenarioId = NewType("ScenarioId", str)
+from taipy.common.alias import PipelineId, ScenarioId
 
 
 @dataclass

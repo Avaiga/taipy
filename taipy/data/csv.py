@@ -25,32 +25,33 @@ class CSVDataSource(DataSource):
     __REQUIRED_PROPERTIES = ["path", "has_header"]
     __TYPE = "csv"
 
-    def __init__(
-        self, config_name: str, scope: Scope, id: Optional[str] = None, properties: Dict = {}
-    ):
+    def __init__(self,
+                 config_name: str,
+                 scope: Scope,
+                 id: Optional[str] = None,
+                 parent_id: Optional[str] = None,
+                 properties: Dict = {}
+                 ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties "
                 f"{', '.join(x for x in missing)} were not informed and are required"
             )
-        super().__init__(
-            config_name,
-            scope,
-            id,
-            path=properties.get("path"),
-            has_header=properties.get("has_header"),
-        )
+        super().__init__(config_name, scope, id, parent_id,
+                         path=properties.get("path"),
+                         has_header=properties.get("has_header"))
 
     @classmethod
     def create(
         cls,
         config_name: str,
         scope: Scope,
+        parent_id: Optional[str],
         path: str,
         has_header: bool = False,
     ) -> DataSource:
         return CSVDataSource(
-            config_name, scope, None, {"path": path, "has_header": has_header}
+            config_name, scope, None, parent_id, {"path": path, "has_header": has_header}
         )
 
     @classmethod

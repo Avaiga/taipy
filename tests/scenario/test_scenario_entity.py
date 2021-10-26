@@ -1,8 +1,9 @@
 from taipy.data import Scope
-from taipy.data import EmbeddedDataSource
-from taipy.pipeline import Pipeline, PipelineId
-from taipy.scenario import Scenario, ScenarioId
-from taipy.task import Task, TaskId
+from taipy.data.in_memory import InMemoryDataSource
+from taipy.pipeline import Pipeline
+from taipy.common.alias import PipelineId, ScenarioId, TaskId
+from taipy.scenario import Scenario
+from taipy.task import Task
 
 
 def test_create_scenario_entity():
@@ -41,10 +42,10 @@ def test_add_property_to_scenario():
 
 
 def test_to_model():
-    input_ds = EmbeddedDataSource(
+    input_ds = InMemoryDataSource(
         "input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"}
     )
-    output = EmbeddedDataSource(
+    output = InMemoryDataSource(
         "output_name", Scope.PIPELINE, "output_id", {"data": ""}
     )
     task = Task("task", [input_ds], print, [output], TaskId("task_id"))

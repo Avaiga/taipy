@@ -2,13 +2,14 @@ from unittest import mock
 
 import pytest
 
+from taipy.common.alias import PipelineId
 from taipy.config import DataSourceConfig, PipelineConfig, TaskConfig
-from taipy.data import EmbeddedDataSource
 from taipy.data.data_source import DataSource
+from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.pipeline import Pipeline, PipelineId
+from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskId, TaskManager
 from taipy.task.scheduler import TaskScheduler
@@ -19,8 +20,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
-    output_2 = EmbeddedDataSource.create("foo", Scope.PIPELINE, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
     task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
@@ -51,7 +52,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id) == task_2
 
     # We save the first pipeline again. We expect nothing to change
     pipeline_manager.save(pipeline_1)
@@ -61,7 +62,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id) == task_2
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
@@ -72,7 +73,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get_task(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id) == task_2
 
 
 def test_submit():
@@ -148,21 +149,21 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
     pipeline = PipelineConfig("by 6", [task_mult_by_2, task_mult_by_3])
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
-    assert len(data_manager.get_data_sources()) == 0
+    assert len(data_manager.get_all()) == 0
     assert len(task_manager.tasks) == 0
 
     pipeline_entity = pipeline_manager.create(pipeline)
 
-    assert len(data_manager.get_data_sources()) == 3
+    assert len(data_manager.get_all()) == 3
     assert len(task_manager.tasks) == 2
     assert len(pipeline_entity.get_sorted_tasks()) == 2
     assert pipeline_entity.foo.get() == 1
@@ -180,9 +181,9 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0)
-    ds_6 = DataSourceConfig("baz", "embedded", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -191,9 +192,9 @@ def test_get_set_data():
 
     pipeline_entity = pipeline_manager.create(pipeline)
 
-    assert pipeline_entity.foo.get() == 1
-    assert pipeline_entity.bar.get() == 0
-    assert pipeline_entity.baz.get() == 0
+    assert pipeline_entity.foo.get() == 1  # Default values
+    assert pipeline_entity.bar.get() == 0  # Default values
+    assert pipeline_entity.baz.get() == 0  # Default values
 
     pipeline_manager.submit(pipeline_entity.id)
     assert pipeline_entity.foo.get() == 1
@@ -227,9 +228,9 @@ def test_subscription():
         [
             TaskConfig(
                 "mult by 2",
-                [DataSourceConfig("foo", "embedded", Scope.PIPELINE, data=1)],
+                [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
                 mult_by_2,
-                DataSourceConfig("bar", "embedded", Scope.PIPELINE, data=0),
+                DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0),
             )
         ],
     )

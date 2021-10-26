@@ -24,12 +24,21 @@ class DataSource:
     """
 
     def __init__(
-        self, config_name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
+        self, config_name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, parent_id: Optional[str] = None, **kwargs
     ):
+        self.parent_id = parent_id
         self.id = id or str(uuid.uuid4())
         self.config_name = self.__protect_name(config_name)
         self.scope = scope
         self.properties = kwargs
+
+    def __eq__(self, other):
+        return self.id == other.id
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return hash(self.id)
 
     @staticmethod
     def __protect_name(config_name: str):

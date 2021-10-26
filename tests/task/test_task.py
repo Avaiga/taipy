@@ -67,8 +67,8 @@ def test_can_not_update_task_output_values(output):
 
 
 def test_can_not_update_task_input_values(input):
-    data_source = DataSourceConfig("data_source", "embedded")
-    task = TaskConfig("name_1", input, print, data_source)
+    data_source = DataSource("data_source")
+    task = TaskConfig("name_1", input, print, [])
 
     task.input.append(data_source)
     assert task.input == input
@@ -79,7 +79,7 @@ def test_can_not_update_task_input_values(input):
 
 def test_create_task_entity():
     path = "my/csv/path"
-    foo_ds = CSVDataSource.create("foo", scope=Scope.PIPELINE, path=path)
+    foo_ds = CSVDataSource.create("foo", Scope.PIPELINE, None, path=path)
     task = Task("namE 1", [foo_ds], print, [])
     assert task.config_name == "name_1"
     assert task.id is not None

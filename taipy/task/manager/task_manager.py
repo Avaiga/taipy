@@ -2,11 +2,11 @@ import itertools
 import logging
 from typing import Dict, Optional
 
-from taipy.config import DataSourceConfig, TaskConfig
-from taipy.data import DataSource
+from taipy.common.alias import TaskId
+from taipy.config import TaskConfig
 from taipy.data.manager import DataManager
 from taipy.exceptions import NonExistingTask
-from taipy.task.task import Task, TaskId
+from taipy.task.task import Task
 
 
 class TaskManager:
@@ -21,21 +21,21 @@ class TaskManager:
         logging.info(f"Task : {task.id} created or updated.")
         self.tasks[task.id] = task
 
-    def create(
-        self, task_config: TaskConfig, data_sources: Optional[Dict[DataSourceConfig, DataSource]] = None
-    ) -> Task:
-        if data_sources is None:
-            data_sources = {
-                ds_config: self.data_manager.get_or_create(ds_config)
-                for ds_config in set(itertools.chain(task_config.input, task_config.output))
-            }
-        inputs = [data_sources[input_config] for input_config in task_config.input]
-        outputs = [data_sources[output_config] for output_config in task_config.output]
-        task = Task(task_config.name, inputs, task_config.function, outputs)
+    def create(self,
+               config: TaskConfig,
+               scenario_id: Optional[str] = None,
+               pipeline_id: Optional[str] = None) -> Task:
+        data_sources = {
+            ds_config: self.data_manager.get_or_create(ds_config, scenario_id, pipeline_id)
+            for ds_config in set(itertools.chain(config.input, config.output))
+        }
+        inputs = [data_sources[input_config] for input_config in config.input]
+        outputs = [data_sources[output_config] for output_config in config.output]
+        task = Task(config.name, inputs, config.function, outputs)
         self.save(task)
         return task
 
-    def get_task(self, task_id: TaskId) -> Task:
+    def get(self, task_id: TaskId) -> Task:
         try:
             return self.tasks[task_id]
         except KeyError:
