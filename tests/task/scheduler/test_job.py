@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from taipy.task import Task
 from taipy.common.alias import TaskId
+from taipy.task import Task
 from taipy.task.scheduler.job import Job, JobId
 
 
@@ -89,16 +89,12 @@ def test_notification_job(job):
 
 
 def test_handle_exception_in_user_function(task_id, job_id):
-    f = Future()
     task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task)
 
-    job.execute(lambda r: _runner(r, f))
+    job.execute(_runner)
     assert job.is_failed()
     assert "Something bad has happened" == str(job.reasons[0])
-
-    with pytest.raises(RuntimeError):
-        f.result()
 
 
 def test_handle_exception_when_writing_datasource(task_id, job_id):
@@ -111,7 +107,7 @@ def test_handle_exception_when_writing_datasource(task_id, job_id):
     job.execute(_runner)
     assert job.is_failed()
     stack_trace = str(job.reasons[0])
-    assert "my_raising_datasource" in stack_trace
+    assert "source" in stack_trace
 
 
 def _error():

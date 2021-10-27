@@ -10,6 +10,7 @@ from taipy.config.task_scheduler import TaskSchedulersRepository
 from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
 from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer as TaskSchedulerConfig
 from taipy.data.in_memory import InMemoryDataSource
+from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
 from taipy.task import JobId, Task
@@ -30,7 +31,7 @@ def multiply(nb1: float, nb2: float):
 
 def lock_multiply(lock, nb1: float, nb2: float):
     with lock:
-        return multiply(nb1, nb2), None
+        return multiply(nb1, nb2)
 
 
 def test_scheduled_task():
@@ -103,7 +104,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
     lock = m.Lock()
 
     task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
-    task = _create_task(partial(lock_multiply, lock, parallel_execution=True))
+    task = _create_task(partial(lock_multiply, lock))
 
     with lock:
         job = task_scheduler.submit(task)
@@ -164,7 +165,7 @@ def test_error_during_writing_data_source_don_t_stop_writing_on_other_data_sourc
     task_scheduler = TaskScheduler()
 
     task = _create_task(lambda nb1, nb2: (42, 21), 2)
-    task.output0.write = None
+    DataManager().delete(task.output0.id)
     task_scheduler.submit(task)
 
     assert task.output0.get() == 0
@@ -176,14 +177,15 @@ def test_scheduled_task_in_parallel():
     lock = m.Lock()
 
     task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
-    task = _create_task(partial(lock_multiply, lock), parallel_execution=True)
+    task = _create_task(partial(lock_multiply, lock))
 
     with lock:
         job = task_scheduler.submit(task)
         assert task.output0.get() == 0
         assert job.is_running()
 
-    task.lock_output.get()
+    # task.lock_output.get()
+    sleep(1)
     assert job.is_completed()
 
 
@@ -194,8 +196,8 @@ def test_scheduled_task_multithreading_multiple_task():
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    task_1 = _create_task(partial(lock_multiply, lock_1), parallel_execution=True)
-    task_2 = _create_task(partial(lock_multiply, lock_2), parallel_execution=True)
+    task_1 = _create_task(partial(lock_multiply, lock_1))
+    task_2 = _create_task(partial(lock_multiply, lock_2))
 
     with lock_1:
         with lock_2:
@@ -207,12 +209,12 @@ def test_scheduled_task_multithreading_multiple_task():
             assert job_1.is_running()
             assert job_2.is_running()
 
-        task_2.lock_output.get()
-        assert task_1.output["output0"].get(None) == 0
+        sleep(1)
+        assert task_1.output["output0"].get() == 42
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    task_1.lock_output.get()
+    sleep(1)
     assert task_2.output["output0"].get(None) == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
@@ -227,8 +229,8 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    task_1 = _create_task(partial(lock_multiply, lock_1), parallel_execution=True)
-    task_2 = _create_task(partial(lock_multiply, lock_2), parallel_execution=True)
+    task_1 = _create_task(partial(lock_multiply, lock_1))
+    task_2 = _create_task(partial(lock_multiply, lock_2))
 
     with lock_1:
         with lock_2:
@@ -240,27 +242,27 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
             assert job_1.is_running()
             assert job_2.is_pending()
 
-        task_2.lock_output.get()
-        assert task_1.output0.get() == 0
+        sleep(1)
+        assert task_1.output0.get() == 42
         assert job_1.is_completed()
         assert job_2.is_running()
 
-    task_1.lock_output.get()
+    sleep(1)
     assert task_2.output0.get() == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
 
 
-def _create_task(function, nb_outputs=1, parallel_execution=False):
+def _create_task(function, nb_outputs=1):
     task_name = str(uuid.uuid4())
     input_ds = [
-        InMemoryDataSource.create("input1", Scope.PIPELINE, None, data=21),
-        InMemoryDataSource.create("input2", Scope.PIPELINE, None, data=2),
+        DataManager().get_or_create(Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, data=21)),
+        DataManager().get_or_create(Config.data_source_configs.create("input2", "in_memory", Scope.PIPELINE, data=2)),
     ]
-    output_ds = [InMemoryDataSource.create(f"output{i}", Scope.PIPELINE, None, data=0) for i in range(nb_outputs)]
-
-    if parallel_execution:
-        output_ds.append(LockDataSource("lock_output"))
+    output_ds = [
+        DataManager().get_or_create(Config.data_source_configs.create(f"output{i}", "pickle", Scope.PIPELINE, data=0))
+        for i in range(nb_outputs)
+    ]
 
     return Task(
         task_name,

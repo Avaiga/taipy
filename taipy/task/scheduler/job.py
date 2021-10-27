@@ -7,6 +7,7 @@ from datetime import datetime
 from functools import partial, singledispatchmethod
 from typing import Any, Callable, Iterable, List, NewType
 
+from taipy.data.manager import DataManager
 from taipy.exceptions.job import DataSourceWritingError
 from taipy.task.scheduler.status import Status
 from taipy.task.task import Task
@@ -113,38 +114,56 @@ class Job:
 
     def execute(self, executor: Callable[[partial], Future]):
         self.running()
-        ft = executor(partial(self.task.function, *[i.get() for i in self.task.input.values()]))
-        ft.add_done_callback(self.__write)
+        ft = executor(
+            partial(
+                self._call_function,
+                [o.id for o in self.task.output.values()],
+                self.task.function,
+                *[i.get() for i in self.task.input.values()],
+            )
+        )
+        ft.add_done_callback(self.__update_status)
 
-    def __write(self, ft: Future):
+    @classmethod
+    def _call_function(cls, outputs, fct, *args):
         try:
-            results = self.__extract_results(ft)
-            self.__write_results_in_output(results)
+            r = fct(*args)
+            return cls.__write(outputs, r)
         except Exception as e:
-            self.__reasons.append(e)
-        finally:
-            self.__update_status()
+            return [e]
 
-    def __extract_results(self, ft: Future) -> List[Any]:
-        results = [ft.result()] if len(self.task.output) == 1 else ft.result()
+    @classmethod
+    def __write(cls, outputs, r):
+        try:
+            results = cls.__extract_results(outputs, r)
+            return cls.__write_results_in_output(outputs, results)
+        except Exception as e:
+            return [e]
 
-        if len(results) != len(self.task.output):
+    @staticmethod
+    def __extract_results(outputs: List[str], ft: Any) -> List[Any]:
+        results: List[Any] = [ft] if len(outputs) == 1 else ft
+
+        if len(results) != len(outputs):
             logging.error("Error, wrong number of result or task output")
             raise DataSourceWritingError("Error, wrong number of result or task output")
 
         return results
 
-    def __write_results_in_output(self, results: List[Any]):
-        for res, output in zip(results, self.task.output.values()):
+    @staticmethod
+    def __write_results_in_output(outputs, results: List[Any]):
+        r = []
+        for res, output in zip(results, outputs):
             try:
-                output.write(res)
+                data_source = DataManager().get(output)
+                data_source.write(res)
             except Exception as e:
-                self.__reasons.append(
-                    DataSourceWritingError(f"Error on writing in datasource {output.config_name}: {e}")
-                )
+                r.append(DataSourceWritingError(f"Error on writing in datasource id {output}: {e}"))
                 logging.error(f"Error on writing output {e}")
+        return r
 
-    def __update_status(self):
+    def __update_status(self, ft: Future):
+        self.__reasons = ft.result()
         if self.__reasons:
             self.failed()
         else:
