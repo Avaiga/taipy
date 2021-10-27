@@ -7,7 +7,7 @@ from taipy.data.scope import Scope
 
 
 class PickleDataSource(DataSource):
-    __TYPE = "embedded"
+    __TYPE = "pickle"
     __PICKLE_FILE_NAME = "file_path"
     __DEFAULT_DATA_VALUE = "data"
 

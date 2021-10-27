@@ -88,7 +88,7 @@ class TestPickleDataSourceEntity:
         ds = PickleDataSource.create("foobar BaZ", Scope.PIPELINE, None, data="Embedded Data Source")
         assert ds.config_name == "foobar_baz"
         assert isinstance(ds, PickleDataSource)
-        assert ds.type() == "embedded"
+        assert ds.type() == "pickle"
         assert ds.id is not None
         assert ds.get() == "Embedded Data Source"
 
