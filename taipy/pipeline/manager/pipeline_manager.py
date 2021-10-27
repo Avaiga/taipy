@@ -7,7 +7,7 @@ import logging
 from typing import Callable, Dict, Iterable, List, Optional
 
 from taipy.common.alias import PipelineId, TaskId
-from taipy.config import Config, PipelineConfig
+from taipy.config import PipelineConfig
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
@@ -28,7 +28,7 @@ class PipelineManager:
 
     def create(self, config: PipelineConfig, scenario_id: Optional[str] = None) -> Pipeline:
         pipeline_id = Pipeline.new_id(config.name)
-        tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks]
+        tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs]
         pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id)
         self.save(pipeline)
         return pipeline

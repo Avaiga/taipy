@@ -6,9 +6,8 @@ from time import sleep
 import pytest
 
 from taipy.config import Config
-from taipy.config.task_scheduler import TaskSchedulersRepository
-from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
-from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer as TaskSchedulerConfig
+from taipy.config.task_scheduler import TaskSchedulerConfigs
+from taipy.config.task_scheduler.task_scheduler_serializer import TaskSchedulerSerializer
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
@@ -21,7 +20,7 @@ from tests.task.scheduler.lock_data_source import LockDataSource
 def reset_configuration_singleton():
     yield
     Config._task_scheduler_serializer = TaskSchedulerSerializer()
-    Config.task_scheduler_configs = TaskSchedulersRepository(Config._task_scheduler_serializer)
+    Config.task_scheduler_configs = TaskSchedulerConfigs(Config._task_scheduler_serializer)
 
 
 def multiply(nb1: float, nb2: float):

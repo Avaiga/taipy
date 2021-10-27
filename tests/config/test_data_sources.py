@@ -1,13 +1,13 @@
 import pytest
 
 from taipy.config import Config
-from taipy.config.data_source import DataSourcesRepository
+from taipy.config.data_source import DataSourceConfigs
 
 
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
     yield
-    Config.data_source_configs = DataSourcesRepository(Config._data_source_serializer)
+    Config.data_source_configs = DataSourceConfigs(Config._data_source_serializer)
 
 
 def test_data_source_creation():

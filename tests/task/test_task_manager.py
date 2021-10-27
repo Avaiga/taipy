@@ -1,14 +1,14 @@
 import pytest
 
+from taipy.common.alias import TaskId
 from taipy.config import DataSourceConfig, TaskConfig
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions.task import NonExistingTask
 from taipy.task import Task
-from taipy.common.alias import TaskId
 from taipy.task.manager.task_manager import TaskManager
 
 
-def test_save_and_get_task_entity():
+def test_save_and_get_task():
 
     task_id_1 = TaskId("id1")
     first_task = Task("name_1", [], print, [], task_id_1)
@@ -53,7 +53,7 @@ def test_save_and_get_task_entity():
     assert task_manager.get(task_id_2) == second_task
 
 
-def test_ensure_conservation_of_order_of_data_sources_on_task_entity_creation():
+def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
     task_manager = TaskManager()
     task_manager.delete_all()
 
@@ -65,13 +65,13 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_entity_creation():
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
-    task = TaskConfig("name_1", input, print, output)
-    task_entity = task_manager.create(task, None)
+    task_config = TaskConfig("name_1", input, print, output)
+    task = task_manager.create(task_config, None)
 
-    assert [i.config_name for i in task_entity.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
-    assert [o.config_name for o in task_entity.output.values()] == [embedded_4.name, embedded_5.name]
+    assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
+    assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
 
-    data_source_entities = {
+    data_sources = {
         embedded_1: InMemoryDataSource(embedded_1.name, Scope.PIPELINE),
         embedded_2: InMemoryDataSource(embedded_2.name, Scope.PIPELINE),
         embedded_3: InMemoryDataSource(embedded_3.name, Scope.PIPELINE),
@@ -79,8 +79,8 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_entity_creation():
         embedded_5: InMemoryDataSource(embedded_5.name, Scope.PIPELINE),
     }
 
-    task = TaskConfig("name_2", input, print, output)
-    task_entity = task_manager.create(task, data_source_entities)
+    task_config = TaskConfig("name_2", input, print, output)
+    task = task_manager.create(task_config, data_sources)
 
-    assert [i.config_name for i in task_entity.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
-    assert [o.config_name for o in task_entity.output.values()] == [embedded_4.name, embedded_5.name]
+    assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
+    assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
