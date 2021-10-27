@@ -1,9 +1,20 @@
 /**
- * Description of table element
+ * Table component supports 3 display modes:
+ * <ul>
+ * <li> paginated where you can choose the page size and page size options (allow_all_rows add an option to show a page with all rows)</li>
+ * <li> unpaginated where all rows and no pages are shown (show_all = True)</li>
+ * <li> auto-loading where the pages are loading on demand depending on teh scrolling</li>
+ * </ul>
  * @element table
  */
 class table extends HTMLElement {
 
+    /**
+     * an id that will be assign the main HTML component
+     * @type {str}
+     */
+     id;
+     
     /**
      * binded to a dataframe
      * @type {binded(any)}
@@ -11,7 +22,7 @@ class table extends HTMLElement {
     value;
 
     /**
-     * binded to a dictionnary that contains the componenet attributes
+     * binded to a dictionnary that contains the component attributes
      * @type {dict[str, any]}
      */
     properties;
@@ -20,7 +31,7 @@ class table extends HTMLElement {
      * css class name that will be associated to the main HTML Element
      * @type {str}
      */
-    class_name = "taipy-table table";
+    class_name = "taipy-table";
 
     /**
      * when table is paginated or auto-loaded, number of rows in each page

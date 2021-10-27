@@ -222,7 +222,7 @@ const Chart = (props: ChartProp) => {
     return (
         <>
             {loading ? <Skeleton key="skeleton" sx={style} /> : null}
-            <div style={divStyle} key="div">
+            <div id={id} style={divStyle} key="div">
                 <Plot
                     data={data}
                     layout={layout}

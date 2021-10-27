@@ -215,7 +215,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     return (
-        <Box sx={boxSx}>
+        <Box sx={boxSx} id={id}>
             <Paper sx={paperSx}>
                 <TableContainer sx={tableContainerSx}>
                     <MuiTable

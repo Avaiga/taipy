@@ -172,103 +172,92 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [value]);
 
     return (
-        <>
-            <Box sx={boxSx}>
-                <Paper sx={paperSx}>
-                    <TableContainer sx={tableContainerSx}>
-                        <Table
-                            sx={tableSx}
-                            aria-labelledby="tableTitle"
-                            size={"medium"}
-                            className={className}
-                            stickyHeader={true}
-                        >
-                            <TableHead>
-                                <TableRow>
-                                    {colsOrder.map((col, idx) => (
-                                        <TableCell
-                                            key={col + idx}
-                                            sortDirection={orderBy === columns[col].dfid && order}
+        <Box id={id} sx={boxSx}>
+            <Paper sx={paperSx}>
+                <TableContainer sx={tableContainerSx}>
+                    <Table
+                        sx={tableSx}
+                        aria-labelledby="tableTitle"
+                        size={"medium"}
+                        className={className}
+                        stickyHeader={true}
+                    >
+                        <TableHead>
+                            <TableRow>
+                                {colsOrder.map((col, idx) => (
+                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
+                                        <TableSortLabel
+                                            active={orderBy === columns[col].dfid}
+                                            direction={orderBy === columns[col].dfid ? order : "asc"}
+                                            onClick={createSortHandler(columns[col].dfid)}
                                         >
-                                            <TableSortLabel
-                                                active={orderBy === columns[col].dfid}
-                                                direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                onClick={createSortHandler(columns[col].dfid)}
-                                            >
-                                                {columns[col].title || columns[col].dfid}
-                                                {orderBy === columns[col].dfid ? (
-                                                    <Box component="span" sx={visuallyHidden}>
-                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
-                                                    </Box>
-                                                ) : null}
-                                            </TableSortLabel>
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows.map((row, index) => {
-                                    const sel = selected.indexOf(index + startIndex);
-                                    if (sel == 0) {
-                                        setTimeout(
-                                            () => selectedRowRef.current?.scrollIntoView({ block: "center" }),
-                                            1
-                                        );
-                                    }
-                                    return (
-                                        <TableRow
-                                            hover
-                                            tabIndex={-1}
-                                            key={"row" + index}
-                                            selected={sel > -1}
-                                            ref={sel == 0 ? selectedRowRef : undefined}
-                                        >
-                                            {colsOrder.map((col, cidx) => (
-                                                <TableCell
-                                                    key={"val" + index + "-" + cidx}
-                                                    {...alignCell(columns[col])}
-                                                >
-                                                    {formatValue(row[col], columns[col])}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    );
-                                })}
-                                {rows.length == 0 &&
-                                    loading &&
-                                    Array.from(Array(30).keys(), (v, idx) => (
-                                        <TableRow hover key={"rowskel" + idx}>
-                                            {colsOrder.map((col, cidx) => (
-                                                <TableCell key={"skel" + cidx}>
-                                                    <Skeleton width="100%" height="3rem" />
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    {!showAll &&
-                        (loading ? (
-                            <Skeleton width="100%" style={loadingStyle}>
-                                <Typography>Loading...</Typography>
-                            </Skeleton>
-                        ) : (
-                            <TablePagination
-                                component="div"
-                                count={rowCount}
-                                page={startIndex / rowsPerPage}
-                                rowsPerPage={rowsPerPage}
-                                showFirstButton={true}
-                                showLastButton={true}
-                                rowsPerPageOptions={pso}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                            />
-                        ))}
-                </Paper>
-            </Box>
-        </>
+                                            {columns[col].title || columns[col].dfid}
+                                            {orderBy === columns[col].dfid ? (
+                                                <Box component="span" sx={visuallyHidden}>
+                                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
+                                                </Box>
+                                            ) : null}
+                                        </TableSortLabel>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows.map((row, index) => {
+                                const sel = selected.indexOf(index + startIndex);
+                                if (sel == 0) {
+                                    setTimeout(() => selectedRowRef.current?.scrollIntoView({ block: "center" }), 1);
+                                }
+                                return (
+                                    <TableRow
+                                        hover
+                                        tabIndex={-1}
+                                        key={"row" + index}
+                                        selected={sel > -1}
+                                        ref={sel == 0 ? selectedRowRef : undefined}
+                                    >
+                                        {colsOrder.map((col, cidx) => (
+                                            <TableCell key={"val" + index + "-" + cidx} {...alignCell(columns[col])}>
+                                                {formatValue(row[col], columns[col])}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                );
+                            })}
+                            {rows.length == 0 &&
+                                loading &&
+                                Array.from(Array(30).keys(), (v, idx) => (
+                                    <TableRow hover key={"rowskel" + idx}>
+                                        {colsOrder.map((col, cidx) => (
+                                            <TableCell key={"skel" + cidx}>
+                                                <Skeleton width="100%" height="3rem" />
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                {!showAll &&
+                    (loading ? (
+                        <Skeleton width="100%" style={loadingStyle}>
+                            <Typography>Loading...</Typography>
+                        </Skeleton>
+                    ) : (
+                        <TablePagination
+                            component="div"
+                            count={rowCount}
+                            page={startIndex / rowsPerPage}
+                            rowsPerPage={rowsPerPage}
+                            showFirstButton={true}
+                            showLastButton={true}
+                            rowsPerPageOptions={pso}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
+                    ))}
+            </Paper>
+        </Box>
     );
 };
 
