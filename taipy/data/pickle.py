@@ -19,6 +19,9 @@ class PickleDataSource(DataSource):
             properties = {}
         super().__init__(config_name, scope, id, parent_id or None, **properties)
         self.__pickle_file_path = self.properties.get(self.__PICKLE_FILE_NAME) or f"{self.id}.p"
+        self._write_default_value_if_not_exist()
+
+    def _write_default_value_if_not_exist(self):
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
