@@ -140,9 +140,9 @@ class Factory:
                 ("id"),
                 ("title"),
                 ("cancel_action"),
-                ("cancel_action_text", AttributeType.string, "Cancel"),
+                ("cancel_label", AttributeType.string, "Cancel"),
                 ("validate_action", AttributeType.string, "validate"),
-                ("validate_action_text", AttributeType.string, "Validate"),
+                ("validate_label", AttributeType.string, "Validate"),
                 ("open", AttributeType.boolean),
             ]
         )

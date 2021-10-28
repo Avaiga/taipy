@@ -10,31 +10,13 @@
  * <code><|{value}|dialog|properties={properties}|partial={myPartial}|></code>
  * @element dialog
  */
-class dialog extends HTMLElement {
-
-    /**
-     * an id that will be assign the main HTML component
-     * @type {str}
-     */
-     id;
+class dialog extends shared {
 
      /**
      * shows the dialog
-     * @type {boolean, default property}
+     * @type {bool, default property}
      */
      open;
-
-    /**
-     * binded to a dictionnary that contains the component attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-dialog";
 
     /**
      * name of a function that will be triggered.<br> parameters of that function are all optional:<ul><li>gui instance</li><li>id</li><li>action</li></ul><br>if cancel_action is empty, the button is not shown
@@ -46,7 +28,7 @@ class dialog extends HTMLElement {
      * text of the cancel button
      * @type {str}
      */
-     cancel_action_text = "Cancel"
+     cancel_label = "Cancel"
 
     /**
      * name of a function that will be triggered.<br> parameters of that function are all optional:<ul><li>gui instance</li><li>id</li><li>action</li></ul>
@@ -58,7 +40,7 @@ class dialog extends HTMLElement {
      * text of the validate button
      * @type {str}
      */
-     validate_action_text = "Validate"
+     validate_label = "Validate"
 
     /**
      * a Partial object that holds the content of the dialog<br>should not be defined if page_id is set

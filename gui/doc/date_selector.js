@@ -10,42 +10,18 @@
  * <code><|{value}|date_selector|properties={properties}|></code>
  * @element date_selector
  */
-class date_selector extends HTMLElement {
-
-    /**
-     * an id that will be assign the main HTML component
-     * @type {str}
-     */
-     id;
+class date_selector extends propagate {
 
      /**
-     * binded to a date
+     * bound to a date
      * @type {datetime, default property}
      */
      date;
-
-    /**
-     * binded to a dictionnary that contains the component attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-date-selector";
 
     /**
      * shows the time part of the date
      * @type {bool}
      */
      with_time = false;
-
-    /**
-     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
-     * @type {bool}
-     */
-     propagate = "App config";
 
 }

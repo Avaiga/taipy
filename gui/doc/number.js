@@ -13,32 +13,9 @@
 class numberCls extends HTMLElement {
 
     /**
-     * an id that will be assign the main HTML component
-     * @type {str}
+     * bound to a value
+     * @type {bound(any), default property}
      */
-     id;
+    value;
 
-     /**
-     * binded to a value
-     * @type {binded(any), default property}
-     */
-     value;
-
-    /**
-     * binded to a dictionnary that contains the component attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-number";
-
-    /**
-     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
-     * @type {bool}
-     */
-     propagate = "App config";
 }

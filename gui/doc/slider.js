@@ -13,44 +13,21 @@
 class slider extends HTMLElement {
 
     /**
-     * an id that will be assign the main HTML component
-     * @type {str}
+     * bound to a value
+     * @type {bound(int|float), default property}
      */
-     id;
-
-     /**
-     * binded to a value
-     * @type {binded(int), default property}
-     */
-     value;
+    value;
 
     /**
-     * binded to a dictionnary that contains the component attributes
-     * @type {dict[str, any]}
+     * minimum value
+     * @type {int|float}
      */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-slider";
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-     min = 1;
+    min = 1;
     
     /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
+     * maximum value
+     * @type {int|float}
      */
     max = 100;
 
-    /**
-     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
-     * @type {bool}
-     */
-    propagate = "App config";
 }

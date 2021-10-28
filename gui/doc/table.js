@@ -15,31 +15,13 @@
  * <code><|{value}|table|properties={properties}|selected={selection}|></code>
  * @element table
  */
-class table extends HTMLElement {
-
-    /**
-     * an id that will be assign the main HTML component
-     * @type {str}
-     */
-     id;
+class table extends shared {
      
     /**
-     * binded to a dataframe
-     * @type {binded(any), default property}
+     * bound to a dataframe
+     * @type {bound(any), default property}
      */
     value;
-
-    /**
-     * binded to a dictionnary that contains the component attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-table";
 
     /**
      * when table is paginated or auto-loaded, number of rows in each page
@@ -51,41 +33,35 @@ class table extends HTMLElement {
      * Allow a page size for all rows
      * @type {bool}
      */
-     allow_all_rows = false;
+    allow_all_rows = false;
 
     /**
      * non paginated table
      * @type {bool}
      */
-     show_all = false;
+    show_all = false;
 
-     /**
+    /**
      * data will be loaded on demand
      * @type {bool}
      */
-     auto_loading = false;
+    auto_loading = false;
 
     /**
      * HTML component width (CSS property)
      * @type {str|int|float}
      */
-     width = "100vw"
+    width = "100vw"
 
     /**
      * HTML component height (CSS property)
      * @type {str|int|float}
      */
-     height = "100vw"
-
-    /**
-     * Should change on binded variables be propagated automatically
-     * @type{bool}
-     */
-    propagate = true;
+    height = "100vw"
 
     /**
      * List of selected indices
-     * @type {binded(list[int]|str)}
+     * @type {bound(list[int]|str)}
      */
     selected;
 

@@ -12,30 +12,12 @@
  * <code><|{value}|status|properties={properties}|></code>
 * @element status
  */
-class status extends HTMLElement {
+class status extends shared {
 
     /**
-     * an id that will be assign the main HTML component
-     * @type {str}
-     */
-     id;
-
-    /**
-     * binded to a value
-     * @type {binded(dict|list[dict]), default property}
+     * bound to a value
+     * @type {bound(dict|list[dict]), default property}
      */
     value;
-
-    /**
-     * binded to a dictionnary that contains the component attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-status";
 
 }

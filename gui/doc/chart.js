@@ -11,30 +11,12 @@
  * <code><|{value}|chart|properties={properties}|selected={selection}|></code>
  * @element chart
  */
-class chart extends HTMLElement {
+class chart extends shared {
     /**
-     * binded to a dataframe
-     * @type {binded(any), default property}
+     * bound to a data object
+     * @type {bound(any), default property}
      */
     value;
-
-    /**
-     * binded to a dictionnary that contains the componenet attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-chart chart";
-
-    /**
-     * component id
-     * @type {str}
-     */
-    id;
 
     /**
      * chart title
@@ -55,14 +37,8 @@ class chart extends HTMLElement {
     height = "100vw";
 
     /**
-     * Should change on binded variables be propagated automatically
-     * @type {bool}
-     */
-    propagate = true;
-
-    /**
      * List of selected indices
-     * @type {binded(list[int]|str)}
+     * @type {bound(list[int]|str)}
      */
     selected;
 
