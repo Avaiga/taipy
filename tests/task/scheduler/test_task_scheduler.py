@@ -9,8 +9,7 @@ from time import sleep
 import pytest
 
 from taipy.config import Config
-from taipy.config.task_scheduler import TaskSchedulerConfigs
-from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
+from taipy.config.task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
