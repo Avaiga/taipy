@@ -17,7 +17,7 @@ class InMemoryDataSource(DataSource):
         if properties is None:
             properties = {}
         super().__init__(config_name, scope, id, parent_id or None, **properties)
-        if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None:
+        if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and self.id not in in_memory_storage:
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
     @classmethod

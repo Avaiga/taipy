@@ -1,4 +1,5 @@
 import json
+import os
 import pickle
 from typing import Any, Optional
 
@@ -11,24 +12,21 @@ class PickleDataSource(DataSource):
     __PICKLE_FILE_NAME = "file_path"
     __DEFAULT_DATA_VALUE = "data"
 
-    def __init__(self,
-                 config_name: str,
-                 scope: Scope,
-                 id: Optional[str] = None,
-                 parent_id: Optional[str] = None,
-                 properties=None
-                 ):
+    def __init__(
+        self, config_name: str, scope: Scope, id: Optional[str] = None, parent_id: Optional[str] = None, properties=None
+    ):
         if properties is None:
             properties = {}
         super().__init__(config_name, scope, id, parent_id or None, **properties)
         self.__pickle_file_path = self.properties.get(self.__PICKLE_FILE_NAME) or f"{self.id}.p"
-        if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None:
+        if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
     @classmethod
     def create(cls, config_name: str, scope: Scope, parent_id: Optional[str], data: Any = None, file_path: str = None):
-        return PickleDataSource(config_name, scope, None, parent_id,
-                                {cls.__DEFAULT_DATA_VALUE: data, cls.__PICKLE_FILE_NAME: file_path})
+        return PickleDataSource(
+            config_name, scope, None, parent_id, {cls.__DEFAULT_DATA_VALUE: data, cls.__PICKLE_FILE_NAME: file_path}
+        )
 
     @classmethod
     def type(cls) -> str:
@@ -60,5 +58,5 @@ class PickleDataSource(DataSource):
             config_name=data_source_dict.get("config_name"),
             scope=Scope[data_source_dict.get("scope")],
             data=data_source_dict.get(PickleDataSource.__DEFAULT_DATA_VALUE),
-            file_path=data_source_dict.get(PickleDataSource.__PICKLE_FILE_NAME)
+            file_path=data_source_dict.get(PickleDataSource.__PICKLE_FILE_NAME),
         )
