@@ -1,32 +1,22 @@
 /**
  * Chart component (based on [plotly.js](https://plotly.com/javascript/))
  * <br>Indexed properties can have a default value (referenced by *property_name*) which would be overridden by the indexed propety ((referenced by *property_name[index]* with index starting at 1))
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|chart|x=Col 1|y=Col 2|></code>
+ * ### Advanced 
+ * <code><|{value}|chart|x=Col 1|selected_color=green|y[1]=Col 2|label[1]=Col 3|y[2]=Col 4|label[2]=Col 5|mode[2]=markers|color[2]=red|type[2]=scatter|xaxis[2]=x2|layout={subplot_layout}|range_change=range_change|width=100%|height=100%|selected={selection}|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|chart|properties={properties}|selected={selection}|></code>
  * @element chart
  */
-class chart extends HTMLElement {
+class chart extends shared {
     /**
-     * binded to a dataframe
-     * @type {binded(any)}
+     * bound to a data object
+     * @type {bound(any), default property}
      */
     value;
-
-    /**
-     * binded to a dictionnary that contains the componenet attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-chart chart";
-
-    /**
-     * component id
-     * @type {str}
-     */
-    id;
 
     /**
      * chart title
@@ -47,14 +37,8 @@ class chart extends HTMLElement {
     height = "100vw";
 
     /**
-     * Should change on binded variables be propagated automatically
-     * @type {bool}
-     */
-    propagate = true;
-
-    /**
      * List of selected indices
-     * @type {binded(list[int]|str)}
+     * @type {bound(list[int]|str)}
      */
     selected;
 

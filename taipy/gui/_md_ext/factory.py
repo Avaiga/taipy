@@ -33,7 +33,7 @@ class Factory:
         .set_default_value()
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
-        .set_attributes([("format")]),
+        .set_attributes([("format"), ("id")]),
         "button": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -55,7 +55,8 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_propagate()
-        .set_className(class_name="taipy-input", config_class="input"),
+        .set_className(class_name="taipy-input", config_class="input")
+        .set_attributes([("id")]),
         "number": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -66,7 +67,8 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-number", config_class="input")
-        .set_propagate(),
+        .set_propagate()
+        .set_attributes([("id")]),
         "date_selector": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="DateSelector",
@@ -76,7 +78,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
-        .set_attributes([("with_time", AttributeType.boolean)])
+        .set_attributes([("with_time", AttributeType.boolean), ("id")])
         .set_propagate(),
         "slider": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -88,7 +90,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-slider", config_class="slider")
-        .set_attributes([("min", AttributeType.string, "1"), ("max", AttributeType.string, "100")])
+        .set_attributes([("min", AttributeType.string, "1"), ("max", AttributeType.string, "100"), ("id")])
         .set_propagate(),
         "selector": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -99,7 +101,7 @@ class Factory:
         .set_className(class_name="taipy-selector", config_class="selector")
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
-        .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean)])
+        .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean), ("id")])
         .set_refresh_on_update()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
@@ -118,6 +120,7 @@ class Factory:
                 ("auto_loading", AttributeType.boolean),
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
+                ("id"),
             ]
         )
         .set_refresh()
@@ -137,9 +140,9 @@ class Factory:
                 ("id"),
                 ("title"),
                 ("cancel_action"),
-                ("cancel_action_text", AttributeType.string, "Cancel"),
+                ("cancel_label", AttributeType.string, "Cancel"),
                 ("validate_action", AttributeType.string, "validate"),
-                ("validate_action_text", AttributeType.string, "Validate"),
+                ("validate_label", AttributeType.string, "Validate"),
                 ("open", AttributeType.boolean),
             ]
         )

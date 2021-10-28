@@ -1,26 +1,27 @@
 /**
- * Description of table element
+ * Table component supports 3 display modes:
+ * <ul>
+ * <li> paginated where you can choose the page size and page size options (allow_all_rows add an option to show a page with all rows)</li>
+ * <li> unpaginated where all rows and no pages are shown (show_all = True)</li>
+ * <li> auto-loading where the pages are loading on demand depending on teh scrolling</li>
+ * </ul>
+ * 
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|table|></code>
+ * ### Advanced 
+ * <code><|{value}|table|page_size=10|page_size_options=10;30;100|columns=Col 1;Col 2;Col 3|date_format=eee dd MMM yyyy|not allow_all_rows|show_all=No|auto_loading=False|width=100vw|height=100vw|selected={selection}|propagate|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|table|properties={properties}|selected={selection}|></code>
  * @element table
  */
-class table extends HTMLElement {
-
+class table extends shared {
+     
     /**
-     * binded to a dataframe
-     * @type {binded(any)}
+     * bound to a dataframe
+     * @type {bound(any), default property}
      */
     value;
-
-    /**
-     * binded to a dictionnary that contains the componenet attributes
-     * @type {dict[str, any]}
-     */
-    properties;
-
-    /**
-     * css class name that will be associated to the main HTML Element
-     * @type {str}
-     */
-    class_name = "taipy-table table";
 
     /**
      * when table is paginated or auto-loaded, number of rows in each page
@@ -32,41 +33,35 @@ class table extends HTMLElement {
      * Allow a page size for all rows
      * @type {bool}
      */
-     allow_all_rows = false;
+    allow_all_rows = false;
 
     /**
      * non paginated table
      * @type {bool}
      */
-     show_all = false;
+    show_all = false;
 
-     /**
+    /**
      * data will be loaded on demand
      * @type {bool}
      */
-     auto_loading = false;
+    auto_loading = false;
 
     /**
      * HTML component width (CSS property)
      * @type {str|int|float}
      */
-     width = "100vw"
+    width = "100vw"
 
     /**
      * HTML component height (CSS property)
      * @type {str|int|float}
      */
-     height = "100vw"
-
-    /**
-     * Should change on binded variables be propagated automatically
-     * @type{bool}
-     */
-    propagate = true;
+    height = "100vw"
 
     /**
      * List of selected indices
-     * @type {binded(list[int]|str)}
+     * @type {bound(list[int]|str)}
      */
     selected;
 

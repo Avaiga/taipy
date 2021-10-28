@@ -16,6 +16,7 @@ import { createRequestUpdateAction, createSendUpdateAction } from "../../context
 
 const boxSx = { width: "100%" };
 const paperSx = { width: "100%", mb: 2 };
+const listSx = { width: "100%", maxWidth: 360, bgcolor: "background.paper" };
 
 interface ItemProps {
     value: string;
@@ -147,12 +148,12 @@ const Selector = (props: SelectorProps) => {
     }, []);
 
     return (
-        <Box sx={boxSx} className={className}>
+        <Box id={id} sx={boxSx} className={className}>
             <Paper sx={paperSx}>
                 {filter && (
                     <TextField margin="dense" placeholder="Search field" value={searchValue} onChange={handleInput} />
                 )}
-                <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
+                <List sx={listSx}>
                     {lovList
                         .filter(
                             (elt) =>

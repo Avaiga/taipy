@@ -54,7 +54,7 @@ const Dialog = (props: DialogProps) => {
     }, [dispatch, id, validateAction]);
 
     return (
-        <MuiDialog onClose={handleClose} open={value === undefined ? defaultValue === "true" : !!value}>
+        <MuiDialog id={id} onClose={handleClose} open={value === undefined ? defaultValue === "true" : !!value}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton
