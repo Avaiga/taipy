@@ -1,6 +1,8 @@
 import re
+import typing as t
 from datetime import datetime
 
+from ..wstype import AttributeType
 from .builder import Builder
 
 
@@ -16,6 +18,8 @@ class Factory:
         "selector": "value",
         "table": "data",
         "dialog": "open",
+        "chart": "data",
+        "status": "value",
     }
 
     CONTROL_BUILDERS = {
@@ -29,7 +33,7 @@ class Factory:
         .set_default_value()
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
-        .set_format(),
+        .set_attributes([("format"), ("id")]),
         "button": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -40,7 +44,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-button", config_class="button")
-        .set_button_attribute(),
+        .set_attributes([("id"), ("on_action", AttributeType.string, "")]),
         "input": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -51,7 +55,8 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_propagate()
-        .set_className(class_name="taipy-input", config_class="input"),
+        .set_className(class_name="taipy-input", config_class="input")
+        .set_attributes([("id")]),
         "number": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -62,7 +67,8 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-number", config_class="input")
-        .set_propagate(),
+        .set_propagate()
+        .set_attributes([("id")]),
         "date_selector": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="DateSelector",
@@ -72,7 +78,7 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
-        .set_withTime()
+        .set_attributes([("with_time", AttributeType.boolean), ("id")])
         .set_propagate(),
         "slider": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -84,22 +90,19 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-slider", config_class="slider")
-        .set_attribute("min", "1")
-        .set_attribute("max", "100")
+        .set_attributes([("min", AttributeType.string, "1"), ("max", AttributeType.string, "100"), ("id")])
         .set_propagate(),
         "selector": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Selector",
             attributes=attrs,
         )
-        .set_default_value()
         .set_expresion_hash()
         .set_className(class_name="taipy-selector", config_class="selector")
-        .get_lov_label_getter()  # need to be called before set_lov
+        .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
-        .set_filter()
-        .set_multiple()
-        .set_refresh_on_update("lov")
+        .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean), ("id")])
+        .set_refresh_on_update()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -109,33 +112,83 @@ class Factory:
         .set_expresion_hash()
         .set_className(class_name="taipy-table", config_class="table")
         .get_dataframe_attributes()
+        .set_attributes(
+            [
+                ("page_size", AttributeType.react, 100),
+                ("allow_all_rows", AttributeType.boolean),
+                ("show_all", AttributeType.boolean),
+                ("auto_loading", AttributeType.boolean),
+                ("width", AttributeType.string_or_number, "100vw"),
+                ("height", AttributeType.string_or_number, "100vh"),
+                ("id"),
+            ]
+        )
         .set_refresh()
-        .set_table_pagesize()
-        .set_table_pagesize_options()
-        .set_allow_all_rows()
-        .set_show_all()
-        .set_auto_loading()
-        .set_show_all(),
+        .set_propagate()
+        .get_list_attribute("selected", AttributeType.number)
+        .set_refresh_on_update()
+        .set_table_pagesize_options(),
         "dialog": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Dialog",
             attributes=attrs,
         )
         .set_expresion_hash()
-        .set_id()
         .set_className(class_name="taipy-dialog", config_class="dialog")
-        .set_title()
+        .set_attributes(
+            [
+                ("id"),
+                ("title"),
+                ("cancel_action"),
+                ("cancel_label", AttributeType.string, "Cancel"),
+                ("validate_action", AttributeType.string, "validate"),
+                ("validate_label", AttributeType.string, "Validate"),
+                ("open", AttributeType.boolean),
+            ]
+        )
         .set_default_value()
-        .set_cancel_action()
-        .set_validate_action()
-        .set_cancel_action_text()
-        .set_validate_action_text()
+        .set_propagate()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
+        "chart": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Chart",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_className(class_name="taipy-chart", config_class="chart")
+        .set_attributes(
+            [
+                ("id"),
+                ("title"),
+                ("width", AttributeType.string_or_number, "100vw"),
+                ("height", AttributeType.string_or_number, "100vh"),
+                ("layout", AttributeType.dict),
+                ("range_change"),
+            ]
+        )
+        .get_chart_config("scatter", "lines+markers")
+        .set_propagate()
+        .set_refresh_on_update()
+        .set_refresh(),
+        "status": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Status",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_default_value()
+        .set_className(class_name="taipy-status", config_class="status")
+        .set_propagate()
+        .set_attributes(
+            [
+                ("id"),
+            ]
+        ),
     }
 
     # TODO: process \" in property value
-    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
+    _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
     def create(control_type: str, all_properties: str) -> str:
@@ -149,5 +202,5 @@ class Factory:
             return f"<|INVALID SYNTAX - Control is '{control_type}'|>"
 
     @staticmethod
-    def get_default_property_name(control_name: str) -> str:
+    def get_default_property_name(control_name: str) -> t.Optional[str]:
         return Factory.CONTROL_DEFAULT_PROP_NAME.get(control_name)

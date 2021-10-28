@@ -30,9 +30,10 @@ class _MapDictionary(object):
         return value
 
     def __setitem__(self, key, value):
-        self._dict.__setitem__(key, value)
         if self._update_var:
             self._update_var(key, value)
+        else:
+            self._dict.__setitem__(key, value)
 
     def __delitem__(self, key):
         self._dict.__delitem__(key)

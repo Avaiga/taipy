@@ -1,5 +1,5 @@
-[DATA_MANAGER.default]
+[DATA_SOURCE.default]
 has_header = false
 
-[DATA_MANAGER.foo]
+[DATA_SOURCE.foo]
 path = "path_from_config_file"

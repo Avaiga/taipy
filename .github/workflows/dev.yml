@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
         run: |
-          pipenv install --deploy --dev
+          pipenv install --deploy --dev --python 3.9
       - id: code-quality
         if: matrix.os == 'ubuntu-latest'
         uses: ricardochaves/python-lint@v1.4.0

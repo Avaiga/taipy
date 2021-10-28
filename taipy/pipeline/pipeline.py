@@ -1,6 +1,6 @@
 """ Generic pipeline.
 More specific pipelines such as optimization pipeline, data preparation pipeline,
-ML training pipeline, etc. should implement this generic pipeline entity
+ML training pipeline, etc. could implement this generic pipeline
 """
 import logging
 import uuid
@@ -10,40 +10,45 @@ from typing import Dict, List
 import networkx as nx
 
 from taipy.data import DataSource
-from taipy.pipeline.pipeline_model import Dag, PipelineId, PipelineModel
+from taipy.pipeline.pipeline_model import PipelineModel
+from taipy.common.alias import PipelineId, Dag
 from taipy.task.task import Task
 
 
 class Pipeline:
     __ID_PREFIX = "PIPELINE"
-    __ID_SEPARATOR = "_"
+    __SEPARATOR = "_"
 
     def __init__(
         self,
-        name: str,
+        config_name: str,
         properties: Dict[str, str],
-        task_entities: List[Task],
+        tasks: List[Task],
         pipeline_id: PipelineId = None,
     ):
-        self.name = self.__protect_name(name)
-        self.id: PipelineId = pipeline_id or PipelineId(
-            self.__ID_SEPARATOR.join([self.__ID_PREFIX, name, str(uuid.uuid4())])
-        )
+        self.config_name = self.__protect_name(config_name)
+        self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
         self.properties = properties
-        self.task_entities = {task.name: task for task in task_entities}
+        self.tasks = {task.config_name: task for task in tasks}
         self.is_consistent = self.__is_consistent()
 
     @staticmethod
     def __protect_name(name):
         return name.strip().lower().replace(' ', '_')
 
+    @staticmethod
+    def new_id(config_name: str) -> PipelineId:
+        return PipelineId(
+            Pipeline.__SEPARATOR.join([Pipeline.__ID_PREFIX, Pipeline.__protect_name(config_name), str(uuid.uuid4())])
+        )
+
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
-        if protected_attribute_name in self.task_entities:
-            return self.task_entities[protected_attribute_name]
-        for task in self.task_entities.values():
+        if protected_attribute_name in self.tasks:
+            return self.tasks[protected_attribute_name]
+        for task in self.tasks.values():
             if protected_attribute_name in task.input:
                 return task.input[protected_attribute_name]
             if protected_attribute_name in task.output:
@@ -67,7 +72,7 @@ class Pipeline:
 
     def __build_dag(self):
         graph = nx.DiGraph()
-        for task in self.task_entities.values():
+        for task in self.tasks.values():
             for predecessor in task.input.values():
                 graph.add_edges_from([(predecessor, task)])
             for successor in task.output.values():
@@ -77,20 +82,20 @@ class Pipeline:
     def to_model(self) -> PipelineModel:
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(lambda: [])
-        for task in self.task_entities.values():
+        for task in self.tasks.values():
             for predecessor in task.input.values():
                 source_task_edges[predecessor.id].append(str(task.id))
             for successor in task.output.values():
                 task_source_edges[str(task.id)].append(successor.id)
         return PipelineModel(
             self.id,
-            self.name,
+            self.config_name,
             self.properties,
             Dag(source_task_edges),
             Dag(task_source_edges),
         )
 
-    def get_sorted_task_entities(self) -> List[List[Task]]:
+    def get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
         return list(
             nodes

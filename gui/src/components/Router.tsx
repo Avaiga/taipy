@@ -3,6 +3,7 @@ import JsxParser from "react-jsx-parser";
 import axios from "axios";
 import type {} from "@mui/lab/themeAugmentation";
 import { ThemeProvider } from "@mui/material/styles";
+import { HelmetProvider } from 'react-helmet-async';
 
 import { setDarkMode, ENDPOINT, setTimeZone } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
@@ -14,6 +15,13 @@ import {
     taipyReducer,
 } from "../context/taipyReducers";
 import { JSXReactRouterComponents } from "./Taipy";
+
+interface AxiosRouter {
+    router: string;
+    darkMode: boolean;
+    timeZone: string;
+    locations: Record<string, string>;
+}
 
 const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
@@ -27,7 +35,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get(`${ENDPOINT}/initialize/`)
+            .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
             .then((result) => {
                 setJSX(result.data.router);
                 setDarkMode(result.data.darkMode);
@@ -49,15 +57,15 @@ const Router = () => {
 
     return (
         <TaipyContext.Provider value={{ state, dispatch }}>
-            <ThemeProvider theme={state.theme}>
-                <JsxParser
-                    disableKeyGeneration={true}
-                    components={
-                        JSXReactRouterComponents as Record<string, ComponentType>
-                    }
-                    jsx={JSX}
-                />
-            </ThemeProvider>
+            <HelmetProvider>
+                <ThemeProvider theme={state.theme}>
+                    <JsxParser
+                        disableKeyGeneration={true}
+                        components={JSXReactRouterComponents as Record<string, ComponentType>}
+                        jsx={JSX}
+                    />
+                </ThemeProvider>
+            </HelmetProvider>
         </TaipyContext.Provider>
     );
 };

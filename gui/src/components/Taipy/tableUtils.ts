@@ -1,7 +1,7 @@
 import { TableCellProps } from "@mui/material/TableCell";
 
-import { getDateTimeString } from "../../utils/index";
-import { TaipyBaseProps } from "./utils";
+import { getDateTimeString, getNumberString } from "../../utils/index";
+import { TaipyBaseProps, TaipyMultiSelect } from "./utils";
 
 export interface ColumnDesc {
     dfid: string;
@@ -27,9 +27,15 @@ export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
 export const defaultDateFormat = "yyyy/MM/dd";
 
 export const formatValue = (val: any, col: any) => {
+    if (val === null || val === undefined) {
+        return "";
+    }
     switch (col.type) {
         case "datetime64[ns]":
             return getDateTimeString(val, col.format || defaultDateFormat);
+        case "int64":
+        case "float64":
+            return getNumberString(val, col.format);
         default:
             return val;
     }
@@ -45,22 +51,25 @@ export const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-export interface TaipyTableProps extends TaipyBaseProps {
+export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelect {
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     value: Record<string, Record<string, any>>;
     columns: string;
     refresh: boolean;
+    height: string;
 }
+
+export type PageSizeOptionsType = (
+    | number
+    | {
+          value: number;
+          label: string;
+      }
+)[];
 
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
     pageSize?: number;
-    pageSizeOptions: (
-        | number
-        | {
-              value: number;
-              label: string;
-          }
-    )[];
+    pageSizeOptions: string;
     allowAllRows: boolean;
     showAll: boolean;
 }
@@ -68,4 +77,3 @@ export interface TaipyPaginatedTableProps extends TaipyTableProps {
 export const boxSx = { width: "100%" };
 export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 750 };
-export const tcSx = { maxHeight: "80vh" };

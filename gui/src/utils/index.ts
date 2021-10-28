@@ -1,4 +1,4 @@
-import { utcToZonedTime, format, getTimezoneOffset } from "date-fns-tz"
+import { utcToZonedTime, format, getTimezoneOffset } from "date-fns-tz";
 import { sprintf } from "sprintf-js";
 
 // set global style the traditonal way
@@ -16,26 +16,31 @@ export const setDarkMode = (isDarkMode: boolean): void => {
 };
 
 export const setTimeZone = (timeZone: string): void => {
-    if(!timeZone || timeZone === "client") {
-        return localStorage.setItem("timeZone", TIMEZONE_CLIENT)
+    if (!timeZone || timeZone === "client") {
+        return localStorage.setItem("timeZone", TIMEZONE_CLIENT);
     }
-    localStorage.setItem("timeZone", timeZone)
-}
+    localStorage.setItem("timeZone", timeZone);
+};
 
 export const setDateTimeFormat = (datetimeformat: string): void => {
-    localStorage.setItem("datetimeformat", datetimeformat)
-}
+    localStorage.setItem("datetimeformat", datetimeformat);
+};
 
 export const getTimeZone = (): string => localStorage.getItem("timeZone") || TIMEZONE_CLIENT;
 
 // return client server timeZone offset in minutes
-export const getClientServerTimeZoneOffset = (): number => (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(getTimeZone())) / 60000;
+export const getClientServerTimeZoneOffset = (): number =>
+    (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(getTimeZone())) / 60000;
 
 export const getDateTimeFormat = (): string => localStorage.getItem("datetimeformat") || DEFAULT_DATETIME_FORMAT;
 
 export const getDateTime = (value: string): Date => utcToZonedTime(value, getTimeZone());
 
-export const getDateTimeString = (value: string, datetimeformat: string): string => format(getDateTime(value), datetimeformat,  { timeZone: getTimeZone()})
+export const getDateTimeString = (value: string, datetimeformat: string): string =>
+    format(getDateTime(value), datetimeformat, { timeZone: getTimeZone() });
+
+export const getNumberString = (value: number, numberformat: string): string =>
+    numberformat ? sprintf(numberformat, value) : value.toLocaleString();
 
 export const formatWSValue = (value: string | number, dataType?: string, dataFormat?: string): string => {
     dataType = dataType || typeof value;
@@ -55,16 +60,26 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
                 value = parseInt(value, 10);
             }
             if (dataFormat) {
-                return sprintf(dataFormat, value);
+                return getNumberString(value, dataFormat);
             }
             return value.toLocaleString();
     }
     return value.toString();
 };
 
+export const getInitials = (value: string, max = 2): string =>
+    (value || "")
+        .split(" ", max)
+        .map((word) => (word.length ? word.charAt(0) : ""))
+        .join("")
+        .toUpperCase();
+
 /* eslint @typescript-eslint/no-explicit-any: "off", curly: "error" */
-export const ENDPOINT = (!process.env.NODE_ENV || process.env.NODE_ENV === "development") ? process.env.REACT_APP_BACKEND_FLASK_URL : (window as any).flask_url;
+export const ENDPOINT =
+    !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+        ? process.env.REACT_APP_BACKEND_FLASK_URL
+        : (window as any).flask_url;
 
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-export const DEFAULT_DATETIME_FORMAT = 'yyyy-MM-dd HH:mm:ss zzz';
+export const DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss zzz";

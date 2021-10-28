@@ -1,8 +1,8 @@
-import pandas as pd
+import typing as t
 
 
-def get_date_col_str_name(df: pd.DataFrame, col: str):
-    sufix = "_str"
-    while col + sufix in df.columns:
-        sufix = sufix + "_"
-    return col + sufix
+def _get_date_col_str_name(columns: t.List[str], col: str) -> str:
+    suffix = "_str"
+    while col + suffix in columns:
+        suffix += "_"
+    return col + suffix

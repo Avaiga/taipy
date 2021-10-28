@@ -1,1 +1,1 @@
-from .future import FutureExecutor
+from .synchronous import Synchronous

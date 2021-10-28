@@ -18,5 +18,7 @@ default_config = {
         "table": "",
         "selector": "",
         "dialog": "",
+        "chart": "",
+        "status": "",
     },
 }

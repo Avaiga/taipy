@@ -1,8 +1,6 @@
 from dataclasses import dataclass
-from typing import Dict, List, NewType
 
-Dag = NewType("Dag", Dict[str, List[str]])
-PipelineId = NewType("PipelineId", str)
+from taipy.common.alias import PipelineId, Dag
 
 
 @dataclass

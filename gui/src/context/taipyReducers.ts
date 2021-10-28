@@ -9,7 +9,7 @@ enum Types {
     MultipleUpdate = "MULTIPLE_UPDATE",
     SendUpdate = "SEND_UPDATE_ACTION",
     Action = "SEND_ACTION_ACTION",
-    RequestTableUpdate = "REQUEST_TABLE_UPDATE",
+    RequestDataUpdate = "REQUEST_DATA_UPDATE",
     RequestUpdate = "REQUEST_UPDATE",
     SetLocations = "SET_LOCATIONS",
 }
@@ -117,8 +117,8 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.Action:
             sendWsMessage(state.socket, "A", action.name, action.payload.value);
             break;
-        case Types.RequestTableUpdate:
-            sendWsMessage(state.socket, "T", action.name, action.payload);
+        case Types.RequestDataUpdate:
+            sendWsMessage(state.socket, "DU", action.name, action.payload);
             break;
         case Types.RequestUpdate:
             sendWsMessage(state.socket, "RU", action.name, action.payload);
@@ -151,24 +151,64 @@ export const createSendActionNameAction = (name: string, value: unknown): TaipyA
     payload: { value: value },
 });
 
+export const createRequestChartUpdateAction = (
+    name: string,
+    id: string,
+    columns: string[],
+): TaipyAction => ({
+    type: Types.RequestDataUpdate,
+    name: name,
+    payload: {
+        id: id,
+        columns: columns,
+        alldata: true,
+    },
+});
+
 export const createRequestTableUpdateAction = (
     name: string,
     id: string,
+    columns: string[],
     pageKey: string,
     start?: number,
     end?: number,
     orderBy?: string,
     sort?: string
 ): TaipyAction => ({
-    type: Types.RequestTableUpdate,
+    type: Types.RequestDataUpdate,
     name: name,
     payload: {
         id: id,
+        columns: columns,
         pagekey: pageKey,
         start: start,
         end: end,
         orderby: orderBy,
         sort: sort,
+    },
+});
+
+export const createRequestInfiniteTableUpdateAction = (
+    name: string,
+    id: string,
+    columns: string[],
+    pageKey: string,
+    start?: number,
+    end?: number,
+    orderBy?: string,
+    sort?: string
+): TaipyAction => ({
+    type: Types.RequestDataUpdate,
+    name: name,
+    payload: {
+        id: id,
+        pagekey: pageKey,
+        infinite: true,
+        start: start,
+        end: end,
+        orderby: orderBy,
+        sort: sort,
+        columns: columns,
     },
 });
 
@@ -181,56 +221,13 @@ export const createRequestUpdateAction = (id: string, names: string[]): TaipyAct
     },
 });
 
-export const createRequestSelectorUpdateAction = (
-    name: string,
-    id: string,
-    pageKey: string,
-    start?: number,
-    end?: number,
-    orderBy?: string,
-    sort?: string
-): TaipyAction => ({
-    type: Types.RequestTableUpdate,
-    name: name,
-    payload: {
-        id: id,
-        pagekey: pageKey,
-        start: start,
-        end: end,
-        orderby: orderBy,
-        sort: sort,
-    },
-});
-
-export const createRequestInfiniteTableUpdateAction = (
-    name: string,
-    id: string,
-    pageKey: string,
-    start?: number,
-    end?: number,
-    orderBy?: string,
-    sort?: string
-): TaipyAction => ({
-    type: Types.RequestTableUpdate,
-    name: name,
-    payload: {
-        id: id,
-        pagekey: pageKey,
-        infinite: true,
-        start: start,
-        end: end,
-        orderby: orderBy,
-        sort: sort,
-    },
-});
-
 export const createSetLocationsAction = (locations: Record<string, string>): TaipyAction => ({
     type: Types.SetLocations,
     name: "locations",
     payload: { value: locations },
 });
 
-type WsMessageType = "A" | "U" | "T" | "MU" | "RU";
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU";
 
 interface WsMessage {
     type: WsMessageType;

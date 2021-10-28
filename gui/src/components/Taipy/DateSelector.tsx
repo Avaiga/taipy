@@ -19,7 +19,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const [value, setValue] = useState(new Date());
     const { dispatch } = useContext(TaipyContext);
 
-    const { className, tp_varname, withTime } = props;
+    const { className, tp_varname, withTime, id } = props;
 
     const handleChange = useCallback(
         (v) => {
@@ -62,7 +62,7 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [props.value]);
 
     return (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <LocalizationProvider id={id} dateAdapter={AdapterDateFns}>
             {withTime ? (
                 <DateTimePicker onChange={handleChange} renderInput={renderInput} value={value} className={className} />
             ) : (

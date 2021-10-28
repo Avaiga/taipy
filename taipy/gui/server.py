@@ -1,13 +1,11 @@
 import os
-import warnings
 import typing as t
+import warnings
 
 import __main__
-from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory, abort
+from flask import Flask, abort, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
-
-from .wstype import WsType
 
 
 class Server(Flask):
@@ -50,56 +48,45 @@ class Server(Flask):
                     app_css="/" + css_file + ".css",
                     title=self._app.title if hasattr(self._app, "title") else "Taipy App",
                 )
-            else:
-                if os.path.isfile(self.static_folder + os.path.sep + path):
-                    return send_from_directory(self.static_folder + os.path.sep, path)
-                # use the path mapping to detect and find resources
-                for k, v in self.__path_mapping.items():
-                    if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
-                        return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
-                if hasattr(__main__, "__file__") and os.path.isfile(
-                    os.path.dirname(__main__.__file__) + os.path.sep + path
-                ):
-                    return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
-                abort(404)
+            if os.path.isfile(self.static_folder + os.path.sep + path):
+                return send_from_directory(self.static_folder + os.path.sep, path)
+            # use the path mapping to detect and find resources
+            for k, v in self.__path_mapping.items():
+                if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
+            if hasattr(__main__, "__file__") and os.path.isfile(
+                os.path.dirname(__main__.__file__) + os.path.sep + path
+            ):
+                return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
+            return ("", 404)
+
+        @self.errorhandler(404)
+        def page_not_found(e):
+            return "{}, {}".format(e.message, e.description)
 
         # Websocket (handle json message)
         @self._ws.on("message")
         def handle_message(message) -> None:
-            try:
-                if "status" in message:
-                    print(message["status"])
-                elif message["type"] == WsType.UPDATE.value:
-                    self._app._update_var(
-                        message["name"],
-                        message["payload"],
-                        message["propagate"] if "propagate" in message else True,
-                    )
-                elif message["type"] == WsType.ACTION.value:
-                    self._app._on_action(message["name"], message["payload"])
-                elif message["type"] == WsType.TABLE_UPDATE.value:
-                    self._app._request_var(message["name"], message["payload"])
-                elif message["type"] == WsType.REQUEST_UPDATE.value:
-                    self._app._request_var_update(message["payload"])
-            except TypeError as te:
-                warnings.warn(f"Decoding Message has failed: {message}\n{te}")
-            except KeyError as ke:
-                warnings.warn(f"Can't access: {message}\n{ke}")
+            if "status" in message:
+                print(message["status"])
+            elif "type" in message.keys():
+                self._app._manage_message(message["type"], message)
 
     # Update to render as JSX
-    def render(self, html_fragment, style):
+    def render(self, html_fragment, style, head):
         template_str = render_template_string(html_fragment)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
         return self._direct_render_json(
             {
                 "jsx": template_str,
-                "style": ((style + os.linesep) if style else ""),
+                "style": (style + os.linesep) if style else "",
+                "head": head or "",
             }
         )
 
     def _direct_render_json(self, data):
         return jsonify(data)
 
-    def runWithWS(self, host=None, port=None, debug=None, load_dotenv=True):
+    def runWithWS(self, host=None, port=None, debug=None):
         self._ws.run(self, host=host, port=port, debug=debug)

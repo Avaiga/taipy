@@ -14,23 +14,24 @@ import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestTableUpdateAction } from "../../context/taipyReducers";
+import { createRequestTableUpdateAction, createRequestUpdateAction } from "../../context/taipyReducers";
 import {
     alignCell,
     boxSx,
     formatValue,
     getsortByIndex,
     Order,
+    PageSizeOptionsType,
     paperSx,
     tableSx,
     TaipyPaginatedTableProps,
-    tcSx,
 } from "./tableUtils";
+import { getUpdateVars } from "./utils";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
 
-const rowsPerPageOptions = [10, 50, 100, 500];
+const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
 const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const {
@@ -38,10 +39,13 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         id,
         tp_varname,
         pageSize = 100,
-        pageSizeOptions = rowsPerPageOptions,
+        pageSizeOptions,
         allowAllRows = false,
         showAll = false,
         refresh = false,
+        height,
+        selected = [],
+        tp_updatevars,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -51,8 +55,29 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [loading, setLoading] = useState(true);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
+    const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
 
-    //    useWhyDidYouUpdate('TaipyTable', props);
+    const [colsOrder, columns] = useMemo(() => {
+        if (props.columns) {
+            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+        }
+        return [[], {}];
+    }, [props.columns]);
+
+    useEffect(() => {
+        const updateVars = getUpdateVars(tp_updatevars);
+        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
+    }, [tp_updatevars, dispatch, id, tp_varname]);
+
+    useEffect(() => {
+        if (selected.length) {
+            if (selected[0] < startIndex || selected[0] > startIndex + rowsPerPage) {
+                setLoading(true);
+                setStartIndex(rowsPerPage * Math.floor(selected[0] / rowsPerPage));
+            }
+        }
+    }, [selected, startIndex, rowsPerPage]);
 
     useEffect(() => {
         if (props.value && props.value[pageKey.current] !== undefined) {
@@ -67,14 +92,24 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}`;
         if (!props.value || props.value[pageKey.current] === undefined || !!refresh) {
             setLoading(true);
+            const cols = colsOrder.map((col) => columns[col].dfid);
             dispatch(
-                createRequestTableUpdateAction(tp_varname, id, pageKey.current, startIndex, endIndex, orderBy, order)
+                createRequestTableUpdateAction(
+                    tp_varname,
+                    id,
+                    cols,
+                    pageKey.current,
+                    startIndex,
+                    endIndex,
+                    orderBy,
+                    order
+                )
             );
         } else {
             setValue(props.value[pageKey.current]);
             setLoading(false);
         }
-    }, [startIndex, refresh, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
+    }, [startIndex, refresh, colsOrder, columns, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -105,19 +140,21 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         setStartIndex(0);
     }, []);
 
-    const [colsOrder, columns] = useMemo(() => {
-        if (props.columns) {
-            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
-        }
-        return [[], {}];
-    }, [props.columns]);
+    const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const pso = useMemo(() => {
-        if (allowAllRows) {
-            return pageSizeOptions.concat([{ value: -1, label: "All" }]);
+        let psOptions = rowsPerPageOptions;
+        if (pageSizeOptions) {
+            try {
+                psOptions = JSON.parse(pageSizeOptions);
+            } catch (e) {
+                console.log("PaginatedTable pageSizeOptions is wrong ", pageSizeOptions, e);
+            }
         }
-        return pageSizeOptions;
+        if (allowAllRows) {
+            return psOptions.concat([{ value: -1, label: "All" }]);
+        }
+        return psOptions;
     }, [pageSizeOptions, allowAllRows]);
 
     /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
@@ -135,91 +172,92 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [value]);
 
     return (
-        <>
-            <Box sx={boxSx}>
-                <Paper sx={paperSx}>
-                    <TableContainer sx={tcSx}>
-                        <Table
-                            sx={tableSx}
-                            aria-labelledby="tableTitle"
-                            size={"medium"}
-                            className={className}
-                            stickyHeader={true}
-                        >
-                            <TableHead>
-                                <TableRow>
-                                    {colsOrder.map((col, idx) => (
-                                        <TableCell
-                                            key={col + idx}
-                                            sortDirection={orderBy === columns[col].dfid && order}
+        <Box id={id} sx={boxSx}>
+            <Paper sx={paperSx}>
+                <TableContainer sx={tableContainerSx}>
+                    <Table
+                        sx={tableSx}
+                        aria-labelledby="tableTitle"
+                        size={"medium"}
+                        className={className}
+                        stickyHeader={true}
+                    >
+                        <TableHead>
+                            <TableRow>
+                                {colsOrder.map((col, idx) => (
+                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
+                                        <TableSortLabel
+                                            active={orderBy === columns[col].dfid}
+                                            direction={orderBy === columns[col].dfid ? order : "asc"}
+                                            onClick={createSortHandler(columns[col].dfid)}
                                         >
-                                            <TableSortLabel
-                                                active={orderBy === columns[col].dfid}
-                                                direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                onClick={createSortHandler(columns[col].dfid)}
-                                            >
-                                                {columns[col].title || columns[col].dfid}
-                                                {orderBy === columns[col].dfid ? (
-                                                    <Box component="span" sx={visuallyHidden}>
-                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
-                                                    </Box>
-                                                ) : null}
-                                            </TableSortLabel>
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows.map((row, index) => {
-                                    const isItemSelected = false;
-                                    return (
-                                        <TableRow hover tabIndex={-1} key={"row" + index} selected={isItemSelected}>
-                                            {colsOrder.map((col, cidx) => (
-                                                <TableCell
-                                                    key={"val" + index + "-" + cidx}
-                                                    {...alignCell(columns[col])}
-                                                >
-                                                    {formatValue(row[col], columns[col])}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    );
-                                })}
-                                {rows.length == 0 &&
-                                    loading &&
-                                    Array.from(Array(30).keys(), (v, idx) => (
-                                        <TableRow hover key={"rowskel" + idx}>
-                                            {colsOrder.map((col, cidx) => (
-                                                <TableCell key={"skel" + cidx}>
-                                                    <Skeleton width="100%" height="3rem" />
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                    {!showAll &&
-                        (loading ? (
-                            <Skeleton width="100%" style={loadingStyle}>
-                                <Typography>Loading...</Typography>
-                            </Skeleton>
-                        ) : (
-                            <TablePagination
-                                component="div"
-                                count={rowCount}
-                                page={startIndex / rowsPerPage}
-                                rowsPerPage={rowsPerPage}
-                                showFirstButton={true}
-                                showLastButton={true}
-                                rowsPerPageOptions={pso}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                            />
-                        ))}
-                </Paper>
-            </Box>
-        </>
+                                            {columns[col].title || columns[col].dfid}
+                                            {orderBy === columns[col].dfid ? (
+                                                <Box component="span" sx={visuallyHidden}>
+                                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
+                                                </Box>
+                                            ) : null}
+                                        </TableSortLabel>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows.map((row, index) => {
+                                const sel = selected.indexOf(index + startIndex);
+                                if (sel == 0) {
+                                    setTimeout(() => selectedRowRef.current?.scrollIntoView({ block: "center" }), 1);
+                                }
+                                return (
+                                    <TableRow
+                                        hover
+                                        tabIndex={-1}
+                                        key={"row" + index}
+                                        selected={sel > -1}
+                                        ref={sel == 0 ? selectedRowRef : undefined}
+                                    >
+                                        {colsOrder.map((col, cidx) => (
+                                            <TableCell key={"val" + index + "-" + cidx} {...alignCell(columns[col])}>
+                                                {formatValue(row[col], columns[col])}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                );
+                            })}
+                            {rows.length == 0 &&
+                                loading &&
+                                Array.from(Array(30).keys(), (v, idx) => (
+                                    <TableRow hover key={"rowskel" + idx}>
+                                        {colsOrder.map((col, cidx) => (
+                                            <TableCell key={"skel" + cidx}>
+                                                <Skeleton width="100%" height="3rem" />
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+                {!showAll &&
+                    (loading ? (
+                        <Skeleton width="100%" style={loadingStyle}>
+                            <Typography>Loading...</Typography>
+                        </Skeleton>
+                    ) : (
+                        <TablePagination
+                            component="div"
+                            count={rowCount}
+                            page={startIndex / rowsPerPage}
+                            rowsPerPage={rowsPerPage}
+                            showFirstButton={true}
+                            showLastButton={true}
+                            rowsPerPageOptions={pso}
+                            onPageChange={handleChangePage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                        />
+                    ))}
+            </Paper>
+        </Box>
     );
 };
 

@@ -7,8 +7,8 @@ import { createSendActionNameAction, createSendUpdateAction } from "../../contex
 import { TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
-    const { className, type, id, tp_varname, actionName } = props;
-    const [value, setValue] = useState(props.defaultvalue);
+    const { className, type, id, tp_varname, tp_onAction } = props;
+    const [value, setValue] = useState(props.defaultValue);
     const { dispatch } = useContext(TaipyContext);
 
     const handleInput = useCallback(
@@ -20,8 +20,8 @@ const Input = (props: TaipyInputProps) => {
     );
 
     const handleClick = useCallback(() => {
-        dispatch(createSendActionNameAction(id, actionName));
-    }, [id, actionName, dispatch]);
+        dispatch(createSendActionNameAction(id, tp_onAction));
+    }, [id, tp_onAction, dispatch]);
 
     useEffect(() => {
         if (props.value !== undefined) {
@@ -31,14 +31,11 @@ const Input = (props: TaipyInputProps) => {
         }
     }, [props.value, value]);
 
-    if (type === "button") {
-        return (
-            <Button id={id} variant="outlined" className={className} onClick={handleClick}>
-                {value}
-            </Button>
-        );
-    }
-    return (
+    return type === "button" ? (
+        <Button id={id} variant="outlined" className={className} onClick={handleClick}>
+            {value}
+        </Button>
+    ) : (
         <TextField
             margin="dense"
             hiddenLabel

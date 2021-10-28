@@ -15,7 +15,7 @@ class DataSource:
     ----------
     id: str
         unique identifier of the data source
-    name: str
+    config_name: str
         name that identifies the data source
     scope: int
         number that refers to the scope of usage of the data source
@@ -24,16 +24,31 @@ class DataSource:
     """
 
     def __init__(
-        self, name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, **kwargs
+        self,
+        config_name,
+        scope: Scope = Scope.PIPELINE,
+        id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        **kwargs,
     ):
+        self.parent_id = parent_id
         self.id = id or str(uuid.uuid4())
-        self.name = self.__protect_name(name)
+        self.config_name = self.__protect_name(config_name)
         self.scope = scope
         self.properties = kwargs
 
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return hash(self.id)
+
     @staticmethod
-    def __protect_name(name):
-        return name.strip().lower().replace(' ', '_')
+    def __protect_name(config_name: str):
+        return config_name.strip().lower().replace(" ", "_")
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
@@ -58,9 +73,3 @@ class DataSource:
     @abstractmethod
     def write(self, data):
         return NotImplemented
-
-    def to_json(self):
-        pass
-
-    def from_json(self):
-        pass

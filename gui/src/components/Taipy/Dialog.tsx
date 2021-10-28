@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext  } from "react";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
@@ -35,8 +35,8 @@ const Dialog = (props: DialogProps) => {
     const {
         id,
         title,
+        defaultValue,
         value,
-        defaultvalue,
         cancelAction,
         validateAction = "ValidateAction",
         pageId,
@@ -54,7 +54,7 @@ const Dialog = (props: DialogProps) => {
     }, [dispatch, id, validateAction]);
 
     return (
-        <MuiDialog onClose={handleClose} open={value === undefined ? !!defaultvalue : !!value}>
+        <MuiDialog id={id} onClose={handleClose} open={value === undefined ? defaultValue === "true" : !!value}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton

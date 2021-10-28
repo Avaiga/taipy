@@ -1,13 +1,16 @@
 import re
+import typing as t
 import warnings
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
+
+from .builder import Builder
 
 
 class Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
-    # Finds, in the Mardwodn text, control declaration constructs:
+    # Finds, in the Markdown text, control declaration constructs:
     #     <|<some value>|>
     # or
     #     <|<some value>|<control_type>|>
@@ -25,6 +28,8 @@ class Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
     # Control in Markdown
     _CONTROL_RE = re.compile(r"<\|(.*?)\|>")
+    # Link in Markdown
+    _LINK_RE = re.compile(r"(\[[^\]]*?\]\([^\)]*?\))")
     # Split properties and control type
     _SPLIT_RE = re.compile(r"(?<!\\\\)\|")
     # Property syntax: '<prop_name>[=<prop_value>]'
@@ -34,17 +39,15 @@ class Preprocessor(MdPreprocessor):
     #       'not', 'dont', 'don't' are equivalent in this context
     #  Note 1: 'not <prop_name>=<prop_value>' is an invalid syntax
     #  Note 2: Space characters after the equal sign are significative
-    _PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*)\s*(?:=(.*))?")
+    _PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?")
 
-    def _make_prop_pair(self, prop_name: str, prop_value: str) -> tuple[str, str]:
+    def _make_prop_pair(self, prop_name: t.Optional[str], prop_value: str) -> tuple[t.Optional[str], str]:
         # Un-escape pipe character in property value
         return (prop_name, prop_value.replace("\\|", "|"))
 
     def run(self, lines: List[str]) -> List[str]:
-        line_count = 0
         new_lines = []
-        for line in lines:
-            line_count += 1
+        for line_count, line in enumerate(lines, start=1):
             new_line = ""
             last_index = 0
             for m in Preprocessor._CONTROL_RE.finditer(line):
@@ -55,10 +58,16 @@ class Preprocessor(MdPreprocessor):
                     new_line += f' {property[0]}="{prop_value}"'
                 new_line += ":tAiPy"
                 last_index = m.end()
-            if last_index == 0:
-                new_lines.append(line)
-            else:
-                new_lines.append(new_line + line[last_index:])
+            new_line = line if last_index == 0 else new_line + line[last_index:]
+            line = new_line
+            new_line = ""
+            last_index = 0
+            for m in Preprocessor._LINK_RE.finditer(line):
+                new_line += line[last_index : m.end()]
+                new_line += "{: key=" + Builder._get_key("link") + "}"
+                last_index = m.end()
+            new_line = line if last_index == 0 else new_line + line[last_index:]
+            new_lines.append(new_line)
         return new_lines
 
     def _process_control(self, m: re.Match, line_count: int) -> Tuple[str, Any]:

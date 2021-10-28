@@ -1,23 +1,17 @@
 """
 Pipeline Manager is responsible for managing the pipelines.
 This is the entry point for operations (such as creating, reading, updating,
-deleting, duplicating, executing) related
- to pipelines.
+deleting, duplicating, executing) related to pipelines.
 """
 import logging
-from typing import Dict, List, Set
+from typing import Callable, Dict, Iterable, List, Optional
 
-from taipy.data import DataSource
-from taipy.data.data_source_config import DataSourceConfig
-from taipy.exceptions import NonExistingTaskEntity
-from taipy.exceptions.pipeline import (
-    NonExistingPipeline,
-    NonExistingPipelineEntity,
-)
-from taipy.pipeline.pipeline_config import PipelineConfig
+from taipy.common.alias import PipelineId, TaskId
+from taipy.config import PipelineConfig
+from taipy.exceptions import NonExistingTask
+from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_model import PipelineId, PipelineModel
-from taipy.task import TaskId
+from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.task.manager.task_manager import TaskManager
 from taipy.task.scheduler.task_scheduler import TaskScheduler
 
@@ -29,81 +23,37 @@ class PipelineManager:
 
     __PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
 
-    __PIPELINES: Dict[str, PipelineConfig] = {}
-
     def delete_all(self):
         self.__PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
-        self.__PIPELINES: Dict[str, PipelineConfig] = {}
 
-    def register_pipeline(self, pipeline: PipelineConfig):
-        [self.task_manager.register_task(task) for task in pipeline.tasks]
-        self.__PIPELINES[pipeline.name] = pipeline
+    def create(self, config: PipelineConfig, scenario_id: Optional[str] = None) -> Pipeline:
+        pipeline_id = Pipeline.new_id(config.name)
+        tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs]
+        pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id)
+        self.save(pipeline)
+        return pipeline
 
-    def get_pipeline(self, name: str) -> PipelineConfig:
-        try:
-            return self.__PIPELINES[name]
-        except KeyError:
-            err = NonExistingPipeline(name)
-            logging.error(err.message)
-            raise err
+    def save(self, pipeline: Pipeline):
+        self.__PIPELINE_MODEL_DB[pipeline.id] = pipeline.to_model()
 
-    def get_pipelines(self) -> List[PipelineConfig]:
-        return [
-            self.get_pipeline(pipeline.name) for pipeline in self.__PIPELINES.values()
-        ]
-
-    def create_pipeline_entity(
-        self,
-        pipeline: PipelineConfig,
-        data_source_entities: Dict[DataSourceConfig, DataSource] = None,
-    ) -> Pipeline:
-        if data_source_entities is None:
-            all_ds: Set[DataSourceConfig] = set()
-            for task in pipeline.tasks:
-                for ds in task.input:
-                    all_ds.add(ds)
-                for ds in task.output:
-                    all_ds.add(ds)
-            data_source_entities = {
-                ds: self.data_manager.create_data_source(ds) for ds in all_ds
-            }
-        task_entities = [
-            self.task_manager.create_task_entity(task, data_source_entities)
-            for task in pipeline.tasks
-        ]
-        pipeline_entity = Pipeline(
-            pipeline.name, pipeline.properties, task_entities
-        )
-        self.save_pipeline_entity(pipeline_entity)
-        return pipeline_entity
-
-    def save_pipeline_entity(self, pipeline_entity: Pipeline):
-        self.__PIPELINE_MODEL_DB[pipeline_entity.id] = pipeline_entity.to_model()
-
-    def get_pipeline_entity(self, pipeline_id: PipelineId) -> Pipeline:
+    def get_pipeline(self, pipeline_id: PipelineId) -> Pipeline:
         try:
             model = self.__PIPELINE_MODEL_DB[pipeline_id]
-            task_entities = [
-                self.task_manager.get_task_entity(TaskId(task_id))
-                for task_id in model.task_source_edges.keys()
-            ]
-            return Pipeline(model.name, model.properties, task_entities, model.id)
-        except NonExistingTaskEntity as err:
+            tasks = [self.task_manager.get(TaskId(task_id)) for task_id in model.task_source_edges.keys()]
+            return Pipeline(model.name, model.properties, tasks, model.id)
+        except NonExistingTask as err:
             logging.error(err.message)
             raise err
         except KeyError:
-            pipeline_err = NonExistingPipelineEntity(pipeline_id)
+            pipeline_err = NonExistingPipeline(pipeline_id)
             logging.error(pipeline_err.message)
             raise pipeline_err
 
-    def get_pipeline_entities(self) -> List[Pipeline]:
-        return [
-            self.get_pipeline_entity(model.id)
-            for model in self.__PIPELINE_MODEL_DB.values()
-        ]
+    def get_pipelines(self) -> Iterable[Pipeline]:
+        return [self.get_pipeline(model.id) for model in self.__PIPELINE_MODEL_DB.values()]
 
-    def submit(self, pipeline_id: PipelineId):
-        pipeline_entity_to_submit = self.get_pipeline_entity(pipeline_id)
-        for tasks in pipeline_entity_to_submit.get_sorted_task_entities():
+    def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
+        pipeline_to_submit = self.get_pipeline(pipeline_id)
+        for tasks in pipeline_to_submit.get_sorted_tasks():
             for task in tasks:
-                self.task_scheduler.submit(task)
+                self.task_scheduler.submit(task, callbacks)
