@@ -114,20 +114,23 @@ class Job:
 
     def execute(self, executor: Callable[[partial], Future]):
         self.running()
+        task_input_ids = self._get_data_source_id(self.task.input.values())
+        task_output_ids = self._get_data_source_id(self.task.output.values())
         ft = executor(
             partial(
                 self._call_function,
-                [o.id for o in self.task.output.values()],
+                task_input_ids,
                 self.task.function,
-                *[i.get() for i in self.task.input.values()],
+                task_output_ids,
             )
         )
         ft.add_done_callback(self.__update_status)
 
     @classmethod
-    def _call_function(cls, outputs, fct, *args):
+    def _call_function(cls, inputs, fct, outputs):
         try:
-            r = fct(*args)
+            inputs = [DataManager().get(i).get() for i in inputs]
+            r = fct(*inputs)
             return cls.__write(outputs, r)
         except Exception as e:
             return [e]
@@ -168,3 +171,7 @@ class Job:
             self.failed()
         else:
             self.completed()
+
+    @staticmethod
+    def _get_data_source_id(data_sources):
+        return [i.id for i in data_sources]

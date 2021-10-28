@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from taipy.common.alias import PipelineId
-from taipy.config import DataSourceConfig, PipelineConfig, TaskConfig
+from taipy.config import Config, PipelineConfig, TaskConfig
 from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
@@ -149,9 +149,9 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0)
-    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -181,13 +181,13 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0)
-    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
 
-    task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
-    task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
-    pipeline = PipelineConfig("by 6", [task_mult_by_2, task_mult_by_3])
+    task_mult_by_2 = Config.task_configs.create("mult by 2", [ds_1], mult_by_2, ds_2)
+    task_mult_by_3 = Config.task_configs.create("mult by 3", [ds_2], mult_by_3, ds_6)
+    pipeline = Config.pipeline_configs.create("by 6", [task_mult_by_2, task_mult_by_3])
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
     pipeline_entity = pipeline_manager.create(pipeline)
@@ -228,9 +228,9 @@ def test_subscription():
         [
             TaskConfig(
                 "mult by 2",
-                [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)],
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
                 mult_by_2,
-                DataSourceConfig("bar", "in_memory", Scope.PIPELINE, data=0),
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
             )
         ],
     )
