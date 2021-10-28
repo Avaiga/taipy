@@ -1,5 +1,13 @@
 /**
  * slider component displays a range input allowing to select an integer value between min and max by sliding a cursor
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|slider|></code>
+ * ### Advanced 
+ * <code><|{value}|slider|min=1|max=100|propagate|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|slider|properties={properties}|></code>
  * @element slider
  */
 class slider extends HTMLElement {
@@ -12,7 +20,7 @@ class slider extends HTMLElement {
 
      /**
      * binded to a value
-     * @type {binded(any)}
+     * @type {binded(int), default property}
      */
      value;
 
@@ -39,4 +47,10 @@ class slider extends HTMLElement {
      * @type {str}
      */
     max = 100;
+
+    /**
+     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
+     * @type {bool}
+     */
+    propagate = "App config";
 }

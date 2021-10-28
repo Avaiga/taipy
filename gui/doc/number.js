@@ -1,5 +1,13 @@
 /**
- * number component displays an input fieldthat handle numbers
+ * number component displays an input field that handle numbers
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|number|></code>
+ * ### Advanced 
+ * <code><|{value}|number|class_name=style_class_name|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|number|properties={properties}|></code>
  * @element number
  */
 class numberCls extends HTMLElement {
@@ -12,7 +20,7 @@ class numberCls extends HTMLElement {
 
      /**
      * binded to a value
-     * @type {binded(any)}
+     * @type {binded(any), default property}
      */
      value;
 
@@ -28,4 +36,9 @@ class numberCls extends HTMLElement {
      */
     class_name = "taipy-number";
 
+    /**
+     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
+     * @type {bool}
+     */
+     propagate = "App config";
 }

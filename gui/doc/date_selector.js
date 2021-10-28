@@ -1,5 +1,13 @@
 /**
- * date_selector component display a formatted date/time selector
+ * date_selector component displays a formatted date/time selector
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|date_selector|></code>
+ * ### Advanced 
+ * <code><|{value}|date_selector|not with_time|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|date_selector|properties={properties}|></code>
  * @element date_selector
  */
 class date_selector extends HTMLElement {
@@ -11,10 +19,10 @@ class date_selector extends HTMLElement {
      id;
 
      /**
-     * binded to a value
-     * @type {str}
+     * binded to a date
+     * @type {datetime, default property}
      */
-     value;
+     date;
 
     /**
      * binded to a dictionnary that contains the component attributes
@@ -34,4 +42,10 @@ class date_selector extends HTMLElement {
      */
      with_time = false;
 
-    }
+    /**
+     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
+     * @type {bool}
+     */
+     propagate = "App config";
+
+}

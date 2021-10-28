@@ -1,5 +1,13 @@
 /**
  * dialog component displays a modal dialog
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|dialog|></code>
+ * ### Advanced 
+ * <code><|dialog|title=Dialog Title|open={value}|page_id=page1|validate_action=validate_action|cancel_action=cancel_action||validate_action_text=Validate|cancel_action_text=Cancel|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|dialog|properties={properties}|partial={myPartial}|></code>
  * @element dialog
  */
 class dialog extends HTMLElement {
@@ -12,7 +20,7 @@ class dialog extends HTMLElement {
 
      /**
      * shows the dialog
-     * @type {str}
+     * @type {boolean, default property}
      */
      open;
 
@@ -29,8 +37,7 @@ class dialog extends HTMLElement {
     class_name = "taipy-dialog";
 
     /**
-     * name of a function that will be triggered.<br> parameters of that function are all optional:
-     * <ul><li>gui instance</li><li>id</li><li>action</li></ul>if cancel_action is empty, the button is not shown
+     * name of a function that will be triggered.<br> parameters of that function are all optional:<ul><li>gui instance</li><li>id</li><li>action</li></ul><br>if cancel_action is empty, the button is not shown
      * @type {str}
      */
      cancel_action = ""
@@ -42,8 +49,7 @@ class dialog extends HTMLElement {
      cancel_action_text = "Cancel"
 
     /**
-     * name of a function that will be triggered.<br> parameters of that function are all optional:
-     * <ul><li>gui instance</li><li>id</li><li>action</li></ul>
+     * name of a function that will be triggered.<br> parameters of that function are all optional:<ul><li>gui instance</li><li>id</li><li>action</li></ul>
      * @type {str}
      */
      validate_action = "validate"

@@ -1,5 +1,13 @@
 /**
  * input component display an input field
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|input|></code>
+ * ### Advanced 
+ * <code><|{value}|input|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|input|properties={properties}|></code>
  * @element input
  */
 class input extends HTMLElement {
@@ -12,7 +20,7 @@ class input extends HTMLElement {
 
      /**
      * binded to a value
-     * @type {str}
+     * @type {binded(any), default property}
      */
      value;
 
@@ -27,5 +35,11 @@ class input extends HTMLElement {
      * @type {str}
      */
     class_name = "taipy-input";
+
+    /**
+     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
+     * @type {bool}
+     */
+     propagate = "App config";
 
 }

@@ -1,5 +1,13 @@
 /**
  * a list component that allows multiple selection and filtering on label<br>text and image can be used
+
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|selector|lov=Item 1;Item 2;Item 3|></code>
+ * ### Advanced 
+ * <code><|{value}|selector|lov={lov}|no filter|not multiple|type=myType|adapter=lambda x: (x.id, x.name)|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|selector|properties={properties}|lov={lov}|></code>
  * @element selector
  */
 class selector extends HTMLElement {
@@ -12,7 +20,7 @@ class selector extends HTMLElement {
 
      /**
      * binded to the selection value
-     * @type {binded(any)}
+     * @type {binded(any), default property}
      */
      value;
 
@@ -29,7 +37,7 @@ class selector extends HTMLElement {
     class_name = "taipy-selector";
 
     /**
-     * css class name that will be associated to the main HTML Element
+     * list of elements
      * @type {str|List[str|TaipyImage|any]}
      */
      lov;
@@ -52,10 +60,15 @@ class selector extends HTMLElement {
      */
      adapter = "lambda x: str(x)";
 
-     /**
-      * needed if the lov List contains a non specific type of data (ex: dict)<br> value and lov varaibales are associated with this type and the adapter<br>
-      * @type {str}
-      */
-     type = "Type(lov-element)";
+    /**
+     * needed if the lov List contains a non specific type of data (ex: dict)<br> value and lov varaibales are associated with this type and the adapter<br>
+     * @type {str}
+     */
+    type = "Type(lov-element)";
 
+    /**
+     * allows the value to be automatically propagated.<br>default value is defined at the app config level 
+     * @type {bool}
+     */
+     propagate = "App config";
     }

@@ -1,6 +1,13 @@
 /**
  * field component is the simplest component. It displays a value as text. (the component name is not mandatory)
- * <pre><|{value}|></pre> is equivalent to <pre><|{value}|field|></pre>
+ * 
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|></code>
+ * ### Advanced 
+ * <code><|{value}|field|format=%.2f|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|field|properties={properties}|></code>
  * @element field
  */
 class field extends HTMLElement {
@@ -12,8 +19,8 @@ class field extends HTMLElement {
      id;
 
     /**
-     * binded to a value
-     * @type {binded(any)}
+     * a value
+     * @type {any, default property}
      */
     value;
 

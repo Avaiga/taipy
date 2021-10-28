@@ -5,6 +5,14 @@
  * <li> unpaginated where all rows and no pages are shown (show_all = True)</li>
  * <li> auto-loading where the pages are loading on demand depending on teh scrolling</li>
  * </ul>
+ * 
+ * ## Usage
+ * ### Simple 
+ * <code><|{value}|table|></code>
+ * ### Advanced 
+ * <code><|{value}|table|page_size=10|page_size_options=10;30;100|columns=Col 1;Col 2;Col 3|date_format=eee dd MMM yyyy|not allow_all_rows|show_all=No|auto_loading=False|width=100vw|height=100vw|selected={selection}|propagate|></code>
+ * <br>or with properties<br>
+ * <code><|{value}|table|properties={properties}|selected={selection}|></code>
  * @element table
  */
 class table extends HTMLElement {
@@ -17,7 +25,7 @@ class table extends HTMLElement {
      
     /**
      * binded to a dataframe
-     * @type {binded(any)}
+     * @type {binded(any), default property}
      */
     value;
 
