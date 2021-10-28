@@ -2,6 +2,7 @@ import glob
 import multiprocessing
 import os
 import uuid
+from datetime import datetime
 from functools import partial
 from time import sleep
 
@@ -195,9 +196,7 @@ def test_scheduled_task_in_parallel():
         assert task.output[f"{task.config_name}-output0"].get() == 0
         assert job.is_running()
 
-    # task.lock_output.get()
-    sleep(1)
-    assert job.is_completed()
+    assert_true_after_10_second_max(lambda: job.is_completed())
 
 
 def test_scheduled_task_multithreading_multiple_task():
@@ -220,14 +219,12 @@ def test_scheduled_task_multithreading_multiple_task():
             assert job_1.is_running()
             assert job_2.is_running()
 
-        sleep(1)
+        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].get() == 42)
         assert task_1.output[f"{task_1.config_name}-output0"].get() == 0
-        assert task_2.output[f"{task_2.config_name}-output0"].get() == 42
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    sleep(1)
-    assert task_1.output[f"{task_1.config_name}-output0"].get(None) == 42
+    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].get(None) == 42)
     assert task_2.output[f"{task_2.config_name}-output0"].get(None) == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
@@ -255,14 +252,12 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
             assert job_1.is_running()
             assert job_2.is_pending()
 
-        sleep(1)
+        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].get() == 42)
         assert task_1.output[f"{task_1.config_name}-output0"].get() == 0
-        assert task_2.output[f"{task_2.config_name}-output0"].get() == 42
         assert job_1.is_completed()
         assert job_2.is_running()
 
-    sleep(1)
-    assert task_1.output[f"{task_1.config_name}-output0"].get(None) == 42
+    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].get(None) == 42)
     assert task_2.output[f"{task_2.config_name}-output0"].get(None) == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
@@ -287,3 +282,12 @@ def _create_task(function, nb_outputs=1):
         function=function,
         output=output_ds,
     )
+
+
+def assert_true_after_10_second_max(assertion):
+    start = datetime.now()
+    while (datetime.now() - start).seconds < 10:
+        sleep(0.1)  # Limit CPU usage
+        if assertion():
+            return
+    assert assertion()
