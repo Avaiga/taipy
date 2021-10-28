@@ -28,18 +28,16 @@ const DateSelector = (props: DateSelectorProps) => {
             const hours = getClientServerTimeZoneOffset() / 60;
             const minutes = getClientServerTimeZoneOffset() % 60;
             const newDate = new Date(v);
+            newDate.setSeconds(0);
+            newDate.setMilliseconds(0);
             if (withTime) {
                 // Parse data with selected time if it is a datetime selector
                 newDate.setHours(newDate.getHours() + hours);
                 newDate.setMinutes(newDate.getMinutes() + minutes);
-                newDate.setSeconds(0);
-                newDate.setMilliseconds(0);
             } else {
                 // Parse data with 00:00 UTC time if it is a date selector
                 newDate.setHours(hours);
                 newDate.setMinutes(minutes);
-                newDate.setSeconds(0);
-                newDate.setMilliseconds(0);
             }
             dispatch(createSendUpdateAction(tp_varname, newDate.toISOString()));
         },
