@@ -41,7 +41,7 @@ const getStatusStrValue = (status: number) => {
     }
 };
 
-const getId = (idx: number) => "status" + idx;
+const getId = (base: string, idx: number) => (base || "status") + idx;
 
 const NO_STATUS = { status: "info", message: "No Status" };
 
@@ -121,14 +121,14 @@ const StatusList = (props: StatusListProps) => {
 
     return (
         <>
-            <Status id="global" value={getGlobalStatus(values)} {...globalProps} />
+            <Status id={props.id} value={getGlobalStatus(values)} {...globalProps} />
             <Popover open={opened} anchorEl={anchorEl} onClose={onOpen} anchorOrigin={ORIGIN}>
                 <Stack direction="column" spacing={1}>
                     {values
                         .filter((val) => !val.hidden)
                         .map((val, idx) => {
                             const closeProp = props.withoutClose ? {} : { onClose: () => onClose(val) };
-                            return <Status key={getId(idx)} id={getId(idx)} value={val} {...closeProp} />;
+                            return <Status key={getId(props.id, idx)} id={getId(props.id, idx)} value={val} {...closeProp} />;
                         })}
                 </Stack>
             </Popover>

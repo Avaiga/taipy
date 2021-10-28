@@ -31,14 +31,11 @@ const Input = (props: TaipyInputProps) => {
         }
     }, [props.value, value]);
 
-    if (type === "button") {
-        return (
-            <Button id={id} variant="outlined" className={className} onClick={handleClick}>
-                {value}
-            </Button>
-        );
-    }
-    return (
+    return type === "button" ? (
+        <Button id={id} variant="outlined" className={className} onClick={handleClick}>
+            {value}
+        </Button>
+    ) : (
         <TextField
             margin="dense"
             hiddenLabel

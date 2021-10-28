@@ -44,7 +44,7 @@ class ScenarioManager:
 
     def create(self, config: ScenarioConfig) -> Scenario:
         scenario_id = Scenario.new_id(config.name)
-        pipelines = [self.pipeline_manager.create(p_config, scenario_id) for p_config in config.pipelines]
+        pipelines = [self.pipeline_manager.create(p_config, scenario_id) for p_config in config.pipelines_configs]
         scenario = Scenario(config.name, pipelines, config.properties, scenario_id)
         self.save(scenario)
         return scenario

@@ -1,5 +1,3 @@
-import json
-import os
 import pickle
 from typing import Any, Optional
 
@@ -43,23 +41,3 @@ class PickleDataSource(DataSource):
 
     def write(self, data):
         pickle.dump(data, open(self.__pickle_file_path, "wb"))
-
-    def to_json(self):
-        return json.dumps(
-            {
-                "config_name": self.config_name,
-                "type": self.__TYPE,
-                "scope": self.scope.name,
-                self.__DEFAULT_DATA_VALUE: self.properties.get(self.__DEFAULT_DATA_VALUE),
-                self.__PICKLE_FILE_NAME: self.__pickle_file_path,
-            }
-        )
-
-    @staticmethod
-    def from_json(data_source_dict):
-        return PickleDataSource.create(
-            config_name=data_source_dict.get("config_name"),
-            scope=Scope[data_source_dict.get("scope")],
-            data=data_source_dict.get(PickleDataSource.__DEFAULT_DATA_VALUE),
-            file_path=data_source_dict.get(PickleDataSource.__PICKLE_FILE_NAME),
-        )

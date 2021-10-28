@@ -25,21 +25,21 @@ class CSVDataSource(DataSource):
     __REQUIRED_PROPERTIES = ["path", "has_header"]
     __TYPE = "csv"
 
-    def __init__(self,
-                 config_name: str,
-                 scope: Scope,
-                 id: Optional[str] = None,
-                 parent_id: Optional[str] = None,
-                 properties: Dict = {}
-                 ):
+    def __init__(
+        self,
+        config_name: str,
+        scope: Scope,
+        id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        properties: Dict = {},
+    ):
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
-                f"The following properties "
-                f"{', '.join(x for x in missing)} were not informed and are required"
+                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
-        super().__init__(config_name, scope, id, parent_id,
-                         path=properties.get("path"),
-                         has_header=properties.get("has_header"))
+        super().__init__(
+            config_name, scope, id, parent_id, path=properties.get("path"), has_header=properties.get("has_header")
+        )
 
     @classmethod
     def create(
@@ -50,9 +50,7 @@ class CSVDataSource(DataSource):
         path: str,
         has_header: bool = False,
     ) -> DataSource:
-        return CSVDataSource(
-            config_name, scope, None, parent_id, {"path": path, "has_header": has_header}
-        )
+        return CSVDataSource(config_name, scope, None, parent_id, {"path": path, "has_header": has_header})
 
     @classmethod
     def type(cls) -> str:
@@ -71,23 +69,3 @@ class CSVDataSource(DataSource):
         else:
             df = pd.DataFrame(data, columns=columns)
         df.to_csv(self.path, index=False)
-
-    def to_json(self):
-        return json.dumps(
-            {
-                "config_name": self.config_name,
-                "type": "csv",
-                "scope": self.scope.name,
-                "path": self.path,
-                "has_header": self.has_header,
-            }
-        )
-
-    @staticmethod
-    def from_json(data_source_dict):
-        return CSVDataSource.create(
-            config_name=data_source_dict.get("config_name"),
-            scope=Scope[data_source_dict.get("scope")],
-            path=data_source_dict.get("path"),
-            has_header=data_source_dict.get("has_header"),
-        )

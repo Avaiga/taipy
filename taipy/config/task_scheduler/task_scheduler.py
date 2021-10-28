@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from taipy.config.interface import ConfigRepository
-from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
+from taipy.config.task_scheduler import TaskSchedulerSerializer
 
 
 @dataclass
@@ -11,7 +11,7 @@ class TaskSchedulerConfig:
     max_number_of_parallel_execution: Optional[int]
 
 
-class TaskSchedulersRepository(ConfigRepository):
+class TaskSchedulerConfigs(ConfigRepository):
     TASK_SCHEDULER_CONFIG_NAME = "task_scheduler_repository"
 
     def __init__(self, config: TaskSchedulerSerializer):

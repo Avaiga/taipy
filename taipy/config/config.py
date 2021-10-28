@@ -3,30 +3,28 @@ __all__ = ["Config"]
 import logging
 import os
 
-from .data_source import DataSourcesRepository
-from .data_source_serializer import DataSourceSerializer
-from .pipeline import PipelinesRepository
-from .scenario import ScenariosRepository
-from .task import TasksRepository
-from .task_scheduler import TaskSchedulersRepository
-from .task_scheduler_serializer import TaskSchedulerSerializer
+from .data_source import DataSourceConfigs, DataSourceSerializer
+from .pipeline import PipelineConfigs
+from .scenario import ScenarioConfigs
+from .task import TaskConfigs
+from .task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
 from .toml_serializer import TomlSerializer
 
 
 class Config:
     ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
 
-    TASK_SCHEDULER_CONFIGURATION_NODE_NAME = "TASK"
-    DATA_SOURCE_CONFIGURATION_NODE_NAME = "DATA_SOURCE"
+    TASK_SCHEDULER_CONFIG_NODE_NAME = "TASK"
+    DATA_SOURCE_CONFIG_NODE_NAME = "DATA_SOURCE"
 
     _data_source_serializer = DataSourceSerializer()
     _task_scheduler_serializer = TaskSchedulerSerializer()
 
-    data_source_configs = DataSourcesRepository(_data_source_serializer)
-    task_scheduler_configs = TaskSchedulersRepository(_task_scheduler_serializer)
-    scenario_configs = ScenariosRepository()
-    pipeline_configs = PipelinesRepository()
-    task_configs = TasksRepository()
+    data_source_configs = DataSourceConfigs(_data_source_serializer)
+    task_scheduler_configs = TaskSchedulerConfigs(_task_scheduler_serializer)
+    scenario_configs = ScenarioConfigs()
+    pipeline_configs = PipelineConfigs()
+    task_configs = TaskConfigs()
 
     __serializer = TomlSerializer()
 
@@ -46,8 +44,8 @@ class Config:
         Note: If the file already exists, it is overwritten
         """
         config = {
-            cls.DATA_SOURCE_CONFIGURATION_NODE_NAME: cls._data_source_serializer.export(),
-            cls.TASK_SCHEDULER_CONFIGURATION_NODE_NAME: cls._task_scheduler_serializer.export(),
+            cls.DATA_SOURCE_CONFIG_NODE_NAME: cls._data_source_serializer.export(),
+            cls.TASK_SCHEDULER_CONFIG_NODE_NAME: cls._task_scheduler_serializer.export(),
         }
         cls.__serializer.write(config, filename)
 
@@ -61,8 +59,8 @@ class Config:
     def __load(cls, filename):
         logging.info(f"Loading configuration filename '{filename}'")
         config = cls.__serializer.read(filename)
-        cls._data_source_serializer.update(config.get(cls.DATA_SOURCE_CONFIGURATION_NODE_NAME, {}))
-        cls._task_scheduler_serializer.update(config.get(cls.TASK_SCHEDULER_CONFIGURATION_NODE_NAME, {}))
+        cls._data_source_serializer.update(config.get(cls.DATA_SOURCE_CONFIG_NODE_NAME, {}))
+        cls._task_scheduler_serializer.update(config.get(cls.TASK_SCHEDULER_CONFIG_NODE_NAME, {}))
         logging.info(f"Successful loaded configuration filename '{filename}'")
 
 

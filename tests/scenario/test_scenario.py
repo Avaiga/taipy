@@ -1,7 +1,7 @@
+from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.data import Scope
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.pipeline import Pipeline
-from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.scenario import Scenario
 from taipy.task import Task
 
@@ -36,25 +36,17 @@ def test_add_property_to_scenario():
 
     scenario_1.properties["new_key"] = "new_value"
 
-    assert scenario_1.properties == {'key': 'value', 'new_key': 'new_value'}
+    assert scenario_1.properties == {"key": "value", "new_key": "new_value"}
     assert scenario_1.key == "value"
     assert scenario_1.new_key == "new_value"
 
 
 def test_to_model():
-    input_ds = InMemoryDataSource(
-        "input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"}
-    )
-    output = InMemoryDataSource(
-        "output_name", Scope.PIPELINE, "output_id", {"data": ""}
-    )
+    input_ds = InMemoryDataSource("input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"})
+    output = InMemoryDataSource("output_name", Scope.PIPELINE, "output_id", {"data": ""})
     task = Task("task", [input_ds], print, [output], TaskId("task_id"))
-    pipeline_entity = Pipeline(
-        "pipeline_name", {"big_pty": "big value"}, [task], PipelineId("pipeline_id")
-    )
-    scenario_entity = Scenario(
-        "scenario_name", [pipeline_entity], {"key": "value"}, ScenarioId("scenario_id")
-    )
+    pipeline_entity = Pipeline("pipeline_name", {"big_pty": "big value"}, [task], PipelineId("pipeline_id"))
+    scenario_entity = Scenario("scenario_name", [pipeline_entity], {"key": "value"}, ScenarioId("scenario_id"))
 
     model = scenario_entity.to_model()
     assert model.id == "scenario_id"

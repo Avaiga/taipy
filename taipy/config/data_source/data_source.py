@@ -1,4 +1,4 @@
-from taipy.config.data_source_serializer import DataSourceSerializer
+from taipy.config.data_source import DataSourceSerializer
 from taipy.config.interface import ConfigRepository
 from taipy.data.scope import Scope
 
@@ -15,7 +15,7 @@ class DataSourceConfig:
         self.properties = kwargs
 
 
-class DataSourcesRepository(ConfigRepository):
+class DataSourceConfigs(ConfigRepository):
     def __init__(self, config: DataSourceSerializer):
         super().__init__()
         self.__config = config

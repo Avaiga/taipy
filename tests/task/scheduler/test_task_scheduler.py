@@ -9,7 +9,7 @@ from time import sleep
 import pytest
 
 from taipy.config import Config
-from taipy.config.task_scheduler import TaskSchedulersRepository
+from taipy.config.task_scheduler import TaskSchedulerConfigs
 from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
@@ -22,7 +22,7 @@ from taipy.task.scheduler import TaskScheduler
 def reset_configuration_singleton():
     yield
     Config._task_scheduler_serializer = TaskSchedulerSerializer()
-    Config.task_scheduler_configs = TaskSchedulersRepository(Config._task_scheduler_serializer)
+    Config.task_scheduler_configs = TaskSchedulerConfigs(Config._task_scheduler_serializer)
 
     for f in glob.glob("*.p"):
         print(f"deleting file {f}")

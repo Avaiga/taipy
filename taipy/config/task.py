@@ -33,7 +33,7 @@ class TaskConfig:
         return list(self.__input)
 
 
-class TasksRepository(ConfigRepository):
+class TaskConfigs(ConfigRepository):
     def create(  # type: ignore
         self,
         name: str,

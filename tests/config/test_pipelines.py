@@ -1,13 +1,13 @@
 import pytest
 
 from taipy.config import Config
-from taipy.config.pipeline import PipelinesRepository
+from taipy.config.pipeline import PipelineConfigs
 
 
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
     yield
-    Config.pipeline_configs = PipelinesRepository()
+    Config.pipeline_configs = PipelineConfigs()
 
 
 def test_pipeline_creation():

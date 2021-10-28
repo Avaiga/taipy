@@ -5,11 +5,9 @@ import tempfile
 import pytest
 
 from taipy.config import Config
-from taipy.config.data_source import DataSourcesRepository
-from taipy.config.data_source_serializer import DataSourceSerializer
-from taipy.config.scenario import ScenariosRepository
-from taipy.config.task_scheduler import TaskSchedulersRepository
-from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
+from taipy.config.data_source import DataSourceConfigs, DataSourceSerializer
+from taipy.config.scenario import ScenarioConfigs
+from taipy.config.task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
 from taipy.exceptions.configuration import LoadingError
 
 
@@ -19,9 +17,9 @@ def reset_configuration_singleton():
     yield
     Config._data_source_serializer = DataSourceSerializer()
     Config._task_scheduler_serializer = TaskSchedulerSerializer()
-    Config.data_source_configs = DataSourcesRepository(Config._data_source_serializer)
-    Config.task_scheduler_configs = TaskSchedulersRepository(Config._task_scheduler_serializer)
-    Config.scenario_configs = ScenariosRepository()
+    Config.data_source_configs = DataSourceConfigs(Config._data_source_serializer)
+    Config.task_scheduler_configs = TaskSchedulerConfigs(Config._task_scheduler_serializer)
+    Config.scenario_configs = ScenarioConfigs()
     os.environ = _env
 
 

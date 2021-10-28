@@ -22,7 +22,7 @@ def test_create_task():
     assert task.config_name == "name_1"
 
 
-def test_can_not_change_task_entity_output(output):
+def test_can_not_change_task_output(output):
     task = Task("name_1", [], print, output=output)
 
     with pytest.raises(Exception):
@@ -33,7 +33,7 @@ def test_can_not_change_task_entity_output(output):
     assert list(task.output.values()) != output
 
 
-def test_can_not_change_task_entity_input(input):
+def test_can_not_change_task_input(input):
     task = Task("name_1", input, print)
 
     with pytest.raises(Exception):
@@ -44,15 +44,15 @@ def test_can_not_change_task_entity_input(input):
     assert list(task.input.values()) != input
 
 
-def test_can_not_change_task_output(output):
-    task = TaskConfig("name_1", [], print, output=output)
+def test_can_not_change_task_config_output(output):
+    task_config = TaskConfig("name_1", [], print, output=output)
 
-    assert task.output == output
+    assert task_config.output == output
     with pytest.raises(Exception):
-        task.output = []
+        task_config.output = []
 
     output.append(output[0])
-    assert task.output != output
+    assert task_config.output != output
 
 
 def test_can_not_update_task_output_values(output):
@@ -77,7 +77,7 @@ def test_can_not_update_task_input_values(input):
     assert task.input[0] != data_source
 
 
-def test_create_task_entity():
+def test_create_task_from_task_config():
     path = "my/csv/path"
     foo_ds = CSVDataSource.create("foo", Scope.PIPELINE, None, path=path)
     task = Task("namE 1", [foo_ds], print, [])

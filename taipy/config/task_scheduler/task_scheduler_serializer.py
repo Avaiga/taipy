@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .interface import Configurable
+from taipy.config.interface import Configurable
 
 
 @dataclass

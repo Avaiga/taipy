@@ -1,13 +1,13 @@
 import pytest
 
 from taipy.config import Config
-from taipy.config.scenario import ScenariosRepository
+from taipy.config.scenario import ScenarioConfigs
 
 
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
     yield
-    Config.scenario_configs = ScenariosRepository()
+    Config.scenario_configs = ScenarioConfigs()
 
 
 def test_scenario_creation():

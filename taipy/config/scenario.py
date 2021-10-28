@@ -5,13 +5,13 @@ from taipy.config.interface import ConfigRepository
 
 
 class ScenarioConfig:
-    def __init__(self, name: str, pipelines: List[PipelineConfig], **properties):
+    def __init__(self, name: str, pipelines_configs: List[PipelineConfig], **properties):
         self.name = name.strip().lower().replace(" ", "_")
-        self.pipelines = pipelines
+        self.pipelines_configs = pipelines_configs
         self.properties = properties
 
 
-class ScenariosRepository(ConfigRepository):
+class ScenarioConfigs(ConfigRepository):
     def create(self, name: str, pipelines: List[PipelineConfig], **properties):  # type: ignore
         scenario_config = ScenarioConfig(name, pipelines, **properties)
         self._data[name] = scenario_config

@@ -24,7 +24,12 @@ class DataSource:
     """
 
     def __init__(
-        self, config_name, scope: Scope = Scope.PIPELINE, id: Optional[str] = None, parent_id: Optional[str] = None, **kwargs
+        self,
+        config_name,
+        scope: Scope = Scope.PIPELINE,
+        id: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        **kwargs,
     ):
         self.parent_id = parent_id
         self.id = id or str(uuid.uuid4())
@@ -34,6 +39,7 @@ class DataSource:
 
     def __eq__(self, other):
         return self.id == other.id
+
     def __ne__(self, other):
         return not self == other
 
@@ -42,7 +48,7 @@ class DataSource:
 
     @staticmethod
     def __protect_name(config_name: str):
-        return config_name.strip().lower().replace(' ', '_')
+        return config_name.strip().lower().replace(" ", "_")
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
@@ -67,9 +73,3 @@ class DataSource:
     @abstractmethod
     def write(self, data):
         return NotImplemented
-
-    def to_json(self):
-        pass
-
-    def from_json(self):
-        pass

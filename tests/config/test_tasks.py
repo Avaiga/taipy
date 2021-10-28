@@ -1,13 +1,13 @@
 import pytest
 
 from taipy.config import Config
-from taipy.config.task import TasksRepository
+from taipy.config.task import TaskConfigs
 
 
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
     yield
-    Config.task_configs = TasksRepository()
+    Config.task_configs = TaskConfigs()
 
 
 def test_task_creation():
