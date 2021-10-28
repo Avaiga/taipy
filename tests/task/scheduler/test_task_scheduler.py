@@ -1,4 +1,6 @@
+import glob
 import multiprocessing
+import os
 import uuid
 from functools import partial
 from time import sleep
@@ -8,14 +10,11 @@ import pytest
 from taipy.config import Config
 from taipy.config.task_scheduler import TaskSchedulersRepository
 from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer
-from taipy.config.task_scheduler_serializer import TaskSchedulerSerializer as TaskSchedulerConfig
-from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
 from taipy.task import JobId, Task
 from taipy.task.scheduler import TaskScheduler
-from tests.task.scheduler.lock_data_source import LockDataSource
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -23,6 +22,10 @@ def reset_configuration_singleton():
     yield
     Config._task_scheduler_serializer = TaskSchedulerSerializer()
     Config.task_scheduler_configs = TaskSchedulersRepository(Config._task_scheduler_serializer)
+
+    for f in glob.glob("*.p"):
+        print(f"deleting file {f}")
+        os.remove(f)
 
 
 def multiply(nb1: float, nb2: float):

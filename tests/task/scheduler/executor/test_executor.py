@@ -1,6 +1,10 @@
+import glob
 import multiprocessing
+import os
 from functools import partial
 from time import sleep
+
+import pytest
 
 from taipy.common.alias import TaskId
 from taipy.config import Config
@@ -8,6 +12,15 @@ from taipy.data import Scope
 from taipy.data.manager import DataManager
 from taipy.task import Job, JobId, Task
 from taipy.task.scheduler.executor.executor import Executor
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset_configuration_singleton():
+    yield
+
+    for f in glob.glob("*.p"):
+        print(f"deleting file {f}")
+        os.remove(f)
 
 
 def execute(lock):
