@@ -116,9 +116,17 @@ site/
 # Demo Testing File
 demo*.py
 *.csv
-demo.css
+demo*.css
 object_selection.py
 gui_assets
+
+# Demos folder
+demo*/
+!demos/
+
+# Docker local dev
+docker-compose-dev.yml
+Dockerfile.dev
 
 # Filesystem default local storage
 .data/
