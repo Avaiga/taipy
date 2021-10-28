@@ -16,7 +16,7 @@ interface DateSelectorProps extends TaipyInputProps {
 }
 
 const DateSelector = (props: DateSelectorProps) => {
-    const [value, setValue] = useState(() => getDateTime(props.defaultvalue));
+    const [value, setValue] = useState(new Date());
     const { dispatch } = useContext(TaipyContext);
 
     const { className, tp_varname, withTime } = props;
@@ -28,19 +28,37 @@ const DateSelector = (props: DateSelectorProps) => {
             const hours = getClientServerTimeZoneOffset() / 60;
             const minutes = getClientServerTimeZoneOffset() % 60;
             const newDate = new Date(v);
-            newDate.setHours(newDate.getHours() + hours);
-            newDate.setMinutes(newDate.getMinutes() + minutes);
+            if (withTime) {
+                // Parse data with selected time if it is a datetime selector
+                newDate.setHours(newDate.getHours() + hours);
+                newDate.setMinutes(newDate.getMinutes() + minutes);
+                newDate.setSeconds(0);
+                newDate.setMilliseconds(0);
+            } else {
+                // Parse data with 00:00 UTC time if it is a date selector
+                newDate.setHours(hours);
+                newDate.setMinutes(minutes);
+                newDate.setSeconds(0);
+                newDate.setMilliseconds(0);
+            }
             dispatch(createSendUpdateAction(tp_varname, newDate.toISOString()));
         },
-        [tp_varname, dispatch]
+        [tp_varname, dispatch, withTime]
     );
 
     const renderInput = useCallback((params) => <TextField {...params} />, []);
 
+    // Run once when component is loaded
     useEffect(() => {
-        if (props.value !== undefined) {
-            setValue(getDateTime(props.value));
+        if (props.defaultvalue !== undefined) {
+            if (withTime) setValue(getDateTime(props.defaultvalue));
+            else handleChange(getDateTime(props.defaultvalue));
         }
+    }, [props.defaultvalue, handleChange, withTime]);
+
+    // Run every time props.value get updated
+    useEffect(() => {
+        if (props.value !== undefined) setValue(getDateTime(props.value))
     }, [props.value]);
 
     return (
