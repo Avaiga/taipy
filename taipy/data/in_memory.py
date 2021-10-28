@@ -36,21 +36,3 @@ class InMemoryDataSource(DataSource):
 
     def write(self, data):
         in_memory_storage[self.id] = data
-
-    def to_json(self):
-        return json.dumps(
-            {
-                "config_name": self.config_name,
-                "type": self.__TYPE,
-                "scope": self.scope.name,
-                self.__DEFAULT_DATA_VALUE: self.properties.get(self.__DEFAULT_DATA_VALUE),
-            }
-        )
-
-    @staticmethod
-    def from_json(data_source_dict):
-        return InMemoryDataSource.create(
-            config_name=data_source_dict.get("config_name"),
-            scope=Scope[data_source_dict.get("scope")],
-            data=data_source_dict.get(InMemoryDataSource.__DEFAULT_DATA_VALUE),
-        )

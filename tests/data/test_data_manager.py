@@ -17,8 +17,8 @@ class TestDataManager:
         # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
         csv_ds_config = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
         csv_1 = dm._create_and_save_data_source(csv_ds_config, None)
-        fetched_ds = dm.get(csv_1.id)
 
+        assert dm.get(csv_1.id) is not None
         assert dm.get(csv_1.id).id == csv_1.id
         assert dm.get(csv_1.id).config_name == csv_1.config_name
         assert dm.get(csv_1.id).scope == csv_1.scope
@@ -88,20 +88,19 @@ class TestDataManager:
         with pytest.raises(ModelNotFound):
             dm.repository.get("test_data_source_2")
 
-
     def test_get_or_create(self):
         dm = DataManager()
         dm.delete_all()
 
-        global_ds_config = Config.data_source_configs.create(name="test_data_source", type="in_memory",
-                                                             scope=Scope.GLOBAL,
-                                                             data="In memory Data Source")
-        scenario_ds_config = Config.data_source_configs.create(name="test_data_source2", type="in_memory",
-                                                               scope=Scope.SCENARIO,
-                                                               data="In memory scenario")
-        pipeline_ds_config = Config.data_source_configs.create(name="test_data_source2", type="in_memory",
-                                                               scope=Scope.PIPELINE,
-                                                               data="In memory pipeline")
+        global_ds_config = Config.data_source_configs.create(
+            name="test_data_source", type="in_memory", scope=Scope.GLOBAL, data="In memory Data Source"
+        )
+        scenario_ds_config = Config.data_source_configs.create(
+            name="test_data_source2", type="in_memory", scope=Scope.SCENARIO, data="In memory scenario"
+        )
+        pipeline_ds_config = Config.data_source_configs.create(
+            name="test_data_source2", type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
+        )
 
         assert len(dm.get_all()) == 0
         global_ds = dm.get_or_create(global_ds_config, None, None)
@@ -135,3 +134,27 @@ class TestDataManager:
         assert pipeline_ds_bis.id != pipeline_ds_ter.id
         assert pipeline_ds_bis.id != pipeline_ds_quater.id
         assert pipeline_ds_ter.id != pipeline_ds_quater.id
+
+    def test_ensure_persistence_of_data_source(self):
+        dm = DataManager()
+        dm.delete_all()
+
+        ds_config_1 = Config.data_source_configs.create(
+            name="data source 1", type="in_memory", data="In memory pipeline 2"
+        )
+        ds_config_2 = Config.data_source_configs.create(
+            name="data source 2", type="in_memory", data="In memory pipeline 2"
+        )
+
+        # Create and save
+        dm.get_or_create(ds_config_1)
+        dm.get_or_create(ds_config_2)
+        assert len(dm.get_all()) == 2
+
+        # Delete the DataManager to ensure it's get from the storage system
+        del dm
+        dm = DataManager()
+        dm.get_or_create(ds_config_1)
+        assert len(dm.get_all()) == 2
+
+        dm.delete_all()

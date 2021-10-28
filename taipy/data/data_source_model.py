@@ -27,6 +27,10 @@ class DataSourceModel:
         identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
     data_source_properties: Dict[str, Any]
         extra properties of a DataSource
+
+    Key
+    ---
+    The tuple config_name and parent_id formed a unique key
     """
 
     id: str
