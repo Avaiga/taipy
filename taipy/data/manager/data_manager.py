@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from typing import List, Optional
 
 from taipy.config import DataSourceConfig
 from taipy.data import CSVDataSource, DataRepository, PickleDataSource
@@ -44,7 +44,7 @@ class DataManager:
         else:
             return self._create_and_save_data_source(data_source_config, parent_id)
 
-    def save(self, data_source: DataSource):
+    def set(self, data_source: DataSource):
         # TODO Check if we should create the model or if it already exist
         model = DataSourceModel(
             data_source.id,
@@ -70,7 +70,7 @@ class DataManager:
         self, data_source_config: DataSourceConfig, parent_id: Optional[str]
     ) -> DataSource:
         data_source = self.__create_data_source(data_source_config, parent_id)
-        self.save(data_source)
+        self.set(data_source)
         return data_source
 
     def __to_data_source(self, model):
