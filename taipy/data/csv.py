@@ -60,7 +60,7 @@ class CSVDataSource(DataSource):
         df = pd.read_csv(self.path)
         print(df.head())
 
-    def get(self, query=None):
+    def read(self, query=None):
         return pd.read_csv(self.properties["path"])
 
     def write(self, data: Any, columns: List[str] = []):

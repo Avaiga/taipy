@@ -166,9 +166,9 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert len(data_manager.get_all()) == 3
     assert len(task_manager.tasks) == 2
     assert len(pipeline_entity.get_sorted_tasks()) == 2
-    assert pipeline_entity.foo.get() == 1
-    assert pipeline_entity.bar.get() == 0
-    assert pipeline_entity.baz.get() == 0
+    assert pipeline_entity.foo.read() == 1
+    assert pipeline_entity.bar.read() == 0
+    assert pipeline_entity.baz.read() == 0
     assert pipeline_entity.get_sorted_tasks()[0][0].config_name == task_mult_by_2.name
     assert pipeline_entity.get_sorted_tasks()[1][0].config_name == task_mult_by_3.name
 
@@ -192,24 +192,24 @@ def test_get_set_data():
 
     pipeline_entity = pipeline_manager.create(pipeline)
 
-    assert pipeline_entity.foo.get() == 1  # Default values
-    assert pipeline_entity.bar.get() == 0  # Default values
-    assert pipeline_entity.baz.get() == 0  # Default values
+    assert pipeline_entity.foo.read() == 1  # Default values
+    assert pipeline_entity.bar.read() == 0  # Default values
+    assert pipeline_entity.baz.read() == 0  # Default values
 
     pipeline_manager.submit(pipeline_entity.id)
-    assert pipeline_entity.foo.get() == 1
-    assert pipeline_entity.bar.get() == 2
-    assert pipeline_entity.baz.get() == 6
+    assert pipeline_entity.foo.read() == 1
+    assert pipeline_entity.bar.read() == 2
+    assert pipeline_entity.baz.read() == 6
 
     pipeline_entity.foo.write("new data value")
-    assert pipeline_entity.foo.get() == "new data value"
-    assert pipeline_entity.bar.get() == 2
-    assert pipeline_entity.baz.get() == 6
+    assert pipeline_entity.foo.read() == "new data value"
+    assert pipeline_entity.bar.read() == 2
+    assert pipeline_entity.baz.read() == 6
 
     pipeline_entity.bar.write(7)
-    assert pipeline_entity.foo.get() == "new data value"
-    assert pipeline_entity.bar.get() == 7
-    assert pipeline_entity.baz.get() == 6
+    assert pipeline_entity.foo.read() == "new data value"
+    assert pipeline_entity.bar.read() == 7
+    assert pipeline_entity.baz.read() == 6
 
     with pytest.raises(AttributeError):
         pipeline_entity.WRONG.write(7)
