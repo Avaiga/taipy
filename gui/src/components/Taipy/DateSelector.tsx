@@ -16,7 +16,7 @@ interface DateSelectorProps extends TaipyInputProps {
 }
 
 const DateSelector = (props: DateSelectorProps) => {
-    const [value, setValue] = useState(new Date());
+    const [value, setValue] = useState(() => getDateTime(props.defaultValue));
     const { dispatch } = useContext(TaipyContext);
 
     const { className, tp_varname, withTime, id } = props;
@@ -47,12 +47,12 @@ const DateSelector = (props: DateSelectorProps) => {
     const renderInput = useCallback((params) => <TextField {...params} />, []);
 
     // Run once when component is loaded
-    useEffect(() => {
-        if (props.defaultvalue !== undefined) {
-            if (withTime) setValue(getDateTime(props.defaultvalue));
-            else handleChange(getDateTime(props.defaultvalue));
-        }
-    }, [props.defaultvalue, handleChange, withTime]);
+    //useEffect(() => {
+    //    if (props.defaultvalue !== undefined) {
+    //        if (withTime) setValue(getDateTime(props.defaultvalue));
+    //        else handleChange(getDateTime(props.defaultvalue));
+    //    }
+    //}, [props.defaultvalue, handleChange, withTime]);
 
     // Run every time props.value get updated
     useEffect(() => {
