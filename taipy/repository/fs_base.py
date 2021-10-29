@@ -1,11 +1,12 @@
 import glob
 import json
+import os
 import pathlib
 import shutil
 from enum import Enum
 from functools import partial
 from os import listdir, makedirs, path
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union, Iterable
+from typing import Any, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
 
 from taipy.exceptions import ModelNotFound
 
@@ -78,6 +79,13 @@ class FileSystemRepository(Generic[ModelType]):
 
     def delete_all(self):
         shutil.rmtree(self.directory)
+
+    def delete(self, model_id: str):
+        try:
+            filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
+            os.unlink(filepath)
+        except FileNotFoundError:
+            raise ModelNotFound(self.dir_name, model_id)
 
     def search(self, attribute: str, value: str) -> Optional[ModelType]:
         model = None

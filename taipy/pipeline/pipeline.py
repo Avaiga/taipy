@@ -9,9 +9,9 @@ from typing import Dict, List
 
 import networkx as nx
 
+from taipy.common.alias import Dag, PipelineId
 from taipy.data import DataSource
 from taipy.pipeline.pipeline_model import PipelineModel
-from taipy.common.alias import PipelineId, Dag
 from taipy.task.task import Task
 
 
@@ -34,7 +34,7 @@ class Pipeline:
 
     @staticmethod
     def __protect_name(name):
-        return name.strip().lower().replace(' ', '_')
+        return name.strip().lower().replace(" ", "_")
 
     @staticmethod
     def new_id(config_name: str) -> PipelineId:
@@ -81,7 +81,7 @@ class Pipeline:
 
     def to_model(self) -> PipelineModel:
         source_task_edges = defaultdict(list)
-        task_source_edges = defaultdict(lambda: [])
+        task_source_edges = defaultdict(list)
         for task in self.tasks.values():
             for predecessor in task.input.values():
                 source_task_edges[predecessor.id].append(str(task.id))
@@ -97,8 +97,4 @@ class Pipeline:
 
     def get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
-        return list(
-            nodes
-            for nodes in nx.topological_generations(dag)
-            if (Task in (type(node) for node in nodes))
-        )
+        return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))

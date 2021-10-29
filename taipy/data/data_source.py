@@ -46,6 +46,12 @@ class DataSource:
     def __hash__(self):
         return hash(self.id)
 
+    def __getstate__(self):
+        return vars(self)
+
+    def __setstate__(self, state):
+        vars(self).update(state)
+
     @staticmethod
     def __protect_name(config_name: str):
         return config_name.strip().lower().replace(" ", "_")

@@ -26,6 +26,9 @@ class DataManager:
     def delete_all(self):
         self.repository.delete_all()
 
+    def delete(self, data_source_id: str):
+        self.repository.delete(data_source_id)
+
     def get_or_create(
         self, data_source_config: DataSourceConfig, scenario_id: Optional[str] = None, pipeline_id: Optional[str] = None
     ) -> DataSource:
