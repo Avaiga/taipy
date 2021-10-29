@@ -8,13 +8,6 @@ export const setStyle = (styleString: string): void => {
     document.head.append(style);
 };
 
-export const setDarkMode = (isDarkMode: boolean): void => {
-    const htmlClasses = document.querySelector("html")?.classList;
-    const mode = isDarkMode ? "dark" : "light";
-    htmlClasses?.add(mode);
-    localStorage.setItem("theme", mode);
-};
-
 export const setTimeZone = (timeZone: string): void => {
     if (!timeZone || timeZone === "client") {
         return localStorage.setItem("timeZone", TIMEZONE_CLIENT);

@@ -1,3 +1,4 @@
+import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
@@ -12,6 +13,7 @@ enum Types {
     RequestDataUpdate = "REQUEST_DATA_UPDATE",
     RequestUpdate = "REQUEST_UPDATE",
     SetLocations = "SET_LOCATIONS",
+    SetTheme = "SET_THEME",
 }
 
 export interface TaipyState {
@@ -108,6 +110,15 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             };
         case Types.SetLocations:
             return { ...state, locations: action.payload.value as Record<string, string> };
+        case Types.SetTheme:
+            return {
+                ...state,
+                theme: createTheme({
+                    palette: {
+                        mode: action.payload.value as PaletteMode,
+                    },
+                }),
+            };
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -151,11 +162,7 @@ export const createSendActionNameAction = (name: string, value: unknown): TaipyA
     payload: { value: value },
 });
 
-export const createRequestChartUpdateAction = (
-    name: string,
-    id: string,
-    columns: string[],
-): TaipyAction => ({
+export const createRequestChartUpdateAction = (name: string, id: string, columns: string[]): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name,
     payload: {
@@ -225,6 +232,12 @@ export const createSetLocationsAction = (locations: Record<string, string>): Tai
     type: Types.SetLocations,
     name: "locations",
     payload: { value: locations },
+});
+
+export const createThemeAction = (dark: boolean): TaipyAction => ({
+    type: Types.SetTheme,
+    name: "theme",
+    payload: { value: dark ? "dark" : "light" },
 });
 
 type WsMessageType = "A" | "U" | "DU" | "MU" | "RU";
