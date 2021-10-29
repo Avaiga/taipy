@@ -17,7 +17,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const [value, setValue] = useState(() => getDateTime(props.defaultValue));
     const { dispatch } = useContext(TaipyContext);
 
-    const { className, tp_varname, withTime, id } = props;
+    const { className, tp_varname, withTime, id, active = true } = props;
 
     const handleChange = useCallback(
         (v) => {
@@ -60,9 +60,21 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [props.value]);
 
     return withTime ? (
-        <DateTimePicker value={value} onChange={handleChange} renderInput={renderInput} className={className} />
+        <DateTimePicker
+            value={value}
+            onChange={handleChange}
+            renderInput={renderInput}
+            className={className}
+            disabled={!active}
+        />
     ) : (
-        <DatePicker value={value} onChange={handleChange} renderInput={renderInput} className={className} />
+        <DatePicker
+            value={value}
+            onChange={handleChange}
+            renderInput={renderInput}
+            className={className}
+            disabled={!active}
+        />
     );
 };
 

@@ -66,6 +66,7 @@ const Chart = (props: ChartProp) => {
         value,
         rangeChange,
         propagate,
+        active = true,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [loading, setLoading] = useState(false);
@@ -191,6 +192,8 @@ const Chart = (props: ChartProp) => {
         [value, config, selected]
     );
 
+    const plotConfig = useMemo(() => active ? {} : {staticPlot: true}, [active]);
+
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
             rangeChange && dispatch(createSendActionNameAction(id, { action: rangeChange, ...eventData })),
@@ -201,6 +204,7 @@ const Chart = (props: ChartProp) => {
 
     const onSelect = useCallback(
         (evt?: PlotMouseEvent | PlotSelectionEvent) => {
+            
             const points = evt?.points || [];
             if (points.length && tp_updatevars) {
                 const traces = points.reduce((tr, pt) => {
@@ -233,6 +237,7 @@ const Chart = (props: ChartProp) => {
                     onSelected={onSelect}
                     onDeselect={onSelect}
                     onClick={onSelect}
+                    config={plotConfig}
                 />
             </div>
         </>

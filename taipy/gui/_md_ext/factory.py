@@ -20,6 +20,7 @@ class Factory:
         "dialog": "open",
         "chart": "data",
         "status": "value",
+        "toggle": "value",
     }
 
     CONTROL_BUILDERS = {
@@ -33,7 +34,12 @@ class Factory:
         .set_default_value()
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
-        .set_attributes([("format"), ("id")]),
+        .set_attributes(
+            [
+                ("format"),
+                ("id"),
+            ]
+        ),
         "button": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -44,7 +50,13 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-button", config_class="button")
-        .set_attributes([("id"), ("on_action", AttributeType.string, "")]),
+        .set_attributes(
+            [
+                ("id"),
+                ("on_action", AttributeType.string, ""),
+                ("active", AttributeType.boolean, True),
+            ]
+        ),
         "input": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -56,7 +68,12 @@ class Factory:
         .set_default_value()
         .set_propagate()
         .set_className(class_name="taipy-input", config_class="input")
-        .set_attributes([("id")]),
+        .set_attributes(
+            [
+                ("id"),
+                ("active", AttributeType.boolean, True),
+            ]
+        ),
         "number": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -68,7 +85,12 @@ class Factory:
         .set_default_value()
         .set_className(class_name="taipy-number", config_class="input")
         .set_propagate()
-        .set_attributes([("id")]),
+        .set_attributes(
+            [
+                ("id"),
+                ("active", AttributeType.boolean, True),
+            ]
+        ),
         "date_selector": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="DateSelector",
@@ -78,7 +100,13 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
-        .set_attributes([("with_time", AttributeType.boolean), ("id")])
+        .set_attributes(
+            [
+                ("with_time", AttributeType.boolean),
+                ("id"),
+                ("active", AttributeType.boolean, True),
+            ]
+        )
         .set_propagate(),
         "slider": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -90,7 +118,14 @@ class Factory:
         .set_expresion_hash()
         .set_default_value()
         .set_className(class_name="taipy-slider", config_class="slider")
-        .set_attributes([("min", AttributeType.string, "1"), ("max", AttributeType.string, "100"), ("id")])
+        .set_attributes(
+            [
+                ("min", AttributeType.string, "1"),
+                ("max", AttributeType.string, "100"),
+                ("id"),
+                ("active", AttributeType.boolean, True),
+            ]
+        )
         .set_propagate(),
         "selector": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -101,7 +136,14 @@ class Factory:
         .set_className(class_name="taipy-selector", config_class="selector")
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
-        .set_attributes([("filter", AttributeType.boolean), ("multiple", AttributeType.boolean), ("id")])
+        .set_attributes(
+            [
+                ("filter", AttributeType.boolean),
+                ("multiple", AttributeType.boolean),
+                ("id"),
+                ("active", AttributeType.boolean, True),
+            ]
+        )
         .set_refresh_on_update()
         .set_propagate(),
         "table": lambda control_type, attrs: Builder(
@@ -121,6 +163,7 @@ class Factory:
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
                 ("id"),
+                ("active", AttributeType.boolean, True),
             ]
         )
         .set_refresh()
@@ -144,6 +187,7 @@ class Factory:
                 ("validate_action", AttributeType.string, "validate"),
                 ("validate_label", AttributeType.string, "Validate"),
                 ("open", AttributeType.boolean),
+                ("active", AttributeType.boolean, True),
             ]
         )
         .set_default_value()
@@ -165,6 +209,7 @@ class Factory:
                 ("height", AttributeType.string_or_number, "100vh"),
                 ("layout", AttributeType.dict),
                 ("range_change"),
+                ("active", AttributeType.boolean, True),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
@@ -183,8 +228,28 @@ class Factory:
         .set_attributes(
             [
                 ("id"),
+                ("active", AttributeType.boolean, True),
             ]
         ),
+        "toggle": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Toggle",
+            attributes=attrs,
+        )
+        .set_expresion_hash()
+        .set_className(class_name="taipy-toggle", config_class="toggle")
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
+        .set_attributes(
+            [
+                ("id"),
+                ("label"),
+                ("theme", AttributeType.boolean),
+                ("active", AttributeType.boolean, True),
+            ]
+        )
+        .set_refresh_on_update()
+        .set_propagate(),
     }
 
     # TODO: process \" in property value

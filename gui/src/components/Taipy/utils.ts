@@ -6,6 +6,7 @@ export interface TaipyBaseProps {
     value: unknown;
     propagate: boolean;
     tp_updatevars: string;
+    active: boolean;
 }
 
 export interface TaipyMultiSelect {

@@ -7,7 +7,7 @@ import { createSendActionNameAction, createSendUpdateAction } from "../../contex
 import { TaipyInputProps } from "./utils";
 
 const Input = (props: TaipyInputProps) => {
-    const { className, type, id, tp_varname, tp_onAction } = props;
+    const { className, type, id, tp_varname, tp_onAction, active = true } = props;
     const [value, setValue] = useState(props.defaultValue);
     const { dispatch } = useContext(TaipyContext);
 
@@ -32,7 +32,13 @@ const Input = (props: TaipyInputProps) => {
     }, [props.value, value]);
 
     return type === "button" ? (
-        <Button id={id} variant="outlined" className={className} onClick={handleClick}>
+        <Button
+            id={id}
+            variant="outlined"
+            className={className}
+            onClick={handleClick}
+            disabled={!active}
+        >
             {value}
         </Button>
     ) : (
@@ -44,6 +50,7 @@ const Input = (props: TaipyInputProps) => {
             type={type}
             id={id}
             onChange={handleInput}
+            disabled={!active}
         />
     );
 };

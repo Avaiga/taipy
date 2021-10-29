@@ -10,9 +10,10 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 
-import { getUpdateVars, TaipyImage, TaipyInputProps } from "./utils";
+import { getUpdateVars, TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestUpdateAction, createSendUpdateAction } from "../../context/taipyReducers";
+import { LovItem, LovProps } from "./lovUtils";
 
 const boxSx = { width: "100%" };
 const paperSx = { width: "100%", mb: 2 };
@@ -52,16 +53,9 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemPr
     </ListItemButton>
 );
 
-interface LovItem {
-    id: string;
-    item: string | TaipyImage;
-}
-
-interface SelectorProps extends TaipyInputProps {
-    defaultLov: string;
+interface SelectorProps extends LovProps {
     filter: boolean;
     multiple: boolean;
-    lov: [string, string | TaipyImage][];
 }
 
 const Selector = (props: SelectorProps) => {
@@ -77,6 +71,7 @@ const Selector = (props: SelectorProps) => {
         propagate,
         lov,
         tp_updatevars = "",
+        active = true,
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
@@ -89,7 +84,7 @@ const Selector = (props: SelectorProps) => {
     const lovList: LovItem[] = useMemo(() => {
         if (lov) {
             if (lov.length && lov[0][0] === undefined) {
-                console.debug("Selector tp_lov wrong format ", lov);
+                console.debug("Selector lov wrong format ", lov);
                 return [];
             }
             return lov.map((elt) => ({ id: elt[0], item: elt[1] || elt[0] }));
@@ -121,37 +116,42 @@ const Selector = (props: SelectorProps) => {
 
     const clickHandler = useCallback(
         (key: string) => {
-            setSelectedValue((keys) => {
-                if (multiple) {
-                    const newKeys = [...keys];
-                    const p = newKeys.indexOf(key);
-                    if (p === -1) {
-                        newKeys.push(key);
+            active &&
+                setSelectedValue((keys) => {
+                    if (multiple) {
+                        const newKeys = [...keys];
+                        const p = newKeys.indexOf(key);
+                        if (p === -1) {
+                            newKeys.push(key);
+                        } else {
+                            newKeys.splice(p, 1);
+                        }
+                        dispatch(createSendUpdateAction(tp_varname, newKeys, propagate));
+                        return newKeys;
                     } else {
-                        newKeys.splice(p, 1);
+                        dispatch(createSendUpdateAction(tp_varname, key, propagate));
+                        return [key];
                     }
-                    dispatch(createSendUpdateAction(tp_varname, newKeys, propagate));
-                    return newKeys;
-                } else {
-                    dispatch(createSendUpdateAction(tp_varname, key, propagate));
-                    return [key];
-                }
-            });
+                });
         },
-        [tp_varname, dispatch, multiple, propagate]
+        [tp_varname, dispatch, multiple, propagate, active]
     );
 
     const createClickHandler = useCallback((key: string) => () => clickHandler(key), [clickHandler]);
 
-    const handleInput = useCallback((e) => {
-        setSearchValue(e.target.value);
-    }, []);
+    const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
     return (
         <Box id={id} sx={boxSx} className={className}>
             <Paper sx={paperSx}>
                 {filter && (
-                    <TextField margin="dense" placeholder="Search field" value={searchValue} onChange={handleInput} />
+                    <TextField
+                        margin="dense"
+                        placeholder="Search field"
+                        value={searchValue}
+                        onChange={handleInput}
+                        disabled={!active}
+                    />
                 )}
                 <List sx={listSx}>
                     {lovList

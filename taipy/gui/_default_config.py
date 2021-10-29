@@ -20,5 +20,6 @@ default_config = {
         "dialog": "",
         "chart": "",
         "status": "",
+        "toggle": "",
     },
 }
