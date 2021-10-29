@@ -28,19 +28,35 @@ const DateSelector = (props: DateSelectorProps) => {
             const hours = getClientServerTimeZoneOffset() / 60;
             const minutes = getClientServerTimeZoneOffset() % 60;
             const newDate = new Date(v);
-            newDate.setHours(newDate.getHours() + hours);
-            newDate.setMinutes(newDate.getMinutes() + minutes);
+            newDate.setSeconds(0);
+            newDate.setMilliseconds(0);
+            if (withTime) {
+                // Parse data with selected time if it is a datetime selector
+                newDate.setHours(newDate.getHours() + hours);
+                newDate.setMinutes(newDate.getMinutes() + minutes);
+            } else {
+                // Parse data with 00:00 UTC time if it is a date selector
+                newDate.setHours(hours);
+                newDate.setMinutes(minutes);
+            }
             dispatch(createSendUpdateAction(tp_varname, newDate.toISOString()));
         },
-        [tp_varname, dispatch]
+        [tp_varname, dispatch, withTime]
     );
 
     const renderInput = useCallback((params) => <TextField {...params} />, []);
 
+    // Run once when component is loaded
+    //useEffect(() => {
+    //    if (props.defaultvalue !== undefined) {
+    //        if (withTime) setValue(getDateTime(props.defaultvalue));
+    //        else handleChange(getDateTime(props.defaultvalue));
+    //    }
+    //}, [props.defaultvalue, handleChange, withTime]);
+
+    // Run every time props.value get updated
     useEffect(() => {
-        if (props.value !== undefined) {
-            setValue(getDateTime(props.value));
-        }
+        if (props.value !== undefined) setValue(getDateTime(props.value))
     }, [props.value]);
 
     return (
