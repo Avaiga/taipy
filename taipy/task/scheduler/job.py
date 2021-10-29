@@ -1,15 +1,9 @@
 __all__ = ["Job", "JobId"]
 
-import collections
-import logging
 from concurrent.futures import Future
 from datetime import datetime
-from functools import partial, singledispatchmethod
-from typing import Any, Callable, Iterable, List, NewType, Union
+from typing import Callable, List, NewType
 
-from taipy.data import DataSource
-from taipy.data.manager import DataManager
-from taipy.exceptions.job import DataSourceWritingError
 from taipy.task.scheduler.status import Status
 from taipy.task.task import Task
 
