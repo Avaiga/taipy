@@ -195,7 +195,7 @@ def test_scheduled_task_in_parallel():
         assert task.output[f"{task.config_name}-output0"].get() == 0
         assert job.is_running()
 
-    assert_true_after_10_second_max(lambda: job.is_completed())
+    assert_true_after_10_second_max(job.is_completed)
 
 
 def test_scheduled_task_multithreading_multiple_task():

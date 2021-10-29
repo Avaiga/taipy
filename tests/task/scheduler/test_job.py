@@ -88,28 +88,6 @@ def test_notification_job(job):
     subscribe.assert_called_once_with(job)
 
 
-def test_handle_exception_in_user_function(task_id, job_id):
-    task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
-    job = Job(job_id, task)
-
-    job.execute(_runner)
-    assert job.is_failed()
-    assert "Something bad has happened" == str(job.reasons[0])
-
-
-def test_handle_exception_when_writing_datasource(task_id, job_id):
-    output = MagicMock()
-    output.config_name = "my_raising_datasource"
-    output.write.side_effect = ValueError()
-    task = Task(config_name="name", input=[], function=print, output=[output], id=task_id)
-    job = Job(job_id, task)
-
-    job.execute(_runner)
-    assert job.is_failed()
-    stack_trace = str(job.reasons[0])
-    assert "source" in stack_trace
-
-
 def _error():
     raise RuntimeError("Something bad has happened")
 

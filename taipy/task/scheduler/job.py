@@ -32,7 +32,7 @@ class Job:
         self.status = Status.SUBMITTED
         self.creation_date = datetime.now()
         self._subscribers: List[Callable] = []
-        self.__reasons: List[Exception] = []
+        self.__exceptions: List[Exception] = []
 
     def __contains__(self, task: Task):
         return self.task.id == task.id
@@ -53,8 +53,8 @@ class Job:
         return self.id == other.id
 
     @property
-    def reasons(self) -> List[Exception]:
-        return self.__reasons
+    def exceptions(self) -> List[Exception]:
+        return self.__exceptions
 
     @_run_callbacks
     def blocked(self):
@@ -113,65 +113,9 @@ class Job:
         if functions:
             self.on_status_change(*functions)
 
-    def execute(self, executor: Callable[[partial], Future]):
-        self.running()
-        input_ids = self._get_data_source_id(self.task.input.values())
-        output_ids = self._get_data_source_id(self.task.output.values())
-        ft = executor(partial(self._call_function, input_ids, self.task.function, output_ids))
-        ft.add_done_callback(self.__update_status)
-
-    def __update_status(self, ft: Future):
-        self.__reasons = ft.result()
-        if self.__reasons:
+    def update_status(self, ft: Future):
+        self.__exceptions = ft.result()
+        if self.__exceptions:
             self.failed()
         else:
             self.completed()
-
-    @classmethod
-    def _call_function(cls, input_ids, fct, output_ids):
-        try:
-            r = fct(*cls.__get_data_sources_value(input_ids))
-            return cls.__write(output_ids, r)
-        except Exception as e:
-            return [e]
-
-    @classmethod
-    def __write(cls, outputs, results):
-        try:
-            _results = cls.__extract_results(outputs, results)
-            return cls.__write_results_in_output(outputs, _results)
-        except Exception as e:
-            return [e]
-
-    @classmethod
-    def __write_results_in_output(cls, outputs, results: List[Any]):
-        exceptions = []
-        for res, ds_id in zip(results, outputs):
-            try:
-                cls.__to_data_source(ds_id).write(res)
-            except Exception as e:
-                exceptions.append(DataSourceWritingError(f"Error on writing in datasource id {ds_id}: {e}"))
-                logging.error(f"Error on writing output {e}")
-        return exceptions
-
-    @classmethod
-    def __get_data_sources_value(cls, ids) -> List[DataSource]:
-        return [cls.__to_data_source(i).get() for i in ids]
-
-    @staticmethod
-    def _get_data_source_id(data_sources):
-        return [i.id for i in data_sources]
-
-    @staticmethod
-    def __extract_results(outputs: List[str], results: Any) -> List[Any]:
-        _results: List[Any] = [results] if len(outputs) == 1 else results
-
-        if len(_results) != len(outputs):
-            logging.error("Error, wrong number of result or task output")
-            raise DataSourceWritingError("Error, wrong number of result or task output")
-
-        return _results
-
-    @staticmethod
-    def __to_data_source(id_: str) -> DataSource:
-        return DataManager().get(id_)
