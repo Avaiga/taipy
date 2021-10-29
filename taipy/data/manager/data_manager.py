@@ -57,11 +57,11 @@ class DataManager:
         self.repository.save(model)
 
     def get(self, data_source_id: str) -> DataSource:
-        model = self.repository.get(data_source_id)
+        model = self.repository.load(data_source_id)
         return self.__to_data_source(model)
 
     def get_all(self) -> List[DataSource]:
-        return [self.__to_data_source(model) for model in self.repository.get_all()]
+        return [self.__to_data_source(model) for model in self.repository.load_all()]
 
     def _get_all_by_config_name(self, config_name: str) -> List[DataSource]:
         return [self.__to_data_source(model) for model in self.repository.search_all("config_name", config_name)]
