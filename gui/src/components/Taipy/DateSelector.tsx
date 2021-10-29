@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import DatePicker from "@mui/lab/DatePicker";
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import TextField from "@mui/material/TextField";
@@ -8,7 +6,7 @@ import TextField from "@mui/material/TextField";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
-import { getDateTime, getClientServerTimeZoneOffset } from "../../utils/index";
+import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
 
 interface DateSelectorProps extends TaipyInputProps {
     withTime?: boolean;
@@ -44,7 +42,7 @@ const DateSelector = (props: DateSelectorProps) => {
         [tp_varname, dispatch, withTime]
     );
 
-    const renderInput = useCallback((params) => <TextField {...params} />, []);
+    const renderInput = useCallback((params) => <TextField id={id} {...params} />, [id]);
 
     // Run once when component is loaded
     //useEffect(() => {
@@ -56,17 +54,15 @@ const DateSelector = (props: DateSelectorProps) => {
 
     // Run every time props.value get updated
     useEffect(() => {
-        if (props.value !== undefined) setValue(getDateTime(props.value))
+        if (props.value !== undefined) {
+            setValue(getDateTime(props.value));
+        }
     }, [props.value]);
 
-    return (
-        <LocalizationProvider id={id} dateAdapter={AdapterDateFns}>
-            {withTime ? (
-                <DateTimePicker onChange={handleChange} renderInput={renderInput} value={value} className={className} />
-            ) : (
-                <DatePicker value={value} onChange={handleChange} renderInput={renderInput} className={className} />
-            )}
-        </LocalizationProvider>
+    return withTime ? (
+        <DateTimePicker value={value} onChange={handleChange} renderInput={renderInput} className={className} />
+    ) : (
+        <DatePicker value={value} onChange={handleChange} renderInput={renderInput} className={className} />
     );
 };
 

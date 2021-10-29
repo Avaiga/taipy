@@ -3,12 +3,16 @@ import JsxParser from "react-jsx-parser";
 import axios from "axios";
 import type {} from "@mui/lab/themeAugmentation";
 import { ThemeProvider } from "@mui/material/styles";
-import { HelmetProvider } from 'react-helmet-async';
+import { HelmetProvider } from "react-helmet-async";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import CssBaseline from "@mui/material/CssBaseline";
 
-import { setDarkMode, ENDPOINT, setTimeZone } from "../utils";
+import { ENDPOINT, setTimeZone } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
 import {
     createSetLocationsAction,
+    createThemeAction,
     initializeWebSocket,
     INITIAL_STATE,
     taipyInitialize,
@@ -38,7 +42,8 @@ const Router = () => {
             .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
             .then((result) => {
                 setJSX(result.data.router);
-                setDarkMode(result.data.darkMode);
+                //setDarkMode(result.data.darkMode);
+                dispatch(createThemeAction(result.data.darkMode));
                 setTimeZone(result.data.timeZone);
                 dispatch(createSetLocationsAction(result.data.locations));
             })
@@ -59,11 +64,14 @@ const Router = () => {
         <TaipyContext.Provider value={{ state, dispatch }}>
             <HelmetProvider>
                 <ThemeProvider theme={state.theme}>
-                    <JsxParser
-                        disableKeyGeneration={true}
-                        components={JSXReactRouterComponents as Record<string, ComponentType>}
-                        jsx={JSX}
-                    />
+                    <CssBaseline />
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <JsxParser
+                            disableKeyGeneration={true}
+                            components={JSXReactRouterComponents as Record<string, ComponentType>}
+                            jsx={JSX}
+                        />
+                    </LocalizationProvider>
                 </ThemeProvider>
             </HelmetProvider>
         </TaipyContext.Provider>
