@@ -1,7 +1,6 @@
 from typing import Optional
-from .renderers import makeTaipyExtension
 from .gui import Gui
-from .renderers import Html, Markdown
+from .renderers import Html, Markdown, makeTaipyExtension
 from .taipyimage import TaipyImage
 from .data import DataAccessor
 
