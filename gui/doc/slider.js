@@ -14,7 +14,7 @@ class slider extends HTMLElement {
 
     /**
      * bound to a value
-     * @type {bound(int|float), default property}
+     * @type {dynamic(int|float), default property}
      */
     value;
 

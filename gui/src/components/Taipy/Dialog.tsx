@@ -13,6 +13,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyBaseProps } from "./utils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyBaseProps {
     title: string;
@@ -42,9 +43,10 @@ const Dialog = (props: DialogProps) => {
         pageId,
         cancelLabel = "Cancel",
         validateLabel = "Validate",
-        active = true,
     } = props;
     const { dispatch } = useContext(TaipyContext);
+
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     const handleClose = useCallback(() => {
         dispatch(createSendActionNameAction(id, cancelAction || validateAction));

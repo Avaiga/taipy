@@ -7,6 +7,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 interface DateSelectorProps extends TaipyInputProps {
     withTime?: boolean;
@@ -14,10 +15,12 @@ interface DateSelectorProps extends TaipyInputProps {
 }
 
 const DateSelector = (props: DateSelectorProps) => {
+    const { className, tp_varname, withTime = false, id, propagate = true } = props;
+
     const [value, setValue] = useState(() => getDateTime(props.defaultValue));
     const { dispatch } = useContext(TaipyContext);
 
-    const { className, tp_varname, withTime, id, active = true } = props;
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     const handleChange = useCallback(
         (v) => {
@@ -37,9 +40,9 @@ const DateSelector = (props: DateSelectorProps) => {
                 newDate.setHours(hours);
                 newDate.setMinutes(minutes);
             }
-            dispatch(createSendUpdateAction(tp_varname, newDate.toISOString()));
+            dispatch(createSendUpdateAction(tp_varname, newDate.toISOString(), propagate));
         },
-        [tp_varname, dispatch, withTime]
+        [tp_varname, dispatch, withTime, propagate]
     );
 
     const renderInput = useCallback((params) => <TextField id={id} {...params} />, [id]);

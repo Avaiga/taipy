@@ -10,6 +10,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import ThemeToggle from "./ThemeToggle";
 import { LovItem, LovProps } from "./lovUtils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 interface ToggleProps extends LovProps {
     style?: CSSProperties;
@@ -24,14 +25,15 @@ const Toggle = (props: ToggleProps) => {
         theme = false,
         label,
         tp_varname,
-        propagate,
+        propagate = true,
         className,
-        active = true,
         lov,
         defaultLov,
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
+    
     const lovList: LovItem[] = useMemo(() => {
         if (lov) {
             if (lov.length && lov[0][0] === undefined) {

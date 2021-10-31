@@ -5,18 +5,21 @@ import Button from "@mui/material/Button";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyInputProps } from "./utils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 const Input = (props: TaipyInputProps) => {
-    const { className, type, id, tp_varname, tp_onAction, active = true } = props;
+    const { className, type, id, tp_varname, tp_onAction, propagate = true } = props;
     const [value, setValue] = useState(props.defaultValue);
     const { dispatch } = useContext(TaipyContext);
+
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     const handleInput = useCallback(
         (e) => {
             setValue(e.target.value);
-            dispatch(createSendUpdateAction(tp_varname, e.target.value));
+            dispatch(createSendUpdateAction(tp_varname, e.target.value, propagate));
         },
-        [tp_varname, dispatch]
+        [tp_varname, dispatch, propagate]
     );
 
     const handleClick = useCallback(() => {

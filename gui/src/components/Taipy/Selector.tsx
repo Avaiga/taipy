@@ -14,6 +14,7 @@ import { getUpdateVars, TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestUpdateAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { LovItem, LovProps } from "./lovUtils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 const boxSx = { width: "100%" };
 const paperSx = { width: "100%", mb: 2 };
@@ -65,17 +66,18 @@ const Selector = (props: SelectorProps) => {
         value,
         tp_varname,
         defaultLov,
-        filter,
-        multiple,
+        filter = false,
+        multiple = false,
         className,
-        propagate,
+        propagate = true,
         lov,
         tp_updatevars = "",
-        active = true,
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
+
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     useEffect(() => {
         dispatch(createRequestUpdateAction(id, [tp_varname, ...getUpdateVars(tp_updatevars)]));

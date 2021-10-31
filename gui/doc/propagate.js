@@ -8,7 +8,7 @@ class propagate extends shared {
 
      /**
       * a way to disable user interaction for a component
-      * @type {bool}
+      * @type {dynamic(bool)}
       */
      active = true;
 

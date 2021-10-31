@@ -10,10 +10,10 @@ default_config = {
         "propagate": True,
     },
     "style_config": {
-        "button": "px-2 py-1 rounded border border-gray-300 bg-gray-200 hover:bg-gray-300 hover:bg-gray-300 dark:bg-gray-800 dark:border-gray-900 dark:text-white dark:hover:bg-gray-900 cursor-pointer",  # noqa
-        "field": "text-lime-600 dark:text-lime-400 font-semibold",
-        "input": "px-2 py-1 rounded border border-gray-300 dark:border-gray-800 dark:bg-gray-700 dark:text-white",  # noqa
-        "slider": "appearance-none rounded-lg overflow-hidden dark:bg-gray-600 ring-lime-400",  # noqa
+        "button": "",
+        "field": "",
+        "input": "",
+        "slider": "",
         "date_selector": "",
         "table": "",
         "selector": "",

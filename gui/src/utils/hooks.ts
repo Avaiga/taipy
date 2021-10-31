@@ -1,15 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
-export const useWhyDidYouUpdate = (name: string, props: any): void => {
+export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {
     // Get a mutable ref object where we can store props ...
     // ... for comparison next time this hook runs.
-    const previousProps = useRef({} as Record<string, any>);
+    const previousProps = useRef({} as Record<string, unknown>);
     useEffect(() => {
       if (previousProps.current) {
         // Get all keys from previous and current props
         const allKeys = Object.keys({ ...previousProps.current, ...props });
         // Use this object to keep track of changed props
-        const changesObj = {}  as Record<string, any>;
+        const changesObj = {}  as Record<string, unknown>;
         // Iterate through keys
         allKeys.forEach((key) => {
           // If previous is different from current
@@ -29,4 +29,16 @@ export const useWhyDidYouUpdate = (name: string, props: any): void => {
       // Finally update previousProps with current props for next hook call
       previousProps.current = props;
     });
+  }
+
+  export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T): T => {
+    return useMemo(() => {
+      if (value !== undefined) {
+        return value;
+      }
+      if (defaultValue !== undefined) {
+        return defaultValue;
+      }
+      return defaultStatic;  
+    }, [value, defaultValue, defaultStatic]);
   }

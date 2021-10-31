@@ -2,13 +2,13 @@ class lovComp extends propagate {
 
     /**
      * bound to the selection value
-     * @type {bound(any), default property}
+     * @type {dynamic(any), default property}
      */
     value;
 
     /**
      * list of elements
-     * @type {str|List[str|TaipyImage|any]}
+     * @type {dynamic(str|List[str|TaipyImage|any])}
      */
     lov;
 

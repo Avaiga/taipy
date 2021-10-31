@@ -12,6 +12,7 @@ import {
     createSendUpdateAction,
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 interface ChartProp extends TaipyBaseProps {
     title: string;
@@ -65,12 +66,13 @@ const Chart = (props: ChartProp) => {
         id,
         value,
         rangeChange,
-        propagate,
-        active = true,
+        propagate = true,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState<number[][]>([]);
+
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     // get props.selected[i] values
     useEffect(() => {
