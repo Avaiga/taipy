@@ -1,4 +1,4 @@
-import React, { CSSProperties, MouseEvent, useCallback, useContext, useMemo } from "react";
+import React, { CSSProperties, MouseEvent, useCallback, useContext } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -9,7 +9,7 @@ import { TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import ThemeToggle from "./ThemeToggle";
-import { LovItem, LovProps } from "./lovUtils";
+import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty } from "../../utils/hooks";
 
 interface ToggleProps extends LovProps {
@@ -24,34 +24,17 @@ const Toggle = (props: ToggleProps) => {
         style = {},
         theme = false,
         label,
-        tp_varname,
+        tp_varname = "",
         propagate = true,
         className,
         lov,
-        defaultLov,
+        defaultLov = "",
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
-    
-    const lovList: LovItem[] = useMemo(() => {
-        if (lov) {
-            if (lov.length && lov[0][0] === undefined) {
-                console.debug("Selector tp_lov wrong format ", lov);
-                return [];
-            }
-            return lov.map((elt) => ({ id: elt[0], item: elt[1] || elt[0] }));
-        } else if (defaultLov) {
-            let parsedLov;
-            try {
-                parsedLov = JSON.parse(defaultLov);
-            } catch (e) {
-                parsedLov = lov as unknown as string[];
-            }
-            return parsedLov.map((elt: [string, string | TaipyImage]) => ({ id: elt[0], item: elt[1] || elt[0] }));
-        }
-        return [];
-    }, [defaultLov, lov]);
+
+    const lovList = useLovListMemo(lov, defaultLov);
 
     const changeValue = useCallback(
         (evt: MouseEvent, val: string) => dispatch(createSendUpdateAction(tp_varname, val, propagate)),

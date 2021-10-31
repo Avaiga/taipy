@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useContext, useCallback, useEffect } from "react";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
@@ -10,11 +10,11 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 
-import { getUpdateVars, TaipyImage } from "./utils";
+import { TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestUpdateAction, createSendUpdateAction } from "../../context/taipyReducers";
-import { LovItem, LovProps } from "./lovUtils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { createSendUpdateAction } from "../../context/taipyReducers";
+import { LovProps, useLovListMemo } from "./lovUtils";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 
 const boxSx = { width: "100%" };
 const paperSx = { width: "100%", mb: 2 };
@@ -62,10 +62,10 @@ interface SelectorProps extends LovProps {
 const Selector = (props: SelectorProps) => {
     const {
         id,
-        defaultValue,
+        defaultValue = "",
         value,
-        tp_varname,
-        defaultLov,
+        tp_varname = "",
+        defaultLov = "",
         filter = false,
         multiple = false,
         className,
@@ -79,28 +79,9 @@ const Selector = (props: SelectorProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
-    useEffect(() => {
-        dispatch(createRequestUpdateAction(id, [tp_varname, ...getUpdateVars(tp_updatevars)]));
-    }, [tp_updatevars, dispatch, id, tp_varname]);
+    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id, tp_varname);
 
-    const lovList: LovItem[] = useMemo(() => {
-        if (lov) {
-            if (lov.length && lov[0][0] === undefined) {
-                console.debug("Selector lov wrong format ", lov);
-                return [];
-            }
-            return lov.map((elt) => ({ id: elt[0], item: elt[1] || elt[0] }));
-        } else if (defaultLov) {
-            let parsedLov;
-            try {
-                parsedLov = JSON.parse(defaultLov);
-            } catch (e) {
-                parsedLov = lov as unknown as string[];
-            }
-            return parsedLov.map((elt: [string, string | TaipyImage]) => ({ id: elt[0], item: elt[1] || elt[0] }));
-        }
-        return [];
-    }, [defaultLov, lov]);
+    const lovList = useLovListMemo(lov, defaultLov);
 
     useEffect(() => {
         if (value !== undefined) {
