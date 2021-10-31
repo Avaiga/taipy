@@ -1,7 +1,7 @@
 import re
 from markdown.inlinepatterns import InlineProcessor
 
-from .factory import Factory
+from ..factory import Factory
 
 
 class ControlPattern(InlineProcessor):
@@ -13,4 +13,4 @@ class ControlPattern(InlineProcessor):
         md.inlinePatterns["taipy-control"] = ControlPattern(ControlPattern._PATTERN, md)
 
     def handleMatch(self, m, data):
-        return Factory.create(m.group(1), m.group(2)), m.start(0), m.end(0)
+        return Factory.create_markdown_element(m.group(1), m.group(2)), m.start(0), m.end(0)

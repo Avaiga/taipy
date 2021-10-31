@@ -5,7 +5,7 @@ from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
-from .builder import Builder
+from ..builder import Builder
 
 
 class Preprocessor(MdPreprocessor):
@@ -77,12 +77,12 @@ class Preprocessor(MdPreprocessor):
         default_prop_value = None
         properties = []
         for fragment in fragments:
-            from .factory import Factory
+            from ..factory import Factory
 
             if control_name is None and Factory.get_default_property_name(fragment):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:
-                from ..gui import Gui
+                from ...gui import Gui
 
                 # Handle First Expression Fragment
                 default_prop_value = Gui._get_instance().evaluate_expr(fragment)
@@ -91,7 +91,7 @@ class Preprocessor(MdPreprocessor):
                 if not prop_match or (prop_match.group(1) and prop_match.group(3)):
                     warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
                 else:
-                    from ..gui import Gui
+                    from ...gui import Gui
 
                     prop_value = "True"
                     if prop_match.group(1):

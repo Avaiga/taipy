@@ -1,6 +1,5 @@
 import os
 import typing as t
-import warnings
 
 import __main__
 from flask import Flask, abort, jsonify, render_template, render_template_string, request, send_from_directory

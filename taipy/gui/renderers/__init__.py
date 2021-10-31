@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import typing as t
 from abc import ABC, abstractmethod
-from ast import parse
 from os import path
 
-from ._html_ext import TaipyHTMLParser
+from ._html import TaipyHTMLParser
+from ._markdown import makeTaipyExtension
 
 
 class PageRenderer(ABC):
@@ -28,7 +28,7 @@ class Markdown(PageRenderer):
 
     # Generate JSX from Markdown
     def render(self) -> str:
-        from .gui import Gui
+        from ..gui import Gui
 
         return Gui._markdown.convert(t.cast(str, self._content))
 
