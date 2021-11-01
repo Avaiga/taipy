@@ -245,10 +245,10 @@ class Factory:
             [
                 ("id"),
                 ("label"),
-                ("theme", AttributeType.boolean),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         )
+        .set_kind()
         .set_refresh_on_update()
         .set_propagate(),
     }

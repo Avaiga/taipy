@@ -470,6 +470,12 @@ class Builder:
         self.set_attribute("type", type_name)
         return self
 
+    def set_kind(self):
+        theme = self.__get_property("theme", False)
+        if theme:
+            self.set_attribute("kind", "theme")
+        return self
+
     def set_attributes(self, attributes: list[tuple]):
         def _get_val(attr, index, default_val):
             return attr[index] if len(attr) > index else default_val

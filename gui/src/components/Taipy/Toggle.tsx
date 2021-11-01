@@ -15,14 +15,14 @@ import { useDynamicProperty } from "../../utils/hooks";
 interface ToggleProps extends LovProps {
     style?: CSSProperties;
     label: string;
-    theme: boolean;
+    kind?: string;
 }
 
 const Toggle = (props: ToggleProps) => {
     const {
         id,
         style = {},
-        theme = false,
+        kind,
         label,
         tp_varname = "",
         propagate = true,
@@ -41,7 +41,7 @@ const Toggle = (props: ToggleProps) => {
         [tp_varname, propagate, dispatch]
     );
 
-    return theme ? (
+    return kind === "theme"  ? (
         <ThemeToggle {...props} />
     ) : (
         <Box id={id} sx={style} className={className}>
