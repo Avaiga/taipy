@@ -20,3 +20,4 @@ class AttributeType(Enum):
     json = "json"
     react = "react"
     dict = "dict"
+    dynamic_boolean = "dynamicbool"

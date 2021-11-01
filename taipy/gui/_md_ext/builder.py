@@ -163,7 +163,7 @@ class Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def get_adapter(self, property_name: str):  # noqa: C901
+    def get_adapter(self, property_name: str, multi_selection = True):  # noqa: C901
         lov = self.__get_list_of_(property_name)
         from_string = hasattr(self, "from_string") and self.from_string
         if isinstance(lov, list):
@@ -223,7 +223,10 @@ class Builder:
                 ret = self._gui._run_adapter(adapter, val, adapter.__name__, -1, id_only=True)
                 if ret is not None:
                     ret_list.append(ret)
-            self.set_default_value(ret_list)
+            if multi_selection:
+                self.set_default_value(ret_list)
+            else:
+                self.set_default_value(ret_list[0] if len(ret_list) else "")
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
@@ -406,13 +409,14 @@ class Builder:
             self.__set_json_attribute("defaultValue", value)
         return self
 
-    def set_expresion_hash(self):
+    def set_expresion_hash(self, with_update = True):
         if self.has_evaluated:
             self.__set_react_attribute(
                 "value",
                 get_client_var_name(self.expr_hash),
             )
-            self.set_attribute("tp_varname", self.expr)
+            if with_update:
+                self.set_attribute("tp_varname", self.expr)
         else:
             self.set_attribute("value", self.value)
         return self
@@ -435,7 +439,10 @@ class Builder:
     def set_propagate(self):
         from ..gui import Gui
 
-        return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
+        val = self.__get_property("propagate", self._gui._config.app_config["propagate"])
+        if val is not True:
+            return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
+        return self
 
     def set_refresh(self):
         return self.__set_react_attribute("refresh", get_client_var_name(self.expr_hash + ".refresh"))
@@ -463,6 +470,12 @@ class Builder:
         self.set_attribute("type", type_name)
         return self
 
+    def set_kind(self):
+        theme = self.__get_property("theme", False)
+        if theme:
+            self.set_attribute("kind", "theme")
+        return self
+
     def set_attributes(self, attributes: list[tuple]):
         def _get_val(attr, index, default_val):
             return attr[index] if len(attr) > index else default_val
@@ -472,7 +485,17 @@ class Builder:
                 attr = (attr,)
             type = _get_val(attr, 1, AttributeType.string)
             if type == AttributeType.boolean:
-                self.__set_boolean_attribute(attr[0], _get_val(attr, 2, False))
+                val = self.__get_property(attr[0])
+                if val is not None and val != _get_val(attr, 2, False):
+                    self.__set_boolean_attribute(attr[0], _get_val(attr, 2, False))
+            elif type == AttributeType.dynamic_boolean:
+                dyn_var = _get_dict_value(self.__hashes, attr[0])
+                val = self.__get_property(attr[0])
+                default_name = "default_" + attr[0] if dyn_var is not None else attr[0]
+                if val is not None and val != _get_val(attr, 2, False):
+                    self.__set_boolean_attribute(default_name, _get_val(attr, 2, False))
+                if dyn_var is not None:
+                    self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(dyn_var))
             elif type == AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
             elif type == AttributeType.react:

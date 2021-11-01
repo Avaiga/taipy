@@ -16,7 +16,7 @@ class status extends shared {
 
     /**
      * bound to a value
-     * @type {bound(dict|list[dict]), default property}
+     * @type {dict|list[dict], default property}
      */
     value;
 

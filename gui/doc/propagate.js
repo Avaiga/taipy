@@ -6,4 +6,10 @@ class propagate extends shared {
      */
      propagate = "App config";
 
+     /**
+      * a way to disable user interaction for a component
+      * @type {dynamic(bool)}
+      */
+     active = true;
+
 }

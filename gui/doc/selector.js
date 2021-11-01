@@ -10,19 +10,7 @@
  * <code><|{value}|selector|properties={properties}|lov={lov}|></code>
  * @element selector
  */
-class selector extends propagate {
-
-    /**
-     * bound to the selection value
-     * @type {bound(any), default property}
-     */
-    value;
-
-    /**
-     * list of elements
-     * @type {str|List[str|TaipyImage|any]}
-     */
-    lov;
+class selector extends lovComp {
 
     /**
      * allows a text filtering input
@@ -35,17 +23,5 @@ class selector extends propagate {
      * @type {bool}
      */
     multiple = false;
-
-    /**
-     * function that transforms an element of the lov into a tuple(id:str, label:str|TaipyImage)
-     * @type {FunctionType}
-     */
-    adapter = "lambda x: str(x)";
-
-    /**
-     * needed if the lov List contains a non specific type of data (ex: dict)<br> value and lov varaibales are associated with this type and the adapter<br>
-     * @type {str}
-     */
-    type = "Type(lov-element)";
 
 }

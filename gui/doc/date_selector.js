@@ -14,7 +14,7 @@ class date_selector extends propagate {
 
      /**
      * bound to a date
-     * @type {datetime, default property}
+     * @type {dynamic(datetime), default property}
      */
      date;
 

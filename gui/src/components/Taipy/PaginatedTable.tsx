@@ -14,7 +14,7 @@ import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestTableUpdateAction, createRequestUpdateAction } from "../../context/taipyReducers";
+import { createRequestTableUpdateAction } from "../../context/taipyReducers";
 import {
     alignCell,
     boxSx,
@@ -26,7 +26,7 @@ import {
     tableSx,
     TaipyPaginatedTableProps,
 } from "./tableUtils";
-import { getUpdateVars } from "./utils";
+import { useDispatchRequestUpdateOnFirstRender } from "../../utils/hooks";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
@@ -65,10 +65,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
-    useEffect(() => {
-        const updateVars = getUpdateVars(tp_updatevars);
-        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
-    }, [tp_updatevars, dispatch, id, tp_varname]);
+    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
 
     useEffect(() => {
         if (selected.length) {

@@ -13,8 +13,8 @@
 class numberCls extends HTMLElement {
 
     /**
-     * bound to a value
-     * @type {bound(any), default property}
+     * bound to a numeric value
+     * @type {dynamic(any), default property}
      */
     value;
 
