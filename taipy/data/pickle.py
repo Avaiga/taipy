@@ -37,7 +37,7 @@ class PickleDataSource(DataSource):
     def preview(self):
         pass
 
-    def get(self, query=None):
+    def read(self, query=None):
         return pickle.load(open(self.__pickle_file_path, "rb"))
 
     def write(self, data):

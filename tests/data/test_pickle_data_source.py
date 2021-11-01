@@ -17,15 +17,15 @@ class TestPickleDataSourceEntity:
 
     def test_get(self):
         pickle_str = PickleDataSource.create("foo", Scope.PIPELINE, None, "bar")
-        assert isinstance(pickle_str.get(), str)
-        assert pickle_str.get() == "bar"
+        assert isinstance(pickle_str.read(), str)
+        assert pickle_str.read() == "bar"
         assert pickle_str.data == "bar"
         pickle_int = PickleDataSource.create("foo", Scope.PIPELINE, None, 197)
-        assert isinstance(pickle_int.get(), int)
-        assert pickle_int.get() == 197
+        assert isinstance(pickle_int.read(), int)
+        assert pickle_int.read() == 197
         pickle_dict = PickleDataSource.create("foo", Scope.PIPELINE, None, {"bar": 12, "baz": "qux", "quux": [13]})
-        assert isinstance(pickle_dict.get(), dict)
-        assert pickle_dict.get() == {"bar": 12, "baz": "qux", "quux": [13]}
+        assert isinstance(pickle_dict.read(), dict)
+        assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
         ds = PickleDataSource.create("foobar BaZ", Scope.PIPELINE, None, data="Pickle Data Source")
@@ -33,7 +33,7 @@ class TestPickleDataSourceEntity:
         assert isinstance(ds, PickleDataSource)
         assert ds.type() == "pickle"
         assert ds.id is not None
-        assert ds.get() == "Pickle Data Source"
+        assert ds.read() == "Pickle Data Source"
 
     def test_preview(self):
         ds = PickleDataSource.create("foo", Scope.PIPELINE, None, data="Pickle Data Source")
@@ -44,22 +44,22 @@ class TestPickleDataSourceEntity:
 
     def test_write(self):
         pickle_str = PickleDataSource.create("foo", Scope.PIPELINE, None, data="bar")
-        assert isinstance(pickle_str.get(), str)
-        assert pickle_str.get() == "bar"
+        assert isinstance(pickle_str.read(), str)
+        assert pickle_str.read() == "bar"
         pickle_str.properties["data"] = "baz"  # this modifies the default data value but not the data value itself
-        assert pickle_str.get() == "bar"
+        assert pickle_str.read() == "bar"
         pickle_str.write("qux")
-        assert pickle_str.get() == "qux"
+        assert pickle_str.read() == "qux"
         pickle_str.write(1998)
-        assert pickle_str.get() == 1998
+        assert pickle_str.read() == 1998
 
     def test_create_with_file_name(self):
         ds = PickleDataSource.create("foo", Scope.PIPELINE, None, data="bar", file_path="foo.EXISTING_FILE.p")
         import os
 
         assert os.path.isfile("foo.EXISTING_FILE.p")
-        assert ds.get() == "bar"
+        assert ds.read() == "bar"
         ds.write("qux")
-        assert ds.get() == "qux"
+        assert ds.read() == "qux"
         ds.write(1998)
-        assert ds.get() == 1998
+        assert ds.read() == 1998

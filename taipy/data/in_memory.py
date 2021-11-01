@@ -34,7 +34,7 @@ class InMemoryDataSource(DataSource):
     def preview(self):
         pass
 
-    def get(self, query=None):
+    def read(self, query=None):
         return in_memory_storage.get(self.id)
 
     def write(self, data):

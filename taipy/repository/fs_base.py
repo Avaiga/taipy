@@ -1,12 +1,10 @@
-import glob
 import json
 import os
 import pathlib
 import shutil
 from enum import Enum
-from functools import partial
-from os import listdir, makedirs, path
-from typing import Any, Dict, Generic, Iterable, List, Optional, Type, TypeVar, Union
+from os import path
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 
 from taipy.exceptions import ModelNotFound
 
@@ -60,14 +58,14 @@ class FileSystemRepository(Generic[ModelType]):
     def _build_model(self, model_data: Dict) -> ModelType:
         return self.model.from_dict(model_data)  # type: ignore
 
-    def get(self, model_id: str) -> Optional[ModelType]:
+    def load(self, model_id: str) -> Optional[ModelType]:
         try:
             filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
             return self._build_model(self.__load_json_file(filepath))
         except FileNotFoundError:
             raise ModelNotFound(self.dir_name, model_id)
 
-    def get_all(self) -> List[ModelType]:
+    def load_all(self) -> List[ModelType]:
         models = []
         for filename in pathlib.Path(self.directory).glob("*.json"):
             models.append(self._build_model(self.__load_json_file(filename)))

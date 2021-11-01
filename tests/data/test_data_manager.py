@@ -79,14 +79,14 @@ class TestDataManager:
                 {"data": "In Memory Data Source"},
             )
         )
-        ds = dm.repository.get("ds_id")
+        ds = dm.repository.load("ds_id")
 
         assert isinstance(ds, DataSourceModel)
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()
         with pytest.raises(ModelNotFound):
-            dm.repository.get("test_data_source_2")
+            dm.repository.load("test_data_source_2")
 
     def test_get_or_create(self):
         dm = DataManager()

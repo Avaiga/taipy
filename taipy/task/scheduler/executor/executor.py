@@ -44,7 +44,7 @@ class Executor:
 
     @classmethod
     def __read_inputs(cls, inputs: List[DataSource]) -> List[Any]:
-        return [DataManager().get(ds.id).get() for ds in inputs]
+        return [DataManager().get(ds.id).read() for ds in inputs]
 
     @classmethod
     def __write_data(cls, outputs: List[DataSource], results):

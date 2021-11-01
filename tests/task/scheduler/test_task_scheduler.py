@@ -42,7 +42,7 @@ def test_scheduled_task():
     task = _create_task(multiply)
 
     job = task_scheduler.submit(task)
-    assert task.output[f"{task.config_name}-output0"].get() == 42
+    assert task.output[f"{task.config_name}-output0"].read() == 42
     assert job.is_completed()
 
 
@@ -132,13 +132,13 @@ def test_scheduled_task_that_return_multiple_outputs():
     task_scheduler.submit(with_list)
 
     assert (
-        with_tuple.output[f"{with_tuple.config_name}-output0"].get()
-        == with_list.output[f"{with_list.config_name}-output0"].get()
+        with_tuple.output[f"{with_tuple.config_name}-output0"].read()
+        == with_list.output[f"{with_list.config_name}-output0"].read()
         == 42
     )
     assert (
-        with_tuple.output[f"{with_tuple.config_name}-output1"].get()
-        == with_list.output[f"{with_list.config_name}-output1"].get()
+        with_tuple.output[f"{with_tuple.config_name}-output1"].read()
+        == with_list.output[f"{with_list.config_name}-output1"].read()
         == 21
     )
 
@@ -155,9 +155,9 @@ def test_scheduled_task_returns_single_iterable_output():
     task_with_list = _create_task(return_list, 1)
 
     task_scheduler.submit(task_with_tuple)
-    assert task_with_tuple.output[f"{task_with_tuple.config_name}-output0"].get() == (42, 21)
+    assert task_with_tuple.output[f"{task_with_tuple.config_name}-output0"].read() == (42, 21)
     task_scheduler.submit(task_with_list)
-    assert task_with_list.output[f"{task_with_list.config_name}-output0"].get() == [42, 21]
+    assert task_with_list.output[f"{task_with_list.config_name}-output0"].read() == [42, 21]
 
 
 def test_data_source_not_written_due_to_wrong_result_nb():
@@ -168,7 +168,7 @@ def test_data_source_not_written_due_to_wrong_result_nb():
     task = _create_task(return_2tuple(), 3)
 
     job = task_scheduler.submit(task)
-    assert task.output[f"{task.config_name}-output0"].get() == 0
+    assert task.output[f"{task.config_name}-output0"].read() == 0
     assert job.is_failed()
 
 
@@ -179,8 +179,8 @@ def test_error_during_writing_data_source_don_t_stop_writing_on_other_data_sourc
     DataManager().delete(task.output[f"{task.config_name}-output0"].id)
     task_scheduler.submit(task)
 
-    assert task.output[f"{task.config_name}-output0"].get() == 0
-    assert task.output[f"{task.config_name}-output1"].get() == 21
+    assert task.output[f"{task.config_name}-output0"].read() == 0
+    assert task.output[f"{task.config_name}-output1"].read() == 21
 
 
 def test_scheduled_task_in_parallel():
@@ -192,7 +192,7 @@ def test_scheduled_task_in_parallel():
 
     with lock:
         job = task_scheduler.submit(task)
-        assert task.output[f"{task.config_name}-output0"].get() == 0
+        assert task.output[f"{task.config_name}-output0"].read() == 0
         assert job.is_running()
 
     assert_true_after_10_second_max(job.is_completed)
@@ -213,18 +213,18 @@ def test_scheduled_task_multithreading_multiple_task():
             job_1 = task_scheduler.submit(task_1)
             job_2 = task_scheduler.submit(task_2)
 
-            assert task_1.output[f"{task_1.config_name}-output0"].get() == 0
-            assert task_2.output[f"{task_2.config_name}-output0"].get() == 0
+            assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
+            assert task_2.output[f"{task_2.config_name}-output0"].read() == 0
             assert job_1.is_running()
             assert job_2.is_running()
 
-        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].get() == 42)
-        assert task_1.output[f"{task_1.config_name}-output0"].get() == 0
+        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
+        assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].get(None) == 42)
-    assert task_2.output[f"{task_2.config_name}-output0"].get(None) == 42
+    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read(None) == 42)
+    assert task_2.output[f"{task_2.config_name}-output0"].read(None) == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
 
@@ -246,18 +246,18 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
             job_1 = task_scheduler.submit(task_2)
             job_2 = task_scheduler.submit(task_1)
 
-            assert task_1.output[f"{task_1.config_name}-output0"].get() == 0
-            assert task_2.output[f"{task_2.config_name}-output0"].get() == 0
+            assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
+            assert task_2.output[f"{task_2.config_name}-output0"].read() == 0
             assert job_1.is_running()
             assert job_2.is_pending()
 
-        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].get() == 42)
-        assert task_1.output[f"{task_1.config_name}-output0"].get() == 0
+        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
+        assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
         assert job_1.is_completed()
         assert job_2.is_running()
 
-    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].get(None) == 42)
-    assert task_2.output[f"{task_2.config_name}-output0"].get(None) == 42
+    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read(None) == 42)
+    assert task_2.output[f"{task_2.config_name}-output0"].read(None) == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
 
