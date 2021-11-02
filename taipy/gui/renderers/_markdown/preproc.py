@@ -77,9 +77,9 @@ class Preprocessor(MdPreprocessor):
         default_prop_value = None
         properties = []
         for fragment in fragments:
-            from ..factory import Factory
+            from .factory import MarkdownFactory
 
-            if control_name is None and Factory.get_default_property_name(fragment):
+            if control_name is None and MarkdownFactory.get_default_property_name(fragment):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:
                 from ...gui import Gui
@@ -103,6 +103,6 @@ class Preprocessor(MdPreprocessor):
         if control_name is None:
             control_name = "field"
         if default_prop_value is not None:
-            default_prop_name = Factory.get_default_property_name(control_name)
+            default_prop_name = MarkdownFactory.get_default_property_name(control_name)
             properties.insert(0, self._make_prop_pair(default_prop_name, default_prop_value))
         return control_name, properties

@@ -1,8 +1,8 @@
 import datetime
 import json
+import numbers
 import typing as t
 import warnings
-import numbers
 from operator import attrgetter
 from types import FunctionType
 
@@ -12,7 +12,7 @@ from ..page import Partial
 from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from ..wstype import AttributeType
 from .jsonencoder import TaipyJsonEncoder
-from .renderers_utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
+from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
 
 class Builder:

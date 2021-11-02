@@ -191,24 +191,5 @@ class Factory:
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
-    def create_markdown_element(control_type: str, all_properties: str) -> str:
-        # Create properties dict from all_properties
-        property_pairs = Factory._PROPERTY_RE.findall(all_properties)
-        properties = {property[0]: property[1] for property in property_pairs}
-        builder = Factory.CONTROL_BUILDERS[control_type](control_type, properties)
-        if builder:
-            return builder.el
-        else:
-            return f"<|INVALID SYNTAX - Control is '{control_type}'|>"
-
-    @staticmethod
-    def create_html_element(control_type: str, all_properties: t.Dict[str, str]) -> t.Tuple[str, str]:
-        builder = Factory.CONTROL_BUILDERS[control_type](control_type, all_properties)
-        if not builder:
-            return f"<div>INVALID SYNTAX - Control is '{control_type}'", "div"
-        builder_str, element_name = builder.build_to_string()
-        return builder_str, element_name
-
-    @staticmethod
     def get_default_property_name(control_name: str) -> t.Optional[str]:
         return Factory.CONTROL_DEFAULT_PROP_NAME.get(control_name)

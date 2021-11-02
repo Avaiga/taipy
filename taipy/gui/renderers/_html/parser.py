@@ -2,7 +2,7 @@ import re
 import typing as t
 from html.parser import HTMLParser
 
-from ..factory import Factory
+from .factory import HtmlFactory
 
 
 class TaipyHTMLParser(HTMLParser):
@@ -88,7 +88,7 @@ class TaipyTag(object):
     def set_value(self, value: str) -> bool:
         if self.has_set_value:
             return False
-        property_name = Factory.get_default_property_name(self.control_type)
+        property_name = HtmlFactory.get_default_property_name(self.control_type)
         if property_name is not None:
             self.properties[property_name] = value
         self.has_set_value = True
@@ -99,4 +99,4 @@ class TaipyTag(object):
 
         for k, v in self.properties.items():
             self.properties[k] = Gui._get_instance().evaluate_expr(v)
-        return Factory.create_html_element(self.control_type, self.properties)
+        return HtmlFactory.create_element(self.control_type, self.properties)
