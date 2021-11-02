@@ -232,10 +232,7 @@ class Factory:
             ]
         ),
         "toggle": lambda control_type, attrs: Builder(
-            control_type=control_type,
-            element_name="Toggle",
-            attributes=attrs,
-            default_value=""
+            control_type=control_type, element_name="Toggle", attributes=attrs, default_value=""
         )
         .set_expresion_hash()
         .set_className(class_name="taipy-toggle", config_class="toggle")
@@ -246,7 +243,7 @@ class Factory:
                 ("id"),
                 ("label"),
                 ("active", AttributeType.dynamic_boolean, True),
-                ("unselected_value", AttributeType.string, "")
+                ("unselected_value", AttributeType.string, ""),
             ]
         )
         .set_kind()

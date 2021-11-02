@@ -89,6 +89,10 @@ class Builder:
         Builder.__keys[name] = (key_index or 0) + 1
         return name + "." + (str(key_index) if key_index else "0")
 
+    @staticmethod
+    def _reset_key() -> None:
+        Builder.__keys = {}
+
     def __get_list_of_(self, name: str):
         lof = self.__get_property(name)
         if isinstance(lof, str):
@@ -164,7 +168,7 @@ class Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def get_adapter(self, property_name: str, multi_selection = True):  # noqa: C901
+    def get_adapter(self, property_name: str, multi_selection=True):  # noqa: C901
         lov = self.__get_list_of_(property_name)
         from_string = hasattr(self, "from_string") and self.from_string
         if isinstance(lov, list):
@@ -413,7 +417,7 @@ class Builder:
             self.__set_json_attribute("defaultValue", value)
         return self
 
-    def set_expresion_hash(self, with_update = True):
+    def set_expresion_hash(self, with_update=True):
         if self.has_evaluated:
             self.__set_react_attribute(
                 "value",
