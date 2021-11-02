@@ -16,6 +16,7 @@ interface ToggleProps extends LovProps {
     style?: CSSProperties;
     label: string;
     kind?: string;
+    unselectedValue: string;
 }
 
 const Toggle = (props: ToggleProps) => {
@@ -29,6 +30,7 @@ const Toggle = (props: ToggleProps) => {
         className,
         lov,
         defaultLov = "",
+        unselectedValue = "",
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
@@ -37,8 +39,8 @@ const Toggle = (props: ToggleProps) => {
     const lovList = useLovListMemo(lov, defaultLov);
 
     const changeValue = useCallback(
-        (evt: MouseEvent, val: string) => dispatch(createSendUpdateAction(tp_varname, val, propagate)),
-        [tp_varname, propagate, dispatch]
+        (evt: MouseEvent, val: string) => dispatch(createSendUpdateAction(tp_varname, val === null ? unselectedValue : val, propagate)),
+        [unselectedValue, tp_varname, propagate, dispatch]
     );
 
     return kind === "theme"  ? (

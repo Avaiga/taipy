@@ -137,7 +137,8 @@ class Builder:
     def __set_list_of_(self, name: str):
         lof = self.__get_list_of_(name)
         if not isinstance(lof, (list, tuple)):
-            warnings.warn(f"{self.element_name} {name} should be a list")
+            if lof is not None:
+                warnings.warn(f"{self.element_name} {name} should be a list")
             return self
         return self.__set_json_attribute(_to_camel_case(name), lof)
 
@@ -226,7 +227,10 @@ class Builder:
             if multi_selection:
                 self.set_default_value(ret_list)
             else:
-                self.set_default_value(ret_list[0] if len(ret_list) else "")
+                ret_val = ret_list[0] if len(ret_list) else ""
+                if ret_val == "-1" and self.__get_property("unselected_value") is not None:
+                    ret_val = self.__get_property("unselected_value")
+                self.set_default_value(ret_val)
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
