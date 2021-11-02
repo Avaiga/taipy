@@ -47,10 +47,10 @@ const ThemeToggle = (props: ThemeToggleProps) => {
                 aria-label="Theme mode"
                 disabled={!active}
             >
-                <ToggleButton value="light" aria-label="light">
+                <ToggleButton value="light" aria-label="light" title="Light">
                     <WbSunny />
                 </ToggleButton>
-                <ToggleButton value="dark" aria-label="dark">
+                <ToggleButton value="dark" aria-label="dark" title="Dark">
                     <Brightness3 />
                 </ToggleButton>
             </ToggleButtonGroup>

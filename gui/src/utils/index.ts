@@ -57,7 +57,7 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
             }
             return value.toLocaleString();
     }
-    return value.toString();
+    return value ? value.toString() : "";
 };
 
 export const getInitials = (value: string, max = 2): string =>

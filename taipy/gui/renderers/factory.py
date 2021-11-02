@@ -246,6 +246,7 @@ class Factory:
                 ("id"),
                 ("label"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("unselected_value", AttributeType.string, "")
             ]
         )
         .set_kind()
