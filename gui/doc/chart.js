@@ -14,7 +14,7 @@
 class chart extends shared {
     /**
      * bound to a data object
-     * @type {bound(any), default property}
+     * @type {any, default property}
      */
     value;
 
@@ -38,7 +38,7 @@ class chart extends shared {
 
     /**
      * List of selected indices
-     * @type {bound(list[int]|str)}
+     * @type {dynamic(list[int]|str)}
      */
     selected;
 

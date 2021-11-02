@@ -73,7 +73,7 @@ class DataSource:
         return NotImplemented
 
     @abstractmethod
-    def get(self, query=None):
+    def read(self, query=None):
         return NotImplemented
 
     @abstractmethod

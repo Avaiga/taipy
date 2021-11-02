@@ -4,14 +4,14 @@ import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotMouseEvent, PlotSelect
 import Skeleton from "@mui/material/Skeleton";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { getArrayValue, getUpdateVar, getUpdateVars, TaipyBaseProps } from "./utils";
+import { getArrayValue, getUpdateVar, TaipyBaseProps } from "./utils";
 import {
     createRequestChartUpdateAction,
-    createRequestUpdateAction,
     createSendActionNameAction,
     createSendUpdateAction,
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 
 interface ChartProp extends TaipyBaseProps {
     title: string;
@@ -65,11 +65,13 @@ const Chart = (props: ChartProp) => {
         id,
         value,
         rangeChange,
-        propagate,
+        propagate = true,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState<number[][]>([]);
+
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     // get props.selected[i] values
     useEffect(() => {
@@ -133,10 +135,7 @@ const Chart = (props: ChartProp) => {
         }
     }, [refresh, dispatch, config.columns, tp_varname, id]);
 
-    useEffect(() => {
-        const updateVars = getUpdateVars(tp_updatevars);
-        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
-    }, [dispatch, tp_updatevars, id]);
+    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
 
     const layout = useMemo(() => {
         const playout = props.layout ? JSON.parse(props.layout) : {};
@@ -191,6 +190,8 @@ const Chart = (props: ChartProp) => {
         [value, config, selected]
     );
 
+    const plotConfig = useMemo(() => (active ? {} : { staticPlot: true }), [active]);
+
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
             rangeChange && dispatch(createSendActionNameAction(id, { action: rangeChange, ...eventData })),
@@ -233,6 +234,7 @@ const Chart = (props: ChartProp) => {
                     onSelected={onSelect}
                     onDeselect={onSelect}
                     onClick={onSelect}
+                    config={plotConfig}
                 />
             </div>
         </>

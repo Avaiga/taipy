@@ -18,8 +18,8 @@
 class table extends shared {
      
     /**
-     * bound to a dataframe
-     * @type {bound(any), default property}
+     * bound to a data object
+     * @type {any, default property}
      */
     value;
 
@@ -61,7 +61,7 @@ class table extends shared {
 
     /**
      * List of selected indices
-     * @type {bound(list[int]|str)}
+     * @type {list[int]|str}
      */
     selected;
 

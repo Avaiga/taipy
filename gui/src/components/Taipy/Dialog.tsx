@@ -1,4 +1,4 @@
-import React, { useCallback, useContext  } from "react";
+import React, { useCallback, useContext } from "react";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
@@ -13,13 +13,14 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
 import { TaipyBaseProps } from "./utils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyBaseProps {
     title: string;
     cancelAction: string;
     validateAction: string;
-    cancelActionText: string;
-    validateActionText: string;
+    cancelLabel: string;
+    validateLabel: string;
     pageId: string;
 }
 
@@ -40,10 +41,12 @@ const Dialog = (props: DialogProps) => {
         cancelAction,
         validateAction = "ValidateAction",
         pageId,
-        cancelActionText = "Cancel",
-        validateActionText = "Validate",
+        cancelLabel = "Cancel",
+        validateLabel = "Validate",
     } = props;
     const { dispatch } = useContext(TaipyContext);
+
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     const handleClose = useCallback(() => {
         dispatch(createSendActionNameAction(id, cancelAction || validateAction));
@@ -61,7 +64,7 @@ const Dialog = (props: DialogProps) => {
                     aria-label="close"
                     onClick={handleClose}
                     sx={closeSx}
-                    title={cancelAction ? cancelActionText : validateActionText}
+                    title={cancelAction ? cancelLabel : validateLabel}
                 >
                     <CloseIcon />
                 </IconButton>
@@ -71,9 +74,9 @@ const Dialog = (props: DialogProps) => {
                 <TaipyRendered path={"/" + pageId} />
             </DialogContent>
             <DialogActions>
-                {cancelAction && <Button onClick={handleClose}>{cancelActionText}</Button>}
-                <Button onClick={handleValidate} autoFocus>
-                    {validateActionText}
+                {cancelAction && <Button onClick={handleClose} disabled={!active}>{cancelLabel}</Button>}
+                <Button onClick={handleValidate} autoFocus disabled={!active}>
+                    {validateLabel}
                 </Button>
             </DialogActions>
         </MuiDialog>

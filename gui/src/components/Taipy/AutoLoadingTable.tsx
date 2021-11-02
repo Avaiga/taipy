@@ -14,7 +14,7 @@ import InfiniteLoader from "react-window-infinite-loader";
 import { Skeleton } from "@mui/material";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestInfiniteTableUpdateAction, createRequestUpdateAction } from "../../context/taipyReducers";
+import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
 import {
     ColumnDesc,
     alignCell,
@@ -26,7 +26,7 @@ import {
     paperSx,
     tableSx,
 } from "./tableUtils";
-import { getUpdateVars } from "./utils";
+import { useDispatchRequestUpdateOnFirstRender } from "../../utils/hooks";
 
 interface RowData {
     colsOrder: string[];
@@ -116,10 +116,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         }
     }, [props.value]);
 
-    useEffect(() => {
-        const updateVars = getUpdateVars(tp_updatevars);
-        updateVars.length && dispatch(createRequestUpdateAction(id, updateVars));
-    }, [tp_updatevars, dispatch, id, tp_varname]);
+    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {

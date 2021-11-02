@@ -11,6 +11,7 @@ import Selector from "./Selector";
 import Dialog from "./Dialog";
 import Chart from "./Chart";
 import StatusList from "./StatusList";
+import Toggle from "./Toggle";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
@@ -23,6 +24,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Dialog: Dialog as ComponentType,
     Chart: Chart as ComponentType,
     Status: StatusList as ComponentType,
+    Toggle: Toggle as ComponentType,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)

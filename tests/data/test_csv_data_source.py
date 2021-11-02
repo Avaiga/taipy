@@ -15,7 +15,7 @@ class TestCSVDataSourceEntity:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         csv = CSVDataSource.create("foo", Scope.PIPELINE, None, path)
         assert csv.path == path
-        data = csv.get()
+        data = csv.read()
         assert isinstance(data, pd.DataFrame)
 
     @pytest.mark.parametrize(
@@ -28,7 +28,7 @@ class TestCSVDataSourceEntity:
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
         csv = CSVDataSource.create("foo", Scope.PIPELINE, None, csv_file)
-        assert np.array_equal(csv.get().values, default_data_frame.values)
+        assert np.array_equal(csv.read().values, default_data_frame.values)
 
         if not columns:
             csv.write(content)
@@ -37,7 +37,7 @@ class TestCSVDataSourceEntity:
             csv.write(content, columns)
             df = pd.DataFrame(content, columns=columns)
 
-        assert np.array_equal(csv.get().values, df.values)
+        assert np.array_equal(csv.read().values, df.values)
 
     def test_create(self):
         ds = CSVDataSource.create("fOo BAr", Scope.PIPELINE, None, "data/source/path")

@@ -14,7 +14,7 @@ class input extends propagate {
 
      /**
      * bound to a value
-     * @type {bound(any), default property}
+     * @type {dynamic(any), default property}
      */
      value;
 

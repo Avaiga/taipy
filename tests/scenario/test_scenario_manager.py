@@ -208,10 +208,10 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert len(task_manager.tasks) == 3
     assert len(pipeline_manager.get_pipelines()) == 2
     assert len(scenario_manager.get_scenarios()) == 1
-    assert scenario_entity.foo.get() == 1
-    assert scenario_entity.bar.get() == 0
-    assert scenario_entity.baz.get() == 0
-    assert scenario_entity.qux.get() == 0
+    assert scenario_entity.foo.read() == 1
+    assert scenario_entity.bar.read() == 0
+    assert scenario_entity.baz.read() == 0
+    assert scenario_entity.qux.read() == 0
     assert scenario_entity.by_6.get_sorted_tasks()[0][0].config_name == task_mult_by_2.name
     assert scenario_entity.by_6.get_sorted_tasks()[1][0].config_name == task_mult_by_3.name
     assert scenario_entity.by_4.get_sorted_tasks()[0][0].config_name == task_mult_by_4.name
@@ -243,28 +243,28 @@ def test_get_set_data():
 
     scenario_entity = scenario_manager.create(scenario)
 
-    assert scenario_entity.foo.get() == 1
-    assert scenario_entity.bar.get() == 0
-    assert scenario_entity.baz.get() == 0
-    assert scenario_entity.qux.get() == 0
+    assert scenario_entity.foo.read() == 1
+    assert scenario_entity.bar.read() == 0
+    assert scenario_entity.baz.read() == 0
+    assert scenario_entity.qux.read() == 0
 
     scenario_manager.submit(scenario_entity.id)
-    assert scenario_entity.foo.get() == 1
-    assert scenario_entity.bar.get() == 2
-    assert scenario_entity.baz.get() == 6
-    assert scenario_entity.qux.get() == 4
+    assert scenario_entity.foo.read() == 1
+    assert scenario_entity.bar.read() == 2
+    assert scenario_entity.baz.read() == 6
+    assert scenario_entity.qux.read() == 4
 
     scenario_entity.foo.write("new data value")
-    assert scenario_entity.foo.get() == "new data value"
-    assert scenario_entity.bar.get() == 2
-    assert scenario_entity.baz.get() == 6
-    assert scenario_entity.qux.get() == 4
+    assert scenario_entity.foo.read() == "new data value"
+    assert scenario_entity.bar.read() == 2
+    assert scenario_entity.baz.read() == 6
+    assert scenario_entity.qux.read() == 4
 
     scenario_entity.baz.write(158)
-    assert scenario_entity.foo.get() == "new data value"
-    assert scenario_entity.bar.get() == 2
-    assert scenario_entity.baz.get() == 158
-    assert scenario_entity.qux.get() == 4
+    assert scenario_entity.foo.read() == "new data value"
+    assert scenario_entity.bar.read() == 2
+    assert scenario_entity.baz.read() == 158
+    assert scenario_entity.qux.read() == 4
 
 
 class NotifyMock:

@@ -18,7 +18,7 @@ class TestFileSystemStorage:
         m = TestModel("uuid", "foo")
         r.save(m)
 
-        fetched_model = r.get(m.id)
+        fetched_model = r.load(m.id)
         assert m == fetched_model
 
     def test_get_all(self, tmpdir):
@@ -26,7 +26,7 @@ class TestFileSystemStorage:
         for i in range(5):
             m = TestModel(f"uuid-{i}", f"Foo{i}")
             r.save(m)
-        _models = r.get_all()
+        _models = r.load_all()
 
         assert len(_models) == 5
 
@@ -40,11 +40,11 @@ class TestFileSystemStorage:
             m = TestModel(f"uuid-{i}", f"Foo{i}")
             r.save(m)
 
-        _models = r.get_all()
+        _models = r.load_all()
         assert len(_models) == 5
 
         r.delete_all()
-        _models = r.get_all()
+        _models = r.load_all()
         assert len(_models) == 0
 
     def test_search(self, tmpdir):
