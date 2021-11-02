@@ -119,6 +119,7 @@ demo*.py
 demo*.css
 object_selection.py
 gui_assets
+dataset
 
 # Demos folder
 demo*/

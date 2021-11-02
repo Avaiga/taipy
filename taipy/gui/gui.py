@@ -16,7 +16,6 @@ import markdown as md_lib
 from flask import Blueprint, jsonify, request
 
 from ._default_config import default_config
-from ._md_ext import *
 from .config import GuiConfig
 from .data.data_accessor import _DataAccessors, DataAccessor
 from .page import Page, Partial

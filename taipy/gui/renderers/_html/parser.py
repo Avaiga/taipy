@@ -2,8 +2,6 @@ import re
 import typing as t
 from html.parser import HTMLParser
 
-from markdown.util import etree
-
 from .factory import HtmlFactory
 
 
@@ -97,8 +95,8 @@ class TaipyTag(object):
         return True
 
     def parse(self) -> t.Tuple[str, str]:
-        from ..gui import Gui
+        from ...gui import Gui
 
         for k, v in self.properties.items():
             self.properties[k] = Gui._get_instance().evaluate_expr(v)
-        return HtmlFactory.create_jsx(self.control_type, self.properties)
+        return HtmlFactory.create_element(self.control_type, self.properties)

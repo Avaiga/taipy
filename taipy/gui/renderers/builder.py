@@ -1,8 +1,8 @@
 import datetime
 import json
+import numbers
 import typing as t
 import warnings
-import numbers
 from operator import attrgetter
 from types import FunctionType
 
@@ -300,18 +300,18 @@ class Builder:
             self.attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
 
-            ret_dict = {}
-            ret_dict["columns"] = columns
-            ret_dict["labels"] = [reverse_cols[t[3]] if t[3] in reverse_cols else (t[3] or "") for t in traces]
-            ret_dict["modes"] = [t[4] for t in traces]
-            ret_dict["types"] = [t[5] for t in traces]
-            ret_dict["xaxis"] = [t[7] for t in traces]
-            ret_dict["yaxis"] = [t[8] for t in traces]
-            ret_dict["markers"] = [t[10] if t[10] else {"color": t[6]} if t[6] else None for t in traces]
-            ret_dict["selectedMarkers"] = [t[11] if t[11] else {"color": t[9]} if t[9] else None for t in traces]
-            ret_dict["traces"] = [
-                [reverse_cols[c] if c in reverse_cols else c for c in [t[0], t[1], t[2]]] for t in traces
-            ]
+            ret_dict = {
+                "columns": columns,
+                "labels": [reverse_cols.get(t[3], (t[3] or "")) for t in traces],
+                "modes": [t[4] for t in traces],
+                "types": [t[5] for t in traces],
+                "xaxis": [t[7] for t in traces],
+                "yaxis": [t[8] for t in traces],
+                "markers": [t[10] or ({"color": t[6]} if t[6] else None) for t in traces],
+                "selectedMarkers": [t[11] or ({"color": t[9]} if t[9] else None) for t in traces],
+                "traces": [[reverse_cols.get(c, c) for c in [t[0], t[1], t[2]]] for t in traces],
+            }
+
             self.__set_json_attribute("config", ret_dict)
             self.set_chart_selected(max=len(traces))
         return self

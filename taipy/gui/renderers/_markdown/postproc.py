@@ -1,5 +1,5 @@
 from markdown.treeprocessors import Treeprocessor
-from .builder import Builder
+from ..builder import Builder
 
 
 class Postprocessor(Treeprocessor):
@@ -9,10 +9,7 @@ class Postprocessor(Treeprocessor):
             attribs = p.attrib
             if p.tag == "p":
                 classes = attribs.get("class")
-                if classes:
-                    classes = MD_PARA_CLASSNAME + " " + classes
-                else:
-                    classes = MD_PARA_CLASSNAME
+                classes = MD_PARA_CLASSNAME + " " + classes if classes else MD_PARA_CLASSNAME
                 attribs["class"] = classes
                 p.tag = "div"
             if p != root:

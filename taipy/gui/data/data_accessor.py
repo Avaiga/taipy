@@ -33,7 +33,6 @@ class DataAccessor(ABC):
 
 
 class _DataAccessors(object):
-
     def __init__(self) -> None:
         self.__access_4_type: t.Dict[str, DataAccessor] = {}
 
