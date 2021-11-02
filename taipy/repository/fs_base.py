@@ -2,6 +2,7 @@ import json
 import os
 import pathlib
 import shutil
+from abc import abstractmethod
 from enum import Enum
 from os import path
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
@@ -40,6 +41,20 @@ class FileSystemRepository(Generic[ModelType]):
         Main folder that will hold the directories of all dataclass models
     """
 
+    @abstractmethod
+    def to_model(self, obj):
+        """
+        Convert the object to save in its model
+        """
+        ...
+
+    @abstractmethod
+    def from_model(self, model):
+        """
+        Convert a model to its functional object
+        """
+        ...
+
     def __init__(self, model: Type[ModelType], dir_name: str, base_path: str = ".data"):
         self.model = model
         self.base_path = base_path
@@ -51,27 +66,24 @@ class FileSystemRepository(Generic[ModelType]):
         dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path
 
-    def __load_json_file(self, filepath):
-        with open(filepath, "r") as f:
-            return json.load(f)
-
     def _build_model(self, model_data: Dict) -> ModelType:
         return self.model.from_dict(model_data)  # type: ignore
 
     def load(self, model_id: str) -> Optional[ModelType]:
         try:
             filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
-            return self._build_model(self.__load_json_file(filepath))
+            return self.__to_object(self.__load_json_file(filepath))
         except FileNotFoundError:
             raise ModelNotFound(self.dir_name, model_id)
 
     def load_all(self) -> List[ModelType]:
         models = []
         for filename in pathlib.Path(self.directory).glob("*.json"):
-            models.append(self._build_model(self.__load_json_file(filename)))
+            models.append(self.__to_object(self.__load_json_file(filename)))
         return models
 
-    def save(self, model: Type[ModelType]):
+    def save(self, model):
+        model = self.to_model(model)
         with open(path.join(self.directory, f"{model.id}.json"), "w") as f:  # type: ignore
             json.dump(model.to_dict(), f, ensure_ascii=False, indent=4, cls=EnumEncoder)  # type: ignore
 
@@ -88,16 +100,24 @@ class FileSystemRepository(Generic[ModelType]):
     def search(self, attribute: str, value: str) -> Optional[ModelType]:
         model = None
         for filename in pathlib.Path(self.directory).glob("*.json"):
-            m = self._build_model(self.__load_json_file(filename))
+            m = self.__to_object(self.__load_json_file(filename))
             if hasattr(m, attribute) and getattr(m, attribute) == value:
                 model = m
                 break
         return model
 
-    def search_all(self, attribute: str, value: str) -> List[ModelType]:
+    def search_all(self, attribute: str, value: str) -> List:
         models = []
         for filename in pathlib.Path(self.directory).glob("*.json"):
-            m = self._build_model(self.__load_json_file(filename))
+            m = self.__to_object(self.__load_json_file(filename))
             if hasattr(m, attribute) and getattr(m, attribute) == value:
                 models.append(m)
         return models
+
+    def __to_object(self, model_data: Dict) -> ModelType:
+        model = self.model.from_dict(model_data)  # type: ignore
+        return self.from_model(model)
+
+    def __load_json_file(self, filepath):
+        with open(filepath, "r") as f:
+            return json.load(f)

@@ -1,6 +1,6 @@
 import pytest
 
-from taipy.common.alias import PipelineId, ScenarioId
+from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.data import DataSource, InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
@@ -8,7 +8,7 @@ from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario, ScenarioManager
-from taipy.task import Task, TaskId, TaskScheduler
+from taipy.task import Task, TaskScheduler
 
 
 def test_save_and_get_scenario_entity():
@@ -45,7 +45,7 @@ def test_save_and_get_scenario_entity():
         scenario_manager.get_scenario(scenario_id_2)
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
-    scenario_manager.pipeline_manager.task_manager.save(task_2)
+    scenario_manager.pipeline_manager.task_manager.set(task_2)
     scenario_manager.pipeline_manager.save(pipeline_entity_2)
     scenario_manager.save(scenario_2)
     assert len(scenario_manager.get_scenarios()) == 2
@@ -55,7 +55,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save the first scenario again. We expect nothing to change
     scenario_manager.save(scenario_1)
@@ -66,11 +66,11 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
-    scenario_manager.pipeline_manager.task_manager.save(scenario_2.pipelines[pipeline_name_2].tasks[task_name])
+    scenario_manager.pipeline_manager.task_manager.set(scenario_2.pipelines[pipeline_name_2].tasks[task_name])
     scenario_manager.pipeline_manager.save(pipeline_entity_3)
     scenario_manager.save(scenario_3_with_same_id)
     assert len(scenario_manager.get_scenarios()) == 2
@@ -80,18 +80,18 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get_scenario(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get_scenario(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get_scenario(scenario_id_2).pipelines) == 1
-    assert scenario_manager.task_manager.get(task_2.id) == task_2
+    assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
 
 
 def test_submit():
-    data_source_1 = DataSource("foo", Scope.PIPELINE, "s1")
-    data_source_2 = DataSource("bar", Scope.PIPELINE, "s2")
-    data_source_3 = DataSource("baz", Scope.PIPELINE, "s3")
-    data_source_4 = DataSource("qux", Scope.PIPELINE, "s4")
-    data_source_5 = DataSource("quux", Scope.PIPELINE, "s5")
-    data_source_6 = DataSource("quuz", Scope.PIPELINE, "s6")
-    data_source_7 = DataSource("corge", Scope.PIPELINE, "s7")
-    data_source_8 = DataSource("fum", Scope.PIPELINE, "s8")
+    data_source_1 = InMemoryDataSource("foo", Scope.PIPELINE, "s1")
+    data_source_2 = InMemoryDataSource("bar", Scope.PIPELINE, "s2")
+    data_source_3 = InMemoryDataSource("baz", Scope.PIPELINE, "s3")
+    data_source_4 = InMemoryDataSource("qux", Scope.PIPELINE, "s4")
+    data_source_5 = InMemoryDataSource("quux", Scope.PIPELINE, "s5")
+    data_source_6 = InMemoryDataSource("quuz", Scope.PIPELINE, "s6")
+    data_source_7 = InMemoryDataSource("corge", Scope.PIPELINE, "s7")
+    data_source_8 = InMemoryDataSource("fum", Scope.PIPELINE, "s8")
     task_1 = Task(
         "grault",
         [data_source_1, data_source_2],
@@ -121,7 +121,7 @@ def test_submit():
         submit_calls = []
 
         def submit(self, task: Task, callbacks=None):
-            self.submit_calls.append(task)
+            self.submit_calls.append(task.id)
             return super().submit(task, callbacks)
 
     pipeline_manager.task_scheduler = MockTaskScheduler()
@@ -146,19 +146,19 @@ def test_submit():
     # scenario, pipeline, and tasks do exist.
     # We expect all the tasks to be submitted once,
     # and respecting specific constraints on the order
-    task_manager.save(task_1)
-    task_manager.save(task_2)
-    task_manager.save(task_3)
-    task_manager.save(task_4)
-    task_manager.save(task_5)
+    task_manager.set(task_1)
+    task_manager.set(task_2)
+    task_manager.set(task_3)
+    task_manager.set(task_4)
+    task_manager.set(task_5)
     scenario_manager.submit(scenario_entity.id)
     submit_calls = pipeline_manager.task_scheduler.submit_calls
     assert len(submit_calls) == 5
-    assert set(submit_calls) == {task_1, task_2, task_4, task_3, task_5}
-    assert submit_calls.index(task_2) < submit_calls.index(task_3)
-    assert submit_calls.index(task_1) < submit_calls.index(task_3)
-    assert submit_calls.index(task_1) < submit_calls.index(task_2)
-    assert submit_calls.index(task_1) < submit_calls.index(task_4)
+    assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
+    assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
+    assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
+    assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
+    assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
 
 def mult_by_2(nb: int):
@@ -198,14 +198,14 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2])
 
     assert len(data_manager.get_all()) == 0
-    assert len(task_manager.tasks) == 0
+    assert len(task_manager.get_all()) == 0
     assert len(pipeline_manager.get_pipelines()) == 0
     assert len(scenario_manager.get_scenarios()) == 0
 
     scenario_entity = scenario_manager.create(scenario)
 
     assert len(data_manager.get_all()) == 5
-    assert len(task_manager.tasks) == 3
+    assert len(task_manager.get_all()) == 3
     assert len(pipeline_manager.get_pipelines()) == 2
     assert len(scenario_manager.get_scenarios()) == 1
     assert scenario_entity.foo.read() == 1

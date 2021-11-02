@@ -1,7 +1,7 @@
 import pytest
 
 from taipy.common.alias import TaskId
-from taipy.config import DataSourceConfig, TaskConfig
+from taipy.config import Config, DataSourceConfig, TaskConfig
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions.task import NonExistingTask
 from taipy.task import Task
@@ -19,38 +19,38 @@ def test_save_and_get_task():
     # No task at initialization
     task_manager = TaskManager()
     task_manager.delete_all()
-    assert len(task_manager.tasks) == 0
+    assert len(task_manager.get_all()) == 0
     with pytest.raises(NonExistingTask):
         task_manager.get(task_id_1)
     with pytest.raises(NonExistingTask):
         task_manager.get(task_id_2)
 
     # Save one task. We expect to have only one task stored
-    task_manager.save(first_task)
-    assert len(task_manager.tasks) == 1
-    assert task_manager.get(task_id_1) == first_task
+    task_manager.set(first_task)
+    assert len(task_manager.get_all()) == 1
+    assert task_manager.get(task_id_1).id == first_task.id
     with pytest.raises(NonExistingTask):
         task_manager.get(task_id_2)
 
     # Save a second task. Now, we expect to have a total of two tasks stored
-    task_manager.save(second_task)
-    assert len(task_manager.tasks) == 2
-    assert task_manager.get(task_id_1) == first_task
-    assert task_manager.get(task_id_2) == second_task
+    task_manager.set(second_task)
+    assert len(task_manager.get_all()) == 2
+    assert task_manager.get(task_id_1).id == first_task.id
+    assert task_manager.get(task_id_2).id == second_task.id
 
     # We save the first task again. We expect nothing to change
-    task_manager.save(first_task)
-    assert len(task_manager.tasks) == 2
-    assert task_manager.get(task_id_1) == first_task
-    assert task_manager.get(task_id_2) == second_task
+    task_manager.set(first_task)
+    assert len(task_manager.get_all()) == 2
+    assert task_manager.get(task_id_1).id == first_task.id
+    assert task_manager.get(task_id_2).id == second_task.id
 
     # We save a third task with same id as the first one.
     # We expect the first task to be updated
-    task_manager.save(third_task_with_same_id_as_first_task)
-    assert len(task_manager.tasks) == 2
-    assert task_manager.get(task_id_1) == third_task_with_same_id_as_first_task
-    assert task_manager.get(task_id_1) != first_task
-    assert task_manager.get(task_id_2) == second_task
+    task_manager.set(third_task_with_same_id_as_first_task)
+    assert len(task_manager.get_all()) == 2
+    assert task_manager.get(task_id_1).id == third_task_with_same_id_as_first_task.id
+    assert task_manager.get(task_id_1).config_name != first_task.config_name
+    assert task_manager.get(task_id_2).id == second_task.id
 
 
 def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
@@ -84,3 +84,18 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
 
     assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
     assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
+
+
+def test_ensure_task_are_persisted():
+    inputs = [Config.data_source_configs.create("input_1", "in_memory")]
+    output = Config.data_source_configs.create("output", "in_memory")
+    task_config = Config.task_configs.create("foo", inputs, print, output)
+
+    task = TaskManager().create(task_config)
+
+    task_retrieved = TaskManager().get(task.id)
+
+    assert task.id == task_retrieved.id
+    assert task.function == task_retrieved.function
+    assert task.input == task_retrieved.input
+    assert task.output == task_retrieved.output

@@ -4,7 +4,6 @@ from typing import List, Optional
 from taipy.config import DataSourceConfig
 from taipy.data import CSVDataSource, DataRepository, PickleDataSource
 from taipy.data.data_source import DataSource
-from taipy.data.data_source_model import DataSourceModel
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
@@ -21,7 +20,7 @@ class DataManager:
     __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}  # type: ignore
 
     def __init__(self):
-        self.repository = DataRepository(model=DataSourceModel, dir_name="sources")
+        self.repository = DataRepository(self.__DATA_SOURCE_CLASS_MAP, "sources")
 
     def delete_all(self):
         self.repository.delete_all()
@@ -46,25 +45,16 @@ class DataManager:
 
     def set(self, data_source: DataSource):
         # TODO Check if we should create the model or if it already exist
-        model = DataSourceModel(
-            data_source.id,
-            data_source.config_name,
-            data_source.scope,
-            data_source.type(),
-            data_source.parent_id,
-            data_source.properties,
-        )
-        self.repository.save(model)
+        self.repository.save(data_source)
 
     def get(self, data_source_id: str) -> DataSource:
-        model = self.repository.load(data_source_id)
-        return self.__to_data_source(model)
+        return self.repository.load(data_source_id)
 
     def get_all(self) -> List[DataSource]:
-        return [self.__to_data_source(model) for model in self.repository.load_all()]
+        return self.repository.load_all()
 
     def _get_all_by_config_name(self, config_name: str) -> List[DataSource]:
-        return [self.__to_data_source(model) for model in self.repository.search_all("config_name", config_name)]
+        return self.repository.search_all("config_name", config_name)
 
     def _create_and_save_data_source(
         self, data_source_config: DataSourceConfig, parent_id: Optional[str]
@@ -72,15 +62,6 @@ class DataManager:
         data_source = self.__create_data_source(data_source_config, parent_id)
         self.set(data_source)
         return data_source
-
-    def __to_data_source(self, model):
-        return self.__DATA_SOURCE_CLASS_MAP[model.type](
-            config_name=model.config_name,
-            scope=model.scope,
-            id=model.id,
-            parent_id=model.parent_id,
-            properties=model.data_source_properties,
-        )
 
     def __create_data_source(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
         try:

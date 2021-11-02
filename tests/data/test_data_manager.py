@@ -4,7 +4,7 @@ import pathlib
 import pytest
 
 from taipy.config import Config, DataSourceConfig
-from taipy.data import CSVDataSource, Scope
+from taipy.data import CSVDataSource, DataSource, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType, ModelNotFound
@@ -70,18 +70,18 @@ class TestDataManager:
         dm = DataManager()
         dm.repository.base_path = tmpdir
         dm.repository.save(
-            DataSourceModel(
-                "ds_id",
+            CSVDataSource(
                 "test_data_source",
                 Scope.PIPELINE,
-                "in_memory",
+                "ds_id",
                 None,
-                {"data": "In Memory Data Source"},
+                {"path": "/path", "has_header": True},
             )
         )
         ds = dm.repository.load("ds_id")
 
-        assert isinstance(ds, DataSourceModel)
+        assert isinstance(ds, CSVDataSource)
+        assert isinstance(ds, DataSource)
 
     def test_fetch_data_source_not_exists(self):
         dm = DataManager()

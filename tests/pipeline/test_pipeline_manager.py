@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.common.alias import PipelineId
-from taipy.config import Config, PipelineConfig, TaskConfig
+from taipy.common.alias import PipelineId, TaskId
+from taipy.config import Config, DataSourceConfig, PipelineConfig, TaskConfig
 from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
@@ -11,7 +11,7 @@ from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
-from taipy.task import Task, TaskId, TaskManager
+from taipy.task import Task, TaskManager
 from taipy.task.scheduler import TaskScheduler
 
 
@@ -44,7 +44,7 @@ def test_save_and_get_pipeline_entity():
         pipeline_manager.get_pipeline(pipeline_id_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
-    task_manager.save(task_2)
+    task_manager.set(task_2)
     pipeline_manager.save(pipeline_2)
     assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
     assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
@@ -52,7 +52,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
     pipeline_manager.save(pipeline_1)
@@ -62,7 +62,7 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
@@ -73,17 +73,17 @@ def test_save_and_get_pipeline_entity():
     assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
     assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
-    assert pipeline_manager.task_manager.get(task_2.id) == task_2
+    assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
 
 def test_submit():
-    data_source_1 = DataSource("foo", Scope.PIPELINE, "s1")
-    data_source_2 = DataSource("bar", Scope.PIPELINE, "s2")
-    data_source_3 = DataSource("baz", Scope.PIPELINE, "s3")
-    data_source_4 = DataSource("qux", Scope.PIPELINE, "s4")
-    data_source_5 = DataSource("quux", Scope.PIPELINE, "s5")
-    data_source_6 = DataSource("quuz", Scope.PIPELINE, "s6")
-    data_source_7 = DataSource("corge", Scope.PIPELINE, "s7")
+    data_source_1 = InMemoryDataSource("foo", Scope.PIPELINE, "s1")
+    data_source_2 = InMemoryDataSource("bar", Scope.PIPELINE, "s2")
+    data_source_3 = InMemoryDataSource("baz", Scope.PIPELINE, "s3")
+    data_source_4 = InMemoryDataSource("qux", Scope.PIPELINE, "s4")
+    data_source_5 = InMemoryDataSource("quux", Scope.PIPELINE, "s5")
+    data_source_6 = InMemoryDataSource("quuz", Scope.PIPELINE, "s6")
+    data_source_7 = InMemoryDataSource("corge", Scope.PIPELINE, "s7")
     task_1 = Task(
         "grault",
         [data_source_1, data_source_2],
@@ -119,18 +119,15 @@ def test_submit():
 
     # pipeline, and tasks does exist. We expect the tasks to be submitted
     # in a specific order
-    task_manager.save(task_1)
-    task_manager.save(task_2)
-    task_manager.save(task_3)
-    task_manager.save(task_4)
+    task_manager.set(task_1)
+    task_manager.set(task_2)
+    task_manager.set(task_3)
+    task_manager.set(task_4)
 
     pipeline_manager.submit(pipeline_entity.id)
-    assert pipeline_manager.task_scheduler.submit_calls == [
-        task_1,
-        task_2,
-        task_4,
-        task_3,
-    ]
+    calls_ids = [t.id for t in pipeline_manager.task_scheduler.submit_calls]
+    tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
+    assert calls_ids == tasks_ids
 
 
 def mult_by_2(nb: int):
@@ -159,12 +156,12 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
     assert len(data_manager.get_all()) == 0
-    assert len(task_manager.tasks) == 0
+    assert len(task_manager.get_all()) == 0
 
     pipeline_entity = pipeline_manager.create(pipeline)
 
     assert len(data_manager.get_all()) == 3
-    assert len(task_manager.tasks) == 2
+    assert len(task_manager.get_all()) == 2
     assert len(pipeline_entity.get_sorted_tasks()) == 2
     assert pipeline_entity.foo.read() == 1
     assert pipeline_entity.bar.read() == 0
