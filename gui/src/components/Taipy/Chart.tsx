@@ -135,7 +135,7 @@ const Chart = (props: ChartProp) => {
         }
     }, [refresh, dispatch, config.columns, tp_varname, id]);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
     const layout = useMemo(() => {
         const playout = props.layout ? JSON.parse(props.layout) : {};

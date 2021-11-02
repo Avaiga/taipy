@@ -22,6 +22,7 @@ interface DialogProps extends TaipyBaseProps {
     cancelLabel: string;
     validateLabel: string;
     pageId: string;
+    value: boolean;
 }
 
 const closeSx: SxProps<Theme> = {

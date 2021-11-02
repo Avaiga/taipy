@@ -149,22 +149,22 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
-export const createSendUpdateAction = (name: string, value: unknown, propagate = true): TaipyAction => ({
+export const createSendUpdateAction = (name: string | undefined, value: unknown, propagate = true): TaipyAction => ({
     type: Types.SendUpdate,
-    name: name,
+    name: name || "",
     propagate: propagate,
     payload: { value: value },
 });
 
-export const createSendActionNameAction = (name: string, value: unknown): TaipyAction => ({
+export const createSendActionNameAction = (name: string | undefined, value: unknown): TaipyAction => ({
     type: Types.Action,
-    name: name,
+    name: name || "",
     payload: { value: value },
 });
 
-export const createRequestChartUpdateAction = (name: string, id: string, columns: string[]): TaipyAction => ({
+export const createRequestChartUpdateAction = (name: string | undefined, id: string | undefined, columns: string[]): TaipyAction => ({
     type: Types.RequestDataUpdate,
-    name: name,
+    name: name || "",
     payload: {
         id: id,
         columns: columns,
@@ -173,8 +173,8 @@ export const createRequestChartUpdateAction = (name: string, id: string, columns
 });
 
 export const createRequestTableUpdateAction = (
-    name: string,
-    id: string,
+    name: string | undefined,
+    id: string | undefined,
     columns: string[],
     pageKey: string,
     start?: number,
@@ -183,7 +183,7 @@ export const createRequestTableUpdateAction = (
     sort?: string
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
-    name: name,
+    name: name || "",
     payload: {
         id: id,
         columns: columns,
@@ -196,8 +196,8 @@ export const createRequestTableUpdateAction = (
 });
 
 export const createRequestInfiniteTableUpdateAction = (
-    name: string,
-    id: string,
+    name: string | undefined,
+    id: string | undefined,
     columns: string[],
     pageKey: string,
     start?: number,
@@ -206,7 +206,7 @@ export const createRequestInfiniteTableUpdateAction = (
     sort?: string
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
-    name: name,
+    name: name || "",
     payload: {
         id: id,
         pagekey: pageKey,
@@ -219,7 +219,7 @@ export const createRequestInfiniteTableUpdateAction = (
     },
 });
 
-export const createRequestUpdateAction = (id: string, names: string[]): TaipyAction => ({
+export const createRequestUpdateAction = (id: string| undefined, names: string[]): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     payload: {
