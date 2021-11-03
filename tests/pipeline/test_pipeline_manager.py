@@ -3,8 +3,7 @@ from unittest import mock
 import pytest
 
 from taipy.common.alias import PipelineId, TaskId
-from taipy.config import Config, DataSourceConfig, PipelineConfig, TaskConfig
-from taipy.data.data_source import DataSource
+from taipy.config import Config, PipelineConfig, TaskConfig
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
