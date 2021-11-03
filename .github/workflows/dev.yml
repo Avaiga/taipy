@@ -15,7 +15,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  # This workflow contains two jobs called "test" and "test-gui"
   test:
     # The type of runner that the job will run on
     strategy:
@@ -62,3 +62,23 @@ jobs:
 
       - name: list files
         run: ls -l .
+  
+  test-gui:
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        os: [ubuntu-18.04, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
