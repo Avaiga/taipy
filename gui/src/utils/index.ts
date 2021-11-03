@@ -48,6 +48,7 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
             }
             return getDateTimeString(value.toString(), getDateTimeFormat());
         case "int":
+        case "float":
         case "number":
             if (typeof value === "string") {
                 value = parseInt(value, 10);
