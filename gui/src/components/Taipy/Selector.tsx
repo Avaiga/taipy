@@ -79,7 +79,7 @@ const Selector = (props: SelectorProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id, tp_varname);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars, tp_varname);
 
     const lovList = useLovListMemo(lov, defaultLov);
 

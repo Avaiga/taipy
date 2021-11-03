@@ -65,7 +65,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
     useEffect(() => {
         if (selected.length) {

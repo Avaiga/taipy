@@ -10,7 +10,7 @@ export interface StatusType {
 }
 
 interface StatusProps {
-    id: string;
+    id?: string;
     value: StatusType;
     onClose?: (evt: MouseEvent) => void;
     icon?: ReactNode;

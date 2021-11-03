@@ -1,13 +1,12 @@
 export interface TaipyBaseProps {
-    id: string;
-    defaultValue: string;
-    tp_varname: string;
+    id?: string;
+    defaultValue?: string;
+    tp_varname?: string;
     className?: string;
-    value: unknown;
-    propagate: boolean;
-    tp_updatevars: string;
-    defaultActive: boolean;
-    active: boolean;
+    propagate?: boolean;
+    tp_updatevars?: string;
+    defaultActive?: boolean;
+    active?: boolean;
 }
 
 export interface TaipyMultiSelect {
@@ -15,9 +14,9 @@ export interface TaipyMultiSelect {
 }
 
 export interface TaipyFieldProps extends TaipyBaseProps {
-    dataType: string;
-    value: string;
-    format: string;
+    dataType?: string;
+    value: string | number;
+    format?: string;
 }
 
 export interface TaipyInputProps extends TaipyBaseProps {
@@ -42,7 +41,7 @@ export const getUpdateVar = (updateVars: string, name: string) => {
     return sel;
 };
 
-export const getUpdateVars = (updateVars: string) =>
+export const getUpdateVars = (updateVars?: string) =>
     updateVars
         ? updateVars
               .split(";")

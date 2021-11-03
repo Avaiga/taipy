@@ -41,7 +41,7 @@ const getStatusStrValue = (status: number) => {
     }
 };
 
-const getId = (base: string, idx: number) => (base || "status") + idx;
+const getId = (base: string | undefined, idx: number) => (base || "status") + idx;
 
 const NO_STATUS = { status: "info", message: "No Status" };
 
@@ -81,7 +81,7 @@ const StatusList = (props: StatusListProps) => {
     useEffect(() => {
         let val;
         if (props.value === undefined) {
-            val = JSON.parse(props.defaultValue) as StatusType[] | StatusType;
+            val = (props.defaultValue ? JSON.parse(props.defaultValue) : []) as StatusType[] | StatusType;
         } else {
             val = props.value;
         }
