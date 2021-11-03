@@ -5,13 +5,14 @@ import TextField from "@mui/material/TextField";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { TaipyInputProps } from "./utils";
+import { TaipyBaseProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
 import { useDynamicProperty } from "../../utils/hooks";
 
-interface DateSelectorProps extends TaipyInputProps {
+interface DateSelectorProps extends TaipyBaseProps {
     withTime?: boolean;
     format?: string;
+    value: string;
 }
 
 const DateSelector = (props: DateSelectorProps) => {

@@ -1,6 +1,6 @@
-export interface TaipyBaseProps {
+export interface TaipyBaseProps<T = string> {
     id?: string;
-    defaultValue?: string;
+    defaultValue?: T;
     tp_varname?: string;
     className?: string;
     propagate?: boolean;
@@ -21,7 +21,6 @@ export interface TaipyFieldProps extends TaipyBaseProps {
 
 export interface TaipyInputProps extends TaipyBaseProps {
     type: string;
-    tp_onAction: string;
     value: string;
 }
 
