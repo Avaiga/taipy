@@ -32,6 +32,6 @@ describe("Field Component", () => {
     })
     it("displays a float with format", async () => {
         const {getByText} = render(<Field defaultValue="titi" value={12.1} dataType="float" format="float is %.0f" /> );
-        const elt = getByText("float are 12");
+        const elt = getByText("float is 12");
     })
 });
