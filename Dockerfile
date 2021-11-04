@@ -6,6 +6,7 @@ WORKDIR /app
 # after publishing to pypi
 COPY Pipfile .
 RUN pip install --upgrade pipenv
+RUN pip install -r requirements.txt
 RUN pipenv install --dev --skip-lock
 
 COPY ./ /app/install
