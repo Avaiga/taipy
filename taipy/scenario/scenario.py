@@ -4,6 +4,8 @@ ML training pipeline, etc. should implement this generic pipeline entity
 """
 import logging
 import uuid
+import re
+import unidecode
 from typing import Dict, List
 
 from taipy.pipeline import Pipeline
@@ -32,7 +34,17 @@ class Scenario:
 
     @staticmethod
     def __protect_name(config_name):
+        # approach 2
+        return re.sub(r'[\W]+', '-', unidecode.unidecode(config_name).strip().lower().replace(' ', '_'))
+        # approach 3
         return config_name.strip().lower().replace(" ", "_")
+    
+    @staticmethod
+    def protect_name(config_name):
+        # # approach 1
+        # return unicodedata.normalize('NFKC', config_name).strip().lower().replace(" ", "_")
+        # approach 2
+        return re.sub(r'[\W_]+', '-', unidecode.unidecode(config_name).lower()).replace(' ', '_')
 
     @staticmethod
     def new_id(config_name: str) -> ScenarioId:

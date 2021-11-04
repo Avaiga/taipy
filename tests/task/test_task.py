@@ -20,6 +20,10 @@ def test_create_task():
     task = Task(name, [], print, [])
     assert f"TASK_{name}_" in task.id
     assert task.config_name == "name_1"
+    
+    name_1 = "name_1//ξ"
+    task_1 = Task(name_1, [], print, [])
+    assert task_1.config_name == "name_1-x"
 
 
 def test_can_not_change_task_output(output):

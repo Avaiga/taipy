@@ -1,5 +1,7 @@
 import logging
 import uuid
+import re
+import unidecode
 from collections.abc import Iterable
 from typing import Dict, Optional
 
@@ -35,7 +37,9 @@ class Task:
 
     @staticmethod
     def __protect_name(config_name):
-        return config_name.strip().lower().replace(" ", "_")
+        # approach 2
+        return re.sub(r'[\W]+', '-', unidecode.unidecode(config_name).strip().lower().replace(' ', '_'))
+    
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)

@@ -4,6 +4,8 @@ ML training pipeline, etc. could implement this generic pipeline
 """
 import logging
 import uuid
+import re
+import unidecode
 from collections import defaultdict
 from typing import Dict, List
 
@@ -34,6 +36,9 @@ class Pipeline:
 
     @staticmethod
     def __protect_name(name):
+        # approach 2
+        return re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
+        # approach 3
         return name.strip().lower().replace(" ", "_")
 
     @staticmethod

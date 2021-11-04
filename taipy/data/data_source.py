@@ -1,5 +1,7 @@
 import logging
 import uuid
+import re
+import unidecode
 from abc import abstractmethod
 from typing import Optional
 
@@ -54,8 +56,9 @@ class DataSource:
 
     @staticmethod
     def __protect_name(config_name: str):
-        return config_name.strip().lower().replace(" ", "_")
-
+        # approach 2
+        return re.sub(r'[\W]+', '-', unidecode.unidecode(config_name).strip().lower().replace(' ', '_'))
+    
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:

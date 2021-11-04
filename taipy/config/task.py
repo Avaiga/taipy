@@ -1,3 +1,5 @@
+import re
+import unidecode
 from copy import copy
 from typing import List, Union
 
@@ -21,7 +23,7 @@ class TaskConfig:
             self.__output = [output]
         else:
             self.__output = copy(output)
-        self.name = name.strip().lower().replace(" ", "_")
+        self.name = re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
         self.function = function
 
     @property
