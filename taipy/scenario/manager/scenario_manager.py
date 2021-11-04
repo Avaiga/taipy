@@ -55,7 +55,7 @@ class ScenarioManager:
     def get_scenario(self, scenario_id: ScenarioId) -> Scenario:
         try:
             model = self.__SCENARIO_MODEL_DB[scenario_id]
-            pipelines = [self.pipeline_manager.get_pipeline(PipelineId(pipeline_id)) for pipeline_id in model.pipelines]
+            pipelines = [self.pipeline_manager.get(PipelineId(pipeline_id)) for pipeline_id in model.pipelines]
             return Scenario(model.name, pipelines, model.properties, model.id)
         except NonExistingPipeline as err:
             logging.error(err.message)
