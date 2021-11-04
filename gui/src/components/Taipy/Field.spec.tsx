@@ -1,8 +1,7 @@
 import React from "react";
-import {render, fireEvent, waitFor, screen} from "@testing-library/react";
+import {render} from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-import { ENDPOINT } from "../../utils";
 import Field from './Field';
 
 describe("Field Component", () => {
@@ -14,7 +13,7 @@ describe("Field Component", () => {
     it("displays the right info for string", async () => {
         const {getByText} = render(<Field value="toto" defaultValue="titi" className="taipy-field" />);
         const elt = getByText("toto");
-        expect(elt.classList).toContain("taipy-field");
+        expect(elt).toHaveClass("taipy-field");
     })
     it("displays the default value", async () => {
         const {getByText} = render(<Field defaultValue="titi" value={undefined as unknown as string} />);
