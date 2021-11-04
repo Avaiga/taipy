@@ -5,9 +5,11 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import Any, List, Optional
 
+from taipy.common.alias import JobId
 from taipy.data import DataSource
 from taipy.data.manager import DataManager
 from taipy.exceptions.job import DataSourceWritingError
+from taipy.task import Task
 from taipy.task.scheduler.executor.synchronous import Synchronous
 from taipy.task.scheduler.job import Job
 
@@ -23,10 +25,8 @@ class JobDispatcher:
 
     def execute(self, job: Job):
         job.running()
-        inputs = job.task.input.values()
-        outputs = job.task.output.values()
         self.__nb_worker_available -= 1
-        future = self.__executor.submit(partial(self._call_function, inputs, job.task.function, outputs))
+        future = self.__executor.submit(partial(self._call_function, job.id, job.task))
         future.add_done_callback(self.__release_worker)
         future.add_done_callback(job.update_status)
 
@@ -34,10 +34,13 @@ class JobDispatcher:
         self.__nb_worker_available += 1
 
     @classmethod
-    def _call_function(cls, inputs: List[DataSource], fct, outputs: List[DataSource]):
+    def _call_function(cls, job_id: JobId, task: Task):
         try:
-            r = fct(*cls.__read_inputs(inputs))
-            return cls.__write_data(outputs, r)
+            inputs: List[DataSource] = list(task.input.values())
+            outputs: List[DataSource] = list(task.output.values())
+            fct = task.function
+            results = fct(*cls.__read_inputs(inputs))
+            return cls.__write_data(outputs, results, job_id)
         except Exception as e:
             return [e]
 
@@ -46,13 +49,16 @@ class JobDispatcher:
         return [DataManager().get(ds.id).read() for ds in inputs]
 
     @classmethod
-    def __write_data(cls, outputs: List[DataSource], results):
+    def __write_data(cls, outputs: List[DataSource], results, job_id: JobId):
+        # TODO set outputs ready status to false
         try:
             _results = cls.__extract_results(outputs, results)
             exceptions = []
             for res, ds in zip(_results, outputs):
                 try:
-                    DataManager().get(ds.id).write(res)
+                    data_source = DataManager().get(ds.id)
+                    data_source.write(res, job_id)
+                    DataManager().set(data_source)
                 except Exception as e:
                     exceptions.append(DataSourceWritingError(f"Error on writing in datasource id {ds.id}: {e}"))
                     logging.error(f"Error on writing output {e}")

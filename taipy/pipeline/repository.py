@@ -10,7 +10,7 @@ from taipy.repository import FileSystemRepository
 from taipy.task import TaskManager
 
 
-class PipelineRepository(FileSystemRepository[PipelineModel]):
+class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
     def to_model(self, pipeline):
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(list)

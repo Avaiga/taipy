@@ -30,6 +30,8 @@ class TestInMemoryDataSourceEntity:
         assert ds.type() == "in_memory"
         assert ds.id is not None
         assert ds.read() == "In memory Data Source"
+        assert ds.last_edition_date is not None
+        assert ds.job_ids == []
 
     def test_write(self):
         in_mem_ds = InMemoryDataSource.create("foo", Scope.PIPELINE, None, data="bar")

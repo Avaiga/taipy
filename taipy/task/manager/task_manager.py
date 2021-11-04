@@ -1,24 +1,22 @@
 import itertools
 import logging
-from importlib import import_module
 from typing import Dict, Optional
 
 from taipy.common.alias import TaskId
 from taipy.config import TaskConfig
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound, NonExistingTask
+from taipy.task import TaskScheduler
 from taipy.task.repository import TaskRepository
 from taipy.task.task import Task
-from taipy.task.task_model import TaskModel
 
 
 class TaskManager:
     # This represents the task database.
     tasks: Dict[(TaskId, Task)] = {}
+    task_scheduler = TaskScheduler()
     data_manager = DataManager()
-
-    def __init__(self):
-        self.repository = TaskRepository(dir_name="tasks_models")
+    repository = TaskRepository(dir_name="task_models")
 
     def delete_all(self):
         self.repository.delete_all()
@@ -45,12 +43,15 @@ class TaskManager:
 
     def get(self, task_id: TaskId) -> Task:
         try:
-            return self.repository.load(task_id)
+            if opt_task := self.repository.load(task_id):
+                return opt_task
+            else:
+                logging.error(f"Task : {task_id} does not exist.")
+                raise NonExistingTask(task_id)
         except ModelNotFound:
             logging.error(f"Task : {task_id} does not exist.")
             raise NonExistingTask(task_id)
 
-    @staticmethod
-    def __save_data_sources(data_sources):
+    def __save_data_sources(self, data_sources):
         for i in data_sources:
-            DataManager().set(i)
+            self.data_manager.set(i)

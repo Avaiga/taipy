@@ -11,6 +11,7 @@ from taipy.exceptions import JobNotDeletedException, NonExistingJob
 from taipy.task import Task
 
 from ...config.task_scheduler import TaskSchedulerConfig
+from ...data.manager import DataManager
 from .job import Job, JobId
 from .job_dispatcher import JobDispatcher
 
@@ -26,6 +27,7 @@ class TaskScheduler:
         self.__executor = JobDispatcher(
             task_scheduler_config.parallel_execution, task_scheduler_config.max_number_of_parallel_execution
         )
+        self.data_manager = DataManager()
         self.lock = Lock()
 
     def submit(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
@@ -40,9 +42,16 @@ class TaskScheduler:
         If an error happens when the result is provided to a data source, we ignore it
         and continue to the next data source
         """
+        # TODO set outputs ready status to false
+        # output.update_submitted()
         job = self.__create_job(task, callbacks or [])
-        self.jobs_to_run.put(job)
+        # if it exists an input not ready
+        #     job.is_blocked()
+        #     self.job_blocked.put(job)
+        # else
         job.pending()
+        self.jobs_to_run.put(job)
+
         self.__run()
         return job
 
@@ -76,18 +85,19 @@ class TaskScheduler:
             job_to_run = self.jobs_to_run.get()
             self.__executor.execute(job_to_run)
 
-    def __job_finished(self, job: Job):
-        if job.is_finished():
-            if self.lock.acquire(block=False):
-                try:
-                    self.__execute_jobs()
-                except:
-                    ...
-                finally:
-                    self.lock.release()
-
     def __create_job(self, task: Task, callbacks: Iterable[Callable]) -> Job:
         job = Job(id=JobId(f"job_id_{task.id}_{uuid.uuid4()}"), task=task)
         self.__JOBS[job.id] = job
         job.on_status_change(self.__job_finished, *callbacks)
         return job
+
+    def __job_finished(self, job: Job):
+        if job.is_finished():
+            if self.lock.acquire(block=False):
+                try:
+                    # TODO self.__unblock_jobs()
+                    self.__execute_jobs()
+                except:
+                    ...
+                finally:
+                    self.lock.release()

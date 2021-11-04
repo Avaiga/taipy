@@ -15,13 +15,12 @@ from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.repository import PipelineRepository
 from taipy.task import Job
 from taipy.task.manager.task_manager import TaskManager
-from taipy.task.scheduler.task_scheduler import TaskScheduler
 
 
 class PipelineManager:
     task_manager = TaskManager()
     data_manager = task_manager.data_manager
-    task_scheduler = TaskScheduler()
+    task_scheduler = task_manager.task_scheduler
 
     def __init__(self):
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")

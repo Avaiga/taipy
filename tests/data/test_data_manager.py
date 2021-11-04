@@ -5,7 +5,6 @@ import pytest
 
 from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, DataSource, Scope
-from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType, ModelNotFound
 
@@ -27,7 +26,7 @@ class TestDataManager:
 
         # Test we can instantiate a EmbeddedDataSource from DataSourceConfig
 
-        # with type embedded
+        # with type in memory
         in_memory_ds_config = DataSourceConfig(name="foo", type="in_memory", scope=Scope.SCENARIO, data="bar")
         in_mem_ds = dm._create_and_save_data_source(in_memory_ds_config, "Scenario_id")
         fetched_entity = dm.get(in_mem_ds.id)
@@ -75,6 +74,9 @@ class TestDataManager:
                 Scope.PIPELINE,
                 "ds_id",
                 None,
+                None,
+                [],
+                False,
                 {"path": "/path", "has_header": True},
             )
         )

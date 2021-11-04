@@ -1,3 +1,4 @@
+import datetime
 import os
 import pathlib
 
@@ -8,13 +9,19 @@ import pytest
 from taipy.data import CSVDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
+from taipy.exceptions.data_source import NoData
 
 
 class TestCSVDataSourceEntity:
     def test_get(self):
+        not_existing_csv = CSVDataSource.create("foo", Scope.PIPELINE, None, "NOT_EXISTING_PATH.csv")
+        with pytest.raises(NoData):
+            not_existing_csv.read()
+
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        csv = CSVDataSource.create("foo", Scope.PIPELINE, None, path)
+        csv = CSVDataSource.create("bar", Scope.PIPELINE, None, path)
         assert csv.path == path
+        csv.last_edition_date = datetime.datetime.now()
         data = csv.read()
         assert isinstance(data, pd.DataFrame)
 
@@ -34,7 +41,7 @@ class TestCSVDataSourceEntity:
             csv.write(content)
             df = pd.DataFrame(content)
         else:
-            csv.write(content, columns)
+            csv.write_with_column_names(content, columns)
             df = pd.DataFrame(content, columns=columns)
 
         assert np.array_equal(csv.read().values, df.values)
@@ -48,6 +55,8 @@ class TestCSVDataSourceEntity:
         assert ds.path == "data/source/path"
         assert ds.type() == "csv"
         assert ds.id is not None
+        assert ds.last_edition_date is None
+        assert ds.job_ids == []
         with pytest.raises(AttributeError):
             ds.foo
 
