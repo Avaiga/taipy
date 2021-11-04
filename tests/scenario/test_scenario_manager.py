@@ -46,7 +46,7 @@ def test_save_and_get_scenario_entity():
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     scenario_manager.pipeline_manager.task_manager.set(task_2)
-    scenario_manager.pipeline_manager.save(pipeline_entity_2)
+    scenario_manager.pipeline_manager.set(pipeline_entity_2)
     scenario_manager.save(scenario_2)
     assert len(scenario_manager.get_scenarios()) == 2
     assert scenario_manager.get_scenario(scenario_id_1).id == scenario_1.id
@@ -71,7 +71,7 @@ def test_save_and_get_scenario_entity():
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
     scenario_manager.pipeline_manager.task_manager.set(scenario_2.pipelines[pipeline_name_2].tasks[task_name])
-    scenario_manager.pipeline_manager.save(pipeline_entity_3)
+    scenario_manager.pipeline_manager.set(pipeline_entity_3)
     scenario_manager.save(scenario_3_with_same_id)
     assert len(scenario_manager.get_scenarios()) == 2
     assert scenario_manager.get_scenario(scenario_id_1).id == scenario_1.id
@@ -138,8 +138,8 @@ def test_submit():
 
     # scenario and pipeline do exist, but tasks does not exist.
     # We expect an exception to be raised
-    pipeline_manager.save(pipeline_entity_1)
-    pipeline_manager.save(pipeline_entity_2)
+    pipeline_manager.set(pipeline_entity_1)
+    pipeline_manager.set(pipeline_entity_2)
     with pytest.raises(NonExistingTask):
         scenario_manager.submit(scenario_entity.id)
 
@@ -199,14 +199,14 @@ def test_scenario_manager_only_creates_data_source_entity_once():
 
     assert len(data_manager.get_all()) == 0
     assert len(task_manager.get_all()) == 0
-    assert len(pipeline_manager.get_pipelines()) == 0
+    assert len(pipeline_manager.get_all()) == 0
     assert len(scenario_manager.get_scenarios()) == 0
 
     scenario_entity = scenario_manager.create(scenario)
 
     assert len(data_manager.get_all()) == 5
     assert len(task_manager.get_all()) == 3
-    assert len(pipeline_manager.get_pipelines()) == 2
+    assert len(pipeline_manager.get_all()) == 2
     assert len(scenario_manager.get_scenarios()) == 1
     assert scenario_entity.foo.read() == 1
     assert scenario_entity.bar.read() == 0

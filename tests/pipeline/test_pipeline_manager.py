@@ -30,48 +30,48 @@ def test_save_and_get_pipeline_entity():
     pipeline_manager = PipelineManager()
     task_manager = TaskManager()
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_1)
+        pipeline_manager.get(pipeline_id_1)
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_2)
+        pipeline_manager.get(pipeline_id_2)
 
     # Save one pipeline. We expect to have only one pipeline stored
-    pipeline_manager.save(pipeline_1)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
+    pipeline_manager.set(pipeline_1)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_2)
+        pipeline_manager.get(pipeline_id_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
     task_manager.set(task_2)
-    pipeline_manager.save(pipeline_2)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
+    pipeline_manager.set(pipeline_2)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert len(pipeline_manager.get(pipeline_id_2).tasks) == 1
     assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
-    pipeline_manager.save(pipeline_1)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
+    pipeline_manager.set(pipeline_1)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert len(pipeline_manager.get(pipeline_id_2).tasks) == 1
     assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
-    pipeline_manager.save(pipeline_3_with_same_id)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_3_with_same_id.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
+    pipeline_manager.set(pipeline_3_with_same_id)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_3_with_same_id.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert len(pipeline_manager.get(pipeline_id_2).tasks) == 1
     assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
 
@@ -112,7 +112,7 @@ def test_submit():
         pipeline_manager.submit(pipeline_entity.id)
 
     # pipeline does exist, but tasks does not exist. We expect an exception to be raised
-    pipeline_manager.save(pipeline_entity)
+    pipeline_manager.set(pipeline_entity)
     with pytest.raises(NonExistingTask):
         pipeline_manager.submit(pipeline_entity.id)
 

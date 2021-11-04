@@ -31,23 +31,23 @@ class PipelineManager:
         pipeline_id = Pipeline.new_id(config.name)
         tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs]
         pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id)
-        self.save(pipeline)
+        self.set(pipeline)
         return pipeline
 
-    def save(self, pipeline: Pipeline):
+    def set(self, pipeline: Pipeline):
         self.repository.save(pipeline)
 
-    def get_pipeline(self, pipeline_id: PipelineId) -> Pipeline:
+    def get(self, pipeline_id: PipelineId) -> Pipeline:
         try:
             return self.repository.load(pipeline_id)
         except ModelNotFound:
             raise NonExistingPipeline(pipeline_id)
 
-    def get_pipelines(self) -> Iterable[Pipeline]:
+    def get_all(self) -> Iterable[Pipeline]:
         return self.repository.load_all()
 
     def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
-        pipeline_to_submit = self.get_pipeline(pipeline_id)
+        pipeline_to_submit = self.get(pipeline_id)
         for tasks in pipeline_to_submit.get_sorted_tasks():
             for task in tasks:
                 self.task_scheduler.submit(task, callbacks)
