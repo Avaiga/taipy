@@ -56,7 +56,6 @@ class DataSource:
 
     @staticmethod
     def __protect_name(config_name: str):
-        # approach 2
         return re.sub(r'[\W]+', '-', unidecode.unidecode(config_name).strip().lower().replace(' ', '_'))
     
     def __getattr__(self, attribute_name):

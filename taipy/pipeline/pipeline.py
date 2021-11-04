@@ -36,11 +36,9 @@ class Pipeline:
 
     @staticmethod
     def __protect_name(name):
-        # approach 2
         return re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
-        # approach 3
-        return name.strip().lower().replace(" ", "_")
-
+    
+    
     @staticmethod
     def new_id(config_name: str) -> PipelineId:
         return PipelineId(
