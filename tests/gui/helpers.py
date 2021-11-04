@@ -1,4 +1,5 @@
 import json
+import logging
 import typing as t
 
 from taipy.gui import Gui, Html, Markdown
@@ -21,8 +22,6 @@ class Helpers:
         assert isinstance(response_data, object)
         assert "jsx" in response_data
         jsx = response_data["jsx"]
-        import logging
-
         logging.getLogger().debug(jsx)
         if isinstance(expected_values, str):
             assert jsx == expected_values
@@ -41,8 +40,6 @@ class Helpers:
         assert isinstance(response_data, object)
         assert "jsx" in response_data
         jsx = response_data["jsx"]
-        import logging
-
         logging.getLogger().debug(jsx)
         if isinstance(expected_values, str):
             assert jsx == expected_values
