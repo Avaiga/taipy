@@ -7,11 +7,6 @@ import Popover, { PopoverOrigin } from "@mui/material/Popover";
 import Status, { StatusType } from "./Status";
 import { TaipyBaseProps } from "./utils";
 
-interface StatusListProps extends TaipyBaseProps {
-    value: StatusType[];
-    withoutClose: boolean;
-}
-
 const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
     if (status.startsWith("i")) {
@@ -72,7 +67,13 @@ interface StatusDel extends StatusType {
     id?: string;
 }
 
+interface StatusListProps extends TaipyBaseProps {
+    value: StatusType[] | StatusType;
+    withoutClose?: boolean;
+}
+
 const StatusList = (props: StatusListProps) => {
+    const { value, defaultValue, className, withoutClose = false } = props;
     const [values, setValues] = useState<StatusDel[]>([]);
     const [opened, setOpened] = useState(false);
     const [multiple, setMultiple] = useState(false);
@@ -80,17 +81,17 @@ const StatusList = (props: StatusListProps) => {
 
     useEffect(() => {
         let val;
-        if (props.value === undefined) {
-            val = (props.defaultValue ? JSON.parse(props.defaultValue) : []) as StatusType[] | StatusType;
+        if (value === undefined) {
+            val = (defaultValue ? JSON.parse(defaultValue) : []) as StatusType[] | StatusType;
         } else {
-            val = props.value;
+            val = value;
         }
         if (!Array.isArray(val)) {
             val = [val];
         }
         setValues(val as StatusDel[]);
         setMultiple(val.length > 1);
-    }, [props.value, props.defaultValue]);
+    }, [value, defaultValue]);
 
     const onClose = useCallback((val) => {
         setValues((vals) => {
@@ -100,7 +101,7 @@ const StatusList = (props: StatusListProps) => {
                 }
                 return v;
             });
-            if (res.filter(v => !v.hidden).length < 2) {
+            if (res.filter((v) => !v.hidden).length < 2) {
                 setOpened(false);
                 setMultiple(false);
             }
@@ -110,25 +111,37 @@ const StatusList = (props: StatusListProps) => {
 
     const onOpen = useCallback((evt: MouseEvent) => {
         setOpened((op) => {
-            setAnchorEl(op ? null : (evt.currentTarget || evt.target as HTMLElement).parentElement)
-            return !op});
+            setAnchorEl(op ? null : (evt.currentTarget || (evt.target as HTMLElement)).parentElement);
+            return !op;
+        });
     }, []);
 
     const globalProps = useMemo(
-        () => (multiple ? { onClose: onOpen, icon: opened ? <ArrowUpward /> : <ArrowDownward /> } : {}),
+        () =>
+            multiple
+                ? { onClose: onOpen, icon: opened ? <ArrowUpward /> : <ArrowDownward /> }
+                : {},
         [multiple, opened, onOpen]
     );
 
     return (
         <>
-            <Status id={props.id} value={getGlobalStatus(values)} {...globalProps} />
+            <Status id={props.id} value={getGlobalStatus(values)} className={className} {...globalProps} />
             <Popover open={opened} anchorEl={anchorEl} onClose={onOpen} anchorOrigin={ORIGIN}>
                 <Stack direction="column" spacing={1}>
                     {values
                         .filter((val) => !val.hidden)
                         .map((val, idx) => {
-                            const closeProp = props.withoutClose ? {} : { onClose: () => onClose(val) };
-                            return <Status key={getId(props.id, idx)} id={getId(props.id, idx)} value={val} {...closeProp} />;
+                            const closeProp = withoutClose ? {} : { onClose: () => onClose(val) };
+                            return (
+                                <Status
+                                    key={getId(props.id, idx)}
+                                    id={getId(props.id, idx)}
+                                    value={val}
+                                    className={className}
+                                    {...closeProp}
+                                />
+                            );
                         })}
                 </Stack>
             </Popover>

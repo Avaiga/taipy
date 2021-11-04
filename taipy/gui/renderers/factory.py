@@ -220,6 +220,7 @@ class Factory:
             [
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("without_close", AttributeType.boolean, False)
             ]
         ),
         "toggle": lambda control_type, attrs: Builder(
