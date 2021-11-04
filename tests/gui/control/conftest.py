@@ -1,6 +1,7 @@
-import typing as t
-import pytest
 import json
+import typing as t
+
+import pytest
 
 from taipy.gui import Gui, Markdown
 
@@ -9,7 +10,8 @@ class Helpers:
     @staticmethod
     def test_control(gui: Gui, md_string: str, expected_values: t.Union[str, t.List]):
         gui.add_page("test", Markdown(md_string))
-        client = gui._run_test()
+        gui.run(run_server=False)
+        client = gui._server.test_client()
         response = client.get("/flask-jsx/test/")
         print(response.get_data())
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))

@@ -17,7 +17,7 @@ from flask import Blueprint, jsonify, request
 
 from ._default_config import default_config
 from .config import GuiConfig
-from .data.data_accessor import _DataAccessors, DataAccessor
+from .data.data_accessor import DataAccessor, _DataAccessors
 from .page import Page, Partial
 from .renderers import PageRenderer
 from .server import Server
@@ -616,7 +616,7 @@ class Gui(object, metaclass=Singleton):
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors.register(data_accessor_class)
 
-    def run(self, host=None, port=None, debug=None) -> None:
+    def run(self, host=None, port=None, debug=None, run_server=True) -> None:
         # Check with default config, override only if parameter
         # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
@@ -648,35 +648,5 @@ class Gui(object, metaclass=Singleton):
             self._server.register_blueprint(bp)
 
         # Start Flask Server
-        self._server.runWithWS(host=host, port=port, debug=debug)
-
-    def _run_test(self):
-        # Register taipy.gui markdown extensions for Markdown renderer
-        Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
-        # Save all local variables of the parent frame (usually __main__)
-        self._locals_bind: t.Dict[str, t.Any] = t.cast(
-            FrameType, t.cast(FrameType, inspect.currentframe()).f_back
-        ).f_locals
-        # Run parse markdown to force variables binding at runtime
-        # (save rendered html to page.rendered_jsx for optimization)
-        for page in self._config.pages:
-            # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
-        for partial in self._config.partials:
-            # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{partial.route}/", view_func=self._render_page)
-
-        # server URL Rule for flask rendered react-router
-        self._server.add_url_rule("/initialize/", view_func=self._render_route)
-
-        # Register Flask Blueprint if available
-        for bp in self._flask_blueprint:
-            self._server.register_blueprint(bp)
-
-        return self._server.test_client()
-
-    @staticmethod
-    def _test_cleanup():
-        from .renderers.builder import Builder
-
-        Builder._reset_key()
+        if run_server:
+            self._server.runWithWS(host=host, port=port, debug=debug)
