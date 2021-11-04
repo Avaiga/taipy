@@ -1,7 +1,7 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-
+import userEvent from "@testing-library/user-event";
 
 import Input from "./Input";
 import { TaipyContext } from "../../context/taipyContext";
@@ -43,11 +43,11 @@ describe("Input Component", () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByDisplayValue } = render(<TaipyContext.Provider value={{ state, dispatch }}>
-                <Input value="Val" type="text" />
+                <Input value="Val" type="text" tp_varname="varname" />
             </TaipyContext.Provider>);
         const elt = getByDisplayValue("Val");
-        fireEvent.change(elt, { target: { value: 'some text' } })
-        expect(dispatch).toHaveBeenCalledWith({name: "", payload: {value: "some text"}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        userEvent.clear(elt);
+        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
 });
 
@@ -87,10 +87,11 @@ describe("Number Component", () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByDisplayValue } = render(<TaipyContext.Provider value={{ state, dispatch }}>
-                <Input value={"33"} type="number" />
+                <Input value={"33"} type="number" tp_varname="varname" />
             </TaipyContext.Provider>);
         const elt = getByDisplayValue("33");
-        fireEvent.change(elt, { target: { value: 666 } })
-        expect(dispatch).toHaveBeenCalledWith({name: "", payload: {value: "666"}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        userEvent.clear(elt);
+        userEvent.type(elt, "666")
+        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: "666"}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
 });

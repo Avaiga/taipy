@@ -8,9 +8,9 @@ export interface LovItem {
 }
 
 export interface LovProps extends TaipyBaseProps {
-    defaultLov: string;
+    defaultLov?: string;
     lov: LoV;
-    value: string;
+    value?: string | string[];
 }
 
 export type LoV = [string, string | TaipyImage][];
@@ -28,7 +28,7 @@ export const useLovListMemo = (lov: LoV, defaultLov: string): LovItem[] =>
             try {
                 parsedLov = JSON.parse(defaultLov);
             } catch (e) {
-                parsedLov = lov as unknown as string[];
+                parsedLov = [];
             }
             return parsedLov.map((elt: [string, string | TaipyImage]) => ({ id: elt[0], item: elt[1] || elt[0] }));
         }

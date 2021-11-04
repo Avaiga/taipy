@@ -55,8 +55,8 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemPr
 );
 
 interface SelectorProps extends LovProps {
-    filter: boolean;
-    multiple: boolean;
+    filter?: boolean;
+    multiple?: boolean;
 }
 
 const Selector = (props: SelectorProps) => {
