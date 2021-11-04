@@ -1,6 +1,7 @@
 from taipy.gui import Gui, Markdown
 
-def test_ws_numbers(gui: Gui):
+
+def test_ws_number(gui: Gui):
     # Bind a variable
     assert gui.bind_var_val("var", 10)
     # Bind a page so that the variable will be evaluated as expression
