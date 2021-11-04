@@ -1,15 +1,16 @@
 import { useMemo } from "react";
 
-import { TaipyImage, TaipyInputProps } from "./utils";
+import { TaipyBaseProps, TaipyImage } from "./utils";
 
 export interface LovItem {
     id: string;
     item: string | TaipyImage;
 }
 
-export interface LovProps extends TaipyInputProps {
+export interface LovProps extends TaipyBaseProps {
     defaultLov: string;
     lov: LoV;
+    value: string;
 }
 
 export type LoV = [string, string | TaipyImage][];

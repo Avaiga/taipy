@@ -225,12 +225,12 @@ class Builder:
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
-                self.set_default_value(ret_list)
+                self.__set_default_value(ret_list)
             else:
                 ret_val = ret_list[0] if len(ret_list) else ""
                 if ret_val == "-1" and self.__get_property("unselected_value") is not None:
                     ret_val = self.__get_property("unselected_value")
-                self.set_default_value(ret_val)
+                self.__set_default_value(ret_val)
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
@@ -402,7 +402,7 @@ class Builder:
             self.__set_react_attribute("lov", hash_name)
         return self
 
-    def set_default_value(self, value: t.Optional[t.Any] = None):
+    def __set_default_value(self, value: t.Optional[t.Any] = None):
         if value is None:
             value = self.value
         if isinstance(value, datetime.datetime):
@@ -413,7 +413,7 @@ class Builder:
             self.__set_json_attribute("defaultValue", value)
         return self
 
-    def set_expresion_hash(self, with_update = True):
+    def set_value_and_default(self, with_update = True, with_default = True):
         if self.has_evaluated:
             self.__set_react_attribute(
                 "value",
@@ -421,6 +421,8 @@ class Builder:
             )
             if with_update:
                 self.set_attribute("tp_varname", self.expr)
+            if with_default:
+                self.__set_default_value()
         else:
             self.set_attribute("value", self.value)
         return self
