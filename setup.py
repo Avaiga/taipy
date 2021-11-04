@@ -13,6 +13,7 @@ with open("HISTORY.md") as history_file:
     history = history_file.read()
 
 requirements: List[str] = [
+    "Unidecode==1.3.2",
     "flask>=2.0",
     "flask-cors",
     "flask-socketio",
