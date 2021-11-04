@@ -193,7 +193,7 @@ describe("DateSelector with time Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DateSelector value={curDateStr} withTime={true} />
+                    <DateSelector value={curDateStr} withTime={true} tp_varname="varname" />
                 </LocalizationProvider>
             </TaipyContext.Provider>
         );
@@ -201,9 +201,10 @@ describe("DateSelector with time Component", () => {
         userEvent.clear(elt);
         await userEvent.type(elt, "01/01/2001 01:01 am", { delay: 1 });
         expect(dispatch).toHaveBeenLastCalledWith({
-            name: "",
+            name: "varname",
             payload: { value: "2001-01-01T01:01:00.000Z" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
-        });    });
+        });
+    });
 });
