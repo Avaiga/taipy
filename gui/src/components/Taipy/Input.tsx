@@ -7,8 +7,8 @@ import { TaipyInputProps } from "./utils";
 import { useDynamicProperty } from "../../utils/hooks";
 
 const Input = (props: TaipyInputProps) => {
-    const { className, type, id, tp_varname, propagate = true, defaultValue } = props;
-    const [value, setValue] = useState(() => defaultValue);
+    const { className, type, id, tp_varname, propagate = true, defaultValue = "" } = props;
+    const [value, setValue] = useState(defaultValue);
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
