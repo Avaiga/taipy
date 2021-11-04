@@ -9,7 +9,7 @@ from taipy.data.scope import Scope
 class PickleDataSource(DataSource):
     __TYPE = "pickle"
     __PICKLE_FILE_NAME = "file_path"
-    __DEFAULT_DATA_VALUE = "data"
+    __DEFAULT_DATA_VALUE = "default_data"
 
     def __init__(
         self, config_name: str, scope: Scope, id: Optional[str] = None, parent_id: Optional[str] = None, properties=None

@@ -184,10 +184,10 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.SCENARIO, data=0)
-    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
-    ds_4 = Config.data_source_configs.create("qux", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.SCENARIO, default_data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_4 = Config.data_source_configs.create("qux", "in_memory", Scope.PIPELINE, default_data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -228,10 +228,10 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, data=0)
-    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, data=0)
-    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0)
+    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, default_data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)

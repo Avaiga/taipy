@@ -13,7 +13,7 @@ class TestInMemoryDataSourceEntity:
         embedded_str = InMemoryDataSource.create("foo", Scope.PIPELINE, None, data="bar")
         assert isinstance(embedded_str.read(), str)
         assert embedded_str.read() == "bar"
-        assert embedded_str.data == "bar"
+        assert embedded_str.default_data == "bar"
         embedded_int = InMemoryDataSource.create("foo", Scope.PIPELINE, None, data=197)
         assert isinstance(embedded_int.read(), int)
         assert embedded_int.read() == 197

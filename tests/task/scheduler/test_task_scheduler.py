@@ -265,12 +265,16 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
 def _create_task(function, nb_outputs=1):
     task_name = str(uuid.uuid4())
     input_ds = [
-        DataManager().get_or_create(Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, data=21)),
-        DataManager().get_or_create(Config.data_source_configs.create("input2", "in_memory", Scope.PIPELINE, data=2)),
+        DataManager().get_or_create(
+            Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, default_data=21)
+        ),
+        DataManager().get_or_create(
+            Config.data_source_configs.create("input2", "in_memory", Scope.PIPELINE, default_data=2)
+        ),
     ]
     output_ds = [
         DataManager().get_or_create(
-            Config.data_source_configs.create(f"{task_name}-output{i}", "pickle", Scope.PIPELINE, data=0)
+            Config.data_source_configs.create(f"{task_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]

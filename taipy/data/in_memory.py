@@ -9,7 +9,7 @@ in_memory_storage: Dict[str, Any] = {}
 
 class InMemoryDataSource(DataSource):
     __TYPE = "in_memory"
-    __DEFAULT_DATA_VALUE = "data"
+    __DEFAULT_DATA_VALUE = "default_data"
 
     def __init__(
         self, config_name: str, scope: Scope, id: Optional[str] = None, parent_id: Optional[str] = None, properties=None

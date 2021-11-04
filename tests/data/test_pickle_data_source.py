@@ -19,7 +19,7 @@ class TestPickleDataSourceEntity:
         pickle_str = PickleDataSource.create("foo", Scope.PIPELINE, None, "bar")
         assert isinstance(pickle_str.read(), str)
         assert pickle_str.read() == "bar"
-        assert pickle_str.data == "bar"
+        assert pickle_str.default_data == "bar"
         pickle_int = PickleDataSource.create("foo", Scope.PIPELINE, None, 197)
         assert isinstance(pickle_int.read(), int)
         assert pickle_int.read() == 197
