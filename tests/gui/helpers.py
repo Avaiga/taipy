@@ -10,6 +10,7 @@ class Helpers:
     @staticmethod
     def test_cleanup():
         Builder._reset_key()
+        del Gui._instances[Gui]
 
     @staticmethod
     def test_control_md(gui: Gui, md_string: str, expected_values: t.Union[str, t.List]):

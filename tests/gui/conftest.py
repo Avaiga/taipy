@@ -10,7 +10,6 @@ def gui(helpers):
     yield Gui(__name__)
     # Delete Gui instance and state of some classes after each test
     helpers.test_cleanup()
-    del Gui._instances[Gui]
 
 
 @pytest.fixture
