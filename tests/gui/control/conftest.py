@@ -13,7 +13,6 @@ class Helpers:
         gui.run(run_server=False)
         client = gui._server.test_client()
         response = client.get("/flask-jsx/test/")
-        print(response.get_data())
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
         assert response.status_code == 200
         assert isinstance(response_data, object)
