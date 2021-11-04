@@ -12,6 +12,7 @@ from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskManager
 from taipy.task.scheduler import TaskScheduler
+from tests.utils.NotifyMock import NotifyMock
 
 
 def test_save_and_get_pipeline_entity():
@@ -236,3 +237,119 @@ def test_subscription():
     callback = mock.MagicMock()
     pipeline_manager.submit(pipeline.id, [callback])
     callback.assert_called()
+
+
+def test_pipeline_notification():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline)
+    pipeline_manager.subscribe(notify_1)
+    pipeline_manager.subscribe(notify_2)
+
+    pipeline_manager.submit(pipeline.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_called_3_times()
+    pipeline_manager.unsubscribe(notify_1)
+    pipeline_manager.unsubscribe(notify_2)
+
+
+def test_pipeline_notification_subscribe_unsubscribe():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline)
+
+    pipeline_manager.subscribe(notify_1)
+    pipeline_manager.subscribe(notify_2)
+
+    pipeline_manager.unsubscribe(notify_2)
+    pipeline_manager.submit(pipeline.id)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+    pipeline_manager.unsubscribe(notify_1)
+
+    with pytest.raises(KeyError):
+        pipeline_manager.unsubscribe(notify_2)
+
+
+def test_pipeline_notification_subscribe_only_on_new_jobs():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline)
+    pipeline_manager.subscribe(notify_1)
+
+    pipeline_manager.submit(pipeline.id)
+
+    pipeline_manager.subscribe(notify_2)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+
+    notify_1.reset()
+
+    pipeline_manager.submit(pipeline.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_called_3_times()
+
+    pipeline_manager.unsubscribe(notify_1)
+    pipeline_manager.unsubscribe(notify_2)

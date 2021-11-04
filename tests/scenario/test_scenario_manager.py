@@ -9,6 +9,7 @@ from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario, ScenarioManager
 from taipy.task import Task, TaskScheduler
+from tests.utils.NotifyMock import NotifyMock
 
 
 def test_save_and_get_scenario_entity():
@@ -265,31 +266,6 @@ def test_get_set_data():
     assert scenario_entity.bar.read() == 2
     assert scenario_entity.baz.read() == 158
     assert scenario_entity.qux.read() == 4
-
-
-class NotifyMock:
-    def __init__(self, scenario):
-        self.scenario = scenario
-        self.nb_called = 0
-
-    def __call__(self, scenario, job):
-        assert scenario == self.scenario
-        if self.nb_called == 0:
-            assert job.is_pending()
-        if self.nb_called == 1:
-            assert job.is_running()
-        if self.nb_called == 2:
-            assert job.is_finished()
-        self.nb_called += 1
-
-    def assert_called_3_times(self):
-        assert self.nb_called == 3
-
-    def assert_not_called(self):
-        assert self.nb_called == 0
-
-    def reset(self):
-        self.nb_called = 0
 
 
 def test_notification():
