@@ -1,4 +1,4 @@
-__all__ = ["Executor"]
+__all__ = ["JobDispatcher"]
 
 import logging
 from concurrent.futures import ProcessPoolExecutor
@@ -8,12 +8,11 @@ from typing import Any, List, Optional
 from taipy.data import DataSource
 from taipy.data.manager import DataManager
 from taipy.exceptions.job import DataSourceWritingError
+from taipy.task.scheduler.executor.synchronous import Synchronous
+from taipy.task.scheduler.job import Job
 
-from ..job import Job
-from .synchronous import Synchronous
 
-
-class Executor:
+class JobDispatcher:
     def __init__(self, parallel_execution: bool, max_number_of_parallel_execution: Optional[int]):
         self.__executor, self.__nb_worker_available = self.__create(
             max_number_of_parallel_execution, parallel_execution
