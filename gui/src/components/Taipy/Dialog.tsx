@@ -17,12 +17,12 @@ import { useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyBaseProps {
     title: string;
-    cancelAction: string;
-    validateAction: string;
-    cancelLabel: string;
-    validateLabel: string;
+    cancelAction?: string;
+    validateAction?: string;
+    cancelLabel?: string;
+    validateLabel?: string;
     pageId: string;
-    value: boolean;
+    value?: boolean;
 }
 
 const closeSx: SxProps<Theme> = {
@@ -44,6 +44,7 @@ const Dialog = (props: DialogProps) => {
         pageId,
         cancelLabel = "Cancel",
         validateLabel = "Validate",
+        className
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
@@ -58,7 +59,7 @@ const Dialog = (props: DialogProps) => {
     }, [dispatch, id, validateAction]);
 
     return (
-        <MuiDialog id={id} onClose={handleClose} open={value === undefined ? defaultValue === "true" : !!value}>
+        <MuiDialog id={id} onClose={handleClose} open={value === undefined ? defaultValue === "true" : !!value} className={className}>
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton
