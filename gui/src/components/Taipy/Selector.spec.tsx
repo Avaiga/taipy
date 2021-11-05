@@ -89,7 +89,7 @@ describe("Selector Component", () => {
         expect(ck).toBeDefined();
         expect(ck.checked).toBe(true);
     });
-    it("dispatch a well formed message", async () => {
+    it("dispatch a well formed message for multiple", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>

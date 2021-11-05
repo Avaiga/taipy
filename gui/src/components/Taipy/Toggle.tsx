@@ -14,9 +14,9 @@ import { useDynamicProperty } from "../../utils/hooks";
 
 interface ToggleProps extends LovProps {
     style?: CSSProperties;
-    label: string;
+    label?: string;
     kind?: string;
-    unselectedValue: string;
+    unselectedValue?: string;
 }
 
 const Toggle = (props: ToggleProps) => {
