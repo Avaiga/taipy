@@ -6,6 +6,7 @@ import logging
 import uuid
 from typing import Dict, List
 
+from taipy.common import protect_name
 from taipy.pipeline import Pipeline
 from taipy.scenario.scenario_model import ScenarioModel
 from taipy.common.alias import ScenarioId
@@ -32,7 +33,7 @@ class Scenario:
 
     @staticmethod
     def __protect_name(config_name):
-        return config_name.strip().lower().replace(" ", "_")
+        return protect_name(config_name)
 
     @staticmethod
     def new_id(config_name: str) -> ScenarioId:

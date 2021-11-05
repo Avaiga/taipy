@@ -21,6 +21,10 @@ def test_create_task():
     assert f"TASK_{name}_" in task.id
     assert task.config_name == "name_1"
 
+    name_1 = "name_1//ξ"
+    task_1 = Task(name_1, [], print, [])
+    assert task_1.config_name == "name_1-x"
+
 
 def test_can_not_change_task_output(output):
     task = Task("name_1", [], print, output=output)
@@ -85,5 +89,15 @@ def test_create_task_from_task_config():
     assert task.id is not None
     assert task.foo == foo_ds
     assert task.foo.path == path
+    with pytest.raises(AttributeError):
+        task.bar
+
+    path = "my/csv/path"
+    abc_ds = CSVDataSource.create("abc_dsξyₓéà", Scope.PIPELINE, None, path=path)
+    task = Task("namE 1éà", [abc_ds], print, [])
+    assert task.config_name == "name_1ea"
+    assert task.id is not None
+    assert task.abc_dsxyxea == abc_ds
+    assert task.abc_dsxyxea.path == path
     with pytest.raises(AttributeError):
         task.bar

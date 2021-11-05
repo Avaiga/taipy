@@ -4,6 +4,7 @@ from abc import abstractmethod
 from datetime import date, datetime
 from typing import List, Optional
 
+from taipy.common import protect_name
 from taipy.common.alias import JobId
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
@@ -69,8 +70,8 @@ class DataSource:
 
     @staticmethod
     def __protect_name(config_name: str):
-        return config_name.strip().lower().replace(" ", "_")
-
+        return protect_name(config_name)
+    
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:

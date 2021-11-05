@@ -47,10 +47,10 @@ class TestCSVDataSourceEntity:
         assert np.array_equal(csv.read().values, df.values)
 
     def test_create(self):
-        ds = CSVDataSource.create("fOo BAr", Scope.PIPELINE, None, "data/source/path")
+        ds = CSVDataSource.create("fOo BArξyₓéà", Scope.PIPELINE, None, "data/source/path")
 
         assert isinstance(ds, CSVDataSource)
-        assert ds.config_name == "foo_bar"
+        assert ds.config_name == "foo_barxyxea"
         assert ds.has_header is False
         assert ds.path == "data/source/path"
         assert ds.type() == "csv"

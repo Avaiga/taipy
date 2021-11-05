@@ -9,6 +9,7 @@ from typing import Dict, List
 
 import networkx as nx
 
+from taipy.common import protect_name
 from taipy.common.alias import Dag, PipelineId
 from taipy.data import DataSource
 from taipy.pipeline.pipeline_model import PipelineModel
@@ -37,7 +38,7 @@ class Pipeline:
 
     @staticmethod
     def __protect_name(name):
-        return name.strip().lower().replace(" ", "_")
+        return protect_name(name)
 
     @staticmethod
     def new_id(config_name: str) -> PipelineId:
