@@ -1,5 +1,4 @@
-import re
-import unidecode
+from taipy.common import protect_name
 from taipy.config.data_source import DataSourceSerializer
 from taipy.config.interface import ConfigRepository
 from taipy.data.scope import Scope
@@ -11,7 +10,7 @@ class DataSourceConfig:
     """
 
     def __init__(self, name: str, type: str, scope=Scope.PIPELINE, **kwargs):
-        self.name = re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
+        self.name = protect_name(name)
         self.type = type
         self.scope = scope
         self.properties = kwargs

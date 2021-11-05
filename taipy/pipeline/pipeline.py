@@ -4,13 +4,12 @@ ML training pipeline, etc. could implement this generic pipeline
 """
 import logging
 import uuid
-import re
-import unidecode
 from collections import defaultdict
 from typing import Dict, List
 
 import networkx as nx
 
+from taipy.common import protect_name
 from taipy.common.alias import Dag, PipelineId
 from taipy.data import DataSource
 from taipy.pipeline.pipeline_model import PipelineModel
@@ -36,7 +35,7 @@ class Pipeline:
 
     @staticmethod
     def __protect_name(name):
-        return re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
+        return protect_name(name)
     
     
     @staticmethod

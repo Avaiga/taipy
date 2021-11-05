@@ -1,10 +1,9 @@
 import logging
 import uuid
-import re
-import unidecode
 from abc import abstractmethod
 from typing import Optional
 
+from taipy.common import protect_name
 from taipy.data.scope import Scope
 
 
@@ -56,7 +55,7 @@ class DataSource:
 
     @staticmethod
     def __protect_name(config_name: str):
-        return re.sub(r'[\W]+', '-', unidecode.unidecode(config_name).strip().lower().replace(' ', '_'))
+        return protect_name(config_name)
     
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)

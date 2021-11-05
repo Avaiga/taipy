@@ -1,10 +1,9 @@
 import logging
 import uuid
-import re
-import unidecode
 from collections.abc import Iterable
 from typing import Dict, Optional
 
+from taipy.common import protect_name
 from taipy.common.alias import TaskId
 from taipy.data.data_source import DataSource
 
@@ -37,7 +36,7 @@ class Task:
 
     @staticmethod
     def __protect_name(config_name):
-        return re.sub(r'[\W]+', '-', unidecode.unidecode(config_name).strip().lower().replace(' ', '_'))
+        return protect_name(config_name)
     
 
     def __getattr__(self, attribute_name):

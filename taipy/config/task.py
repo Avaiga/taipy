@@ -1,8 +1,7 @@
-import re
-import unidecode
 from copy import copy
 from typing import List, Union
 
+from taipy.common import protect_name
 from taipy.config import DataSourceConfig
 from taipy.config.interface import ConfigRepository
 
@@ -23,7 +22,7 @@ class TaskConfig:
             self.__output = [output]
         else:
             self.__output = copy(output)
-        self.name = re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
+        self.name = protect_name(name)
         self.function = function
 
     @property

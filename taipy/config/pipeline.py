@@ -1,14 +1,13 @@
-import re
-import unidecode
 from typing import List
 
+from taipy.common import protect_name
 from taipy.config import TaskConfig
 from taipy.config.interface import ConfigRepository
 
 
 class PipelineConfig:
     def __init__(self, name: str, tasks_configs: List[TaskConfig], **properties):
-        self.name = re.sub(r'[\W]+', '-', unidecode.unidecode(name).strip().lower().replace(' ', '_'))
+        self.name = protect_name(name)
         self.tasks_configs = tasks_configs
         self.properties = properties
 
