@@ -50,7 +50,6 @@ class JobDispatcher:
 
     @classmethod
     def __write_data(cls, outputs: List[DataSource], results, job_id: JobId):
-        # TODO set outputs ready status to false
         try:
             _results = cls.__extract_results(outputs, results)
             exceptions = []

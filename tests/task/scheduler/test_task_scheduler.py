@@ -11,6 +11,7 @@ import pytest
 from taipy.common.alias import JobId
 from taipy.config import Config
 from taipy.config.task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
+from taipy.data import PickleDataSource
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
@@ -37,32 +38,6 @@ def multiply(nb1: float, nb2: float):
 def lock_multiply(lock, nb1: float, nb2: float):
     with lock:
         return multiply(nb1, nb2)
-
-
-def test_scheduled_task():
-    task_scheduler = TaskScheduler()
-    data_manager = task_scheduler.data_manager
-
-    before_creation = datetime.now()
-    sleep(0.1)
-    task = _create_task(multiply)
-    output_ds_id = task.output[f"{task.config_name}-output0"].id
-
-    assert data_manager.get(output_ds_id).last_edition_date > before_creation
-    assert data_manager.get(output_ds_id).job_ids == []
-    assert data_manager.get(output_ds_id).up_to_date
-
-    before_submission_creation = datetime.now()
-    sleep(0.1)
-    job = task_scheduler.submit(task)
-    sleep(0.1)
-    after_submission_creation = datetime.now()
-    assert data_manager.get(output_ds_id).read() == 42
-    assert data_manager.get(output_ds_id).last_edition_date > before_submission_creation
-    assert data_manager.get(output_ds_id).last_edition_date < after_submission_creation
-    assert data_manager.get(output_ds_id).job_ids == [job.id]
-    assert data_manager.get(output_ds_id).up_to_date
-    assert job.is_completed()
 
 
 def test_get_job():
@@ -135,7 +110,33 @@ def test_raise_when_trying_to_delete_unfinished_job():
             task_scheduler.delete(job)
 
 
-def test_scheduled_task_that_return_multiple_outputs():
+def test_submit_task():
+    task_scheduler = TaskScheduler()
+    data_manager = task_scheduler.data_manager
+
+    before_creation = datetime.now()
+    sleep(0.1)
+    task = _create_task(multiply)
+    output_ds_id = task.output[f"{task.config_name}-output0"].id
+
+    assert data_manager.get(output_ds_id).last_edition_date > before_creation
+    assert data_manager.get(output_ds_id).job_ids == []
+    assert data_manager.get(output_ds_id).up_to_date
+
+    before_submission_creation = datetime.now()
+    sleep(0.1)
+    job = task_scheduler.submit(task)
+    sleep(0.1)
+    after_submission_creation = datetime.now()
+    assert data_manager.get(output_ds_id).read() == 42
+    assert data_manager.get(output_ds_id).last_edition_date > before_submission_creation
+    assert data_manager.get(output_ds_id).last_edition_date < after_submission_creation
+    assert data_manager.get(output_ds_id).job_ids == [job.id]
+    assert data_manager.get(output_ds_id).up_to_date
+    assert job.is_completed()
+
+
+def test_submit_task_that_return_multiple_outputs():
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
 
@@ -162,7 +163,7 @@ def test_scheduled_task_that_return_multiple_outputs():
     )
 
 
-def test_scheduled_task_returns_single_iterable_output():
+def test_submit_task_returns_single_iterable_output():
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
 
@@ -202,7 +203,7 @@ def test_error_during_writing_data_source_don_t_stop_writing_on_other_data_sourc
     assert task.output[f"{task.config_name}-output1"].read() == 21
 
 
-def test_scheduled_task_in_parallel():
+def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
@@ -217,7 +218,7 @@ def test_scheduled_task_in_parallel():
     assert_true_after_10_second_max(job.is_completed)
 
 
-def test_scheduled_task_multithreading_multiple_task():
+def test_submit_task_multithreading_multiple_task():
     task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
 
     m = multiprocessing.Manager()
@@ -248,7 +249,7 @@ def test_scheduled_task_multithreading_multiple_task():
     assert job_2.is_completed()
 
 
-def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
+def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
     task_scheduler = TaskScheduler(
         Config.task_scheduler_configs.create(parallel_execution=True, max_number_of_parallel_execution=1)
     )
@@ -281,8 +282,47 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
     assert job_2.is_completed()
 
 
+def test_blocked_task():
+    data_manager = DataManager()
+    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
+    m = multiprocessing.Manager()
+    lock_1 = m.Lock()
+    lock_2 = m.Lock()
+
+    data_source_1 = PickleDataSource("foo", Scope.PIPELINE, "s1", properties={"default_data": 1})
+    data_source_2 = PickleDataSource("bar", Scope.PIPELINE, "s2")
+    data_source_3 = PickleDataSource("baz", Scope.PIPELINE, "s3")
+    data_manager.set(data_source_1)
+    data_manager.set(data_source_2)
+    data_manager.set(data_source_3)
+    task_1 = Task("by_2", input=[data_source_1], function=partial(lock_multiply, lock_1, 2), output=[data_source_2])
+    task_2 = Task("by_3", input=[data_source_2], function=partial(lock_multiply, lock_2, 3), output=[data_source_3])
+    assert data_source_1.up_to_date  # Data source 1 is ready
+    assert not data_source_2.up_to_date  # But data source 2 is not ready
+    assert not data_source_3.up_to_date  # neither does data source 3
+
+    assert len(task_scheduler.blocked_jobs) == 0
+    job_2 = task_scheduler.submit(task_2)  # job 2 is submitted first
+    assert job_2.is_blocked()  # since data source 2 is not up_to_date the job 2 is blocked
+    assert len(task_scheduler.blocked_jobs) == 1
+    with lock_2:
+        with lock_1:
+            job_1 = task_scheduler.submit(task_1)  # job 1 is submitted and locked
+            assert task_scheduler.get_job(job_1.id).is_running()  # so it is still running
+            assert not data_manager.get(data_source_2.id).up_to_date  # And data source 2 still not ready to be consumed
+            assert task_scheduler.get_job(job_2.id).is_blocked()  # the job_2 remains blocked
+        assert_true_after_10_second_max(task_scheduler.get_job(job_1.id).is_completed)  # job1 unlocked and can complete
+        assert data_manager.get(data_source_2.id).up_to_date  # Data source 2 becomes ready
+        assert data_manager.get(data_source_2.id).read() == 2  # the data is computed and written
+        assert task_scheduler.get_job(job_2.id).is_running()  # And job 2 can run
+        assert len(task_scheduler.blocked_jobs) == 0
+    assert_true_after_10_second_max(task_scheduler.get_job(job_2.id).is_completed)  # job 2 unlocked so it can complete
+    assert data_manager.get(data_source_3.id).up_to_date  # Data source 3 becomes ready
+    assert data_manager.get(data_source_3.id).read() == 6  # the data is computed and written
+
+
 def _create_task(function, nb_outputs=1):
-    task_name = str(uuid.uuid4())
+    config_name = str(uuid.uuid4())
     input_ds = [
         DataManager().get_or_create(
             Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, default_data=21)
@@ -293,13 +333,13 @@ def _create_task(function, nb_outputs=1):
     ]
     output_ds = [
         DataManager().get_or_create(
-            Config.data_source_configs.create(f"{task_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+            Config.data_source_configs.create(f"{config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]
 
     return Task(
-        task_name,
+        config_name,
         input=input_ds,
         function=function,
         output=output_ds,

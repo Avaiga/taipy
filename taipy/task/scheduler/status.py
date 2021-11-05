@@ -13,6 +13,3 @@ class Status(Enum):
     CANCELLED = 5
     FAILED = 6
     COMPLETED = 7
-
-    def is_finished(self) -> bool:
-        return self.value > Status.RUNNING.value

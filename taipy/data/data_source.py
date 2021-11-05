@@ -17,18 +17,25 @@ class DataSource:
 
     Attributes
     ----------
-    id: str
-        unique identifier of the data source
     config_name: str
-        name that identifies the data source
-    scope: int
-        number that refers to the scope of usage of the data source
+        Name that identifies the data source. We strongly recommend to use lowercase alphanumeric characters,
+        dash character '-', or underscore character '_'.
+        Note that other characters are replaced according the following rules :
+        - Space character ' ' is replaced by '_'
+        - Unicode characters are replaced by a corresponding alphanumeric character using unicode library
+        - Other characters are replaced by dash character '-'
+    scope: Scope
+        Scope Enum that refers to the scope of usage of the data source
+    id: str
+        Unique identifier of the data source
     parent_id: str
-        identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
-    last_computation_date: str
-        isoformat of the last computation datetime
+        Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
+    last_edition_date: datetime
+        Date and time of the last edition
     job_ids: List[str]
-        list of jobs that computed the data source
+        Ordered list of jobs that have written the data source
+    up_to_date: bool
+        True if the data is considered as up to date. False otherwise.
     properties: list
         list of additional arguments
     """
@@ -39,8 +46,8 @@ class DataSource:
         scope: Scope = Scope.PIPELINE,
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
-        last_computation_date: Optional[datetime] = None,
-        job_ids: List[JobId] = [],
+        last_edition_date: Optional[datetime] = None,
+        job_ids: List[JobId] = None,
         up_to_date: bool = False,
         **kwargs,
     ):
@@ -48,8 +55,8 @@ class DataSource:
         self.config_name = self.__protect_name(config_name)
         self.parent_id = parent_id
         self.scope = scope
-        self.last_edition_date = last_computation_date
-        self.job_ids = job_ids
+        self.last_edition_date = last_edition_date
+        self.job_ids = job_ids or []
         self.properties = kwargs
         self.up_to_date = up_to_date
 
@@ -71,7 +78,7 @@ class DataSource:
     @staticmethod
     def __protect_name(config_name: str):
         return protect_name(config_name)
-    
+
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:

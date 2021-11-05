@@ -18,8 +18,8 @@ def test_create_pipeline():
 
 
 def test_create_pipeline_entity():
-    input = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "data")
-    output = InMemoryDataSource.create("bar", Scope.PIPELINE, None, "other data")
+    input = InMemoryDataSource("foo", Scope.PIPELINE)
+    output = InMemoryDataSource("bar", Scope.PIPELINE)
     task = Task("baz", [input], print, [output], TaskId("task_id"))
     pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
     assert pipeline.id is not None
@@ -32,8 +32,8 @@ def test_create_pipeline_entity():
     with pytest.raises(AttributeError):
         pipeline.qux
 
-    input_1 = InMemoryDataSource.create("inξ", Scope.PIPELINE, None, "data")
-    output_1 = InMemoryDataSource.create("outξ", Scope.PIPELINE, None, "other data")
+    input_1 = InMemoryDataSource("inξ", Scope.PIPELINE)
+    output_1 = InMemoryDataSource("outξ", Scope.PIPELINE)
     task_1 = Task("task_ξ", [input_1], print, [output_1], TaskId("task_id_1"))
     pipeline_1 = Pipeline("nAmE 1 ", {"description": "description"}, [task_1])
     assert pipeline_1.id is not None
@@ -48,19 +48,19 @@ def test_check_consistency():
     pipeline_1 = Pipeline("name_1", {}, [])
     assert pipeline_1.is_consistent
 
-    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
-    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    input_2 = InMemoryDataSource("foo", Scope.PIPELINE)
+    output_2 = InMemoryDataSource("foo", Scope.PIPELINE)
     task_2 = Task("foo", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2])
     assert pipeline_2.is_consistent
 
-    data_source_3 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    data_source_3 = InMemoryDataSource("foo", Scope.PIPELINE)
     task_3 = Task("foo", [data_source_3], print, [data_source_3], TaskId("task_id_3"))
     pipeline_3 = Pipeline("name_3", {}, [task_3])
     assert not pipeline_3.is_consistent  # Not a dag
 
-    input_4 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
-    output_4 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    input_4 = InMemoryDataSource("foo", Scope.PIPELINE)
+    output_4 = InMemoryDataSource("foo", Scope.PIPELINE)
     task_4_1 = Task("foo", [input_4], print, [output_4], TaskId("task_id_4_1"))
     task_4_2 = Task("bar", [output_4], print, [input_4], TaskId("task_id_4_2"))
     pipeline_4 = Pipeline("name_4", {}, [task_4_1, task_4_2])
@@ -78,8 +78,8 @@ def test_check_consistency():
 
 
 def test_to_model():
-    input = InMemoryDataSource.create("input", Scope.PIPELINE, None, "this is some data")
-    output = InMemoryDataSource.create("output", Scope.PIPELINE, None, "")
+    input = InMemoryDataSource("input", Scope.PIPELINE)
+    output = InMemoryDataSource("output", Scope.PIPELINE)
     task = Task("task", [input], print, [output], TaskId("task_id"))
     pipeline = Pipeline("name", {"foo": "bar"}, [task])
     model = pipeline.to_model()

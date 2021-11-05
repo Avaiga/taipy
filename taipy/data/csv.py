@@ -12,16 +12,32 @@ from taipy.exceptions import MissingRequiredProperty
 
 class CSVDataSource(DataSource):
     """
-    A class to represent a CSV Data Source.
+    A class to represent a Data Source stored as a CSV file.
 
     Attributes
     ----------
     config_name: str
-        name that identifies the data source config
-    scope: int
-        number that refers to the scope of usage of the data source
-    properties: list
-        list of additional arguments
+        Name that identifies the data source. We strongly recommend to use lowercase alphanumeric characters,
+        dash character '-', or underscore character '_'.
+        Note that other characters are replaced according the following rules :
+        - Space character ' ' is replaced by '_'
+        - Unicode characters are replaced by a corresponding alphanumeric character using unicode library
+        - Other characters are replaced by dash character '-'
+    scope: Scope
+        Scope Enum that refers to the scope of usage of the data source
+    id: str
+        Unique identifier of the data source
+    parent_id: str
+        Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
+    last_edition_date: datetime
+        Date and time of the last edition
+    job_ids: List[str]
+        Ordered list of jobs that have written the data source
+    up_to_date: bool
+        True if the data is considered as up to date. False otherwise.
+    properties: dict
+        list of additional arguments. Note that the properties parameter should at least contain values for "path" and
+        "has_header" properties.
     """
 
     __REQUIRED_PROPERTIES = ["path", "has_header"]
@@ -36,8 +52,10 @@ class CSVDataSource(DataSource):
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         up_to_date: bool = False,
-        properties: Dict = {},
+        properties: Dict = None,
     ):
+        if properties is None:
+            properties = {}
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
@@ -55,29 +73,6 @@ class CSVDataSource(DataSource):
         )
         if not self.last_edition_date and isfile(self.properties["path"]):
             self.updated()
-
-    @classmethod
-    def create(
-        cls,
-        config_name: str,
-        scope: Scope,
-        parent_id: Optional[str],
-        path: str,
-        has_header: bool = False,
-        last_edition_date: Optional[datetime] = None,
-        up_to_date: bool = False,
-        job_ids: List[JobId] = None,
-    ) -> DataSource:
-        return CSVDataSource(
-            config_name,
-            scope,
-            None,
-            parent_id,
-            last_edition_date,
-            job_ids or [],
-            up_to_date,
-            {"path": path, "has_header": has_header},
-        )
 
     @classmethod
     def type(cls) -> str:

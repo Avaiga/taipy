@@ -12,17 +12,42 @@ from taipy.exceptions import MissingRequiredProperty
 from taipy.exceptions.data_source import NoData
 
 
-class TestCSVDataSourceEntity:
-    def test_get(self):
-        not_existing_csv = CSVDataSource.create("foo", Scope.PIPELINE, None, "NOT_EXISTING_PATH.csv")
+class TestCSVDataSource:
+    def test_create(self):
+        path = "data/source/path"
+        ds = CSVDataSource("fOo BAr", Scope.PIPELINE, properties={"path": path, "has_header": False})
+        assert isinstance(ds, CSVDataSource)
+        assert ds.type() == "csv"
+        assert ds.config_name == "foo_bar"
+        assert ds.scope == Scope.PIPELINE
+        assert ds.id is not None
+        assert ds.parent_id is None
+        assert ds.last_edition_date is None
+        assert ds.job_ids == []
+        assert not ds.up_to_date
+        assert ds.path == path
+        assert ds.has_header is False
+
+    def test_create_with_missing_parameters(self):
+        with pytest.raises(MissingRequiredProperty):
+            CSVDataSource("foo", Scope.PIPELINE, "ds_id")
+        with pytest.raises(MissingRequiredProperty):
+            CSVDataSource("foo", Scope.PIPELINE, "ds_id", properties={})
+        with pytest.raises(MissingRequiredProperty):
+            CSVDataSource("foo", Scope.PIPELINE, "ds_id", properties={"path": "path"})
+        with pytest.raises(MissingRequiredProperty):
+            CSVDataSource("foo", Scope.PIPELINE, "ds_id", properties={"has_header": True})
+
+    def test_read(self):
+        not_existing_csv = CSVDataSource("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": False})
         with pytest.raises(NoData):
             not_existing_csv.read()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        csv = CSVDataSource.create("bar", Scope.PIPELINE, None, path)
-        assert csv.path == path
-        csv.last_edition_date = datetime.datetime.now()
-        data = csv.read()
+        csv_ds = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path, "has_header": False})
+        assert csv_ds.path == path
+        csv_ds.last_edition_date = datetime.datetime.now()
+        data = csv_ds.read()
         assert isinstance(data, pd.DataFrame)
 
     @pytest.mark.parametrize(
@@ -34,37 +59,17 @@ class TestCSVDataSourceEntity:
         ],
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
-        csv = CSVDataSource.create("foo", Scope.PIPELINE, None, csv_file)
-        assert np.array_equal(csv.read().values, default_data_frame.values)
-
+        csv_ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": csv_file, "has_header": False})
+        assert np.array_equal(csv_ds.read().values, default_data_frame.values)
         if not columns:
-            csv.write(content)
+            csv_ds.write(content)
             df = pd.DataFrame(content)
         else:
-            csv.write_with_column_names(content, columns)
+            csv_ds.write_with_column_names(content, columns)
             df = pd.DataFrame(content, columns=columns)
-
-        assert np.array_equal(csv.read().values, df.values)
-
-    def test_create(self):
-        ds = CSVDataSource.create("fOo BArξyₓéà", Scope.PIPELINE, None, "data/source/path")
-
-        assert isinstance(ds, CSVDataSource)
-        assert ds.config_name == "foo_barxyxea"
-        assert ds.has_header is False
-        assert ds.path == "data/source/path"
-        assert ds.type() == "csv"
-        assert ds.id is not None
-        assert ds.last_edition_date is None
-        assert ds.job_ids == []
-        with pytest.raises(AttributeError):
-            ds.foo
-
-    def test_init_missing_parameters(self):
-        with pytest.raises(MissingRequiredProperty):
-            CSVDataSource("foo", Scope.PIPELINE, "ds_id", {})
+        assert np.array_equal(csv_ds.read().values, df.values)
 
     def test_preview(self):
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        ds = CSVDataSource.create("foo", Scope.PIPELINE, None, path)
+        ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": path, "has_header": False})
         ds.preview()
