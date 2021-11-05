@@ -9,4 +9,3 @@ class TestDataSource:
         assert csv_ds.name == "foo-bar_xea"
         assert csv_ds.scope == Scope.PIPELINE
         assert csv_ds.properties["path"] == "baz"
-        

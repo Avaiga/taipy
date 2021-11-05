@@ -20,7 +20,7 @@ def test_create_task():
     task = Task(name, [], print, [])
     assert f"TASK_{name}_" in task.id
     assert task.config_name == "name_1"
-    
+
     name_1 = "name_1//ξ"
     task_1 = Task(name_1, [], print, [])
     assert task_1.config_name == "name_1-x"
@@ -91,7 +91,7 @@ def test_create_task_from_task_config():
     assert task.foo.path == path
     with pytest.raises(AttributeError):
         task.bar
-        
+
     path = "my/csv/path"
     abc_ds = CSVDataSource.create("abc_dsξyₓéà", Scope.PIPELINE, None, path=path)
     task = Task("namE 1éà", [abc_ds], print, [])

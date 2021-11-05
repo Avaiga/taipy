@@ -39,8 +39,7 @@ class Pipeline:
     @staticmethod
     def __protect_name(name):
         return protect_name(name)
-    
-    
+
     @staticmethod
     def new_id(config_name: str) -> PipelineId:
         return PipelineId(

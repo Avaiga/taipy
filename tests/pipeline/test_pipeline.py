@@ -12,9 +12,9 @@ from taipy.task import Task
 def test_create_pipeline():
     pipeline = Config.pipeline_configs.create("  nAmE 1 ", [])
     assert pipeline.name == "name_1"
-    
-    pipeline_1 = Config.pipeline_configs.create(' PipeLine/ξ', [])
-    assert pipeline_1.name == 'pipeline-x'
+
+    pipeline_1 = Config.pipeline_configs.create(" PipeLine/ξ", [])
+    assert pipeline_1.name == "pipeline-x"
 
 
 def test_create_pipeline_entity():
@@ -28,10 +28,10 @@ def test_create_pipeline_entity():
     assert pipeline.foo == input
     assert pipeline.bar == output
     assert pipeline.baz == task
-    
+
     with pytest.raises(AttributeError):
         pipeline.qux
-    
+
     input_1 = InMemoryDataSource.create("inξ", Scope.PIPELINE, None, "data")
     output_1 = InMemoryDataSource.create("outξ", Scope.PIPELINE, None, "other data")
     task_1 = Task("task_ξ", [input_1], print, [output_1], TaskId("task_id_1"))
