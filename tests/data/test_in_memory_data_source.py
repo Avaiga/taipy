@@ -24,8 +24,8 @@ class TestInMemoryDataSourceEntity:
         assert embedded_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
-        ds = InMemoryDataSource.create("foobar BaZ", Scope.PIPELINE, None, data="In memory Data Source")
-        assert ds.config_name == "foobar_baz"
+        ds = InMemoryDataSource.create("foobar BaZξyₓéà", Scope.PIPELINE, None, data="In memory Data Source")
+        assert ds.config_name == "foobar_bazxyxea"
         assert isinstance(ds, InMemoryDataSource)
         assert ds.type() == "in_memory"
         assert ds.id is not None

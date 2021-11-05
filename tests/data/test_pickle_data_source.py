@@ -28,8 +28,8 @@ class TestPickleDataSourceEntity:
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
     def test_create(self):
-        ds = PickleDataSource.create("foobar BaZ", Scope.PIPELINE, None, data="Pickle Data Source")
-        assert ds.config_name == "foobar_baz"
+        ds = PickleDataSource.create("foobar BaZξyₓéà", Scope.PIPELINE, None, data="Pickle Data Source")
+        assert ds.config_name == "foobar_bazxyxea"
         assert isinstance(ds, PickleDataSource)
         assert ds.type() == "pickle"
         assert ds.id is not None
