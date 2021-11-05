@@ -50,6 +50,27 @@ describe("ThemeToggle Component", () => {
         expect(getByTitle("Dark")).toHaveClass("Mui-selected");
         expect(getByTitle("Light")).not.toHaveClass("Mui-selected");
     });
+    it("is disabled", async () => {
+        const { getAllByRole } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+            <ThemeToggle active={false} />
+        </TaipyContext.Provider>);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).toBeDisabled());
+    });
+    it("is enabled by default", async () => {
+        const { getAllByRole } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+            <ThemeToggle />
+        </TaipyContext.Provider>);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).not.toBeDisabled());
+    });
+    it("is enabled by active", async () => {
+        const { getAllByRole } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+            <ThemeToggle active={true}/>
+        </TaipyContext.Provider>);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).not.toBeDisabled());
+    });
     it("dispatch a well formed message", async () => {
         const { getByTitle } = render(<TaipyContext.Provider value={{ state, dispatch }}>
                 <ThemeToggle />

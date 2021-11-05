@@ -69,7 +69,22 @@ describe("Toggle Component", () => {
         const elt2 = getByText("Item 2");
         expect(elt2.parentElement).toHaveClass("Mui-selected");
     });
-    it("dispatch a well formed message", async () => {
+    it("is disabled", async () => {
+        const { getAllByRole } = render(<Toggle lov={lov} active={false} />);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).toBeDisabled());
+    });
+    it("is enabled by default", async () => {
+        const { getAllByRole } = render(<Toggle lov={lov} />);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).not.toBeDisabled());
+    });
+    it("is enabled by active", async () => {
+        const { getAllByRole } = render(<Toggle lov={lov} active={true} />);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).not.toBeDisabled());
+    });
+it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>

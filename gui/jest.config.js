@@ -3,5 +3,5 @@ module.exports = {
  // testEnvironment: 'jest-environment-jsdom',
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFiles: ['./jest.env.js']
+  setupFiles: ['./test-config/jest.env.js', './test-config/createObjectUrl.js', './test-config/Canvas.js']
 };

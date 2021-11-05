@@ -57,6 +57,21 @@ describe("Selector Component", () => {
         const elt2 = getByText("Item 2");
         expect(elt2.parentElement?.parentElement).toHaveClass("Mui-selected");
     });
+    it("is disabled", async () => {
+        const { getAllByRole } = render(<Selector lov={lov} active={false} />);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).toHaveClass("Mui-disabled"));
+    });
+    it("is enabled by default", async () => {
+        const { getAllByRole } = render(<Selector lov={lov} />);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).not.toHaveClass("Mui-disabled"));
+    });
+    it("is enabled by active", async () => {
+        const { getAllByRole } = render(<Selector lov={lov} active={true} />);
+        const elts = getAllByRole("button");
+        elts.forEach(elt => expect(elt).not.toHaveClass("Mui-disabled"));
+    });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
