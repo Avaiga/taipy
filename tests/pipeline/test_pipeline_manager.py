@@ -3,8 +3,7 @@ from unittest import mock
 import pytest
 
 from taipy.common.alias import PipelineId, TaskId
-from taipy.config import Config, DataSourceConfig, PipelineConfig, TaskConfig
-from taipy.data.data_source import DataSource
+from taipy.config import Config, PipelineConfig, TaskConfig
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
@@ -13,6 +12,7 @@ from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskManager
 from taipy.task.scheduler import TaskScheduler
+from tests.utils.NotifyMock import NotifyMock
 
 
 def test_save_and_get_pipeline_entity():
@@ -20,8 +20,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
-    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, "bar")
+    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, None, "bar")
+    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, None, "bar")
     task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
@@ -31,48 +31,48 @@ def test_save_and_get_pipeline_entity():
     pipeline_manager = PipelineManager()
     task_manager = TaskManager()
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_1)
+        pipeline_manager.get(pipeline_id_1)
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_2)
+        pipeline_manager.get(pipeline_id_2)
 
     # Save one pipeline. We expect to have only one pipeline stored
-    pipeline_manager.save(pipeline_1)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
+    pipeline_manager.set(pipeline_1)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
     with pytest.raises(NonExistingPipeline):
-        pipeline_manager.get_pipeline(pipeline_id_2)
+        pipeline_manager.get(pipeline_id_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
     task_manager.set(task_2)
-    pipeline_manager.save(pipeline_2)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
+    pipeline_manager.set(pipeline_2)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert len(pipeline_manager.get(pipeline_id_2).tasks) == 1
     assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
-    pipeline_manager.save(pipeline_1)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_1.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
+    pipeline_manager.set(pipeline_1)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert len(pipeline_manager.get(pipeline_id_2).tasks) == 1
     assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
-    pipeline_manager.save(pipeline_3_with_same_id)
-    assert pipeline_manager.get_pipeline(pipeline_id_1).id == pipeline_1.id
-    assert pipeline_manager.get_pipeline(pipeline_id_1).config_name == pipeline_3_with_same_id.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_1).tasks) == 0
-    assert pipeline_manager.get_pipeline(pipeline_id_2).id == pipeline_2.id
-    assert pipeline_manager.get_pipeline(pipeline_id_2).config_name == pipeline_2.config_name
-    assert len(pipeline_manager.get_pipeline(pipeline_id_2).tasks) == 1
+    pipeline_manager.set(pipeline_3_with_same_id)
+    assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
+    assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_3_with_same_id.config_name
+    assert len(pipeline_manager.get(pipeline_id_1).tasks) == 0
+    assert pipeline_manager.get(pipeline_id_2).id == pipeline_2.id
+    assert pipeline_manager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert len(pipeline_manager.get(pipeline_id_2).tasks) == 1
     assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
 
 
@@ -113,7 +113,7 @@ def test_submit():
         pipeline_manager.submit(pipeline_entity.id)
 
     # pipeline does exist, but tasks does not exist. We expect an exception to be raised
-    pipeline_manager.save(pipeline_entity)
+    pipeline_manager.set(pipeline_entity)
     with pytest.raises(NonExistingTask):
         pipeline_manager.submit(pipeline_entity.id)
 
@@ -146,9 +146,9 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0)
-    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
     task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -178,9 +178,9 @@ def test_get_set_data():
     data_manager.delete_all()
     task_manager.delete_all()
 
-    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)
-    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0)
-    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, data=0)
+    ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_6 = Config.data_source_configs.create("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
     task_mult_by_2 = Config.task_configs.create("mult by 2", [ds_1], mult_by_2, ds_2)
     task_mult_by_3 = Config.task_configs.create("mult by 3", [ds_2], mult_by_3, ds_6)
@@ -237,3 +237,119 @@ def test_subscription():
     callback = mock.MagicMock()
     pipeline_manager.submit(pipeline.id, [callback])
     callback.assert_called()
+
+
+def test_pipeline_notification():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline)
+    pipeline_manager.subscribe(notify_1)
+    pipeline_manager.subscribe(notify_2)
+
+    pipeline_manager.submit(pipeline.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_called_3_times()
+    pipeline_manager.unsubscribe(notify_1)
+    pipeline_manager.unsubscribe(notify_2)
+
+
+def test_pipeline_notification_subscribe_unsubscribe():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline)
+
+    pipeline_manager.subscribe(notify_1)
+    pipeline_manager.subscribe(notify_2)
+
+    pipeline_manager.unsubscribe(notify_2)
+    pipeline_manager.submit(pipeline.id)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+    pipeline_manager.unsubscribe(notify_1)
+
+    with pytest.raises(KeyError):
+        pipeline_manager.unsubscribe(notify_2)
+
+
+def test_pipeline_notification_subscribe_only_on_new_jobs():
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline)
+    pipeline_manager.subscribe(notify_1)
+
+    pipeline_manager.submit(pipeline.id)
+
+    pipeline_manager.subscribe(notify_2)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+
+    notify_1.reset()
+
+    pipeline_manager.submit(pipeline.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_called_3_times()
+
+    pipeline_manager.unsubscribe(notify_1)
+    pipeline_manager.unsubscribe(notify_2)

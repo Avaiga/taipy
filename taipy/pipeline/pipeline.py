@@ -33,6 +33,9 @@ class Pipeline:
         self.tasks = {task.config_name: task for task in tasks}
         self.is_consistent = self.__is_consistent()
 
+    def __eq__(self, other):
+        return self.id == other.id
+
     @staticmethod
     def __protect_name(name):
         return protect_name(name)

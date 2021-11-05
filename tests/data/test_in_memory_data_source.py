@@ -13,7 +13,7 @@ class TestInMemoryDataSourceEntity:
         embedded_str = InMemoryDataSource.create("foo", Scope.PIPELINE, None, data="bar")
         assert isinstance(embedded_str.read(), str)
         assert embedded_str.read() == "bar"
-        assert embedded_str.data == "bar"
+        assert embedded_str.default_data == "bar"
         embedded_int = InMemoryDataSource.create("foo", Scope.PIPELINE, None, data=197)
         assert isinstance(embedded_int.read(), int)
         assert embedded_int.read() == 197
@@ -30,6 +30,8 @@ class TestInMemoryDataSourceEntity:
         assert ds.type() == "in_memory"
         assert ds.id is not None
         assert ds.read() == "In memory Data Source"
+        assert ds.last_edition_date is not None
+        assert ds.job_ids == []
 
     def test_write(self):
         in_mem_ds = InMemoryDataSource.create("foo", Scope.PIPELINE, None, data="bar")

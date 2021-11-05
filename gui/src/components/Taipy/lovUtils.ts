@@ -1,15 +1,16 @@
 import { useMemo } from "react";
 
-import { TaipyImage, TaipyInputProps } from "./utils";
+import { TaipyBaseProps, TaipyImage } from "./utils";
 
 export interface LovItem {
     id: string;
     item: string | TaipyImage;
 }
 
-export interface LovProps extends TaipyInputProps {
-    defaultLov: string;
+export interface LovProps extends TaipyBaseProps {
+    defaultLov?: string;
     lov: LoV;
+    value?: string | string[];
 }
 
 export type LoV = [string, string | TaipyImage][];
@@ -27,7 +28,7 @@ export const useLovListMemo = (lov: LoV, defaultLov: string): LovItem[] =>
             try {
                 parsedLov = JSON.parse(defaultLov);
             } catch (e) {
-                parsedLov = lov as unknown as string[];
+                parsedLov = [];
             }
             return parsedLov.map((elt: [string, string | TaipyImage]) => ({ id: elt[0], item: elt[1] || elt[0] }));
         }

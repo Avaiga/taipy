@@ -1,13 +1,12 @@
-__all__ = ["Job", "JobId"]
+__all__ = ["Job"]
 
 from concurrent.futures import Future
 from datetime import datetime
-from typing import Callable, List, NewType
+from typing import Callable, List
 
+from taipy.common.alias import JobId
 from taipy.task.scheduler.status import Status
 from taipy.task.task import Task
-
-JobId = NewType("JobId", str)
 
 
 def _run_callbacks(fn):

@@ -10,6 +10,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from taipy.exceptions import ModelNotFound
 
 ModelType = TypeVar("ModelType")
+Entity = TypeVar("Entity")
 Json = Union[dict, list, str, int, float, bool, None]
 
 
@@ -23,7 +24,7 @@ class EnumEncoder(json.JSONEncoder):
         return result
 
 
-class FileSystemRepository(Generic[ModelType]):
+class FileSystemRepository(Generic[ModelType, Entity]):
     """
     This class holds common methods to be used and extended when a functionality of saving
     dataclasses as JSON files in local storage emerges.
@@ -69,17 +70,17 @@ class FileSystemRepository(Generic[ModelType]):
     def _build_model(self, model_data: Dict) -> ModelType:
         return self.model.from_dict(model_data)  # type: ignore
 
-    def load(self, model_id: str) -> Optional[ModelType]:
+    def load(self, model_id: str) -> Optional[Entity]:
         try:
             filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
-            return self.__to_object(self.__load_json_file(filepath))
+            return self.__to_entity(filepath)
         except FileNotFoundError:
             raise ModelNotFound(self.dir_name, model_id)
 
-    def load_all(self) -> List[ModelType]:
+    def load_all(self) -> List[Entity]:
         models = []
         for filename in pathlib.Path(self.directory).glob("*.json"):
-            models.append(self.__to_object(self.__load_json_file(filename)))
+            models.append(self.__to_entity(filename))
         return models
 
     def save(self, model):
@@ -97,27 +98,25 @@ class FileSystemRepository(Generic[ModelType]):
         except FileNotFoundError:
             raise ModelNotFound(self.dir_name, model_id)
 
-    def search(self, attribute: str, value: str) -> Optional[ModelType]:
+    def search(self, attribute: str, value: str) -> Optional[Entity]:
         model = None
         for filename in pathlib.Path(self.directory).glob("*.json"):
-            m = self.__to_object(self.__load_json_file(filename))
+            m = self.__to_entity(filename)
             if hasattr(m, attribute) and getattr(m, attribute) == value:
                 model = m
                 break
         return model
 
-    def search_all(self, attribute: str, value: str) -> List:
+    def search_all(self, attribute: str, value: str) -> List[Entity]:
         models = []
         for filename in pathlib.Path(self.directory).glob("*.json"):
-            m = self.__to_object(self.__load_json_file(filename))
+            m = self.__to_entity(filename)
             if hasattr(m, attribute) and getattr(m, attribute) == value:
                 models.append(m)
         return models
 
-    def __to_object(self, model_data: Dict) -> ModelType:
-        model = self.model.from_dict(model_data)  # type: ignore
-        return self.from_model(model)
-
-    def __load_json_file(self, filepath):
+    def __to_entity(self, filepath):
         with open(filepath, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+        model = self.model.from_dict(data)  # type: ignore
+        return self.from_model(model)

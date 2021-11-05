@@ -8,12 +8,13 @@ from time import sleep
 
 import pytest
 
+from taipy.common.alias import JobId
 from taipy.config import Config
 from taipy.config.task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
-from taipy.task import JobId, Task
+from taipy.task import Task
 from taipy.task.scheduler import TaskScheduler
 
 
@@ -29,6 +30,7 @@ def reset_configuration_singleton():
 
 
 def multiply(nb1: float, nb2: float):
+    sleep(0.1)
     return nb1 * nb2
 
 
@@ -39,10 +41,27 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_scheduled_task():
     task_scheduler = TaskScheduler()
-    task = _create_task(multiply)
+    data_manager = task_scheduler.data_manager
 
+    before_creation = datetime.now()
+    sleep(0.1)
+    task = _create_task(multiply)
+    output_ds_id = task.output[f"{task.config_name}-output0"].id
+
+    assert data_manager.get(output_ds_id).last_edition_date > before_creation
+    assert data_manager.get(output_ds_id).job_ids == []
+    assert data_manager.get(output_ds_id).up_to_date
+
+    before_submission_creation = datetime.now()
+    sleep(0.1)
     job = task_scheduler.submit(task)
-    assert task.output[f"{task.config_name}-output0"].read() == 42
+    sleep(0.1)
+    after_submission_creation = datetime.now()
+    assert data_manager.get(output_ds_id).read() == 42
+    assert data_manager.get(output_ds_id).last_edition_date > before_submission_creation
+    assert data_manager.get(output_ds_id).last_edition_date < after_submission_creation
+    assert data_manager.get(output_ds_id).job_ids == [job.id]
+    assert data_manager.get(output_ds_id).up_to_date
     assert job.is_completed()
 
 
@@ -265,12 +284,16 @@ def test_scheduled_task_multithreading_multiple_task_in_sync_way_to_check_job_st
 def _create_task(function, nb_outputs=1):
     task_name = str(uuid.uuid4())
     input_ds = [
-        DataManager().get_or_create(Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, data=21)),
-        DataManager().get_or_create(Config.data_source_configs.create("input2", "in_memory", Scope.PIPELINE, data=2)),
+        DataManager().get_or_create(
+            Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, default_data=21)
+        ),
+        DataManager().get_or_create(
+            Config.data_source_configs.create("input2", "in_memory", Scope.PIPELINE, default_data=2)
+        ),
     ]
     output_ds = [
         DataManager().get_or_create(
-            Config.data_source_configs.create(f"{task_name}-output{i}", "pickle", Scope.PIPELINE, data=0)
+            Config.data_source_configs.create(f"{task_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]

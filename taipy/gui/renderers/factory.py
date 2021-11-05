@@ -30,8 +30,7 @@ class Factory:
             attributes=attrs,
             default_value="<empty>",
         )
-        .set_expresion_hash(False)
-        .set_default_value()
+        .set_value_and_default(False)
         .set_className(class_name="taipy-field", config_class="field")
         .set_dataType()
         .set_attributes(
@@ -42,13 +41,11 @@ class Factory:
         ),
         "button": lambda control_type, attrs: Builder(
             control_type=control_type,
-            element_name="Input",
+            element_name="Button",
             attributes=attrs,
             default_value="<empty>",
         )
-        .set_type("button")
-        .set_expresion_hash(False)
-        .set_default_value()
+        .set_value_and_default(False)
         .set_className(class_name="taipy-button", config_class="button")
         .set_attributes(
             [
@@ -64,8 +61,7 @@ class Factory:
             default_value="<empty>",
         )
         .set_type("text")
-        .set_expresion_hash()
-        .set_default_value()
+        .set_value_and_default()
         .set_propagate()
         .set_className(class_name="taipy-input", config_class="input")
         .set_attributes(
@@ -81,8 +77,7 @@ class Factory:
             default_value=0,
         )
         .set_type("number")
-        .set_expresion_hash()
-        .set_default_value()
+        .set_value_and_default()
         .set_className(class_name="taipy-number", config_class="input")
         .set_propagate()
         .set_attributes(
@@ -97,8 +92,7 @@ class Factory:
             attributes=attrs,
             default_value=datetime.fromtimestamp(0),
         )
-        .set_expresion_hash()
-        .set_default_value()
+        .set_value_and_default()
         .set_className(class_name="taipy-date-selector", config_class="date_selector")
         .set_attributes(
             [
@@ -110,20 +104,19 @@ class Factory:
         .set_propagate(),
         "slider": lambda control_type, attrs: Builder(
             control_type=control_type,
-            element_name="Input",
+            element_name="Slider",
             attributes=attrs,
             default_value=0,
         )
-        .set_type("range")
-        .set_expresion_hash()
-        .set_default_value()
+        .set_value_and_default()
         .set_className(class_name="taipy-slider", config_class="slider")
         .set_attributes(
             [
-                ("min", AttributeType.string, "1"),
-                ("max", AttributeType.string, "100"),
+                ("min", AttributeType.number, 0),
+                ("max", AttributeType.number, 100),
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("width", AttributeType.string_or_number, 200)
             ]
         )
         .set_propagate(),
@@ -132,7 +125,7 @@ class Factory:
             element_name="Selector",
             attributes=attrs,
         )
-        .set_expresion_hash()
+        .set_value_and_default(with_default=False)
         .set_className(class_name="taipy-selector", config_class="selector")
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
@@ -151,7 +144,7 @@ class Factory:
             element_name="Table",
             attributes=attrs,
         )
-        .set_expresion_hash()
+        .set_value_and_default(with_default=False)
         .set_className(class_name="taipy-table", config_class="table")
         .get_dataframe_attributes()
         .set_attributes(
@@ -176,7 +169,7 @@ class Factory:
             element_name="Dialog",
             attributes=attrs,
         )
-        .set_expresion_hash()
+        .set_value_and_default()
         .set_className(class_name="taipy-dialog", config_class="dialog")
         .set_attributes(
             [
@@ -190,7 +183,6 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         )
-        .set_default_value()
         .set_propagate()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
@@ -199,7 +191,7 @@ class Factory:
             element_name="Chart",
             attributes=attrs,
         )
-        .set_expresion_hash()
+        .set_value_and_default(with_default=False)
         .set_className(class_name="taipy-chart", config_class="chart")
         .set_attributes(
             [
@@ -221,14 +213,14 @@ class Factory:
             element_name="Status",
             attributes=attrs,
         )
-        .set_expresion_hash(False)
-        .set_default_value()
+        .set_value_and_default(False)
         .set_className(class_name="taipy-status", config_class="status")
         .set_propagate()
         .set_attributes(
             [
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("without_close", AttributeType.boolean, False)
             ]
         ),
         "toggle": lambda control_type, attrs: Builder(
@@ -237,7 +229,7 @@ class Factory:
             attributes=attrs,
             default_value=""
         )
-        .set_expresion_hash()
+        .set_value_and_default(with_default=False)
         .set_className(class_name="taipy-toggle", config_class="toggle")
         .get_adapter("lov", False)  # need to be called before set_lov
         .set_lov()

@@ -3,57 +3,77 @@ Pipeline Manager is responsible for managing the pipelines.
 This is the entry point for operations (such as creating, reading, updating,
 deleting, duplicating, executing) related to pipelines.
 """
-import logging
-from typing import Callable, Dict, Iterable, List, Optional
+from functools import partial
+from typing import Callable, Iterable, List, Optional, Set
 
-from taipy.common.alias import PipelineId, TaskId
+from taipy.common.alias import PipelineId
 from taipy.config import PipelineConfig
-from taipy.exceptions import NonExistingTask
+from taipy.exceptions import ModelNotFound
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
+from taipy.pipeline.repository import PipelineRepository
+from taipy.task import Job
 from taipy.task.manager.task_manager import TaskManager
-from taipy.task.scheduler.task_scheduler import TaskScheduler
 
 
 class PipelineManager:
     task_manager = TaskManager()
     data_manager = task_manager.data_manager
-    task_scheduler = TaskScheduler()
+    task_scheduler = task_manager.task_scheduler
 
-    __PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
+    def __init__(self):
+        self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
+
+    __status_notifier: Set[Callable] = set()
+
+    def subscribe(self, callback: Callable[[Pipeline, Job], None]):
+        """
+        Subscribe a function to be called when the status of a Job changes
+
+        Note:
+            - Notification will be available only for Jobs created after this subscription
+        """
+        self.__status_notifier.add(callback)
+
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
+        """
+        Unsubscribe a function called when the status of a Job changes
+
+        Note:
+            - The function will continue to be called for ongoing Jobs
+        """
+        self.__status_notifier.remove(callback)
 
     def delete_all(self):
-        self.__PIPELINE_MODEL_DB: Dict[PipelineId, PipelineModel] = {}
+        self.repository.delete_all()
 
     def create(self, config: PipelineConfig, scenario_id: Optional[str] = None) -> Pipeline:
         pipeline_id = Pipeline.new_id(config.name)
         tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs]
         pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id)
-        self.save(pipeline)
+        self.set(pipeline)
         return pipeline
 
-    def save(self, pipeline: Pipeline):
-        self.__PIPELINE_MODEL_DB[pipeline.id] = pipeline.to_model()
+    def set(self, pipeline: Pipeline):
+        self.repository.save(pipeline)
 
-    def get_pipeline(self, pipeline_id: PipelineId) -> Pipeline:
+    def get(self, pipeline_id: PipelineId) -> Pipeline:
         try:
-            model = self.__PIPELINE_MODEL_DB[pipeline_id]
-            tasks = [self.task_manager.get(TaskId(task_id)) for task_id in model.task_source_edges.keys()]
-            return Pipeline(model.name, model.properties, tasks, model.id)
-        except NonExistingTask as err:
-            logging.error(err.message)
-            raise err
-        except KeyError:
-            pipeline_err = NonExistingPipeline(pipeline_id)
-            logging.error(pipeline_err.message)
-            raise pipeline_err
+            return self.repository.load(pipeline_id)
+        except ModelNotFound:
+            raise NonExistingPipeline(pipeline_id)
 
-    def get_pipelines(self) -> Iterable[Pipeline]:
-        return [self.get_pipeline(model.id) for model in self.__PIPELINE_MODEL_DB.values()]
+    def get_all(self) -> Iterable[Pipeline]:
+        return self.repository.load_all()
 
     def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
-        pipeline_to_submit = self.get_pipeline(pipeline_id)
+        callbacks = callbacks or []
+        pipeline_to_submit = self.get(pipeline_id)
+        pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline_to_submit) + callbacks
         for tasks in pipeline_to_submit.get_sorted_tasks():
             for task in tasks:
-                self.task_scheduler.submit(task, callbacks)
+                self.task_scheduler.submit(task, pipeline_subscription_callback)
+
+    def __get_status_notifier_callbacks(self, pipeline: Pipeline) -> List:
+        return [partial(c, pipeline) for c in self.__status_notifier]

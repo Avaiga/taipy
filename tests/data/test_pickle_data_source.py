@@ -16,14 +16,14 @@ class TestPickleDataSourceEntity:
             os.remove(f)
 
     def test_get(self):
-        pickle_str = PickleDataSource.create("foo", Scope.PIPELINE, None, "bar")
+        pickle_str = PickleDataSource.create("foo", Scope.PIPELINE, None, data="bar")
         assert isinstance(pickle_str.read(), str)
         assert pickle_str.read() == "bar"
-        assert pickle_str.data == "bar"
-        pickle_int = PickleDataSource.create("foo", Scope.PIPELINE, None, 197)
+        assert pickle_str.default_data == "bar"
+        pickle_int = PickleDataSource.create("foo", Scope.PIPELINE, None, data=197)
         assert isinstance(pickle_int.read(), int)
         assert pickle_int.read() == 197
-        pickle_dict = PickleDataSource.create("foo", Scope.PIPELINE, None, {"bar": 12, "baz": "qux", "quux": [13]})
+        pickle_dict = PickleDataSource.create("foo", Scope.PIPELINE, None, data={"bar": 12, "baz": "qux", "quux": [13]})
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
@@ -34,6 +34,8 @@ class TestPickleDataSourceEntity:
         assert ds.type() == "pickle"
         assert ds.id is not None
         assert ds.read() == "Pickle Data Source"
+        assert ds.last_edition_date is not None
+        assert ds.job_ids == []
 
     def test_preview(self):
         ds = PickleDataSource.create("foo", Scope.PIPELINE, None, data="Pickle Data Source")
