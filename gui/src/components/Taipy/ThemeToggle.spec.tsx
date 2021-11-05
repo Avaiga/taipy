@@ -35,22 +35,14 @@ describe("ThemeToggle Component", () => {
         const elt = getByText("Mode");
         expect(elt.parentElement).toHaveClass("taipy-toggle");
     })
-    it("shows light selection at start", async () => {
-        state.theme.palette.mode = "light"
-        const {getByTitle} = render(<TaipyContext.Provider value={{ state, dispatch }}>
-            <ThemeToggle />
-        </TaipyContext.Provider>);
-        const elt = getByTitle("Light");
-        expect(elt).toHaveClass("Mui-selected");
-    });
-    it("shows light selection at start", async () => {
+    it("shows Light theme selected at start", async () => {
         const {getByTitle} = render(<TaipyContext.Provider value={{ state, dispatch }}>
             <ThemeToggle />
         </TaipyContext.Provider>);
         expect(getByTitle("Dark")).not.toHaveClass("Mui-selected");
         expect(getByTitle("Light")).toHaveClass("Mui-selected");
     });
-    it("shows dark selection at start", async () => {
+    it("shows Dark theme selected at start", async () => {
         state.theme.palette.mode = "dark";
         const {getByTitle} = render(<TaipyContext.Provider value={{ state, dispatch }}>
             <ThemeToggle />
