@@ -5,9 +5,11 @@ from typing import Callable, Dict, List, Set
 from taipy.common.alias import PipelineId, ScenarioId
 from taipy.config import ScenarioConfig
 from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.exceptions.repository import ModelNotFound
 from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import PipelineManager
 from taipy.scenario import Scenario
+from taipy.scenario.repository import ScenarioRepository
 from taipy.scenario.scenario_model import ScenarioModel
 from taipy.task import Job
 
@@ -16,6 +18,7 @@ class ScenarioManager:
     pipeline_manager = PipelineManager()
     task_manager = pipeline_manager.task_manager
     data_manager = pipeline_manager.data_manager
+    repository = ScenarioRepository(dir_name="scenarios")
 
     __status_notifier: Set[Callable] = set()
     __SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
@@ -40,7 +43,7 @@ class ScenarioManager:
         self.__status_notifier.remove(callback)
 
     def delete_all(self):
-        self.__SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
+        self.repository.delete_all()
 
     def create(self, config: ScenarioConfig) -> Scenario:
         scenario_id = Scenario.new_id(config.name)
@@ -50,25 +53,22 @@ class ScenarioManager:
         return scenario
 
     def save(self, scenario: Scenario):
-        self.__SCENARIO_MODEL_DB[scenario.id] = scenario.to_model()
+        self.repository.save(scenario)
 
-    def get_scenario(self, scenario_id: ScenarioId) -> Scenario:
+    def get(self, scenario_id: ScenarioId) -> Scenario:
         try:
-            model = self.__SCENARIO_MODEL_DB[scenario_id]
-            pipelines = [self.pipeline_manager.get(PipelineId(pipeline_id)) for pipeline_id in model.pipelines]
-            return Scenario(model.name, pipelines, model.properties, model.id)
-        except NonExistingPipeline as err:
-            logging.error(err.message)
-            raise err
-        except KeyError:
+            if model := self.repository.load(scenario_id):
+                return model
+            raise NonExistingScenario(scenario_id)
+        except ModelNotFound:
             logging.error(f"Scenario entity : {scenario_id} does not exist.")
             raise NonExistingScenario(scenario_id)
 
-    def get_scenarios(self) -> List[Scenario]:
-        return [self.get_scenario(model.id) for model in self.__SCENARIO_MODEL_DB.values()]
+    def get_all(self) -> List[Scenario]:
+        return self.repository.load_all()
 
     def submit(self, scenario_id: ScenarioId):
-        scenario_to_submit = self.get_scenario(scenario_id)
+        scenario_to_submit = self.get(scenario_id)
         callbacks = self.__get_status_notifier_callbacks(scenario_to_submit)
         for pipeline in scenario_to_submit.pipelines.values():
             self.pipeline_manager.submit(pipeline.id, callbacks)
