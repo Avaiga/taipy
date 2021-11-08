@@ -21,6 +21,7 @@ class Factory:
         "chart": "data",
         "status": "value",
         "toggle": "value",
+        "content": "value",
     }
 
     CONTROL_BUILDERS = {
@@ -244,6 +245,11 @@ class Factory:
         .set_kind()
         .set_refresh_on_update()
         .set_propagate(),
+        "content": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="PageContent",
+            attributes=attrs
+        ),
     }
 
     # TODO: process \" in property value
