@@ -1,19 +1,20 @@
 version: '3.7'
 
 services:
+  rabbitmq:
+    image: rabbitmq:latest
+    networks:
+      - taipy-network
 
-  taipy:
+  taipy-worker:
     build:
       context: .
       dockerfile: Dockerfile
-      target: build
+      target: worker
     networks:
       - taipy-network
-    expose:
-      - "5000"
-    tty: true
-    volumes:
-      - .:/app
+    depends_on:
+      - rabbitmq
 
 networks:
   taipy-network:

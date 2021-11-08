@@ -13,7 +13,7 @@ help:
 	@echo "build                     Create the containers used in the development environment"
 	@echo "tests                     Execute the tests in the development environment"
 	@echo "run                       Starts application"
-	@echo "run-multiple              Starts application"
+	@echo "run-with-worker           Starts application"
 	@echo "clean                     Remove all application related containers"
 	@echo ""
 
@@ -26,9 +26,9 @@ run: build
 	@docker-compose up -d taipy
 
 .PHONY:
-run-multiple: build
-	@docker-compose up -d --scale taipy=$(workers) nginx
+run-with-worker: build
+	@docker-compose -f docker-compose.yml -f docker-compose-worker.yml up
 
 .PHONY:
 clean:
-	@docker-compose down
+	@docker-compose -f docker-compose.yml -f docker-compose-worker.yml down

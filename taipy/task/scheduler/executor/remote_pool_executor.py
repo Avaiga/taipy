@@ -14,7 +14,7 @@ class RemotePoolExecutor(ThreadPoolExecutor):
 
     def __init__(self, max_number_of_worker, *args, **kwargs):
         super().__init__(max_number_of_worker, *args, **kwargs)
-        self.app = Celery("tasks", backend="rpc://", broker="pyamqp://guest@localhost//")
+        self.app = Celery("tasks", backend="rpc://", broker="pyamqp://guest@rabbitmq//")
         self.remote_executor = self.app.task(self._execute)
 
     def submit(self, fn, /, *args, **kwargs):
