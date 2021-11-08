@@ -10,9 +10,10 @@ from taipy.config import Config
 from taipy.exceptions import JobNotDeletedException, NonExistingJob
 from taipy.task import Task
 
+from ...common.alias import JobId
 from ...config.task_scheduler import TaskSchedulerConfig
 from ...data.manager import DataManager
-from .job import Job, JobId
+from .job import Job
 from .job_dispatcher import JobDispatcher
 
 
@@ -22,37 +23,30 @@ class TaskScheduler:
     """
 
     def __init__(self, task_scheduler_config: TaskSchedulerConfig = Config.task_scheduler_configs.create()):
+        self.data_manager = DataManager()
         self.__JOBS: Dict[JobId, Job] = {}
         self.jobs_to_run: Queue[Job] = Queue()
+        self.blocked_jobs: List[Job] = []
         self.__executor = JobDispatcher(
-            task_scheduler_config.parallel_execution, task_scheduler_config.max_number_of_parallel_execution
+            task_scheduler_config.parallel_execution,
+            task_scheduler_config.remote_execution,
+            task_scheduler_config.nb_of_workers,
         )
         self.data_manager = DataManager()
         self.lock = Lock()
 
     def submit(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
-        """
-        Submit a task that should be executed as a Job
-
-        The result of the Task executed is provided to its output data source
-        by mapping each element with each output data source of the Task.
-        If the number of output data sources is
-        different to the number of Task results, we do nothing
-
-        If an error happens when the result is provided to a data source, we ignore it
-        and continue to the next data source
-        """
-        # TODO set outputs ready status to false
-        # output.update_submitted()
+        for ds in task.output.values():
+            ds.update_submitted()
         job = self.__create_job(task, callbacks or [])
-        # if it exists an input not ready
-        #     job.is_blocked()
-        #     self.job_blocked.put(job)
-        # else
-        job.pending()
-        self.jobs_to_run.put(job)
+        if self.__should_be_blocked(job):
+            job.blocked()
+            self.blocked_jobs.append(job)
+        else:
+            job.pending()
+            self.jobs_to_run.put(job)
+            self.__run()
 
-        self.__run()
         return job
 
     def get_job(self, job_id: JobId) -> Job:
@@ -76,6 +70,12 @@ class TaskScheduler:
     def get_latest_job(self, task: Task) -> Job:
         return max(filter(lambda job: task in job, self.__JOBS.values()))
 
+    def __should_be_blocked(self, job) -> bool:
+        for ds in job.task.input.values():
+            if not self.data_manager.get(ds.id).up_to_date:
+                return True
+        return False
+
     def __run(self):
         with self.lock:
             self.__execute_jobs()
@@ -95,9 +95,16 @@ class TaskScheduler:
         if job.is_finished():
             if self.lock.acquire(block=False):
                 try:
-                    # TODO self.__unblock_jobs()
+                    self.__unblock_jobs()
                     self.__execute_jobs()
                 except:
                     ...
                 finally:
                     self.lock.release()
+
+    def __unblock_jobs(self):
+        jobs_to_unblock = [job for job in self.blocked_jobs if not self.__should_be_blocked(job)]
+        for job in jobs_to_unblock:
+            job.pending()
+            self.blocked_jobs.remove(job)
+            self.jobs_to_run.put(job)

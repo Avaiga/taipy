@@ -1,7 +1,7 @@
 import pytest
 
 from taipy.config import DataSourceConfig, TaskConfig
-from taipy.data import CSVDataSource, DataSource, Scope
+from taipy.data import CSVDataSource, DataSource, InMemoryDataSource, Scope
 from taipy.task import Task
 
 
@@ -20,6 +20,10 @@ def test_create_task():
     task = Task(name, [], print, [])
     assert f"TASK_{name}_" in task.id
     assert task.config_name == "name_1"
+
+    name_1 = "name_1//ξ"
+    task_1 = Task(name_1, [], print, [])
+    assert task_1.config_name == "name_1-x"
 
 
 def test_can_not_change_task_output(output):
@@ -79,11 +83,21 @@ def test_can_not_update_task_input_values(input):
 
 def test_create_task_from_task_config():
     path = "my/csv/path"
-    foo_ds = CSVDataSource.create("foo", Scope.PIPELINE, None, path=path)
+    foo_ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
     task = Task("namE 1", [foo_ds], print, [])
     assert task.config_name == "name_1"
     assert task.id is not None
     assert task.foo == foo_ds
     assert task.foo.path == path
+    with pytest.raises(AttributeError):
+        task.bar
+
+    path = "my/csv/path"
+    abc_ds = InMemoryDataSource("abc_dsξyₓéà", Scope.PIPELINE, properties={"path": path})
+    task = Task("namE 1éà", [abc_ds], print, [])
+    assert task.config_name == "name_1ea"
+    assert task.id is not None
+    assert task.abc_dsxyxea == abc_ds
+    assert task.abc_dsxyxea.path == path
     with pytest.raises(AttributeError):
         task.bar

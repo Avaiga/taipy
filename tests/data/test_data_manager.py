@@ -4,50 +4,115 @@ import pathlib
 import pytest
 
 from taipy.config import Config, DataSourceConfig
-from taipy.data import CSVDataSource, DataSource, Scope
+from taipy.data import CSVDataSource, InMemoryDataSource, PickleDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType, ModelNotFound
 
 
 class TestDataManager:
-    def test_create_data_source(self, tmpdir):
+    def test_create_and_get_csv_data_source(self):
         dm = DataManager()
-        dm.repository.base_path = tmpdir
-        # Test we can instantiate a CsvDataSourceEntity from DataSource with type csv
+        # Test we can instantiate a CsvDataSource from DataSourceConfig with :
+        # - a csv type
+        # - a default pipeline scope
+        # - No parent_id
         csv_ds_config = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
-        csv_1 = dm._create_and_save_data_source(csv_ds_config, None)
+        csv_ds = dm._create_and_save_data_source(csv_ds_config, None)
 
-        assert dm.get(csv_1.id) is not None
-        assert dm.get(csv_1.id).id == csv_1.id
-        assert dm.get(csv_1.id).config_name == csv_1.config_name
-        assert dm.get(csv_1.id).scope == csv_1.scope
-        assert dm.get(csv_1.id).parent_id is None
-        assert dm.get(csv_1.id).properties == csv_1.properties
+        assert isinstance(csv_ds, CSVDataSource)
+        assert isinstance(dm.get(csv_ds.id), CSVDataSource)
+        assert dm.get(csv_ds.id) is not None
+        assert dm.get(csv_ds.id).id == csv_ds.id
+        assert dm.get(csv_ds.id).config_name == "foo"
+        assert dm.get(csv_ds.id).config_name == csv_ds.config_name
+        assert dm.get(csv_ds.id).scope == Scope.PIPELINE
+        assert dm.get(csv_ds.id).scope == csv_ds.scope
+        assert dm.get(csv_ds.id).parent_id is None
+        assert dm.get(csv_ds.id).parent_id == csv_ds.parent_id
+        assert dm.get(csv_ds.id).last_edition_date is None
+        assert dm.get(csv_ds.id).last_edition_date == csv_ds.last_edition_date
+        assert dm.get(csv_ds.id).job_ids == []
+        assert dm.get(csv_ds.id).job_ids == csv_ds.job_ids
+        assert not dm.get(csv_ds.id).up_to_date
+        assert dm.get(csv_ds.id).up_to_date == csv_ds.up_to_date
+        assert len(dm.get(csv_ds.id).properties) == 2
+        assert dm.get(csv_ds.id).properties.get("path") == "bar"
+        assert dm.get(csv_ds.id).properties.get("has_header")
+        assert dm.get(csv_ds.id).properties == csv_ds.properties
 
-        # Test we can instantiate a EmbeddedDataSource from DataSourceConfig
-
-        # with type in memory
-        in_memory_ds_config = DataSourceConfig(name="foo", type="in_memory", scope=Scope.SCENARIO, data="bar")
+    def test_create_and_get_in_memory_data_source(self):
+        dm = DataManager()
+        # Test we can instantiate a InMemoryDataSource from DataSourceConfig with :
+        # - an in_memory type
+        # - a scenario scope
+        # - a parent id
+        # - some default data
+        in_memory_ds_config = DataSourceConfig(name="baz", type="in_memory", scope=Scope.SCENARIO, default_data="qux")
         in_mem_ds = dm._create_and_save_data_source(in_memory_ds_config, "Scenario_id")
-        fetched_entity = dm.get(in_mem_ds.id)
 
-        assert fetched_entity.id == in_mem_ds.id
-        assert fetched_entity.config_name == in_mem_ds.config_name
-        assert fetched_entity.scope == in_mem_ds.scope
-        assert fetched_entity.parent_id == "Scenario_id"
-        assert fetched_entity.properties == in_mem_ds.properties
+        assert isinstance(in_mem_ds, InMemoryDataSource)
+        assert isinstance(dm.get(in_mem_ds.id), InMemoryDataSource)
+        assert dm.get(in_mem_ds.id) is not None
+        assert dm.get(in_mem_ds.id).id == in_mem_ds.id
+        assert dm.get(in_mem_ds.id).config_name == "baz"
+        assert dm.get(in_mem_ds.id).config_name == in_mem_ds.config_name
+        assert dm.get(in_mem_ds.id).scope == Scope.SCENARIO
+        assert dm.get(in_mem_ds.id).scope == in_mem_ds.scope
+        assert dm.get(in_mem_ds.id).parent_id == "Scenario_id"
+        assert dm.get(in_mem_ds.id).parent_id == in_mem_ds.parent_id
+        assert dm.get(in_mem_ds.id).last_edition_date is not None
+        assert dm.get(in_mem_ds.id).last_edition_date == in_mem_ds.last_edition_date
+        assert dm.get(in_mem_ds.id).job_ids == []
+        assert dm.get(in_mem_ds.id).job_ids == in_mem_ds.job_ids
+        assert dm.get(in_mem_ds.id).up_to_date
+        assert dm.get(in_mem_ds.id).up_to_date == in_mem_ds.up_to_date
+        assert len(dm.get(in_mem_ds.id).properties) == 1
+        assert dm.get(in_mem_ds.id).properties.get("default_data") == "qux"
+        assert dm.get(in_mem_ds.id).properties == in_mem_ds.properties
 
-        # Test an exception is raised if the type provided to the data source is wrong
+    def test_create_and_get_pickle_data_source(self):
+        dm = DataManager()
+        # Test we can instantiate a PickleDataSource from DataSourceConfig with :
+        # - an in_memory type
+        # - a business cycle scope
+        # - No parent id
+        # - no default data
+        ds_config = DataSourceConfig(name="plop", type="pickle", scope=Scope.BUSINESS_CYCLE)
+        pickle_ds = dm._create_and_save_data_source(ds_config, None)
+
+        assert isinstance(pickle_ds, PickleDataSource)
+        assert isinstance(dm.get(pickle_ds.id), PickleDataSource)
+        assert dm.get(pickle_ds.id) is not None
+        assert dm.get(pickle_ds.id).id == pickle_ds.id
+        assert dm.get(pickle_ds.id).config_name == "plop"
+        assert dm.get(pickle_ds.id).config_name == pickle_ds.config_name
+        assert dm.get(pickle_ds.id).scope == Scope.BUSINESS_CYCLE
+        assert dm.get(pickle_ds.id).scope == pickle_ds.scope
+        assert dm.get(pickle_ds.id).parent_id is None
+        assert dm.get(pickle_ds.id).parent_id == pickle_ds.parent_id
+        assert dm.get(pickle_ds.id).last_edition_date is None
+        assert dm.get(pickle_ds.id).last_edition_date == pickle_ds.last_edition_date
+        assert dm.get(pickle_ds.id).job_ids == []
+        assert dm.get(pickle_ds.id).job_ids == pickle_ds.job_ids
+        assert not dm.get(pickle_ds.id).up_to_date
+        assert dm.get(pickle_ds.id).up_to_date == pickle_ds.up_to_date
+        assert len(dm.get(pickle_ds.id).properties) == 0
+        assert dm.get(pickle_ds.id).properties == pickle_ds.properties
+
+    def test_create_raises_exception_with_wrong_type(self):
+        dm = DataManager()
         wrong_type_ds_config = DataSourceConfig(name="foo", type="bar")
         with pytest.raises(InvalidDataSourceType):
             dm._create_and_save_data_source(wrong_type_ds_config, None)
 
-        # Test that each time we ask for a data source entity creation from the same
-        # data source, a new id is created
-        csv_2 = dm._create_and_save_data_source(csv_ds_config, None)
-        assert csv_2.id != csv_1.id
+    def test_create_from_same_config_generates_new_data_source_and_new_id(self):
+        dm = DataManager()
+        ds_config = DataSourceConfig(name="foo", type="in_memory")
+        ds = dm._create_and_save_data_source(ds_config, None)
+        ds_2 = dm._create_and_save_data_source(ds_config, None)
+        assert ds_2.id != ds.id
 
-    def test_create_data_source_with_config_file(self):
+    def test_create_uses_overridden_attributes_in_config_file(self):
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         dm = DataManager()
@@ -58,37 +123,88 @@ class TestDataManager:
         assert csv.path == "path_from_config_file"
         assert csv.has_header is False
 
-        csv_ds = Config.data_source_configs.create(name="bar", type="csv", path="bar", has_header=True)
+        csv_ds = Config.data_source_configs.create(name="baz", type="csv", path="bar", has_header=True)
         csv = dm._create_and_save_data_source(csv_ds, None)
-        assert csv.config_name == "bar"
+        assert csv.config_name == "baz"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "bar"
         assert csv.has_header is False
 
-    def test_create_and_fetch(self, tmpdir):
-        dm = DataManager()
-        dm.repository.base_path = tmpdir
-        dm.repository.save(
-            CSVDataSource(
-                "test_data_source",
-                Scope.PIPELINE,
-                "ds_id",
-                None,
-                None,
-                [],
-                False,
-                {"path": "/path", "has_header": True},
-            )
-        )
-        ds = dm.repository.load("ds_id")
-
-        assert isinstance(ds, CSVDataSource)
-        assert isinstance(ds, DataSource)
-
-    def test_fetch_data_source_not_exists(self):
-        dm = DataManager()
+    def test_get_if_not_exists(self):
         with pytest.raises(ModelNotFound):
-            dm.repository.load("test_data_source_2")
+            DataManager().repository.load("test_data_source_2")
+
+    def test_get_all(self):
+        dm = DataManager()
+        assert len(dm.get_all()) == 0
+        ds_config_1 = Config.data_source_configs.create(name="foo", type="in_memory")
+        dm._create_and_save_data_source(ds_config_1, None)
+        assert len(dm.get_all()) == 1
+        ds_config_2 = Config.data_source_configs.create(name="baz", type="in_memory")
+        dm._create_and_save_data_source(ds_config_2, None)
+        dm._create_and_save_data_source(ds_config_2, None)
+        assert len(dm.get_all()) == 3
+        assert len([ds for ds in dm.get_all() if ds.config_name == "foo"]) == 1
+        assert len([ds for ds in dm.get_all() if ds.config_name == "baz"]) == 2
+
+    def test_get_all_by_config_name(self):
+        dm = DataManager()
+        assert len(dm._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
+        ds_config_1 = Config.data_source_configs.create(name="foo", type="in_memory")
+        assert len(dm._get_all_by_config_name("foo")) == 0
+        dm._create_and_save_data_source(ds_config_1, None)
+        assert len(dm._get_all_by_config_name("foo")) == 1
+        ds_config_2 = Config.data_source_configs.create(name="baz", type="in_memory")
+        dm._create_and_save_data_source(ds_config_2, None)
+        assert len(dm._get_all_by_config_name("foo")) == 1
+        assert len(dm._get_all_by_config_name("baz")) == 1
+        dm._create_and_save_data_source(ds_config_2, None)
+        assert len(dm._get_all_by_config_name("foo")) == 1
+        assert len(dm._get_all_by_config_name("baz")) == 2
+
+    def test_set(self):
+        dm = DataManager()
+        ds = InMemoryDataSource(
+            "config_name",
+            Scope.PIPELINE,
+            id="id",
+            parent_id=None,
+            last_edition_date=None,
+            job_ids=[],
+            up_to_date=False,
+            properties={"foo": "bar"},
+        )
+        assert len(dm.get_all()) == 0
+        dm.set(ds)
+        assert len(dm.get_all()) == 1
+
+        # changing data source attribute
+        ds.config_name = "foo"
+        assert ds.config_name == "foo"
+        assert dm.get(ds.id).config_name == "config_name"
+        dm.set(ds)
+        assert len(dm.get_all()) == 1
+        assert ds.config_name == "foo"
+        assert dm.get(ds.id).config_name == "foo"
+
+    def test_delete(self):
+        dm = DataManager()
+        ds_1 = InMemoryDataSource("config_name", Scope.PIPELINE, id="id_1")
+        ds_2 = InMemoryDataSource("config_name", Scope.PIPELINE, id="id_2")
+        ds_3 = InMemoryDataSource("config_name", Scope.PIPELINE, id="id_3")
+        assert len(dm.get_all()) == 0
+        dm.set(ds_1)
+        dm.set(ds_2)
+        dm.set(ds_3)
+        assert len(dm.get_all()) == 3
+        dm.delete(ds_1.id)
+        assert len(dm.get_all()) == 2
+        assert dm.get(ds_2.id).id == ds_2.id
+        assert dm.get(ds_3.id).id == ds_3.id
+        with pytest.raises(ModelNotFound):
+            dm.get(ds_1.id)
+        dm.delete_all()
+        assert len(dm.get_all()) == 0
 
     def test_get_or_create(self):
         dm = DataManager()

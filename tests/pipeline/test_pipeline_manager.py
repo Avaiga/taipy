@@ -20,8 +20,8 @@ def test_save_and_get_pipeline_entity():
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
     pipeline_id_2 = PipelineId("id2")
-    input_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, None, "bar")
-    output_2 = InMemoryDataSource.create("foo", Scope.PIPELINE, None, None, "bar")
+    input_2 = InMemoryDataSource("foo", Scope.PIPELINE)
+    output_2 = InMemoryDataSource("foo", Scope.PIPELINE)
     task_2 = Task("task", [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2], pipeline_id_2)
 
@@ -252,9 +252,9 @@ def test_pipeline_notification():
         [
             TaskConfig(
                 "mult by 2",
-                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 mult_by_2,
-                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )
@@ -286,9 +286,9 @@ def test_pipeline_notification_subscribe_unsubscribe():
         [
             TaskConfig(
                 "mult by 2",
-                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 mult_by_2,
-                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )
@@ -325,9 +325,9 @@ def test_pipeline_notification_subscribe_only_on_new_jobs():
         [
             TaskConfig(
                 "mult by 2",
-                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, data=1)],
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 mult_by_2,
-                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, data=0),
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )

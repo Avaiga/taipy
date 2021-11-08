@@ -48,7 +48,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
 
     return (
         <>
-            <Helmet>{head ? head.map((v) => React.createElement(v.tag, v.props, v.content)) : null}</Helmet>
+            {head ? <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet> : null}
             <JsxParser
                 disableKeyGeneration={true}
                 bindings={state.data}

@@ -13,7 +13,7 @@ import { createThemeAction } from "../../context/taipyReducers";
 
 interface ThemeToggleProps extends TaipyBaseProps {
     style?: CSSProperties;
-    label: string;
+    label?: string;
 }
 
 const boxSx = {

@@ -14,9 +14,9 @@ def test_create_scenario_entity():
     assert scenario_entity_1.properties == {"key": "value"}
     assert scenario_entity_1.key == "value"
 
-    scenario_entity_2 = Scenario("   bar   ", [], {}, ScenarioId("baz"))
+    scenario_entity_2 = Scenario("   bar/ξéà   ", [], {}, ScenarioId("baz"))
     assert scenario_entity_2.id == "baz"
-    assert scenario_entity_2.config_name == "bar"
+    assert scenario_entity_2.config_name == "bar-xea"
     assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
 
@@ -27,6 +27,14 @@ def test_create_scenario_entity():
     assert len(scenario_entity_3.pipelines) == 1
     assert scenario_entity_3.qux == pipeline_entity
     assert scenario_entity_3.properties == {}
+
+    pipeline_entity_1 = Pipeline("abcξyₓéà", {}, [])
+    scenario_entity_4 = Scenario("abcx", [pipeline_entity_1], {})
+    assert scenario_entity_4.id is not None
+    assert scenario_entity_4.config_name == "abcx"
+    assert len(scenario_entity_4.pipelines) == 1
+    assert scenario_entity_4.abcxyxea == pipeline_entity_1
+    assert scenario_entity_4.properties == {}
 
 
 def test_add_property_to_scenario():

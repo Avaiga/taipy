@@ -29,6 +29,6 @@ class Scope(OrderedEnum):
     """
 
     GLOBAL = 4
-    TIME_BUCKET = 3
+    BUSINESS_CYCLE = 3
     SCENARIO = 2
     PIPELINE = 1
