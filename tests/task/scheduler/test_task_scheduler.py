@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 from functools import partial
 from time import sleep
+from unittest.mock import patch
 
 import pytest
 
@@ -250,9 +251,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    task_scheduler = TaskScheduler(
-        Config.task_scheduler_configs.create(parallel_execution=True, max_number_of_parallel_execution=1)
-    )
+    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True, nb_of_workers=1))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -319,6 +318,24 @@ def test_blocked_task():
     assert_true_after_10_second_max(task_scheduler.get_job(job_2.id).is_completed)  # job 2 unlocked so it can complete
     assert data_manager.get(data_source_3.id).up_to_date  # Data source 3 becomes ready
     assert data_manager.get(data_source_3.id).read() == 6  # the data is computed and written
+
+
+@patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
+def test_task_scheduler_create_synchronous_dispatcher(job_dispatcher):
+    TaskScheduler(Config.task_scheduler_configs.create())
+    job_dispatcher.assert_called_with(False, False, None)
+
+
+@patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
+def test_task_scheduler_create_parallel_dispatcher(job_dispatcher):
+    TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True, nb_of_workers=42))
+    job_dispatcher.assert_called_with(True, False, 42)
+
+
+@patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
+def test_task_scheduler_create_remote_dispatcher(job_dispatcher):
+    TaskScheduler(Config.task_scheduler_configs.create(remote_execution=True, nb_of_workers=42))
+    job_dispatcher.assert_called_with(False, True, 42)
 
 
 def _create_task(function, nb_outputs=1):

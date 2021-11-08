@@ -28,7 +28,9 @@ class TaskScheduler:
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
         self.__executor = JobDispatcher(
-            task_scheduler_config.parallel_execution, task_scheduler_config.max_number_of_parallel_execution
+            task_scheduler_config.parallel_execution,
+            task_scheduler_config.remote_execution,
+            task_scheduler_config.nb_of_workers,
         )
         self.data_manager = DataManager()
         self.lock = Lock()

@@ -6,25 +6,62 @@ from taipy.config.interface import Configurable
 
 @dataclass
 class TaskSchedulerSerializer(Configurable):
+    NB_OF_WORKERS_NODE = "nb_of_workers"
+    EXECUTION_ENV_NODE = "execution_env"
+    LOCAL_EXECUTION_LABEL = "local"
+    REMOTE_EXECUTION_LABEL = "remote"
+
+    DEFAULT_REMOTE_EXECUTION = False
     DEFAULT_PARALLEL_EXECUTION = False
 
+    remote_execution: Optional[bool] = field(default=None)
     parallel_execution: Optional[bool] = field(default=None)
-    _max_number_of_parallel_execution: int = field(default=-1)
+    _nb_of_workers: int = field(default=-1)
 
     @property
-    def max_number_of_parallel_execution(self) -> Optional[int]:
-        if self._max_number_of_parallel_execution > 0:
-            return self._max_number_of_parallel_execution
+    def nb_of_workers(self) -> Optional[int]:
+        if self._nb_of_workers > 0:
+            return self._nb_of_workers
         return None
 
     def update(self, config):
-        self.parallel_execution = config.get("parallel_execution", self.parallel_execution)
-        self._max_number_of_parallel_execution = config.get(
-            "max_number_of_parallel_execution", self._max_number_of_parallel_execution
-        )
+        nb_of_workers = config.get(self.NB_OF_WORKERS_NODE)
+        if nb_of_workers is not None:
+            self._set_nb_of_workers(nb_of_workers)
+            if not self._is_synchronous():
+                self._is_parallel()
+        if execution_env := config.get(self.EXECUTION_ENV_NODE):
+            self._is_remote(execution_env)
 
     def export(self):
+        env = self.REMOTE_EXECUTION_LABEL if self.remote_execution else self.LOCAL_EXECUTION_LABEL
         return {
-            "parallel_execution": self.parallel_execution or self.DEFAULT_PARALLEL_EXECUTION,
-            "max_number_of_parallel_execution": self._max_number_of_parallel_execution,
+            self.EXECUTION_ENV_NODE: env,
+            self.NB_OF_WORKERS_NODE: self._nb_of_workers,
         }
+
+    def _set_nb_of_workers(self, nb_of_workers):
+        if nb_of_workers == 0:
+            self._nb_of_workers = 1
+        elif nb_of_workers == -1:
+            self._nb_of_workers = -1
+        else:
+            self._nb_of_workers = abs(int(nb_of_workers))
+
+    def _is_synchronous(self):
+        if self._nb_of_workers == 0 or self._nb_of_workers == 1:
+            self.remote_execution = False
+            self.parallel_execution = False
+            return True
+        return False
+
+    def _is_parallel(self):
+        self.remote_execution = False
+        self.parallel_execution = True
+
+    def _is_remote(self, execution_env):
+        if execution_env == self.REMOTE_EXECUTION_LABEL:
+            self.remote_execution = True
+            self.parallel_execution = False
+        else:
+            self.remote_execution = False
