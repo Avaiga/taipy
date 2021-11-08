@@ -57,9 +57,9 @@ class ScenarioManager:
 
     def get(self, scenario_id: ScenarioId) -> Scenario:
         try:
-            if model := self.repository.load(scenario_id):
-                return model
-            raise NonExistingScenario(scenario_id)
+            if scenario := self.repository.load(scenario_id):
+                return scenario
+            raise ModelNotFound
         except ModelNotFound:
             logging.error(f"Scenario entity : {scenario_id} does not exist.")
             raise NonExistingScenario(scenario_id)
