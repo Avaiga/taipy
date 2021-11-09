@@ -76,7 +76,7 @@ const tableValue = {
         "start": 0
     }
 };
-const tableColumns = JSON.stringify({"Entity": {"dfid": "Entity"}});
+const tableColumns = JSON.stringify({"Entity": {dfid: "Entity", type: "int64"}});
 
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
@@ -139,16 +139,42 @@ describe("PaginatedTable Component", () => {
     });
     it("displays the received data", async () => {
         const dispatch = jest.fn();
-        const state: TaipyState = {...INITIAL_STATE, data: {table: undefined} };
+        const state: TaipyState = INITIAL_STATE;
         const { getAllByText, rerender } = render(<TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable id="table" value={state.data.table as undefined} columns={tableColumns} tp_updatevars="varname=varname" />
+                <PaginatedTable value={undefined} columns={tableColumns} />
             </TaipyContext.Provider>);
-        const newState = {...state, data: {...state.data, table: tableValue}}
-        rerender(<TaipyContext.Provider value={{ state: newState, dispatch }}>
-            <PaginatedTable id="table" value={newState.data.table as TableValueType} columns={tableColumns} tp_updatevars="varname=varname" />
+        
+        rerender(<TaipyContext.Provider value={{ state, dispatch }}>
+            <PaginatedTable value={tableValue as TableValueType} columns={tableColumns} />
         </TaipyContext.Provider>);
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
+    });    
+    it("selects the rows", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const selected = [2, 4, 6];
+        const { getAllByText, rerender } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable value={undefined} columns={tableColumns} />
+            </TaipyContext.Provider>
+        );
+        rerender(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <PaginatedTable
+                    selected={selected}
+                    value={tableValue as TableValueType}
+                    columns={tableColumns}
+                />
+            </TaipyContext.Provider>
+        );
+        const elts = getAllByText("Austria");
+        elts.forEach((elt: HTMLElement, idx: number) =>
+            selected.indexOf(idx) == -1
+                ? expect(elt.parentElement).not.toHaveClass("Mui-selected")
+                : expect(elt.parentElement).toHaveClass("Mui-selected")
+        );
+        expect(document.querySelectorAll(".Mui-selected")).toHaveLength(selected.length);
     });
 });
