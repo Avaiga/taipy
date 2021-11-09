@@ -10,13 +10,13 @@ def test_number_md(gui: Gui, helpers):
 
 def test_number_html_1(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
-    md_string = '<taipy:number value="{x}" />'
+    html_string = '<taipy:number value="{x}" />'
     expected_list = ["<Input", 'tp_varname="x"', 'defaultValue="10"', 'type="number"', "value={x}"]
-    helpers.test_control_html(gui, md_string, expected_list)
+    helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_number_html_2(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
-    md_string = "<taipy:number>{x}</taipy:number>"
+    html_string = "<taipy:number>{x}</taipy:number>"
     expected_list = ["<Input", 'tp_varname="x"', 'defaultValue="10"', 'type="number"', "value={x}"]
-    helpers.test_control_html(gui, md_string, expected_list)
+    helpers.test_control_html(gui, html_string, expected_list)

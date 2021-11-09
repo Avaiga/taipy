@@ -5,7 +5,6 @@ import typing as t
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import Builder
 
-
 class Helpers:
     @staticmethod
     def test_cleanup():
