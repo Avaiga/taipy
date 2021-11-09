@@ -391,7 +391,7 @@ class Gui(object, metaclass=Singleton):
         # Init a new page
         new_page = Page()
         new_page.route = name
-        new_page.template_renderer = renderer
+        new_page.renderer = renderer
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)
@@ -447,7 +447,7 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
         if not isinstance(renderer, PageRenderer):
             raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
-        new_partial.template_renderer = renderer
+        new_partial.renderer = renderer
         # Append partial to _config
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(new_partial.route)
@@ -635,7 +635,7 @@ class Gui(object, metaclass=Singleton):
         if Gui.__root_page_name not in self._config.routes:
             new_page = Page()
             new_page.route = Gui.__root_page_name
-            new_page.template_renderer = EmptyPageRenderer()
+            new_page.renderer = EmptyPageRenderer()
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
