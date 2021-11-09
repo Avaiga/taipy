@@ -1,5 +1,5 @@
 import pytest
-
+import pandas as pd
 from taipy.gui import Gui
 
 from .helpers import Helpers
@@ -15,3 +15,7 @@ def gui(helpers):
 @pytest.fixture
 def helpers():
     return Helpers
+
+@pytest.fixture(scope="function")
+def csvdata():
+    yield pd.read_csv("current-covid-patients-hospital.csv", parse_dates=["Day"])
