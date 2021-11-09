@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = (env, options) => ({
     mode: options.mode, //'development', //'production',
@@ -31,20 +32,6 @@ module.exports = (env, options) => ({
         rules: [
             {
                 test: /\.tsx?$/,
-                enforce: 'pre',
-                use: [
-                  {
-                    options: {
-                      eslintPath: require.resolve('eslint'),
-
-                    },
-                    loader: require.resolve('eslint-loader'),
-                  },
-                ],
-                exclude: /node_modules/,
-            },
-            {
-                test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/,
             },
@@ -66,6 +53,13 @@ module.exports = (env, options) => ({
         new Dotenv({
             path: './.env.' + options.mode
         }),
-        new MiniCssExtractPlugin()
+        new MiniCssExtractPlugin(),
+        new ESLintPlugin({
+            extensions: [`ts`, `tsx`],
+            exclude: [
+                `/node_modules/`,
+              ],
+              eslintPath: require.resolve('eslint'),
+          })
     ]
 });
