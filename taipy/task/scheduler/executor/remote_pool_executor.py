@@ -3,7 +3,12 @@ __all__ = ["RemotePoolExecutor"]
 from concurrent.futures import ThreadPoolExecutor
 from importlib import import_module
 
-from celery import Celery
+try:
+    from celery import Celery
+except ImportError:
+    _has_celery = False
+else:
+    _has_celery = True
 
 
 class RemotePoolExecutor(ThreadPoolExecutor):
@@ -13,6 +18,8 @@ class RemotePoolExecutor(ThreadPoolExecutor):
     """
 
     def __init__(self, max_number_of_worker, *args, **kwargs):
+        if not _has_celery:
+            raise ImportError("celery is required.\nRun: pip install taipy[celery]")
         super().__init__(max_number_of_worker, *args, **kwargs)
         self.app = Celery("tasks", backend="rpc://", broker="pyamqp://guest@rabbitmq//")
         self.remote_executor = self.app.task(self._execute)

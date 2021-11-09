@@ -1,8 +1,13 @@
-from unittest.mock import MagicMock
+from unittest import mock
 
 import pytest
 
 from taipy.task.scheduler.executor.remote_pool_executor import RemotePoolExecutor
+
+try:
+    from celery import Celery
+except ImportError:
+    pytest.skip("skipping RemotePoolExecutor tests", allow_module_level=True)
 
 
 def mult(nb1, nb2):
