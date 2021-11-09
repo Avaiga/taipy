@@ -6,9 +6,11 @@ interface MainPageProps {
 }
 
 const MainPage = (props: MainPageProps) => {
-    return <>
-        <TaipyRendered path={props.path} />
-    </>
-}
+    return (
+        <>
+            <TaipyRendered path={props.path} />
+        </>
+    );
+};
 
 export default MainPage;
