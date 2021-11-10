@@ -9,9 +9,9 @@ from taipy.cycle.frequency import Frequency
 @dataclass
 class CycleModel:
     id: CycleId
-    config_name: str
+    name: str
     frequency: Frequency
-    creation_date: datetime
-    start_date: Optional[datetime]
-    end_date: Optional[datetime]
+    creation_date: str
+    start_date: Optional[str]
+    end_date: Optional[str]
     properties: dict

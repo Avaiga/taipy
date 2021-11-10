@@ -8,8 +8,6 @@ from taipy.common.alias import CycleId
 from taipy.cycle.cycle_model import CycleModel
 from taipy.cycle.frequency import Frequency
 
-# from taipy.scenario import Scenario
-
 
 class Cycle:
 
@@ -44,7 +42,7 @@ class Cycle:
             Cycle.__SEPARATOR.join([Cycle.__ID_PREFIX, Cycle.__protect_name(config_name), str(uuid.uuid4())])
         )
 
-    def __getattribute__(self, attribute_name: str):
+    def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
@@ -56,8 +54,8 @@ class Cycle:
             self.id,
             self.config_name,
             self.frequency,
-            self.creation_date,
-            self.start_date,
-            self.end_date,
+            self.creation_date.isoformat(),
+            self.start_date.isoformat() if self.start_date else None,
+            self.end_date.isoformat() if self.end_date else None,
             self.properties,
         )

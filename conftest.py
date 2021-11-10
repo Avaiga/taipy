@@ -1,5 +1,6 @@
 import os
 import shutil
+from datetime import datetime
 
 import pandas as pd
 import pytest
@@ -22,3 +23,8 @@ def default_data_frame():
 def cleanup_files():
     if os.path.exists(".data"):
         shutil.rmtree(".data")
+
+
+@pytest.fixture(scope="function")
+def current_datetime():
+    return datetime.now()
