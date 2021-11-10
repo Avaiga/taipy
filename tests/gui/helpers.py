@@ -59,3 +59,4 @@ class Helpers:
         payload = args["payload"][0]
         assert "name" in payload and payload["name"] == varname
         assert "payload" in payload and "value" in payload["payload"] and payload["payload"]["value"] == value
+        logging.getLogger().debug(payload["payload"]["value"])
