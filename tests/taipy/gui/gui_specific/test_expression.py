@@ -48,7 +48,7 @@ def test_expression_field_control_3(gui: Gui, helpers):
 def test_expression_button_control(gui: Gui, helpers):
     gui.bind_var_val("label", "A button label")
     md_string = "<|button|label={label}|>"
-    expected_list = ["<Input", 'type="button"', 'defaultValue="A button label"', "value={label}"]
+    expected_list = ["<Button", 'defaultValue="A button label"', "value={label}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
