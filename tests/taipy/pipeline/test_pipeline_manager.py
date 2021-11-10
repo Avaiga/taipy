@@ -12,7 +12,7 @@ from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
 from taipy.task import Task, TaskManager
 from taipy.task.scheduler import TaskScheduler
-from tests.utils.NotifyMock import NotifyMock
+from tests.taipy.utils.NotifyMock import NotifyMock
 
 
 def test_save_and_get_pipeline_entity():

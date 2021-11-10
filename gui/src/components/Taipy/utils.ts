@@ -9,8 +9,8 @@ export interface TaipyBaseProps<T = string> {
     active?: boolean;
 }
 
-export interface TaipyMultiSelect {
-    selected: number[];
+export interface TaipyMultiSelectProps {
+    selected?: number[];
 }
 
 export interface TaipyFieldProps extends TaipyBaseProps {

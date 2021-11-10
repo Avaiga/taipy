@@ -1,7 +1,7 @@
 import { TableCellProps } from "@mui/material/TableCell";
 
 import { getDateTimeString, getNumberString } from "../../utils/index";
-import { TaipyBaseProps, TaipyMultiSelect } from "./utils";
+import { TaipyBaseProps, TaipyMultiSelectProps } from "./utils";
 
 export interface ColumnDesc {
     dfid: string;
@@ -51,12 +51,16 @@ export const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelect {
-    /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
-    value: Record<string, Record<string, any>>;
+/* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
+export type TableValueType = Record<string, Record<string, any>>;
+
+export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelectProps {
+    value?: TableValueType;
     columns: string;
-    refresh: boolean;
-    height: string;
+    refresh?: boolean;
+    height?: string;
+    pageSize?: number;
+    defaultKey?: string; // for testing purposes only
 }
 
 export type PageSizeOptionsType = (
@@ -68,10 +72,9 @@ export type PageSizeOptionsType = (
 )[];
 
 export interface TaipyPaginatedTableProps extends TaipyTableProps {
-    pageSize?: number;
-    pageSizeOptions: string;
-    allowAllRows: boolean;
-    showAll: boolean;
+    pageSizeOptions?: string;
+    allowAllRows?: boolean;
+    showAll?: boolean;
 }
 
 export const boxSx = { width: "100%" };

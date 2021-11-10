@@ -4,7 +4,7 @@ import pytest
 
 from taipy.config import Config
 from taipy.exceptions.configuration import LoadingError
-from tests.config.named_temporary_file import NamedTemporaryFile
+from tests.taipy.config.named_temporary_file import NamedTemporaryFile
 
 
 def test_default_configuration():
