@@ -1,10 +1,14 @@
 import pytest
 import pandas as pd
 from taipy.gui import Gui
+from pathlib import Path
+import os
 
 from .helpers import Helpers
 
-csv = pd.read_csv("current-covid-patients-hospital.csv", parse_dates=["Day"])
+csv = pd.read_csv(
+    f"{Path(Path(__file__).parent.resolve())}{os.path.sep}current-covid-patients-hospital.csv", parse_dates=["Day"]
+)
 
 
 @pytest.fixture(scope="function")
