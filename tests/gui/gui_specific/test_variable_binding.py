@@ -1,17 +1,20 @@
 from taipy.gui import Gui, Markdown
 from types import FunctionType
 
+
 def test_variable_binding_1(helpers):
     """
     Test locals binding of a function and 3 variables
     """
+
     def another_function(gui):
         print("Hello World!")
+
     x = 10
     y = 20
     z = "Hello World!"
     gui = Gui(__name__)
-    gui.add_page("test", Markdown("<|{x} {y}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
+    gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
     client.get("/flask-jsx/test/")
@@ -21,19 +24,22 @@ def test_variable_binding_1(helpers):
     assert isinstance(gui.another_function, FunctionType)
     helpers.test_cleanup()
 
+
 def test_variable_binding_2(helpers):
     """
-    Test locals binding of a function and 3 variables, now with properties usage
+    Test locals binding of a function and 3 variables, now with button properties usage
     """
+
     def another_function(gui):
         print("Hello World!")
+
     x = 10
     y = 20
     z = "Hello World!"
     label = "an label"
     button_properties = {"label": label, "on_action": "another_function"}
     gui = Gui(__name__)
-    gui.add_page("test", Markdown("<|{x} {y}|> | <|{y}|> | <|{z}|button|properties=button_properties|>"))
+    gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|properties=button_properties|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
     client.get("/flask-jsx/test/")
