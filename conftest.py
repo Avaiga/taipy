@@ -29,7 +29,7 @@ def cleanup_files():
 
 
 @pytest.fixture(scope="class")
-def scenario_entity():
+def scenario():
     return Scenario("sc", [], {}, ScenarioId("sc_id"))
 
 
