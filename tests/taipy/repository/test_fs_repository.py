@@ -36,7 +36,6 @@ class TestFileSystemStorage:
         fetched_model = r.load(m.id)
         assert m == fetched_model
 
-
     def test_get_all(self, tmpdir):
         objs = []
         r = TestRepository(model=TestModel, dir_name="foo", base_path=tmpdir)

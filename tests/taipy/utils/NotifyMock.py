@@ -1,10 +1,10 @@
-
 class NotifyMock:
     """
     A shared class for testing notification on jobStatus of pipeline level and scenario level
 
     "entity" can be understand as either "scenario" or "pipeline".
     """
+
     def __init__(self, entity):
         self.scenario = entity
         self.nb_called = 0
