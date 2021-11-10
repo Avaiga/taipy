@@ -47,3 +47,15 @@ class Helpers:
         elif isinstance(expected_values, list):
             for expected_value in expected_values:
                 assert expected_value in jsx
+
+    @staticmethod
+    def assert_outward_ws_message(received_message, type, varname, value):
+        assert isinstance(received_message, dict)
+        assert "name" in received_message and received_message["name"] == "message"
+        assert "args" in received_message
+        args = received_message["args"]
+        assert "type" in args and args["type"] == type
+        assert "payload" in args
+        payload = args["payload"][0]
+        assert "name" in payload and payload["name"] == varname
+        assert "payload" in payload and "value" in payload["payload"] and payload["payload"]["value"] == value
