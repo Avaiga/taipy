@@ -10,7 +10,7 @@ from taipy.scenario.scenario_model import ScenarioModel
 
 
 class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
-    def __init__(self, dir_name="scenario"):
+    def __init__(self, dir_name="scenarios"):
         super().__init__(model=ScenarioModel, dir_name=dir_name)
 
     def to_model(self, scenario: Scenario):
