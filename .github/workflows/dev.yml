@@ -60,9 +60,14 @@ jobs:
         run:
           tox
 
+      - name: Install and test with optional dependancy
+        run: |
+          pip install celery[RabbitMQ]==5.1.2
+          tox
+
       - name: list files
         run: ls -l .
-  
+
   test-gui:
 
     strategy:
@@ -73,7 +78,7 @@ jobs:
     defaults:
       run:
         working-directory: ./gui
-    
+
     runs-on: ${{ matrix.os }}
 
     steps:

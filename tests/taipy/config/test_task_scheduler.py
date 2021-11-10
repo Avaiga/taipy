@@ -1,5 +1,5 @@
 from taipy.config import Config
-from tests.config.named_temporary_file import NamedTemporaryFile
+from tests.taipy.config.named_temporary_file import NamedTemporaryFile
 
 
 def test_run_in_synchronous():

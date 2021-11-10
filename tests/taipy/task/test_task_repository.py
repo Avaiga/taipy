@@ -3,8 +3,7 @@ import datetime
 import pytest
 
 from taipy.common.alias import JobId, TaskId
-from taipy.data import CSVDataSource, DataSource, Scope
-from taipy.data.data_source_model import DataSourceModel
+from taipy.data import CSVDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound
 from taipy.task import Task, TaskManager

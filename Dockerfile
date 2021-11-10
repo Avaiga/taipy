@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9 AS build
 
 WORKDIR /app
 
@@ -18,3 +18,8 @@ RUN rm Pipfile
 RUN rm -fr /app/install
 
 CMD ["bash"]
+
+FROM build as worker
+
+COPY taipy/task/scheduler/executor/remote_pool_worker.py /worker.py
+CMD ["python", "/worker.py"]

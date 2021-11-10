@@ -25,6 +25,8 @@ requirements: List[str] = [
     "simple-websocket",
     "toml",
     "tzlocal",
+    "dataclasses_json",
+    "celery",
 ]
 
 test_requirements = [

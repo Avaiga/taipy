@@ -50,7 +50,7 @@ const Router = () => {
             .catch((error) => {
                 // Fallback router if there is any error
                 setJSX(
-                    '<Router><Switch><Route path="/404" exact component={NotFound404} /><Redirect to="/404" /></Switch></Router>'
+                    '<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>'
                 );
                 console.log(error);
             });

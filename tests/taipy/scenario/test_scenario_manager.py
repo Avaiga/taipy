@@ -2,7 +2,7 @@ import pytest
 
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
-from taipy.data import DataSource, InMemoryDataSource, Scope
+from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
@@ -10,7 +10,7 @@ from taipy.pipeline import Pipeline
 from taipy.scenario.manager import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.task import Task, TaskScheduler
-from tests.utils.NotifyMock import NotifyMock
+from tests.taipy.utils.NotifyMock import NotifyMock
 
 
 def test_save_and_get_scenario_entity():

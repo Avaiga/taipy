@@ -4,7 +4,7 @@ import PaginatedTable from "./PaginatedTable";
 import { TaipyPaginatedTableProps } from "./tableUtils";
 
 interface TableProps extends TaipyPaginatedTableProps {
-    autoLoading: boolean;
+    autoLoading?: boolean;
 }
 
 const Table = ({ autoLoading = false, ...rest }: TableProps) =>

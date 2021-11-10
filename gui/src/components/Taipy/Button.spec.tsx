@@ -1,6 +1,7 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import userEvent from "@testing-library/user-event";
 
 import Button from "./Button";
 import { TaipyContext } from "../../context/taipyContext";
@@ -45,7 +46,7 @@ describe("Button Component", () => {
                 <Button value="Button" tp_onAction="on_action" />
             </TaipyContext.Provider>);
         const elt = getByText("Button");
-        fireEvent.click(elt);
+        userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"value": "on_action"}, "type": "SEND_ACTION_ACTION"});
     });
 });

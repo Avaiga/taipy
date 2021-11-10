@@ -17,7 +17,7 @@
     "react-helmet-async": "^1.1.2",
     "react-jsx-parser": "^1.28.4",
     "react-plotly.js": "^2.5.1",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "^6.0.1",
     "react-virtualized-auto-sizer": "^1.0.6",
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.7",
@@ -31,7 +31,8 @@
     "test": "cross-env TZ=UTC jest",
     "lint": "eslint --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "doc": "web-component-analyzer doc --format markdown --outDir generateddoc"
+    "doc": "web-component-analyzer doc --format markdown --outDir generateddoc",
+    "coverage": "npm test -- --coverage"
   },
   "husky": {
     "hooks": {
@@ -74,9 +75,9 @@
     "css-loader": "^6.5.0",
     "dotenv-webpack": "^7.0.3",
     "eslint": "^7.32.0",
-    "eslint-loader": "^4.0.2",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-webpack-plugin": "^3.1.0",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^7.0.4",
     "jest": "^27.3.1",
