@@ -1,0 +1,2 @@
+class CycleManager:
+    pass
