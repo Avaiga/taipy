@@ -3,22 +3,18 @@ from taipy.scenario.manager import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
 
-scenario = Scenario("sc", [], {}, ScenarioId("sc_id"))
-
-scenario_model = ScenarioModel(ScenarioId("sc_id"), "sc", [], {})
-
 
 class TestScenarioRepository:
-    def test_save_and_load(self, tmpdir):
+    def test_save_and_load(self, tmpdir, scenario_entity):
         repository = ScenarioManager().repository
         repository.base_path = tmpdir
-        repository.save(scenario)
+        repository.save(scenario_entity)
         sc = repository.load("sc_id")
 
         assert isinstance(sc, Scenario)
-        assert scenario.id == sc.id
+        assert scenario_entity.id == sc.id
 
-    def test_from_and_to_model(self):
+    def test_from_and_to_model(self, scenario_entity, scenario_model):
         repository = ScenarioManager().repository
-        assert repository.to_model(scenario) == scenario_model
-        assert repository.from_model(scenario_model) == scenario
+        assert repository.to_model(scenario_entity) == scenario_model
+        assert repository.from_model(scenario_model) == scenario_entity
