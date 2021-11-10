@@ -25,10 +25,11 @@ interface ItemProps {
     createClickHandler: (key: string) => () => void;
     selectedValue: string[];
     item: string | TaipyImage;
+    disabled: boolean;
 }
 
-const SingleItem = ({ value, createClickHandler, selectedValue, item }: ItemProps) => (
-    <ListItemButton onClick={createClickHandler(value)} selected={selectedValue.indexOf(value) !== -1}>
+const SingleItem = ({ value, createClickHandler, selectedValue, item, disabled }: ItemProps) => (
+    <ListItemButton onClick={createClickHandler(value)} selected={selectedValue.indexOf(value) !== -1} disabled={disabled}>
         {typeof item === "string" ? (
             <ListItemText primary={item} />
         ) : (
@@ -39,10 +40,10 @@ const SingleItem = ({ value, createClickHandler, selectedValue, item }: ItemProp
     </ListItemButton>
 );
 
-const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemProps) => (
-    <ListItemButton onClick={createClickHandler(value)} dense>
+const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled }: ItemProps) => (
+    <ListItemButton onClick={createClickHandler(value)} dense disabled={disabled}>
         <ListItemIcon>
-            <Checkbox edge="start" checked={selectedValue.indexOf(value) !== -1} tabIndex={-1} disableRipple />
+            <Checkbox disabled={disabled} edge="start" checked={selectedValue.indexOf(value) !== -1} tabIndex={-1} disableRipple />
         </ListItemIcon>
         {typeof item === "string" ? (
             <ListItemText primary={item} />
@@ -55,8 +56,8 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item }: ItemPr
 );
 
 interface SelectorProps extends LovProps {
-    filter: boolean;
-    multiple: boolean;
+    filter?: boolean;
+    multiple?: boolean;
 }
 
 const Selector = (props: SelectorProps) => {
@@ -79,7 +80,7 @@ const Selector = (props: SelectorProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id, tp_varname);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars, tp_varname);
 
     const lovList = useLovListMemo(lov, defaultLov);
 
@@ -157,6 +158,7 @@ const Selector = (props: SelectorProps) => {
                                     item={elt.item}
                                     selectedValue={selectedValue}
                                     createClickHandler={createClickHandler}
+                                    disabled={!active}
                                 />
                             ) : (
                                 <SingleItem
@@ -165,6 +167,7 @@ const Selector = (props: SelectorProps) => {
                                     item={elt.item}
                                     selectedValue={selectedValue}
                                     createClickHandler={createClickHandler}
+                                    disabled={!active}
                                 />
                             )
                         )}

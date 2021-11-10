@@ -26,7 +26,7 @@ import {
     tableSx,
     TaipyPaginatedTableProps,
 } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender } from "../../utils/hooks";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
@@ -57,6 +57,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const pageKey = useRef("no-page");
     const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
 
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
+
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
@@ -65,7 +67,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
     useEffect(() => {
         if (selected.length) {
@@ -187,6 +189,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             active={orderBy === columns[col].dfid}
                                             direction={orderBy === columns[col].dfid ? order : "asc"}
                                             onClick={createSortHandler(columns[col].dfid)}
+                                            disabled={!active}
                                         >
                                             {columns[col].title || columns[col].dfid}
                                             {orderBy === columns[col].dfid ? (

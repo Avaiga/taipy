@@ -26,7 +26,7 @@ import {
     paperSx,
     tableSx,
 } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender } from "../../utils/hooks";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 
 interface RowData {
     colsOrder: string[];
@@ -85,24 +85,24 @@ interface key2Rows {
     promises: Record<number, PromiseProps>;
 }
 
-const ROW_HEIGHT = 65;
-const PAGE_SIZE = 100;
+const ROW_HEIGHT = 54;
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
-    const { className, id, tp_varname, refresh = false, height, tp_updatevars, selected = [] } = props;
+    const { className, id, tp_varname, refresh = false, height = "50vh", tp_updatevars, selected = [], pageSize = 100, defaultKey = "" } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
-    const page = useRef<key2Rows>({ key: "", promises: {} });
+    const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
     const [orderBy, setOrderBy] = useState("");
     const [order, setOrder] = useState<Order>("asc");
     const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
 
+    const active = useDynamicProperty(props.active, props.defaultActive, true);
+
     useEffect(() => {
         if (props.value && page.current.key && props.value[page.current.key] !== undefined) {
             const newValue = props.value[page.current.key];
-            console.log("loadMoreItems: Response", newValue.start);
             const promise = page.current.promises[newValue.start];
             setRowCount(newValue.rowcount);
             const nr = newValue.data as Record<string, unknown>[];
@@ -116,7 +116,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         }
     }, [props.value]);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -168,7 +168,6 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
 
     const loadMoreItems = useCallback(
         (startIndex: number, stopIndex: number) => {
-            console.log("loadMoreItems: Request", startIndex, stopIndex);
             if (page.current.promises[startIndex]) {
                 page.current.promises[startIndex].reject();
             }
@@ -230,6 +229,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             active={orderBy === columns[col].dfid}
                                             direction={orderBy === columns[col].dfid ? order : "asc"}
                                             onClick={createSortHandler(columns[col].dfid)}
+                                            disabled={!active}
                                         >
                                             {columns[col].title || columns[col].dfid}
                                             {orderBy === columns[col].dfid ? (
@@ -252,7 +252,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         isItemLoaded={isItemLoaded}
                                         itemCount={rowCount}
                                         loadMoreItems={loadMoreItems}
-                                        minimumBatchSize={PAGE_SIZE}
+                                        minimumBatchSize={pageSize}
                                     >
                                         {({ onItemsRendered, ref }) => {
                                             return (

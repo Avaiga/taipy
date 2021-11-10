@@ -7,7 +7,7 @@ from taipy.task import Task
 from taipy.task.task_model import TaskModel
 
 
-class TaskRepository(FileSystemRepository[TaskModel]):
+class TaskRepository(FileSystemRepository[TaskModel, Task]):
     def __init__(self, dir_name="tasks"):
         super().__init__(model=TaskModel, dir_name=dir_name)
 

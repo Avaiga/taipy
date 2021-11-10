@@ -27,7 +27,7 @@ export const getClientServerTimeZoneOffset = (): number =>
 
 export const getDateTimeFormat = (): string => localStorage.getItem("datetimeformat") || DEFAULT_DATETIME_FORMAT;
 
-export const getDateTime = (value: string): Date => utcToZonedTime(value, getTimeZone());
+export const getDateTime = (value?: string): Date => utcToZonedTime(value || new Date(), getTimeZone());
 
 export const getDateTimeString = (value: string, datetimeformat: string): string =>
     format(getDateTime(value), datetimeformat, { timeZone: getTimeZone() });
@@ -44,10 +44,11 @@ export const formatWSValue = (value: string | number, dataType?: string, dataFor
                     return getDateTimeString(value.toString(), dataFormat);
                 }
             } catch (e) {
-                console.error(`wrong dateformat "${dataFormat}"`);
+                console.error(`wrong dateformat "${dataFormat}"\n${e}`);
             }
             return getDateTimeString(value.toString(), getDateTimeFormat());
         case "int":
+        case "float":
         case "number":
             if (typeof value === "string") {
                 value = parseInt(value, 10);
@@ -69,7 +70,7 @@ export const getInitials = (value: string, max = 2): string =>
 
 /* eslint @typescript-eslint/no-explicit-any: "off", curly: "error" */
 export const ENDPOINT =
-    !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+    !process.env.NODE_ENV || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
         ? process.env.REACT_APP_BACKEND_FLASK_URL
         : (window as any).flask_url;
 

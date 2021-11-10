@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 
-from taipy.common.alias import PipelineId, Dag
+from dataclasses_json import dataclass_json
+
+from taipy.common.alias import Dag, PipelineId
 
 
+@dataclass_json
 @dataclass
 class PipelineModel:
     id: PipelineId

@@ -19,7 +19,7 @@ from ._default_config import default_config
 from .config import GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .page import Page, Partial
-from .renderers import PageRenderer
+from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
 from .taipyimage import TaipyImage
 from .utils import (
@@ -124,8 +124,11 @@ class Gui(object, metaclass=Singleton):
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         if page.rendered_jsx is None:
             page.render()
+            if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
+                page.rendered_jsx += "<PageContent />"
+
         # Return jsx page
-        if page.rendered_jsx:
+        if page.rendered_jsx is not None:
             return self._server.render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
         else:
             return ("No page template", 404)
@@ -134,31 +137,30 @@ class Gui(object, metaclass=Singleton):
         # Generate router
         routes = self._config.routes
         locations = {}
-        router = '<Router key="router"><Switch key="switch">'
+        router = '<Router key="router"><Routes key="routes">'
+        router += (
+            '<Route path="/" key="'
+            + Gui.__root_page_name
+            + '" element={<MainPage key="tr'
+            + Gui.__root_page_name
+            + '" path="/'+Gui.__root_page_name+'" />} >'
+        )
+        locations["/"] = "/" + Gui.__root_page_name
         for route in routes:
-            router += (
-                '<Route path="/'
-                + (route if route != Gui.__root_page_name else "")
-                + '" exact key="'
-                + route
-                + '" ><TaipyRendered key="tr'
-                + route
-                + '"/></Route>'
-            )
-            locations["/" + (route if route != Gui.__root_page_name else "")] = "/" + route
-        if Gui.__root_page_name not in routes:
-            router += (
-                '<Route path="/" exact key="'
-                + Gui.__root_page_name
-                + '" ><TaipyRendered key="tr'
-                + Gui.__root_page_name
-                + '"/></Route>'
-            )
-            locations["/"] = "/" + routes[0]
-
-        router += '<Route path="/404" exact key="404" ><NotFound404 key="tr404" /></Route>'
-        router += '<Redirect to="/' + routes[0] + '" key="Redirect" />'
-        router += "</Switch></Router>"
+            if route != Gui.__root_page_name:
+                router += (
+                    '<Route path="'
+                    + route
+                    + '" key="'
+                    + route
+                    + '" element={<TaipyRendered key="tr'
+                    + route
+                    + '"/>} />'
+                )
+                locations["/" + route] = "/" + route
+        router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
+        router += '</Route>'
+        router += "</Routes></Router>"
 
         return self._server._direct_render_json(
             {
@@ -389,7 +391,7 @@ class Gui(object, metaclass=Singleton):
         # Init a new page
         new_page = Page()
         new_page.route = name
-        new_page.template_renderer = renderer
+        new_page.renderer = renderer
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)
@@ -445,7 +447,7 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
         if not isinstance(renderer, PageRenderer):
             raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
-        new_partial.template_renderer = renderer
+        new_partial.renderer = renderer
         # Append partial to _config
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(new_partial.route)
@@ -631,14 +633,20 @@ class Gui(object, metaclass=Singleton):
         self._locals_bind: t.Dict[str, t.Any] = t.cast(
             FrameType, t.cast(FrameType, inspect.currentframe()).f_back
         ).f_locals
+
+        # add en empty main page if it is not defined
+        if Gui.__root_page_name not in self._config.routes:
+            new_page = Page()
+            new_page.route = Gui.__root_page_name
+            new_page.renderer = EmptyPageRenderer()
+            self._config.pages.append(new_page)
+            self._config.routes.append(Gui.__root_page_name)
+
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.rendered_jsx for optimization)
-        for page in self._config.pages:
+        for page in self._config.pages + self._config.partials:
             # Server URL Rule for each page jsx
             self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
-        for partial in self._config.partials:
-            # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{partial.route}/", view_func=self._render_page)
 
         # server URL Rule for flask rendered react-router
         self._server.add_url_rule("/initialize/", view_func=self._render_route)

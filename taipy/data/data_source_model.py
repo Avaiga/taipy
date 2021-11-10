@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from dataclasses_json import dataclass_json
 
+from taipy.common.alias import JobId
 from taipy.data.scope import Scope
 
 
@@ -25,6 +26,10 @@ class DataSourceModel:
         name of the class that represents a DataSource
     parent_id: str
         identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
+    last_computation_date: str
+        isoformat of the last computation datetime
+    job_ids: List[str]
+        list of jobs that computed the data source
     data_source_properties: Dict[str, Any]
         extra properties of a DataSource
 
@@ -38,4 +43,7 @@ class DataSourceModel:
     scope: Scope
     type: str
     parent_id: Optional[str]
+    last_edition_date: Optional[str]
+    job_ids: List[JobId]
+    up_to_date: bool
     data_source_properties: Dict[str, Any]

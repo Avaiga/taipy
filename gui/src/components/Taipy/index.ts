@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Input from "./Input";
 import Field from "./Field";
 import DateSelector from "./DateSelector";
@@ -12,6 +12,10 @@ import Dialog from "./Dialog";
 import Chart from "./Chart";
 import StatusList from "./StatusList";
 import Toggle from "./Toggle";
+import Slider from "./Slider";
+import Button from "./Button";
+import MainPage from "../pages/MainPage";
+import PageContent from "../pages/PageContent";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
@@ -25,14 +29,17 @@ export const taipyComponents: Record<string, ComponentType> = {
     Chart: Chart as ComponentType,
     Status: StatusList as ComponentType,
     Toggle: Toggle as ComponentType,
+    Slider: Slider as ComponentType,
+    Button: Button as ComponentType,
+    PageContent: PageContent as ComponentType,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)
 export const JSXReactRouterComponents: Record<string, unknown> = {
-    Switch: Switch,
+    Routes: Routes,
     Route: Route,
-    Router: Router,
-    Redirect: Redirect,
+    Router: BrowserRouter,
     NotFound404: NotFound404,
     TaipyRendered: TaipyRendered,
+    MainPage: MainPage
 };

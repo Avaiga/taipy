@@ -20,4 +20,9 @@ class status extends shared {
      */
     value;
 
+    /**
+     * prevent from hiding the children if true
+     * @type {bool}
+     */
+    without_close = false;
 }

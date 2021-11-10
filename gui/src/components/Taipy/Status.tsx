@@ -10,10 +10,11 @@ export interface StatusType {
 }
 
 interface StatusProps {
-    id: string;
+    id?: string;
     value: StatusType;
     onClose?: (evt: MouseEvent) => void;
     icon?: ReactNode;
+    className?: string;
 }
 
 const status2Color = (status: string): "error" | "info" | "success" | "warning" => {
@@ -30,8 +31,10 @@ const status2Color = (status: string): "error" | "info" | "success" | "warning" 
     return "info";
 };
 
+const chipSx = { alignSelf: "flex-start" };
+
 const Status = (props: StatusProps) => {
-    const {value} = props;
+    const { value, className, id } = props;
 
     const chipProps = useMemo(() => {
         const cp: Record<string, unknown> = {};
@@ -46,7 +49,7 @@ const Status = (props: StatusProps) => {
         return cp;
     }, [value.status, props.onClose, props.icon]);
 
-    return <Chip variant="outlined" {...chipProps} label={value.message} sx={{alignSelf: "flex-start"}} />;
+    return <Chip id={id} variant="outlined" {...chipProps} label={value.message} sx={chipSx} className={className} />;
 };
 
 export default Status;

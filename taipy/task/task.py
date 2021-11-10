@@ -3,6 +3,7 @@ import uuid
 from collections.abc import Iterable
 from typing import Dict, Optional
 
+from taipy.common import protect_name
 from taipy.common.alias import TaskId
 from taipy.data.data_source import DataSource
 
@@ -25,6 +26,15 @@ class Task:
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.function = function
 
+    def __hash__(self):
+        return hash(self.id)
+
+    def __getstate__(self):
+        return vars(self)
+
+    def __setstate__(self, state):
+        vars(self).update(state)
+
     @property
     def output(self) -> Dict[str, DataSource]:
         return self.__output
@@ -35,7 +45,8 @@ class Task:
 
     @staticmethod
     def __protect_name(config_name):
-        return config_name.strip().lower().replace(" ", "_")
+        return protect_name(config_name)
+    
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)

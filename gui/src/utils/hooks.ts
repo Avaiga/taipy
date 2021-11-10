@@ -46,9 +46,9 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
 };
 
 export const useDispatchRequestUpdateOnFirstRender = (
-    updateVars: string,
     dispatch: Dispatch<TaipyBaseAction>,
-    id: string,
+    id?: string,
+    updateVars?: string,
     varName?: string
 ) => {
     useEffect(() => {

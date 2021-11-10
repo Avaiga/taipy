@@ -14,14 +14,15 @@ import { ColumnDesc } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 
 interface ChartProp extends TaipyBaseProps {
-    title: string;
-    width: string | number;
-    height: string | number;
+    title?: string;
+    width?: string | number;
+    height?: string | number;
     config: string;
-    value: TraceValueType;
-    refresh: boolean;
-    layout: string;
-    rangeChange: string;
+    value?: TraceValueType;
+    refresh?: boolean;
+    layout?: string;
+    rangeChange?: string;
+    testId?: string;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -37,11 +38,11 @@ interface ChartConfig {
     selectedMarkers: Partial<PlotMarker>[];
 }
 
-type TraceValueType = Record<string, (string | number)[]>;
+export type TraceValueType = Record<string, (string | number)[]>;
 
 const defaultStyle = { position: "relative", display: "inline-block" };
 
-const getValue = <T extends unknown>(values: TraceValueType, arr: T[], idx: number): (string | number)[] => {
+const getValue = <T extends unknown>(values: TraceValueType | undefined, arr: T[], idx: number): (string | number)[] => {
     if (values) {
         const confValue = getArrayValue(arr, idx) as string;
         if (confValue) {
@@ -135,7 +136,7 @@ const Chart = (props: ChartProp) => {
         }
     }, [refresh, dispatch, config.columns, tp_varname, id]);
 
-    useDispatchRequestUpdateOnFirstRender(tp_updatevars, dispatch, id);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
     const layout = useMemo(() => {
         const playout = props.layout ? JSON.parse(props.layout) : {};
@@ -223,7 +224,7 @@ const Chart = (props: ChartProp) => {
     return (
         <>
             {loading ? <Skeleton key="skeleton" sx={style} /> : null}
-            <div id={id} style={divStyle} key="div">
+            <div id={id} style={divStyle} key="div" data-testid={props.testId}>
                 <Plot
                     data={data}
                     layout={layout}
