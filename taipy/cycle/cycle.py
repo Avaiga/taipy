@@ -16,7 +16,7 @@ class Cycle:
 
     def __init__(
         self,
-        config_name: str,
+        name: str,
         frequency: Frequency,
         properties: Dict[str, str],
         creation_date: Optional[datetime] = None,
@@ -24,8 +24,8 @@ class Cycle:
         end_date: Optional[datetime] = None,
         cycle_id: CycleId = None,
     ):
-        self.config_name = self.__protect_name(config_name)
-        self.id: CycleId = cycle_id or self.new_id(config_name)
+        self.name = self.__protect_name(name)
+        self.id: CycleId = cycle_id or self.new_id(name)
         self.frequency = frequency
         self.properties = properties
         self.creation_date: datetime = creation_date or datetime.now()
@@ -37,10 +37,8 @@ class Cycle:
         return protect_name(config_name)
 
     @staticmethod
-    def new_id(config_name: str) -> CycleId:
-        return CycleId(
-            Cycle.__SEPARATOR.join([Cycle.__ID_PREFIX, Cycle.__protect_name(config_name), str(uuid.uuid4())])
-        )
+    def new_id(name: str) -> CycleId:
+        return CycleId(Cycle.__SEPARATOR.join([Cycle.__ID_PREFIX, Cycle.__protect_name(name), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = self.__protect_name(attribute_name)
@@ -48,14 +46,3 @@ class Cycle:
             return self.properties[protected_attribute_name]
         logging.error(f"{attribute_name} is not an attribute of cycle {self.id}")
         raise AttributeError
-
-    def to_model(self) -> CycleModel:
-        return CycleModel(
-            self.id,
-            self.config_name,
-            self.frequency,
-            self.creation_date.isoformat(),
-            self.start_date.isoformat() if self.start_date else None,
-            self.end_date.isoformat() if self.end_date else None,
-            self.properties,
-        )
