@@ -21,8 +21,6 @@ class ScenarioManager:
     repository = ScenarioRepository(dir_name="scenarios")
 
     __status_notifier: Set[Callable] = set()
-    __SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
-    __SCENARIO_CONFIG_DB: Dict[str, ScenarioConfig] = {}
 
     def subscribe(self, callback: Callable[[Scenario, Job], None]):
         """
