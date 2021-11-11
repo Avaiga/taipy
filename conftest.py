@@ -5,6 +5,10 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
+from taipy.common.alias import ScenarioId
+from taipy.scenario.scenario import Scenario
+from taipy.scenario.scenario_model import ScenarioModel
+
 
 @pytest.fixture(scope="function")
 def csv_file(tmpdir_factory):
@@ -28,3 +32,13 @@ def cleanup_files():
 @pytest.fixture(scope="function")
 def current_datetime():
     return datetime.now()
+
+
+@pytest.fixture(scope="class")
+def scenario():
+    return Scenario("sc", [], {}, ScenarioId("sc_id"))
+
+
+@pytest.fixture
+def scenario_model(scope="class"):
+    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {})
