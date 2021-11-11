@@ -143,7 +143,9 @@ class Gui(object, metaclass=Singleton):
             + Gui.__root_page_name
             + '" element={<MainPage key="tr'
             + Gui.__root_page_name
-            + '" path="/'+Gui.__root_page_name+'" />} >'
+            + '" path="/'
+            + Gui.__root_page_name
+            + '" />} >'
         )
         locations["/"] = "/" + Gui.__root_page_name
         for route in routes:
@@ -159,7 +161,7 @@ class Gui(object, metaclass=Singleton):
                 )
                 locations["/" + route] = "/" + route
         router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
-        router += '</Route>'
+        router += "</Route>"
         router += "</Routes></Router>"
 
         return self._server._direct_render_json(
@@ -651,6 +653,8 @@ class Gui(object, metaclass=Singleton):
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             self._server.register_blueprint(bp)
+
+        self._server.set_client_url(self._config.app_config["client_url"])
 
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)

@@ -43,7 +43,7 @@ class Server(Flask):
             if path == "" or "." not in path:
                 return render_template(
                     "index.html",
-                    flask_url=request.url_root,
+                    flask_url=self._client_url,
                     app_css="/" + css_file + ".css",
                     title=self._app.title if hasattr(self._app, "title") else "Taipy App",
                 )
@@ -86,6 +86,9 @@ class Server(Flask):
 
     def _direct_render_json(self, data):
         return jsonify(data)
+
+    def set_client_url(self, client_url=None):
+        self._client_url = client_url
 
     def runWithWS(self, host=None, port=None, debug=None):
         self._ws.run(self, host=host, port=port, debug=debug)
