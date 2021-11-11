@@ -5,7 +5,10 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from taipy.common.alias import ScenarioId
+from taipy.common.alias import CycleId, ScenarioId
+from taipy.cycle.cycle import Cycle
+from taipy.cycle.cycle_model import CycleModel
+from taipy.cycle.frequency import Frequency
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
 
@@ -34,11 +37,35 @@ def current_datetime():
     return datetime.now()
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def scenario():
     return Scenario("sc", [], {}, ScenarioId("sc_id"))
 
 
 @pytest.fixture
-def scenario_model(scope="class"):
+def scenario_model(scope="function"):
     return ScenarioModel(ScenarioId("sc_id"), "sc", [], {})
+
+
+@pytest.fixture
+def cycle(scope="function"):
+    return Cycle(
+        "cc",
+        Frequency.DAILY,
+        {},
+        creation_date=datetime.fromisoformat("2021-11-11T11:11:01.000001"),
+        id=CycleId("cc_id"),
+    )
+
+
+@pytest.fixture
+def cycle_model(scope="function"):
+    return CycleModel(
+        CycleId("cc_id"),
+        "cc",
+        Frequency.DAILY,
+        {},
+        creation_date="2021-11-11T11:11:01.000001",
+        start_date=None,
+        end_date=None,
+    )

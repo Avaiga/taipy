@@ -22,10 +22,10 @@ class Cycle:
         creation_date: Optional[datetime] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
-        cycle_id: CycleId = None,
+        id: CycleId = None,
     ):
         self.name = self.__protect_name(name)
-        self.id: CycleId = cycle_id or self.new_id(name)
+        self.id: CycleId = id or self.new_id(name)
         self.frequency = frequency
         self.properties = properties
         self.creation_date: datetime = creation_date or datetime.now()
@@ -46,3 +46,6 @@ class Cycle:
             return self.properties[protected_attribute_name]
         logging.error(f"{attribute_name} is not an attribute of cycle {self.id}")
         raise AttributeError
+
+    def __eq__(self, other):
+        return self.id == other.id
