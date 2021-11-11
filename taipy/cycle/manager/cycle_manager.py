@@ -25,7 +25,7 @@ class CycleManager:
         try:
             cycle = self.repository.load(cycle_id)
             return cycle
-        except ModelNotFound:
+        except Exception:
             logging.error(f"Cycle entity : {cycle_id} does not exist.")
             raise NonExistingCycle(cycle_id)
 
