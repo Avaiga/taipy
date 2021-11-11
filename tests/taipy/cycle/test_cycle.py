@@ -7,17 +7,17 @@ from taipy.cycle.frequency import Frequency
 
 def test_create_cycle_entity(current_datetime):
 
-    cycle_entity_1 = Cycle("fOo   ", Frequency.DAILY, {"key": "value"})
-    assert cycle_entity_1.id is not None
-    assert cycle_entity_1.name == "foo"
-    assert cycle_entity_1.properties == {"key": "value"}
-    assert cycle_entity_1.creation_date is not None
-    assert cycle_entity_1.start_date is None
-    assert cycle_entity_1.end_date is None
-    assert cycle_entity_1.key == "value"
-    assert cycle_entity_1.frequency == Frequency.DAILY
+    cycle_1 = Cycle("fOo   ", Frequency.DAILY, {"key": "value"})
+    assert cycle_1.id is not None
+    assert cycle_1.name == "foo"
+    assert cycle_1.properties == {"key": "value"}
+    assert cycle_1.creation_date is not None
+    assert cycle_1.start_date is None
+    assert cycle_1.end_date is None
+    assert cycle_1.key == "value"
+    assert cycle_1.frequency == Frequency.DAILY
 
-    cycle_entity_2 = Cycle(
+    cycle_2 = Cycle(
         "   bar/ξéà   ",
         Frequency.MONTHLY,
         {},
@@ -25,11 +25,11 @@ def test_create_cycle_entity(current_datetime):
         start_date=current_datetime,
         end_date=current_datetime,
     )
-    assert cycle_entity_2.name == "bar-xea"
-    assert cycle_entity_2.frequency == Frequency.MONTHLY
-    assert cycle_entity_2.creation_date == current_datetime
-    assert cycle_entity_2.start_date == current_datetime
-    assert cycle_entity_2.end_date == current_datetime
+    assert cycle_2.name == "bar-xea"
+    assert cycle_2.frequency == Frequency.MONTHLY
+    assert cycle_2.creation_date == current_datetime
+    assert cycle_2.start_date == current_datetime
+    assert cycle_2.end_date == current_datetime
 
 
 def test_add_property_to_scenario():
