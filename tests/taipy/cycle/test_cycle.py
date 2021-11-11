@@ -42,39 +42,3 @@ def test_add_property_to_scenario():
     assert cycle_1.properties == {"key": "value", "new_key": "new_value"}
     assert cycle_1.key == "value"
     assert cycle_1.new_key == "new_value"
-
-
-# def test_to_model(current_datetime):
-#     cycle_entity_1 = Cycle(
-#         "cycle_name_1",
-#         Frequency.QUARTERLY,
-#         {"key": "value"},
-#         creation_date=current_datetime,
-#         start_date=current_datetime,
-#         end_date=current_datetime,
-#         cycle_id=CycleId("cycle_id_1"),
-#     )
-
-#     model = cycle_entity_1.to_model()
-#     assert model.id == "cycle_id_1"
-#     assert model.name == "cycle_name_1"
-#     assert model.creation_date == current_datetime.isoformat()
-#     assert model.start_date == current_datetime.isoformat()
-#     assert model.end_date == current_datetime.isoformat()
-#     assert len(model.properties) == 1
-#     assert model.properties["key"] == "value"
-
-#     cycle_entity_2 = Cycle(
-#         "cycle_name_2",
-#         Frequency.QUARTERLY,
-#         {},
-#         cycle_id=CycleId("cycle_id_2"),
-#     )
-
-#     model_2 = cycle_entity_2.to_model()
-#     assert model_2.id == "cycle_id_2"
-#     assert model_2.name == "cycle_name_2"
-#     assert isinstance(model_2.creation_date, str)
-#     assert model_2.start_date is None
-#     assert model_2.end_date is None
-#     assert len(model_2.properties) == 0
