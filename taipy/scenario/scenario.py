@@ -7,9 +7,9 @@ import uuid
 from typing import Dict, List
 
 from taipy.common import protect_name
+from taipy.common.alias import ScenarioId
 from taipy.pipeline import Pipeline
 from taipy.scenario.scenario_model import ScenarioModel
-from taipy.common.alias import ScenarioId
 
 
 class Scenario:
@@ -23,7 +23,7 @@ class Scenario:
         properties: Dict[str, str],
         scenario_id: ScenarioId = None,
     ):
-        self.config_name = self.__protect_name(config_name)
+        self.config_name = protect_name(config_name)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
@@ -32,17 +32,13 @@ class Scenario:
         return self.id == other.id
 
     @staticmethod
-    def __protect_name(config_name):
-        return protect_name(config_name)
-
-    @staticmethod
     def new_id(config_name: str) -> ScenarioId:
         return ScenarioId(
-            Scenario.__SEPARATOR.join([Scenario.__ID_PREFIX, Scenario.__protect_name(config_name), str(uuid.uuid4())])
+            Scenario.__SEPARATOR.join([Scenario.__ID_PREFIX, protect_name(config_name), str(uuid.uuid4())])
         )
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = self.__protect_name(attribute_name)
+        protected_attribute_name = protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.pipelines:
