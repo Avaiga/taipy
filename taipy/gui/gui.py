@@ -655,5 +655,8 @@ class Gui(object, metaclass=Singleton):
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)
 
+    def get_flask_client(self):
+        return self._server
+
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors.register(data_accessor_class)
