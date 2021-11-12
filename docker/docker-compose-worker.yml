@@ -8,8 +8,8 @@ services:
 
   taipy-worker:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       target: worker
     networks:
       - taipy-network

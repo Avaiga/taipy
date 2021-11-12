@@ -19,16 +19,16 @@ help:
 
 .PHONY:
 build: clean
-	@docker-compose build --force-rm --pull taipy
+	@docker-compose -f docker/docker-compose.yml build --force-rm --pull taipy
 
 .PHONY:
 run: build
-	@docker-compose up -d taipy
+	@docker-compose -f docker/docker-compose.yml up -d taipy
 
 .PHONY:
 run-with-worker: build
-	@docker-compose -f docker-compose.yml -f docker-compose-worker.yml up
+	@docker-compose -f docker/docker-compose.yml -f docker/docker-compose-worker.yml up
 
 .PHONY:
 clean:
-	@docker-compose -f docker-compose.yml -f docker-compose-worker.yml down
+	@docker-compose -f docker/docker-compose.yml -f docker/docker-compose-worker.yml down

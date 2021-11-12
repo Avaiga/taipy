@@ -8,7 +8,7 @@ COPY Pipfile .
 RUN pip install --upgrade pipenv
 RUN pipenv install --dev --skip-lock
 
-COPY ./ /app/install
+COPY . /app/install
 WORKDIR /app/install
 
 RUN python setup.py install
@@ -21,5 +21,5 @@ CMD ["bash"]
 
 FROM build as worker
 
-COPY taipy/task/scheduler/executor/remote_pool_worker.py /worker.py
+COPY ./taipy/task/scheduler/executor/remote_pool_worker.py /worker.py
 CMD ["python", "/worker.py"]
