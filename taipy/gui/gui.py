@@ -654,7 +654,7 @@ class Gui(object, metaclass=Singleton):
         for bp in self._flask_blueprint:
             self._server.register_blueprint(bp)
 
-        self._server.set_client_url(self._config.app_config["client_url"])
+        self._server._set_client_url(self._config.app_config["client_url"])
 
         # Start Flask Server
         self._server.runWithWS(host=host, port=port, debug=debug)

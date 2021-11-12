@@ -87,7 +87,7 @@ class Server(Flask):
     def _direct_render_json(self, data):
         return jsonify(data)
 
-    def set_client_url(self, client_url=None):
+    def _set_client_url(self, client_url=None):
         self._client_url = client_url
 
     def runWithWS(self, host=None, port=None, debug=None):
