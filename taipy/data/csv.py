@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
@@ -47,7 +47,8 @@ class CSVDataSource(DataSource):
         self,
         config_name: str,
         scope: Scope,
-        id: Optional[str] = None,
+        id: Optional[DataSourceId] = None,
+        name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
@@ -64,6 +65,7 @@ class CSVDataSource(DataSource):
             config_name,
             scope,
             id,
+            name,
             parent_id,
             last_edition_date,
             job_ids or [],
