@@ -8,8 +8,8 @@ from taipy.task.task_model import TaskModel
 
 
 class TaskRepository(FileSystemRepository[TaskModel, Task]):
-    def __init__(self, dir_name="tasks"):
-        super().__init__(model=TaskModel, dir_name=dir_name)
+    def __init__(self, dir_name="tasks", base_path=".data"):
+        super().__init__(model=TaskModel, dir_name=dir_name, base_path=base_path)
 
     def to_model(self, task):
         return TaskModel(
