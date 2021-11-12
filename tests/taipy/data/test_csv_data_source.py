@@ -15,10 +15,11 @@ from taipy.exceptions.data_source import NoData
 class TestCSVDataSource:
     def test_create(self):
         path = "data/source/path"
-        ds = CSVDataSource("fOo BAr", Scope.PIPELINE, properties={"path": path, "has_header": False})
+        ds = CSVDataSource("fOo BAr", Scope.PIPELINE, name="super name", properties={"path": path, "has_header": False})
         assert isinstance(ds, CSVDataSource)
         assert ds.type() == "csv"
         assert ds.config_name == "foo_bar"
+        assert ds.name == "super name"
         assert ds.scope == Scope.PIPELINE
         assert ds.id is not None
         assert ds.parent_id is None

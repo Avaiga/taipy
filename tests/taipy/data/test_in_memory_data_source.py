@@ -8,13 +8,19 @@ from taipy.exceptions.data_source import NoData
 class TestInMemoryDataSourceEntity:
     def test_create(self):
         ds = InMemoryDataSource(
-            "foobar BaZ", Scope.SCENARIO, "id", "parent_id", properties={"default_data": "In memory Data Source"}
+            "foobar BaZ",
+            Scope.SCENARIO,
+            "id",
+            "my name",
+            "parent_id",
+            properties={"default_data": "In memory Data Source"},
         )
         assert isinstance(ds, InMemoryDataSource)
         assert ds.type() == "in_memory"
         assert ds.config_name == "foobar_baz"
         assert ds.scope == Scope.SCENARIO
         assert ds.id == "id"
+        assert ds.name == "my name"
         assert ds.parent_id == "parent_id"
         assert ds.last_edition_date is not None
         assert ds.job_ids == []

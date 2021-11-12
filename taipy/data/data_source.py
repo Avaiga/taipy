@@ -28,6 +28,8 @@ class DataSource:
         Scope Enum that refers to the scope of usage of the data source
     id: str
         Unique identifier of the data source
+    id: str
+        Displayable name of the data source
     parent_id: str
         Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
     last_edition_date: datetime
@@ -45,6 +47,7 @@ class DataSource:
         config_name,
         scope: Scope = Scope.PIPELINE,
         id: Optional[str] = None,
+        name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
@@ -52,6 +55,7 @@ class DataSource:
         **kwargs,
     ):
         self.id = id or str(uuid.uuid4())
+        self.name = name or self.id
         self.config_name = protect_name(config_name)
         self.parent_id = parent_id
         self.scope = scope
