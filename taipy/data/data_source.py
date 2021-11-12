@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import List, Optional
 
 from taipy.common import protect_name
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
 
@@ -42,11 +42,14 @@ class DataSource:
         list of additional arguments
     """
 
+    __ID_PREFIX = "DATASOURCE"
+    __ID_SEPARATOR = "_"
+
     def __init__(
         self,
         config_name,
         scope: Scope = Scope.PIPELINE,
-        id: Optional[str] = None,
+        id: Optional[DataSourceId] = None,
         name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
@@ -54,9 +57,9 @@ class DataSource:
         up_to_date: bool = False,
         **kwargs,
     ):
-        self.id = id or str(uuid.uuid4())
-        self.name = name or self.id
         self.config_name = protect_name(config_name)
+        self.id = id or DataSourceId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.name = name or self.id
         self.parent_id = parent_id
         self.scope = scope
         self.last_edition_date = last_edition_date

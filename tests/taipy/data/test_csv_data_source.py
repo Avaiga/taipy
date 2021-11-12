@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from taipy.common.alias import DataSourceId
 from taipy.data import CSVDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
@@ -31,13 +32,13 @@ class TestCSVDataSource:
 
     def test_create_with_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
-            CSVDataSource("foo", Scope.PIPELINE, "ds_id")
+            CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"))
         with pytest.raises(MissingRequiredProperty):
-            CSVDataSource("foo", Scope.PIPELINE, "ds_id", properties={})
+            CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            CSVDataSource("foo", Scope.PIPELINE, "ds_id", properties={"path": "path"})
+            CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"path": "path"})
         with pytest.raises(MissingRequiredProperty):
-            CSVDataSource("foo", Scope.PIPELINE, "ds_id", properties={"has_header": True})
+            CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True})
 
     def test_read(self):
         not_existing_csv = CSVDataSource("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": False})

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 
@@ -45,7 +45,7 @@ class InMemoryDataSource(DataSource):
         self,
         config_name: str,
         scope: Scope,
-        id: Optional[str] = None,
+        id: Optional[DataSourceId] = None,
         name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
