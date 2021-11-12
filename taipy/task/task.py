@@ -22,7 +22,7 @@ class Task:
     ):
         self.__input = {ds.config_name: ds for ds in input}
         self.__output = {ds.config_name: ds for ds in output or []}
-        self.config_name = self.__protect_name(config_name)
+        self.config_name = protect_name(config_name)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.function = function
 
@@ -43,13 +43,8 @@ class Task:
     def input(self) -> Dict[str, DataSource]:
         return self.__input
 
-    @staticmethod
-    def __protect_name(config_name):
-        return protect_name(config_name)
-    
-
     def __getattr__(self, attribute_name):
-        protected_attribute_name = self.__protect_name(attribute_name)
+        protected_attribute_name = protect_name(attribute_name)
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:
