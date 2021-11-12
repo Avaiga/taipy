@@ -12,4 +12,4 @@ else:
 
 def test_submit_one_argument():
     with pytest.raises(ImportError):
-        RemotePoolExecutor(None)
+        RemotePoolExecutor(None, None)

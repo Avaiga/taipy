@@ -323,19 +323,19 @@ def test_blocked_task():
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_synchronous_dispatcher(job_dispatcher):
     TaskScheduler(Config.task_scheduler_configs.create())
-    job_dispatcher.assert_called_with(False, False, None)
+    job_dispatcher.assert_called_with(False, False, None, None)
 
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_parallel_dispatcher(job_dispatcher):
     TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True, nb_of_workers=42))
-    job_dispatcher.assert_called_with(True, False, 42)
+    job_dispatcher.assert_called_with(True, False, 42, None)
 
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_remote_dispatcher(job_dispatcher):
     TaskScheduler(Config.task_scheduler_configs.create(remote_execution=True, nb_of_workers=42))
-    job_dispatcher.assert_called_with(False, True, 42)
+    job_dispatcher.assert_called_with(False, True, 42, None)
 
 
 def _create_task(function, nb_outputs=1):

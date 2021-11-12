@@ -32,7 +32,7 @@ def remote_pool_executor():
 
 @pytest.fixture
 def celery(remote_pool_executor):
-    r = RemotePoolExecutor(None)
+    r = RemotePoolExecutor(None, None)
     r.remote_executor = remote_pool_executor
     return r
 
@@ -48,10 +48,17 @@ def test_submit_two_arguments(celery):
 
 
 def test_submit_two_arguments_in_context_manager(remote_pool_executor):
-    with RemotePoolExecutor(None) as pool:
+    with RemotePoolExecutor(None, None) as pool:
         pool.remote_executor = remote_pool_executor
         res = pool.submit(mult, 21, 4)
         assert res.result() == 84
+
+
+def test_hostname(remote_pool_executor):
+    pool = RemotePoolExecutor(None, "localhost")
+    assert "localhost" in pool.app._conf.broker_url
+    pool = RemotePoolExecutor(None, "custom_url")
+    assert "custom_url" in pool.app._conf.broker_url
 
 
 def test_submit_raised(celery):
