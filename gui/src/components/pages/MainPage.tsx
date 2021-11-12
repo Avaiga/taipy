@@ -5,7 +5,7 @@ import TaipyRendered from "./TaipyRendered";
 
 interface MainPageProps {
     path: string;
-    route: string;
+    route?: string;
 }
 
 const MainPage = (props: MainPageProps) => {
