@@ -164,7 +164,7 @@ class Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def get_adapter(self, property_name: str, multi_selection = True):  # noqa: C901
+    def get_adapter(self, property_name: str, multi_selection=True):  # noqa: C901
         lov = self.__get_list_of_(property_name)
         from_string = hasattr(self, "from_string") and self.from_string
         if isinstance(lov, list):
@@ -413,7 +413,7 @@ class Builder:
             self.__set_json_attribute("defaultValue", value)
         return self
 
-    def set_value_and_default(self, with_update = True, with_default = True):
+    def set_value_and_default(self, with_update=True, with_default=True):
         if self.has_evaluated:
             self.__set_react_attribute(
                 "value",
