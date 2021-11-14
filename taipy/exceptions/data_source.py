@@ -28,3 +28,11 @@ class NoData(Exception):
     """
 
     pass
+
+
+class UnknownDatabaseEngine(Exception):
+    """
+    Exception raised when creating a connection with a SQLDataSource
+    """
+
+    pass

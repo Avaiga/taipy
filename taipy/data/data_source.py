@@ -1,7 +1,7 @@
 import logging
 import uuid
 from abc import abstractmethod
-from datetime import date, datetime
+from datetime import datetime
 from typing import List, Optional
 
 from taipy.common import protect_name
