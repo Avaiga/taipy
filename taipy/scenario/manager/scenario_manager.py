@@ -93,6 +93,9 @@ class ScenarioManager:
         return master_scenarios
 
     def set_master(self, scenario: Scenario):
+        if scenario.cycle:
+            # Doesn't belong to any cycle
+            return
         if not scenario.is_master_scenario():
             scenarios = self.get_all_scenarios_of_cycle(scenario.cycle)
             for sc in scenarios:
