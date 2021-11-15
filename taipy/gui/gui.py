@@ -666,4 +666,3 @@ class Gui(object, metaclass=Singleton):
 
     def get_flask_app(self):
         return self._server
-
