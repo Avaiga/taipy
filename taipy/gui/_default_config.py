@@ -8,6 +8,7 @@ default_config = {
         "host": "127.0.0.1",
         "time_zone": "client",
         "propagate": True,
+        "client_url": "http://127.0.0.1:5000",
     },
     "style_config": {
         "button": "",

@@ -13,6 +13,7 @@ data_source = CSVDataSource(
     "test_data_source",
     Scope.PIPELINE,
     "ds_id",
+    "name",
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],

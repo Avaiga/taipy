@@ -117,7 +117,7 @@ class Factory:
                 ("max", AttributeType.number, 100),
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
-                ("width", AttributeType.string_or_number, 200)
+                ("width", AttributeType.string_or_number, 200),
             ]
         )
         .set_propagate(),
@@ -218,17 +218,10 @@ class Factory:
         .set_className(class_name="taipy-status", config_class="status")
         .set_propagate()
         .set_attributes(
-            [
-                ("id"),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("without_close", AttributeType.boolean, False)
-            ]
+            [("id"), ("active", AttributeType.dynamic_boolean, True), ("without_close", AttributeType.boolean, False)]
         ),
         "toggle": lambda control_type, attrs: Builder(
-            control_type=control_type,
-            element_name="Toggle",
-            attributes=attrs,
-            default_value=""
+            control_type=control_type, element_name="Toggle", attributes=attrs, default_value=""
         )
         .set_value_and_default(with_default=False)
         .set_className(class_name="taipy-toggle", config_class="toggle")
@@ -239,16 +232,14 @@ class Factory:
                 ("id"),
                 ("label"),
                 ("active", AttributeType.dynamic_boolean, True),
-                ("unselected_value", AttributeType.string, "")
+                ("unselected_value", AttributeType.string, ""),
             ]
         )
         .set_kind()
         .set_refresh_on_update()
         .set_propagate(),
         "content": lambda control_type, attrs: Builder(
-            control_type=control_type,
-            element_name="PageContent",
-            attributes=attrs
+            control_type=control_type, element_name="PageContent", attributes=attrs
         ),
     }
 

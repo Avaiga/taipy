@@ -17,11 +17,11 @@ class RemotePoolExecutor(ThreadPoolExecutor):
     the function is executed through a Celery
     """
 
-    def __init__(self, max_number_of_worker, *args, **kwargs):
+    def __init__(self, max_number_of_worker, hostname, *args, **kwargs):
         if not _has_celery:
             raise ImportError("celery is required.\nRun: pip install taipy[celery]")
         super().__init__(max_number_of_worker, *args, **kwargs)
-        self.app = Celery("tasks", backend="rpc://", broker="pyamqp://guest@rabbitmq//")
+        self.app = Celery("tasks", backend="rpc://", broker=f"pyamqp://guest@{hostname}//")
         self.remote_executor = self.app.task(self._execute)
 
     def submit(self, fn, /, *args, **kwargs):

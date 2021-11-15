@@ -21,12 +21,14 @@ class PageRenderer(ABC):
     def render(self) -> str:
         pass
 
+
 class EmptyPageRenderer(PageRenderer):
     def __init__(self) -> None:
         super().__init__("<PageContent />")
-    
+
     def render(self) -> str:
         return self._content
+
 
 class Markdown(PageRenderer):
     def __init__(self, content: str) -> None:

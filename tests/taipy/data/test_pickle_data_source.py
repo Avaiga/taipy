@@ -23,6 +23,7 @@ class TestPickleDataSourceEntity:
         assert ds.config_name == "foobar_bazxyxea"
         assert ds.scope == Scope.PIPELINE
         assert ds.id is not None
+        assert ds.name == ds.id
         assert ds.parent_id is None
         assert ds.last_edition_date is not None
         assert ds.job_ids == []

@@ -31,6 +31,7 @@ class TaskScheduler:
             task_scheduler_config.parallel_execution,
             task_scheduler_config.remote_execution,
             task_scheduler_config.nb_of_workers,
+            task_scheduler_config.hostname,
         )
         self.data_manager = DataManager()
         self.lock = Lock()
