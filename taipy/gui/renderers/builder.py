@@ -417,7 +417,7 @@ class Builder:
             self.__set_json_attribute("defaultValue", value)
         return self
 
-    def set_value_and_default(self, with_update = True, with_default = True):
+    def set_value_and_default(self, with_update=True, with_default=True):
         if self.has_evaluated:
             self.__set_react_attribute(
                 "value",

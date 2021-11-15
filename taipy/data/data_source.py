@@ -5,7 +5,7 @@ from datetime import date, datetime
 from typing import List, Optional
 
 from taipy.common import protect_name
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
 
@@ -28,6 +28,8 @@ class DataSource:
         Scope Enum that refers to the scope of usage of the data source
     id: str
         Unique identifier of the data source
+    id: str
+        Displayable name of the data source
     parent_id: str
         Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
     last_edition_date: datetime
@@ -40,19 +42,24 @@ class DataSource:
         list of additional arguments
     """
 
+    __ID_PREFIX = "DATASOURCE"
+    __ID_SEPARATOR = "_"
+
     def __init__(
         self,
         config_name,
         scope: Scope = Scope.PIPELINE,
-        id: Optional[str] = None,
+        id: Optional[DataSourceId] = None,
+        name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         up_to_date: bool = False,
         **kwargs,
     ):
-        self.id = id or str(uuid.uuid4())
-        self.config_name = self.__protect_name(config_name)
+        self.config_name = protect_name(config_name)
+        self.id = id or DataSourceId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.name = name or self.id
         self.parent_id = parent_id
         self.scope = scope
         self.last_edition_date = last_edition_date
@@ -75,12 +82,8 @@ class DataSource:
     def __setstate__(self, state):
         vars(self).update(state)
 
-    @staticmethod
-    def __protect_name(config_name: str):
-        return protect_name(config_name)
-
     def __getattr__(self, attribute_name):
-        protected_attribute_name = self.__protect_name(attribute_name)
+        protected_attribute_name = protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         logging.error(f"{attribute_name} is not an attribute of data source {self.id}")

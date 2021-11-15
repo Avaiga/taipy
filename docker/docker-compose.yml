@@ -4,8 +4,8 @@ services:
 
   taipy:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: ./docker/Dockerfile
       target: build
     networks:
       - taipy-network

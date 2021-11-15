@@ -27,7 +27,7 @@ class Pipeline:
         tasks: List[Task],
         pipeline_id: PipelineId = None,
     ):
-        self.config_name = self.__protect_name(config_name)
+        self.config_name = protect_name(config_name)
         self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
         self.properties = properties
         self.tasks = {task.config_name: task for task in tasks}
@@ -37,17 +37,13 @@ class Pipeline:
         return self.id == other.id
 
     @staticmethod
-    def __protect_name(name):
-        return protect_name(name)
-
-    @staticmethod
     def new_id(config_name: str) -> PipelineId:
         return PipelineId(
-            Pipeline.__SEPARATOR.join([Pipeline.__ID_PREFIX, Pipeline.__protect_name(config_name), str(uuid.uuid4())])
+            Pipeline.__SEPARATOR.join([Pipeline.__ID_PREFIX, protect_name(config_name), str(uuid.uuid4())])
         )
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = self.__protect_name(attribute_name)
+        protected_attribute_name = protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.tasks:

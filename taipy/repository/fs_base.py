@@ -14,7 +14,7 @@ Entity = TypeVar("Entity")
 Json = Union[dict, list, str, int, float, bool, None]
 
 
-class EnumEncoder(json.JSONEncoder):
+class CustomEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Json:
         result: Json
         if isinstance(o, Enum):
@@ -86,7 +86,7 @@ class FileSystemRepository(Generic[ModelType, Entity]):
     def save(self, model):
         model = self.to_model(model)
         with open(path.join(self.directory, f"{model.id}.json"), "w") as f:  # type: ignore
-            json.dump(model.to_dict(), f, ensure_ascii=False, indent=4, cls=EnumEncoder)  # type: ignore
+            json.dump(model.to_dict(), f, ensure_ascii=False, indent=4, cls=CustomEncoder)  # type: ignore
 
     def delete_all(self):
         shutil.rmtree(self.directory)

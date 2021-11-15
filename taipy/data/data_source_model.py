@@ -24,6 +24,8 @@ class DataSourceModel:
         scope of usage of a DataSource
     type: str
         name of the class that represents a DataSource
+    name: str
+        Displayable name of the DataSource
     parent_id: str
         identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
     last_computation_date: str
@@ -42,6 +44,7 @@ class DataSourceModel:
     config_name: str
     scope: Scope
     type: str
+    name: str
     parent_id: Optional[str]
     last_edition_date: Optional[str]
     job_ids: List[JobId]
