@@ -38,7 +38,7 @@ def test_save_and_get_scenario_entity():
         scenario_manager.get(scenario_id_2)
 
     # Save one scenario. We expect to have only one scenario stored
-    scenario_manager.save(scenario_1)
+    scenario_manager.set(scenario_1)
     assert len(scenario_manager.get_all()) == 1
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_1.config_name
@@ -49,7 +49,7 @@ def test_save_and_get_scenario_entity():
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     scenario_manager.pipeline_manager.task_manager.set(task_2)
     scenario_manager.pipeline_manager.set(pipeline_entity_2)
-    scenario_manager.save(scenario_2)
+    scenario_manager.set(scenario_2)
     assert len(scenario_manager.get_all()) == 2
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_1.config_name
@@ -60,7 +60,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
 
     # We save the first scenario again. We expect nothing to change
-    scenario_manager.save(scenario_1)
+    scenario_manager.set(scenario_1)
     assert len(scenario_manager.get_all()) == 2
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_1.config_name
@@ -74,7 +74,7 @@ def test_save_and_get_scenario_entity():
     # We expect the first scenario to be updated
     scenario_manager.pipeline_manager.task_manager.set(scenario_2.pipelines[pipeline_name_2].tasks[task_name])
     scenario_manager.pipeline_manager.set(pipeline_entity_3)
-    scenario_manager.save(scenario_3_with_same_id)
+    scenario_manager.set(scenario_3_with_same_id)
     assert len(scenario_manager.get_all()) == 2
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_3_with_same_id.config_name
@@ -134,7 +134,7 @@ def test_submit():
 
     # scenario does exist, but pipeline does not exist.
     # We expect an exception to be raised
-    scenario_manager.save(scenario_entity)
+    scenario_manager.set(scenario_entity)
     with pytest.raises(NonExistingPipeline):
         scenario_manager.submit(scenario_entity.id)
 

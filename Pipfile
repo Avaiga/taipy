@@ -38,7 +38,6 @@ toml = "*"
 tox = "==3.24.3"
 mypy = "*"
 types-toml = "0.10.0"
-autopep8 = "*"
 
 [requires]
 python_version = "3"

@@ -15,7 +15,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle):
 
     assert len(cycle_manager.get_all()) == 0
 
-    cycle_manager.save(cycle)
+    cycle_manager.set(cycle)
 
     cycle_entity = cycle_manager.get(cycle.id)
 
@@ -38,8 +38,12 @@ def test_save_and_get_cycle_entity(tmpdir, cycle):
     with pytest.raises(NonExistingCycle):
         assert cycle_manager.get(cycle_2_id)
 
-    cycle_3 = Cycle("   bar/ξéà   ", Frequency.MONTHLY, {})
-    cycle_manager.save(cycle_3)
+    cycle_3 = Cycle(
+        Frequency.MONTHLY,
+        {},
+        name="   bar/ξéà   ",
+    )
+    cycle_manager.set(cycle_3)
 
     cycle_3_entity = cycle_manager.get(cycle_3.id)
 
@@ -48,8 +52,8 @@ def test_save_and_get_cycle_entity(tmpdir, cycle):
     assert cycle_3_entity.name == cycle_3.name
     assert cycle_3_entity.properties == cycle_3.properties
     assert isinstance(cycle_3_entity.creation_date, datetime)
-    assert cycle_3_entity.start_date is None
-    assert cycle_3_entity.end_date is None
+    assert cycle_3_entity.start_date is not None
+    assert cycle_3_entity.end_date is not None
     assert cycle_3_entity.frequency == cycle_3.frequency
 
 
@@ -59,14 +63,14 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     assert len(cycle_manager.get_all()) == 0
 
-    cycle_1 = cycle_manager.create("fOo   ", Frequency.DAILY, key="value")
+    cycle_1 = cycle_manager.create(Frequency.DAILY, name="fOo   ", key="value")
 
     assert cycle_1.id is not None
     assert cycle_1.name == "foo"
     assert cycle_1.properties == {"key": "value"}
     assert cycle_1.creation_date is not None
-    assert cycle_1.start_date is None
-    assert cycle_1.end_date is None
+    assert cycle_1.start_date is not None
+    assert cycle_1.end_date is not None
     assert cycle_1.key == "value"
     assert cycle_1.frequency == Frequency.DAILY
 
@@ -82,7 +86,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
     with pytest.raises(NonExistingCycle):
         assert cycle_manager.get(cycle_2_id)
 
-    cycle_3 = cycle_manager.create("   bar/ξéà   ", Frequency.MONTHLY)
+    cycle_3 = cycle_manager.create(Frequency.MONTHLY, "   bar/ξéà   ")
 
     assert cycle_3.id is not None
     assert cycle_3.name == "bar-xea"
@@ -96,7 +100,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
     assert cycle_manager.get(cycle_3_id).name == "bar-xea"
     assert cycle_manager.get(cycle_3_id).properties == {}
 
-    cycle_4 = cycle_manager.create("ξéà   ", Frequency.YEARLY)
+    cycle_4 = cycle_manager.create(Frequency.YEARLY, "ξéà   ")
     cycle_4_id = cycle_4.id
 
     assert len(cycle_manager.get_all()) == 3

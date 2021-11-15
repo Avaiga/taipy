@@ -23,6 +23,7 @@ class Scenario:
         pipelines: List[Pipeline],
         properties: Dict[str, str],
         scenario_id: ScenarioId = None,
+        master_scenario: bool = False,
         cycle: Cycle = None,
     ):
         self.config_name = self.__protect_name(config_name)
@@ -30,6 +31,7 @@ class Scenario:
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
         self.cycle = cycle
+        self.master_scenario = master_scenario
 
     def __eq__(self, other):
         return self.id == other.id
@@ -67,4 +69,9 @@ class Scenario:
             self.config_name,
             [pipeline.id for pipeline in self.pipelines.values()],
             self.properties,
+            self.master_scenario,
+            self.cycle.id if self.cycle else None,
         )
+
+    def is_master_scenario(self) -> bool:
+        return self.master_scenario

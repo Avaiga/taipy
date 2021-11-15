@@ -13,4 +13,5 @@ class ScenarioModel:
     name: str
     pipelines: List[PipelineId]
     properties: dict
+    master_scenario: bool
     cycle: Optional[CycleId] = None

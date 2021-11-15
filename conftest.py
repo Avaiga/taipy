@@ -38,34 +38,42 @@ def current_datetime():
 
 
 @pytest.fixture(scope="function")
-def scenario():
-    return Scenario("sc", [], {}, ScenarioId("sc_id"))
+def week_example():
+    return datetime(2021, 11, 16, 0, 0, 0, 0)
 
 
-@pytest.fixture
-def scenario_model(scope="function"):
-    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {})
+@pytest.fixture(scope="function")
+def scenario(cycle):
+    return Scenario("sc", [], {}, ScenarioId("sc_id"), master_scenario=False, cycle=None)
 
 
-@pytest.fixture
-def cycle(scope="function"):
+@pytest.fixture(scope="function")
+def scenario_model(cycle):
+    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, cycle=None)
+
+
+@pytest.fixture(scope="function")
+def cycle():
+    example_date = datetime.fromisoformat("2021-11-11T11:11:01.000001")
     return Cycle(
-        "cc",
         Frequency.DAILY,
         {},
-        creation_date=datetime.fromisoformat("2021-11-11T11:11:01.000001"),
+        name="cc",
+        creation_date=example_date,
+        start_date=example_date,
+        end_date=example_date,
         id=CycleId("cc_id"),
     )
 
 
-@pytest.fixture
-def cycle_model(scope="function"):
+@pytest.fixture(scope="function")
+def cycle_model():
     return CycleModel(
         CycleId("cc_id"),
         "cc",
         Frequency.DAILY,
         {},
         creation_date="2021-11-11T11:11:01.000001",
-        start_date=None,
-        end_date=None,
+        start_date="2021-11-11T11:11:01.000001",
+        end_date="2021-11-11T11:11:01.000001",
     )
