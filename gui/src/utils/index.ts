@@ -1,5 +1,6 @@
 import { utcToZonedTime, format, getTimezoneOffset } from "date-fns-tz";
 import { sprintf } from "sprintf-js";
+import { FormatConfig } from "../context/taipyReducers";
 
 // set global style the traditonal way
 export const setStyle = (styleString: string): void => {
@@ -8,55 +9,55 @@ export const setStyle = (styleString: string): void => {
     document.head.append(style);
 };
 
-export const setTimeZone = (timeZone: string): void => {
-    if (!timeZone || timeZone === "client") {
-        return localStorage.setItem("timeZone", TIMEZONE_CLIENT);
-    }
-    localStorage.setItem("timeZone", timeZone);
-};
-
-export const setDateTimeFormat = (datetimeformat: string): void => {
-    localStorage.setItem("datetimeformat", datetimeformat);
-};
-
-export const getTimeZone = (): string => localStorage.getItem("timeZone") || TIMEZONE_CLIENT;
-
 // return client server timeZone offset in minutes
-export const getClientServerTimeZoneOffset = (): number =>
-    (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(getTimeZone())) / 60000;
+export const getClientServerTimeZoneOffset = (tz: string): number =>
+    (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;
 
-export const getDateTimeFormat = (): string => localStorage.getItem("datetimeformat") || DEFAULT_DATETIME_FORMAT;
+export const getDateTime = (value: string | undefined, tz: string): Date => utcToZonedTime(value || new Date(), tz);
 
-export const getDateTime = (value?: string): Date => utcToZonedTime(value || new Date(), getTimeZone());
+export const getDateTimeString = (
+    value: string,
+    datetimeformat: string | undefined,
+    formatConf: FormatConfig
+): string =>
+    format(getDateTime(value, formatConf.timeZone), datetimeformat || formatConf.dateTime, {
+        timeZone: formatConf.timeZone,
+    });
 
-export const getDateTimeString = (value: string, datetimeformat: string): string =>
-    format(getDateTime(value), datetimeformat, { timeZone: getTimeZone() });
+export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string =>
+    numberformat || formatConf.number ? sprintf(numberformat || formatConf.number, value) : value.toLocaleString();
 
-export const getNumberString = (value: number, numberformat: string): string =>
-    numberformat ? sprintf(numberformat, value) : value.toLocaleString();
-
-export const formatWSValue = (value: string | number, dataType?: string, dataFormat?: string): string => {
+export const formatWSValue = (
+    value: string | number,
+    dataType: string | undefined,
+    dataFormat: string | undefined,
+    formatConf: FormatConfig
+): string => {
     dataType = dataType || typeof value;
     switch (dataType) {
         case "datetime.datetime":
             try {
-                if (dataFormat) {
-                    return getDateTimeString(value.toString(), dataFormat);
-                }
+                return getDateTimeString(value.toString(), dataFormat, formatConf);
             } catch (e) {
-                console.error(`wrong dateformat "${dataFormat}"\n${e}`);
+                console.error(`wrong dateformat "${dataFormat || formatConf.dateTime}"`, e);
             }
-            return getDateTimeString(value.toString(), getDateTimeFormat());
+            return getDateTimeString(value.toString(), undefined, formatConf);
         case "int":
         case "float":
         case "number":
             if (typeof value === "string") {
-                value = parseInt(value, 10);
+                try {
+                    if (dataType === "float") {
+                        value = parseFloat(value);
+                    } else {
+                        value = parseInt(value, 10);
+                    }
+                } catch (e) {
+                    console.error("number parse exception", e);
+                    value = NaN;
+                }
             }
-            if (dataFormat) {
-                return getNumberString(value, dataFormat);
-            }
-            return value.toLocaleString();
+            return getNumberString(value, dataFormat, formatConf);
     }
     return value ? value.toString() : "";
 };
@@ -75,5 +76,3 @@ export const ENDPOINT =
         : (window as any).flask_url;
 
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-export const DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss zzz";

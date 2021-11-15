@@ -8,11 +8,12 @@ import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import CssBaseline from "@mui/material/CssBaseline";
 
-import { ENDPOINT, setTimeZone } from "../utils";
+import { ENDPOINT } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
 import {
     createSetLocationsAction,
     createThemeAction,
+    createTimeZoneAction,
     initializeWebSocket,
     INITIAL_STATE,
     taipyInitialize,
@@ -42,16 +43,13 @@ const Router = () => {
             .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
             .then((result) => {
                 setJSX(result.data.router);
-                //setDarkMode(result.data.darkMode);
-                dispatch(createThemeAction(result.data.darkMode));
-                setTimeZone(result.data.timeZone);
+                dispatch(createThemeAction(result.data.darkMode, true));
+                dispatch(createTimeZoneAction(result.data.timeZone, true));
                 dispatch(createSetLocationsAction(result.data.locations));
             })
             .catch((error) => {
                 // Fallback router if there is any error
-                setJSX(
-                    '<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>'
-                );
+                setJSX('<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>');
                 console.log(error);
             });
     }, [refresh]);

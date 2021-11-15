@@ -76,7 +76,7 @@ const tableValue = {
         "start": 0
     }
 };
-const tableColumns = JSON.stringify({"Entity": {dfid: "Entity", type: "int64"}});
+const tableColumns = JSON.stringify({"Entity": {dfid: "Entity"}, "Daily hospital occupancy": {dfid: "Daily hospital occupancy", type:"int64"}});
 
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
@@ -111,7 +111,7 @@ describe("PaginatedTable Component", () => {
                 <PaginatedTable id="table" value={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
             </TaipyContext.Provider>);
         expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"id": "table", "names": ["varname"]}, "type": "REQUEST_UPDATE"});
-        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"columns": ["Entity"],"end": 100,"id": "table","orderby": "","pagekey": "0-100--asc","sort": "asc","start": 0 },"type": "REQUEST_DATA_UPDATE"});
+        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"columns": ["Entity", "Daily hospital occupancy"],"end": 100,"id": "table","orderby": "","pagekey": "0-100--asc","sort": "asc","start": 0 },"type": "REQUEST_DATA_UPDATE"});
     });
     it("dispatch a well formed message on sort", async () => {
         const dispatch = jest.fn();
@@ -121,7 +121,7 @@ describe("PaginatedTable Component", () => {
             </TaipyContext.Provider>);
         const elt = getByText("Entity");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"columns": ["Entity"],"end": 100,"id": undefined,"orderby": "Entity","pagekey": "0-100-Entity-asc","sort": "asc","start": 0,}, "type": "REQUEST_DATA_UPDATE"});
+        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"columns": ["Entity", "Daily hospital occupancy"],"end": 100,"id": undefined,"orderby": "Entity","pagekey": "0-100-Entity-asc","sort": "asc","start": 0,}, "type": "REQUEST_DATA_UPDATE"});
     });
     it("dispatch a well formed message on page change", async () => {
         const dispatch = jest.fn();
@@ -135,7 +135,7 @@ describe("PaginatedTable Component", () => {
         </TaipyContext.Provider>);
         const elt = getByLabelText("Go to next page");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"columns": ["Entity"],"end": 200,"id": "table","orderby": "","pagekey": "100-200--asc","sort": "asc","start": 100}, "type": "REQUEST_DATA_UPDATE"});
+        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"columns": ["Entity", "Daily hospital occupancy"],"end": 200,"id": "table","orderby": "","pagekey": "100-200--asc","sort": "asc","start": 100}, "type": "REQUEST_DATA_UPDATE"});
     });
     it("displays the received data", async () => {
         const dispatch = jest.fn();
