@@ -1,7 +1,7 @@
 from taipy.gui import Gui, Markdown
 
 
-def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
+def test_ru_selector(gui: Gui, helpers, csvdata):
     # Bind test variables
     assert gui.bind_var_val("selected_val", ["value1", "value2"])
     # Bind a page so that the variable will be evaluated as expression

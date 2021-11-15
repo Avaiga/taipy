@@ -662,7 +662,6 @@ class Gui(object, metaclass=Singleton):
         # Start Flask Server
         if run_server:
             self._server.runWithWS(host=host, port=port, debug=debug)
-        self._server.runWithWS(host=host, port=port, debug=debug)
 
     def get_flask_app(self):
         return self._server
