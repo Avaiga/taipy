@@ -7,7 +7,7 @@ from .factory import HtmlFactory
 
 class TaipyHTMLParser(HTMLParser):
 
-    __TAIPY_NAMESPACE_RE = re.compile(r"taipy:([a-zA-Z]*)")
+    __TAIPY_NAMESPACE_RE = re.compile(r"taipy:([a-zA-Z\_]*)")
 
     def __init__(self):
         super().__init__()

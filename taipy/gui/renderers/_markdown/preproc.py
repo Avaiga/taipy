@@ -68,6 +68,10 @@ class Preprocessor(MdPreprocessor):
                 last_index = m.end()
             new_line = line if last_index == 0 else new_line + line[last_index:]
             new_lines.append(new_line)
+        # issue #337: add an empty string at the beginning of new_lines list if there is not one
+        # so that markdown extension would be able to render properly
+        if new_lines and new_lines[0] != "":
+            new_lines.insert(0, "")
         return new_lines
 
     def _process_control(self, m: re.Match, line_count: int) -> Tuple[str, Any]:
