@@ -42,7 +42,7 @@ class Gui(object, metaclass=Singleton):
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
-    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*\{\([^\}]*?\)\}\s*$")
+    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
