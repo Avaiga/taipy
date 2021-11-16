@@ -39,7 +39,7 @@ describe("Toggle Component", () => {
         render(<Toggle lov={lov}/>);
         const boxDiv = document.querySelector(".MuiBox-root");
         const eltPs = boxDiv?.querySelectorAll("p");
-        //We don't want p tags as children of the main Box ie no label 
+        //We don't want p tags as children of the main Box ie no label
         eltPs?.forEach(p => expect(p.parentElement).not.toBe(boxDiv));
     })
     it("can display an image", async () => {

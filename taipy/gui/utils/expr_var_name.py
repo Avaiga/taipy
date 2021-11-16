@@ -1,5 +1,5 @@
-import typing as t
 import re
+import typing as t
 
 __expr_var_name_index: t.Dict[str, int] = {}
 _RE_NOT_IN_VAR_NAME = r"[^A-Za-z0-9]+"

@@ -1,5 +1,6 @@
-from taipy.gui import Gui
 from datetime import datetime
+
+from taipy.gui import Gui
 
 
 def test_date_selector_md_1(gui: Gui, helpers):

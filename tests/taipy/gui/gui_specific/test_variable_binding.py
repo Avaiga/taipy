@@ -1,5 +1,6 @@
-from taipy.gui import Gui, Markdown
 from types import FunctionType
+
+from taipy.gui import Gui, Markdown
 
 
 def test_variable_binding_1(helpers):
@@ -37,7 +38,7 @@ def test_variable_binding_2(helpers):
     y = 20
     z = "Hello World!"
     label = "an label"
-    button_properties = {"label": label, "on_action": "another_function"}
+    button_properties = {"label": label, "on_action": "another_function"}  # noqa: F841
     gui = Gui(__name__)
     gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|properties=button_properties|>"))
     gui.run(run_server=False)

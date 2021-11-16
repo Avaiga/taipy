@@ -1,5 +1,6 @@
-from taipy.gui import Gui, Markdown
 import json
+
+from taipy.gui import Gui, Markdown
 
 
 def test_partial(gui: Gui):

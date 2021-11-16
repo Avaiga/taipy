@@ -2,9 +2,9 @@
  * number component displays an input field that handle numbers
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|number|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|{value}|number|class_name=style_class_name|></code>
  * <br>or with properties<br>
  * <code><|{value}|number|properties={properties}|></code>

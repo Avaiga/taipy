@@ -2,9 +2,9 @@
  * slider component displays a range input allowing to select an integer value between min and max by sliding a cursor
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|slider|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|{value}|slider|min=1|max=100|propagate|></code>
  * <br>or with properties<br>
  * <code><|{value}|slider|properties={properties}|></code>
@@ -23,7 +23,7 @@ class slider extends HTMLElement {
      * @type {int|float}
      */
     min = 1;
-    
+
     /**
      * maximum value
      * @type {int|float}

@@ -1,8 +1,10 @@
-import pytest
-import pandas as pd
-from taipy.gui import Gui
-from pathlib import Path
 import os
+from pathlib import Path
+
+import pandas as pd
+import pytest
+
+from taipy.gui import Gui
 
 from .helpers import Helpers
 

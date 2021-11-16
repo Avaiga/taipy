@@ -2,9 +2,9 @@
  * button component displays a button that triggers an function
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|Button Label|button|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|Button Label|button|on_action=button_action_function_name|></code>
  * <br>or with properties<br>
  * <code><|Button Label|button|properties={properties}|></code>

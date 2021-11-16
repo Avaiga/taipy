@@ -3,9 +3,9 @@
  * <br>Indexed properties can have a default value (referenced by *property_name*) which would be overridden by the indexed propety ((referenced by *property_name[index]* with index starting at 1))
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|chart|x=Col 1|y=Col 2|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|{value}|chart|x=Col 1|selected_color=green|y[1]=Col 2|label[1]=Col 3|y[2]=Col 4|label[2]=Col 5|mode[2]=markers|color[2]=red|type[2]=scatter|xaxis[2]=x2|layout={subplot_layout}|range_change=range_change|width=100%|height=100%|selected={selection}|></code>
  * <br>or with properties<br>
  * <code><|{value}|chart|properties={properties}|selected={selection}|></code>

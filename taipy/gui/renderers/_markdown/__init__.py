@@ -3,8 +3,8 @@ from typing import Any
 from markdown.extensions import Extension
 
 from .control import ControlPattern
-from .preproc import Preprocessor
 from .postproc import Postprocessor
+from .preproc import Preprocessor
 
 __all__ = ["makeTaipyExtension"]
 

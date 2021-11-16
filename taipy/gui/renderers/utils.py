@@ -51,7 +51,7 @@ def _get_columns_dict(
             if type.startswith("datetime64"):
                 if date_format:
                     _add_to_dict_and_get(columns[col], "format", date_format)
-                columns[_get_date_col_str_name(col_types.keys(), col)] = columns.pop(col)
+                columns[_get_date_col_str_name(col_types.keys(), col)] = columns.pop(col)  # type: ignore
             elif number_format and type in NumberTypes:
                 _add_to_dict_and_get(columns[col], "format", number_format)
     return columns

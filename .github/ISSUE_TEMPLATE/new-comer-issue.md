@@ -7,10 +7,10 @@ assignees: ''
 
 ---
 
-List of actions for new comers : 
+List of actions for new comers :
 - [ ] Google account creation
 - [ ] Add in chat rooms and mailing lists
-- [ ] Provide white paper 
+- [ ] Provide white paper
 - [ ] Provide Back-end requirement document
 - [ ] Provide Front-end requirement document
 - [ ] Present Roadmap

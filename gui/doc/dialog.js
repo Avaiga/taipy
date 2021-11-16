@@ -2,9 +2,9 @@
  * dialog component displays a modal dialog
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|dialog|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|dialog|title=Dialog Title|open={value}|page_id=page1|validate_action=validate_action|cancel_action=cancel_action||validate_action_text=Validate|cancel_action_text=Cancel|></code>
  * <br>or with properties<br>
  * <code><|{value}|dialog|properties={properties}|partial={myPartial}|></code>

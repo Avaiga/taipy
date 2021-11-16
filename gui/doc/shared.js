@@ -16,5 +16,5 @@ class shared extends HTMLElement {
      * @type {str}
      */
     class_name;
- 
+
 }
