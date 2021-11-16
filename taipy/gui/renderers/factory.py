@@ -22,6 +22,7 @@ class Factory:
         "status": "value",
         "toggle": "value",
         "content": "value",
+        "navbar": "value",
     }
 
     CONTROL_BUILDERS = {
@@ -240,6 +241,19 @@ class Factory:
         .set_propagate(),
         "content": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="PageContent", attributes=attrs
+        ),
+        "navbar": lambda control_type, attrs: Builder(
+            control_type=control_type, element_name="NavBar", attributes=attrs, default_value=""
+        )
+        .set_value_and_default(with_default=False)
+        .set_className(class_name="taipy-navbar", config_class="navbar")
+        .get_adapter("lov", False)  # need to be called before set_lov
+        .set_lov()
+        .set_attributes(
+            [
+                ("id"),
+                ("active", AttributeType.dynamic_boolean, True),
+            ]
         ),
     }
 
