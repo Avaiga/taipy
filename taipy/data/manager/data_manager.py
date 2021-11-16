@@ -37,11 +37,11 @@ class DataManager:
         ds_from_parent = [ds for ds in ds_from_data_source_config if ds.parent_id == parent_id]
         if len(ds_from_parent) == 1:
             return ds_from_parent[0]
-        elif len(ds_from_parent) == 2:
-            logging.error("Multiple data sources from same config exists with the same parent_id.")
+        elif len(ds_from_parent) > 1:
+            logging.error("Multiple data sources from same config exist with the same parent_id.")
             raise MultipleDataSourceFromSameConfigWithSameParent
         else:
-            return self._create_and_save_data_source(data_source_config, parent_id)
+            return self._create_and_set(data_source_config, parent_id)
 
     def set(self, data_source: DataSource):
         # TODO Check if we should create the model or if it already exist
@@ -56,14 +56,12 @@ class DataManager:
     def _get_all_by_config_name(self, config_name: str) -> List[DataSource]:
         return self.repository.search_all("config_name", config_name)
 
-    def _create_and_save_data_source(
-        self, data_source_config: DataSourceConfig, parent_id: Optional[str]
-    ) -> DataSource:
-        data_source = self.__create_data_source(data_source_config, parent_id)
+    def _create_and_set(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
+        data_source = self.__create(data_source_config, parent_id)
         self.set(data_source)
         return data_source
 
-    def __create_data_source(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
+    def __create(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
         try:
             return self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](  # type: ignore
                 config_name=data_source_config.name,

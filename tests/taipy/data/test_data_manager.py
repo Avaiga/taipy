@@ -17,7 +17,7 @@ class TestDataManager:
         # - a default pipeline scope
         # - No parent_id
         csv_ds_config = DataSourceConfig(name="foo", type="csv", path="bar", has_header=True)
-        csv_ds = dm._create_and_save_data_source(csv_ds_config, None)
+        csv_ds = dm._create_and_set(csv_ds_config, None)
 
         assert isinstance(csv_ds, CSVDataSource)
         assert isinstance(dm.get(csv_ds.id), CSVDataSource)
@@ -48,7 +48,7 @@ class TestDataManager:
         # - a parent id
         # - some default data
         in_memory_ds_config = DataSourceConfig(name="baz", type="in_memory", scope=Scope.SCENARIO, default_data="qux")
-        in_mem_ds = dm._create_and_save_data_source(in_memory_ds_config, "Scenario_id")
+        in_mem_ds = dm._create_and_set(in_memory_ds_config, "Scenario_id")
 
         assert isinstance(in_mem_ds, InMemoryDataSource)
         assert isinstance(dm.get(in_mem_ds.id), InMemoryDataSource)
@@ -78,7 +78,7 @@ class TestDataManager:
         # - No parent id
         # - no default data
         ds_config = DataSourceConfig(name="plop", type="pickle", scope=Scope.BUSINESS_CYCLE)
-        pickle_ds = dm._create_and_save_data_source(ds_config, None)
+        pickle_ds = dm._create_and_set(ds_config, None)
 
         assert isinstance(pickle_ds, PickleDataSource)
         assert isinstance(dm.get(pickle_ds.id), PickleDataSource)
@@ -103,13 +103,13 @@ class TestDataManager:
         dm = DataManager()
         wrong_type_ds_config = DataSourceConfig(name="foo", type="bar")
         with pytest.raises(InvalidDataSourceType):
-            dm._create_and_save_data_source(wrong_type_ds_config, None)
+            dm._create_and_set(wrong_type_ds_config, None)
 
     def test_create_from_same_config_generates_new_data_source_and_new_id(self):
         dm = DataManager()
         ds_config = DataSourceConfig(name="foo", type="in_memory")
-        ds = dm._create_and_save_data_source(ds_config, None)
-        ds_2 = dm._create_and_save_data_source(ds_config, None)
+        ds = dm._create_and_set(ds_config, None)
+        ds_2 = dm._create_and_set(ds_config, None)
         assert ds_2.id != ds.id
 
     def test_create_uses_overridden_attributes_in_config_file(self):
@@ -117,14 +117,14 @@ class TestDataManager:
 
         dm = DataManager()
         csv_ds = Config.data_source_configs.create(name="foo", type="csv", path="bar", has_header=True)
-        csv = dm._create_and_save_data_source(csv_ds, None)
+        csv = dm._create_and_set(csv_ds, None)
         assert csv.config_name == "foo"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "path_from_config_file"
         assert csv.has_header is False
 
         csv_ds = Config.data_source_configs.create(name="baz", type="csv", path="bar", has_header=True)
-        csv = dm._create_and_save_data_source(csv_ds, None)
+        csv = dm._create_and_set(csv_ds, None)
         assert csv.config_name == "baz"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "bar"
@@ -138,11 +138,11 @@ class TestDataManager:
         dm = DataManager()
         assert len(dm.get_all()) == 0
         ds_config_1 = Config.data_source_configs.create(name="foo", type="in_memory")
-        dm._create_and_save_data_source(ds_config_1, None)
+        dm._create_and_set(ds_config_1, None)
         assert len(dm.get_all()) == 1
         ds_config_2 = Config.data_source_configs.create(name="baz", type="in_memory")
-        dm._create_and_save_data_source(ds_config_2, None)
-        dm._create_and_save_data_source(ds_config_2, None)
+        dm._create_and_set(ds_config_2, None)
+        dm._create_and_set(ds_config_2, None)
         assert len(dm.get_all()) == 3
         assert len([ds for ds in dm.get_all() if ds.config_name == "foo"]) == 1
         assert len([ds for ds in dm.get_all() if ds.config_name == "baz"]) == 2
@@ -152,13 +152,13 @@ class TestDataManager:
         assert len(dm._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
         ds_config_1 = Config.data_source_configs.create(name="foo", type="in_memory")
         assert len(dm._get_all_by_config_name("foo")) == 0
-        dm._create_and_save_data_source(ds_config_1, None)
+        dm._create_and_set(ds_config_1, None)
         assert len(dm._get_all_by_config_name("foo")) == 1
         ds_config_2 = Config.data_source_configs.create(name="baz", type="in_memory")
-        dm._create_and_save_data_source(ds_config_2, None)
+        dm._create_and_set(ds_config_2, None)
         assert len(dm._get_all_by_config_name("foo")) == 1
         assert len(dm._get_all_by_config_name("baz")) == 1
-        dm._create_and_save_data_source(ds_config_2, None)
+        dm._create_and_set(ds_config_2, None)
         assert len(dm._get_all_by_config_name("foo")) == 1
         assert len(dm._get_all_by_config_name("baz")) == 2
 
@@ -232,9 +232,15 @@ class TestDataManager:
         scenario_ds_bis = dm.get_or_create(scenario_ds_config, "scenario_id")
         assert len(dm.get_all()) == 2
         assert scenario_ds.id == scenario_ds_bis.id
-        scenario_ds_ter = dm.get_or_create(scenario_ds_config, "scenario_id_2")
+        scenario_ds_ter = dm.get_or_create(scenario_ds_config, "scenario_id", "whatever_pipeline_id")
+        assert len(dm.get_all()) == 2
+        assert scenario_ds.id == scenario_ds_bis.id
+        assert scenario_ds_bis.id == scenario_ds_ter.id
+        scenario_ds_quater = dm.get_or_create(scenario_ds_config, "scenario_id_2")
         assert len(dm.get_all()) == 3
-        assert scenario_ds.id != scenario_ds_ter.id
+        assert scenario_ds.id == scenario_ds_bis.id
+        assert scenario_ds_bis.id == scenario_ds_ter.id
+        assert scenario_ds_ter.id != scenario_ds_quater.id
 
         pipeline_ds = dm.get_or_create(pipeline_ds_config, "scenario_id", "pipeline_1")
         assert len(dm.get_all()) == 4
@@ -243,15 +249,21 @@ class TestDataManager:
         assert pipeline_ds.id == pipeline_ds_bis.id
         pipeline_ds_ter = dm.get_or_create(pipeline_ds_config, "scenario_id", "pipeline_2")
         assert len(dm.get_all()) == 5
+        assert pipeline_ds.id == pipeline_ds_bis.id
         assert pipeline_ds.id != pipeline_ds_ter.id
+        pipeline_ds_quater = dm.get_or_create(pipeline_ds_config, "other_scenario_id", "pipeline_2")
+        assert len(dm.get_all()) == 5
+        assert pipeline_ds.id == pipeline_ds_bis.id
+        assert pipeline_ds_bis.id != pipeline_ds_ter.id
+        assert pipeline_ds_ter.id == pipeline_ds_quater.id
 
         pipeline_ds_config.name = "test_data_source4"
-        pipeline_ds_quater = dm.get_or_create(pipeline_ds_config, None)
+        pipeline_ds_quinquies = dm.get_or_create(pipeline_ds_config, None)
         assert len(dm.get_all()) == 6
         assert pipeline_ds.id == pipeline_ds_bis.id
         assert pipeline_ds_bis.id != pipeline_ds_ter.id
-        assert pipeline_ds_bis.id != pipeline_ds_quater.id
-        assert pipeline_ds_ter.id != pipeline_ds_quater.id
+        assert pipeline_ds_bis.id != pipeline_ds_quinquies.id
+        assert pipeline_ds_ter.id != pipeline_ds_quinquies.id
 
     def test_ensure_persistence_of_data_source(self):
         dm = DataManager()

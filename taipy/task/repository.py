@@ -11,9 +11,10 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
     def __init__(self, dir_name="tasks", base_path=".data"):
         super().__init__(model=TaskModel, dir_name=dir_name, base_path=base_path)
 
-    def to_model(self, task):
+    def to_model(self, task: Task) -> TaskModel:
         return TaskModel(
             id=task.id,
+            parent_id=task.parent_id,
             config_name=task.config_name,
             input_ids=self.__to_ids(task.input.values()),
             function_name=task.function.__name__,
@@ -21,9 +22,10 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
             output_ids=self.__to_ids(task.output.values()),
         )
 
-    def from_model(self, model):
+    def from_model(self, model: TaskModel) -> Task:
         return Task(
             id=TaskId(model.id),
+            parent_id=model.parent_id,
             config_name=model.config_name,
             input=self.__to_data_source(model.input_ids),
             function=self.__load_fct(model.function_module, model.function_name),

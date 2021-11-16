@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from taipy.common.alias import JobId, TaskId
+from taipy.common.alias import DataSourceId, JobId, TaskId
 from taipy.data import CSVDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound
@@ -12,7 +12,7 @@ from taipy.task.task_model import TaskModel
 data_source = CSVDataSource(
     "test_data_source",
     Scope.PIPELINE,
-    "ds_id",
+    DataSourceId("ds_id"),
     "name",
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
@@ -21,10 +21,11 @@ data_source = CSVDataSource(
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_name", [data_source], print, [], TaskId("id"))
+task = Task("config_name", [data_source], print, [], TaskId("id"), parent_id="parent_id")
 
 task_model = TaskModel(
     id="id",
+    parent_id="parent_id",
     config_name="config_name",
     input_ids=["ds_id"],
     function_name=print.__name__,
