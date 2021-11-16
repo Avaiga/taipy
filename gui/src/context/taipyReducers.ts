@@ -3,7 +3,7 @@ import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 
-import { ENDPOINT } from "../utils";
+import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 
 enum Types {
     Update = "UPDATE",
@@ -14,6 +14,7 @@ enum Types {
     RequestUpdate = "REQUEST_UPDATE",
     SetLocations = "SET_LOCATIONS",
     SetTheme = "SET_THEME",
+    SetTimeZone = "SET_TIMEZONE",
 }
 
 export interface TaipyState {
@@ -21,6 +22,9 @@ export interface TaipyState {
     data: Record<string, unknown>;
     theme: Theme;
     locations: Record<string, string>;
+    timeZone: string;
+    dateTimeFormat?: string;
+    numberFormat?: string;
 }
 
 export interface TaipyBaseAction {
@@ -40,6 +44,12 @@ interface TaipyMultipleAction extends TaipyBaseAction {
     payload: NamePayload[];
 }
 
+export interface FormatConfig {
+    timeZone: string;
+    dateTime: string;
+    number: string;
+}
+
 export const INITIAL_STATE: TaipyState = {
     data: {},
     theme: createTheme({
@@ -48,12 +58,18 @@ export const INITIAL_STATE: TaipyState = {
         },
     }),
     locations: {},
+    timeZone: TIMEZONE_CLIENT,
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
     socket: io(ENDPOINT),
 });
+
+const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
+    const val = localStorage && (localStorage.getItem(key) as unknown as T);
+    return !val ? defaultValue : !values ? val : values.indexOf(val) == -1 ? defaultValue : val;
+};
 
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
@@ -110,15 +126,41 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             };
         case Types.SetLocations:
             return { ...state, locations: action.payload.value as Record<string, string> };
-        case Types.SetTheme:
-            return {
-                ...state,
-                theme: createTheme({
-                    palette: {
-                        mode: action.payload.value as PaletteMode,
-                    },
-                }),
-            };
+        case Types.SetTheme: {
+            let mode = action.payload.value as PaletteMode;
+            if (action.payload.fromBackend) {
+                mode = getLocalStorageValue("theme", mode, ["light", "dark"]);
+            }
+            localStorage && localStorage.setItem("theme", mode);
+            if (mode !== state.theme.palette.mode) {
+                return {
+                    ...state,
+                    theme: createTheme({
+                        palette: {
+                            mode: mode,
+                        },
+                    }),
+                };
+            }
+            return state;
+        }
+        case Types.SetTimeZone: {
+            let timeZone = (action.payload.timeZone as string) || "client";
+            if (action.payload.fromBackend) {
+                timeZone = getLocalStorageValue("timeZone", timeZone);
+            }
+            if (!timeZone || timeZone === "client") {
+                timeZone = TIMEZONE_CLIENT;
+            }
+            localStorage && localStorage.setItem("timeZone", timeZone);
+            if (timeZone !== state.timeZone) {
+                return {
+                    ...state,
+                    timeZone: timeZone,
+                };
+            }
+            return state;
+        }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -162,7 +204,11 @@ export const createSendActionNameAction = (name: string | undefined, value: unkn
     payload: { value: value },
 });
 
-export const createRequestChartUpdateAction = (name: string | undefined, id: string | undefined, columns: string[]): TaipyAction => ({
+export const createRequestChartUpdateAction = (
+    name: string | undefined,
+    id: string | undefined,
+    columns: string[]
+): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
     payload: {
@@ -219,7 +265,7 @@ export const createRequestInfiniteTableUpdateAction = (
     },
 });
 
-export const createRequestUpdateAction = (id: string| undefined, names: string[]): TaipyAction => ({
+export const createRequestUpdateAction = (id: string | undefined, names: string[]): TaipyAction => ({
     type: Types.RequestUpdate,
     name: "",
     payload: {
@@ -234,10 +280,16 @@ export const createSetLocationsAction = (locations: Record<string, string>): Tai
     payload: { value: locations },
 });
 
-export const createThemeAction = (dark: boolean): TaipyAction => ({
+export const createThemeAction = (dark: boolean, fromBackend = false): TaipyAction => ({
     type: Types.SetTheme,
     name: "theme",
-    payload: { value: dark ? "dark" : "light" },
+    payload: { value: dark ? "dark" : "light", fromBackend: fromBackend },
+});
+
+export const createTimeZoneAction = (timeZone: string, fromBackend = false): TaipyAction => ({
+    type: Types.SetTimeZone,
+    name: "timeZone",
+    payload: { value: timeZone, fromBackend: fromBackend },
 });
 
 type WsMessageType = "A" | "U" | "DU" | "MU" | "RU";

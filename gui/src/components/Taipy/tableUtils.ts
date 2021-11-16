@@ -1,4 +1,5 @@
 import { TableCellProps } from "@mui/material/TableCell";
+import { FormatConfig } from "../../context/taipyReducers";
 
 import { getDateTimeString, getNumberString } from "../../utils/index";
 import { TaipyBaseProps, TaipyMultiSelectProps } from "./utils";
@@ -26,16 +27,16 @@ export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
-export const formatValue = (val: any, col: any) => {
+export const formatValue = (val: any, col: any, formatConf: FormatConfig) => {
     if (val === null || val === undefined) {
         return "";
     }
     switch (col.type) {
         case "datetime64[ns]":
-            return getDateTimeString(val, col.format || defaultDateFormat);
+            return getDateTimeString(val, col.format || defaultDateFormat, formatConf);
         case "int64":
         case "float64":
-            return getNumberString(val, col.format);
+            return getNumberString(val, col.format, formatConf);
         default:
             return val;
     }

@@ -17,7 +17,7 @@ from flask import Blueprint, jsonify, request
 
 from ._default_config import default_config
 from .config import GuiConfig
-from .data.data_accessor import _DataAccessors, DataAccessor
+from .data.data_accessor import DataAccessor, _DataAccessors
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -42,7 +42,7 @@ class Gui(object, metaclass=Singleton):
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
-    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*?\{(.*?)\}\s*?$")
+    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*\{\([^\}]*?\)\}\s*$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -145,8 +145,11 @@ class Gui(object, metaclass=Singleton):
             + Gui.__root_page_name
             + '" path="/'
             + Gui.__root_page_name
-            + '" />} >'
+            + '"'
         )
+        route = next((r for r in routes if r != Gui.__root_page_name), None)
+        router += (' route="/' + route + '"') if route else ""
+        router += ' />} >'
         locations["/"] = "/" + Gui.__root_page_name
         for route in routes:
             if route != Gui.__root_page_name:
@@ -617,7 +620,10 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def run(self, host=None, port=None, debug=None) -> None:
+    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
+        self._data_accessors.register(data_accessor_class)
+
+    def run(self, host=None, port=None, debug=None, run_server=True) -> None:
         # Check with default config, override only if parameter
         # is not passed directly into the run function
         if host is None and self._config.app_config["host"] is not None:
@@ -657,10 +663,8 @@ class Gui(object, metaclass=Singleton):
         self._server._set_client_url(self._config.app_config["client_url"])
 
         # Start Flask Server
-        self._server.runWithWS(host=host, port=port, debug=debug)
+        if run_server:
+            self._server.runWithWS(host=host, port=port, debug=debug)
 
     def get_flask_app(self):
         return self._server
-
-    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
-        self._data_accessors.register(data_accessor_class)
