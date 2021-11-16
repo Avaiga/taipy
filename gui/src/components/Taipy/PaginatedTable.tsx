@@ -26,7 +26,7 @@ import {
     tableSx,
     TaipyPaginatedTableProps,
 } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
@@ -56,6 +56,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
     const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
+    const formatConfig = useFormatConfig();
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -218,7 +219,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     >
                                         {colsOrder.map((col, cidx) => (
                                             <TableCell key={"val" + index + "-" + cidx} {...alignCell(columns[col])}>
-                                                {formatValue(row[col], columns[col])}
+                                                {formatValue(row[col], columns[col], formatConfig)}
                                             </TableCell>
                                         ))}
                                     </TableRow>

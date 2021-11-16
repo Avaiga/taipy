@@ -14,7 +14,7 @@ import InfiniteLoader from "react-window-infinite-loader";
 import { Skeleton } from "@mui/material";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestInfiniteTableUpdateAction } from "../../context/taipyReducers";
+import { createRequestInfiniteTableUpdateAction, FormatConfig } from "../../context/taipyReducers";
 import {
     ColumnDesc,
     alignCell,
@@ -26,7 +26,7 @@ import {
     paperSx,
     tableSx,
 } from "./tableUtils";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
 interface RowData {
     colsOrder: string[];
@@ -36,12 +36,13 @@ interface RowData {
     cellStyles: CSSProperties[];
     isItemLoaded: (index: number) => boolean;
     selection: number[];
+    formatConfig: FormatConfig;
 }
 
 const Row = ({
     index,
     style,
-    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selection },
+    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selection, formatConfig },
 }: {
     index: number;
     style: CSSProperties;
@@ -66,7 +67,7 @@ const Row = ({
                     {...alignCell(columns[col])}
                     style={cellStyles[cidx]}
                 >
-                    {formatValue(rows[index][col], columns[col])}
+                    {formatValue(rows[index][col], columns[col], formatConfig)}
                 </TableCell>
             ))}
         </TableRow>
@@ -88,7 +89,17 @@ interface key2Rows {
 const ROW_HEIGHT = 54;
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
-    const { className, id, tp_varname, refresh = false, height = "50vh", tp_updatevars, selected = [], pageSize = 100, defaultKey = "" } = props;
+    const {
+        className,
+        id,
+        tp_varname,
+        refresh = false,
+        height = "50vh",
+        tp_updatevars,
+        selected = [],
+        pageSize = 100,
+        defaultKey = "",
+    } = props;
     const [rows, setRows] = useState<Record<string, unknown>[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
@@ -97,6 +108,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const [order, setOrder] = useState<Order>("asc");
     const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
+    const formatConfig = useFormatConfig();
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -206,8 +218,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
             isItemLoaded: isItemLoaded,
             selection: selected,
+            formatConfig: formatConfig,
         }),
-        [rows, isItemLoaded, colsOrder, columns, selected]
+        [rows, isItemLoaded, colsOrder, columns, selected, formatConfig]
     );
 
     return (

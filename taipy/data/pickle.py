@@ -3,7 +3,7 @@ import pickle
 from datetime import datetime
 from typing import Any, List, Optional
 
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 
@@ -48,7 +48,8 @@ class PickleDataSource(DataSource):
         self,
         config_name: str,
         scope: Scope,
-        id: Optional[str] = None,
+        id: Optional[DataSourceId] = None,
+        name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
@@ -59,7 +60,7 @@ class PickleDataSource(DataSource):
             up_to_date = []
         if properties is None:
             properties = {}
-        super().__init__(config_name, scope, id, parent_id, last_edition_date, job_ids, up_to_date, **properties)
+        super().__init__(config_name, scope, id, name, parent_id, last_edition_date, job_ids, up_to_date, **properties)
         self.__pickle_file_path = self.properties.get(self.__PICKLE_FILE_NAME) or f"{self.id}.p"
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))

@@ -89,6 +89,10 @@ class Builder:
         Builder.__keys[name] = (key_index or 0) + 1
         return name + "." + (str(key_index) if key_index else "0")
 
+    @staticmethod
+    def _reset_key() -> None:
+        Builder.__keys = {}
+
     def __get_list_of_(self, name: str):
         lof = self.__get_property(name)
         if isinstance(lof, str):

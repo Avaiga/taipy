@@ -1,6 +1,47 @@
-import { Dispatch, useEffect, useMemo, useRef } from "react";
+import { Dispatch, useContext, useEffect, useMemo, useRef } from "react";
+
 import { getUpdateVars } from "../components/Taipy/utils";
-import { createRequestUpdateAction, TaipyBaseAction } from "../context/taipyReducers";
+import { TaipyContext } from "../context/taipyContext";
+import { createRequestUpdateAction, FormatConfig, TaipyBaseAction } from "../context/taipyReducers";
+
+export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T): T => {
+    return useMemo(() => {
+        if (value !== undefined) {
+            return value;
+        }
+        if (defaultValue !== undefined) {
+            return defaultValue;
+        }
+        return defaultStatic;
+    }, [value, defaultValue, defaultStatic]);
+};
+
+export const useDispatchRequestUpdateOnFirstRender = (
+    dispatch: Dispatch<TaipyBaseAction>,
+    id?: string,
+    updateVars?: string,
+    varName?: string
+) => {
+    useEffect(() => {
+        const updateArray = getUpdateVars(updateVars);
+        varName && updateArray.push(varName);
+        updateArray.length && dispatch(createRequestUpdateAction(id, updateArray));
+    }, [updateVars, dispatch, id, varName]);
+};
+
+export const useFormatConfig = (): FormatConfig => {
+    const { state } = useContext(TaipyContext);
+
+    return useMemo(
+        () =>
+            ({
+                timeZone: state.timeZone,
+                dateTime: state.dateTimeFormat || "yyyy-MM-dd HH:mm:ss zzz",
+                number: state.numberFormat || "%.2f",
+            } as FormatConfig),
+        [state.timeZone, state.dateTimeFormat, state.numberFormat]
+    );
+};
 
 export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {
     // Get a mutable ref object where we can store props ...
@@ -31,29 +72,4 @@ export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>)
         // Finally update previousProps with current props for next hook call
         previousProps.current = props;
     });
-};
-
-export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T): T => {
-    return useMemo(() => {
-        if (value !== undefined) {
-            return value;
-        }
-        if (defaultValue !== undefined) {
-            return defaultValue;
-        }
-        return defaultStatic;
-    }, [value, defaultValue, defaultStatic]);
-};
-
-export const useDispatchRequestUpdateOnFirstRender = (
-    dispatch: Dispatch<TaipyBaseAction>,
-    id?: string,
-    updateVars?: string,
-    varName?: string
-) => {
-    useEffect(() => {
-        const updateArray = getUpdateVars(updateVars);
-        varName && updateArray.push(varName);
-        updateArray.length && dispatch(createRequestUpdateAction(id, updateArray));
-    }, [updateVars, dispatch, id, varName]);
 };
