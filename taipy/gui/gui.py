@@ -149,7 +149,7 @@ class Gui(object, metaclass=Singleton):
         )
         route = next((r for r in routes if r != Gui.__root_page_name), None)
         router += (' route="/' + route + '"') if route else ""
-        router += ' />} >'
+        router += " />} >"
         locations["/"] = "/" + Gui.__root_page_name
         for route in routes:
             if route != Gui.__root_page_name:

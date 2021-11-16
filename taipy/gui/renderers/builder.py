@@ -6,7 +6,7 @@ import warnings
 from operator import attrgetter
 from types import FunctionType
 
-from markdown.util import etree
+import xml.etree.ElementTree as etree
 
 from ..page import Partial
 from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
