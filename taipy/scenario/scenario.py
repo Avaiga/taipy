@@ -30,8 +30,8 @@ class Scenario:
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
-        self.cycle = cycle
         self.master_scenario = master_scenario
+        self.cycle = cycle
 
     def __eq__(self, other):
         return self.id == other.id

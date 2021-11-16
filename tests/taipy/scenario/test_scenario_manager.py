@@ -1,9 +1,11 @@
 import pytest
 
-from taipy.common.alias import PipelineId, ScenarioId, TaskId
-from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from taipy.common.alias import CycleId, PipelineId, ScenarioId, TaskId
+from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig, scenario
+from taipy.cycle.cycle import Cycle
+from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
-from taipy.exceptions import NonExistingTask
+from taipy.exceptions import NonExistingTask, cycle
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import Pipeline
@@ -13,7 +15,7 @@ from taipy.task import Task, TaskScheduler
 from tests.taipy.utils.NotifyMock import NotifyMock
 
 
-def test_save_and_get_scenario_entity():
+def test_save_and_get_scenario_entity(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
@@ -24,10 +26,10 @@ def test_save_and_get_scenario_entity():
     pipeline_name_2 = "pipeline_name_2"
     pipeline_entity_2 = Pipeline(pipeline_name_2, {}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
-    scenario_2 = Scenario("scenario_name_2", [pipeline_entity_2], {}, scenario_id_2)
+    scenario_2 = Scenario("scenario_name_2", [pipeline_entity_2], {}, scenario_id_2, True, cycle)
 
     pipeline_entity_3 = Pipeline("pipeline_name_3", {}, [], PipelineId("pipeline_id_3"))
-    scenario_3_with_same_id = Scenario("scenario_name_3", [pipeline_entity_3], {}, scenario_id_1)
+    scenario_3_with_same_id = Scenario("scenario_name_3", [pipeline_entity_3], {}, scenario_id_1, False, cycle)
 
     # No existing scenario entity
     scenario_manager = ScenarioManager()
@@ -49,6 +51,7 @@ def test_save_and_get_scenario_entity():
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     scenario_manager.pipeline_manager.task_manager.set(task_2)
     scenario_manager.pipeline_manager.set(pipeline_entity_2)
+    scenario_manager.cycle_manager.set(cycle)
     scenario_manager.set(scenario_2)
     assert len(scenario_manager.get_all()) == 2
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
@@ -58,6 +61,8 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
+    assert scenario_manager.get(scenario_id_2).cycle == cycle
+    assert scenario_manager.cycle_manager.get(cycle.id).id == cycle.id
 
     # We save the first scenario again. We expect nothing to change
     scenario_manager.set(scenario_1)
@@ -69,6 +74,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
+    assert scenario_manager.cycle_manager.get(cycle.id).id == cycle.id
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
@@ -79,6 +85,7 @@ def test_save_and_get_scenario_entity():
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_3_with_same_id.config_name
     assert len(scenario_manager.get(scenario_id_1).pipelines) == 1
+    assert scenario_manager.get(scenario_id_1).cycle == cycle
     assert scenario_manager.get(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
@@ -180,10 +187,12 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     pipeline_manager = scenario_manager.pipeline_manager
     task_manager = scenario_manager.task_manager
     data_manager = scenario_manager.data_manager
+    cycle_manager = scenario_manager.cycle_manager
     scenario_manager.delete_all()
     pipeline_manager.delete_all()
     data_manager.delete_all()
     task_manager.delete_all()
+    cycle_manager.delete_all()
 
     ds_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)
     ds_2 = Config.data_source_configs.create("bar", "in_memory", Scope.SCENARIO, default_data=0)
@@ -197,12 +206,13 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
     pipeline_2 = PipelineConfig("by 4", [task_mult_by_4])
     # ds_1 ---> mult by 4 ---> ds_4
-    scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2])
+    scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2], Frequency.DAILY)
 
     assert len(data_manager.get_all()) == 0
     assert len(task_manager.get_all()) == 0
     assert len(pipeline_manager.get_all()) == 0
     assert len(scenario_manager.get_all()) == 0
+    assert len(cycle_manager.get_all()) == 0
 
     scenario_entity = scenario_manager.create(scenario)
 
@@ -217,6 +227,7 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert scenario_entity.by_6.get_sorted_tasks()[0][0].config_name == task_mult_by_2.name
     assert scenario_entity.by_6.get_sorted_tasks()[1][0].config_name == task_mult_by_3.name
     assert scenario_entity.by_4.get_sorted_tasks()[0][0].config_name == task_mult_by_4.name
+    assert scenario_entity.cycle.frequency == Frequency.DAILY
 
 
 def test_get_set_data():
@@ -403,3 +414,39 @@ def test_notification_subscribe_only_on_new_jobs():
 
     scenario_manager.unsubscribe(notify_1)
     scenario_manager.unsubscribe(notify_2)
+
+
+def test_get_set_master_scenario():
+    scenario_manager = ScenarioManager()
+    cycle_manager = scenario_manager.cycle_manager
+
+    cycle_1 = Cycle(Frequency.DAILY, {}, id=CycleId("cc_1"))
+
+    scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), master_scenario=False, cycle=cycle_1)
+    scenario_2 = Scenario("sc_2", [], {}, ScenarioId("sc_2"), master_scenario=False, cycle=cycle_1)
+
+    scenario_manager.delete_all()
+    cycle_manager.delete_all()
+
+    assert len(scenario_manager.get_all()) == 0
+    assert len(cycle_manager.get_all()) == 0
+
+    cycle_manager.set(cycle_1)
+
+    scenario_manager.set(scenario_1)
+    scenario_manager.set(scenario_2)
+
+    assert len(scenario_manager.get_all_master_scenarios()) == 0
+    assert len(scenario_manager.get_all_scenarios_of_cycle(cycle_1)) == 2
+
+    scenario_manager.set_master(scenario_1)
+
+    assert len(scenario_manager.get_all_master_scenarios()) == 1
+    assert len(scenario_manager.get_all_scenarios_of_cycle(cycle_1)) == 2
+    assert scenario_manager.get_master(cycle_1) == scenario_1
+
+    scenario_manager.set_master(scenario_2)
+
+    assert len(scenario_manager.get_all_master_scenarios()) == 1
+    assert len(scenario_manager.get_all_scenarios_of_cycle(cycle_1)) == 2
+    assert scenario_manager.get_master(cycle_1) == scenario_2

@@ -14,3 +14,7 @@ class NonExistingScenarioConfig(Exception):
 
     def __init__(self, scenario_config_name: str):
         self.message = f"Scenario config : {scenario_config_name} does not exist."
+
+
+class DoesNotBelongToACycle(Exception):
+    pass
