@@ -16,15 +16,15 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
         task_source_edges = defaultdict(list)
         for task in pipeline.tasks.values():
             for predecessor in task.input.values():
-                source_task_edges[predecessor.id].append(str(task.id))
+                source_task_edges[str(predecessor.id)].append(str(task.id))
             for successor in task.output.values():
-                task_source_edges[str(task.id)].append(successor.id)
+                task_source_edges[str(task.id)].append(str(successor.id))
         return PipelineModel(
             pipeline.id,
             pipeline.config_name,
             pipeline.properties,
-            Dag(source_task_edges),
-            Dag(task_source_edges),
+            Dag(dict(source_task_edges)),
+            Dag(dict(task_source_edges)),
         )
 
     def from_model(self, model):
