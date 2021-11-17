@@ -5,8 +5,9 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 from taipy.common.alias import JobId
-from taipy.data import DataSource, Scope
-from taipy.exceptions import UnknownDatabaseEngine
+from taipy.data.data_source import DataSource
+from taipy.data.scope import Scope
+from taipy.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 
 
 class SQLDataSource(DataSource):
@@ -40,6 +41,7 @@ class SQLDataSource(DataSource):
     """
 
     __TYPE = "sql"
+    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine"]
 
     def __init__(
         self,
@@ -55,11 +57,16 @@ class SQLDataSource(DataSource):
         if properties is None:
             properties = {}
 
+        if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
+            raise MissingRequiredProperty(
+                f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
+            )
+
         self.__engine = self.__create_engine(
+            properties.get("db_engine"),
             properties.get("db_username"),
             properties.get("db_password"),
             properties.get("db_name"),
-            properties.get("db_engine"),
         )
 
         super().__init__(
