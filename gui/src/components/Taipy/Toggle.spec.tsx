@@ -84,7 +84,7 @@ describe("Toggle Component", () => {
         const elts = getAllByRole("button");
         elts.forEach(elt => expect(elt).not.toBeDisabled());
     });
-it("dispatch a well formed message", async () => {
+    it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>

@@ -22,5 +22,6 @@ default_config = {
         "chart": "",
         "status": "",
         "toggle": "",
+        "navbar": "",
     },
 }

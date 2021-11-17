@@ -14,6 +14,7 @@ import StatusList from "./StatusList";
 import Toggle from "./Toggle";
 import Slider from "./Slider";
 import Button from "./Button";
+import NavBar from "./NavBar";
 import MainPage from "../pages/MainPage";
 import PageContent from "../pages/PageContent";
 
@@ -31,6 +32,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Toggle: Toggle as ComponentType,
     Slider: Slider as ComponentType,
     Button: Button as ComponentType,
+    NavBar: NavBar as ComponentType,
     PageContent: PageContent as ComponentType,
 };
 
@@ -41,5 +43,5 @@ export const JSXReactRouterComponents: Record<string, unknown> = {
     Router: BrowserRouter,
     NotFound404: NotFound404,
     TaipyRendered: TaipyRendered,
-    MainPage: MainPage
+    MainPage: MainPage,
 };

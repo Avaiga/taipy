@@ -37,7 +37,7 @@ export const useFormatConfig = (): FormatConfig => {
             ({
                 timeZone: state.timeZone,
                 dateTime: state.dateTimeFormat || "yyyy-MM-dd HH:mm:ss zzz",
-                number: state.numberFormat || "%.2f",
+                number: state.numberFormat || "%f",
             } as FormatConfig),
         [state.timeZone, state.dateTimeFormat, state.numberFormat]
     );

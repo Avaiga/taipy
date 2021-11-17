@@ -13,7 +13,9 @@ describe("Link Component", () => {
         const state: TaipyState = { ...INITIAL_STATE, locations: { } };
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
+                <BrowserRouter>
                 <Link href="toto">toto</Link>
+                </BrowserRouter>
             </TaipyContext.Provider>
         );
         const elt = getByText("toto");
