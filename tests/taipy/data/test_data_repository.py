@@ -1,6 +1,6 @@
 import datetime
 
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data import CSVDataSource, DataSource, Scope
 from taipy.data.data_source_model import DataSourceModel
 from taipy.data.manager import DataManager
@@ -8,7 +8,7 @@ from taipy.data.manager import DataManager
 data_source = CSVDataSource(
     "test_data_source",
     Scope.PIPELINE,
-    "ds_id",
+    DataSourceId("ds_id"),
     "name",
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
