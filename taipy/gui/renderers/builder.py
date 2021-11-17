@@ -3,10 +3,9 @@ import json
 import numbers
 import typing as t
 import warnings
+import xml.etree.ElementTree as etree
 from operator import attrgetter
 from types import FunctionType
-
-from markdown.util import etree
 
 from ..page import Partial
 from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
@@ -107,7 +106,7 @@ class Builder:
         return prop
 
     def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
-        names = [n if index is None else f"{n}[{index}]" for n in names]
+        names = [n if index is None else f"{n}[{index}]" for n in names]  # type: ignore
         return [self.__get_property(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:

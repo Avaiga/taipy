@@ -2,9 +2,9 @@
  * date_selector component displays a formatted date/time selector
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|date_selector|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|{value}|date_selector|not with_time|></code>
  * <br>or with properties<br>
  * <code><|{value}|date_selector|properties={properties}|></code>

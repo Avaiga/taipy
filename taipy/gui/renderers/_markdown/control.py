@@ -11,7 +11,8 @@ class ControlPattern(InlineProcessor):
 
     @staticmethod
     def extendMarkdown(md):
-        md.inlinePatterns["taipy-control"] = ControlPattern(ControlPattern._PATTERN, md)
+        # md.inlinePatterns["taipy-control"] = ControlPattern(ControlPattern._PATTERN, md)
+        md.inlinePatterns.register(ControlPattern(ControlPattern._PATTERN, md), "taipy-control", 205)
 
     def handleMatch(self, m, data):
         return MarkdownFactory.create_element(m.group(1), m.group(2)), m.start(0), m.end(0)

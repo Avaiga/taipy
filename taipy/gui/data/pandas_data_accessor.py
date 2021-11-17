@@ -1,15 +1,15 @@
-import warnings
 import typing as t
+import warnings
 
 import pandas as pd
 
-from ..utils import _get_dict_value, _get_date_col_str_name
+from ..utils import _get_date_col_str_name, _get_dict_value
 from .data_accessor import DataAccessor
 
 
 class PandasDataAccessor(DataAccessor):
     @staticmethod
-    def get_supported_classes() -> t.Callable:
+    def get_supported_classes() -> t.Callable:  # type: ignore
         return pd.DataFrame
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
@@ -91,7 +91,7 @@ class PandasDataAccessor(DataAccessor):
             ret_payload["value"] = value
         return ret_payload
 
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
+    def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
         if isinstance(value, pd.DataFrame):
             return value.dtypes.apply(lambda x: x.name).to_dict()
         return None

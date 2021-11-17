@@ -1,10 +1,10 @@
 /**
  * field component is the simplest component. It displays a value as text. (the component name is not mandatory)
- * 
+ *
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|{value}|field|format=%.2f|></code>
  * <br>or with properties<br>
  * <code><|{value}|field|properties={properties}|></code>

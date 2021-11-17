@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
+import inspect
 import typing as t
 import warnings
-import inspect
+from abc import ABC, abstractmethod
 
 from ..utils import _get_dict_value
 
@@ -46,13 +46,13 @@ class _DataAccessors(object):
                 names = cls.get_supported_classes()
                 if not names:
                     raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
-                if names and not isinstance(names, (t.List, t.Tuple)):
+                if names and not isinstance(names, (t.List, t.Tuple)):  # type: ignore
                     names = [
-                        names,
+                        names,  # type: ignore
                     ]
                 for name in names:
                     if inspect.isclass(cls):
-                        self.__access_4_type[name] = cls()
+                        self.__access_4_type[name] = cls()  # type: ignore
                     else:
                         raise TypeError(f"{name.__name__} is not a class")
             else:
@@ -60,7 +60,7 @@ class _DataAccessors(object):
         else:
             raise AttributeError("The argument of 'DataAccessRegistry.register' should be a class")
 
-    def __get_instance(self, value: t.Any) -> DataAccessor:
+    def __get_instance(self, value: t.Any) -> DataAccessor:  # type: ignore
         try:
             return self.__access_4_type[value.__class__]
         except Exception:

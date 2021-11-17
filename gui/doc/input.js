@@ -2,9 +2,9 @@
  * input component display an input field
 
  * ## Usage
- * ### Simple 
+ * ### Simple
  * <code><|{value}|input|></code>
- * ### Advanced 
+ * ### Advanced
  * <code><|{value}|input|></code>
  * <br>or with properties<br>
  * <code><|{value}|input|properties={properties}|></code>

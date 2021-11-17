@@ -1,4 +1,5 @@
 from json import JSONEncoder
+
 from ..taipyimage import TaipyImage
 from ..utils import _MapDictionary
 

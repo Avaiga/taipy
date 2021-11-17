@@ -6,7 +6,7 @@ def test_a_button_pressed(gui: Gui, helpers):
         gui.x = gui.x + 10
         gui.text = "a random text"
 
-    gui.do_something = do_something_fn
+    gui.do_something = do_something_fn  # type: ignore
     # Bind test variables
     assert gui.bind_var_val("x", 10)
     assert gui.bind_var_val("text", "hi")
@@ -15,8 +15,8 @@ def test_a_button_pressed(gui: Gui, helpers):
         "test", Markdown("<|Do something!|button|on_action=do_something|id=my_button|> | <|{x}|> | <|{text}|>")
     )
     gui.run(run_server=False)
-    assert gui.x == 10
-    assert gui.text == "hi"
+    assert gui.x == 10  # type: ignore
+    assert gui.text == "hi"  # type: ignore
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get("/flask-jsx/test/")
@@ -24,7 +24,7 @@ def test_a_button_pressed(gui: Gui, helpers):
     ws_client = gui._server._ws.test_client(gui._server)
     ws_client.emit("message", {"type": "A", "name": "my_button", "payload": "do_something"})
     assert gui._values.text == "a random text"
-    assert gui.x == 20
+    assert gui.x == 20  # type: ignore
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_message(received_messages[0], "MU", "x", 20)

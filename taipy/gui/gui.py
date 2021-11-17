@@ -109,7 +109,7 @@ class Gui(object, metaclass=Singleton):
 
     def _render_page(self) -> t.Any:
         page = None
-        render_path_name = Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)
+        render_path_name = Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)  # type: ignore
         # Get page instance
         for page_i in self._config.pages:
             if page_i.route == render_path_name:
@@ -124,6 +124,7 @@ class Gui(object, metaclass=Singleton):
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         if page.rendered_jsx is None:
             page.render()
+            page.rendered_jsx = str(page.rendered_jsx)
             if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
                 page.rendered_jsx += "<PageContent />"
 
@@ -149,7 +150,7 @@ class Gui(object, metaclass=Singleton):
         )
         route = next((r for r in routes if r != Gui.__root_page_name), None)
         router += (' route="/' + route + '"') if route else ""
-        router += ' />} >'
+        router += " />} >"
         locations["/"] = "/" + Gui.__root_page_name
         for route in routes:
             if route != Gui.__root_page_name:
@@ -301,7 +302,7 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
-    def _on_action(self, id: t.Optional[str], payload: t.any) -> None:
+    def _on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
             action = _get_dict_value(payload, "action")
         else:
@@ -621,7 +622,7 @@ class Gui(object, metaclass=Singleton):
         self._config.load_config(app_config=app_config, style_config=style_config)
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
-        self._data_accessors.register(data_accessor_class)
+        self._data_accessors._register(data_accessor_class)
 
     def run(self, host=None, port=None, debug=None, run_server=True) -> None:
         # Check with default config, override only if parameter
@@ -649,7 +650,7 @@ class Gui(object, metaclass=Singleton):
 
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.rendered_jsx for optimization)
-        for page in self._config.pages + self._config.partials:
+        for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
             self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
 

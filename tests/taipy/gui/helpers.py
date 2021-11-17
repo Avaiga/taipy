@@ -29,7 +29,7 @@ class Helpers:
         response = client.get("/flask-jsx/test/")
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
         assert response.status_code == 200
-        assert isinstance(response_data, object)
+        assert isinstance(response_data, t.Dict)
         assert "jsx" in response_data
         jsx = response_data["jsx"]
         logging.getLogger().debug(jsx)

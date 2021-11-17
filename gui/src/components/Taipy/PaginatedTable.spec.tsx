@@ -143,14 +143,14 @@ describe("PaginatedTable Component", () => {
         const { getAllByText, rerender } = render(<TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable value={undefined} columns={tableColumns} />
             </TaipyContext.Provider>);
-        
+
         rerender(<TaipyContext.Provider value={{ state, dispatch }}>
             <PaginatedTable value={tableValue as TableValueType} columns={tableColumns} />
         </TaipyContext.Provider>);
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
-    });    
+    });
     it("selects the rows", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;

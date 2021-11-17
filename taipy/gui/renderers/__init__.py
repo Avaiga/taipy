@@ -27,7 +27,7 @@ class EmptyPageRenderer(PageRenderer):
         super().__init__("<PageContent />")
 
     def render(self) -> str:
-        return self._content
+        return str(self._content)
 
 
 class Markdown(PageRenderer):

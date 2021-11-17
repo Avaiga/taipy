@@ -1,5 +1,6 @@
-from taipy.gui import Gui
 import pandas as pd
+
+from taipy.gui import Gui
 
 
 def test_expression_field_control_str(gui: Gui, helpers):
