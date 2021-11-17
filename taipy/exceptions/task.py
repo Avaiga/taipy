@@ -14,3 +14,11 @@ class NonExistingTaskConfig(Exception):
 
     def __init__(self, name: str):
         self.message = f"Task config : {name} does not exist."
+
+
+class MultipleTaskFromSameConfigWithSameParent(Exception):
+    """
+    Exception raised if it exists multiple tasks from the same task config and with the same parent_id
+    """
+
+    pass

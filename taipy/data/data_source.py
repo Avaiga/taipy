@@ -31,7 +31,7 @@ class DataSource:
     id: str
         Displayable name of the data source
     parent_id: str
-        Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
+        Identifier of the parent (pipeline_id, scenario_id, cycle_id, None)
     last_edition_date: datetime
         Date and time of the last edition
     job_ids: List[str]

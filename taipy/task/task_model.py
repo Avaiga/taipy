@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from dataclasses_json import dataclass_json
 
@@ -8,13 +8,14 @@ from dataclasses_json import dataclass_json
 @dataclass
 class TaskModel:
     """
-    Class to hold a model of a DataSource. A model refers to the structure of a
-    Data Source stored in a database.
+    Class to hold a model of a Task. A model refers to the structure of a Task stored in a database.
 
     Attributes
     ----------
     id: str
         identifier of a DataSource
+    parent_id: str
+        identifier of the parent (pipeline_id, scenario_id, cycle_id, None)
     config_name: int
         name of the DataSourceConfig
     input: taipy.data.data_source.DataSource
@@ -28,10 +29,11 @@ class TaskModel:
 
     Key
     ---
-    The tuple config_name and parent_id formed a unique key
+    The tuple config_name and parent_id represent a unique key
     """
 
     id: str
+    parent_id: Optional[str]
     config_name: str
     input_ids: List[str]
     function_name: str

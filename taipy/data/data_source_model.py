@@ -27,7 +27,7 @@ class DataSourceModel:
     name: str
         Displayable name of the DataSource
     parent_id: str
-        identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
+        identifier of the parent (pipeline_id, scenario_id, cycle_id, None)
     last_computation_date: str
         isoformat of the last computation datetime
     job_ids: List[str]

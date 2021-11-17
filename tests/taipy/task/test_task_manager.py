@@ -9,13 +9,13 @@ from taipy.task import Task
 from taipy.task.manager.task_manager import TaskManager
 
 
-def test_create_and_persist():
+def test_create_and_save():
     tm = TaskManager()
     dm = DataManager()
     input_configs = [Config.data_source_configs.create("my_input", "in_memory")]
     output_configs = Config.data_source_configs.create("my_output", "in_memory")
     task_config = Config.task_configs.create("foo", input_configs, print, output_configs)
-    task = tm.create(task_config)
+    task = tm.get_or_create(task_config)
     assert task.id is not None
     assert task.config_name == "foo"
     assert len(task.input) == 1
@@ -43,11 +43,11 @@ def test_do_not_recreate_existing_data_source():
     input_config = Config.data_source_configs.create("my_input", "in_memory")
     output_config = Config.data_source_configs.create("my_output", "in_memory")
 
-    dm._create_and_save_data_source(input_config, "pipeline_id")
+    dm._create_and_set(input_config, "pipeline_id")
     assert len(dm.get_all()) == 1
 
     task_config = Config.task_configs.create("foo", input_config, print, output_config)
-    tm.create(task_config, pipeline_id="pipeline_id")
+    tm.get_or_create(task_config, pipeline_id="pipeline_id")
     assert len(dm.get_all()) == 2
 
 
@@ -56,30 +56,58 @@ def test_do_not_recreate_existing_task():
     input_config_scope_pipeline = Config.data_source_configs.create("my_input", "in_memory")
     output_config_scope_pipeline = Config.data_source_configs.create("my_output", "in_memory")
     task_config = Config.task_configs.create("foo", input_config_scope_pipeline, print, output_config_scope_pipeline)
-    task_1 = tm.create(task_config)
-    task_2 = tm.create(task_config)
-    assert task_1.id != task_2.id
-    assert len(tm.get_all()) == 2
-    task_3 = tm.create(task_config, "whatever_scenario", "pipeline_1")
-    # task_4 = tm.create(task_config, "other_scenario", "pipeline_1")  # Do not recreate a task since it already exists
-    task_5 = tm.create(task_config, "pipeline_2")
-    # assert task_3.id == task_4.id
-    assert task_3.id != task_5.id
-    # assert len(tm.get_all()) == 4
+    # task_config scope is Pipeline
 
-    input_config_scope_scenario = Config.data_source_configs.create("my_input", "in_memory", Scope.SCENARIO)
-    output_config_scope_scenario = Config.data_source_configs.create("my_output", "in_memory", Scope.SCENARIO)
+    task_1 = tm.get_or_create(task_config)
+    assert len(tm.get_all()) == 1
+    tm.get_or_create(task_config)  # Do not create. It already exists for None pipeline
+    assert len(tm.get_all()) == 1
+    task_2 = tm.get_or_create(task_config, "whatever_scenario")  # Do not create. It already exists for None pipeline
+    assert len(tm.get_all()) == 1
+    assert task_1.id == task_2.id
+    task_3 = tm.get_or_create(task_config, "whatever_scenario", "pipeline_1")
+    assert len(tm.get_all()) == 2
+    assert task_1.id == task_2.id
+    assert task_2.id != task_3.id
+    task_4 = tm.get_or_create(task_config, "other_sc", "pipeline_1")  # Do not create. It already exists for pipeline_1
+    assert len(tm.get_all()) == 2
+    assert task_1.id == task_2.id
+    assert task_2.id != task_3.id
+    assert task_3.id == task_4.id
+
+    input_config_scope_scenario = Config.data_source_configs.create("my_input_2", "in_memory", Scope.SCENARIO)
+    output_config_scope_scenario = Config.data_source_configs.create("my_output_2", "in_memory", Scope.SCENARIO)
     task_config_2 = Config.task_configs.create("bar", input_config_scope_scenario, print, output_config_scope_scenario)
-    # task_6 = tm.create(task_config_2)
-    # task_7 = tm.create(task_config_2)
-    # assert task_6.id == task_7.id
-    # assert len(tm.get_all()) == 6
-    task_8 = tm.create(task_config_2, "scenario_1", "pipeline")
-    # task_9 = tm.create(task_config_2, "scenario_1", "pipeline_2")  # Do not recreate a task since it already exists
-    task_10 = tm.create(task_config_2, "scenario_2", "pipeline_3")
-    # assert task_8.id == task_9.id
-    assert task_8.id != task_10.id
-    # assert len(tm.get_all()) == 8
+    # task_config_2 scope is Scenario
+
+    task_5 = tm.get_or_create(task_config_2)
+    assert len(tm.get_all()) == 3
+    task_6 = tm.get_or_create(task_config_2)  # Do not create. It already exists for None scenario
+    assert len(tm.get_all()) == 3
+    assert task_5.id == task_6.id
+    task_7 = tm.get_or_create(task_config_2, None, "A_pipeline")  # Do not create. It already exists for None scenario
+    assert len(tm.get_all()) == 3
+    assert task_5.id == task_6.id
+    assert task_6.id == task_7.id
+    task_8 = tm.get_or_create(task_config_2, "scenario_1", "A_pipeline")  # Create even if pipeline is the same.
+    assert len(tm.get_all()) == 4
+    assert task_5.id == task_6.id
+    assert task_6.id == task_7.id
+    assert task_7.id != task_8.id
+    task_9 = tm.get_or_create(task_config_2, "scenario_1", "bar")  # Do not create. It already exists for scenario_1
+    assert len(tm.get_all()) == 4
+    assert task_5.id == task_6.id
+    assert task_6.id == task_7.id
+    assert task_7.id != task_8.id
+    assert task_8.id == task_9.id
+    task_10 = tm.get_or_create(task_config_2, "scenario_2", "baz")
+    assert len(tm.get_all()) == 5
+    assert task_5.id == task_6.id
+    assert task_6.id == task_7.id
+    assert task_7.id != task_8.id
+    assert task_8.id == task_9.id
+    assert task_9.id != task_10.id
+    assert task_7.id != task_10.id
 
 
 def test_set_and_get_task():
@@ -139,7 +167,7 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
     task_config = TaskConfig("name_1", input, print, output)
-    task = task_manager.create(task_config)
+    task = task_manager.get_or_create(task_config)
 
     assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
     assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
@@ -153,7 +181,27 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
     }
 
     task_config = TaskConfig("name_2", input, print, output)
-    task = task_manager.create(task_config, data_sources)
+    task = task_manager.get_or_create(task_config, data_sources)
 
     assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
     assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
+
+
+def test_get_all_by_config_name():
+    tm = TaskManager()
+    input_configs = [Config.data_source_configs.create("my_input", "in_memory")]
+    assert len(tm._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
+    task_config_1 = Config.task_configs.create("foo", input_configs, print, [])
+    assert len(tm._get_all_by_config_name("foo")) == 0
+
+    tm.get_or_create(task_config_1)
+    assert len(tm._get_all_by_config_name("foo")) == 1
+
+    task_config_2 = Config.task_configs.create("baz", input_configs, print, [])
+    tm.get_or_create(task_config_2)
+    assert len(tm._get_all_by_config_name("foo")) == 1
+    assert len(tm._get_all_by_config_name("baz")) == 1
+
+    tm.get_or_create(task_config_2, "other_scenario", "other_pipeline")
+    assert len(tm._get_all_by_config_name("foo")) == 1
+    assert len(tm._get_all_by_config_name("baz")) == 2

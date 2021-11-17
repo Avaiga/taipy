@@ -50,7 +50,9 @@ class PipelineManager:
 
     def create(self, config: PipelineConfig, scenario_id: Optional[str] = None) -> Pipeline:
         pipeline_id = Pipeline.new_id(config.name)
-        tasks = [self.task_manager.create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs]
+        tasks = [
+            self.task_manager.get_or_create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs
+        ]
         pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id)
         self.set(pipeline)
         return pipeline
