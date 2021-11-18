@@ -1,28 +1,27 @@
 import logging
 from functools import partial
-from typing import Callable, Dict, List, Set
+from typing import Callable, List, Optional, Set
 
-from taipy.common.alias import PipelineId, ScenarioId
+from taipy.common.alias import ScenarioId
 from taipy.config import ScenarioConfig
-from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.cycle.cycle import Cycle
+from taipy.cycle.manager.cycle_manager import CycleManager
 from taipy.exceptions.repository import ModelNotFound
-from taipy.exceptions.scenario import NonExistingScenario
+from taipy.exceptions.scenario import DoesNotBelongToACycle, NonExistingScenario
 from taipy.pipeline import PipelineManager
 from taipy.scenario import Scenario
 from taipy.scenario.repository import ScenarioRepository
-from taipy.scenario.scenario_model import ScenarioModel
 from taipy.task import Job
 
 
 class ScenarioManager:
     pipeline_manager = PipelineManager()
+    cycle_manager = CycleManager()
     task_manager = pipeline_manager.task_manager
     data_manager = pipeline_manager.data_manager
     repository = ScenarioRepository(dir_name="scenarios")
 
     __status_notifier: Set[Callable] = set()
-    __SCENARIO_MODEL_DB: Dict[ScenarioId, ScenarioModel] = {}
-    __SCENARIO_CONFIG_DB: Dict[str, ScenarioConfig] = {}
 
     def subscribe(self, callback: Callable[[Scenario, Job], None]):
         """
@@ -45,14 +44,15 @@ class ScenarioManager:
     def delete_all(self):
         self.repository.delete_all()
 
-    def create(self, config: ScenarioConfig) -> Scenario:
+    def create(self, config: ScenarioConfig, creation_date=None) -> Scenario:
         scenario_id = Scenario.new_id(config.name)
         pipelines = [self.pipeline_manager.create(p_config, scenario_id) for p_config in config.pipelines_configs]
-        scenario = Scenario(config.name, pipelines, config.properties, scenario_id)
-        self.save(scenario)
+        cycle = self.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
+        scenario = Scenario(config.name, pipelines, config.properties, scenario_id, cycle=cycle)
+        self.set(scenario)
         return scenario
 
-    def save(self, scenario: Scenario):
+    def set(self, scenario: Scenario):
         self.repository.save(scenario)
 
     def get(self, scenario_id: ScenarioId) -> Scenario:
@@ -77,3 +77,35 @@ class ScenarioManager:
         if self.__status_notifier:
             return [partial(c, scenario) for c in self.__status_notifier]
         return []
+
+    def get_master(self, cycle: Cycle) -> Optional[Scenario]:
+        scenarios = self.get_all_scenarios_of_cycle(cycle)
+        for scenario in scenarios:
+            if scenario.is_master_scenario():
+                return scenario
+        return None
+
+    def get_all_scenarios_of_cycle(self, cycle: Cycle) -> List[Scenario]:
+        scenarios = []
+        for scenario in self.get_all():
+            if scenario.cycle == cycle:
+                scenarios.append(scenario)
+        return scenarios
+
+    def get_all_master_scenarios(self) -> List[Scenario]:
+        master_scenarios = []
+        for scenario in self.get_all():
+            if scenario.is_master_scenario():
+                master_scenarios.append(scenario)
+        return master_scenarios
+
+    def set_master(self, scenario: Scenario):
+        if scenario.cycle:
+            master_scenario = self.get_master(scenario.cycle)
+            if master_scenario:
+                master_scenario.master_scenario = False
+                self.set(master_scenario)
+            scenario.master_scenario = True
+            self.set(scenario)
+        else:
+            raise DoesNotBelongToACycle

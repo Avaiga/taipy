@@ -1,10 +1,14 @@
 import os
 import shutil
+from datetime import datetime
 
 import pandas as pd
 import pytest
 
-from taipy.common.alias import ScenarioId
+from taipy.common.alias import CycleId, ScenarioId
+from taipy.cycle.cycle import Cycle
+from taipy.cycle.cycle_model import CycleModel
+from taipy.cycle.frequency import Frequency
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
 
@@ -28,11 +32,48 @@ def cleanup_files():
         shutil.rmtree(".data")
 
 
-@pytest.fixture(scope="class")
-def scenario():
-    return Scenario("sc", [], {}, ScenarioId("sc_id"))
+@pytest.fixture(scope="function")
+def current_datetime():
+    return datetime.now()
 
 
-@pytest.fixture
-def scenario_model(scope="class"):
-    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {})
+@pytest.fixture(scope="function")
+def week_example():
+    return datetime(2021, 11, 16, 0, 0, 0, 0)
+
+
+@pytest.fixture(scope="function")
+def scenario(cycle):
+    return Scenario("sc", [], {}, ScenarioId("sc_id"), master_scenario=False, cycle=None)
+
+
+@pytest.fixture(scope="function")
+def scenario_model(cycle):
+    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, cycle=None)
+
+
+@pytest.fixture(scope="function")
+def cycle():
+    example_date = datetime.fromisoformat("2021-11-11T11:11:01.000001")
+    return Cycle(
+        Frequency.DAILY,
+        {},
+        name="cc",
+        creation_date=example_date,
+        start_date=example_date,
+        end_date=example_date,
+        id=CycleId("cc_id"),
+    )
+
+
+@pytest.fixture(scope="function")
+def cycle_model():
+    return CycleModel(
+        CycleId("cc_id"),
+        "cc",
+        Frequency.DAILY,
+        {},
+        creation_date="2021-11-11T11:11:01.000001",
+        start_date="2021-11-11T11:11:01.000001",
+        end_date="2021-11-11T11:11:01.000001",
+    )
