@@ -11,10 +11,12 @@ interface LayoutProps {
 
 const baseSx = { display: "grid" };
 
+const SPLIT_COLS = /\D+/
+
 const Layout = (props: LayoutProps) => {
     const { type = "1 1", gap = "0.5rem" } = props;
     const sx = useMemo(() => {
-        const vals = type.split(" ").map((t) => {
+        const vals = type.split(SPLIT_COLS).filter(t => t).map((t) => {
             try {
                 return parseFloat(t);
             } catch (e) {

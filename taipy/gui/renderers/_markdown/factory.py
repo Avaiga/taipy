@@ -2,6 +2,12 @@ from ..factory import Factory
 
 
 class MarkdownFactory(Factory):
+    # Taipy Markdown tags
+    _TAIPY_START = "TaIpY:"
+    _TAIPY_END = ":tAiPy"
+
+    _TAIPY_BLOCK_TAGS = ["layout", "part", "expandable"]
+
     @staticmethod
     def create_element(control_type: str, all_properties: str) -> str:
         # Create properties dict from all_properties
