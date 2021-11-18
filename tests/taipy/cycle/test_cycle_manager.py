@@ -56,29 +56,6 @@ def test_save_and_get_cycle_entity(tmpdir, cycle):
     assert cycle_3_entity.end_date is not None
     assert cycle_3_entity.frequency == cycle_3.frequency
 
-    assert len(cycle_manager.get_cycles_by_frequency_and_creation_date(cycle_1.frequency, cycle_1.creation_date)) == 1
-    assert len(cycle_manager.get_cycles_by_frequency_and_creation_date(cycle_3.frequency, cycle_3.creation_date)) == 1
-    assert (
-        len(cycle_manager.get_cycles_by_frequency_and_creation_date(Frequency.WEEKLY, datetime(2000, 1, 1, 1, 0, 0, 0)))
-        == 0
-    )
-
-    assert (
-        len(cycle_manager.get_cycles_by_frequency_and_overlapping_date(cycle_1.frequency, cycle_1.creation_date)) == 1
-    )
-    assert (
-        cycle_manager.get_cycles_by_frequency_and_overlapping_date(cycle_1.frequency, cycle_1.creation_date)[0]
-        == cycle_1
-    )
-    assert (
-        len(
-            cycle_manager.get_cycles_by_frequency_and_overlapping_date(
-                Frequency.WEEKLY, datetime(2000, 1, 1, 1, 0, 0, 0)
-            )
-        )
-        == 0
-    )
-
 
 def test_create_and_delete_cycle_entity(tmpdir):
     cycle_manager = CycleManager()
