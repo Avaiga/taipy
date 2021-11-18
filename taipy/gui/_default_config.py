@@ -23,5 +23,8 @@ default_config = {
         "status": "",
         "toggle": "",
         "navbar": "",
+        "layout": "",
+        "part": "",
+        "expandable": "",
     },
 }

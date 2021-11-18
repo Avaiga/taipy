@@ -7,12 +7,11 @@ class Postprocessor(Treeprocessor):
     def run(self, root):
         MD_PARA_CLASSNAME = "md-para"
         for p in root.iter():
-            attribs = p.attrib
             if p.tag == "p":
-                classes = attribs.get("class")
+                classes = p.get("class")
                 classes = MD_PARA_CLASSNAME + " " + classes if classes else MD_PARA_CLASSNAME
-                attribs["class"] = classes
+                p.set("class", classes)
                 p.tag = "div"
             if p != root:
-                attribs["key"] = Builder._get_key(p.tag)
+                p.set("key", Builder._get_key(p.tag))
         return root

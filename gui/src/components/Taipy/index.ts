@@ -14,9 +14,12 @@ import StatusList from "./StatusList";
 import Toggle from "./Toggle";
 import Slider from "./Slider";
 import Button from "./Button";
+import Layout from "./Layout";
 import NavBar from "./NavBar";
+import Part from "./Part";
 import MainPage from "../pages/MainPage";
 import PageContent from "../pages/PageContent";
+import Expandable from "./Expandable";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
@@ -33,7 +36,10 @@ export const taipyComponents: Record<string, ComponentType> = {
     Slider: Slider as ComponentType,
     Button: Button as ComponentType,
     NavBar: NavBar as ComponentType,
-    PageContent: PageContent as ComponentType,
+    PageContent: PageContent,
+    Layout: Layout,
+    Part: Part,
+    Expandable: Expandable,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)
