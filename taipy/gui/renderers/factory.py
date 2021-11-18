@@ -8,7 +8,7 @@ from .builder import Builder
 
 class Factory:
 
-    CONTROL_DEFAULT_PROP_NAME = {
+    __CONTROL_DEFAULT_PROP_NAME = {
         "field": "value",
         "button": "label",
         "input": "value",
@@ -23,6 +23,9 @@ class Factory:
         "toggle": "value",
         "content": "value",
         "navbar": "value",
+        "layout": "type",
+        "part": "type",
+        "expandable": "title",
     }
 
     CONTROL_BUILDERS = {
@@ -245,7 +248,6 @@ class Factory:
         "navbar": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="NavBar", attributes=attrs, default_value=""
         )
-        .set_value_and_default(with_default=False)
         .set_className(class_name="taipy-navbar", config_class="navbar")
         .get_adapter("lov", False)  # need to be called before set_lov
         .set_lov()
@@ -255,6 +257,37 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         ),
+        "layout": lambda control_type, attrs: Builder(
+            control_type=control_type, element_name="Layout", attributes=attrs, default_value=""
+        )
+        .set_className(class_name="taipy-layout", config_class="layout")
+        .set_attributes(
+            [
+                ("id"),
+                ("type"),
+                ("gap"),
+            ]
+        ),
+        "part": lambda control_type, attrs: Builder(
+            control_type=control_type, element_name="Part", attributes=attrs, default_value=""
+        )
+        .set_className(class_name="taipy-part", config_class="part")
+        .set_attributes(
+            [
+                ("id"),
+            ]
+        ),
+        "expandable": lambda control_type, attrs: Builder(
+            control_type=control_type, element_name="Expandable", attributes=attrs, default_value=""
+        )
+        .set_value_and_default()
+        .set_className(class_name="taipy-expandable", config_class="expandable")
+        .set_attributes(
+            [
+                ("id"),
+                ("expanded", AttributeType.dynamic_boolean, True),
+            ]
+        ),
     }
 
     # TODO: process \" in property value
@@ -262,4 +295,4 @@ class Factory:
 
     @staticmethod
     def get_default_property_name(control_name: str) -> t.Optional[str]:
-        return Factory.CONTROL_DEFAULT_PROP_NAME.get(control_name)
+        return Factory.__CONTROL_DEFAULT_PROP_NAME.get(control_name.split(".", 1)[0])
