@@ -33,7 +33,7 @@ class JobDispatcher:
     def execute(self, job: Job):
         job.running()
         self.__nb_worker_available -= 1
-        future = self.__executor.submit(partial(self._call_function, job.id, job.task))
+        future = self.__executor.submit(self._call_function, job.id, job.task)
         future.add_done_callback(self.__release_worker)
         future.add_done_callback(job.update_status)
 
