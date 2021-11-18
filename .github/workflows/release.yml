@@ -20,11 +20,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Extract branch tag
-        shell: bash
-        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/release/})"
-        id: extract_branch
-
       - name: npm build ${{ matrix.node-version }} on ${{ matrix.os }}
         uses: actions/setup-node@v1
         with:
@@ -49,14 +44,33 @@ jobs:
           message: 'React Build for Frontend'
           add: './taipy/gui'
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+  release:
+    name: Release Taipy Package
+
+    needs: build
+
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: git pull
+
+      - name: Extract branch tag
+        shell: bash
+        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/release/})"
+        id: extract_branch
+
+      - name: Extract commit hash
+        shell: bash
+        run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
+        id: extract_hash
+
+      - name: Create release
+        run: gh release create ${{ steps.extract_branch.outputs.tag }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.extract_branch.outputs.tag }}
-          release_name: ${{ steps.extract_branch.outputs.tag }}
-          body: Automated Release Created by Github Actions
-          draft: false
-          prerelease: false
