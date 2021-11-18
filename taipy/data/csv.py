@@ -27,6 +27,8 @@ class CSVDataSource(DataSource):
         Scope Enum that refers to the scope of usage of the data source
     id: str
         Unique identifier of the data source
+    name: str
+        Displayable name of the data source
     parent_id: str
         Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
     last_edition_date: datetime

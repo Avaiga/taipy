@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 import pandas as pd
 from sqlalchemy import create_engine
 
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
@@ -27,6 +27,8 @@ class SQLDataSource(DataSource):
         Scope Enum that refers to the scope of usage of the data source
     id: str
         Unique identifier of the data source
+    name: str
+        Displayable name of the data source
     parent_id: str
         Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
     last_edition_date: datetime
@@ -41,13 +43,14 @@ class SQLDataSource(DataSource):
     """
 
     __TYPE = "sql"
-    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine"]
+    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "query"]
 
     def __init__(
         self,
         config_name: str,
         scope: Scope,
-        id: Optional[str] = None,
+        id: Optional[DataSourceId] = None,
+        name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
@@ -73,6 +76,7 @@ class SQLDataSource(DataSource):
             config_name,
             scope,
             id,
+            name,
             parent_id,
             last_edition_date,
             job_ids or [],
