@@ -1,18 +1,18 @@
 from datetime import datetime
-from os.path import isfile
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
+from sqlalchemy import create_engine
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
-from taipy.exceptions import MissingRequiredProperty
+from taipy.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 
 
-class CSVDataSource(DataSource):
+class SQLDataSource(DataSource):
     """
-    A class to represent a Data Source stored as a CSV file.
+    A class that represents a Data Source stored in a SQL database table.
 
     Attributes
     ----------
@@ -42,8 +42,8 @@ class CSVDataSource(DataSource):
         "has_header" properties.
     """
 
-    __REQUIRED_PROPERTIES = ["path", "has_header"]
-    __TYPE = "csv"
+    __TYPE = "sql"
+    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "query"]
 
     def __init__(
         self,
@@ -59,10 +59,19 @@ class CSVDataSource(DataSource):
     ):
         if properties is None:
             properties = {}
+
         if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
+
+        self.__engine = self.__create_engine(
+            properties.get("db_engine"),
+            properties.get("db_username"),
+            properties.get("db_password"),
+            properties.get("db_name"),
+        )
+
         super().__init__(
             config_name,
             scope,
@@ -72,33 +81,32 @@ class CSVDataSource(DataSource):
             last_edition_date,
             job_ids or [],
             up_to_date,
-            path=properties.get("path"),
-            has_header=properties.get("has_header"),
+            username=properties.get("db_username"),
+            password=properties.get("db_password"),
+            database=properties.get("db_name"),
+            engine=properties.get("db_engine"),
+            query=properties.get("query"),
         )
-        if not self.last_edition_date and isfile(self.properties["path"]):
-            self.updated()
+
+    @staticmethod
+    def __build_conn_string(engine, username, password, database):
+        # TODO: Add support to other SQL engines
+        if engine == "mssql":
+            return f"{engine}+pyodbc://{username}:{password}@{database}"
+        raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
+
+    def __create_engine(self, engine, username, password, database):
+        return create_engine(self.__build_conn_string(engine, username, password, database))
 
     @classmethod
     def type(cls) -> str:
         return cls.__TYPE
 
     def preview(self):
-        df = pd.read_csv(self.path)
-        print(df.head())
+        pd.read_sql_query(self.query, con=self.__engine, chunksize=10)
 
     def _read(self, query=None):
-        return pd.read_csv(self.properties["path"])
+        return pd.read_sql_query(self.query, con=self.__engine)
 
-    def _write(self, data: Any):
-        pd.DataFrame(data).to_csv(self.path, index=False)
-
-    def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
-        if not columns:
-            df = pd.DataFrame(data)
-        else:
-            df = pd.DataFrame(data, columns=columns)
-        df.to_csv(self.path, index=False)
-        self.last_edition_date = datetime.now()
-        self.up_to_date = True
-        if job_id:
-            self.job_ids.append(job_id)
+    def _write(self, data):
+        pass
