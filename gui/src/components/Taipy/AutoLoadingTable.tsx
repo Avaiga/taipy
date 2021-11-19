@@ -47,14 +47,14 @@ const Row = ({
     index: number;
     style: CSSProperties;
     data: RowData;
-}) => {
-    return isItemLoaded(index) ? (
+}) =>
+    isItemLoaded(index) ? (
         <TableRow
             hover
             tabIndex={-1}
             key={"row" + index}
             component="div"
-            style={style}
+            sx={style}
             className={classes && classes.row}
             data-index={index}
             selected={selection.indexOf(index) > -1}
@@ -65,16 +65,15 @@ const Row = ({
                     variant="body"
                     key={"val" + index + "-" + cidx}
                     {...alignCell(columns[col])}
-                    style={cellStyles[cidx]}
+                    sx={cellStyles[cidx]}
                 >
                     {formatValue(rows[index][col], columns[col], formatConfig)}
                 </TableCell>
             ))}
         </TableRow>
     ) : (
-        <Skeleton style={style} key={"Skeleton" + index} />
+        <Skeleton sx={style} key={"Skeleton" + index} />
     );
-};
 
 interface PromiseProps {
     resolve: () => void;
@@ -94,7 +93,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         id,
         tp_varname,
         refresh = false,
-        height = "50vh",
+        height = "60vh",
         tp_updatevars,
         selected = [],
         pageSize = 100,
@@ -161,7 +160,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         return [[], {}];
     }, [props.columns]);
 
-    const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
+    const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
     useEffect(() => {
         /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
@@ -226,7 +225,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     return (
         <Box sx={boxSx} id={id}>
             <Paper sx={paperSx}>
-                <TableContainer sx={tableContainerSx}>
+                <TableContainer>
                     <MuiTable
                         sx={tableSx}
                         aria-labelledby="tableTitle"
@@ -256,37 +255,33 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                             </TableRow>
                         </TableHead>
                     </MuiTable>
-                    <div style={{ height: "60vh" }}>
+                    <Box sx={boxBodySx}>
                         <AutoSizer>
-                            {({ height, width }) => {
-                                return (
-                                    <InfiniteLoader
-                                        ref={infiniteLoaderRef}
-                                        isItemLoaded={isItemLoaded}
-                                        itemCount={rowCount}
-                                        loadMoreItems={loadMoreItems}
-                                        minimumBatchSize={pageSize}
-                                    >
-                                        {({ onItemsRendered, ref }) => {
-                                            return (
-                                                <List
-                                                    height={height}
-                                                    width={width}
-                                                    itemCount={rowCount}
-                                                    itemSize={ROW_HEIGHT}
-                                                    onItemsRendered={onItemsRendered}
-                                                    ref={ref}
-                                                    itemData={rowData}
-                                                >
-                                                    {Row}
-                                                </List>
-                                            );
-                                        }}
-                                    </InfiniteLoader>
-                                );
-                            }}
+                            {({ height, width }) => (
+                                <InfiniteLoader
+                                    ref={infiniteLoaderRef}
+                                    isItemLoaded={isItemLoaded}
+                                    itemCount={rowCount}
+                                    loadMoreItems={loadMoreItems}
+                                    minimumBatchSize={pageSize}
+                                >
+                                    {({ onItemsRendered, ref }) => (
+                                        <List
+                                            height={height}
+                                            width={width}
+                                            itemCount={rowCount}
+                                            itemSize={ROW_HEIGHT}
+                                            onItemsRendered={onItemsRendered}
+                                            ref={ref}
+                                            itemData={rowData}
+                                        >
+                                            {Row}
+                                        </List>
+                                    )}
+                                </InfiniteLoader>
+                            )}
                         </AutoSizer>
-                    </div>
+                    </Box>
                 </TableContainer>
             </Paper>
         </Box>

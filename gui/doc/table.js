@@ -57,7 +57,7 @@ class table extends shared {
      * HTML component height (CSS property)
      * @type {str|int|float}
      */
-    height = "100vw"
+    height = "80vh"
 
     /**
      * List of selected indices

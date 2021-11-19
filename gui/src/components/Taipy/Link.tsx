@@ -24,7 +24,7 @@ const Link = (props: LinkProps) => {
 
     if (Object.keys(state.locations).some((route) => props.href === route)) {
         return (
-            <MuiLink to={props.href} component={RouterLink} style={linkStyle}>
+            <MuiLink to={props.href} component={RouterLink} sx={linkStyle}>
                 {props.children}
             </MuiLink>
         );

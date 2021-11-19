@@ -508,7 +508,7 @@ class Builder:
             elif type == AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
             elif type == AttributeType.react:
-                self.__set_react_attribute(attr[0], _get_val(attr, 2, None))
+                self.__set_react_attribute(_to_camel_case(attr[0]), _get_val(attr, 2, None))
             elif type == AttributeType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.dict:
