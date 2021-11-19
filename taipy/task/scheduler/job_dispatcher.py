@@ -66,8 +66,8 @@ class JobDispatcher:
                     data_source.write(res, job_id)
                     DataManager().set(data_source)
                 except Exception as e:
-                    exceptions.append(DataSourceWritingError(f"Error on writing in datasource id {ds.id}: {e}"))
-                    logging.error(f"Error on writing output {e}")
+                    exceptions.append(DataSourceWritingError(f"Error writing in datasource id {ds.id}: {e}"))
+                    logging.error(f"Error writing output {e}")
             return exceptions
         except Exception as e:
             return [e]
@@ -77,8 +77,8 @@ class JobDispatcher:
         _results: List[Any] = [results] if len(outputs) == 1 else results
 
         if len(_results) != len(outputs):
-            logging.error("Error, wrong number of result or task output")
-            raise DataSourceWritingError("Error, wrong number of result or task output")
+            logging.error("Error: wrong number of result or task output")
+            raise DataSourceWritingError("Error: wrong number of result or task output")
 
         return _results
 

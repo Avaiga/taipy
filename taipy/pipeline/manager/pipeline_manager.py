@@ -1,5 +1,6 @@
 """
-Pipeline Manager is responsible for managing the pipelines.
+The Pipeline Manager is responsible for managing the pipelines.
+
 This is the entry point for operations (such as creating, reading, updating,
 deleting, duplicating, executing) related to pipelines.
 """
@@ -29,19 +30,19 @@ class PipelineManager:
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None]):
         """
-        Subscribe a function to be called when the status of a Job changes
+        Subscribes a function to be called when the status of a Job changes.
 
         Note:
-            - Notification will be available only for Jobs created after this subscription
+            Notification will be available only for jobs created after this subscription.
         """
         self.__status_notifier.add(callback)
 
     def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
         """
-        Unsubscribe a function called when the status of a Job changes
+        Unsubscribes a function that is called when the status of a Job changes.
 
         Note:
-            - The function will continue to be called for ongoing Jobs
+            The function will continue to be called for ongoing jobs.
         """
         self.__status_notifier.remove(callback)
 

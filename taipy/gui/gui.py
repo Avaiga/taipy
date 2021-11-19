@@ -63,6 +63,18 @@ class Gui(object, metaclass=Singleton):
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
     ):
+        """Initializes a new Gui instance.
+
+        Parameters:
+            css_file (string):  An optional pathname to a CSS file that gets used as a style sheet in
+                all the pages.
+
+                The default value is a file that has the same basename as the Python
+                file defining the `main` function, sitting next to this Python file,
+                with the `.css` extension.
+
+            default_page_renderer (PageRenderer): An optional `PageRenderer` class that is used to render pages.
+        """
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._server = Server(
             self,

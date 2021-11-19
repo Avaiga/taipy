@@ -3,12 +3,12 @@ site_name: Taipy
 repo_url: https://github.com/avaiga/taipy
 repo_name: taipy
 #strict: true
-copyright: 2021 Avaiga
+copyright: © 2022 Avaiga
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - Usage: usage.md
-  - Modules: api.md
+  - Getting started: getting_started.md
+  - User Manual: user.md
+  - Reference Manual: reference.md
   - Contributing: contributing.md
   - Authors: authors.md
   - History: history.md
@@ -28,7 +28,6 @@ theme:
       toggle:
         icon: material/toggle-switch
         name: Switch to light mode
-#293183
   features:
     - navigation.indexes
     - navigation.tabs
@@ -63,6 +62,12 @@ plugins:
   - search:
       lang: en
   - mkdocstrings:
+      handlers:
+        python:
+          selection:
+            docstring_style: google
+          rendering:
+            show_source: false
       watch:
         - taipy
 extra:

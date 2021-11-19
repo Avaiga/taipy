@@ -5,8 +5,8 @@ from concurrent.futures import Executor, Future
 
 class Synchronous(Executor):
     """
-    Equivalence of Python standard Thread/Process Pool Executor but
-    the function is executed directly
+    Equivalent to the Python standard Thread/Process Pool Executor but
+    the function is executed directly.
     """
 
     @staticmethod

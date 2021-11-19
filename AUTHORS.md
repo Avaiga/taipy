@@ -6,4 +6,5 @@
 
 ## Contributors
 
-None yet. Why not be the first?
+None yet.
+Why not be the first? Check out the [Contributing](docs/contributing.md) section!

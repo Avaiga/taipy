@@ -26,7 +26,7 @@ class TaskManager:
         return self.repository.load_all()
 
     def set(self, task: Task):
-        logging.info(f"Task : {task.id} created or updated.")
+        logging.info(f"Task: {task.id} created or updated.")
         self.__save_data_sources(task.input.values())
         self.__save_data_sources(task.output.values())
         self.repository.save(task)
@@ -59,10 +59,10 @@ class TaskManager:
             if opt_task := self.repository.load(task_id):
                 return opt_task
             else:
-                logging.error(f"Task : {task_id} does not exist.")
+                logging.error(f"Task: {task_id} does not exist.")
                 raise NonExistingTask(task_id)
         except ModelNotFound:
-            logging.error(f"Task : {task_id} does not exist.")
+            logging.error(f"Task: {task_id} does not exist.")
             raise NonExistingTask(task_id)
 
     def __save_data_sources(self, data_sources):

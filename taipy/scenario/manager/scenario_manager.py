@@ -25,19 +25,19 @@ class ScenarioManager:
 
     def subscribe(self, callback: Callable[[Scenario, Job], None]):
         """
-        Subscribe a function to be called when the status of a Job changes
+        Subscribes a function to be called when the status of a Job changes.
 
         Note:
-            - Notification will be available only for Jobs created after this subscription
+            Notification will be available only for jobs created after this subscription.
         """
         self.__status_notifier.add(callback)
 
     def unsubscribe(self, callback: Callable[[Scenario, Job], None]):
         """
-        Unsubscribe a function called when the status of a Job changes
+        Unsubscribes a function that is called when the status of a Job changes.
 
         Note:
-            - The function will continue to be called for ongoing Jobs
+            The function will continue to be called for ongoing jobs.
         """
         self.__status_notifier.remove(callback)
 
@@ -61,7 +61,7 @@ class ScenarioManager:
                 return scenario
             raise ModelNotFound
         except ModelNotFound:
-            logging.error(f"Scenario entity : {scenario_id} does not exist.")
+            logging.error(f"Scenario entity: {scenario_id} does not exist.")
             raise NonExistingScenario(scenario_id)
 
     def get_all(self) -> List[Scenario]:

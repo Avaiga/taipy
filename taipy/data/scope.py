@@ -25,7 +25,7 @@ class OrderedEnum(Enum):
 
 class Scope(OrderedEnum):
     """
-    Class to represent the scope of usage of a Data Source
+    The scope of usage of a Data Source.
     """
 
     GLOBAL = 4

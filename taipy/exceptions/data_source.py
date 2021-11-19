@@ -1,6 +1,6 @@
 class MissingRequiredProperty(Exception):
     """
-    Exception raised if a required property is missing when creating a Data Source.
+    Raised if a required property is missing when creating a Data Source.
     """
 
     pass
@@ -8,7 +8,7 @@ class MissingRequiredProperty(Exception):
 
 class InvalidDataSourceType(Exception):
     """
-    Exception raised if a data source does not exist
+    Raised if a data source does not exist.
     """
 
     pass
@@ -16,7 +16,7 @@ class InvalidDataSourceType(Exception):
 
 class MultipleDataSourceFromSameConfigWithSameParent(Exception):
     """
-    Exception raised if it exists multiple data sources from the same data source config and the same parent_id
+    Raised if there are multiple data sources from the same data source configuration and the same parent identifier.
     """
 
     pass
@@ -24,7 +24,7 @@ class MultipleDataSourceFromSameConfigWithSameParent(Exception):
 
 class NoData(Exception):
     """
-    Exception raised when reading a data source before it has been written
+    Raised when reading a data source before it has been written.
     """
 
     pass

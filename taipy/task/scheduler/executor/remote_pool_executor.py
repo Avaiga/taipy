@@ -13,8 +13,8 @@ else:
 
 class RemotePoolExecutor(ThreadPoolExecutor):
     """
-    Equivalence of Python standard Thread/Process Pool Executor but
-    the function is executed through a Celery
+    Equivalent to the Python standard Thread/Process Pool Executor but
+    the function is executed through Celery.
     """
 
     def __init__(self, max_number_of_worker, hostname, *args, **kwargs):

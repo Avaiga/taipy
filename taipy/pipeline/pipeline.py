@@ -1,6 +1,7 @@
-""" Generic pipeline.
+"""Generic pipeline.
+
 More specific pipelines such as optimization pipeline, data preparation pipeline,
-ML training pipeline, etc. could implement this generic pipeline
+Machine-Learning training pipeline, etc. could implement this generic pipeline.
 """
 import logging
 import uuid

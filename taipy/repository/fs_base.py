@@ -26,33 +26,29 @@ class CustomEncoder(json.JSONEncoder):
 
 class FileSystemRepository(Generic[ModelType, Entity]):
     """
-    This class holds common methods to be used and extended when a functionality of saving
+    Holds common methods to be used and extended when the need for saving
     dataclasses as JSON files in local storage emerges.
 
     Some lines have type: ignore because MyPy won't recognize some generic attributes. This
     should be revised in the future.
 
-    Attributes
-    ----------
-    model: ModelType
-        Generic dataclass
-    dir_name: str
-        Folder that will hold the files for this dataclass model
-    base_path: str
-        Main folder that will hold the directories of all dataclass models
+    Attributes:
+        model (ModelType): Generic dataclass.
+        dir_name (str): Folder that will hold the files for this dataclass model.
+        base_path (str): Main folder that will hold the directories of all dataclass models.
     """
 
     @abstractmethod
     def to_model(self, obj):
         """
-        Convert the object to save in its model
+        Converts the object to be saved to its model.
         """
         ...
 
     @abstractmethod
     def from_model(self, model):
         """
-        Convert a model to its functional object
+        Converts a model to its functional object.
         """
         ...
 

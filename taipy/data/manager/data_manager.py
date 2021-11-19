@@ -10,8 +10,9 @@ from taipy.exceptions import InvalidDataSourceType
 from taipy.exceptions.data_source import MultipleDataSourceFromSameConfigWithSameParent
 
 """
-A Data Manager is entity responsible for keeping track and retrieving Taipy DataSources.
-The Data Manager will facilitate data access between Taipy Modules.
+The Data Manager is responsible for keeping track and retrieving Taipy Data Sources.
+
+The Data Manager facilitates data access between Taipy modules.
 """
 
 

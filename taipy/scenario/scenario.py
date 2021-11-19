@@ -1,4 +1,4 @@
-""" Generic pipeline.
+""" Generic pipeline (seriously?).
 More specific pipelines such as optimization pipeline, data preparation pipeline,
 ML training pipeline, etc. should implement this generic pipeline entity
 """

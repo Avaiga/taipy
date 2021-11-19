@@ -10,36 +10,14 @@ from taipy.data.scope import Scope
 
 class PickleDataSource(DataSource):
     """
-    A class to represent a Data Source stored as a pickle file.
+    A Data Source stored as a pickle file.
 
-    Attributes
-    ----------
-    config_name: str
-        Name that identifies the data source. We strongly recommend to use lowercase alphanumeric characters,
-        dash character '-', or underscore character '_'.
-        Note that other characters are replaced according the following rules :
-        - Space character ' ' is replaced by '_'
-        - Unicode characters are replaced by a corresponding alphanumeric character using unicode library
-        - Other characters are replaced by dash character '-'
-    scope: Scope
-        Scope Enum that refers to the scope of usage of the data source
-    id: str
-        Unique identifier of the data source
-    name: str
-        Displayable name of the data source
-    parent_id: str
-        Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
-    last_edition_date: datetime
-        Date and time of the last edition
-    job_ids: List[str]
-        Ordered list of jobs that have written the data source
-    up_to_date: bool
-        True if the data is considered as up to date. False otherwise.
-    properties: dict
-        list of additional arguments.
-        Note that at the creation of the data source, if the property default_data is
-        present, the data source is automatically written with the corresponding default_data value.
-        If the property file_path is present, data will be stored using the corresponding value as the name of the file.
+    Note:
+        When the data source is created, if the property `default_data` is set, then the
+        the data source is automatically written with the value of this `default_data` property.
+
+        If the property `file_path` is present, data will be stored using the corresponding value
+        as the path name of the pickle file.
     """
 
     __TYPE = "pickle"

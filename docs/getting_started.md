@@ -1,6 +1,8 @@
-# Installation
+# Getting Started with Taipy
 
-## Stable release
+## Installation
+
+### Stable release
 
 To install Taipy, run this command in your
 terminal:
@@ -14,7 +16,7 @@ This is the preferred method to install Taipy, as it will always install the mos
 If you don't have [pip][] installed, this [Python installation guide][]
 can guide you through the process.
 
-## From source
+### From source
 
 The source for Taipy can be downloaded from
 the [Github repo][].
@@ -41,3 +43,21 @@ $ pip install .
   [Python installation guide]: http://docs.python-guide.org/en/latest/starting/installation/
   [Github repo]: https://github.com/Avaiga/taipy
   [tarball]: https://github.com/Avaiga/taipy/tarball/main
+
+## Creating a Taipy application
+
+The general steps to take to create a Taipy application are the following:
+
+   - Create the application setup
+
+   - Create the application scenarios
+
+   - Run the scenarios
+
+   - Connect a user interface
+
+   - Interact with the user interface
+
+```
+    import taipy
+```

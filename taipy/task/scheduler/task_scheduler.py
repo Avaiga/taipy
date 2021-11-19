@@ -19,7 +19,7 @@ from .job_dispatcher import JobDispatcher
 
 class TaskScheduler:
     """
-    Create and schedule Jobs from Task and keep their states
+    Creates and schedules Jobs from their Task and watch their state.
     """
 
     def __init__(self, task_scheduler_config: TaskSchedulerConfig = Config.task_scheduler_configs.create()):
@@ -54,7 +54,7 @@ class TaskScheduler:
         try:
             return self.__JOBS[job_id]
         except KeyError:
-            logging.error(f"Job : {job_id} does not exist.")
+            logging.error(f"Job: {job_id} does not exist.")
             raise NonExistingJob(job_id)
 
     def get_jobs(self) -> List[Job]:

@@ -11,33 +11,23 @@ from taipy.data.scope import Scope
 @dataclass
 class DataSourceModel:
     """
-    Class to hold a model of a DataSource. A model refers to the structure of a
-    Data Source stored in a database.
+    The model of a DataSource.
+    
+    A model refers to the structure of a Data Source stored in a database.
 
-    Attributes
-    ----------
-    id: str
-        identifier of a DataSource
-    config_name: int
-        name of the DataSourceConfig
-    scope: taipy.data.source.scope.Scope
-        scope of usage of a DataSource
-    type: str
-        name of the class that represents a DataSource
-    name: str
-        Displayable name of the DataSource
-    parent_id: str
-        identifier of the parent (pipeline_id, scenario_id, cycle_id, None)
-    last_computation_date: str
-        isoformat of the last computation datetime
-    job_ids: List[str]
-        list of jobs that computed the data source
-    data_source_properties: Dict[str, Any]
-        extra properties of a DataSource
+    Attributes:
+        id (str): Identifier of a DataSource.
+        config_name (int): Name of the `DataSourceConfig`.
+        scope (taipy.data.source.scope.Scope): Scope of the usage of a DataSource.
+        type (str):  Name of the class that represents a DataSource.
+        name (str): User-readable name of the data source.
+        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        last_computation_date (str): ISO format of the last computation date and time.
+        job_ids (List[str]): List of jobs that computed the data source.
+        data_source_properties (Dict[str, Any]): Additional properties of the data source.
 
-    Key
-    ---
-    The tuple config_name and parent_id formed a unique key
+    Note:
+        The tuple `(config_name, parent_id)` forms a unique key.
     """
 
     id: str

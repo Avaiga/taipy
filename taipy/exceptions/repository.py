@@ -1,6 +1,6 @@
 class ModelNotFound(Exception):
     """
-    Exception raised when trying to fetch a non existent model
+    Raised when trying to fetch a non existent model.
     """
 
     def __init__(self, model_name: str, model_id: str):
