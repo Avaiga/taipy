@@ -29,7 +29,8 @@ import {
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 //import { useWhyDidYouUpdate } from "../../utils/hooks";
 
-const loadingStyle: CSSProperties = { height: "52px", textAlign: "right", verticalAlign: "center" };
+const loadingStyle: CSSProperties = { width: "100%", height: "52px", textAlign: "right", verticalAlign: "center" };
+const skelSx = {width: "100%", height: "3rem"};
 
 const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
@@ -231,7 +232,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     <TableRow hover key={"rowskel" + idx}>
                                         {colsOrder.map((col, cidx) => (
                                             <TableCell key={"skel" + cidx}>
-                                                <Skeleton width="100%" height="3rem" />
+                                                <Skeleton sx={skelSx} />
                                             </TableCell>
                                         ))}
                                     </TableRow>
@@ -241,7 +242,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 </TableContainer>
                 {!showAll &&
                     (loading ? (
-                        <Skeleton width="100%" style={loadingStyle}>
+                        <Skeleton sx={loadingStyle}>
                             <Typography>Loading...</Typography>
                         </Skeleton>
                     ) : (

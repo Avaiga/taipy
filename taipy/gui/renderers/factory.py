@@ -159,7 +159,7 @@ class Factory:
                 ("show_all", AttributeType.boolean),
                 ("auto_loading", AttributeType.boolean),
                 ("width", AttributeType.string_or_number, "100vw"),
-                ("height", AttributeType.string_or_number, "100vh"),
+                ("height", AttributeType.string_or_number, "80vh"),
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
             ]

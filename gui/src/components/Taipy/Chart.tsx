@@ -2,6 +2,7 @@ import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useS
 import Plot from "react-plotly.js";
 import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotMouseEvent, PlotSelectionEvent } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
+import Box from "@mui/material/Box";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { getArrayValue, getUpdateVar, TaipyBaseProps } from "./utils";
@@ -224,7 +225,7 @@ const Chart = (props: ChartProp) => {
     return (
         <>
             {loading ? <Skeleton key="skeleton" sx={style} /> : null}
-            <div id={id} style={divStyle} key="div" data-testid={props.testId}>
+            <Box id={id} sx={divStyle} key="div" data-testid={props.testId}>
                 <Plot
                     data={data}
                     layout={layout}
@@ -237,7 +238,7 @@ const Chart = (props: ChartProp) => {
                     onClick={onSelect}
                     config={plotConfig}
                 />
-            </div>
+            </Box>
         </>
     );
 };
