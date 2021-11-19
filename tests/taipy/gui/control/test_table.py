@@ -7,7 +7,7 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
     expected_list = [
         "<Table",
         'columns="{&quot;Entity&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;}, &quot;Code&quot;: {&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;}, &quot;Daily hospital occupancy&quot;: {&quot;index&quot;: 3, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;}, &quot;Day_str&quot;: {&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime64[ns]&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;}}"',
-        'height="100vh"',
+        'height="80vh"',
         'width="100vw"',
         'pageSizeOptions="[10, 30, 100]"',
         "pageSize={100}",
@@ -63,7 +63,7 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
     expected_list = [
         "<Table",
         'columns="{&quot;Entity&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;}, &quot;Code&quot;: {&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;}, &quot;Daily hospital occupancy&quot;: {&quot;index&quot;: 3, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;}, &quot;Day_str&quot;: {&quot;index&quot;: 0, &quot;type&quot;: &quot;datetime64[ns]&quot;, &quot;dfid&quot;: &quot;Day&quot;, &quot;format&quot;: &quot;eee dd MMM yyyy&quot;}}"',
-        'height="100vh"',
+        'height="80vh"',
         'width="100vw"',
         'pageSizeOptions="[10, 30, 100]"',
         "pageSize={100}",
