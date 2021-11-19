@@ -11,7 +11,7 @@ from taipy.task import TaskManager
 
 
 class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
-    def to_model(self, pipeline):
+    def to_model(self, pipeline: Pipeline) -> PipelineModel:
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(list)
         for task in pipeline.tasks.values():
@@ -21,16 +21,17 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
                 task_source_edges[str(task.id)].append(str(successor.id))
         return PipelineModel(
             pipeline.id,
+            pipeline.parent_id,
             pipeline.config_name,
             pipeline.properties,
             Dag(dict(source_task_edges)),
             Dag(dict(task_source_edges)),
         )
 
-    def from_model(self, model):
+    def from_model(self, model: PipelineModel) -> Pipeline:
         try:
             tasks = self.__to_tasks(model.task_source_edges.keys())
-            return Pipeline(model.name, model.properties, tasks, model.id)
+            return Pipeline(model.name, model.properties, tasks, model.id, model.parent_id)
         except NonExistingTask as err:
             logging.error(err.message)
             raise err

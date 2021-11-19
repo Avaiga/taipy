@@ -46,7 +46,9 @@ class ScenarioManager:
 
     def create(self, config: ScenarioConfig, creation_date=None) -> Scenario:
         scenario_id = Scenario.new_id(config.name)
-        pipelines = [self.pipeline_manager.create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        pipelines = [
+            self.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs
+        ]
         cycle = self.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
         scenario = Scenario(config.name, pipelines, config.properties, scenario_id, cycle=cycle)
         self.set(scenario)

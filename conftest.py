@@ -5,10 +5,12 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from taipy.common.alias import CycleId, ScenarioId
+from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.cycle_model import CycleModel
 from taipy.cycle.frequency import Frequency
+from taipy.pipeline import Pipeline
+from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
 
@@ -66,6 +68,11 @@ def cycle():
     )
 
 
+@pytest.fixture(scope="class")
+def pipeline():
+    return Pipeline("pipeline", {}, [], PipelineId("pipeline_id"))
+
+
 @pytest.fixture(scope="function")
 def cycle_model():
     return CycleModel(
@@ -77,3 +84,8 @@ def cycle_model():
         start_date="2021-11-11T11:11:01.000001",
         end_date="2021-11-11T11:11:01.000001",
     )
+
+
+@pytest.fixture(scope="class")
+def pipeline_model():
+    return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, Dag({}), Dag({}))

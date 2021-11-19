@@ -158,7 +158,7 @@ def test_pipeline_manager_only_creates_intermediate_data_source_entity_once():
     assert len(data_manager.get_all()) == 0
     assert len(task_manager.get_all()) == 0
 
-    pipeline_entity = pipeline_manager.create(pipeline)
+    pipeline_entity = pipeline_manager.get_or_create(pipeline)
 
     assert len(data_manager.get_all()) == 3
     assert len(task_manager.get_all()) == 2
@@ -187,7 +187,7 @@ def test_get_set_data():
     pipeline = Config.pipeline_configs.create("by 6", [task_mult_by_2, task_mult_by_3])
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
-    pipeline_entity = pipeline_manager.create(pipeline)
+    pipeline_entity = pipeline_manager.get_or_create(pipeline)
 
     assert pipeline_entity.foo.read() == 1  # Default values
     assert pipeline_entity.bar.read() == 0  # Default values
@@ -232,7 +232,7 @@ def test_subscription():
         ],
     )
 
-    pipeline = pipeline_manager.create(pipeline_config)
+    pipeline = pipeline_manager.get_or_create(pipeline_config)
 
     callback = mock.MagicMock()
     pipeline_manager.submit(pipeline.id, [callback])
@@ -259,7 +259,7 @@ def test_pipeline_notification():
         ],
     )
 
-    pipeline = pipeline_manager.create(pipeline_config)
+    pipeline = pipeline_manager.get_or_create(pipeline_config)
 
     notify_1 = NotifyMock(pipeline)
     notify_2 = NotifyMock(pipeline)
@@ -293,7 +293,7 @@ def test_pipeline_notification_subscribe_unsubscribe():
         ],
     )
 
-    pipeline = pipeline_manager.create(pipeline_config)
+    pipeline = pipeline_manager.get_or_create(pipeline_config)
 
     notify_1 = NotifyMock(pipeline)
     notify_2 = NotifyMock(pipeline)
@@ -332,7 +332,7 @@ def test_pipeline_notification_subscribe_only_on_new_jobs():
         ],
     )
 
-    pipeline = pipeline_manager.create(pipeline_config)
+    pipeline = pipeline_manager.get_or_create(pipeline_config)
 
     notify_1 = NotifyMock(pipeline)
     notify_2 = NotifyMock(pipeline)
@@ -353,3 +353,145 @@ def test_pipeline_notification_subscribe_only_on_new_jobs():
 
     pipeline_manager.unsubscribe(notify_1)
     pipeline_manager.unsubscribe(notify_2)
+
+
+def test_get_all_by_config_name():
+    pm = PipelineManager()
+    input_configs = [Config.data_source_configs.create("my_input", "in_memory")]
+    task_config_1 = Config.task_configs.create("task_config_1", input_configs, print, [])
+    assert len(pm._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
+    pipeline_config_1 = Config.pipeline_configs.create("foo", [task_config_1])
+    assert len(pm._get_all_by_config_name("foo")) == 0
+
+    pm.get_or_create(pipeline_config_1)
+    assert len(pm._get_all_by_config_name("foo")) == 1
+
+    pipeline_config_2 = Config.pipeline_configs.create("baz", [task_config_1])
+    pm.get_or_create(pipeline_config_2)
+    assert len(pm._get_all_by_config_name("foo")) == 1
+    assert len(pm._get_all_by_config_name("baz")) == 1
+
+    pm.get_or_create(pipeline_config_2, "other_scenario")
+    assert len(pm._get_all_by_config_name("foo")) == 1
+    assert len(pm._get_all_by_config_name("baz")) == 2
+
+
+def test_create_second_pipeline_from_same_config():
+    pm = PipelineManager()
+    input_config_scope_pipeline = Config.data_source_configs.create("my_input", "in_memory")
+    output_config_scope_pipeline = Config.data_source_configs.create("my_output", "in_memory")
+    task_config = Config.task_configs.create(
+        "task_config", input_config_scope_pipeline, print, output_config_scope_pipeline
+    )
+    pipeline_config = Config.pipeline_configs.create("test2", [task_config])
+
+    pipeline1 = pm.get_or_create(pipeline_config)
+    assert len(pm.get_all()) == 1
+    pipeline2 = pm.get_or_create(pipeline_config)
+    assert len(pm.get_all()) == 2
+    assert pipeline1.id != pipeline2.id
+
+
+def test_do_not_recreate_existing_pipeline():
+    pm = PipelineManager()
+    input_config_scope_pipeline = Config.data_source_configs.create("my_input", "in_memory", scope=Scope.SCENARIO)
+    output_config_scope_pipeline = Config.data_source_configs.create("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config.task_configs.create(
+        "task_config", input_config_scope_pipeline, print, output_config_scope_pipeline
+    )
+    pipeline_config = Config.pipeline_configs.create("pipeline_config_1", [task_config])
+
+    # Scope is scenario
+    pipeline1 = pm.get_or_create(pipeline_config)
+    assert len(pm.get_all()) == 1
+    pipeline2 = pm.get_or_create(pipeline_config)
+    assert len(pm.get_all()) == 1
+    assert pipeline1.id == pipeline2.id
+    pipeline3 = pm.get_or_create(pipeline_config, "a_scenario")  # Create even if the config is the same
+    assert len(pm.get_all()) == 2
+    assert pipeline1.id == pipeline2.id
+    assert pipeline3.id != pipeline1.id
+    assert pipeline3.id != pipeline2.id
+    pipeline4 = pm.get_or_create(pipeline_config, "a_scenario")  # Do not create because existed pipeline
+    assert len(pm.get_all()) == 2
+    assert pipeline3.id == pipeline4.id
+
+    input_config_scope_pipeline_2 = Config.data_source_configs.create("my_input_2", "in_memory", scope=Scope.SCENARIO)
+    output_config_scope_pipeline_2 = Config.data_source_configs.create("my_output_2", "in_memory", scope=Scope.GLOBAL)
+    task_config_2 = Config.task_configs.create(
+        "task_config_2", input_config_scope_pipeline_2, print, output_config_scope_pipeline_2
+    )
+    pipeline_config_2 = Config.pipeline_configs.create("pipeline_config_2", [task_config_2])
+
+    # Scope is scenario and global
+    pipeline5 = pm.get_or_create(pipeline_config_2)
+    assert len(pm.get_all()) == 3
+    pipeline6 = pm.get_or_create(pipeline_config_2)
+    assert len(pm.get_all()) == 3
+    assert pipeline5.id == pipeline6.id
+    pipeline7 = pm.get_or_create(pipeline_config_2, "another_scenario")
+    assert len(pm.get_all()) == 4
+    assert pipeline7.id != pipeline6.id
+    assert pipeline7.id != pipeline5.id
+    pipeline8 = pm.get_or_create(pipeline_config_2, "another_scenario")
+    assert len(pm.get_all()) == 4
+    assert pipeline7.id == pipeline8.id
+
+    input_config_scope_pipeline_3 = Config.data_source_configs.create("my_input_3", "in_memory", scope=Scope.GLOBAL)
+    output_config_scope_pipeline_3 = Config.data_source_configs.create("my_output_3", "in_memory", scope=Scope.GLOBAL)
+    task_config_3 = Config.task_configs.create(
+        "task_config_3", input_config_scope_pipeline_3, print, output_config_scope_pipeline_3
+    )
+    pipeline_config_3 = Config.pipeline_configs.create("pipeline_config_3", [task_config_3])
+
+    # Scope is global
+    pipeline9 = pm.get_or_create(pipeline_config_3)
+    assert len(pm.get_all()) == 5
+    pipeline10 = pm.get_or_create(pipeline_config_3)
+    assert len(pm.get_all()) == 5
+    assert pipeline9.id == pipeline10.id
+    pipeline11 = pm.get_or_create(pipeline_config_3, "another_new_scenario")  # Do not create because scope is global
+    assert len(pm.get_all()) == 5
+    assert pipeline11.id == pipeline10.id
+    assert pipeline11.id == pipeline9.id
+
+    input_config_scope_pipeline_4 = Config.data_source_configs.create("my_input_4", "in_memory", scope=Scope.PIPELINE)
+    output_config_scope_pipeline_4 = Config.data_source_configs.create("my_output_4", "in_memory", scope=Scope.GLOBAL)
+    task_config_4 = Config.task_configs.create(
+        "task_config_4", input_config_scope_pipeline_4, print, output_config_scope_pipeline_4
+    )
+    pipeline_config_4 = Config.pipeline_configs.create("pipeline_config_4", [task_config_4])
+
+    # Scope is global and pipeline
+    pipeline12 = pm.get_or_create(pipeline_config_4)
+    assert len(pm.get_all()) == 6
+    pipeline13 = pm.get_or_create(pipeline_config_4)  # Create a new pipeline because new pipeline ID
+    assert len(pm.get_all()) == 7
+    assert pipeline12.id != pipeline13.id
+    pipeline14 = pm.get_or_create(pipeline_config_4, "another_new_scenario_2")
+    assert len(pm.get_all()) == 8
+    assert pipeline14.id != pipeline12.id
+    assert pipeline14.id != pipeline13.id
+    pipeline15 = pm.get_or_create(pipeline_config_4, "another_new_scenario_2")  # Don't create because scope is pipeline
+    assert len(pm.get_all()) == 9
+    assert pipeline15.id != pipeline14.id
+    assert pipeline15.id != pipeline13.id
+    assert pipeline15.id != pipeline12.id
+
+    input_config_scope_pipeline_5 = Config.data_source_configs.create("my_input_5", "in_memory", scope=Scope.PIPELINE)
+    output_config_scope_pipeline_5 = Config.data_source_configs.create("my_output_5", "in_memory", scope=Scope.SCENARIO)
+    task_config_5 = Config.task_configs.create(
+        "task_config_5", input_config_scope_pipeline_5, print, output_config_scope_pipeline_5
+    )
+    pipeline_config_5 = Config.pipeline_configs.create("pipeline_config_5", [task_config_5])
+
+    # Scope is scenario and pipeline
+    pipeline16 = pm.get_or_create(pipeline_config_5)
+    assert len(pm.get_all()) == 10
+    pipeline17 = pm.get_or_create(pipeline_config_5)
+    assert len(pm.get_all()) == 11
+    assert pipeline16.id != pipeline17.id
+    pipeline18 = pm.get_or_create(pipeline_config_5, "random_scenario")  # Create because scope is pipeline
+    assert len(pm.get_all()) == 12
+    assert pipeline18.id != pipeline17.id
+    assert pipeline18.id != pipeline16.id

@@ -14,3 +14,11 @@ class NonExistingPipelineConfig(Exception):
 
     def __init__(self, pipeline_config_name: str):
         self.message = f"Pipeline config: {pipeline_config_name} does not exist."
+
+
+class MultiplePipelineFromSameConfigWithSameParent(Exception):
+    """
+    Exception raised if it exists multiple pipelines from the same pipeline config and with the same parent_id
+    """
+
+    pass

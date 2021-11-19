@@ -23,6 +23,7 @@ def test_create_pipeline_entity():
     task = Task("baz", [input], print, [output], TaskId("task_id"))
     pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
     assert pipeline.id is not None
+    assert pipeline.parent_id is None
     assert pipeline.config_name == "name_1"
     assert pipeline.description == "description"
     assert pipeline.foo == input
@@ -32,11 +33,12 @@ def test_create_pipeline_entity():
     with pytest.raises(AttributeError):
         pipeline.qux
 
-    input_1 = InMemoryDataSource("inξ", Scope.PIPELINE)
-    output_1 = InMemoryDataSource("outξ", Scope.PIPELINE)
+    input_1 = InMemoryDataSource("inξ", Scope.SCENARIO)
+    output_1 = InMemoryDataSource("outξ", Scope.SCENARIO)
     task_1 = Task("task_ξ", [input_1], print, [output_1], TaskId("task_id_1"))
-    pipeline_1 = Pipeline("nAmE 1 ", {"description": "description"}, [task_1])
+    pipeline_1 = Pipeline("nAmE 1 ", {"description": "description"}, [task_1], parent_id="parent_id")
     assert pipeline_1.id is not None
+    assert pipeline_1.parent_id == "parent_id"
     assert pipeline_1.config_name == "name_1"
     assert pipeline_1.description == "description"
     assert pipeline_1.inx == input_1

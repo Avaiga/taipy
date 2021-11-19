@@ -6,7 +6,7 @@ Machine-Learning training pipeline, etc. could implement this generic pipeline.
 import logging
 import uuid
 from collections import defaultdict
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import networkx as nx
 
@@ -27,11 +27,13 @@ class Pipeline:
         properties: Dict[str, str],
         tasks: List[Task],
         pipeline_id: PipelineId = None,
+        parent_id: Optional[str] = None,
     ):
         self.config_name = protect_name(config_name)
-        self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
         self.properties = properties
         self.tasks = {task.config_name: task for task in tasks}
+        self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
+        self.parent_id = parent_id
         self.is_consistent = self.__is_consistent()
 
     def __eq__(self, other):
@@ -90,6 +92,7 @@ class Pipeline:
                 task_source_edges[str(task.id)].append(str(successor.id))
         return PipelineModel(
             self.id,
+            self.parent_id,
             self.config_name,
             self.properties,
             Dag(dict(source_task_edges)),

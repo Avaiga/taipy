@@ -1,3 +1,4 @@
+import itertools
 import logging
 import uuid
 from collections.abc import Iterable
@@ -5,6 +6,7 @@ from typing import Dict, Optional
 
 from taipy.common import protect_name
 from taipy.common.alias import TaskId
+from taipy.data import Scope
 from taipy.data.data_source import DataSource
 
 
@@ -53,3 +55,9 @@ class Task:
             return self.output[protected_attribute_name]
         logging.error(f"{attribute_name} is not a data source of task {self.id}")
         raise AttributeError
+
+    @property
+    def scope(self):
+        data_sources = list(self.input.values()) + list(self.output.values())
+        scope = min(ds.scope for ds in data_sources) if len(data_sources) != 0 else Scope.GLOBAL
+        return scope
