@@ -3,9 +3,9 @@
  *
  * ## Usage
  * ### Simple
- * <code><title|expandable|<br>...<br>|></code>
+ * <code><|title|expandable|<br>...<br>|></code>
  * ### Advanced
- * <code><{value}|expandable|expanded={False}|<br>...<br>|></code>
+ * <code><|{value}|expandable|expanded={False}|<br>...<br>|></code>
  * <br>or with properties<br>
  * <code><|expandable|properties={properties}|<br>...<br>|></code>
  * <br>or with closing tag<br>
