@@ -1,4 +1,5 @@
 import { Dispatch, useContext, useEffect, useMemo, useRef } from "react";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 import { getUpdateVars } from "../components/Taipy/utils";
 import { TaipyContext } from "../context/taipyContext";
@@ -41,6 +42,11 @@ export const useFormatConfig = (): FormatConfig => {
             } as FormatConfig),
         [state.timeZone, state.dateTimeFormat, state.numberFormat]
     );
+};
+
+export const useIsMobile = () => {
+    const theme = useTheme();
+    return useMediaQuery(theme.breakpoints.down("sm"));
 };
 
 export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {

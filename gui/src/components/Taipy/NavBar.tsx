@@ -8,11 +8,10 @@ import ListItemText from "@mui/material/ListItemText";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/icons-material/Menu";
-import { useMediaQuery, useTheme } from "@mui/material";
 import { useLocation, useNavigate } from "react-router";
 
 import { LovItem, LovProps, useLovListMemo } from "./lovUtils";
-import { useDynamicProperty } from "../../utils/hooks";
+import { useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyImage } from "./utils";
 import Link from "./Link";
@@ -25,8 +24,7 @@ const NavBar = (props: LovProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const location = useLocation();
     const navigate = useNavigate();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+    const isMobile = useIsMobile();
     const [opened, setOpened] = useState(false);
 
     let lovList = useLovListMemo(lov, defaultLov);

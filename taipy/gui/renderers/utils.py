@@ -63,5 +63,5 @@ def _to_camel_case(value: str) -> str:
 
     if len(value) <= 1:
         return value.lower()
-    value = value.replace("_", " ").title().replace(" ", "")
+    value = value.replace("_", " ").title().replace(" ", "").replace("[", "_").replace("]", "_")
     return value[0].lower() + value[1:]

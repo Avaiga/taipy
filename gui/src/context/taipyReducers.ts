@@ -50,13 +50,36 @@ export interface FormatConfig {
     number: string;
 }
 
-export const INITIAL_STATE: TaipyState = {
-    data: {},
-    theme: createTheme({
+const themes = {
+    light: createTheme({
         palette: {
             mode: "light",
         },
+        components: {
+            MuiUseMediaQuery: {
+                defaultProps: {
+                    noSsr: true,
+                },
+            },
+        },
     }),
+    dark: createTheme({
+        palette: {
+            mode: "dark",
+        },
+        components: {
+            MuiUseMediaQuery: {
+                defaultProps: {
+                    noSsr: true,
+                },
+            },
+        },
+    }),
+};
+
+export const INITIAL_STATE: TaipyState = {
+    data: {},
+    theme: themes.light,
     locations: {},
     timeZone: TIMEZONE_CLIENT,
 };
@@ -135,11 +158,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             if (mode !== state.theme.palette.mode) {
                 return {
                     ...state,
-                    theme: createTheme({
-                        palette: {
-                            mode: mode,
-                        },
-                    }),
+                    theme: themes[mode],
                 };
             }
             return state;

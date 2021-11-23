@@ -23,7 +23,7 @@ class Factory:
         "toggle": "value",
         "content": "value",
         "navbar": "value",
-        "layout": "type",
+        "layout": "columns",
         "part": "type",
         "expandable": "title",
     }
@@ -264,7 +264,8 @@ class Factory:
         .set_attributes(
             [
                 ("id"),
-                ("type"),
+                ("columns"),
+                ("columns[mobile]"),
                 ("gap"),
             ]
         ),
