@@ -32,3 +32,4 @@ class PipelineModel:
     properties: dict
     source_task_edges: Dag
     task_source_edges: Dag
+    subscribers: List[Dict]

@@ -263,8 +263,8 @@ def test_pipeline_notification():
 
     notify_1 = NotifyMock(pipeline)
     notify_2 = NotifyMock(pipeline)
-    pipeline_manager.subscribe(notify_1)
-    pipeline_manager.subscribe(notify_2)
+    pipeline_manager.subscribe(notify_1, pipeline)
+    pipeline_manager.subscribe(notify_2, pipeline)
 
     pipeline_manager.submit(pipeline.id)
     notify_1.assert_called_3_times()
@@ -298,18 +298,18 @@ def test_pipeline_notification_subscribe_unsubscribe():
     notify_1 = NotifyMock(pipeline)
     notify_2 = NotifyMock(pipeline)
 
-    pipeline_manager.subscribe(notify_1)
-    pipeline_manager.subscribe(notify_2)
+    pipeline_manager.subscribe(notify_1, pipeline)
+    pipeline_manager.subscribe(notify_2, pipeline)
 
-    pipeline_manager.unsubscribe(notify_2)
+    pipeline_manager.unsubscribe(notify_2, pipeline)
     pipeline_manager.submit(pipeline.id)
 
     notify_1.assert_called_3_times()
     notify_2.assert_not_called()
-    pipeline_manager.unsubscribe(notify_1)
+    pipeline_manager.unsubscribe(notify_1, pipeline)
 
     with pytest.raises(KeyError):
-        pipeline_manager.unsubscribe(notify_2)
+        pipeline_manager.unsubscribe(notify_2, pipeline)
 
 
 def test_pipeline_notification_subscribe_only_on_new_jobs():

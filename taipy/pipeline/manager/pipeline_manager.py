@@ -31,23 +31,25 @@ class PipelineManager:
 
     __status_notifier: Set[Callable] = set()
 
-    def subscribe(self, callback: Callable[[Pipeline, Job], None]):
+    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
         """
         Subscribes a function to be called when the status of a Job changes.
 
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        self.__status_notifier.add(callback)
+        pipeline.add_subscriber(callback)
+        self.set(pipeline)
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
         """
         Unsubscribes a function that is called when the status of a Job changes.
 
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        self.__status_notifier.remove(callback)
+        pipeline.remove_subscriber(callback)
+        self.set(pipeline)
 
     def delete_all(self):
         self.repository.delete_all()
@@ -86,7 +88,7 @@ class PipelineManager:
     def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
         callbacks = callbacks or []
         pipeline_to_submit = self.get(pipeline_id)
-        pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline_to_submit) + callbacks
+        pipeline_subscription_callback = list(pipeline_to_submit.subscribers) + callbacks
         for tasks in pipeline_to_submit.get_sorted_tasks():
             for task in tasks:
                 self.task_scheduler.submit(task, pipeline_subscription_callback)
