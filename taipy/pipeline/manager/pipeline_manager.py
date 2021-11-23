@@ -88,13 +88,13 @@ class PipelineManager:
     def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
         callbacks = callbacks or []
         pipeline_to_submit = self.get(pipeline_id)
-        pipeline_subscription_callback = list(pipeline_to_submit.subscribers) + callbacks
+        pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline_to_submit) + callbacks
         for tasks in pipeline_to_submit.get_sorted_tasks():
             for task in tasks:
                 self.task_scheduler.submit(task, pipeline_subscription_callback)
 
     def __get_status_notifier_callbacks(self, pipeline: Pipeline) -> List:
-        return [partial(c, pipeline) for c in self.__status_notifier]
+        return [partial(c, pipeline) for c in pipeline.subscribers]
 
     def _get_all_by_config_name(self, config_name: str) -> List[Pipeline]:
         return self.repository.search_all("config_name", config_name)
