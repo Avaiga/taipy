@@ -88,4 +88,4 @@ def cycle_model():
 
 @pytest.fixture(scope="class")
 def pipeline_model():
-    return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, Dag({}), Dag({}))
+    return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, Dag({}), Dag({}), [])
