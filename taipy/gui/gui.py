@@ -274,7 +274,7 @@ class Gui(object, metaclass=Singleton):
                 ws_dict[_var + ".refresh"] = True
             else:
                 if isinstance(newvalue, list):
-                    new_list = [self._run_adapter_for_var(_var, elt, idx) for idx, elt in enumerate(newvalue)]
+                    new_list = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
                     newvalue = new_list
                 else:
                     newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
@@ -483,7 +483,7 @@ class Gui(object, metaclass=Singleton):
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
         return _get_dict_value(self._adapter_for_type, type_name)
 
-    def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[int] = None, id_only=False) -> t.Any:
+    def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
         adapter = None
         type_name = _get_dict_value(self._type_for_variable, var_name)
         if not isinstance(type_name, str):
@@ -501,50 +501,90 @@ class Gui(object, metaclass=Singleton):
         return value
 
     def _run_adapter(
-        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[int], id_only=False
+        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
     ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
+        if value is None:
+            return None
         try:
             result = adapter(value if not isinstance(value, _MapDictionary) else value._dict)
             result = self._get_valid_adapter_result(result, index, id_only)
             if result is None:
                 warnings.warn(
-                    f"Adapter for {var_name} does not return a valid result. It should return a type (id, label) or a label with label being a string or a TaipyImage instance"
+                    f"Adapter for {var_name} does not return a valid result. It should return a tuple (id, label) or a label with label being a string or a TaipyImage instance"
                 )
             else:
+                if not id_only and len(result) > 2 and isinstance(result[2], list):
+                    result = (result[0], result[1], self.__adapter_on_tree(adapter, result[2], str(index) + "."))
                 return result
         except Exception as e:
             warnings.warn(f"Can't run adapter for {var_name}: {e}")
         return None
 
+    def __adapter_on_tree(self, adapter: FunctionType, tree: t.List[t.Any], prefix: str):
+        ret_list = []
+        for idx, elt in enumerate(tree):
+            ret = self._run_adapter(adapter, elt, adapter.__name__, prefix + str(idx))
+            if ret is not None:
+                if len(ret) > 2 and isinstance(ret[2], list):
+                    ret = (ret[0], ret[1], self.__adapter_on_tree(adapter, ret[2], prefix + str(idx) + "."))
+                ret_list.append(ret)
+        return ret_list
+
     def _get_valid_adapter_result(
-        self, value: t.Any, index: t.Optional[int], id_only=False
+        self, value: t.Any, index: t.Optional[str], id_only=False
     ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
         if (
             isinstance(value, tuple)
-            and len(value) == 2
+            and len(value) > 1
             and isinstance(value[0], str)
             and isinstance(value[1], (str, TaipyImage))
         ):
             if id_only:
                 return value[0]
+            elif len(value) > 2 and isinstance(value[2], list):
+                return (value[0], TaipyImage.get_dict_or(value[1]), value[2])  # type: ignore
             else:
                 return (value[0], TaipyImage.get_dict_or(value[1]))  # type: ignore
-        elif isinstance(value, (str, TaipyImage)):
+        else:
+            id = self.__get_id(value, index)
             if id_only:
-                return self._get_id(value, index)
+                return id
             else:
-                return (self._get_id(value, index), TaipyImage.get_dict_or(value))  # type: ignore
-        return None
+                label = self.__get_label(value)
+                if label is None:
+                    return None
+                if len(value) > 2 and isinstance(value[2], list):
+                    return (id, label, self.__get_children(value))  # type: ignore
+                else:
+                    return (id, label)  # type: ignore
 
-    def _get_id(self, value: t.Any, index: t.Optional[int]) -> str:
+    def __get_id(self, value: t.Any, index: t.Optional[str]) -> str:
         if hasattr(value, "id"):
             return str(value.id)
         elif hasattr(value, "__getitem__") and "id" in value:
             return str(value["id"])
         elif index is not None:
-            return str(index)
+            return index
         else:
-            return id(value)  # type: ignore
+            return str(id(value))
+
+    def __get_label(self, value: t.Any) -> t.Union[str, dict]:
+        if isinstance(value, (str, TaipyImage)):
+            return TaipyImage.get_dict_or(value)
+        elif hasattr(value, "label"):
+            return TaipyImage.get_dict_or(value.label)
+        elif hasattr(value, "__getitem__") and "label" in value:
+            return TaipyImage.get_dict_or(value["label"])
+        return None
+
+    def __get_children(self, value: t.Any) -> t.List[t.Any]:
+        if isinstance(value, list):
+            return value
+        elif hasattr(value, "children"):
+            return value.children if isinstance(value.children, list) else [value.children]
+        elif hasattr(value, "__getitem__") and "children" in value:
+            return value["children"] if isinstance(value["children"], list) else [value["children"]]
+        return []
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:

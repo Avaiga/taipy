@@ -16,6 +16,7 @@ class Factory:
         "date_selector": "date",
         "slider": "value",
         "selector": "value",
+        "tree": "value",
         "table": "data",
         "dialog": "open",
         "chart": "data",
@@ -36,7 +37,7 @@ class Factory:
             default_value="<empty>",
         )
         .set_value_and_default(False)
-        .set_className(class_name="taipy-field", config_class="field")
+        .set_classNames(class_name="taipy-field", config_class="field")
         .set_dataType()
         .set_attributes(
             [
@@ -51,7 +52,7 @@ class Factory:
             default_value="<empty>",
         )
         .set_value_and_default(False)
-        .set_className(class_name="taipy-button", config_class="button")
+        .set_classNames(class_name="taipy-button", config_class="button")
         .set_attributes(
             [
                 ("id"),
@@ -68,7 +69,7 @@ class Factory:
         .set_type("text")
         .set_value_and_default()
         .set_propagate()
-        .set_className(class_name="taipy-input", config_class="input")
+        .set_classNames(class_name="taipy-input", config_class="input")
         .set_attributes(
             [
                 ("id"),
@@ -83,7 +84,7 @@ class Factory:
         )
         .set_type("number")
         .set_value_and_default()
-        .set_className(class_name="taipy-number", config_class="input")
+        .set_classNames(class_name="taipy-number", config_class="input")
         .set_propagate()
         .set_attributes(
             [
@@ -98,7 +99,7 @@ class Factory:
             default_value=datetime.fromtimestamp(0),
         )
         .set_value_and_default()
-        .set_className(class_name="taipy-date-selector", config_class="date_selector")
+        .set_classNames(class_name="taipy-date-selector", config_class="date_selector")
         .set_attributes(
             [
                 ("with_time", AttributeType.boolean),
@@ -114,7 +115,7 @@ class Factory:
             default_value=0,
         )
         .set_value_and_default()
-        .set_className(class_name="taipy-slider", config_class="slider")
+        .set_classNames(class_name="taipy-slider", config_class="slider")
         .set_attributes(
             [
                 ("min", AttributeType.number, 0),
@@ -131,7 +132,7 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default(with_default=False)
-        .set_className(class_name="taipy-selector", config_class="selector")
+        .set_classNames(class_name="taipy-selector", config_class="selector")
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_attributes(
@@ -140,6 +141,29 @@ class Factory:
                 ("multiple", AttributeType.boolean),
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("height", AttributeType.string_or_number),
+                ("width", AttributeType.string_or_number),
+            ]
+        )
+        .set_refresh_on_update()
+        .set_propagate(),
+        "tree": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="TreeView",
+            attributes=attrs,
+        )
+        .set_value_and_default(with_default=False)
+        .set_classNames(class_name="taipy-tree", config_class="tree")
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
+        .set_attributes(
+            [
+                ("filter", AttributeType.boolean),
+                ("multiple", AttributeType.boolean),
+                ("id"),
+                ("active", AttributeType.dynamic_boolean, True),
+                ("height", AttributeType.string_or_number),
+                ("width", AttributeType.string_or_number),
             ]
         )
         .set_refresh_on_update()
@@ -150,7 +174,7 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default(with_default=False)
-        .set_className(class_name="taipy-table", config_class="table")
+        .set_classNames(class_name="taipy-table", config_class="table")
         .get_dataframe_attributes()
         .set_attributes(
             [
@@ -175,7 +199,7 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default()
-        .set_className(class_name="taipy-dialog", config_class="dialog")
+        .set_classNames(class_name="taipy-dialog", config_class="dialog")
         .set_attributes(
             [
                 ("id"),
@@ -197,7 +221,7 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default(with_default=False)
-        .set_className(class_name="taipy-chart", config_class="chart")
+        .set_classNames(class_name="taipy-chart", config_class="chart")
         .set_attributes(
             [
                 ("id"),
@@ -219,7 +243,7 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default(False)
-        .set_className(class_name="taipy-status", config_class="status")
+        .set_classNames(class_name="taipy-status", config_class="status")
         .set_propagate()
         .set_attributes(
             [("id"), ("active", AttributeType.dynamic_boolean, True), ("without_close", AttributeType.boolean, False)]
@@ -228,7 +252,7 @@ class Factory:
             control_type=control_type, element_name="Toggle", attributes=attrs, default_value=""
         )
         .set_value_and_default(with_default=False)
-        .set_className(class_name="taipy-toggle", config_class="toggle")
+        .set_classNames(class_name="taipy-toggle", config_class="toggle")
         .get_adapter("lov", False)  # need to be called before set_lov
         .set_lov()
         .set_attributes(
@@ -248,7 +272,7 @@ class Factory:
         "navbar": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="NavBar", attributes=attrs, default_value=""
         )
-        .set_className(class_name="taipy-navbar", config_class="navbar")
+        .set_classNames(class_name="taipy-navbar", config_class="navbar")
         .get_adapter("lov", False)  # need to be called before set_lov
         .set_lov()
         .set_attributes(
@@ -260,7 +284,7 @@ class Factory:
         "layout": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Layout", attributes=attrs, default_value=""
         )
-        .set_className(class_name="taipy-layout", config_class="layout")
+        .set_classNames(class_name="taipy-layout", config_class="layout")
         .set_attributes(
             [
                 ("id"),
@@ -272,17 +296,13 @@ class Factory:
         "part": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Part", attributes=attrs, default_value=""
         )
-        .set_className(class_name="taipy-part", config_class="part")
-        .set_attributes(
-            [
-                ("id"),
-            ]
-        ),
+        .set_classNames(class_name="taipy-part", config_class="part")
+        .set_attributes([("id"), ("render", AttributeType.dynamic_boolean, True)]),
         "expandable": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Expandable", attributes=attrs, default_value=""
         )
         .set_value_and_default()
-        .set_className(class_name="taipy-expandable", config_class="expandable")
+        .set_classNames(class_name="taipy-expandable", config_class="expandable")
         .set_attributes(
             [
                 ("id"),

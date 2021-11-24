@@ -24,4 +24,16 @@ class selector extends lovComp {
      */
     multiple = false;
 
+    /**
+     * list width
+     * @type {str|int}
+     */
+     width = 360
+
+    /**
+     * component height
+     * @type {str|int}
+     */
+    height
+
 }

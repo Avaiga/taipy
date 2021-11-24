@@ -214,7 +214,7 @@ class Builder:
                 ret = self._gui._get_valid_adapter_result(lov[0], index=0)
                 if ret is None:  # lov list is not a list of tuple(id, label)
                     for idx, elt in enumerate(lov):
-                        ret = self._gui._run_adapter(adapter, elt, adapter.__name__, idx)
+                        ret = self._gui._run_adapter(adapter, elt, adapter.__name__, str(idx))
                         if ret is not None:
                             ret_list.append(ret)
                 else:
@@ -384,14 +384,20 @@ class Builder:
             self.__set_react_attribute(_to_camel_case(name), varname)
         return self
 
-    def set_className(self, class_name="", config_class="input"):
+    def set_classNames(self, class_name="", config_class="input"):
         from ..gui import Gui
 
-        self.set_attribute(
-            "className",
-            class_name + " " + self._gui._config.style_config[config_class],
-        )
-        return self
+        classes = []
+        if class_name:
+            classes.append(class_name)
+        cl = _get_dict_value(self._gui._config.style_config, config_class)
+        if cl:
+            classes.append(self._gui._config.style_config[config_class])
+        cl = self.__get_property("classname")
+        if cl:
+            classes.append(str(cl))
+
+        return self.set_attribute("className", " ".join(classes))
 
     def set_dataType(self):
         self.set_attribute("dataType", getDataType(self.value))

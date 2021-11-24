@@ -20,6 +20,7 @@ import Part from "./Part";
 import MainPage from "../pages/MainPage";
 import PageContent from "../pages/PageContent";
 import Expandable from "./Expandable";
+import TreeView from "./TreeView";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
@@ -40,6 +41,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Layout: Layout,
     Part: Part,
     Expandable: Expandable,
+    TreeView: TreeView as ComponentType,
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)

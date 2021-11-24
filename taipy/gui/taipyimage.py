@@ -4,12 +4,11 @@ import typing as t
 class TaipyImage:
     @staticmethod
     def get_dict_or(value: t.Union[str, t.Any]) -> t.Union[str, dict]:
-        return value if isinstance(value, str) else value.to_dict()
+        return value.to_dict() if isinstance(value, TaipyImage) else value
 
     def __init__(self, path: str, text: t.Optional[str] = None) -> None:
         self.path = path
         self.text = text
-        pass
 
     def to_dict(self, a_dict: t.Optional[dict] = None) -> dict:
         if a_dict is None:
