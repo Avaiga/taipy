@@ -224,7 +224,7 @@ class Builder:
             ret_list = []
             val_list = self.value if isinstance(self.value, list) else [self.value]
             for val in val_list:
-                ret = self._gui._run_adapter(adapter, val, adapter.__name__, -1, id_only=True)
+                ret = self._gui._run_adapter(adapter, val, adapter.__name__, "-1", id_only=True)
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
