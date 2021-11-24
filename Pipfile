@@ -40,6 +40,7 @@ toml = "*"
 tox = "==3.24.3"
 mypy = "*"
 types-toml = "0.10.0"
+pytest-mock = "*"
 
 [requires]
 python_version = "3"

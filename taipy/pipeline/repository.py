@@ -1,8 +1,8 @@
 import logging
 from collections import defaultdict
 
+from taipy.common import utils
 from taipy.common.alias import Dag, TaskId
-from taipy.common.utils import load_fct, objs_to_dict
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
@@ -27,14 +27,16 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
             pipeline.properties,
             Dag(dict(source_task_edges)),
             Dag(dict(task_source_edges)),
-            objs_to_dict(pipeline.subscribers),
+            utils.objs_to_dict(pipeline.subscribers),
         )
 
     def from_model(self, model: PipelineModel) -> Pipeline:
         try:
             tasks = self.__to_tasks(model.task_source_edges.keys())
-            pipeline = Pipeline(model.name, model.properties, tasks, model.id, model.parent_id)
-            pipeline.subscribers = {load_fct(it.get("fct_module"), it.get("fct_name")) for it in model.subscribers}
+            pipeline = Pipeline(model.name, model.properties, tasks, model.id)
+            pipeline.subscribers = {
+                utils.load_fct(it.get("fct_module"), it.get("fct_name")) for it in model.subscribers
+            }
             return pipeline
         except NonExistingTask as err:
             logging.error(err.message)
