@@ -10,6 +10,7 @@ default_config = {
         "propagate": True,
         "client_url": "http://127.0.0.1:5000",
         "favicon": None,
+        "title": None,
     },
     "style_config": {
         "button": "",

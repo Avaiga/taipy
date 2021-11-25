@@ -185,7 +185,7 @@ class Gui(object, metaclass=Singleton):
                 "router": router,
                 "locations": locations,
                 "timeZone": self._config.get_time_zone(),
-                "darkMode": self._config.app_config["dark_mode"],
+                "darkMode": self._get_app_config("dark_mode", True),
             }
         )
 
@@ -672,6 +672,9 @@ class Gui(object, metaclass=Singleton):
 
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
+
+    def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
+        return self._config._get_app_config(name, defaultValue)
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)

@@ -2,7 +2,7 @@ import os
 import typing as t
 
 import __main__
-from flask import Flask, abort, jsonify, render_template, render_template_string, request, send_from_directory
+from flask import Flask, jsonify, render_template, render_template_string, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -45,8 +45,8 @@ class Server(Flask):
                     "index.html",
                     flask_url=self._client_url,
                     app_css="/" + css_file + ".css",
-                    title=self._app.title if hasattr(self._app, "title") else "Taipy App",
-                    favicon=self._app.favicon if hasattr(self._app, "favicon") else "/favicon.ico",
+                    title=self._app._get_app_config("title", "Taipy App"),
+                    favicon=self._app._get_app_config("favicon", "/favicon.png"),
                 )
             if os.path.isfile(self.static_folder + os.path.sep + path):
                 return send_from_directory(self.static_folder + os.path.sep, path)
