@@ -21,6 +21,11 @@ class GuiConfig(object):
         # Run get_time_zone to verify user predefined IANA time_zone if available
         self.get_time_zone()
 
+    def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
+        if name in self.app_config and self.app_config[name] is not None:
+            return self.app_config[name]
+        return defaultValue
+
     def get_time_zone(self) -> str:
         if "time_zone" not in self.app_config or self.app_config["time_zone"] == "client":
             return "client"
