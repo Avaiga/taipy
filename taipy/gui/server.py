@@ -47,6 +47,7 @@ class Server(Flask):
                     app_css="/" + css_file + ".css",
                     title=self._app._get_app_config("title", "Taipy App"),
                     favicon=self._app._get_app_config("favicon", "/favicon.png"),
+                    theme_script=self._app._get_theme_script(),
                 )
             if os.path.isfile(self.static_folder + os.path.sep + path):
                 return send_from_directory(self.static_folder + os.path.sep, path)

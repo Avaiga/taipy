@@ -11,6 +11,9 @@ default_config = {
         "client_url": "http://127.0.0.1:5000",
         "favicon": None,
         "title": None,
+        "theme": None,
+        "theme[light]": None,
+        "theme[dark]": None,
     },
     "style_config": {
         "button": "",

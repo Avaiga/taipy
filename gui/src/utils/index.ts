@@ -2,6 +2,13 @@ import { utcToZonedTime, format, getTimezoneOffset } from "date-fns-tz";
 import { sprintf } from "sprintf-js";
 import { FormatConfig } from "../context/taipyReducers";
 
+declare global {
+    interface Window {
+        taipyUrl: string;
+        taipyUserThemes: Record<string, Record<string, unknown>>;
+    }
+}
+
 // set global style the traditonal way
 export const setStyle = (styleString: string): void => {
     const style = document.createElement("style");
@@ -69,10 +76,9 @@ export const getInitials = (value: string, max = 2): string =>
         .join("")
         .toUpperCase();
 
-/* eslint @typescript-eslint/no-explicit-any: "off", curly: "error" */
 export const ENDPOINT =
     !process.env.NODE_ENV || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
-        ? process.env.REACT_APP_BACKEND_FLASK_URL
-        : (window as any).flask_url;
+        ? (process.env.REACT_APP_BACKEND_FLASK_URL as string)
+        : window.taipyUrl;
 
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;

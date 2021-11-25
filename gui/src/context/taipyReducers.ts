@@ -50,31 +50,28 @@ export interface FormatConfig {
     number: string;
 }
 
+const getUserTheme = (mode: PaletteMode) => {
+    const userTheme = window.taipyUserThemes?.base || {};
+    const modeTheme = (window.taipyUserThemes && window.taipyUserThemes[mode]) || {};
+    return createTheme({
+        ...userTheme,
+        ...modeTheme,
+        palette: {
+            mode: mode,
+        },
+        components: {
+            MuiUseMediaQuery: {
+                defaultProps: {
+                    noSsr: true,
+                },
+            },
+        },
+    });
+};
+
 const themes = {
-    light: createTheme({
-        palette: {
-            mode: "light",
-        },
-        components: {
-            MuiUseMediaQuery: {
-                defaultProps: {
-                    noSsr: true,
-                },
-            },
-        },
-    }),
-    dark: createTheme({
-        palette: {
-            mode: "dark",
-        },
-        components: {
-            MuiUseMediaQuery: {
-                defaultProps: {
-                    noSsr: true,
-                },
-            },
-        },
-    }),
+    light: getUserTheme("light"),
+    dark: getUserTheme("dark"),
 };
 
 export const INITIAL_STATE: TaipyState = {
