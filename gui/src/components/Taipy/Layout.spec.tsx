@@ -22,7 +22,7 @@ describe("Layout Component", () => {
     it("displays the default value", async () => {
         const {getByText} = render(<Layout gap="1rem" columns="1 1 1 1" ><div>foo</div></Layout>);
         const elt = getByText("foo");
-        expect(elt.parentElement).toHaveStyle({"grid-template-columns": "25% calc(25% - 1rem) calc(25% - 1rem) calc(25% - 1rem)"})
+        expect(elt.parentElement).toHaveStyle({"grid-template-columns": "1fr 1fr 1fr 1fr"})
     })
     it("displays the default value for mobile", async () => {
         Object.defineProperty(window, "matchMedia", {
@@ -41,6 +41,6 @@ describe("Layout Component", () => {
             })),});
         const {getByText} = render(<ThemeProvider theme={createTheme()}><Layout gap="1rem" columns="1 1 1 1" ><div>foo</div></Layout></ThemeProvider>);
         const elt = getByText("foo");
-        expect(elt.parentElement).toHaveStyle({"grid-template-columns": "100%"});
+        expect(elt.parentElement).toHaveStyle({"grid-template-columns": "1fr"});
     })
 });

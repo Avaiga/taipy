@@ -9,6 +9,7 @@ default_config = {
         "time_zone": "client",
         "propagate": True,
         "client_url": "http://127.0.0.1:5000",
+        "favicon": None,
     },
     "style_config": {
         "button": "",
@@ -18,6 +19,7 @@ default_config = {
         "date_selector": "",
         "table": "",
         "selector": "",
+        "tree": "",
         "dialog": "",
         "chart": "",
         "status": "",

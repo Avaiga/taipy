@@ -16,7 +16,7 @@
 class layout extends shared {
 
     /**
-     * list of each column's weight<br> ie "1 2" will create a grid with 2 columns of width:<br> - 33%<br> - 66%
+     * list of each column's weight<br> ie "1 2" will create a grid with 2 columns of width:<br> - 1fr<br> - 2fr
      * @type {str, default property}
      */
      columns = "1 1";

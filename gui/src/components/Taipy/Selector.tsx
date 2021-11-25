@@ -1,5 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect } from "react";
-import Avatar from "@mui/material/Avatar";
+import React, { useState, useContext, useCallback, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import List from "@mui/material/List";
@@ -13,12 +12,8 @@ import TextField from "@mui/material/TextField";
 import { TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { LovProps, useLovListMemo } from "./lovUtils";
+import { boxSx, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-
-const boxSx = { width: "100%" };
-const paperSx = { width: "100%", mb: 2 };
-const listSx = { width: "100%", maxWidth: 360, bgcolor: "background.paper" };
 
 interface ItemProps {
     value: string;
@@ -34,7 +29,7 @@ const SingleItem = ({ value, createClickHandler, selectedValue, item, disabled }
             <ListItemText primary={item} />
         ) : (
             <ListItemAvatar>
-                <Avatar alt={(item as TaipyImage).text || value} src={(item as TaipyImage).path} />
+                <LovImage item={item} />
             </ListItemAvatar>
         )}
     </ListItemButton>
@@ -49,18 +44,13 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled
             <ListItemText primary={item} />
         ) : (
             <ListItemAvatar>
-                <Avatar alt={(item as TaipyImage).text || value} src={(item as TaipyImage).path} />
+                <LovImage item={item} />
             </ListItemAvatar>
         )}
     </ListItemButton>
 );
 
-interface SelectorProps extends LovProps {
-    filter?: boolean;
-    multiple?: boolean;
-}
-
-const Selector = (props: SelectorProps) => {
+const Selector = (props: SelTreeProps) => {
     const {
         id,
         defaultValue = "",
@@ -73,6 +63,8 @@ const Selector = (props: SelectorProps) => {
         propagate = true,
         lov,
         tp_updatevars = "",
+        width = 360,
+        height,
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
@@ -83,6 +75,8 @@ const Selector = (props: SelectorProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars, tp_varname);
 
     const lovList = useLovListMemo(lov, defaultLov);
+    const listSx = useMemo(() => ({...treeSelBaseSx, maxWidth: width}), [width]);
+    const paperSx = useMemo(() => height === undefined ? paperBaseSx : {...paperBaseSx, maxHeight: height}, [height]);
 
     useEffect(() => {
         if (value !== undefined) {
@@ -128,6 +122,7 @@ const Selector = (props: SelectorProps) => {
     return (
         <Box id={id} sx={boxSx} className={className}>
             <Paper sx={paperSx}>
+                <Box>
                 {filter && (
                     <TextField
                         margin="dense"
@@ -137,19 +132,10 @@ const Selector = (props: SelectorProps) => {
                         disabled={!active}
                     />
                 )}
+                </Box>
                 <List sx={listSx}>
                     {lovList
-                        .filter(
-                            (elt) =>
-                                !filter ||
-                                (
-                                    (typeof elt.item === "string"
-                                        ? (elt.item as string)
-                                        : (elt.item as TaipyImage).text) || elt.id
-                                )
-                                    .toLowerCase()
-                                    .indexOf(searchValue.toLowerCase()) > -1
-                        )
+                        .filter((elt) => showItem(elt, searchValue))
                         .map((elt) =>
                             multiple ? (
                                 <MultipleItem
