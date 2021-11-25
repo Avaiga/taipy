@@ -13,7 +13,7 @@ with open("HISTORY.md") as history_file:
     history = history_file.read()
 
 requirements: List[str] = [
-    "Unidecode",
+    "dataclasses_json",
     "flask>=2.0",
     "flask-cors",
     "flask-socketio",
@@ -21,12 +21,13 @@ requirements: List[str] = [
     "networkx",
     "numpy",
     "pandas",
+    "pyodbc",
     "pytz",
+    "sqlalchemy",
     "simple-websocket",
     "toml",
     "tzlocal",
-    "dataclasses_json",
-    "celery",
+    "Unidecode",
 ]
 
 test_requirements = [
