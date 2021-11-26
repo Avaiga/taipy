@@ -222,7 +222,8 @@ export const createSendActionNameAction = (name: string | undefined, value: unkn
 export const createRequestChartUpdateAction = (
     name: string | undefined,
     id: string | undefined,
-    columns: string[]
+    columns: string[],
+    width: number | undefined,
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -230,6 +231,7 @@ export const createRequestChartUpdateAction = (
         id: id,
         columns: columns,
         alldata: true,
+        width: width,
     },
 });
 

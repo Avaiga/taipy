@@ -15,6 +15,10 @@ export interface ColumnDesc {
 
 export type Order = "asc" | "desc";
 
+export type RowValue = string | number | null;
+
+export type RowType = Record<string, RowValue>;
+
 export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
     if (cols[key1].index < cols[key2].index) {
         return -1;
@@ -27,22 +31,22 @@ export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
-export const formatValue = (val: any, col: any, formatConf: FormatConfig) => {
+export const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig): string => {
     if (val === null || val === undefined) {
         return "";
     }
     switch (col.type) {
         case "datetime64[ns]":
-            return getDateTimeString(val, col.format || defaultDateFormat, formatConf);
+            return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf);
         case "int64":
         case "float64":
-            return getNumberString(val, col.format, formatConf);
+            return getNumberString(val as number, col.format, formatConf);
         default:
-            return val;
+            return val as string;
     }
 };
 
-export const alignCell = (col: any): Partial<TableCellProps> => {
+export const alignCell = (col: ColumnDesc): Partial<TableCellProps> => {
     switch (col.type) {
         case "int64":
         case "float64":
@@ -52,7 +56,7 @@ export const alignCell = (col: any): Partial<TableCellProps> => {
     }
 };
 
-/* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TableValueType = Record<string, Record<string, any>>;
 
 export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelectProps {

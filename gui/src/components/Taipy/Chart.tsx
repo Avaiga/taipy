@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotMouseEvent, PlotSelectionEvent } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
@@ -23,6 +23,7 @@ interface ChartProp extends TaipyBaseProps {
     refresh?: boolean;
     layout?: string;
     rangeChange?: string;
+    limitRows?: boolean;
     testId?: string;
     //[key: `selected_${number}`]: number[];
 }
@@ -68,10 +69,12 @@ const Chart = (props: ChartProp) => {
         value,
         rangeChange,
         propagate = true,
+        limitRows = false,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState<number[][]>([]);
+    const plotRef = useRef<HTMLDivElement>(null);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -128,14 +131,14 @@ const Chart = (props: ChartProp) => {
         }
     }, [props.config]);
 
-    /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
-        if (!props.value || !!refresh) {
+        if (!value || !!refresh) {
             setLoading(true);
             const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols));
+            dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols, limitRows ? plotRef.current?.clientWidth : 0));
         }
-    }, [refresh, dispatch, config.columns, tp_varname, id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [refresh, dispatch, config.columns, tp_varname, id, limitRows]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
@@ -162,7 +165,7 @@ const Chart = (props: ChartProp) => {
 
     const style = useMemo(
         () => ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [defaultStyle, width, height]
+        [width, height]
     );
 
     const divStyle = useMemo(() => (loading ? { display: "none" } : {}), [loading]);
@@ -197,10 +200,12 @@ const Chart = (props: ChartProp) => {
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
             rangeChange && dispatch(createSendActionNameAction(id, { action: rangeChange, ...eventData })),
-        [rangeChange]
+        [dispatch, rangeChange, id]
     );
 
     const onAfterPlot = useCallback(() => setLoading(false), []);
+
+    const getRealIndex = useCallback((index: number) => value?.tp_index ? value.tp_index[index] as number : index, [value]);
 
     const onSelect = useCallback(
         (evt?: PlotMouseEvent | PlotSelectionEvent) => {
@@ -208,7 +213,7 @@ const Chart = (props: ChartProp) => {
             if (points.length && tp_updatevars) {
                 const traces = points.reduce((tr, pt) => {
                     tr[pt.curveNumber] = tr[pt.curveNumber] || [];
-                    tr[pt.curveNumber].push(pt.pointIndex);
+                    tr[pt.curveNumber].push(getRealIndex(pt.pointIndex));
                     return tr;
                 }, [] as number[][]);
                 traces.forEach((tr, idx) => {
@@ -219,17 +224,16 @@ const Chart = (props: ChartProp) => {
                 });
             }
         },
-        [tp_updatevars, propagate]
+        [getRealIndex, dispatch, tp_updatevars, propagate]
     );
 
     return (
         <>
             {loading ? <Skeleton key="skeleton" sx={style} /> : null}
-            <Box id={id} sx={divStyle} key="div" data-testid={props.testId}>
+            <Box id={id} sx={divStyle} key="div" data-testid={props.testId} className={className} ref={plotRef}>
                 <Plot
                     data={data}
                     layout={layout}
-                    className={className}
                     style={style}
                     onRelayout={onRelayout}
                     onAfterPlot={onAfterPlot}

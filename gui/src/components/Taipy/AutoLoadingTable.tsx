@@ -25,13 +25,14 @@ import {
     boxSx,
     paperSx,
     tableSx,
+    RowType,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
 interface RowData {
     colsOrder: string[];
     columns: Record<string, ColumnDesc>;
-    rows: Record<string, unknown>[];
+    rows: RowType[];
     classes: Record<string, string>;
     cellStyles: CSSProperties[];
     isItemLoaded: (index: number) => boolean;
@@ -99,7 +100,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         pageSize = 100,
         defaultKey = "",
     } = props;
-    const [rows, setRows] = useState<Record<string, unknown>[]>([]);
+    const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
     const { dispatch } = useContext(TaipyContext);
     const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
@@ -116,7 +117,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             const newValue = props.value[page.current.key];
             const promise = page.current.promises[newValue.start];
             setRowCount(newValue.rowcount);
-            const nr = newValue.data as Record<string, unknown>[];
+            const nr = newValue.data as RowType[];
             if (Array.isArray(nr) && nr.length > newValue.start) {
                 setRows(nr);
                 promise && promise.resolve();
@@ -163,9 +164,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
     useEffect(() => {
-        /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
         selected.length &&
             infiniteLoaderRef.current &&
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (infiniteLoaderRef.current as any)._listRef.scrollToItem(selected[0]);
     }, [selected]);
 
