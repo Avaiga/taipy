@@ -33,7 +33,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
     def from_model(self, model: PipelineModel) -> Pipeline:
         try:
             tasks = self.__to_tasks(model.task_source_edges.keys())
-            pipeline = Pipeline(model.name, model.properties, tasks, model.id)
+            pipeline = Pipeline(model.name, model.properties, tasks, model.id, model.parent_id)
             pipeline.subscribers = {
                 utils.load_fct(it.get("fct_module"), it.get("fct_name")) for it in model.subscribers
             }
