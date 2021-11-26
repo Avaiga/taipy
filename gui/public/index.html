@@ -8,8 +8,8 @@
     <link rel="apple-touch-icon" href="/favicon.png" />
     <title>{{title}}</title>
     <script type="text/javascript">window.taipyUrl="{{flask_url}}";
-    {%- if theme_script -%}
-    window.taipyUserThemes={{theme_script|tojson|safe}};{% endif %}</script>
+    {%- if themes -%}
+    window.taipyUserThemes={{themes|tojson|safe}};{% endif %}</script>
   </head>
   <body >
     <link
