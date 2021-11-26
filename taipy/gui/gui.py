@@ -676,6 +676,21 @@ class Gui(object, metaclass=Singleton):
     def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
         return self._config._get_app_config(name, defaultValue)
 
+    def _get_themes(self) -> str:
+        theme = self._get_app_config("theme", None)
+        dark_theme = self._get_app_config("theme[dark]", None)
+        light_theme = self._get_app_config("theme[light]", None)
+        res = {}
+        if theme:
+            res["base"] = theme
+        if dark_theme:
+            res["dark"] = dark_theme
+        if light_theme:
+            res["light"] = light_theme
+        if theme or dark_theme or light_theme:
+            return res
+        return None
+
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)
 

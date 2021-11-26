@@ -2,6 +2,7 @@ import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
+import { merge } from "lodash";
 
 import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 
@@ -50,31 +51,26 @@ export interface FormatConfig {
     number: string;
 }
 
+const getUserTheme = (mode: PaletteMode) => {
+    const userTheme = window.taipyUserThemes?.base || {};
+    const modeTheme = (window.taipyUserThemes && window.taipyUserThemes[mode]) || {};
+    return createTheme(merge(userTheme, modeTheme, {
+        palette: {
+            mode: mode,
+        },
+        components: {
+            MuiUseMediaQuery: {
+                defaultProps: {
+                    noSsr: true,
+                },
+            },
+        },
+    }));
+};
+
 const themes = {
-    light: createTheme({
-        palette: {
-            mode: "light",
-        },
-        components: {
-            MuiUseMediaQuery: {
-                defaultProps: {
-                    noSsr: true,
-                },
-            },
-        },
-    }),
-    dark: createTheme({
-        palette: {
-            mode: "dark",
-        },
-        components: {
-            MuiUseMediaQuery: {
-                defaultProps: {
-                    noSsr: true,
-                },
-            },
-        },
-    }),
+    light: getUserTheme("light"),
+    dark: getUserTheme("dark"),
 };
 
 export const INITIAL_STATE: TaipyState = {
