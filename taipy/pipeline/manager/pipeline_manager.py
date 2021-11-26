@@ -7,7 +7,7 @@ deleting, duplicating, executing) related to pipelines.
 
 import logging
 from functools import partial
-from typing import Callable, Iterable, List, Optional, Set
+from typing import Callable, List, Optional, Set
 
 from taipy.common.alias import PipelineId
 from taipy.config import PipelineConfig
@@ -28,8 +28,6 @@ class PipelineManager:
 
     def __init__(self):
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
-
-    __status_notifier: Set[Callable] = set()
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
         """
