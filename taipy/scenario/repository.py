@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from taipy.common import utils
 from taipy.common.alias import CycleId, PipelineId
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager import CycleManager
@@ -21,11 +22,12 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
             properties=scenario.properties,
             master_scenario=scenario.master_scenario,
+            subscribers=utils.objs_to_dict(scenario.subscribers),
             cycle=self.__to_cycle_id(scenario.cycle),
         )
 
     def from_model(self, model: ScenarioModel) -> Scenario:
-        return Scenario(
+        scenario = Scenario(
             scenario_id=model.id,
             config_name=model.name,
             pipelines=self.__to_pipelines(model.pipelines),
@@ -33,6 +35,8 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             master_scenario=model.master_scenario,
             cycle=self.__to_cycle(model.cycle),
         )
+        scenario.subscribers = {utils.load_fct(it.get("fct_module"), it.get("fct_name")) for it in model.subscribers}
+        return scenario
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:

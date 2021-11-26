@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from dataclasses_json import dataclass_json
 
@@ -14,4 +14,5 @@ class ScenarioModel:
     pipelines: List[PipelineId]
     properties: dict
     master_scenario: bool
+    subscribers: List[Dict]
     cycle: Optional[CycleId] = None

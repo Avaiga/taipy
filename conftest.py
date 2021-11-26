@@ -51,7 +51,7 @@ def scenario(cycle):
 
 @pytest.fixture(scope="function")
 def scenario_model(cycle):
-    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, cycle=None)
+    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, subscribers=[], cycle=None)
 
 
 @pytest.fixture(scope="function")

@@ -4,10 +4,11 @@ ML training pipeline, etc. should implement this generic pipeline entity
 """
 import logging
 import uuid
-from typing import Dict, List
+from typing import Callable, Dict, List, Set
 
 from taipy.common import protect_name
 from taipy.common.alias import ScenarioId
+from taipy.common.utils import objs_to_dict
 from taipy.cycle.cycle import Cycle
 from taipy.pipeline import Pipeline
 from taipy.scenario.scenario_model import ScenarioModel
@@ -31,6 +32,7 @@ class Scenario:
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
         self.master_scenario = master_scenario
+        self.subscribers: Set[Callable] = set()
         self.cycle = cycle
 
     def __eq__(self, other):
@@ -59,6 +61,12 @@ class Scenario:
         logging.error(f"{attribute_name} is not an attribute of scenario {self.id}")
         raise AttributeError
 
+    def add_subscriber(self, callback: Callable):
+        self.subscribers.add(callback)
+
+    def remove_subscriber(self, callback: Callable):
+        self.subscribers.remove(callback)
+
     def to_model(self) -> ScenarioModel:
         return ScenarioModel(
             self.id,
@@ -66,6 +74,7 @@ class Scenario:
             [pipeline.id for pipeline in self.pipelines.values()],
             self.properties,
             self.master_scenario,
+            objs_to_dict(list(self.subscribers)),
             self.cycle.id if self.cycle else None,
         )
 

@@ -1,11 +1,12 @@
 import pytest
 
+from taipy.common import utils
 from taipy.common.alias import CycleId, PipelineId, ScenarioId, TaskId
-from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig, scenario
+from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
-from taipy.exceptions import NonExistingTask, cycle
+from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import NonExistingScenario
 from taipy.pipeline import Pipeline
@@ -280,7 +281,7 @@ def test_get_set_data():
     assert scenario_entity.qux.read() == 4
 
 
-def test_notification():
+def test_notification(mocker):
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
     task_manager = scenario_manager.task_manager
@@ -310,17 +311,19 @@ def test_notification():
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
-    scenario_manager.subscribe(notify_1)
-    scenario_manager.subscribe(notify_2)
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_2])
+
+    scenario_manager.subscribe(notify_1, scenario)
+    scenario_manager.subscribe(notify_2, scenario)
 
     scenario_manager.submit(scenario.id)
     notify_1.assert_called_3_times()
     notify_2.assert_called_3_times()
-    scenario_manager.unsubscribe(notify_1)
-    scenario_manager.unsubscribe(notify_2)
+    scenario_manager.unsubscribe(notify_1, scenario)
+    scenario_manager.unsubscribe(notify_2, scenario)
 
 
-def test_notification_subscribe_unsubscribe():
+def test_notification_subscribe_unsubscribe(mocker):
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
     task_manager = scenario_manager.task_manager
@@ -351,22 +354,23 @@ def test_notification_subscribe_unsubscribe():
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1])
 
-    scenario_manager.subscribe(notify_1)
-    scenario_manager.subscribe(notify_2)
+    scenario_manager.subscribe(notify_1, scenario)
+    scenario_manager.subscribe(notify_2, scenario)
 
-    scenario_manager.unsubscribe(notify_2)
+    scenario_manager.unsubscribe(notify_2, scenario)
     scenario_manager.submit(scenario.id)
 
     notify_1.assert_called_3_times()
     notify_2.assert_not_called()
-    scenario_manager.unsubscribe(notify_1)
+    scenario_manager.unsubscribe(notify_1, scenario)
 
     with pytest.raises(KeyError):
-        scenario_manager.unsubscribe(notify_2)
+        scenario_manager.unsubscribe(notify_2, scenario)
 
 
-def test_notification_subscribe_only_on_new_jobs():
+def test_notification_subscribe_only_on_new_jobs(mocker):
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
     task_manager = scenario_manager.task_manager
@@ -397,11 +401,13 @@ def test_notification_subscribe_only_on_new_jobs():
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
-    scenario_manager.subscribe(notify_1)
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_1, notify_2])
+
+    scenario_manager.subscribe(notify_1, scenario)
 
     scenario_manager.submit(scenario.id)
 
-    scenario_manager.subscribe(notify_2)
+    scenario_manager.subscribe(notify_2, scenario)
 
     notify_1.assert_called_3_times()
     notify_2.assert_not_called()
@@ -412,8 +418,8 @@ def test_notification_subscribe_only_on_new_jobs():
     notify_1.assert_called_3_times()
     notify_2.assert_called_3_times()
 
-    scenario_manager.unsubscribe(notify_1)
-    scenario_manager.unsubscribe(notify_2)
+    scenario_manager.unsubscribe(notify_1, scenario)
+    scenario_manager.unsubscribe(notify_2, scenario)
 
 
 def test_get_set_master_scenario():
