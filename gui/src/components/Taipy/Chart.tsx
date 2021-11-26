@@ -135,7 +135,7 @@ const Chart = (props: ChartProp) => {
         if (!value || !!refresh) {
             setLoading(true);
             const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols, limitRows ? plotRef.current?.clientWidth : 0));
+            dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols, limitRows ? plotRef.current?.clientWidth : undefined));
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refresh, dispatch, config.columns, tp_varname, id, limitRows]);
