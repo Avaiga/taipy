@@ -323,6 +323,67 @@ def test_notification(mocker):
     scenario_manager.unsubscribe(notify_2, scenario)
 
 
+def test_notification_with_two_scenarios(mocker):
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    scenario_config = ScenarioConfig(
+        "Awesome scenario",
+        [
+            PipelineConfig(
+                "by 6",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
+
+    scenario_config_2 = ScenarioConfig(
+        "Awesome scenario 2",
+        [
+            PipelineConfig(
+                "by 7",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
+
+    scenario = scenario_manager.create(scenario_config)
+    scenario_2 = scenario_manager.create(scenario_config_2)
+
+    notify_1 = NotifyMock(scenario)
+    notify_2 = NotifyMock(scenario)
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1])
+
+    scenario_manager.subscribe(notify_1, scenario)
+    scenario_manager.subscribe(notify_2, scenario_2)
+
+    scenario_manager.submit(scenario.id)
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+    scenario_manager.unsubscribe(notify_1, scenario)
+    scenario_manager.unsubscribe(notify_2, scenario_2)
+
+
 def test_notification_subscribe_unsubscribe(mocker):
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
