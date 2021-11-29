@@ -7,7 +7,7 @@ from taipy.config import ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager.cycle_manager import CycleManager
 from taipy.exceptions.repository import ModelNotFound
-from taipy.exceptions.scenario import DoesNotBelongToACycle, NonExistingScenario
+from taipy.exceptions.scenario import DeletingMasterScenario, DoesNotBelongToACycle, NonExistingScenario
 from taipy.pipeline import PipelineManager
 from taipy.scenario import Scenario
 from taipy.scenario.repository import ScenarioRepository
@@ -50,7 +50,11 @@ class ScenarioManager:
             self.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs
         ]
         cycle = self.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
-        scenario = Scenario(config.name, pipelines, config.properties, scenario_id, cycle=cycle)
+        is_master_scenario = len(self.get_all_scenarios_of_cycle(cycle)) == 0 if cycle else False
+        scenario = Scenario(
+            config.name, pipelines, config.properties, scenario_id, master_scenario=is_master_scenario, cycle=cycle
+        )
+
         self.set(scenario)
         return scenario
 
@@ -111,3 +115,8 @@ class ScenarioManager:
             self.set(scenario)
         else:
             raise DoesNotBelongToACycle
+
+    def delete(self, scenario_id: ScenarioId):
+        if self.get(scenario_id).is_master_scenario():
+            raise DeletingMasterScenario
+        self.repository.delete(scenario_id)

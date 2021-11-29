@@ -1,13 +1,15 @@
+from datetime import date, datetime
+
 import pytest
 
 from taipy.common.alias import CycleId, PipelineId, ScenarioId, TaskId
-from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig, scenario
+from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
-from taipy.exceptions import NonExistingTask, cycle
+from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.exceptions.scenario import NonExistingScenario
+from taipy.exceptions.scenario import DeletingMasterScenario, NonExistingScenario
 from taipy.pipeline import Pipeline
 from taipy.scenario.manager import ScenarioManager
 from taipy.scenario.scenario import Scenario
@@ -90,6 +92,48 @@ def test_save_and_get_scenario_entity(cycle):
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
+
+
+def test_create_and_delete_scenario_entity():
+    creation_date = datetime.now()
+    scenario_manager = ScenarioManager()
+
+    scenario_manager.delete_all()
+    assert len(scenario_manager.get_all()) == 0
+
+    scenario = Config.scenario_configs.create("sc", [], Frequency.DAILY)
+
+    scenario_entity_1 = scenario_manager.create(scenario, creation_date=creation_date)
+    assert scenario_entity_1.config_name == "sc"
+    assert scenario_entity_1.pipelines == {}
+    assert scenario_entity_1.cycle.frequency == Frequency.DAILY
+    assert scenario_entity_1.is_master_scenario()
+    assert scenario_entity_1.cycle.creation_date == creation_date
+    assert scenario_entity_1.cycle.start_date.date() == creation_date.date()
+    assert scenario_entity_1.cycle.end_date.date() == creation_date.date()
+
+    with pytest.raises(DeletingMasterScenario):
+        scenario_manager.delete(scenario_entity_1.id)
+
+    scenario_entity_2 = scenario_manager.create(scenario, creation_date=creation_date)
+    assert scenario_entity_2.config_name == "sc"
+    assert scenario_entity_2.pipelines == {}
+    assert scenario_entity_2.cycle.frequency == Frequency.DAILY
+    assert not scenario_entity_2.is_master_scenario()
+    assert scenario_entity_2.cycle.creation_date == creation_date
+    assert scenario_entity_2.cycle.start_date.date() == creation_date.date()
+    assert scenario_entity_2.cycle.end_date.date() == creation_date.date()
+
+    assert scenario_entity_1 != scenario_entity_2
+    assert scenario_entity_1.cycle == scenario_entity_2.cycle
+
+    assert len(scenario_manager.get_all()) == 2
+    scenario_manager.delete(scenario_entity_2.id)
+    assert len(scenario_manager.get_all()) == 1
+    with pytest.raises(DeletingMasterScenario):
+        scenario_manager.delete(scenario_entity_1.id)
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.get(scenario_entity_2.id)
 
 
 def test_submit():
