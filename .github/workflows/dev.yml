@@ -15,7 +15,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains two jobs called "test" and "test-gui"
+   #This workflow contains two jobs called "test" and "test-gui"
   test:
     # The type of runner that the job will run on
     strategy:
@@ -57,7 +57,7 @@ jobs:
             extra-pycodestyle-options: "--max-line-length=120 --ignore=E203,E266,E501,E722,W503,F403,F401"
             extra-mypy-options: "--ignore-missing-imports"
       - name: test with tox
-        run:
+        run: |
           tox
 
       - name: Install and test with optional dependancy
@@ -91,3 +91,39 @@ jobs:
         run: npm ci
       - run: npm run build --if-present
       - run: npm test
+
+  code-coverage:
+      runs-on: ubuntu-18.04
+      steps:
+          -   uses: actions/checkout@v2
+          -   name: Set up Python 3.9
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.9
+
+          -   name: Install pipenv
+              run: |
+                  python -m pip install --upgrade pipenv wheel
+                  pip install pytest pytest-cov
+
+          -   id: cache-pipenv
+              uses: actions/cache@v1
+              with:
+                  path: ~/.local/share/virtualenvs
+                  key: ${{ runner.os }}-pipenv-${{ hashFiles('**/Pipfile.lock') }}
+
+          -   name: Install dependencies
+              run: |
+                   pipenv lock
+                   pipenv install --system --dev --python 3.9
+
+          -   name: Build coverage file
+              run: |
+                  pytest -s --cov=taipy --cov-append --cov-report=xml --cov-report term-missing tests
+
+          -   name: Code coverage
+              uses: orgoro/coverage@v2
+              with:
+                  coverageFile: coverage.xml
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  thresholdAll: 0.85

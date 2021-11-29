@@ -2,8 +2,8 @@ import os
 import shutil
 from datetime import datetime
 
-import pandas as pd
 import pytest
+import pandas as pd
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.cycle.cycle import Cycle
