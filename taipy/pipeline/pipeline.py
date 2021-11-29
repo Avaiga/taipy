@@ -6,13 +6,13 @@ Machine-Learning training pipeline, etc. could implement this generic pipeline.
 import logging
 import uuid
 from collections import defaultdict
-from typing import Callable, Dict, List, Set, Optional
+from typing import Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
 from taipy.common import protect_name
 from taipy.common.alias import Dag, PipelineId
-from taipy.common.utils import objs_to_dict
+from taipy.common.utils import fcts_to_dict
 from taipy.data import DataSource
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.task.task import Task
@@ -105,7 +105,7 @@ class Pipeline:
             self.properties,
             Dag(dict(source_task_edges)),
             Dag(dict(task_source_edges)),
-            objs_to_dict(list(self.subscribers)),
+            fcts_to_dict(list(self.subscribers)),
         )
 
     def get_sorted_tasks(self) -> List[List[Task]]:

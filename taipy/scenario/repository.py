@@ -22,7 +22,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
             properties=scenario.properties,
             master_scenario=scenario.master_scenario,
-            subscribers=utils.objs_to_dict(scenario.subscribers),
+            subscribers=utils.fcts_to_dict(scenario.subscribers),
             cycle=self.__to_cycle_id(scenario.cycle),
         )
 
@@ -35,7 +35,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             master_scenario=model.master_scenario,
             cycle=self.__to_cycle(model.cycle),
         )
-        scenario.subscribers = {utils.load_fct(it.get("fct_module"), it.get("fct_name")) for it in model.subscribers}
+        scenario.subscribers = {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers}
         return scenario
 
     @staticmethod

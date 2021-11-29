@@ -8,7 +8,7 @@ from typing import Callable, Dict, List, Set
 
 from taipy.common import protect_name
 from taipy.common.alias import ScenarioId
-from taipy.common.utils import objs_to_dict
+from taipy.common.utils import fcts_to_dict
 from taipy.cycle.cycle import Cycle
 from taipy.pipeline import Pipeline
 from taipy.scenario.scenario_model import ScenarioModel
@@ -74,7 +74,7 @@ class Scenario:
             [pipeline.id for pipeline in self.pipelines.values()],
             self.properties,
             self.master_scenario,
-            objs_to_dict(list(self.subscribers)),
+            fcts_to_dict(list(self.subscribers)),
             self.cycle.id if self.cycle else None,
         )
 

@@ -368,6 +368,60 @@ def test_pipeline_notification_subscribe_only_on_new_jobs(mocker):
     pipeline_manager.unsubscribe(notify_2, pipeline)
 
 
+def test_pipeline_notification_subscribe_only_one_pipeline(mocker):
+    pipeline_manager = PipelineManager()
+    task_manager = pipeline_manager.task_manager
+    data_manager = task_manager.data_manager
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    pipeline_config = PipelineConfig(
+        "by 6",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
+            )
+        ],
+    )
+
+    pipeline_config_2 = PipelineConfig(
+        "by 7",
+        [
+            TaskConfig(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
+            )
+        ],
+    )
+
+    pipeline = pipeline_manager.get_or_create(pipeline_config)
+    pipeline_2 = pipeline_manager.get_or_create(pipeline_config_2)
+
+    notify_1 = NotifyMock(pipeline)
+    notify_2 = NotifyMock(pipeline_2)
+    # Mocking this because NotifyMock is a class that does not loads correctly when getting the pipeline
+    # from the storage.
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1])
+
+    pipeline_manager.subscribe(notify_1, pipeline)
+
+    pipeline_manager.submit(pipeline.id)
+
+    pipeline_manager.subscribe(notify_2, pipeline_2)
+
+    notify_1.assert_called_3_times()
+    notify_2.assert_not_called()
+
+    pipeline_manager.unsubscribe(notify_1, pipeline)
+    pipeline_manager.unsubscribe(notify_2, pipeline_2)
+
+
 def test_get_all_by_config_name():
     pm = PipelineManager()
     input_configs = [Config.data_source_configs.create("my_input", "in_memory")]
