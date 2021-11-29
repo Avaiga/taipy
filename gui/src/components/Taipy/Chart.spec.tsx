@@ -55,7 +55,7 @@ describe("Chart Component", () => {
     it("displays the right info for class", async () => {
         const { getByTestId } = render(<Chart value={chartValue} config={chartConfig} testId="test" className="taipy-chart" />);
         const elt = getByTestId("test");
-        expect(elt.firstElementChild).toHaveClass("taipy-chart");
+        expect(elt).toHaveClass("taipy-chart");
     });
     xit("is disabled", async () => {
         const { getByTestId } = render(<Chart value={chartValue} config={chartConfig} testId="test" active={false} />);

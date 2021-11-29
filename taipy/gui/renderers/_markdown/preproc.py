@@ -62,26 +62,34 @@ class Preprocessor(MdPreprocessor):
                 tag_queue.append("part")
                 line = (
                     line[: m.start()]
+                    + "\n"
                     + MarkdownFactory._TAIPY_START
                     + "part.start"
                     + MarkdownFactory._TAIPY_END
+                    + "\n"
                     + line[m.end() :]
                 )
             # all other components
             for m in Preprocessor.__CONTROL_RE.finditer(line):
                 start_tag = len(m.group(2)) == 0  # tag not closed
                 control_name, properties = self._process_control(m, line_count)
-                new_line += line[last_index : m.start()] + MarkdownFactory._TAIPY_START + control_name
+                new_line += line[last_index : m.start()]
+                local_line = MarkdownFactory._TAIPY_START + control_name
+                block = False
                 if start_tag:
                     if control_name in MarkdownFactory._TAIPY_BLOCK_TAGS:
-                        new_line += ".start"
+                        local_line += ".start"
                         tag_queue.append(control_name)
+                        block = True
                     else:
                         warnings.warn(f"Line {line_count} tag {control_name} is not properly closed")
                 for property in properties:
                     prop_value = property[1].replace('"', '\\"')
-                    new_line += f' {property[0]}="{prop_value}"'
-                new_line += MarkdownFactory._TAIPY_END
+                    local_line += f' {property[0]}="{prop_value}"'
+                local_line += MarkdownFactory._TAIPY_END
+                if block:
+                    local_line = "\n" + local_line + "\n"
+                new_line += local_line
                 last_index = m.end()
             new_line = line if last_index == 0 else new_line + line[last_index:]
             # Add key attribute to links

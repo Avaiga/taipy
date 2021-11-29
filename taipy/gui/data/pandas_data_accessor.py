@@ -32,6 +32,7 @@ class PandasDataAccessor(DataAccessor):
                     ret_payload["infinite"] = payload["infinite"]
             else:
                 ret_payload["alldata"] = payload["alldata"]
+                nb_rows_max = _get_dict_value(payload, "width")
             # deal with columns
             cols = _get_dict_value(payload, "columns")
             if isinstance(cols, list) and len(cols):
@@ -85,9 +86,16 @@ class PandasDataAccessor(DataAccessor):
                 value = value.loc[:, cols].iloc[new_indexes]  # returns a view
                 dictret = {"data": value.to_dict(orient="records"), "rowcount": rowcount, "start": start}
                 value = dictret
-            if not paged:
+            else:
                 # view with the requested columns
-                value = value.loc[:, cols].to_dict(orient="list")
+                if nb_rows_max and nb_rows_max < len(value) / 2:
+                    value = value.loc[:, cols]
+                    value["tp_index"] = value.index
+                    # we need to be more clever than this :-)
+                    value = value.iloc[:: (len(value) // nb_rows_max)]
+                else:
+                    value = value.loc[:, cols]
+                value = value.to_dict(orient="list")
             ret_payload["value"] = value
         return ret_payload
 

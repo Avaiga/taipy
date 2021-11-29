@@ -231,6 +231,7 @@ class Factory:
                 ("layout", AttributeType.dict),
                 ("range_change"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("limit_rows", AttributeType.boolean),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
