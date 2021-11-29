@@ -244,8 +244,8 @@ def test_submit_task_multithreading_multiple_task():
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read(None) == 42)
-    assert task_2.output[f"{task_2.config_name}-output0"].read(None) == 42
+    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
+    assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
 
@@ -275,8 +275,8 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
         assert job_1.is_completed()
         assert job_2.is_running()
 
-    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read(None) == 42)
-    assert task_2.output[f"{task_2.config_name}-output0"].read(None) == 42
+    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
+    assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
 

@@ -17,7 +17,7 @@ class InMemoryDataSource(DataSource):
         the data source is automatically written with the value of this `default_data` property.
     """
 
-    __TYPE = "in_memory"
+    __STORAGE_TYPE = "in_memory"
     __DEFAULT_DATA_VALUE = "default_data"
 
     def __init__(
@@ -41,13 +41,13 @@ class InMemoryDataSource(DataSource):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
     @classmethod
-    def type(cls) -> str:
-        return cls.__TYPE
+    def storage_type(cls) -> str:
+        return cls.__STORAGE_TYPE
 
     def preview(self):
         pass
 
-    def _read(self, query=None):
+    def _read(self):
         return in_memory_storage.get(self.id)
 
     def _write(self, data):

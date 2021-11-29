@@ -13,14 +13,14 @@ from taipy.exceptions.data_source import NoData
 class DataSource:
     """
     A Data Source object.
-    
+
     Data Sources hold the name, scope and additional properties of the data.
 
     Attributes:
         config_name (str):  Name that identifies the data source.
 
             We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
-            or underscore characters ('_').  
+            or underscore characters ('_').
             Other characters are replaced according the following rules:
 
             - Space characters are replaced by underscore characters ('_').
@@ -86,17 +86,17 @@ class DataSource:
 
     @classmethod
     @abstractmethod
-    def type(cls) -> str:
+    def storage_type(cls) -> str:
         return NotImplemented
 
     @abstractmethod
     def preview(self):
         return NotImplemented
 
-    def read(self, query=None):
+    def read(self):
         if not self.last_edition_date:
             raise NoData
-        return self._read(query)
+        return self._read()
 
     def write(self, data, job_id: Optional[JobId] = None):
         self._write(data)
@@ -112,7 +112,7 @@ class DataSource:
         self.up_to_date = False
 
     @abstractmethod
-    def _read(self, query=None):
+    def _read(self):
         return NotImplemented
 
     @abstractmethod

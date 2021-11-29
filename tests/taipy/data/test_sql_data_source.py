@@ -19,7 +19,7 @@ class TestSQLDataSource:
             },
         )
         assert isinstance(ds, SQLDataSource)
-        assert ds.type() == "sql"
+        assert ds.storage_type() == "sql"
         assert ds.config_name == "foo_bar"
         assert ds.scope == Scope.PIPELINE
         assert ds.id is not None

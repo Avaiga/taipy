@@ -18,7 +18,7 @@ class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
             data_source.id,
             data_source.config_name,
             data_source.scope,
-            data_source.type(),
+            data_source.storage_type(),
             data_source.name,
             data_source.parent_id,
             data_source.last_edition_date.isoformat() if data_source.last_edition_date else None,
@@ -28,7 +28,7 @@ class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
         )
 
     def from_model(self, model: DataSourceModel):
-        return self.class_map[model.type](
+        return self.class_map[model.storage_type](
             config_name=model.config_name,
             scope=model.scope,
             id=model.id,

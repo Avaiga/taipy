@@ -18,7 +18,7 @@ class TestCSVDataSource:
         path = "data/source/path"
         ds = CSVDataSource("fOo BAr", Scope.PIPELINE, name="super name", properties={"path": path, "has_header": False})
         assert isinstance(ds, CSVDataSource)
-        assert ds.type() == "csv"
+        assert ds.storage_type() == "csv"
         assert ds.config_name == "foo_bar"
         assert ds.name == "super name"
         assert ds.scope == Scope.PIPELINE

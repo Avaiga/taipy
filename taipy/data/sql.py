@@ -42,7 +42,7 @@ class SQLDataSource(DataSource):
         "has_header" properties.
     """
 
-    __TYPE = "sql"
+    __STORAGE_TYPE = "sql"
     __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "query"]
 
     def __init__(
@@ -99,13 +99,13 @@ class SQLDataSource(DataSource):
         return create_engine(self.__build_conn_string(engine, username, password, database))
 
     @classmethod
-    def type(cls) -> str:
-        return cls.__TYPE
+    def storage_type(cls) -> str:
+        return cls.__STORAGE_TYPE
 
     def preview(self):
         pd.read_sql_query(self.query, con=self.__engine, chunksize=10)
 
-    def _read(self, query=None):
+    def _read(self):
         return pd.read_sql_query(self.query, con=self.__engine)
 
     def _write(self, data):

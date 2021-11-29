@@ -12,7 +12,7 @@ from taipy.data.scope import Scope
 class DataSourceModel:
     """
     The model of a DataSource.
-    
+
     A model refers to the structure of a Data Source stored in a database.
 
     Attributes:
@@ -33,7 +33,7 @@ class DataSourceModel:
     id: str
     config_name: str
     scope: Scope
-    type: str
+    storage_type: str
     name: str
     parent_id: Optional[str]
     last_edition_date: Optional[str]

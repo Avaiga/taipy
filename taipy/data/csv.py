@@ -19,8 +19,8 @@ class CSVDataSource(DataSource):
         "`has_header`" properties.
     """
 
+    __STORAGE_TYPE = "csv"
     __REQUIRED_PROPERTIES = ["path", "has_header"]
-    __TYPE = "csv"
 
     def __init__(
         self,
@@ -56,14 +56,14 @@ class CSVDataSource(DataSource):
             self.updated()
 
     @classmethod
-    def type(cls) -> str:
-        return cls.__TYPE
+    def storage_type(cls) -> str:
+        return cls.__STORAGE_TYPE
 
     def preview(self):
         df = pd.read_csv(self.path)
         print(df.head())
 
-    def _read(self, query=None):
+    def _read(self):
         return pd.read_csv(self.properties["path"])
 
     def _write(self, data: Any):
