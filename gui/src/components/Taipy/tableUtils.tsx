@@ -140,7 +140,10 @@ export const EditableCell = (props: EditableCellProps) => {
 
     const onChange = useCallback((e) => setVal(e.target.value), []);
     const onCheckClick = useCallback(
-        () => (onValidation && onValidation(val, rowIndex, colDesc.dfid)) || setEdit((e) => !e),
+        () => {
+            onValidation && onValidation(val, rowIndex, colDesc.dfid);
+            setEdit((e) => !e);
+        },
         [onValidation, val, rowIndex, colDesc.dfid]
     );
     const onEditClick = useCallback(() => (onValidation && setEdit((e) => !e)) || setVal(value), [onValidation, value]);
@@ -159,7 +162,10 @@ export const EditableCell = (props: EditableCellProps) => {
     );
 
     const onDeleteCheckClick = useCallback(
-        () => (onDeletion && onDeletion(rowIndex)) || setDeletion((d) => !d),
+        () => {
+            onDeletion && onDeletion(rowIndex);
+            setDeletion((d) => !d);
+        },
         [onDeletion, rowIndex]
     );
     const onDeleteClick = useCallback(() => onDeletion && setDeletion((d) => !d), [onDeletion]);
