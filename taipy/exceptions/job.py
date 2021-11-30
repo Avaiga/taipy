@@ -22,3 +22,11 @@ class DataSourceWritingError(RuntimeError):
     """
 
     pass
+
+
+class InvalidSubscriber(RuntimeError):
+    """
+    Raised if we try to load a function that is not valid.
+    """
+
+    pass

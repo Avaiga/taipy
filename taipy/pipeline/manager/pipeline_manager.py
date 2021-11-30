@@ -7,7 +7,7 @@ deleting, duplicating, executing) related to pipelines.
 
 import logging
 from functools import partial
-from typing import Callable, Iterable, List, Optional, Set
+from typing import Callable, List, Optional, Set
 
 from taipy.common.alias import PipelineId
 from taipy.config import PipelineConfig
@@ -29,25 +29,25 @@ class PipelineManager:
     def __init__(self):
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
 
-    __status_notifier: Set[Callable] = set()
-
-    def subscribe(self, callback: Callable[[Pipeline, Job], None]):
+    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
         """
         Subscribes a function to be called when the status of a Job changes.
 
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        self.__status_notifier.add(callback)
+        pipeline.add_subscriber(callback)
+        self.set(pipeline)
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
         """
         Unsubscribes a function that is called when the status of a Job changes.
 
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        self.__status_notifier.remove(callback)
+        pipeline.remove_subscriber(callback)
+        self.set(pipeline)
 
     def delete_all(self):
         self.repository.delete_all()
@@ -92,7 +92,7 @@ class PipelineManager:
                 self.task_scheduler.submit(task, pipeline_subscription_callback)
 
     def __get_status_notifier_callbacks(self, pipeline: Pipeline) -> List:
-        return [partial(c, pipeline) for c in self.__status_notifier]
+        return [partial(c, pipeline) for c in pipeline.subscribers]
 
     def _get_all_by_config_name(self, config_name: str) -> List[Pipeline]:
         return self.repository.search_all("config_name", config_name)
