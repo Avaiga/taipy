@@ -502,7 +502,7 @@ class Gui(object, metaclass=Singleton):
 
     def _run_adapter(
         self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
-    ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
+    ) -> t.Union[t.Tuple[str, ...], str, None]:
         if value is None:
             return None
         try:
@@ -568,7 +568,7 @@ class Gui(object, metaclass=Singleton):
         else:
             return str(id(value))
 
-    def __get_label(self, value: t.Any) -> t.Union[str, dict]:
+    def __get_label(self, value: t.Any) -> t.Union[str, t.Dict, None]:
         if isinstance(value, (str, TaipyImage)):
             return TaipyImage.get_dict_or(value)
         elif hasattr(value, "label"):
@@ -676,7 +676,7 @@ class Gui(object, metaclass=Singleton):
     def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
         return self._config._get_app_config(name, defaultValue)
 
-    def _get_themes(self) -> str:
+    def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
         theme = self._get_app_config("theme", None)
         dark_theme = self._get_app_config("theme[dark]", None)
         light_theme = self._get_app_config("theme[light]", None)
