@@ -89,10 +89,6 @@ class DataSource:
     def storage_type(cls) -> str:
         return NotImplemented
 
-    @abstractmethod
-    def preview(self):
-        return NotImplemented
-
     def read(self):
         if not self.last_edition_date:
             raise NoData

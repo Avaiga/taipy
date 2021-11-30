@@ -44,9 +44,6 @@ class InMemoryDataSource(DataSource):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def preview(self):
-        pass
-
     def _read(self):
         return in_memory_storage.get(self.id)
 

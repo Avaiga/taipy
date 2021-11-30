@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
@@ -43,6 +43,7 @@ class SQLDataSource(DataSource):
     """
 
     __STORAGE_TYPE = "sql"
+    __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "query"]
 
     def __init__(
@@ -73,20 +74,10 @@ class SQLDataSource(DataSource):
         )
 
         super().__init__(
-            config_name,
-            scope,
-            id,
-            name,
-            parent_id,
-            last_edition_date,
-            job_ids or [],
-            up_to_date,
-            username=properties.get("db_username"),
-            password=properties.get("db_password"),
-            database=properties.get("db_name"),
-            engine=properties.get("db_engine"),
-            query=properties.get("query"),
+            config_name, scope, id, name, parent_id, last_edition_date, job_ids or [], up_to_date, **properties
         )
+        if not self.last_edition_date:
+            self.updated()
 
     @staticmethod
     def __build_conn_string(engine, username, password, database):
@@ -102,10 +93,19 @@ class SQLDataSource(DataSource):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def preview(self):
-        pd.read_sql_query(self.query, con=self.__engine, chunksize=10)
-
     def _read(self):
+        if self.__EXPOSED_TYPE_PROPERTY in self.properties:
+            return self._read_as(self.query, self.properties[self.__EXPOSED_TYPE_PROPERTY])
+        return self._read_as_pandas_dataframe()
+
+    def _read_as(self, query, custom_class):
+        with self.__engine.connect() as connection:
+            query_result = connection.execute(text(query))
+        return list(map(lambda row: custom_class(**row), query_result))
+
+    def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
+        if columns:
+            return pd.read_sql_query(self.query, con=self.__engine)[columns]
         return pd.read_sql_query(self.query, con=self.__engine)
 
     def _write(self, data):
