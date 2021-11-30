@@ -37,6 +37,7 @@ import {
     EDIT_COL,
     OnRowDeletion,
     iconInRowSx,
+    addDeleteColumn,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
@@ -192,10 +193,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-            if (active && editable && deleteAction) {
-                Object.keys(columns).forEach((key) => columns[key].index++);
-                columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: "2rem" };
-            }
+            addDeleteColumn(!!(active && editable && deleteAction), columns);
             return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
         }
         return [[], {}];

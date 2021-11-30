@@ -18,7 +18,7 @@ export interface ColumnDesc {
     format: string;
     title?: string;
     index: number;
-    width?: number;
+    width?: number | string;
     notEditable?: boolean;
 }
 
@@ -42,7 +42,7 @@ export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
-export const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig): string => {
+const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig): string => {
     if (val === null || val === undefined) {
         return "";
     }
@@ -118,6 +118,14 @@ interface EditableCellProps {
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
 }
+
+export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnDesc>) => {
+    if (render) {
+        Object.keys(columns).forEach((key) => columns[key].index++);
+        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: "2em" };
+    }
+    return columns;
+} 
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 

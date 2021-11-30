@@ -12,26 +12,33 @@ import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
+import IconButton from "@mui/material/IconButton";
+import AddIcon from "@mui/icons-material/Add";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestTableUpdateAction } from "../../context/taipyReducers";
+import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
+    addDeleteColumn,
     alignCell,
     boxSx,
-    formatValue,
+    EditableCell,
+    EDIT_COL,
     getsortByIndex,
+    iconInRowSx,
+    OnCellValidation,
+    OnRowDeletion,
     Order,
     PageSizeOptionsType,
     paperSx,
     RowType,
+    RowValue,
     tableSx,
     TaipyPaginatedTableProps,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
-//import { useWhyDidYouUpdate } from "../../utils/hooks";
 
-const loadingStyle: CSSProperties = { width: "100%", height: "52px", textAlign: "right", verticalAlign: "center" };
-const skelSx = {width: "100%", height: "3rem"};
+const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
+const skelSx = {width: "100%", height: "3em"};
 
 const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
@@ -48,6 +55,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         height,
         selected = [],
         tp_updatevars,
+        editAction = "",
+        deleteAction = "",
+        addAction = "",
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -61,14 +71,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const formatConfig = useFormatConfig();
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
 
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+            addDeleteColumn(!!(active && editable && deleteAction), columns);
             return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
         }
         return [[], {}];
-    }, [props.columns]);
+    }, [active, editable, deleteAction, props.columns]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
@@ -142,6 +154,41 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         setStartIndex(0);
     }, []);
 
+    const onAddRowClick = useCallback(
+        () =>
+            dispatch(
+                createSendActionNameAction(tp_varname, {
+                    action: addAction,
+                    index: startIndex,
+                })
+            ),
+        [startIndex, dispatch, tp_varname, addAction]
+    );
+
+    const onCellValidation: OnCellValidation = useCallback(
+        (value: RowValue, rowIndex: number, colName: string) =>
+            dispatch(
+                createSendActionNameAction(tp_varname, {
+                    action: editAction,
+                    value: value,
+                    index: rowIndex,
+                    col: colName,
+                })
+            ),
+        [dispatch, tp_varname, editAction]
+    );
+
+    const onRowDeletion: OnRowDeletion = useCallback(
+        (rowIndex: number) =>
+            dispatch(
+                createSendActionNameAction(tp_varname, {
+                    action: deleteAction,
+                    index: rowIndex,
+                })
+            ),
+        [dispatch, tp_varname, deleteAction]
+    );
+
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
 
     const pso = useMemo(() => {
@@ -187,6 +234,13 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                             <TableRow>
                                 {colsOrder.map((col, idx) => (
                                     <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
+                                        {columns[col].dfid === EDIT_COL ? (
+                                            active && editable && addAction ? (
+                                                <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
+                                                    <AddIcon />
+                                                </IconButton>
+                                            ) : null
+                                        ) : (
                                         <TableSortLabel
                                             active={orderBy === columns[col].dfid}
                                             direction={orderBy === columns[col].dfid ? order : "asc"}
@@ -200,6 +254,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                 </Box>
                                             ) : null}
                                         </TableSortLabel>
+                                        )}
                                     </TableCell>
                                 ))}
                             </TableRow>
@@ -220,7 +275,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     >
                                         {colsOrder.map((col, cidx) => (
                                             <TableCell key={"val" + index + "-" + cidx} {...alignCell(columns[col])}>
-                                                {formatValue(row[col], columns[col], formatConfig)}
+                                                <EditableCell
+                                                    colDesc={columns[col]}
+                                                    value={rows[index][col]}
+                                                    formatConfig={formatConfig}
+                                                    rowIndex={index}
+                                                    onValidation={active && editable && editAction ? onCellValidation : undefined}
+                                                    onDeletion={active && editable && deleteAction ? onRowDeletion : undefined}
+                                                />
                                             </TableCell>
                                         ))}
                                     </TableRow>
