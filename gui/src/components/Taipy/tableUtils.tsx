@@ -125,12 +125,12 @@ export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnD
         columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: "2em" };
     }
     return columns;
-} 
+};
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
 const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
-export const iconInRowSx = {height: "1em"} as CSSProperties;
+export const iconInRowSx = { height: "1em" } as CSSProperties;
 
 export const EditableCell = (props: EditableCellProps) => {
     const { onValidation, value, colDesc, formatConfig, rowIndex, onDeletion } = props;
@@ -139,14 +139,16 @@ export const EditableCell = (props: EditableCellProps) => {
     const [deletion, setDeletion] = useState(false);
 
     const onChange = useCallback((e) => setVal(e.target.value), []);
-    const onCheckClick = useCallback(
-        () => {
-            onValidation && onValidation(val, rowIndex, colDesc.dfid);
-            setEdit((e) => !e);
-        },
-        [onValidation, val, rowIndex, colDesc.dfid]
-    );
-    const onEditClick = useCallback(() => (onValidation && setEdit((e) => !e)) || setVal(value), [onValidation, value]);
+    const onCheckClick = useCallback(() => {
+        onValidation && onValidation(val, rowIndex, colDesc.dfid);
+        setEdit((e) => !e);
+    }, [onValidation, val, rowIndex, colDesc.dfid]);
+
+    const onEditClick = useCallback(() => {
+        onValidation && setEdit((e) => !e);
+        setVal(value);
+    }, [onValidation, value]);
+
     const onKeyDown = useCallback(
         (e) => {
             switch (e.keyCode) {
@@ -161,13 +163,11 @@ export const EditableCell = (props: EditableCellProps) => {
         [onCheckClick, onEditClick]
     );
 
-    const onDeleteCheckClick = useCallback(
-        () => {
-            onDeletion && onDeletion(rowIndex);
-            setDeletion((d) => !d);
-        },
-        [onDeletion, rowIndex]
-    );
+    const onDeleteCheckClick = useCallback(() => {
+        onDeletion && onDeletion(rowIndex);
+        setDeletion((d) => !d);
+    }, [onDeletion, rowIndex]);
+
     const onDeleteClick = useCallback(() => onDeletion && setDeletion((d) => !d), [onDeletion]);
     const onDeleteKeyDown = useCallback(
         (e) => {
