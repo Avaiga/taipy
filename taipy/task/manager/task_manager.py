@@ -17,7 +17,7 @@ class TaskManager:
     tasks: Dict[(TaskId, Task)] = {}
     task_scheduler = TaskScheduler()
     data_manager = DataManager()
-    repository = TaskRepository(dir_name="task_models")
+    repository = TaskRepository()
 
     def delete_all(self):
         self.repository.delete_all()
