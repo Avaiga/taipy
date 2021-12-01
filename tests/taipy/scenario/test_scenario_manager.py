@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 import pytest
 
+from taipy.common import utils
 from taipy.common.alias import CycleId, PipelineId, ScenarioId, TaskId
 from taipy.config import Config, DataSourceConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.cycle.cycle import Cycle
@@ -274,7 +275,7 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert scenario_entity.cycle.frequency == Frequency.DAILY
 
 
-def test_notification_subscribe_unsubscribe():
+def test_notification_subscribe_unsubscribe(mocker):
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
     task_manager = scenario_manager.task_manager
@@ -304,28 +305,29 @@ def test_notification_subscribe_unsubscribe():
     scenario = scenario_manager.create(scenario_config)
 
     notify_1 = NotifyMock(scenario)
-    # notify_2 = NotifyMock(scenario)
+    notify_2 = NotifyMock(scenario)
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_2])
 
     # test subscribing notification
     scenario_manager.subscribe(notify_1, scenario)
     scenario_manager.submit(scenario.id)
 
-    # notify_1.assert_called_3_times()
+    notify_1.assert_called_3_times()
 
-    # notify_1.reset()
+    notify_1.reset()
 
-    # # test unsubscribing notification
-    # # test notis subscribe only on new jobs
-    # scenario_manager.unsubscribe(notify_1)
-    # scenario_manager.subscribe(notify_2, scenario)
-    # scenario_manager.submit(scenario.id)
+    # test unsubscribing notification
+    # test notis subscribe only on new jobs
+    scenario_manager.unsubscribe(notify_1, scenario)
+    scenario_manager.subscribe(notify_2, scenario)
+    scenario_manager.submit(scenario.id)
 
-    # notify_1.assert_not_called()
-    # notify_2.assert_called_3_times()
+    notify_1.assert_not_called()
+    notify_2.assert_called_3_times()
 
-    # with pytest.raises(KeyError):
-    #     scenario_manager.unsubscribe(notify_1)
-    # scenario_manager.unsubscribe(notify_2)
+    with pytest.raises(KeyError):
+        scenario_manager.unsubscribe(notify_1, scenario)
+    scenario_manager.unsubscribe(notify_2, scenario)
 
 
 def test_get_set_master_scenario():
