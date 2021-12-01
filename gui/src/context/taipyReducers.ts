@@ -131,7 +131,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.Update:
             let newValue = action.payload.value as Record<string, unknown>;
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
-            console.log(newValue.format)
             if (newValue.format && newValue.format === DataFormat.APACHE_ARROW) {
                 const arrowData = ArrowTable.from(new Uint8Array(newValue.data as ArrayBuffer));
                 const tableHeading = arrowData.schema.fields.map((f) => f.name);
