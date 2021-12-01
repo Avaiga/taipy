@@ -38,7 +38,15 @@ module.exports = (env, options) => ({
             {
                 test: /\.css$/,
                 use: [ MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader' ]
-            }
+            },
+            {
+                // added to resolve apache-arrow library (don't really understand the problem tbh)
+                // Reference: https://github.com/graphql/graphql-js/issues/2721
+                test: /\.m?js/,
+                resolve: {
+                    fullySpecified: false,
+                },
+            },
           ],
     },
     plugins: [

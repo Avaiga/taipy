@@ -5,6 +5,7 @@ import { io, Socket } from "socket.io-client";
 import { merge } from "lodash";
 
 import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
+import { parseData } from "../utils/dataFormat";
 
 enum Types {
     Update = "UPDATE",
@@ -17,7 +18,6 @@ enum Types {
     SetTheme = "SET_THEME",
     SetTimeZone = "SET_TIMEZONE",
 }
-
 export interface TaipyState {
     socket?: Socket;
     data: Record<string, unknown>;
@@ -123,7 +123,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     const action = baseAction as TaipyAction;
     switch (action.type) {
         case Types.Update:
-            const newValue = action.payload.value as Record<string, unknown>;
+            const newValue = parseData(action.payload.value as Record<string, unknown>);
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
             if (typeof action.payload.infinite === "boolean" && action.payload.infinite) {
                 const start = newValue.start;
