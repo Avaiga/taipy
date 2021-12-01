@@ -44,9 +44,9 @@ export type TraceValueType = Record<string, (string | number)[]>;
 
 const defaultStyle = { position: "relative", display: "inline-block" };
 
-const getValue = <T extends unknown>(values: TraceValueType | undefined, arr: T[], idx: number): (string | number)[] => {
+const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number): (string | number)[] => {
     if (values) {
-        const confValue = getArrayValue(arr, idx) as string;
+        const confValue = getArrayValue(arr, idx) as unknown as string;
         if (confValue) {
             return values[confValue] || [];
         }
@@ -135,9 +135,16 @@ const Chart = (props: ChartProp) => {
         if (!value || !!refresh) {
             setLoading(true);
             const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dispatch(createRequestChartUpdateAction(tp_varname, id, back_cols, limitRows ? plotRef.current?.clientWidth : undefined));
+            dispatch(
+                createRequestChartUpdateAction(
+                    tp_varname,
+                    id,
+                    back_cols,
+                    limitRows ? plotRef.current?.clientWidth : undefined
+                )
+            );
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refresh, dispatch, config.columns, tp_varname, id, limitRows]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
@@ -163,10 +170,7 @@ const Chart = (props: ChartProp) => {
         } as Layout;
     }, [title, config.columns, config.traces, props.layout]);
 
-    const style = useMemo(
-        () => ({ ...defaultStyle, width: width, height: height } as CSSProperties),
-        [width, height]
-    );
+    const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
 
     const divStyle = useMemo(() => (loading ? { display: "none" } : {}), [loading]);
 
@@ -205,7 +209,10 @@ const Chart = (props: ChartProp) => {
 
     const onAfterPlot = useCallback(() => setLoading(false), []);
 
-    const getRealIndex = useCallback((index: number) => value?.tp_index ? value.tp_index[index] as number : index, [value]);
+    const getRealIndex = useCallback(
+        (index: number) => (value?.tp_index ? (value.tp_index[index] as number) : index),
+        [value]
+    );
 
     const onSelect = useCallback(
         (evt?: PlotMouseEvent | PlotSelectionEvent) => {
