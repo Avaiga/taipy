@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 from taipy.config import DataSourceConfig
-from taipy.data import CSVDataSource, DataRepository, PickleDataSource
+from taipy.data import CSVDataSource, DataRepository, PickleDataSource, SQLDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.scope import Scope
@@ -17,11 +17,11 @@ The Data Manager facilitates data access between Taipy modules.
 
 
 class DataManager:
-    __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource}
-    __DATA_SOURCE_CLASS_MAP = {v.type(): v for v in __DATA_SOURCE_CLASSES}  # type: ignore
+    __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource, SQLDataSource}
+    __DATA_SOURCE_CLASS_MAP = {ds_class.storage_type(): ds_class for ds_class in __DATA_SOURCE_CLASSES}  # type: ignore
 
     def __init__(self):
-        self.repository = DataRepository(self.__DATA_SOURCE_CLASS_MAP, "sources")
+        self.repository = DataRepository(self.__DATA_SOURCE_CLASS_MAP)
 
     def delete_all(self):
         self.repository.delete_all()
@@ -64,12 +64,12 @@ class DataManager:
 
     def __create(self, data_source_config: DataSourceConfig, parent_id: Optional[str]) -> DataSource:
         try:
-            return self.__DATA_SOURCE_CLASS_MAP[data_source_config.type](  # type: ignore
+            return self.__DATA_SOURCE_CLASS_MAP[data_source_config.storage_type](  # type: ignore
                 config_name=data_source_config.name,
                 scope=data_source_config.scope,
                 parent_id=parent_id,
                 properties=data_source_config.properties,
             )
         except KeyError:
-            logging.error(f"Cannot create Data source. " f"Type {data_source_config.type} does not exist.")
-            raise InvalidDataSourceType(data_source_config.type)
+            logging.error(f"Cannot create Data source. " f"Type {data_source_config.storage_type} does not exist.")
+            raise InvalidDataSourceType(data_source_config.storage_type)

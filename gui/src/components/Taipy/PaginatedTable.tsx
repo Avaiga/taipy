@@ -23,6 +23,7 @@ import {
     Order,
     PageSizeOptionsType,
     paperSx,
+    RowType,
     tableSx,
     TaipyPaginatedTableProps,
 } from "./tableUtils";
@@ -87,7 +88,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         }
     }, [props.value]);
 
-    /* eslint react-hooks/exhaustive-deps: "off", curly: "error" */
     useEffect(() => {
         const endIndex = showAll ? -1 : startIndex + rowsPerPage;
         pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}`;
@@ -110,6 +110,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             setValue(props.value[pageKey.current]);
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [startIndex, refresh, colsOrder, columns, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
 
     const handleRequestSort = useCallback(
@@ -158,12 +159,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return psOptions;
     }, [pageSizeOptions, allowAllRows]);
 
-    /* eslint "@typescript-eslint/no-explicit-any": "off", curly: "error" */
     const { rows, rowCount } = useMemo(() => {
-        const ret = { rows: [], rowCount: 0 } as { rows: any[]; rowCount: number };
+        const ret = { rows: [], rowCount: 0 } as { rows: RowType[]; rowCount: number };
         if (value) {
             if (value.data) {
-                ret.rows = value.data as any[];
+                ret.rows = value.data as RowType[];
             }
             if (value.rowcount) {
                 ret.rowCount = value.rowcount as unknown as number;

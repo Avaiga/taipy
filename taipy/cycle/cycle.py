@@ -57,7 +57,6 @@ class Cycle:
     def __get_end_date_of_cycle(self):
 
         end_date = self.start_date
-        print(type(end_date))
         if self.frequency == Frequency.DAILY:
             end_date = end_date + timedelta(days=1)
         if self.frequency == Frequency.WEEKLY:

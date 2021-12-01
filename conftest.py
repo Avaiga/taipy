@@ -2,8 +2,8 @@ import os
 import shutil
 from datetime import datetime
 
-import pandas as pd
 import pytest
+import pandas as pd
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.cycle.cycle import Cycle
@@ -51,7 +51,7 @@ def scenario(cycle):
 
 @pytest.fixture(scope="function")
 def scenario_model(cycle):
-    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, cycle=None)
+    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, subscribers=[], cycle=None)
 
 
 @pytest.fixture(scope="function")
@@ -88,4 +88,4 @@ def cycle_model():
 
 @pytest.fixture(scope="class")
 def pipeline_model():
-    return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, Dag({}), Dag({}))
+    return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, Dag({}), Dag({}), [])

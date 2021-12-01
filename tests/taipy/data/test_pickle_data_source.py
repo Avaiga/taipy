@@ -19,7 +19,7 @@ class TestPickleDataSourceEntity:
     def test_create(self):
         ds = PickleDataSource("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
         assert isinstance(ds, PickleDataSource)
-        assert ds.type() == "pickle"
+        assert ds.storage_type() == "pickle"
         assert ds.config_name == "foobar_bazxyxea"
         assert ds.scope == Scope.PIPELINE
         assert ds.id is not None

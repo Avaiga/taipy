@@ -20,7 +20,7 @@ class PickleDataSource(DataSource):
         as the path name of the pickle file.
     """
 
-    __TYPE = "pickle"
+    __STORAGE_TYPE = "pickle"
     __PICKLE_FILE_NAME = "file_path"
     __DEFAULT_DATA_VALUE = "default_data"
 
@@ -46,13 +46,10 @@ class PickleDataSource(DataSource):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
     @classmethod
-    def type(cls) -> str:
-        return cls.__TYPE
+    def storage_type(cls) -> str:
+        return cls.__STORAGE_TYPE
 
-    def preview(self):
-        pass
-
-    def _read(self, query=None):
+    def _read(self):
         return pickle.load(open(self.__pickle_file_path, "rb"))
 
     def _write(self, data):

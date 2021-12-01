@@ -16,7 +16,7 @@ class TestInMemoryDataSourceEntity:
             properties={"default_data": "In memory Data Source"},
         )
         assert isinstance(ds, InMemoryDataSource)
-        assert ds.type() == "in_memory"
+        assert ds.storage_type() == "in_memory"
         assert ds.config_name == "foobar_baz"
         assert ds.scope == Scope.SCENARIO
         assert ds.id == "id"

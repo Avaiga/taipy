@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 from os.path import isfile
 from typing import Any, Dict, List, Optional
@@ -19,8 +20,11 @@ class CSVDataSource(DataSource):
         "`has_header`" properties.
     """
 
-    __REQUIRED_PROPERTIES = ["path", "has_header"]
-    __TYPE = "csv"
+    __STORAGE_TYPE = "csv"
+    __EXPOSED_TYPE_PROPERTY = "exposed_type"
+    __REQUIRED_PATH_PROPERTY = "path"
+    __REQUIRED_HAS_HEADER_PROPERTY = "has_header"
+    __REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
 
     def __init__(
         self,
@@ -41,33 +45,47 @@ class CSVDataSource(DataSource):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
         super().__init__(
-            config_name,
-            scope,
-            id,
-            name,
-            parent_id,
-            last_edition_date,
-            job_ids or [],
-            up_to_date,
-            path=properties.get("path"),
-            has_header=properties.get("has_header"),
+            config_name, scope, id, name, parent_id, last_edition_date, job_ids or [], up_to_date, **properties
         )
-        if not self.last_edition_date and isfile(self.properties["path"]):
+        if not self.last_edition_date and isfile(self.properties[self.__REQUIRED_PATH_PROPERTY]):
             self.updated()
 
     @classmethod
-    def type(cls) -> str:
-        return cls.__TYPE
+    def storage_type(cls) -> str:
+        return cls.__STORAGE_TYPE
 
-    def preview(self):
-        df = pd.read_csv(self.path)
-        print(df.head())
+    def _read(self):
+        if self.__EXPOSED_TYPE_PROPERTY in self.properties:
+            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
+        return self._read_as_pandas_dataframe()
 
-    def _read(self, query=None):
-        return pd.read_csv(self.properties["path"])
+    def _read_as(self, custom_class):
+        with open(self.properties[self.__REQUIRED_PATH_PROPERTY]) as csvFile:
+            res = list()
+            if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+                reader = csv.DictReader(csvFile)
+                for line in reader:
+                    res.append(custom_class(**line))
+            else:
+                reader = csv.reader(
+                    csvFile,
+                )
+                for line in reader:
+                    res.append(custom_class(*line))
+            return res
+
+    def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
+        if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+            if column_names:
+                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])[column_names]
+            return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])
+        else:
+            if usecols:
+                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None, usecols=usecols)
+            return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None)
 
     def _write(self, data: Any):
-        pd.DataFrame(data).to_csv(self.path, index=False)
+        pd.DataFrame(data).to_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         if not columns:

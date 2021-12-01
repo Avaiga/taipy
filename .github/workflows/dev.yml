@@ -15,7 +15,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains two jobs called "test" and "test-gui"
+   #This workflow contains two jobs called "test" and "test-gui"
   test:
     # The type of runner that the job will run on
     strategy:
@@ -57,7 +57,7 @@ jobs:
             extra-pycodestyle-options: "--max-line-length=120 --ignore=E203,E266,E501,E722,W503,F403,F401"
             extra-mypy-options: "--ignore-missing-imports"
       - name: test with tox
-        run:
+        run: |
           tox
 
       - name: Install and test with optional dependancy

@@ -1,6 +1,7 @@
 from datetime import datetime
-from importlib import import_module
 
+from taipy.common.utils import fcts_to_dict, load_fct
+from taipy.exceptions import InvalidSubscriber
 from taipy.repository import FileSystemRepository
 from taipy.task import Job
 from taipy.task.repository import TaskRepository
@@ -14,7 +15,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
             job.task.id,
             job.status,
             job.creation_date.isoformat(),
-            self.__to_dict(job._subscribers),
+            fcts_to_dict(job._subscribers),
             self.__to_names(job.exceptions),
         )
 
@@ -23,7 +24,11 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
 
         job.status = model.status
         job.creation_date = datetime.fromisoformat(model.creation_date) if model.creation_date else None
-        job._subscribers = [self.__load_fct(it.get("fct_module"), it.get("fct_name")) for it in model.subscribers]
+        for it in model.subscribers:
+            try:
+                job._subscribers.append(load_fct(it.get("fct_module"), it.get("fct_name")))
+            except AttributeError:
+                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be load.")
         job.__exceptions = []
 
         return job
@@ -31,12 +36,3 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
     @staticmethod
     def __to_names(objs):
         return [obj.__name__ for obj in objs]
-
-    @staticmethod
-    def __to_dict(objs):
-        return [{"fct_name": obj.__name__, "fct_module": obj.__module__} for obj in objs]
-
-    @staticmethod
-    def __load_fct(module_name, fct_name):
-        module = import_module(module_name)
-        return getattr(module, fct_name)

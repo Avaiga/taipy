@@ -21,25 +21,25 @@ class ScenarioManager:
     data_manager = pipeline_manager.data_manager
     repository = ScenarioRepository(dir_name="scenarios")
 
-    __status_notifier: Set[Callable] = set()
-
-    def subscribe(self, callback: Callable[[Scenario, Job], None]):
+    def subscribe(self, callback: Callable[[Scenario, Job], None], scenario: Scenario):
         """
         Subscribes a function to be called when the status of a Job changes.
 
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        self.__status_notifier.add(callback)
+        scenario.add_subscriber(callback)
+        self.set(scenario)
 
-    def unsubscribe(self, callback: Callable[[Scenario, Job], None]):
+    def unsubscribe(self, callback: Callable[[Scenario, Job], None], scenario: Scenario):
         """
         Unsubscribes a function that is called when the status of a Job changes.
 
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        self.__status_notifier.remove(callback)
+        scenario.remove_subscriber(callback)
+        self.set(scenario)
 
     def delete_all(self):
         self.repository.delete_all()
@@ -80,9 +80,7 @@ class ScenarioManager:
             self.pipeline_manager.submit(pipeline.id, callbacks)
 
     def __get_status_notifier_callbacks(self, scenario: Scenario) -> List:
-        if self.__status_notifier:
-            return [partial(c, scenario) for c in self.__status_notifier]
-        return []
+        return [partial(c, scenario) for c in scenario.subscribers]
 
     def get_master(self, cycle: Cycle) -> Optional[Scenario]:
         scenarios = self.get_all_scenarios_of_cycle(cycle)
