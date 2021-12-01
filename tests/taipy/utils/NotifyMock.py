@@ -8,6 +8,7 @@ class NotifyMock:
     def __init__(self, entity):
         self.scenario = entity
         self.nb_called = 0
+        self.__name__ = "NotifyMock"
 
     def __call__(self, entity, job):
         assert entity == self.scenario

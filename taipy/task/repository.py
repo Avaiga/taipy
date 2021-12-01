@@ -1,6 +1,5 @@
-from importlib import import_module
-
 from taipy.common.alias import TaskId
+from taipy.common.utils import load_fct
 from taipy.data.manager import DataManager
 from taipy.repository import FileSystemRepository
 from taipy.task import Task
@@ -28,7 +27,7 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
             parent_id=model.parent_id,
             config_name=model.config_name,
             input=self.__to_data_source(model.input_ids),
-            function=self.__load_fct(model.function_module, model.function_name),
+            function=load_fct(model.function_module, model.function_name),
             output=self.__to_data_source(model.output_ids),
         )
 
@@ -39,8 +38,3 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
     @staticmethod
     def __to_data_source(data_sources_ids):
         return [DataManager().get(i) for i in data_sources_ids]
-
-    @staticmethod
-    def __load_fct(module_name, fct_name):
-        module = import_module(module_name)
-        return getattr(module, fct_name)

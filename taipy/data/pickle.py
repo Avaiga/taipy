@@ -49,9 +49,6 @@ class PickleDataSource(DataSource):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
-    def preview(self):
-        pass
-
     def _read(self):
         return pickle.load(open(self.__pickle_file_path, "rb"))
 

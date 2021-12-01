@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, List, Optional
 
 from dataclasses_json import dataclass_json
 
@@ -32,3 +32,4 @@ class PipelineModel:
     properties: dict
     source_task_edges: Dag
     task_source_edges: Dag
+    subscribers: List[Dict]

@@ -1,6 +1,7 @@
 import datetime
 import os
 import pathlib
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -40,17 +41,69 @@ class TestCSVDataSource:
         with pytest.raises(MissingRequiredProperty):
             CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True})
 
-    def test_read(self):
+    def test_read_with_header(self):
+        not_existing_csv = CSVDataSource("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": True})
+        with pytest.raises(NoData):
+            not_existing_csv.read()
+
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
+        csv_data_source_as_pandas = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path, "has_header": True})
+        data_pandas = csv_data_source_as_pandas.read()
+        assert isinstance(data_pandas, pd.DataFrame)
+        assert len(data_pandas) == 10
+
+        # Create the same CSVDataSource but with custom exposed_type
+        class MyCustomObject:
+            def __init__(self, id, integer, text):
+                self.id = id
+                self.integer = integer
+                self.text = text
+
+        csv_data_source_as_custom_object = CSVDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": MyCustomObject}
+        )
+        data_custom = csv_data_source_as_custom_object.read()
+        assert isinstance(data_custom, list)
+        assert len(data_custom) == 10
+
+        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+            assert isinstance(row_custom, MyCustomObject)
+            assert row_pandas["id"] == row_custom.id
+            assert str(row_pandas["integer"]) == row_custom.integer
+            assert row_pandas["text"] == row_custom.text
+
+    def test_read_without_header(self):
         not_existing_csv = CSVDataSource("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": False})
         with pytest.raises(NoData):
             not_existing_csv.read()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        csv_ds = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path, "has_header": False})
-        assert csv_ds.path == path
-        csv_ds.last_edition_date = datetime.datetime.now()
-        data = csv_ds.read()
-        assert isinstance(data, pd.DataFrame)
+        # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
+        csv_data_source_as_pandas = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path, "has_header": False})
+        data_pandas = csv_data_source_as_pandas.read()
+        assert isinstance(data_pandas, pd.DataFrame)
+        assert len(data_pandas) == 11
+
+        # Create the same CSVDataSource but with custom exposed_type
+        class MyCustomObject:
+            def __init__(self, id, integer, text):
+                self.id = id
+                self.integer = integer
+                self.text = text
+
+        csv_data_source_as_custom_object = CSVDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": MyCustomObject}
+        )
+        data_custom = csv_data_source_as_custom_object.read()
+        assert isinstance(data_custom, list)
+        assert len(data_custom) == 11
+
+        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+            assert isinstance(row_custom, MyCustomObject)
+            assert row_pandas[0] == row_custom.id
+            assert str(row_pandas[1]) == row_custom.integer
+            assert row_pandas[2] == row_custom.text
 
     @pytest.mark.parametrize(
         "content,columns",
@@ -61,7 +114,7 @@ class TestCSVDataSource:
         ],
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
-        csv_ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": csv_file, "has_header": False})
+        csv_ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": csv_file, "has_header": True})
         assert np.array_equal(csv_ds.read().values, default_data_frame.values)
         if not columns:
             csv_ds.write(content)
@@ -70,8 +123,3 @@ class TestCSVDataSource:
             csv_ds.write_with_column_names(content, columns)
             df = pd.DataFrame(content, columns=columns)
         assert np.array_equal(csv_ds.read().values, df.values)
-
-    def test_preview(self):
-        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": path, "has_header": False})
-        ds.preview()
