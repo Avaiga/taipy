@@ -621,7 +621,7 @@ class Gui(object, metaclass=Singleton):
         for e in self._fetch_expression_list(expr):
             st = ast.parse(e)
             for node in ast.walk(st):
-                if type(node) is ast.Name:
+                if isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
                     self.bind_var(var_name)
                     try:
