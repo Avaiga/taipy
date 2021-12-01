@@ -3,9 +3,9 @@ import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 import { merge } from "lodash";
-import { Table as ArrowTable } from "apache-arrow";
 
 import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
+import { parseData } from "../utils/dataFormat";
 
 enum Types {
     Update = "UPDATE",
@@ -18,12 +18,6 @@ enum Types {
     SetTheme = "SET_THEME",
     SetTimeZone = "SET_TIMEZONE",
 }
-
-enum DataFormat {
-    JSON = "JSON",
-    APACHE_ARROW = "ARROW"
-}
-
 export interface TaipyState {
     socket?: Socket;
     data: Record<string, unknown>;
@@ -129,33 +123,8 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     const action = baseAction as TaipyAction;
     switch (action.type) {
         case Types.Update:
-            let newValue = action.payload.value as Record<string, unknown>;
+            const newValue = parseData(action.payload.value as Record<string, unknown>);
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
-            if (newValue.format && newValue.format === DataFormat.APACHE_ARROW) {
-                const arrowData = ArrowTable.from(new Uint8Array(newValue.data as ArrayBuffer));
-                const tableHeading = arrowData.schema.fields.map((f) => f.name);
-                if (newValue.orient === "records") {
-                    const convertedData: Array<unknown> = [];
-                    for (let i = 0; i < arrowData.count(); i++) {
-                        const dataRow: Record<string, unknown> = {};
-                        for (let j = 0; j < tableHeading.length; j++) {
-                            dataRow[tableHeading[j]] = arrowData.getColumnAt(j)?.get(i).valueOf();
-                        }
-                        convertedData.push(dataRow);
-                    }
-                    newValue.data = convertedData;
-                } else if (newValue.orient === "list") {
-                    const convertedData: Record<string, unknown> = {};
-                    for (let i = 0; i < tableHeading.length; i++) {
-                        const dataRow: Array<unknown> = [];
-                        for (let j = 0; j < arrowData.count(); j++) {
-                            dataRow.push(arrowData.getColumnAt(i)?.get(j).valueOf());
-                        }
-                        convertedData[tableHeading[i]] = dataRow;
-                    }
-                    newValue.data = convertedData
-                }
-            }
             if (typeof action.payload.infinite === "boolean" && action.payload.infinite) {
                 const start = newValue.start;
                 if (typeof start === "number") {
@@ -164,9 +133,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                         []) as Record<string, unknown>[];
                     newValue.data = addRows(rows, newValue.data as Record<string, unknown>[], start);
                 }
-            }
-            if (typeof newValue.dataExtraction === "boolean" && newValue.dataExtraction) {
-                newValue = newValue.data as Record<string, unknown>
             }
             return {
                 ...state,

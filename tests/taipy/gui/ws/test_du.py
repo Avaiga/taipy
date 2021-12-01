@@ -111,6 +111,5 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
             "rowcount": 14477,
             "start": 0,
             "format": "JSON",
-            "dataExtraction": False,
         },
     )

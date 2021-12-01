@@ -113,7 +113,6 @@ class PandasDataAccessor(DataAccessor):
                     "rowcount": rowcount,
                     "start": start,
                     "format": str(data_format.value),
-                    "dataExtraction": False,  # Keep data in the same hierarchical on frontend
                 }
             else:
                 # view with the requested columns
