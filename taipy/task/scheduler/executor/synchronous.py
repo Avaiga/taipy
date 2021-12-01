@@ -4,8 +4,7 @@ from concurrent.futures import Executor, Future
 
 
 class Synchronous(Executor):
-    """
-    Equivalent to the Python standard Thread/Process Pool Executor but
+    """Equivalent to the Python standard Thread/Process Pool Executor but
     the function is executed directly.
     """
 

@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional
 
+from taipy.common.alias import DataSourceId, PipelineId, ScenarioId
 from taipy.config import DataSourceConfig
 from taipy.data import CSVDataSource, DataRepository, PickleDataSource, SQLDataSource
 from taipy.data.data_source import DataSource
@@ -9,14 +10,14 @@ from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataSourceType
 from taipy.exceptions.data_source import MultipleDataSourceFromSameConfigWithSameParent
 
-"""
-The Data Manager is responsible for keeping track and retrieving Taipy Data Sources.
-
-The Data Manager facilitates data access between Taipy modules.
-"""
-
 
 class DataManager:
+    """
+    A Data Manager is responsible for all managing data source related capabilities.
+
+    In particular, it is exposing methods for creating, storing, updating, retrieving, deleting data sources.
+    """
+
     __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource, SQLDataSource}
     __DATA_SOURCE_CLASS_MAP = {ds_class.storage_type(): ds_class for ds_class in __DATA_SOURCE_CLASSES}  # type: ignore
 
@@ -24,14 +25,42 @@ class DataManager:
         self.repository = DataRepository(self.__DATA_SOURCE_CLASS_MAP)
 
     def delete_all(self):
+        """Deletes all data sources."""
         self.repository.delete_all()
 
     def delete(self, data_source_id: str):
+        """
+        Deletes the data source provided as parameter.
+
+        Parameters:
+            data_source_id (str) : identifier of the data source to delete.
+
+        Raises:
+            ModelNotFound: Raised if no data source corresponds to data_source_id.
+        """
         self.repository.delete(data_source_id)
 
     def get_or_create(
-        self, data_source_config: DataSourceConfig, scenario_id: Optional[str] = None, pipeline_id: Optional[str] = None
+        self,
+        data_source_config: DataSourceConfig,
+        scenario_id: Optional[ScenarioId] = None,
+        pipeline_id: Optional[PipelineId] = None,
     ) -> DataSource:
+        """Gets or creates a Data Source.
+
+        Returns the data source created from the data_source_config, by (pipeline_id and scenario_id) if it already
+        exists, or creates and returns a new data_source.
+
+        Parameters:
+            data_source_config (DataSourceConfig) : data source configuration object.
+            scenario_id (Optional[ScenarioId]) : id of the scenario creating the data source.
+            pipeline_id (Optional[PipelineId]) : id of the pipeline creating the data source.
+
+        Raises:
+            MultipleDataSourceFromSameConfigWithSameParent: Raised if more than 1 data source already exist with same
+                config, and the same parent id (scenario_id, or pipeline_id depending on the scope of the data source).
+            InvalidDataSourceType: Raised if the type of the data source config is invalid.
+        """
         scope = data_source_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
         ds_from_data_source_config = self._get_all_by_config_name(data_source_config.name)
@@ -45,13 +74,28 @@ class DataManager:
             return self._create_and_set(data_source_config, parent_id)
 
     def set(self, data_source: DataSource):
-        # TODO Check if we should create the model or if it already exist
+        """
+        Saves or Updates the data source given as parameter.
+
+        Parameters:
+            data_source (DataSource) : data source to save or update.
+        """
         self.repository.save(data_source)
 
-    def get(self, data_source_id: str) -> DataSource:
+    def get(self, data_source_id: DataSourceId) -> DataSource:
+        """
+        Gets the data source corresponding to the identifier given as parameter.
+
+        Parameters:
+            data_source_id (DataSourceId) : data source to get.
+
+        Raises:
+            ModelNotFound: Raised if no data source corresponds to data_source_id.
+        """
         return self.repository.load(data_source_id)
 
     def get_all(self) -> List[DataSource]:
+        """Returns the list of all existing data sources."""
         return self.repository.load_all()
 
     def _get_all_by_config_name(self, config_name: str) -> List[DataSource]:

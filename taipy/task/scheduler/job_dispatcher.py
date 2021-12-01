@@ -2,7 +2,6 @@ __all__ = ["JobDispatcher"]
 
 import logging
 from concurrent.futures import ProcessPoolExecutor
-from functools import partial
 from typing import Any, List, Optional
 
 from taipy.common.alias import JobId
@@ -16,6 +15,13 @@ from taipy.task.scheduler.job import Job
 
 
 class JobDispatcher:
+    """Wrapper around executor that will run jobs.
+
+    Job can be executed on different contexts (locally, remotly, etc.). This wrapper
+    instantiate the executor based on its args then deal with its low level interface to provide
+    a homogeneous way to execute jobs.
+    """
+
     def __init__(
         self,
         parallel_execution: bool,
@@ -28,9 +34,19 @@ class JobDispatcher:
         )
 
     def can_execute(self) -> bool:
+        """Allow to know if another job can be executed.
+
+        Returns:
+            True if another job can be executed.
+        """
         return self.__nb_worker_available > 0
 
     def execute(self, job: Job):
+        """Start the execution of a Job.
+
+        Args:
+            job: Element to execute.
+        """
         job.running()
         self.__nb_worker_available -= 1
         future = self.__executor.submit(self._call_function, job.id, job.task)

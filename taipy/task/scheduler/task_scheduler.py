@@ -18,12 +18,16 @@ from .job_dispatcher import JobDispatcher
 
 
 class TaskScheduler:
-    """
-    Creates and schedules Jobs from their Task and watch their state.
+    """Creates and schedules Jobs from their Task.
+
+    Attributes:
+        data_manager: DataManager is an element that retrieves and deals with Data Source.
+        jobs_to_run: Queue of Jobs to execute.
+        blocked_jobs:
+            List of Jobs that can't be executed because some of their input is waiting for the output of other jobs.
     """
 
     def __init__(self, task_scheduler_config: TaskSchedulerConfig = Config.task_scheduler_configs.create()):
-        self.data_manager = DataManager()
         self.__JOBS: Dict[JobId, Job] = {}
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
@@ -37,6 +41,17 @@ class TaskScheduler:
         self.lock = Lock()
 
     def submit(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
+        """Submit task to execution.
+
+        Transforms task to job and enqueues it for execution.
+
+        Args:
+             task: Task to be transformed into Job for execution.
+             callbacks: Optional list of functions that should be executed once the job is done.
+
+        Returns:
+            Job created.
+        """
         for ds in task.output.values():
             ds.update_submitted()
         job = self.__create_job(task, callbacks or [])
@@ -51,6 +66,14 @@ class TaskScheduler:
         return job
 
     def get_job(self, job_id: JobId) -> Job:
+        """Allows to retrieve a job from its id.
+
+        Returns:
+            The Job corresponding to this id.
+
+        Raises:
+            NonExistingJob: if not found.
+        """
         try:
             return self.__JOBS[job_id]
         except KeyError:
@@ -58,9 +81,19 @@ class TaskScheduler:
             raise NonExistingJob(job_id)
 
     def get_jobs(self) -> List[Job]:
+        """Allows to retrieve all jobs.
+
+        Returns:
+            List of all jobs.
+        """
         return list(self.__JOBS.values())
 
     def delete(self, job: Job):
+        """Deletes a job if finished.
+
+        Raises:
+            JobNotDeletedException: if the job is not finished.
+        """
         if job.is_finished():
             del self.__JOBS[job.id]
         else:
@@ -69,6 +102,11 @@ class TaskScheduler:
             raise err
 
     def get_latest_job(self, task: Task) -> Job:
+        """Allows to retrieve the latest computed job of a task.
+
+        Returns:
+            The latest computed job of the task.
+        """
         return max(filter(lambda job: task in job, self.__JOBS.values()))
 
     def __should_be_blocked(self, job) -> bool:

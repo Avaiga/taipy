@@ -2,8 +2,8 @@ import os
 import shutil
 from datetime import datetime
 
-import pytest
 import pandas as pd
+import pytest
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.cycle.cycle import Cycle
@@ -46,7 +46,7 @@ def week_example():
 
 @pytest.fixture(scope="function")
 def scenario(cycle):
-    return Scenario("sc", [], {}, ScenarioId("sc_id"), master_scenario=False, cycle=None)
+    return Scenario("sc", [], {}, ScenarioId("sc_id"), is_master=False, cycle=None)
 
 
 @pytest.fixture(scope="function")

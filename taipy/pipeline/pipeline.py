@@ -1,8 +1,3 @@
-"""Generic pipeline.
-
-More specific pipelines such as optimization pipeline, data preparation pipeline,
-Machine-Learning training pipeline, etc. could implement this generic pipeline.
-"""
 import logging
 import uuid
 from collections import defaultdict
@@ -19,6 +14,24 @@ from taipy.task.task import Task
 
 
 class Pipeline:
+    """
+    A Pipeline entity that holds a list of tasks and additional arguments representing a set of data processing elements
+    connected in series.
+
+    Attributes:
+        config_name (str):  Name that identifies the pipeline configuration.
+            We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
+            or underscore characters ('_').
+            Other characters are replaced according the following rules:
+            - Space characters are replaced by underscore characters ('_').
+            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
+            - Other characters are replaced by dash characters ('-').
+        properties (dict):  List of additional arguments.
+        tasks (List[Task]): List of tasks.
+        pipeline_id (str): Unique identifier of this pipeline.
+        parent_id (str):  Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+    """
+
     __ID_PREFIX = "PIPELINE"
     __SEPARATOR = "_"
 
