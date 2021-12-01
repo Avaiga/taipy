@@ -18,7 +18,7 @@ from taipy.task import Task, TaskScheduler
 from tests.taipy.utils.NotifyMock import NotifyMock
 
 
-def test_save_and_get_scenario_entity(cycle):
+def test_set_and_get_scenario_entity(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
