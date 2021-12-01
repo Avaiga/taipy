@@ -109,11 +109,12 @@ class PandasDataAccessor(DataAccessor):
                 value = value.loc[:, cols].iloc[new_indexes]  # returns a view
                 dictret = {
                     "data": self._format_data(value, data_format, "records"),
+                    "orient": "records",
                     "rowcount": rowcount,
                     "start": start,
                     "format": str(data_format.value),
+                    "dataExtraction": False,  # Keep data in the same hierarchical on frontend
                 }
-                value = dictret
             else:
                 # view with the requested columns
                 if nb_rows_max and nb_rows_max < len(value) / 2:
@@ -123,8 +124,13 @@ class PandasDataAccessor(DataAccessor):
                     value = value.iloc[:: (len(value) // nb_rows_max)]
                 else:
                     value = value.loc[:, cols]
-                value = self._format_data(value, data_format, "list")
-            ret_payload["value"] = value
+                dictret = {
+                    "data": self._format_data(value, data_format, "list"),
+                    "orient": "list",
+                    "format": str(data_format.value),
+                    "dataExtraction": True,  # Extract data out of dictionary on frontend
+                }
+            ret_payload["value"] = dictret
         return ret_payload
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
