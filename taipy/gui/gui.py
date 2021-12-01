@@ -18,6 +18,7 @@ from flask import Blueprint, jsonify, request
 from ._default_config import default_config
 from .config import GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
+from .data.data_format import DataFormat
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -730,6 +731,11 @@ class Gui(object, metaclass=Singleton):
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             self._server.register_blueprint(bp)
+
+        # Register data accessor communicaiton data format (JSON, Apache Arrow)
+        self._data_accessors._set_data_format(
+            DataFormat.APACHE_ARROW if self._config.app_config["use_arrow"] else DataFormat.JSON
+        )
 
         self._server._set_client_url(self._config.app_config["client_url"])
 

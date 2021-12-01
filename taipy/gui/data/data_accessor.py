@@ -4,6 +4,7 @@ import warnings
 from abc import ABC, abstractmethod
 
 from ..utils import _get_dict_value
+from .data_format import DataFormat
 
 
 class DataAccessor(ABC):
@@ -24,7 +25,9 @@ class DataAccessor(ABC):
         pass
 
     @abstractmethod
-    def get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+    def get_data(
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+    ) -> t.Dict[str, t.Any]:
         pass
 
     @abstractmethod
@@ -35,6 +38,8 @@ class DataAccessor(ABC):
 class _DataAccessors(object):
     def __init__(self) -> None:
         self.__access_4_type: t.Dict[str, DataAccessor] = {}
+
+        self.__data_format = DataFormat.JSON
 
         from .pandas_data_accessor import PandasDataAccessor
 
@@ -75,7 +80,10 @@ class _DataAccessors(object):
         return inst and inst.is_data_access(var_name, value)
 
     def _get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
-        return self.__get_instance(value).get_data(var_name, value, payload)
+        return self.__get_instance(value).get_data(var_name, value, payload, self.__data_format)
 
     def _get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         return self.__get_instance(value).get_col_types(var_name, value)
+
+    def _set_data_format(self, data_format: DataFormat):
+        self.__data_format = data_format

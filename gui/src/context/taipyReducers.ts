@@ -3,6 +3,7 @@ import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 import { merge } from "lodash";
+import { Table as ArrowTable } from "apache-arrow";
 
 import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 
@@ -16,6 +17,11 @@ enum Types {
     SetLocations = "SET_LOCATIONS",
     SetTheme = "SET_THEME",
     SetTimeZone = "SET_TIMEZONE",
+}
+
+enum DataFormat {
+    JSON = "JSON",
+    APACHE_ARROW = "Arrow"
 }
 
 export interface TaipyState {
@@ -125,6 +131,19 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.Update:
             const newValue = action.payload.value as Record<string, unknown>;
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
+            if (newValue?.format && newValue.format === DataFormat.APACHE_ARROW) {
+                const arrowData = ArrowTable.from(new Uint8Array(newValue.data as ArrayBuffer));
+                const tableHeading = arrowData.schema.fields.map((f) => f.name);
+                const convertedData = [];
+                for (let i = 0; i < arrowData.count(); i++) {
+                    const dataRow: Record<string, any> = {};
+                    for (let j = 0; j < tableHeading.length; j++) {
+                        dataRow[tableHeading[j]] = arrowData.getColumnAt(j)?.get(i).valueOf();
+                    }
+                    convertedData.push(dataRow);
+                }
+                newValue.data = convertedData;
+            }
             if (typeof action.payload.infinite === "boolean" && action.payload.infinite) {
                 const start = newValue.start;
                 if (typeof start === "number") {
