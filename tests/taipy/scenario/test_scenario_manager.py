@@ -274,96 +274,6 @@ def test_scenario_manager_only_creates_data_source_entity_once():
     assert scenario_entity.cycle.frequency == Frequency.DAILY
 
 
-def test_get_set_data():
-    scenario_manager = ScenarioManager()
-    pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    data_manager = scenario_manager.data_manager
-    scenario_manager.delete_all()
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-
-    ds_1 = DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    ds_2 = DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0)
-    ds_6 = DataSourceConfig("baz", "in_memory", Scope.PIPELINE, default_data=0)
-    ds_4 = DataSourceConfig("qux", "in_memory", Scope.PIPELINE, default_data=0)
-
-    task_mult_by_2 = TaskConfig("mult by 2", [ds_1], mult_by_2, ds_2)
-    task_mult_by_3 = TaskConfig("mult by 3", [ds_2], mult_by_3, ds_6)
-    task_mult_by_4 = TaskConfig("mult by 4", [ds_1], mult_by_4, ds_4)
-    pipeline_1 = PipelineConfig("by 6", [task_mult_by_2, task_mult_by_3])
-    # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
-    pipeline_2 = PipelineConfig("by 4", [task_mult_by_4])
-    # ds_1 ---> mult by 4 ---> ds_4
-    scenario = Config.scenario_configs.create("Awesome scenario", [pipeline_1, pipeline_2])
-
-    scenario_entity = scenario_manager.create(scenario)
-
-    assert scenario_entity.foo.read() == 1
-    assert scenario_entity.bar.read() == 0
-    assert scenario_entity.baz.read() == 0
-    assert scenario_entity.qux.read() == 0
-
-    scenario_manager.submit(scenario_entity.id)
-    assert scenario_entity.foo.read() == 1
-    assert scenario_entity.bar.read() == 2
-    assert scenario_entity.baz.read() == 6
-    assert scenario_entity.qux.read() == 4
-
-    scenario_entity.foo.write("new data value")
-    assert scenario_entity.foo.read() == "new data value"
-    assert scenario_entity.bar.read() == 2
-    assert scenario_entity.baz.read() == 6
-    assert scenario_entity.qux.read() == 4
-
-    scenario_entity.baz.write(158)
-    assert scenario_entity.foo.read() == "new data value"
-    assert scenario_entity.bar.read() == 2
-    assert scenario_entity.baz.read() == 158
-    assert scenario_entity.qux.read() == 4
-
-
-def test_notification():
-    scenario_manager = ScenarioManager()
-    pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    data_manager = scenario_manager.data_manager
-    scenario_manager.delete_all()
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-
-    scenario_config = ScenarioConfig(
-        "Awesome scenario",
-        [
-            PipelineConfig(
-                "by 6",
-                [
-                    TaskConfig(
-                        "mult by 2",
-                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                        mult_by_2,
-                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
-                    )
-                ],
-            )
-        ],
-    )
-    scenario = scenario_manager.create(scenario_config)
-
-    notify_1 = NotifyMock(scenario)
-    notify_2 = NotifyMock(scenario)
-    scenario_manager.subscribe(notify_1)
-    scenario_manager.subscribe(notify_2)
-
-    scenario_manager.submit(scenario.id)
-    notify_1.assert_called_3_times()
-    notify_2.assert_called_3_times()
-    scenario_manager.unsubscribe(notify_1)
-    scenario_manager.unsubscribe(notify_2)
-
-
 def test_notification_subscribe_unsubscribe():
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
@@ -396,68 +306,25 @@ def test_notification_subscribe_unsubscribe():
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
 
+    # test subscribing notification
     scenario_manager.subscribe(notify_1)
-    scenario_manager.subscribe(notify_2)
-
-    scenario_manager.unsubscribe(notify_2)
     scenario_manager.submit(scenario.id)
 
     notify_1.assert_called_3_times()
-    notify_2.assert_not_called()
-    scenario_manager.unsubscribe(notify_1)
-
-    with pytest.raises(KeyError):
-        scenario_manager.unsubscribe(notify_2)
-
-
-def test_notification_subscribe_only_on_new_jobs():
-    scenario_manager = ScenarioManager()
-    pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    data_manager = scenario_manager.data_manager
-    scenario_manager.delete_all()
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-
-    scenario_config = ScenarioConfig(
-        "Awesome scenario",
-        [
-            PipelineConfig(
-                "by 6",
-                [
-                    TaskConfig(
-                        "mult by 2",
-                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                        mult_by_2,
-                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
-                    )
-                ],
-            )
-        ],
-    )
-
-    scenario = scenario_manager.create(scenario_config)
-
-    notify_1 = NotifyMock(scenario)
-    notify_2 = NotifyMock(scenario)
-    scenario_manager.subscribe(notify_1)
-
-    scenario_manager.submit(scenario.id)
-
-    scenario_manager.subscribe(notify_2)
-
-    notify_1.assert_called_3_times()
-    notify_2.assert_not_called()
 
     notify_1.reset()
 
+    # test unsubscribing notification
+    # test notis subscribe only on new jobs
+    scenario_manager.unsubscribe(notify_1)
+    scenario_manager.subscribe(notify_2)
     scenario_manager.submit(scenario.id)
-    notify_1.assert_called_3_times()
+
+    notify_1.assert_not_called()
     notify_2.assert_called_3_times()
 
-    scenario_manager.unsubscribe(notify_1)
-    scenario_manager.unsubscribe(notify_2)
+    with pytest.raises(KeyError):
+        scenario_manager.unsubscribe(notify_1)
 
 
 def test_get_set_master_scenario():
