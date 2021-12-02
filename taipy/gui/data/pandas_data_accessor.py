@@ -16,8 +16,6 @@ class PandasDataAccessor(DataAccessor):
         return pd.DataFrame
 
     def _format_data(self, data: DataFrame, data_format: DataFormat, orient: str = None) -> t.Union[t.Dict, bytes]:
-        if data_format == DataFormat.JSON:
-            return data.to_dict(orient=orient)
         if data_format == DataFormat.APACHE_ARROW:
             # Convert from pandas to Arrow
             table = pa.Table.from_pandas(data)
@@ -32,6 +30,7 @@ class PandasDataAccessor(DataAccessor):
             buf = sink.getvalue()
             # convert buffer to python bytes and return
             return buf.to_pybytes()
+        return data.to_dict(orient=orient)
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         if isinstance(value, pd.DataFrame):
