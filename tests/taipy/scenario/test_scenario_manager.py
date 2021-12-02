@@ -102,9 +102,9 @@ def test_create_and_delete_scenario():
     scenario_manager.delete_all()
     assert len(scenario_manager.get_all()) == 0
 
-    scenario = Config.scenario_configs.create("sc", [], Frequency.DAILY)
+    scenario_config = Config.scenario_configs.create("sc", [], Frequency.DAILY)
 
-    scenario_1 = scenario_manager.create(scenario, creation_date=creation_date)
+    scenario_1 = scenario_manager.create(scenario_config, creation_date=creation_date)
     assert scenario_1.config_name == "sc"
     assert scenario_1.pipelines == {}
     assert scenario_1.cycle.frequency == Frequency.DAILY
@@ -116,7 +116,7 @@ def test_create_and_delete_scenario():
     with pytest.raises(DeletingMasterScenario):
         scenario_manager.delete(scenario_1.id)
 
-    scenario_2 = scenario_manager.create(scenario, creation_date=creation_date)
+    scenario_2 = scenario_manager.create(scenario_config, creation_date=creation_date)
     assert scenario_2.config_name == "sc"
     assert scenario_2.pipelines == {}
     assert scenario_2.cycle.frequency == Frequency.DAILY
