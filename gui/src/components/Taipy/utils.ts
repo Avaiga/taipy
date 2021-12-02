@@ -29,7 +29,7 @@ export interface TaipyImage {
     text: string;
 }
 
-export const getArrayValue = <T extends unknown>(arr: T[], idx: number, defVal?: T): T | undefined =>
+export const getArrayValue = <T,>(arr: T[], idx: number, defVal?: T): T | undefined =>
     (arr && idx < arr.length && arr[idx]) || defVal;
 
 export const getUpdateVar = (updateVars: string, name: string) => {
