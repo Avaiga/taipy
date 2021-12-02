@@ -42,24 +42,24 @@ def test_create_scenario_entity(cycle):
 
 
 def test_add_property_to_scenario():
-    scenario_1 = Scenario("foo", [], {"key": "value"})
-    assert scenario_1.properties == {"key": "value"}
-    assert scenario_1.key == "value"
+    scenario = Scenario("foo", [], {"key": "value"})
+    assert scenario.properties == {"key": "value"}
+    assert scenario.key == "value"
 
-    scenario_1.properties["new_key"] = "new_value"
+    scenario.properties["new_key"] = "new_value"
 
-    assert scenario_1.properties == {"key": "value", "new_key": "new_value"}
-    assert scenario_1.key == "value"
-    assert scenario_1.new_key == "new_value"
+    assert scenario.properties == {"key": "value", "new_key": "new_value"}
+    assert scenario.key == "value"
+    assert scenario.new_key == "new_value"
 
 
 def test_add_cycle_to_scenario(cycle):
-    scenario_1 = Scenario("foo", [], {})
-    assert scenario_1.cycle is None
+    scenario = Scenario("foo", [], {})
+    assert scenario.cycle is None
 
-    scenario_1.cycle = cycle
+    scenario.cycle = cycle
 
-    assert scenario_1.cycle == cycle
+    assert scenario.cycle == cycle
 
 
 def test_to_model(cycle):
@@ -80,3 +80,16 @@ def test_to_model(cycle):
     assert model.properties["key"] == "value"
     assert model.master_scenario
     assert model.cycle == cycle.id
+
+
+def test_add_and_remove_subscriber():
+    def mock_function():
+        pass
+
+    scenario = Scenario("foo", [], {})
+
+    scenario.add_subscriber(mock_function)
+    assert len(scenario.subscribers) == 1
+
+    scenario.remove_subscriber(mock_function)
+    assert len(scenario.subscribers) == 0
