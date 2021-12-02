@@ -2,9 +2,7 @@ from enum import Enum
 
 
 class Status(Enum):
-    """
-    Represents the status of a Job.
-    """
+    """Represents the status of a Job."""
 
     SUBMITTED = 1
     BLOCKED = 2

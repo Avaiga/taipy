@@ -11,14 +11,19 @@ import { visuallyHidden } from "@mui/utils";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList as List } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
-import { Skeleton } from "@mui/material";
+import Skeleton from "@mui/material/Skeleton";
+import IconButton from "@mui/material/IconButton";
+import AddIcon from "@mui/icons-material/Add";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createRequestInfiniteTableUpdateAction, FormatConfig } from "../../context/taipyReducers";
+import {
+    createRequestInfiniteTableUpdateAction,
+    createSendActionNameAction,
+    FormatConfig,
+} from "../../context/taipyReducers";
 import {
     ColumnDesc,
     alignCell,
-    formatValue,
     getsortByIndex,
     Order,
     TaipyTableProps,
@@ -26,6 +31,13 @@ import {
     paperSx,
     tableSx,
     RowType,
+    EditableCell,
+    OnCellValidation,
+    RowValue,
+    EDIT_COL,
+    OnRowDeletion,
+    iconInRowSx,
+    addDeleteColumn,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
@@ -38,12 +50,25 @@ interface RowData {
     isItemLoaded: (index: number) => boolean;
     selection: number[];
     formatConfig: FormatConfig;
+    onValidation?: OnCellValidation;
+    onDeletion?: OnRowDeletion;
 }
 
 const Row = ({
     index,
     style,
-    data: { colsOrder, columns, rows, classes, cellStyles, isItemLoaded, selection, formatConfig },
+    data: {
+        colsOrder,
+        columns,
+        rows,
+        classes,
+        cellStyles,
+        isItemLoaded,
+        selection,
+        formatConfig,
+        onValidation,
+        onDeletion,
+    },
 }: {
     index: number;
     style: CSSProperties;
@@ -68,7 +93,14 @@ const Row = ({
                     {...alignCell(columns[col])}
                     sx={cellStyles[cidx]}
                 >
-                    {formatValue(rows[index][col], columns[col], formatConfig)}
+                    <EditableCell
+                        colDesc={columns[col]}
+                        value={rows[index][col]}
+                        formatConfig={formatConfig}
+                        rowIndex={index}
+                        onValidation={onValidation}
+                        onDeletion={onDeletion}
+                    />
                 </TableCell>
             ))}
         </TableRow>
@@ -99,6 +131,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         selected = [],
         pageSize = 100,
         defaultKey = "",
+        editAction = "",
+        deleteAction = "",
+        addAction = "",
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
@@ -109,8 +144,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
+    const [visibleStartIndex, setVisibleStartIndex] = useState(0);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
 
     useEffect(() => {
         if (props.value && page.current.key && props.value[page.current.key] !== undefined) {
@@ -156,10 +193,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+            addDeleteColumn(!!(active && editable && deleteAction), columns);
             return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
         }
         return [[], {}];
-    }, [props.columns]);
+    }, [active, editable, deleteAction, props.columns]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -207,7 +245,47 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         [tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
     );
 
+    const onAddRowClick = useCallback(
+        () =>
+            dispatch(
+                createSendActionNameAction(tp_varname, {
+                    action: addAction,
+                    index: visibleStartIndex,
+                })
+            ),
+        [visibleStartIndex, dispatch, tp_varname, addAction]
+    );
+
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
+
+    const onCellValidation: OnCellValidation = useCallback(
+        (value: RowValue, rowIndex: number, colName: string) =>
+            dispatch(
+                createSendActionNameAction(tp_varname, {
+                    action: editAction,
+                    value: value,
+                    index: rowIndex,
+                    col: colName,
+                })
+            ),
+        [dispatch, tp_varname, editAction]
+    );
+
+    const onRowDeletion: OnRowDeletion = useCallback(
+        (rowIndex: number) =>
+            dispatch(
+                createSendActionNameAction(tp_varname, {
+                    action: deleteAction,
+                    index: rowIndex,
+                })
+            ),
+        [dispatch, tp_varname, deleteAction]
+    );
+
+    const onTaipyItemsRendered = useCallback((onItemsR) => ({visibleStartIndex, visibleStopIndex}: {visibleStartIndex: number, visibleStopIndex: number}) => {
+        setVisibleStartIndex(visibleStartIndex);
+        onItemsR({visibleStartIndex,visibleStopIndex});
+    }, []);
 
     const rowData: RowData = useMemo(
         () => ({
@@ -219,8 +297,23 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
+            onValidation: active && editable && editAction ? onCellValidation : undefined,
+            onDeletion: active && editable && deleteAction ? onRowDeletion : undefined,
         }),
-        [rows, isItemLoaded, colsOrder, columns, selected, formatConfig]
+        [
+            rows,
+            isItemLoaded,
+            active,
+            editable,
+            colsOrder,
+            columns,
+            selected,
+            formatConfig,
+            editAction,
+            onCellValidation,
+            deleteAction,
+            onRowDeletion,
+        ]
     );
 
     return (
@@ -238,19 +331,29 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                             <TableRow ref={headerRow}>
                                 {colsOrder.map((col, idx) => (
                                     <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
-                                        <TableSortLabel
-                                            active={orderBy === columns[col].dfid}
-                                            direction={orderBy === columns[col].dfid ? order : "asc"}
-                                            onClick={createSortHandler(columns[col].dfid)}
-                                            disabled={!active}
-                                        >
-                                            {columns[col].title || columns[col].dfid}
-                                            {orderBy === columns[col].dfid ? (
-                                                <Box component="span" sx={visuallyHidden}>
-                                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
-                                                </Box>
-                                            ) : null}
-                                        </TableSortLabel>
+                                        {columns[col].dfid === EDIT_COL ? (
+                                            active && editable && addAction ? (
+                                                <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
+                                                    <AddIcon />
+                                                </IconButton>
+                                            ) : null
+                                        ) : (
+                                            <TableSortLabel
+                                                active={orderBy === columns[col].dfid}
+                                                direction={orderBy === columns[col].dfid ? order : "asc"}
+                                                onClick={createSortHandler(columns[col].dfid)}
+                                                disabled={!active}
+                                            >
+                                                {columns[col].title === undefined
+                                                    ? columns[col].dfid
+                                                    : columns[col].title}
+                                                {orderBy === columns[col].dfid ? (
+                                                    <Box component="span" sx={visuallyHidden}>
+                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
+                                                    </Box>
+                                                ) : null}
+                                            </TableSortLabel>
+                                        )}
                                     </TableCell>
                                 ))}
                             </TableRow>
@@ -272,7 +375,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             width={width}
                                             itemCount={rowCount}
                                             itemSize={ROW_HEIGHT}
-                                            onItemsRendered={onItemsRendered}
+                                            onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
                                             ref={ref}
                                             itemData={rowData}
                                         >

@@ -5,7 +5,7 @@ on:
 
     workflow_dispatch:
 jobs:
-    code-coverage:
+    backend-code-coverage:
         runs-on: ubuntu-18.04
         steps:
             -   uses: actions/checkout@v2
@@ -40,3 +40,31 @@ jobs:
                     coverageFile: coverage.xml
                     token: ${{ secrets.GITHUB_TOKEN }}
                     thresholdAll: 0.85
+
+    frontend-code-coverage:
+        strategy:
+            matrix:
+                node-version: [ 16.x ]
+                os: [ ubuntu-18.04 ]
+        defaults:
+            run:
+                working-directory: ./gui
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            -   uses: actions/checkout@v2
+            -   name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
+                uses: actions/setup-node@v2
+                with:
+                   node-version: ${{ matrix.node-version }}
+
+            -   name: Install dependencies
+                run: npm ci
+
+            -   name: Code coverage
+                uses: artiomtr/jest-coverage-report-action@v2.0-rc.6
+                with:
+                    github-token: ${{ secrets.GITHUB_TOKEN }}
+                    threshold: "80"
+                    working-directory: "gui"
+                    skip-step: "install"

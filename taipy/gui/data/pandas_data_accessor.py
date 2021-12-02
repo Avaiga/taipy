@@ -2,15 +2,36 @@ import typing as t
 import warnings
 
 import pandas as pd
+import pyarrow as pa
+from pandas.core.frame import DataFrame
 
 from ..utils import _get_date_col_str_name, _get_dict_value
 from .data_accessor import DataAccessor
+from .data_format import DataFormat
 
 
 class PandasDataAccessor(DataAccessor):
     @staticmethod
     def get_supported_classes() -> t.Callable:  # type: ignore
         return pd.DataFrame
+
+    def _format_data(self, data: DataFrame, data_format: DataFormat, orient: str = None) -> t.Union[t.Dict, bytes]:
+        if data_format == DataFormat.JSON:
+            return data.to_dict(orient=orient)
+        if data_format == DataFormat.APACHE_ARROW:
+            # Convert from pandas to Arrow
+            table = pa.Table.from_pandas(data)
+            # Create sink buffer stream
+            sink = pa.BufferOutputStream()
+            # Create Stream writer
+            writer = pa.ipc.new_stream(sink, table.schema)
+            # Write data to table
+            writer.write_table(table)
+            writer.close()
+            # end buffer stream
+            buf = sink.getvalue()
+            # convert buffer to python bytes and return
+            return buf.to_pybytes()
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         if isinstance(value, pd.DataFrame):
@@ -21,7 +42,9 @@ class PandasDataAccessor(DataAccessor):
     def is_data_access(self, var_name: str, value: t.Any) -> bool:
         return isinstance(value, pd.DataFrame)
 
-    def get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:  # noqa: C901
+    def get_data(  # noqa: C901
+        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+    ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         if isinstance(value, pd.DataFrame):
             paged = not _get_dict_value(payload, "alldata")
@@ -84,8 +107,13 @@ class PandasDataAccessor(DataAccessor):
                 else:
                     new_indexes = slice(start, end + 1)
                 value = value.loc[:, cols].iloc[new_indexes]  # returns a view
-                dictret = {"data": value.to_dict(orient="records"), "rowcount": rowcount, "start": start}
-                value = dictret
+                dictret = {
+                    "data": self._format_data(value, data_format, "records"),
+                    "orient": "records",
+                    "rowcount": rowcount,
+                    "start": start,
+                    "format": str(data_format.value),
+                }
             else:
                 # view with the requested columns
                 if nb_rows_max and nb_rows_max < len(value) / 2:
@@ -95,8 +123,13 @@ class PandasDataAccessor(DataAccessor):
                     value = value.iloc[:: (len(value) // nb_rows_max)]
                 else:
                     value = value.loc[:, cols]
-                value = value.to_dict(orient="list")
-            ret_payload["value"] = value
+                dictret = {
+                    "data": self._format_data(value, data_format, "list"),
+                    "orient": "list",
+                    "format": str(data_format.value),
+                    "dataExtraction": True,  # Extract data out of dictionary on frontend
+                }
+            ret_payload["value"] = dictret
         return ret_payload
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore

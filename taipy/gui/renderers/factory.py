@@ -186,6 +186,10 @@ class Factory:
                 ("height", AttributeType.string_or_number, "80vh"),
                 ("id"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("editable", AttributeType.dynamic_boolean, True),
+                ("edit_action"),
+                ("delete_action"),
+                ("add_action"),
             ]
         )
         .set_refresh()

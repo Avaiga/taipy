@@ -1,4 +1,3 @@
-import itertools
 import logging
 import uuid
 from collections.abc import Iterable
@@ -11,6 +10,30 @@ from taipy.data.data_source import DataSource
 
 
 class Task:
+    """Entity that holds function, parameters and outputs that will be executed.
+
+    This element bring together the user code as function, parameters and outputs.
+
+    Attributes:
+        config_name:
+            Name that identifies the task config. We strongly recommend to use lowercase alphanumeric characters,
+            dash character '-', or underscore character '_'.
+            Note that other characters are replaced according the following rules :
+            - Space character ' ' is replaced by '_'.
+            - Unicode characters are replaced by a corresponding alphanumeric character using unicode library.
+            - Other characters are replaced by dash character '-'.
+        input:
+            Data source input as list.
+        function:
+            Taking data from input data source and return data that should go inside of the output data source.
+        output:
+            Data source output result of the function as optional list.
+        id:
+            Unique identifier of this task. Generated if `None`.
+        parent_id:
+            Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+    """
+
     __ID_PREFIX = "TASK"
     __ID_SEPARATOR = "_"
 
@@ -57,7 +80,12 @@ class Task:
         raise AttributeError
 
     @property
-    def scope(self):
+    def scope(self) -> Scope:
+        """Retrieve the lowest scope of the task based on its data source.
+
+        Returns:
+           Lowest `scope` present in input and output data source or GLOBAL if there are no neither input or output.
+        """
         data_sources = list(self.input.values()) + list(self.output.values())
         scope = min(ds.scope for ds in data_sources) if len(data_sources) != 0 else Scope.GLOBAL
         return scope

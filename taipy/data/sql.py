@@ -12,34 +12,24 @@ from taipy.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 
 class SQLDataSource(DataSource):
     """
-    A class that represents a Data Source stored in a SQL database table.
+    A Data Source stored as a SQL database.
 
-    Attributes
-    ----------
-    config_name: str
-        Name that identifies the data source. We strongly recommend to use lowercase alphanumeric characters,
-        dash character '-', or underscore character '_'.
-        Note that other characters are replaced according the following rules :
-        - Space character ' ' is replaced by '_'
-        - Unicode characters are replaced by a corresponding alphanumeric character using unicode library
-        - Other characters are replaced by dash character '-'
-    scope: Scope
-        Scope Enum that refers to the scope of usage of the data source
-    id: str
-        Unique identifier of the data source
-    name: str
-        Displayable name of the data source
-    parent_id: str
-        Identifier of the parent (pipeline_id, scenario_id, bucket_id, None)
-    last_edition_date: datetime
-        Date and time of the last edition
-    job_ids: List[str]
-        Ordered list of jobs that have written the data source
-    up_to_date: bool
-        True if the data is considered as up to date. False otherwise.
-    properties: dict
-        list of additional arguments. Note that the properties parameter should at least contain values for "path" and
-        "has_header" properties.
+    Attributes:
+        config_name (str):  Name that identifies the data source.
+            We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
+            '_'. Note that other characters are replaced according the following rules :
+            - Space characters are replaced by underscore characters ('_').
+            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
+            - Other characters are replaced by dash characters ('-').
+        scope (Scope):  The usage scope of this data source.
+        id (str): Unique identifier of this data source.
+        name (str): User-readable name of the data source.
+        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        last_edition_date (datetime):  Date and time of the last edition.
+        job_ids (List[str]): Ordered list of jobs that have written this data source.
+        up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
+        properties (list): List of additional arguments. Note that the properties parameter should at least contain
+            values for "db_username", "db_password", "db_name", "db_engine" and "query" properties.
     """
 
     __STORAGE_TYPE = "sql"

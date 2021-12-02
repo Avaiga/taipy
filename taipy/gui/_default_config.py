@@ -14,6 +14,7 @@ default_config = {
         "theme": None,
         "theme[light]": None,
         "theme[dark]": None,
+        "use_arrow": False,
     },
     "style_config": {
         "button": "",

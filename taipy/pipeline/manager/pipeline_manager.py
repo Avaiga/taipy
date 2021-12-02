@@ -1,15 +1,8 @@
-"""
-The Pipeline Manager is responsible for managing the pipelines.
-
-This is the entry point for operations (such as creating, reading, updating,
-deleting, duplicating, executing) related to pipelines.
-"""
-
 import logging
 from functools import partial
 from typing import Callable, List, Optional, Set
 
-from taipy.common.alias import PipelineId
+from taipy.common.alias import PipelineId, ScenarioId
 from taipy.config import PipelineConfig
 from taipy.data import Scope
 from taipy.exceptions import ModelNotFound
@@ -22,11 +15,20 @@ from taipy.task.manager.task_manager import TaskManager
 
 
 class PipelineManager:
+    """
+    Pipeline Manager is responsible for all managing pipeline related capabilities. In particular, it is exposing
+    methods for creating, storing, updating, retrieving, deleting pipeline.
+    """
+
     task_manager = TaskManager()
     data_manager = task_manager.data_manager
     task_scheduler = task_manager.task_scheduler
+    __status_notifier: Set[Callable] = set()
 
     def __init__(self):
+        """
+        Initializes a pipeline manager object.
+        """
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
@@ -50,16 +52,31 @@ class PipelineManager:
         self.set(pipeline)
 
     def delete_all(self):
+        """
+        Deletes all data sources.
+        """
         self.repository.delete_all()
 
-    def get_or_create(self, config: PipelineConfig, scenario_id: Optional[str] = None) -> Pipeline:
-        pipeline_id = Pipeline.new_id(config.name)
+    def get_or_create(self, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
+        """
+        Returns the pipeline created from the pipeline_config, by scenario_id if it already
+        exists, or creates and returns a new pipeline.
+
+        Parameters:
+            pipeline_config (PipelineConfig) : pipeline configuration object.
+            scenario_id (Optional[ScenarioId]) : id of the scenario creating the data source. Default value : None.
+        Raises:
+            MultiplePipelineFromSameConfigWithSameParent error if more than 1 pipeline already exist with the same
+            config, and the same parent id (scenario_id, or pipeline_id depending on the scope of the data source).
+        """
+        pipeline_id = Pipeline.new_id(pipeline_config.name)
         tasks = [
-            self.task_manager.get_or_create(t_config, scenario_id, pipeline_id) for t_config in config.tasks_configs
+            self.task_manager.get_or_create(t_config, scenario_id, pipeline_id)
+            for t_config in pipeline_config.tasks_configs
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
-        pipelines_from_config_name = self._get_all_by_config_name(config.name)
+        pipelines_from_config_name = self._get_all_by_config_name(pipeline_config.name)
         pipelines_from_parent = [pipeline for pipeline in pipelines_from_config_name if pipeline.parent_id == parent_id]
         if len(pipelines_from_parent) == 1:
             return pipelines_from_parent[0]
@@ -67,20 +84,38 @@ class PipelineManager:
             logging.error("Multiple pipelines from same config exist with the same parent_id.")
             raise MultiplePipelineFromSameConfigWithSameParent
         else:
-            pipeline = Pipeline(config.name, config.properties, tasks, pipeline_id, parent_id)
+            pipeline = Pipeline(pipeline_config.name, pipeline_config.properties, tasks, pipeline_id, parent_id)
             self.set(pipeline)
             return pipeline
 
     def set(self, pipeline: Pipeline):
+        """
+        Saves or Updates the pipeline given as parameter.
+
+        Parameters:
+            pipeline (Pipeline) : pipeline to save or update.
+        """
         self.repository.save(pipeline)
 
     def get(self, pipeline_id: PipelineId) -> Pipeline:
+        """
+        Gets the pipeline corresponding to the identifier given as parameter.
+
+        Parameters:
+            pipeline_id (PipelineId) : pipeline to get.
+
+        Raises:
+            NonExistingPipeline : No pipeline corresponds to pipeline_id.
+        """
         try:
             return self.repository.load(pipeline_id)
         except ModelNotFound:
             raise NonExistingPipeline(pipeline_id)
 
     def get_all(self) -> List[Pipeline]:
+        """
+        Returns the list of all existing pipelines.
+        """
         return self.repository.load_all()
 
     def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
@@ -95,4 +130,10 @@ class PipelineManager:
         return [partial(c, pipeline) for c in pipeline.subscribers]
 
     def _get_all_by_config_name(self, config_name: str) -> List[Pipeline]:
+        """
+        Returns the list of all existing pipelines with the corresponding config name.
+
+        Parameters:
+             config_name (str) : pipeline config's name.
+        """
         return self.repository.search_all("config_name", config_name)

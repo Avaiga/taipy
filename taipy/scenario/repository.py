@@ -32,7 +32,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             config_name=model.name,
             pipelines=self.__to_pipelines(model.pipelines),
             properties=model.properties,
-            master_scenario=model.master_scenario,
+            is_master=model.master_scenario,
             cycle=self.__to_cycle(model.cycle),
         )
         scenario.subscribers = {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers}

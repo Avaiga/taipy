@@ -8,6 +8,7 @@
     "@mui/icons-material": "^5.0.5",
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
+    "apache-arrow": "^6.0.1",
     "axios": "^0.24.0",
     "date-fns": "^2.25.0",
     "date-fns-tz": "^1.1.6",

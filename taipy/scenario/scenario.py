@@ -1,7 +1,3 @@
-""" Generic pipeline (seriously?).
-More specific pipelines such as optimization pipeline, data preparation pipeline,
-ML training pipeline, etc. should implement this generic pipeline entity
-"""
 import logging
 import uuid
 from typing import Callable, Dict, List, Set
@@ -15,6 +11,26 @@ from taipy.scenario.scenario_model import ScenarioModel
 
 
 class Scenario:
+    """
+    Represents an instance of the  business case to solve.
+
+    It holds a set of pipelines to submit for execution in order to solve the business case.
+
+    Attributes:
+        config_name (str):  Name that identifies the scenario configuration.
+            We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
+            or underscore characters ('_').
+            Other characters are replaced according the following rules:
+            - Space characters are replaced by underscore characters ('_').
+            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
+            - Other characters are replaced by dash characters ('-').
+        pipelines (List[Pipeline]): List of pipelines.
+        properties (dict): Dictionary of additional properties of the scenario.
+        scenario_id (str): Unique identifier of this scenario. Will be generated if None value provided.
+        is_master (bool): True if the scenario is the master of its cycle. False otherwise.
+        cycle (Cycle): Cycle of the scenario.
+    """
+
     __ID_PREFIX = "SCENARIO"
     __SEPARATOR = "_"
 
@@ -24,14 +40,14 @@ class Scenario:
         pipelines: List[Pipeline],
         properties: Dict[str, str],
         scenario_id: ScenarioId = None,
-        master_scenario: bool = False,
+        is_master: bool = False,
         cycle: Cycle = None,
     ):
         self.config_name = protect_name(config_name)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
-        self.master_scenario = master_scenario
+        self.master_scenario = is_master
         self.subscribers: Set[Callable] = set()
         self.cycle = cycle
 
@@ -40,6 +56,7 @@ class Scenario:
 
     @staticmethod
     def new_id(config_name: str) -> ScenarioId:
+        """Generates a unique scenario identifier."""
         return ScenarioId(
             Scenario.__SEPARATOR.join([Scenario.__ID_PREFIX, protect_name(config_name), str(uuid.uuid4())])
         )
@@ -62,9 +79,11 @@ class Scenario:
         raise AttributeError
 
     def add_subscriber(self, callback: Callable):
+        """Adds callback function to be called when executing the scenario each time a scenario job changes status"""
         self.subscribers.add(callback)
 
     def remove_subscriber(self, callback: Callable):
+        """Removes callback function"""
         self.subscribers.remove(callback)
 
     def to_model(self) -> ScenarioModel:
@@ -77,6 +96,3 @@ class Scenario:
             fcts_to_dict(list(self.subscribers)),
             self.cycle.id if self.cycle else None,
         )
-
-    def is_master_scenario(self) -> bool:
-        return self.master_scenario

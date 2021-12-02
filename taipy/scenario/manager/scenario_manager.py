@@ -1,3 +1,4 @@
+import datetime
 import logging
 from functools import partial
 from typing import Callable, List, Optional, Set
@@ -15,6 +16,11 @@ from taipy.task import Job
 
 
 class ScenarioManager:
+    """
+    Scenario Manager is responsible for all managing scenario related capabilities. In particular, it is exposing
+    methods for creating, storing, updating, retrieving, deleting, submitting scenarios.
+    """
+
     pipeline_manager = PipelineManager()
     cycle_manager = CycleManager()
     task_manager = pipeline_manager.task_manager
@@ -23,7 +29,7 @@ class ScenarioManager:
 
     def subscribe(self, callback: Callable[[Scenario, Job], None], scenario: Scenario):
         """
-        Subscribes a function to be called when the status of a Job changes.
+        Subscribes a function to be called each time one of the provided scenario jobs changes status.
 
         Note:
             Notification will be available only for jobs created after this subscription.
@@ -42,26 +48,52 @@ class ScenarioManager:
         self.set(scenario)
 
     def delete_all(self):
+        """Deletes all data sources."""
         self.repository.delete_all()
 
-    def create(self, config: ScenarioConfig, creation_date=None) -> Scenario:
+    def create(self, config: ScenarioConfig, creation_date: Optional[datetime.datetime] = None) -> Scenario:
+        """
+        Creates and returns a new scenario from the scenario configuration provided as parameter.
+
+        If the scenario belongs to a work cycle, the cycle (corresponding to the creation_date and the configuration
+        frequency attribute) is created if it does not exist yet.
+
+        Parameters:
+            config (ScenarioConfig) : scenario configuration object.
+            creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
+                default value.
+        """
         scenario_id = Scenario.new_id(config.name)
         pipelines = [
             self.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs
         ]
         cycle = self.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
-        is_master_scenario = len(self.get_all_scenarios_of_cycle(cycle)) == 0 if cycle else False
+        is_master_scenario = len(self.get_all_by_cycle(cycle)) == 0 if cycle else False
         scenario = Scenario(
-            config.name, pipelines, config.properties, scenario_id, master_scenario=is_master_scenario, cycle=cycle
+            config.name, pipelines, config.properties, scenario_id, is_master=is_master_scenario, cycle=cycle
         )
 
         self.set(scenario)
         return scenario
 
     def set(self, scenario: Scenario):
+        """
+        Saves or Updates the scenario given as parameter.
+
+        Parameters:
+            scenario (Scenario) : Scenario to save or update.
+        """
         self.repository.save(scenario)
 
     def get(self, scenario_id: ScenarioId) -> Scenario:
+        """
+        Returns the scenario corresponding to the identifier given as parameter.
+
+        Parameters:
+            scenario_id (ScenarioId) : scenario to get.
+        Raises:
+            NonExistingScenario : No scenario corresponds to scenario_id.
+        """
         try:
             if scenario := self.repository.load(scenario_id):
                 return scenario
@@ -71,9 +103,20 @@ class ScenarioManager:
             raise NonExistingScenario(scenario_id)
 
     def get_all(self) -> List[Scenario]:
+        """
+        Returns the list of all existing scenarios.
+        """
         return self.repository.load_all()
 
     def submit(self, scenario_id: ScenarioId):
+        """
+        Submits the scenario corresponding to the identifier given as parameter for execution.
+
+        All the tasks of scenario will be submitted for execution.
+
+        Parameters:
+            scenario_id (ScenarioId) : identifier of the scenario to submit.
+        """
         scenario_to_submit = self.get(scenario_id)
         callbacks = self.__get_status_notifier_callbacks(scenario_to_submit)
         for pipeline in scenario_to_submit.pipelines.values():
@@ -83,27 +126,47 @@ class ScenarioManager:
         return [partial(c, scenario) for c in scenario.subscribers]
 
     def get_master(self, cycle: Cycle) -> Optional[Scenario]:
-        scenarios = self.get_all_scenarios_of_cycle(cycle)
+        """
+        Returns the master scenario of the cycle given as parameter. None is the cycle has no master scenario.
+
+        Parameters:
+             cycle (Cycle) : cycle of the master scenario to return.
+        """
+        scenarios = self.get_all_by_cycle(cycle)
         for scenario in scenarios:
-            if scenario.is_master_scenario():
+            if scenario.master_scenario:
                 return scenario
         return None
 
-    def get_all_scenarios_of_cycle(self, cycle: Cycle) -> List[Scenario]:
+    def get_all_by_cycle(self, cycle: Cycle) -> List[Scenario]:
+        """
+        Returns the list of all existing scenarios that belong to the cycle given as parameter.
+
+        Parameters:
+             cycle (Cycle) : Cycle of the scenarios to return.
+        """
         scenarios = []
         for scenario in self.get_all():
             if scenario.cycle == cycle:
                 scenarios.append(scenario)
         return scenarios
 
-    def get_all_master_scenarios(self) -> List[Scenario]:
+    def get_all_masters(self) -> List[Scenario]:
+        """Returns the list of all master scenarios."""
         master_scenarios = []
         for scenario in self.get_all():
-            if scenario.is_master_scenario():
+            if scenario.master_scenario:
                 master_scenarios.append(scenario)
         return master_scenarios
 
     def set_master(self, scenario: Scenario):
+        """
+        Promotes scenario given as parameter as master scenario of its cycle. If the cycle already had a master scenario
+        it will be demoted and it will no longer be master for the cycle.
+
+        Parameters:
+            scenario (Scenario) : scenario to promote as master.
+        """
         if scenario.cycle:
             master_scenario = self.get_master(scenario.cycle)
             if master_scenario:
@@ -115,6 +178,15 @@ class ScenarioManager:
             raise DoesNotBelongToACycle
 
     def delete(self, scenario_id: ScenarioId):
-        if self.get(scenario_id).is_master_scenario():
+        """
+        Deletes the scenario given as parameter.
+
+        Parameters:
+            scenario_id (ScenarioId) : identifier of the scenario to delete.
+        Raises:
+            DeletingMasterScenario : scenario_id corresponds to a master Scenario. It cannot be deleted.
+            ModelNotFound : No scenario corresponds to scenario_id.
+        """
+        if self.get(scenario_id).master_scenario:
             raise DeletingMasterScenario
         self.repository.delete(scenario_id)
