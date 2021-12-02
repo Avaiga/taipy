@@ -2,10 +2,10 @@ from typing import Any
 
 from markdown.extensions import Extension
 
+from .blocproc import StartBlockProcessor
 from .control import ControlPattern
 from .postproc import Postprocessor
 from .preproc import Preprocessor
-from .blocproc import StartBlockProcessor
 
 __all__ = ["makeTaipyExtension"]
 

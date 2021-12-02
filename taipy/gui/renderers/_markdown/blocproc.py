@@ -1,15 +1,20 @@
-from markdown.blockprocessors import BlockProcessor
 import re
 
-from taipy.gui.renderers._markdown.factory import MarkdownFactory
+from markdown.blockprocessors import BlockProcessor
+
+from .factory import MarkdownFactory
 
 
 class StartBlockProcessor(BlockProcessor):
     __RE_FENCE_START = re.compile(
-        MarkdownFactory._TAIPY_START + "([a-zA-Z][\.a-zA-Z_$0-9]*)\.start(.*?)" + MarkdownFactory._TAIPY_END
+        MarkdownFactory._TAIPY_START
+        + "([a-zA-Z][\.a-zA-Z_$0-9]*)\.start(.*?)"  # noqa: W605
+        + MarkdownFactory._TAIPY_END
     )  # start line
     __RE_OTHER_FENCE = re.compile(
-        MarkdownFactory._TAIPY_START + "([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)" + MarkdownFactory._TAIPY_END
+        MarkdownFactory._TAIPY_START
+        + "([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)"  # noqa: W605
+        + MarkdownFactory._TAIPY_END
     )  # start or end tag
 
     def test(self, parent, block):
@@ -32,7 +37,10 @@ class StartBlockProcessor(BlockProcessor):
             if len(queue) == 0:
                 # remove end fence
                 blocks[block_num] = re.sub(
-                    MarkdownFactory._TAIPY_START + tag + "\.end(.*?)" + MarkdownFactory._TAIPY_END, "", block, 1
+                    MarkdownFactory._TAIPY_START + tag + "\.end(.*?)" + MarkdownFactory._TAIPY_END,  # noqa: W605
+                    "",
+                    block,
+                    1,
                 )
                 # render fenced area inside a new div
                 e = MarkdownFactory.create_element(original_match.group(1), original_match.group(2))

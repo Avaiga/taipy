@@ -13,10 +13,11 @@ from types import FrameType, FunctionType, SimpleNamespace
 
 import __main__
 import markdown as md_lib
+from dotenv import dotenv_values
 from flask import Blueprint, jsonify, request
 
-from ._default_config import default_config
-from .config import GuiConfig
+from ._default_config import app_config_default, style_config_default
+from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .page import Page, Partial
@@ -40,6 +41,7 @@ class Gui(object, metaclass=Singleton):
     """The class that handles the Graphical User Interface."""
 
     __root_page_name = "TaiPy_root_page"
+    __env_filename = "taipy.gui.env"
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
@@ -63,6 +65,7 @@ class Gui(object, metaclass=Singleton):
         default_page_renderer: t.Optional[PageRenderer] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
+        env_filename: t.Optional[str] = None,
     ):
         """Initializes a new Gui instance.
 
@@ -92,7 +95,7 @@ class Gui(object, metaclass=Singleton):
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
         self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
-        self._config.load_config(default_config["app_config"], default_config["style_config"])
+        self._config.load_config(app_config_default, style_config_default)
         self._values = SimpleNamespace()
         self._adapter_for_type: t.Dict[str, FunctionType] = {}
         self._type_for_variable: t.Dict[str, str] = {}
@@ -115,6 +118,8 @@ class Gui(object, metaclass=Singleton):
             self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
         if pages is not None:
             self.add_pages(pages)
+        if env_filename is not None:
+            self.__env_filename = env_filename
 
     @staticmethod
     def _get_instance() -> Gui:
@@ -674,7 +679,7 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
+    def _get_app_config(self, name: AppConfigOption, defaultValue: t.Any) -> t.Any:
         return self._config._get_app_config(name, defaultValue)
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
@@ -695,15 +700,38 @@ class Gui(object, metaclass=Singleton):
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)
 
-    def run(self, host=None, port=None, debug=None, run_server=True) -> None:
-        # Check with default config, override only if parameter
-        # is not passed directly into the run function
-        if host is None and self._config.app_config["host"] is not None:
-            host = self._config.app_config["host"]
-        if port is None and self._config.app_config["port"] is not None:
-            port = self._config.app_config["port"]
-        if debug is None and self._config.app_config["debug"] is not None:
-            debug = self._config.app_config["debug"]
+    def run(self, run_server=True, **kwargs) -> None:
+        app_config = self._config.app_config
+        # Load config from gui env file if available
+        if not hasattr(self, "_root_dir"):
+            self._root_dir = os.path.dirname(
+                inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
+            )
+        env_file_abs_path = (
+            self.__env_filename
+            if os.path.isabs(self.__env_filename)
+            else os.path.join(self._root_dir, self.__env_filename)
+        )
+        if os.path.isfile(env_file_abs_path):
+            for key, value in dotenv_values(env_file_abs_path).items():
+                key = key.lower()
+                if value is not None and key in app_config:
+                    try:
+                        app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                    except ValueError as ve:
+                        warnings.warn(
+                            f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{ve}"
+                        )
+        # Load keyword arguments
+        for key, value in kwargs.items():
+            key = key.lower()
+            if value is not None and key in app_config:
+                try:
+                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                except ValueError as ve:
+                    warnings.warn(
+                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{ve}"
+                    )
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
         # Save all local variables of the parent frame (usually __main__)
@@ -733,15 +761,13 @@ class Gui(object, metaclass=Singleton):
             self._server.register_blueprint(bp)
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
-        self._data_accessors._set_data_format(
-            DataFormat.APACHE_ARROW if self._config.app_config["use_arrow"] else DataFormat.JSON
-        )
+        self._data_accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
-        self._server._set_client_url(self._config.app_config["client_url"])
+        self._server._set_client_url(app_config["client_url"])
 
         # Start Flask Server
         if run_server:
-            self._server.runWithWS(host=host, port=port, debug=debug)
+            self._server.runWithWS(host=app_config["host"], port=app_config["port"], debug=app_config["debug"])
 
     def get_flask_app(self):
         return self._server
