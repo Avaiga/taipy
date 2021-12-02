@@ -16,8 +16,8 @@ import markdown as md_lib
 from dotenv import dotenv_values
 from flask import Blueprint, jsonify, request
 
-from ._default_config import default_config
-from .config import GuiConfig
+from ._default_config import app_config_default, style_config_default
+from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .page import Page, Partial
@@ -95,7 +95,7 @@ class Gui(object, metaclass=Singleton):
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
         self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
-        self._config.load_config(default_config["app_config"], default_config["style_config"])
+        self._config.load_config(app_config_default, style_config_default)
         self._values = SimpleNamespace()
         self._adapter_for_type: t.Dict[str, FunctionType] = {}
         self._type_for_variable: t.Dict[str, str] = {}
@@ -679,7 +679,7 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
+    def _get_app_config(self, name: AppConfigOption, defaultValue: t.Any) -> t.Any:
         return self._config._get_app_config(name, defaultValue)
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
@@ -716,12 +716,12 @@ class Gui(object, metaclass=Singleton):
             for key, value in dotenv_values(env_file_abs_path).items():
                 key = key.lower()
                 if value is not None and key in app_config:
-                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)
+                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
         # Load keyword arguments
         for key, value in kwargs.items():
             key = key.lower()
             if value is not None and key in app_config:
-                app_config[key] = value if app_config[key] is None else type(app_config[key])(value)
+                app_config[key] = value  # type: ignore
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
         # Save all local variables of the parent frame (usually __main__)

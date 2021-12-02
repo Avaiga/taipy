@@ -5,8 +5,8 @@ from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
-from .factory import MarkdownFactory
 from ..builder import Builder
+from .factory import MarkdownFactory
 
 
 class Preprocessor(MdPreprocessor):
@@ -137,8 +137,6 @@ class Preprocessor(MdPreprocessor):
         default_prop_value = None
         properties = []
         for fragment in fragments:
-            from .factory import MarkdownFactory
-
             if control_name is None and MarkdownFactory.get_default_property_name(fragment):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:

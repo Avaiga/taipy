@@ -5,6 +5,42 @@ import tzlocal
 
 from .page import Page, Partial
 
+AppConfigOption = t.Literal[
+    "port",
+    "dark_mode",
+    "debug",
+    "host",
+    "time_zone",
+    "propagate",
+    "client_url",
+    "favicon",
+    "title",
+    "theme",
+    "theme[light]",
+    "theme[dark]",
+    "use_arrow",
+]
+
+AppConfig = t.TypedDict(
+    "AppConfig",
+    {
+        "port": int,
+        "dark_mode": bool,
+        "debug": bool,
+        "host": str,
+        "time_zone": str,
+        "propagate": bool,
+        "client_url": str,
+        "favicon": t.Union[str, None],
+        "title": t.Union[str, None],
+        "theme": t.Union[t.Dict[str, t.Any], None],
+        "theme[light]": t.Union[t.Dict[str, t.Any], None],
+        "theme[dark]": t.Union[t.Dict[str, t.Any], None],
+        "use_arrow": bool,
+    },
+    total=False,
+)
+
 
 class GuiConfig(object):
     def __init__(self):
@@ -12,7 +48,7 @@ class GuiConfig(object):
         self.routes: t.List[str] = []
         self.partials: t.List[Partial] = []
         self.partial_routes: t.List[str] = []
-        self.app_config: t.Dict = {}
+        self.app_config: AppConfig = {}
         self.style_config: t.Dict = {}
 
     def load_config(self, app_config={}, style_config={}) -> None:
@@ -21,7 +57,7 @@ class GuiConfig(object):
         # Run get_time_zone to verify user predefined IANA time_zone if available
         self.get_time_zone()
 
-    def _get_app_config(self, name: str, defaultValue: t.Any) -> t.Any:
+    def _get_app_config(self, name: AppConfigOption, defaultValue: t.Any) -> t.Any:
         if name in self.app_config and self.app_config[name] is not None:
             return self.app_config[name]
         return defaultValue
