@@ -721,7 +721,7 @@ class Gui(object, metaclass=Singleton):
         for key, value in kwargs.items():
             key = key.lower()
             if value is not None and key in app_config:
-                app_config[key] = value  # type: ignore
+                app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
         # Save all local variables of the parent frame (usually __main__)
