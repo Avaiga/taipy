@@ -707,17 +707,21 @@ class Gui(object, metaclass=Singleton):
             self._root_dir = os.path.dirname(
                 inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
             )
-        env_file_abs_path = os.path.join(self._root_dir, self.__env_filename)
+        env_file_abs_path = (
+            self.__env_filename
+            if os.path.isabs(self.__env_filename)
+            else os.path.join(self._root_dir, self.__env_filename)
+        )
         if os.path.isfile(env_file_abs_path):
             for key, value in dotenv_values(env_file_abs_path).items():
                 key = key.lower()
                 if value is not None and key in app_config:
-                    app_config[key] = type(app_config[key])(value)
+                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)
         # Load keyword arguments
         for key, value in kwargs.items():
             key = key.lower()
             if value is not None and key in app_config:
-                app_config[key] = type(app_config[key])(value)
+                app_config[key] = value if app_config[key] is None else type(app_config[key])(value)
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
         # Save all local variables of the parent frame (usually __main__)
