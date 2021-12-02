@@ -2,7 +2,7 @@ import re
 
 from markdown.blockprocessors import BlockProcessor
 
-from taipy.gui.renderers._markdown.factory import MarkdownFactory
+from .factory import MarkdownFactory
 
 
 class StartBlockProcessor(BlockProcessor):

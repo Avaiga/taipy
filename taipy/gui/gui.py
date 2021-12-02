@@ -716,12 +716,22 @@ class Gui(object, metaclass=Singleton):
             for key, value in dotenv_values(env_file_abs_path).items():
                 key = key.lower()
                 if value is not None and key in app_config:
-                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                    try:
+                        app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                    except ValueError as ve:
+                        warnings.warn(
+                            f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse to the correct type.\n{ve}"
+                        )
         # Load keyword arguments
         for key, value in kwargs.items():
             key = key.lower()
             if value is not None and key in app_config:
-                app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                try:
+                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                except ValueError as ve:
+                    warnings.warn(
+                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse to the correct type.\n{ve}"
+                    )
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
         # Save all local variables of the parent frame (usually __main__)

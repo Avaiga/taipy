@@ -41,6 +41,29 @@ AppConfig = t.TypedDict(
     total=False,
 )
 
+StyleConfig = t.TypedDict(
+    "StyleConfig",
+    {
+        "button": str,
+        "field": str,
+        "input": str,
+        "slider": str,
+        "date_selector": str,
+        "table": str,
+        "selector": str,
+        "tree": str,
+        "dialog": str,
+        "chart": str,
+        "status": str,
+        "toggle": str,
+        "navbar": str,
+        "layout": str,
+        "part": str,
+        "expandable": str,
+    },
+    total=False,
+)
+
 
 class GuiConfig(object):
     def __init__(self):
@@ -49,7 +72,7 @@ class GuiConfig(object):
         self.partials: t.List[Partial] = []
         self.partial_routes: t.List[str] = []
         self.app_config: AppConfig = {}
-        self.style_config: t.Dict = {}
+        self.style_config: StyleConfig = {}
 
     def load_config(self, app_config={}, style_config={}) -> None:
         self.app_config.update(app_config)

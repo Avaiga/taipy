@@ -1,4 +1,4 @@
-from .config import AppConfig
+from .config import AppConfig, StyleConfig
 
 # Default config loaded by app.py
 app_config_default: AppConfig = {
@@ -17,7 +17,7 @@ app_config_default: AppConfig = {
     "use_arrow": False,
 }
 
-style_config_default = {
+style_config_default: StyleConfig = {
     "button": "",
     "field": "",
     "input": "",
