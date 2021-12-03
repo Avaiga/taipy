@@ -11,3 +11,6 @@ assignees: ''
 What this improvement addresses (performance, API...).
 
 **Acceptance Criteria**
+- [ ] Ensure new code is unit tested, and check code coverage is at least 90%
+- [ ] Propagate any change on the demos and run all of them to ensure there is no breaking change
+- [ ] Ensure any change is well documented
