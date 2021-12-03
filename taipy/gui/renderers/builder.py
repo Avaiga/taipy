@@ -502,13 +502,13 @@ class Builder:
             if type == AttributeType.boolean:
                 val = self.__get_property(attr[0])
                 if val is not None and val != _get_val(attr, 2, False):
-                    self.__set_boolean_attribute(attr[0], _get_val(attr, 2, False))
+                    self.__set_boolean_attribute(attr[0], val)
             elif type == AttributeType.dynamic_boolean:
                 dyn_var = _get_dict_value(self.__hashes, attr[0])
                 val = self.__get_property(attr[0])
                 default_name = "default_" + attr[0] if dyn_var is not None else attr[0]
                 if val is not None and val != _get_val(attr, 2, False):
-                    self.__set_boolean_attribute(default_name, _get_val(attr, 2, False))
+                    self.__set_boolean_attribute(default_name, val)
                 if dyn_var is not None:
                     self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(dyn_var))
             elif type == AttributeType.string:
