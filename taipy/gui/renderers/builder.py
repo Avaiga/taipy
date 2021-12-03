@@ -502,7 +502,7 @@ class Builder:
             if type == AttributeType.boolean:
                 val = self.__get_property(attr[0])
                 if val is not None and val != _get_val(attr, 2, False):
-                    self.__set_boolean_attribute(attr[0], _get_val(attr, 2, False))
+                    self.__set_boolean_attribute(attr[0], val)
             elif type == AttributeType.dynamic_boolean:
                 dyn_var = _get_dict_value(self.__hashes, attr[0])
                 val = self.__get_property(attr[0])
