@@ -6,7 +6,7 @@ from taipy.scenario import Scenario
 from taipy.task import Task
 
 
-def test_create_scenario_entity(cycle):
+def test_create_scenario(cycle):
     scenario_entity_1 = Scenario("fOo ", [], {"key": "value"}, is_master=True, cycle=cycle)
     assert scenario_entity_1.id is not None
     assert scenario_entity_1.config_name == "foo"
