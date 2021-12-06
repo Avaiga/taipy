@@ -1,5 +1,5 @@
-from collections import Callable
 from importlib import import_module
+from typing import Callable
 
 
 def load_fct(module_name: str, fct_name: str) -> Callable:

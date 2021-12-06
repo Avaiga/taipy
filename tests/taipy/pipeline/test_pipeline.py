@@ -10,14 +10,6 @@ from taipy.task import Task
 
 
 def test_create_pipeline():
-    pipeline = Config.pipeline_configs.create("  nAmE 1 ", [])
-    assert pipeline.name == "name_1"
-
-    pipeline_1 = Config.pipeline_configs.create(" PipeLine/ξ", [])
-    assert pipeline_1.name == "pipeline-x"
-
-
-def test_create_pipeline_entity():
     input = InMemoryDataSource("foo", Scope.PIPELINE)
     output = InMemoryDataSource("bar", Scope.PIPELINE)
     task = Task("baz", [input], print, [output], TaskId("task_id"))
