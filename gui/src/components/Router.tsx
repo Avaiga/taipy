@@ -20,6 +20,7 @@ import {
     taipyReducer,
 } from "../context/taipyReducers";
 import { JSXReactRouterComponents } from "./Taipy";
+import Alert from "./Taipy/Alert";
 
 interface AxiosRouter {
     router: string;
@@ -69,6 +70,7 @@ const Router = () => {
                             components={JSXReactRouterComponents as Record<string, ComponentType>}
                             jsx={JSX}
                         />
+                        <Alert alert={state.alert} />
                     </LocalizationProvider>
                 </ThemeProvider>
             </HelmetProvider>

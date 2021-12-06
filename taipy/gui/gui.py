@@ -310,6 +310,14 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
+    def _send_ws_alert(self, type: str, message: str) -> None:
+        try:
+            self._server._ws.send(
+                {"type": WsType.ALERT.value, "atype": type, "message": message}
+            )
+        except Exception as e:
+            warnings.warn(f"Web Socket communication error {e}")
+
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
             {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
@@ -696,6 +704,9 @@ class Gui(object, metaclass=Singleton):
         if theme or dark_theme or light_theme:
             return res
         return None
+
+    def send_alert(self, type: str = "I", message: str = ""):
+        self._send_ws_alert(type, message)
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)
