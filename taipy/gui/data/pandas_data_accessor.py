@@ -46,7 +46,7 @@ class PandasDataAccessor(DataAccessor):
         data_extraction: t.Optional[bool] = None,
     ) -> t.Union[t.Dict, bytes]:
         data = self.__manage_date_cols(payload_cols, data)
-        ret = {
+        ret: t.Dict[str, t.Any] = {
             "format": str(data_format.value),
         }
         if rowcount is not None:
