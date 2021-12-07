@@ -707,13 +707,19 @@ class Gui(object, metaclass=Singleton):
 
     def send_alert(self, type: str = "I", message: str = "", browser_notification: t.Optional[bool] = None):
         """Allows to send a notification alert to the UI
-        
+
         Arguments:
         type -- One of success, info, warning, error (or first letter of), empty string removes the alert (default: I)
         message -- text message to display (default: empty string)
         browser_notification -- Ask the browser to also show the notification (default: app_config[browser_notification])
         """
-        self._send_ws_alert(type, message, self._get_app_config("browser_notification", True) if browser_notification is None else browser_notification)
+        self._send_ws_alert(
+            type,
+            message,
+            self._get_app_config("browser_notification", True)
+            if browser_notification is None
+            else browser_notification,
+        )
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)
