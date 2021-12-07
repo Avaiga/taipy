@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 
 import pytest
 
@@ -96,7 +96,7 @@ def test_set_and_get_scenario(cycle):
 
 
 def test_create_and_delete_scenario():
-    creation_date = datetime.now()
+    start_date = datetime.combine(datetime.now().date(), time())
     scenario_manager = ScenarioManager()
 
     scenario_manager.delete_all()
@@ -104,26 +104,26 @@ def test_create_and_delete_scenario():
 
     scenario_config = Config.scenario_configs.create("sc", [], Frequency.DAILY)
 
-    scenario_1 = scenario_manager.create(scenario_config, creation_date=creation_date)
+    scenario_1 = scenario_manager.create(scenario_config, start_date=start_date)
     assert scenario_1.config_name == "sc"
     assert scenario_1.pipelines == {}
     assert scenario_1.cycle.frequency == Frequency.DAILY
     assert scenario_1.master_scenario
-    assert scenario_1.cycle.creation_date == creation_date
-    assert scenario_1.cycle.start_date.date() == creation_date.date()
-    assert scenario_1.cycle.end_date.date() == creation_date.date()
+    assert scenario_1.cycle.creation_date.date() == start_date.date()
+    assert scenario_1.cycle.start_date == start_date
+    assert scenario_1.cycle.end_date.date() == start_date.date()
 
     with pytest.raises(DeletingMasterScenario):
         scenario_manager.delete(scenario_1.id)
 
-    scenario_2 = scenario_manager.create(scenario_config, creation_date=creation_date)
+    scenario_2 = scenario_manager.create(scenario_config)
     assert scenario_2.config_name == "sc"
     assert scenario_2.pipelines == {}
     assert scenario_2.cycle.frequency == Frequency.DAILY
     assert not scenario_2.master_scenario
-    assert scenario_2.cycle.creation_date == creation_date
-    assert scenario_2.cycle.start_date.date() == creation_date.date()
-    assert scenario_2.cycle.end_date.date() == creation_date.date()
+    assert scenario_2.cycle.creation_date.date() == start_date.date()
+    assert scenario_2.cycle.start_date == start_date
+    assert scenario_2.cycle.end_date.date() == start_date.date()
 
     assert scenario_1 != scenario_2
     assert scenario_1.cycle == scenario_2.cycle

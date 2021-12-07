@@ -1,12 +1,12 @@
 import logging
-from datetime import datetime
+from datetime import datetime, time
 from typing import List, Optional
 
 from taipy.common.alias import CycleId
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.frequency import Frequency
 from taipy.cycle.repository import CycleRepository
-from taipy.exceptions.cycle import CycleAlreadyExists, NonExistingCycle
+from taipy.exceptions.cycle import NonExistingCycle
 from taipy.exceptions.repository import ModelNotFound
 
 
@@ -54,22 +54,20 @@ class CycleManager:
             logging.error(f"Cycle entity : {cycle_id} does not exist.")
             raise NonExistingCycle(cycle_id)
 
-    def get_or_create(self, frequency: Frequency, creation_date: datetime = None) -> Cycle:
+    def get_or_create(self, frequency: Frequency, start_date: datetime = None) -> Cycle:
         """
         Returns the cycle created by frequency and creation_date if it already
         exists, or creates and returns a new cycle.
         Parameters:
             frequency (Frequency): creation_date of the cycle.
-            creation_date (datetime): creation date of the cycle. Default value : None.
+            start_date (datetime): creation date of the cycle. Default value : None.
         """
-        creation_date = creation_date if creation_date else datetime.now()
-        cycles = self.repository.get_cycles_by_frequency_and_creation_date(
-            frequency=frequency, creation_date=creation_date
-        )
+        start_date = start_date if start_date else datetime.combine(datetime.now().date(), time())
+        cycles = self.repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return self.create(frequency=frequency, creation_date=creation_date)
+            return self.create(frequency=frequency, creation_date=datetime.now())
 
     def get_all(self):
         """

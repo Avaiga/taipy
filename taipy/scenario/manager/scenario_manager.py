@@ -51,7 +51,7 @@ class ScenarioManager:
         """Deletes all data sources."""
         self.repository.delete_all()
 
-    def create(self, config: ScenarioConfig, creation_date: Optional[datetime.datetime] = None) -> Scenario:
+    def create(self, config: ScenarioConfig, start_date: Optional[datetime.datetime] = None) -> Scenario:
         """
         Creates and returns a new scenario from the scenario configuration provided as parameter.
 
@@ -60,14 +60,14 @@ class ScenarioManager:
 
         Parameters:
             config (ScenarioConfig) : scenario configuration object.
-            creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
+                start_date (Optional[datetime.datetime]) : Start date of the scenario. Current date time is used as
                 default value.
         """
         scenario_id = Scenario.new_id(config.name)
         pipelines = [
             self.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs
         ]
-        cycle = self.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
+        cycle = self.cycle_manager.get_or_create(config.frequency, start_date) if config.frequency else None
         is_master_scenario = len(self.get_all_by_cycle(cycle)) == 0 if cycle else False
         scenario = Scenario(
             config.name, pipelines, config.properties, scenario_id, is_master=is_master_scenario, cycle=cycle
