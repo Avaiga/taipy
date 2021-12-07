@@ -1,8 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo } from "react";
-import Snackbar from "@mui/material/Snackbar";
+import { useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
-import MuiAlert, { AlertColor } from "@mui/material/Alert";
 
 import { AlertMessage, createAlertAction } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
@@ -14,12 +13,19 @@ interface AlertProps {
 const Alert = (props: AlertProps) => {
     const { alert } = props;
     const { dispatch } = useContext(TaipyContext);
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
-    const resetAlert = useCallback(() => dispatch(createAlertAction()), [dispatch]);
+    const resetAlert = useCallback(
+        (key: string) => () => {
+            closeSnackbar(key);
+            dispatch(createAlertAction());
+        },
+        [dispatch, closeSnackbar]
+    );
 
-    const alertAction = useMemo(
-        () => (
-            <IconButton size="small" aria-label="close" color="inherit" onClick={resetAlert}>
+    const notifAction = useCallback(
+        (key: string) => (
+            <IconButton size="small" aria-label="close" color="inherit" onClick={resetAlert(key)}>
                 <CloseIcon fontSize="small" />
             </IconButton>
         ),
@@ -29,37 +35,28 @@ const Alert = (props: AlertProps) => {
     const faviconUrl = useMemo(() => {
         const nodeList = document.getElementsByTagName("link");
         for (let i = 0; i < nodeList.length; i++) {
-            if ((nodeList[i].getAttribute("rel") == "icon") || (nodeList[i].getAttribute("rel") == "shortcut icon")) {
+            if (nodeList[i].getAttribute("rel") == "icon" || nodeList[i].getAttribute("rel") == "shortcut icon") {
                 return nodeList[i].getAttribute("href") || "/favicon.png";
             }
         }
         return "/favicon.png";
-    
     }, []);
 
     useEffect(() => {
-        alert && new Notification(document.title || "Taipy", {body: alert.message, icon: faviconUrl})
-    }, [alert, faviconUrl]);
+        if (alert) {
+            enqueueSnackbar(alert.message, {
+                variant: alert.atype as VariantType,
+                action: notifAction,
+                autoHideDuration: 3000,
+            });
+            alert.browser && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
+        }
+    }, [alert, enqueueSnackbar, notifAction, faviconUrl]);
 
     useEffect(() => {
-        window.Notification && Notification.requestPermission();
-    }, []);
+        alert?.browser && window.Notification && Notification.requestPermission();
+    }, [alert?.browser]);
 
-    if (alert) {
-        return (
-            <Snackbar open={true} autoHideDuration={5000} onClose={resetAlert} action={alertAction}>
-                <MuiAlert
-                    onClose={resetAlert}
-                    severity={alert.atype as AlertColor}
-                    sx={{ width: "100%" }}
-                    variant="filled"
-                    elevation={6}
-                >
-                    {alert.message}
-                </MuiAlert>
-            </Snackbar>
-        );
-    }
     return null;
 };
 

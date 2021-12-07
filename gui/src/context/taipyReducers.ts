@@ -42,6 +42,7 @@ interface NamePayload {
 export interface AlertMessage {
     atype: string;
     message: string;
+    browser: boolean;
 }
 
 interface TaipyAction extends NamePayload, TaipyBaseAction {
@@ -159,7 +160,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.SetAlert:
             const alertAction = action as unknown as TaipyAlertAction;
             if (alertAction.atype) {
-                return {...state, alert: {atype: alertAction.atype, message: alertAction.message}}
+                return {...state, alert: {atype: alertAction.atype, message: alertAction.message, browser: alertAction.browser}}
             }
             delete state.alert;
             return {...state}
@@ -345,7 +346,8 @@ const getAlertType = (aType: string) => {
 export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
     atype: alert ? getAlertType(alert.atype) : "",
-    message: alert? alert.message : "",
+    message: alert ? alert.message : "",
+    browser: alert ? alert.browser : true,
 })
 
 type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL";
