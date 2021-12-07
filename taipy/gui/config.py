@@ -89,7 +89,9 @@ class GuiConfig(object):
                 try:
                     return type(default_value)(self.app_config[name])
                 except Exception as e:
-                    warnings.warn(f'app_config "{name}" value "{self.app_config[name]}" is not of type {type(default_value)}\n{e}')
+                    warnings.warn(
+                        f'app_config "{name}" value "{self.app_config[name]}" is not of type {type(default_value)}\n{e}'
+                    )
                     return default_value
             return self.app_config[name]
         return default_value
