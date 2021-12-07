@@ -107,7 +107,6 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
                     "Entity": "Austria",
                 },
             ],
-            "orient": "records",
             "rowcount": 14477,
             "start": 0,
             "format": "JSON",
