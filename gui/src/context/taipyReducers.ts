@@ -8,6 +8,7 @@ import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 
 enum Types {
+    SocketConnected = "SOCKET_CONNECTED",
     Update = "UPDATE",
     MultipleUpdate = "MULTIPLE_UPDATE",
     SendUpdate = "SEND_UPDATE_ACTION",
@@ -20,6 +21,7 @@ enum Types {
 }
 export interface TaipyState {
     socket?: Socket;
+    isSocketConnected?: boolean;
     data: Record<string, unknown>;
     theme: Theme;
     locations: Record<string, string>;
@@ -82,6 +84,7 @@ export const INITIAL_STATE: TaipyState = {
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
+    isSocketConnected: false,
     socket: io(ENDPOINT),
 });
 
@@ -94,6 +97,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
     if (socket) {
         // Websocket confirm successful initialization
         socket.on("connect", () => {
+            dispatch({ type: Types.SocketConnected });
             socket?.send({ status: "Connected!" });
         });
         socket.on("disconnect", () => {
@@ -122,6 +126,8 @@ const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string
 export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
     const action = baseAction as TaipyAction;
     switch (action.type) {
+        case Types.SocketConnected:
+            return { ...state, isSocketConnected: true };
         case Types.Update:
             const newValue = parseData(action.payload.value as Record<string, unknown>);
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};

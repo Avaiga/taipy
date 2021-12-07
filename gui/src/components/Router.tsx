@@ -38,6 +38,11 @@ const Router = () => {
             // no need to access the backend again, the routes are static
             return;
         }
+        if (!state.isSocketConnected) {
+            // initialize only when there is an existing ws connection
+            // --> assuring that there is a session data scope on the backend
+            return;
+        }
         // Fetch Flask Rendered JSX React Router
         axios
             .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
@@ -52,7 +57,7 @@ const Router = () => {
                 setJSX('<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>');
                 console.log(error);
             });
-    }, [refresh]);
+    }, [refresh, state.isSocketConnected]);
 
     useEffect(() => {
         initializeWebSocket(state.socket, dispatch);

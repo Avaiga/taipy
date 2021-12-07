@@ -1,16 +1,21 @@
+from __future__ import annotations
+
 import os
 import typing as t
 
 import __main__
-from flask import Flask, jsonify, render_template, render_template_string, send_from_directory
+from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
+
+if t.TYPE_CHECKING:
+    from .gui import Gui
 
 
 class Server(Flask):
     def __init__(
         self,
-        app,
+        app: Gui,
         css_file: str,
         static_folder: t.Optional[str] = "",
         template_folder: str = "",
@@ -31,7 +36,7 @@ class Server(Flask):
         self._app = app
         self.config["SECRET_KEY"] = "TaIpY"
         # Add cors for frontend access
-        self._ws = SocketIO(self, async_mode=None, cors_allowed_origins="*")
+        self._ws = SocketIO(self, async_mode=None, cors_allowed_origins="*", ping_timeout=10, ping_interval=5)
         CORS(self)
 
         self.__path_mapping = path_mapping
@@ -72,6 +77,16 @@ class Server(Flask):
                 print(message["status"])
             elif "type" in message.keys():
                 self._app._manage_message(message["type"], message)
+
+        @self._ws.on("connect")
+        def ws_connect(message):
+            print("Connected to ws session id " + request.sid)
+            self._app._data_scopes.create_scope()
+
+        @self._ws.on("disconnect")
+        def ws_disconnect():
+            print("Disconnected to ws session id " + request.sid)
+            self._app._data_scopes.delete_scope()
 
     # Update to render as JSX
     def render(self, html_fragment, style, head):

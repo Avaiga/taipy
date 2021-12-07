@@ -20,6 +20,7 @@ from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
+from .data.data_scope import _DataScopes
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -90,6 +91,9 @@ class Gui(object, metaclass=Singleton):
         self._config = GuiConfig()
         # Data Registry
         self._data_accessors = _DataAccessors()
+
+        # Data Scopes
+        self._data_scopes = _DataScopes()
 
         # Load default config
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
@@ -718,9 +722,9 @@ class Gui(object, metaclass=Singleton):
                 if value is not None and key in app_config:
                     try:
                         app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
-                    except ValueError as ve:
+                    except Exception as e:
                         warnings.warn(
-                            f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{ve}"
+                            f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
                         )
         # Load keyword arguments
         for key, value in kwargs.items():
@@ -728,9 +732,9 @@ class Gui(object, metaclass=Singleton):
             if value is not None and key in app_config:
                 try:
                     app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
-                except ValueError as ve:
+                except Exception as e:
                     warnings.warn(
-                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{ve}"
+                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
                     )
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})

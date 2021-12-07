@@ -126,7 +126,7 @@ demo*/
 !demos/
 
 # Docker local dev
-docker-compose-dev.yml
+docker-compose-dev*.yml
 Dockerfile.dev
 
 # Filesystem default local storage
