@@ -121,3 +121,7 @@ class TestSQLDataSource:
         assert data[4].foo is None
         assert data[4].bar is None
         assert data[4].kwargs["KWARGS_KEY"] == "KWARGS_VALUE"
+
+    # def test_write_dicts(self, mocker):
+    #
+    #
