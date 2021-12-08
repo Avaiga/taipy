@@ -1,10 +1,9 @@
-import React, { useCallback, useContext, useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { AlertMessage, createAlertAction } from "../../context/taipyReducers";
-import { TaipyContext } from "../../context/taipyContext";
+import { AlertMessage } from "../../context/taipyReducers";
 
 interface AlertProps {
     alert?: AlertMessage;
@@ -12,15 +11,13 @@ interface AlertProps {
 
 const Alert = (props: AlertProps) => {
     const { alert } = props;
-    const { dispatch } = useContext(TaipyContext);
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const resetAlert = useCallback(
         (key: string) => () => {
             closeSnackbar(key);
-            dispatch(createAlertAction());
         },
-        [dispatch, closeSnackbar]
+        [closeSnackbar]
     );
 
     const notifAction = useCallback(
