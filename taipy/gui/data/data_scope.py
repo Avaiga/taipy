@@ -14,6 +14,8 @@ class _DataScopes:
     def get_scope(self) -> SimpleNamespace:
         if request.sid is None:
             raise RuntimeError("Empty session id, might be due to unestablished WebSocket connection")
+        if (client_id := request.args.get("client_id")) is not None:
+            return self._scopes[client_id]
         if request.sid not in self._scopes:
             warnings.warn(
                 f"session id {request.sid} not found in data scope. Taipy will automatically create a scope for this session id but you might have to reload your webpage"

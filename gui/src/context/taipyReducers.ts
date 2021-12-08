@@ -98,10 +98,10 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         // Websocket confirm successful initialization
         socket.on("connect", () => {
             dispatch({ type: Types.SocketConnected });
-            socket?.send({ status: "Connected!" });
+            socket?.send({ status: "Connected! " + socket.id });
         });
         socket.on("disconnect", () => {
-            socket?.send({ status: "Disconnected!" });
+            socket?.send({ status: "Disconnected! " + socket.id });
         });
         // handle message data from backend
         socket.on("message", (message: WsMessage) => {

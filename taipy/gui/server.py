@@ -79,7 +79,7 @@ class Server(Flask):
                 self._app._manage_message(message["type"], message)
 
         @self._ws.on("connect")
-        def ws_connect(message):
+        def ws_connect():
             print("Connected to ws session id " + request.sid)
             self._app._data_scopes.create_scope()
 
