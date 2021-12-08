@@ -100,7 +100,6 @@ class Gui(object, metaclass=Singleton):
         self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
-        self._values = SimpleNamespace()
         self._adapter_for_type: t.Dict[str, FunctionType] = {}
         self._type_for_variable: t.Dict[str, str] = {}
         self._list_for_variable: t.Dict[str, str] = {}
@@ -144,8 +143,8 @@ class Gui(object, metaclass=Singleton):
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+        page.render()
         if page.rendered_jsx is None:
-            page.render()
             page.rendered_jsx = str(page.rendered_jsx)
             if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
                 page.rendered_jsx += "<PageContent />"
@@ -207,15 +206,15 @@ class Gui(object, metaclass=Singleton):
         if not name.isidentifier():
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(self._values, name, _MapDictionary(value))
+            setattr(self._data_scopes.get_scope(), name, _MapDictionary(value))
         else:
-            setattr(self._values, name, value)
+            setattr(self._data_scopes.get_scope(), name, value)
         prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter, Setter
         setattr(Gui, name, prop)
 
     def __value_getter(self, name):
         def __getter(elt: Gui) -> t.Any:
-            value = getattr(elt._values, name)
+            value = getattr(elt._data_scopes.get_scope(), name)
             if isinstance(value, _MapDictionary):
                 return _MapDictionary(value._dict, lambda s, v: elt._update_var(name + "." + s, v))
             else:
@@ -244,7 +243,7 @@ class Gui(object, metaclass=Singleton):
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
-        currentvalue = attrgetter(self._expr_to_hash[var_name])(self._values)
+        currentvalue = attrgetter(self._expr_to_hash[var_name])(self._data_scopes.get_scope())
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
                 value = ISOToDate(value)
@@ -265,7 +264,7 @@ class Gui(object, metaclass=Singleton):
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
-            attrsetter(self._values, hash_expr, value)
+            attrsetter(self._data_scopes.get_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
                 modified_vars.extend(self._re_evaluate_expr(var_name))
@@ -277,7 +276,7 @@ class Gui(object, metaclass=Singleton):
     def __send_var_list_update(self, modified_vars: list):
         ws_dict = {}
         for _var in modified_vars:
-            newvalue = attrgetter(_var)(self._values)
+            newvalue = attrgetter(_var)(self._data_scopes.get_scope())
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
             if self._data_accessors._is_data_access(_var, newvalue):
@@ -298,7 +297,7 @@ class Gui(object, metaclass=Singleton):
     def _request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._expr_to_hash[var_name]
-        newvalue = attrgetter(var_name)(self._values)
+        newvalue = attrgetter(var_name)(self._data_scopes.get_scope())
         ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
@@ -308,8 +307,10 @@ class Gui(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
         try:
-            self._server._ws.send(
-                {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload}
+            self._server._ws.emit(
+                "message",
+                {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload},
+                room=request.sid,
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
@@ -320,7 +321,9 @@ class Gui(object, metaclass=Singleton):
             for k, v in modified_values.items()
         ]
         try:
-            self._server._ws.send({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
+            self._server._ws.emit(
+                "message", {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload}, room=request.sid
+            )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
@@ -379,7 +382,7 @@ class Gui(object, metaclass=Singleton):
                 continue
             hash_expr = self._expr_to_hash[expr]
             expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
-            eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
+            eval_dict = {v: attrgetter(v)(self._data_scopes.get_scope()) for v in expr_var_list}
 
             if self._is_expression(expr):
                 expr_string = 'f"' + expr.replace('"', '\\"') + '"'
@@ -387,7 +390,7 @@ class Gui(object, metaclass=Singleton):
                 expr_string = expr
 
             expr_evaluated = eval(expr_string, {}, eval_dict)
-            attrsetter(self._values, hash_expr, expr_evaluated)
+            attrsetter(self._data_scopes.get_scope(), hash_expr, expr_evaluated)
             modified_vars.append(hash_expr)
         return modified_vars
 
@@ -635,7 +638,7 @@ class Gui(object, metaclass=Singleton):
                     var_name = node.id.split(sep=".")[0]
                     self.bind_var(var_name)
                     try:
-                        var_val[var_name] = attrgetter(var_name)(self._values)
+                        var_val[var_name] = attrgetter(var_name)(self._data_scopes.get_scope())
                         var_list.append(var_name)
                     except AttributeError:
                         warnings.warn(f"Variable '{var_name}' is not defined")
@@ -648,7 +651,7 @@ class Gui(object, metaclass=Singleton):
             expr_hash = expr if Gui.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
         # validate whether expression has already been evaluated
-        if expr in self._expr_to_hash:
+        if expr in self._expr_to_hash and hasattr(self._data_scopes.get_scope(), self._expr_to_hash[expr]):
             return "{" + self._expr_to_hash[expr] + "}"
         try:
             # evaluate expressions
@@ -658,6 +661,11 @@ class Gui(object, metaclass=Singleton):
             expr_evaluated = None
         # save the expression if it needs to be re-evaluated
         if re_evaluated:
+            if expr in self._expr_to_hash:
+                if expr_hash is None:
+                    expr_hash = self._expr_to_hash[expr]
+                    self.bind_var_val(expr_hash, expr_evaluated)
+                return "{" + expr_hash + "}"
             if expr_hash is None:
                 expr_hash = self._expr_to_hash[expr] = _get_expr_var_name(expr)
                 self.bind_var_val(expr_hash, expr_evaluated)

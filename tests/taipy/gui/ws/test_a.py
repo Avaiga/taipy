@@ -23,7 +23,7 @@ def test_a_button_pressed(gui: Gui, helpers):
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server)
     ws_client.emit("message", {"type": "A", "name": "my_button", "payload": "do_something"})
-    assert gui._values.text == "a random text"
+    assert gui._data_scopes.get_scope().text == "a random text"
     assert gui.x == 20  # type: ignore
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()

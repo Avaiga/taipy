@@ -10,12 +10,17 @@ from flask import request
 class _DataScopes:
     def __init__(self) -> None:
         self._scopes: t.Dict[str, SimpleNamespace] = {}
+        self._scopes["global"] = SimpleNamespace()
 
     def get_scope(self) -> SimpleNamespace:
-        if request.sid is None:
-            raise RuntimeError("Empty session id, might be due to unestablished WebSocket connection")
+        # global context in case request is not registered of client_id is not available (such as in the context of running tests)
+        if not request or "client_id" not in request.args.to_dict():
+            return self._scopes["global"]
         if (client_id := request.args.get("client_id")) is not None:
             return self._scopes[client_id]
+        if request.sid is None:
+            warnings.warn("Empty session id, using global scope instead")
+            return self._scopes["global"]
         if request.sid not in self._scopes:
             warnings.warn(
                 f"session id {request.sid} not found in data scope. Taipy will automatically create a scope for this session id but you might have to reload your webpage"
