@@ -1,14 +1,13 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import userEvent from "@testing-library/user-event";
 import { SnackbarProvider } from "notistack";
 
 import Alert from "./Alert";
 import { AlertMessage } from "../../context/taipyReducers";
 
 const defaultMessage = "message";
-const defaultAlert: AlertMessage = { atype: "success", message: defaultMessage, browser: true };
+const defaultAlert: AlertMessage = { atype: "success", message: defaultMessage, browser: true, duration: 3000 };
 
 class myNotification {
     static requestPermission = jest.fn();
