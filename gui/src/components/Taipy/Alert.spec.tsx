@@ -24,7 +24,7 @@ describe("Alert Component", () => {
         const elt = getByText(defaultMessage);
         expect(elt.tagName).toBe("DIV");
     });
-    it("displays an success alert", async () => {
+    it("displays a success alert", async () => {
         const { getByText } = render(<SnackbarProvider><Alert alert={defaultAlert} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.closest(".SnackbarItem-variantSuccess")).toBeInTheDocument()
@@ -34,7 +34,7 @@ describe("Alert Component", () => {
         const elt = getByText(defaultMessage);
         expect(elt.closest(".SnackbarItem-variantError")).toBeInTheDocument()
     });
-    it("displays an warning alert", async () => {
+    it("displays a warning alert", async () => {
         const { getByText } = render(<SnackbarProvider><Alert alert={{...defaultAlert, atype:"warning"}} /></SnackbarProvider>);
         const elt = getByText(defaultMessage);
         expect(elt.closest(".SnackbarItem-variantWarning")).toBeInTheDocument()

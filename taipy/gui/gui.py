@@ -706,7 +706,7 @@ class Gui(object, metaclass=Singleton):
         return None
 
     def send_alert(self, type: str = "I", message: str = "", browser_notification: t.Optional[bool] = None):
-        """Allows to send a notification alert to the UI.
+        """Sends a notification alert to the UI.
 
         Arguments:
         type -- One of success, info, warning, error (or first letter of), empty string removes the alert (default: I)
