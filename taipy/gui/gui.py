@@ -310,10 +310,16 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
-    def _send_ws_alert(self, type: str, message: str, browser_notification: bool) -> None:
+    def _send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
         try:
             self._server._ws.send(
-                {"type": WsType.ALERT.value, "atype": type, "message": message, "browser": browser_notification}
+                {
+                    "type": WsType.ALERT.value,
+                    "atype": type,
+                    "message": message,
+                    "browser": browser_notification,
+                    "duration": duration,
+                }
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
@@ -705,13 +711,20 @@ class Gui(object, metaclass=Singleton):
             return res
         return None
 
-    def send_alert(self, type: str = "I", message: str = "", browser_notification: t.Optional[bool] = None):
+    def send_alert(
+        self,
+        type: str = "I",
+        message: str = "",
+        browser_notification: t.Optional[bool] = None,
+        duration: t.Optional[int] = None,
+    ):
         """Sends a notification alert to the UI.
 
         Arguments:
         type -- One of success, info, warning, error (or first letter of), empty string removes the alert (default: I)
         message -- text message to display (default: empty string)
         browser_notification -- Ask the browser to also show the notification (default: app_config[browser_notification])
+        duration -- time during which the notification is shown in ms (default: app_config[notification_duration])
         """
         self._send_ws_alert(
             type,
@@ -719,6 +732,7 @@ class Gui(object, metaclass=Singleton):
             self._get_app_config("browser_notification", True)
             if browser_notification is None
             else browser_notification,
+            self._get_app_config("notification_duration", 3000) if duration is None else duration,
         )
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:

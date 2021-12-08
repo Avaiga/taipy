@@ -44,7 +44,7 @@ const Alert = (props: AlertProps) => {
             enqueueSnackbar(alert.message, {
                 variant: alert.atype as VariantType,
                 action: notifAction,
-                autoHideDuration: 3000,
+                autoHideDuration: alert.duration,
             });
             alert.browser && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
         }

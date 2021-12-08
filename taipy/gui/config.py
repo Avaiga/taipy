@@ -21,6 +21,7 @@ AppConfigOption = t.Literal[
     "theme[dark]",
     "use_arrow",
     "browser_notification",
+    "notification_duration",
 ]
 
 AppConfig = t.TypedDict(
@@ -40,6 +41,7 @@ AppConfig = t.TypedDict(
         "theme[dark]": t.Union[t.Dict[str, t.Any], None],
         "use_arrow": bool,
         "browser_notification": bool,
+        "notification_duration": int,
     },
     total=False,
 )
