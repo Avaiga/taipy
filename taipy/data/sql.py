@@ -118,7 +118,7 @@ class SQLDataSource(DataSource):
         Check data against a collection of types to handle insertion on the database.
         """
         with self.__engine.connect() as connection:
-            write_table = table(self.write_table, MetaData(), autoload=True, autoload_with=self.__engine)
+            write_table = table(self.write_table)
             if isinstance(data, pd.DataFrame):
                 self.__insert_dicts(data.to_dict(orient="records"), write_table, connection)
             elif isinstance(data, dict):
@@ -148,7 +148,8 @@ class SQLDataSource(DataSource):
         """
         with connection.begin() as transaction:
             try:
-                markers = ",".join("?" * len(data[0]))
+                markers = ",".join([f'({",".join("?" * len(data[0]))})'] * len(data))
+                markers = markers
                 ins = "INSERT INTO {tablename} VALUES ({markers})"
                 ins = ins.format(tablename=write_table.name, markers=markers)
                 connection.execute(ins, data)
