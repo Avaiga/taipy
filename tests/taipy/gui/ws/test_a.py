@@ -7,24 +7,27 @@ def test_a_button_pressed(gui: Gui, helpers):
         gui.text = "a random text"
 
     gui.do_something = do_something_fn  # type: ignore
+    x = 10  # noqa: F841
+    text = "hi"  # noqa: F841
     # Bind test variables
-    assert gui.bind_var_val("x", 10)
-    assert gui.bind_var_val("text", "hi")
+    # assert gui.bind_var_val("x", 10)
+    # assert gui.bind_var_val("text", "hi")
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page(
         "test", Markdown("<|Do something!|button|on_action=do_something|id=my_button|> | <|{x}|> | <|{text}|>")
     )
     gui.run(run_server=False)
-    assert gui.x == 10  # type: ignore
-    assert gui.text == "hi"  # type: ignore
     flask_client = gui._server.test_client()
-    # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get("/flask-jsx/test/")
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server)
+    # Get the jsx once so that the page will be evaluated -> variable will be registered
+    sid = list(gui._data_scopes._scopes.keys())[1]
+    flask_client.get(f"/flask-jsx/test/?client_id={sid}")
+    assert gui._data_scopes._scopes[sid].x == 10  # type: ignore
+    assert gui._data_scopes._scopes[sid].text == "hi"  # type: ignore
     ws_client.emit("message", {"type": "A", "name": "my_button", "payload": "do_something"})
-    assert gui._data_scopes.get_scope().text == "a random text"
-    assert gui.x == 20  # type: ignore
+    assert gui._data_scopes._scopes[sid].text == "a random text"
+    assert gui._data_scopes._scopes[sid].x == 20  # type: ignore
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_message(received_messages[0], "MU", "x", 20)
