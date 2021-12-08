@@ -310,6 +310,14 @@ class Gui(object, metaclass=Singleton):
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
 
+    def _send_ws_alert(self, type: str, message: str, browser_notification: bool) -> None:
+        try:
+            self._server._ws.send(
+                {"type": WsType.ALERT.value, "atype": type, "message": message, "browser": browser_notification}
+            )
+        except Exception as e:
+            warnings.warn(f"Web Socket communication error {e}")
+
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
             {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
@@ -679,8 +687,8 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def _get_app_config(self, name: AppConfigOption, defaultValue: t.Any) -> t.Any:
-        return self._config._get_app_config(name, defaultValue)
+    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
+        return self._config._get_app_config(name, default_value)
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
         theme = self._get_app_config("theme", None)
@@ -696,6 +704,22 @@ class Gui(object, metaclass=Singleton):
         if theme or dark_theme or light_theme:
             return res
         return None
+
+    def send_alert(self, type: str = "I", message: str = "", browser_notification: t.Optional[bool] = None):
+        """Sends a notification alert to the UI.
+
+        Arguments:
+        type -- One of success, info, warning, error (or first letter of), empty string removes the alert (default: I)
+        message -- text message to display (default: empty string)
+        browser_notification -- Ask the browser to also show the notification (default: app_config[browser_notification])
+        """
+        self._send_ws_alert(
+            type,
+            message,
+            self._get_app_config("browser_notification", True)
+            if browser_notification is None
+            else browser_notification,
+        )
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)

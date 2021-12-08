@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import CssBaseline from "@mui/material/CssBaseline";
+import { SnackbarProvider } from "notistack";
 
 import { ENDPOINT } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
@@ -20,6 +21,7 @@ import {
     taipyReducer,
 } from "../context/taipyReducers";
 import { JSXReactRouterComponents } from "./Taipy";
+import Alert from "./Taipy/Alert";
 
 interface AxiosRouter {
     router: string;
@@ -62,14 +64,19 @@ const Router = () => {
         <TaipyContext.Provider value={{ state, dispatch }}>
             <HelmetProvider>
                 <ThemeProvider theme={state.theme}>
-                    <CssBaseline />
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <JsxParser
-                            disableKeyGeneration={true}
-                            components={JSXReactRouterComponents as Record<string, ComponentType>}
-                            jsx={JSX}
-                        />
-                    </LocalizationProvider>
+                    <SnackbarProvider
+                        maxSnack={5}
+                    >
+                        <CssBaseline />
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <JsxParser
+                                disableKeyGeneration={true}
+                                components={JSXReactRouterComponents as Record<string, ComponentType>}
+                                jsx={JSX}
+                            />
+                            <Alert alert={state.alert} />
+                        </LocalizationProvider>
+                    </SnackbarProvider>
                 </ThemeProvider>
             </HelmetProvider>
         </TaipyContext.Provider>
