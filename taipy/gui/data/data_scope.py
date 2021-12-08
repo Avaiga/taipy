@@ -13,7 +13,7 @@ class _DataScopes:
         self._scopes["global"] = SimpleNamespace()
 
     def get_scope(self) -> SimpleNamespace:
-        # global context in case request is not registered of client_id is not available (such as in the context of running tests)
+        # global context in case request is not registered or client_id is not available (such as in the context of running tests)
         if not request or (not hasattr(request, "sid") and "client_id" not in request.args.to_dict()):
             return self._scopes["global"]
         if client_id := request.args.get("client_id"):
