@@ -80,12 +80,12 @@ class Server(Flask):
 
         @self._ws.on("connect")
         def ws_connect():
-            print("Connected to ws session id " + request.sid)
+            print("Connected to ws session id " + request.sid)  # type: ignore
             self._app._data_scopes.create_scope()
 
         @self._ws.on("disconnect")
         def ws_disconnect():
-            print("Disconnected to ws session id " + request.sid)
+            print("Disconnected to ws session id " + request.sid)  # type: ignore
             self._app._data_scopes.delete_scope()
 
     # Update to render as JSX

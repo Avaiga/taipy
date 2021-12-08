@@ -310,7 +310,7 @@ class Gui(object, metaclass=Singleton):
             self._server._ws.emit(
                 "message",
                 {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload},
-                room=request.sid,
+                room=request.sid,  # type: ignore
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
@@ -322,7 +322,7 @@ class Gui(object, metaclass=Singleton):
         ]
         try:
             self._server._ws.emit(
-                "message", {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload}, room=request.sid
+                "message", {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload}, room=request.sid  # type: ignore
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
