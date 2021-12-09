@@ -356,7 +356,7 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f"Web Socket communication error {e}")
 
     def _get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or not self._data_scopes.get_use_multi_user():
+        if not hasattr(request, "sid") or not self._data_scopes.get_multi_user():
             return None
         return request.sid  # type: ignore
 
@@ -833,7 +833,7 @@ class Gui(object, metaclass=Singleton):
         self._data_accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
         # Use multi user or not
-        self._data_scopes.set_use_multi_user(app_config["use_multi_user"])
+        self._data_scopes.set_multi_user(app_config["multi_user"])
 
         self._server._set_client_url(app_config["client_url"])
 
