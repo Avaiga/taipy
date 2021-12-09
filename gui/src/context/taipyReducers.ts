@@ -136,7 +136,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     const action = baseAction as TaipyAction;
     switch (action.type) {
         case Types.SocketConnected:
-            return { ...state, isSocketConnected: true };
+            return !!state.isSocketConnected ? state : { ...state, isSocketConnected: true };
         case Types.Update:
             const newValue = parseData(action.payload.value as Record<string, unknown>);
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
