@@ -38,6 +38,8 @@ interface ChartConfig {
     yaxis: string[];
     markers: Partial<PlotMarker>[];
     selectedMarkers: Partial<PlotMarker>[];
+    orientations: string[];
+    names: string[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -55,6 +57,8 @@ const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number)
 };
 
 const selectedPropRe = /selected(\d+)/;
+
+const defaultChartConfig = {responsive: true};
 
 const Chart = (props: ChartProp) => {
     const {
@@ -127,6 +131,8 @@ const Chart = (props: ChartProp) => {
                 yaxis: [],
                 markers: [],
                 selectedMarkers: [],
+                orientations: [],
+                names: [],
             } as ChartConfig;
         }
     }, [props.config]);
@@ -153,18 +159,20 @@ const Chart = (props: ChartProp) => {
         const playout = props.layout ? JSON.parse(props.layout) : {};
         return {
             ...playout,
-            title: title,
+            title: title || playout.title,
             xaxis: {
                 title:
                     config.traces.length && config.traces[0].length && config.traces[0][0]
                         ? config.columns[config.traces[0][0]].dfid
                         : undefined,
+                ...playout.xaxis
             },
             yaxis: {
                 title:
                     config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
                         ? config.columns[config.traces[0][1]].dfid
                         : undefined,
+                ...playout.yaxis
             },
             clickmode: "event+select",
         } as Layout;
@@ -180,7 +188,7 @@ const Chart = (props: ChartProp) => {
                 const ret = {
                     type: config.types[idx],
                     mode: config.modes[idx],
-                    name: config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined,
+                    name: getArrayValue(config.names, idx) || (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
                     marker: getArrayValue(config.markers, idx, {}),
                     x: getValue(value, trace, 0),
                     y: getValue(value, trace, 1),
@@ -189,6 +197,7 @@ const Chart = (props: ChartProp) => {
                     yaxis: config.yaxis[idx],
                     hovertext: getValue(value, config.labels, idx),
                     selectedpoints: getArrayValue(selected, idx, []),
+                    orientation: getArrayValue(config.orientations, idx),
                 } as Record<string, unknown>;
                 const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
@@ -199,7 +208,7 @@ const Chart = (props: ChartProp) => {
         [value, config, selected]
     );
 
-    const plotConfig = useMemo(() => (active ? {} : { staticPlot: true }), [active]);
+    const plotConfig = useMemo(() => (active ? defaultChartConfig : {...defaultChartConfig, staticPlot: true }), [active]);
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
