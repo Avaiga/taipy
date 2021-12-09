@@ -30,15 +30,6 @@ class ScenarioConfig:
         else:
             self.comparators = {ds_config_name: comparator}
 
-    # def __is_comparator(self, comparators: Dict):
-    #     if isinstance(comparators, Dict):
-    #         if not all(isinstance(comp, str) for comp in comparators.keys()):
-    #             raise InvalidComparators
-    #         if not all(isinstance(comp, Callable) for comp in comparators.values()):
-    #             raise InvalidComparators
-    #         return True
-    #     raise InvalidComparators
-
 
 class ScenarioConfigs(ConfigRepository):
     def create(self, name: str, pipelines: List[PipelineConfig], frequency: Optional[Frequency] = None, **properties):  # type: ignore
