@@ -7,6 +7,7 @@ class WsType(Enum):
     REQUEST_UPDATE = "RU"
     DATA_UPDATE = "DU"
     UPDATE = "U"
+    ALERT = "AL"
 
 
 NumberTypes = set(["int", "int64", "float", "float64"])

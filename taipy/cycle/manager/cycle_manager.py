@@ -22,10 +22,10 @@ class CycleManager:
         """
         Creates a new cycle from the provided information (frequency, name, creation date and properties)
         Parameters:
-            frequency (Frequency) : frequency of the cycle
-            name (str) : custom name of the cycle. Default: None
-            creation_date (datetime) : date and time the cycle is created. Default: None
-            properties (dict[str, str]) : other properties. Default: None
+            frequency (Frequency): frequency of the cycle
+            name (str): custom name of the cycle. Default: None
+            creation_date (datetime): date and time the cycle is created. Default: None
+            properties (dict[str, str]): other properties. Default: None
         """
         cycle = Cycle(frequency, properties, name=name, creation_date=creation_date)
         self.set(cycle)
