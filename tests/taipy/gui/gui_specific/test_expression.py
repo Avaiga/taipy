@@ -66,4 +66,4 @@ def test_expression_table_control(gui: Gui, helpers):
         "value={tp_pd_concat_series_1_series_2_axis_1__0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
-    assert isinstance(gui._values.tp_pd_concat_series_1_series_2_axis_1__0, pd.DataFrame)
+    assert isinstance(gui._get_data_scope().tp_pd_concat_series_1_series_2_axis_1__0, pd.DataFrame)

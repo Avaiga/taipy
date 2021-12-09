@@ -44,7 +44,7 @@ class Builder:
             if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
                 self.has_evaluated = True
                 default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
-                self.value = attrgetter(default_property_value)(self._gui._values)
+                self.value = attrgetter(default_property_value)(self._gui._get_data_scope())
                 self.expr_hash = default_property_value
                 self.expr = self._gui._hash_to_expr[self.expr_hash]
             else:
@@ -114,7 +114,7 @@ class Builder:
             hash_value = self._gui._fetch_expression_list(value)[0]
             self._gui.bind_var(hash_value)
             try:
-                return (attrgetter(hash_value)(self._gui._values), hash_value)
+                return (attrgetter(hash_value)(self._gui._get_data_scope()), hash_value)
             except AttributeError:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
