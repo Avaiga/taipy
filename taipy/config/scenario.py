@@ -1,10 +1,9 @@
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional
 
 from taipy.common import protect_name
 from taipy.config import PipelineConfig
 from taipy.config.interface import ConfigRepository
 from taipy.cycle.frequency import Frequency
-from taipy.exceptions.scenario import InvalidComparators
 
 
 class ScenarioConfig:

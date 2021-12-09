@@ -46,11 +46,3 @@ class ScenarioConfigDoesNotExist(Exception):
     """
 
     pass
-
-
-class InvalidComparators(Exception):
-    """
-    Raised when the comparators declared in scenario config is invalid
-    """
-
-    pass
