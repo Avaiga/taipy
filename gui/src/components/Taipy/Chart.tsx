@@ -62,7 +62,7 @@ const defaultChartConfig = {responsive: true};
 
 const Chart = (props: ChartProp) => {
     const {
-        title = "Chart",
+        title = "",
         className,
         width = "100%",
         height = "100%",

@@ -66,6 +66,18 @@ class chart extends shared {
      */
      label;
 
+    /**
+     * trace name
+     * @type {indexed(str)}
+     */
+     name;
+
+    /**
+     * trace orientation
+     * @type {indexed(str)}
+     */
+     orientation;
+
      /**
      * column name for z axis
      * @type {indexed(str)}
