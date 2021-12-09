@@ -145,7 +145,6 @@ class Gui(object, metaclass=Singleton):
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         # TODO: assign global scopes to current scope if the page has been rendered
         page.render()
-        page.rendered_jsx = str(page.rendered_jsx)
         if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
             page.rendered_jsx += "<PageContent />"
 
