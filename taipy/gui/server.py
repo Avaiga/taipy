@@ -4,7 +4,7 @@ import os
 import typing as t
 
 import __main__
-from flask import Flask, jsonify, render_template, render_template_string, request, send_from_directory
+from flask import Flask, jsonify, render_template, render_template_string, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -80,12 +80,10 @@ class Server(Flask):
 
         @self._ws.on("connect")
         def ws_connect():
-            print("Connected to ws session id " + request.sid)  # type: ignore
             self._app._data_scopes.create_scope()
 
         @self._ws.on("disconnect")
         def ws_disconnect():
-            print("Disconnected to ws session id " + request.sid)  # type: ignore
             self._app._data_scopes.delete_scope()
 
     # Update to render as JSX

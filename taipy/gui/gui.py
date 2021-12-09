@@ -143,11 +143,11 @@ class Gui(object, metaclass=Singleton):
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+        # TODO: assign global scopes to current scope if the page has been rendered
         page.render()
-        if page.rendered_jsx is None:
-            page.rendered_jsx = str(page.rendered_jsx)
-            if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
-                page.rendered_jsx += "<PageContent />"
+        page.rendered_jsx = str(page.rendered_jsx)
+        if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
+            page.rendered_jsx += "<PageContent />"
 
         # Return jsx page
         if page.rendered_jsx is not None:
@@ -207,10 +207,18 @@ class Gui(object, metaclass=Singleton):
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
             setattr(self._data_scopes.get_scope(), name, _MapDictionary(value))
+            self._bind_global(name, _MapDictionary(value))
         else:
             setattr(self._data_scopes.get_scope(), name, value)
+            self._bind_global(name, value)
         prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter, Setter
         setattr(Gui, name, prop)
+
+    def _bind_global(self, name: str, value: t.Any) -> None:
+        global_scope = self._data_scopes.get_global_scope()
+        if hasattr(global_scope, name):
+            return
+        setattr(global_scope, name, value)
 
     def __value_getter(self, name):
         def __getter(elt: Gui) -> t.Any:
@@ -277,6 +285,7 @@ class Gui(object, metaclass=Singleton):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._data_scopes.get_scope())
+            self._data_scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
             if self._data_accessors._is_data_access(_var, newvalue):
@@ -290,7 +299,6 @@ class Gui(object, metaclass=Singleton):
                     if isinstance(newvalue, _MapDictionary):
                         continue  # this var has no transformer
                 ws_dict[_var] = newvalue
-
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
@@ -310,7 +318,7 @@ class Gui(object, metaclass=Singleton):
             self._server._ws.emit(
                 "message",
                 {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload},
-                room=request.sid,  # type: ignore
+                to=self._get_ws_receiver(),  # type: ignore
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
@@ -322,10 +330,17 @@ class Gui(object, metaclass=Singleton):
         ]
         try:
             self._server._ws.emit(
-                "message", {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload}, room=request.sid  # type: ignore
+                "message",
+                {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload},
+                to=self._get_ws_receiver(),  # type: ignore
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
+
+    def _get_ws_receiver(self) -> t.Union[str, None]:
+        if not hasattr(request, "sid"):
+            return None
+        return request.sid  # type: ignore
 
     def _on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):

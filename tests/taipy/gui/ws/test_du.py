@@ -15,7 +15,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server)
-    sid = list(gui._data_scopes._scopes.keys())[1]
+    sid = list(gui._data_scopes.get_all_scopes().keys())[1]
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
     ws_client.emit(
