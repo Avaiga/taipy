@@ -11,8 +11,17 @@ class _DataScopes:
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {}
         self.__scopes["global"] = SimpleNamespace()
+        self.__use_multi_user = True
+
+    def set_use_multi_user(self, value: bool) -> None:
+        self.__use_multi_user = value
+
+    def get_use_multi_user(self) -> bool:
+        return self.__use_multi_user
 
     def get_scope(self) -> SimpleNamespace:
+        if not self.__use_multi_user:
+            return self.__scopes["global"]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
         if not request or (not hasattr(request, "sid") and "client_id" not in request.args.to_dict()):
             return self.__scopes["global"]
@@ -35,18 +44,24 @@ class _DataScopes:
         return self.__scopes["global"]
 
     def broadcast_data(self, name, value):
+        if not self.__use_multi_user:
+            return
         if not hasattr(request, "sid"):
             for _, v in self.__scopes.items():
                 if name in v:
                     setattr(v, name, value)
 
     def create_scope(self) -> None:
+        if not self.__use_multi_user:
+            return
         if request.sid is None:  # type: ignore
             warnings.warn("Empty session id, might be due to unestablished WebSocket connection")
             return
         self.__scopes[request.sid] = SimpleNamespace()  # type: ignore
 
     def delete_scope(self) -> None:
+        if not self.__use_multi_user:
+            return
         if request.sid is None:  # type: ignore
             warnings.warn("Empty session id, might be due to unestablished WebSocket connection")
             return

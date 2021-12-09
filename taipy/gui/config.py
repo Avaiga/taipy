@@ -1,8 +1,8 @@
 import typing as t
+import warnings
 
 import pytz
 import tzlocal
-import warnings
 
 from .page import Page, Partial
 
@@ -22,6 +22,7 @@ AppConfigOption = t.Literal[
     "use_arrow",
     "browser_notification",
     "notification_duration",
+    "use_multi_user",
 ]
 
 AppConfig = t.TypedDict(
@@ -42,6 +43,7 @@ AppConfig = t.TypedDict(
         "use_arrow": bool,
         "browser_notification": bool,
         "notification_duration": int,
+        "use_multi_user": bool,
     },
     total=False,
 )
