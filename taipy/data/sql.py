@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
-from sqlalchemy import create_engine, text
+from sqlalchemy import MetaData, create_engine, table, text
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
@@ -35,7 +35,7 @@ class SQLDataSource(DataSource):
 
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "query"]
+    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
 
     def __init__(
         self,
@@ -100,7 +100,7 @@ class SQLDataSource(DataSource):
 
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-            return self._read_as(self.query, self.properties[self.__EXPOSED_TYPE_PROPERTY])
+            return self._read_as(self.read_query, self.properties[self.__EXPOSED_TYPE_PROPERTY])
         return self._read_as_pandas_dataframe()
 
     def _read_as(self, query, custom_class):
@@ -110,8 +110,70 @@ class SQLDataSource(DataSource):
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
         if columns:
-            return pd.read_sql_query(self.query, con=self.__engine)[columns]
-        return pd.read_sql_query(self.query, con=self.__engine)
+            return pd.read_sql_query(self.read_query, con=self.__engine)[columns]
+        return pd.read_sql_query(self.read_query, con=self.__engine)
 
-    def _write(self, data):
-        pass
+    def _write(self, data) -> None:
+        """ "
+        Check data against a collection of types to handle insertion on the database.
+        """
+        with self.__engine.connect() as connection:
+            write_table = table(self.write_table)
+            if isinstance(data, pd.DataFrame):
+                self.__insert_dicts(data.to_dict(orient="records"), write_table, connection)
+            elif isinstance(data, dict):
+                self.__insert_dicts([data], write_table, connection)
+            elif isinstance(data, tuple):
+                self.__insert_tuples([data], write_table, connection)
+            elif isinstance(data, list):
+                if isinstance(data[0], tuple):
+                    self.__insert_tuples(data, write_table, connection)
+                elif isinstance(data[0], dict):
+                    self.__insert_dicts(data, write_table, connection)
+            else:
+                # if data is a single primitive value (int, str, etc), pass it as a list of tuples
+                # with only one value
+                self.__insert_tuples([(data,)], write_table, connection)
+
+    @staticmethod
+    def __insert_tuples(data: List[Tuple], write_table: Any, connection: Any) -> None:
+        """
+        :param data: a list of tuples
+        :param write_table: a SQLAlchemy object that represents a table
+        :param connection: a SQLAlchemy connection to write the data
+
+        This method will lookup the length of the first object of the list and build the insert through
+        creation of a string of '?' equivalent to the length of the element. The '?' character is used as
+        placeholder for a tuple of same size.
+        """
+        with connection.begin() as transaction:
+            try:
+                markers = ",".join([f'({",".join("?" * len(data[0]))})'] * len(data))
+                markers = markers
+                ins = "INSERT INTO {tablename} VALUES ({markers})"
+                ins = ins.format(tablename=write_table.name, markers=markers)
+                connection.execute(ins, data)
+            except:
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
+
+    @staticmethod
+    def __insert_dicts(data: List[Dict], write_table: Any, connection: Any) -> None:
+        """
+        :param data: a list of tuples
+        :param write_table: a SQLAlchemy object that represents a table
+        :param connection: a SQLAlchemy connection to write the data
+
+        This method will insert the data contained in a list of dictionaries into a table. The query itself is handled
+        by SQLAlchemy, so it's only needed to pass the correctly data type.
+        """
+        with connection.begin() as transaction:
+            try:
+                connection.execute(write_table.insert(), data)
+            except:
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()

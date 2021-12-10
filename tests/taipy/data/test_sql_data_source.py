@@ -1,5 +1,6 @@
 from unittest import mock
 
+import pandas as pd
 import pytest
 
 from taipy.common.alias import DataSourceId
@@ -18,7 +19,8 @@ class TestSQLDataSource:
                 "db_password": "foobar",
                 "db_name": "datasource",
                 "db_engine": "mssql",
-                "query": "SELECT * from table_name",
+                "read_query": "SELECT * from table_name",
+                "write_table": "foo",
             },
         )
         assert isinstance(ds, SQLDataSource)
@@ -29,7 +31,7 @@ class TestSQLDataSource:
         assert ds.parent_id is None
         assert ds.job_ids == []
         assert ds.is_ready_for_reading
-        assert ds.query != ""
+        assert ds.read_query != ""
 
     @pytest.mark.parametrize(
         "properties",
@@ -54,7 +56,14 @@ class TestSQLDataSource:
         sql_data_source_as_pandas = SQLDataSource(
             "foo",
             Scope.PIPELINE,
-            properties={"db_username": "a", "db_password": "a", "db_name": "a", "db_engine": "mssql", "query": "a"},
+            properties={
+                "db_username": "a",
+                "db_password": "a",
+                "db_name": "a",
+                "db_engine": "mssql",
+                "read_query": "a",
+                "write_table": "foo",
+            },
         )
 
         assert sql_data_source_as_pandas._read() == "pandas"
@@ -68,7 +77,8 @@ class TestSQLDataSource:
                 "db_password": "a",
                 "db_name": "a",
                 "db_engine": "mssql",
-                "query": "a",
+                "read_query": "SELECT * from table_name",
+                "write_table": "foo",
                 "exposed_type": "Whatever",
             },
         )
@@ -90,7 +100,8 @@ class TestSQLDataSource:
                 "db_password": "foo",
                 "db_name": "foo",
                 "db_engine": "mssql",
-                "query": "foo",
+                "read_query": "SELECT * from table_name",
+                "write_table": "foo",
             },
         )
 
@@ -121,3 +132,33 @@ class TestSQLDataSource:
         assert data[4].foo is None
         assert data[4].bar is None
         assert data[4].kwargs["KWARGS_KEY"] == "KWARGS_VALUE"
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}]),
+            [{"a": 1, "b": 2}, {"a": 3, "b": 4}],
+            {"a": 1, "b": 2},
+            [(1, 2), (3, 4)],
+            (1, 2),
+            "foo",
+        ],
+    )
+    def test_write(self, mocker, data):
+        ds = SQLDataSource(
+            "foo",
+            Scope.PIPELINE,
+            properties={
+                "db_username": "sa",
+                "db_password": "foobar",
+                "db_name": "datasource",
+                "db_engine": "mssql",
+                "read_query": "SELECT * from foo",
+                "write_table": "foo",
+            },
+        )
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+            cursor_mock = engine_mock.return_value.__enter__.return_value
+            cursor_mock.execute.return_value = None
+
+            ds._write(data)
