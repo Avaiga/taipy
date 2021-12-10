@@ -45,14 +45,28 @@ class PickleDataSource(DataSource):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        up_to_date: bool = False,
+        validity_days: Optional[int] = None,
+        validity_hours: Optional[int] = None,
+        validity_minutes: Optional[int] = None,
+        edition_in_progress: bool = False,
         properties=None,
     ):
-        if up_to_date is None:
-            up_to_date = []
         if properties is None:
             properties = {}
-        super().__init__(config_name, scope, id, name, parent_id, last_edition_date, job_ids, up_to_date, **properties)
+        super().__init__(
+            config_name,
+            scope,
+            id,
+            name,
+            parent_id,
+            last_edition_date,
+            job_ids,
+            validity_days,
+            validity_hours,
+            validity_minutes,
+            edition_in_progress,
+            **properties,
+        )
         self.__pickle_file_path = self.properties.get(self.__PICKLE_FILE_NAME) or f"{self.id}.p"
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))

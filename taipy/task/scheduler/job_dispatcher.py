@@ -79,7 +79,7 @@ class JobDispatcher:
             for res, ds in zip(_results, outputs):
                 try:
                     data_source = DataManager().get(ds.id)
-                    data_source.write(res, job_id)
+                    data_source.write(res, job_id=job_id)
                     DataManager().set(data_source)
                 except Exception as e:
                     exceptions.append(DataSourceWritingError(f"Error writing in datasource id {ds.id}: {e}"))

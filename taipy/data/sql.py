@@ -27,7 +27,8 @@ class SQLDataSource(DataSource):
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data source.
-        up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
+        edition_in_progress (bool): True if a task computing the data source has been submitted and not completed yet.
+            False otherwise.
         properties (list): List of additional arguments. Note that the properties parameter should at least contain
             values for "db_username", "db_password", "db_name", "db_engine" and "query" properties.
     """
@@ -45,7 +46,10 @@ class SQLDataSource(DataSource):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        up_to_date: bool = False,
+        validity_days: Optional[int] = None,
+        validity_hours: Optional[int] = None,
+        validity_minutes: Optional[int] = None,
+        edition_in_progress: bool = False,
         properties: Dict = None,
     ):
         if properties is None:
@@ -64,10 +68,21 @@ class SQLDataSource(DataSource):
         )
 
         super().__init__(
-            config_name, scope, id, name, parent_id, last_edition_date, job_ids or [], up_to_date, **properties
+            config_name,
+            scope,
+            id,
+            name,
+            parent_id,
+            last_edition_date,
+            job_ids,
+            validity_days,
+            validity_hours,
+            validity_minutes,
+            edition_in_progress,
+            **properties,
         )
         if not self.last_edition_date:
-            self.updated()
+            self.unlock_edition()
 
     @staticmethod
     def __build_conn_string(engine, username, password, database):

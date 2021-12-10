@@ -46,14 +46,30 @@ class InMemoryDataSource(DataSource):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        up_to_date: bool = False,
+        validity_days: Optional[int] = None,
+        validity_hours: Optional[int] = None,
+        validity_minutes: Optional[int] = None,
+        edition_in_progress: bool = False,
         properties=None,
     ):
         if job_ids is None:
             job_ids = []
         if properties is None:
             properties = {}
-        super().__init__(config_name, scope, id, name, parent_id, last_edition_date, job_ids, up_to_date, **properties)
+        super().__init__(
+            config_name,
+            scope,
+            id,
+            name,
+            parent_id,
+            last_edition_date,
+            job_ids,
+            validity_days,
+            validity_hours,
+            validity_minutes,
+            edition_in_progress,
+            **properties
+        )
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and self.id not in in_memory_storage:
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 

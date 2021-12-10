@@ -28,7 +28,7 @@ class TestSQLDataSource:
         assert ds.id is not None
         assert ds.parent_id is None
         assert ds.job_ids == []
-        assert ds.up_to_date
+        assert ds.is_ready_for_reading
         assert ds.query != ""
 
     @pytest.mark.parametrize(

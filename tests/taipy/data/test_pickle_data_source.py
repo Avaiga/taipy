@@ -27,7 +27,7 @@ class TestPickleDataSourceEntity:
         assert ds.parent_id is None
         assert ds.last_edition_date is not None
         assert ds.job_ids == []
-        assert ds.up_to_date
+        assert ds.is_ready_for_reading
         assert ds.read() == "Data"
         assert ds.default_data == "Data"
         assert ds.last_edition_date is not None

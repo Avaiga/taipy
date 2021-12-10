@@ -23,7 +23,10 @@ class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
             data_source.parent_id,
             data_source.last_edition_date.isoformat() if data_source.last_edition_date else None,
             data_source.job_ids,
-            data_source.up_to_date,
+            data_source.validity_days,
+            data_source.validity_hours,
+            data_source.validity_minutes,
+            data_source.edition_in_progress,
             data_source.properties,
         )
 
@@ -36,6 +39,9 @@ class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
             parent_id=model.parent_id,
             last_edition_date=datetime.fromisoformat(model.last_edition_date) if model.last_edition_date else None,
             job_ids=model.job_ids,
-            up_to_date=model.up_to_date,
+            validity_days=model.validity_days,
+            validity_hours=model.validity_hours,
+            validity_minutes=model.validity_minutes,
+            edition_in_progress=model.edition_in_progress,
             properties=model.data_source_properties,
         )
