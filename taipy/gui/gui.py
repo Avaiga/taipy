@@ -21,6 +21,7 @@ from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .data.data_scope import _DataScopes
+from .expression_evaluator import _ExpressionEvaluator
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -43,11 +44,7 @@ class Gui(object, metaclass=Singleton):
 
     __root_page_name = "TaiPy_root_page"
     __env_filename = "taipy.gui.env"
-    # Regex to separate content from inside curly braces when evaluating f string expressions
-    __EXPR_RE = re.compile(r"\{(.*?)\}")
-    __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
-    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
-    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
+
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
@@ -95,6 +92,8 @@ class Gui(object, metaclass=Singleton):
         # Data Scopes
         self._data_scopes = _DataScopes()
 
+        self._expression_evaluator = _ExpressionEvaluator()
+
         # Load default config
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
         self._directory_name_of_pages: t.List[str] = []
@@ -105,18 +104,6 @@ class Gui(object, metaclass=Singleton):
         self._list_for_variable: t.Dict[str, str] = {}
         self._update_function = None
         self._action_function = None
-        # key = expression, value = hashed value of the expression
-        self._expr_to_hash: t.Dict[str, str] = {}
-        # key = hashed value of the expression, value = expression
-        self._hash_to_expr: t.Dict[str, str] = {}
-        # key = variable name of the expression, key = list of related expressions
-        # ex: {x + y}
-        # "x": ["{x + y}"],
-        # "y": ["{x + y}"],
-        self._var_to_expr_list: t.Dict[str, t.List[str]] = {}
-        # key = expression, value = list of related variables
-        # "{x + y}": ["x", "y"]
-        self._expr_to_var_list: t.Dict[str, t.List[str]] = {}
         if default_page_renderer:
             self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
         if pages is not None:
@@ -253,7 +240,7 @@ class Gui(object, metaclass=Singleton):
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
-        currentvalue = attrgetter(self._expr_to_hash[var_name])(self._get_data_scope())
+        currentvalue = attrgetter(self._expression_evaluator.get_hash_from_expr(var_name))(self._get_data_scope())
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
                 value = ISOToDate(value)
@@ -270,14 +257,14 @@ class Gui(object, metaclass=Singleton):
         self._update_var(var_name, value, propagate)
 
     def _update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
-        hash_expr = self._expr_to_hash[var_name]
+        hash_expr = self._expression_evaluator.get_hash_from_expr(var_name)
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
             attrsetter(self._get_data_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
-                modified_vars.extend(self._re_evaluate_expr(var_name))
+                modified_vars.extend(self._expression_evaluator.re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, var_name, value)
@@ -306,7 +293,7 @@ class Gui(object, metaclass=Singleton):
 
     def _request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
-        var_name = self._expr_to_hash[var_name]
+        var_name = self._expression_evaluator.get_hash_from_expr(var_name)
         newvalue = attrgetter(var_name)(self._get_data_scope())
         ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
@@ -401,37 +388,6 @@ class Gui(object, metaclass=Singleton):
             except Exception as e:
                 warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
         return False
-
-    def _re_evaluate_expr(self, var_name: str) -> t.List:
-        """
-        This function will execute when the _update_var function is handling
-        an expression with only a single variable
-        """
-        modified_vars: t.List[str] = []
-        if var_name not in self._var_to_expr_list.keys():
-            return modified_vars
-        for expr in self._var_to_expr_list[var_name]:
-            if expr == var_name:
-                continue
-            hash_expr = self._expr_to_hash[expr]
-            expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
-            eval_dict = {v: attrgetter(v)(self._get_data_scope()) for v in expr_var_list}
-
-            if self._is_expression(expr):
-                expr_string = 'f"' + expr.replace('"', '\\"') + '"'
-            else:
-                expr_string = expr
-
-            expr_evaluated = eval(expr_string, {}, eval_dict)
-            attrsetter(self._get_data_scope(), hash_expr, expr_evaluated)
-            modified_vars.append(hash_expr)
-        return modified_vars
-
-    def _is_expression(self, expr: str) -> bool:
-        return len(Gui.__EXPR_IS_EXPR.findall(expr)) != 0
-
-    def _fetch_expression_list(self, expr: str) -> t.List:
-        return Gui.__EXPR_RE.findall(expr)
 
     def add_page(
         self,
@@ -657,63 +613,7 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        if not self._is_expression(expr):
-            return expr
-        var_val = {}
-        var_list = []
-        expr_hash = None
-        is_edge_case = False
-        # Get A list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
-        for e in self._fetch_expression_list(expr):
-            st = ast.parse(e)
-            for node in ast.walk(st):
-                if isinstance(node, ast.Name):
-                    var_name = node.id.split(sep=".")[0]
-                    self.bind_var(var_name)
-                    try:
-                        var_val[var_name] = attrgetter(var_name)(self._get_data_scope())
-                        var_list.append(var_name)
-                    except AttributeError:
-                        warnings.warn(f"Variable '{var_name}' is not defined")
-        # The expr_string is placed here in case expr get replaced by edge case
-        expr_string = 'f"' + expr.replace('"', '\\"') + '"'
-        # simplify expression if it only contains var_name
-        m = Gui.__EXPR_IS_EDGE_CASE.match(expr)
-        if m:
-            expr = m.group(1)
-            expr_hash = expr if Gui.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
-            is_edge_case = True
-        # validate whether expression has already been evaluated
-        if expr in self._expr_to_hash and hasattr(self._get_data_scope(), self._expr_to_hash[expr]):
-            return "{" + self._expr_to_hash[expr] + "}"
-        try:
-            # evaluate expressions
-            expr_evaluated = eval(expr_string if not is_edge_case else expr, {}, var_val)
-        except Exception:
-            warnings.warn(f"Cannot evaluate expression '{expr if is_edge_case else expr_string}'")
-            expr_evaluated = None
-        # save the expression if it needs to be re-evaluated
-        if re_evaluated:
-            if expr in self._expr_to_hash:
-                if expr_hash is None:
-                    expr_hash = self._expr_to_hash[expr]
-                    self.bind_var_val(expr_hash, expr_evaluated)
-                return "{" + expr_hash + "}"
-            if expr_hash is None:
-                expr_hash = self._expr_to_hash[expr] = _get_expr_var_name(expr)
-                self.bind_var_val(expr_hash, expr_evaluated)
-            else:
-                self._expr_to_hash[expr] = expr
-            self._hash_to_expr[expr_hash] = expr
-            for var in var_val:
-                if var not in self._var_to_expr_list:
-                    self._var_to_expr_list[var] = [expr]
-                else:
-                    self._var_to_expr_list[var].append(expr)
-            if expr not in self._expr_to_var_list:
-                self._expr_to_var_list[expr] = var_list
-            return "{" + expr_hash + "}"
-        return expr_evaluated
+        return self._expression_evaluator.evaluate_expr(expr, re_evaluated)
 
     def on_update(self, f) -> None:
         self._update_function = f
