@@ -3,6 +3,7 @@ import pytest
 from taipy.config import Config
 from taipy.config.scenario import ScenarioConfigs
 from taipy.cycle.frequency import Frequency
+from taipy.exceptions.scenario import NonExistingComparator
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -68,10 +69,10 @@ def test_scenario_get_set_and_remove_comparators():
     scenario_config_1.set_comparator(ds_config_2, my_func)
     assert len(scenario_config_1.comparators.keys()) == 2
 
-    scenario_config_1.remove_comparator(ds_config_1)
+    scenario_config_1.delete_comparator(ds_config_1)
     assert len(scenario_config_1.comparators.keys()) == 1
 
-    scenario_config_1.remove_comparator(ds_config_2)
+    scenario_config_1.delete_comparator(ds_config_2)
     assert len(scenario_config_1.comparators.keys()) == 0
 
     scenario_name_2 = "scenarios2"
@@ -82,3 +83,6 @@ def test_scenario_get_set_and_remove_comparators():
 
     scenario_config_2.set_comparator(ds_config_1, my_func)
     assert len(scenario_config_2.comparators.keys()) == 1
+
+    with pytest.raises(NonExistingComparator):
+        scenario_config_2.delete_comparator("ds_config_3")

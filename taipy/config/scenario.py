@@ -33,7 +33,7 @@ class ScenarioConfig:
         else:
             self.comparators = {ds_config_name: [comparator]}
 
-    def remove_comparator(self, ds_config_name: str):
+    def delete_comparator(self, ds_config_name: str):
         if self.comparators and ds_config_name in self.comparators.keys():
             del self.comparators[ds_config_name]
         else:
