@@ -1,5 +1,7 @@
 /**
  * Organizes its children into cells in a regular grid.
+ * 
+ * block component
  *
  * ## Usage
  * ### Simple

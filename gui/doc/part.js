@@ -1,6 +1,8 @@
 /**
  * Displays its children in a block.
  * 
+ * block component
+ * 
  * Part controls can be simplified by specifying no component. TODO: explain.
   *
  * ## Usage
