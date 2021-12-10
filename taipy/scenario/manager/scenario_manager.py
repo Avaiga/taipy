@@ -1,20 +1,20 @@
 import datetime
 import logging
 from functools import partial
-from typing import Callable, List, Optional, Set
+from typing import Callable, List, Optional
 
 from taipy.common.alias import ScenarioId
 from taipy.config import Config, ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager.cycle_manager import CycleManager
-from taipy.data.data_source import DataSource
 from taipy.exceptions.repository import ModelNotFound
 from taipy.exceptions.scenario import (
     DeletingMasterScenario,
+    DifferentScenarioConfigs,
     DoesNotBelongToACycle,
-    DoesNotHaveSameConfig,
+    InsufficientScenarioToCompare,
     NonExistingScenario,
-    ScenarioConfigDoesNotExist,
+    NonExistingScenarioConfig,
 )
 from taipy.pipeline import PipelineManager
 from taipy.scenario import Scenario
@@ -198,7 +198,7 @@ class ScenarioManager:
             raise DeletingMasterScenario
         self.repository.delete(scenario_id)
 
-    def compare(self, scenario_1: Scenario, scenario_2: Scenario, ds_config_name: str):
+    def compare(self, *scenarios: Scenario, ds_config_name: str = None):
         """
         Compares the datasources of 2 given scenarios with known datasource config name
 
@@ -206,19 +206,30 @@ class ScenarioManager:
             scenario_1 (Scenario) : the 1st scenario to compare
             scenario_2 (Scenario) : the 2nd scenario to compare
         Raises:
-            DoesNotHaveSameConfig: The provided scenario_1 and scenario_2 do not share the same scenario_config
-            ScenarioConfigDoesNotExit: Cannot find the shared scenario config of scenario_1 and scenario_2
+            DifferentScenarioConfig: The provided scenario_1 and scenario_2 do not share the same scenario_config
+            NonExistingScenarioConfig: Cannot find the shared scenario config of scenario_1 and scenario_2
         """
 
-        if scenario_1.config_name != scenario_2.config_name:
-            raise DoesNotHaveSameConfig
+        if len(scenarios) < 2:
+            raise InsufficientScenarioToCompare
 
-        if scenario_config := Config.scenario_configs.get(scenario_1.config_name):
-            # check if ds_config_exists?
-            # check if ds exists
-            comparator = scenario_config.comparators[ds_config_name]
-            ds_1 = scenario_1.__getattr__(ds_config_name)
-            ds_2 = scenario_2.__getattr__(ds_config_name)
-            return comparator(ds_1, ds_2)
+        if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
+            raise DifferentScenarioConfigs
+
+        if scenario_config := Config.scenario_configs.get(scenarios[0].config_name):
+
+            results = {}
+            ds_comparators = (
+                {ds_config_name: scenario_config.comparators[ds_config_name]}
+                if ds_config_name
+                else scenario_config.comparators
+            )
+
+            for ds_config_name, comparators in ds_comparators.items():
+                datasources = [scenario.__getattr__(ds_config_name) for scenario in scenarios]
+                results[ds_config_name] = {comparator.__name__: comparator(*datasources) for comparator in comparators}
+
+            return results
+
         else:
-            raise ScenarioConfigDoesNotExist
+            raise NonExistingScenarioConfig

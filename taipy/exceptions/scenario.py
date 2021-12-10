@@ -32,7 +32,7 @@ class DeletingMasterScenario(Exception):
     pass
 
 
-class DoesNotHaveSameConfig(Exception):
+class DifferentScenarioConfigs(Exception):
     """
     Raised when comparing 2 scenarios that have different scenario configs
     """
@@ -40,9 +40,9 @@ class DoesNotHaveSameConfig(Exception):
     pass
 
 
-class ScenarioConfigDoesNotExist(Exception):
+class InsufficientScenarioToCompare(Exception):
     """
-    Raised when trying to retrieve an unexisting scenario config
+    Raised when only 1 or no scenario is provided for scenario comparison
     """
 
     pass

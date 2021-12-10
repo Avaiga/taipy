@@ -15,7 +15,7 @@ class ScenarioConfig:
         self.name = protect_name(name)
         self.pipelines_configs = pipelines_configs
         self.frequency = frequency
-        self.comparators: Optional[Dict[str, Callable]] = None
+        self.comparators: Optional[Dict[str, List[Callable]]] = None
 
         if self.COMPARATOR_KEY in properties.keys():
             self.comparators = properties["comparators"]
@@ -25,9 +25,12 @@ class ScenarioConfig:
 
     def set_comparator(self, ds_config_name: str, comparator: Callable):
         if self.comparators:
-            self.comparators[ds_config_name] = comparator
+            if ds_config_name in self.comparators.keys():
+                self.comparators[ds_config_name].append(comparator)
+            else:
+                self.comparators[ds_config_name] = [comparator]
         else:
-            self.comparators = {ds_config_name: comparator}
+            self.comparators = {ds_config_name: [comparator]}
 
 
 class ScenarioConfigs(ConfigRepository):
