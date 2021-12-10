@@ -1,6 +1,8 @@
 /**
- * slider component displays a range input allowing to select an integer value between min and max by sliding a cursor
-
+ * Displays and allows the user to set a value within a range.
+ * 
+ * The range is set by the values `min` and `max` that must be integer values.
+ *
  * ## Usage
  * ### Simple
  * <code><|{value}|slider|></code>

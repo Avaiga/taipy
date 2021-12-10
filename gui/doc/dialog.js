@@ -1,6 +1,8 @@
 /**
- * dialog component displays a modal dialog
-
+ * A modal dialog.
+ *
+ * TODO: Complete
+ *
  * ## Usage
  * ### Simple
  * <code><|{value}|dialog|></code>

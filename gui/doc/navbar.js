@@ -1,6 +1,8 @@
 /**
- * a list component represented as a serie of links
- * <br>text
+ * A navigation bar control.
+ *
+ * This control is implemented as a list of links.
+ *
  * ## Usage
  * ### Simple
  * <code><|navbar|></code>

@@ -1,5 +1,5 @@
 /**
- * date_selector component displays a formatted date/time selector
+ * A control that can display or set a formatted date, with or without time.
 
  * ## Usage
  * ### Simple

@@ -1,5 +1,5 @@
 /**
- * number component displays an input field that handle numbers
+ * A kind of [`input`](input.md) that handles numbers.
 
  * ## Usage
  * ### Simple
@@ -13,7 +13,7 @@
 class numberCls extends HTMLElement {
 
     /**
-     * bound to a numeric value
+     * Bound to a numeric value.
      * @type {dynamic(any), default property}
      */
     value;

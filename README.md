@@ -11,7 +11,7 @@
     </a -->
 </p>
 
-AI Business Application Builder
+A framework for creating AI Business Applications.
 
 * Free software: MIT
 * Documentation:

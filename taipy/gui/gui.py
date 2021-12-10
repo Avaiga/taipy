@@ -70,7 +70,7 @@ class Gui(object, metaclass=Singleton):
     ):
         """Initializes a new Gui instance.
 
-        Parameters:
+        Args:
             css_file (string):  An optional pathname to a CSS file that gets used as a style sheet in
                 all the pages.
 
@@ -749,13 +749,21 @@ class Gui(object, metaclass=Singleton):
         browser_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
     ):
-        """Sends a notification alert to the UI.
+        """Sends a notification alert to the user interface.
 
-        Arguments:
-        type -- One of success, info, warning, error (or first letter of), empty string removes the alert (default: I)
-        message -- text message to display (default: empty string)
-        browser_notification -- Ask the browser to also show the notification (default: app_config[browser_notification])
-        duration -- time during which the notification is shown in ms (default: app_config[notification_duration])
+        Args:
+            type (string): The alert type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
+                To remove the alert, set this parameter to the empty string.
+            message (string): The text message to display.
+            browser_notification (bool): If set to `True`, the browser will also show the notification.
+                If not specified or set to `None`, this parameter will user the value of
+                `app_config[browser_notification]`.
+            duration: The time, in milliseconds, during which the notification is shown.
+                If not specified or set to `None`, this parameter will user the value of
+                `app_config[notification_duration]`.
+
+        Note that you can also call this function with _type_ set to the first letter or the alert type
+        (ie setting _type_ to `"i"` is equivalent to setting it to `"info"`).
         """
         self._send_ws_alert(
             type,
