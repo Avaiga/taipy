@@ -46,3 +46,11 @@ class InsufficientScenarioToCompare(Exception):
     """
 
     pass
+
+
+class NonExistingComparator(Exception):
+    """
+    Raised when trying to delete a non-existing comparator
+    """
+
+    pass

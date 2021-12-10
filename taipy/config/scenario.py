@@ -4,6 +4,7 @@ from taipy.common import protect_name
 from taipy.config import PipelineConfig
 from taipy.config.interface import ConfigRepository
 from taipy.cycle.frequency import Frequency
+from taipy.exceptions.scenario import NonExistingComparator
 
 
 class ScenarioConfig:
@@ -18,9 +19,9 @@ class ScenarioConfig:
         self.comparators: Optional[Dict[str, List[Callable]]] = None
 
         if self.COMPARATOR_KEY in properties.keys():
-            self.comparators = properties["comparators"]
+            self.comparators = properties[self.COMPARATOR_KEY]
+            del properties[self.COMPARATOR_KEY]
 
-        properties.pop("comparators", None)
         self.properties = properties
 
     def set_comparator(self, ds_config_name: str, comparator: Callable):
@@ -31,6 +32,12 @@ class ScenarioConfig:
                 self.comparators[ds_config_name] = [comparator]
         else:
             self.comparators = {ds_config_name: [comparator]}
+
+    def remove_comparator(self, ds_config_name: str):
+        if self.comparators and ds_config_name in self.comparators.keys():
+            del self.comparators[ds_config_name]
+        else:
+            raise NonExistingComparator
 
 
 class ScenarioConfigs(ConfigRepository):

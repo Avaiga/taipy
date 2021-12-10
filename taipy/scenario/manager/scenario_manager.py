@@ -13,6 +13,7 @@ from taipy.exceptions.scenario import (
     DifferentScenarioConfigs,
     DoesNotBelongToACycle,
     InsufficientScenarioToCompare,
+    NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
 )
@@ -216,14 +217,15 @@ class ScenarioManager:
         if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
             raise DifferentScenarioConfigs
 
-        if scenario_config := Config.scenario_configs.get(scenarios[0].config_name):
-
+        if scenario_config := Config.scenario_configs.get(scenarios[0].config_name, None):
             results = {}
-            ds_comparators = (
-                {ds_config_name: scenario_config.comparators[ds_config_name]}
-                if ds_config_name
-                else scenario_config.comparators
-            )
+            if ds_config_name:
+                if ds_config_name in scenario_config.comparators.keys():
+                    ds_comparators = {ds_config_name: scenario_config.comparators[ds_config_name]}
+                else:
+                    raise NonExistingComparator
+            else:
+                ds_comparators = scenario_config.comparators
 
             for ds_config_name, comparators in ds_comparators.items():
                 datasources = [scenario.__getattr__(ds_config_name) for scenario in scenarios]
@@ -232,4 +234,4 @@ class ScenarioManager:
             return results
 
         else:
-            raise NonExistingScenarioConfig
+            raise NonExistingScenarioConfig(scenarios[0].config_name)
