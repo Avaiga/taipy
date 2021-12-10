@@ -204,9 +204,11 @@ class ScenarioManager:
         Compares the datasources of 2 given scenarios with known datasource config name
 
         Parameters:
-            scenario_1 (Scenario) : the 1st scenario to compare
-            scenario_2 (Scenario) : the 2nd scenario to compare
+            scenarios (Scenario) : list of Scenario objects to compare
+            ds_config_name (str) : config name of the DataSource to compare scenarios
         Raises:
+            InsufficientScenarioToCompare: Provided only one or no scenario for comparison
+            NonExistingComparator: The provided comparator does not exist
             DifferentScenarioConfig: The provided scenario_1 and scenario_2 do not share the same scenario_config
             NonExistingScenarioConfig: Cannot find the shared scenario config of scenario_1 and scenario_2
         """
