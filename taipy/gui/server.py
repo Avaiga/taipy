@@ -107,7 +107,7 @@ class Server:
         return self._flask
 
     def test_client(self):
-        return self._flask.test_client():
+        return self._flask.test_client()
 
     def runWithWS(self, host=None, port=None, debug=None):
         self._ws.run(self._flask, host=host, port=port, debug=debug)
