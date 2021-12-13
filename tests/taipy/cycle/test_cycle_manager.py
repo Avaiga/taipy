@@ -121,24 +121,50 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
 
 def test_get_cycle_start_date_and_end_date():
-    creation_date = datetime.fromisoformat("2021-11-11T11:11:01.000001")
+    creation_date_1 = datetime.fromisoformat("2021-11-11T11:11:01.000001")
 
-    daily_start_date = CycleManager.get_start_date_of_cycle(Frequency.DAILY, creation_date=creation_date)
-    weekly_start_date = CycleManager.get_start_date_of_cycle(Frequency.WEEKLY, creation_date=creation_date)
-    monthly_start_date = CycleManager.get_start_date_of_cycle(Frequency.MONTHLY, creation_date=creation_date)
-    yearly_start_date = CycleManager.get_start_date_of_cycle(Frequency.YEARLY, creation_date=creation_date)
+    daily_start_date_1 = CycleManager.get_start_date_of_cycle(Frequency.DAILY, creation_date=creation_date_1)
+    weekly_start_date_1 = CycleManager.get_start_date_of_cycle(Frequency.WEEKLY, creation_date=creation_date_1)
+    monthly_start_date_1 = CycleManager.get_start_date_of_cycle(Frequency.MONTHLY, creation_date=creation_date_1)
+    yearly_start_date_1 = CycleManager.get_start_date_of_cycle(Frequency.YEARLY, creation_date=creation_date_1)
 
-    assert daily_start_date == datetime.fromisoformat("2021-11-11T00:00:00.000000")
-    assert weekly_start_date == datetime.fromisoformat("2021-11-08T00:00:00.000000")
-    assert monthly_start_date == datetime.fromisoformat("2021-11-01T00:00:00.000000")
-    assert yearly_start_date == datetime.fromisoformat("2021-01-01T00:00:00.000000")
+    assert daily_start_date_1 == datetime.fromisoformat("2021-11-11T00:00:00.000000")
+    assert weekly_start_date_1 == datetime.fromisoformat("2021-11-08T00:00:00.000000")
+    assert monthly_start_date_1 == datetime.fromisoformat("2021-11-01T00:00:00.000000")
+    assert yearly_start_date_1 == datetime.fromisoformat("2021-01-01T00:00:00.000000")
 
-    daily_end_date = CycleManager.get_end_date_of_cycle(Frequency.DAILY, start_date=daily_start_date)
-    weekly_end_date = CycleManager.get_end_date_of_cycle(Frequency.WEEKLY, start_date=weekly_start_date)
-    monthly_end_date = CycleManager.get_end_date_of_cycle(Frequency.MONTHLY, start_date=monthly_start_date)
-    yearly_end_date = CycleManager.get_end_date_of_cycle(Frequency.YEARLY, start_date=yearly_start_date)
+    daily_end_date_1 = CycleManager.get_end_date_of_cycle(Frequency.DAILY, start_date=daily_start_date_1)
+    weekly_end_date_1 = CycleManager.get_end_date_of_cycle(Frequency.WEEKLY, start_date=weekly_start_date_1)
+    monthly_end_date_1 = CycleManager.get_end_date_of_cycle(Frequency.MONTHLY, start_date=monthly_start_date_1)
+    yearly_end_date_1 = CycleManager.get_end_date_of_cycle(Frequency.YEARLY, start_date=yearly_start_date_1)
 
-    assert daily_end_date == datetime.fromisoformat("2021-11-11T23:59:59.999999")
-    assert weekly_end_date == datetime.fromisoformat("2021-11-14T23:59:59.999999")
-    assert monthly_end_date == datetime.fromisoformat("2021-11-30T23:59:59.999999")
-    assert yearly_end_date == datetime.fromisoformat("2021-12-31T23:59:59.999999")
+    assert daily_end_date_1 == datetime.fromisoformat("2021-11-11T23:59:59.999999")
+    assert weekly_end_date_1 == datetime.fromisoformat("2021-11-14T23:59:59.999999")
+    assert monthly_end_date_1 == datetime.fromisoformat("2021-11-30T23:59:59.999999")
+    assert yearly_end_date_1 == datetime.fromisoformat("2021-12-31T23:59:59.999999")
+
+    creation_date_2 = datetime.now()
+
+    daily_start_date_2 = CycleManager.get_start_date_of_cycle(Frequency.DAILY, creation_date=creation_date_2)
+    daily_end_date_2 = CycleManager.get_end_date_of_cycle(Frequency.DAILY, daily_start_date_2)
+    assert daily_start_date_2.date() == creation_date_2.date()
+    assert daily_end_date_2.date() == creation_date_2.date()
+    assert daily_start_date_2 < creation_date_2 < daily_end_date_2
+
+    weekly_start_date_2 = CycleManager.get_start_date_of_cycle(Frequency.WEEKLY, creation_date=creation_date_2)
+    weekly_end_date_2 = CycleManager.get_end_date_of_cycle(Frequency.WEEKLY, weekly_start_date_2)
+    assert weekly_start_date_2 < creation_date_2 < weekly_end_date_2
+
+    monthly_start_date_2 = CycleManager.get_start_date_of_cycle(Frequency.MONTHLY, creation_date=creation_date_2)
+    monthly_end_date_2 = CycleManager.get_end_date_of_cycle(Frequency.MONTHLY, monthly_start_date_2)
+    assert monthly_start_date_2.month == creation_date_2.month and monthly_start_date_2.day == 1
+    assert monthly_end_date_2.month == creation_date_2.month
+    assert monthly_start_date_2 < creation_date_2 < monthly_end_date_2
+
+    yearly_start_date_2 = CycleManager.get_start_date_of_cycle(Frequency.YEARLY, creation_date=creation_date_2)
+    yearly_end_date_2 = CycleManager.get_end_date_of_cycle(Frequency.YEARLY, yearly_start_date_2)
+    assert yearly_start_date_2.year == creation_date_2.year
+    assert yearly_start_date_2 == datetime(creation_date_2.year, 1, 1)
+    assert yearly_end_date_2.year == creation_date_2.year
+    assert yearly_end_date_2.date() == datetime(creation_date_2.year, 12, 31).date()
+    assert yearly_start_date_2 < creation_date_2 < yearly_end_date_2
