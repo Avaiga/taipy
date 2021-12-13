@@ -60,7 +60,7 @@ class ScenarioManager:
 
         Parameters:
             config (ScenarioConfig) : scenario configuration object.
-            creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
+                creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
                 default value.
         """
         scenario_id = Scenario.new_id(config.name)

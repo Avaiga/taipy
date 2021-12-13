@@ -17,8 +17,8 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             name=cycle.name,
             frequency=cycle.frequency,
             creation_date=cycle.creation_date.isoformat(),
-            start_date=cycle.start_date.isoformat() if cycle.start_date else None,
-            end_date=cycle.end_date.isoformat() if cycle.end_date else None,
+            start_date=cycle.start_date.isoformat(),
+            end_date=cycle.end_date.isoformat(),
             properties=cycle.properties,
         )
 
@@ -29,26 +29,26 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             frequency=model.frequency,
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
-            start_date=datetime.fromisoformat(model.start_date) if model.start_date else None,
-            end_date=datetime.fromisoformat(model.end_date) if model.end_date else None,
+            start_date=datetime.fromisoformat(model.start_date),
+            end_date=datetime.fromisoformat(model.end_date),
         )
 
-    def get_cycles_by_frequency_and_creation_date(self, frequency: Frequency, creation_date: datetime) -> List[Cycle]:
+    def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         cycles_by_frequency = self.__get_cycles_by_frequency(frequency)
-        cycles_by_creation_date = self.__get_cycles_by_creation_date(creation_date)
-        return list(set(cycles_by_frequency) & set(cycles_by_creation_date))
+        cycles_by_start_date = self.__get_cycles_by_start_date(start_date)
+        return list(set(cycles_by_frequency) & set(cycles_by_start_date))
 
     def get_cycles_by_frequency_and_overlapping_date(self, frequency: Frequency, date=datetime) -> List[Cycle]:
         cycles_by_frequency = self.__get_cycles_by_frequency(frequency)
         cycles_by_overlapping_date = self.__get_cycles_with_overlapping_date(date)
         return list(set(cycles_by_frequency) & set(cycles_by_overlapping_date))
 
-    def __get_cycles_by_creation_date(self, creation_date: datetime) -> List[Cycle]:
-        cycles_by_creation_date = []
+    def __get_cycles_by_start_date(self, start_date: datetime) -> List[Cycle]:
+        cycles_by_start_date = []
         for cycle in self.load_all():
-            if cycle.creation_date == creation_date:
-                cycles_by_creation_date.append(cycle)
-        return cycles_by_creation_date
+            if cycle.start_date == start_date:
+                cycles_by_start_date.append(cycle)
+        return cycles_by_start_date
 
     def __get_cycles_by_frequency(self, frequency: Frequency) -> List[Cycle]:
         cycles_by_frequency = []
