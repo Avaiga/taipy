@@ -46,7 +46,7 @@ class Builder:
                 default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
                 self.value = attrgetter(default_property_value)(self._gui._get_data_scope())
                 self.expr_hash = default_property_value
-                self.expr = self._gui._hash_to_expr[self.expr_hash]
+                self.expr = self._gui._get_expr_from_hash(self.expr_hash)
             else:
                 self.value = self.expr_hash = self.expr = default_property_value
 
@@ -389,8 +389,6 @@ class Builder:
         return self
 
     def set_classNames(self, class_name="", config_class="input"):
-        from ..gui import Gui
-
         classes = []
         if class_name:
             classes.append(class_name)
@@ -456,8 +454,6 @@ class Builder:
         return self
 
     def set_propagate(self):
-        from ..gui import Gui
-
         val = self.__get_property("propagate", self._gui._config.app_config["propagate"])
         if val is not True:
             return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
