@@ -732,7 +732,7 @@ class Gui(object, metaclass=Singleton):
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
-        taipy_pages_bp = Blueprint("tiapy_pages", __name__)
+        taipy_pages_bp = Blueprint("taipy_pages", __name__)
         self._flask_blueprint.append(taipy_pages_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
