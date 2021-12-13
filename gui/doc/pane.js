@@ -34,15 +34,13 @@ class pane extends shared {
      close_action
 
     /**
-     * a Partial object that holds the content of the pane
-     * should not be defined if page_id is set
+     * a Partial object that holds the content of the pane<br>should not be defined if page_id is set
      * @type {Partial}
      */
      partial
 
      /**
-      * a page id to show as the content of the pane
-      * should not be defined if partial is set
+      * a page id to show as the content of the pane<br>should not be defined if partial is set
       * @type {str}
       */
      page_id
