@@ -27,7 +27,7 @@ class TestCSVDataSource:
         assert ds.parent_id is None
         assert ds.last_edition_date is None
         assert ds.job_ids == []
-        assert not ds.up_to_date
+        assert not ds.is_ready_for_reading
         assert ds.path == path
         assert ds.has_header is False
 

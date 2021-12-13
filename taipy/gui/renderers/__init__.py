@@ -9,7 +9,24 @@ from ._markdown import makeTaipyExtension
 
 
 class PageRenderer(ABC):
+    """
+    The base class that transform template text to actual pages that can be
+    displayed on a Web browser.
+
+    When a page is requested to be displayed, it is transformed into HTML
+    code that can be sent to the client. All control placeholders are
+    replaced by the appropriate graphical component so you can display
+    your application variables, and potentially interact with them.
+    """
+
     def __init__(self, content: str) -> None:
+        """Initializes a new PageRenderer with the indicated content.
+
+        Args:
+            content (string): The text content or the path to the file holding the text to be transformed.
+
+        If `content` is a path to a readable file, the file is read entirely as the text template.
+        """
         self._content = None
         if path.exists(content) and path.isfile(content):
             with open(t.cast(str, content), "r") as f:
@@ -31,7 +48,16 @@ class EmptyPageRenderer(PageRenderer):
 
 
 class Markdown(PageRenderer):
+    """
+    The page renderer for _Markdown_ text.
+    """
+
     def __init__(self, content: str) -> None:
+        """Initializes a new `Markdown` page renderer.
+
+        Args:
+            content (string): The text content or the path to the file holding the Markdown text to be transformed.
+        """
         super().__init__(content)
 
     # Generate JSX from Markdown
@@ -42,7 +68,16 @@ class Markdown(PageRenderer):
 
 
 class Html(PageRenderer):
+    """
+    The page renderer for _HTML_ text.
+    """
+
     def __init__(self, content: str) -> None:
+        """Initializes a new `Html` page renderer.
+
+        Args:
+            content (string): The text content or the path to the file holding the HTML text to be transformed.
+        """
         super().__init__(content)
         self.head = None
 

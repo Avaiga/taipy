@@ -1,4 +1,5 @@
 import typing as t
+import warnings
 
 import pytz
 import tzlocal
@@ -19,6 +20,9 @@ AppConfigOption = t.Literal[
     "theme[light]",
     "theme[dark]",
     "use_arrow",
+    "browser_notification",
+    "notification_duration",
+    "multi_user",
 ]
 
 AppConfig = t.TypedDict(
@@ -37,6 +41,9 @@ AppConfig = t.TypedDict(
         "theme[light]": t.Union[t.Dict[str, t.Any], None],
         "theme[dark]": t.Union[t.Dict[str, t.Any], None],
         "use_arrow": bool,
+        "browser_notification": bool,
+        "notification_duration": int,
+        "multi_user": bool,
     },
     total=False,
 )
@@ -80,10 +87,18 @@ class GuiConfig(object):
         # Run get_time_zone to verify user predefined IANA time_zone if available
         self.get_time_zone()
 
-    def _get_app_config(self, name: AppConfigOption, defaultValue: t.Any) -> t.Any:
+    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
         if name in self.app_config and self.app_config[name] is not None:
+            if default_value is not None and not isinstance(self.app_config[name], type(default_value)):
+                try:
+                    return type(default_value)(self.app_config[name])
+                except Exception as e:
+                    warnings.warn(
+                        f'app_config "{name}" value "{self.app_config[name]}" is not of type {type(default_value)}\n{e}'
+                    )
+                    return default_value
             return self.app_config[name]
-        return defaultValue
+        return default_value
 
     def get_time_zone(self) -> str:
         if "time_zone" not in self.app_config or self.app_config["time_zone"] == "client":

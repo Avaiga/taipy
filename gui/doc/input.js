@@ -1,5 +1,5 @@
 /**
- * input component display an input field
+ * A control that displays some text that can potentially be edited.
 
  * ## Usage
  * ### Simple

@@ -13,13 +13,13 @@ class Cycle:
     A Cycle object holds the frequency representing a work cycle.
 
     Attributes:
-    frequency (Frequency): The frequency of the cycle
-    properties (dict[str, str]): List of additional arguments.
-    name (str): Name that identifies the cycle.
-    creation_date (datetime): Date and time of the creation of the cycle
-    start_date (datetime): Date and time of the start of the cycle
-    end_date (datetime): Date and time of the end of the cycle
-    id (str): Unique identifier of the cycle
+        frequency (Frequency): The frequency of the cycle
+        properties (dict[str, str]): List of additional arguments.
+        name (str): Name that identifies the cycle.
+        creation_date (datetime): Date and time of the creation of the cycle
+        start_date (datetime): Date and time of the start of the cycle
+        end_date (datetime): Date and time of the end of the cycle
+        id (str): Unique identifier of the cycle
     """
 
     __ID_PREFIX = "CYCLE"

@@ -1,5 +1,8 @@
 /**
- * field component is the simplest component. It displays a value as text. (the component name is not mandatory)
+ * Displays a value as a static text.
+ * 
+ * Note that if order to create a `field` control, you don't need to specify the control name
+ * in the text template. See the documentation for [Controls](../controls.md) for more details.
  *
  * ## Usage
  * ### Simple

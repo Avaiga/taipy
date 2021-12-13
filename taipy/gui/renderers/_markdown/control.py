@@ -7,7 +7,7 @@ from .factory import MarkdownFactory
 
 class ControlPattern(InlineProcessor):
 
-    __PATTERN = MarkdownFactory._TAIPY_START + "([a-zA-Z][\.a-zA-Z_$0-9]*)(.*?)" + MarkdownFactory._TAIPY_END
+    __PATTERN = MarkdownFactory._TAIPY_START + "([a-zA-Z][\\.a-zA-Z_$0-9]*)(.*?)" + MarkdownFactory._TAIPY_END
 
     @staticmethod
     def extendMarkdown(md):

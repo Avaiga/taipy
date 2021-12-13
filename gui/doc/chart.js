@@ -1,7 +1,11 @@
 /**
- * Chart component (based on [plotly.js](https://plotly.com/javascript/))
- * <br>Indexed properties can have a default value (referenced by *property_name*) which would be overridden by the indexed propety ((referenced by *property_name[index]* with index starting at 1))
-
+ * Displays data sets in a chart or a group of charts.
+ * 
+ * The chart component is based on [plotly.js](https://plotly.com/javascript/).<br>
+ *
+ * Indexed properties can have a default value (referenced by *property_name*) which would be overridden by the indexed propety
+ * (referenced by *property_name[index]* with index starting at 1)
+ * 
  * ## Usage
  * ### Simple
  * <code><|{value}|chart|x=Col 1|y=Col 2|></code>
@@ -65,6 +69,18 @@ class chart extends shared {
      * @type {indexed(str)}
      */
      label;
+
+    /**
+     * trace name
+     * @type {indexed(str)}
+     */
+     name;
+
+    /**
+     * trace orientation
+     * @type {indexed(str)}
+     */
+     orientation;
 
      /**
      * column name for z axis

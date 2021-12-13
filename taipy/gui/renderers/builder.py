@@ -44,7 +44,7 @@ class Builder:
             if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
                 self.has_evaluated = True
                 default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
-                self.value = attrgetter(default_property_value)(self._gui._values)
+                self.value = attrgetter(default_property_value)(self._gui._get_data_scope())
                 self.expr_hash = default_property_value
                 self.expr = self._gui._hash_to_expr[self.expr_hash]
             else:
@@ -114,7 +114,7 @@ class Builder:
             hash_value = self._gui._fetch_expression_list(value)[0]
             self._gui.bind_var(hash_value)
             try:
-                return (attrgetter(hash_value)(self._gui._values), hash_value)
+                return (attrgetter(hash_value)(self._gui._get_data_scope()), hash_value)
             except AttributeError:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
@@ -268,6 +268,8 @@ class Builder:
             "selected_color",
             "marker",
             "selected_marker",
+            "orientation",
+            "name",
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[4]:
@@ -317,6 +319,8 @@ class Builder:
                 "markers": [t[10] or ({"color": t[6]} if t[6] else None) for t in traces],
                 "selectedMarkers": [t[11] or ({"color": t[9]} if t[9] else None) for t in traces],
                 "traces": [[reverse_cols.get(c, c) for c in [t[0], t[1], t[2]]] for t in traces],
+                "orientations": [t[12] for t in traces],
+                "names": [t[13] for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)

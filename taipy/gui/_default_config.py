@@ -15,6 +15,9 @@ app_config_default: AppConfig = {
     "theme[light]": None,
     "theme[dark]": None,
     "use_arrow": False,
+    "browser_notification": True,
+    "notification_duration": 3000,
+    "multi_user": True,
 }
 
 style_config_default: StyleConfig = {

@@ -1,0 +1,38 @@
+name: Documentation Generation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    Deploy-Doc:
+        runs-on: ubuntu-18.04
+        steps:
+            -   uses: actions/checkout@v2
+            -   name: Set up Python
+                uses: actions/setup-python@v2
+                with:
+                    python-version: 3.9
+            -   name: Install pipenv and dependancies
+                run: |
+                    python -m pip install pipenv
+                    # Hiding pyodbc (if it does not install for some reason)
+                    ##sed -i.BK -e '/pyodbc/d' Pipfile
+                    ##mv taipy/data/sql.py taipy/data/sql.py.BK
+                    ##sed -i.BK -e '/\.sql/d' taipy/data/__init__.py
+                    ##sed -i.BK -e 's/, SQLDataSource//g' taipy/data/manager/data_manager.py
+                    # Installing unixodbc if needed
+                    if (apt list --installed | grep unixodbc) && (apt list --installed | grep unixodbc-dev); then echo unixodbc ok; else apt-get -y update; apt-get -y install unixodbc unixodbc-dev; fi
+                    python -m pipenv install --dev
+            -   name: Set up Node.JS
+                uses: actions/setup-node@v1
+            -   name: Build controls doc
+                working-directory: ./gui
+                run: |
+                    npm i web-component-analyzer
+                    npm run doc
+                    pipenv run python ../tools/generate_controls_ref.py
+            -   name: Build doc and deploy
+                run: |
+                    pipenv run mkdocs gh-deploy

@@ -1,5 +1,5 @@
 /**
- * button component displays a button that triggers an function
+ * A button control that can trigger a function when pressed.
 
  * ## Usage
  * ### Simple

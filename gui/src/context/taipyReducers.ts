@@ -8,6 +8,7 @@ import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 
 enum Types {
+    SocketConnected = "SOCKET_CONNECTED",
     Update = "UPDATE",
     MultipleUpdate = "MULTIPLE_UPDATE",
     SendUpdate = "SEND_UPDATE_ACTION",
@@ -17,15 +18,18 @@ enum Types {
     SetLocations = "SET_LOCATIONS",
     SetTheme = "SET_THEME",
     SetTimeZone = "SET_TIMEZONE",
+    SetAlert = "SET_ALERT",
 }
 export interface TaipyState {
     socket?: Socket;
+    isSocketConnected?: boolean;
     data: Record<string, unknown>;
     theme: Theme;
     locations: Record<string, string>;
     timeZone: string;
     dateTimeFormat?: string;
     numberFormat?: string;
+    alert?: AlertMessage;
 }
 
 export interface TaipyBaseAction {
@@ -37,12 +41,22 @@ interface NamePayload {
     payload: Record<string, unknown>;
 }
 
+export interface AlertMessage {
+    atype: string;
+    message: string;
+    browser: boolean;
+    duration: number;
+}
+
 interface TaipyAction extends NamePayload, TaipyBaseAction {
     propagate?: boolean;
 }
 
 interface TaipyMultipleAction extends TaipyBaseAction {
     payload: NamePayload[];
+}
+
+interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {
 }
 
 export interface FormatConfig {
@@ -82,6 +96,7 @@ export const INITIAL_STATE: TaipyState = {
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
+    isSocketConnected: false,
     socket: io(ENDPOINT),
 });
 
@@ -94,19 +109,17 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
     if (socket) {
         // Websocket confirm successful initialization
         socket.on("connect", () => {
-            socket?.send({ status: "Connected!" });
-        });
-        socket.on("disconnect", () => {
-            socket?.send({ status: "Disconnected!" });
+            dispatch({ type: Types.SocketConnected });
         });
         // handle message data from backend
         socket.on("message", (message: WsMessage) => {
             if (message.type) {
                 if (message.type === "U" && message.name) {
-                    // interestingly we can't use === for message.type here 8-|
                     dispatch(createUpdateAction(message.name, message.payload as Record<string, unknown>));
                 } else if (message.type === "MU" && Array.isArray(message.payload)) {
                     dispatch(createMultipleUpdateAction(message.payload as NamePayload[]));
+                } else if (message.type === "AL") {
+                    dispatch(createAlertAction(message as unknown as AlertMessage));
                 }
             }
         });
@@ -122,6 +135,8 @@ const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string
 export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
     const action = baseAction as TaipyAction;
     switch (action.type) {
+        case Types.SocketConnected:
+            return !!state.isSocketConnected ? state : { ...state, isSocketConnected: true };
         case Types.Update:
             const newValue = parseData(action.payload.value as Record<string, unknown>);
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
@@ -145,6 +160,13 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             };
         case Types.SetLocations:
             return { ...state, locations: action.payload.value as Record<string, string> };
+        case Types.SetAlert:
+            const alertAction = action as unknown as TaipyAlertAction;
+            if (alertAction.atype) {
+                return {...state, alert: {atype: alertAction.atype, message: alertAction.message, browser: alertAction.browser, duration: alertAction.duration}}
+            }
+            delete state.alert;
+            return {...state}
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -309,7 +331,30 @@ export const createTimeZoneAction = (timeZone: string, fromBackend = false): Tai
     payload: { value: timeZone, fromBackend: fromBackend },
 });
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU";
+const getAlertType = (aType: string) => {
+    aType = aType.trim() || "i";
+    aType = aType.substr(0, 1).toLowerCase();
+    switch (aType) {
+        case "e":
+            return "error";
+        case "w":
+            return "warning";
+        case "s":
+            return "success";
+        default:
+            return "info";
+    }
+}
+
+export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
+    type: Types.SetAlert,
+    atype: alert ? getAlertType(alert.atype) : "",
+    message: alert ? alert.message : "",
+    browser: alert ? alert.browser : true,
+    duration: alert ? alert.duration : 3000,
+})
+
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL";
 
 interface WsMessage {
     type: WsMessageType;

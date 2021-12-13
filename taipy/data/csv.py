@@ -48,7 +48,10 @@ class CSVDataSource(DataSource):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        up_to_date: bool = False,
+        validity_days: Optional[int] = None,
+        validity_hours: Optional[int] = None,
+        validity_minutes: Optional[int] = None,
+        edition_in_progress: bool = False,
         properties: Dict = None,
     ):
         if properties is None:
@@ -58,10 +61,21 @@ class CSVDataSource(DataSource):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
         super().__init__(
-            config_name, scope, id, name, parent_id, last_edition_date, job_ids or [], up_to_date, **properties
+            config_name,
+            scope,
+            id,
+            name,
+            parent_id,
+            last_edition_date,
+            job_ids,
+            validity_days,
+            validity_hours,
+            validity_minutes,
+            edition_in_progress,
+            **properties,
         )
         if not self.last_edition_date and isfile(self.properties[self.__REQUIRED_PATH_PROPERTY]):
-            self.updated()
+            self.unlock_edition()
 
     @classmethod
     def storage_type(cls) -> str:
@@ -107,6 +121,5 @@ class CSVDataSource(DataSource):
             df = pd.DataFrame(data, columns=columns)
         df.to_csv(self.path, index=False)
         self.last_edition_date = datetime.now()
-        self.up_to_date = True
         if job_id:
             self.job_ids.append(job_id)
