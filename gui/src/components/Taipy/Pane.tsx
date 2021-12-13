@@ -90,10 +90,10 @@ const Pane = (props: PaneProps) => {
         }
     }, [value]);
 
-    return (
+    return !persistent || (persistent && open) ? (
         <Drawer
             sx={drawerSx}
-            variant={persistent ? "persistent" : undefined}
+            variant={persistent ? "permanent" : undefined}
             anchor={anchor}
             open={open}
             onClose={handleClose}
@@ -112,7 +112,7 @@ const Pane = (props: PaneProps) => {
             {pageId ? <TaipyRendered path={"/" + pageId} /> : null}
             {props.children}
         </Drawer>
-    );
+    ) : null;
 };
 
 export default Pane;

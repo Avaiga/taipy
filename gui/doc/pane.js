@@ -6,14 +6,18 @@
  *
  * ## Usage
  * ### Simple
- * <code><|{value}|pane|></code>
+ * <code><|{open}|pane|</code>
+ * 
+ * ...
+ * 
+ * <code>|></code>
  * ### Advanced
  * <code><|pane|open={value}|page_id=page1|close_action=close_action|></code>
  * 
  * or with properties
  * 
- * <code><|{value}|pane|properties={properties}|partial={myPartial}|></code>
- * @element dialog
+ * <code><|{open}|pane|properties={properties}|partial={myPartial}|></code>
+ * @element pane
  */
 class pane extends shared {
 
@@ -24,22 +28,13 @@ class pane extends shared {
      open
 
     /**
-     * name of a function that will be triggered on close (clieck outside or Esc).
-     * 
-     * Parameters of that function are all optional:
-     * 
-     * - gui instance
-     * - id
-     * - action
-     * 
-     * if close_action is empty, no function is called
+     * name of a function that will be triggered on close (clieck outside or Esc).<ul>Parameters of that function are all optional:<li>gui instance</li><li>id</li><li>action</li></ul>if close_action is empty, no function is called
      * @type {str}
      */
      close_action
 
     /**
      * a Partial object that holds the content of the pane
-     * 
      * should not be defined if page_id is set
      * @type {Partial}
      */
@@ -47,7 +42,6 @@ class pane extends shared {
 
      /**
       * a page id to show as the content of the pane
-      * 
       * should not be defined if partial is set
       * @type {str}
       */
@@ -68,13 +62,7 @@ class pane extends shared {
       height = "30vh"
 
      /**
-      * anchor of the pane
-      * 
-      * values:
-      * - left
-      * - right
-      * - top
-      * - bottom
+      * anchor of the pane<ul>values:<li>left</li><li>right</li><li>top</li><li>bottom</li></ul>
       * 
       * @type {str}
       */
