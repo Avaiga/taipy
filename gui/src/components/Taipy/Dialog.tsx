@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { ReactNode, useCallback, useContext } from "react";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
@@ -23,6 +23,7 @@ interface DialogProps extends TaipyBaseProps {
     validateLabel?: string;
     pageId: string;
     value?: boolean;
+    children?: ReactNode;
 }
 
 const closeSx: SxProps<Theme> = {
@@ -73,7 +74,8 @@ const Dialog = (props: DialogProps) => {
             </DialogTitle>
 
             <DialogContent dividers>
-                <TaipyRendered path={"/" + pageId} />
+                {pageId ? <TaipyRendered path={"/" + pageId} /> : null}
+                {props.children}
             </DialogContent>
             <DialogActions>
                 {cancelAction && <Button onClick={handleClose} disabled={!active}>{cancelLabel}</Button>}

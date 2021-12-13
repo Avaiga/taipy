@@ -439,10 +439,10 @@ class Builder:
         return self
 
     def set_page_id(self):
-        return self.__set_string_attribute("page_id", optional=False)
+        return self.__set_string_attribute("page_id")
 
     def set_partial(self):
-        if self.element_name != "Dialog":
+        if self.element_name != "Dialog" and self.element_name != "Pane":
             return self
         partial = self.__get_property("partial")
         if partial:

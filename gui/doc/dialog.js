@@ -3,6 +3,8 @@
  *
  * TODO: Complete
  *
+ * block component
+ * 
  * ## Usage
  * ### Simple
  * <code><|{value}|dialog|></code>

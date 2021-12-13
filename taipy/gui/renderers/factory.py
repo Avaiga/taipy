@@ -9,24 +9,25 @@ from .builder import Builder
 class Factory:
 
     __CONTROL_DEFAULT_PROP_NAME = {
-        "field": "value",
         "button": "label",
-        "input": "value",
-        "number": "value",
-        "date_selector": "date",
-        "slider": "value",
-        "selector": "value",
-        "tree": "value",
-        "table": "data",
-        "dialog": "open",
         "chart": "data",
-        "status": "value",
-        "toggle": "value",
         "content": "value",
-        "navbar": "value",
-        "layout": "columns",
-        "part": "type",
+        "date_selector": "date",
+        "dialog": "open",
         "expandable": "title",
+        "field": "value",
+        "input": "value",
+        "layout": "columns",
+        "navbar": "value",
+        "number": "value",
+        "pane": "open",
+        "part": "type",
+        "selector": "value",
+        "slider": "value",
+        "status": "value",
+        "table": "data",
+        "toggle": "value",
+        "tree": "value",
     }
 
     CONTROL_BUILDERS = {
@@ -102,7 +103,6 @@ class Factory:
                 ("cancel_label", AttributeType.string, "Cancel"),
                 ("validate_action", AttributeType.string, "validate"),
                 ("validate_label", AttributeType.string, "Validate"),
-                ("open", AttributeType.boolean),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         )
@@ -191,6 +191,25 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         ),
+        "pane": lambda control_type, attrs: Builder(
+            control_type=control_type, element_name="Pane", attributes=attrs, default_value=""
+        )
+        .set_value_and_default()
+        .set_classNames(class_name="taipy-pane", config_class="pane")
+        .set_attributes(
+            [
+                ("id"),
+                ("anchor", AttributeType.string, "left"),
+                ("close_action"),
+                ("persistent", AttributeType.boolean, False),
+                ("active", AttributeType.dynamic_boolean, True),
+                ("width", AttributeType.string_or_number, "30vw"),
+                ("height", AttributeType.string_or_number, "30vh"),
+            ]
+        )
+        .set_propagate()
+        .set_partial()  # partial should be set before page_id
+        .set_page_id(),
         "part": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Part", attributes=attrs, default_value=""
         )
