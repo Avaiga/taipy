@@ -63,7 +63,7 @@ class Gui(object, metaclass=Singleton):
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
-        flask: Flask = None,
+        flask: t.Optional[Flask] = None,
     ):
         """Initializes a new Gui instance.
 
@@ -740,7 +740,7 @@ class Gui(object, metaclass=Singleton):
             self._server._get_default_blueprint(
                 static_folder=f"{_absolute_path}{os.path.sep}webapp",
                 template_folder=f"{_absolute_path}{os.path.sep}webapp",
-                client_url=self._get_app_config(app_config["client_url"], None),
+                client_url=app_config["client_url"],
                 title=self._get_app_config("title", "Taipy App"),
                 favicon=self._get_app_config("favicon", "/favicon.png"),
                 themes=self._get_themes(),

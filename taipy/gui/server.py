@@ -16,8 +16,8 @@ class Server:
     def __init__(
         self,
         app: Gui,
-        flask: Flask,
-        css_file: str,
+        flask: t.Optional[Flask] = None,
+        css_file: str = "",
         path_mapping: t.Optional[dict] = {},
     ):
         self._flask = Flask("Taipy") if flask is None else flask
@@ -53,10 +53,11 @@ class Server:
         client_url: str = "",
         title: str = "",
         favicon: str = "",
-        themes: t.Dict[str, t.Any] = {},
+        themes: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
+
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
