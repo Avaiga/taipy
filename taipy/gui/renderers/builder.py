@@ -41,16 +41,12 @@ class Builder:
         default_property_name = Factory.get_default_property_name(control_type)
         default_property_value = self.attributes.get(default_property_name)
         if default_property_value:
-            if isinstance(default_property_value, str) and self._gui._expression_evaluator._is_expression(
-                default_property_value
-            ):
+            if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
                 self.has_evaluated = True
-                default_property_value = self._gui._expression_evaluator._fetch_expression_list(default_property_value)[
-                    0
-                ]
+                default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
                 self.value = attrgetter(default_property_value)(self._gui._get_data_scope())
                 self.expr_hash = default_property_value
-                self.expr = self._gui._expression_evaluator.get_expr_from_hash(self.expr_hash)
+                self.expr = self._gui._get_expr_from_hash(self.expr_hash)
             else:
                 self.value = self.expr_hash = self.expr = default_property_value
 
@@ -114,8 +110,8 @@ class Builder:
         return [self.__get_property(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:
-        if isinstance(value, str) and self._gui._expression_evaluator._is_expression(value):
-            hash_value = self._gui._expression_evaluator._fetch_expression_list(value)[0]
+        if isinstance(value, str) and self._gui._is_expression(value):
+            hash_value = self._gui._fetch_expression_list(value)[0]
             self._gui.bind_var(hash_value)
             try:
                 return (attrgetter(hash_value)(self._gui._get_data_scope()), hash_value)

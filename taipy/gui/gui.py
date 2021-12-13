@@ -240,7 +240,7 @@ class Gui(object, metaclass=Singleton):
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
-        currentvalue = attrgetter(self._expression_evaluator.get_hash_from_expr(var_name))(self._get_data_scope())
+        currentvalue = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
                 value = ISOToDate(value)
@@ -257,14 +257,14 @@ class Gui(object, metaclass=Singleton):
         self._update_var(var_name, value, propagate)
 
     def _update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
-        hash_expr = self._expression_evaluator.get_hash_from_expr(var_name)
+        hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
             attrsetter(self._get_data_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
-                modified_vars.extend(self._expression_evaluator.re_evaluate_expr(var_name))
+                modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self._update_function:
             self._update_function(self, var_name, value)
@@ -293,7 +293,7 @@ class Gui(object, metaclass=Singleton):
 
     def _request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
-        var_name = self._expression_evaluator.get_hash_from_expr(var_name)
+        var_name = self._get_hash_from_expr(var_name)
         newvalue = attrgetter(var_name)(self._get_data_scope())
         ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
@@ -612,8 +612,23 @@ class Gui(object, metaclass=Singleton):
             return True
         return False
 
-    def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        return self._expression_evaluator.evaluate_expr(expr, re_evaluated)
+    def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+        return self._expression_evaluator.evaluate_expr(self, expr, re_evaluated)
+
+    def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
+        return self._expression_evaluator.re_evaluate_expr(self, var_name)
+
+    def _get_hash_from_expr(self, expr: str) -> str:
+        return self._expression_evaluator.get_hash_from_expr(expr)
+
+    def _get_expr_from_hash(self, hash: str) -> str:
+        return self._expression_evaluator.get_expr_from_hash(hash)
+
+    def _is_expression(self, expr: str) -> bool:
+        return self._expression_evaluator._is_expression(expr)
+
+    def _fetch_expression_list(self, expr: str) -> t.List:
+        return self._expression_evaluator._fetch_expression_list(expr)
 
     def on_update(self, f) -> None:
         self._update_function = f

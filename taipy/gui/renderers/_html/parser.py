@@ -98,5 +98,5 @@ class TaipyTag(object):
         from ...gui import Gui
 
         for k, v in self.properties.items():
-            self.properties[k] = Gui._get_instance().evaluate_expr(v)
+            self.properties[k] = Gui._get_instance()._evaluate_expr(v)
         return HtmlFactory.create_element(self.control_type, self.properties)

@@ -94,12 +94,9 @@ class _ExpressionEvaluator:
             self.__expr_to_var_list[expr] = var_list
         return "{" + expr_hash + "}"
 
-    def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+    def evaluate_expr(self, gui: Gui, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
         if not self._is_expression(expr):
             return expr
-        from .gui import Gui
-
-        gui = Gui._get_instance()
         var_val, var_list = self._analyze_expression(gui, expr)
         expr_hash = None
         is_edge_case = False
@@ -126,7 +123,7 @@ class _ExpressionEvaluator:
             return self._save_expression(gui, expr, expr_hash, expr_evaluated, var_val, var_list)
         return expr_evaluated
 
-    def re_evaluate_expr(self, var_name: str) -> t.List[str]:
+    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.List[str]:
         """
         This function will execute when the _update_var function is handling
         an expression with only a single variable
@@ -134,9 +131,6 @@ class _ExpressionEvaluator:
         modified_vars: t.List[str] = []
         if var_name not in self.__var_to_expr_list.keys():
             return modified_vars
-        from .gui import Gui
-
-        gui = Gui._get_instance()
         for expr in self.__var_to_expr_list[var_name]:
             if expr == var_name:
                 continue
