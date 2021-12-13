@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, timedelta
 
 import pytest
 
@@ -96,7 +96,9 @@ def test_set_and_get_scenario(cycle):
 
 
 def test_create_and_delete_scenario():
-    start_date = datetime.combine(datetime.now().date(), time())
+    creation_date_1 = datetime.now()
+    creation_date_2 = creation_date_1 + timedelta(minutes=10)
+
     scenario_manager = ScenarioManager()
 
     scenario_manager.delete_all()
@@ -104,26 +106,26 @@ def test_create_and_delete_scenario():
 
     scenario_config = Config.scenario_configs.create("sc", [], Frequency.DAILY)
 
-    scenario_1 = scenario_manager.create(scenario_config, start_date=start_date)
+    scenario_1 = scenario_manager.create(scenario_config, creation_date=creation_date_1)
     assert scenario_1.config_name == "sc"
     assert scenario_1.pipelines == {}
     assert scenario_1.cycle.frequency == Frequency.DAILY
     assert scenario_1.master_scenario
-    assert scenario_1.cycle.creation_date.date() == start_date.date()
-    assert scenario_1.cycle.start_date == start_date
-    assert scenario_1.cycle.end_date.date() == start_date.date()
+    assert scenario_1.cycle.creation_date == creation_date_1
+    assert scenario_1.cycle.start_date.date() == creation_date_1.date()
+    assert scenario_1.cycle.end_date.date() == creation_date_1.date()
 
     with pytest.raises(DeletingMasterScenario):
         scenario_manager.delete(scenario_1.id)
 
-    scenario_2 = scenario_manager.create(scenario_config)
+    scenario_2 = scenario_manager.create(scenario_config, creation_date=creation_date_2)
     assert scenario_2.config_name == "sc"
     assert scenario_2.pipelines == {}
     assert scenario_2.cycle.frequency == Frequency.DAILY
     assert not scenario_2.master_scenario
-    assert scenario_2.cycle.creation_date.date() == start_date.date()
-    assert scenario_2.cycle.start_date == start_date
-    assert scenario_2.cycle.end_date.date() == start_date.date()
+    assert scenario_2.cycle.creation_date == creation_date_1
+    assert scenario_2.cycle.start_date.date() == creation_date_2.date()
+    assert scenario_2.cycle.end_date.date() == creation_date_2.date()
 
     assert scenario_1 != scenario_2
     assert scenario_1.cycle == scenario_2.cycle
@@ -336,7 +338,7 @@ def test_get_set_master_scenario():
     scenario_manager = ScenarioManager()
     cycle_manager = scenario_manager.cycle_manager
 
-    cycle_1 = Cycle(Frequency.DAILY, {}, id=CycleId("cc_1"))
+    cycle_1 = cycle_manager.create(Frequency.DAILY)
 
     scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), is_master=False, cycle=cycle_1)
     scenario_2 = Scenario("sc_2", [], {}, ScenarioId("sc_2"), is_master=False, cycle=cycle_1)

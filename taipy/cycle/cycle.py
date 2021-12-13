@@ -1,7 +1,6 @@
-import calendar
 import logging
 import uuid
-from datetime import datetime, time, timedelta
+from datetime import datetime
 from typing import Dict, Optional
 
 from taipy.common import protect_name
@@ -30,21 +29,19 @@ class Cycle:
         self,
         frequency: Frequency,
         properties: Dict[str, str],
+        creation_date: datetime,
+        start_date: datetime,
+        end_date: datetime,
         name: str = None,
-        creation_date: Optional[datetime] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
         id: CycleId = None,
     ):
         self.frequency = frequency
         self.properties = properties
-        self.creation_date = creation_date or datetime.now()
+        self.creation_date = creation_date
+        self.start_date = start_date
+        self.end_date = end_date
         self.name = self.new_name(name)
         self.id = id or self.new_id(self.name)
-        # auto generated from creation date or should not be None
-        self.start_date = start_date if start_date else self.__get_start_date_of_cycle()
-        # auto generated from start date or should not be None
-        self.end_date = end_date if end_date else self.__get_end_date_of_cycle()
 
     def new_name(self, name: str = None) -> str:
         return (
@@ -52,32 +49,6 @@ class Cycle:
             if name
             else Cycle.__SEPARATOR.join([str(self.frequency), self.creation_date.isoformat()])
         )
-
-    def __get_start_date_of_cycle(self):
-        start_date = self.creation_date.date()
-        start_time = time()
-        if self.frequency == Frequency.DAILY:
-            start_date = start_date
-        if self.frequency == Frequency.WEEKLY:
-            start_date = start_date - timedelta(days=start_date.weekday())
-        if self.frequency == Frequency.MONTHLY:
-            start_date = start_date.replace(day=1)
-        if self.frequency == Frequency.YEARLY:
-            start_date = start_date.replace(day=1, month=1)
-        return datetime.combine(start_date, start_time)
-
-    def __get_end_date_of_cycle(self):
-        end_date = self.start_date
-        if self.frequency == Frequency.DAILY:
-            end_date = end_date + timedelta(days=1)
-        if self.frequency == Frequency.WEEKLY:
-            end_date = end_date + timedelta(7 - end_date.weekday())
-        if self.frequency == Frequency.MONTHLY:
-            last_day_of_month = calendar.monthrange(self.start_date.year, self.start_date.month)[1]
-            end_date = end_date.replace(day=last_day_of_month) + timedelta(days=1)
-        if self.frequency == Frequency.YEARLY:
-            end_date = end_date.replace(month=12, day=31) + timedelta(days=1)
-        return end_date - timedelta(microseconds=1)
 
     @staticmethod
     def new_id(name: str) -> CycleId:

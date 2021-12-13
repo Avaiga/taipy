@@ -1,6 +1,7 @@
+import calendar
 import logging
-from datetime import datetime, time
-from typing import List, Optional
+from datetime import datetime, time, timedelta
+from typing import Optional
 
 from taipy.common.alias import CycleId
 from taipy.cycle.cycle import Cycle
@@ -27,7 +28,12 @@ class CycleManager:
             creation_date (datetime) : date and time the cycle is created. Default: None
             properties (dict[str, str]) : other properties. Default: None
         """
-        cycle = Cycle(frequency, properties, name=name, creation_date=creation_date)
+        creation_date = creation_date if creation_date else datetime.now()
+        start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
+        end_date = CycleManager.get_end_date_of_cycle(frequency, start_date)
+        cycle = Cycle(
+            frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
+        )
         self.set(cycle)
         return cycle
 
@@ -54,7 +60,7 @@ class CycleManager:
             logging.error(f"Cycle entity : {cycle_id} does not exist.")
             raise NonExistingCycle(cycle_id)
 
-    def get_or_create(self, frequency: Frequency, start_date: datetime = None) -> Cycle:
+    def get_or_create(self, frequency: Frequency, creation_date: datetime = None) -> Cycle:
         """
         Returns the cycle created by frequency and creation_date if it already
         exists, or creates and returns a new cycle.
@@ -62,12 +68,41 @@ class CycleManager:
             frequency (Frequency): creation_date of the cycle.
             start_date (datetime): creation date of the cycle. Default value : None.
         """
-        start_date = start_date if start_date else datetime.combine(datetime.now().date(), time())
+        creation_date = creation_date if creation_date else datetime.now()
+        start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
         cycles = self.repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return self.create(frequency=frequency, creation_date=datetime.now())
+            return self.create(frequency=frequency, creation_date=creation_date)
+
+    @staticmethod
+    def get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):
+        start_date = creation_date.date()
+        start_time = time()
+        if frequency == Frequency.DAILY:
+            start_date = start_date
+        if frequency == Frequency.WEEKLY:
+            start_date = start_date - timedelta(days=start_date.weekday())
+        if frequency == Frequency.MONTHLY:
+            start_date = start_date.replace(day=1)
+        if frequency == Frequency.YEARLY:
+            start_date = start_date.replace(day=1, month=1)
+        return datetime.combine(start_date, start_time)
+
+    @staticmethod
+    def get_end_date_of_cycle(frequency: Frequency, start_date: datetime):
+        end_date = start_date
+        if frequency == Frequency.DAILY:
+            end_date = end_date + timedelta(days=1)
+        if frequency == Frequency.WEEKLY:
+            end_date = end_date + timedelta(7 - end_date.weekday())
+        if frequency == Frequency.MONTHLY:
+            last_day_of_month = calendar.monthrange(start_date.year, start_date.month)[1]
+            end_date = end_date.replace(day=last_day_of_month) + timedelta(days=1)
+        if frequency == Frequency.YEARLY:
+            end_date = end_date.replace(month=12, day=31) + timedelta(days=1)
+        return end_date - timedelta(microseconds=1)
 
     def get_all(self):
         """

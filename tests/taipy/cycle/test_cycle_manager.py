@@ -9,7 +9,7 @@ from taipy.cycle.manager.cycle_manager import CycleManager
 from taipy.exceptions.cycle import NonExistingCycle
 
 
-def test_save_and_get_cycle_entity(tmpdir, cycle):
+def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     cycle_manager = CycleManager()
     cycle_manager.repository.base_path = tmpdir
 
@@ -41,20 +41,24 @@ def test_save_and_get_cycle_entity(tmpdir, cycle):
     cycle_3 = Cycle(
         Frequency.MONTHLY,
         {},
+        creation_date=current_datetime,
+        start_date=current_datetime,
+        end_date=current_datetime,
         name="   bar/ξéà   ",
+        id=cycle_1.id,
     )
     cycle_manager.set(cycle_3)
 
-    cycle_3_entity = cycle_manager.get(cycle_3.id)
+    cycle_3 = cycle_manager.get(cycle_1.id)
 
-    assert len(cycle_manager.get_all()) == 2
-    assert cycle_3_entity.id == cycle_3.id
-    assert cycle_3_entity.name == cycle_3.name
-    assert cycle_3_entity.properties == cycle_3.properties
-    assert isinstance(cycle_3_entity.creation_date, datetime)
-    assert cycle_3_entity.start_date is not None
-    assert cycle_3_entity.end_date is not None
-    assert cycle_3_entity.frequency == cycle_3.frequency
+    assert len(cycle_manager.get_all()) == 1
+    assert cycle_3.id == cycle_1.id
+    assert cycle_3.name == cycle_3.name
+    assert cycle_3.properties == cycle_3.properties
+    assert cycle_3.creation_date == current_datetime
+    assert cycle_3.start_date == current_datetime
+    assert cycle_3.end_date == current_datetime
+    assert cycle_3.frequency == cycle_3.frequency
 
 
 def test_create_and_delete_cycle_entity(tmpdir):
@@ -71,6 +75,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
     assert cycle_1.creation_date is not None
     assert cycle_1.start_date is not None
     assert cycle_1.end_date is not None
+    assert cycle_1.start_date < cycle_1.creation_date < cycle_1.end_date
     assert cycle_1.key == "value"
     assert cycle_1.frequency == Frequency.DAILY
 
@@ -113,3 +118,27 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     cycle_manager.delete_all()
     assert len(cycle_manager.get_all()) == 0
+
+
+def test_get_cycle_start_date_and_end_date():
+    creation_date = datetime.fromisoformat("2021-11-11T11:11:01.000001")
+
+    daily_start_date = CycleManager.get_start_date_of_cycle(Frequency.DAILY, creation_date=creation_date)
+    weekly_start_date = CycleManager.get_start_date_of_cycle(Frequency.WEEKLY, creation_date=creation_date)
+    monthly_start_date = CycleManager.get_start_date_of_cycle(Frequency.MONTHLY, creation_date=creation_date)
+    yearly_start_date = CycleManager.get_start_date_of_cycle(Frequency.YEARLY, creation_date=creation_date)
+
+    assert daily_start_date == datetime.fromisoformat("2021-11-11T00:00:00.000000")
+    assert weekly_start_date == datetime.fromisoformat("2021-11-08T00:00:00.000000")
+    assert monthly_start_date == datetime.fromisoformat("2021-11-01T00:00:00.000000")
+    assert yearly_start_date == datetime.fromisoformat("2021-01-01T00:00:00.000000")
+
+    daily_end_date = CycleManager.get_end_date_of_cycle(Frequency.DAILY, start_date=daily_start_date)
+    weekly_end_date = CycleManager.get_end_date_of_cycle(Frequency.WEEKLY, start_date=weekly_start_date)
+    monthly_end_date = CycleManager.get_end_date_of_cycle(Frequency.MONTHLY, start_date=monthly_start_date)
+    yearly_end_date = CycleManager.get_end_date_of_cycle(Frequency.YEARLY, start_date=yearly_start_date)
+
+    assert daily_end_date == datetime.fromisoformat("2021-11-11T23:59:59.999999")
+    assert weekly_end_date == datetime.fromisoformat("2021-11-14T23:59:59.999999")
+    assert monthly_end_date == datetime.fromisoformat("2021-11-30T23:59:59.999999")
+    assert yearly_end_date == datetime.fromisoformat("2021-12-31T23:59:59.999999")

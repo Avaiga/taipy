@@ -40,11 +40,6 @@ def current_datetime():
 
 
 @pytest.fixture(scope="function")
-def week_example():
-    return datetime(2021, 11, 16, 0, 0, 0, 0)
-
-
-@pytest.fixture(scope="function")
 def scenario(cycle):
     return Scenario("sc", [], {}, ScenarioId("sc_id"), is_master=False, cycle=None)
 
@@ -60,10 +55,10 @@ def cycle():
     return Cycle(
         Frequency.DAILY,
         {},
-        name="cc",
         creation_date=example_date,
         start_date=example_date,
         end_date=example_date,
+        name="cc",
         id=CycleId("cc_id"),
     )
 

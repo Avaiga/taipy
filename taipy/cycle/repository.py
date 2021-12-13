@@ -17,8 +17,8 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             name=cycle.name,
             frequency=cycle.frequency,
             creation_date=cycle.creation_date.isoformat(),
-            start_date=cycle.start_date.isoformat() if cycle.start_date else None,
-            end_date=cycle.end_date.isoformat() if cycle.end_date else None,
+            start_date=cycle.start_date.isoformat(),
+            end_date=cycle.end_date.isoformat(),
             properties=cycle.properties,
         )
 
@@ -29,8 +29,8 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             frequency=model.frequency,
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
-            start_date=datetime.fromisoformat(model.start_date) if model.start_date else None,
-            end_date=datetime.fromisoformat(model.end_date) if model.end_date else None,
+            start_date=datetime.fromisoformat(model.start_date),
+            end_date=datetime.fromisoformat(model.end_date),
         )
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:

@@ -23,7 +23,7 @@ def test_from_and_to_model(cycle, cycle_model):
     assert repository.from_model(cycle_model) == cycle
 
 
-def test_get_masters(tmpdir, cycle):
+def test_get_masters(tmpdir, cycle, current_datetime):
 
     cycle_repository = CycleRepository()
     cycle_repository.base_path = tmpdir
@@ -32,10 +32,7 @@ def test_get_masters(tmpdir, cycle):
 
     cycle_repository.save(cycle)
     cycle_1 = cycle_repository.load(cycle.id)
-    cycle_2 = Cycle(
-        Frequency.MONTHLY,
-        {},
-    )
+    cycle_2 = Cycle(Frequency.MONTHLY, {}, current_datetime, current_datetime, current_datetime)
     cycle_repository.save(cycle_2)
     cycle_2 = cycle_repository.load(cycle_2.id)
 
