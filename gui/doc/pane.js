@@ -28,7 +28,7 @@ class pane extends shared {
      open
 
     /**
-     * name of a function that will be triggered on close (clieck outside or Esc).<ul>Parameters of that function are all optional:<li>gui instance</li><li>id</li><li>action</li></ul>if close_action is empty, no function is called
+     * name of a function that will be triggered on close (click outside or Esc).<ul>Parameters of that function are all optional:<li>gui instance</li><li>id</li><li>action</li></ul>if close_action is empty, no function is called
      * @type {str}
      */
      close_action
