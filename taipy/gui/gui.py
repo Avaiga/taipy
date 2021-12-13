@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import datetime
 import inspect
 import os
@@ -9,12 +8,12 @@ import re
 import typing as t
 import warnings
 from operator import attrgetter
-from types import FrameType, FunctionType, SimpleNamespace
+from types import FrameType, FunctionType
 
 import __main__
 import markdown as md_lib
 from dotenv import dotenv_values
-from flask import Blueprint, jsonify, request
+from flask import Flask, Blueprint, jsonify, request
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
@@ -64,6 +63,7 @@ class Gui(object, metaclass=Singleton):
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
+        flask: t.Optional[Flask] = None,
     ):
         """Initializes a new Gui instance.
 
@@ -77,14 +77,7 @@ class Gui(object, metaclass=Singleton):
 
             default_page_renderer (PageRenderer): An optional `PageRenderer` class that is used to render pages.
         """
-        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
-        self._server = Server(
-            self,
-            css_file=css_file,
-            static_folder=f"{_absolute_path}{os.path.sep}webapp",
-            template_folder=f"{_absolute_path}{os.path.sep}webapp",
-            path_mapping=path_mapping,
-        )
+        self._server = Server(self, path_mapping=path_mapping, flask=flask, css_file=css_file)
         self._config = GuiConfig()
         # Data Registry
         self._data_accessors = _DataAccessors()
@@ -739,18 +732,33 @@ class Gui(object, metaclass=Singleton):
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
+        taipy_pages_bp = Blueprint("taipy_pages", __name__)
+        self._flask_blueprint.append(taipy_pages_bp)
+
+        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
+        self._flask_blueprint.append(
+            self._server._get_default_blueprint(
+                static_folder=f"{_absolute_path}{os.path.sep}webapp",
+                template_folder=f"{_absolute_path}{os.path.sep}webapp",
+                client_url=app_config["client_url"],
+                title=self._get_app_config("title", "Taipy App"),
+                favicon=self._get_app_config("favicon", "/favicon.png"),
+                themes=self._get_themes(),
+            )
+        )
+
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.rendered_jsx for optimization)
         for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
+            taipy_pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
 
         # server URL Rule for flask rendered react-router
-        self._server.add_url_rule("/initialize/", view_func=self._render_route)
+        taipy_pages_bp.add_url_rule("/initialize/", view_func=self._render_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
-            self._server.register_blueprint(bp)
+            self._server.get_flask().register_blueprint(bp)
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
         self._data_accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
@@ -758,11 +766,9 @@ class Gui(object, metaclass=Singleton):
         # Use multi user or not
         self._data_scopes.set_multi_user(app_config["multi_user"])
 
-        self._server._set_client_url(app_config["client_url"])
-
         # Start Flask Server
         if run_server:
             self._server.runWithWS(host=app_config["host"], port=app_config["port"], debug=app_config["debug"])
 
     def get_flask_app(self):
-        return self._server
+        return self._server.get_flask()
