@@ -21,7 +21,6 @@ from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .data.data_scope import _DataScopes
-from .expression_evaluator import _ExpressionEvaluator
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -36,6 +35,7 @@ from .utils import (
     dateToISO,
     get_client_var_name,
 )
+from .utils._evaluator import _Evaluator
 from .wstype import WsType
 
 
@@ -92,7 +92,7 @@ class Gui(object, metaclass=Singleton):
         # Data Scopes
         self._data_scopes = _DataScopes()
 
-        self._expression_evaluator = _ExpressionEvaluator()
+        self._evaluator = _Evaluator()
 
         # Load default config
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
@@ -613,22 +613,22 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        return self._expression_evaluator.evaluate_expr(self, expr, re_evaluated)
+        return self._evaluator.evaluate_expr(self, expr, re_evaluated)
 
     def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
-        return self._expression_evaluator.re_evaluate_expr(self, var_name)
+        return self._evaluator.re_evaluate_expr(self, var_name)
 
     def _get_hash_from_expr(self, expr: str) -> str:
-        return self._expression_evaluator.get_hash_from_expr(expr)
+        return self._evaluator.get_hash_from_expr(expr)
 
     def _get_expr_from_hash(self, hash: str) -> str:
-        return self._expression_evaluator.get_expr_from_hash(hash)
+        return self._evaluator.get_expr_from_hash(hash)
 
     def _is_expression(self, expr: str) -> bool:
-        return self._expression_evaluator._is_expression(expr)
+        return self._evaluator._is_expression(expr)
 
     def _fetch_expression_list(self, expr: str) -> t.List:
-        return self._expression_evaluator._fetch_expression_list(expr)
+        return self._evaluator._fetch_expression_list(expr)
 
     def on_update(self, f) -> None:
         self._update_function = f

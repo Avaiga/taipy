@@ -8,13 +8,13 @@ from operator import attrgetter
 
 import __main__
 
-from .utils import _get_expr_var_name, attrsetter
+from . import _get_expr_var_name, attrsetter
 
 if t.TYPE_CHECKING:
-    from .gui import Gui
+    from ..gui import Gui
 
 
-class _ExpressionEvaluator:
+class _Evaluator:
 
     # Regex to separate content from inside curly braces when evaluating f string expressions
     __EXPR_RE = re.compile(r"\{(.*?)\}")
@@ -43,10 +43,10 @@ class _ExpressionEvaluator:
         return self.__hash_to_expr[hash]
 
     def _is_expression(self, expr: str) -> bool:
-        return len(_ExpressionEvaluator.__EXPR_IS_EXPR.findall(expr)) != 0
+        return len(_Evaluator.__EXPR_IS_EXPR.findall(expr)) != 0
 
     def _fetch_expression_list(self, expr: str) -> t.List:
-        return _ExpressionEvaluator.__EXPR_RE.findall(expr)
+        return _Evaluator.__EXPR_RE.findall(expr)
 
     def _analyze_expression(self, gui: Gui, expr: str) -> t.Tuple[t.Dict[str, t.Any], t.List[str]]:
         var_val: t.Dict[str, t.Any] = {}
@@ -104,10 +104,10 @@ class _ExpressionEvaluator:
         # The expr_string is placed here in case expr get replaced by edge case
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
-        m = _ExpressionEvaluator.__EXPR_IS_EDGE_CASE.match(expr)
+        m = _Evaluator.__EXPR_IS_EDGE_CASE.match(expr)
         if m:
             expr = m.group(1)
-            expr_hash = expr if _ExpressionEvaluator.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
+            expr_hash = expr if _Evaluator.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
         # validate whether expression has already been evaluated
         if expr in self.__expr_to_hash and hasattr(gui._get_data_scope(), self.__expr_to_hash[expr]):
