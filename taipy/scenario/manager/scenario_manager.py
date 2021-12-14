@@ -201,16 +201,17 @@ class ScenarioManager:
 
     def compare(self, *scenarios: Scenario, ds_config_name: str = None):
         """
-        Compares the datasources of 2 given scenarios with known datasource config name
+        Compares the datasources of given scenarios with known datasource config name.
 
         Parameters:
             scenarios (Scenario) : list of Scenario objects to compare
-            ds_config_name (str) : config name of the DataSource to compare scenarios
+            ds_config_name (Optional[str]) : config name of the DataSource to compare scenarios, if no ds_config_name is
+            provided, the scenarios will be compared based on all the previously defined comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
             NonExistingComparator: The provided comparator does not exist
-            DifferentScenarioConfig: The provided scenario_1 and scenario_2 do not share the same scenario_config
-            NonExistingScenarioConfig: Cannot find the shared scenario config of scenario_1 and scenario_2
+            DifferentScenarioConfig: The provided scenarios do not share the same scenario_config
+            NonExistingScenarioConfig: Cannot find the shared scenario config of the provided scenarios
         """
 
         if len(scenarios) < 2:

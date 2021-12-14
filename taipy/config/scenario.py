@@ -1,4 +1,5 @@
-from typing import Callable, Dict, List, Optional
+from collections import defaultdict
+from typing import Callable, List, Optional
 
 from taipy.common import protect_name
 from taipy.config import PipelineConfig
@@ -16,25 +17,20 @@ class ScenarioConfig:
         self.name = protect_name(name)
         self.pipelines_configs = pipelines_configs
         self.frequency = frequency
-        self.comparators: Optional[Dict[str, List[Callable]]] = None
+        self.comparators = defaultdict(list)
 
         if self.COMPARATOR_KEY in properties.keys():
-            self.comparators = properties[self.COMPARATOR_KEY]
+            for k, v in properties[self.COMPARATOR_KEY].items():
+                self.comparators[k] = v
             del properties[self.COMPARATOR_KEY]
 
         self.properties = properties
 
-    def set_comparator(self, ds_config_name: str, comparator: Callable):
-        if self.comparators:
-            if ds_config_name in self.comparators.keys():
-                self.comparators[ds_config_name].append(comparator)
-            else:
-                self.comparators[ds_config_name] = [comparator]
-        else:
-            self.comparators = {ds_config_name: [comparator]}
+    def add_comparator(self, ds_config_name: str, comparator: Callable):
+        self.comparators[ds_config_name].append(comparator)
 
     def delete_comparator(self, ds_config_name: str):
-        if self.comparators and ds_config_name in self.comparators.keys():
+        if ds_config_name in self.comparators:
             del self.comparators[ds_config_name]
         else:
             raise NonExistingComparator

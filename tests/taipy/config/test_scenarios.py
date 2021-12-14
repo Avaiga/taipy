@@ -66,7 +66,7 @@ def test_scenario_get_set_and_remove_comparators():
     assert len(scenario_config_1.comparators.keys()) == 1
 
     ds_config_2 = "ds_config_2"
-    scenario_config_1.set_comparator(ds_config_2, my_func)
+    scenario_config_1.add_comparator(ds_config_2, my_func)
     assert len(scenario_config_1.comparators.keys()) == 2
 
     scenario_config_1.delete_comparator(ds_config_1)
@@ -79,9 +79,9 @@ def test_scenario_get_set_and_remove_comparators():
 
     scenario_config_2 = Config.scenario_configs.create(scenario_name_2, ["pipeline1", "pipeline2"])
 
-    assert scenario_config_2.comparators is None
+    assert scenario_config_2.comparators is not None
 
-    scenario_config_2.set_comparator(ds_config_1, my_func)
+    scenario_config_2.add_comparator(ds_config_1, my_func)
     assert len(scenario_config_2.comparators.keys()) == 1
 
     with pytest.raises(NonExistingComparator):
