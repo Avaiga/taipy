@@ -96,9 +96,9 @@ class TestSQLDataSource:
             "foo",
             Scope.PIPELINE,
             properties={
-                "db_username": "foo",
-                "db_password": "foo",
-                "db_name": "foo",
+                "db_username": "sa",
+                "db_password": "foobar",
+                "db_name": "datasource",
                 "db_engine": "mssql",
                 "read_query": "SELECT * from table_name",
                 "write_table": "foo",
