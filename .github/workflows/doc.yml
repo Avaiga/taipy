@@ -35,4 +35,4 @@ jobs:
                     pipenv run python ../tools/generate_controls_ref.py
             -   name: Build doc and deploy
                 run: |
-                    pipenv run mkdocs gh-deploy
+                    pipenv run mkdocs gh-deploy --force
