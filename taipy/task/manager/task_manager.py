@@ -35,6 +35,16 @@ class TaskManager:
         """
         self.repository.delete_all()
 
+    def delete(self, task_id: TaskId):
+        """Deletes the cycle provided as parameter.
+
+        Parameters:
+            task_id (str): identifier of the task to delete.
+        Raises:
+            ModelNotFound error if no task corresponds to task_id.
+        """
+        self.repository.delete(task_id)
+
     def get_all(self):
         """
         Returns the list of all existing tasks.
@@ -138,3 +148,41 @@ class TaskManager:
             List of tasks of this config name
         """
         return self.repository.search_all("config_name", config_name)
+
+    def hard_delete(
+        self, task_id: TaskId, scenario_id: Optional[ScenarioId] = None, pipeline_id: Optional[PipelineId] = None
+    ):
+        """
+        Deletes the task given as parameter and the nested data sources, and jobs.
+
+        Deletes the task given as parameter and propagate the hard deletion. The hard delete is propagated to a
+        nested data sources if the data sources is not shared by another pipeline or if a scenario id is given as
+        parameter, by another scenario.
+
+        Parameters:
+        task_id (TaskId): identifier of the task to hard delete.
+        pipeline_id (PipelineId) : identifier of the optional parent pipeline.
+        scenario_id (ScenarioId) : identifier of the optional parent scenario.
+
+        Raises:
+        ModelNotFound error if no pipeline corresponds to pipeline_id.
+        """
+        task = self.get(task_id)
+        jobs = self.task_scheduler.get_jobs()
+
+        if scenario_id:
+            self.remove_if_parent_id_eq(task.input.values(), scenario_id)
+            self.remove_if_parent_id_eq(task.output.values(), scenario_id)
+        if pipeline_id:
+            self.remove_if_parent_id_eq(task.input.values(), pipeline_id)
+            self.remove_if_parent_id_eq(task.output.values(), pipeline_id)
+
+        for job in jobs:
+            if job.task.id == task.id:
+                self.task_scheduler.delete(job)
+        self.delete(task_id)
+
+    def remove_if_parent_id_eq(self, data_sources, id_):
+        for data_source in data_sources:
+            if data_source.parent_id == id_:
+                self.data_manager.delete(data_source.id)

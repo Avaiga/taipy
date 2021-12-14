@@ -101,6 +101,10 @@ class TaskScheduler:
             logging.warning(err)
             raise err
 
+    def delete_all(self):
+        """Deletes all jobs."""
+        self.__JOBS: Dict[JobId, Job] = {}
+
     def get_latest_job(self, task: Task) -> Job:
         """Allows to retrieve the latest computed job of a task.
 

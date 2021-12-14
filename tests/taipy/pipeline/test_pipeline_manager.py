@@ -11,6 +11,7 @@ from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
+from taipy.scenario import ScenarioManager
 from taipy.task import Task, TaskManager
 from taipy.task.scheduler import TaskScheduler
 from tests.taipy.utils.NotifyMock import NotifyMock
@@ -145,9 +146,6 @@ def test_get_or_create_data():
     pipeline_manager = PipelineManager()
     task_manager = pipeline_manager.task_manager
     data_manager = task_manager.data_manager
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
 
     ds_config_1 = Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)
     ds_config_2 = Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0)
@@ -193,11 +191,6 @@ def test_get_or_create_data():
 
 def test_pipeline_notification_subscribe_unsubscribe(mocker):
     pipeline_manager = PipelineManager()
-    task_manager = pipeline_manager.task_manager
-    data_manager = task_manager.data_manager
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
 
     pipeline_config = PipelineConfig(
         "by 6",
@@ -394,3 +387,128 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_20 = pm.get_or_create(pipeline_config_6)
     assert len(pm.get_all()) == 14
     assert pipeline_19.id != pipeline_20.id
+
+
+def test_hard_delete():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+    task_scheduler = task_manager.task_scheduler
+
+    #  test hard delete with pipeline at pipeline level
+    ds_input_config_1 = Config.data_source_configs.create(
+        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+    )
+    ds_output_config_1 = Config.data_source_configs.create("my_output_1", "in_memory")
+    task_config_1 = Config.task_configs.create("task_config_1", ds_input_config_1, print, ds_output_config_1)
+    pipeline_config_1 = Config.pipeline_configs.create("pipeline_config_1", [task_config_1])
+    pipeline_1 = pipeline_manager.get_or_create(pipeline_config_1)
+    pipeline_manager.submit(pipeline_1.id)
+
+    assert len(pipeline_manager.get_all()) == 1
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+    pipeline_manager.hard_delete(pipeline_1.id)
+    assert len(pipeline_manager.get_all()) == 0
+    assert len(task_manager.get_all()) == 0
+    assert len(data_manager.get_all()) == 0
+    assert len(task_scheduler.get_jobs()) == 0
+
+    #  test hard delete with pipeline at scenario level
+    ds_input_config_2 = Config.data_source_configs.create(
+        "my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing"
+    )
+    ds_output_config_2 = Config.data_source_configs.create("my_output_2", "in_memory", scope=Scope.SCENARIO)
+    task_config_2 = Config.task_configs.create("task_config_2", ds_input_config_2, print, ds_output_config_2)
+    pipeline_config_2 = Config.pipeline_configs.create("pipeline_config_2", [task_config_2])
+    pipeline_2 = pipeline_manager.get_or_create(pipeline_config_2)
+    pipeline_manager.submit(pipeline_2.id)
+
+    assert len(pipeline_manager.get_all()) == 1
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+    pipeline_manager.hard_delete(pipeline_2.id)
+    assert len(pipeline_manager.get_all()) == 0
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+    task_scheduler.delete_all()
+
+    #  test hard delete with pipeline at business level
+    ds_input_config_3 = Config.data_source_configs.create(
+        "my_input_3", "in_memory", scope=Scope.BUSINESS_CYCLE, default_data="testing"
+    )
+    ds_output_config_3 = Config.data_source_configs.create("my_output_3", "in_memory", scope=Scope.BUSINESS_CYCLE)
+    task_config_3 = Config.task_configs.create("task_config_3", ds_input_config_3, print, ds_output_config_3)
+    pipeline_config_3 = Config.pipeline_configs.create("pipeline_config_3", [task_config_3])
+    pipeline_3 = pipeline_manager.get_or_create(pipeline_config_3)
+    pipeline_manager.submit(pipeline_3.id)
+
+    assert len(pipeline_manager.get_all()) == 1
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+    pipeline_manager.hard_delete(pipeline_3.id)
+    assert len(pipeline_manager.get_all()) == 0
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+    task_scheduler.delete_all()
+
+    #  test hard delete with pipeline at global level
+    ds_input_config_4 = Config.data_source_configs.create(
+        "my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing"
+    )
+    ds_output_config_4 = Config.data_source_configs.create("my_output_4", "in_memory", scope=Scope.GLOBAL)
+    task_config_4 = Config.task_configs.create("task_config_4", ds_input_config_4, print, ds_output_config_4)
+    pipeline_config_4 = Config.pipeline_configs.create("pipeline_config_4", [task_config_4])
+    pipeline_4 = pipeline_manager.get_or_create(pipeline_config_4)
+    pipeline_manager.submit(pipeline_4.id)
+
+    assert len(pipeline_manager.get_all()) == 1
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+    pipeline_manager.hard_delete(pipeline_4.id)
+    assert len(pipeline_manager.get_all()) == 0
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+    task_scheduler.delete_all()
+
+    ds_input_config_5 = Config.data_source_configs.create(
+        "my_input_5", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+    )
+    ds_output_config_5 = Config.data_source_configs.create("my_output_5", "in_memory", scope=Scope.GLOBAL)
+    task_config_5 = Config.task_configs.create("task_config_5", ds_input_config_5, print, ds_output_config_5)
+    pipeline_config_5 = Config.pipeline_configs.create("pipeline_config_5", [task_config_5])
+    pipeline_5 = pipeline_manager.get_or_create(pipeline_config_5)
+    pipeline_manager.submit(pipeline_5.id)
+
+    assert len(pipeline_manager.get_all()) == 1
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    assert len(task_scheduler.get_jobs()) == 1
+    pipeline_manager.hard_delete(pipeline_5.id)
+    assert len(pipeline_manager.get_all()) == 0
+    assert len(task_manager.get_all()) == 0
+    assert len(data_manager.get_all()) == 1
+    assert len(task_scheduler.get_jobs()) == 0

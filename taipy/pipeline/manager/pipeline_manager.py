@@ -56,6 +56,16 @@ class PipelineManager:
         """
         self.repository.delete_all()
 
+    def delete(self, pipeline_id: PipelineId):
+        """Deletes the pipeline provided as parameter.
+
+        Parameters:
+            pipeline_id (str): identifier of the pipeline to delete.
+        Raises:
+            ModelNotFound error if no pipeline corresponds to pipeline_id.
+        """
+        self.repository.delete(pipeline_id)
+
     def get_or_create(self, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         """
         Returns a pipeline created from the pipeline configuration.
@@ -145,3 +155,26 @@ class PipelineManager:
                 that use the indicated configuration name.
         """
         return self.repository.search_all("config_name", config_name)
+
+    def hard_delete(self, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
+        """
+        Deletes the pipeline given as parameter and the nested tasks, data sources, and jobs.
+
+        Deletes the pipeline given as parameter and propagate the hard deletion. The hard delete is propagated to a
+        nested task if the task is not shared by another pipeline or if a scenario id is given as parameter, by another
+        scenario.
+
+        Parameters:
+        pipeline_id (PipelineId) : identifier of the pipeline to hard delete.
+        scenario_id (ScenarioId) : identifier of the optional parent scenario.
+
+        Raises:
+        ModelNotFound error if no pipeline corresponds to pipeline_id.
+        """
+        pipeline = self.get(pipeline_id)
+        for task in pipeline.tasks.values():
+            if scenario_id and task.parent_id == scenario_id:
+                self.task_manager.hard_delete(task.id, scenario_id)
+            elif task.parent_id == pipeline.id:
+                self.task_manager.hard_delete(task.id, None, pipeline_id)
+        self.delete(pipeline_id)
