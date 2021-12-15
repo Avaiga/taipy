@@ -514,10 +514,10 @@ def test_submit():
 
 def test_scenarios_comparison():
     def subtraction(inp, out):
-        return inp.read() - out.read()
+        return inp - out
 
     def addition(inp, out):
-        return inp.read() + out.read()
+        return inp + out
 
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager

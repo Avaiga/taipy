@@ -231,7 +231,7 @@ class ScenarioManager:
                 ds_comparators = scenario_config.comparators
 
             for ds_config_name, comparators in ds_comparators.items():
-                datasources = [scenario.__getattr__(ds_config_name) for scenario in scenarios]
+                datasources = [scenario.__getattr__(ds_config_name).read() for scenario in scenarios]
                 results[ds_config_name] = {comparator.__name__: comparator(*datasources) for comparator in comparators}
 
             return results
