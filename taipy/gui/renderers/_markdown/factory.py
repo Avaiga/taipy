@@ -6,7 +6,7 @@ class MarkdownFactory(Factory):
     _TAIPY_START = "TaIpY:"
     _TAIPY_END = ":tAiPy"
 
-    _TAIPY_BLOCK_TAGS = ["layout", "part", "expandable"]
+    _TAIPY_BLOCK_TAGS = ["layout", "part", "expandable", "dialog", "pane"]
 
     @staticmethod
     def create_element(control_type: str, all_properties: str) -> str:

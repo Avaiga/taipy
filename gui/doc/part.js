@@ -1,7 +1,10 @@
 /**
- * part component displays its children in a block
- * <br>part can be simplified by specifying no component
- *
+ * Displays its children in a block.
+ * 
+ * block component
+ * 
+ * Part controls can be simplified by specifying no component. TODO: explain.
+  *
  * ## Usage
  * ### Simple
  * <code><|<br>...<br>|></code>

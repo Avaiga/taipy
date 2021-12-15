@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import CssBaseline from "@mui/material/CssBaseline";
+import { SnackbarProvider } from "notistack";
 
 import { ENDPOINT } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
@@ -20,6 +21,7 @@ import {
     taipyReducer,
 } from "../context/taipyReducers";
 import { JSXReactRouterComponents } from "./Taipy";
+import Alert from "./Taipy/Alert";
 
 interface AxiosRouter {
     router: string;
@@ -38,6 +40,11 @@ const Router = () => {
             // no need to access the backend again, the routes are static
             return;
         }
+        if (!state.isSocketConnected) {
+            // initialize only when there is an existing ws connection
+            // --> assuring that there is a session data scope on the backend
+            return;
+        }
         // Fetch Flask Rendered JSX React Router
         axios
             .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
@@ -52,7 +59,7 @@ const Router = () => {
                 setJSX('<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>');
                 console.log(error);
             });
-    }, [refresh]);
+    }, [refresh, state.isSocketConnected]);
 
     useEffect(() => {
         initializeWebSocket(state.socket, dispatch);
@@ -62,14 +69,19 @@ const Router = () => {
         <TaipyContext.Provider value={{ state, dispatch }}>
             <HelmetProvider>
                 <ThemeProvider theme={state.theme}>
-                    <CssBaseline />
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                        <JsxParser
-                            disableKeyGeneration={true}
-                            components={JSXReactRouterComponents as Record<string, ComponentType>}
-                            jsx={JSX}
-                        />
-                    </LocalizationProvider>
+                    <SnackbarProvider
+                        maxSnack={5}
+                    >
+                        <CssBaseline />
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <JsxParser
+                                disableKeyGeneration={true}
+                                components={JSXReactRouterComponents as Record<string, ComponentType>}
+                                jsx={JSX}
+                            />
+                            <Alert alert={state.alert} />
+                        </LocalizationProvider>
+                    </SnackbarProvider>
                 </ThemeProvider>
             </HelmetProvider>
         </TaipyContext.Provider>

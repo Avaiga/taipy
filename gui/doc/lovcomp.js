@@ -1,25 +1,27 @@
 class lovComp extends propagate {
 
     /**
-     * bound to the selection value
+     * Bound to the selection value.
      * @type {dynamic(any), default property}
      */
     value;
 
     /**
-     * list of elements
+     * The list of values.
      * @type {dynamic(str|List[str|TaipyImage|any])}
      */
     lov;
 
     /**
-     * function that transforms an element of the lov into a tuple(id:str, label:str|TaipyImage)
+     * The function that transforms an element of `lov` into a `tuple(id:str, label:str|TaipyImage)`.
      * @type {FunctionType}
      */
     adapter = "lambda x: str(x)";
 
     /**
-     * needed if the lov List contains a non specific type of data (ex: dict)<br> value and lov varaibales are associated with this type and the adapter<br>
+     * Must be specified if `lov` contains a non specific type of data (ex: dict).
+     * 
+     * `value` and `lov` are associated with this type and the adapter.
      * @type {str}
      */
     type = "Type(lov-element)";

@@ -15,5 +15,5 @@ class CycleModel:
     frequency: Frequency
     properties: dict
     creation_date: str
-    start_date: Optional[str]
-    end_date: Optional[str]
+    start_date: str
+    end_date: str

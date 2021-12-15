@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import pytest
 
-from taipy.common.alias import JobId
+from taipy.common.alias import DataSourceId, JobId
 from taipy.config import Config
 from taipy.config.task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
 from taipy.data import PickleDataSource
@@ -122,7 +122,7 @@ def test_submit_task():
 
     assert data_manager.get(output_ds_id).last_edition_date > before_creation
     assert data_manager.get(output_ds_id).job_ids == []
-    assert data_manager.get(output_ds_id).up_to_date
+    assert data_manager.get(output_ds_id).is_ready_for_reading
 
     before_submission_creation = datetime.now()
     sleep(0.1)
@@ -133,7 +133,7 @@ def test_submit_task():
     assert data_manager.get(output_ds_id).last_edition_date > before_submission_creation
     assert data_manager.get(output_ds_id).last_edition_date < after_submission_creation
     assert data_manager.get(output_ds_id).job_ids == [job.id]
-    assert data_manager.get(output_ds_id).up_to_date
+    assert data_manager.get(output_ds_id).is_ready_for_reading
     assert job.is_completed()
 
 
@@ -191,17 +191,6 @@ def test_data_source_not_written_due_to_wrong_result_nb():
     job = task_scheduler.submit(task)
     assert task.output[f"{task.config_name}-output0"].read() == 0
     assert job.is_failed()
-
-
-def test_error_during_writing_data_source_don_t_stop_writing_on_other_data_source():
-    task_scheduler = TaskScheduler()
-
-    task = _create_task(lambda nb1, nb2: (42, 21), 2)
-    DataManager().delete(task.output[f"{task.config_name}-output0"].id)
-    task_scheduler.submit(task)
-
-    assert task.output[f"{task.config_name}-output0"].read() == 0
-    assert task.output[f"{task.config_name}-output1"].read() == 21
 
 
 def test_submit_task_in_parallel():
@@ -288,17 +277,17 @@ def test_blocked_task():
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    data_source_1 = PickleDataSource("foo", Scope.PIPELINE, "s1", properties={"default_data": 1})
-    data_source_2 = PickleDataSource("bar", Scope.PIPELINE, "s2")
-    data_source_3 = PickleDataSource("baz", Scope.PIPELINE, "s3")
+    data_source_1 = PickleDataSource("foo", Scope.PIPELINE, DataSourceId("s1"), properties={"default_data": 1})
+    data_source_2 = PickleDataSource("bar", Scope.PIPELINE, DataSourceId("s2"))
+    data_source_3 = PickleDataSource("baz", Scope.PIPELINE, DataSourceId("s3"))
     data_manager.set(data_source_1)
     data_manager.set(data_source_2)
     data_manager.set(data_source_3)
     task_1 = Task("by_2", input=[data_source_1], function=partial(lock_multiply, lock_1, 2), output=[data_source_2])
     task_2 = Task("by_3", input=[data_source_2], function=partial(lock_multiply, lock_2, 3), output=[data_source_3])
-    assert data_source_1.up_to_date  # Data source 1 is ready
-    assert not data_source_2.up_to_date  # But data source 2 is not ready
-    assert not data_source_3.up_to_date  # neither does data source 3
+    assert data_source_1.is_ready_for_reading  # Data source 1 is ready
+    assert not data_source_2.is_ready_for_reading  # But data source 2 is not ready
+    assert not data_source_3.is_ready_for_reading  # neither does data source 3
 
     assert len(task_scheduler.blocked_jobs) == 0
     job_2 = task_scheduler.submit(task_2)  # job 2 is submitted first
@@ -308,15 +297,15 @@ def test_blocked_task():
         with lock_1:
             job_1 = task_scheduler.submit(task_1)  # job 1 is submitted and locked
             assert task_scheduler.get_job(job_1.id).is_running()  # so it is still running
-            assert not data_manager.get(data_source_2.id).up_to_date  # And data source 2 still not ready to be consumed
+            assert not data_manager.get(data_source_2.id).is_ready_for_reading  # And data source 2 still not ready
             assert task_scheduler.get_job(job_2.id).is_blocked()  # the job_2 remains blocked
         assert_true_after_10_second_max(task_scheduler.get_job(job_1.id).is_completed)  # job1 unlocked and can complete
-        assert data_manager.get(data_source_2.id).up_to_date  # Data source 2 becomes ready
+        assert data_manager.get(data_source_2.id).is_ready_for_reading  # Data source 2 becomes ready
         assert data_manager.get(data_source_2.id).read() == 2  # the data is computed and written
         assert task_scheduler.get_job(job_2.id).is_running()  # And job 2 can run
         assert len(task_scheduler.blocked_jobs) == 0
     assert_true_after_10_second_max(task_scheduler.get_job(job_2.id).is_completed)  # job 2 unlocked so it can complete
-    assert data_manager.get(data_source_3.id).up_to_date  # Data source 3 becomes ready
+    assert data_manager.get(data_source_3.id).is_ready_for_reading  # Data source 3 becomes ready
     assert data_manager.get(data_source_3.id).read() == 6  # the data is computed and written
 
 

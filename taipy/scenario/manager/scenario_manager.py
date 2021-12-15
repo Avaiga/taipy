@@ -68,7 +68,7 @@ class ScenarioManager:
 
         Parameters:
             config (ScenarioConfig) : scenario configuration object.
-            creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
+                creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
                 default value.
         """
         scenario_id = Scenario.new_id(config.name)
@@ -238,3 +238,25 @@ class ScenarioManager:
 
         else:
             raise NonExistingScenarioConfig(scenarios[0].config_name)
+
+    def hard_delete(self, scenario_id: ScenarioId):
+        """
+        Deletes the scenario given as parameter and the nested pipelines, tasks, data sources, and jobs.
+
+        Deletes the scenario given as parameter and propagate the hard deletion. The hard delete is propagated to a
+        nested pipeline if the pipeline is not shared by another scenario.
+
+        Parameters:
+        scenario_id (ScenarioId) : identifier of the scenario to hard delete.
+
+        Raises:
+        ModelNotFound error if no scenario corresponds to scenario_id.
+        """
+        scenario = self.get(scenario_id)
+        if scenario.master_scenario:
+            raise DeletingMasterScenario
+        else:
+            for pipeline in scenario.pipelines.values():
+                if pipeline.parent_id == scenario.id or pipeline.parent_id == pipeline.id:
+                    self.pipeline_manager.hard_delete(pipeline.id, scenario.id)
+            self.repository.delete(scenario_id)

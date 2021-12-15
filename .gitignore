@@ -25,8 +25,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
 # GUI generation
 taipy_webapp/
+# Doc generation
+docs/gui/controls.md
+docs/gui/controls/*.md
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -126,7 +130,7 @@ demo*/
 !demos/
 
 # Docker local dev
-docker-compose-dev.yml
+docker-compose-dev*.yml
 Dockerfile.dev
 
 # Filesystem default local storage

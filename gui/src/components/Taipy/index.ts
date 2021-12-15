@@ -21,26 +21,28 @@ import MainPage from "../pages/MainPage";
 import PageContent from "../pages/PageContent";
 import Expandable from "./Expandable";
 import TreeView from "./TreeView";
+import Pane from "./Pane";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
-    Input: Input as ComponentType,
-    Field: Field as ComponentType,
-    DateSelector: DateSelector as ComponentType,
-    Table: Table as ComponentType,
     a: Link as ComponentType,
-    Selector: Selector as ComponentType,
-    Dialog: Dialog as ComponentType,
-    Chart: Chart as ComponentType,
-    Status: StatusList as ComponentType,
-    Toggle: Toggle as ComponentType,
-    Slider: Slider as ComponentType,
     Button: Button as ComponentType,
+    Chart: Chart as ComponentType,
+    DateSelector: DateSelector as ComponentType,
+    Dialog: Dialog as ComponentType,
+    Expandable: Expandable,
+    Field: Field as ComponentType,
+    Input: Input as ComponentType,
+    Layout: Layout,
     NavBar: NavBar as ComponentType,
     PageContent: PageContent,
-    Layout: Layout,
+    Pane: Pane,
     Part: Part,
-    Expandable: Expandable,
+    Selector: Selector as ComponentType,
+    Slider: Slider as ComponentType,
+    Status: StatusList as ComponentType,
+    Table: Table as ComponentType,
+    Toggle: Toggle as ComponentType,
     TreeView: TreeView as ComponentType,
 };
 

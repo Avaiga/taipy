@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import datetime
 import inspect
 import os
@@ -9,17 +8,18 @@ import re
 import typing as t
 import warnings
 from operator import attrgetter
-from types import FrameType, FunctionType, SimpleNamespace
+from types import FrameType, FunctionType
 
 import __main__
 import markdown as md_lib
 from dotenv import dotenv_values
-from flask import Blueprint, jsonify, request
+from flask import Flask, Blueprint, jsonify, request
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
+from .data.data_scope import _DataScopes
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -34,6 +34,7 @@ from .utils import (
     dateToISO,
     get_client_var_name,
 )
+from .utils._evaluator import _Evaluator
 from .wstype import WsType
 
 
@@ -42,11 +43,7 @@ class Gui(object, metaclass=Singleton):
 
     __root_page_name = "TaiPy_root_page"
     __env_filename = "taipy.gui.env"
-    # Regex to separate content from inside curly braces when evaluating f string expressions
-    __EXPR_RE = re.compile(r"\{(.*?)\}")
-    __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
-    __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
-    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
+
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
@@ -66,10 +63,11 @@ class Gui(object, metaclass=Singleton):
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
+        flask: t.Optional[Flask] = None,
     ):
         """Initializes a new Gui instance.
 
-        Parameters:
+        Args:
             css_file (string):  An optional pathname to a CSS file that gets used as a style sheet in
                 all the pages.
 
@@ -79,41 +77,26 @@ class Gui(object, metaclass=Singleton):
 
             default_page_renderer (PageRenderer): An optional `PageRenderer` class that is used to render pages.
         """
-        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
-        self._server = Server(
-            self,
-            css_file=css_file,
-            static_folder=f"{_absolute_path}{os.path.sep}webapp",
-            template_folder=f"{_absolute_path}{os.path.sep}webapp",
-            path_mapping=path_mapping,
-        )
+        self._server = Server(self, path_mapping=path_mapping, flask=flask, css_file=css_file)
         self._config = GuiConfig()
         # Data Registry
         self._data_accessors = _DataAccessors()
+
+        # Data Scopes
+        self._data_scopes = _DataScopes()
+
+        self._evaluator = _Evaluator()
 
         # Load default config
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
         self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
-        self._values = SimpleNamespace()
         self._adapter_for_type: t.Dict[str, FunctionType] = {}
         self._type_for_variable: t.Dict[str, str] = {}
         self._list_for_variable: t.Dict[str, str] = {}
         self._update_function = None
         self._action_function = None
-        # key = expression, value = hashed value of the expression
-        self._expr_to_hash: t.Dict[str, str] = {}
-        # key = hashed value of the expression, value = expression
-        self._hash_to_expr: t.Dict[str, str] = {}
-        # key = variable name of the expression, key = list of related expressions
-        # ex: {x + y}
-        # "x": ["{x + y}"],
-        # "y": ["{x + y}"],
-        self._var_to_expr_list: t.Dict[str, t.List[str]] = {}
-        # key = expression, value = list of related variables
-        # "{x + y}": ["x", "y"]
-        self._expr_to_var_list: t.Dict[str, t.List[str]] = {}
         if default_page_renderer:
             self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
         if pages is not None:
@@ -140,11 +123,10 @@ class Gui(object, metaclass=Singleton):
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-        if page.rendered_jsx is None:
-            page.render()
-            page.rendered_jsx = str(page.rendered_jsx)
-            if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
-                page.rendered_jsx += "<PageContent />"
+        # TODO: assign global scopes to current scope if the page has been rendered
+        page.render()
+        if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
+            page.rendered_jsx += "<PageContent />"
 
         # Return jsx page
         if page.rendered_jsx is not None:
@@ -195,6 +177,9 @@ class Gui(object, metaclass=Singleton):
             }
         )
 
+    def _get_data_scope(self):
+        return self._data_scopes.get_scope()
+
     # TODO: Check name value to avoid conflicting with Flask,
     # or, simply, compose with Flask instead of inherit from it.
     def _bind(self, name: str, value: t.Any) -> None:
@@ -203,15 +188,23 @@ class Gui(object, metaclass=Singleton):
         if not name.isidentifier():
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(self._values, name, _MapDictionary(value))
+            setattr(self._get_data_scope(), name, _MapDictionary(value))
+            self._bind_global(name, _MapDictionary(value))
         else:
-            setattr(self._values, name, value)
+            setattr(self._get_data_scope(), name, value)
+            self._bind_global(name, value)
         prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter, Setter
         setattr(Gui, name, prop)
 
+    def _bind_global(self, name: str, value: t.Any) -> None:
+        global_scope = self._data_scopes.get_global_scope()
+        if hasattr(global_scope, name):
+            return
+        setattr(global_scope, name, value)
+
     def __value_getter(self, name):
         def __getter(elt: Gui) -> t.Any:
-            value = getattr(elt._values, name)
+            value = getattr(elt._get_data_scope(), name)
             if isinstance(value, _MapDictionary):
                 return _MapDictionary(value._dict, lambda s, v: elt._update_var(name + "." + s, v))
             else:
@@ -240,7 +233,7 @@ class Gui(object, metaclass=Singleton):
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
-        currentvalue = attrgetter(self._expr_to_hash[var_name])(self._values)
+        currentvalue = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
         if isinstance(value, str):
             if isinstance(currentvalue, datetime.datetime):
                 value = ISOToDate(value)
@@ -257,11 +250,11 @@ class Gui(object, metaclass=Singleton):
         self._update_var(var_name, value, propagate)
 
     def _update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
-        hash_expr = self._expr_to_hash[var_name]
+        hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
-            attrsetter(self._values, hash_expr, value)
+            attrsetter(self._get_data_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
                 modified_vars.extend(self._re_evaluate_expr(var_name))
@@ -273,7 +266,8 @@ class Gui(object, metaclass=Singleton):
     def __send_var_list_update(self, modified_vars: list):
         ws_dict = {}
         for _var in modified_vars:
-            newvalue = attrgetter(_var)(self._values)
+            newvalue = attrgetter(_var)(self._get_data_scope())
+            self._data_scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
             if self._data_accessors._is_data_access(_var, newvalue):
@@ -287,14 +281,13 @@ class Gui(object, metaclass=Singleton):
                     if isinstance(newvalue, _MapDictionary):
                         continue  # this var has no transformer
                 ws_dict[_var] = newvalue
-
         # TODO: What if value == newvalue?
         self._send_ws_update_with_dict(ws_dict)
 
     def _request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
-        var_name = self._expr_to_hash[var_name]
-        newvalue = attrgetter(var_name)(self._values)
+        var_name = self._get_hash_from_expr(var_name)
+        newvalue = attrgetter(var_name)(self._get_data_scope())
         ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
@@ -304,8 +297,26 @@ class Gui(object, metaclass=Singleton):
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
         try:
-            self._server._ws.send(
-                {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload}
+            self._server._ws.emit(
+                "message",
+                {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload},
+                to=self._get_ws_receiver(),
+            )
+        except Exception as e:
+            warnings.warn(f"Web Socket communication error {e}")
+
+    def _send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
+        try:
+            self._server._ws.emit(
+                "message",
+                {
+                    "type": WsType.ALERT.value,
+                    "atype": type,
+                    "message": message,
+                    "browser": browser_notification,
+                    "duration": duration,
+                },
+                to=self._get_ws_receiver(),
             )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
@@ -316,9 +327,18 @@ class Gui(object, metaclass=Singleton):
             for k, v in modified_values.items()
         ]
         try:
-            self._server._ws.send({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
+            self._server._ws.emit(
+                "message",
+                {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload},
+                to=self._get_ws_receiver(),
+            )
         except Exception as e:
             warnings.warn(f"Web Socket communication error {e}")
+
+    def _get_ws_receiver(self) -> t.Union[str, None]:
+        if not hasattr(request, "sid") or not self._data_scopes.get_multi_user():
+            return None
+        return request.sid  # type: ignore
 
     def _on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
@@ -361,37 +381,6 @@ class Gui(object, metaclass=Singleton):
             except Exception as e:
                 warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
         return False
-
-    def _re_evaluate_expr(self, var_name: str) -> t.List:
-        """
-        This function will execute when the _update_var function is handling
-        an expression with only a single variable
-        """
-        modified_vars: t.List[str] = []
-        if var_name not in self._var_to_expr_list.keys():
-            return modified_vars
-        for expr in self._var_to_expr_list[var_name]:
-            if expr == var_name:
-                continue
-            hash_expr = self._expr_to_hash[expr]
-            expr_var_list = self._expr_to_var_list[expr]  # ["x", "y"]
-            eval_dict = {v: attrgetter(v)(self._values) for v in expr_var_list}
-
-            if self._is_expression(expr):
-                expr_string = 'f"' + expr.replace('"', '\\"') + '"'
-            else:
-                expr_string = expr
-
-            expr_evaluated = eval(expr_string, {}, eval_dict)
-            attrsetter(self._values, hash_expr, expr_evaluated)
-            modified_vars.append(hash_expr)
-        return modified_vars
-
-    def _is_expression(self, expr: str) -> bool:
-        return len(Gui.__EXPR_IS_EXPR.findall(expr)) != 0
-
-    def _fetch_expression_list(self, expr: str) -> t.List:
-        return Gui.__EXPR_RE.findall(expr)
 
     def add_page(
         self,
@@ -616,59 +605,23 @@ class Gui(object, metaclass=Singleton):
             return True
         return False
 
-    def evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        if not self._is_expression(expr):
-            return expr
-        var_val = {}
-        var_list = []
-        expr_hash = None
-        is_edge_case = False
-        # Get A list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
-        for e in self._fetch_expression_list(expr):
-            st = ast.parse(e)
-            for node in ast.walk(st):
-                if isinstance(node, ast.Name):
-                    var_name = node.id.split(sep=".")[0]
-                    self.bind_var(var_name)
-                    try:
-                        var_val[var_name] = attrgetter(var_name)(self._values)
-                        var_list.append(var_name)
-                    except AttributeError:
-                        warnings.warn(f"Variable '{var_name}' is not defined")
-        # The expr_string is placed here in case expr get replaced by edge case
-        expr_string = 'f"' + expr.replace('"', '\\"') + '"'
-        # simplify expression if it only contains var_name
-        m = Gui.__EXPR_IS_EDGE_CASE.match(expr)
-        if m:
-            expr = m.group(1)
-            expr_hash = expr if Gui.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
-            is_edge_case = True
-        # validate whether expression has already been evaluated
-        if expr in self._expr_to_hash:
-            return "{" + self._expr_to_hash[expr] + "}"
-        try:
-            # evaluate expressions
-            expr_evaluated = eval(expr_string if not is_edge_case else expr, {}, var_val)
-        except Exception:
-            warnings.warn(f"Cannot evaluate expression '{expr if is_edge_case else expr_string}'")
-            expr_evaluated = None
-        # save the expression if it needs to be re-evaluated
-        if re_evaluated:
-            if expr_hash is None:
-                expr_hash = self._expr_to_hash[expr] = _get_expr_var_name(expr)
-                self.bind_var_val(expr_hash, expr_evaluated)
-            else:
-                self._expr_to_hash[expr] = expr
-            self._hash_to_expr[expr_hash] = expr
-            for var in var_val:
-                if var not in self._var_to_expr_list:
-                    self._var_to_expr_list[var] = [expr]
-                else:
-                    self._var_to_expr_list[var].append(expr)
-            if expr not in self._expr_to_var_list:
-                self._expr_to_var_list[expr] = var_list
-            return "{" + expr_hash + "}"
-        return expr_evaluated
+    def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+        return self._evaluator.evaluate_expr(self, expr, re_evaluated)
+
+    def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
+        return self._evaluator.re_evaluate_expr(self, var_name)
+
+    def _get_hash_from_expr(self, expr: str) -> str:
+        return self._evaluator.get_hash_from_expr(expr)
+
+    def _get_expr_from_hash(self, hash: str) -> str:
+        return self._evaluator.get_expr_from_hash(hash)
+
+    def _is_expression(self, expr: str) -> bool:
+        return self._evaluator._is_expression(expr)
+
+    def _fetch_expression_list(self, expr: str) -> t.List:
+        return self._evaluator._fetch_expression_list(expr)
 
     def on_update(self, f) -> None:
         self._update_function = f
@@ -679,8 +632,8 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def _get_app_config(self, name: AppConfigOption, defaultValue: t.Any) -> t.Any:
-        return self._config._get_app_config(name, defaultValue)
+    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
+        return self._config._get_app_config(name, default_value)
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
         theme = self._get_app_config("theme", None)
@@ -696,6 +649,38 @@ class Gui(object, metaclass=Singleton):
         if theme or dark_theme or light_theme:
             return res
         return None
+
+    def send_alert(
+        self,
+        type: str = "I",
+        message: str = "",
+        browser_notification: t.Optional[bool] = None,
+        duration: t.Optional[int] = None,
+    ):
+        """Sends a notification alert to the user interface.
+
+        Args:
+            type (string): The alert type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
+                To remove the alert, set this parameter to the empty string.
+            message (string): The text message to display.
+            browser_notification (bool): If set to `True`, the browser will also show the notification.
+                If not specified or set to `None`, this parameter will user the value of
+                `app_config[browser_notification]`.
+            duration: The time, in milliseconds, during which the notification is shown.
+                If not specified or set to `None`, this parameter will user the value of
+                `app_config[notification_duration]`.
+
+        Note that you can also call this function with _type_ set to the first letter or the alert type
+        (ie setting _type_ to `"i"` is equivalent to setting it to `"info"`).
+        """
+        self._send_ws_alert(
+            type,
+            message,
+            self._get_app_config("browser_notification", True)
+            if browser_notification is None
+            else browser_notification,
+            self._get_app_config("notification_duration", 3000) if duration is None else duration,
+        )
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._data_accessors._register(data_accessor_class)
@@ -718,9 +703,9 @@ class Gui(object, metaclass=Singleton):
                 if value is not None and key in app_config:
                     try:
                         app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
-                    except ValueError as ve:
+                    except Exception as e:
                         warnings.warn(
-                            f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{ve}"
+                            f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
                         )
         # Load keyword arguments
         for key, value in kwargs.items():
@@ -728,9 +713,9 @@ class Gui(object, metaclass=Singleton):
             if value is not None and key in app_config:
                 try:
                     app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
-                except ValueError as ve:
+                except Exception as e:
                     warnings.warn(
-                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{ve}"
+                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
                     )
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
@@ -747,27 +732,43 @@ class Gui(object, metaclass=Singleton):
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
+        taipy_pages_bp = Blueprint("taipy_pages", __name__)
+        self._flask_blueprint.append(taipy_pages_bp)
+
+        _absolute_path = str(pathlib.Path(__file__).parent.resolve())
+        self._flask_blueprint.append(
+            self._server._get_default_blueprint(
+                static_folder=f"{_absolute_path}{os.path.sep}webapp",
+                template_folder=f"{_absolute_path}{os.path.sep}webapp",
+                client_url=app_config["client_url"],
+                title=self._get_app_config("title", "Taipy App"),
+                favicon=self._get_app_config("favicon", "/favicon.png"),
+                themes=self._get_themes(),
+            )
+        )
+
         # Run parse markdown to force variables binding at runtime
         # (save rendered html to page.rendered_jsx for optimization)
         for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
-            self._server.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
+            taipy_pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
 
         # server URL Rule for flask rendered react-router
-        self._server.add_url_rule("/initialize/", view_func=self._render_route)
+        taipy_pages_bp.add_url_rule("/initialize/", view_func=self._render_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
-            self._server.register_blueprint(bp)
+            self._server.get_flask().register_blueprint(bp)
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
         self._data_accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
-        self._server._set_client_url(app_config["client_url"])
+        # Use multi user or not
+        self._data_scopes.set_multi_user(app_config["multi_user"])
 
         # Start Flask Server
         if run_server:
             self._server.runWithWS(host=app_config["host"], port=app_config["port"], debug=app_config["debug"])
 
     def get_flask_app(self):
-        return self._server
+        return self._server.get_flask()

@@ -1,7 +1,7 @@
 import logging
 import uuid
 from abc import abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from taipy.common import protect_name
@@ -33,7 +33,17 @@ class DataSource:
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data source.
-        up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
+        validity_days (Optional[int]): Number of days to be added to the data source validity duration. If
+            validity_days, validity_hours, and validity_minutes are all set to None, The data_source is always up to
+            date.
+        validity_hours (Optional[int]): Number of hours to be added to the data source validity duration. If
+            validity_days, validity_hours, and validity_minutes are all set to None, The data_source is always up to
+            date.
+        validity_minutes (Optional[int]): Number of minutes to be added to the data source validity duration. If
+            validity_days, validity_hours, and validity_minutes are all set to None, The data_source is always up to
+            date.
+        edition_in_progress (bool) : True if a task computing the data source has been submitted and not completed yet.
+            False otherwise.
         properties (list): List of additional arguments.
     """
 
@@ -49,7 +59,10 @@ class DataSource:
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        up_to_date: bool = False,
+        validity_days: Optional[int] = None,
+        validity_hours: Optional[int] = None,
+        validity_minutes: Optional[int] = None,
+        edition_in_progress: bool = False,
         **kwargs,
     ):
         self.config_name = protect_name(config_name)
@@ -60,7 +73,10 @@ class DataSource:
         self.last_edition_date = last_edition_date
         self.job_ids = job_ids or []
         self.properties = kwargs
-        self.up_to_date = up_to_date
+        self.edition_in_progress = edition_in_progress
+        self.validity_days = validity_days
+        self.validity_hours = validity_hours
+        self.validity_minutes = validity_minutes
 
     def __eq__(self, other):
         return self.id == other.id
@@ -96,16 +112,16 @@ class DataSource:
 
     def write(self, data, job_id: Optional[JobId] = None):
         self._write(data)
-        self.updated(job_id=job_id)
+        self.unlock_edition(job_id=job_id)
 
-    def updated(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
+    def lock_edition(self):
+        self.edition_in_progress = True
+
+    def unlock_edition(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
         self.last_edition_date = at or datetime.now()
-        self.up_to_date = True
+        self.edition_in_progress = False
         if job_id:
             self.job_ids.append(job_id)
-
-    def update_submitted(self):
-        self.up_to_date = False
 
     @abstractmethod
     def _read(self):
@@ -114,3 +130,28 @@ class DataSource:
     @abstractmethod
     def _write(self, data):
         return NotImplemented
+
+    @property
+    def is_ready_for_reading(self):
+        if self.edition_in_progress:
+            return False
+        if not self.last_edition_date:
+            # Never been written so it is not up to date
+            return False
+        return True
+
+    @property
+    def is_up_to_date(self):
+        if not self.last_edition_date:
+            # Never been written so it is not up to date
+            return False
+        if not self.validity_days and not self.validity_hours and not self.validity_minutes:
+            # No validity period so it is up to date
+            return True
+        expiration_date = self.last_edition_date + timedelta(
+            minutes=self.validity_minutes or 0, hours=self.validity_hours or 0, days=self.validity_days or 0
+        )
+        if datetime.now() > expiration_date:
+            # expiration_date has been passed
+            return False
+        return True

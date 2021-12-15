@@ -16,8 +16,7 @@ from taipy.task.manager.task_manager import TaskManager
 
 class PipelineManager:
     """
-    Pipeline Manager is responsible for all managing pipeline related capabilities. In particular, it is exposing
-    methods for creating, storing, updating, retrieving, deleting pipeline.
+    The Pipeline Manager is responsible for managing all pipeline-related capabilities.
     """
 
     task_manager = TaskManager()
@@ -27,7 +26,7 @@ class PipelineManager:
 
     def __init__(self):
         """
-        Initializes a pipeline manager object.
+        Initializes a new pipeline manager.
         """
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
 
@@ -57,17 +56,30 @@ class PipelineManager:
         """
         self.repository.delete_all()
 
+    def delete(self, pipeline_id: PipelineId):
+        """Deletes the pipeline provided as parameter.
+
+        Parameters:
+            pipeline_id (str): identifier of the pipeline to delete.
+        Raises:
+            ModelNotFound error if no pipeline corresponds to pipeline_id.
+        """
+        self.repository.delete(pipeline_id)
+
     def get_or_create(self, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         """
-        Returns the pipeline created from the pipeline_config, by scenario_id if it already
+        Returns a pipeline created from the pipeline configuration.
+
+        created from the pipeline_config, by scenario_id if it already
         exists, or creates and returns a new pipeline.
 
         Parameters:
-            pipeline_config (PipelineConfig) : pipeline configuration object.
-            scenario_id (Optional[ScenarioId]) : id of the scenario creating the data source. Default value : None.
+            pipeline_config (PipelineConfig): The pipeline configuration object.
+            scenario_id (Optional[ScenarioId]): id of the scenario creating the pipeline. Default value : `None`.
         Raises:
-            MultiplePipelineFromSameConfigWithSameParent error if more than 1 pipeline already exist with the same
-            config, and the same parent id (scenario_id, or pipeline_id depending on the scope of the data source).
+            MultiplePipelineFromSameConfigWithSameParent: if more than one pipeline already exists with the
+                same config, and the same parent id (scenario_id, or pipeline_id depending on the scope of
+                the data source).
         """
         pipeline_id = Pipeline.new_id(pipeline_config.name)
         tasks = [
@@ -90,22 +102,22 @@ class PipelineManager:
 
     def set(self, pipeline: Pipeline):
         """
-        Saves or Updates the pipeline given as parameter.
+        Saves or updates a pipeline.
 
         Parameters:
-            pipeline (Pipeline) : pipeline to save or update.
+            pipeline (Pipeline): the pipeline to save or update.
         """
         self.repository.save(pipeline)
 
     def get(self, pipeline_id: PipelineId) -> Pipeline:
         """
-        Gets the pipeline corresponding to the identifier given as parameter.
+        Gets a pipeline.
 
         Parameters:
-            pipeline_id (PipelineId) : pipeline to get.
+            pipeline_id (PipelineId): pipeline identifier or the pipeline to get.
 
         Raises:
-            NonExistingPipeline : No pipeline corresponds to pipeline_id.
+            NonExistingPipeline: if no pipeline corresponds to `pipeline_id`.
         """
         try:
             return self.repository.load(pipeline_id)
@@ -114,7 +126,10 @@ class PipelineManager:
 
     def get_all(self) -> List[Pipeline]:
         """
-        Returns the list of all existing pipelines.
+        Returns all existing pipelines.
+
+        Returns:
+            List[Pipeline]: the list of all pipelines managed by this pipeline manager.
         """
         return self.repository.load_all()
 
@@ -131,9 +146,35 @@ class PipelineManager:
 
     def _get_all_by_config_name(self, config_name: str) -> List[Pipeline]:
         """
-        Returns the list of all existing pipelines with the corresponding config name.
+        Returns all the existing pipelines for a configuration.
 
         Parameters:
-             config_name (str) : pipeline config's name.
+            config_name (str): The pipeline configuration name to be looked for.
+        Returns:
+            List[Pipeline]: the list of all pipelines, managed by this pipeline manager,
+                that use the indicated configuration name.
         """
         return self.repository.search_all("config_name", config_name)
+
+    def hard_delete(self, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
+        """
+        Deletes the pipeline given as parameter and the nested tasks, data sources, and jobs.
+
+        Deletes the pipeline given as parameter and propagate the hard deletion. The hard delete is propagated to a
+        nested task if the task is not shared by another pipeline or if a scenario id is given as parameter, by another
+        scenario.
+
+        Parameters:
+        pipeline_id (PipelineId) : identifier of the pipeline to hard delete.
+        scenario_id (ScenarioId) : identifier of the optional parent scenario.
+
+        Raises:
+        ModelNotFound error if no pipeline corresponds to pipeline_id.
+        """
+        pipeline = self.get(pipeline_id)
+        for task in pipeline.tasks.values():
+            if scenario_id and task.parent_id == scenario_id:
+                self.task_manager.hard_delete(task.id, scenario_id)
+            elif task.parent_id == pipeline.id:
+                self.task_manager.hard_delete(task.id, None, pipeline_id)
+        self.delete(pipeline_id)

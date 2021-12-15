@@ -53,7 +53,8 @@ class TaskScheduler:
             Job created.
         """
         for ds in task.output.values():
-            ds.update_submitted()
+            ds.lock_edition()
+            self.data_manager.set(ds)
         job = self.__create_job(task, callbacks or [])
         if self.__should_be_blocked(job):
             job.blocked()
@@ -62,7 +63,6 @@ class TaskScheduler:
             job.pending()
             self.jobs_to_run.put(job)
             self.__run()
-
         return job
 
     def get_job(self, job_id: JobId) -> Job:
@@ -101,6 +101,10 @@ class TaskScheduler:
             logging.warning(err)
             raise err
 
+    def delete_all(self):
+        """Deletes all jobs."""
+        self.__JOBS: Dict[JobId, Job] = {}
+
     def get_latest_job(self, task: Task) -> Job:
         """Allows to retrieve the latest computed job of a task.
 
@@ -111,7 +115,8 @@ class TaskScheduler:
 
     def __should_be_blocked(self, job) -> bool:
         for ds in job.task.input.values():
-            if not self.data_manager.get(ds.id).up_to_date:
+            ds = self.data_manager.get(ds.id)
+            if not ds.is_ready_for_reading:
                 return True
         return False
 

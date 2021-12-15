@@ -3,6 +3,7 @@ import pathlib
 
 import pytest
 
+from taipy.common.alias import DataSourceId
 from taipy.config import Config, DataSourceConfig
 from taipy.data import CSVDataSource, InMemoryDataSource, PickleDataSource, Scope
 from taipy.data.manager import DataManager
@@ -33,8 +34,8 @@ class TestDataManager:
         assert dm.get(csv_ds.id).last_edition_date == csv_ds.last_edition_date
         assert dm.get(csv_ds.id).job_ids == []
         assert dm.get(csv_ds.id).job_ids == csv_ds.job_ids
-        assert not dm.get(csv_ds.id).up_to_date
-        assert dm.get(csv_ds.id).up_to_date == csv_ds.up_to_date
+        assert not dm.get(csv_ds.id).is_ready_for_reading
+        assert dm.get(csv_ds.id).is_ready_for_reading == csv_ds.is_ready_for_reading
         assert len(dm.get(csv_ds.id).properties) == 2
         assert dm.get(csv_ds.id).properties.get("path") == "bar"
         assert dm.get(csv_ds.id).properties.get("has_header")
@@ -42,7 +43,7 @@ class TestDataManager:
 
     def test_create_and_get_in_memory_data_source(self):
         dm = DataManager()
-        # Test we can instantiate a InMemoryDataSource from DataSourceConfig with :
+        # Test we can instantiate an InMemoryDataSource from DataSourceConfig with :
         # - an in_memory type
         # - a scenario scope
         # - a parent id
@@ -66,8 +67,8 @@ class TestDataManager:
         assert dm.get(in_mem_ds.id).last_edition_date == in_mem_ds.last_edition_date
         assert dm.get(in_mem_ds.id).job_ids == []
         assert dm.get(in_mem_ds.id).job_ids == in_mem_ds.job_ids
-        assert dm.get(in_mem_ds.id).up_to_date
-        assert dm.get(in_mem_ds.id).up_to_date == in_mem_ds.up_to_date
+        assert dm.get(in_mem_ds.id).is_ready_for_reading
+        assert dm.get(in_mem_ds.id).is_ready_for_reading == in_mem_ds.is_ready_for_reading
         assert len(dm.get(in_mem_ds.id).properties) == 1
         assert dm.get(in_mem_ds.id).properties.get("default_data") == "qux"
         assert dm.get(in_mem_ds.id).properties == in_mem_ds.properties
@@ -96,8 +97,8 @@ class TestDataManager:
         assert dm.get(pickle_ds.id).last_edition_date == pickle_ds.last_edition_date
         assert dm.get(pickle_ds.id).job_ids == []
         assert dm.get(pickle_ds.id).job_ids == pickle_ds.job_ids
-        assert not dm.get(pickle_ds.id).up_to_date
-        assert dm.get(pickle_ds.id).up_to_date == pickle_ds.up_to_date
+        assert not dm.get(pickle_ds.id).is_ready_for_reading
+        assert dm.get(pickle_ds.id).is_ready_for_reading == pickle_ds.is_ready_for_reading
         assert len(dm.get(pickle_ds.id).properties) == 0
         assert dm.get(pickle_ds.id).properties == pickle_ds.properties
 
@@ -169,11 +170,11 @@ class TestDataManager:
         ds = InMemoryDataSource(
             "config_name",
             Scope.PIPELINE,
-            id="id",
+            id=DataSourceId("id"),
             parent_id=None,
             last_edition_date=None,
             job_ids=[],
-            up_to_date=False,
+            edition_in_progress=False,
             properties={"foo": "bar"},
         )
         assert len(dm.get_all()) == 0

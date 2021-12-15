@@ -1,6 +1,8 @@
 /**
- * expandable component displays its children in a collapsable zone
+ * Displays its child elements in a collapsable area.
  *
+ * block component
+ * 
  * ## Usage
  * ### Simple
  * <code><|title|expandable|<br>...<br>|></code>

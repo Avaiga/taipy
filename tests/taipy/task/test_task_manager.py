@@ -4,6 +4,7 @@ from taipy.common.alias import TaskId
 from taipy.config import Config, DataSourceConfig, TaskConfig
 from taipy.data import InMemoryDataSource, Scope
 from taipy.data.manager import DataManager
+from taipy.exceptions import ModelNotFound
 from taipy.exceptions.task import NonExistingTask
 from taipy.task import Task
 from taipy.task.manager.task_manager import TaskManager
@@ -119,7 +120,7 @@ def test_set_and_get_task():
 
     # No task at initialization
     task_manager = TaskManager()
-    task_manager.delete_all()
+
     assert len(task_manager.get_all()) == 0
     with pytest.raises(NonExistingTask):
         task_manager.get(task_id_1)
@@ -156,7 +157,6 @@ def test_set_and_get_task():
 
 def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
     task_manager = TaskManager()
-    task_manager.delete_all()
 
     embedded_1 = DataSourceConfig("ds_1", "in_memory")
     embedded_2 = DataSourceConfig("ds_2", "in_memory")
@@ -205,3 +205,35 @@ def test_get_all_by_config_name():
     tm.get_or_create(task_config_2, "other_scenario", "other_pipeline")
     assert len(tm._get_all_by_config_name("foo")) == 1
     assert len(tm._get_all_by_config_name("baz")) == 2
+
+
+def test_delete_raise_exception():
+    task_manager = TaskManager()
+    ds_input_config_1 = Config.data_source_configs.create(
+        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+    )
+    ds_output_config_1 = Config.data_source_configs.create("my_output_1", "in_memory")
+    task_config_1 = Config.task_configs.create("task_config_1", ds_input_config_1, print, ds_output_config_1)
+    task_1 = task_manager.get_or_create(task_config_1)
+    task_manager.delete(task_1.id)
+
+    with pytest.raises(ModelNotFound):
+        task_manager.delete(task_1.id)
+
+
+def test_hard_delete():
+    task_manager = TaskManager()
+    data_manager = task_manager.data_manager
+
+    ds_input_config_1 = Config.data_source_configs.create(
+        "my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing"
+    )
+    ds_output_config_1 = Config.data_source_configs.create("my_output_1", "in_memory")
+    task_config_1 = Config.task_configs.create("task_config_1", ds_input_config_1, print, ds_output_config_1)
+    task_1 = task_manager.get_or_create(task_config_1)
+
+    assert len(task_manager.get_all()) == 1
+    assert len(data_manager.get_all()) == 2
+    task_manager.hard_delete(task_1.id)
+    assert len(task_manager.get_all()) == 0
+    assert len(data_manager.get_all()) == 2

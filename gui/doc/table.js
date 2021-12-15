@@ -1,10 +1,11 @@
 /**
- * Table component supports 3 display modes:
- * <ul>
- * <li> paginated where you can choose the page size and page size options (allow_all_rows add an option to show a page with all rows)</li>
- * <li> unpaginated where all rows and no pages are shown (show_all = True)</li>
- * <li> auto-loading where the pages are loading on demand depending on teh scrolling</li>
- * </ul>
+ * Displays a data set as tabular data.
+ *
+ * The table component supports 3 display modes:
+ *
+ *   - _paginated_: you can choose the page size and page size options (allow_all_rows add an option to show a page with all rows).
+ *   - _unpaginated_:  all rows and no pages are shown (`show_all = True`).
+ *   - _auto-loading_: the pages are loaded on demand depending on the visible area.
  *
  * ## Usage
  * ### Simple

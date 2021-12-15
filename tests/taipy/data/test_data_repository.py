@@ -13,6 +13,9 @@ data_source = CSVDataSource(
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
+    None,
+    None,
+    None,
     False,
     {"path": "/path", "has_header": True},
 )
@@ -26,6 +29,9 @@ data_source_model = DataSourceModel(
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0).isoformat(),
     [JobId("job_id")],
+    None,
+    None,
+    None,
     False,
     {"path": "/path", "has_header": True},
 )

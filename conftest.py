@@ -11,6 +11,7 @@ from taipy.cycle.cycle_model import CycleModel
 from taipy.cycle.frequency import Frequency
 from taipy.pipeline import Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
+from taipy.scenario import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
 
@@ -40,11 +41,6 @@ def current_datetime():
 
 
 @pytest.fixture(scope="function")
-def week_example():
-    return datetime(2021, 11, 16, 0, 0, 0, 0)
-
-
-@pytest.fixture(scope="function")
 def scenario(cycle):
     return Scenario("sc", [], {}, ScenarioId("sc_id"), is_master=False, cycle=None)
 
@@ -60,10 +56,10 @@ def cycle():
     return Cycle(
         Frequency.DAILY,
         {},
-        name="cc",
         creation_date=example_date,
         start_date=example_date,
         end_date=example_date,
+        name="cc",
         id=CycleId("cc_id"),
     )
 
@@ -89,3 +85,33 @@ def cycle_model():
 @pytest.fixture(scope="class")
 def pipeline_model():
     return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, Dag({}), Dag({}), [])
+
+
+@pytest.fixture(scope="function", autouse=True)
+def setup():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    task_scheduler = task_manager.task_scheduler
+    data_manager = scenario_manager.data_manager
+    cycle_manager = scenario_manager.cycle_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+    task_scheduler.delete_all()
+    cycle_manager.delete_all()
+
+
+@pytest.fixture(scope="function", autouse=True)
+def teardown():
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    task_scheduler = task_manager.task_scheduler
+    data_manager = scenario_manager.data_manager
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+    task_scheduler.delete_all()

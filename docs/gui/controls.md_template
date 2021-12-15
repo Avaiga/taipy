@@ -1,0 +1,32 @@
+# Controls
+
+Controls are user interface objects that are displayed on a given page,
+representing some application data, and that users typically can
+interact with.
+
+Controls can be directly created within the Markdown text (see the
+[`Markdown`](../reference/#taipy.gui.renderers.Markdown) class)
+or HTML content (see the [`Html`](../reference/#taipy.gui.renderers.Html) class).
+
+Every control that can be used in a page has a type, and a set of properties.
+
+Every control type has the following properties:
+
+  - `id`: The identifier of the control, as generated in the output HTML content.
+  - `properties`: The name of a variable that holds a dictionary where all property name and
+    value pairs will be used by a given control declaration.
+
+Beside those common properties, every control type has a specific set of properties that you
+can use, listed in the documentation page for that control type.
+
+Every property value can be set to a given value, that depends on the property type, or a
+formatted string literal (also known as a _f-string_). This string may reference variable
+names defined in your code, and the evaluated string is used as the property value. The
+property value is also updated when your Python variable is modified.
+
+Every control type has a default property name: if you want to set the value for this property,
+you can use the short version of the control syntax.
+
+Here is the list of all available controls in Taipy:
+
+[CONTROLS_LIST]

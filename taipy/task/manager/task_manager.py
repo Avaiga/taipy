@@ -14,13 +14,14 @@ from taipy.task.task import Task
 
 
 class TaskManager:
-    """Allow to save and retrieve Tasks.
+    """
+    The Task Manager saves and retrieves Tasks.
 
     Attributes:
-        tasks: Dict of all tasks with ID.
-        task_scheduler: Allow to run task.
-        data_manager: For interaction with DataSource.
-        repository: Repository for saving tasks.
+        tasks (Dict[(TaskId, Task)]): A dictionary that associates every task with its identifier.
+        task_scheduler (TaskScheduler): The task scheduler that can run tasks.
+        data_manager (DataManager): The Data Manager that interacts with data sources.
+        repository (TaskRepository): The repository where tasks are saved.
     """
 
     tasks: Dict[(TaskId, Task)] = {}
@@ -29,22 +30,36 @@ class TaskManager:
     repository = TaskRepository()
 
     def delete_all(self):
-        """Deletes all data sources."""
+        """
+        Deletes all the persisted tasks.
+        """
         self.repository.delete_all()
 
+    def delete(self, task_id: TaskId):
+        """Deletes the cycle provided as parameter.
+
+        Parameters:
+            task_id (str): identifier of the task to delete.
+        Raises:
+            ModelNotFound error if no task corresponds to task_id.
+        """
+        self.repository.delete(task_id)
+
     def get_all(self):
-        """Returns the list of all existing tasks.
+        """
+        Returns the list of all existing tasks.
 
         Returns:
-            List of tasks.
+            List: The list of tasks handled by this Task Manager.
         """
         return self.repository.load_all()
 
     def set(self, task: Task):
-        """Saves or Updates the task given as parameter.
+        """
+        Saves or updates a task.
 
         Args:
-            task (Task) : task to save.
+            task (Task): The task to save.
         """
         logging.info(f"Task: {task.id} created or updated.")
         self.__save_data_sources(task.input.values())
@@ -57,20 +72,23 @@ class TaskManager:
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
     ) -> Task:
-        """Returns the task created from the task_config, by (pipeline_id and scenario_id) if it already
-        exists, or creates and returns a new task.
+        """Returns a task created from the provided task configuration.
+
+        If no task exists for that task configuration, in the provided `scenario_id` and `pipeline_id`, then
+        a new task is created and returned.
 
         Args:
-            task_config (TaskConfig) : task configuration object.
-            scenario_id (Optional[ScenarioId]) : id of the scenario creating the data source. Default value : None.
-            pipeline_id (Optional[PipelineId]) : id of the pipeline creating the data source. Default value : None.
+            task_config (TaskConfig): The task configuration object.
+            scenario_id (ScenarioId): The identifier of the scenario creating the task.
+            pipeline_id (PipelineId): The identifier of the pipeline creating the task.
 
         Returns:
-            Task created
+            A task, potentially new, that is created for that task configuration.
 
         Raises:
-            MultipleTaskFromSameConfigWithSameParent error if more than 1 task already exist with the same
-            config, and the same parent id (scenario_id, or pipeline_id depending on the scope of the data source).
+            MultipleTaskFromSameConfigWithSameParent: if more than one task already exists with the same
+                configuration, and the same parent id (scenario or pipeline identifier, depending on the
+                scope of the data source). TODO: This comment makes no sense - Data Source scope
         """
         data_sources = {
             ds_config: self.data_manager.get_or_create(ds_config, scenario_id, pipeline_id)
@@ -93,16 +111,17 @@ class TaskManager:
             return task
 
     def get(self, task_id: TaskId) -> Task:
-        """Gets the task corresponding to the identifier given as parameter.
+        """
+        Gets a task given its identifier.
 
         Args:
-            task_id (TaskId) : task to get.
+            task_id (TaskId): The task identifier.
 
         Returns:
-            Task corresponding to the id.
+            The task with the provided identifier.
 
         Raises:
-            ModelNotFound error if no task corresponds to task_id.
+            ModelNotFound: if no task corresponds to `task_id`.
         """
         try:
             if opt_task := self.repository.load(task_id):
@@ -129,3 +148,41 @@ class TaskManager:
             List of tasks of this config name
         """
         return self.repository.search_all("config_name", config_name)
+
+    def hard_delete(
+        self, task_id: TaskId, scenario_id: Optional[ScenarioId] = None, pipeline_id: Optional[PipelineId] = None
+    ):
+        """
+        Deletes the task given as parameter and the nested data sources, and jobs.
+
+        Deletes the task given as parameter and propagate the hard deletion. The hard delete is propagated to a
+        nested data sources if the data sources is not shared by another pipeline or if a scenario id is given as
+        parameter, by another scenario.
+
+        Parameters:
+        task_id (TaskId): identifier of the task to hard delete.
+        pipeline_id (PipelineId) : identifier of the optional parent pipeline.
+        scenario_id (ScenarioId) : identifier of the optional parent scenario.
+
+        Raises:
+        ModelNotFound error if no pipeline corresponds to pipeline_id.
+        """
+        task = self.get(task_id)
+        jobs = self.task_scheduler.get_jobs()
+
+        if scenario_id:
+            self.remove_if_parent_id_eq(task.input.values(), scenario_id)
+            self.remove_if_parent_id_eq(task.output.values(), scenario_id)
+        if pipeline_id:
+            self.remove_if_parent_id_eq(task.input.values(), pipeline_id)
+            self.remove_if_parent_id_eq(task.output.values(), pipeline_id)
+
+        for job in jobs:
+            if job.task.id == task.id:
+                self.task_scheduler.delete(job)
+        self.delete(task_id)
+
+    def remove_if_parent_id_eq(self, data_sources, id_):
+        for data_source in data_sources:
+            if data_source.parent_id == id_:
+                self.data_manager.delete(data_source.id)

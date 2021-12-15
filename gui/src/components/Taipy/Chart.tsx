@@ -1,5 +1,14 @@
-import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import Plot from "react-plotly.js";
+import React, {
+    CSSProperties,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    lazy,
+    Suspense,
+} from "react";
 import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotMouseEvent, PlotSelectionEvent } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
@@ -13,6 +22,8 @@ import {
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+
+const Plot = lazy(() => import("react-plotly.js"));
 
 interface ChartProp extends TaipyBaseProps {
     title?: string;
@@ -38,6 +49,8 @@ interface ChartConfig {
     yaxis: string[];
     markers: Partial<PlotMarker>[];
     selectedMarkers: Partial<PlotMarker>[];
+    orientations: string[];
+    names: string[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -56,9 +69,11 @@ const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number)
 
 const selectedPropRe = /selected(\d+)/;
 
+const defaultChartConfig = { responsive: true };
+
 const Chart = (props: ChartProp) => {
     const {
-        title = "Chart",
+        title = "",
         className,
         width = "100%",
         height = "100%",
@@ -72,7 +87,6 @@ const Chart = (props: ChartProp) => {
         limitRows = false,
     } = props;
     const { dispatch } = useContext(TaipyContext);
-    const [loading, setLoading] = useState(false);
     const [selected, setSelected] = useState<number[][]>([]);
     const plotRef = useRef<HTMLDivElement>(null);
 
@@ -127,13 +141,14 @@ const Chart = (props: ChartProp) => {
                 yaxis: [],
                 markers: [],
                 selectedMarkers: [],
+                orientations: [],
+                names: [],
             } as ChartConfig;
         }
     }, [props.config]);
 
     useEffect(() => {
         if (!value || !!refresh) {
-            setLoading(true);
             const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
             dispatch(
                 createRequestChartUpdateAction(
@@ -153,26 +168,27 @@ const Chart = (props: ChartProp) => {
         const playout = props.layout ? JSON.parse(props.layout) : {};
         return {
             ...playout,
-            title: title,
+            title: title || playout.title,
             xaxis: {
                 title:
                     config.traces.length && config.traces[0].length && config.traces[0][0]
                         ? config.columns[config.traces[0][0]].dfid
                         : undefined,
+                ...playout.xaxis,
             },
             yaxis: {
                 title:
                     config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]]
                         ? config.columns[config.traces[0][1]].dfid
                         : undefined,
+                ...playout.yaxis,
             },
             clickmode: "event+select",
         } as Layout;
     }, [title, config.columns, config.traces, props.layout]);
 
     const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
-
-    const divStyle = useMemo(() => (loading ? { display: "none" } : {}), [loading]);
+    const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const data = useMemo(
         () =>
@@ -180,7 +196,9 @@ const Chart = (props: ChartProp) => {
                 const ret = {
                     type: config.types[idx],
                     mode: config.modes[idx],
-                    name: config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined,
+                    name:
+                        getArrayValue(config.names, idx) ||
+                        (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
                     marker: getArrayValue(config.markers, idx, {}),
                     x: getValue(value, trace, 0),
                     y: getValue(value, trace, 1),
@@ -189,6 +207,7 @@ const Chart = (props: ChartProp) => {
                     yaxis: config.yaxis[idx],
                     hovertext: getValue(value, config.labels, idx),
                     selectedpoints: getArrayValue(selected, idx, []),
+                    orientation: getArrayValue(config.orientations, idx),
                 } as Record<string, unknown>;
                 const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
@@ -199,7 +218,10 @@ const Chart = (props: ChartProp) => {
         [value, config, selected]
     );
 
-    const plotConfig = useMemo(() => (active ? {} : { staticPlot: true }), [active]);
+    const plotConfig = useMemo(
+        () => (active ? defaultChartConfig : { ...defaultChartConfig, staticPlot: true }),
+        [active]
+    );
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
@@ -207,7 +229,9 @@ const Chart = (props: ChartProp) => {
         [dispatch, rangeChange, id]
     );
 
-    const onAfterPlot = useCallback(() => setLoading(false), []);
+    const onAfterPlot = useCallback(() => {
+        // Manage loading Animation ... One day
+    }, []);
 
     const getRealIndex = useCallback(
         (index: number) => (value?.tp_index ? (value.tp_index[index] as number) : index),
@@ -235,9 +259,8 @@ const Chart = (props: ChartProp) => {
     );
 
     return (
-        <>
-            {loading ? <Skeleton key="skeleton" sx={style} /> : null}
-            <Box id={id} sx={divStyle} key="div" data-testid={props.testId} className={className} ref={plotRef}>
+        <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
+            <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                 <Plot
                     data={data}
                     layout={layout}
@@ -249,8 +272,8 @@ const Chart = (props: ChartProp) => {
                     onClick={onSelect}
                     config={plotConfig}
                 />
-            </Box>
-        </>
+            </Suspense>
+        </Box>
     );
 };
 

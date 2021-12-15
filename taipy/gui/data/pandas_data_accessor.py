@@ -15,7 +15,46 @@ class PandasDataAccessor(DataAccessor):
     def get_supported_classes() -> t.Callable:  # type: ignore
         return pd.DataFrame
 
-    def _format_data(self, data: DataFrame, data_format: DataFormat, orient: str = None) -> t.Union[t.Dict, bytes]:
+    def __manage_date_cols(self, payload_cols: t.Any, data: pd.DataFrame):
+        if isinstance(payload_cols, list) and len(payload_cols):
+            col_types = data.dtypes[data.dtypes.index.isin(payload_cols)]
+        else:
+            col_types = data.dtypes
+        cols = col_types.index.tolist()
+        # deal with dates
+        datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
+        if len(datecols) != 0:
+            # copy the df so that we don't "mess" with the user's data
+            data = data.copy()
+            for col in datecols:
+                newcol = _get_date_col_str_name(cols, col)
+                cols.append(newcol)
+                data[newcol] = data[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
+            # remove the date columns from the list of columns
+            cols = list(set(cols) - set(datecols))
+        data = data.loc[:, cols]
+        return data
+
+    def __format_data(
+        self,
+        payload_cols: t.Any,
+        data: DataFrame,
+        data_format: DataFormat,
+        orient: str = None,
+        start: t.Optional[int] = None,
+        rowcount: t.Optional[int] = None,
+        data_extraction: t.Optional[bool] = None,
+    ) -> t.Union[t.Dict, bytes]:
+        data = self.__manage_date_cols(payload_cols, data)
+        ret: t.Dict[str, t.Any] = {
+            "format": str(data_format.value),
+        }
+        if rowcount is not None:
+            ret["rowcount"] = rowcount
+        if start is not None:
+            ret["start"] = start
+        if data_extraction is not None:
+            ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
         if data_format == DataFormat.APACHE_ARROW:
             # Convert from pandas to Arrow
             table = pa.Table.from_pandas(data)
@@ -29,8 +68,11 @@ class PandasDataAccessor(DataAccessor):
             # end buffer stream
             buf = sink.getvalue()
             # convert buffer to python bytes and return
-            return buf.to_pybytes()
-        return data.to_dict(orient=orient)
+            ret["data"] = buf.to_pybytes()
+            ret["orient"] = orient
+        else:
+            ret["data"] = data.to_dict(orient=orient)
+        return ret
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         if isinstance(value, pd.DataFrame):
@@ -55,24 +97,6 @@ class PandasDataAccessor(DataAccessor):
             else:
                 ret_payload["alldata"] = payload["alldata"]
                 nb_rows_max = _get_dict_value(payload, "width")
-            # deal with columns
-            cols = _get_dict_value(payload, "columns")
-            if isinstance(cols, list) and len(cols):
-                col_types = value.dtypes[value.dtypes.index.isin(cols)]
-            else:
-                col_types = value.dtypes
-            cols = col_types.index.tolist()
-            # deal with dates
-            datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
-            if len(datecols) != 0:
-                # copy the df so that we don't "mess" with the user's data
-                value = value.copy()
-                for col in datecols:
-                    newcol = _get_date_col_str_name(cols, col)
-                    cols.append(newcol)
-                    value[newcol] = value[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
-                # remove the date columns from the list of columns
-                cols = list(set(cols) - set(datecols))
             if paged:
                 rowcount = len(value)
                 # here we'll deal with start and end values from payload if present
@@ -105,29 +129,20 @@ class PandasDataAccessor(DataAccessor):
                     new_indexes = new_indexes[slice(start, end + 1)]
                 else:
                     new_indexes = slice(start, end + 1)
-                value = value.loc[:, cols].iloc[new_indexes]  # returns a view
-                dictret = {
-                    "data": self._format_data(value, data_format, "records"),
-                    "orient": "records",
-                    "rowcount": rowcount,
-                    "start": start,
-                    "format": str(data_format.value),
-                }
+                value = value.iloc[new_indexes]  # returns a view
+                dictret = self.__format_data(
+                    _get_dict_value(payload, "columns"), value, data_format, "records", start, rowcount
+                )
             else:
                 # view with the requested columns
                 if nb_rows_max and nb_rows_max < len(value) / 2:
-                    value = value.loc[:, cols]
+                    value = value.copy()
                     value["tp_index"] = value.index
                     # we need to be more clever than this :-)
                     value = value.iloc[:: (len(value) // nb_rows_max)]
-                else:
-                    value = value.loc[:, cols]
-                dictret = {
-                    "data": self._format_data(value, data_format, "list"),
-                    "orient": "list",
-                    "format": str(data_format.value),
-                    "dataExtraction": True,  # Extract data out of dictionary on frontend
-                }
+                dictret = self.__format_data(
+                    _get_dict_value(payload, "columns"), value, data_format, "list", data_extraction=True
+                )
             ret_payload["value"] = dictret
         return ret_payload
 

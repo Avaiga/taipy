@@ -1,6 +1,7 @@
 /**
- * status component displays a status or a list of statuses
- * value can be a list of or a single dict containing the keys
+ * Displays a status or a list of statuses.
+ *
+ * `value` can be a list of or a single dict containing the keys
  * <ul><li>status</li><li>message</li></ul>
 
  * ## Usage
