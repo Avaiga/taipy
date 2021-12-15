@@ -24,17 +24,9 @@ from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
 from .taipyimage import TaipyImage
-from .utils import (
-    ISOToDate,
-    Singleton,
-    _Adapter,
-    _Evaluator,
-    _get_dict_value,
-    _MapDictionary,
-    attrsetter,
-    dateToISO,
-    get_client_var_name,
-)
+from .utils import ISOToDate, Singleton, _get_dict_value, _MapDictionary, attrsetter, dateToISO, get_client_var_name
+from .utils.Adapter import _Adapter
+from .utils.Evaluator import _Evaluator
 from .wstype import WsType
 
 
