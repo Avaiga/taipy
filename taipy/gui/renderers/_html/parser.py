@@ -97,6 +97,7 @@ class TaipyTag(object):
     def parse(self) -> t.Tuple[str, str]:
         from ...gui import Gui
 
+        gui = Gui._get_instance()
         for k, v in self.properties.items():
-            self.properties[k] = Gui._get_instance()._evaluate_expr(v)
+            self.properties[k] = gui._evaluate_expr(v) if v is not None else "true"
         return HtmlFactory.create_element(self.control_type, self.properties)
