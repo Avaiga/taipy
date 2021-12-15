@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import os
+import re
 import typing as t
 
 import __main__
-from flask import Flask, Blueprint, jsonify, render_template, render_template_string, send_from_directory
+from flask import Blueprint, Flask, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -13,13 +14,19 @@ if t.TYPE_CHECKING:
 
 
 class Server:
+
+    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
+
     def __init__(
         self,
-        app: Gui,
+        gui: Gui,
         flask: t.Optional[Flask] = None,
         css_file: str = "",
         path_mapping: t.Optional[dict] = {},
+        root_page_name: str = "",
     ):
+        self._gui = gui
+        self._root_page_name = root_page_name
         self._flask = Flask("Taipy") if flask is None else flask
         self.css_file = css_file
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
@@ -36,15 +43,15 @@ class Server:
             if "status" in message:
                 print(message["status"])
             elif "type" in message.keys():
-                app._manage_message(message["type"], message)
+                gui._manage_message(message["type"], message)
 
         @self._ws.on("connect")
         def ws_connect():
-            app._data_scopes.create_scope()
+            gui._data_scopes.create_scope()
 
         @self._ws.on("disconnect")
         def ws_disconnect():
-            app._data_scopes.delete_scope()
+            gui._data_scopes.delete_scope()
 
     def _get_default_blueprint(
         self,
@@ -89,7 +96,7 @@ class Server:
         return taipy_bp
 
     # Update to render as JSX
-    def render(self, html_fragment, style, head):
+    def _render(self, html_fragment, style, head):
         template_str = render_template_string(html_fragment)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
@@ -103,6 +110,74 @@ class Server:
 
     def _direct_render_json(self, data):
         return jsonify(data)
+
+    def _render_page(self) -> t.Any:
+        page = None
+        render_path_name = Server.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)  # type: ignore
+        # Get page instance
+        for page_i in self._gui._config.pages:
+            if page_i.route == render_path_name:
+                page = page_i
+        # try partials
+        if page is None:
+            for partial in self._gui._config.partials:
+                if partial.route == render_path_name:
+                    page = partial
+        # Make sure that there is a page instance found
+        if page is None:
+            return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+        # TODO: assign global scopes to current scope if the page has been rendered
+        page.render()
+        if render_path_name == self._root_page_name and "<PageContent" not in page.rendered_jsx:
+            page.rendered_jsx += "<PageContent />"
+        # Return jsx page
+        if page.rendered_jsx is not None:
+            return self._render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
+        else:
+            return ("No page template", 404)
+
+    def _render_route(self) -> t.Any:
+        # Generate router
+        routes = self._gui._config.routes
+        locations = {}
+        router = '<Router key="router"><Routes key="routes">'
+        router += (
+            '<Route path="/" key="'
+            + self._root_page_name
+            + '" element={<MainPage key="tr'
+            + self._root_page_name
+            + '" path="/'
+            + self._root_page_name
+            + '"'
+        )
+        route = next((r for r in routes if r != self._root_page_name), None)
+        router += (' route="/' + route + '"') if route else ""
+        router += " />} >"
+        locations["/"] = "/" + self._root_page_name
+        for route in routes:
+            if route != self._root_page_name:
+                router += (
+                    '<Route path="'
+                    + route
+                    + '" key="'
+                    + route
+                    + '" element={<TaipyRendered key="tr'
+                    + route
+                    + '"/>} />'
+                )
+                locations["/" + route] = "/" + route
+        router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
+        router += "</Route>"
+        router += "</Routes></Router>"
+
+        return self._direct_render_json(
+            {
+                "router": router,
+                "locations": locations,
+                "timeZone": self._gui._config.get_time_zone(),
+                "darkMode": self._gui._get_app_config("dark_mode", True),
+            }
+        )
 
     def get_flask(self):
         return self._flask
