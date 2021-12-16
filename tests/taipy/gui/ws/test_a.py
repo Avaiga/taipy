@@ -21,13 +21,13 @@ def test_a_button_pressed(gui: Gui, helpers):
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    sid = list(gui._data_scopes.get_all_scopes().keys())[1]
+    sid = list(gui._scopes.get_all_scopes().keys())[1]
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
-    assert gui._data_scopes.get_all_scopes()[sid].x == 10  # type: ignore
-    assert gui._data_scopes.get_all_scopes()[sid].text == "hi"  # type: ignore
+    assert gui._scopes.get_all_scopes()[sid].x == 10  # type: ignore
+    assert gui._scopes.get_all_scopes()[sid].text == "hi"  # type: ignore
     ws_client.emit("message", {"type": "A", "name": "my_button", "payload": "do_something"})
-    assert gui._data_scopes.get_all_scopes()[sid].text == "a random text"
-    assert gui._data_scopes.get_all_scopes()[sid].x == 20  # type: ignore
+    assert gui._scopes.get_all_scopes()[sid].text == "a random text"
+    assert gui._scopes.get_all_scopes()[sid].x == 20  # type: ignore
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_message(received_messages[0], "MU", "x", 20)

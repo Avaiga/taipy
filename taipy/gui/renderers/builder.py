@@ -197,15 +197,15 @@ class Builder:
                 if adapter is None:
                     adapter = self._gui._get_adapter_for_type(lov_name)
                 else:
-                    self._gui.add_type_for_var(lov_name, var_type)
+                    self._gui._add_type_for_var(lov_name, var_type)
             value_name = _get_dict_value(self.__hashes, "value")
             if value_name:
                 if adapter is None:
                     adapter = self._gui._get_adapter_for_type(value_name)
                 else:
-                    self._gui.add_type_for_var(value_name, var_type)
+                    self._gui._add_type_for_var(value_name, var_type)
             if adapter is not None:
-                self._gui.add_adapter_for_type(var_type, adapter)
+                self._gui._add_adapter_for_type(var_type, adapter)
 
             if adapter is None:
                 adapter = (lambda x: (x, x)) if from_string else (lambda x: str(x))  # type: ignore
@@ -240,7 +240,7 @@ class Builder:
         columns = _get_columns_dict(
             self.value,
             _add_to_dict_and_get(self.attributes, "columns", {}),
-            self._gui._data_accessors._get_col_types("", self.value),
+            self._gui._accessors._get_col_types("", self.value),
             _add_to_dict_and_get(self.attributes, "date_format", date_format),
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
@@ -304,7 +304,7 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:4] if t])
-        columns = _get_columns_dict(self.value, list(columns), self._gui._data_accessors._get_col_types("", self.value))
+        columns = _get_columns_dict(self.value, list(columns), self._gui._accessors._get_col_types("", self.value))
         if columns is not None:
             self.attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}

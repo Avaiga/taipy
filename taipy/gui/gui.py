@@ -25,8 +25,8 @@ from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
 from .taipyimage import TaipyImage
 from .utils import ISOToDate, Singleton, _get_dict_value, _MapDictionary, attrsetter, dateToISO, get_client_var_name
-from .utils.Adapter import _Adapter
-from .utils.Evaluator import _Evaluator
+from .utils._adapter import _Adapter
+from .utils._evaluator import _Evaluator
 from .wstype import WsType
 
 
@@ -72,8 +72,8 @@ class Gui(object, metaclass=Singleton):
             self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
         )
         self._config = GuiConfig()
-        self._data_accessors = _DataAccessors()
-        self._data_scopes = _DataScopes()
+        self._accessors = _DataAccessors()
+        self._scopes = _DataScopes()
         self._evaluator = _Evaluator()
         self._adapter = _Adapter()
 
@@ -115,7 +115,7 @@ class Gui(object, metaclass=Singleton):
         return None
 
     def _get_data_scope(self):
-        return self._data_scopes.get_scope()
+        return self._scopes.get_scope()
 
     # TODO: Check name value to avoid conflicting with Flask,
     # or, simply, compose with Flask instead of inherit from it.
@@ -134,7 +134,7 @@ class Gui(object, metaclass=Singleton):
         setattr(Gui, name, prop)
 
     def _bind_global(self, name: str, value: t.Any) -> None:
-        global_scope = self._data_scopes.get_global_scope()
+        global_scope = self._scopes.get_global_scope()
         if hasattr(global_scope, name):
             return
         setattr(global_scope, name, value)
@@ -182,7 +182,7 @@ class Gui(object, metaclass=Singleton):
                 value = complex(value) if value else 0
             elif isinstance(currentvalue, bool):
                 value = bool(value)
-            elif self._data_accessors._cast_string_value(var_name, currentvalue) is None:
+            elif self._accessors._cast_string_value(var_name, currentvalue) is None:
                 return
         self._update_var(var_name, value, propagate)
 
@@ -204,10 +204,10 @@ class Gui(object, metaclass=Singleton):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
-            self._data_scopes.broadcast_data(_var, newvalue)
+            self._scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
-            if self._data_accessors._is_data_access(_var, newvalue):
+            if self._accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
                 if isinstance(newvalue, list):
@@ -225,7 +225,7 @@ class Gui(object, metaclass=Singleton):
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._get_hash_from_expr(var_name)
         newvalue = attrgetter(var_name)(self._get_data_scope())
-        ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
+        ret_payload = self._accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
     def _request_var_update(self, payload):
@@ -273,7 +273,7 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f"Web Socket communication error {e}")
 
     def _get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or not self._data_scopes.get_multi_user():
+        if not hasattr(request, "sid") or not self._scopes.get_multi_user():
             return None
         return request.sid  # type: ignore
 
@@ -342,10 +342,10 @@ class Gui(object, metaclass=Singleton):
     def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
         self._adapter._add_list_for_variable(var_name, list_name)
 
-    def add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
+    def _add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
         self._adapter._add_adapter_for_type(type_name, adapter)
 
-    def add_type_for_var(self, var_name: str, type_name: str) -> None:
+    def _add_type_for_var(self, var_name: str, type_name: str) -> None:
         self._adapter._add_type_for_var(var_name, type_name)
 
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
@@ -515,7 +515,7 @@ class Gui(object, metaclass=Singleton):
         )
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
-        self._data_accessors._register(data_accessor_class)
+        self._accessors._register(data_accessor_class)
 
     def get_flask_app(self):
         return self._server.get_flask()
@@ -567,8 +567,8 @@ class Gui(object, metaclass=Singleton):
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
-        taipy_pages_bp = Blueprint("taipy_pages", __name__)
-        self._flask_blueprint.append(taipy_pages_bp)
+        pages_bp = Blueprint("taipy_pages", __name__)
+        self._flask_blueprint.append(pages_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._flask_blueprint.append(
@@ -586,20 +586,20 @@ class Gui(object, metaclass=Singleton):
         # (save rendered html to page.rendered_jsx for optimization)
         for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
-            taipy_pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._server._render_page)
+            pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._server._render_page)
 
         # server URL Rule for flask rendered react-router
-        taipy_pages_bp.add_url_rule("/initialize/", view_func=self._server._render_route)
+        pages_bp.add_url_rule("/initialize/", view_func=self._server._render_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             self._server.get_flask().register_blueprint(bp)
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
-        self._data_accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
+        self._accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
         # Use multi user or not
-        self._data_scopes.set_multi_user(app_config["multi_user"])
+        self._scopes.set_multi_user(app_config["multi_user"])
 
         # Start Flask Server
         if run_server:

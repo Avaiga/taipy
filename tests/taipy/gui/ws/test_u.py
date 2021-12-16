@@ -11,11 +11,11 @@ def ws_u_assert_template(gui, helpers, value_before_update, value_after_update, 
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    sid = list(gui._data_scopes.get_all_scopes().keys())[1]
+    sid = list(gui._scopes.get_all_scopes().keys())[1]
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
-    assert gui._data_scopes.get_all_scopes()[sid].var == value_before_update
+    assert gui._scopes.get_all_scopes()[sid].var == value_before_update
     ws_client.emit("message", {"type": "U", "name": "var", "payload": payload})
-    assert gui._data_scopes.get_all_scopes()[sid].var == value_after_update
+    assert gui._scopes.get_all_scopes()[sid].var == value_after_update
     # assert for received message (message that would be sent to the frontend client)
     received_message = ws_client.get_received()[0]
     helpers.assert_outward_ws_message(received_message, "MU", "var", value_after_update)
