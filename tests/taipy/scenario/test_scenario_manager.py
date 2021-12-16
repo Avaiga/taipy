@@ -10,7 +10,14 @@ from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.exceptions.scenario import DeletingMasterScenario, NonExistingScenario
+from taipy.exceptions.scenario import (
+    DeletingMasterScenario,
+    DifferentScenarioConfigs,
+    InsufficientScenarioToCompare,
+    NonExistingComparator,
+    NonExistingScenario,
+    NonExistingScenarioConfig,
+)
 from taipy.pipeline import Pipeline
 from taipy.scenario.manager import ScenarioManager
 from taipy.scenario.scenario import Scenario
@@ -503,3 +510,70 @@ def test_submit():
     assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
+
+
+def test_scenarios_comparison():
+    def subtraction(inp, out):
+        return inp - out
+
+    def addition(inp, out):
+        return inp + out
+
+    scenario_manager = ScenarioManager()
+    pipeline_manager = scenario_manager.pipeline_manager
+    task_manager = scenario_manager.task_manager
+    data_manager = scenario_manager.data_manager
+
+    scenario_manager.delete_all()
+    pipeline_manager.delete_all()
+    data_manager.delete_all()
+    task_manager.delete_all()
+
+    scenario_config = Config.scenario_configs.create(
+        "Awesome scenario",
+        [
+            PipelineConfig(
+                "by 6",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+        comparators={"bar": [subtraction], "foo": [subtraction, addition]},
+    )
+
+    assert scenario_config.comparators is not None
+
+    scenario_1 = scenario_manager.create(scenario_config)
+    scenario_2 = scenario_manager.create(scenario_config)
+
+    with pytest.raises(InsufficientScenarioToCompare):
+        scenario_manager.compare(scenario_1, ds_config_name="bar")
+
+    scenario_3 = Scenario("awesome_scenario_config", [], {})
+    with pytest.raises(DifferentScenarioConfigs):
+        scenario_manager.compare(scenario_1, scenario_3, ds_config_name="bar")
+
+    scenario_manager.submit(scenario_1.id)
+    scenario_manager.submit(scenario_2.id)
+
+    bar_comparison = scenario_manager.compare(scenario_1, scenario_2, ds_config_name="bar")["bar"]
+    assert bar_comparison["subtraction"] == 0
+
+    foo_comparison = scenario_manager.compare(scenario_1, scenario_2, ds_config_name="foo")["foo"]
+    assert len(foo_comparison.keys()) == 2
+    assert foo_comparison["addition"] == 2
+    assert foo_comparison["subtraction"] == 0
+
+    assert len(scenario_manager.compare(scenario_1, scenario_2).keys()) == 2
+
+    with pytest.raises(NonExistingScenarioConfig):
+        scenario_manager.compare(scenario_3, scenario_3)
+
+    with pytest.raises(NonExistingComparator):
+        scenario_manager.compare(scenario_1, scenario_2, ds_config_name="abc")

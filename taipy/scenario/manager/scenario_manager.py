@@ -1,14 +1,22 @@
 import datetime
 import logging
 from functools import partial
-from typing import Callable, List, Optional, Set
+from typing import Callable, List, Optional
 
 from taipy.common.alias import ScenarioId
-from taipy.config import ScenarioConfig
+from taipy.config import Config, ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager.cycle_manager import CycleManager
 from taipy.exceptions.repository import ModelNotFound
-from taipy.exceptions.scenario import DeletingMasterScenario, DoesNotBelongToACycle, NonExistingScenario
+from taipy.exceptions.scenario import (
+    DeletingMasterScenario,
+    DifferentScenarioConfigs,
+    DoesNotBelongToACycle,
+    InsufficientScenarioToCompare,
+    NonExistingComparator,
+    NonExistingScenario,
+    NonExistingScenarioConfig,
+)
 from taipy.pipeline import PipelineManager
 from taipy.scenario import Scenario
 from taipy.scenario.repository import ScenarioRepository
@@ -190,6 +198,46 @@ class ScenarioManager:
         if self.get(scenario_id).master_scenario:
             raise DeletingMasterScenario
         self.repository.delete(scenario_id)
+
+    def compare(self, *scenarios: Scenario, ds_config_name: str = None):
+        """
+        Compares the datasources of given scenarios with known datasource config name.
+
+        Parameters:
+            scenarios (Scenario) : Scenario objects to compare
+            ds_config_name (Optional[str]) : config name of the DataSource to compare scenarios, if no ds_config_name is
+            provided, the scenarios will be compared based on all the previously defined comparators.
+        Raises:
+            InsufficientScenarioToCompare: Provided only one or no scenario for comparison
+            NonExistingComparator: The provided comparator does not exist
+            DifferentScenarioConfigs: The provided scenarios do not share the same scenario_config
+            NonExistingScenarioConfig: Cannot find the shared scenario config of the provided scenarios
+        """
+
+        if len(scenarios) < 2:
+            raise InsufficientScenarioToCompare
+
+        if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
+            raise DifferentScenarioConfigs
+
+        if scenario_config := Config.scenario_configs.get(scenarios[0].config_name, None):
+            results = {}
+            if ds_config_name:
+                if ds_config_name in scenario_config.comparators.keys():
+                    ds_comparators = {ds_config_name: scenario_config.comparators[ds_config_name]}
+                else:
+                    raise NonExistingComparator
+            else:
+                ds_comparators = scenario_config.comparators
+
+            for ds_config_name, comparators in ds_comparators.items():
+                datasources = [scenario.__getattr__(ds_config_name).read() for scenario in scenarios]
+                results[ds_config_name] = {comparator.__name__: comparator(*datasources) for comparator in comparators}
+
+            return results
+
+        else:
+            raise NonExistingScenarioConfig(scenarios[0].config_name)
 
     def hard_delete(self, scenario_id: ScenarioId):
         """

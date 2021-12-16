@@ -30,3 +30,27 @@ class DeletingMasterScenario(Exception):
     """
 
     pass
+
+
+class DifferentScenarioConfigs(Exception):
+    """
+    Scenarios must contains the same config
+    """
+
+    pass
+
+
+class InsufficientScenarioToCompare(Exception):
+    """
+    Must provide at least 2 scenarios for scenario comparison
+    """
+
+    pass
+
+
+class NonExistingComparator(Exception):
+    """
+    Must provide an existing comparator
+    """
+
+    pass
