@@ -16,10 +16,10 @@ class TestSQLDataSource:
             Scope.PIPELINE,
             properties={
                 "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datasource",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
                 "db_engine": "mssql",
-                "read_query": "SELECT * from table_name",
+                "read_query": "SELECT * from daily_min_example",
                 "write_table": "foo",
             },
         )
@@ -96,9 +96,9 @@ class TestSQLDataSource:
             "foo",
             Scope.PIPELINE,
             properties={
-                "db_username": "foo",
-                "db_password": "foo",
-                "db_name": "foo",
+                "db_username": "sa",
+                "db_password": "foobar",
+                "db_name": "datasource",
                 "db_engine": "mssql",
                 "read_query": "SELECT * from table_name",
                 "write_table": "foo",
@@ -141,10 +141,11 @@ class TestSQLDataSource:
             {"a": 1, "b": 2},
             [(1, 2), (3, 4)],
             (1, 2),
+            [1, 2, 3, 4],
             "foo",
         ],
     )
-    def test_write(self, mocker, data):
+    def test_write(self, data):
         ds = SQLDataSource(
             "foo",
             Scope.PIPELINE,
