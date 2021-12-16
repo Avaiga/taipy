@@ -34,7 +34,7 @@ class DeletingMasterScenario(Exception):
 
 class DifferentScenarioConfigs(Exception):
     """
-    Raised when comparing 2 scenarios that have different scenario configs
+    Scenarios must contains the same config
     """
 
     pass
@@ -42,7 +42,7 @@ class DifferentScenarioConfigs(Exception):
 
 class InsufficientScenarioToCompare(Exception):
     """
-    Raised when only 1 or no scenario is provided for scenario comparison
+    Must provide at least 2 scenarios for scenario comparison
     """
 
     pass
@@ -50,7 +50,7 @@ class InsufficientScenarioToCompare(Exception):
 
 class NonExistingComparator(Exception):
     """
-    Raised when trying to delete a non-existing comparator
+    Must provide an existing comparator
     """
 
     pass
