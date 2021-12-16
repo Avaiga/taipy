@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Input from "./Input";
 import Field from "./Field";
 import DateSelector from "./DateSelector";
@@ -50,7 +50,6 @@ export const taipyComponents: Record<string, ComponentType> = {
 export const JSXReactRouterComponents: Record<string, unknown> = {
     Routes: Routes,
     Route: Route,
-    Router: BrowserRouter,
     NotFound404: NotFound404,
     TaipyRendered: TaipyRendered,
     MainPage: MainPage,

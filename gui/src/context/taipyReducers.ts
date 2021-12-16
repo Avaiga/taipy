@@ -19,6 +19,8 @@ enum Types {
     SetTheme = "SET_THEME",
     SetTimeZone = "SET_TIMEZONE",
     SetAlert = "SET_ALERT",
+    SetBlock = "SET_BLOCK",
+    Navigate = "NAVIGATE",
 }
 export interface TaipyState {
     socket?: Socket;
@@ -30,6 +32,8 @@ export interface TaipyState {
     dateTimeFormat?: string;
     numberFormat?: string;
     alert?: AlertMessage;
+    block?: BlockMessage;
+    to?: string;
 }
 
 export interface TaipyBaseAction {
@@ -57,6 +61,26 @@ interface TaipyMultipleAction extends TaipyBaseAction {
 }
 
 interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {
+}
+
+export const BLOCK_CLOSE = {action: "", message: "", close: true, noCancel: false} as BlockMessage;
+
+export interface BlockMessage {
+    action: string;
+    noCancel: boolean;
+    close: boolean;
+    message: string;
+}
+
+interface TaipyBlockAction extends TaipyBaseAction, BlockMessage {
+}
+
+interface NavigateMessage {
+    to?: string;
+}
+
+interface TaipyNavigateAction extends TaipyBaseAction, NavigateMessage {
+
 }
 
 export interface FormatConfig {
@@ -120,6 +144,10 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
                     dispatch(createMultipleUpdateAction(message.payload as NamePayload[]));
                 } else if (message.type === "AL") {
                     dispatch(createAlertAction(message as unknown as AlertMessage));
+                } else if (message.type === "BL") {
+                    dispatch(createBlockAction(message as unknown as BlockMessage));
+                } else if (message.type === "NA") {
+                    dispatch(createNavigateAction((message as unknown as NavigateMessage).to));
                 }
             }
         });
@@ -131,6 +159,30 @@ const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string
         arr[start++] = row;
         return arr;
     }, previousRows.concat([]));
+
+const storeBlockUi = (block?: BlockMessage) => () => {
+    if (localStorage) {
+        if (block) {
+            document.visibilityState !== "visible" && localStorage.setItem("TaipyBlockUi", JSON.stringify(block))
+        } else {
+            localStorage.removeItem("TaipyBlockUi")
+        }
+    }
+}
+
+export const retreiveBlockUi = ():BlockMessage => {
+    if (localStorage) {
+        const val = localStorage.getItem("TaipyBlockUi");
+        if (val) {
+            try {
+                return JSON.parse(val)
+            } catch {
+                // too bad
+            }
+        }
+    }
+    return {} as BlockMessage;
+}
 
 export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
     const action = baseAction as TaipyAction;
@@ -167,6 +219,18 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             delete state.alert;
             return {...state}
+        case Types.SetBlock:
+            const blockAction = action as unknown as TaipyBlockAction;
+            if (blockAction.close) {
+                storeBlockUi()();
+                delete state.block;
+                return {...state}
+            } else {
+                document.onvisibilitychange = storeBlockUi(blockAction as BlockMessage)
+                return {...state, block: {noCancel: blockAction.noCancel, action: blockAction.action, close: false, message: blockAction.message}}
+            }
+        case Types.Navigate:
+            return {...state, to: (action as unknown as TaipyNavigateAction).to}
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -354,7 +418,20 @@ export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
     duration: alert ? alert.duration : 3000,
 })
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL";
+export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
+    type: Types.SetBlock,
+    noCancel: block.noCancel,
+    action: block.action || "",
+    close: !!block.close,
+    message: block.message
+})
+
+export const createNavigateAction = (to?: string): TaipyNavigateAction => ({
+    type: Types.Navigate,
+    to: to,
+})
+
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA";
 
 interface WsMessage {
     type: WsMessageType;

@@ -8,6 +8,8 @@ class WsType(Enum):
     DATA_UPDATE = "DU"
     UPDATE = "U"
     ALERT = "AL"
+    BLOCK = "BL"
+    NAVIGATE = "NA"
 
 
 NumberTypes = set(["int", "int64", "float", "float64"])

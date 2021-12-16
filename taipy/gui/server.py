@@ -140,7 +140,7 @@ class Server:
         # Generate router
         routes = self._gui._config.routes
         locations = {}
-        router = '<Router key="router"><Routes key="routes">'
+        router = '<Routes key="routes">'
         router += (
             '<Route path="/" key="'
             + self._root_page_name
@@ -168,7 +168,7 @@ class Server:
                 locations["/" + route] = "/" + route
         router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
         router += "</Route>"
-        router += "</Routes></Router>"
+        router += "</Routes>"
 
         return self._direct_render_json(
             {
@@ -176,6 +176,7 @@ class Server:
                 "locations": locations,
                 "timeZone": self._gui._config.get_time_zone(),
                 "darkMode": self._gui._get_app_config("dark_mode", True),
+                "blockUI": self._gui._is_ui_blocked(),
             }
         )
 

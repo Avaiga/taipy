@@ -35,6 +35,7 @@ class Gui(object, metaclass=Singleton):
 
     __root_page_name = "TaiPy_root_page"
     __env_filename = "taipy.gui.env"
+    __UI_BLOCK_NAME = "TaipyUiBlockVar"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -252,6 +253,44 @@ class Gui(object, metaclass=Singleton):
                     "message": message,
                     "browser": browser_notification,
                     "duration": duration,
+                },
+                to=self._get_ws_receiver(),
+            )
+        except Exception as e:
+            warnings.warn(f"Web Socket communication error {e}")
+
+    def _send_ws_block(
+        self,
+        action: t.Optional[str] = None,
+        message: t.Optional[str] = None,
+        close: t.Optional[bool] = False,
+        cancel: t.Optional[bool] = False,
+    ):
+        try:
+            self._server._ws.emit(
+                "message",
+                {
+                    "type": WsType.BLOCK.value,
+                    "action": action,
+                    "close": close,
+                    "message": message,
+                    "noCancel": not cancel,
+                },
+                to=self._get_ws_receiver(),
+            )
+        except Exception as e:
+            warnings.warn(f"Web Socket communication error {e}")
+
+    def _send_ws_navigate(
+        self,
+        to: t.Optional[str] = None,
+    ):
+        try:
+            self._server._ws.emit(
+                "message",
+                {
+                    "type": WsType.NAVIGATE.value,
+                    "to": to,
                 },
                 to=self._get_ws_receiver(),
             )
@@ -513,6 +552,52 @@ class Gui(object, metaclass=Singleton):
             else browser_notification,
             self._get_app_config("notification_duration", 3000) if duration is None else duration,
         )
+
+    def block_ui(
+        self,
+        callback: t.Optional[t.Union[str, FunctionType[str]]] = None,
+        message: t.Optional[str] = "Work in Progress...",
+    ):
+        """Blocks the UI
+
+        Args;
+            action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action wiill be provided to the user.
+            message (string): The message to show. Default: Work in Progress...
+        """
+        action_name = callback.__name__ if isinstance(callback, FunctionType) else callback
+        if action_name:
+            self.bind_func(action_name)
+        func = self.__get_on_cancel_block_ui(action_name)
+        def_action_name = func.__name__
+        setattr(self, def_action_name, func)
+
+        if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
+            setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, True)
+        else:
+            self._bind(Gui.__UI_BLOCK_NAME, True)
+        self._send_ws_block(action=def_action_name, message=message, cancel=True if action_name else False)
+
+    def unblock_ui(self):
+        if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
+            setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+        self._send_ws_block(close=True)
+
+    def _is_ui_blocked(self):
+        return getattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+
+    def __get_on_cancel_block_ui(self, callback: str):
+        def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
+            if hasattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME):
+                setattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+            self._on_action(id, callback)
+        return _taipy_on_cancel_block_ui
+
+    def navigate(self, to: t.Optional[str] = ""):
+        to = to if to else Gui.__root_page_name
+        if to not in self._config.routes:
+            warnings.warn(f"cannot navigate to '{to}' which is not a declared route.")
+            return
+        self._send_ws_navigate(to)
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
