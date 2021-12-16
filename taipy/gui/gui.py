@@ -13,7 +13,7 @@ from types import FrameType, FunctionType
 import __main__
 import markdown as md_lib
 from dotenv import dotenv_values
-from flask import Flask, Blueprint, jsonify, request
+from flask import Blueprint, Flask, request
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
@@ -24,16 +24,8 @@ from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
 from .taipyimage import TaipyImage
-from .utils import (
-    ISOToDate,
-    Singleton,
-    _get_dict_value,
-    _get_expr_var_name,
-    _MapDictionary,
-    attrsetter,
-    dateToISO,
-    get_client_var_name,
-)
+from .utils import ISOToDate, Singleton, _get_dict_value, _MapDictionary, attrsetter, dateToISO, get_client_var_name
+from .utils._adapter import _Adapter
 from .utils._evaluator import _Evaluator
 from .wstype import WsType
 
@@ -46,7 +38,6 @@ class Gui(object, metaclass=Singleton):
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
-    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
@@ -77,26 +68,23 @@ class Gui(object, metaclass=Singleton):
 
             default_page_renderer (PageRenderer): An optional `PageRenderer` class that is used to render pages.
         """
-        self._server = Server(self, path_mapping=path_mapping, flask=flask, css_file=css_file)
+        self._server = Server(
+            self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
+        )
         self._config = GuiConfig()
-        # Data Registry
-        self._data_accessors = _DataAccessors()
-
-        # Data Scopes
-        self._data_scopes = _DataScopes()
-
+        self._accessors = _DataAccessors()
+        self._scopes = _DataScopes()
         self._evaluator = _Evaluator()
+        self._adapter = _Adapter()
 
         # Load default config
         self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
         self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
-        self._adapter_for_type: t.Dict[str, FunctionType] = {}
-        self._type_for_variable: t.Dict[str, str] = {}
-        self._list_for_variable: t.Dict[str, str] = {}
         self._update_function = None
         self._action_function = None
+
         if default_page_renderer:
             self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
         if pages is not None:
@@ -108,77 +96,26 @@ class Gui(object, metaclass=Singleton):
     def _get_instance() -> Gui:
         return Gui._instances[Gui]
 
-    def _render_page(self) -> t.Any:
-        page = None
-        render_path_name = Gui.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)  # type: ignore
-        # Get page instance
-        for page_i in self._config.pages:
-            if page_i.route == render_path_name:
-                page = page_i
-        # try partials
-        if page is None:
-            for partial in self._config.partials:
-                if partial.route == render_path_name:
-                    page = partial
-        # Make sure that there is a page instance found
-        if page is None:
-            return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-        # TODO: assign global scopes to current scope if the page has been rendered
-        page.render()
-        if render_path_name == Gui.__root_page_name and "<PageContent" not in page.rendered_jsx:
-            page.rendered_jsx += "<PageContent />"
+    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
+        return self._config._get_app_config(name, default_value)
 
-        # Return jsx page
-        if page.rendered_jsx is not None:
-            return self._server.render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
-        else:
-            return ("No page template", 404)
-
-    def _render_route(self) -> t.Any:
-        # Generate router
-        routes = self._config.routes
-        locations = {}
-        router = '<Router key="router"><Routes key="routes">'
-        router += (
-            '<Route path="/" key="'
-            + Gui.__root_page_name
-            + '" element={<MainPage key="tr'
-            + Gui.__root_page_name
-            + '" path="/'
-            + Gui.__root_page_name
-            + '"'
-        )
-        route = next((r for r in routes if r != Gui.__root_page_name), None)
-        router += (' route="/' + route + '"') if route else ""
-        router += " />} >"
-        locations["/"] = "/" + Gui.__root_page_name
-        for route in routes:
-            if route != Gui.__root_page_name:
-                router += (
-                    '<Route path="'
-                    + route
-                    + '" key="'
-                    + route
-                    + '" element={<TaipyRendered key="tr'
-                    + route
-                    + '"/>} />'
-                )
-                locations["/" + route] = "/" + route
-        router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
-        router += "</Route>"
-        router += "</Routes></Router>"
-
-        return self._server._direct_render_json(
-            {
-                "router": router,
-                "locations": locations,
-                "timeZone": self._config.get_time_zone(),
-                "darkMode": self._get_app_config("dark_mode", True),
-            }
-        )
+    def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
+        theme = self._get_app_config("theme", None)
+        dark_theme = self._get_app_config("theme[dark]", None)
+        light_theme = self._get_app_config("theme[light]", None)
+        res = {}
+        if theme:
+            res["base"] = theme
+        if dark_theme:
+            res["dark"] = dark_theme
+        if light_theme:
+            res["light"] = light_theme
+        if theme or dark_theme or light_theme:
+            return res
+        return None
 
     def _get_data_scope(self):
-        return self._data_scopes.get_scope()
+        return self._scopes.get_scope()
 
     # TODO: Check name value to avoid conflicting with Flask,
     # or, simply, compose with Flask instead of inherit from it.
@@ -197,7 +134,7 @@ class Gui(object, metaclass=Singleton):
         setattr(Gui, name, prop)
 
     def _bind_global(self, name: str, value: t.Any) -> None:
-        global_scope = self._data_scopes.get_global_scope()
+        global_scope = self._scopes.get_global_scope()
         if hasattr(global_scope, name):
             return
         setattr(global_scope, name, value)
@@ -245,7 +182,7 @@ class Gui(object, metaclass=Singleton):
                 value = complex(value) if value else 0
             elif isinstance(currentvalue, bool):
                 value = bool(value)
-            elif self._data_accessors._cast_string_value(var_name, currentvalue) is None:
+            elif self._accessors._cast_string_value(var_name, currentvalue) is None:
                 return
         self._update_var(var_name, value, propagate)
 
@@ -267,10 +204,10 @@ class Gui(object, metaclass=Singleton):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
-            self._data_scopes.broadcast_data(_var, newvalue)
+            self._scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
-            if self._data_accessors._is_data_access(_var, newvalue):
+            if self._accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
                 if isinstance(newvalue, list):
@@ -288,7 +225,7 @@ class Gui(object, metaclass=Singleton):
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._get_hash_from_expr(var_name)
         newvalue = attrgetter(var_name)(self._get_data_scope())
-        ret_payload = self._data_accessors._get_data(var_name, newvalue, payload)
+        ret_payload = self._accessors._get_data(var_name, newvalue, payload)
         self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
     def _request_var_update(self, payload):
@@ -336,7 +273,7 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f"Web Socket communication error {e}")
 
     def _get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or not self._data_scopes.get_multi_user():
+        if not hasattr(request, "sid") or not self._scopes.get_multi_user():
             return None
         return request.sid  # type: ignore
 
@@ -382,6 +319,52 @@ class Gui(object, metaclass=Singleton):
                 warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
         return False
 
+    # Proxy methods for Evaluator
+    def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+        return self._evaluator.evaluate_expr(self, expr, re_evaluated)
+
+    def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
+        return self._evaluator.re_evaluate_expr(self, var_name)
+
+    def _get_hash_from_expr(self, expr: str) -> str:
+        return self._evaluator.get_hash_from_expr(expr)
+
+    def _get_expr_from_hash(self, hash: str) -> str:
+        return self._evaluator.get_expr_from_hash(hash)
+
+    def _is_expression(self, expr: str) -> bool:
+        return self._evaluator._is_expression(expr)
+
+    def _fetch_expression_list(self, expr: str) -> t.List:
+        return self._evaluator._fetch_expression_list(expr)
+
+    # Proxy methods for Adapter
+    def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
+        self._adapter._add_list_for_variable(var_name, list_name)
+
+    def _add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
+        self._adapter._add_adapter_for_type(type_name, adapter)
+
+    def _add_type_for_var(self, var_name: str, type_name: str) -> None:
+        self._adapter._add_type_for_var(var_name, type_name)
+
+    def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
+        return self._adapter._get_adapter_for_type(type_name)
+
+    def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
+        return self._adapter._run_adapter_for_var(var_name, value, index, id_only)
+
+    def _run_adapter(
+        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
+    ) -> t.Union[t.Tuple[str, ...], str, None]:
+        return self._adapter._run_adapter(adapter, value, var_name, index, id_only)
+
+    def _get_valid_adapter_result(
+        self, value: t.Any, index: t.Optional[str], id_only=False
+    ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
+        return self._adapter._get_valid_adapter_result(value, index, id_only)
+
+    # Public methods
     def add_page(
         self,
         name: str,
@@ -466,121 +449,6 @@ class Gui(object, metaclass=Singleton):
         self._config.partial_routes.append(new_partial.route)
         return new_partial
 
-    def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
-        self._list_for_variable[var_name] = list_name
-
-    def add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
-        self._adapter_for_type[type_name] = adapter
-
-    def add_type_for_var(self, var_name: str, type_name: str) -> None:
-        self._type_for_variable[var_name] = type_name
-
-    def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
-        return _get_dict_value(self._adapter_for_type, type_name)
-
-    def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
-        adapter = None
-        type_name = _get_dict_value(self._type_for_variable, var_name)
-        if not isinstance(type_name, str):
-            adapter = _get_dict_value(self._adapter_for_type, var_name)
-            if isinstance(adapter, FunctionType):
-                type_name = var_name
-            else:
-                type_name = type(value).__name__
-        if adapter is None:
-            adapter = _get_dict_value(self._adapter_for_type, type_name)
-        if isinstance(adapter, FunctionType):
-            ret = self._run_adapter(adapter, value, var_name, index, id_only)
-            if ret is not None:
-                return ret
-        return value
-
-    def _run_adapter(
-        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
-    ) -> t.Union[t.Tuple[str, ...], str, None]:
-        if value is None:
-            return None
-        try:
-            result = adapter(value if not isinstance(value, _MapDictionary) else value._dict)
-            result = self._get_valid_adapter_result(result, index, id_only)
-            if result is None:
-                warnings.warn(
-                    f"Adapter for {var_name} does not return a valid result. It should return a tuple (id, label) or a label with label being a string or a TaipyImage instance"
-                )
-            else:
-                if not id_only and len(result) > 2 and isinstance(result[2], list):
-                    result = (result[0], result[1], self.__adapter_on_tree(adapter, result[2], str(index) + "."))
-                return result
-        except Exception as e:
-            warnings.warn(f"Can't run adapter for {var_name}: {e}")
-        return None
-
-    def __adapter_on_tree(self, adapter: FunctionType, tree: t.List[t.Any], prefix: str):
-        ret_list = []
-        for idx, elt in enumerate(tree):
-            ret = self._run_adapter(adapter, elt, adapter.__name__, prefix + str(idx))
-            if ret is not None:
-                if len(ret) > 2 and isinstance(ret[2], list):
-                    ret = (ret[0], ret[1], self.__adapter_on_tree(adapter, ret[2], prefix + str(idx) + "."))
-                ret_list.append(ret)
-        return ret_list
-
-    def _get_valid_adapter_result(
-        self, value: t.Any, index: t.Optional[str], id_only=False
-    ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
-        if (
-            isinstance(value, tuple)
-            and len(value) > 1
-            and isinstance(value[0], str)
-            and isinstance(value[1], (str, TaipyImage))
-        ):
-            if id_only:
-                return value[0]
-            elif len(value) > 2 and isinstance(value[2], list):
-                return (value[0], TaipyImage.get_dict_or(value[1]), value[2])  # type: ignore
-            else:
-                return (value[0], TaipyImage.get_dict_or(value[1]))  # type: ignore
-        else:
-            id = self.__get_id(value, index)
-            if id_only:
-                return id
-            else:
-                label = self.__get_label(value)
-                if label is None:
-                    return None
-                if len(value) > 2 and isinstance(value[2], list):
-                    return (id, label, self.__get_children(value))  # type: ignore
-                else:
-                    return (id, label)  # type: ignore
-
-    def __get_id(self, value: t.Any, index: t.Optional[str]) -> str:
-        if hasattr(value, "id"):
-            return str(value.id)
-        elif hasattr(value, "__getitem__") and "id" in value:
-            return str(value["id"])
-        elif index is not None:
-            return index
-        else:
-            return str(id(value))
-
-    def __get_label(self, value: t.Any) -> t.Union[str, t.Dict, None]:
-        if isinstance(value, (str, TaipyImage)):
-            return TaipyImage.get_dict_or(value)
-        elif hasattr(value, "label"):
-            return TaipyImage.get_dict_or(value.label)
-        elif hasattr(value, "__getitem__") and "label" in value:
-            return TaipyImage.get_dict_or(value["label"])
-        return None
-
-    def __get_children(self, value: t.Any) -> t.List[t.Any]:
-        if isinstance(value, list):
-            return value
-        elif hasattr(value, "children"):
-            return value.children if isinstance(value.children, list) else [value.children]
-        elif hasattr(value, "__getitem__") and "children" in value:
-            return value["children"] if isinstance(value["children"], list) else [value["children"]]
-        return []
-
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:
         if not hasattr(self, var_name) and var_name in self._locals_bind:
@@ -605,24 +473,6 @@ class Gui(object, metaclass=Singleton):
             return True
         return False
 
-    def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        return self._evaluator.evaluate_expr(self, expr, re_evaluated)
-
-    def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
-        return self._evaluator.re_evaluate_expr(self, var_name)
-
-    def _get_hash_from_expr(self, expr: str) -> str:
-        return self._evaluator.get_hash_from_expr(expr)
-
-    def _get_expr_from_hash(self, hash: str) -> str:
-        return self._evaluator.get_expr_from_hash(hash)
-
-    def _is_expression(self, expr: str) -> bool:
-        return self._evaluator._is_expression(expr)
-
-    def _fetch_expression_list(self, expr: str) -> t.List:
-        return self._evaluator._fetch_expression_list(expr)
-
     def on_update(self, f) -> None:
         self._update_function = f
 
@@ -631,24 +481,6 @@ class Gui(object, metaclass=Singleton):
 
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
-
-    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
-        return self._config._get_app_config(name, default_value)
-
-    def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
-        theme = self._get_app_config("theme", None)
-        dark_theme = self._get_app_config("theme[dark]", None)
-        light_theme = self._get_app_config("theme[light]", None)
-        res = {}
-        if theme:
-            res["base"] = theme
-        if dark_theme:
-            res["dark"] = dark_theme
-        if light_theme:
-            res["light"] = light_theme
-        if theme or dark_theme or light_theme:
-            return res
-        return None
 
     def send_alert(
         self,
@@ -683,7 +515,10 @@ class Gui(object, metaclass=Singleton):
         )
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
-        self._data_accessors._register(data_accessor_class)
+        self._accessors._register(data_accessor_class)
+
+    def get_flask_app(self):
+        return self._server.get_flask()
 
     def run(self, run_server=True, **kwargs) -> None:
         app_config = self._config.app_config
@@ -732,8 +567,8 @@ class Gui(object, metaclass=Singleton):
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
-        taipy_pages_bp = Blueprint("taipy_pages", __name__)
-        self._flask_blueprint.append(taipy_pages_bp)
+        pages_bp = Blueprint("taipy_pages", __name__)
+        self._flask_blueprint.append(pages_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._flask_blueprint.append(
@@ -751,24 +586,21 @@ class Gui(object, metaclass=Singleton):
         # (save rendered html to page.rendered_jsx for optimization)
         for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
-            taipy_pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._render_page)
+            pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._server._render_page)
 
         # server URL Rule for flask rendered react-router
-        taipy_pages_bp.add_url_rule("/initialize/", view_func=self._render_route)
+        pages_bp.add_url_rule("/initialize/", view_func=self._server._render_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
             self._server.get_flask().register_blueprint(bp)
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
-        self._data_accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
+        self._accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
         # Use multi user or not
-        self._data_scopes.set_multi_user(app_config["multi_user"])
+        self._scopes.set_multi_user(app_config["multi_user"])
 
         # Start Flask Server
         if run_server:
             self._server.runWithWS(host=app_config["host"], port=app_config["port"], debug=app_config["debug"])
-
-    def get_flask_app(self):
-        return self._server.get_flask()
