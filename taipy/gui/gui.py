@@ -254,7 +254,9 @@ class Gui(object, metaclass=Singleton):
                 to=self._get_ws_receiver(),
             )
         except Exception as e:
-            warnings.warn(f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}")
+            warnings.warn(
+                f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}"
+            )
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
         self.__send_ws_any({"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload})
