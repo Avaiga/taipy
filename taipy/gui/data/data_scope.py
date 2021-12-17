@@ -37,7 +37,8 @@ class _DataScopes:
         return self.__scopes[client_id]
 
     def _set_client_id(self, client_id: t.Optional[str]):
-        client_id and setattr(request, "taipy_client_id", client_id)
+        if client_id:
+            setattr(request, "taipy_client_id", client_id)
 
     def get_all_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__scopes
