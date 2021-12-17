@@ -1,0 +1,65 @@
+## Usage
+
+### Simple
+
+You can create a selector on a series of strings:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|selector|lov=Item 1;Item 2;Item 3|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:selector lov="Item 1;Item 2;Item 3">{value}</taipy:selector>
+        ```
+
+### Binding to a list of objects
+
+Assuming your Python code has created a list of object:
+```py3
+class User:
+    def __init__(self, id, name, birth_year):
+        self.id, self.name, self.birth_year = (id, name, birth_year)
+
+users = [
+    User(231, "Johanna", 1987),
+    User(125, "John", 1979),
+    User(4,   "Peter", 1968),
+    User(31,  "Mary", 1974)
+    ]
+```
+
+If you want to create a selector control that lets you pick a specific user, you
+can use the following fragment.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{users}|selector|lov={users}|type=User|adapter=lambda u: (u.id, u.name)|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:selector lov="{users}" type="User" adapter="lambda u: (u.id, u.name)">{users}</taipy:selector>
+        ```
+
+In this example, we are using the Python list _users_ as the selector's _list of values_.
+Because the control needs a way to convert the list items (which are instances of the class
+_User_) into a string that can be displayed, we are using an _adapter_: a function that converts
+an object, whose type must be provided to the _type_ property, to a tuple. The first element
+of the tuple is used to reference the selection (therefore those elements should be unique
+among all the items) and the second element is the string that turns out to be displayed.
+
+!!! warning "Lambda parameter names"
+
+    The parameter _u_ that is used in the lambda expression must be declared in your Python
+    code in the same scope as the other variables. Otherwise Taipy will fail to recognize
+    the construct as valid.

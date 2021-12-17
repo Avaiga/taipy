@@ -32,7 +32,7 @@ jobs:
                 run: |
                     npm i web-component-analyzer
                     npm run doc
-                    pipenv run python ../tools/generate_controls_ref.py
+                    pipenv run python ../tools/mkdocs/generate_controls_ref.py
             -   name: Build doc and deploy
                 run: |
                     pipenv run mkdocs gh-deploy --force

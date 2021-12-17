@@ -1,13 +1,6 @@
 /**
  * A button control that can trigger a function when pressed.
-
- * ## Usage
- * ### Simple
- * <code><|Button Label|button|></code>
- * ### Advanced
- * <code><|Button Label|button|on_action=button_action_function_name|></code>
- * <br>or with properties<br>
- * <code><|Button Label|button|properties={properties}|></code>
+ *
  * @element button
  */
 class button extends shared {

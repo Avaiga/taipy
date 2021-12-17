@@ -2,7 +2,7 @@
 # generate_controls_ref.py
 #   Generates the home page for Taipy controls documentation.
 #
-# The documentation for Taipy controls is generated using
+# The documentation for Taipy controls must have been generated using
 #            npm run doc
 # from the `gui` directory.
 #
@@ -16,10 +16,13 @@ import os
 import re
 import shutil
 
-SKELETON_PATH = "../docs/gui/controls.md_template"
-CONTROLS_MD_PATH = "../docs/gui/controls.md"
-CONTROLS_DIR_PATH = "../docs/gui/controls"
-CONTROLS_DOC_PATH = "../gui/generateddoc"
+# Assuming that this script is located in TaipyHome/tools/mkdocs
+taipy_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
+SKELETON_PATH = taipy_dir + "/docs/gui/controls.md_template"
+CONTROLS_MD_PATH = taipy_dir + "/docs/gui/controls.md"
+CONTROLS_DIR_PATH = taipy_dir + "/docs/gui/controls"
+CONTROLS_DOC_PATH = taipy_dir + "/gui/generateddoc"
 
 if not os.path.isdir(CONTROLS_DOC_PATH):
     raise SystemExit(f"Error: controls documentation has not been generated {CONTROLS_DOC_PATH}")
@@ -40,6 +43,7 @@ if not os.path.exists(CONTROLS_DIR_PATH):
 controls_list = ""
 for file in os.listdir(CONTROLS_DOC_PATH):
     current = os.path.join(CONTROLS_DOC_PATH, file)
+    control_text = None
     if os.path.isfile(current):
         with open(current, "r") as control_file:
             control_text = control_file.read()
@@ -47,13 +51,32 @@ for file in os.listdir(CONTROLS_DOC_PATH):
             if match:
                 control_type = match.group(1)
                 short_desc = ""
-                para_end_match = FIRST_PARA_END_RE.match(control_text[match.end():])
+                para_end_match = FIRST_PARA_END_RE.match(control_text[match.end() :])
                 if para_end_match:
                     short_desc = ": " + para_end_match.group(1)
                     short_desc = MD_REF_IN_DESC.sub(r"[`\1`](\1/)", short_desc)
                 controls_list += f" - [`{control_type}`](controls/{control_type}.md){short_desc}\n"
-        # Copy md file to CONTROLS_DIR_PATH
-        shutil.copy(current, CONTROLS_DIR_PATH)
+            # Enlarge the 'Property' column for a better rendering
+            control_text = re.sub(
+                r"(##\s+Properties\s+\|\s*Property)(\s+\|)",
+                "\\1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\2",
+                control_text,
+            )
+    # Generate output Markdown file if necessary
+    if control_text:
+        details_path = os.path.join(CONTROLS_DIR_PATH, file + "_details")
+        details_text = None
+        # Is there a _template file for this control?
+        if os.path.isfile(details_path):
+            with open(details_path, "r") as details_file:
+                details_text = details_file.read()
+        # Generate final md file to CONTROLS_DIR_PATH
+        output_path = os.path.join(CONTROLS_DIR_PATH, file)
+        with open(output_path, "w") as output_file:
+            output_file.write(control_text)
+            if details_text:
+                output_file.write("\n")
+                output_file.write(details_text)
 
 with open(CONTROLS_MD_PATH, "w") as controls_file:
     output_data = skeleton_data.replace("[CONTROLS_LIST]", controls_list)

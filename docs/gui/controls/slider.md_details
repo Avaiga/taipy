@@ -1,0 +1,38 @@
+## Usage
+
+### Simple
+
+A numeric value can easily be represented and interacted with using the
+following content:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|slider|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:slider>{value}</taipy:slider>
+        ```
+
+### Constraining values
+
+You can specify what bounds the value should be restrained to:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|slider|min=1|max=100|propagate|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:slider min="1" max="100" propagate="true">{value}</taipy:slider>
+        ```

@@ -1,39 +1,43 @@
 /**
- * a list component that allows multiple selection and filtering on label<br>text and image can be used
-
- * ## Usage
- * ### Simple
- * <code><|{value}|selector|lov=Item 1;Item 2;Item 3|></code>
- * ### Advanced
- * <code><|{value}|selector|lov={lov}|no filter|not multiple|type=myType|adapter=lambda x: (x.id, x.name)|></code>
- * <br>or with properties<br>
- * <code><|{value}|selector|properties={properties}|lov={lov}|></code>
+ * A control that allows for selecting items from a list of choices.
+ * 
+ * Each item is represented by a string, an image or both.
+ *
+ * The selector can let the user select multiple items.
+ * 
+ * A filtering feature is available to display only a subset of the items.
+ *
+ * You can use an arbitrary type for all the items (see the [example](#binding-to-a-list-of-objects)).
+ *
  * @element selector
  */
 class selector extends lovComp {
 
     /**
-     * allows a text filtering input
+     * Combines the control with a filter input area.
+     *
      * @type {bool}
      */
     filter = false;
 
     /**
-     * Multiple selection
+     * Allows for multiple selection.
+     *
      * @type {bool}
      */
     multiple = false;
 
     /**
-     * list width
+     * The width of this control.<br/>This must be a CSS measurement.
+     *
      * @type {str|int}
      */
      width = 360
 
     /**
-     * component height
+     * The height of this control.<br/>This must be a CSS measurement.
+     *
      * @type {str|int}
      */
     height
-
 }

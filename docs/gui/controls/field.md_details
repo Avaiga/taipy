@@ -1,0 +1,40 @@
+## Usage
+
+### Simple
+
+You can represent a variable value as a simple, static text:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:field>{value}</taipy:field>
+        ```
+
+### Formatted output
+
+If your value is a floating point value, you can use the _format_ property
+to indicate what the output format should be used.
+
+To display a floating point value with two decimal place:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|field|format=%.2f|>
+        ```
+
+    === "HTML"
+
+        ```html
+        <taipy:field format="%.2f">{value}</taipy:field>
+        ```

@@ -41,6 +41,10 @@ class Gui(object, metaclass=Singleton):
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
+    #
+    # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
+    # There's a section that explicitly lists these extensions in
+    #      docs/gui/user_pages.md#markdown-specifics
     _markdown = md_lib.Markdown(
         extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"]
     )
@@ -520,7 +524,19 @@ class Gui(object, metaclass=Singleton):
     def get_flask_app(self):
         return self._server.get_flask()
 
-    def run(self, run_server=True, **kwargs) -> None:
+    def run(self, run_server: bool = True, **kwargs) -> None:
+        """
+        Starts the server that delivers pages to Web clients.
+
+        Once you enter `run`, users can run Web browsers and point to the Web server
+        URL that `Gui` serves. The default is to listen to the _localhost_ address
+        (127.0.0.1) on the port number 5000. However, the configuration of the `Gui`
+        object may impact that (see TODO-Configuration-TODO).
+
+        Args:
+            run_server (bool): whether or not to run a Web server locally.
+                If set to `False`, a Web server is _not_ created and started.
+        """
         app_config = self._config.app_config
         # Load config from gui env file if available
         if not hasattr(self, "_root_dir"):

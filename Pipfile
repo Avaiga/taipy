@@ -22,6 +22,7 @@ pyodbc = "==4.0.32"
 sqlalchemy = "==1.4.27"
 pyarrow = "==6.0.1"
 python-dotenv = ">=0.19"
+mkdocs-macros-plugin = "*"
 
 [dev-packages]
 pytest = "*"

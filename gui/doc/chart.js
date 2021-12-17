@@ -1,155 +1,148 @@
 /**
  * Displays data sets in a chart or a group of charts.
  * 
- * The chart component is based on [plotly.js](https://plotly.com/javascript/).<br>
+ * The chart control is based on the [plotly.js](https://plotly.com/javascript/)
+ * graphs library.
  *
- * Indexed properties can have a default value (referenced by *property_name*) which would be overridden by the indexed propety
- * (referenced by *property_name[index]* with index starting at 1)
+ * A chart control can hold several traces, that can display individual data sets.  
+ * To indicate properties for a given trace, you will use the indexed properties
+ * (using the *property_name[index]* syntax, with the indices starting at index 1) to
+ * specify which trace you target.  
+ * Indexed properties can have a default value (using the *property_name* syntax with
+ * no index) which is overridden by any specified indexed property.
  * 
- * ## Usage
- * ### Simple
- * <code><|{value}|chart|x=Col 1|y=Col 2|></code>
- * ### Advanced
- * <code><|{value}|chart|x=Col 1|selected_color=green|y[1]=Col 2|label[1]=Col 3|y[2]=Col 4|label[2]=Col 5|mode[2]=markers|color[2]=red|type[2]=scatter|xaxis[2]=x2|layout={subplot_layout}|range_change=range_change|width=100%|height=100%|selected={selection}|></code>
- * <br>or with properties<br>
- * <code><|{value}|chart|properties={properties}|selected={selection}|></code>
  * @element chart
  */
 class chart extends shared {
     /**
-     * bound to a data object
+     * The data object bound to this chart control.
      * @type {any, default property}
      */
     value;
 
     /**
-     * chart title
+     * The title of this chart control.
      * @type {str}
      */
     title;
 
     /**
-     * HTML component width (CSS property)
+     * The HTML component width.<br/>(CSS property)
      * @type {str|int|float}
      */
     width = "100vw";
 
     /**
-     * HTML component height (CSS property)
+     * The HTML component height.<br/>(CSS property)
      * @type {str|int|float}
      */
     height = "100vw";
 
     /**
-     * List of selected indices
+     * List of the selected point indices.
      * @type {dynamic(list[int]|str)}
      */
     selected;
 
     /**
-     * plotly.js compatible [layout object](https://plotly.com/javascript/reference/layout/)
+     * The _plotly.js_ compatible [layout object](https://plotly.com/javascript/reference/layout/).
      * @type {dict[str, any]}
      */
     layout;
 
     /**
-     * callback function called on zoom with parameter <ul><li>id: optional[str]</li><li>action: optional[str]</li><li>payload: dict[str, any] as emmitted by [plotly](https://plotly.com/javascript/plotlyjs-events/#update-data)</li></ul>
+     * Callback function called when the visible part of the x axis changes.<br/>The function receives three parameters:<ul><li>`id` (optional[str]): the identifier of the chart control.</li><li>`action` (optional[str]): the name of the action that provoked the change.</li><li>`payload` (dict[str, any]): all the event information, as emmitted by</li> [plotly](https://plotly.com/javascript/plotlyjs-events/#update-data)</li></ul>
+     *
      * @type {function name}
      */
     range_change;
 
     /**
-     *  List of column names <br><ul><li>*str* ; separated list </li><li>*List[str]* </li><li>*dict* <pre>{"col name": {format: "format", index: 1}}</pre>if index is specified, it represents the display order of the columns <br>if not, the list order defines the index</li></ul>
+     *  List of column names <br><ul><li>*str*: ;-separated list of names</li><li>*List[str]*: list of names</li><li>*dict*: <pre>{"col_name": {format: "format", index: 1}}</pre>if index is specified, it represents the display order of the columns.<br/>If not, the list order defines the index</li></ul>
      * @type {str|List[str]|dict[str, dict[str, str]]}
      */
     columns = "All columns";
 
     /**
-     * column name for hover text
+     * The label for a trace</br/>This is used when the mouse hovers over a trace.
      * @type {indexed(str)}
      */
      label;
 
     /**
-     * trace name
+     * The name of a trace.
      * @type {indexed(str)}
      */
      name;
 
     /**
-     * trace orientation
+     * The orientation of a trace.
      * @type {indexed(str)}
      */
      orientation;
 
      /**
-     * column name for z axis
+     * Column name for the _z_ axis.
      * @type {indexed(str)}
      */
      z;
 
      /**
-     * column name for y axis
+     * Column name for the _y_ axis.
      * @type {indexed(str)}
      */
      y;
 
      /**
-     * column name for x axis
+     * Column name for _x_ axis.
      * @type {indexed(str)}
      */
     x;
 
     /**
-     * chart [mode](https://plotly.com/javascript/reference/scatter/#scatter-mode)
+     * Chart mode<br/>See the Plotly [chart mode](https://plotly.com/javascript/reference/scatter/#scatter-mode) documentation for details.
      * @type {indexed(str)}
      */
     mode = "lines+markers";
 
     /**
-     * chart [type](https://plotly.com/javascript/reference/)
+     * Chart type<br/>See the Plotly [chart type](https://plotly.com/javascript/reference/) documentation for details.
      * @type {indexed(str)}
      */
     type;
 
     /**
-     * trace marker color
+     * The color of the indicated trace.
      * @type {indexed(str)}
      */
     color;
 
     /**
-     * x axis id
+     * The _x_ axis identifier.
      * @type {indexed(str)}
      */
     xaxis = "x";
 
     /**
-     * y axis id
+     * The _y_ axis identifier.
      * @type {indexed(str)}
      */
     yaxis = "y";
 
     /**
-     * trace marker color
-     * @type {indexed(str)}
-     */
-    color;
-
-    /**
-     * trace selected marker color
+     * The color of the selected points for a trace.
      * @type {indexed(str)}
      */
     selected_color;
 
     /**
-     * trace [marker](https://plotly.com/javascript/reference/scatter/#scatter-marker)
+     * The type of markers used for a trace.<br/> See [marker](https://plotly.com/javascript/reference/scatter/#scatter-marker) for details.
      * @type {indexed(dict[str, any])}
      */
     marker;
 
     /**
-     * trace [selected marker](https://plotly.com/javascript/reference/scatter/#scatter-selected-marker)
+     * The type of markers used for selected points in a trace<br/>See [selected marker](https://plotly.com/javascript/reference/scatter/#scatter-selected-marker) for details.
      * @type {indexed(dict[str, any])}
      */
     selected_marker;

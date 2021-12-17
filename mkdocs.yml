@@ -33,6 +33,7 @@ theme:
     - navigation.tabs
     - navigation.instant
     - navigation.tabs.sticky
+    - content.tabs.link
 extra_css:
   - assets/stylesheets/avaiga.css
 markdown_extensions:
@@ -43,13 +44,12 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.mark
   - pymdownx.tilde
-  - pymdownx.tabbed
   - attr_list
   - pymdownx.arithmatex:
       generic: true
-  - pymdownx.highlight:
-      linenums: true
+  - pymdownx.highlight
   - pymdownx.superfences
+  - pymdownx.tabbed
   - pymdownx.details
   - admonition
   - toc:
@@ -70,6 +70,8 @@ plugins:
             show_source: false
       watch:
         - taipy
+  - macros:
+      module_name: tools/mkdocs/postprocess
 extra:
   social:
     - icon: fontawesome/brands/twitter

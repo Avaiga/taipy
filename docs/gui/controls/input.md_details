@@ -1,0 +1,20 @@
+## Usage
+
+### Simple
+
+You can create an input field bound to a variable with the following content:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|input|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:input>{value}</taipy:input>
+        ```
+

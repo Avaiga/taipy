@@ -1,18 +1,18 @@
 class shared extends HTMLElement {
     /**
-     * an id that will be assign the main HTML component
+     * The identifier that will be assigned to the rendered HTML component.
      * @type {str}
      */
     id;
 
     /**
-     * binded to a dictionnary that contains the component attributes
+     * Bound to a dictionary that contains the component properties.
      * @type {dict[str, any]}
      */
     properties;
 
     /**
-     * css class name that will be associated to the main HTML Element<br>These class names will be added to a standard <code>taipy-&lt;component name&gt;</code>.
+     * CSS class name that will be associated to the generated HTML Element<br/>This class names will be added to the default <code>taipy-&lt;component_type&gt;</code>.
      * @type {str}
      */
     class_name;
