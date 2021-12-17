@@ -47,11 +47,13 @@ class Server:
 
         @self._ws.on("connect")
         def ws_connect():
-            gui._scopes.create_scope()
+            # gui._scopes.create_scope()
+            pass
 
         @self._ws.on("disconnect")
         def ws_disconnect():
-            gui._scopes.delete_scope()
+            # gui._scopes.delete_scope()
+            pass
 
     def _get_default_blueprint(
         self,

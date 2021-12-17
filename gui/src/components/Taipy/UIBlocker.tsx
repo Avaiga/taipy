@@ -16,7 +16,8 @@ const style = {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 400,
+    minWidth: 400,
+    width: "30%",
     bgcolor: "background.paper",
     border: "2px solid #000",
     boxShadow: 24,
@@ -34,7 +35,7 @@ const UIBlocker = ({ block }: UIBlockerProps) => {
 
     return block === undefined || block.close ? null : (
         <Modal open>
-            <Box sx={style}>
+            <Box sx={style} className="taipy-UIBlocker">
                 <Typography variant="h6" component="h2">
                     {block.message}
                 </Typography>

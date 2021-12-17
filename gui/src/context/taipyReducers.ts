@@ -21,6 +21,7 @@ enum Types {
     SetAlert = "SET_ALERT",
     SetBlock = "SET_BLOCK",
     Navigate = "NAVIGATE",
+    ClientId = "CLIENT_ID",
 }
 export interface TaipyState {
     socket?: Socket;
@@ -34,6 +35,7 @@ export interface TaipyState {
     alert?: AlertMessage;
     block?: BlockMessage;
     to?: string;
+    id: string;
 }
 
 export interface TaipyBaseAction {
@@ -60,10 +62,9 @@ interface TaipyMultipleAction extends TaipyBaseAction {
     payload: NamePayload[];
 }
 
-interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {
-}
+interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {}
 
-export const BLOCK_CLOSE = {action: "", message: "", close: true, noCancel: false} as BlockMessage;
+export const BLOCK_CLOSE = { action: "", message: "", close: true, noCancel: false } as BlockMessage;
 
 export interface BlockMessage {
     action: string;
@@ -72,16 +73,19 @@ export interface BlockMessage {
     message: string;
 }
 
-interface TaipyBlockAction extends TaipyBaseAction, BlockMessage {
-}
+interface TaipyBlockAction extends TaipyBaseAction, BlockMessage {}
 
 interface NavigateMessage {
     to?: string;
 }
 
-interface TaipyNavigateAction extends TaipyBaseAction, NavigateMessage {
+interface TaipyNavigateAction extends TaipyBaseAction, NavigateMessage {}
 
+interface IdMessage {
+    id: string;
 }
+
+interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
 export interface FormatConfig {
     timeZone: string;
@@ -92,18 +96,20 @@ export interface FormatConfig {
 const getUserTheme = (mode: PaletteMode) => {
     const userTheme = window.taipyUserThemes?.base || {};
     const modeTheme = (window.taipyUserThemes && window.taipyUserThemes[mode]) || {};
-    return createTheme(merge(userTheme, modeTheme, {
-        palette: {
-            mode: mode,
-        },
-        components: {
-            MuiUseMediaQuery: {
-                defaultProps: {
-                    noSsr: true,
+    return createTheme(
+        merge(userTheme, modeTheme, {
+            palette: {
+                mode: mode,
+            },
+            components: {
+                MuiUseMediaQuery: {
+                    defaultProps: {
+                        noSsr: true,
+                    },
                 },
             },
-        },
-    }));
+        })
+    );
 };
 
 const themes = {
@@ -111,11 +117,17 @@ const themes = {
     dark: getUserTheme("dark"),
 };
 
+const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
+    const val = localStorage && (localStorage.getItem(key) as unknown as T);
+    return !val ? defaultValue : !values ? val : values.indexOf(val) == -1 ? defaultValue : val;
+};
+
 export const INITIAL_STATE: TaipyState = {
     data: {},
     theme: themes.light,
     locations: {},
     timeZone: TIMEZONE_CLIENT,
+    id: getLocalStorageValue("TaipyClientId", ""),
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -124,15 +136,14 @@ export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     socket: io(ENDPOINT),
 });
 
-const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
-    const val = localStorage && (localStorage.getItem(key) as unknown as T);
-    return !val ? defaultValue : !values ? val : values.indexOf(val) == -1 ? defaultValue : val;
-};
+const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);
 
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
         // Websocket confirm successful initialization
         socket.on("connect", () => {
+            const id = getLocalStorageValue("TaipyClientId", "");
+            sendWsMessage(socket, "ID", "TaipyClientId", id, id);
             dispatch({ type: Types.SocketConnected });
         });
         // handle message data from backend
@@ -148,6 +159,8 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
                     dispatch(createBlockAction(message as unknown as BlockMessage));
                 } else if (message.type === "NA") {
                     dispatch(createNavigateAction((message as unknown as NavigateMessage).to));
+                } else if (message.type === "ID") {
+                    dispatch(createIdAction((message as unknown as IdMessage).id));
                 }
             }
         });
@@ -163,26 +176,26 @@ const addRows = (previousRows: Record<string, unknown>[], newRows: Record<string
 const storeBlockUi = (block?: BlockMessage) => () => {
     if (localStorage) {
         if (block) {
-            document.visibilityState !== "visible" && localStorage.setItem("TaipyBlockUi", JSON.stringify(block))
+            document.visibilityState !== "visible" && localStorage.setItem("TaipyBlockUi", JSON.stringify(block));
         } else {
-            localStorage.removeItem("TaipyBlockUi")
+            localStorage.removeItem("TaipyBlockUi");
         }
     }
-}
+};
 
-export const retreiveBlockUi = ():BlockMessage => {
+export const retreiveBlockUi = (): BlockMessage => {
     if (localStorage) {
         const val = localStorage.getItem("TaipyBlockUi");
         if (val) {
             try {
-                return JSON.parse(val)
+                return JSON.parse(val);
             } catch {
                 // too bad
             }
         }
     }
     return {} as BlockMessage;
-}
+};
 
 export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
     const action = baseAction as TaipyAction;
@@ -215,22 +228,42 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.SetAlert:
             const alertAction = action as unknown as TaipyAlertAction;
             if (alertAction.atype) {
-                return {...state, alert: {atype: alertAction.atype, message: alertAction.message, browser: alertAction.browser, duration: alertAction.duration}}
+                return {
+                    ...state,
+                    alert: {
+                        atype: alertAction.atype,
+                        message: alertAction.message,
+                        browser: alertAction.browser,
+                        duration: alertAction.duration,
+                    },
+                };
             }
             delete state.alert;
-            return {...state}
+            return { ...state };
         case Types.SetBlock:
             const blockAction = action as unknown as TaipyBlockAction;
             if (blockAction.close) {
                 storeBlockUi()();
                 delete state.block;
-                return {...state}
+                return { ...state };
             } else {
-                document.onvisibilitychange = storeBlockUi(blockAction as BlockMessage)
-                return {...state, block: {noCancel: blockAction.noCancel, action: blockAction.action, close: false, message: blockAction.message}}
+                document.onvisibilitychange = storeBlockUi(blockAction as BlockMessage);
+                return {
+                    ...state,
+                    block: {
+                        noCancel: blockAction.noCancel,
+                        action: blockAction.action,
+                        close: false,
+                        message: blockAction.message,
+                    },
+                };
             }
         case Types.Navigate:
-            return {...state, to: (action as unknown as TaipyNavigateAction).to}
+            return { ...state, to: (action as unknown as TaipyNavigateAction).to };
+        case Types.ClientId:
+            const id = (action as unknown as TaipyIdAction).id;
+            storeClientId(id);
+            return { ...state, id: id };
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -266,16 +299,16 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
         case Types.SendUpdate:
-            sendWsMessage(state.socket, "U", action.name, action.payload.value, action.propagate);
+            sendWsMessage(state.socket, "U", action.name, action.payload.value, state.id, action.propagate);
             break;
         case Types.Action:
-            sendWsMessage(state.socket, "A", action.name, action.payload.value);
+            sendWsMessage(state.socket, "A", action.name, action.payload.value, state.id);
             break;
         case Types.RequestDataUpdate:
-            sendWsMessage(state.socket, "DU", action.name, action.payload);
+            sendWsMessage(state.socket, "DU", action.name, action.payload, state.id);
             break;
         case Types.RequestUpdate:
-            sendWsMessage(state.socket, "RU", action.name, action.payload);
+            sendWsMessage(state.socket, "RU", action.name, action.payload, state.id);
             break;
     }
     return state;
@@ -309,7 +342,7 @@ export const createRequestChartUpdateAction = (
     name: string | undefined,
     id: string | undefined,
     columns: string[],
-    width: number | undefined,
+    width: number | undefined
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -408,7 +441,7 @@ const getAlertType = (aType: string) => {
         default:
             return "info";
     }
-}
+};
 
 export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
@@ -416,28 +449,34 @@ export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
     message: alert ? alert.message : "",
     browser: alert ? alert.browser : true,
     duration: alert ? alert.duration : 3000,
-})
+});
 
 export const createBlockAction = (block: BlockMessage): TaipyBlockAction => ({
     type: Types.SetBlock,
     noCancel: block.noCancel,
     action: block.action || "",
     close: !!block.close,
-    message: block.message
-})
+    message: block.message,
+});
 
 export const createNavigateAction = (to?: string): TaipyNavigateAction => ({
     type: Types.Navigate,
     to: to,
-})
+});
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA";
+export const createIdAction = (id: string): TaipyIdAction => ({
+    type: Types.ClientId,
+    id: id,
+});
+
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID";
 
 interface WsMessage {
     type: WsMessageType;
     name: string;
     payload: Record<string, unknown> | unknown;
     propagate: boolean;
+    client_id: string;
 }
 
 const sendWsMessage = (
@@ -445,8 +484,9 @@ const sendWsMessage = (
     type: WsMessageType,
     name: string,
     payload: Record<string, unknown> | unknown,
+    id: string,
     propagate = true
 ): void => {
-    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate };
+    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate, client_id: id };
     socket?.emit("message", msg);
 };

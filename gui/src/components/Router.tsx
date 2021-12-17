@@ -53,7 +53,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get<AxiosRouter>(`${ENDPOINT}/initialize/`)
+            .get<AxiosRouter>(`${ENDPOINT}/initialize/?client_id=${state.id || ""}`)
             .then((result) => {
                 setJSX(result.data.router);
                 dispatch(createThemeAction(result.data.darkMode, true));
@@ -66,7 +66,7 @@ const Router = () => {
                 setJSX('<Router><Routes><Route path="/*" element={NotFound404} /></Routes></Router>');
                 console.log(error);
             });
-    }, [refresh, state.isSocketConnected]);
+    }, [refresh, state.isSocketConnected, state.id]);
 
     useEffect(() => {
         initializeWebSocket(state.socket, dispatch);
@@ -76,20 +76,18 @@ const Router = () => {
         <TaipyContext.Provider value={{ state, dispatch }}>
             <HelmetProvider>
                 <ThemeProvider theme={state.theme}>
-                    <SnackbarProvider
-                        maxSnack={5}
-                    >
+                    <SnackbarProvider maxSnack={5}>
                         <CssBaseline />
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <BrowserRouter>
-                            <JsxParser
-                                disableKeyGeneration={true}
-                                components={JSXReactRouterComponents as Record<string, ComponentType>}
-                                jsx={JSX}
-                            />
-                            <Alert alert={state.alert} />
-                            <UIBlocker block={state.block} />
-                            <Navigate to={state.to} />
+                                <JsxParser
+                                    disableKeyGeneration={true}
+                                    components={JSXReactRouterComponents as Record<string, ComponentType>}
+                                    jsx={JSX}
+                                />
+                                <Alert alert={state.alert} />
+                                <UIBlocker block={state.block} />
+                                <Navigate to={state.to} />
                             </BrowserRouter>
                         </LocalizationProvider>
                     </SnackbarProvider>
