@@ -523,7 +523,7 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def shoiw_notification(
+    def show_notification(
         self,
         type: str = "I",
         message: str = "",
