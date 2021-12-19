@@ -241,6 +241,33 @@ def test_pipeline_notification_subscribe_unsubscribe(mocker):
         pipeline_manager.unsubscribe(notify_2, pipeline)
 
 
+def test_pipeline_notification_subscribe_all():
+    pipeline_manager = PipelineManager()
+    pipeline_config = Config.add_pipeline(
+        "by 6",
+        [
+            Config.add_task(
+                "mult by 2",
+                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                mult_by_2,
+                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
+            )
+        ],
+    )
+
+    pipeline = PipelineManager().get_or_create(pipeline_config)
+    pipeline_config.name = "other pipeline"
+
+    other_pipeline = PipelineManager().get_or_create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+
+    pipeline_manager.subscribe(notify_1)
+
+    assert len(pipeline_manager.get(pipeline.id).subscribers) == 1
+    assert len(pipeline_manager.get(other_pipeline.id).subscribers) == 1
+
+
 def test_get_all_by_config_name():
     pm = PipelineManager()
     input_configs = [Config.add_data_source("my_input", "in_memory")]

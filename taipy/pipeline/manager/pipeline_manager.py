@@ -34,23 +34,43 @@ class PipelineManager:
         self.is_standalone = True
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
 
-    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
+    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
         Subscribes a function to be called when the status of a Job changes.
+        If pipeline is not passed, the subscription is added to all pipelines.
 
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        pipeline.add_subscriber(callback)
-        self.set(pipeline)
+        if pipeline is None:
+            pipelines = self.get_all()
+            for pln in pipelines:
+                self.__add_subscriber(callback, pln)
+            return
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
+        self.__add_subscriber(callback, pipeline)
+
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
         Unsubscribes a function that is called when the status of a Job changes.
+        If pipeline is not passed, the subscription is removed to all pipelines.
 
         Note:
             The function will continue to be called for ongoing jobs.
         """
+        if pipeline is None:
+            pipelines = self.get_all()
+            for pln in pipelines:
+                self.__remove_subscriber(callback, pln)
+            return
+
+        self.__remove_subscriber(callback, pipeline)
+
+    def __add_subscriber(self, callback, pipeline):
+        pipeline.add_subscriber(callback)
+        self.set(pipeline)
+
+    def __remove_subscriber(self, callback, pipeline):
         pipeline.remove_subscriber(callback)
         self.set(pipeline)
 

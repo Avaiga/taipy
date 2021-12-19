@@ -249,6 +249,38 @@ def test_notification_subscribe_unsubscribe(mocker):
     scenario_manager.unsubscribe(notify_2, scenario)
 
 
+def test_scenario_notification_subscribe_all():
+    scenario_manager = ScenarioManager()
+    scenario_config = ScenarioConfig(
+        "Awesome scenario",
+        [
+            PipelineConfig(
+                "by 6",
+                [
+                    TaskConfig(
+                        "mult by 2",
+                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        mult_by_2,
+                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
+
+    scenario = ScenarioManager().create(scenario_config)
+    scenario_config.name = "other scenario"
+
+    other_scenario = ScenarioManager().create(scenario_config)
+
+    notify_1 = NotifyMock(scenario)
+
+    scenario_manager.subscribe(notify_1)
+
+    assert len(scenario_manager.get(scenario.id).subscribers) == 1
+    assert len(scenario_manager.get(other_scenario.id).subscribers) == 1
+
+
 def test_get_set_master_scenario():
     scenario_manager = ScenarioManager()
     cycle_manager = scenario_manager.cycle_manager
