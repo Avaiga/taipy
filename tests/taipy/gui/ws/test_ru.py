@@ -13,7 +13,7 @@ def test_ru_selector(gui: Gui, helpers, csvdata):
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
-    sid = list(gui._scopes.get_all_scopes().keys())[1]
+    sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
     ws_client.emit("message", {"type": "RU", "name": "", "payload": {"names": ["selected_val"]}})

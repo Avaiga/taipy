@@ -4,6 +4,7 @@ import datetime
 import inspect
 import os
 import pathlib
+import random
 import re
 import typing as t
 import warnings
@@ -35,6 +36,7 @@ class Gui(object, metaclass=Singleton):
 
     __root_page_name = "TaiPy_root_page"
     __env_filename = "taipy.gui.env"
+    __UI_BLOCK_NAME = "TaipyUiBlockVar"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -155,6 +157,7 @@ class Gui(object, metaclass=Singleton):
 
     def _manage_message(self, msg_type: WsType, message: dict) -> None:
         try:
+            self.__set_client_id(message)
             if msg_type == WsType.UPDATE.value:
                 self._front_end_update(
                     message["name"],
@@ -167,10 +170,21 @@ class Gui(object, metaclass=Singleton):
                 self._request_data_update(message["name"], message["payload"])
             elif msg_type == WsType.REQUEST_UPDATE.value:
                 self._request_var_update(message["payload"])
+            elif msg_type == WsType.CLIENT_ID.value:
+                self.__get_or_create_scope(message["payload"])
         except TypeError as te:
             warnings.warn(f"Decoding Message has failed: {message}\n{te}")
         except KeyError as ke:
             warnings.warn(f"Can't access: {message}\n{ke}")
+
+    def __set_client_id(self, message: dict):
+        self._scopes._set_client_id(_get_dict_value(message, "client_id"))
+
+    def __get_or_create_scope(self, id: str):
+        if not id:
+            id = f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}-{random.random()}"
+            self._send_ws_id(id)
+        self._scopes.create_scope(id)
 
     def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
@@ -236,45 +250,74 @@ class Gui(object, metaclass=Singleton):
         if "names" in payload and isinstance(payload["names"], list):
             self.__send_var_list_update(payload["names"])
 
-    def _send_ws_update(self, var_name: str, payload: dict) -> None:
+    def __send_ws(self, payload: dict) -> None:
         try:
             self._server._ws.emit(
                 "message",
-                {"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload},
+                payload,
                 to=self._get_ws_receiver(),
             )
         except Exception as e:
-            warnings.warn(f"Web Socket communication error {e}")
+            warnings.warn(
+                f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}"
+            )
+
+    def _send_ws_update(self, var_name: str, payload: dict) -> None:
+        self.__send_ws({"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload})
+
+    def _send_ws_id(self, id: str) -> None:
+        self.__send_ws(
+            {
+                "type": WsType.CLIENT_ID.value,
+                "id": id,
+            }
+        )
 
     def _send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
-        try:
-            self._server._ws.emit(
-                "message",
-                {
-                    "type": WsType.ALERT.value,
-                    "atype": type,
-                    "message": message,
-                    "browser": browser_notification,
-                    "duration": duration,
-                },
-                to=self._get_ws_receiver(),
-            )
-        except Exception as e:
-            warnings.warn(f"Web Socket communication error {e}")
+        self.__send_ws(
+            {
+                "type": WsType.ALERT.value,
+                "atype": type,
+                "message": message,
+                "browser": browser_notification,
+                "duration": duration,
+            }
+        )
+
+    def _send_ws_block(
+        self,
+        action: t.Optional[str] = None,
+        message: t.Optional[str] = None,
+        close: t.Optional[bool] = False,
+        cancel: t.Optional[bool] = False,
+    ):
+        self.__send_ws(
+            {
+                "type": WsType.BLOCK.value,
+                "action": action,
+                "close": close,
+                "message": message,
+                "noCancel": not cancel,
+            }
+        )
+
+    def _send_ws_navigate(
+        self,
+        to: t.Optional[str] = None,
+    ):
+        self.__send_ws(
+            {
+                "type": WsType.NAVIGATE.value,
+                "to": to,
+            }
+        )
 
     def _send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
             {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
             for k, v in modified_values.items()
         ]
-        try:
-            self._server._ws.emit(
-                "message",
-                {"type": WsType.MULTIPLE_UPDATE.value, "payload": payload},
-                to=self._get_ws_receiver(),
-            )
-        except Exception as e:
-            warnings.warn(f"Web Socket communication error {e}")
+        self.__send_ws({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def _get_ws_receiver(self) -> t.Union[str, None]:
         if not hasattr(request, "sid") or not self._scopes.get_multi_user():
@@ -486,18 +529,18 @@ class Gui(object, metaclass=Singleton):
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
 
-    def send_alert(
+    def show_notification(
         self,
         type: str = "I",
         message: str = "",
         browser_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
     ):
-        """Sends a notification alert to the user interface.
+        """Sends a notification to the user interface.
 
         Args:
-            type (string): The alert type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
-                To remove the alert, set this parameter to the empty string.
+            type (string): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
+                To remove the last notification, set this parameter to the empty string.
             message (string): The text message to display.
             browser_notification (bool): If set to `True`, the browser will also show the notification.
                 If not specified or set to `None`, this parameter will user the value of
@@ -517,6 +560,59 @@ class Gui(object, metaclass=Singleton):
             else browser_notification,
             self._get_app_config("notification_duration", 3000) if duration is None else duration,
         )
+
+    def block_ui(
+        self,
+        callback: t.Optional[t.Union[str, FunctionType]] = None,
+        message: t.Optional[str] = "Work in Progress...",
+    ):
+        """Blocks the UI
+
+        Args:
+            action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action will be provided to the user.
+            message (string): The message to show. Default: Work in Progress...
+        """
+        action_name = callback.__name__ if isinstance(callback, FunctionType) else callback
+        if action_name:
+            self.bind_func(action_name)
+        func = self.__get_on_cancel_block_ui(action_name)
+        def_action_name = func.__name__
+        setattr(self, def_action_name, func)
+
+        if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
+            setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, True)
+        else:
+            self._bind(Gui.__UI_BLOCK_NAME, True)
+        self._send_ws_block(action=def_action_name, message=message, cancel=True if action_name else False)
+
+    def unblock_ui(self):
+        """Unblocks the UI"""
+        if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
+            setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+        self._send_ws_block(close=True)
+
+    def _is_ui_blocked(self):
+        return getattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+
+    def __get_on_cancel_block_ui(self, callback: t.Optional[str]):
+        def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
+            if hasattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME):
+                setattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+            self._on_action(id, callback)
+
+        return _taipy_on_cancel_block_ui
+
+    def navigate(self, to: t.Optional[str] = ""):
+        """Navigate to a page
+
+        Args:
+            to: page to navigate to. Should be a valid page identifier. If ommitted, navigates to the root page.
+        """
+        to = to if to else Gui.__root_page_name
+        if to not in self._config.routes:
+            warnings.warn(f"cannot navigate to '{to}' which is not a declared route.")
+            return
+        self._send_ws_navigate(to)
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)

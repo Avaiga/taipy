@@ -36,7 +36,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     useEffect(() => {
         // Fetch JSX Flask Backend Render
         axios
-            .get<AxiosRenderer>(`${ENDPOINT}/flask-jsx${path}?client_id=${state.socket?.id}`)
+            .get<AxiosRenderer>(`${ENDPOINT}/flask-jsx${path}?client_id=${state.id || ""}`)
             .then((result) => {
                 // set rendered JSX and CSS style from fetch result
                 result.data.jsx && setJSX(result.data.jsx);
@@ -44,7 +44,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 result.data.head && setHead(result.data.head);
             })
             .catch((error) => setJSX(`<h1>No data fetched from backend from ${path}</h1><br></br>${error}`));
-    }, [path, state.socket?.id]);
+    }, [path, state.id]);
 
     return (
         <>
