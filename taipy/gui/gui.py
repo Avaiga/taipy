@@ -565,7 +565,7 @@ class Gui(object, metaclass=Singleton):
         """Blocks the UI
 
         Args:
-            action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action wiill be provided to the user.
+            action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action will be provided to the user.
             message (string): The message to show. Default: Work in Progress...
         """
         action_name = callback.__name__ if isinstance(callback, FunctionType) else callback
