@@ -246,7 +246,7 @@ class Gui(object, metaclass=Singleton):
         if "names" in payload and isinstance(payload["names"], list):
             self.__send_var_list_update(payload["names"])
 
-    def __send_ws_any(self, payload: dict) -> None:
+    def __send_ws(self, payload: dict) -> None:
         try:
             self._server._ws.emit(
                 "message",
@@ -259,10 +259,10 @@ class Gui(object, metaclass=Singleton):
             )
 
     def _send_ws_update(self, var_name: str, payload: dict) -> None:
-        self.__send_ws_any({"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload})
+        self.__send_ws({"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload})
 
     def _send_ws_id(self, id: str) -> None:
-        self.__send_ws_any(
+        self.__send_ws(
             {
                 "type": WsType.CLIENT_ID.value,
                 "id": id,
@@ -270,7 +270,7 @@ class Gui(object, metaclass=Singleton):
         )
 
     def _send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
-        self.__send_ws_any(
+        self.__send_ws(
             {
                 "type": WsType.ALERT.value,
                 "atype": type,
@@ -287,7 +287,7 @@ class Gui(object, metaclass=Singleton):
         close: t.Optional[bool] = False,
         cancel: t.Optional[bool] = False,
     ):
-        self.__send_ws_any(
+        self.__send_ws(
             {
                 "type": WsType.BLOCK.value,
                 "action": action,
@@ -301,7 +301,7 @@ class Gui(object, metaclass=Singleton):
         self,
         to: t.Optional[str] = None,
     ):
-        self.__send_ws_any(
+        self.__send_ws(
             {
                 "type": WsType.NAVIGATE.value,
                 "to": to,
@@ -313,7 +313,7 @@ class Gui(object, metaclass=Singleton):
             {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
             for k, v in modified_values.items()
         ]
-        self.__send_ws_any({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
+        self.__send_ws({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def _get_ws_receiver(self) -> t.Union[str, None]:
         if not hasattr(request, "sid") or not self._scopes.get_multi_user():
