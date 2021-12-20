@@ -1,7 +1,6 @@
 import pytest
 
 from taipy.common.alias import PipelineId, TaskId
-from taipy.config import Config
 from taipy.data import InMemoryDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import MetaData, create_engine, table, text
+from sqlalchemy import create_engine, table, text
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource

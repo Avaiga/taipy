@@ -201,7 +201,7 @@ class ScenarioManager:
 
     def compare(self, *scenarios: Scenario, ds_config_name: str = None):
         """
-        Compares the datasources of given scenarios with known datasource config name.
+        Compares the data sources of given scenarios with known datasource config name.
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
@@ -220,7 +220,7 @@ class ScenarioManager:
         if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
             raise DifferentScenarioConfigs
 
-        if scenario_config := Config.scenario_configs.get(scenarios[0].config_name, None):
+        if scenario_config := Config.scenarios().get(scenarios[0].config_name, None):
             results = {}
             if ds_config_name:
                 if ds_config_name in scenario_config.comparators.keys():

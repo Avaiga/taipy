@@ -110,7 +110,7 @@ class DataManager:
         try:
             return self.__DATA_SOURCE_CLASS_MAP[data_source_config.storage_type](  # type: ignore
                 config_name=data_source_config.name,
-                scope=data_source_config.scope,
+                scope=data_source_config.scope or DataSourceConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,
                 properties=data_source_config.properties,
             )

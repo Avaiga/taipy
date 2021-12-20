@@ -6,12 +6,12 @@ from multiprocessing import Lock
 from queue import Queue
 from typing import Callable, Dict, Iterable, List, Optional
 
-from taipy.config import Config
+from taipy.config import JobConfig
 from taipy.exceptions import JobNotDeletedException, NonExistingJob
 from taipy.task import Task
 
 from ...common.alias import JobId
-from ...config.task_scheduler import TaskSchedulerConfig
+from ...config.config import Config
 from ...data.manager import DataManager
 from .job import Job
 from .job_dispatcher import JobDispatcher
@@ -27,15 +27,15 @@ class TaskScheduler:
             List of Jobs that can't be executed because some of their input is waiting for the output of other jobs.
     """
 
-    def __init__(self, task_scheduler_config: TaskSchedulerConfig = Config.task_scheduler_configs.create()):
+    def __init__(self, job_config: JobConfig = Config.job_config()):
         self.__JOBS: Dict[JobId, Job] = {}
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
         self.__executor = JobDispatcher(
-            task_scheduler_config.parallel_execution,
-            task_scheduler_config.remote_execution,
-            task_scheduler_config.nb_of_workers,
-            task_scheduler_config.hostname,
+            job_config.parallel_execution or JobConfig.DEFAULT_PARALLEL_EXECUTION,
+            job_config.remote_execution or JobConfig.DEFAULT_REMOTE_EXECUTION,
+            job_config.nb_of_workers,
+            job_config.hostname,
         )
         self.data_manager = DataManager()
         self.lock = Lock()

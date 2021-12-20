@@ -4,7 +4,7 @@ import pathlib
 import pytest
 
 from taipy.common.alias import DataSourceId
-from taipy.config import Config, DataSourceConfig
+from taipy.config.config import Config
 from taipy.data import CSVDataSource, InMemoryDataSource, PickleDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType, ModelNotFound
@@ -17,7 +17,7 @@ class TestDataManager:
         # - a csv type
         # - a default pipeline scope
         # - No parent_id
-        csv_ds_config = DataSourceConfig(name="foo", storage_type="csv", path="bar", has_header=True)
+        csv_ds_config = Config.add_data_source(name="foo", storage_type="csv", path="bar", has_header=True)
         csv_ds = dm._create_and_set(csv_ds_config, None)
 
         assert isinstance(csv_ds, CSVDataSource)
@@ -48,7 +48,7 @@ class TestDataManager:
         # - a scenario scope
         # - a parent id
         # - some default data
-        in_memory_ds_config = DataSourceConfig(
+        in_memory_ds_config = Config.add_data_source(
             name="baz", storage_type="in_memory", scope=Scope.SCENARIO, default_data="qux"
         )
         in_mem_ds = dm._create_and_set(in_memory_ds_config, "Scenario_id")
@@ -80,7 +80,7 @@ class TestDataManager:
         # - a business cycle scope
         # - No parent id
         # - no default data
-        ds_config = DataSourceConfig(name="plop", storage_type="pickle", scope=Scope.BUSINESS_CYCLE)
+        ds_config = Config.add_data_source(name="plop", storage_type="pickle", scope=Scope.BUSINESS_CYCLE)
         pickle_ds = dm._create_and_set(ds_config, None)
 
         assert isinstance(pickle_ds, PickleDataSource)
@@ -104,13 +104,13 @@ class TestDataManager:
 
     def test_create_raises_exception_with_wrong_type(self):
         dm = DataManager()
-        wrong_type_ds_config = DataSourceConfig(name="foo", storage_type="bar")
+        wrong_type_ds_config = Config.add_data_source(name="foo", storage_type="bar")
         with pytest.raises(InvalidDataSourceType):
             dm._create_and_set(wrong_type_ds_config, None)
 
     def test_create_from_same_config_generates_new_data_source_and_new_id(self):
         dm = DataManager()
-        ds_config = DataSourceConfig(name="foo", storage_type="in_memory")
+        ds_config = Config.add_data_source(name="foo", storage_type="in_memory")
         ds = dm._create_and_set(ds_config, None)
         ds_2 = dm._create_and_set(ds_config, None)
         assert ds_2.id != ds.id
@@ -119,19 +119,19 @@ class TestDataManager:
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         dm = DataManager()
-        csv_ds = Config.data_source_configs.create(name="foo", storage_type="csv", path="bar", has_header=True)
+        csv_ds = Config.add_data_source(name="foo", storage_type="csv", path="bar", has_header=True)
         csv = dm._create_and_set(csv_ds, None)
         assert csv.config_name == "foo"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "path_from_config_file"
-        assert csv.has_header is False
+        assert csv.has_header
 
-        csv_ds = Config.data_source_configs.create(name="baz", storage_type="csv", path="bar", has_header=True)
+        csv_ds = Config.add_data_source(name="baz", storage_type="csv", path="bar", has_header=True)
         csv = dm._create_and_set(csv_ds, None)
         assert csv.config_name == "baz"
         assert isinstance(csv, CSVDataSource)
         assert csv.path == "bar"
-        assert csv.has_header is False
+        assert csv.has_header
 
     def test_get_if_not_exists(self):
         with pytest.raises(ModelNotFound):
@@ -140,10 +140,10 @@ class TestDataManager:
     def test_get_all(self):
         dm = DataManager()
         assert len(dm.get_all()) == 0
-        ds_config_1 = Config.data_source_configs.create(name="foo", storage_type="in_memory")
+        ds_config_1 = Config.add_data_source(name="foo", storage_type="in_memory")
         dm._create_and_set(ds_config_1, None)
         assert len(dm.get_all()) == 1
-        ds_config_2 = Config.data_source_configs.create(name="baz", storage_type="in_memory")
+        ds_config_2 = Config.add_data_source(name="baz", storage_type="in_memory")
         dm._create_and_set(ds_config_2, None)
         dm._create_and_set(ds_config_2, None)
         assert len(dm.get_all()) == 3
@@ -153,11 +153,11 @@ class TestDataManager:
     def test_get_all_by_config_name(self):
         dm = DataManager()
         assert len(dm._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
-        ds_config_1 = Config.data_source_configs.create(name="foo", storage_type="in_memory")
+        ds_config_1 = Config.add_data_source(name="foo", storage_type="in_memory")
         assert len(dm._get_all_by_config_name("foo")) == 0
         dm._create_and_set(ds_config_1, None)
         assert len(dm._get_all_by_config_name("foo")) == 1
-        ds_config_2 = Config.data_source_configs.create(name="baz", storage_type="in_memory")
+        ds_config_2 = Config.add_data_source(name="baz", storage_type="in_memory")
         dm._create_and_set(ds_config_2, None)
         assert len(dm._get_all_by_config_name("foo")) == 1
         assert len(dm._get_all_by_config_name("baz")) == 1
@@ -213,13 +213,13 @@ class TestDataManager:
         dm = DataManager()
         dm.delete_all()
 
-        global_ds_config = Config.data_source_configs.create(
+        global_ds_config = Config.add_data_source(
             name="test_data_source", storage_type="in_memory", scope=Scope.GLOBAL, data="In memory Data Source"
         )
-        scenario_ds_config = Config.data_source_configs.create(
+        scenario_ds_config = Config.add_data_source(
             name="test_data_source2", storage_type="in_memory", scope=Scope.SCENARIO, data="In memory scenario"
         )
-        pipeline_ds_config = Config.data_source_configs.create(
+        pipeline_ds_config = Config.add_data_source(
             name="test_data_source2", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
         )
 
@@ -272,10 +272,10 @@ class TestDataManager:
         dm = DataManager()
         dm.delete_all()
 
-        ds_config_1 = Config.data_source_configs.create(
+        ds_config_1 = Config.add_data_source(
             name="data source 1", storage_type="in_memory", data="In memory pipeline 2"
         )
-        ds_config_2 = Config.data_source_configs.create(
+        ds_config_2 = Config.add_data_source(
             name="data source 2", storage_type="in_memory", data="In memory pipeline 2"
         )
 

@@ -1,5 +1,7 @@
-from .data_source import DataSourceConfig  # isort:skip
-from .task import TaskConfig, TaskConfigs  # isort:skip
-from .pipeline import PipelineConfig  # isort:skip
-from .scenario import ScenarioConfig  # isort:skip
+from .global_app import GlobalAppConfig  # isort:skip
+from .job_config import JobConfig  # isort:skip
+from .data_source_config import DataSourceConfig  # isort:skip
+from .task_config import TaskConfig  # isort:skip
+from .pipeline_config import PipelineConfig  # isort:skip
+from .scenario_config import ScenarioConfig  # isort:skip
 from .config import Config  # isort:skip

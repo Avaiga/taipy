@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from taipy.common.alias import JobId, TaskId
-from taipy.config import Config
+from taipy.config.config import Config
 from taipy.data import Scope
 from taipy.data.manager import DataManager
 from taipy.task import Job, Task
@@ -40,9 +40,7 @@ def test_can_execute_parallel():
         config_name="name",
         input=[],
         function=partial(execute, lock),
-        output=[
-            DataManager().get_or_create(Config.data_source_configs.create("input1", "pickle", Scope.PIPELINE, data=21))
-        ],
+        output=[DataManager().get_or_create(Config.add_data_source("input1", "pickle", Scope.PIPELINE, data=21))],
         id=task_id,
     )
     job_id = JobId("id1")

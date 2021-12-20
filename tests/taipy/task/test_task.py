@@ -1,6 +1,6 @@
 import pytest
 
-from taipy.config import DataSourceConfig, TaskConfig
+from taipy.config import Config
 from taipy.data import CSVDataSource, DataSource, InMemoryDataSource, Scope
 from taipy.task import Task
 
@@ -71,7 +71,7 @@ def test_can_not_change_task_input(input):
 
 
 def test_can_not_change_task_config_output(output):
-    task_config = TaskConfig("name_1", [], print, output=output)
+    task_config = Config.add_task("name_1", [], print, output=output)
 
     assert task_config.output == output
     with pytest.raises(Exception):
@@ -83,21 +83,21 @@ def test_can_not_change_task_config_output(output):
 
 def test_can_not_update_task_output_values(output):
     data_source = DataSource("data_source")
-    task = TaskConfig("name_1", [], print, output=output)
+    task_config = Config.add_task("name_1", [], print, output=output)
 
-    task.output.append(data_source)
-    assert task.output == output
+    task_config.output.append(data_source)
+    assert task_config.output == output
 
-    task.output[0] = data_source
-    assert task.output[0] != data_source
+    task_config.output[0] = data_source
+    assert task_config.output[0] != data_source
 
 
 def test_can_not_update_task_input_values(input):
     data_source = DataSource("data_source")
-    task = TaskConfig("name_1", input, print, [])
+    task_config = Config.add_task("name_1", input, print, [])
 
-    task.input.append(data_source)
-    assert task.input == input
+    task_config.input.append(data_source)
+    assert task_config.input == input
 
-    task.input[0] = data_source
-    assert task.input[0] != data_source
+    task_config.input[0] = data_source
+    assert task_config.input[0] != data_source

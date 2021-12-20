@@ -10,8 +10,8 @@ from unittest.mock import patch
 import pytest
 
 from taipy.common.alias import DataSourceId, JobId
-from taipy.config import Config
-from taipy.config.task_scheduler import TaskSchedulerConfigs, TaskSchedulerSerializer
+from taipy.config import Config, JobConfig
+from taipy.config._config import _Config
 from taipy.data import PickleDataSource
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
@@ -23,8 +23,10 @@ from taipy.task.scheduler import TaskScheduler
 @pytest.fixture(scope="function", autouse=True)
 def reset_configuration_singleton():
     yield
-    Config._task_scheduler_serializer = TaskSchedulerSerializer()
-    Config.task_scheduler_configs = TaskSchedulerConfigs(Config._task_scheduler_serializer)
+    Config._python_config = _Config()
+    Config._file_config = None
+    Config._env_config = None
+    Config._applied_config = _Config.default_config()
 
     for f in glob.glob("*.p"):
         print(f"deleting file {f}")
@@ -101,7 +103,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
+    task_scheduler = TaskScheduler(Config.set_job_config(parallel_execution=True))
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
@@ -197,7 +199,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
+    task_scheduler = TaskScheduler(Config.set_job_config(parallel_execution=True))
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
@@ -209,7 +211,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_task_multithreading_multiple_task():
-    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
+    task_scheduler = TaskScheduler(Config.set_job_config(parallel_execution=True, nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -240,7 +242,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True, nb_of_workers=1))
+    task_scheduler = TaskScheduler(Config.set_job_config(parallel_execution=True, nb_of_workers=1))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -272,7 +274,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 def test_blocked_task():
     data_manager = DataManager()
-    task_scheduler = TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True))
+    task_scheduler = TaskScheduler(Config.set_job_config(parallel_execution=True))
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
     lock_2 = m.Lock()
@@ -311,41 +313,42 @@ def test_blocked_task():
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_synchronous_dispatcher(job_dispatcher):
-    TaskScheduler(Config.task_scheduler_configs.create())
-    job_dispatcher.assert_called_with(False, False, None, None)
+    TaskScheduler(Config.set_job_config())
+    job_dispatcher.assert_called_with(
+        JobConfig.DEFAULT_PARALLEL_EXECUTION,
+        JobConfig.DEFAULT_REMOTE_EXECUTION,
+        JobConfig.DEFAULT_NB_OF_WORKERS,
+        JobConfig.DEFAULT_HOSTNAME,
+    )
 
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_parallel_dispatcher(job_dispatcher):
-    TaskScheduler(Config.task_scheduler_configs.create(parallel_execution=True, nb_of_workers=42))
-    job_dispatcher.assert_called_with(True, False, 42, None)
+    TaskScheduler(Config.set_job_config(parallel_execution=True, nb_of_workers=42))
+    job_dispatcher.assert_called_with(True, JobConfig.DEFAULT_REMOTE_EXECUTION, 42, JobConfig.DEFAULT_HOSTNAME)
 
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_remote_dispatcher(job_dispatcher):
-    TaskScheduler(Config.task_scheduler_configs.create(remote_execution=True, nb_of_workers=42))
-    job_dispatcher.assert_called_with(False, True, 42, None)
+    TaskScheduler(Config.set_job_config(remote_execution=True, nb_of_workers=42))
+    job_dispatcher.assert_called_with(JobConfig.DEFAULT_PARALLEL_EXECUTION, True, 42, JobConfig.DEFAULT_HOSTNAME)
 
 
 def _create_task(function, nb_outputs=1):
-    config_name = str(uuid.uuid4())
+    output_ds_config_name = str(uuid.uuid4())
     input_ds = [
-        DataManager().get_or_create(
-            Config.data_source_configs.create("input1", "in_memory", Scope.PIPELINE, default_data=21)
-        ),
-        DataManager().get_or_create(
-            Config.data_source_configs.create("input2", "in_memory", Scope.PIPELINE, default_data=2)
-        ),
+        DataManager().get_or_create(Config.add_data_source("input1", "in_memory", Scope.PIPELINE, default_data=21)),
+        DataManager().get_or_create(Config.add_data_source("input2", "in_memory", Scope.PIPELINE, default_data=2)),
     ]
     output_ds = [
         DataManager().get_or_create(
-            Config.data_source_configs.create(f"{config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+            Config.add_data_source(f"{output_ds_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]
 
     return Task(
-        config_name,
+        output_ds_config_name,
         input=input_ds,
         function=function,
         output=output_ds,

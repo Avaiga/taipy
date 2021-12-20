@@ -10,7 +10,7 @@ from taipy.data.data_source import DataSource
 
 
 class Task:
-    """Entity that holds function, parameters and outputs that will be executed.
+    """Holds user function that will be executed, its parameters qs data sources and outputs as data sources.
 
     This element bring together the user code as function, parameters and outputs.
 
