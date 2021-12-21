@@ -1,0 +1,2 @@
+SECRET_KEY=testing
+DATABASE_URI=sqlite:///:memory:
