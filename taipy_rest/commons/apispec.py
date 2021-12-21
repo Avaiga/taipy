@@ -62,9 +62,15 @@ class APISpecExt:
             url_prefix=app.config["SWAGGER_URL_PREFIX"],
         )
 
-        blueprint.add_url_rule(app.config["SWAGGER_JSON_URL"], "swagger_json", self.swagger_json)
-        blueprint.add_url_rule(app.config["SWAGGER_UI_URL"], "swagger_ui", self.swagger_ui)
-        blueprint.add_url_rule(app.config["OPENAPI_YAML_URL"], "openapi_yaml", self.openapi_yaml)
+        blueprint.add_url_rule(
+            app.config["SWAGGER_JSON_URL"], "swagger_json", self.swagger_json
+        )
+        blueprint.add_url_rule(
+            app.config["SWAGGER_UI_URL"], "swagger_ui", self.swagger_ui
+        )
+        blueprint.add_url_rule(
+            app.config["OPENAPI_YAML_URL"], "openapi_yaml", self.openapi_yaml
+        )
         blueprint.add_url_rule(app.config["REDOC_UI_URL"], "redoc_ui", self.redoc_ui)
 
         app.register_blueprint(blueprint)
