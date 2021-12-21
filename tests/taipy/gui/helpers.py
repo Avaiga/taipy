@@ -51,3 +51,9 @@ class Helpers:
         assert "name" in payload and payload["name"] == varname
         assert "payload" in payload and "value" in payload["payload"] and payload["payload"]["value"] == value
         logging.getLogger().debug(payload["payload"]["value"])
+
+    @staticmethod
+    def create_scope_and_get_sid(gui: Gui) -> str:
+        sid = "test"
+        gui._scopes.create_scope(sid)
+        return sid

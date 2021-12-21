@@ -37,7 +37,7 @@ class _Evaluator:
         self.__expr_to_var_list: t.Dict[str, t.List[str]] = {}
 
     def get_hash_from_expr(self, expr: str) -> str:
-        return self.__expr_to_hash[expr]
+        return self.__expr_to_hash[expr] if expr in self.__expr_to_hash else expr
 
     def get_expr_from_hash(self, hash: str) -> str:
         return self.__hash_to_expr[hash]
