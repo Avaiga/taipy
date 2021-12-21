@@ -16,7 +16,7 @@ class User(db.Model):
     def password(self):
         return self._password
 
-    @password.setter
+    @password.setter  # type: ignore
     def password(self, value):
         self._password = pwd_context.hash(value)
 

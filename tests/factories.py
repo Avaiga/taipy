@@ -1,4 +1,5 @@
 import factory
+
 from taipy_rest.models import User
 
 

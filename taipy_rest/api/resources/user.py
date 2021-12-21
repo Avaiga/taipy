@@ -1,9 +1,10 @@
 from flask import request
 from flask_restful import Resource
+
 from taipy_rest.api.schemas import UserSchema
-from taipy_rest.models import User
-from taipy_rest.extensions import db
 from taipy_rest.commons.pagination import paginate
+from taipy_rest.extensions import db
+from taipy_rest.models import User
 
 
 class UserResource(Resource):

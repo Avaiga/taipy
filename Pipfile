@@ -23,6 +23,7 @@ uwsgi = "*"
 pytest = "*"
 pytest-factoryboy = "*"
 pytest-flask = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.9"

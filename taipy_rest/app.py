@@ -1,9 +1,7 @@
 from flask import Flask
-from taipy_rest import api
-from taipy_rest import manage
-from taipy_rest.extensions import apispec
-from taipy_rest.extensions import db
-from taipy_rest.extensions import migrate
+
+from taipy_rest import api, manage
+from taipy_rest.extensions import apispec, db, migrate
 
 
 def create_app(testing=False):

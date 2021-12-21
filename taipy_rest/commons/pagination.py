@@ -1,6 +1,6 @@
 """Simple helper to paginate query
 """
-from flask import url_for, request
+from flask import request, url_for
 
 DEFAULT_PAGE_SIZE = 50
 DEFAULT_PAGE_NUMBER = 1

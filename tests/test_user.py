@@ -6,7 +6,7 @@ from taipy_rest.models import User
 
 def test_get_user(client, db, user):
     # test 404
-    user_url = url_for('api.user_by_id', user_id="100000")
+    user_url = url_for("api.user_by_id", user_id="100000")
     rep = client.get(user_url)
     assert rep.status_code == 404
 
@@ -14,7 +14,7 @@ def test_get_user(client, db, user):
     db.session.commit()
 
     # test get_user
-    user_url = url_for('api.user_by_id', user_id=user.id)
+    user_url = url_for("api.user_by_id", user_id=user.id)
     rep = client.get(user_url)
     assert rep.status_code == 200
 
@@ -26,7 +26,7 @@ def test_get_user(client, db, user):
 
 def test_put_user(client, db, user):
     # test 404
-    user_url = url_for('api.user_by_id', user_id="100000")
+    user_url = url_for("api.user_by_id", user_id="100000")
     rep = client.put(user_url)
     assert rep.status_code == 404
 
@@ -35,7 +35,7 @@ def test_put_user(client, db, user):
 
     data = {"username": "updated", "password": "new_password"}
 
-    user_url = url_for('api.user_by_id', user_id=user.id)
+    user_url = url_for("api.user_by_id", user_id=user.id)
     # test update user
     rep = client.put(user_url, json=data)
     assert rep.status_code == 200
@@ -51,7 +51,7 @@ def test_put_user(client, db, user):
 
 def test_delete_user(client, db, user):
     # test 404
-    user_url = url_for('api.user_by_id', user_id="100000")
+    user_url = url_for("api.user_by_id", user_id="100000")
     rep = client.delete(user_url)
     assert rep.status_code == 404
 
@@ -60,7 +60,7 @@ def test_delete_user(client, db, user):
 
     # test get_user
 
-    user_url = url_for('api.user_by_id', user_id=user.id)
+    user_url = url_for("api.user_by_id", user_id=user.id)
     rep = client.delete(user_url)
     assert rep.status_code == 200
     assert db.session.query(User).filter_by(id=user.id).first() is None
@@ -68,7 +68,7 @@ def test_delete_user(client, db, user):
 
 def test_create_user(client, db):
     # test bad data
-    users_url = url_for('api.users')
+    users_url = url_for("api.users")
     data = {"username": "created"}
     rep = client.post(users_url, json=data)
     assert rep.status_code == 400
@@ -87,7 +87,7 @@ def test_create_user(client, db):
 
 
 def test_get_all_user(client, db, user_factory):
-    users_url = url_for('api.users')
+    users_url = url_for("api.users")
     users = user_factory.create_batch(30)
 
     db.session.add_all(users)

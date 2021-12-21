@@ -1,10 +1,10 @@
 from flask import Blueprint, current_app, jsonify
 from flask_restful import Api
 from marshmallow import ValidationError
-from taipy_rest.extensions import apispec
-from taipy_rest.api.resources import UserResource, UserList
-from taipy_rest.api.schemas import UserSchema
 
+from taipy_rest.api.resources import UserList, UserResource
+from taipy_rest.api.schemas import UserSchema
+from taipy_rest.extensions import apispec
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 api = Api(blueprint)

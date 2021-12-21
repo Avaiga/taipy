@@ -1,5 +1,5 @@
+from taipy_rest.extensions import db, ma
 from taipy_rest.models import User
-from taipy_rest.extensions import ma, db
 
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
