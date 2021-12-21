@@ -3,9 +3,8 @@ from datetime import datetime, timedelta
 import pytest
 
 from taipy.common import utils
-from taipy.common.alias import CycleId, PipelineId, ScenarioId, TaskId
+from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.config.config import Config
-from taipy.cycle.cycle import Cycle
 from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
@@ -247,6 +246,38 @@ def test_notification_subscribe_unsubscribe(mocker):
     with pytest.raises(KeyError):
         scenario_manager.unsubscribe(notify_1, scenario)
     scenario_manager.unsubscribe(notify_2, scenario)
+
+
+def test_scenario_notification_subscribe_all():
+    scenario_manager = ScenarioManager()
+    scenario_config = Config.add_scenario(
+        "Awesome scenario",
+        [
+            Config.add_pipeline(
+                "by 6",
+                [
+                    Config.add_task(
+                        "mult by 2",
+                        [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        mult_by_2,
+                        Config.add_data_source("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
+
+    scenario = ScenarioManager().create(scenario_config)
+    scenario_config.name = "other scenario"
+
+    other_scenario = ScenarioManager().create(scenario_config)
+
+    notify_1 = NotifyMock(scenario)
+
+    scenario_manager.subscribe(notify_1)
+
+    assert len(scenario_manager.get(scenario.id).subscribers) == 1
+    assert len(scenario_manager.get(other_scenario.id).subscribers) == 1
 
 
 def test_get_set_master_scenario():
