@@ -11,24 +11,24 @@ class _DataScopes:
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {}
         self.__scopes["global"] = SimpleNamespace()
-        self.__multi_user = True
+        self.__single_client = False
 
-    def set_multi_user(self, value: bool) -> None:
-        self.__multi_user = value
+    def set_single_client(self, value: bool) -> None:
+        self.__single_client = value
 
-    def get_multi_user(self) -> bool:
-        return self.__multi_user
+    def get_single_client(self) -> bool:
+        return self.__single_client
 
     def get_scope(self) -> SimpleNamespace:
-        if not self.__multi_user or not request:
+        if self.__single_client or not request:
             return self.__scopes["global"]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
         client_id = getattr(request, "taipy_client_id", "")
         if not client_id:
             client_id = request.args.get("client_id", "")
-            if not client_id:
-                warnings.warn("Empty session id, using global scope instead")
-                return self.__scopes["global"]
+        if not client_id:
+            warnings.warn("Empty session id, using global scope instead")
+            return self.__scopes["global"]
         if client_id not in self.__scopes:
             warnings.warn(
                 f"session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you might have to reload your webpage"
@@ -47,7 +47,7 @@ class _DataScopes:
         return self.__scopes["global"]
 
     def broadcast_data(self, name, value):
-        if not self.__multi_user:
+        if self.__single_client:
             return
         if not hasattr(request, "taipy_client_id"):
             for _, v in self.__scopes.items():
@@ -55,7 +55,7 @@ class _DataScopes:
                     setattr(v, name, value)
 
     def create_scope(self, id: str) -> None:
-        if not self.__multi_user:
+        if self.__single_client:
             return
         if id is None:
             warnings.warn("Empty session id, might be due to unestablished WebSocket connection")
@@ -64,7 +64,7 @@ class _DataScopes:
             self.__scopes[id] = SimpleNamespace()
 
     def delete_scope(self, id: str) -> None:
-        if not self.__multi_user:
+        if self.__single_client:
             return
         if id is None:
             warnings.warn("Empty session id, might be due to unestablished WebSocket connection")

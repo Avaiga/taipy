@@ -32,5 +32,5 @@ Here are the various configuration elements that you can set:
   - `notification_duration` (_int_, defaults to _3000_): The time, in milliseconds, that
     notifications should remain visible (see [Notifications](user_notifications.md) for
     details).
-  - `multi_user` (_bool_, defaults to _True_): Set to _True_ if multiple clients can connect
+  - `single_client` (_bool_, defaults to _False_): Set to _True_ if only one client can connect and to _False_ if multiple clients can connect
     to this `Gui` instance.

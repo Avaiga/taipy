@@ -22,7 +22,7 @@ AppConfigOption = t.Literal[
     "use_arrow",
     "browser_notification",
     "notification_duration",
-    "multi_user",
+    "single_client",
 ]
 
 AppConfig = t.TypedDict(
@@ -43,7 +43,7 @@ AppConfig = t.TypedDict(
         "use_arrow": bool,
         "browser_notification": bool,
         "notification_duration": int,
-        "multi_user": bool,
+        "single_client": bool,
     },
     total=False,
 )

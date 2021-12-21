@@ -320,7 +320,7 @@ class Gui(object, metaclass=Singleton):
         self.__send_ws({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def _get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or not self._scopes.get_multi_user():
+        if not hasattr(request, "sid") or self._scopes.get_single_client():
             return None
         return request.sid  # type: ignore
 
@@ -711,7 +711,7 @@ class Gui(object, metaclass=Singleton):
         self._accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
         # Use multi user or not
-        self._scopes.set_multi_user(app_config["multi_user"])
+        self._scopes.set_single_client(app_config["single_client"])
 
         # Start Flask Server
         if run_server:
