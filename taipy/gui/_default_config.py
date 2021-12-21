@@ -17,7 +17,7 @@ app_config_default: AppConfig = {
     "use_arrow": False,
     "browser_notification": True,
     "notification_duration": 3000,
-    "single_client": True,
+    "single_client": False,
 }
 
 style_config_default: StyleConfig = {
