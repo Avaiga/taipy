@@ -18,6 +18,7 @@ Flask-Migrate = "*"
 Flask-SQLAlchemy = "*"
 Flask-JWT-Extended = "*"
 uwsgi = "*"
+black = "*"
 
 [dev-packages]
 pytest = "*"
