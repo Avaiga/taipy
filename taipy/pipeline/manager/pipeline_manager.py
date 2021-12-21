@@ -1,5 +1,8 @@
+import json
 import logging
+import os
 from functools import partial
+from pathlib import Path
 from typing import Callable, List, Optional, Set
 
 from taipy.common.alias import PipelineId, ScenarioId
@@ -28,6 +31,7 @@ class PipelineManager:
         """
         Initializes a new pipeline manager.
         """
+        self.is_standalone = True
         self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
@@ -137,9 +141,21 @@ class PipelineManager:
         callbacks = callbacks or []
         pipeline_to_submit = self.get(pipeline_id)
         pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline_to_submit) + callbacks
-        for tasks in pipeline_to_submit.get_sorted_tasks():
-            for task in tasks:
-                self.task_scheduler.submit(task, pipeline_subscription_callback)
+        if self.is_standalone:
+            for tasks in pipeline_to_submit.get_sorted_tasks():
+                for task in tasks:
+                    self.task_scheduler.submit(task, pipeline_subscription_callback)
+        else:
+            tasks = [task for task in pipeline_to_submit.tasks.values()]
+            json_model = {
+                "path": "tests/airflow",
+                "dag_id": pipeline_id,
+                "task_repository": str(Path(self.task_manager.data_manager.repository.dir_name).resolve()),
+                "data_source_repository": str(Path(self.task_manager.data_manager.repository.dir_name).resolve()),
+                "tasks": [task.id for task in tasks],
+            }
+            with open(f"{pipeline_id}.json", "w", encoding="utf-8") as f:
+                json.dump(json_model, f, ensure_ascii=False, indent=4)
 
     def __get_status_notifier_callbacks(self, pipeline: Pipeline) -> List:
         return [partial(c, pipeline) for c in pipeline.subscribers]
