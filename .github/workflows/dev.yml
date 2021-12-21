@@ -52,13 +52,15 @@ jobs:
         if: matrix.os == 'ubuntu-18.04'
         uses: ricardochaves/python-lint@v1.4.0
         with:
-            python-root-list: "taipy tests"
+            python-root-list: "taipy_rest tests"
             use-pylint: false
             use-isort: false
             extra-pycodestyle-options: "--max-line-length=120 --ignore=E203,E266,E501,E722,W503,F403,F401"
             extra-mypy-options: "--ignore-missing-imports"
 
-
       - name: test with tox
         run: |
           tox
+
+      - name: list files
+        run: ls -l .
