@@ -54,7 +54,7 @@ class DataSourceResource(Resource):
       description: Delete a single datasource by ID
       parameters:
         - in: path
-          name: user_id
+          name: datasource_id
           schema:
             type: integer
       responses:
