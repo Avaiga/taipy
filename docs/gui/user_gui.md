@@ -24,11 +24,11 @@ Here are the various configuration elements that you can set:
      - _"client"_ indicates that the time zone to be used is the one of the Web client.
      - _"server"_ indicates that the time zone to be used is the one of the Web server.
   - `client_url` (_str_, defaults to _"https:127.0.0.1:5000"_): TODO
-  - `theme` (_str_ or _None_, defaults to _None_):  
+  - `theme` (_str_ or _None_, defaults to _None_): 
   - `use_arrow` (_bool_, defaults to _False_): Can be set to _True_ in order to use the
     [Apache Arrow](https://arrow.apache.org/) technology to serialize data to Taipy
     clients. This allows for better performance in many situations.
-  - `browser_notification` (_bool_, defaults to _True_):  
+  - `browser_notification` (_bool_, defaults to _True_): 
   - `notification_duration` (_int_, defaults to _3000_): The time, in milliseconds, that
     notifications should remain visible (see [Notifications](user_notifications.md) for
     details).
