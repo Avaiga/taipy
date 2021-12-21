@@ -248,9 +248,9 @@ def test_pipeline_notification_subscribe_all():
         [
             Config.add_task(
                 "mult by 2",
-                [Config.data_source_configs.create("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 mult_by_2,
-                Config.data_source_configs.create("bar", "in_memory", Scope.PIPELINE, default_data=0),
+                Config.add_data_source("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )

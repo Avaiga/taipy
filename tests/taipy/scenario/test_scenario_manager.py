@@ -3,9 +3,8 @@ from datetime import datetime, timedelta
 import pytest
 
 from taipy.common import utils
-from taipy.common.alias import CycleId, PipelineId, ScenarioId, TaskId
+from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.config.config import Config
-from taipy.cycle.cycle import Cycle
 from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
@@ -251,17 +250,17 @@ def test_notification_subscribe_unsubscribe(mocker):
 
 def test_scenario_notification_subscribe_all():
     scenario_manager = ScenarioManager()
-    scenario_config = ScenarioConfig(
+    scenario_config = Config.add_scenario(
         "Awesome scenario",
         [
-            PipelineConfig(
+            Config.add_pipeline(
                 "by 6",
                 [
-                    TaskConfig(
+                    Config.add_task(
                         "mult by 2",
-                        [DataSourceConfig("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                         mult_by_2,
-                        DataSourceConfig("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        Config.add_data_source("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
