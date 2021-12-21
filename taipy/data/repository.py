@@ -1,16 +1,14 @@
 from datetime import datetime
 
+from taipy.config.config import Config
 from taipy.data import DataSource
 from taipy.data.data_source_model import DataSourceModel
 from taipy.repository import FileSystemRepository
 
 
 class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
-    def __init__(self, class_map, dir_name="data_sources"):
-        super().__init__(
-            model=DataSourceModel,
-            dir_name=dir_name,
-        )
+    def __init__(self, class_map, dir_name="data_sources", base_path=Config.global_config().storage_folder):
+        super().__init__(model=DataSourceModel, dir_name=dir_name, base_path=base_path)
         self.class_map = class_map
 
     def to_model(self, data_source: DataSource):

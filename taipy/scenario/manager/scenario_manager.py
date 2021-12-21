@@ -33,7 +33,7 @@ class ScenarioManager:
     cycle_manager = CycleManager()
     task_manager = pipeline_manager.task_manager
     data_manager = pipeline_manager.data_manager
-    repository = ScenarioRepository(dir_name="scenarios")
+    repository = ScenarioRepository()
 
     def subscribe(self, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
         """

@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from taipy.common import utils
 from taipy.common.alias import CycleId, PipelineId
+from taipy.config import Config
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager import CycleManager
 from taipy.pipeline.manager.pipeline_manager import PipelineManager
@@ -12,8 +13,8 @@ from taipy.scenario.scenario_model import ScenarioModel
 
 
 class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
-    def __init__(self, dir_name="scenarios"):
-        super().__init__(model=ScenarioModel, dir_name=dir_name)
+    def __init__(self, dir_name="scenarios", base_path=Config.global_config().storage_folder):
+        super().__init__(model=ScenarioModel, dir_name=dir_name, base_path=base_path)
 
     def to_model(self, scenario: Scenario):
         return ScenarioModel(

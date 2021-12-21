@@ -11,7 +11,6 @@ from taipy.data import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.repository import PipelineRepository
 from taipy.task import Job
 from taipy.task.manager.task_manager import TaskManager
@@ -32,7 +31,7 @@ class PipelineManager:
         Initializes a new pipeline manager.
         """
         self.is_standalone = True
-        self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
+        self.repository = PipelineRepository()
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
