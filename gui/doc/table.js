@@ -73,20 +73,32 @@ class table extends shared {
     page_size_options = [50, 100, 500];
 
     /**
-     *  List of column names <br><ul><li>*str* ; separated list </li><li>*List[str]* </li><li>*dict* <pre>{"col name": {format: "format", index: 1}}</pre>if index is specified, it represents the display order of the columns <br>if not, the list order defines the index</li></ul>
+     * List of column names <br><ul><li>*str* ; separated list </li><li>*List[str]* </li><li>*dict* <pre>{"col name": {format: "format", index: 1}}</pre>if index is specified, it represents the display order of the columns <br>if not, the list order defines the index</li></ul>
      * @type {str|List[str]|dict[str, dict[str, str|int]]}
      */
     columns = "All columns";
 
     /**
-     * date format for all date columns when format is not defined
+     * Date format for all date columns when format is not defined
      * @type {str}
      */
     date_format = "MM/dd/yyyy";
 
     /**
-     * number format for all number columns when format is not defined <br>format is printf compatible
+     * Number format for all number columns when format is not defined <br>format is printf compatible
      * @type {str}
      */
     number_format;
+
+    /**
+     * List of columns names that can be aggregated
+     * @type {List[str]|str}
+     */
+    group_by;
+
+    /**
+     * Dictionnary where key is the column name and value is the name of an aggregation function (built-in functions are count, sum, mean, median, min, max, std, first, last). A local function name can also be provided, it should take a serie as parameter and return a scalar value
+     * @type {Dict[str,str]|str}
+     */
+    apply;
 }
