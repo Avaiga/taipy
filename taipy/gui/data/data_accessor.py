@@ -29,7 +29,7 @@ class DataAccessor(ABC):
 
     @abstractmethod
     def get_data(
-        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         pass
 
