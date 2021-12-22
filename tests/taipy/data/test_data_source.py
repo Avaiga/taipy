@@ -1,10 +1,12 @@
 from datetime import datetime, timedelta
 from time import sleep
 
+import pandas as pd
 import pytest
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data import DataSource, InMemoryDataSource, Scope
+from taipy.data.operator import Operator
 from taipy.exceptions.data_source import NoData
 
 
@@ -20,6 +22,20 @@ class FakeDataSource(DataSource):
 
     def _write(self, data):
         self.write_has_been_called += 1
+
+
+class FakeDataframeDataSource(DataSource):
+    COLUMN_NAME = "col_1"
+    data = pd.DataFrame({COLUMN_NAME: [i for i in range(3)]})
+
+    def __init__(self, config_name, **kwargs):
+        super().__init__(config_name, **kwargs)
+
+    def _read(self, query=None):
+        return self.data
+
+    def _write(self, data):
+        self.data = self.data.append({self.COLUMN_NAME: self.data.iloc[-1][self.COLUMN_NAME] + 1}, ignore_index=True)
 
 
 class TestDataSource:
@@ -141,3 +157,18 @@ class TestDataSource:
         # Has been writen more than 30 minutes ago
         ds.last_edition_date = datetime.now() + timedelta(days=-1)
         assert ds.is_up_to_date is False
+
+    def test_filter(self):
+        ds = FakeDataSource("fake ds")
+        ds.write("Any data")
+
+        assert NotImplemented == ds.filter("any", 0, Operator.EQUAL)
+        assert NotImplemented == ds.filter("any", 0, Operator.LESSER)
+        assert NotImplemented == ds.filter("any", 0, Operator.GREATER)
+
+        df_ds = FakeDataframeDataSource("fake dataframe ds")
+        df_ds.write("Any data")
+
+        assert len(df_ds.filter(df_ds.COLUMN_NAME, 1, Operator.EQUAL)) == 1
+        assert len(df_ds.filter(df_ds.COLUMN_NAME, 1, Operator.GREATER)) == 2
+        assert len(df_ds.filter(df_ds.COLUMN_NAME, 1, Operator.LESSER)) == 1

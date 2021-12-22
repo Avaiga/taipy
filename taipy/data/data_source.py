@@ -4,8 +4,11 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import List, Optional
 
+import pandas as pd
+
 from taipy.common import protect_name
 from taipy.common.alias import DataSourceId, JobId
+from taipy.data.operator import Operator
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
 
@@ -122,6 +125,21 @@ class DataSource:
         self.edition_in_progress = False
         if job_id:
             self.job_ids.append(job_id)
+
+    def filter(self, keys, value, operator: Operator = Operator.EQUAL):
+        data = self._read()
+
+        if not isinstance(data, pd.DataFrame):
+            return NotImplemented
+
+        data = data[keys]
+
+        if operator == Operator.EQUAL:
+            return data[data == value]
+        if operator == Operator.GREATER:
+            return data[data > value]
+        if operator == Operator.LESSER:
+            return data[data < value]
 
     @abstractmethod
     def _read(self):
