@@ -12,6 +12,7 @@ from .data_format import DataFormat
 if t.TYPE_CHECKING:
     from ..gui import Gui
 
+
 class PandasDataAccessor(DataAccessor):
     @staticmethod
     def get_supported_classes() -> t.Callable:  # type: ignore

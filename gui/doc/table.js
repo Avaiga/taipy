@@ -74,7 +74,7 @@ class table extends shared {
 
     /**
      * List of column names <br><ul><li>*str* ; separated list </li><li>*List[str]* </li><li>*dict* <pre>{"col name": {format: "format", index: 1}}</pre>if index is specified, it represents the display order of the columns <br>if not, the list order defines the index</li></ul>
-     * @type {str|List[str]|dict[str, dict[str, str|int]]}
+     * @type {str|List[str]|Dict[str, Dict[str, str|int]]}
      */
     columns = "All columns";
 
