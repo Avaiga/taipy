@@ -1,4 +1,14 @@
-import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties } from "react";
+import React, {
+    useState,
+    useEffect,
+    useContext,
+    useCallback,
+    useRef,
+    useMemo,
+    CSSProperties,
+    ChangeEvent,
+    MouseEvent,
+} from "react";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -14,6 +24,8 @@ import Typography from "@mui/material/Typography";
 import { visuallyHidden } from "@mui/utils";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
+import DataSaverOn from "@mui/icons-material/DataSaverOn";
+import DataSaverOff from "@mui/icons-material/DataSaverOff";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
@@ -24,6 +36,7 @@ import {
     EditableCell,
     EDIT_COL,
     getsortByIndex,
+    headBoxSx,
     iconInRowSx,
     OnCellValidation,
     OnRowDeletion,
@@ -38,7 +51,7 @@ import {
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
-const skelSx = {width: "100%", height: "3em"};
+const skelSx = { width: "100%", height: "3em" };
 
 const rowsPerPageOptions: PageSizeOptionsType = [10, 50, 100, 500];
 
@@ -65,6 +78,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [order, setOrder] = useState<Order>("asc");
     const [orderBy, setOrderBy] = useState("");
     const [loading, setLoading] = useState(true);
+    const [aggregates, setAggregates] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
     const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
@@ -102,10 +116,26 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     useEffect(() => {
         const endIndex = showAll ? -1 : startIndex + rowsPerPage;
-        pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}`;
+        const agg = aggregates.length
+            ? colsOrder.reduce((pv, col, idx) => {
+                  if (aggregates.includes(columns[col].dfid)) {
+                      return pv + "-" + idx;
+                  }
+                  return pv;
+              }, "-agg")
+            : "";
+        pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}${agg}`;
         if (!props.value || props.value[pageKey.current] === undefined || !!refresh) {
             setLoading(true);
             const cols = colsOrder.map((col) => columns[col].dfid);
+            const applies = aggregates.length
+                ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
+                      if (columns[col].apply) {
+                          pv[columns[col].dfid] = columns[col].apply;
+                      }
+                      return pv;
+                  }, {})
+                : undefined;
             dispatch(
                 createRequestTableUpdateAction(
                     tp_varname,
@@ -115,18 +145,33 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     startIndex,
                     endIndex,
                     orderBy,
-                    order
+                    order,
+                    aggregates,
+                    applies
                 )
             );
         } else {
             setValue(props.value[pageKey.current]);
             setLoading(false);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [startIndex, refresh, colsOrder, columns, showAll, rowsPerPage, order, orderBy, tp_varname, id, dispatch]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        startIndex,
+        refresh,
+        aggregates,
+        colsOrder,
+        columns,
+        showAll,
+        rowsPerPage,
+        order,
+        orderBy,
+        tp_varname,
+        id,
+        dispatch,
+    ]);
 
     const handleRequestSort = useCallback(
-        (event: React.MouseEvent<unknown>, col: string) => {
+        (event: MouseEvent<unknown>, col: string) => {
             const isAsc = orderBy === col && order === "asc";
             setOrder(isAsc ? "desc" : "asc");
             setOrderBy(col);
@@ -135,7 +180,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     );
 
     const createSortHandler = useCallback(
-        (col: string) => (event: React.MouseEvent<unknown>) => {
+        (col: string) => (event: MouseEvent<unknown>) => {
             handleRequestSort(event, col);
         },
         [handleRequestSort]
@@ -148,10 +193,24 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         [rowsPerPage]
     );
 
-    const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChangeRowsPerPage = useCallback((event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setLoading(true);
         setRowsPerPage(parseInt(event.target.value, 10));
         setStartIndex(0);
+    }, []);
+
+    const onAggregate = useCallback((e: MouseEvent<HTMLElement>) => {
+        const groupBy = e.currentTarget.getAttribute("data-dfid");
+        if (groupBy) {
+            setAggregates((ags) => {
+                const nags = ags.filter((ag) => ag !== groupBy);
+                if (ags.length == nags.length) {
+                    nags.push(groupBy);
+                }
+                return nags;
+            });
+        }
+        e.stopPropagation();
     }, []);
 
     const onAddRowClick = useCallback(
@@ -241,19 +300,39 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                 </IconButton>
                                             ) : null
                                         ) : (
-                                        <TableSortLabel
-                                            active={orderBy === columns[col].dfid}
-                                            direction={orderBy === columns[col].dfid ? order : "asc"}
-                                            onClick={createSortHandler(columns[col].dfid)}
-                                            disabled={!active}
-                                        >
-                                            {columns[col].title || columns[col].dfid}
-                                            {orderBy === columns[col].dfid ? (
-                                                <Box component="span" sx={visuallyHidden}>
-                                                    {order === "desc" ? "sorted descending" : "sorted ascending"}
+                                            <TableSortLabel
+                                                active={orderBy === columns[col].dfid}
+                                                direction={orderBy === columns[col].dfid ? order : "asc"}
+                                                onClick={createSortHandler(columns[col].dfid)}
+                                                disabled={!active}
+                                            >
+                                                <Box sx={headBoxSx}>
+                                                    {columns[col].groupBy ? (
+                                                        <IconButton
+                                                            onClick={onAggregate}
+                                                            size="small"
+                                                            title="aggregate"
+                                                            sx={iconInRowSx}
+                                                            data-dfid={columns[col].dfid}
+                                                            disabled={!active}
+                                                        >
+                                                            {aggregates.includes(columns[col].dfid) ? (
+                                                                <DataSaverOff />
+                                                            ) : (
+                                                                <DataSaverOn />
+                                                            )}
+                                                        </IconButton>
+                                                    ) : null}
+                                                    {columns[col].title === undefined
+                                                        ? columns[col].dfid
+                                                        : columns[col].title}
                                                 </Box>
-                                            ) : null}
-                                        </TableSortLabel>
+                                                {orderBy === columns[col].dfid ? (
+                                                    <Box component="span" sx={visuallyHidden}>
+                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
+                                                    </Box>
+                                                ) : null}
+                                            </TableSortLabel>
                                         )}
                                     </TableCell>
                                 ))}
@@ -280,8 +359,12 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     value={rows[index][col]}
                                                     formatConfig={formatConfig}
                                                     rowIndex={index}
-                                                    onValidation={active && editable && editAction ? onCellValidation : undefined}
-                                                    onDeletion={active && editable && deleteAction ? onRowDeletion : undefined}
+                                                    onValidation={
+                                                        active && editable && editAction ? onCellValidation : undefined
+                                                    }
+                                                    onDeletion={
+                                                        active && editable && deleteAction ? onRowDeletion : undefined
+                                                    }
                                                 />
                                             </TableCell>
                                         ))}

@@ -128,6 +128,14 @@ class Builder:
     def __set_dict_attribute(self, name: str):
         dict_attr = _get_dict_value(self.attributes, name)
         if dict_attr:
+            if isinstance(dict_attr, str):
+                vals = [x.strip().split(":") for x in dict_attr.split(";")]
+                dict_attr = {}
+                for val in vals:
+                    if len(val) > 1:
+                        value = val[2].strip()
+                        self._gui.bind_func(value)
+                        dict_attr[val[1].strip()] = value
             if isinstance(dict_attr, (dict, _MapDictionary)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
@@ -245,6 +253,38 @@ class Builder:
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
         if columns is not None:
+            group_by = self.__get_property("group_by", "")
+            if isinstance(group_by, str):
+                group_by = [x.strip() for x in group_by.split(";")]
+            if isinstance(group_by, (list, tuple)):
+                for gb in group_by:
+                    if gb:
+                        col_desc = next((x for x in columns.values() if x["dfid"] == gb), None)
+                        if col_desc:
+                            col_desc["groupBy"] = True
+                        else:
+                            warnings.warn(f"{self.element_name} group_by {gb} is not in the list of displayed columns")
+            apply = self.__get_property("apply", "")
+            if isinstance(apply, str):
+                vals = [x.strip().split(":") for x in apply.split(";")]
+                apply = {}
+                for v in vals:
+                    key = v[0].strip()
+                    if key:
+                        if len(v) > 1:
+                            value = v[1].strip()
+                            if v:
+                                if v not in self._gui._agregate_functions:
+                                    # Bind potential function
+                                    self._gui.bind_func(value)
+                            apply[key] = value
+            if isinstance(apply, (dict, _MapDictionary)):
+                for ap in apply:
+                    col_desc = next((x for x in columns.values() if x["dfid"] == ap), None)
+                    if col_desc:
+                        col_desc["apply"] = apply[ap]
+                    else:
+                        warnings.warn(f"{self.element_name} apply {ap} is not in the list of displayed columns")
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self
@@ -335,9 +375,9 @@ class Builder:
             else:
                 warnings.warn(f"Chart: layout attribute should be a dict\n'{str(layout)}'")
 
-    def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any) -> t.List[str]:
+    def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type) -> t.List[str]:
         if not hash_name and isinstance(val, str):
-            val = [int(t.strip()) for t in val.split(";")]
+            val = [elt_type(t.strip()) for t in val.split(";")]
         if isinstance(val, list):
             if hash_name:
                 self.__set_react_attribute(name, hash_name)
@@ -345,7 +385,7 @@ class Builder:
             else:
                 self.__set_json_attribute(name, val)
         else:
-            warnings.warn(f"{self.element_name} {name} should be a list of int")
+            warnings.warn(f"{self.element_name} {name} should be a list of {elt_type}")
         return []
 
     def set_chart_selected(self, max=0):
@@ -361,6 +401,7 @@ class Builder:
                         f"{name}{idx - 1}",
                         _get_dict_value(self.__hashes, name_idx if sel is not None else name),
                         sel if sel is not None else default_sel,
+                        int,
                     )
                 )
             idx += 1
