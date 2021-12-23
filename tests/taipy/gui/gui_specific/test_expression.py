@@ -69,12 +69,16 @@ def test_expression_table_control(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
     assert isinstance(gui._get_data_scope().tp_pd_concat_series_1_series_2_axis_1__0, pd.DataFrame)
 
+
 def test_lambda_expression_selector(gui: Gui, helpers):
-    gui.bind_var_val("lov", [
-        {"id": "1", "name": "scenario 1"},
-        {"id": "3", "name": "scenario 3"},
-        {"id": "2", "name": "scenario 2"},
-    ])
+    gui.bind_var_val(
+        "lov",
+        [
+            {"id": "1", "name": "scenario 1"},
+            {"id": "3", "name": "scenario 3"},
+            {"id": "2", "name": "scenario 2"},
+        ],
+    )
     gui.bind_var_val("sel", {"id": "1", "name": "scenario 1"})
     md_string = "<|{sel}|selector|lov={lov}|type=test|adapter={lambda elt: (elt['id'], elt['name'])}|>"
     expected_list = [
@@ -83,7 +87,7 @@ def test_lambda_expression_selector(gui: Gui, helpers):
         'defaultValue="[&quot;1&quot;]"',
         'tp_updatevars="lov=lov"',
         'tp_varname="sel"',
-        'value={sel}',
+        "value={sel}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
     assert isinstance(gui._get_data_scope().tp_lambda_elt_elt_id_elt_name__0, FunctionType)
