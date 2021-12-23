@@ -126,20 +126,26 @@ class DataSource:
         if job_id:
             self.job_ids.append(job_id)
 
-    def filter(self, keys, value, operator: Operator = Operator.EQUAL):
+    def filter(self, key: str, value, operator: Operator = Operator.EQUAL):
         data = self._read()
 
         if not isinstance(data, pd.DataFrame):
             return NotImplemented
 
-        data = data[keys]
+        data_by_column = data[key]
 
         if operator == Operator.EQUAL:
-            return data[data == value]
-        if operator == Operator.GREATER:
-            return data[data > value]
+            return data[data_by_column == value]
+        if operator == Operator.NOTEQUAL:
+            return data[data_by_column != value]
         if operator == Operator.LESSER:
-            return data[data < value]
+            return data[data_by_column < value]
+        if operator == Operator.LESSEROREQUAL:
+            return data[data_by_column <= value]
+        if operator == Operator.GREATER:
+            return data[data_by_column > value]
+        if operator == Operator.GREATEROREQUAL:
+            return data[data_by_column >= value]
 
     @abstractmethod
     def _read(self):

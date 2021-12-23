@@ -7,5 +7,8 @@ class Operator(Enum):
     """
 
     EQUAL = 1
-    LESSER = 2
-    GREATER = 3
+    NOTEQUAL = 2
+    LESSER = 3
+    LESSEROREQUAL = 4
+    GREATER = 5
+    GREATEROREQUAL = 6

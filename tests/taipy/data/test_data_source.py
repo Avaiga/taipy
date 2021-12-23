@@ -25,8 +25,9 @@ class FakeDataSource(DataSource):
 
 
 class FakeDataframeDataSource(DataSource):
-    COLUMN_NAME = "col_1"
-    data = pd.DataFrame({COLUMN_NAME: [i for i in range(3)]})
+    COLUMN_NAME_1 = "col_1"
+    COLUMN_NAME_2 = "col_2"
+    data = pd.DataFrame({COLUMN_NAME_1: [i for i in range(3)], COLUMN_NAME_2: [i for i in range(3)]})
 
     def __init__(self, config_name, **kwargs):
         super().__init__(config_name, **kwargs)
@@ -35,7 +36,13 @@ class FakeDataframeDataSource(DataSource):
         return self.data
 
     def _write(self, data):
-        self.data = self.data.append({self.COLUMN_NAME: self.data.iloc[-1][self.COLUMN_NAME] + 1}, ignore_index=True)
+        self.data = self.data.append(
+            {
+                self.COLUMN_NAME_1: self.data.iloc[-1][self.COLUMN_NAME_1] + 1,
+                self.COLUMN_NAME_2: 0,
+            },
+            ignore_index=True,
+        )
 
 
 class TestDataSource:
@@ -163,12 +170,20 @@ class TestDataSource:
         ds.write("Any data")
 
         assert NotImplemented == ds.filter("any", 0, Operator.EQUAL)
+        assert NotImplemented == ds.filter("any", 0, Operator.NOTEQUAL)
         assert NotImplemented == ds.filter("any", 0, Operator.LESSER)
+        assert NotImplemented == ds.filter("any", 0, Operator.LESSEROREQUAL)
         assert NotImplemented == ds.filter("any", 0, Operator.GREATER)
+        assert NotImplemented == ds.filter("any", 0, Operator.GREATEROREQUAL)
 
         df_ds = FakeDataframeDataSource("fake dataframe ds")
         df_ds.write("Any data")
 
-        assert len(df_ds.filter(df_ds.COLUMN_NAME, 1, Operator.EQUAL)) == 1
-        assert len(df_ds.filter(df_ds.COLUMN_NAME, 1, Operator.GREATER)) == 2
-        assert len(df_ds.filter(df_ds.COLUMN_NAME, 1, Operator.LESSER)) == 1
+        COLUMN_NAME_1 = df_ds.COLUMN_NAME_1
+
+        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.EQUAL)) == 1
+        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.NOTEQUAL)) == 3
+        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.LESSER)) == 1
+        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.LESSEROREQUAL)) == 2
+        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.GREATER)) == 2
+        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.GREATEROREQUAL)) == 3
