@@ -6,6 +6,9 @@ from abc import ABC, abstractmethod
 from ..utils import _get_dict_value
 from .data_format import DataFormat
 
+if t.TYPE_CHECKING:
+    from ..gui import Gui
+
 
 class DataAccessor(ABC):
 
@@ -26,7 +29,7 @@ class DataAccessor(ABC):
 
     @abstractmethod
     def get_data(
-        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         pass
 
@@ -79,8 +82,8 @@ class _DataAccessors(object):
         inst = _get_dict_value(self.__access_4_type, value.__class__)
         return inst and inst.is_data_access(var_name, value)
 
-    def _get_data(self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
-        return self.__get_instance(value).get_data(var_name, value, payload, self.__data_format)
+    def _get_data(self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        return self.__get_instance(value).get_data(guiApp, var_name, value, payload, self.__data_format)
 
     def _get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
         return self.__get_instance(value).get_col_types(var_name, value)

@@ -101,6 +101,7 @@ export interface TaipyPaginatedTableProps extends TaipyTableProps {
 export const boxSx = { width: "100%" };
 export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 250 };
+export const headBoxSx = { display: "flex", alignItems: "flex-start" };
 
 export interface OnCellValidation {
     (value: RowValue, rowIndex: number, colName: string): void;
