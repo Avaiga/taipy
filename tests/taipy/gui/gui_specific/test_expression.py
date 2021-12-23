@@ -90,4 +90,3 @@ def test_lambda_expression_selector(gui: Gui, helpers):
         "value={sel}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
-    assert isinstance(gui._get_data_scope().tp_lambda_elt_elt_id_elt_name__0, FunctionType)
