@@ -1,12 +1,11 @@
 import json
 import logging
-import os
 from functools import partial
 from pathlib import Path
 from typing import Callable, List, Optional, Set
 
 from taipy.common.alias import PipelineId, ScenarioId
-from taipy.config import PipelineConfig
+from taipy.config.pipeline_config import PipelineConfig
 from taipy.data import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline

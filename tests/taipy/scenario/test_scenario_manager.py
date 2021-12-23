@@ -4,8 +4,8 @@ import pytest
 
 from taipy.common import utils
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
+from taipy.common.frequency import Frequency
 from taipy.config.config import Config
-from taipy.cycle.frequency import Frequency
 from taipy.data import InMemoryDataSource, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline

@@ -1,10 +1,12 @@
+import pathlib
 from datetime import datetime
 from typing import List
 
-from taipy.cycle.cycle import Cycle
-from taipy.cycle.cycle_model import CycleModel
-from taipy.cycle.frequency import Frequency
-from taipy.repository import FileSystemRepository
+from taipy.cycle.cycle import Cycle  # isort:skip
+from taipy.cycle.cycle_model import CycleModel  # isort:skip
+from taipy.common.frequency import Frequency  # isort:skip
+from taipy.repository import FileSystemRepository  # isort:skip
+from taipy.config.config import Config  # isort:skip
 
 
 class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
@@ -32,6 +34,10 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             start_date=datetime.fromisoformat(model.start_date),
             end_date=datetime.fromisoformat(model.end_date),
         )
+
+    @property
+    def storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         cycles_by_frequency = self.__get_cycles_by_frequency(frequency)

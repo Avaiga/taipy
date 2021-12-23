@@ -4,7 +4,8 @@ from functools import partial
 from typing import Callable, List, Optional
 
 from taipy.common.alias import ScenarioId
-from taipy.config import Config, ScenarioConfig
+from taipy.config.config import Config
+from taipy.config.scenario_config import ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager.cycle_manager import CycleManager
 from taipy.exceptions.repository import ModelNotFound

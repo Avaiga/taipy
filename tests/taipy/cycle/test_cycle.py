@@ -1,7 +1,5 @@
-from datetime import date
-
+from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.frequency import Frequency
 
 
 def test_create_cycle_entity(current_datetime):
