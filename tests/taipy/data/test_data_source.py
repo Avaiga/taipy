@@ -25,24 +25,28 @@ class FakeDataSource(DataSource):
 
 
 class FakeDataframeDataSource(DataSource):
-    COLUMN_NAME_1 = "col_1"
-    COLUMN_NAME_2 = "col_2"
-    data = pd.DataFrame({COLUMN_NAME_1: [i for i in range(3)], COLUMN_NAME_2: [i for i in range(3)]})
+    COLUMN_NAME_1 = "a"
+    COLUMN_NAME_2 = "b"
+
+    def __init__(self, config_name, default_data_frame, **kwargs):
+        super().__init__(config_name, **kwargs)
+        self.data = default_data_frame
+
+    def _read(self):
+        return self.data
+
+
+class FakeListDataSource(DataSource):
+    class Row:
+        def __init__(self, value):
+            self.value = value
 
     def __init__(self, config_name, **kwargs):
         super().__init__(config_name, **kwargs)
+        self.data = [self.Row(i) for i in range(10)]
 
-    def _read(self, query=None):
+    def _read(self):
         return self.data
-
-    def _write(self, data):
-        self.data = self.data.append(
-            {
-                self.COLUMN_NAME_1: self.data.iloc[-1][self.COLUMN_NAME_1] + 1,
-                self.COLUMN_NAME_2: 0,
-            },
-            ignore_index=True,
-        )
 
 
 class TestDataSource:
@@ -165,25 +169,51 @@ class TestDataSource:
         ds.last_edition_date = datetime.now() + timedelta(days=-1)
         assert ds.is_up_to_date is False
 
-    def test_filter(self):
+    def test_filter(self, default_data_frame):
         ds = FakeDataSource("fake ds")
         ds.write("Any data")
 
         assert NotImplemented == ds.filter("any", 0, Operator.EQUAL)
-        assert NotImplemented == ds.filter("any", 0, Operator.NOTEQUAL)
-        assert NotImplemented == ds.filter("any", 0, Operator.LESSER)
-        assert NotImplemented == ds.filter("any", 0, Operator.LESSEROREQUAL)
-        assert NotImplemented == ds.filter("any", 0, Operator.GREATER)
-        assert NotImplemented == ds.filter("any", 0, Operator.GREATEROREQUAL)
+        assert NotImplemented == ds.filter("any", 0, Operator.NOT_EQUAL)
+        assert NotImplemented == ds.filter("any", 0, Operator.LESS_THAN)
+        assert NotImplemented == ds.filter("any", 0, Operator.LESS_OR_EQUAL)
+        assert NotImplemented == ds.filter("any", 0, Operator.GREATER_THAN)
+        assert NotImplemented == ds.filter("any", 0, Operator.GREATER_OR_EQUAL)
 
-        df_ds = FakeDataframeDataSource("fake dataframe ds")
-        df_ds.write("Any data")
+        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
 
-        COLUMN_NAME_1 = df_ds.COLUMN_NAME_1
+        COLUMN_NAME = "a"
 
-        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.EQUAL)) == 1
-        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.NOTEQUAL)) == 3
-        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.LESSER)) == 1
-        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.LESSEROREQUAL)) == 2
-        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.GREATER)) == 2
-        assert len(df_ds.filter(COLUMN_NAME_1, 1, Operator.GREATEROREQUAL)) == 3
+        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.EQUAL)) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME] == 1]
+        )
+        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.NOT_EQUAL)) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME] != 1]
+        )
+        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.LESS_THAN)) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME] < 1]
+        )
+        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.LESS_OR_EQUAL)) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME] <= 1]
+        )
+        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.GREATER_THAN)) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME] > 1]
+        )
+        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.GREATER_OR_EQUAL)) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME] >= 1]
+        )
+        assert len(df_ds.filter(COLUMN_NAME, -1000, Operator.LESS_OR_EQUAL)) == 0
+        assert len(df_ds.filter(COLUMN_NAME, 1000, Operator.GREATER_OR_EQUAL)) == 0
+
+        list_ds = FakeListDataSource("fake list ds")
+
+        KEY_NAME = "value"
+
+        assert len(list_ds.filter(KEY_NAME, 4, Operator.EQUAL)) == 1
+        assert len(list_ds.filter(KEY_NAME, 4, Operator.NOT_EQUAL)) == 9
+        assert len(list_ds.filter(KEY_NAME, 4, Operator.LESS_THAN)) == 4
+        assert len(list_ds.filter(KEY_NAME, 4, Operator.LESS_OR_EQUAL)) == 5
+        assert len(list_ds.filter(KEY_NAME, 4, Operator.GREATER_THAN)) == 5
+        assert len(list_ds.filter(KEY_NAME, 4, Operator.GREATER_OR_EQUAL)) == 6
+        assert len(list_ds.filter(KEY_NAME, -1000, Operator.LESS_OR_EQUAL)) == 0
+        assert len(list_ds.filter(KEY_NAME, 1000, Operator.GREATER_OR_EQUAL)) == 0
