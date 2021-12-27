@@ -165,7 +165,7 @@ class GuiConfig(object):
         if args.no_reloader:
             app_config["use_reloader"] = False
 
-    def load_app_config_runtime(self, root_dir, env_filename, kwargs):  # noqa: C901
+    def load_app_config_runtime(self, root_dir, env_filename, kwargs):
         app_config = self.app_config
         env_file_abs_path = env_filename if os.path.isabs(env_filename) else os.path.join(root_dir, env_filename)
         if os.path.isfile(env_file_abs_path):
