@@ -142,7 +142,8 @@ class GuiConfig(object):
         reloader_group.add_argument("--use-reloader", help="Auto reload on code changes", action="store_true")
         reloader_group.add_argument("--no-reloader", help="No reload on code changes", action="store_true")
 
-        self._handle_argparse(parser.parse_args())
+        args, unknown_args = parser.parse_known_args()
+        self._handle_argparse(args)
 
     def _handle_argparse(self, args):
         app_config = self.app_config
