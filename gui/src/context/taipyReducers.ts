@@ -362,7 +362,9 @@ export const createRequestTableUpdateAction = (
     start?: number,
     end?: number,
     orderBy?: string,
-    sort?: string
+    sort?: string,
+    aggregates?: string[],
+    applies?: Record<string, unknown>,
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -374,6 +376,8 @@ export const createRequestTableUpdateAction = (
         end: end,
         orderby: orderBy,
         sort: sort,
+        aggregates: aggregates,
+        applies: applies,
     },
 });
 
@@ -385,7 +389,9 @@ export const createRequestInfiniteTableUpdateAction = (
     start?: number,
     end?: number,
     orderBy?: string,
-    sort?: string
+    sort?: string,
+    aggregates?: string[],
+    applies?: Record<string, unknown>,
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -398,6 +404,8 @@ export const createRequestInfiniteTableUpdateAction = (
         orderby: orderBy,
         sort: sort,
         columns: columns,
+        aggregates: aggregates,
+        applies: applies,
     },
 });
 

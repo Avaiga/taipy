@@ -89,7 +89,7 @@ describe("AutoLoadingTable Component", () => {
     it("renders", async () => {
         const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} />);
         const elt = getByText("Entity");
-        expect(elt.tagName).toBe("SPAN");
+        expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
         const { getByText } = render(
@@ -101,17 +101,17 @@ describe("AutoLoadingTable Component", () => {
     it("is disabled", async () => {
         const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} active={false} />);
         const elt = getByText("Entity");
-        expect(elt).toHaveClass("Mui-disabled");
+        expect(elt.parentElement).toHaveClass("Mui-disabled");
     });
     it("is enabled by default", async () => {
         const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} />);
         const elt = getByText("Entity");
-        expect(elt).not.toHaveClass("Mui-disabled");
+        expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
         const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} active={true} />);
         const elt = getByText("Entity");
-        expect(elt).not.toHaveClass("Mui-disabled");
+        expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("dispatch a well formed message on sort", async () => {
         const dispatch = jest.fn();
@@ -134,6 +134,8 @@ describe("AutoLoadingTable Component", () => {
                 pagekey: "Infinite--asc",
                 sort: "asc",
                 start: 0,
+                aggregates: [],
+                applies: undefined,
             },
             type: "REQUEST_DATA_UPDATE",
         });

@@ -4,12 +4,16 @@ import logging
 import os
 from typing import Callable, Dict, List, Optional, Union
 
-from taipy.config import DataSourceConfig, GlobalAppConfig, JobConfig, PipelineConfig, ScenarioConfig
+from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
+from taipy.config.data_source_config import DataSourceConfig
+from taipy.config.global_app import GlobalAppConfig
+from taipy.config.job_config import JobConfig
+from taipy.config.pipeline_config import PipelineConfig
+from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
 from taipy.config.toml_serializer import TomlSerializer
-from taipy.cycle.frequency import Frequency
-from taipy.data import Scope
+from taipy.data.scope import Scope
 
 
 class Config:
@@ -57,7 +61,7 @@ class Config:
         Loads configuration from file located at the filename given as parameter.
 
         Parameters:
-            filename (str) : File to load.
+            filename (str or Path): File to load.
         """
         logging.info(f"Loading configuration filename '{filename}'")
         cls._file_config = TomlSerializer().read(filename)
@@ -74,7 +78,7 @@ class Config:
         configuration.
 
         Parameters:
-            filename (str) : File to export.
+            filename (str or Path): File to export.
         Note:
             Overwrite the file if it already exists.
         """
@@ -86,7 +90,7 @@ class Config:
         Exports the python code configuration as a toml file.
 
         Parameters:
-            filename (str) : File to export.
+            filename (str): File to export.
         Note:
             Overwrite the file if it already exists.
         """

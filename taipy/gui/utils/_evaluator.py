@@ -54,15 +54,19 @@ class _Evaluator:
         # Get a list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
         for e in self._fetch_expression_list(expr):
             st = ast.parse(e)
+            args = []
             for node in ast.walk(st):
-                if isinstance(node, ast.Name):
+                if isinstance(node, ast.arguments):
+                    args = [x.arg for x in node.args]
+                elif isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
-                    gui.bind_var(var_name)
-                    try:
-                        var_val[var_name] = attrgetter(var_name)(gui._get_data_scope())
-                        var_list.append(var_name)
-                    except AttributeError:
-                        warnings.warn(f"Variable '{var_name}' is not defined")
+                    if var_name not in args:
+                        gui.bind_var(var_name)
+                        try:
+                            var_val[var_name] = attrgetter(var_name)(gui._get_data_scope())
+                            var_list.append(var_name)
+                        except AttributeError:
+                            warnings.warn(f"Variable '{var_name}' is not defined")
         return var_val, var_list
 
     def _save_expression(

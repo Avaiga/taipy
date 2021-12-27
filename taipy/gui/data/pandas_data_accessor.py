@@ -9,6 +9,9 @@ from ..utils import _get_date_col_str_name, _get_dict_value
 from .data_accessor import DataAccessor
 from .data_format import DataFormat
 
+if t.TYPE_CHECKING:
+    from ..gui import Gui
+
 
 class PandasDataAccessor(DataAccessor):
     @staticmethod
@@ -80,13 +83,28 @@ class PandasDataAccessor(DataAccessor):
             return None
         return value
 
-    def is_data_access(self, var_name: str, value: t.Any) -> bool:
-        return isinstance(value, pd.DataFrame)
+    def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
+        if isinstance(value, pd.DataFrame):
+            return value.dtypes.apply(lambda x: x.name).to_dict()
+        return None
 
     def get_data(  # noqa: C901
-        self, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
+        aggregates = _get_dict_value(payload, "aggregates")
+        applies = _get_dict_value(payload, "applies")
+        if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
+            applies_with_fn = {}
+            for k, v in applies.items():
+                applies_with_fn[k] = getattr(guiApp, v) if hasattr(guiApp, v) else v
+            for col in _get_dict_value(payload, "columns") or []:
+                if col not in applies_with_fn.keys():
+                    applies_with_fn[col] = "first"
+            try:
+                value = value.groupby(aggregates).agg(applies_with_fn)
+            except Exception:
+                warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
         if isinstance(value, pd.DataFrame):
             paged = not _get_dict_value(payload, "alldata")
             if paged:
@@ -146,7 +164,5 @@ class PandasDataAccessor(DataAccessor):
             ret_payload["value"] = dictret
         return ret_payload
 
-    def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, pd.DataFrame):
-            return value.dtypes.apply(lambda x: x.name).to_dict()
-        return None
+    def is_data_access(self, var_name: str, value: t.Any) -> bool:
+        return isinstance(value, pd.DataFrame)

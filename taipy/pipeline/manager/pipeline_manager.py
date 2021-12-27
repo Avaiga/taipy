@@ -1,14 +1,15 @@
+import json
 import logging
 from functools import partial
+from pathlib import Path
 from typing import Callable, List, Optional, Set
 
 from taipy.common.alias import PipelineId, ScenarioId
-from taipy.config import PipelineConfig
+from taipy.config.pipeline_config import PipelineConfig
 from taipy.data import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.pipeline.repository import PipelineRepository
 from taipy.task import Job
 from taipy.task.manager.task_manager import TaskManager
@@ -28,25 +29,46 @@ class PipelineManager:
         """
         Initializes a new pipeline manager.
         """
-        self.repository = PipelineRepository(model=PipelineModel, dir_name="pipelines")
+        self.is_standalone = True
+        self.repository = PipelineRepository()
 
-    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
+    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
         Subscribes a function to be called when the status of a Job changes.
+        If pipeline is not passed, the subscription is added to all pipelines.
 
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        pipeline.add_subscriber(callback)
-        self.set(pipeline)
+        if pipeline is None:
+            pipelines = self.get_all()
+            for pln in pipelines:
+                self.__add_subscriber(callback, pln)
+            return
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Pipeline):
+        self.__add_subscriber(callback, pipeline)
+
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
         Unsubscribes a function that is called when the status of a Job changes.
+        If pipeline is not passed, the subscription is removed to all pipelines.
 
         Note:
             The function will continue to be called for ongoing jobs.
         """
+        if pipeline is None:
+            pipelines = self.get_all()
+            for pln in pipelines:
+                self.__remove_subscriber(callback, pln)
+            return
+
+        self.__remove_subscriber(callback, pipeline)
+
+    def __add_subscriber(self, callback, pipeline):
+        pipeline.add_subscriber(callback)
+        self.set(pipeline)
+
+    def __remove_subscriber(self, callback, pipeline):
         pipeline.remove_subscriber(callback)
         self.set(pipeline)
 
@@ -137,9 +159,21 @@ class PipelineManager:
         callbacks = callbacks or []
         pipeline_to_submit = self.get(pipeline_id)
         pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline_to_submit) + callbacks
-        for tasks in pipeline_to_submit.get_sorted_tasks():
-            for task in tasks:
-                self.task_scheduler.submit(task, pipeline_subscription_callback)
+        if self.is_standalone:
+            for tasks in pipeline_to_submit.get_sorted_tasks():
+                for task in tasks:
+                    self.task_scheduler.submit(task, pipeline_subscription_callback)
+        else:
+            tasks = [task for task in pipeline_to_submit.tasks.values()]
+            json_model = {
+                "path": "tests/airflow",
+                "dag_id": pipeline_id,
+                "task_repository": str(Path(self.task_manager.data_manager.repository.dir_name).resolve()),
+                "data_source_repository": str(Path(self.task_manager.data_manager.repository.dir_name).resolve()),
+                "tasks": [task.id for task in tasks],
+            }
+            with open(f"{pipeline_id}.json", "w", encoding="utf-8") as f:
+                json.dump(json_model, f, ensure_ascii=False, indent=4)
 
     def __get_status_notifier_callbacks(self, pipeline: Pipeline) -> List:
         return [partial(c, pipeline) for c in pipeline.subscribers]

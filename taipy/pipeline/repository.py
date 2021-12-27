@@ -1,8 +1,10 @@
 import logging
+import pathlib
 from collections import defaultdict
 
 from taipy.common import utils
 from taipy.common.alias import Dag, TaskId
+from taipy.config.config import Config
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
@@ -12,6 +14,9 @@ from taipy.task import TaskManager
 
 
 class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
+    def __init__(self, dir_name="pipelines"):
+        super().__init__(model=PipelineModel, dir_name=dir_name)
+
     def to_model(self, pipeline: Pipeline) -> PipelineModel:
         source_task_edges = defaultdict(list)
         task_source_edges = defaultdict(list)
@@ -43,6 +48,10 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
             pipeline_err = NonExistingPipeline(model.id)
             logging.error(pipeline_err.message)
             raise pipeline_err
+
+    @property
+    def storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
 
     @staticmethod
     def __to_tasks(task_ids):

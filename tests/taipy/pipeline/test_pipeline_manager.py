@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -239,6 +241,33 @@ def test_pipeline_notification_subscribe_unsubscribe(mocker):
         pipeline_manager.unsubscribe(notify_2, pipeline)
 
 
+def test_pipeline_notification_subscribe_all():
+    pipeline_manager = PipelineManager()
+    pipeline_config = Config.add_pipeline(
+        "by 6",
+        [
+            Config.add_task(
+                "mult by 2",
+                [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                mult_by_2,
+                Config.add_data_source("bar", "in_memory", Scope.PIPELINE, default_data=0),
+            )
+        ],
+    )
+
+    pipeline = PipelineManager().get_or_create(pipeline_config)
+    pipeline_config.name = "other pipeline"
+
+    other_pipeline = PipelineManager().get_or_create(pipeline_config)
+
+    notify_1 = NotifyMock(pipeline)
+
+    pipeline_manager.subscribe(notify_1)
+
+    assert len(pipeline_manager.get(pipeline.id).subscribers) == 1
+    assert len(pipeline_manager.get(other_pipeline.id).subscribers) == 1
+
+
 def test_get_all_by_config_name():
     pm = PipelineManager()
     input_configs = [Config.add_data_source("my_input", "in_memory")]
@@ -377,6 +406,30 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_20 = pm.get_or_create(pipeline_config_6)
     assert len(pm.get_all()) == 14
     assert pipeline_19.id != pipeline_20.id
+
+
+def test_generate_json():
+    pm = PipelineManager()
+    pm.is_standalone = False
+    ds_input_config = Config.add_data_source(
+        name="test_data_source_input", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
+    )
+    ds_output_config = Config.add_data_source(
+        name="test_data_source_output", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
+    )
+    task_config = Config.add_task("task_config", ds_input_config, print, ds_output_config)
+    pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
+    pipeline = pm.get_or_create(pipeline_config)
+    pm.submit(pipeline.id)
+    assert pipeline.tasks.values() is not None
+    assert Path(f"{pipeline.id}.json").exists()  # Check if file is created
+    with open(f"{pipeline.id}.json") as pipeline_json:
+        data = json.load(pipeline_json)
+        assert data["path"] == "tests/airflow"
+        assert data["dag_id"] == pipeline.id
+        assert data["task_repository"] == str(Path(pm.task_manager.data_manager.repository.dir_name).resolve())
+        assert data["data_source_repository"] == str(Path(pm.task_manager.data_manager.repository.dir_name).resolve())
+        assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
 
 
 def test_hard_delete():

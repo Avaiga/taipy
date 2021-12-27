@@ -1,8 +1,8 @@
 import pytest
 
+from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
 from taipy.config.config import Config
-from taipy.cycle.frequency import Frequency
 from taipy.exceptions.scenario import NonExistingComparator
 
 

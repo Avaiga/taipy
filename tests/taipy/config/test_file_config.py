@@ -1,7 +1,7 @@
 import pytest
 
+from taipy.common.frequency import Frequency
 from taipy.config.config import Config
-from taipy.cycle.frequency import Frequency
 from taipy.data import Scope
 from taipy.exceptions.configuration import LoadingError
 from tests.taipy.config.named_temporary_file import NamedTemporaryFile

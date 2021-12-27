@@ -1,5 +1,7 @@
+import pathlib
 from datetime import datetime
 
+from taipy.config.config import Config
 from taipy.data import DataSource
 from taipy.data.data_source_model import DataSourceModel
 from taipy.repository import FileSystemRepository
@@ -7,10 +9,7 @@ from taipy.repository import FileSystemRepository
 
 class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
     def __init__(self, class_map, dir_name="data_sources"):
-        super().__init__(
-            model=DataSourceModel,
-            dir_name=dir_name,
-        )
+        super().__init__(model=DataSourceModel, dir_name=dir_name)
         self.class_map = class_map
 
     def to_model(self, data_source: DataSource):
@@ -45,3 +44,7 @@ class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
             edition_in_progress=model.edition_in_progress,
             properties=model.data_source_properties,
         )
+
+    @property
+    def storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore

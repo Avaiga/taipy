@@ -1,5 +1,8 @@
+import pathlib
+
 from taipy.common.alias import TaskId
 from taipy.common.utils import load_fct
+from taipy.config import Config
 from taipy.data.manager import DataManager
 from taipy.repository import FileSystemRepository
 from taipy.task import Task
@@ -7,8 +10,8 @@ from taipy.task.task_model import TaskModel
 
 
 class TaskRepository(FileSystemRepository[TaskModel, Task]):
-    def __init__(self, dir_name="tasks", base_path=".data"):
-        super().__init__(model=TaskModel, dir_name=dir_name, base_path=base_path)
+    def __init__(self, dir_name="tasks"):
+        super().__init__(model=TaskModel, dir_name=dir_name)
 
     def to_model(self, task: Task) -> TaskModel:
         return TaskModel(
@@ -30,6 +33,10 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
             function=load_fct(model.function_module, model.function_name),
             output=self.__to_data_source(model.output_ids),
         )
+
+    @property
+    def storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
 
     @staticmethod
     def __to_ids(data_sources):

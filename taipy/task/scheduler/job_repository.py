@@ -1,6 +1,8 @@
+import pathlib
 from datetime import datetime
 
 from taipy.common.utils import fcts_to_dict, load_fct
+from taipy.config.config import Config
 from taipy.exceptions import InvalidSubscriber
 from taipy.repository import FileSystemRepository
 from taipy.task import Job
@@ -20,7 +22,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
         )
 
     def from_model(self, model):
-        job = Job(id=model.id, task=TaskRepository(base_path=self.base_path).load(model.task_id))
+        job = Job(id=model.id, task=TaskRepository().load(model.task_id))
 
         job.status = model.status
         job.creation_date = datetime.fromisoformat(model.creation_date) if model.creation_date else None
@@ -32,6 +34,10 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
         job.__exceptions = []
 
         return job
+
+    @property
+    def storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
 
     @staticmethod
     def __to_names(objs):

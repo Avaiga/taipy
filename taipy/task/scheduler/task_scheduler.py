@@ -6,12 +6,12 @@ from multiprocessing import Lock
 from queue import Queue
 from typing import Callable, Dict, Iterable, List, Optional
 
-from taipy.config import JobConfig
+from taipy.config.config import Config
+from taipy.config.job_config import JobConfig
 from taipy.exceptions import JobNotDeletedException, NonExistingJob
 from taipy.task import Task
 
 from ...common.alias import JobId
-from ...config.config import Config
 from ...data.manager import DataManager
 from .job import Job
 from .job_dispatcher import JobDispatcher
@@ -37,7 +37,7 @@ class TaskScheduler:
             job_config.nb_of_workers,
             job_config.hostname,
         )
-        self.data_manager = DataManager()
+        self.data_manager: DataManager = DataManager()
         self.lock = Lock()
 
     def submit(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:

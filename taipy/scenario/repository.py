@@ -1,7 +1,9 @@
+import pathlib
 from typing import List, Optional
 
 from taipy.common import utils
 from taipy.common.alias import CycleId, PipelineId
+from taipy.config.config import Config
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager import CycleManager
 from taipy.pipeline.manager.pipeline_manager import PipelineManager
@@ -37,6 +39,10 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
         )
         scenario.subscribers = {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers}
         return scenario
+
+    @property
+    def storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:

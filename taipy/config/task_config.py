@@ -2,7 +2,7 @@ from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
 from taipy.common import protect_name
-from taipy.config import DataSourceConfig
+from taipy.config.data_source_config import DataSourceConfig
 
 
 class TaskConfig:

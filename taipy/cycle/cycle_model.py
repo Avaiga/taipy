@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 from dataclasses_json.api import dataclass_json
 
 from taipy.common.alias import CycleId
-from taipy.cycle.frequency import Frequency
+from taipy.common.frequency import Frequency
 
 
 @dataclass_json

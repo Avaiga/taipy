@@ -1,11 +1,11 @@
 import logging
 import uuid
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict
 
 from taipy.common import protect_name
 from taipy.common.alias import CycleId
-from taipy.cycle.frequency import Frequency
+from taipy.common.frequency import Frequency
 
 
 class Cycle:
