@@ -4,8 +4,11 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import List, Optional
 
+import pandas as pd
+
 from taipy.common import protect_name
 from taipy.common.alias import DataSourceId, JobId
+from taipy.data.operator import Operator
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
 
@@ -122,6 +125,50 @@ class DataSource:
         self.edition_in_progress = False
         if job_id:
             self.job_ids.append(job_id)
+
+    def filter(self, key: str, value, operator: Operator = Operator.EQUAL):
+        data = self._read()
+
+        if isinstance(data, pd.DataFrame):
+            return data[DataSource.filter_dataframe(data[key], value, operator)]
+        if isinstance(data, List):
+            return DataSource.filter_list(data, key, value, operator)
+
+        return NotImplemented
+
+    @staticmethod
+    def filter_dataframe(df_by_col: pd.DataFrame, value, operator: Operator):
+        if operator == Operator.EQUAL:
+            return df_by_col == value
+        if operator == Operator.NOT_EQUAL:
+            return df_by_col != value
+        if operator == Operator.LESS_THAN:
+            return df_by_col < value
+        if operator == Operator.LESS_OR_EQUAL:
+            return df_by_col <= value
+        if operator == Operator.GREATER_THAN:
+            return df_by_col > value
+        if operator == Operator.GREATER_OR_EQUAL:
+            return df_by_col >= value
+
+    @staticmethod
+    def filter_list(list_data: List, key, value, operator: Operator):
+        filtered_list = []
+        for row in list_data:
+            row_value = getattr(row, key)
+            if operator == Operator.EQUAL and row_value == value:
+                filtered_list.append(row)
+            if operator == Operator.NOT_EQUAL and row_value != value:
+                filtered_list.append(row)
+            if operator == Operator.LESS_THAN and row_value < value:
+                filtered_list.append(row)
+            if operator == Operator.LESS_OR_EQUAL and row_value <= value:
+                filtered_list.append(row)
+            if operator == Operator.GREATER_THAN and row_value > value:
+                filtered_list.append(row)
+            if operator == Operator.GREATER_OR_EQUAL and row_value >= value:
+                filtered_list.append(row)
+        return filtered_list
 
     @abstractmethod
     def _read(self):
