@@ -4,8 +4,8 @@ from datetime import datetime, time, timedelta
 from typing import Optional
 
 from taipy.common.alias import CycleId
+from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.frequency import Frequency
 from taipy.cycle.repository import CycleRepository
 from taipy.exceptions.cycle import NonExistingCycle
 from taipy.exceptions.repository import ModelNotFound

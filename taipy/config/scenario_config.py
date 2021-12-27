@@ -3,8 +3,8 @@ from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.common import protect_name
+from taipy.common.frequency import Frequency
 from taipy.config.pipeline_config import PipelineConfig
-from taipy.cycle.frequency import Frequency
 from taipy.exceptions.scenario import NonExistingComparator
 
 

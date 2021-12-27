@@ -41,6 +41,9 @@ class Gui(object, metaclass=Singleton):
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
+    __reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
+    _agregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
+
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
     #
     # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
@@ -79,16 +82,16 @@ class Gui(object, metaclass=Singleton):
         self._config = GuiConfig()
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
-        self._evaluator = _Evaluator()
-        self._adapter = _Adapter()
+
+        self.__evaluator = _Evaluator()
+        self.__adapter = _Adapter()
+        self.__update_function = None
+        self.__action_function = None
+        self.__directory_name_of_pages: t.List[str] = []
 
         # Load default config
-        self._reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
-        self._directory_name_of_pages: t.List[str] = []
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
-        self._update_function = None
-        self._action_function = None
 
         if default_page_renderer:
             self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
@@ -135,7 +138,7 @@ class Gui(object, metaclass=Singleton):
         else:
             setattr(self._get_data_scope(), name, value)
             self._bind_global(name, value)
-        prop = property(self.__value_getter(name), lambda s, v: s._update_var(name, v))  # Getter, Setter
+        prop = property(self.__value_getter(name), lambda s, v: s.__update_var(name, v))  # Getter, Setter
         setattr(Gui, name, prop)
 
     def _bind_global(self, name: str, value: t.Any) -> None:
@@ -148,7 +151,7 @@ class Gui(object, metaclass=Singleton):
         def __getter(elt: Gui) -> t.Any:
             value = getattr(elt._get_data_scope(), name)
             if isinstance(value, _MapDictionary):
-                return _MapDictionary(value._dict, lambda s, v: elt._update_var(name + "." + s, v))
+                return _MapDictionary(value._dict, lambda s, v: elt.__update_var(name + "." + s, v))
             else:
                 return value
 
@@ -158,17 +161,17 @@ class Gui(object, metaclass=Singleton):
         try:
             self.__set_client_id(message)
             if msg_type == WsType.UPDATE.value:
-                self._front_end_update(
+                self.__front_end_update(
                     message["name"],
                     message["payload"],
                     message.get("propagate", True),
                 )
             elif msg_type == WsType.ACTION.value:
-                self._on_action(_get_dict_value(message, "name"), message["payload"])
+                self.__on_action(_get_dict_value(message, "name"), message["payload"])
             elif msg_type == WsType.DATA_UPDATE.value:
-                self._request_data_update(message["name"], message["payload"])
+                self.__request_data_update(message["name"], message["payload"])
             elif msg_type == WsType.REQUEST_UPDATE.value:
-                self._request_var_update(message["payload"])
+                self.__request_var_update(message["payload"])
             elif msg_type == WsType.CLIENT_ID.value:
                 self.__get_or_create_scope(message["payload"])
         except TypeError as te:
@@ -182,10 +185,10 @@ class Gui(object, metaclass=Singleton):
     def __get_or_create_scope(self, id: str):
         if not id:
             id = f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}-{random.random()}"
-            self._send_ws_id(id)
+            self.__send_ws_id(id)
         self._scopes.create_scope(id)
 
-    def _front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
+    def __front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
         currentvalue = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
         if isinstance(value, str):
@@ -201,9 +204,9 @@ class Gui(object, metaclass=Singleton):
                 value = bool(value)
             elif self._accessors._cast_string_value(var_name, currentvalue) is None:
                 return
-        self._update_var(var_name, value, propagate)
+        self.__update_var(var_name, value, propagate)
 
-    def _update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
+    def __update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
         hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
@@ -213,8 +216,8 @@ class Gui(object, metaclass=Singleton):
             if var_name == hash_expr:
                 modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        if self._update_function:
-            self._update_function(self, var_name, value)
+        if self.__update_function:
+            self.__update_function(self, var_name, value)
         self.__send_var_list_update(modified_vars)
 
     def __send_var_list_update(self, modified_vars: list):
@@ -236,16 +239,16 @@ class Gui(object, metaclass=Singleton):
                         continue  # this var has no transformer
                 ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
-        self._send_ws_update_with_dict(ws_dict)
+        self.__send_ws_update_with_dict(ws_dict)
 
-    def _request_data_update(self, var_name: str, payload: t.Any) -> None:
+    def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
         var_name = self._get_hash_from_expr(var_name)
         newvalue = attrgetter(var_name)(self._get_data_scope())
-        ret_payload = self._accessors._get_data(var_name, newvalue, payload)
-        self._send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
+        ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
+        self.__send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
-    def _request_var_update(self, payload):
+    def __request_var_update(self, payload):
         if "names" in payload and isinstance(payload["names"], list):
             self.__send_var_list_update(payload["names"])
 
@@ -254,17 +257,14 @@ class Gui(object, metaclass=Singleton):
             self._server._ws.emit(
                 "message",
                 payload,
-                to=self._get_ws_receiver(),
+                to=self.__get_ws_receiver(),
             )
         except Exception as e:
             warnings.warn(
                 f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}"
             )
 
-    def _send_ws_update(self, var_name: str, payload: dict) -> None:
-        self.__send_ws({"type": WsType.UPDATE.value, "name": get_client_var_name(var_name), "payload": payload})
-
-    def _send_ws_id(self, id: str) -> None:
+    def __send_ws_id(self, id: str) -> None:
         self.__send_ws(
             {
                 "type": WsType.CLIENT_ID.value,
@@ -272,7 +272,7 @@ class Gui(object, metaclass=Singleton):
             }
         )
 
-    def _send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
+    def __send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
         self.__send_ws(
             {
                 "type": WsType.ALERT.value,
@@ -283,7 +283,7 @@ class Gui(object, metaclass=Singleton):
             }
         )
 
-    def _send_ws_block(
+    def __send_ws_block(
         self,
         action: t.Optional[str] = None,
         message: t.Optional[str] = None,
@@ -300,7 +300,7 @@ class Gui(object, metaclass=Singleton):
             }
         )
 
-    def _send_ws_navigate(
+    def __send_ws_navigate(
         self,
         to: t.Optional[str] = None,
     ):
@@ -311,19 +311,19 @@ class Gui(object, metaclass=Singleton):
             }
         )
 
-    def _send_ws_update_with_dict(self, modified_values: dict) -> None:
+    def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
             {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
             for k, v in modified_values.items()
         ]
         self.__send_ws({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
-    def _get_ws_receiver(self) -> t.Union[str, None]:
+    def __get_ws_receiver(self) -> t.Union[str, None]:
         if not hasattr(request, "sid") or self._scopes.get_single_client():
             return None
         return request.sid  # type: ignore
 
-    def _on_action(self, id: t.Optional[str], payload: t.Any) -> None:
+    def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
             action = _get_dict_value(payload, "action")
         else:
@@ -331,8 +331,10 @@ class Gui(object, metaclass=Singleton):
         if action and hasattr(self, action):
             if self.__call_function_with_args(action_function=getattr(self, action), id=id, payload=payload):
                 return
-        if self._action_function:
-            self.__call_function_with_args(action_function=self._action_function, id=id, payload=payload, action=action)
+        if self.__action_function:
+            self.__call_function_with_args(
+                action_function=self.__action_function, id=id, payload=payload, action=action
+            )
 
     def __call_function_with_args(*args, **kwargs):
         action_function = _get_dict_value(kwargs, "action_function")
@@ -367,48 +369,48 @@ class Gui(object, metaclass=Singleton):
 
     # Proxy methods for Evaluator
     def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        return self._evaluator.evaluate_expr(self, expr, re_evaluated)
+        return self.__evaluator.evaluate_expr(self, expr, re_evaluated)
 
     def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
-        return self._evaluator.re_evaluate_expr(self, var_name)
+        return self.__evaluator.re_evaluate_expr(self, var_name)
 
     def _get_hash_from_expr(self, expr: str) -> str:
-        return self._evaluator.get_hash_from_expr(expr)
+        return self.__evaluator.get_hash_from_expr(expr)
 
     def _get_expr_from_hash(self, hash: str) -> str:
-        return self._evaluator.get_expr_from_hash(hash)
+        return self.__evaluator.get_expr_from_hash(hash)
 
     def _is_expression(self, expr: str) -> bool:
-        return self._evaluator._is_expression(expr)
+        return self.__evaluator._is_expression(expr)
 
     def _fetch_expression_list(self, expr: str) -> t.List:
-        return self._evaluator._fetch_expression_list(expr)
+        return self.__evaluator._fetch_expression_list(expr)
 
     # Proxy methods for Adapter
     def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
-        self._adapter._add_list_for_variable(var_name, list_name)
+        self.__adapter._add_list_for_variable(var_name, list_name)
 
     def _add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
-        self._adapter._add_adapter_for_type(type_name, adapter)
+        self.__adapter._add_adapter_for_type(type_name, adapter)
 
     def _add_type_for_var(self, var_name: str, type_name: str) -> None:
-        self._adapter._add_type_for_var(var_name, type_name)
+        self.__adapter._add_type_for_var(var_name, type_name)
 
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
-        return self._adapter._get_adapter_for_type(type_name)
+        return self.__adapter._get_adapter_for_type(type_name)
 
     def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
-        return self._adapter._run_adapter_for_var(var_name, value, index, id_only)
+        return self.__adapter._run_adapter_for_var(var_name, value, index, id_only)
 
     def _run_adapter(
         self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
-        return self._adapter._run_adapter(adapter, value, var_name, index, id_only)
+        return self.__adapter._run_adapter(adapter, value, var_name, index, id_only)
 
     def _get_valid_adapter_result(
         self, value: t.Any, index: t.Optional[str], id_only=False
     ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
-        return self._adapter._get_valid_adapter_result(value, index, id_only)
+        return self.__adapter._get_valid_adapter_result(value, index, id_only)
 
     def _is_ui_blocked(self):
         return getattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
@@ -417,7 +419,7 @@ class Gui(object, metaclass=Singleton):
         def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
             if hasattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME):
                 setattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
-            self._on_action(id, callback)
+            self.__on_action(id, callback)
 
         return _taipy_on_cancel_block_ui
 
@@ -465,11 +467,11 @@ class Gui(object, metaclass=Singleton):
             folder_name = os.path.basename(folder_path)
             if not os.path.isdir(folder_path):
                 raise RuntimeError(f"Path {folder_path} is not a valid directory")
-            if folder_name in self._directory_name_of_pages:
+            if folder_name in self.__directory_name_of_pages:
                 raise Exception(f"Base directory name {folder_name} of path {folder_path} is not unique")
-            if folder_name in self._reserved_routes:
+            if folder_name in Gui.__reserved_routes:
                 raise Exception(f"Invalid directory. Directory {folder_name} is a reserved route")
-            self._directory_name_of_pages.append(folder_name)
+            self.__directory_name_of_pages.append(folder_name)
             list_of_files = os.listdir(folder_path)
             for file_name in list_of_files:
                 from .renderers import Html, Markdown
@@ -531,10 +533,10 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def on_update(self, f) -> None:
-        self._update_function = f
+        self.__update_function = f
 
     def on_action(self, f) -> None:
-        self._action_function = f
+        self.__action_function = f
 
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
@@ -562,7 +564,7 @@ class Gui(object, metaclass=Singleton):
         Note that you can also call this function with _type_ set to the first letter or the alert type
         (ie setting _type_ to `"i"` is equivalent to setting it to `"info"`).
         """
-        self._send_ws_alert(
+        self.__send_ws_alert(
             type,
             message,
             self._get_app_config("browser_notification", True)
@@ -593,13 +595,13 @@ class Gui(object, metaclass=Singleton):
             setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, True)
         else:
             self._bind(Gui.__UI_BLOCK_NAME, True)
-        self._send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
+        self.__send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
 
     def unblock_ui(self):
         """Unblocks the UI"""
         if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
             setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
-        self._send_ws_block(close=True)
+        self.__send_ws_block(close=True)
 
     def navigate(self, to: t.Optional[str] = ""):
         """Navigate to a page
@@ -611,7 +613,7 @@ class Gui(object, metaclass=Singleton):
         if to not in self._config.routes:
             warnings.warn(f"cannot navigate to '{to}' which is not a declared route.")
             return
-        self._send_ws_navigate(to)
+        self.__send_ws_navigate(to)
 
     def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)

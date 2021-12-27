@@ -4,6 +4,7 @@ import logging
 import os
 from typing import Callable, Dict, List, Optional, Union
 
+from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
 from taipy.config.data_source_config import DataSourceConfig
 from taipy.config.global_app import GlobalAppConfig
@@ -12,7 +13,6 @@ from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
 from taipy.config.toml_serializer import TomlSerializer
-from taipy.cycle.frequency import Frequency
 from taipy.data.scope import Scope
 
 

@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 from taipy.common.alias import DataSourceId, PipelineId, ScenarioId
-from taipy.config import DataSourceConfig
+from taipy.config.data_source_config import DataSourceConfig
 from taipy.data import CSVDataSource, PickleDataSource, SQLDataSource
 from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource

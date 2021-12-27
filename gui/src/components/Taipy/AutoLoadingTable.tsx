@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties } from "react";
+import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties, MouseEvent } from "react";
 import Box from "@mui/material/Box";
 import MuiTable from "@mui/material/Table";
 import TableCell from "@mui/material/TableCell";
@@ -14,6 +14,8 @@ import InfiniteLoader from "react-window-infinite-loader";
 import Skeleton from "@mui/material/Skeleton";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
+import DataSaverOn from "@mui/icons-material/DataSaverOn";
+import DataSaverOff from "@mui/icons-material/DataSaverOff";
 
 import { TaipyContext } from "../../context/taipyContext";
 import {
@@ -38,6 +40,7 @@ import {
     OnRowDeletion,
     iconInRowSx,
     addDeleteColumn,
+    headBoxSx,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
@@ -145,6 +148,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
     const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+    const [aggregates, setAggregates] = useState<string[]>([]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
@@ -184,11 +188,25 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     }, [refresh]);
 
     const createSortHandler = useCallback(
-        (col: string) => (event: React.MouseEvent<unknown>) => {
+        (col: string) => (event: MouseEvent<unknown>) => {
             handleRequestSort(event, col);
         },
         [handleRequestSort]
     );
+
+    const onAggregate = useCallback((e: MouseEvent<HTMLElement>) => {
+        const groupBy = e.currentTarget.getAttribute("data-dfid");
+        if (groupBy) {
+            setAggregates((ags) => {
+                const nags = ags.filter((ag) => ag !== groupBy);
+                if (ags.length == nags.length) {
+                    nags.push(groupBy);
+                }
+                return nags;
+            });
+        }
+        e.stopPropagation();
+    }, []);
 
     const [colsOrder, columns] = useMemo(() => {
         if (props.columns) {
@@ -222,12 +240,28 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 page.current.promises[startIndex].reject();
             }
             return new Promise<void>((resolve, reject) => {
-                const key = `Infinite-${orderBy}-${order}`;
+                const agg = aggregates.length
+                    ? colsOrder.reduce((pv, col, idx) => {
+                          if (aggregates.includes(columns[col].dfid)) {
+                              return pv + "-" + idx;
+                          }
+                          return pv;
+                      }, "-agg")
+                    : "";
+                const key = `Infinite-${orderBy}-${order}${agg}`;
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
                 };
                 const cols = colsOrder.map((col) => columns[col].dfid);
+                const applies = aggregates.length
+                    ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
+                          if (columns[col].apply) {
+                              pv[columns[col].dfid] = columns[col].apply;
+                          }
+                          return pv;
+                      }, {})
+                    : undefined;
                 dispatch(
                     createRequestInfiniteTableUpdateAction(
                         tp_varname,
@@ -237,12 +271,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         startIndex,
                         stopIndex,
                         orderBy,
-                        order
+                        order,
+                        aggregates,
+                        applies
                     )
                 );
             });
         },
-        [tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
+        [aggregates, tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
     );
 
     const onAddRowClick = useCallback(
@@ -282,10 +318,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         [dispatch, tp_varname, deleteAction]
     );
 
-    const onTaipyItemsRendered = useCallback((onItemsR) => ({visibleStartIndex, visibleStopIndex}: {visibleStartIndex: number, visibleStopIndex: number}) => {
-        setVisibleStartIndex(visibleStartIndex);
-        onItemsR({visibleStartIndex,visibleStopIndex});
-    }, []);
+    const onTaipyItemsRendered = useCallback(
+        (onItemsR) =>
+            ({ visibleStartIndex, visibleStopIndex }: { visibleStartIndex: number; visibleStopIndex: number }) => {
+                setVisibleStartIndex(visibleStartIndex);
+                onItemsR({ visibleStartIndex, visibleStopIndex });
+            },
+        []
+    );
 
     const rowData: RowData = useMemo(
         () => ({
@@ -344,9 +384,27 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                 onClick={createSortHandler(columns[col].dfid)}
                                                 disabled={!active}
                                             >
-                                                {columns[col].title === undefined
-                                                    ? columns[col].dfid
-                                                    : columns[col].title}
+                                                <Box sx={headBoxSx}>
+                                                    {columns[col].groupBy ? (
+                                                        <IconButton
+                                                            onClick={onAggregate}
+                                                            size="small"
+                                                            title="aggregate"
+                                                            sx={iconInRowSx}
+                                                            data-dfid={columns[col].dfid}
+                                                            disabled={!active}
+                                                        >
+                                                            {aggregates.includes(columns[col].dfid) ? (
+                                                                <DataSaverOff />
+                                                            ) : (
+                                                                <DataSaverOn />
+                                                            )}
+                                                        </IconButton>
+                                                    ) : null}
+                                                    {columns[col].title === undefined
+                                                        ? columns[col].dfid
+                                                        : columns[col].title}
+                                                </Box>
                                                 {orderBy === columns[col].dfid ? (
                                                     <Box component="span" sx={visuallyHidden}>
                                                         {order === "desc" ? "sorted descending" : "sorted ascending"}

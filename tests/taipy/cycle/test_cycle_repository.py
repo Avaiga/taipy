@@ -1,7 +1,7 @@
 from datetime import datetime
 
+from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.frequency import Frequency
 from taipy.cycle.repository import CycleRepository
 
 

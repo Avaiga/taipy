@@ -6,9 +6,9 @@ import pandas as pd
 import pytest
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
+from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.cycle_model import CycleModel
-from taipy.cycle.frequency import Frequency
 from taipy.pipeline import Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.scenario import ScenarioManager

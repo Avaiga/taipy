@@ -3,11 +3,11 @@ from typing import Any, Dict
 
 import toml  # type: ignore
 
+from taipy.common.frequency import Frequency
 from taipy.config import DataSourceConfig, GlobalAppConfig, JobConfig, ScenarioConfig
 from taipy.config._config import _Config
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.task_config import TaskConfig
-from taipy.cycle.frequency import Frequency
 from taipy.data import Scope
 from taipy.exceptions.configuration import LoadingError
 

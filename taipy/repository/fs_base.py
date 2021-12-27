@@ -1,11 +1,9 @@
 import json
-import os
 import pathlib
 import shutil
 from abc import abstractmethod
 from enum import Enum
-from os import path
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
 from taipy.exceptions import ModelNotFound
 
@@ -35,13 +33,20 @@ class FileSystemRepository(Generic[ModelType, Entity]):
     Attributes:
         model (ModelType): Generic dataclass.
         dir_name (str): Folder that will hold the files for this dataclass model.
-        base_path (str): Main folder that will hold the directories of all dataclass models.
     """
 
     @abstractmethod
     def to_model(self, obj):
         """
         Converts the object to be saved to its model.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def storage_folder(self) -> pathlib.Path:
+        """
+        Base folder used by repository to store data
         """
         ...
 
@@ -52,64 +57,56 @@ class FileSystemRepository(Generic[ModelType, Entity]):
         """
         ...
 
-    def __init__(self, model: Type[ModelType], dir_name: str, base_path: str = ".data"):
+    def __init__(self, model: Type[ModelType], dir_name: str):
         self.model = model
-        self.base_path = base_path
         self.dir_name = dir_name
 
     @property
-    def directory(self):
-        dir_path = pathlib.Path(path.join(self.base_path, self.dir_name))
-        dir_path.mkdir(parents=True, exist_ok=True)
+    def directory(self) -> pathlib.Path:
+        dir_path = self.storage_folder / self.dir_name
+
+        if not dir_path.exists():
+            dir_path.mkdir(parents=True, exist_ok=True)
+
         return dir_path
 
-    def _build_model(self, model_data: Dict) -> ModelType:
-        return self.model.from_dict(model_data)  # type: ignore
-
     def load(self, model_id: str) -> Optional[Entity]:
-        try:
-            filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
-            return self.__to_entity(filepath)
-        except FileNotFoundError:
-            raise ModelNotFound(self.dir_name, model_id)
+        return self.__to_entity(self.__get_model(model_id))
 
     def load_all(self) -> List[Entity]:
-        models = []
-        for filename in pathlib.Path(self.directory).glob("*.json"):
-            models.append(self.__to_entity(filename))
-        return models
+        return [self.__to_entity(f) for f in self.directory.glob("*.json")]
 
     def save(self, model):
         model = self.to_model(model)
-        with open(path.join(self.directory, f"{model.id}.json"), "w") as f:  # type: ignore
-            json.dump(model.to_dict(), f, ensure_ascii=False, indent=4, cls=CustomEncoder)  # type: ignore
+        self.__get_model(model.id, False).write_text(
+            json.dumps(model.to_dict(), ensure_ascii=False, indent=4, cls=CustomEncoder)
+        )
 
     def delete_all(self):
         shutil.rmtree(self.directory)
 
     def delete(self, model_id: str):
-        try:
-            filepath = path.join(self.base_path, self.dir_name, f"{model_id}.json")
-            os.unlink(filepath)
-        except FileNotFoundError:
-            raise ModelNotFound(self.dir_name, model_id)
+        self.__get_model(model_id).unlink()
 
     def search(self, attribute: str, value: str) -> Optional[Entity]:
-        model = None
-        for filename in pathlib.Path(self.directory).glob("*.json"):
-            m = self.__to_entity(filename)
-            if hasattr(m, attribute) and getattr(m, attribute) == value:
-                model = m
-                break
-        return model
+        return next(self._search(attribute, value), None)
 
     def search_all(self, attribute: str, value: str) -> List[Entity]:
-        models = []
-        for filename in pathlib.Path(self.directory).glob("*.json"):
-            m = self.__to_entity(filename)
-            if hasattr(m, attribute) and getattr(m, attribute) == value:
-                models.append(m)
-        return models
+        return list(self._search(attribute, value))
+
+    def _build_model(self, model_data: Dict) -> ModelType:
+        return self.model.from_dict(model_data)  # type: ignore
+
+    def _search(self, attribute: str, value: str) -> Iterator[Entity]:
+        return filter(lambda e: hasattr(e, attribute) and getattr(e, attribute) == value, self.load_all())
+
+    def __get_model(self, model_id, raise_if_not_exist=True) -> pathlib.Path:
+        filepath = self.directory / f"{model_id}.json"
+
+        if not filepath.exists() and raise_if_not_exist:
+            raise ModelNotFound(str(self.directory), model_id)
+
+        return filepath
 
     def __to_entity(self, filepath):
         with open(filepath, "r") as f:
