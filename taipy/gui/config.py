@@ -126,7 +126,7 @@ class GuiConfig(object):
         # return user defined IANA Time Zone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
         return self.app_config["time_zone"]
 
-    def _load_argparse(self):
+    def _init_argparse(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("-P", "--port", nargs="?", default="", const="", help="Specify server port")
         parser.add_argument("-H", "--host", nargs="?", default="", const="", help="Specify server host")
@@ -165,7 +165,7 @@ class GuiConfig(object):
         if args.no_reloader:
             app_config["use_reloader"] = False
 
-    def load_app_config_runtime(self, root_dir, env_filename, kwargs):
+    def build_app_config(self, root_dir, env_filename, kwargs):
         app_config = self.app_config
         env_file_abs_path = env_filename if os.path.isabs(env_filename) else os.path.join(root_dir, env_filename)
         if os.path.isfile(env_file_abs_path):
@@ -189,4 +189,4 @@ class GuiConfig(object):
                         f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
                     )
         # Load from system arguments
-        self._load_argparse()
+        self._init_argparse()

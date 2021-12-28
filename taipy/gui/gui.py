@@ -643,7 +643,7 @@ class Gui(object, metaclass=Singleton):
             )
 
         # Load application config from multiple sources (env files, kwargs, command line)
-        self._config.load_app_config_runtime(self._root_dir, self.__env_filename, kwargs)
+        self._config.build_app_config(self._root_dir, self.__env_filename, kwargs)
 
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
