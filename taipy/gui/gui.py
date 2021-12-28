@@ -13,7 +13,6 @@ from types import FrameType, FunctionType
 
 import __main__
 import markdown as md_lib
-from dotenv import dotenv_values
 from flask import Blueprint, Flask, request
 
 from ._default_config import app_config_default, style_config_default
@@ -165,7 +164,7 @@ class Gui(object, metaclass=Singleton):
                 self.__front_end_update(
                     message["name"],
                     message["payload"],
-                    message["propagate"] if "propagate" in message else True,
+                    message.get("propagate", True),
                 )
             elif msg_type == WsType.ACTION.value:
                 self.__on_action(_get_dict_value(message, "name"), message["payload"])
@@ -413,6 +412,17 @@ class Gui(object, metaclass=Singleton):
     ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
         return self.__adapter._get_valid_adapter_result(value, index, id_only)
 
+    def _is_ui_blocked(self):
+        return getattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+
+    def __get_on_cancel_block_ui(self, callback: t.Optional[str]):
+        def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
+            if hasattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME):
+                setattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+            self.__on_action(id, callback)
+
+        return _taipy_on_cancel_block_ui
+
     # Public methods
     def add_page(
         self,
@@ -585,7 +595,7 @@ class Gui(object, metaclass=Singleton):
             setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, True)
         else:
             self._bind(Gui.__UI_BLOCK_NAME, True)
-        self.__send_ws_block(action=def_action_name, message=message, cancel=True if action_name else False)
+        self.__send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
 
     def unblock_ui(self):
         """Unblocks the UI"""
@@ -593,24 +603,13 @@ class Gui(object, metaclass=Singleton):
             setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
 
-    def _is_ui_blocked(self):
-        return getattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
-
-    def __get_on_cancel_block_ui(self, callback: t.Optional[str]):
-        def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
-            if hasattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME):
-                setattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
-            self.__on_action(id, callback)
-
-        return _taipy_on_cancel_block_ui
-
     def navigate(self, to: t.Optional[str] = ""):
         """Navigate to a page
 
         Args:
             to: page to navigate to. Should be a valid page identifier. If ommitted, navigates to the root page.
         """
-        to = to if to else Gui.__root_page_name
+        to = to or Gui.__root_page_name
         if to not in self._config.routes:
             warnings.warn(f"cannot navigate to '{to}' which is not a declared route.")
             return
@@ -636,38 +635,19 @@ class Gui(object, metaclass=Singleton):
                 If set to `False`, a Web server is _not_ created and started.
         """
         app_config = self._config.app_config
-        # Load config from gui env file if available
+
+        # Register _root_dir for abs path
         if not hasattr(self, "_root_dir"):
             self._root_dir = os.path.dirname(
                 inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
             )
-        env_file_abs_path = (
-            self.__env_filename
-            if os.path.isabs(self.__env_filename)
-            else os.path.join(self._root_dir, self.__env_filename)
-        )
-        if os.path.isfile(env_file_abs_path):
-            for key, value in dotenv_values(env_file_abs_path).items():
-                key = key.lower()
-                if value is not None and key in app_config:
-                    try:
-                        app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
-                    except Exception as e:
-                        warnings.warn(
-                            f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
-                        )
-        # Load keyword arguments
-        for key, value in kwargs.items():
-            key = key.lower()
-            if value is not None and key in app_config:
-                try:
-                    app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
-                except Exception as e:
-                    warnings.warn(
-                        f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
-                    )
+
+        # Load application config from multiple sources (env files, kwargs, command line)
+        self._config.build_app_config(self._root_dir, self.__env_filename, kwargs)
+
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
+
         # Save all local variables of the parent frame (usually __main__)
         self._locals_bind: t.Dict[str, t.Any] = t.cast(
             FrameType, t.cast(FrameType, inspect.currentframe()).f_back
@@ -717,4 +697,9 @@ class Gui(object, metaclass=Singleton):
 
         # Start Flask Server
         if run_server:
-            self._server.runWithWS(host=app_config["host"], port=app_config["port"], debug=app_config["debug"])
+            self._server.runWithWS(
+                host=app_config["host"],
+                port=app_config["port"],
+                debug=app_config["debug"],
+                use_reloader=app_config["use_reloader"],
+            )
