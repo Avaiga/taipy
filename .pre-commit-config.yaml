@@ -24,10 +24,10 @@ repos:
     - id: check-merge-conflict
     - id: check-yaml
       args: [--unsafe]
--   repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.9.3
-    hooks:
-    - id: isort
+#-   repo: https://github.com/pre-commit/mirrors-isort
+#    rev: v5.9.3
+#    hooks:
+#    - id: isort
 -   repo: https://github.com/ambv/black
     rev: 21.8b0
     hooks:
