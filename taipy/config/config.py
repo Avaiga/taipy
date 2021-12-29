@@ -6,6 +6,8 @@ from typing import Callable, Dict, List, Optional, Union
 
 from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
+from taipy.config.checker.checker import Checker
+from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.data_source_config import DataSourceConfig
 from taipy.config.global_app import GlobalAppConfig
 from taipy.config.job_config import JobConfig
@@ -14,6 +16,7 @@ from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
 from taipy.config.toml_serializer import TomlSerializer
 from taipy.data.scope import Scope
+from taipy.exceptions.configuration import ConfigurationIssueError
 
 
 class Config:
@@ -24,6 +27,7 @@ class Config:
     _file_config = None
     _env_config = None
     _applied_config = _Config.default_config()
+    collector = IssueCollector()
 
     @classmethod
     def global_config(cls) -> GlobalAppConfig:
@@ -256,6 +260,15 @@ class Config:
             cls._applied_config.update(cls._file_config)
         if cls._env_config:
             cls._applied_config.update(cls._env_config)
+        cls.collector = Checker().check(cls._applied_config)
+        for issue in cls.collector.warnings:
+            logging.warning(str(issue))
+        for issue in cls.collector.infos:
+            logging.info(str(issue))
+        for issue in cls.collector.errors:
+            logging.error(str(issue))
+        if len(cls.collector.errors) != 0:
+            raise ConfigurationIssueError
 
 
 Config._load_from_environment()

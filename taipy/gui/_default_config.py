@@ -6,6 +6,7 @@ app_config_default: AppConfig = {
     "dark_mode": True,
     "debug": True,
     "host": "127.0.0.1",
+    "use_reloader": True,
     "time_zone": "client",
     "propagate": True,
     "client_url": "http://127.0.0.1:5000",
