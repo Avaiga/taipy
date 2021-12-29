@@ -104,6 +104,8 @@ class Factory:
                 ("validate_action", AttributeType.string, "validate"),
                 ("validate_label", AttributeType.string, "Validate"),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("width", AttributeType.string_or_number),
+                ("height", AttributeType.string_or_number),
             ]
         )
         .set_propagate()
