@@ -113,6 +113,7 @@ class TestSQLDataSource:
                 {"foo": "corge"},
                 {"bar": "grault"},
                 {"KWARGS_KEY": "KWARGS_VALUE"},
+                {},
             ]
             data = sql_data_source._read_as("fake query", MyCustomObject)
 
@@ -121,6 +122,9 @@ class TestSQLDataSource:
         assert isinstance(data[1], MyCustomObject)
         assert isinstance(data[2], MyCustomObject)
         assert isinstance(data[3], MyCustomObject)
+        assert isinstance(data[4], MyCustomObject)
+        assert isinstance(data[5], MyCustomObject)
+
         assert data[0].foo == "baz"
         assert data[0].bar == "qux"
         assert data[1].foo == "quux"
@@ -132,6 +136,17 @@ class TestSQLDataSource:
         assert data[4].foo is None
         assert data[4].bar is None
         assert data[4].kwargs["KWARGS_KEY"] == "KWARGS_VALUE"
+        assert data[5].foo is None
+        assert data[5].bar is None
+        assert len(data[5].args) == 0
+        assert len(data[5].kwargs) == 0
+
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+            cursor_mock = engine_mock.return_value.__enter__.return_value
+            cursor_mock.execute.return_value = []
+            data_2 = sql_data_source._read_as("fake query", MyCustomObject)
+        assert isinstance(data_2, list)
+        assert len(data_2) == 0
 
     @pytest.mark.parametrize(
         "data",
@@ -143,6 +158,7 @@ class TestSQLDataSource:
             (1, 2),
             [1, 2, 3, 4],
             "foo",
+            None,
         ],
     )
     def test_write(self, data):
@@ -158,8 +174,8 @@ class TestSQLDataSource:
                 "write_table": "foo",
             },
         )
+
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.return_value = None
-
             ds._write(data)

@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from sqlalchemy import create_engine, table, text
 
@@ -121,9 +122,10 @@ class SQLDataSource(DataSource):
         return pd.read_sql_query(self.read_query, con=self.__engine)
 
     def _write(self, data) -> None:
-        """ "
+        """
         Check data against a collection of types to handle insertion on the database.
         """
+        print("data")
         with self.__engine.connect() as connection:
             write_table = table(self.write_table)
             if isinstance(data, pd.DataFrame):
@@ -146,7 +148,7 @@ class SQLDataSource(DataSource):
                 self.__insert_tuples([(data,)], write_table, connection)
 
     @staticmethod
-    def __insert_list(data: Union[List[Any], np.ndarray[Any, Any]], write_table: Any, connection: Any) -> None:
+    def __insert_list(data: Union[List[Any], npt.ArrayLike], write_table: Any, connection: Any) -> None:
         """
         :param data: a list of values
         :param write_table: a SQLAlchemy object that represents a table
@@ -170,7 +172,7 @@ class SQLDataSource(DataSource):
                 transaction.commit()
 
     @staticmethod
-    def __insert_tuples(data: Union[List[Any], np.ndarray[Any, Any]], write_table: Any, connection: Any) -> None:
+    def __insert_tuples(data: Union[List[Any], npt.ArrayLike], write_table: Any, connection: Any) -> None:
         """
         :param data: a list of tuples
         :param write_table: a SQLAlchemy object that represents a table
@@ -195,7 +197,7 @@ class SQLDataSource(DataSource):
                 transaction.commit()
 
     @staticmethod
-    def __insert_dicts(data: Union[List[Any], np.ndarray[Any, Any]], write_table: Any, connection: Any) -> None:
+    def __insert_dicts(data: Union[List[Any], npt.ArrayLike], write_table: Any, connection: Any) -> None:
         """
         :param data: a list of tuples
         :param write_table: a SQLAlchemy object that represents a table
