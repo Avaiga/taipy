@@ -1,5 +1,4 @@
 import inspect
-from types import NoneType
 import typing as t
 import warnings
 from abc import ABC, abstractmethod
@@ -42,7 +41,7 @@ class DataAccessor(ABC):
 class _InvalidDataAccessor(DataAccessor):
     @staticmethod
     def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
-        return NoneType
+        return type(None)
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         return None
