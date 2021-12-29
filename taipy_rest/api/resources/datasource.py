@@ -2,9 +2,6 @@ from flask import jsonify, make_response, request
 from flask_restful import Resource
 from taipy.config import Config
 
-# from taipy_rest.commons.pagination import paginate
-# from taipy_rest.extensions import db
-# # from taipy_rest.models import DataSource
 from taipy.data.manager.data_manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.repository import ModelNotFound
@@ -15,6 +12,7 @@ from taipy_rest.api.schemas import (
     InMemoryDataSourceConfigSchema,
     PickleDataSourceConfigSchema,
     SQLDataSourceConfigSchema,
+    DataSourceConfigSchema,
 )
 
 ds_schema_map = {
@@ -46,34 +44,6 @@ class DataSourceResource(Resource):
               schema:
                 type: object
                 properties:
-                  datasource: DataSourceSchema
-        404:
-          description: datasource does not exists
-    put:
-      tags:
-        - api
-      summary: Update a datasource
-      description: Update a single datasource by ID
-      parameters:
-        - in: path
-          name: datasource_id
-          schema:
-            type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              DataSourceSchema
-      responses:
-        200:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  msg:
-                    type: string
-                    example: datasource updated
                   datasource: DataSourceSchema
         404:
           description: datasource does not exists
@@ -134,7 +104,6 @@ class DataSourceList(Resource):
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/PaginatedResult'
                   - type: object
                     properties:
                       results:
@@ -150,7 +119,7 @@ class DataSourceList(Resource):
         content:
           application/json:
             schema:
-              DataSourceSchema
+              DataSourceConfigSchema
       responses:
         201:
           content:
@@ -161,7 +130,7 @@ class DataSourceList(Resource):
                   msg:
                     type: string
                     example: datasource created
-                  datasource: DataSourceSchema
+                  datasource: DataSourceConfigSchema
     """
 
     def get(self):

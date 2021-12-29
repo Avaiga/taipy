@@ -4,6 +4,7 @@ from taipy_rest.api.schemas.datasource import (
     InMemoryDataSourceConfigSchema,
     PickleDataSourceConfigSchema,
     SQLDataSourceConfigSchema,
+    DataSourceConfigSchema,
 )
 
 __all__ = ["DataSourceSchema"]
