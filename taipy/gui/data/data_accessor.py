@@ -1,4 +1,5 @@
 import inspect
+from types import NoneType
 import typing as t
 import warnings
 from abc import ABC, abstractmethod
@@ -38,9 +39,31 @@ class DataAccessor(ABC):
         pass
 
 
+class _InvalidDataAccessor(DataAccessor):
+    @staticmethod
+    def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
+        return NoneType
+
+    def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
+        return None
+
+    def is_data_access(self, var_name: str, value: t.Any) -> bool:
+        return False
+
+    def get_data(
+        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+    ) -> t.Dict[str, t.Any]:
+        return {}
+
+    def get_col_types(self, var_name: str, value: t.Any) -> t.Dict[str, str]:
+        return {}
+
+
 class _DataAccessors(object):
     def __init__(self) -> None:
         self.__access_4_type: t.Dict[str, DataAccessor] = {}
+
+        self.__invalid_data_accessor = _InvalidDataAccessor()
 
         self.__data_format = DataFormat.JSON
 
@@ -73,6 +96,7 @@ class _DataAccessors(object):
             return self.__access_4_type[value.__class__]
         except Exception:
             warnings.warn(f"Can't find Data Accessor for type {value.__class__}")
+        return self.__invalid_data_accessor
 
     def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         inst = _get_dict_value(self.__access_4_type, value.__class__)
