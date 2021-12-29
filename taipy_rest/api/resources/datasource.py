@@ -108,7 +108,9 @@ class DataSourceResource(Resource):
             datasource = manager.get(datasource_id)
             return {"datasource": schema.dump(datasource)}
         except ModelNotFound:
-            return make_response(jsonify({"message": f"DataSource {datasource_id} not found"}), 404)
+            return make_response(
+                jsonify({"message": f"DataSource {datasource_id} not found"}), 404
+            )
 
     def delete(self, datasource_id):
         manager = DataManager()
