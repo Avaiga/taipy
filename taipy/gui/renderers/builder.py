@@ -310,6 +310,7 @@ class Builder:
             "selected_marker",
             "orientation",
             "name",
+            "line",
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[4]:
@@ -361,6 +362,7 @@ class Builder:
                 "traces": [[reverse_cols.get(c, c) for c in [t[0], t[1], t[2]]] for t in traces],
                 "orientations": [t[12] for t in traces],
                 "names": [t[13] for t in traces],
+                "lines": [t[14] if isinstance(t[14], dict) else {"dash": t[14]} for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)

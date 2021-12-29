@@ -142,6 +142,12 @@ class chart extends shared {
     marker;
 
     /**
+     * The configuration of line used for a trace.<br/> See [line](https://plotly.com/javascript/reference/scatter/#scatter-line) for details. if str then dash
+     * @type {indexed(str|dict[str, any])}
+     */
+     line;
+
+     /**
      * The type of markers used for selected points in a trace<br/>See [selected marker](https://plotly.com/javascript/reference/scatter/#scatter-selected-marker) for details.
      * @type {indexed(dict[str, any])}
      */
