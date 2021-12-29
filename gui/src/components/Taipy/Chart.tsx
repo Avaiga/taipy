@@ -9,7 +9,15 @@ import React, {
     lazy,
     Suspense,
 } from "react";
-import { Data, Layout, PlotMarker, PlotRelayoutEvent, PlotMouseEvent, PlotSelectionEvent } from "plotly.js";
+import {
+    Data,
+    Layout,
+    PlotMarker,
+    PlotRelayoutEvent,
+    PlotMouseEvent,
+    PlotSelectionEvent,
+    ScatterLine,
+} from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 
@@ -51,6 +59,7 @@ interface ChartConfig {
     selectedMarkers: Partial<PlotMarker>[];
     orientations: string[];
     names: string[];
+    lines: Partial<ScatterLine>[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -143,6 +152,7 @@ const Chart = (props: ChartProp) => {
                 selectedMarkers: [],
                 orientations: [],
                 names: [],
+                lines: [],
             } as ChartConfig;
         }
     }, [props.config]);
@@ -208,6 +218,7 @@ const Chart = (props: ChartProp) => {
                     hovertext: getValue(value, config.labels, idx),
                     selectedpoints: getArrayValue(selected, idx, []),
                     orientation: getArrayValue(config.orientations, idx),
+                    line: getArrayValue(config.lines, idx),
                 } as Record<string, unknown>;
                 const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
