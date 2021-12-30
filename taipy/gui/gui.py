@@ -218,9 +218,9 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.__update_function:
             self.__update_function(self, var_name, value)
-        self.__send_var_list_update(modified_vars, from_front)
+        self.__send_var_list_update(modified_vars, var_name if from_front else None)
 
-    def __send_var_list_update(self, modified_vars: list, from_front=False):
+    def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
@@ -230,7 +230,7 @@ class Gui(object, metaclass=Singleton):
             if self._accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
-                if not from_front:
+                if _var != front_var:
                     if isinstance(newvalue, list):
                         newvalue = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
                     else:
