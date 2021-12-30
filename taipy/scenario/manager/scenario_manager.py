@@ -19,8 +19,8 @@ from taipy.exceptions.scenario import (
     NonExistingScenarioConfig,
 )
 from taipy.pipeline import PipelineManager
-from taipy.scenario import Scenario
 from taipy.scenario.repository import ScenarioRepository
+from taipy.scenario.scenario import Scenario
 from taipy.task import Job
 
 
