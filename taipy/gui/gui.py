@@ -204,9 +204,9 @@ class Gui(object, metaclass=Singleton):
                 value = bool(value)
             elif self._accessors._cast_string_value(var_name, currentvalue) is None:
                 return
-        self.__update_var(var_name, value, propagate)
+        self.__update_var(var_name, value, propagate, True)
 
-    def __update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
+    def __update_var(self, var_name: str, value: t.Any, propagate=True, from_front=False) -> None:
         hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
@@ -218,9 +218,9 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.__update_function:
             self.__update_function(self, var_name, value)
-        self.__send_var_list_update(modified_vars)
+        self.__send_var_list_update(modified_vars, var_name if from_front else None)
 
-    def __send_var_list_update(self, modified_vars: list):
+    def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
@@ -230,13 +230,13 @@ class Gui(object, metaclass=Singleton):
             if self._accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
-                if isinstance(newvalue, list):
-                    new_list = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
-                    newvalue = new_list
-                else:
-                    newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
-                    if isinstance(newvalue, _MapDictionary):
-                        continue  # this var has no transformer
+                if _var != front_var:
+                    if isinstance(newvalue, list):
+                        newvalue = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
+                    else:
+                        newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
+                if isinstance(newvalue, _MapDictionary):
+                    continue  # this var has no transformer
                 ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
