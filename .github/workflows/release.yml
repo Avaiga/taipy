@@ -35,7 +35,7 @@ jobs:
 
       - name: Remove .gitignore
         working-directory: ./taipy/gui
-        run: rm .gitignore
+        run: rm -f .gitignore
 
       - name: Commit changes
         uses: EndBug/add-and-commit@v7
@@ -70,7 +70,10 @@ jobs:
         run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
         id: extract_hash
 
-      - name: Create release
-        run: gh release create ${{ steps.extract_branch.outputs.tag }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
+      - name: Create/update release
+        run: |
+            gh release view ${{ steps.extract_branch.outputs.tag }} &&
+            gh release delete ${{ steps.extract_branch.outputs.tag }};
+            gh release create ${{ steps.extract_branch.outputs.tag }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
