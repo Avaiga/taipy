@@ -123,3 +123,6 @@ class TestCSVDataSource:
             csv_ds.write_with_column_names(content, columns)
             df = pd.DataFrame(content, columns=columns)
         assert np.array_equal(csv_ds.read().values, df.values)
+
+        csv_ds.write(None)
+        assert len(csv_ds.read()) == 0
