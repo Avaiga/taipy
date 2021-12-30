@@ -84,7 +84,10 @@ class CSVDataSource(DataSource):
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
             return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
-        return self._read_as_pandas_dataframe()
+        try:
+            return self._read_as_pandas_dataframe()
+        except pd.errors.EmptyDataError:
+            return pd.DataFrame()
 
     def _read_as(self, custom_class):
         with open(self.properties[self.__REQUIRED_PATH_PROPERTY]) as csvFile:
