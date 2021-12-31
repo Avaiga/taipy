@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from unittest import mock
 
@@ -430,6 +431,7 @@ def test_generate_json():
         assert data["task_repository"] == str(Path(pm.task_manager.data_manager.repository.dir_name).resolve())
         assert data["data_source_repository"] == str(Path(pm.task_manager.data_manager.repository.dir_name).resolve())
         assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
+    os.remove(Path(f"{pipeline.id}.json"))
 
 
 def test_hard_delete():
