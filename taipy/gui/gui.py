@@ -344,9 +344,9 @@ class Gui(object, metaclass=Singleton):
         try:
             self.__send_messages()
         except Exception as e:
-            warnings.warn(f"an exception was raised while sending messages: {e}")
+            warnings.warn(f"An exception was raised while sending messages: {e}")
         if exc_value:
-            warnings.warn(f"an {exc_type} was raised: {exc_value}")
+            warnings.warn(f"An {exc_type} was raised: {exc_value}")
         return True
 
     def __hold_messages(self):
