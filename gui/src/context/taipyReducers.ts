@@ -145,9 +145,7 @@ const storeClientId = (id: string) => localStorage && localStorage.setItem("Taip
 
 const messageToAction = (message: WsMessage) => {
     if (message.type) {
-        if (message.type === "U" && message.name) {
-            return createUpdateAction(message.name, message.payload as Record<string, unknown>);
-        } else if (message.type === "MU" && Array.isArray(message.payload)) {
+        if (message.type === "MU" && Array.isArray(message.payload)) {
             return createMultipleUpdateAction(message.payload as NamePayload[]);
         } else if (message.type === "MS" && Array.isArray(message.payload)) {
             return createMultipleMessagesAction(message.payload as WsMessage[]);
@@ -326,12 +324,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     }
     return state;
 };
-
-const createUpdateAction = (name: string, payload: Record<string, unknown>): TaipyAction => ({
-    type: Types.Update,
-    name: name,
-    payload: payload,
-});
 
 const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
     type: Types.MultipleUpdate,
