@@ -3,11 +3,13 @@ from flask_restful import Resource
 
 from taipy.task.manager import TaskManager
 from taipy.data.manager.data_manager import DataManager
+from taipy.exceptions.task import NonExistingTask
 from taipy.exceptions.repository import ModelNotFound
 
 from taipy_rest.api.schemas import TaskSchema
 from taipy.task.task import Task
 from taipy.common.utils import load_fct
+from taipy.task.scheduler import TaskScheduler
 
 
 class TaskResource(Resource):
@@ -33,7 +35,7 @@ class TaskResource(Resource):
                 properties:
                   task: TaskSchema
         404:
-          description: task does not exists
+          description: task does not exist
     delete:
       tags:
         - api
@@ -55,7 +57,7 @@ class TaskResource(Resource):
                     type: string
                     example: task deleted
         404:
-          description: task does not exists
+          description: task does not exist
     """
 
     def get(self, task_id):
@@ -63,13 +65,18 @@ class TaskResource(Resource):
             schema = TaskSchema()
             manager = TaskManager()
             task = manager.get(task_id)
-            return {"task": schema.dump(task)}
-        except ModelNotFound:
+            return {"task": schema.dump(manager.repository.to_model(task))}
+        except NonExistingTask:
             return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
 
     def delete(self, task_id):
-        manager = TaskManager()
-        manager.delete(task_id)
+        try:
+            manager = TaskManager()
+            manager.delete(task_id)
+        except ModelNotFound:
+            return make_response(
+                jsonify({"message": f"DataSource {task_id} not found"}), 404
+            )
 
         return {"msg": f"task {task_id} deleted"}
 
@@ -104,7 +111,7 @@ class TaskList(Resource):
         content:
           application/json:
             schema:
-              TaskConfigSchema
+              TaskSchema
       responses:
         201:
           content:
@@ -115,14 +122,15 @@ class TaskList(Resource):
                   msg:
                     type: string
                     example: task created
-                  task: TaskConfigSchema
+                  task: TaskSchema
     """
 
     def get(self):
         schema = TaskSchema(many=True)
         manager = TaskManager()
         tasks = manager.get_all()
-        return schema.dump(tasks)
+        tasks_model = [manager.repository.to_model(t) for t in tasks]
+        return schema.dump(tasks_model)
 
     def post(self):
         schema = TaskSchema()
@@ -139,9 +147,50 @@ class TaskList(Resource):
     def __create_task_from_schema(self, task_schema: TaskSchema):
         data_manager = DataManager()
         return Task(
-            task_schema.config_name,
-            [data_manager.get(ds) for ds in task_schema.input_ids],
-            load_fct(task_schema.function_module, task_schema.function_name),
-            [data_manager.get(ds) for ds in task_schema.output_ids],
-            task_schema.parent_id,
+            task_schema.get("config_name"),
+            [data_manager.get(ds) for ds in task_schema.get("input_ids")],
+            load_fct(
+                task_schema.get("function_module"), task_schema.get("function_name")
+            ),
+            [data_manager.get(ds) for ds in task_schema.get("output_ids")],
+            task_schema.get("parent_id"),
         )
+
+
+class TaskExecutor(Resource):
+    """Execute a task
+
+    ---
+    post:
+      tags:
+        - api
+      summary: Execute a task
+      description: Execute a task
+      parameters:
+        - in: path
+          name: task_id
+          schema:
+            type: string
+      responses:
+        204:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: task created
+                  task: TaskSchema
+      404:
+          description: task does not exist
+    """
+
+    def post(self, task_id):
+        try:
+            manager = TaskManager()
+            task = manager.get(task_id)
+            TaskScheduler().submit(task)
+            return {"message": f"Executed task {task_id}"}
+        except NonExistingTask:
+            return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)

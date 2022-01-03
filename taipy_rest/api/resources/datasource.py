@@ -46,7 +46,7 @@ class DataSourceResource(Resource):
                 properties:
                   datasource: DataSourceSchema
         404:
-          description: datasource does not exists
+          description: datasource does not exist
     delete:
       tags:
         - api
@@ -68,7 +68,7 @@ class DataSourceResource(Resource):
                     type: string
                     example: datasource deleted
         404:
-          description: datasource does not exists
+          description: datasource does not exist
     """
 
     def get(self, datasource_id):
@@ -83,9 +83,13 @@ class DataSourceResource(Resource):
             )
 
     def delete(self, datasource_id):
-        manager = DataManager()
-        manager.delete(datasource_id)
-
+        try:
+            manager = DataManager()
+            manager.delete(datasource_id)
+        except ModelNotFound:
+            return make_response(
+                jsonify({"message": f"DataSource {datasource_id} not found"}), 404
+            )
         return {"msg": f"datasource {datasource_id} deleted"}
 
 
