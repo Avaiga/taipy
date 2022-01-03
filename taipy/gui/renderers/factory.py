@@ -2,7 +2,7 @@ import re
 import typing as t
 from datetime import datetime
 
-from ..wstype import AttributeType
+from ..types import AttributeType
 from .builder import Builder
 
 
