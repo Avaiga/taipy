@@ -9,7 +9,7 @@ from typing import Callable, Dict, Iterable, List, Optional
 from taipy.config.config import Config
 from taipy.config.job_config import JobConfig
 from taipy.exceptions import JobNotDeletedException, NonExistingJob
-from taipy.task import Task
+from taipy.task.task import Task
 
 from ...common.alias import JobId
 from ...data.manager import DataManager

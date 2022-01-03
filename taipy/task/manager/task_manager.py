@@ -8,8 +8,8 @@ from taipy.data import Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound, NonExistingTask
 from taipy.exceptions.task import MultipleTaskFromSameConfigWithSameParent
-from taipy.task import TaskScheduler
 from taipy.task.repository import TaskRepository
+from taipy.task.scheduler import TaskScheduler
 from taipy.task.task import Task
 
 
