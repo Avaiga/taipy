@@ -7,4 +7,7 @@ from taipy_rest.api.schemas.datasource import (
     DataSourceConfigSchema,
 )
 
-__all__ = ["DataSourceSchema"]
+from taipy_rest.api.schemas.task import TaskSchema
+
+
+__all__ = ["DataSourceSchema", "TaskSchema"]

@@ -1,6 +1,6 @@
 from flask import Flask
 
-from taipy_rest import api, manage
+from taipy_rest import api
 from taipy_rest.extensions import apispec, db, migrate
 
 
@@ -13,7 +13,6 @@ def create_app(testing=False):
         app.config["TESTING"] = True
 
     configure_extensions(app)
-    configure_cli(app)
     configure_apispec(app)
     register_blueprints(app)
 
@@ -24,11 +23,6 @@ def configure_extensions(app):
     """Configure flask extensions"""
     db.init_app(app)
     migrate.init_app(app, db)
-
-
-def configure_cli(app):
-    """Configure Flask 2.0's cli for easy entity management"""
-    app.cli.add_command(manage.init)
 
 
 def configure_apispec(app):
