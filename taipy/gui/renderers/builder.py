@@ -245,10 +245,11 @@ class Builder:
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
+        col_types = self._gui._accessors._get_col_types(self.expr_hash or "", self.value)
         columns = _get_columns_dict(
             self.value,
             _add_to_dict_and_get(self.attributes, "columns", {}),
-            self._gui._accessors._get_col_types("", self.value),
+            col_types,
             _add_to_dict_and_get(self.attributes, "date_format", date_format),
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
@@ -271,20 +272,43 @@ class Builder:
                 for v in vals:
                     key = v[0].strip()
                     if key:
-                        if len(v) > 1:
-                            value = v[1].strip()
-                            if v:
-                                if v not in self._gui._agregate_functions:
-                                    # Bind potential function
-                                    self._gui.bind_func(value)
-                            apply[key] = value
+                        if len(v) > 1 and v[1]:
+                            apply[key] = v[1]
             if isinstance(apply, (dict, _MapDictionary)):
                 for ap in apply:
                     col_desc = next((x for x in columns.values() if x["dfid"] == ap), None)
                     if col_desc:
-                        col_desc["apply"] = apply[ap]
+                        value = apply[ap].strip()
+                        if value:
+                            if value not in self._gui._agregate_functions:
+                                # Bind potential function
+                                self._gui.bind_func(value)
+                            col_desc["apply"] = value
                     else:
                         warnings.warn(f"{self.element_name} apply {ap} is not in the list of displayed columns")
+            styles = self.__get_property("styles", "")
+            if isinstance(styles, str):
+                vals = [x.strip().split(":") for x in styles.split(";")]
+                styles = {}
+                for v in vals:
+                    key = v[0].strip()
+                    if key:
+                        col_desc = next((x for x in columns.values() if x["dfid"] == key), None)
+                        if col_desc and len(v) > 1 and v[1]:
+                            styles[key] = v[1]
+            if isinstance(styles, (dict, _MapDictionary)):
+                for st in styles:
+                    col_desc = next((x for x in columns.values() if x["dfid"] == st), None)
+                    if col_desc:
+                        value = styles[st].strip()
+                        if value:
+                            if value in col_types.keys():
+                                warnings.warn(f"{self.element_name} styles {value} cannot be a column's name")
+                            # Bind potential function
+                            self._gui.bind_func(value)
+                            col_desc["style"] = value
+                    else:
+                        warnings.warn(f"{self.element_name} styles {st} is not in the list of displayed columns")
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self

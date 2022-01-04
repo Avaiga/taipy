@@ -128,6 +128,9 @@ export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnD
     return columns;
 };
 
+export const getClassName = (row: Record<string, unknown>, style?: string) =>
+    style ? (row[style] as string) : undefined;
+
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
 const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;

@@ -369,7 +369,8 @@ export const createRequestTableUpdateAction = (
     orderBy?: string,
     sort?: string,
     aggregates?: string[],
-    applies?: Record<string, unknown>
+    applies?: Record<string, unknown>,
+    styles?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -383,6 +384,7 @@ export const createRequestTableUpdateAction = (
         sort: sort,
         aggregates: aggregates,
         applies: applies,
+        styles: styles,
     },
 });
 
