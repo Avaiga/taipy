@@ -1,3 +1,10 @@
-from taipy_rest.api.schemas.user import UserSchema
+from taipy_rest.api.schemas.datasource import (
+    CSVDataSourceConfigSchema,
+    DataSourceSchema,
+    InMemoryDataSourceConfigSchema,
+    PickleDataSourceConfigSchema,
+    SQLDataSourceConfigSchema,
+    DataSourceConfigSchema,
+)
 
-__all__ = ["UserSchema"]
+__all__ = ["DataSourceSchema"]

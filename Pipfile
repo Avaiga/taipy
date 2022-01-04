@@ -25,6 +25,7 @@ pytest = "*"
 pytest-factoryboy = "*"
 pytest-flask = "*"
 pre-commit = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.9"

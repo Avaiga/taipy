@@ -1,3 +1,3 @@
-from taipy_rest.api.resources.user import UserList, UserResource
+from taipy_rest.api.resources.datasource import DataSourceList, DataSourceResource
 
-__all__ = ["UserResource", "UserList"]
+__all__ = ["DataSourceResource", "DataSourceList"]
