@@ -14,7 +14,7 @@ with open("HISTORY.md") as history_file:
 
 requirements: List[str] = [
     "dataclasses_json",
-    "flask>=2.0",
+    "flask",
     "flask-cors",
     "flask-socketio",
     "markdown",

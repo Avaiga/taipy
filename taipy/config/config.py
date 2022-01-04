@@ -127,6 +127,8 @@ class Config:
         airflow_dag_folder: str = None,
         airflow_folder: str = None,
         airflow_db_endpoint: str = None,
+        start_airflow: bool = None,
+        airflow_api_retry: int = None,
         **properties,
     ):
         """Configures fields related to job execution."""
@@ -139,6 +141,8 @@ class Config:
             airflow_dag_folder,
             airflow_folder,
             airflow_db_endpoint,
+            start_airflow,
+            airflow_api_retry,
             **properties,
         )
         cls._python_config.job_config = job_config

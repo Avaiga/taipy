@@ -57,6 +57,12 @@ class JobConfig:
     AIRFLOW_DB_ENDPOINT_KEY = "airflow_db_endpoint"
     DEFAULT_DB_ENDPOINT = None
 
+    START_AIRFLOW_KEY = "start_airflow"
+    DEFAULT_START_AIRFLOW = False
+
+    AIRFLOW_API_RETRY_KEY = "airflow_api_retry"
+    DEFAULT_AIRFLOW_API_RETRY = 10
+
     def __init__(
         self,
         mode: str = None,
@@ -67,6 +73,8 @@ class JobConfig:
         airflow_dag_folder: str = None,
         airflow_folder: str = None,
         airflow_db_endpoint: str = None,
+        start_airflow: bool = None,
+        airflow_api_retry: int = None,
         **properties
     ):
         self.mode = mode
@@ -79,6 +87,8 @@ class JobConfig:
         self.airflow_dag_folder = airflow_dag_folder
         self.airflow_folder = airflow_folder
         self.airflow_db_endpoint = airflow_db_endpoint
+        self.start_airflow = start_airflow
+        self.airflow_api_retry = airflow_api_retry
 
         self.properties = properties
 
@@ -96,6 +106,8 @@ class JobConfig:
             cls.DEFAULT_AIRFLOW_DAG_FOLDER,
             cls.DEFAULT_AIRFLOW_FOLDER,
             cls.DEFAULT_DB_ENDPOINT,
+            cls.DEFAULT_START_AIRFLOW,
+            cls.DEFAULT_AIRFLOW_API_RETRY,
         )
 
     def to_dict(self):
@@ -116,6 +128,10 @@ class JobConfig:
             as_dict[self.AIRFLOW_FOLDER_KEY] = self.airflow_folder
         if self.airflow_db_endpoint is not None:
             as_dict[self.AIRFLOW_DB_ENDPOINT_KEY] = self.airflow_db_endpoint
+        if self.start_airflow is not None:
+            as_dict[self.START_AIRFLOW_KEY] = self.start_airflow
+        if self.airflow_api_retry is not None:
+            as_dict[self.AIRFLOW_API_RETRY_KEY] = self.airflow_api_retry
         as_dict.update(self.properties)
         return as_dict
 
@@ -130,6 +146,8 @@ class JobConfig:
         config.airflow_dag_folder = config_as_dict.pop(cls.AIRFLOW_DAG_FOLDER_KEY, None)
         config.airflow_folder = config_as_dict.pop(cls.AIRFLOW_FOLDER_KEY, None)
         config.airflow_db_endpoint = config_as_dict.pop(cls.AIRFLOW_DB_ENDPOINT_KEY, None)
+        config.start_airflow = config_as_dict.pop(cls.START_AIRFLOW_KEY, None)
+        config.airflow_api_retry = config_as_dict.pop(cls.AIRFLOW_API_RETRY_KEY, None)
         config.properties = config_as_dict
         return config
 
@@ -142,4 +160,10 @@ class JobConfig:
         self.airflow_dag_folder = config_as_dict.pop(self.AIRFLOW_DAG_FOLDER_KEY, self.airflow_dag_folder)
         self.airflow_folder = config_as_dict.pop(self.AIRFLOW_FOLDER_KEY, self.airflow_folder)
         self.airflow_db_endpoint = config_as_dict.pop(self.AIRFLOW_DB_ENDPOINT_KEY, self.airflow_db_endpoint)
+        self.start_airflow = config_as_dict.pop(self.START_AIRFLOW_KEY, self.start_airflow)
+        self.airflow_api_retry = config_as_dict.pop(self.AIRFLOW_API_RETRY_KEY, self.airflow_api_retry)
         self.properties.update(config_as_dict)
+
+    def is_standalone(self) -> bool:
+        """True if the config is set to standalone execution"""
+        return self.mode == self.MODE_VALUE_STANDALONE

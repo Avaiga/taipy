@@ -7,6 +7,7 @@ import pytest
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.common.frequency import Frequency
+from taipy.config import Config
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.cycle_model import CycleModel
 from taipy.pipeline import Pipeline
@@ -101,6 +102,8 @@ def setup():
     task_manager.delete_all()
     task_scheduler.delete_all()
     cycle_manager.delete_all()
+    Config._python_config.data_sources.clear()
+    Config._python_config.tasks.clear()
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -115,3 +118,5 @@ def teardown():
     data_manager.delete_all()
     task_manager.delete_all()
     task_scheduler.delete_all()
+    Config._python_config.data_sources.clear()
+    Config._python_config.tasks.clear()
