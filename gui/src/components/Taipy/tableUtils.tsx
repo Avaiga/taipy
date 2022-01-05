@@ -20,6 +20,7 @@ export interface ColumnDesc {
     index: number;
     width?: number | string;
     notEditable?: boolean;
+    style?:string;
 }
 
 export type Order = "asc" | "desc";

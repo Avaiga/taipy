@@ -41,6 +41,7 @@ import {
     iconInRowSx,
     addDeleteColumn,
     headBoxSx,
+    getClassName,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
@@ -95,6 +96,7 @@ const Row = ({
                     key={"val" + index + "-" + cidx}
                     {...alignCell(columns[col])}
                     sx={cellStyles[cidx]}
+                    className={getClassName(rows[index], columns[col].style)}
                 >
                     <EditableCell
                         colDesc={columns[col]}
@@ -208,13 +210,20 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns] = useMemo(() => {
+    const [colsOrder, columns, styles] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
             addDeleteColumn(!!(active && editable && deleteAction), columns);
-            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+            const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
+            const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
+                if (columns[col].style) {
+                    pv[columns[col].dfid] = columns[col].style;
+                }
+                return pv;
+            }, {});
+            return [colsOrder, columns, styles];
         }
-        return [[], {}];
+        return [[], {}, {}];
     }, [active, editable, deleteAction, props.columns]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
@@ -273,12 +282,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         orderBy,
                         order,
                         aggregates,
-                        applies
+                        applies,
+                        styles
                     )
                 );
             });
         },
-        [aggregates, tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
+        [aggregates, styles, tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
     );
 
     const onAddRowClick = useCallback(

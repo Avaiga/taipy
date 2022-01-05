@@ -17,7 +17,6 @@
  * @element table
  */
 class table extends shared {
-
     /**
      * bound to a data object
      * @type {any, default property}
@@ -52,13 +51,13 @@ class table extends shared {
      * HTML component width (CSS property)
      * @type {str|int|float}
      */
-    width = "100vw"
+    width = "100vw";
 
     /**
      * HTML component height (CSS property)
      * @type {str|int|float}
      */
-    height = "80vh"
+    height = "80vh";
 
     /**
      * List of selected indices
@@ -91,14 +90,20 @@ class table extends shared {
     number_format;
 
     /**
-     * List of columns names that can be aggregated
-     * @type {List[str]|str}
+     * Column name indexed property (group_by[column name]) that indicates that the column can be aggregated
+     * @type {column_indexed(bool)}
      */
     group_by;
 
     /**
-     * Dictionnary where key is the column name and value is the name of an aggregation function (built-in functions are count, sum, mean, median, min, max, std, first, last). A local function name can also be provided, it should take a serie as parameter and return a scalar value
-     * @type {Dict[str,str]|str}
+     * Column name indexed property (applly[column name]) where the value is the name of an aggregation function (built-in functions are count, sum, mean, median, min, max, std, first, last). A local function or lambda can also be provided, it should take a serie as parameter and return a scalar value
+     * @type {column_indexed(str)}
      */
     apply;
+
+    /**
+     * Column name indexed property (applly[column name]) where the value is a local function or lambda, it should take at least a serie as parameter (with column_name and function_name optional string patameters) and return a string value
+     * @type {column_indexed(str)}
+     */
+    style;
 }

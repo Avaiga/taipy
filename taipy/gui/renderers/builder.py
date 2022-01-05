@@ -1,6 +1,7 @@
 import datetime
 import json
 import numbers
+import re
 import typing as t
 import warnings
 import xml.etree.ElementTree as etree
@@ -98,6 +99,15 @@ class Builder:
             self.from_string = True
             lof = [(s, s) for s in lof.split(";")]
         return lof
+
+    def __get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
+        ret = {}
+        index_re = re.compile(name + "\[(.*)\]$")
+        for key in self.attributes.keys():
+            m = index_re.match(key)
+            if m:
+                ret[m.group(1)] = _get_dict_value(self.attributes, key)
+        return ret
 
     def __get_property(self, name: str, default_value: t.Any = None) -> t.Any:
         prop = _get_dict_value(self.attributes, name)
@@ -254,61 +264,50 @@ class Builder:
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
         if columns is not None:
-            group_by = self.__get_property("group_by", "")
-            if isinstance(group_by, str):
-                group_by = [x.strip() for x in group_by.split(";")]
-            if isinstance(group_by, (list, tuple)):
-                for gb in group_by:
-                    if gb:
-                        col_desc = next((x for x in columns.values() if x["dfid"] == gb), None)
-                        if col_desc:
-                            col_desc["groupBy"] = True
-                        else:
-                            warnings.warn(f"{self.element_name} group_by {gb} is not in the list of displayed columns")
-            apply = self.__get_property("apply", "")
-            if isinstance(apply, str):
-                vals = [x.strip().split(":") for x in apply.split(";")]
-                apply = {}
-                for v in vals:
-                    key = v[0].strip()
-                    if key:
-                        if len(v) > 1 and v[1]:
-                            apply[key] = v[1]
-            if isinstance(apply, (dict, _MapDictionary)):
-                for ap in apply:
-                    col_desc = next((x for x in columns.values() if x["dfid"] == ap), None)
+            group_by = self.__get_name_indexed_property("group_by")
+            for k, v in group_by.items():
+                if is_boolean_true(v):
+                    col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
                     if col_desc:
-                        value = apply[ap].strip()
-                        if value:
-                            if value not in self._gui._agregate_functions:
-                                # Bind potential function
-                                self._gui.bind_func(value)
-                            col_desc["apply"] = value
+                        col_desc["groupBy"] = True
                     else:
-                        warnings.warn(f"{self.element_name} apply {ap} is not in the list of displayed columns")
-            styles = self.__get_property("styles", "")
-            if isinstance(styles, str):
-                vals = [x.strip().split(":") for x in styles.split(";")]
-                styles = {}
-                for v in vals:
-                    key = v[0].strip()
-                    if key:
-                        col_desc = next((x for x in columns.values() if x["dfid"] == key), None)
-                        if col_desc and len(v) > 1 and v[1]:
-                            styles[key] = v[1]
-            if isinstance(styles, (dict, _MapDictionary)):
-                for st in styles:
-                    col_desc = next((x for x in columns.values() if x["dfid"] == st), None)
-                    if col_desc:
-                        value = styles[st].strip()
-                        if value:
-                            if value in col_types.keys():
-                                warnings.warn(f"{self.element_name} styles {value} cannot be a column's name")
+                        warnings.warn(f"{self.element_name} group_by[{k}] is not in the list of displayed columns")
+            apply = self.__get_name_indexed_property("apply")
+            for k, v in apply.items():
+                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
+                if col_desc:
+                    if isinstance(v, FunctionType):
+                        value = self.__hashes[f"apply[{k}]"]
+                        # bind the function to its hashed value
+                        self._gui.bind_var_val(value, v)
+                    else:
+                        value = str(v).strip()
+                        if value and value not in self._gui._agregate_functions:
                             # Bind potential function
                             self._gui.bind_func(value)
-                            col_desc["style"] = value
+                    if value:
+                        col_desc["apply"] = value
+                else:
+                    warnings.warn(f"{self.element_name} apply[{k}] is not in the list of displayed columns")
+            styles = self.__get_name_indexed_property("style")
+            for k, v in styles.items():
+                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
+                if col_desc:
+                    if isinstance(v, FunctionType):
+                        value = self.__hashes[f"style[{k}]"]
+                        # bind the function to its hashed value
+                        self._gui.bind_var_val(value, v)
                     else:
-                        warnings.warn(f"{self.element_name} styles {st} is not in the list of displayed columns")
+                        value = str(v).strip()
+                        if value:
+                            # Bind potential function
+                            self._gui.bind_func(value)
+                    if value in col_types.keys():
+                        warnings.warn(f"{self.element_name} style[{k}]={value} cannot be a column's name")
+                    elif value:
+                        col_desc["style"] = value
+                else:
+                    warnings.warn(f"{self.element_name} style[{k}] is not in the list of displayed columns")
             self.attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self
