@@ -29,8 +29,8 @@ wheels/
 # GUI generation
 taipy_webapp/
 # Doc generation
-docs/gui/controls.md
-docs/gui/controls/*.md
+docs/manuals/gui/user_controls.md
+docs/manuals/gui/controls/*.md
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

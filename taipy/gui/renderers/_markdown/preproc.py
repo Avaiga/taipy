@@ -46,7 +46,7 @@ class Preprocessor(MdPreprocessor):
     #  Note 2: Space characters after the equal sign are significative
     __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?")
 
-    def _make_prop_pair(self, prop_name: t.Optional[str], prop_value: str) -> tuple[t.Optional[str], str]:
+    def _make_prop_pair(self, prop_name: str, prop_value: str) -> Tuple[str, str]:
         # Un-escape pipe character in property value
         return (prop_name, prop_value.replace("\\|", "|"))
 
@@ -59,7 +59,8 @@ class Preprocessor(MdPreprocessor):
             # Opening tags
             m = Preprocessor.__OPENING_TAG_RE.search(line)
             if m is not None:
-                tag, properties = ("part", None)
+                tag = "part"
+                properties: List[Tuple[str, str]] = []
                 if m.group(1):
                     tag, properties = self._process_control(m.group(1), line_count)
                 if tag in MarkdownFactory._TAIPY_BLOCK_TAGS:
@@ -123,12 +124,12 @@ class Preprocessor(MdPreprocessor):
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
 
-    def _process_control(self, properties: str, line_count: int) -> Tuple[str, Any]:
-        fragments = [f for f in Preprocessor.__SPLIT_RE.split(properties) if f]
+    def _process_control(self, prop_string: str, line_count: int) -> Tuple[str, List[Tuple[str, str]]]:
+        fragments = [f for f in Preprocessor.__SPLIT_RE.split(prop_string) if f]
         control_name = None
         default_prop_name = None
         default_prop_value = None
-        properties = []
+        properties: List[Tuple[str, Any]] = []
         for fragment in fragments:
             if control_name is None and MarkdownFactory.get_default_property_name(fragment):
                 control_name = fragment
@@ -139,10 +140,12 @@ class Preprocessor(MdPreprocessor):
                 default_prop_value = Gui._get_instance()._evaluate_expr(fragment)
             else:
                 prop_match = Preprocessor.__PROPERTY_RE.match(fragment)
-                not_prefix, val = (prop_match.group(1), prop_match.group(3))
-                if not prop_match or (not_prefix and val):
-                    warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
-                else:
+                if prop_match:
+                    not_prefix = prop_match.group(1)
+                    prop_name = prop_match.group(2)
+                    val = prop_match.group(3)
+                    if not_prefix and val:
+                        warnings.warn(f"Negated property {prop_name} value ignored at {line_count}")
                     from ...gui import Gui
 
                     prop_value = "True"
@@ -151,10 +154,14 @@ class Preprocessor(MdPreprocessor):
                     elif val:
                         prop_value = val
                     prop_value = Gui._get_instance()._evaluate_expr(prop_value)
-                    properties.append(self._make_prop_pair(prop_match.group(2), prop_value))
+                    properties.append(self._make_prop_pair(prop_name, prop_value))
+                else:
+                    warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
+
         if control_name is None:
             control_name = "field"
         if default_prop_value is not None:
             default_prop_name = MarkdownFactory.get_default_property_name(control_name)
-            properties.insert(0, self._make_prop_pair(default_prop_name, default_prop_value))
+            if default_prop_name:
+                properties.insert(0, self._make_prop_pair(default_prop_name, default_prop_value))
         return control_name, properties
