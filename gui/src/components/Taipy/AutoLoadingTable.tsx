@@ -42,6 +42,7 @@ import {
     addDeleteColumn,
     headBoxSx,
     getClassName,
+    LINE_STYLE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
@@ -56,6 +57,7 @@ interface RowData {
     formatConfig: FormatConfig;
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
+    lineStyle?: string;
 }
 
 const Row = ({
@@ -72,6 +74,7 @@ const Row = ({
         formatConfig,
         onValidation,
         onDeletion,
+        lineStyle,
     },
 }: {
     index: number;
@@ -85,7 +88,7 @@ const Row = ({
             key={"row" + index}
             component="div"
             sx={style}
-            className={classes && classes.row}
+            className={(classes && classes.row) + " " + getClassName(rows[index], lineStyle)}
             data-index={index}
             selected={selection.indexOf(index) > -1}
         >
@@ -221,10 +224,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 }
                 return pv;
             }, {});
+            if (props.lineStyle) {
+                styles[LINE_STYLE] = props.lineStyle;
+            }
             return [colsOrder, columns, styles];
         }
         return [[], {}, {}];
-    }, [active, editable, deleteAction, props.columns]);
+    }, [active, editable, deleteAction, props.columns, props.lineStyle]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -349,6 +355,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             formatConfig: formatConfig,
             onValidation: active && editable && editAction ? onCellValidation : undefined,
             onDeletion: active && editable && deleteAction ? onRowDeletion : undefined,
+            lineStyle: props.lineStyle,
         }),
         [
             rows,
@@ -363,6 +370,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onCellValidation,
             deleteAction,
             onRowDeletion,
+            props.lineStyle,
         ]
     );
 

@@ -289,6 +289,21 @@ class Builder:
                         col_desc["apply"] = value
                 else:
                     warnings.warn(f"{self.element_name} apply[{k}] is not in the list of displayed columns")
+            line_style = self.__get_property("style")
+            if line_style:
+                if isinstance(line_style, FunctionType):
+                    value = self.__hashes["style"]
+                    # bind the function to its hashed value
+                    self._gui.bind_var_val(value, line_style)
+                else:
+                    value = str(line_style).strip()
+                    if value:
+                        # Bind potential function
+                        self._gui.bind_func(value)
+                if value in col_types.keys():
+                    warnings.warn(f"{self.element_name} style={value} cannot be a column's name")
+                elif value:
+                    self.set_attribute("lineStyle", value)
             styles = self.__get_name_indexed_property("style")
             for k, v in styles.items():
                 col_desc = next((x for x in columns.values() if x["dfid"] == k), None)

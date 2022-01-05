@@ -39,6 +39,7 @@ import {
     getsortByIndex,
     headBoxSx,
     iconInRowSx,
+    LINE_STYLE,
     OnCellValidation,
     OnRowDeletion,
     Order,
@@ -93,16 +94,19 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
             addDeleteColumn(!!(active && editable && deleteAction), columns);
             const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
-            const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
+            const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
                 if (columns[col].style) {
                     pv[columns[col].dfid] = columns[col].style;
                 }
                 return pv;
             }, {});
+            if (props.lineStyle) {
+                styles[LINE_STYLE] = props.lineStyle;
+            }
             return [colsOrder, columns, styles];
         }
         return [[], {}, {}];
-    }, [active, editable, deleteAction, props.columns]);
+    }, [active, editable, deleteAction, props.columns, props.lineStyle]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
@@ -360,6 +364,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         key={"row" + index}
                                         selected={sel > -1}
                                         ref={sel == 0 ? selectedRowRef : undefined}
+                                        className={getClassName(rows[index], props.lineStyle)}
                                     >
                                         {colsOrder.map((col, cidx) => (
                                             <TableCell
