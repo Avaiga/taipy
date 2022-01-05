@@ -129,6 +129,10 @@ class DataSource:
             self.job_ids.append(job_id)
 
     def filter(self, operators: List, join_operator=Operator.AND):
+        """
+        Filter data based on the provided list of tuples (key, value, operator)
+        If mulitple filter operators, filtered data will be joined based on the join operator (AND or OR)
+        """
         data = self._read()
         if len(operators) == 0:
             return data
