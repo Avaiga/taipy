@@ -102,7 +102,7 @@ class table extends shared {
     apply;
 
     /**
-     * Column name indexed property (applly[column name]) where the value is a local function or lambda, it should take at least a serie as parameter (with column_name and function_name optional string patameters) and return a string value
+     * Column name indexed property (applly[column name]) where the value is a style class name, a local function or lambda which should take at least a serie as parameter (with column_name and function_name optional string patameters) and return a string value
      * @type {column_indexed(str)}
      */
     style;
