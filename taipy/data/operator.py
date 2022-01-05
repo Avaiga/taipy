@@ -12,3 +12,5 @@ class Operator(Enum):
     LESS_OR_EQUAL = 4
     GREATER_THAN = 5
     GREATER_OR_EQUAL = 6
+    AND = 7
+    OR = 8

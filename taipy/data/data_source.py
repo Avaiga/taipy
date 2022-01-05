@@ -2,8 +2,10 @@ import logging
 import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from typing import List, Optional
+from functools import reduce
+from typing import List, Optional, Set
 
+import numpy as np
 import pandas as pd
 
 from taipy.common import protect_name
@@ -126,18 +128,31 @@ class DataSource:
         if job_id:
             self.job_ids.append(job_id)
 
-    def filter(self, key: str, value, operator: Operator = Operator.EQUAL):
+    def filter(self, operators: List, join_operator=Operator.AND):
         data = self._read()
-
+        if len(operators) == 0:
+            return data
         if isinstance(data, pd.DataFrame):
-            return data[DataSource.filter_dataframe(data[key], value, operator)]
+            return DataSource.filter_dataframe(data, operators, join_operator=join_operator)
         if isinstance(data, List):
-            return DataSource.filter_list(data, key, value, operator)
-
+            return DataSource.filter_list(data, operators, join_operator=join_operator)
         return NotImplemented
 
     @staticmethod
-    def filter_dataframe(df_by_col: pd.DataFrame, value, operator: Operator):
+    def filter_dataframe(df_data: pd.DataFrame, operators: List, join_operator=Operator.AND):
+        filtered_df_data = []
+        if join_operator == Operator.AND:
+            how = "inner"
+        elif join_operator == Operator.OR:
+            how = "outer"
+        else:
+            return NotImplemented
+        for key, value, operator in operators:
+            filtered_df_data.append(df_data[DataSource.filter_dataframe_per_key_value(df_data[key], value, operator)])
+        return DataSource.dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
+
+    @staticmethod
+    def filter_dataframe_per_key_value(df_by_col: pd.DataFrame, value, operator: Operator):
         if operator == Operator.EQUAL:
             return df_by_col == value
         if operator == Operator.NOT_EQUAL:
@@ -152,7 +167,25 @@ class DataSource:
             return df_by_col >= value
 
     @staticmethod
-    def filter_list(list_data: List, key, value, operator: Operator):
+    def dataframe_merge(df_list: List, how="inner"):
+        return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
+
+    @staticmethod
+    def filter_list(list_data: List, operators: List, join_operator=Operator.AND):
+        filtered_list_data = []
+        for key, value, operator in operators:
+            filtered_list_data.append(DataSource.filter_list_per_key_value(list_data, key, value, operator))
+        if len(filtered_list_data) == 0:
+            return filtered_list_data
+        if join_operator == Operator.AND:
+            return DataSource.list_intersect(filtered_list_data)
+        elif join_operator == Operator.OR:
+            return list(set(np.concatenate(filtered_list_data)))
+        else:
+            return NotImplemented
+
+    @staticmethod
+    def filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
         filtered_list = []
         for row in list_data:
             row_value = getattr(row, key)
@@ -169,6 +202,10 @@ class DataSource:
             if operator == Operator.GREATER_OR_EQUAL and row_value >= value:
                 filtered_list.append(row)
         return filtered_list
+
+    @staticmethod
+    def list_intersect(list_data):
+        return list(set(list_data.pop()).intersection(*map(set, list_data)))
 
     @abstractmethod
     def _read(self):
