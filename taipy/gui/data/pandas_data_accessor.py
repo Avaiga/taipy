@@ -59,11 +59,9 @@ class PandasDataAccessor(DataAccessor):
     ):
         arg_count = user_function.__code__.co_argcount
         args = []
-        if arg_count > 0 and arg_count < 4:
+        if arg_count > 0 and arg_count < 3:
             if arg_count > 1:
                 args.append(column_name)
-            if arg_count > 2:
-                args.append(function_name)
             data[function_name] = data.apply(user_function, axis=1, args=tuple(args))
             return True
         else:

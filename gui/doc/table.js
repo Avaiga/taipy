@@ -96,13 +96,13 @@ class table extends shared {
     group_by;
 
     /**
-     * Column name indexed property (applly[column name]) where the value is the name of an aggregation function (built-in functions are count, sum, mean, median, min, max, std, first, last). A local function or lambda can also be provided, it should take a serie as parameter and return a scalar value
+     * Column name indexed property (apply[column name]) where the value is the name of an aggregation function (built-in functions are count, sum, mean, median, min, max, std, first, last). A local function or lambda can also be provided, it should take a serie as parameter and return a scalar value
      * @type {column_indexed(str)}
      */
     apply;
 
     /**
-     * Column name indexed property (applly[column name]) where the value is a style class name, a local function or lambda which should take at least a row of data as first parameter (with column_name and function_name optional string patameters) and return a string value
+     * Column name indexed property (style[column name]) where the value is a style class name, a local function or lambda which should take at least a row of data as first parameter (with column_name optional string second parameter) and return a string value
      * @type {column_indexed(str)}
      */
     style;
