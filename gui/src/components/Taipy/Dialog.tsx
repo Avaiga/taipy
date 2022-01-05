@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useContext } from "react";
+import React, { ReactNode, useCallback, useContext, useMemo } from "react";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
@@ -24,6 +24,8 @@ interface DialogProps extends TaipyBaseProps {
     pageId: string;
     value?: boolean;
     children?: ReactNode;
+    height?: string | number;
+    width?: string | number;
 }
 
 const closeSx: SxProps<Theme> = {
@@ -45,7 +47,9 @@ const Dialog = (props: DialogProps) => {
         pageId,
         cancelLabel = "Cancel",
         validateLabel = "Validate",
-        className
+        className,
+        width,
+        height,
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
@@ -59,8 +63,29 @@ const Dialog = (props: DialogProps) => {
         dispatch(createSendActionNameAction(id, validateAction));
     }, [dispatch, id, validateAction]);
 
+    const paperProps = useMemo(() => {
+        if (width !== undefined || height !== undefined) {
+            const res = { sx: {} } as Record<string, Record<string, unknown>>;
+            if (width !== undefined) {
+                res.sx.width = width;
+                res.sx.maxWidth = width;
+            }
+            if (height !== undefined) {
+                res.sx.height = height;
+            }
+            return res;
+        }
+        return {};
+    }, [width, height]);
+
     return (
-        <MuiDialog id={id} onClose={handleClose} open={value === undefined ? defaultValue === "true" : !!value} className={className}>
+        <MuiDialog
+            id={id}
+            onClose={handleClose}
+            open={value === undefined ? defaultValue === "true" : !!value}
+            className={className}
+            PaperProps={paperProps}
+        >
             <DialogTitle sx={titleSx}>
                 {title}
                 <IconButton
@@ -78,7 +103,11 @@ const Dialog = (props: DialogProps) => {
                 {props.children}
             </DialogContent>
             <DialogActions>
-                {cancelAction && <Button onClick={handleClose} disabled={!active}>{cancelLabel}</Button>}
+                {cancelAction && (
+                    <Button onClick={handleClose} disabled={!active}>
+                        {cancelLabel}
+                    </Button>
+                )}
                 <Button onClick={handleValidate} autoFocus disabled={!active}>
                     {validateLabel}
                 </Button>

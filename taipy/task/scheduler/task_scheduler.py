@@ -4,12 +4,12 @@ import logging
 import uuid
 from multiprocessing import Lock
 from queue import Queue
-from typing import Callable, Dict, Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 from taipy.config.config import Config
 from taipy.config.job_config import JobConfig
 from taipy.exceptions import JobNotDeletedException, NonExistingJob
-from taipy.task import Task
+from taipy.task.task import Task
 
 from ...common.alias import JobId
 from ...data.manager import DataManager
@@ -56,7 +56,7 @@ class TaskScheduler:
             ds.lock_edition()
             self.data_manager.set(ds)
         job = self.__create_job(task, callbacks or [])
-        if self.__should_be_blocked(job):
+        if self.is_blocked(job):
             job.blocked()
             self.blocked_jobs.append(job)
         else:
@@ -113,12 +113,17 @@ class TaskScheduler:
         """
         return max(filter(lambda job: task in job, self.__JOBS.values()))
 
-    def __should_be_blocked(self, job) -> bool:
-        for ds in job.task.input.values():
-            ds = self.data_manager.get(ds.id)
-            if not ds.is_ready_for_reading:
-                return True
-        return False
+    def is_blocked(self, obj: Union[Task, Job]) -> bool:
+        """Allows to know if all data sources of a task or a job are ready
+
+        Args:
+             obj: Task or Job
+
+        Returns:
+             True if one of its input data source is blocked
+        """
+        data_sources = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
+        return any(not self.data_manager.get(ds.id).is_ready_for_reading for ds in data_sources)
 
     def __run(self):
         with self.lock:
@@ -147,7 +152,7 @@ class TaskScheduler:
                     self.lock.release()
 
     def __unblock_jobs(self):
-        jobs_to_unblock = [job for job in self.blocked_jobs if not self.__should_be_blocked(job)]
+        jobs_to_unblock = [job for job in self.blocked_jobs if not self.is_blocked(job)]
         for job in jobs_to_unblock:
             job.pending()
             self.blocked_jobs.remove(job)

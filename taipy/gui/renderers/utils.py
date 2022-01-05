@@ -2,7 +2,7 @@ import typing as t
 import warnings
 
 from ..utils import _get_date_col_str_name, _MapDictionary
-from ..wstype import NumberTypes
+from ..types import NumberTypes
 
 
 def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:

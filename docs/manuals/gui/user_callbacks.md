@@ -1,4 +1,4 @@
-# Callbacks
+#Callbacks
 
 Callbacks are functions that you create in your application, that are meant to be
 invoked in response to user actions in generated pages, or other events that the
@@ -11,30 +11,30 @@ let the user modify the value they hold.
 Because you may want to control what that _new value_ is, and decide whether to use
 as such or not, a callback function is called in your application.
 
-Here is a full example:
-``` { .python .annotate }
-from taipy.gui import Gui, Markdown
+!!! example
 
-page = """
-# Hello Taipy
+    ``` py linenums="1"
+    from taipy.gui import Gui, Markdown
 
-The variable `x` is here: <|{x}|slider|>.
-"""
+    page = """
+    # Hello Taipy
 
-x = 50
+    The variable `x` is here: <|{x}|slider|>.
+    """
 
-def on_value_change(guiApp, var, val):
-    if var == "x":
-        print(f"X was changed to: {x}")
+    x = 50
 
-gui = Gui(default_page_renderer=Markdown(page))
-gui.on_update(on_value_change)
-if __name__ == '__main__':
-    gui.run()
-```
+    def on_value_change(guiApp, var, val):
+        if var == "x":
+            print(f"X was changed to: {x}")
 
-Note how, in line 16, we indicate that the function _on_value_change_ should be called
-when variables are modified.
+    gui = Gui(default_page_renderer=Markdown(page))
+    gui.on_update(on_value_change)
+    if __name__ == '__main__':
+        gui.run()
+    ```
+
+!!! note "Note how, in line 16, we indicate that the function _on_value_change_ should be called when variables are modified."
 
 Once if your function body, you can check the new variable value, and decide what to
 do with it (may be trigger some other code that might be impacted by the variable
@@ -48,24 +48,26 @@ be `gui.x`.
 Controls like buttons don't notify of a value change. Instead, they use callbacks to let
 the application know that they were activated.
 
-Here is a full example:
-``` { .python .annotate }
-from taipy.gui import Gui, Markdown
+!!! example
 
-page = """
-# Hello Taipy
+        ``` py linenums="1"
+        from taipy.gui import Gui, Markdown
 
-Press <|THIS|button|> button.
-"""
+        page = """
+        # Hello Taipy
 
-def on_action(guiApp, id, action):
-    print("The button was pressed!")
+        Press <|THIS|button|> button.
+        """
 
-gui = Gui(default_page_renderer=Markdown(page))
-gui.on_action(on_action)
-if __name__ == '__main__':
-    gui.run()
-```
+        def on_action(guiApp, id, action):
+            print("The button was pressed!")
 
-Line 13 makes sure that the function _on_action_ gets called when the user triggers
-an action on a control.
+        gui = Gui(default_page_renderer=Markdown(page))
+        gui.on_action(on_action)
+        if __name__ == '__main__':
+            gui.run()
+
+
+        ```
+
+!!! note "Line 13 makes sure that the function _on_action_ gets called when the user triggers an action on a control."

@@ -11,6 +11,7 @@ class WsType(Enum):
     BLOCK = "BL"
     NAVIGATE = "NA"
     CLIENT_ID = "ID"
+    MULTIPLE_MESSAGE = "MS"
 
 
 NumberTypes = set(["int", "int64", "float", "float64"])

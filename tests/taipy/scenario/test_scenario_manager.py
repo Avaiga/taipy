@@ -229,7 +229,6 @@ def test_notification_subscribe_unsubscribe(mocker):
     # test subscribing notification
     scenario_manager.subscribe(notify_1, scenario)
     scenario_manager.submit(scenario.id)
-
     notify_1.assert_called_3_times()
 
     notify_1.reset()

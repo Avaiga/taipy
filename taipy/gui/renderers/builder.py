@@ -9,7 +9,7 @@ from types import FunctionType
 
 from ..page import Partial
 from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
-from ..wstype import AttributeType
+from ..types import AttributeType
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 

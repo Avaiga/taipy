@@ -22,6 +22,7 @@ enum Types {
     SetBlock = "SET_BLOCK",
     Navigate = "NAVIGATE",
     ClientId = "CLIENT_ID",
+    MultipleMessages = "MULTIPLE_MESSAGES",
 }
 export interface TaipyState {
     socket?: Socket;
@@ -60,6 +61,10 @@ interface TaipyAction extends NamePayload, TaipyBaseAction {
 
 interface TaipyMultipleAction extends TaipyBaseAction {
     payload: NamePayload[];
+}
+
+interface TaipyMultipleMessageAction extends TaipyBaseAction {
+    actions: TaipyBaseAction[];
 }
 
 interface TaipyAlertAction extends TaipyBaseAction, AlertMessage {}
@@ -138,6 +143,25 @@ export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
 
 const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);
 
+const messageToAction = (message: WsMessage) => {
+    if (message.type) {
+        if (message.type === "MU" && Array.isArray(message.payload)) {
+            return createMultipleUpdateAction(message.payload as NamePayload[]);
+        } else if (message.type === "MS" && Array.isArray(message.payload)) {
+            return createMultipleMessagesAction(message.payload as WsMessage[]);
+        } else if (message.type === "AL") {
+            return createAlertAction(message as unknown as AlertMessage);
+        } else if (message.type === "BL") {
+            return createBlockAction(message as unknown as BlockMessage);
+        } else if (message.type === "NA") {
+            return createNavigateAction((message as unknown as NavigateMessage).to);
+        } else if (message.type === "ID") {
+            return createIdAction((message as unknown as IdMessage).id);
+        }
+    }
+    return {} as TaipyBaseAction;
+};
+
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
         // Websocket confirm successful initialization
@@ -147,23 +171,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
             dispatch({ type: Types.SocketConnected });
         });
         // handle message data from backend
-        socket.on("message", (message: WsMessage) => {
-            if (message.type) {
-                if (message.type === "U" && message.name) {
-                    dispatch(createUpdateAction(message.name, message.payload as Record<string, unknown>));
-                } else if (message.type === "MU" && Array.isArray(message.payload)) {
-                    dispatch(createMultipleUpdateAction(message.payload as NamePayload[]));
-                } else if (message.type === "AL") {
-                    dispatch(createAlertAction(message as unknown as AlertMessage));
-                } else if (message.type === "BL") {
-                    dispatch(createBlockAction(message as unknown as BlockMessage));
-                } else if (message.type === "NA") {
-                    dispatch(createNavigateAction((message as unknown as NavigateMessage).to));
-                } else if (message.type === "ID") {
-                    dispatch(createIdAction((message as unknown as IdMessage).id));
-                }
-            }
-        });
+        socket.on("message", (message: WsMessage) => dispatch(messageToAction(message)));
     }
 };
 
@@ -298,6 +306,9 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
+        case Types.MultipleMessages:
+            const msgAction = baseAction as TaipyMultipleMessageAction;
+            return msgAction.actions.reduce((pState, act) => taipyReducer(pState, act), state);
         case Types.SendUpdate:
             sendWsMessage(state.socket, "U", action.name, action.payload.value, state.id, action.propagate);
             break;
@@ -313,12 +324,6 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
     }
     return state;
 };
-
-const createUpdateAction = (name: string, payload: Record<string, unknown>): TaipyAction => ({
-    type: Types.Update,
-    name: name,
-    payload: payload,
-});
 
 const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction => ({
     type: Types.MultipleUpdate,
@@ -364,7 +369,7 @@ export const createRequestTableUpdateAction = (
     orderBy?: string,
     sort?: string,
     aggregates?: string[],
-    applies?: Record<string, unknown>,
+    applies?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -391,7 +396,7 @@ export const createRequestInfiniteTableUpdateAction = (
     orderBy?: string,
     sort?: string,
     aggregates?: string[],
-    applies?: Record<string, unknown>,
+    applies?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -477,7 +482,12 @@ export const createIdAction = (id: string): TaipyIdAction => ({
     id: id,
 });
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID";
+export const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
+    type: Types.MultipleMessages,
+    actions: messages.map(messageToAction),
+});
+
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS";
 
 interface WsMessage {
     type: WsMessageType;

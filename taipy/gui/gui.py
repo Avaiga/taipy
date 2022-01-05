@@ -27,7 +27,7 @@ from .taipyimage import TaipyImage
 from .utils import ISOToDate, Singleton, _get_dict_value, _MapDictionary, attrsetter, dateToISO, get_client_var_name
 from .utils._adapter import _Adapter
 from .utils._evaluator import _Evaluator
-from .wstype import WsType
+from .types import WsType
 
 
 class Gui(object, metaclass=Singleton):
@@ -36,6 +36,7 @@ class Gui(object, metaclass=Singleton):
     __root_page_name = "TaiPy_root_page"
     __env_filename = "taipy.gui.env"
     __UI_BLOCK_NAME = "TaipyUiBlockVar"
+    __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -204,9 +205,9 @@ class Gui(object, metaclass=Singleton):
                 value = bool(value)
             elif self._accessors._cast_string_value(var_name, currentvalue) is None:
                 return
-        self.__update_var(var_name, value, propagate)
+        self.__update_var(var_name, value, propagate, True)
 
-    def __update_var(self, var_name: str, value: t.Any, propagate=True) -> None:
+    def __update_var(self, var_name: str, value: t.Any, propagate=True, from_front=False) -> None:
         hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
@@ -218,9 +219,9 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.__update_function:
             self.__update_function(self, var_name, value)
-        self.__send_var_list_update(modified_vars)
+        self.__send_var_list_update(modified_vars, var_name if from_front else None)
 
-    def __send_var_list_update(self, modified_vars: list):
+    def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
@@ -230,13 +231,13 @@ class Gui(object, metaclass=Singleton):
             if self._accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
-                if isinstance(newvalue, list):
-                    new_list = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
-                    newvalue = new_list
-                else:
-                    newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
-                    if isinstance(newvalue, _MapDictionary):
-                        continue  # this var has no transformer
+                if _var != front_var:
+                    if isinstance(newvalue, list):
+                        newvalue = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
+                    else:
+                        newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
+                if isinstance(newvalue, _MapDictionary):
+                    continue  # this var has no transformer
                 ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
@@ -253,16 +254,20 @@ class Gui(object, metaclass=Singleton):
             self.__send_var_list_update(payload["names"])
 
     def __send_ws(self, payload: dict) -> None:
-        try:
-            self._server._ws.emit(
-                "message",
-                payload,
-                to=self.__get_ws_receiver(),
-            )
-        except Exception as e:
-            warnings.warn(
-                f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}"
-            )
+        grouping_message = self.__get_message_grouping()
+        if grouping_message is None:
+            try:
+                self._server._ws.emit(
+                    "message",
+                    payload,
+                    to=self.__get_ws_receiver(),
+                )
+            except Exception as e:
+                warnings.warn(
+                    f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}"
+                )
+        else:
+            grouping_message.append(payload)
 
     def __send_ws_id(self, id: str) -> None:
         self.__send_ws(
@@ -322,6 +327,39 @@ class Gui(object, metaclass=Singleton):
         if not hasattr(request, "sid") or self._scopes.get_single_client():
             return None
         return request.sid  # type: ignore
+
+    def __get_message_grouping(self):
+        scope = self._get_data_scope()
+        if scope is self._scopes.get_global_scope():
+            return
+        if not hasattr(scope, Gui.__MESSAGE_GROUPING_NAME):
+            return None
+        return getattr(scope, Gui.__MESSAGE_GROUPING_NAME)
+
+    def __enter__(self):
+        self.__hold_messages()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            self.__send_messages()
+        except Exception as e:
+            warnings.warn(f"An exception was raised while sending messages: {e}")
+        if exc_value:
+            warnings.warn(f"An {exc_type or 'Exception'} was raised: {exc_value}")
+        return True
+
+    def __hold_messages(self):
+        grouping_message = self.__get_message_grouping()
+        if grouping_message is None:
+            self.bind_var_val(Gui.__MESSAGE_GROUPING_NAME, [])
+
+    def __send_messages(self):
+        grouping_message = self.__get_message_grouping()
+        if grouping_message is not None:
+            delattr(self._get_data_scope(), Gui.__MESSAGE_GROUPING_NAME)
+            if len(grouping_message):
+                self.__send_ws({"type": WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
