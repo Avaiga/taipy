@@ -135,5 +135,6 @@ Dockerfile.dev
 
 # Filesystem default local storage
 .data/
+.databkp/
 
 *.db

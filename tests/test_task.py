@@ -32,7 +32,7 @@ def test_delete_task(client):
 def test_create_task(client, task_data, default_datasource):
     # test bad data
     tasks_url = url_for("api.tasks")
-    data = {"username": "created"}
+    data = {"bad": "data"}
     rep = client.post(tasks_url, json=data)
     assert rep.status_code == 400
 
