@@ -8,10 +8,10 @@ from taipy.common.alias import JobId
 from taipy.data import DataSource
 from taipy.data.manager import DataManager
 from taipy.exceptions.job import DataSourceWritingError
-from taipy.task import Task
 from taipy.task.scheduler.executor.remote_pool_executor import RemotePoolExecutor
 from taipy.task.scheduler.executor.synchronous import Synchronous
 from taipy.task.scheduler.job import Job
+from taipy.task.task import Task
 
 
 class JobDispatcher:

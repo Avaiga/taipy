@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 from unittest import mock
 
@@ -8,6 +9,7 @@ from taipy.common import utils
 from taipy.common.alias import PipelineId, TaskId
 from taipy.config.config import Config
 from taipy.data.in_memory import InMemoryDataSource
+from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
@@ -17,6 +19,13 @@ from taipy.scenario import ScenarioManager
 from taipy.task import Task, TaskManager
 from taipy.task.scheduler import TaskScheduler
 from tests.taipy.utils.NotifyMock import NotifyMock
+
+
+@pytest.fixture()
+def airflow_config():
+    Config.set_job_config(mode=Config.job_config().MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
+    yield
+    Config.set_job_config(mode=Config.job_config().DEFAULT_MODE)
 
 
 def test_set_and_get_pipeline():
@@ -408,30 +417,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert pipeline_19.id != pipeline_20.id
 
 
-def test_generate_json():
-    pm = PipelineManager()
-    pm.is_standalone = False
-    ds_input_config = Config.add_data_source(
-        name="test_data_source_input", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
-    )
-    ds_output_config = Config.add_data_source(
-        name="test_data_source_output", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
-    )
-    task_config = Config.add_task("task_config", ds_input_config, print, ds_output_config)
-    pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
-    pipeline = pm.get_or_create(pipeline_config)
-    pm.submit(pipeline.id)
-    assert pipeline.tasks.values() is not None
-    assert Path(f"{pipeline.id}.json").exists()  # Check if file is created
-    with open(f"{pipeline.id}.json") as pipeline_json:
-        data = json.load(pipeline_json)
-        assert data["path"] == "tests/airflow"
-        assert data["dag_id"] == pipeline.id
-        assert data["task_repository"] == str(Path(pm.task_manager.data_manager.repository.dir_name).resolve())
-        assert data["data_source_repository"] == str(Path(pm.task_manager.data_manager.repository.dir_name).resolve())
-        assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
-
-
 def test_hard_delete():
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
@@ -547,3 +532,39 @@ def test_hard_delete():
     assert len(task_manager.get_all()) == 0
     assert len(data_manager.get_all()) == 1
     assert len(task_scheduler.get_jobs()) == 0
+
+
+def test_generate_json(airflow_config):
+    class Response:
+        status_code = 200
+
+    pm = PipelineManager()
+    ds_input_config = Config.add_data_source(name="test_data_source_input", storage_type="pickle", scope=Scope.PIPELINE)
+    ds_output_config = Config.add_data_source(
+        name="test_data_source_output", storage_type="pickle", scope=Scope.PIPELINE
+    )
+    task_config = Config.add_task("task_config", ds_input_config, print, ds_output_config)
+    pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
+    pipeline = pm.get_or_create(pipeline_config)
+    pipeline.task_config.test_data_source_input.write("foo")
+    DataManager().set(pipeline.task_config.test_data_source_input)
+    with mock.patch("taipy.airflow.airflow.requests.get") as get, mock.patch(
+        "taipy.airflow.airflow.requests.patch"
+    ) as patch, mock.patch("taipy.airflow.airflow.requests.post") as post:
+        get.return_value = Response()
+        pm.airflow._get_credentials = mock.MagicMock()
+        pm.submit(pipeline.id)
+
+        get.assert_called_once()
+        post.assert_called_once()
+        patch.assert_called_once()
+
+    dag_as_json = Path(Config.job_config().airflow_dag_folder).resolve() / "taipy" / f"{pipeline.id}.json"
+    data = json.loads(dag_as_json.read_text())
+
+    assert data["path"] == sys.path[0]
+    assert data["dag_id"] == pipeline.id
+    assert data["storage_folder"] == str(Path(Config.global_config().storage_folder).resolve())
+    assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
+
+    pm.airflow.stop()

@@ -54,6 +54,8 @@ nb_of_workers = 1
 hostname = "localhost"
 airflow_dag_folder = ".dag/"
 airflow_folder = ".airflow/"
+start_airflow = false
+airflow_api_retry = 10
 
 [DATA_SOURCE.default]
 storage_type = "in_memory"

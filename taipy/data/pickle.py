@@ -1,7 +1,8 @@
 import os
+import pathlib
 import pickle
 from datetime import datetime
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
@@ -67,7 +68,7 @@ class PickleDataSource(DataSource):
             edition_in_progress,
             **properties,
         )
-        self.__pickle_file_path = self.properties.get(self.__PICKLE_FILE_NAME) or f"{self.id}.p"
+        self.__pickle_file_path = self.__build_path()
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 
@@ -80,3 +81,13 @@ class PickleDataSource(DataSource):
 
     def _write(self, data):
         pickle.dump(data, open(self.__pickle_file_path, "wb"))
+
+    def __build_path(self):
+        if file_name := self.properties.get(self.__PICKLE_FILE_NAME):
+            return file_name
+        from taipy.config.config import Config
+
+        dir_path = pathlib.Path(Config.global_config().storage_folder) / "pickles"
+        if not dir_path.exists():
+            dir_path.mkdir(parents=True, exist_ok=True)
+        return dir_path / f"{self.id}.p"

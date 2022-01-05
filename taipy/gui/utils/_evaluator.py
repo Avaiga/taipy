@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import builtins
 import re
 import typing as t
 import warnings
@@ -66,7 +67,8 @@ class _Evaluator:
                             var_val[var_name] = attrgetter(var_name)(gui._get_data_scope())
                             var_list.append(var_name)
                         except AttributeError:
-                            warnings.warn(f"Variable '{var_name}' is not defined")
+                            if var_name not in dir(builtins):
+                                warnings.warn(f"Variable '{var_name}' is not defined (in expression '{expr}')")
         return var_val, var_list
 
     def _save_expression(

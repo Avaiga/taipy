@@ -1,5 +1,8 @@
+import os
+
 import pytest
 
+from taipy.config import Config
 from taipy.data import PickleDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
@@ -10,7 +13,6 @@ class TestPickleDataSourceEntity:
     def remove_pickle_files(self):
         yield
         import glob
-        import os
 
         for f in glob.glob("*.p"):
             print(f"deleting file {f}")
@@ -18,6 +20,7 @@ class TestPickleDataSourceEntity:
 
     def test_create(self):
         ds = PickleDataSource("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
+        assert os.path.isfile(Config.global_config().storage_folder + "pickles/" + ds.id + ".p")
         assert isinstance(ds, PickleDataSource)
         assert ds.storage_type() == "pickle"
         assert ds.config_name == "foobar_bazxyxea"
@@ -35,8 +38,6 @@ class TestPickleDataSourceEntity:
 
     def test_create_with_file_name(self):
         ds = PickleDataSource("foo", Scope.PIPELINE, properties={"default_data": "bar", "file_path": "foo.FILE.p"})
-        import os
-
         assert os.path.isfile("foo.FILE.p")
         assert ds.read() == "bar"
         ds.write("qux")

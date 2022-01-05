@@ -6,24 +6,49 @@ repo_name: taipy
 copyright: © 2022 Avaiga
 nav:
   - Home: index.md
-  - Getting started: getting_started.md
-  - User Manual: user.md
-  - Reference Manual: reference.md
-  - Contributing: contributing.md
-  - Authors: authors.md
-  - History: history.md
+  - 'Getting started': 
+    - 'Installation': 'getting_started/installation.md'
+    - 'Creating a Taipy application': 'getting_started/creating_a_taipy_application.md'
+  - 'Manuals':
+    - 'About Taipy user manuals': 'manuals/about.md'
+    - 'Scenario management': 'manuals/scenario_management.md'
+    - Graphical User Interface: 
+        - 'About': 'manuals/gui/user.md'
+        - 'Pages': 'manuals/gui/user_pages.md'
+        - 'Controls': 'manuals/gui/user_controls.md'
+        - 'Binding variables': 'manuals/gui/user_binding.md'
+        - 'Styling': 'manuals/gui/user_styling.md'
+        - 'Callbacks': 'manuals/gui/user_callbacks.md'
+        - 'Dialogs': 'manuals/gui/user_dialogs.md'
+        - 'Notifications': 'manuals/gui/user_notifications.md'
+        - 'GUI References': 'manuals/gui/user_gui.md'
+    - 'References': 'manuals/reference.md'
+  - 'Contributing':
+    - 'About contributions': 'contributing/about_contributing.md'
+    - 'How you can contribute': 'contributing/how-to-contribute.md'
+    - 'Get started for local development': 'contributing/get-started.md'
+  - 'Credits':
+    - 'Development lead': 'credits/development_lead.md'
+    - 'Contributors': 'credits/contributors.md'
+  - 'History': 'history.md'
 theme:
   name: material
   language: en
   custom_dir: tools/mkdocs
   logo: assets/images/logo.png
+  font:
+    text: Lato
   palette:
     - media: "(prefers-color-scheme: light)"
+      primary: indigo
+      accent: indigo
       scheme: default
       toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
+      primary: deep-orange
+      accent: deep-orange
       scheme: slate
       toggle:
         icon: material/toggle-switch
