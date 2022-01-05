@@ -47,6 +47,13 @@ def test_expression_field_control_3(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_expression_field_gt_operator(gui: Gui, helpers):
+    gui.bind_var_val("x", 0)
+    md_string = "<|{x > 0}|>"
+    expected_list = ["<Field", 'dataType="bool"', 'defaultValue="false"', "value={tp_x_0_0}"]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_expression_button_control(gui: Gui, helpers):
     gui.bind_var_val("label", "A button label")
     md_string = "<|button|label={label}|>"
