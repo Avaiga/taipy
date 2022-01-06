@@ -70,10 +70,12 @@ jobs:
         run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
         id: extract_hash
 
-      - name: Create/update release
+      - name: Create/update release and tag
         run: |
             gh release view ${{ steps.extract_branch.outputs.tag }} &&
-            gh release delete ${{ steps.extract_branch.outputs.tag }};
+            gh release delete ${{ steps.extract_branch.outputs.tag }} &&
+            git tag -f ${{ steps.extract_branch.outputs.tag }} &&
+            git push -f origin ${{ steps.extract_branch.outputs.tag }};
             gh release create ${{ steps.extract_branch.outputs.tag }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
