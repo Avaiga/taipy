@@ -35,9 +35,11 @@ import {
     boxSx,
     EditableCell,
     EDIT_COL,
+    getClassName,
     getsortByIndex,
     headBoxSx,
     iconInRowSx,
+    LINE_STYLE,
     OnCellValidation,
     OnRowDeletion,
     Order,
@@ -87,14 +89,24 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
 
-    const [colsOrder, columns] = useMemo(() => {
+    const [colsOrder, columns, styles] = useMemo(() => {
         if (props.columns) {
             const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
             addDeleteColumn(!!(active && editable && deleteAction), columns);
-            return [Object.keys(columns).sort(getsortByIndex(columns)), columns];
+            const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
+            const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
+                if (columns[col].style) {
+                    pv[columns[col].dfid] = columns[col].style;
+                }
+                return pv;
+            }, {});
+            if (props.lineStyle) {
+                styles[LINE_STYLE] = props.lineStyle;
+            }
+            return [colsOrder, columns, styles];
         }
-        return [[], {}];
-    }, [active, editable, deleteAction, props.columns]);
+        return [[], {}, {}];
+    }, [active, editable, deleteAction, props.columns, props.lineStyle]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
@@ -147,7 +159,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     orderBy,
                     order,
                     aggregates,
-                    applies
+                    applies,
+                    styles
                 )
             );
         } else {
@@ -351,9 +364,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         key={"row" + index}
                                         selected={sel > -1}
                                         ref={sel == 0 ? selectedRowRef : undefined}
+                                        className={getClassName(rows[index], props.lineStyle)}
                                     >
                                         {colsOrder.map((col, cidx) => (
-                                            <TableCell key={"val" + index + "-" + cidx} {...alignCell(columns[col])}>
+                                            <TableCell
+                                                key={"val" + index + "-" + cidx}
+                                                {...alignCell(columns[col])}
+                                                className={getClassName(rows[index], columns[col].style)}
+                                            >
                                                 <EditableCell
                                                     colDesc={columns[col]}
                                                     value={rows[index][col]}

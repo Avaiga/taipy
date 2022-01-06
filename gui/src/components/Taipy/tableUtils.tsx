@@ -20,6 +20,7 @@ export interface ColumnDesc {
     index: number;
     width?: number | string;
     notEditable?: boolean;
+    style?: string;
 }
 
 export type Order = "asc" | "desc";
@@ -29,6 +30,8 @@ export type RowValue = string | number | null;
 export type RowType = Record<string, RowValue>;
 
 export const EDIT_COL = "taipy_edit";
+
+export const LINE_STYLE = "__taipy_line_style__";
 
 export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: string, key2: string) => {
     if (cols[key1].index < cols[key2].index) {
@@ -81,6 +84,7 @@ export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelectProps {
     addAction?: string;
     editable?: boolean;
     defaultEditable?: boolean;
+    lineStyle?: string;
     defaultKey?: string; // for testing purposes only
 }
 
@@ -127,6 +131,9 @@ export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnD
     }
     return columns;
 };
+
+export const getClassName = (row: Record<string, unknown>, style?: string) =>
+    style ? (row[style] as string) : undefined;
 
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
