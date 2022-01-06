@@ -126,7 +126,7 @@ Here is an example of a toml file :
 
     [DATA_SOURCE.Historical_data_set]
     type=csv
-    path=”folder/subfolder/file.csv”
+    path="folder/subfolder/file.csv"
 
 ```
 

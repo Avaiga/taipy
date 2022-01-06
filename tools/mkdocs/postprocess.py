@@ -64,7 +64,11 @@ def on_post_build(env):
                 filename = os.path.join(root, f)
                 file_was_changed = False
                 with open(filename) as html_file:
-                    html_content = html_file.read()
+                    try:
+                        html_content = html_file.read()
+                    except Exception as e:
+                        print(f"Couldn't read HTML file {filename}")
+                        raise e
                     # Rebuild coherent links from TOC to sub-pages
                     ids = find_dummy_h3_entries(html_content)
                     if ids:

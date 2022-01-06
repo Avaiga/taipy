@@ -19,9 +19,9 @@ import shutil
 # Assuming that this script is located in TaipyHome/tools/mkdocs
 taipy_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
-SKELETON_PATH = taipy_dir + "/docs/gui/controls.md_template"
-CONTROLS_MD_PATH = taipy_dir + "/docs/gui/controls.md"
-CONTROLS_DIR_PATH = taipy_dir + "/docs/gui/controls"
+SKELETON_PATH = taipy_dir + "/docs/manuals/gui/user_controls.md_template"
+CONTROLS_MD_PATH = taipy_dir + "/docs/manuals/gui/user_controls.md"
+CONTROLS_DIR_PATH = taipy_dir + "/docs/manuals/gui/controls"
 CONTROLS_DOC_PATH = taipy_dir + "/gui/generateddoc"
 
 if not os.path.isdir(CONTROLS_DOC_PATH):
