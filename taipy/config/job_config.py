@@ -23,6 +23,8 @@ class JobConfig:
             is used in conjunction with the GlobalAppConfig.root_folder field. That means the path for the airflow dag
             folder is <root_folder><airflow_dag_folder> (Default path : "./taipy/.airflow/").
         airflow_db_endpoint (str): Airflow database endpoint used if airflow mode is activated. Default value is None.
+        start_airflow (bool): Allow Taipy to start Airflow if not alreay started.
+        airflow_api_retry (int): Retry pattern on Airflow APIs.
         properties (dict): Dictionary of additional properties.
 
     """
