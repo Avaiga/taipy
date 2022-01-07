@@ -3,7 +3,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import Any, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -128,7 +128,7 @@ class DataSource:
         if job_id:
             self.job_ids.append(job_id)
 
-    def filter(self, operators: List, join_operator=JoinOperator.AND):
+    def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """
         Filter data based on the provided list of tuples (key, value, operator)
         If mulitple filter operators, filtered data will be joined based on the join operator (AND or OR)
@@ -149,7 +149,7 @@ class DataSource:
         return NotImplemented
 
     @staticmethod
-    def filter_dataframe(df_data: pd.DataFrame, operators: List, join_operator=JoinOperator.AND):
+    def filter_dataframe(df_data: pd.DataFrame, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         filtered_df_data = []
         if join_operator == JoinOperator.AND:
             how = "inner"
@@ -183,7 +183,7 @@ class DataSource:
         return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
 
     @staticmethod
-    def filter_list(list_data: List, operators: List, join_operator=JoinOperator.AND):
+    def filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         filtered_list_data = []
         for key, value, operator in operators:
             filtered_list_data.append(DataSource.filter_list_per_key_value(list_data, key, value, operator))
