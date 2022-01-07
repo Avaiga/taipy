@@ -3,7 +3,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -128,7 +128,7 @@ class DataSource:
         if job_id:
             self.job_ids.append(job_id)
 
-    def filter(self, operators, join_operator=JoinOperator.AND):
+    def filter(self, operators: List, join_operator=JoinOperator.AND):
         """
         Filter data based on the provided list of tuples (key, value, operator)
         If mulitple filter operators, filtered data will be joined based on the join operator (AND or OR)
@@ -136,7 +136,7 @@ class DataSource:
         data = self._read()
         if len(operators) == 0:
             return data
-        if not (isinstance(operators[0], List) or isinstance(operators[0], Tuple)):
+        if not ((type(operators[0]) is List) or (type(operators[0]) is Tuple)):
             if isinstance(data, pd.DataFrame):
                 return DataSource.filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, List):
