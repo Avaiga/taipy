@@ -1,9 +1,10 @@
+from types import FunctionType
 import typing as t
 import warnings
 
 import pandas as pd
-import pyarrow as pa
 from pandas.core.frame import DataFrame
+import pyarrow as pa
 
 from ..utils import _get_date_col_str_name, _get_dict_value
 from .data_accessor import DataAccessor
@@ -18,17 +19,59 @@ class PandasDataAccessor(DataAccessor):
     def get_supported_classes() -> t.Callable:  # type: ignore
         return pd.DataFrame
 
-    def __manage_date_cols(self, payload_cols: t.Any, data: pd.DataFrame):
+    @staticmethod
+    def __style_function(
+        row: pd.Series, column_name: t.Optional[str], user_function: FunctionType, arg_count: int, function_name: str
+    ) -> str:
+        if arg_count > 0:
+            args_idx = 0
+            args = []
+            if column_name:
+                args.append(row[column_name])
+                args_idx += 1
+            if arg_count > args_idx:
+                args.append(row.name)
+                if arg_count > args_idx + 1:
+                    args.append(row)
+                    if arg_count > args_idx + 2:
+                        if column_name:
+                            args.append(column_name)
+                            args_idx += 1
+                        args += (arg_count - (args_idx + 2)) * [None]
+        try:
+            return str(user_function(*args))
+        except Exception as e:
+            warnings.warn(f"Exception raised when calling user style function {function_name}\n{e}")
+        return ""
+
+    def __build_transferred_cols(
+        self, guiApp: t.Any, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
+    ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = data.dtypes[data.dtypes.index.isin(payload_cols)]
         else:
             col_types = data.dtypes
         cols = col_types.index.tolist()
+        is_copied = False
+        if styles:
+            # copy the df so that we don't "mess" with the user's data
+            data = data.copy()
+            is_copied = True
+            for k, v in styles.items():
+                applied = False
+                if hasattr(guiApp, v):
+                    style_fn = getattr(guiApp, v)
+                    if isinstance(style_fn, FunctionType):
+                        applied = self.__apply_user_function(style_fn, k if k in cols else None, v, data)
+                if not applied:
+                    data[v] = v
+                cols.append(v)
         # deal with dates
         datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
         if len(datecols) != 0:
-            # copy the df so that we don't "mess" with the user's data
-            data = data.copy()
+            if not is_copied:
+                # copy the df so that we don't "mess" with the user's data
+                data = data.copy()
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
                 cols.append(newcol)
@@ -38,17 +81,30 @@ class PandasDataAccessor(DataAccessor):
         data = data.loc[:, cols]
         return data
 
+    def __apply_user_function(
+        self, user_function: FunctionType, column_name: t.Optional[str], function_name: str, data: pd.DataFrame
+    ):
+        arg_count = user_function.__code__.co_argcount
+        if arg_count > 0:
+            data[function_name] = data.apply(
+                PandasDataAccessor.__style_function,
+                axis=1,
+                args=(column_name, user_function, arg_count, function_name),
+            )
+            return True
+        else:
+            warnings.warn(f"Style function {function_name} should take at least a value as first argument")
+        return False
+
     def __format_data(
         self,
-        payload_cols: t.Any,
         data: DataFrame,
         data_format: DataFormat,
         orient: str = None,
         start: t.Optional[int] = None,
         rowcount: t.Optional[int] = None,
         data_extraction: t.Optional[bool] = None,
-    ) -> t.Union[t.Dict, bytes]:
-        data = self.__manage_date_cols(payload_cols, data)
+    ) -> t.Dict[str, t.Any]:
         ret: t.Dict[str, t.Any] = {
             "format": str(data_format.value),
         }
@@ -92,20 +148,20 @@ class PandasDataAccessor(DataAccessor):
         self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
-        aggregates = _get_dict_value(payload, "aggregates")
-        applies = _get_dict_value(payload, "applies")
-        if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
-            applies_with_fn = {}
-            for k, v in applies.items():
-                applies_with_fn[k] = getattr(guiApp, v) if hasattr(guiApp, v) else v
-            for col in _get_dict_value(payload, "columns") or []:
-                if col not in applies_with_fn.keys():
-                    applies_with_fn[col] = "first"
-            try:
-                value = value.groupby(aggregates).agg(applies_with_fn)
-            except Exception:
-                warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
         if isinstance(value, pd.DataFrame):
+            aggregates = _get_dict_value(payload, "aggregates")
+            applies = _get_dict_value(payload, "applies")
+            if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
+                applies_with_fn = {}
+                for k, v in applies.items():
+                    applies_with_fn[k] = getattr(guiApp, v) if hasattr(guiApp, v) else v
+                for col in _get_dict_value(payload, "columns") or []:
+                    if col not in applies_with_fn.keys():
+                        applies_with_fn[col] = "first"
+                try:
+                    value = value.groupby(aggregates).agg(applies_with_fn)
+                except Exception:
+                    warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
             paged = not _get_dict_value(payload, "alldata")
             if paged:
                 keys = payload.keys()
@@ -115,6 +171,7 @@ class PandasDataAccessor(DataAccessor):
             else:
                 ret_payload["alldata"] = payload["alldata"]
                 nb_rows_max = _get_dict_value(payload, "width")
+            columns = _get_dict_value(payload, "columns")
             if paged:
                 rowcount = len(value)
                 # here we'll deal with start and end values from payload if present
@@ -147,10 +204,10 @@ class PandasDataAccessor(DataAccessor):
                     new_indexes = new_indexes[slice(start, end + 1)]
                 else:
                     new_indexes = slice(start, end + 1)
-                value = value.iloc[new_indexes]  # returns a view
-                dictret = self.__format_data(
-                    _get_dict_value(payload, "columns"), value, data_format, "records", start, rowcount
+                value = self.__build_transferred_cols(
+                    guiApp, columns, value.iloc[new_indexes], styles=_get_dict_value(payload, "styles")
                 )
+                dictret = self.__format_data(value, data_format, "records", start, rowcount)
             else:
                 # view with the requested columns
                 if nb_rows_max and nb_rows_max < len(value) / 2:
@@ -158,9 +215,8 @@ class PandasDataAccessor(DataAccessor):
                     value["tp_index"] = value.index
                     # we need to be more clever than this :-)
                     value = value.iloc[:: (len(value) // nb_rows_max)]
-                dictret = self.__format_data(
-                    _get_dict_value(payload, "columns"), value, data_format, "list", data_extraction=True
-                )
+                value = self.__build_transferred_cols(guiApp, columns, value)
+                dictret = self.__format_data(value, data_format, "list", data_extraction=True)
             ret_payload["value"] = dictret
         return ret_payload
 
