@@ -136,7 +136,7 @@ class DataSource:
         data = self._read()
         if len(operators) == 0:
             return data
-        if not ((type(operators[0]) is List) or (type(operators[0]) is Tuple)):
+        if not ((type(operators[0]) == list) or (type(operators[0]) == tuple)):
             if isinstance(data, pd.DataFrame):
                 return DataSource.filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, List):
