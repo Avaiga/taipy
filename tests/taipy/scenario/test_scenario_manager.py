@@ -513,6 +513,8 @@ def test_submit():
     pipeline_manager.set(pipeline_2)
     with pytest.raises(NonExistingTask):
         scenario_manager.submit(scenario.id)
+    with pytest.raises(NonExistingTask):
+        scenario_manager.submit(scenario)
 
     # scenario, pipeline, and tasks do exist.
     # We expect all the tasks to be submitted once,
@@ -525,6 +527,15 @@ def test_submit():
     scenario_manager.submit(scenario.id)
     submit_calls = pipeline_manager.task_scheduler.submit_calls
     assert len(submit_calls) == 5
+    assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
+    assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
+    assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
+    assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
+    assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
+
+    scenario_manager.submit(scenario)
+    submit_calls = pipeline_manager.task_scheduler.submit_calls
+    assert len(submit_calls) == 10
     assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
     assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)

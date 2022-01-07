@@ -143,6 +143,11 @@ def test_submit():
     tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
     assert calls_ids == tasks_ids
 
+    pipeline_manager.submit(pipeline)
+    calls_ids = [t.id for t in pipeline_manager.task_scheduler.submit_calls]
+    tasks_ids = tasks_ids * 2
+    assert set(calls_ids) == set(tasks_ids)
+
 
 def mult_by_2(nb: int):
     return nb * 2

@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from typing import Callable, List, Optional, Set
+from typing import Callable, List, Optional, Set, Union
 
 from taipy.airflow.airflow import Airflow
 from taipy.common.alias import PipelineId, ScenarioId
@@ -155,15 +155,18 @@ class PipelineManager:
         """
         return self.repository.load_all()
 
-    def submit(self, pipeline_id: PipelineId, callbacks: Optional[List[Callable]] = None):
+    def submit(self, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None):
         callbacks = callbacks or []
-        pipeline_to_submit = self.get(pipeline_id)
-        pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline_to_submit) + callbacks
+        if isinstance(pipeline, Pipeline):
+            pipeline = self.get(pipeline.id)
+        if isinstance(pipeline, str):
+            pipeline = self.get(pipeline)
+        pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline) + callbacks
         if not Config.job_config().is_standalone():
-            tasks = [task for task in pipeline_to_submit.tasks.values()]
-            self.airflow.trigger(pipeline_id, tasks)
+            tasks = [task for task in pipeline.tasks.values()]
+            self.airflow.trigger(pipeline.id, tasks)
         else:
-            for tasks in pipeline_to_submit.get_sorted_tasks():
+            for tasks in pipeline.get_sorted_tasks():
                 for task in tasks:
                     self.task_scheduler.submit(task, pipeline_subscription_callback)
 
