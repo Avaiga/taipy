@@ -246,6 +246,8 @@ class TestDataSource:
 
         KEY_NAME = "value"
 
+        assert len(list_ds.filter((KEY_NAME, 4, Operator.EQUAL))) == 1
+        assert len(list_ds.filter((KEY_NAME, 4, Operator.NOT_EQUAL))) == 9
         assert len(list_ds.filter([(KEY_NAME, 4, Operator.EQUAL)])) == 1
         assert len(list_ds.filter([(KEY_NAME, 4, Operator.NOT_EQUAL)])) == 9
         assert len(list_ds.filter([(KEY_NAME, 4, Operator.LESS_THAN)])) == 4
