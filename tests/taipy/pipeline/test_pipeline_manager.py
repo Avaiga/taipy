@@ -125,11 +125,15 @@ def test_submit():
     # pipeline does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingPipeline):
         pipeline_manager.submit(pipeline.id)
+    with pytest.raises(NonExistingPipeline):
+        pipeline_manager.submit(pipeline)
 
     # pipeline does exist, but tasks does not exist. We expect an exception to be raised
     pipeline_manager.set(pipeline)
     with pytest.raises(NonExistingTask):
         pipeline_manager.submit(pipeline.id)
+    with pytest.raises(NonExistingTask):
+        pipeline_manager.submit(pipeline)
 
     # pipeline, and tasks does exist. We expect the tasks to be submitted
     # in a specific order

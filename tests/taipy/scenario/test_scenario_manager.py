@@ -500,12 +500,16 @@ def test_submit():
     # scenario does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingScenario):
         scenario_manager.submit(scenario.id)
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.submit(scenario)
 
     # scenario does exist, but pipeline does not exist.
     # We expect an exception to be raised
     scenario_manager.set(scenario)
     with pytest.raises(NonExistingPipeline):
         scenario_manager.submit(scenario.id)
+    with pytest.raises(NonExistingPipeline):
+        scenario_manager.submit(scenario)
 
     # scenario and pipeline do exist, but tasks does not exist.
     # We expect an exception to be raised
