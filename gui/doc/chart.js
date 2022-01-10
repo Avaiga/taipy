@@ -81,23 +81,35 @@ class chart extends shared {
      */
      orientation;
 
-     /**
+    /**
      * Column name for the _z_ axis.
      * @type {indexed(str)}
      */
      z;
 
-     /**
+    /**
      * Column name for the _y_ axis.
      * @type {indexed(str)}
      */
      y;
 
-     /**
+    /**
      * Column name for _x_ axis.
      * @type {indexed(str)}
      */
     x;
+
+    /**
+     * Column name for the text associated to the point (mode with _text_).
+     * @type {indexed(str)}
+     */
+    text;
+
+    /**
+     * Position of the text relative to the point (values: top, bottom, left, right)
+     * @type {indexed(str)}
+     */
+    textposition;
 
     /**
      * Chart mode<br/>See the Plotly [chart mode](https://plotly.com/javascript/reference/scatter/#scatter-mode) documentation for details.

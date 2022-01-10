@@ -60,6 +60,8 @@ interface ChartConfig {
     orientations: string[];
     names: string[];
     lines: Partial<ScatterLine>[];
+    texts: string[];
+    textPositions: string[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -153,6 +155,8 @@ const Chart = (props: ChartProp) => {
                 orientations: [],
                 names: [],
                 lines: [],
+                texts: [],
+                textPositions: [],
             } as ChartConfig;
         }
     }, [props.config]);
@@ -213,12 +217,14 @@ const Chart = (props: ChartProp) => {
                     x: getValue(value, trace, 0),
                     y: getValue(value, trace, 1),
                     z: getValue(value, trace, 2),
+                    text: getValue(value, config.texts, idx),
                     xaxis: config.xaxis[idx],
                     yaxis: config.yaxis[idx],
                     hovertext: getValue(value, config.labels, idx),
                     selectedpoints: getArrayValue(selected, idx, []),
                     orientation: getArrayValue(config.orientations, idx),
                     line: getArrayValue(config.lines, idx),
+                    textposition: getArrayValue(config.textPositions, idx),
                 } as Record<string, unknown>;
                 const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
