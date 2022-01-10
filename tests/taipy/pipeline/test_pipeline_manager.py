@@ -559,7 +559,7 @@ def test_generate_json(airflow_config):
         post.assert_called_once()
         patch.assert_called_once()
 
-    dag_as_json = Path(Config.job_config().airflow_dag_folder).resolve() / "taipy" / f"{pipeline.id}.json"
+    dag_as_json = Path(Config.job_config().airflow_dags_folder).resolve() / "taipy" / f"{pipeline.id}.json"
     data = json.loads(dag_as_json.read_text())
 
     assert data["path"] == sys.path[0]
