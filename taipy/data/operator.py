@@ -12,3 +12,8 @@ class Operator(Enum):
     LESS_OR_EQUAL = 4
     GREATER_THAN = 5
     GREATER_OR_EQUAL = 6
+
+
+class JoinOperator(Enum):
+    AND = 1
+    OR = 2
