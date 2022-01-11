@@ -137,6 +137,9 @@ Dockerfile.dev
 # Filesystem default local storage
 .data/
 
+# python notebook
+*.ipynb
+
 .airflow
 .dag
 data_sources
