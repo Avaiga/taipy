@@ -64,7 +64,7 @@ class Builder:
             for k, v in properties_dict.items():
                 self.attributes[k] = v
 
-        # Bind potential function and experssions in self.attributes
+        # Bind potential function and expressions in self.attributes
         for k, v in self.attributes.items():
             # need to unescape the double quotes that were escaped during preprocessing
             (val, hashname) = self.__parse_attribute_value(v.replace('\\"', '"') if isinstance(v, str) else v)
