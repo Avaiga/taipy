@@ -1,3 +1,4 @@
+import pytest
 from taipy.gui import Gui, Markdown
 
 
@@ -14,7 +15,8 @@ def ws_u_assert_template(gui, helpers, value_before_update, value_after_update, 
     sid = helpers.create_scope_and_get_sid(gui)
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
     assert gui._scopes.get_all_scopes()[sid].var == value_before_update
-    ws_client.emit("message", {"type": "U", "name": "var", "payload": payload})
+    with pytest.warns(UserWarning):
+        ws_client.emit("message", {"type": "U", "name": "var", "payload": payload})
     assert gui._scopes.get_all_scopes()[sid].var == value_after_update
     # assert for received message (message that would be sent to the frontend client)
     received_message = ws_client.get_received()[0]

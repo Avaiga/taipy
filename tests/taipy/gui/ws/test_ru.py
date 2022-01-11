@@ -1,3 +1,4 @@
+import pytest
 from taipy.gui import Gui, Markdown
 
 
@@ -16,7 +17,8 @@ def test_ru_selector(gui: Gui, helpers, csvdata):
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
-    ws_client.emit("message", {"type": "RU", "name": "", "payload": {"names": ["selected_val"]}})
+    with pytest.warns(UserWarning):
+        ws_client.emit("message", {"type": "RU", "name": "", "payload": {"names": ["selected_val"]}})
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_message(received_messages[0], "MU", "selected_val", ["value1", "value2"])

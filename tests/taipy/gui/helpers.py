@@ -1,6 +1,7 @@
 import json
 import logging
 import typing as t
+import pytest
 
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import Builder
@@ -26,7 +27,8 @@ class Helpers:
     def _test_control(gui: Gui, expected_values: t.Union[str, t.List]):
         gui.run(run_server=False)
         client = gui._server.test_client()
-        response = client.get("/flask-jsx/test/")
+        with pytest.warns(UserWarning):
+            response = client.get("/flask-jsx/test/")
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
         assert response.status_code == 200
         assert isinstance(response_data, t.Dict)
