@@ -11,8 +11,16 @@ from taipy_rest.api.resources import (
     PipelineList,
     PipelineResource,
     PipelineExecutor,
+    ScenarioList,
+    ScenarioResource,
+    ScenarioExecutor,
 )
-from taipy_rest.api.schemas import DataSourceSchema, TaskSchema, PipelineSchema
+from taipy_rest.api.schemas import (
+    DataSourceSchema,
+    TaskSchema,
+    PipelineSchema,
+    ScenarioSchema,
+)
 from taipy_rest.extensions import apispec
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
@@ -44,6 +52,18 @@ api.add_resource(
     PipelineExecutor,
     "/pipelines/submit/<string:pipeline_id>",
     endpoint="pipeline_submit",
+)
+
+api.add_resource(
+    ScenarioResource,
+    "/scenarios/<string:scenario_id>",
+    endpoint="scenario_by_id",
+)
+api.add_resource(ScenarioList, "/scenarios", endpoint="scenarios")
+api.add_resource(
+    ScenarioExecutor,
+    "/scenarios/submit/<string:scenario_id>",
+    endpoint="scenario_submit",
 )
 
 

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from taipy.common.alias import DataSourceId
 from taipy.data import InMemoryDataSource, Scope
 from taipy.pipeline import Pipeline
+from taipy.scenario import Scenario
 from taipy.task import Task
 
 from taipy_rest.app import create_app
@@ -44,6 +45,15 @@ def pipeline_data():
     return {
         "name": "foo",
         "task_ids": ["TASK_foo_3b888e17-1974-4a56-a42c-c7c96bc9cd54"],
+    }
+
+
+@pytest.fixture
+def scenario_data():
+    return {
+        "name": "foo",
+        "pipeline_ids": ["PIPELINE_foo_3b888e17-1974-4a56-a42c-c7c96bc9cd54"],
+        "properties": {},
     }
 
 
@@ -91,12 +101,25 @@ def default_task():
     return __default_task()
 
 
-@pytest.fixture
-def default_pipeline():
+def __default_pipeline():
     return Pipeline(
         config_name="foo",
         properties={},
         tasks=[__default_task()],
+    )
+
+
+@pytest.fixture
+def default_pipeline():
+    return __default_pipeline()
+
+
+@pytest.fixture
+def default_scenario():
+    return Scenario(
+        config_name="foo",
+        properties={},
+        pipelines=[__default_pipeline()],
     )
 
 
