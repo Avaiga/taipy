@@ -106,6 +106,10 @@ class SQLDataSource(DataSource):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
+    @classmethod
+    def required_properties(cls) -> List[str]:
+        return cls.__REQUIRED_PROPERTIES
+
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
             return self._read_as(self.read_query, self.properties[self.__EXPOSED_TYPE_PROPERTY])

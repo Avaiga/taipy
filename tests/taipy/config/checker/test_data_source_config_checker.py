@@ -39,10 +39,7 @@ class TestDataSourceConfigChecker:
         assert len(collector.errors) == 0
 
     def test_check_scope(self):
-        collector = IssueCollector()
         config = _Config.default_config()
-        DataSourceConfigChecker(config, collector).check()
-        assert len(collector.errors) == 0
 
         config.data_sources["default"].scope = "bar"
         collector = IssueCollector()
@@ -73,3 +70,35 @@ class TestDataSourceConfigChecker:
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
+
+    def test_check_required_properties(self):
+        config = _Config.default_config()
+
+        config.data_sources["default"].storage_type = "csv"
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.warnings) == 2
+
+        config.data_sources["default"].storage_type = "csv"
+        config.data_sources["default"].properties = {"has_header": True}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.warnings) == 1
+
+        config.data_sources["default"].storage_type = "csv"
+        config.data_sources["default"].properties = {"has_header": True, "path": "bar"}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.warnings) == 0
+
+        config.data_sources["default"].storage_type = "sql"
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.warnings) == 6
+
+        required_properties = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
+        config.data_sources["default"].storage_type = "sql"
+        config.data_sources["default"].properties = {key: "" for key in required_properties}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.warnings) == 0
