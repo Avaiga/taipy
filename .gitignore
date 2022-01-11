@@ -141,9 +141,8 @@ Dockerfile.dev
 *.ipynb
 
 .airflow
-.dag
+*.dags
 data_sources
 pipelines
 tasks
 pickles
-tests/.dags
