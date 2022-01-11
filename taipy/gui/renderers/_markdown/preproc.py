@@ -134,10 +134,7 @@ class Preprocessor(MdPreprocessor):
             if control_name is None and MarkdownFactory.get_default_property_name(fragment):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:
-                from ...gui import Gui
-
-                # Handle First Expression Fragment
-                default_prop_value = Gui._get_instance()._evaluate_expr(fragment)
+                default_prop_value = fragment
             else:
                 prop_match = Preprocessor.__PROPERTY_RE.match(fragment)
                 if prop_match:
@@ -146,14 +143,11 @@ class Preprocessor(MdPreprocessor):
                     val = prop_match.group(3)
                     if not_prefix and val:
                         warnings.warn(f"Negated property {prop_name} value ignored at {line_count}")
-                    from ...gui import Gui
-
                     prop_value = "True"
                     if not_prefix:
                         prop_value = "False"
                     elif val:
                         prop_value = val
-                    prop_value = Gui._get_instance()._evaluate_expr(prop_value)
                     properties.append(self._make_prop_pair(prop_name, prop_value))
                 else:
                     warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")

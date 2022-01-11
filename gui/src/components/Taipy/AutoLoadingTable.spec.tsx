@@ -87,29 +87,29 @@ const tableColumns = JSON.stringify({ Entity: { dfid: "Entity" } });
 
 describe("AutoLoadingTable Component", () => {
     it("renders", async () => {
-        const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
         const { getByText } = render(
-            <AutoLoadingTable value={undefined} columns={tableColumns} className="taipy-table" />
+            <AutoLoadingTable data={undefined} columns={tableColumns} className="taipy-table" />
         );
         const elt = getByText("Entity").closest("table");
         expect(elt).toHaveClass("taipy-table");
     });
     it("is disabled", async () => {
-        const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} active={false} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={false} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).toHaveClass("Mui-disabled");
     });
     it("is enabled by default", async () => {
-        const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText } = render(<AutoLoadingTable value={undefined} columns={tableColumns} active={true} />);
+        const { getByText } = render(<AutoLoadingTable data={undefined} columns={tableColumns} active={true} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
@@ -118,7 +118,7 @@ describe("AutoLoadingTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable value={undefined} columns={tableColumns} />
+                <AutoLoadingTable data={undefined} columns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elt = getByText("Entity");
@@ -146,7 +146,7 @@ describe("AutoLoadingTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable id="table" value={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
+                <AutoLoadingTable id="table" data={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -162,7 +162,7 @@ describe("AutoLoadingTable Component", () => {
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <AutoLoadingTable
                     id="table"
-                    value={state.data.table as undefined}
+                    data={state.data.table as undefined}
                     columns={tableColumns}
                     defaultKey="Infinite--asc"
                     pageSize={2}
@@ -175,7 +175,7 @@ describe("AutoLoadingTable Component", () => {
             <TaipyContext.Provider value={{ state: newState, dispatch }}>
                 <AutoLoadingTable
                     id="table"
-                    value={newState.data.table as TableValueType}
+                    data={newState.data.table as TableValueType}
                     defaultKey="Infinite--asc"
                     columns={tableColumns}
                     pageSize={2}
@@ -193,14 +193,14 @@ describe("AutoLoadingTable Component", () => {
         const selected = [2, 4, 6];
         const { getAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable value={undefined} columns={tableColumns} pageSize={2} />
+                <AutoLoadingTable data={undefined} columns={tableColumns} pageSize={2} />
             </TaipyContext.Provider>
         );
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <AutoLoadingTable
                     selected={selected}
-                    value={tableValue as TableValueType}
+                    data={tableValue as TableValueType}
                     defaultKey="Infinite--asc"
                     columns={tableColumns}
                     pageSize={2}

@@ -7,11 +7,12 @@ import { createSendUpdateAction } from "../../context/taipyReducers";
 import { TaipyBaseProps } from "./utils";
 import { useDynamicProperty } from "../../utils/hooks";
 
-interface SliderProps extends TaipyBaseProps<number> {
+interface SliderProps extends TaipyBaseProps {
     width?: number | string;
     min?: number;
     max?: number;
     value: number;
+    defaultValue?: string|number;
 }
 
 const Slider = (props: SliderProps) => {

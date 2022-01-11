@@ -18,7 +18,7 @@ def test_chart_md_1(gui: Gui, helpers, csvdata):
         'rangeChange="range_change"',
         'tp_updatevars="selected0=selected_indices;selected1=selected_indices"',
         'tp_varname="csvdata"',
-        "value={csvdata}",
+        "data={csvdata}",
         'width="100%"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -41,7 +41,7 @@ def test_chart_html_1(gui: Gui, helpers, csvdata):
         'rangeChange="range_change"',
         'tp_updatevars="selected0=selected_indices;selected1=selected_indices"',
         'tp_varname="csvdata"',
-        "value={csvdata}",
+        "data={csvdata}",
         'width="100%"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -64,7 +64,7 @@ def test_chart_html_2(gui: Gui, helpers, csvdata):
         'rangeChange="range_change"',
         'tp_updatevars="selected0=selected_indices;selected1=selected_indices"',
         'tp_varname="csvdata"',
-        "value={csvdata}",
+        "data={csvdata}",
         'width="100%"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

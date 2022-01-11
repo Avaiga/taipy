@@ -9,7 +9,15 @@ from operator import attrgetter
 from types import FunctionType
 
 from ..page import Partial
-from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
+from ..utils import (
+    _get_dict_value,
+    _MapDictionary,
+    dateToISO,
+    get_client_var_name,
+    getDataType,
+    is_boolean_true,
+    _get_expr_var_name,
+)
 from ..types import AttributeType
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
@@ -34,22 +42,13 @@ class Builder:
         self.attributes = attributes or {}
         self.__hashes = {}
         self.__update_vars = []
-        self.value = default_value
         self.el = etree.Element(element_name)
         self._gui = Gui._get_instance()
-        # Whether this object has been evaluated (by expression) in preprocessor
-        self.has_evaluated = False
-        default_property_name = Factory.get_default_property_name(control_type)
-        default_property_value = self.attributes.get(default_property_name)
-        if default_property_value:
-            if isinstance(default_property_value, str) and self._gui._is_expression(default_property_value):
-                self.has_evaluated = True
-                default_property_value = self._gui._fetch_expression_list(default_property_value)[0]
-                self.value = attrgetter(default_property_value)(self._gui._get_data_scope())
-                self.expr_hash = default_property_value
-                self.expr = self._gui._get_expr_from_hash(self.expr_hash)
-            else:
-                self.value = self.expr_hash = self.expr = default_property_value
+
+        self.default_property_name = Factory.get_default_property_name(control_type)
+        default_property_value = self.attributes.get(self.default_property_name, None)
+        if default_property_value is None:
+            self.attributes[self.default_property_name] = default_value
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.attributes:
@@ -65,9 +64,10 @@ class Builder:
             for k, v in properties_dict.items():
                 self.attributes[k] = v
 
-        # Bind potential function in self.attributes
+        # Bind potential function and experssions in self.attributes
         for k, v in self.attributes.items():
-            (val, hashname) = self.__parse_attribute_value(v)
+            # need to unescape the double quotes that were escaped during preprocessing
+            (val, hashname) = self.__parse_attribute_value(v.replace('\\"', '"') if isinstance(v, str) else v)
             if isinstance(val, str):
                 # Bind potential function
                 self._gui.bind_func(val)
@@ -121,8 +121,7 @@ class Builder:
 
     def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self._gui._is_expression(value):
-            hash_value = self._gui._fetch_expression_list(value)[0]
-            self._gui.bind_var(hash_value)
+            hash_value = self._gui._evaluate_expr(value, get_hash=True)
             try:
                 return (attrgetter(hash_value)(self._gui._get_data_scope()), hash_value)
             except AttributeError:
@@ -200,11 +199,12 @@ class Builder:
             if not isinstance(var_type, str):
                 elt = None
                 if len(lov) == 0:
-                    if isinstance(self.value, list):
-                        if len(self.value) > 0:
-                            elt = self.value[0]
+                    value = self.__get_property("value")
+                    if isinstance(value, list):
+                        if len(value) > 0:
+                            elt = value[0]
                     else:
-                        elt = self.value
+                        elt = value
                 else:
                     elt = lov[0]
                 var_type = type(elt).__name__ if elt is not None else None
@@ -240,24 +240,27 @@ class Builder:
             self.attributes["default_lov"] = ret_list
 
             ret_list = []
-            val_list = self.value if isinstance(self.value, list) else [self.value]
+            value = self.__get_property("value")
+            val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self._gui._run_adapter(adapter, val, adapter.__name__, "-1", id_only=True)
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
-                self.__set_default_value(ret_list)
+                self.__set_default_value("value", ret_list)
             else:
                 ret_val = ret_list[0] if len(ret_list) else ""
                 if ret_val == "-1" and self.__get_property("unselected_value") is not None:
                     ret_val = self.__get_property("unselected_value")
-                self.__set_default_value(ret_val)
+                self.__set_default_value("value", ret_val)
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
-        col_types = self._gui._accessors._get_col_types(self.expr_hash or "", self.value)
+        value = self.__get_property("data")
+
+        col_types = self._gui._accessors._get_col_types(self.__hashes.get("data", ""), value)
         columns = _get_columns_dict(
-            self.value,
+            value,
             _add_to_dict_and_get(self.attributes, "columns", {}),
             col_types,
             _add_to_dict_and_get(self.attributes, "date_format", date_format),
@@ -277,7 +280,7 @@ class Builder:
                 col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
                 if col_desc:
                     if isinstance(v, FunctionType):
-                        value = self.__hashes[f"apply[{k}]"]
+                        value = self.__hashes.get(f"apply[{k}]")
                         # bind the function to its hashed value
                         self._gui.bind_var_val(value, v)
                     else:
@@ -292,7 +295,7 @@ class Builder:
             line_style = self.__get_property("style")
             if line_style:
                 if isinstance(line_style, FunctionType):
-                    value = self.__hashes["style"]
+                    value = self.__hashes.get("style")
                     # bind the function to its hashed value
                     self._gui.bind_var_val(value, line_style)
                 else:
@@ -309,7 +312,7 @@ class Builder:
                 col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
                 if col_desc:
                     if isinstance(v, FunctionType):
-                        value = self.__hashes[f"style[{k}]"]
+                        value = self.__hashes.get(f"style[{k}]")
                         # bind the function to its hashed value
                         self._gui.bind_var_val(value, v)
                     else:
@@ -385,7 +388,8 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:5] if t])
-        columns = _get_columns_dict(self.value, list(columns), self._gui._accessors._get_col_types("", self.value))
+        value = self.__get_property("data")
+        columns = _get_columns_dict(value, list(columns), self._gui._accessors._get_col_types("", value))
         if columns is not None:
             self.attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
@@ -487,7 +491,8 @@ class Builder:
         return self.set_attribute("className", " ".join(classes))
 
     def set_dataType(self):
-        self.set_attribute("dataType", getDataType(self.value))
+        value = self.__get_property("value")
+        self.set_attribute("dataType", getDataType(value))
         return self
 
     def set_lov(self):
@@ -498,29 +503,31 @@ class Builder:
             self.__set_react_attribute("lov", hash_name)
         return self
 
-    def __set_default_value(self, value: t.Optional[t.Any] = None):
+    def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None):
         if value is None:
-            value = self.value
+            value = self.__get_property(var_name)
+        default_var_name = _to_camel_case("default_" + var_name)
         if isinstance(value, datetime.datetime):
-            self.set_attribute("defaultValue", dateToISO(value))
+            self.set_attribute(default_var_name, dateToISO(value))
         elif isinstance(value, str):
-            self.set_attribute("defaultValue", value)
+            self.set_attribute(default_var_name, value)
         else:
-            self.__set_json_attribute("defaultValue", value)
+            self.__set_json_attribute(default_var_name, value)
         return self
 
     def set_value_and_default(self, with_update=True, with_default=True):
-        if self.has_evaluated:
+        var_name = self.default_property_name
+        if var_name in self.__hashes:
             self.__set_react_attribute(
-                "value",
-                get_client_var_name(self.expr_hash),
+                var_name,
+                get_client_var_name(self.__hashes[var_name]),
             )
             if with_update:
-                self.set_attribute("tp_varname", self.expr)
+                self.set_attribute("tp_varname", self._gui._get_expr_from_hash(self.__hashes[var_name]))
             if with_default:
-                self.__set_default_value()
+                self.__set_default_value(var_name)
         else:
-            self.set_attribute("value", self.value)
+            self.set_attribute(var_name, self.__get_property(var_name))
         return self
 
     def set_page_id(self):
@@ -545,7 +552,10 @@ class Builder:
         return self
 
     def set_refresh(self):
-        return self.__set_react_attribute("refresh", get_client_var_name(self.expr_hash + ".refresh"))
+        return self.__set_react_attribute(
+            "refresh",
+            get_client_var_name(self.__hashes.get(self.default_property_name, self.default_property_name) + ".refresh"),
+        )
 
     def set_refresh_on_update(self):
         if len(self.__update_vars):

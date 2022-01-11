@@ -71,7 +71,7 @@ class _Evaluator:
                                 warnings.warn(f"Variable '{var_name}' is not defined (in expression '{expr}')")
         return var_val, var_list
 
-    def _save_expression(
+    def __save_expression(
         self,
         gui: Gui,
         expr: str,
@@ -84,7 +84,7 @@ class _Evaluator:
             if expr_hash is None:
                 expr_hash = self.__expr_to_hash[expr]
                 gui.bind_var_val(expr_hash, expr_evaluated)
-            return "{" + expr_hash + "}"
+            return expr_hash
         if expr_hash is None:
             expr_hash = self.__expr_to_hash[expr] = _get_expr_var_name(expr)
             gui.bind_var_val(expr_hash, expr_evaluated)
@@ -98,9 +98,11 @@ class _Evaluator:
                 self.__var_to_expr_list[var].append(expr)
         if expr not in self.__expr_to_var_list:
             self.__expr_to_var_list[expr] = var_list
-        return "{" + expr_hash + "}"
+        return expr_hash
 
-    def evaluate_expr(self, gui: Gui, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
+    def evaluate_expr(
+        self, gui: Gui, expr: str, re_evaluated: t.Optional[bool] = True, get_hash: t.Optional[bool] = False
+    ) -> t.Any:
         if not self._is_expression(expr):
             return expr
         var_val, var_list = self._analyze_expression(gui, expr)
@@ -117,6 +119,8 @@ class _Evaluator:
             is_edge_case = True
         # validate whether expression has already been evaluated
         if expr in self.__expr_to_hash and hasattr(gui._get_data_scope(), self.__expr_to_hash[expr]):
+            if get_hash:
+                return self.__expr_to_hash[expr]
             return "{" + self.__expr_to_hash[expr] + "}"
         try:
             # evaluate expressions
@@ -126,7 +130,10 @@ class _Evaluator:
             expr_evaluated = None
         # save the expression if it needs to be re-evaluated
         if re_evaluated:
-            return self._save_expression(gui, expr, expr_hash, expr_evaluated, var_val, var_list)
+            var_name = self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_val, var_list)
+            if get_hash:
+                return var_name
+            return "{" + var_name + "}"
         return expr_evaluated
 
     def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.List[str]:

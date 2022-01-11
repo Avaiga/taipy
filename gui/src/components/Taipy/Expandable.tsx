@@ -11,11 +11,12 @@ interface ExpandableProps extends TaipyBaseProps {
     expanded?: boolean;
     defaultExpanded?: boolean;
     children?: ReactNode;
-    value?: string;
+    title?: string;
+    defaultTitle?: string;
 }
 
 const Expandable = (props: ExpandableProps) => {
-    const { id, expanded = true, defaultExpanded, value, defaultValue, className } = props;
+    const { id, expanded = true, defaultExpanded, title, defaultTitle, className } = props;
     const [opened, setOpened] = useState(defaultExpanded === undefined ? expanded : defaultExpanded );
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -25,8 +26,8 @@ const Expandable = (props: ExpandableProps) => {
 
     return (
         <Accordion expanded={opened} onChange={onChange} className={className} id={id} disabled={!active}>
-            {value || defaultValue ? (
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>{value || defaultValue}</AccordionSummary>
+            {title || defaultTitle ? (
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>{title || defaultTitle}</AccordionSummary>
             ) : null}
             <AccordionDetails>{props.children}</AccordionDetails>
         </Accordion>

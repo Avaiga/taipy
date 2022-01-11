@@ -38,7 +38,7 @@ interface ChartProp extends TaipyBaseProps {
     width?: string | number;
     height?: string | number;
     config: string;
-    value?: TraceValueType;
+    data?: TraceValueType;
     refresh?: boolean;
     layout?: string;
     rangeChange?: string;
@@ -92,7 +92,7 @@ const Chart = (props: ChartProp) => {
         tp_varname,
         tp_updatevars,
         id,
-        value,
+        data,
         rangeChange,
         propagate = true,
         limitRows = false,
@@ -162,7 +162,7 @@ const Chart = (props: ChartProp) => {
     }, [props.config]);
 
     useEffect(() => {
-        if (!value || !!refresh) {
+        if (!data || !!refresh) {
             const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
             dispatch(
                 createRequestChartUpdateAction(
@@ -204,7 +204,7 @@ const Chart = (props: ChartProp) => {
     const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
-    const data = useMemo(
+    const dataPl = useMemo(
         () =>
             config.traces.map((trace, idx) => {
                 const ret = {
@@ -214,13 +214,13 @@ const Chart = (props: ChartProp) => {
                         getArrayValue(config.names, idx) ||
                         (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
                     marker: getArrayValue(config.markers, idx, {}),
-                    x: getValue(value, trace, 0),
-                    y: getValue(value, trace, 1),
-                    z: getValue(value, trace, 2),
-                    text: getValue(value, config.texts, idx),
+                    x: getValue(data, trace, 0),
+                    y: getValue(data, trace, 1),
+                    z: getValue(data, trace, 2),
+                    text: getValue(data, config.texts, idx),
                     xaxis: config.xaxis[idx],
                     yaxis: config.yaxis[idx],
-                    hovertext: getValue(value, config.labels, idx),
+                    hovertext: getValue(data, config.labels, idx),
                     selectedpoints: getArrayValue(selected, idx, []),
                     orientation: getArrayValue(config.orientations, idx),
                     line: getArrayValue(config.lines, idx),
@@ -232,7 +232,7 @@ const Chart = (props: ChartProp) => {
                 }
                 return ret as Data;
             }),
-        [value, config, selected]
+        [data, config, selected]
     );
 
     const plotConfig = useMemo(
@@ -251,8 +251,8 @@ const Chart = (props: ChartProp) => {
     }, []);
 
     const getRealIndex = useCallback(
-        (index: number) => (value?.tp_index ? (value.tp_index[index] as number) : index),
-        [value]
+        (index: number) => (data?.tp_index ? (data.tp_index[index] as number) : index),
+        [data]
     );
 
     const onSelect = useCallback(
@@ -279,7 +279,7 @@ const Chart = (props: ChartProp) => {
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                 <Plot
-                    data={data}
+                    data={dataPl}
                     layout={layout}
                     style={style}
                     onRelayout={onRelayout}

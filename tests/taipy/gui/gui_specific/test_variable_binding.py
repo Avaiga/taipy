@@ -19,7 +19,7 @@ def test_variable_binding(helpers):
     gui.run(run_server=False)
     client = gui._server.test_client()
     jsx = client.get("/flask-jsx/test/").json["jsx"]
-    for expected in ["<Button", f'defaultValue="{z}"', "value={z}"]:
+    for expected in ["<Button", f'defaultLabel="{z}"', "label={z}"]:
         assert expected in jsx
     assert gui.x == x
     assert gui.y == y
@@ -28,7 +28,6 @@ def test_variable_binding(helpers):
     helpers.test_cleanup()
 
 
-@pytest.mark.skip(reason="Issue #662 is preventing this to work properly")
 def test_properties_binding(helpers):
     gui = Gui(__name__)
     modifier = "nice "  # noqa: F841
@@ -37,9 +36,8 @@ def test_properties_binding(helpers):
     gui.run(run_server=False)
     client = gui._server.test_client()
     jsx = client.get("/flask-jsx/test/").json["jsx"]
-    for expected in ["<Button", 'defaultValue="A nice button"']:
+    for expected in ["<Button", 'defaultLabel="A nice button"']:
         assert expected in jsx
-    assert isinstance(gui.another_function, FunctionType)
     helpers.test_cleanup()
 
 

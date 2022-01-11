@@ -35,9 +35,8 @@ class Factory:
             control_type=control_type,
             element_name="Button",
             attributes=attrs,
-            default_value="<empty>",
         )
-        .set_value_and_default(False)
+        .set_value_and_default(with_update=False)
         .set_classNames(class_name="taipy-button", config_class="button")
         .set_attributes(
             [
@@ -126,9 +125,8 @@ class Factory:
             control_type=control_type,
             element_name="Field",
             attributes=attrs,
-            default_value="<empty>",
         )
-        .set_value_and_default(False)
+        .set_value_and_default(with_update=False)
         .set_classNames(class_name="taipy-field", config_class="field")
         .set_dataType()
         .set_attributes(
@@ -141,7 +139,6 @@ class Factory:
             control_type=control_type,
             element_name="Input",
             attributes=attrs,
-            default_value="<empty>",
         )
         .set_type("text")
         .set_value_and_default()
@@ -157,10 +154,10 @@ class Factory:
             control_type=control_type, element_name="Layout", attributes=attrs, default_value=""
         )
         .set_classNames(class_name="taipy-layout", config_class="layout")
+        .set_value_and_default(with_default=False)
         .set_attributes(
             [
                 ("id"),
-                ("columns"),
                 ("columns[mobile]"),
                 ("gap"),
             ]
@@ -261,7 +258,7 @@ class Factory:
             element_name="Status",
             attributes=attrs,
         )
-        .set_value_and_default(False)
+        .set_value_and_default(with_update=False)
         .set_classNames(class_name="taipy-status", config_class="status")
         .set_propagate()
         .set_attributes(

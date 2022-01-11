@@ -17,7 +17,7 @@ def test_value_to_negated_property(gui: Gui, helpers):
 def test_invalid_property_value(gui: Gui, helpers):
     # Catch warning?
     md_string = "<|button|let's try that!|>"
-    expected_list = ["<Button", 'value="&lt;empty&gt;"']
+    expected_list = ["<Button", 'label="&lt;Empty&gt;"']
     helpers.test_control_md(gui, md_string, expected_list)
 
 

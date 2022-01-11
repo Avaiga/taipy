@@ -10,7 +10,7 @@ def test_expandable_md_1(gui: Gui, helpers):
     expected_list = [
         "<Expandable",
         "expanded={false}",
-        'value="Expandable section"',
+        'title="Expandable section"',
         "<h1",
         "This is an expandable section",
     ]
@@ -26,7 +26,7 @@ def test_expandable_md_2(gui: Gui, helpers):
     expected_list = [
         "<Expandable",
         "expanded={false}",
-        'value="Expandable section"',
+        'title="Expandable section"',
         "<h1",
         "This is an expandable section",
     ]
@@ -38,7 +38,7 @@ def test_expandable_html(gui: Gui, helpers):
     expected_list = [
         "<Expandable",
         "expanded={false}",
-        'value="Expandable section"',
+        'title="Expandable section"',
         "<h1",
         "This is an expandable section",
     ]

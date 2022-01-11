@@ -422,8 +422,10 @@ class Gui(object, metaclass=Singleton):
         return False
 
     # Proxy methods for Evaluator
-    def _evaluate_expr(self, expr: str, re_evaluated: t.Optional[bool] = True) -> t.Any:
-        return self.__evaluator.evaluate_expr(self, expr, re_evaluated)
+    def _evaluate_expr(
+        self, expr: str, re_evaluated: t.Optional[bool] = True, get_hash: t.Optional[bool] = False
+    ) -> t.Any:
+        return self.__evaluator.evaluate_expr(self, expr, re_evaluated, get_hash)
 
     def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
