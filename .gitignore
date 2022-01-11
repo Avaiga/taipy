@@ -136,3 +136,11 @@ Dockerfile.dev
 
 # Filesystem default local storage
 .data/
+
+.airflow
+.dag
+data_sources
+pipelines
+tasks
+pickles
+tests/.dags

@@ -59,7 +59,7 @@ class Gui(object, metaclass=Singleton):
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        default_page_renderer: t.Optional[PageRenderer] = None,
+        page: t.Optional[PageRenderer] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
@@ -75,7 +75,9 @@ class Gui(object, metaclass=Singleton):
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
 
-            default_page_renderer (PageRenderer): An optional `PageRenderer` class that is used to render pages.
+            page (PageRenderer): An optional `PageRenderer` class that is used when there
+                is a single page in this interface, referenced as the root page (in `/`).
+                Note that if `pages` is provided, those pages are added as well.
         """
         self._server = Server(
             self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
@@ -94,8 +96,8 @@ class Gui(object, metaclass=Singleton):
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
 
-        if default_page_renderer:
-            self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
+        if page:
+            self.add_page(name=Gui.__root_page_name, renderer=page)
         if pages is not None:
             self.add_pages(pages)
         if env_filename is not None:
