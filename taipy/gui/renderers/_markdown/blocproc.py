@@ -7,14 +7,10 @@ from .factory import MarkdownFactory
 
 class StartBlockProcessor(BlockProcessor):
     __RE_FENCE_START = re.compile(
-        MarkdownFactory._TAIPY_START
-        + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.start(.*?)"
-        + MarkdownFactory._TAIPY_END
+        MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.start(.*?)" + MarkdownFactory._TAIPY_END
     )  # start line
     __RE_OTHER_FENCE = re.compile(
-        MarkdownFactory._TAIPY_START
-        + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)"
-        + MarkdownFactory._TAIPY_END
+        MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)" + MarkdownFactory._TAIPY_END
     )  # start or end tag
 
     def test(self, parent, block):
@@ -37,7 +33,7 @@ class StartBlockProcessor(BlockProcessor):
             if len(queue) == 0:
                 # remove end fence
                 blocks[block_num] = re.sub(
-                    MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + MarkdownFactory._TAIPY_END, 
+                    MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + MarkdownFactory._TAIPY_END,
                     "",
                     block,
                     1,
