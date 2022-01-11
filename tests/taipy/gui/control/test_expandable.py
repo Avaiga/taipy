@@ -14,7 +14,7 @@ def test_expandable_md_1(gui: Gui, helpers):
         "<h1",
         "This is an expandable section",
     ]
-    helpers.test_control_md(gui, md_string, expected_list)
+    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
 
 
 def test_expandable_md_2(gui: Gui, helpers):
@@ -30,7 +30,7 @@ def test_expandable_md_2(gui: Gui, helpers):
         "<h1",
         "This is an expandable section",
     ]
-    helpers.test_control_md(gui, md_string, expected_list)
+    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
 
 
 def test_expandable_html(gui: Gui, helpers):
@@ -42,4 +42,4 @@ def test_expandable_html(gui: Gui, helpers):
         "<h1",
         "This is an expandable section",
     ]
-    helpers.test_control_html(gui, html_string, expected_list)
+    helpers.test_control_html(gui, html_string, expected_list, check_warning=False)
