@@ -1,7 +1,7 @@
 import datetime
 import logging
 from functools import partial
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
 from taipy.common.alias import ScenarioId
 from taipy.config.config import Config
@@ -137,19 +137,22 @@ class ScenarioManager:
         """
         return self.repository.load_all()
 
-    def submit(self, scenario_id: ScenarioId):
+    def submit(self, scenario: Union[Scenario, ScenarioId]):
         """
-        Submits the scenario corresponding to the identifier given as parameter for execution.
+        Submits the scenario corresponding to the scenario of the identifier given as parameter for execution.
 
         All the tasks of scenario will be submitted for execution.
 
         Parameters:
-            scenario_id (ScenarioId) : identifier of the scenario to submit.
+            scenario (Union[Scenario, ScenarioId]) : the scenario or its identifier to submit.
         """
-        scenario_to_submit = self.get(scenario_id)
-        callbacks = self.__get_status_notifier_callbacks(scenario_to_submit)
-        for pipeline in scenario_to_submit.pipelines.values():
-            self.pipeline_manager.submit(pipeline.id, callbacks)
+        if isinstance(scenario, Scenario):
+            scenario = self.get(scenario.id)
+        if isinstance(scenario, str):
+            scenario = self.get(scenario)
+        callbacks = self.__get_status_notifier_callbacks(scenario)
+        for pipeline in scenario.pipelines.values():
+            self.pipeline_manager.submit(pipeline, callbacks)
 
     def __get_status_notifier_callbacks(self, scenario: Scenario) -> List:
         return [partial(c, scenario) for c in scenario.subscribers]
