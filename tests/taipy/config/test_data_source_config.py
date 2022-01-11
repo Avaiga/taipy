@@ -2,6 +2,7 @@ import pytest
 
 from taipy.config._config import _Config
 from taipy.config.config import Config
+from taipy.exceptions.configuration import ConfigurationIssueError
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -19,6 +20,12 @@ def test_data_source_config_creation():
 
     data_source2_config = Config.add_data_source("data_sources2", "csv")
     assert list(Config.data_sources()) == ["default", data_source_config.name, data_source2_config.name]
+
+    with pytest.raises(ConfigurationIssueError):
+        data_source2_config = Config.add_data_source("data_sources", storage_type="bar")
+
+    with pytest.raises(ConfigurationIssueError):
+        data_source2_config = Config.add_data_source("data_sources", scope="bar")
 
 
 def test_data_source_count():

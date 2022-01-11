@@ -1,4 +1,4 @@
-from taipy.config.checker.checkers.data_source_checker import DataSourceConfigChecker
+from taipy.config.checker.checkers.data_source_config_checker import DataSourceConfigChecker
 from taipy.config.checker.checkers.gLobal_config_checker import GlobalConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 
