@@ -102,7 +102,7 @@ class Builder:
 
     def __get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
         ret = {}
-        index_re = re.compile(name + "\[(.*)\]$")
+        index_re = re.compile(name + r"\[(.*)\]$")
         for key in self.attributes.keys():
             m = index_re.match(key)
             if m:
