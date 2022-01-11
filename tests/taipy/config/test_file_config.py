@@ -48,7 +48,6 @@ storage_folder = ".data/"
 
 [JOB]
 mode = "standalone"
-remote_execution = false
 parallel_execution = true
 nb_of_workers = 1
 hostname = "localhost"

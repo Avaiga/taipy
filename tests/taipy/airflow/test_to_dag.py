@@ -1,18 +1,18 @@
 import sys
 from datetime import datetime
+from importlib import util
 from io import StringIO
-from unittest.mock import MagicMock
 
 import pytest
 
 from taipy.config import Config
 from taipy.data.manager import DataManager
 
-try:
+if util.find_spec("airflow"):
     from airflow import DAG
     from airflow.operators.python import PythonOperator
     from airflow.sensors.python import PythonSensor
-except ImportError:
+else:
     pytest.skip("skipping tests because Airflow is not installed", allow_module_level=True)
 
 

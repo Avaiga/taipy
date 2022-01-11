@@ -33,9 +33,7 @@ class TaskScheduler:
         self.blocked_jobs: List[Job] = []
         self.__executor = JobDispatcher(
             job_config.parallel_execution or JobConfig.DEFAULT_PARALLEL_EXECUTION,
-            job_config.remote_execution or JobConfig.DEFAULT_REMOTE_EXECUTION,
             job_config.nb_of_workers,
-            job_config.hostname,
         )
         self.data_manager: DataManager = DataManager()
         self.lock = Lock()
