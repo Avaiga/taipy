@@ -1,6 +1,7 @@
 import pytest
 
 from taipy.config import Config
+from taipy.config.data_source_config import DataSourceConfig
 from taipy.data import CSVDataSource, DataSource, InMemoryDataSource, Scope
 from taipy.task import Task
 
@@ -11,8 +12,18 @@ def output():
 
 
 @pytest.fixture
+def output_config():
+    return [DataSourceConfig("name_1"), DataSourceConfig("name_2"), DataSourceConfig("name_3")]
+
+
+@pytest.fixture
 def input():
     return [DataSource("input_name_1"), DataSource("input_name_2"), DataSource("input_name_3")]
+
+
+@pytest.fixture
+def input_config():
+    return [DataSourceConfig("input_name_1"), DataSourceConfig("input_name_2"), DataSourceConfig("input_name_3")]
 
 
 def test_create_task():
@@ -70,34 +81,34 @@ def test_can_not_change_task_input(input):
     assert list(task.input.values()) != input
 
 
-def test_can_not_change_task_config_output(output):
-    task_config = Config.add_task("name_1", [], print, output=output)
+def test_can_not_change_task_config_output(output_config):
+    task_config = Config.add_task("name_1", [], print, output=output_config)
 
-    assert task_config.output == output
+    assert task_config.output == output_config
     with pytest.raises(Exception):
         task_config.output = []
 
-    output.append(output[0])
-    assert task_config.output != output
+    output_config.append(output_config[0])
+    assert task_config.output != output_config
 
 
-def test_can_not_update_task_output_values(output):
+def test_can_not_update_task_output_values(output_config):
     data_source = DataSource("data_source")
-    task_config = Config.add_task("name_1", [], print, output=output)
+    task_config = Config.add_task("name_1", [], print, output=output_config)
 
     task_config.output.append(data_source)
-    assert task_config.output == output
+    assert task_config.output == output_config
 
     task_config.output[0] = data_source
     assert task_config.output[0] != data_source
 
 
-def test_can_not_update_task_input_values(input):
-    data_source = DataSource("data_source")
-    task_config = Config.add_task("name_1", input, print, [])
+def test_can_not_update_task_input_values(input_config):
+    data_source_config = DataSourceConfig("data_source")
+    task_config = Config.add_task("name_1", input_config, print, [])
 
-    task_config.input.append(data_source)
-    assert task_config.input == input
+    task_config.input.append(data_source_config)
+    assert task_config.input == input_config
 
-    task_config.input[0] = data_source
-    assert task_config.input[0] != data_source
+    task_config.input[0] = data_source_config
+    assert task_config.input[0] != data_source_config

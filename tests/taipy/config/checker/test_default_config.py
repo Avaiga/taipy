@@ -6,4 +6,6 @@ class TestDefaultConfigChecker:
     def test_check_default_config(self):
         config = _Config.default_config()
         collector = Checker().check(config)
-        assert len(collector.all) == 0
+        assert len(collector.errors) == 0
+        assert len(collector.infos) == 0
+        assert len(collector.warnings) == 4

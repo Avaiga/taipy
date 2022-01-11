@@ -1,8 +1,6 @@
-from taipy.config import Config
 from taipy.config._config import _Config
 from taipy.config.checker import IssueCollector
 from taipy.config.checker.checkers.data_source_config_checker import DataSourceConfigChecker
-from taipy.config.data_source_config import DataSourceConfig
 from taipy.data.scope import Scope
 
 
