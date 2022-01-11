@@ -136,3 +136,7 @@ Dockerfile.dev
 
 # Filesystem default local storage
 .data/
+
+# python notebook
+
+*.ipynb
