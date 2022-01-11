@@ -16,12 +16,12 @@ class JobConfig:
         nb_of_workers (int): Maximum number of running workers to execute jobs. Must be a positive integer.
             Default value : 1
         hostname (str): Hostname. Default value is "localhost".
-        airflow_dag_folder (str): Folder name used to store the dags to be read by airflow if airflow mode is activated.
+        airflow_dags_folder (str): Folder name used to store the dags to be read by airflow if airflow mode is activated.
             Default value is ".dag/". It is used in conjunction with the GlobalAppConfig.root_folder field. That means
-            the path for the airflow dag folder is <root_folder><airflow_dag_folder> (Default path : "./taipy/.dag/").
+            the path for the airflow dag folder is <root_folder><airflow_dags_folder> (Default path : "./taipy/.dag/").
         airflow_folder (str): Folder name used by airflow if airflow mode is activated. Default value is ".airflow/". It
             is used in conjunction with the GlobalAppConfig.root_folder field. That means the path for the airflow dag
-            folder is <root_folder><airflow_dag_folder> (Default path : "./taipy/.airflow/").
+            folder is <root_folder><airflow_dags_folder> (Default path : "./taipy/.airflow/").
         airflow_db_endpoint (str): Airflow database endpoint used if airflow mode is activated. Default value is None.
         start_airflow (bool): Allow Taipy to start Airflow if not alreay started.
         airflow_api_retry (int): Retry pattern on Airflow APIs.
@@ -50,8 +50,8 @@ class JobConfig:
     HOSTNAME_KEY = "hostname"
     DEFAULT_HOSTNAME = "localhost"
 
-    AIRFLOW_DAG_FOLDER_KEY = "airflow_dag_folder"
-    DEFAULT_AIRFLOW_DAG_FOLDER = ".dag/"
+    AIRFLOW_DAGS_FOLDER_KEY = "airflow_dags_folder"
+    DEFAULT_AIRFLOW_DAG_FOLDER = ".dags/"
 
     AIRFLOW_FOLDER_KEY = "airflow_folder"
     DEFAULT_AIRFLOW_FOLDER = ".airflow/"
@@ -72,7 +72,7 @@ class JobConfig:
         parallel_execution: bool = None,
         nb_of_workers: int = None,
         hostname: str = None,
-        airflow_dag_folder: str = None,
+        airflow_dags_folder: str = None,
         airflow_folder: str = None,
         airflow_db_endpoint: str = None,
         start_airflow: bool = None,
@@ -86,7 +86,7 @@ class JobConfig:
         self.nb_of_workers = nb_of_workers
         self.hostname = hostname
 
-        self.airflow_dag_folder = airflow_dag_folder
+        self.airflow_dags_folder = airflow_dags_folder
         self.airflow_folder = airflow_folder
         self.airflow_db_endpoint = airflow_db_endpoint
         self.start_airflow = start_airflow
@@ -124,8 +124,8 @@ class JobConfig:
             as_dict[self.NB_OF_WORKERS_KEY] = self.nb_of_workers
         if self.hostname is not None:
             as_dict[self.HOSTNAME_KEY] = self.hostname
-        if self.airflow_dag_folder is not None:
-            as_dict[self.AIRFLOW_DAG_FOLDER_KEY] = self.airflow_dag_folder
+        if self.airflow_dags_folder is not None:
+            as_dict[self.AIRFLOW_DAGS_FOLDER_KEY] = self.airflow_dags_folder
         if self.airflow_folder is not None:
             as_dict[self.AIRFLOW_FOLDER_KEY] = self.airflow_folder
         if self.airflow_db_endpoint is not None:
@@ -145,7 +145,7 @@ class JobConfig:
         config.parallel_execution = config_as_dict.pop(cls.PARALLEL_EXECUTION_KEY, None)
         config.nb_of_workers = config_as_dict.pop(cls.NB_OF_WORKERS_KEY, None)
         config.hostname = config_as_dict.pop(cls.HOSTNAME_KEY, None)
-        config.airflow_dag_folder = config_as_dict.pop(cls.AIRFLOW_DAG_FOLDER_KEY, None)
+        config.airflow_dags_folder = config_as_dict.pop(cls.AIRFLOW_DAGS_FOLDER_KEY, None)
         config.airflow_folder = config_as_dict.pop(cls.AIRFLOW_FOLDER_KEY, None)
         config.airflow_db_endpoint = config_as_dict.pop(cls.AIRFLOW_DB_ENDPOINT_KEY, None)
         config.start_airflow = config_as_dict.pop(cls.START_AIRFLOW_KEY, None)
@@ -159,7 +159,7 @@ class JobConfig:
         self.parallel_execution = config_as_dict.pop(self.PARALLEL_EXECUTION_KEY, self.parallel_execution)
         self.nb_of_workers = config_as_dict.pop(self.NB_OF_WORKERS_KEY, self.nb_of_workers)
         self.hostname = config_as_dict.pop(self.HOSTNAME_KEY, self.hostname)
-        self.airflow_dag_folder = config_as_dict.pop(self.AIRFLOW_DAG_FOLDER_KEY, self.airflow_dag_folder)
+        self.airflow_dags_folder = config_as_dict.pop(self.AIRFLOW_DAGS_FOLDER_KEY, self.airflow_dags_folder)
         self.airflow_folder = config_as_dict.pop(self.AIRFLOW_FOLDER_KEY, self.airflow_folder)
         self.airflow_db_endpoint = config_as_dict.pop(self.AIRFLOW_DB_ENDPOINT_KEY, self.airflow_db_endpoint)
         self.start_airflow = config_as_dict.pop(self.START_AIRFLOW_KEY, self.start_airflow)

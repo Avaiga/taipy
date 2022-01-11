@@ -138,5 +138,12 @@ Dockerfile.dev
 .data/
 
 # python notebook
-
 *.ipynb
+
+.airflow
+.dag
+data_sources
+pipelines
+tasks
+pickles
+tests/.dags
