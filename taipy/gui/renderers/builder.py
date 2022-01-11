@@ -350,7 +350,7 @@ class Builder:
             "orientation",
             "name",
             "line",
-            "textposition",
+            "text_anchor",
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[5]:
@@ -404,7 +404,7 @@ class Builder:
                 "orientations": [t[13] for t in traces],
                 "names": [t[14] for t in traces],
                 "lines": [t[15] if isinstance(t[15], dict) else {"dash": t[15]} for t in traces],
-                "textPositions": [t[16] for t in traces],
+                "textAnchors": [t[16] for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)

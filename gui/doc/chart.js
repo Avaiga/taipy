@@ -109,7 +109,7 @@ class chart extends shared {
      * Position of the text relative to the point (values: top, bottom, left, right)
      * @type {indexed(str)}
      */
-    textposition;
+    text_anchor;
 
     /**
      * Chart mode<br/>See the Plotly [chart mode](https://plotly.com/javascript/reference/scatter/#scatter-mode) documentation for details.
