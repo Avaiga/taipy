@@ -265,13 +265,17 @@ class Config:
         if cls._env_config:
             cls._applied_config.update(cls._env_config)
         cls.collector = Checker().check(cls._applied_config)
-        for issue in cls.collector.warnings:
+        cls.__log_message(cls)
+
+    @staticmethod
+    def __log_message(config):
+        for issue in config.collector.warnings:
             logging.warning(str(issue))
-        for issue in cls.collector.infos:
+        for issue in config.collector.infos:
             logging.info(str(issue))
-        for issue in cls.collector.errors:
+        for issue in config.collector.errors:
             logging.error(str(issue))
-        if len(cls.collector.errors) != 0:
+        if len(config.collector.errors) != 0:
             raise ConfigurationIssueError
 
 
