@@ -8,12 +8,12 @@ const tableColumns = JSON.stringify({"Entity": {"dfid": "Entity"}});
 
 describe("Table Component", () => {
     it("renders paginated", async () => {
-        const { getByText } = render(<Table value={undefined} columns={tableColumns}  />);
+        const { getByText } = render(<Table data={undefined} columns={tableColumns}  />);
         const elt = getByText("Entity");
         expect(elt.tagName).toBe("DIV");
     });
     it("renders auto loading", async () => {
-        const { getByText } = render(<Table value={undefined} columns={tableColumns} autoLoading={true} />);
+        const { getByText } = render(<Table data={undefined} columns={tableColumns} autoLoading={true} />);
         const elt = getByText("Entity");
         expect(elt.tagName).toBe("DIV");
     });

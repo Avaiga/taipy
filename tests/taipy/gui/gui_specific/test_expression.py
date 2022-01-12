@@ -57,7 +57,7 @@ def test_expression_field_gt_operator(gui: Gui, helpers):
 def test_expression_button_control(gui: Gui, helpers):
     gui.bind_var_val("label", "A button label")
     md_string = "<|button|label={label}|>"
-    expected_list = ["<Button", 'defaultValue="A button label"', "value={label}"]
+    expected_list = ["<Button", 'defaultLabel="A button label"', "label={label}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -71,7 +71,7 @@ def test_expression_table_control(gui: Gui, helpers):
         'columns="{&quot;Letters&quot;: {&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;}, &quot;Numbers&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Numbers&quot;}}"',
         "refresh={tp_pd_concat_series_1_series_2_axis_1__0__refresh}",
         'tp_varname="pd.concat([series_1, series_2], axis=1)"',
-        "value={tp_pd_concat_series_1_series_2_axis_1__0}",
+        "data={tp_pd_concat_series_1_series_2_axis_1__0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
     assert isinstance(gui._get_data_scope().tp_pd_concat_series_1_series_2_axis_1__0, pd.DataFrame)

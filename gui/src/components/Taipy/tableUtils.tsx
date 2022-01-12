@@ -82,7 +82,7 @@ export const alignCell = (col: ColumnDesc): Partial<TableCellProps> => {
 export type TableValueType = Record<string, Record<string, any>>;
 
 export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelectProps {
-    value?: TableValueType;
+    data?: TableValueType;
     columns: string;
     refresh?: boolean;
     height?: string;

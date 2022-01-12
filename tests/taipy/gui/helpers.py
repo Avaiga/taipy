@@ -1,6 +1,7 @@
 import json
 import logging
 import typing as t
+import pytest
 
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import Builder
@@ -13,20 +14,24 @@ class Helpers:
         del Gui._instances[Gui]
 
     @staticmethod
-    def test_control_md(gui: Gui, md_string: str, expected_values: t.Union[str, t.List]):
+    def test_control_md(gui: Gui, md_string: str, expected_values: t.Union[str, t.List], check_warning=True):
         gui.add_page("test", Markdown(md_string))
-        Helpers._test_control(gui, expected_values)
+        Helpers._test_control(gui, expected_values, check_warning)
 
     @staticmethod
-    def test_control_html(gui: Gui, html_string: str, expected_values: t.Union[str, t.List]):
+    def test_control_html(gui: Gui, html_string: str, expected_values: t.Union[str, t.List], check_warning=True):
         gui.add_page("test", Html(html_string))
-        Helpers._test_control(gui, expected_values)
+        Helpers._test_control(gui, expected_values, check_warning)
 
     @staticmethod
-    def _test_control(gui: Gui, expected_values: t.Union[str, t.List]):
+    def _test_control(gui: Gui, expected_values: t.Union[str, t.List], check_warning=True):
         gui.run(run_server=False)
         client = gui._server.test_client()
-        response = client.get("/flask-jsx/test/")
+        if check_warning:
+            with pytest.warns(UserWarning):
+                response = client.get("/flask-jsx/test/")
+        else:
+            response = client.get("/flask-jsx/test/")
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
         assert response.status_code == 200
         assert isinstance(response_data, t.Dict)

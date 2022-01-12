@@ -18,8 +18,9 @@ def test_variable_binding(helpers):
     gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
-    jsx = client.get("/flask-jsx/test/").json["jsx"]
-    for expected in ["<Button", f'defaultValue="{z}"', "value={z}"]:
+    with pytest.warns(UserWarning):
+        jsx = client.get("/flask-jsx/test/").json["jsx"]
+    for expected in ["<Button", f'defaultLabel="{z}"', "label={z}"]:
         assert expected in jsx
     assert gui.x == x
     assert gui.y == y
@@ -28,7 +29,6 @@ def test_variable_binding(helpers):
     helpers.test_cleanup()
 
 
-@pytest.mark.skip(reason="Issue #662 is preventing this to work properly")
 def test_properties_binding(helpers):
     gui = Gui(__name__)
     modifier = "nice "  # noqa: F841
@@ -36,10 +36,10 @@ def test_properties_binding(helpers):
     gui.add_page("test", Markdown("<|button|properties=button_properties|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
-    jsx = client.get("/flask-jsx/test/").json["jsx"]
-    for expected in ["<Button", 'defaultValue="A nice button"']:
+    with pytest.warns(UserWarning):
+        jsx = client.get("/flask-jsx/test/").json["jsx"]
+    for expected in ["<Button", 'defaultLabel="A nice button"']:
         assert expected in jsx
-    assert isinstance(gui.another_function, FunctionType)
     helpers.test_cleanup()
 
 
@@ -52,7 +52,8 @@ def test_dict_binding(helpers):
     gui = Gui(__name__, Markdown("<|{d.k}|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
-    jsx = client.get("/flask-jsx/TaiPy_root_page/").json["jsx"]
+    with pytest.warns(UserWarning):
+        jsx = client.get("/flask-jsx/TaiPy_root_page/").json["jsx"]
     for expected in ["<Field", 'defaultValue="test"']:
         assert expected in jsx
     helpers.test_cleanup()

@@ -22,7 +22,8 @@ interface DialogProps extends TaipyBaseProps {
     cancelLabel?: string;
     validateLabel?: string;
     pageId: string;
-    value?: boolean;
+    open?: boolean;
+    defaultOpen?: string;
     children?: ReactNode;
     height?: string | number;
     width?: string | number;
@@ -40,8 +41,8 @@ const Dialog = (props: DialogProps) => {
     const {
         id,
         title,
-        defaultValue,
-        value,
+        defaultOpen,
+        open,
         cancelAction,
         validateAction = "ValidateAction",
         pageId,
@@ -82,7 +83,7 @@ const Dialog = (props: DialogProps) => {
         <MuiDialog
             id={id}
             onClose={handleClose}
-            open={value === undefined ? defaultValue === "true" : !!value}
+            open={open === undefined ? defaultOpen === "true" : !!open}
             className={className}
             PaperProps={paperProps}
         >

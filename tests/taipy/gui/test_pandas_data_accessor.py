@@ -1,3 +1,4 @@
+import pytest
 import pandas  # type: ignore
 from taipy.gui import Gui
 from taipy.gui.data.data_format import DataFormat
@@ -8,7 +9,8 @@ def test_simple_data(gui: Gui, helpers, small_dataframe):
     accessor = PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
     assert accessor.is_data_access("x", pd)
-    no_value = accessor.cast_string_value("x", pd)
+    with pytest.warns(UserWarning):
+        no_value = accessor.cast_string_value("x", pd)
     assert no_value is None
     ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1}, DataFormat.JSON)
     assert ret_data
@@ -42,7 +44,9 @@ def test_sort(gui: Gui, helpers, small_dataframe):
 def test_aggregate(gui: Gui, helpers, small_dataframe):
     accessor = PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
-    pd = pd.append({"name": "A", "value": 4}, ignore_index=True)
+    pd = pandas.concat(
+        [pd, pandas.DataFrame(data={"name": ["A"], "value": [4]})], axis=0, join="outer", ignore_index=True
+    )
     query = {"columns": ["name", "value"], "start": 0, "end": -1, "aggregates": ["name"], "applies": {"value": "sum"}}
     value = accessor.get_data(gui, "x", pd, query, DataFormat.JSON)["value"]
     assert value["rowcount"] == 3

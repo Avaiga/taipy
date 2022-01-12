@@ -8,12 +8,13 @@ import { useDynamicProperty } from "../../utils/hooks";
 
 interface ButtonProps extends TaipyBaseProps {
     tp_onAction?: string;
-    value: string;
+    label: string;
+    defaultLabel?: string;
 }
 
 const Button = (props: ButtonProps) => {
-    const { className, id, tp_onAction, defaultValue } = props;
-    const [value, setValue] = useState(defaultValue);
+    const { className, id, tp_onAction, defaultLabel } = props;
+    const [value, setValue] = useState(defaultLabel);
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -23,10 +24,10 @@ const Button = (props: ButtonProps) => {
     }, [id, tp_onAction, dispatch]);
 
     useEffect(() => {
-        if (props.value !== undefined && value !== props.value) {
-            setValue(props.value);
+        if (props.label !== undefined && value !== props.label) {
+            setValue(props.label);
         }
-    }, [props.value, value]);
+    }, [props.label, value]);
 
     return <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
             {value}

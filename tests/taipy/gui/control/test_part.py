@@ -8,7 +8,7 @@ def test_part_md_1(gui: Gui, helpers):
 |>
 """
     expected_list = ["<Part", "<h1", "This is a part"]
-    helpers.test_control_md(gui, md_string, expected_list)
+    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
 
 
 def test_part_md_2(gui: Gui, helpers):
@@ -18,10 +18,10 @@ def test_part_md_2(gui: Gui, helpers):
 <|part.end|>
 """
     expected_list = ["<Part", "<h1", "This is a part"]
-    helpers.test_control_md(gui, md_string, expected_list)
+    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
 
 
 def test_part_html(gui: Gui, helpers):
     html_string = '<taipy:part class_name="class1"><h1>This is a part</h1></taipy:part>'
     expected_list = ["<Part", "<h1", "This is a part"]
-    helpers.test_control_html(gui, html_string, expected_list)
+    helpers.test_control_html(gui, html_string, expected_list, check_warning=False)

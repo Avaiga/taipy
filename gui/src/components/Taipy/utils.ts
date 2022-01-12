@@ -1,6 +1,5 @@
-export interface TaipyBaseProps<T = string> {
+export interface TaipyBaseProps {
     id?: string;
-    defaultValue?: T;
     tp_varname?: string;
     className?: string;
     propagate?: boolean;
@@ -16,12 +15,14 @@ export interface TaipyMultiSelectProps {
 export interface TaipyFieldProps extends TaipyBaseProps {
     dataType?: string;
     value: string | number;
+    defaultValue?: string;
     format?: string;
 }
 
 export interface TaipyInputProps extends TaipyBaseProps {
     type: string;
     value: string;
+    defaultValue?: string;
 }
 
 export interface TaipyImage {

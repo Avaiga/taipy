@@ -8,13 +8,13 @@ def test_dialog_md_1(gui: Gui, helpers):
         "<Dialog",
         'cancelAction="cancel_action"',
         'cancelLabel="Cancel"',
-        'defaultValue="false"',
+        'defaultOpen="false"',
         'pageId="page_test"',
         'title="This is a Dialog"',
         'tp_varname="dialog_open"',
         'validateAction="validate_action"',
         'validateLabel="Validate"',
-        "value={dialog_open}",
+        "open={dialog_open}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -27,13 +27,13 @@ def test_dialog_md_2(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'cancelLabel="Cancel"',
-        'defaultValue="false"',
+        'defaultOpen="false"',
         'pageId="TaiPy_partials',
         'title="Another Dialog"',
         'tp_varname="dialog_open"',
         'validateAction="validate_action"',
         'validateLabel="Validate"',
-        "value={dialog_open}",
+        "open={dialog_open}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -45,13 +45,13 @@ def test_dialog_html_1(gui: Gui, helpers, csvdata):
         "<Dialog",
         'cancelAction="cancel_action"',
         'cancelLabel="Cancel"',
-        'defaultValue="false"',
+        'defaultOpen="false"',
         'pageId="page1"',
         'title="This is a Dialog"',
         'tp_varname="dialog_open"',
         'validateAction="validate_action"',
         'validateLabel="Validate"',
-        "value={dialog_open}",
+        "open={dialog_open}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -64,12 +64,12 @@ def test_dialog_html_2(gui: Gui, helpers, csvdata):
     expected_list = [
         "<Dialog",
         'cancelLabel="Cancel"',
-        'defaultValue="false"',
+        'defaultOpen="false"',
         'pageId="TaiPy_partials',
         'title="Another Dialog"',
         'tp_varname="dialog_open"',
         'validateAction="validate_action"',
         'validateLabel="Validate"',
-        "value={dialog_open}",
+        "open={dialog_open}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

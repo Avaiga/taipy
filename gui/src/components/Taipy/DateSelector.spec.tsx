@@ -61,7 +61,7 @@ describe("DateSelector Component", () => {
     it("renders", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} />
+                <DateSelector date={curDateStr} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testDate);
@@ -70,7 +70,7 @@ describe("DateSelector Component", () => {
     it("displays the right info for string", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} defaultValue="2001-01-01T00:00:01.001Z" className="taipy-date" />
+                <DateSelector date={curDateStr} defaultDate="2001-01-01T00:00:01.001Z" className="taipy-date" />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testDate);
@@ -79,7 +79,7 @@ describe("DateSelector Component", () => {
     it("displays the default value", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector defaultValue="2001-01-01T00:00:01.001Z" value={undefined as unknown as string} />
+                <DateSelector defaultDate="2001-01-01T00:00:01.001Z" date={undefined as unknown as string} />
             </LocalizationProvider>
         );
         getByDisplayValue("01/01/2001");
@@ -87,7 +87,7 @@ describe("DateSelector Component", () => {
     it("is disabled", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} active={false} />
+                <DateSelector date={curDateStr} active={false} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testDate);
@@ -96,7 +96,7 @@ describe("DateSelector Component", () => {
     it("is enabled by default", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} />
+                <DateSelector date={curDateStr} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testDate);
@@ -105,7 +105,7 @@ describe("DateSelector Component", () => {
     it("is enabled by active", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} active={true} />
+                <DateSelector date={curDateStr} active={true} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testDate);
@@ -117,7 +117,7 @@ describe("DateSelector Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DateSelector value={curDateStr} />
+                    <DateSelector date={curDateStr} />
                 </LocalizationProvider>
             </TaipyContext.Provider>
         );
@@ -137,7 +137,7 @@ describe("DateSelector with time Component", () => {
     it("renders", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} withTime={true} />
+                <DateSelector date={curDateStr} withTime={true} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testTime);
@@ -146,7 +146,7 @@ describe("DateSelector with time Component", () => {
     it("displays the right info for string", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} withTime={true} className="taipy-time" />
+                <DateSelector date={curDateStr} withTime={true} className="taipy-time" />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testTime);
@@ -155,7 +155,7 @@ describe("DateSelector with time Component", () => {
     it("displays the default value", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector defaultValue={curDateStr} withTime={true} value={undefined as unknown as string} />
+                <DateSelector defaultDate={curDateStr} withTime={true} date={undefined as unknown as string} />
             </LocalizationProvider>
         );
         getByDisplayValue(testTime);
@@ -163,7 +163,7 @@ describe("DateSelector with time Component", () => {
     it("is disabled", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} withTime={true} active={false} />
+                <DateSelector date={curDateStr} withTime={true} active={false} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testTime);
@@ -172,7 +172,7 @@ describe("DateSelector with time Component", () => {
     it("is enabled by default", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} withTime={true} />
+                <DateSelector date={curDateStr} withTime={true} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testTime);
@@ -181,7 +181,7 @@ describe("DateSelector with time Component", () => {
     it("is enabled by active", async () => {
         const { getByDisplayValue } = render(
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateSelector value={curDateStr} withTime={true} active={true} />
+                <DateSelector date={curDateStr} withTime={true} active={true} />
             </LocalizationProvider>
         );
         const elt = getByDisplayValue(testTime);
@@ -193,7 +193,7 @@ describe("DateSelector with time Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DateSelector value={curDateStr} withTime={true} tp_varname="varname" />
+                    <DateSelector date={curDateStr} withTime={true} tp_varname="varname" />
                 </LocalizationProvider>
             </TaipyContext.Provider>
         );

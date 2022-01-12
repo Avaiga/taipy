@@ -20,6 +20,7 @@ export interface LovProps extends TaipyBaseProps {
     defaultLov?: string;
     lov: LoV;
     value?: string | string[];
+    defaultValue?: string;
     height?: string | number;
 }
 

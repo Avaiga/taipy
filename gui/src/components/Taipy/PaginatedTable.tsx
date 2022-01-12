@@ -120,11 +120,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     }, [selected, startIndex, rowsPerPage]);
 
     useEffect(() => {
-        if (props.value && props.value[pageKey.current] !== undefined) {
-            setValue(props.value[pageKey.current]);
+        if (props.data && props.data[pageKey.current] !== undefined) {
+            setValue(props.data[pageKey.current]);
             setLoading(false);
         }
-    }, [props.value]);
+    }, [props.data]);
 
     useEffect(() => {
         const endIndex = showAll ? -1 : startIndex + rowsPerPage;
@@ -137,7 +137,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
               }, "-agg")
             : "";
         pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}${agg}`;
-        if (!props.value || props.value[pageKey.current] === undefined || !!refresh) {
+        if (!props.data || props.data[pageKey.current] === undefined || !!refresh) {
             setLoading(true);
             const cols = colsOrder.map((col) => columns[col].dfid);
             const applies = aggregates.length
@@ -164,7 +164,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 )
             );
         } else {
-            setValue(props.value[pageKey.current]);
+            setValue(props.data[pageKey.current]);
             setLoading(false);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

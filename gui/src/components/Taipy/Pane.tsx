@@ -16,7 +16,8 @@ type AnchorType = "left" | "bottom" | "right" | "top" | undefined;
 
 interface PaneProps extends TaipyBaseProps {
     children?: ReactNode;
-    value?: boolean;
+    open?: boolean;
+    defaultOpen?: string;
     anchor?: AnchorType;
     persistent?: boolean;
     closeAction?: string;
@@ -53,8 +54,7 @@ const Pane = (props: PaneProps) => {
         persistent = false,
         closeAction,
         pageId,
-        value,
-        defaultValue,
+        defaultOpen,
         height = "30vh",
         width = "30vw",
         tp_varname,
@@ -62,7 +62,7 @@ const Pane = (props: PaneProps) => {
         className,
     } = props;
     const { dispatch } = useContext(TaipyContext);
-    const [open, setOpen] = useState(defaultValue === "true");
+    const [open, setOpen] = useState(defaultOpen === "true");
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -85,10 +85,10 @@ const Pane = (props: PaneProps) => {
     }, [active, dispatch, id, closeAction, tp_varname, propagate]);
 
     useEffect(() => {
-        if (value !== undefined) {
-            setOpen(value);
+        if (props.open !== undefined) {
+            setOpen(props.open);
         }
-    }, [value]);
+    }, [props.open]);
 
     return !persistent || (persistent && open) ? (
         <Drawer

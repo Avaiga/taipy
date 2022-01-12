@@ -69,6 +69,7 @@ interface StatusDel extends StatusType {
 
 interface StatusListProps extends TaipyBaseProps {
     value: StatusType[] | StatusType;
+    defaultValue?: string;
     withoutClose?: boolean;
 }
 

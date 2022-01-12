@@ -159,8 +159,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
 
     useEffect(() => {
-        if (props.value && page.current.key && props.value[page.current.key] !== undefined) {
-            const newValue = props.value[page.current.key];
+        if (props.data && page.current.key && props.data[page.current.key] !== undefined) {
+            const newValue = props.data[page.current.key];
             const promise = page.current.promises[newValue.start];
             setRowCount(newValue.rowcount);
             const nr = newValue.data as RowType[];
@@ -172,7 +172,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             }
             delete page.current.promises[newValue.start];
         }
-    }, [props.value]);
+    }, [props.data]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 

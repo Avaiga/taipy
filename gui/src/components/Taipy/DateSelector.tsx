@@ -13,7 +13,8 @@ import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 interface DateSelectorProps extends TaipyBaseProps {
     withTime?: boolean;
     format?: string;
-    value: string;
+    date: string;
+    defaultDate?: string;
 }
 
 const DateSelector = (props: DateSelectorProps) => {
@@ -21,7 +22,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const { dispatch } = useContext(TaipyContext);
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
-    const [value, setValue] = useState(() => getDateTime(props.defaultValue, tz));
+    const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz));
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -57,10 +58,10 @@ const DateSelector = (props: DateSelectorProps) => {
 
     // Run every time props.value get updated
     useEffect(() => {
-        if (props.value !== undefined) {
-            setValue(getDateTime(props.value, tz));
+        if (props.date !== undefined) {
+            setValue(getDateTime(props.date, tz));
         }
-    }, [props.value, tz]);
+    }, [props.date, tz]);
 
     return withTime ? (
         <DateTimePicker

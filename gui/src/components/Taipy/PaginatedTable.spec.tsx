@@ -83,29 +83,29 @@ const tableColumns = JSON.stringify({
 
 describe("PaginatedTable Component", () => {
     it("renders", async () => {
-        const { getByText } = render(<PaginatedTable value={undefined} columns={tableColumns} />);
+        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
         const { getByText } = render(
-            <PaginatedTable value={undefined} columns={tableColumns} className="taipy-table" />
+            <PaginatedTable data={undefined} columns={tableColumns} className="taipy-table" />
         );
         const elt = getByText("Entity").closest("table");
         expect(elt).toHaveClass("taipy-table");
     });
     it("is disabled", async () => {
-        const { getByText } = render(<PaginatedTable value={undefined} columns={tableColumns} active={false} />);
+        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} active={false} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).toHaveClass("Mui-disabled");
     });
     it("is enabled by default", async () => {
-        const { getByText } = render(<PaginatedTable value={undefined} columns={tableColumns} />);
+        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByText } = render(<PaginatedTable value={undefined} columns={tableColumns} active={true} />);
+        const { getByText } = render(<PaginatedTable data={undefined} columns={tableColumns} active={true} />);
         const elt = getByText("Entity");
         expect(elt.parentElement).not.toHaveClass("Mui-disabled");
     });
@@ -114,7 +114,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable id="table" value={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
+                <PaginatedTable id="table" data={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -144,7 +144,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable value={undefined} columns={tableColumns} />
+                <PaginatedTable data={undefined} columns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elt = getByText("Entity");
@@ -173,7 +173,7 @@ describe("PaginatedTable Component", () => {
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable
                     id="table"
-                    value={state.data.table as undefined}
+                    data={state.data.table as undefined}
                     columns={tableColumns}
                     tp_updatevars="varname=varname"
                 />
@@ -184,7 +184,7 @@ describe("PaginatedTable Component", () => {
             <TaipyContext.Provider value={{ state: newState, dispatch }}>
                 <PaginatedTable
                     id="table"
-                    value={newState.data.table as TableValueType}
+                    data={newState.data.table as TableValueType}
                     columns={tableColumns}
                     tp_updatevars="varname=varname"
                 />
@@ -214,13 +214,13 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable value={undefined} columns={tableColumns} />
+                <PaginatedTable data={undefined} columns={tableColumns} />
             </TaipyContext.Provider>
         );
 
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable value={tableValue as TableValueType} columns={tableColumns} />
+                <PaginatedTable data={tableValue as TableValueType} columns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elts = getAllByText("Austria");
@@ -233,12 +233,12 @@ describe("PaginatedTable Component", () => {
         const selected = [2, 4, 6];
         const { getAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable value={undefined} columns={tableColumns} />
+                <PaginatedTable data={undefined} columns={tableColumns} />
             </TaipyContext.Provider>
         );
         rerender(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable selected={selected} value={tableValue as TableValueType} columns={tableColumns} />
+                <PaginatedTable selected={selected} data={tableValue as TableValueType} columns={tableColumns} />
             </TaipyContext.Provider>
         );
         const elts = getAllByText("Austria");

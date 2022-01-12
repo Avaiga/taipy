@@ -1,3 +1,4 @@
+import pytest
 from taipy.gui import Gui, Markdown
 
 
@@ -18,21 +19,22 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/flask-jsx/test/?client_id={sid}")
-    ws_client.emit(
-        "message",
-        {
-            "type": "DU",
-            "name": "csvdata",
-            "payload": {
-                "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
-                "pagekey": "0-100--asc",
-                "start": 0,
-                "end": 10,
-                "orderby": "",
-                "sort": "asc",
+    with pytest.warns(UserWarning):
+        ws_client.emit(
+            "message",
+            {
+                "type": "DU",
+                "name": "csvdata",
+                "payload": {
+                    "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
+                    "pagekey": "0-100--asc",
+                    "start": 0,
+                    "end": 10,
+                    "orderby": "",
+                    "sort": "asc",
+                },
             },
-        },
-    )
+        )
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_message(
