@@ -21,8 +21,7 @@ class DataSourceConfig:
             - Other characters are replaced by dash characters ('-').
         storage_type (str): Storage type of the data sources created from the data source config. The possible values
             are : "csv", "pickle", "sql" and "In_memory". Default value is "pickle".
-            Note that the "in_memory" value can only be used when JobConfig.mode is "standalone" and
-            JobConfig.remote_execution is false.
+            Note that the "in_memory" value can only be used when JobConfig.mode is "standalone".
         scope (Scope):  The usage scope of the data sources created from the data source config. Default value is
             Pipeline.
         properties (dict): Dictionary of additional properties.

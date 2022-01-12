@@ -316,22 +316,20 @@ def test_task_scheduler_create_synchronous_dispatcher(job_dispatcher):
     TaskScheduler(Config.set_job_config())
     job_dispatcher.assert_called_with(
         JobConfig.DEFAULT_PARALLEL_EXECUTION,
-        JobConfig.DEFAULT_REMOTE_EXECUTION,
         JobConfig.DEFAULT_NB_OF_WORKERS,
-        JobConfig.DEFAULT_HOSTNAME,
     )
 
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_parallel_dispatcher(job_dispatcher):
     TaskScheduler(Config.set_job_config(parallel_execution=True, nb_of_workers=42))
-    job_dispatcher.assert_called_with(True, JobConfig.DEFAULT_REMOTE_EXECUTION, 42, JobConfig.DEFAULT_HOSTNAME)
+    job_dispatcher.assert_called_with(True, 42)
 
 
 @patch("taipy.task.scheduler.task_scheduler.JobDispatcher")
 def test_task_scheduler_create_remote_dispatcher(job_dispatcher):
-    TaskScheduler(Config.set_job_config(remote_execution=True, nb_of_workers=42))
-    job_dispatcher.assert_called_with(JobConfig.DEFAULT_PARALLEL_EXECUTION, True, 42, JobConfig.DEFAULT_HOSTNAME)
+    TaskScheduler(Config.set_job_config(nb_of_workers=42))
+    job_dispatcher.assert_called_with(JobConfig.DEFAULT_PARALLEL_EXECUTION, 42)
 
 
 def _create_task(function, nb_outputs=1):

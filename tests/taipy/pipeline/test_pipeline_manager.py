@@ -125,11 +125,15 @@ def test_submit():
     # pipeline does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingPipeline):
         pipeline_manager.submit(pipeline.id)
+    with pytest.raises(NonExistingPipeline):
+        pipeline_manager.submit(pipeline)
 
     # pipeline does exist, but tasks does not exist. We expect an exception to be raised
     pipeline_manager.set(pipeline)
     with pytest.raises(NonExistingTask):
         pipeline_manager.submit(pipeline.id)
+    with pytest.raises(NonExistingTask):
+        pipeline_manager.submit(pipeline)
 
     # pipeline, and tasks does exist. We expect the tasks to be submitted
     # in a specific order
@@ -142,6 +146,11 @@ def test_submit():
     calls_ids = [t.id for t in pipeline_manager.task_scheduler.submit_calls]
     tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
     assert calls_ids == tasks_ids
+
+    pipeline_manager.submit(pipeline)
+    calls_ids = [t.id for t in pipeline_manager.task_scheduler.submit_calls]
+    tasks_ids = tasks_ids * 2
+    assert set(calls_ids) == set(tasks_ids)
 
 
 def mult_by_2(nb: int):

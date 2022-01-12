@@ -8,9 +8,6 @@ class JobConfig:
     Parameters:
         mode (str): Field representing the Taipy operating mode. Possible values are "standalone", "airflow". Default
             value: "standalone".
-        remote_execution (bool): Boolean to activate/deactivate the job executions on a remote environment.
-            Default value is false.
-            TO BE REMOVED IN THE NEXT TAIPY VERSION.
         parallel_execution (bool): Boolean to activate/deactivate the possibility to run multiple tasks in parallel.
             Default value is false.
         nb_of_workers (int): Maximum number of running workers to execute jobs. Must be a positive integer.
@@ -33,11 +30,6 @@ class JobConfig:
     MODE_VALUE_STANDALONE = "standalone"
     MODE_VALUE_AIRFLOW = "airflow"
     DEFAULT_MODE = MODE_VALUE_STANDALONE
-
-    REMOTE_EXECUTION_KEY = "remote_execution"
-    REMOTE_EXECUTION_TRUE = True
-    REMOTE_EXECUTION_FALSE = False
-    DEFAULT_REMOTE_EXECUTION = REMOTE_EXECUTION_FALSE
 
     PARALLEL_EXECUTION_KEY = "parallel_execution"
     PARALLEL_EXECUTION_TRUE = True
@@ -68,7 +60,6 @@ class JobConfig:
     def __init__(
         self,
         mode: str = None,
-        remote_execution: bool = None,
         parallel_execution: bool = None,
         nb_of_workers: int = None,
         hostname: str = None,
@@ -81,11 +72,10 @@ class JobConfig:
     ):
         self.mode = mode
 
-        self.remote_execution = remote_execution
         self.parallel_execution = parallel_execution
         self.nb_of_workers = nb_of_workers
-        self.hostname = hostname
 
+        self.hostname = hostname
         self.airflow_dags_folder = airflow_dags_folder
         self.airflow_folder = airflow_folder
         self.airflow_db_endpoint = airflow_db_endpoint
@@ -101,7 +91,6 @@ class JobConfig:
     def default_config(cls):
         return JobConfig(
             cls.DEFAULT_MODE,
-            cls.DEFAULT_REMOTE_EXECUTION,
             cls.DEFAULT_PARALLEL_EXECUTION,
             cls.DEFAULT_NB_OF_WORKERS,
             cls.DEFAULT_HOSTNAME,
@@ -116,8 +105,6 @@ class JobConfig:
         as_dict = {}
         if self.mode is not None:
             as_dict[self.MODE_KEY] = self.mode
-        if self.remote_execution is not None:
-            as_dict[self.REMOTE_EXECUTION_KEY] = self.remote_execution
         if self.parallel_execution is not None:
             as_dict[self.PARALLEL_EXECUTION_KEY] = self.parallel_execution
         if self.nb_of_workers is not None:
@@ -141,7 +128,6 @@ class JobConfig:
     def from_dict(cls, config_as_dict: Dict[str, Any]):
         config = JobConfig()
         config.mode = config_as_dict.pop(cls.MODE_KEY, None)
-        config.remote_execution = config_as_dict.pop(cls.REMOTE_EXECUTION_KEY, None)
         config.parallel_execution = config_as_dict.pop(cls.PARALLEL_EXECUTION_KEY, None)
         config.nb_of_workers = config_as_dict.pop(cls.NB_OF_WORKERS_KEY, None)
         config.hostname = config_as_dict.pop(cls.HOSTNAME_KEY, None)
@@ -155,7 +141,6 @@ class JobConfig:
 
     def update(self, config_as_dict):
         self.mode = config_as_dict.pop(self.MODE_KEY, self.mode)
-        self.remote_execution = config_as_dict.pop(self.REMOTE_EXECUTION_KEY, self.remote_execution)
         self.parallel_execution = config_as_dict.pop(self.PARALLEL_EXECUTION_KEY, self.parallel_execution)
         self.nb_of_workers = config_as_dict.pop(self.NB_OF_WORKERS_KEY, self.nb_of_workers)
         self.hostname = config_as_dict.pop(self.HOSTNAME_KEY, self.hostname)

@@ -120,7 +120,6 @@ class Config:
     def set_job_config(
         cls,
         mode: str = None,
-        remote_execution: bool = None,
         parallel_execution: bool = None,
         nb_of_workers: int = None,
         hostname: str = None,
@@ -134,7 +133,6 @@ class Config:
         """Configures fields related to job execution."""
         job_config = JobConfig(
             mode,
-            remote_execution,
             parallel_execution,
             nb_of_workers,
             hostname,

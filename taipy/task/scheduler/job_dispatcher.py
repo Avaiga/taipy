@@ -8,7 +8,6 @@ from taipy.common.alias import JobId
 from taipy.data import DataSource
 from taipy.data.manager import DataManager
 from taipy.exceptions.job import DataSourceWritingError
-from taipy.task.scheduler.executor.remote_pool_executor import RemotePoolExecutor
 from taipy.task.scheduler.executor.synchronous import Synchronous
 from taipy.task.scheduler.job import Job
 from taipy.task.task import Task
@@ -17,7 +16,7 @@ from taipy.task.task import Task
 class JobDispatcher:
     """Wrapper around executor that will run jobs.
 
-    Job can be executed on different contexts (locally, remotly, etc.). This wrapper
+    Job can be executed on different contexts (locally, etc.). This wrapper
     instantiate the executor based on its args then deal with its low level interface to provide
     a homogeneous way to execute jobs.
     """
@@ -25,12 +24,10 @@ class JobDispatcher:
     def __init__(
         self,
         parallel_execution: bool,
-        remote_execution: bool,
         max_number_of_parallel_execution: Optional[int],
-        hostname: Optional[str] = None,
     ):
         self.__executor, self.__nb_worker_available = self.__create(
-            parallel_execution, remote_execution, max_number_of_parallel_execution, hostname
+            parallel_execution, max_number_of_parallel_execution
         )
 
     def can_execute(self) -> bool:
@@ -99,12 +96,9 @@ class JobDispatcher:
         return _results
 
     @staticmethod
-    def __create(parallel_execution, remote_execution, max_number_of_parallel_execution, hostname):
+    def __create(parallel_execution, max_number_of_parallel_execution):
         if parallel_execution:
             executor = ProcessPoolExecutor(max_number_of_parallel_execution)
-            return executor, (executor._max_workers)
-        elif remote_execution:
-            executor = RemotePoolExecutor(max_number_of_parallel_execution, hostname)
             return executor, (executor._max_workers)
         else:
             return Synchronous(), 1
