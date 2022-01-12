@@ -125,26 +125,37 @@ def test_set_and_get_task():
     with pytest.raises(NonExistingTask):
         task_manager.get(task_id_1)
     with pytest.raises(NonExistingTask):
+        task_manager.get(first_task)
+    with pytest.raises(NonExistingTask):
         task_manager.get(task_id_2)
+    with pytest.raises(NonExistingTask):
+        task_manager.get(second_task)
 
     # Save one task. We expect to have only one task stored
     task_manager.set(first_task)
     assert len(task_manager.get_all()) == 1
     assert task_manager.get(task_id_1).id == first_task.id
+    assert task_manager.get(first_task).id == first_task.id
     with pytest.raises(NonExistingTask):
         task_manager.get(task_id_2)
+    with pytest.raises(NonExistingTask):
+        task_manager.get(second_task)
 
     # Save a second task. Now, we expect to have a total of two tasks stored
     task_manager.set(second_task)
     assert len(task_manager.get_all()) == 2
     assert task_manager.get(task_id_1).id == first_task.id
+    assert task_manager.get(first_task).id == first_task.id
     assert task_manager.get(task_id_2).id == second_task.id
+    assert task_manager.get(second_task).id == second_task.id
 
     # We save the first task again. We expect nothing to change
     task_manager.set(first_task)
     assert len(task_manager.get_all()) == 2
     assert task_manager.get(task_id_1).id == first_task.id
+    assert task_manager.get(first_task).id == first_task.id
     assert task_manager.get(task_id_2).id == second_task.id
+    assert task_manager.get(second_task).id == second_task.id
 
     # We save a third task with same id as the first one.
     # We expect the first task to be updated
@@ -152,7 +163,10 @@ def test_set_and_get_task():
     assert len(task_manager.get_all()) == 2
     assert task_manager.get(task_id_1).id == third_task_with_same_id_as_first_task.id
     assert task_manager.get(task_id_1).config_name != first_task.config_name
+    assert task_manager.get(first_task).id == third_task_with_same_id_as_first_task.id
+    assert task_manager.get(first_task).config_name != first_task.config_name
     assert task_manager.get(task_id_2).id == second_task.id
+    assert task_manager.get(second_task).id == second_task.id
 
 
 def test_ensure_conservation_of_order_of_data_sources_on_task_creation():

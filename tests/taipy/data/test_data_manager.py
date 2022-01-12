@@ -22,6 +22,7 @@ class TestDataManager:
 
         assert isinstance(csv_ds, CSVDataSource)
         assert isinstance(dm.get(csv_ds.id), CSVDataSource)
+
         assert dm.get(csv_ds.id) is not None
         assert dm.get(csv_ds.id).id == csv_ds.id
         assert dm.get(csv_ds.id).config_name == "foo"
@@ -41,6 +42,25 @@ class TestDataManager:
         assert dm.get(csv_ds.id).properties.get("has_header")
         assert dm.get(csv_ds.id).properties == csv_ds.properties
 
+        assert dm.get(csv_ds) is not None
+        assert dm.get(csv_ds).id == csv_ds.id
+        assert dm.get(csv_ds).config_name == "foo"
+        assert dm.get(csv_ds).config_name == csv_ds.config_name
+        assert dm.get(csv_ds).scope == Scope.PIPELINE
+        assert dm.get(csv_ds).scope == csv_ds.scope
+        assert dm.get(csv_ds).parent_id is None
+        assert dm.get(csv_ds).parent_id == csv_ds.parent_id
+        assert dm.get(csv_ds).last_edition_date is None
+        assert dm.get(csv_ds).last_edition_date == csv_ds.last_edition_date
+        assert dm.get(csv_ds).job_ids == []
+        assert dm.get(csv_ds).job_ids == csv_ds.job_ids
+        assert not dm.get(csv_ds).is_ready_for_reading
+        assert dm.get(csv_ds).is_ready_for_reading == csv_ds.is_ready_for_reading
+        assert len(dm.get(csv_ds).properties) == 2
+        assert dm.get(csv_ds).properties.get("path") == "bar"
+        assert dm.get(csv_ds).properties.get("has_header")
+        assert dm.get(csv_ds).properties == csv_ds.properties
+
     def test_create_and_get_in_memory_data_source(self):
         dm = DataManager()
         # Test we can instantiate an InMemoryDataSource from DataSourceConfig with :
@@ -55,6 +75,7 @@ class TestDataManager:
 
         assert isinstance(in_mem_ds, InMemoryDataSource)
         assert isinstance(dm.get(in_mem_ds.id), InMemoryDataSource)
+
         assert dm.get(in_mem_ds.id) is not None
         assert dm.get(in_mem_ds.id).id == in_mem_ds.id
         assert dm.get(in_mem_ds.id).config_name == "baz"
@@ -73,6 +94,24 @@ class TestDataManager:
         assert dm.get(in_mem_ds.id).properties.get("default_data") == "qux"
         assert dm.get(in_mem_ds.id).properties == in_mem_ds.properties
 
+        assert dm.get(in_mem_ds) is not None
+        assert dm.get(in_mem_ds).id == in_mem_ds.id
+        assert dm.get(in_mem_ds).config_name == "baz"
+        assert dm.get(in_mem_ds).config_name == in_mem_ds.config_name
+        assert dm.get(in_mem_ds).scope == Scope.SCENARIO
+        assert dm.get(in_mem_ds).scope == in_mem_ds.scope
+        assert dm.get(in_mem_ds).parent_id == "Scenario_id"
+        assert dm.get(in_mem_ds).parent_id == in_mem_ds.parent_id
+        assert dm.get(in_mem_ds).last_edition_date is not None
+        assert dm.get(in_mem_ds).last_edition_date == in_mem_ds.last_edition_date
+        assert dm.get(in_mem_ds).job_ids == []
+        assert dm.get(in_mem_ds).job_ids == in_mem_ds.job_ids
+        assert dm.get(in_mem_ds).is_ready_for_reading
+        assert dm.get(in_mem_ds).is_ready_for_reading == in_mem_ds.is_ready_for_reading
+        assert len(dm.get(in_mem_ds).properties) == 1
+        assert dm.get(in_mem_ds).properties.get("default_data") == "qux"
+        assert dm.get(in_mem_ds).properties == in_mem_ds.properties
+
     def test_create_and_get_pickle_data_source(self):
         dm = DataManager()
         # Test we can instantiate a PickleDataSource from DataSourceConfig with :
@@ -85,6 +124,7 @@ class TestDataManager:
 
         assert isinstance(pickle_ds, PickleDataSource)
         assert isinstance(dm.get(pickle_ds.id), PickleDataSource)
+
         assert dm.get(pickle_ds.id) is not None
         assert dm.get(pickle_ds.id).id == pickle_ds.id
         assert dm.get(pickle_ds.id).config_name == "plop"
@@ -101,6 +141,23 @@ class TestDataManager:
         assert dm.get(pickle_ds.id).is_ready_for_reading == pickle_ds.is_ready_for_reading
         assert len(dm.get(pickle_ds.id).properties) == 0
         assert dm.get(pickle_ds.id).properties == pickle_ds.properties
+
+        assert dm.get(pickle_ds) is not None
+        assert dm.get(pickle_ds).id == pickle_ds.id
+        assert dm.get(pickle_ds).config_name == "plop"
+        assert dm.get(pickle_ds).config_name == pickle_ds.config_name
+        assert dm.get(pickle_ds).scope == Scope.BUSINESS_CYCLE
+        assert dm.get(pickle_ds).scope == pickle_ds.scope
+        assert dm.get(pickle_ds).parent_id is None
+        assert dm.get(pickle_ds).parent_id == pickle_ds.parent_id
+        assert dm.get(pickle_ds).last_edition_date is None
+        assert dm.get(pickle_ds).last_edition_date == pickle_ds.last_edition_date
+        assert dm.get(pickle_ds).job_ids == []
+        assert dm.get(pickle_ds).job_ids == pickle_ds.job_ids
+        assert not dm.get(pickle_ds).is_ready_for_reading
+        assert dm.get(pickle_ds).is_ready_for_reading == pickle_ds.is_ready_for_reading
+        assert len(dm.get(pickle_ds).properties) == 0
+        assert dm.get(pickle_ds).properties == pickle_ds.properties
 
     def test_create_raises_exception_with_wrong_type(self):
         dm = DataManager()

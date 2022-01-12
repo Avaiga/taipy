@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from taipy.common.alias import DataSourceId, PipelineId, ScenarioId
 from taipy.config.data_source_config import DataSourceConfig
@@ -83,16 +83,17 @@ class DataManager:
         """
         self.repository.save(data_source)
 
-    def get(self, data_source_id: DataSourceId) -> DataSource:
+    def get(self, data_source: Union[DataSource, DataSourceId]) -> DataSource:
         """
-        Gets the data source corresponding to the identifier given as parameter.
+        Gets the data source corresponding to the DataSource or the identifier given as parameter.
 
         Parameters:
-            data_source_id (DataSourceId) : data source to get.
+            data_source (Union[DataSource, DataSourceId]) : data source to get.
 
         Raises:
             ModelNotFound: Raised if no data source corresponds to data_source_id.
         """
+        data_source_id = data_source.id if isinstance(data_source, DataSource) else data_source
         return self.repository.load(data_source_id)
 
     def get_all(self) -> List[DataSource]:
