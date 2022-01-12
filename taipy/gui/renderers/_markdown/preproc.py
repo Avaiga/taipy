@@ -44,7 +44,7 @@ class Preprocessor(MdPreprocessor):
     #       'not', 'dont', 'don't' are equivalent in this context
     #  Note 1: 'not <prop_name>=<prop_value>' is an invalid syntax
     #  Note 2: Space characters after the equal sign are significative
-    __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?")
+    __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
 
     def _make_prop_pair(self, prop_name: str, prop_value: str) -> Tuple[str, str]:
         # Un-escape pipe character in property value

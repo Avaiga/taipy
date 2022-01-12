@@ -48,11 +48,10 @@ storage_folder = ".data/"
 
 [JOB]
 mode = "standalone"
-remote_execution = false
 parallel_execution = true
 nb_of_workers = 1
 hostname = "localhost"
-airflow_dag_folder = ".dag/"
+airflow_dags_folder = ".dags/"
 airflow_folder = ".airflow/"
 start_airflow = false
 airflow_api_retry = 10

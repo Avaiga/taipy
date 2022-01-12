@@ -338,6 +338,7 @@ class Builder:
             "y",
             "z",
             "label",
+            "text",
             "mode",
             "type",
             "color",
@@ -349,28 +350,29 @@ class Builder:
             "orientation",
             "name",
             "line",
+            "text_anchor",
         )
         trace = self.__get_multiple_indexed_attributes(names)
-        if not trace[4]:
-            # mode
-            trace[4] = default_mode
         if not trace[5]:
+            # mode
+            trace[5] = default_mode
+        if not trace[6]:
             # type
-            trace[5] = default_type
-        if not trace[7]:
-            # xaxis
-            trace[7] = "x"
+            trace[6] = default_type
         if not trace[8]:
+            # xaxis
+            trace[8] = "x"
+        if not trace[9]:
             # yaxis
-            trace[8] = "y"
-        self.__check_dict(trace, 10, names)
+            trace[9] = "y"
         self.__check_dict(trace, 11, names)
+        self.__check_dict(trace, 12, names)
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         while len([x for x in indexed_trace if x]):
-            self.__check_dict(indexed_trace, 10, names)
             self.__check_dict(indexed_trace, 11, names)
+            self.__check_dict(indexed_trace, 12, names)
             traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
             idx += 1
             indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -382,7 +384,7 @@ class Builder:
         # configure columns
         columns = set()
         for trace in traces:
-            columns.update([t for t in trace[0:4] if t])
+            columns.update([t for t in trace[0:5] if t])
         columns = _get_columns_dict(self.value, list(columns), self._gui._accessors._get_col_types("", self.value))
         if columns is not None:
             self.attributes["columns"] = columns
@@ -391,16 +393,18 @@ class Builder:
             ret_dict = {
                 "columns": columns,
                 "labels": [reverse_cols.get(t[3], (t[3] or "")) for t in traces],
-                "modes": [t[4] for t in traces],
-                "types": [t[5] for t in traces],
-                "xaxis": [t[7] for t in traces],
-                "yaxis": [t[8] for t in traces],
-                "markers": [t[10] or ({"color": t[6]} if t[6] else None) for t in traces],
-                "selectedMarkers": [t[11] or ({"color": t[9]} if t[9] else None) for t in traces],
+                "texts": [reverse_cols.get(t[4], (t[4] or None)) for t in traces],
+                "modes": [t[5] for t in traces],
+                "types": [t[6] for t in traces],
+                "xaxis": [t[8] for t in traces],
+                "yaxis": [t[9] for t in traces],
+                "markers": [t[11] or ({"color": t[7]} if t[7] else None) for t in traces],
+                "selectedMarkers": [t[12] or ({"color": t[10]} if t[10] else None) for t in traces],
                 "traces": [[reverse_cols.get(c, c) for c in [t[0], t[1], t[2]]] for t in traces],
-                "orientations": [t[12] for t in traces],
-                "names": [t[13] for t in traces],
-                "lines": [t[14] if isinstance(t[14], dict) else {"dash": t[14]} for t in traces],
+                "orientations": [t[13] for t in traces],
+                "names": [t[14] for t in traces],
+                "lines": [t[15] if isinstance(t[15], dict) else {"dash": t[15]} for t in traces],
+                "textAnchors": [t[16] for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)

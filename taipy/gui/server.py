@@ -9,6 +9,8 @@ from flask import Blueprint, Flask, jsonify, render_template, render_template_st
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
+from .utils import KillableThread, _is_in_notebook
+
 if t.TYPE_CHECKING:
     from .gui import Gui
 
@@ -188,5 +190,14 @@ class Server:
     def test_client(self):
         return self._flask.test_client()
 
+    def _run_notebook(self):
+        self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
+
     def runWithWS(self, host=None, port=None, debug=None, use_reloader=None):
+        if _is_in_notebook():
+            self._host = host
+            self._port = port
+            self._thread = KillableThread(target=self._run_notebook)
+            self._thread.start()
+            return
         self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)

@@ -46,7 +46,7 @@ def test_can_execute_parallel():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(True, False, 1)
+    executor = JobDispatcher(True, 1)
 
     with lock:
         assert executor.can_execute()
@@ -65,7 +65,7 @@ def test_can_execute_parallel_multiple_submit():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(True, False, 2)
+    executor = JobDispatcher(True, 2)
 
     with lock:
         assert executor.can_execute()
@@ -79,7 +79,7 @@ def test_can_execute_synchronous():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(False, False, None)
+    executor = JobDispatcher(False, None)
 
     assert executor.can_execute()
     executor.execute(job)
@@ -92,7 +92,7 @@ def test_handle_exception_in_user_function():
     task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task)
 
-    executor = JobDispatcher(False, False, None)
+    executor = JobDispatcher(False, None)
     executor.execute(job)
     assert job.is_failed()
     assert "Something bad has happened" == str(job.exceptions[0])
@@ -107,7 +107,7 @@ def test_handle_exception_when_writing_datasource():
     task = Task(config_name="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task)
 
-    executor = JobDispatcher(False, False, None)
+    executor = JobDispatcher(False, None)
     executor.execute(job)
     assert job.is_failed()
     stack_trace = str(job.exceptions[0])

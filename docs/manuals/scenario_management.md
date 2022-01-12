@@ -64,7 +64,7 @@ Here is the toml export file of all (not None) default values :
     parallel_execution = false
     nb_of_workers = "1"
     hostname = "localhost"
-    airflow_dag_folder = ".dag/"
+    airflow_dags_folder = ".dags/"
     airflow_folder = ".airflow/"
 
     [DATA_SOURCE.default]
@@ -156,7 +156,7 @@ Taipy also provides a method to export the configuration applied after the compi
     parallel_execution = false
     nb_of_workers = "1"
     hostname = "localhost"
-    airflow_dag_folder = "./dag/"
+    airflow_dags_folder = "./dags/"
     airflow_folder = "./airflow"
     airflow_db_endpoint = "db"
 

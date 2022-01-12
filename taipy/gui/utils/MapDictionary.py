@@ -75,11 +75,11 @@ class _MapDictionary(object):
     def clear(self):
         return self._dict.clear()
 
-    def setdefault(self):
-        return self._dict.setdefault()
+    def setdefault(self, key, value=None):
+        return self._dict.setdefault(key, value)
 
-    def pop(self):
-        return self._dict.pop()
+    def pop(self, key, default=None):
+        return self._dict.pop(key, default)
 
     def popitem(self):
         return self._dict.popitem()

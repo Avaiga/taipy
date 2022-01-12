@@ -6,7 +6,7 @@ import pytest
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data import DataSource, InMemoryDataSource, Scope
-from taipy.data.operator import Operator
+from taipy.data.operator import JoinOperator, Operator
 from taipy.exceptions.data_source import NoData
 
 
@@ -173,47 +173,138 @@ class TestDataSource:
         ds = FakeDataSource("fake ds")
         ds.write("Any data")
 
-        assert NotImplemented == ds.filter("any", 0, Operator.EQUAL)
-        assert NotImplemented == ds.filter("any", 0, Operator.NOT_EQUAL)
-        assert NotImplemented == ds.filter("any", 0, Operator.LESS_THAN)
-        assert NotImplemented == ds.filter("any", 0, Operator.LESS_OR_EQUAL)
-        assert NotImplemented == ds.filter("any", 0, Operator.GREATER_THAN)
-        assert NotImplemented == ds.filter("any", 0, Operator.GREATER_OR_EQUAL)
+        assert NotImplemented == ds.filter((("any", 0, Operator.EQUAL)), JoinOperator.OR)
+        assert NotImplemented == ds.filter((("any", 0, Operator.NOT_EQUAL)), JoinOperator.OR)
+        assert NotImplemented == ds.filter((("any", 0, Operator.LESS_THAN)), JoinOperator.AND)
+        assert NotImplemented == ds.filter((("any", 0, Operator.LESS_OR_EQUAL)), JoinOperator.AND)
+        assert NotImplemented == ds.filter((("any", 0, Operator.GREATER_THAN)))
+        assert NotImplemented == ds.filter((("any", 0, Operator.GREATER_OR_EQUAL)))
 
         df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
 
-        COLUMN_NAME = "a"
-
-        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.EQUAL)) == len(
-            default_data_frame[default_data_frame[COLUMN_NAME] == 1]
+        COLUMN_NAME_1 = "a"
+        COLUMN_NAME_2 = "b"
+        assert len(df_ds.filter((COLUMN_NAME_1, 1, Operator.EQUAL))) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] == 1]
         )
-        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.NOT_EQUAL)) == len(
-            default_data_frame[default_data_frame[COLUMN_NAME] != 1]
+        assert len(df_ds.filter((COLUMN_NAME_1, 1, Operator.NOT_EQUAL))) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] != 1]
         )
-        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.LESS_THAN)) == len(
-            default_data_frame[default_data_frame[COLUMN_NAME] < 1]
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1, Operator.EQUAL)])) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] == 1]
         )
-        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.LESS_OR_EQUAL)) == len(
-            default_data_frame[default_data_frame[COLUMN_NAME] <= 1]
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1, Operator.NOT_EQUAL)])) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] != 1]
         )
-        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.GREATER_THAN)) == len(
-            default_data_frame[default_data_frame[COLUMN_NAME] > 1]
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1, Operator.LESS_THAN)])) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] < 1]
         )
-        assert len(df_ds.filter(COLUMN_NAME, 1, Operator.GREATER_OR_EQUAL)) == len(
-            default_data_frame[default_data_frame[COLUMN_NAME] >= 1]
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1, Operator.LESS_OR_EQUAL)])) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] <= 1]
         )
-        assert len(df_ds.filter(COLUMN_NAME, -1000, Operator.LESS_OR_EQUAL)) == 0
-        assert len(df_ds.filter(COLUMN_NAME, 1000, Operator.GREATER_OR_EQUAL)) == 0
-
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1, Operator.GREATER_THAN)])) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] > 1]
+        )
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1, Operator.GREATER_OR_EQUAL)])) == len(
+            default_data_frame[default_data_frame[COLUMN_NAME_1] >= 1]
+        )
+        assert len(df_ds.filter([(COLUMN_NAME_1, -1000, Operator.LESS_OR_EQUAL)])) == 0
+        assert len(df_ds.filter([(COLUMN_NAME_1, 1000, Operator.GREATER_OR_EQUAL)])) == 0
+        assert len(df_ds.filter([(COLUMN_NAME_1, 4, Operator.EQUAL), (COLUMN_NAME_1, 5, Operator.EQUAL)])) == len(
+            default_data_frame[(default_data_frame[COLUMN_NAME_1] == 4) & (default_data_frame[COLUMN_NAME_1] == 5)]
+        )
+        assert len(
+            df_ds.filter([(COLUMN_NAME_1, 4, Operator.EQUAL), (COLUMN_NAME_2, 5, Operator.EQUAL)], JoinOperator.OR)
+        ) == len(
+            default_data_frame[(default_data_frame[COLUMN_NAME_1] == 4) | (default_data_frame[COLUMN_NAME_2] == 5)]
+        )
+        assert len(
+            df_ds.filter(
+                [(COLUMN_NAME_1, 1, Operator.GREATER_THAN), (COLUMN_NAME_2, 3, Operator.GREATER_THAN)], JoinOperator.AND
+            )
+        ) == len(default_data_frame[(default_data_frame[COLUMN_NAME_1] > 1) & (default_data_frame[COLUMN_NAME_2] > 3)])
+        assert len(
+            df_ds.filter(
+                [(COLUMN_NAME_1, 2, Operator.GREATER_THAN), (COLUMN_NAME_1, 3, Operator.GREATER_THAN)], JoinOperator.OR
+            )
+        ) == len(default_data_frame[(default_data_frame[COLUMN_NAME_1] > 2) | (default_data_frame[COLUMN_NAME_1] > 3)])
+        assert len(
+            df_ds.filter(
+                [(COLUMN_NAME_1, 10, Operator.GREATER_THAN), (COLUMN_NAME_1, -10, Operator.LESS_THAN)], JoinOperator.AND
+            )
+        ) == len(
+            default_data_frame[(default_data_frame[COLUMN_NAME_1] > 10) | (default_data_frame[COLUMN_NAME_1] < -10)]
+        )
+        assert len(
+            df_ds.filter(
+                [(COLUMN_NAME_1, 10, Operator.GREATER_THAN), (COLUMN_NAME_1, -10, Operator.LESS_THAN)], JoinOperator.OR
+            )
+        ) == len(
+            default_data_frame[(default_data_frame[COLUMN_NAME_1] > 10) | (default_data_frame[COLUMN_NAME_1] < -10)]
+        )
         list_ds = FakeListDataSource("fake list ds")
 
         KEY_NAME = "value"
 
-        assert len(list_ds.filter(KEY_NAME, 4, Operator.EQUAL)) == 1
-        assert len(list_ds.filter(KEY_NAME, 4, Operator.NOT_EQUAL)) == 9
-        assert len(list_ds.filter(KEY_NAME, 4, Operator.LESS_THAN)) == 4
-        assert len(list_ds.filter(KEY_NAME, 4, Operator.LESS_OR_EQUAL)) == 5
-        assert len(list_ds.filter(KEY_NAME, 4, Operator.GREATER_THAN)) == 5
-        assert len(list_ds.filter(KEY_NAME, 4, Operator.GREATER_OR_EQUAL)) == 6
-        assert len(list_ds.filter(KEY_NAME, -1000, Operator.LESS_OR_EQUAL)) == 0
-        assert len(list_ds.filter(KEY_NAME, 1000, Operator.GREATER_OR_EQUAL)) == 0
+        assert len(list_ds.filter((KEY_NAME, 4, Operator.EQUAL))) == 1
+        assert len(list_ds.filter((KEY_NAME, 4, Operator.NOT_EQUAL))) == 9
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.EQUAL)])) == 1
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.NOT_EQUAL)])) == 9
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.LESS_THAN)])) == 4
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.LESS_OR_EQUAL)])) == 5
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.GREATER_THAN)])) == 5
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.GREATER_OR_EQUAL)])) == 6
+        assert len(list_ds.filter([(KEY_NAME, -1000, Operator.LESS_OR_EQUAL)])) == 0
+        assert len(list_ds.filter([(KEY_NAME, 1000, Operator.GREATER_OR_EQUAL)])) == 0
+
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.EQUAL), (KEY_NAME, 5, Operator.EQUAL)])) == 0
+        assert len(list_ds.filter([(KEY_NAME, 4, Operator.EQUAL), (KEY_NAME, 5, Operator.EQUAL)], JoinOperator.OR)) == 2
+        assert (
+            len(list_ds.filter([(KEY_NAME, 4, Operator.EQUAL), (KEY_NAME, 11, Operator.EQUAL)], JoinOperator.AND)) == 0
+        )
+        assert (
+            len(list_ds.filter([(KEY_NAME, 4, Operator.EQUAL), (KEY_NAME, 11, Operator.EQUAL)], JoinOperator.OR)) == 1
+        )
+
+        assert (
+            len(list_ds.filter([(KEY_NAME, -10, Operator.LESS_OR_EQUAL), (KEY_NAME, 11, Operator.GREATER_OR_EQUAL)]))
+            == 0
+        )
+        assert (
+            len(
+                list_ds.filter(
+                    [
+                        (KEY_NAME, 4, Operator.GREATER_OR_EQUAL),
+                        (KEY_NAME, 6, Operator.GREATER_OR_EQUAL),
+                    ],
+                    JoinOperator.AND,
+                )
+            )
+            == 4
+        )
+        assert (
+            len(
+                list_ds.filter(
+                    [
+                        (KEY_NAME, 4, Operator.GREATER_OR_EQUAL),
+                        (KEY_NAME, 6, Operator.GREATER_OR_EQUAL),
+                        (KEY_NAME, 11, Operator.EQUAL),
+                    ],
+                    JoinOperator.AND,
+                )
+            )
+            == 0
+        )
+        assert (
+            len(
+                list_ds.filter(
+                    [
+                        (KEY_NAME, 4, Operator.GREATER_OR_EQUAL),
+                        (KEY_NAME, 6, Operator.GREATER_OR_EQUAL),
+                        (KEY_NAME, 11, Operator.EQUAL),
+                    ],
+                    JoinOperator.OR,
+                )
+            )
+            == 6
+        )

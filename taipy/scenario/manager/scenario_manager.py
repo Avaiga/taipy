@@ -139,7 +139,7 @@ class ScenarioManager:
 
     def submit(self, scenario: Union[Scenario, ScenarioId]):
         """
-        Submits the scenario corresponding to the identifier given as parameter for execution.
+        Submits the scenario corresponding to the scenario of the identifier given as parameter for execution.
 
         All the tasks of scenario will be submitted for execution.
 

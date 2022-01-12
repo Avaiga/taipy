@@ -120,11 +120,10 @@ class Config:
     def set_job_config(
         cls,
         mode: str = None,
-        remote_execution: bool = None,
         parallel_execution: bool = None,
         nb_of_workers: int = None,
         hostname: str = None,
-        airflow_dag_folder: str = None,
+        airflow_dags_folder: str = None,
         airflow_folder: str = None,
         airflow_db_endpoint: str = None,
         start_airflow: bool = None,
@@ -134,11 +133,10 @@ class Config:
         """Configures fields related to job execution."""
         job_config = JobConfig(
             mode,
-            remote_execution,
             parallel_execution,
             nb_of_workers,
             hostname,
-            airflow_dag_folder,
+            airflow_dags_folder,
             airflow_folder,
             airflow_db_endpoint,
             start_airflow,

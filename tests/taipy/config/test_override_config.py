@@ -97,7 +97,6 @@ nb_of_workers = 2
 
     Config.set_job_config(parallel_execution=True, nb_of_workers=21)
 
-    assert Config.job_config().remote_execution is False  # From default config
     assert Config.job_config().parallel_execution is True  # From code config
     assert Config.job_config().nb_of_workers == 2  # From file config
 
@@ -112,7 +111,6 @@ nb_of_workers = 2
     Config.set_job_config(parallel_execution=True, nb_of_workers=21)
     Config.load(config_from_filename.filename)
 
-    assert Config.job_config().remote_execution is False  # From default config
     assert Config.job_config().parallel_execution is True  # From code config
     assert Config.job_config().nb_of_workers == 2  # From file config
 

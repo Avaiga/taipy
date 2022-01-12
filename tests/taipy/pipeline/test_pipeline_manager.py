@@ -568,12 +568,12 @@ def test_generate_json(airflow_config):
         post.assert_called_once()
         patch.assert_called_once()
 
-    dag_as_json = Path(Config.job_config().airflow_dag_folder).resolve() / "taipy" / f"{pipeline.id}.json"
+    dag_as_json = Path(Config.job_config().airflow_dags_folder).resolve() / "taipy" / f"{pipeline.id}.json"
     data = json.loads(dag_as_json.read_text())
 
-    assert data["path"] == sys.path[0]
+    assert data["path"] == pm.airflow.generate_airflow_path()
     assert data["dag_id"] == pipeline.id
-    assert data["storage_folder"] == str(Path(Config.global_config().storage_folder).resolve())
+    assert data["storage_folder"] == pm.airflow.generate_storage_folder_path()
     assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
 
     pm.airflow.stop()

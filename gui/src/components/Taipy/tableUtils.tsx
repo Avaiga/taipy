@@ -7,6 +7,7 @@ import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Switch from "@mui/material/Switch";
 
 import { FormatConfig } from "../../context/taipyReducers";
 import { getDateTimeString, getNumberString } from "../../utils/index";
@@ -58,6 +59,13 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig): 
         default:
             return val as string;
     }
+};
+
+const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig) => {
+    if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
+        return <Switch checked={val as boolean} title={"" + val} />;
+    }
+    return <>{formatValue(val as RowValue, col, formatConf)}</>;
 };
 
 export const alignCell = (col: ColumnDesc): Partial<TableCellProps> => {
@@ -240,6 +248,6 @@ export const EditableCell = (props: EditableCellProps) => {
             ) : null}
         </Box>
     ) : (
-        <>{formatValue(value, colDesc, formatConfig)}</>
+        renderCellValue(value, colDesc, formatConfig)
     );
 };

@@ -24,10 +24,19 @@ from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
 from .taipyimage import TaipyImage
-from .utils import ISOToDate, Singleton, _get_dict_value, _MapDictionary, attrsetter, dateToISO, get_client_var_name
+from .types import WsType
+from .utils import (
+    ISOToDate,
+    Singleton,
+    _get_dict_value,
+    _is_in_notebook,
+    _MapDictionary,
+    attrsetter,
+    dateToISO,
+    get_client_var_name,
+)
 from .utils._adapter import _Adapter
 from .utils._evaluator import _Evaluator
-from .types import WsType
 
 
 class Gui(object, metaclass=Singleton):
@@ -59,7 +68,7 @@ class Gui(object, metaclass=Singleton):
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        default_page_renderer: t.Optional[PageRenderer] = None,
+        page: t.Optional[PageRenderer] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
@@ -75,11 +84,18 @@ class Gui(object, metaclass=Singleton):
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
 
-            default_page_renderer (PageRenderer): An optional `PageRenderer` class that is used to render pages.
+            page (PageRenderer): An optional `PageRenderer` class that is used when there
+                is a single page in this interface, referenced as the root page (in `/`).
+                Note that if `pages` is provided, those pages are added as well.
         """
         self._server = Server(
             self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
         )
+        # Preserve server config for re-initialization on notebook
+        self._path_mapping = path_mapping
+        self._flask = flask
+        self._css_file = css_file
+
         self._config = GuiConfig()
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
@@ -94,8 +110,8 @@ class Gui(object, metaclass=Singleton):
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
 
-        if default_page_renderer:
-            self.add_page(name=Gui.__root_page_name, renderer=default_page_renderer)
+        if page:
+            self.add_page(name=Gui.__root_page_name, renderer=page)
         if pages is not None:
             self.add_pages(pages)
         if env_filename is not None:
@@ -672,6 +688,21 @@ class Gui(object, metaclass=Singleton):
             run_server (bool): whether or not to run a Web server locally.
                 If set to `False`, a Web server is _not_ created and started.
         """
+        if _is_in_notebook():
+            if hasattr(self._server, "_thread"):
+                self._server._thread.kill()
+                self._server._thread.join()
+            self._flask_blueprint = []
+            self._server = Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                root_page_name=Gui.__root_page_name,
+            )
+            self._scopes = _DataScopes()
+            self.__evaluator = _Evaluator()
+
         app_config = self._config.app_config
 
         # Register _root_dir for abs path
@@ -741,3 +772,9 @@ class Gui(object, metaclass=Singleton):
                 debug=app_config["debug"],
                 use_reloader=app_config["use_reloader"],
             )
+
+    def stop(self):
+        if _is_in_notebook() and hasattr(self._server, "_thread"):
+            self._server._thread.kill()
+            self._server._thread.join()
+            print("Gui server has been stopped")
