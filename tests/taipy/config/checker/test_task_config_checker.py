@@ -18,6 +18,12 @@ class TestTaskConfigChecker:
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
+        config.tasks["default"].inputs = ["bar"]
+        collector = IssueCollector()
+        TaskConfigChecker(config, collector).check()
+        assert len(collector.errors) == 1
+        assert len(collector.warnings) == 2
+
         config.tasks["default"].inputs = [DataSourceConfig("bar")]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
