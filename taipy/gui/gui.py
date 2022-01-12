@@ -714,6 +714,10 @@ class Gui(object, metaclass=Singleton):
         # Load application config from multiple sources (env files, kwargs, command line)
         self._config.build_app_config(self._root_dir, self.__env_filename, kwargs)
 
+        # Special config for notebook runtime
+        if _is_in_notebook():
+            self._config.app_config["single_client"] = True
+
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
 
