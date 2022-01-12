@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
@@ -48,7 +48,7 @@ class ScenarioConfigChecker(ConfigChecker):
 
     def _check_comparators(self, scenario_config_name: str, scenario_config: ScenarioConfig):
         if not scenario_config.comparators:
-            self._info(  # TODO: info or warning???
+            self._info(
                 scenario_config.COMPARATOR_KEY,
                 scenario_config.comparators,
                 f"{scenario_config.COMPARATOR_KEY} field of Scenario {scenario_config_name} is empty.",

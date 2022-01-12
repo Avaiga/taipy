@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional
+from typing import List
 
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.config_checker import ConfigChecker
