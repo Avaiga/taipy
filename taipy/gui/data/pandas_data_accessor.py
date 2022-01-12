@@ -173,6 +173,7 @@ class PandasDataAccessor(DataAccessor):
                 nb_rows_max = _get_dict_value(payload, "width")
             columns = _get_dict_value(payload, "columns")
             if paged:
+                # real number of rows is needed to calculate the number of pages
                 rowcount = len(value)
                 # here we'll deal with start and end values from payload if present
                 if isinstance(payload["start"], int):
