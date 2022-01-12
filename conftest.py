@@ -18,11 +18,11 @@ from taipy.scenario.scenario_model import ScenarioModel
 
 
 @pytest.fixture(scope="function")
-def csv_file(tmpdir_factory):
+def csv_file(tmpdir_factory) -> str:
     csv = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
     fn = tmpdir_factory.mktemp("data").join("df.csv")
     csv.to_csv(str(fn), index=False)
-    return fn
+    return fn.strpath
 
 
 @pytest.fixture(scope="session")

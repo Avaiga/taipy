@@ -1,27 +1,29 @@
 from datetime import datetime, timedelta
 from time import sleep
 
-import pandas as pd
 import pytest
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data import DataSource, InMemoryDataSource, Scope
+from taipy.data.manager import DataManager
 from taipy.data.operator import JoinOperator, Operator
 from taipy.exceptions.data_source import NoData
 
 
-class FakeDataSource(DataSource):
+class FakeDataSource(InMemoryDataSource):
     read_has_been_called = 0
     write_has_been_called = 0
 
     def __init__(self, config_name, **kwargs):
-        super().__init__(config_name, **kwargs)
+        super().__init__(config_name, Scope.PIPELINE, **kwargs)
 
     def _read(self, query=None):
         self.read_has_been_called += 1
 
     def _write(self, data):
         self.write_has_been_called += 1
+
+    write = DataSource.write  # Make sure that the writing behavior comes from DataSource
 
 
 class FakeDataframeDataSource(DataSource):
@@ -308,3 +310,14 @@ class TestDataSource:
             )
             == 6
         )
+
+    def test_datasource_update_after_writing(self):
+        dm = DataManager()
+        ds = FakeDataSource("foo")
+
+        dm.set(ds)
+        assert not dm.get(ds.id).is_ready_for_reading
+        ds.write("Any data")
+
+        assert ds.is_ready_for_reading
+        assert dm.get(ds.id).is_ready_for_reading

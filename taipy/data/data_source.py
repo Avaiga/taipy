@@ -116,8 +116,11 @@ class DataSource:
         return self._read()
 
     def write(self, data, job_id: Optional[JobId] = None):
+        from taipy.data.manager import DataManager
+
         self._write(data)
         self.unlock_edition(job_id=job_id)
+        DataManager().set(self)
 
     def lock_edition(self):
         self.edition_in_progress = True
