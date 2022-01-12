@@ -89,7 +89,8 @@ class TaipyTag(object):
         if self.has_set_value:
             return False
         property_name = HtmlFactory.get_default_property_name(self.control_type)
-        if property_name is not None:
+        # Set property only if it is not already defined
+        if property_name and property_name not in self.properties.keys():
             self.properties[property_name] = value
         self.has_set_value = True
         return True

@@ -156,6 +156,7 @@ class Preprocessor(MdPreprocessor):
             control_name = "field"
         if default_prop_value is not None:
             default_prop_name = MarkdownFactory.get_default_property_name(control_name)
-            if default_prop_name:
+            # Set property only if it is not already defined
+            if default_prop_name and default_prop_name not in [x[0] for x in properties]:
                 properties.insert(0, self._make_prop_pair(default_prop_name, default_prop_value))
         return control_name, properties
