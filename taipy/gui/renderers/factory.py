@@ -255,8 +255,8 @@ class Factory:
                 ("width", AttributeType.string_or_number, 200),
             ]
         )
-        .get_adapter("items", "lov")  # need to be called before set_lov
-        .set_lov("items", "lov")
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
         .set_string_with_check("text_anchor", Factory.__TEXT_ANCHORS + [Factory.__TEXT_ANCHOR_NONE], "bottom")
         .set_propagate(),
         "status": lambda control_type, attrs: Builder(

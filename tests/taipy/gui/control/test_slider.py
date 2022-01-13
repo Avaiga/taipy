@@ -10,7 +10,7 @@ def test_slider_md(gui: Gui, helpers):
 
 def test_slider_items_md(gui: Gui, helpers):
     gui.bind_var_val("x", "Item 1")
-    md_string = "<|{x}|slider|items=Item 1;Item 2;Item 3|text_anchor=left|>"
+    md_string = "<|{x}|slider|lov=Item 1;Item 2;Item 3|text_anchor=left|>"
     expected_list = [
         "<Slider",
         'tp_varname="x"',
