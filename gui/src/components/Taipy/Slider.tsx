@@ -7,7 +7,8 @@ import Typography from "@mui/material/Typography";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
-import { LovProps, useLovListMemo } from "./lovUtils";
+import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
+import { TaipyImage } from "./utils";
 
 interface SliderProps extends LovProps<number | string, number | string> {
     width?: number | string;
@@ -50,16 +51,28 @@ const Slider = (props: SliderProps) => {
         [lovList, tp_varname, dispatch, propagate]
     );
 
-    const getLabel = useCallback((value) => <>{lovList.length ? lovList[value].item : value}</>, [lovList]);
+    const getLabel = useCallback(
+        (value) =>
+            lovList.length ? (
+                typeof lovList[value].item === "string" ? (
+                    <Typography>{lovList[value].item}</Typography>
+                ) : (
+                    <LovImage item={lovList[value].item as TaipyImage} />
+                )
+            ) : (
+                <>{value}</>
+            ),
+        [lovList]
+    );
 
     const getText = useCallback(
         (value, before) => {
             if (lovList.length) {
                 if (before && (textAnchor === "top" || textAnchor === "left")) {
-                    return <Typography>{getLabel(value)}</Typography>;
+                    return getLabel(value);
                 }
                 if (!before && (textAnchor === "bottom" || textAnchor === "right")) {
-                    return <Typography>{getLabel(value)}</Typography>;
+                    return getLabel(value);
                 }
             }
             return null;
