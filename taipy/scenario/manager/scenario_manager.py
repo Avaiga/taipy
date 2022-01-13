@@ -125,9 +125,7 @@ class ScenarioManager:
         """
         try:
             scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
-            if sc := self.repository.load(scenario_id):
-                return sc
-            raise ModelNotFound
+            return self.repository.load(scenario_id)
         except ModelNotFound:
             logging.error(f"Scenario entity: {scenario_id} does not exist.")
             raise NonExistingScenario(scenario_id)

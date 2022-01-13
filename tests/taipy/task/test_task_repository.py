@@ -6,6 +6,7 @@ from taipy.common.alias import DataSourceId, JobId, TaskId
 from taipy.data import CSVDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound
+from taipy.exceptions.data_source import NonExistingDataSource
 from taipy.task import Task, TaskManager
 from taipy.task.task_model import TaskModel
 
@@ -42,7 +43,7 @@ class TestDataRepository:
         repository = TaskManager().repository
         repository.base_path = tmpdir
         repository.save(task)
-        with pytest.raises(ModelNotFound):
+        with pytest.raises(NonExistingDataSource):
             repository.load("id")
         DataManager().set(data_source)
         t = repository.load("id")
@@ -51,7 +52,7 @@ class TestDataRepository:
     def test_from_and_to_model(self):
         repository = TaskManager().repository
         assert repository.to_model(task) == task_model
-        with pytest.raises(ModelNotFound):
+        with pytest.raises(NonExistingDataSource):
             repository.from_model(task_model)
         DataManager().set(data_source)
         assert repository.from_model(task_model).id == task.id

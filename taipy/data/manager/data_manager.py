@@ -8,8 +8,12 @@ from taipy.data.data_source import DataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.repository import DataRepository
 from taipy.data.scope import Scope
-from taipy.exceptions import InvalidDataSourceType
-from taipy.exceptions.data_source import MultipleDataSourceFromSameConfigWithSameParent
+from taipy.exceptions import ModelNotFound
+from taipy.exceptions.data_source import (
+    InvalidDataSourceType,
+    MultipleDataSourceFromSameConfigWithSameParent,
+    NonExistingDataSource,
+)
 
 
 class DataManager:
@@ -93,8 +97,12 @@ class DataManager:
         Raises:
             ModelNotFound: Raised if no data source corresponds to data_source_id.
         """
-        data_source_id = data_source.id if isinstance(data_source, DataSource) else data_source
-        return self.repository.load(data_source_id)
+        try:
+            data_source_id = data_source.id if isinstance(data_source, DataSource) else data_source
+            return self.repository.load(data_source_id)
+        except ModelNotFound:
+            logging.error(f"DataSource: {data_source_id} does not exist.")
+            raise NonExistingDataSource(data_source_id)
 
     def get_all(self) -> List[DataSource]:
         """Returns the list of all existing data sources."""

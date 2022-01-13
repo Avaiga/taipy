@@ -125,9 +125,7 @@ class TaskManager:
         """
         try:
             task_id = task.id if isinstance(task, Task) else task
-            if opt_task := self.repository.load(task_id):
-                return opt_task
-            raise ModelNotFound
+            return self.repository.load(task_id)
         except ModelNotFound:
             logging.error(f"Task: {task_id} does not exist.")
             raise NonExistingTask(task_id)

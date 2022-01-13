@@ -145,6 +145,7 @@ class PipelineManager:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
             return self.repository.load(pipeline_id)
         except ModelNotFound:
+            logging.error(f"Pipeline entity: {pipeline_id} does not exist.")
             raise NonExistingPipeline(pipeline_id)
 
     def get_all(self) -> List[Pipeline]:

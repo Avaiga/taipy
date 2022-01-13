@@ -8,6 +8,7 @@ from taipy.config.config import Config
 from taipy.data import CSVDataSource, InMemoryDataSource, PickleDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType, ModelNotFound
+from taipy.exceptions.data_source import NonExistingDataSource
 
 
 class TestDataManager:
@@ -261,7 +262,7 @@ class TestDataManager:
         assert len(dm.get_all()) == 2
         assert dm.get(ds_2.id).id == ds_2.id
         assert dm.get(ds_3.id).id == ds_3.id
-        with pytest.raises(ModelNotFound):
+        with pytest.raises(NonExistingDataSource):
             dm.get(ds_1.id)
         dm.delete_all()
         assert len(dm.get_all()) == 0
