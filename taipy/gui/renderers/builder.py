@@ -184,8 +184,9 @@ class Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    def get_adapter(self, property_name: str, multi_selection=True):  # noqa: C901
-        lov = self.__get_list_of_(property_name)
+    def get_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True):  # noqa: C901
+        property_name = var_name if property_name is None else property_name
+        lov = self.__get_list_of_(var_name)
         if isinstance(lov, list):
             from_string = hasattr(self, "from_string") and self.from_string
             adapter = self.__get_property("adapter")
@@ -210,7 +211,7 @@ class Builder:
                 var_type = type(elt).__name__ if elt is not None else None
             if adapter is None:
                 adapter = self._gui._get_adapter_for_type(var_type)
-            lov_name = _get_dict_value(self.__hashes, property_name)
+            lov_name = _get_dict_value(self.__hashes, var_name)
             if lov_name:
                 if adapter is None:
                     adapter = self._gui._get_adapter_for_type(lov_name)
@@ -237,7 +238,7 @@ class Builder:
                             ret_list.append(ret)
                 else:
                     ret_list = lov
-            self.attributes["default_lov"] = ret_list
+            self.attributes["default_" + property_name] = ret_list
 
             ret_list = []
             value = self.__get_property("value")
@@ -506,12 +507,13 @@ class Builder:
         self.set_attribute("dataType", getDataType(value))
         return self
 
-    def set_lov(self):
-        self.__set_list_of_("default_lov")
-        hash_name = _get_dict_value(self.__hashes, "lov")
+    def set_lov(self, var_name="lov", property_name: t.Optional[str] = None):
+        property_name = var_name if property_name is None else property_name
+        self.__set_list_of_("default_" + property_name)
+        hash_name = _get_dict_value(self.__hashes, var_name)
         if hash_name:
-            self.__update_vars.append(f"lov={hash_name}")
-            self.__set_react_attribute("lov", hash_name)
+            self.__update_vars.append(f"{property_name}={hash_name}")
+            self.__set_react_attribute(property_name, hash_name)
         return self
 
     def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None):

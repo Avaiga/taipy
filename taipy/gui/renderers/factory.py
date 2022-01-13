@@ -169,7 +169,7 @@ class Factory:
             control_type=control_type, element_name="NavBar", attributes=attrs, default_value=""
         )
         .set_classNames(class_name="taipy-navbar", config_class="navbar")
-        .get_adapter("lov", False)  # need to be called before set_lov
+        .get_adapter("lov", multi_selection=False)  # need to be called before set_lov
         .set_lov()
         .set_attributes(
             [
@@ -208,9 +208,6 @@ class Factory:
                 ("width", AttributeType.string_or_number, "30vw"),
                 ("height", AttributeType.string_or_number, "30vh"),
             ]
-        )
-        .set_string_with_check(
-            "text_anchor",
         )
         .set_propagate()
         .set_partial()  # partial should be set before page_id
@@ -258,8 +255,8 @@ class Factory:
                 ("width", AttributeType.string_or_number, 200),
             ]
         )
-        .get_adapter("lov")  # need to be called before set_lov
-        .set_lov()
+        .get_adapter("items", "lov")  # need to be called before set_lov
+        .set_lov("items", "lov")
         .set_string_with_check("text_anchor", Factory.__TEXT_ANCHORS + [Factory.__TEXT_ANCHOR_NONE], "bottom")
         .set_propagate(),
         "status": lambda control_type, attrs: Builder(
@@ -307,7 +304,7 @@ class Factory:
         )
         .set_value_and_default(with_default=False)
         .set_classNames(class_name="taipy-toggle", config_class="toggle")
-        .get_adapter("lov", False)  # need to be called before set_lov
+        .get_adapter("lov", multi_selection=False)  # need to be called before set_lov
         .set_lov()
         .set_attributes(
             [

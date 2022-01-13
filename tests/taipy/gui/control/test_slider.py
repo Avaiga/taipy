@@ -8,9 +8,9 @@ def test_slider_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_slider_lov_md(gui: Gui, helpers):
+def test_slider_items_md(gui: Gui, helpers):
     gui.bind_var_val("x", "Item 1")
-    md_string = "<|{x}|slider|lov=Item 1;Item 2;Item 3|text_anchor=left|>"
+    md_string = "<|{x}|slider|items=Item 1;Item 2;Item 3|text_anchor=left|>"
     expected_list = [
         "<Slider",
         'tp_varname="x"',
@@ -31,7 +31,7 @@ def test_slider_text_anchor_md(gui: Gui, helpers):
 
 def test_slider_text_anchor_default_md(gui: Gui, helpers):
     gui.bind_var_val("x", "Item 1")
-    md_string = "<|{x}|slider|lov=Item 1|>"
+    md_string = "<|{x}|slider|items=Item 1|>"
     expected_list = ["<Slider", 'tp_varname="x"', "value={x}", 'textAnchor="bottom"']
     helpers.test_control_md(gui, md_string, expected_list)
 
