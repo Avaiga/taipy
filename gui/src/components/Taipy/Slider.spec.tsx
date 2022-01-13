@@ -79,7 +79,7 @@ describe("Slider Component", () => {
         const elts = getAllByText("Item 1");
         expect(elts).toHaveLength(2);
         const tags = elts.map(elt => elt.tagName)
-        expect(tags).toContain("SPAN")
+        expect(tags).toContain("P")
         expect(tags).toContain("P")
     });
     it("doesn't show text when_text_anchor is none", async () => {
@@ -92,7 +92,7 @@ describe("Slider Component", () => {
         );
         const elts = getAllByText("Item 1");
         expect(elts).toHaveLength(1);
-        expect(elts[0].tagName).toBe("SPAN");
+        expect(elts[0].tagName).toBe("P");
     });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
