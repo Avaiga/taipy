@@ -30,6 +30,9 @@ class Factory:
         "tree": "value",
     }
 
+    __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
+    __TEXT_ANCHOR_NONE = "none"
+
     CONTROL_BUILDERS = {
         "button": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -206,6 +209,9 @@ class Factory:
                 ("height", AttributeType.string_or_number, "30vh"),
             ]
         )
+        .set_string_with_check(
+            "text_anchor",
+        )
         .set_propagate()
         .set_partial()  # partial should be set before page_id
         .set_page_id(),
@@ -252,6 +258,9 @@ class Factory:
                 ("width", AttributeType.string_or_number, 200),
             ]
         )
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
+        .set_string_with_check("text_anchor", Factory.__TEXT_ANCHORS + [Factory.__TEXT_ANCHOR_NONE], "bottom")
         .set_propagate(),
         "status": lambda control_type, attrs: Builder(
             control_type=control_type,

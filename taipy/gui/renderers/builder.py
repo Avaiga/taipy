@@ -186,8 +186,8 @@ class Builder:
 
     def get_adapter(self, property_name: str, multi_selection=True):  # noqa: C901
         lov = self.__get_list_of_(property_name)
-        from_string = hasattr(self, "from_string") and self.from_string
         if isinstance(lov, list):
+            from_string = hasattr(self, "from_string") and self.from_string
             adapter = self.__get_property("adapter")
             if not isinstance(adapter, FunctionType):
                 if adapter:
@@ -422,6 +422,17 @@ class Builder:
                 self.__set_json_attribute("layout", layout)
             else:
                 warnings.warn(f"Chart: layout attribute should be a dict\n'{str(layout)}'")
+
+    def set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
+        value = self.__get_property(var_name, default_value)
+        if value is not None:
+            value = str(value).lower()
+            self.attributes[var_name] = value
+            if value not in values:
+                warnings.warn(f"{self.element_name} {var_name}={value} should be in {values}")
+            else:
+                self.__set_string_attribute(var_name, default_value)
+        return self
 
     def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type) -> t.List[str]:
         if not hash_name and isinstance(val, str):
