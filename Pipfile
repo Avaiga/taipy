@@ -23,6 +23,7 @@ sqlalchemy = "==1.3.24"
 pyarrow = "==6.0.1"
 python-dotenv = ">=0.19"
 mkdocs-macros-plugin = "*"
+pyngrok = ">=5.1"
 
 [dev-packages]
 pytest = "*"

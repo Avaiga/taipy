@@ -19,6 +19,7 @@ app_config_default: AppConfig = {
     "browser_notification": True,
     "notification_duration": 3000,
     "single_client": False,
+    "ngrok_token": "",
 }
 
 style_config_default: StyleConfig = {
