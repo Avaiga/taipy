@@ -8,6 +8,7 @@ from taipy_rest.api.schemas.datasource import (
 )
 
 from taipy_rest.api.schemas.task import TaskSchema
+from taipy_rest.api.schemas.pipeline import PipelineSchema, PipelineResponseSchema
 
 
-__all__ = ["DataSourceSchema", "TaskSchema"]
+__all__ = ["DataSourceSchema", "TaskSchema", "PipelineSchema", "PipelineResponseSchema"]

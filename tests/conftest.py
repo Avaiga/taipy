@@ -5,6 +5,7 @@ import pytest
 from dotenv import load_dotenv
 from taipy.common.alias import DataSourceId
 from taipy.data import InMemoryDataSource, Scope
+from taipy.pipeline import Pipeline
 from taipy.task import Task
 
 from taipy_rest.app import create_app
@@ -39,6 +40,14 @@ def task_data():
 
 
 @pytest.fixture
+def pipeline_data():
+    return {
+        "name": "foo",
+        "task_ids": ["TASK_foo_3b888e17-1974-4a56-a42c-c7c96bc9cd54"],
+    }
+
+
+@pytest.fixture
 def default_datasource():
     return InMemoryDataSource(
         "input_ds",
@@ -50,8 +59,7 @@ def default_datasource():
     )
 
 
-@pytest.fixture
-def default_task():
+def __default_task():
     input_ds = InMemoryDataSource(
         "input_ds",
         Scope.SCENARIO,
@@ -75,6 +83,20 @@ def default_task():
         print,
         [output_ds],
         None,
+    )
+
+
+@pytest.fixture
+def default_task():
+    return __default_task()
+
+
+@pytest.fixture
+def default_pipeline():
+    return Pipeline(
+        config_name="foo",
+        properties={},
+        tasks=[__default_task()],
     )
 
 

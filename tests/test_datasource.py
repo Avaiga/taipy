@@ -47,7 +47,7 @@ def test_delete_datasource(client):
 def test_create_datasource(client, datasource_data):
     # test bad data
     datasources_url = url_for("api.datasources")
-    data = {"username": "created"}
+    data = {"bad": "data"}
     rep = client.post(datasources_url, json=data)
     assert rep.status_code == 400
 
