@@ -46,7 +46,11 @@ def test_set_and_get_scenario(cycle):
     with pytest.raises(NonExistingScenario):
         scenario_manager.get(scenario_id_1)
     with pytest.raises(NonExistingScenario):
+        scenario_manager.get(scenario_1)
+    with pytest.raises(NonExistingScenario):
         scenario_manager.get(scenario_id_2)
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.get(scenario_2)
 
     # Save one scenario. We expect to have only one scenario stored
     scenario_manager.set(scenario_1)
@@ -54,8 +58,13 @@ def test_set_and_get_scenario(cycle):
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_1.config_name
     assert len(scenario_manager.get(scenario_id_1).pipelines) == 0
+    assert scenario_manager.get(scenario_1).id == scenario_1.id
+    assert scenario_manager.get(scenario_1).config_name == scenario_1.config_name
+    assert len(scenario_manager.get(scenario_1).pipelines) == 0
     with pytest.raises(NonExistingScenario):
         scenario_manager.get(scenario_id_2)
+    with pytest.raises(NonExistingScenario):
+        scenario_manager.get(scenario_2)
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     scenario_manager.pipeline_manager.task_manager.set(task_2)
@@ -66,11 +75,18 @@ def test_set_and_get_scenario(cycle):
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_1.config_name
     assert len(scenario_manager.get(scenario_id_1).pipelines) == 0
+    assert scenario_manager.get(scenario_1).id == scenario_1.id
+    assert scenario_manager.get(scenario_1).config_name == scenario_1.config_name
+    assert len(scenario_manager.get(scenario_1).pipelines) == 0
     assert scenario_manager.get(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
+    assert scenario_manager.get(scenario_2).id == scenario_2.id
+    assert scenario_manager.get(scenario_2).config_name == scenario_2.config_name
+    assert len(scenario_manager.get(scenario_2).pipelines) == 1
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
     assert scenario_manager.get(scenario_id_2).cycle == cycle
+    assert scenario_manager.get(scenario_2).cycle == cycle
     assert scenario_manager.cycle_manager.get(cycle.id).id == cycle.id
 
     # We save the first scenario again. We expect nothing to change
@@ -79,9 +95,15 @@ def test_set_and_get_scenario(cycle):
     assert scenario_manager.get(scenario_id_1).id == scenario_1.id
     assert scenario_manager.get(scenario_id_1).config_name == scenario_1.config_name
     assert len(scenario_manager.get(scenario_id_1).pipelines) == 0
+    assert scenario_manager.get(scenario_1).id == scenario_1.id
+    assert scenario_manager.get(scenario_1).config_name == scenario_1.config_name
+    assert len(scenario_manager.get(scenario_1).pipelines) == 0
     assert scenario_manager.get(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
+    assert scenario_manager.get(scenario_2).id == scenario_2.id
+    assert scenario_manager.get(scenario_2).config_name == scenario_2.config_name
+    assert len(scenario_manager.get(scenario_2).pipelines) == 1
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
     assert scenario_manager.cycle_manager.get(cycle.id).id == cycle.id
 
@@ -95,9 +117,16 @@ def test_set_and_get_scenario(cycle):
     assert scenario_manager.get(scenario_id_1).config_name == scenario_3_with_same_id.config_name
     assert len(scenario_manager.get(scenario_id_1).pipelines) == 1
     assert scenario_manager.get(scenario_id_1).cycle == cycle
+    assert scenario_manager.get(scenario_1).id == scenario_1.id
+    assert scenario_manager.get(scenario_1).config_name == scenario_3_with_same_id.config_name
+    assert len(scenario_manager.get(scenario_1).pipelines) == 1
+    assert scenario_manager.get(scenario_1).cycle == cycle
     assert scenario_manager.get(scenario_id_2).id == scenario_2.id
     assert scenario_manager.get(scenario_id_2).config_name == scenario_2.config_name
     assert len(scenario_manager.get(scenario_id_2).pipelines) == 1
+    assert scenario_manager.get(scenario_2).id == scenario_2.id
+    assert scenario_manager.get(scenario_2).config_name == scenario_2.config_name
+    assert len(scenario_manager.get(scenario_2).pipelines) == 1
     assert scenario_manager.task_manager.get(task_2.id).id == task_2.id
 
 

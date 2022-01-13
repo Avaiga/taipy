@@ -1,6 +1,6 @@
 import itertools
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.config import TaskConfig
@@ -110,12 +110,12 @@ class TaskManager:
             self.set(task)
             return task
 
-    def get(self, task_id: TaskId) -> Task:
+    def get(self, task: Union[Task, TaskId]) -> Task:
         """
-        Gets a task given its identifier.
+        Gets a task given the Task or the identifier.
 
         Args:
-            task_id (TaskId): The task identifier.
+            task (Union[Task, TaskId]): The task identifier of the task to get.
 
         Returns:
             The task with the provided identifier.
@@ -124,11 +124,8 @@ class TaskManager:
             ModelNotFound: if no task corresponds to `task_id`.
         """
         try:
-            if opt_task := self.repository.load(task_id):
-                return opt_task
-            else:
-                logging.error(f"Task: {task_id} does not exist.")
-                raise NonExistingTask(task_id)
+            task_id = task.id if isinstance(task, Task) else task
+            return self.repository.load(task_id)
         except ModelNotFound:
             logging.error(f"Task: {task_id} does not exist.")
             raise NonExistingTask(task_id)

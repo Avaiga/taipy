@@ -114,19 +114,18 @@ class ScenarioManager:
         """
         self.repository.save(scenario)
 
-    def get(self, scenario_id: ScenarioId) -> Scenario:
+    def get(self, scenario: Union[Scenario, ScenarioId]) -> Scenario:
         """
-        Returns the scenario corresponding to the identifier given as parameter.
+        Returns the scenario corresponding to the scenario or the identifier given as parameter.
 
         Parameters:
-            scenario_id (ScenarioId) : scenario to get.
+            scenario (Union[Scenario, ScenarioId]) : scenario to get.
         Raises:
             NonExistingScenario : No scenario corresponds to scenario_id.
         """
         try:
-            if scenario := self.repository.load(scenario_id):
-                return scenario
-            raise ModelNotFound
+            scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
+            return self.repository.load(scenario_id)
         except ModelNotFound:
             logging.error(f"Scenario entity: {scenario_id} does not exist.")
             raise NonExistingScenario(scenario_id)

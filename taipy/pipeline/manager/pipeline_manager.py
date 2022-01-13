@@ -131,19 +131,21 @@ class PipelineManager:
         """
         self.repository.save(pipeline)
 
-    def get(self, pipeline_id: PipelineId) -> Pipeline:
+    def get(self, pipeline: Union[Pipeline, PipelineId]) -> Pipeline:
         """
         Gets a pipeline.
 
         Parameters:
-            pipeline_id (PipelineId): pipeline identifier or the pipeline to get.
+            pipeline (Union[Pipeline, PipelineId]): pipeline identifier or the pipeline to get.
 
         Raises:
             NonExistingPipeline: if no pipeline corresponds to `pipeline_id`.
         """
         try:
+            pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
             return self.repository.load(pipeline_id)
         except ModelNotFound:
+            logging.error(f"Pipeline entity: {pipeline_id} does not exist.")
             raise NonExistingPipeline(pipeline_id)
 
     def get_all(self) -> List[Pipeline]:

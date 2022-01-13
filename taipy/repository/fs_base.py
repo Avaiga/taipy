@@ -70,7 +70,7 @@ class FileSystemRepository(Generic[ModelType, Entity]):
 
         return dir_path
 
-    def load(self, model_id: str) -> Optional[Entity]:
+    def load(self, model_id: str) -> Entity:
         return self.__to_entity(self.__get_model(model_id))
 
     def load_all(self) -> List[Entity]:

@@ -36,3 +36,12 @@ class UnknownDatabaseEngine(Exception):
     """
 
     pass
+
+
+class NonExistingDataSource(Exception):
+    """
+    Raised if a requested DataSource is not known by the DataSource Manager.
+    """
+
+    def __init__(self, data_source_id: str):
+        self.message = f"DataSource: {data_source_id} does not exist."
