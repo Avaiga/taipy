@@ -11,3 +11,14 @@
 [data-md-color-scheme="slate"] {
   --md-hue: 240; 
 }
+
+a.ext-link:after {
+    display: inline-block;
+    content: url("../images/ext-link.svg");
+    width: .7em;
+    height: .7em;
+    margin: 0 3px 0 3px;
+    /* Does nothing, surprisingly
+    fill: #ff0000;
+    */
+}

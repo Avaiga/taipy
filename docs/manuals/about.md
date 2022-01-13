@@ -1,4 +1,4 @@
-# About Taipy user manuals
+# About Taipy's User Manual
 
 This User Manual covers all the topics and concepts that you can find in Taipy.
 For each topic, we are trying to provide as many examples as possible so that
@@ -18,12 +18,7 @@ in order to see a complete example of a complete Taipy application, described st
 ## Graphical User Interface
 
 Taipy comes with a package (`taipy.gui`) that allows for building user interfaces. The
-Graphical User Interface section will provide you with all the information
+Graphical User Interface (GUI) section will provide you with all the information
 you need to create pages that you can display and interact with.
 
 [:material-arrow-right: GUI user manual](gui/user.md)
-
-## References
-
-[:material-arrow-right: Full set of the Taipy specific references](/manuals/reference)
-

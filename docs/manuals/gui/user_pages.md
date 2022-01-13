@@ -7,18 +7,24 @@ the application data.
 ## Page renderers
 
 Taipy lets you create as many pages as you want, with whatever content you need.
-Pages are created using `_page renderers_`, that convert some text (inside the application
+Pages are created using _page renderers_, that convert some text (inside the application
 code or from an external file) into HTML content that is sent and rendered onto the client
 device.
 
-!!! info "A `_page rendered_` is a Python class that reads some text (directly from a string, or reading a text file) and converts it into a page that can be displayed in a browser."
+!!! note
+    A _page rendered_ is an instance of a Python class that reads some text (directly from a
+    string, or reading a text file) and converts it into a page that can be displayed in a browser.
 
-There are different types of page renderers in Taipy but all follow the same core
-principles: they parse some input text, locate the Taipy-specific constructs that
-involve, in the case of Taipy controls, the creation of potentially complex HTML
-components, bind these controls to application variables and connect `_callbacks_`
-from the rendered page back to the Python code, if you want to watch user events
-(the notion of callbacks is detailed in the section [Callbacks](user_callbacks.md)).
+There are different types of page renderers in Taipy and all process their input text
+with the following steps:
+
+- The text is parsed in order to locate the Taipy-specific constructs. Those constructs
+  may be _controls_ or _blocks_, and will trigger the creation of potentially complex HTML
+  components;
+- Control (and block) properties are read, and all referenced application variables are
+  bound.
+- Potentially, _callbacks_ are located and connected from the rendered page back to the Python code,
+  if you want to watch user events (the notion of callbacks is detailed in the section [Callbacks](user_callbacks.md)).
 
 ### Registering the page
 
@@ -30,97 +36,93 @@ used by your application.
 
 When the user browser connects to the Web server, requesting the indicated page,
 the rendering takes place (involving the retrieval of the application variable
-values) and you can see your application's state, and interact with it.
+values) so you can see your application's state, and interact with it.
 
-### Python markdown
+### Markdown processing
+
+One of the page description format is the [Markdown](https://en.wikipedia.org/wiki/Markdown)
+markup language.
 
 Taipy uses [Python Markdown](https://python-markdown.github.io/) to translate Markdown
 text to elements that are used to create Web pages. It also uses many extensions that
 make it easier to create nice-looking page that user can enjoy. Specifically,
-Taipy uses the following extensions: `_admonition_`, `_attr_list_`, `_fenced_code_`, `_meta_`, `_md_in_html_`, `_sane_lists_` and `_tables_`. Please refer to the Python Markdown package documentation to get information on how these are used.
+Taipy uses the following [Markdown extensions](https://python-markdown.github.io/extensions/):
+[_Admonition_](https://python-markdown.github.io/extensions/admonition/),
+[_Attribute Lists_](https://python-markdown.github.io/extensions/attr_list/),
+[_Fenced Code Blocks_](https://python-markdown.github.io/extensions/fenced_code_blocks/),
+[_Meta-Data_](https://python-markdown.github.io/extensions/meta_data/),
+[_Markdown in HTML_](https://python-markdown.github.io/extensions/md_in_html/),
+[_Sane Lists_](https://python-markdown.github.io/extensions/sane_lists/)
+and [_Tables_](https://python-markdown.github.io/extensions/tables/).
+Please refer to the Python Markdown package documentation to get information on how these are used.
 
-### Markdown specifics
-
-Beside these extension, Taipy adds its own, that can parse a Taipy-specific
+Beside these extensions, Taipy adds its own, that can parse a Taipy-specific
 construct that allows for defining controls (and all the properties they need)
 and structuring elements.
 
-!!! info "The basic syntax for creating Taipy constructs in Markdown is: `_<|...|...|>_`. Taipy will interpret any text between the `_<|_ and the _|>_` markers and try to make sense of it."
+The basic syntax for creating Taipy constructs in Markdown is: `<|...|...|>` (opening with a
+_less than_ character immediately followed by a vertical bar character &#151; sometimes called
+_pipe_ &#151; followed a potentially empty series of vertical bar-separated items, and closing
+by a vertical bar character immediately followed by the _greater than_ character).<br/>Taipy
+will interpret any text between the `<|` and the `|>` markers and try to make sense of it.
 
-The most common use is to create controls. Taipy expects the control type name
-to appear as the first `_|...|_` element.
+The most common use of this construct is to create controls. Taipy expects the control type
+name to appear between the two first vertical bar character (like in `<|control|...}>`.
 
-!!! info "If it fails to do so, Taipy will consider the first element to be the default value for the default property of the control, whose name must then appear as the second element."
+!!! important
+    If the first fragment text is not the name of a control type, Taipy will consider this
+    fragment to be the default value for the default property of the control, whose type name
+    must then appear as the second element.
 
 Every following elements will be interpreted as a property name-property value pair
-using the syntax: `_property_name_=_property_value_` (note that all space characters
+using the syntax: _property\_name=property\_value_ (note that all space characters
 are significative).  
-Should the `_=property_value_` fragment be missing, the property value is interpreted
-as the Boolean value `True`.
 
-!!! info "If the property name is preceded by the text "_no _", "_not _", "_don't _" or "_dont _" (including the trailing space character) then no property value is expected, and the property value is set to `False`."
+!!! note "Shortcut for Boolean properties"
+    Should the `=property_value` fragment be missing, the property value is interpreted as the
+    Boolean value `True`.<br/>
+    Furthermore if the property name is preceded by the text "_no&blank;_", "_not&blank;_",
+    "_don't&blank;_" or "_dont&blank;_" (including the trailing space character) then no
+    property value is expected, and the property value is set to `False`.
 
 #### Some examples
 
 !!! example "Multiple properties"
-
     You can have several properties defined in the same control fragment:
-    ``` py
-    _<|button|label=Do something|active=True|>_
-
+    ```
+    <|button|label=Do something|active=False|>
     ```
 
 !!! example "The _default property_ rule"
-
-    The control type [`button`](controls/button.md) has a default property called _label_. In Taipy, the Markdown text
-
-    ``` py
-
-    _<|button|label=Some text|>_
-
+    The default property name for the control type [`button`](controls/button.md) is _label_. In Taipy,
+    the Markdown text
     ```
-
+    <|button|label=Some text|>
+    ```
     Is exactly equivalent to
-
-    ``` py
-
-    _<|Some text|button|>_
-
     ```
+    <|Some text|button|>
+    ```
+    which is slightly shorter.
 
 !!! example "The _missing Boolean property value_ rules"
-
-    ``` py
-
-    _<|button|active=True|>_
-
     ```
-
-    Is equivalent to
-
-    ``` py
-
-    _<|button|active|>_
-
+    <|button|active=True|>
     ```
-
+    is equivalent to
+    ```
+    <|button|active|>
+    ```
     And
-
-    ``` py
-
-    _<|button|active=False|>_
-
+    ```
+    <|button|active=False|>
+    ```
+    is equivalent to
+    ```
+    <|button|not active|>
     ```
 
-    Is equivalent to
-
-    ``` py
-
-    _<|button|not active|>_
-
-    ```
-
-There are a very few exceptions to the _<|control_type|>_ syntax, that are described
+There are a very few exceptions to the `<|control_type|...|>` syntax, that are described
 in their respective documentation section. The most obvious exception being the
 [`field`](controls/field.md) control, that can be created without even mentioning it's
 type.
@@ -159,4 +161,4 @@ you create such elements as described below.
 
 ## Local resources
 
-!!! abstract "TODO: local ressources documentation"
+!!! abstract "TODO: local resources documentation"

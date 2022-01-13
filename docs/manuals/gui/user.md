@@ -11,16 +11,20 @@ server and its settings are handled by the [`Gui object`](user_gui.md).
 ## How is the Graphical User Interface generated
 
 The generated Web pages are build from a set of template text files that you provide,
-where you would have planted placeholders to hold `_controls_`. Taipy comes the support
-for two template formats, handled by the classes
-[`Markdown`](../../reference/#taipy.gui.renderers.Markdown)
+where you would have planted placeholders that will display application data, in different
+ways, and let final users of the application interact with it. We call these representative
+and interactive objects: _controls_.
+
+In order to describe the content of pages, Taipy comes the support for two template formats,
+handled by the classes [`Markdown`](../../reference/#taipy.gui.renderers.Markdown)
 and [`Html`](../../reference/#taipy.gui.renderers.Html).
 
 The basic principle is that you create pages as you need them, give them a name
-so you can point your browser to show them, and add them to a `Gui` instance used in your application.
+so you can point your browser to show them, and provide them to a `Gui` instance used in your
+application.
 
-When the [`run() method`](../reference/#taipy.gui.gui.Gui.run) of the `Gui` instance
-is invoked, a Web client can connect to the underlying server and request for a page.
+When the [`run()`](../../reference/#taipy.gui.gui.Gui.run) method of the `Gui` instance
+is invoked, a Web client can connect to the underlying Web server and request for a given page.
 At this time, Taipy transforms the page that you had created into some HTML content
 that is sent to the client so the user can see the application interface.
 

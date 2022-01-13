@@ -9,8 +9,8 @@ nav:
   - 'Getting started': 
     - 'Installation': 'getting_started/installation.md'
     - 'Creating a Taipy application': 'getting_started/creating_a_taipy_application.md'
-  - 'Manuals':
-    - 'About Taipy user manuals': 'manuals/about.md'
+  - 'User Manual':
+    - "About Taipy's User Manual": 'manuals/about.md'
     - 'Scenario management': 'manuals/scenario_management.md'
     - Graphical User Interface: 
         - 'About': 'manuals/gui/user.md'
@@ -22,7 +22,7 @@ nav:
         - 'Dialogs': 'manuals/gui/user_dialogs.md'
         - 'Notifications': 'manuals/gui/user_notifications.md'
         - 'GUI References': 'manuals/gui/user_gui.md'
-    - 'References': 'manuals/reference.md'
+  - 'Reference Manual': 'manuals/reference.md'
   - 'Contributing':
     - 'About contributions': 'contributing/about_contributing.md'
     - 'How you can contribute': 'contributing/how-to-contribute.md'
@@ -38,6 +38,8 @@ theme:
   logo: assets/images/logo.png
   font:
     text: Lato
+  icon:
+    repo: fontawesome/brands/git-alt
   palette:
     - media: "(prefers-color-scheme: light)"
       primary: indigo

@@ -76,9 +76,17 @@ def on_post_build(env):
                         file_was_changed = True
                     # Collapse doubled <h1>/<h2> page titles
                     REPEATED_H1_H2 = re.compile(
-                        r"<h1>(.*?)</h1>\s*<h2\s+id=\"(.*?)\">\1(<a\s+class=\"headerlink\".*?</a>)?</h2>", re.M | re.S
+                        r"<h1>(.*?)</h1>\s*<h2\s+(id=\".*?\")>\1(<a\s+class=\"headerlink\".*?</a>)?</h2>", re.M | re.S
                     )
-                    html_content, n_changes = REPEATED_H1_H2.subn('<h1 id="\\2">\\1\\3</h1>', html_content)
+                    html_content, n_changes = REPEATED_H1_H2.subn('<h1 \\2>\\1\\3</h1>', html_content)
+                    if n_changes != 0:
+                        file_was_changed = True
+                    # Add external link icons
+                    # Note we want this only for the simple [text](http*://ext_url) cases
+                    EXTLINK = re.compile(
+                        r"<a\s+(href=\"http[^\"]+\">.*?<\/a>)", re.M | re.S
+                    )
+                    html_content, n_changes = EXTLINK.subn('<a class="ext-link" \\1', html_content)
                     if n_changes != 0:
                         file_was_changed = True
                 if file_was_changed:
