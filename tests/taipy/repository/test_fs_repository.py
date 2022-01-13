@@ -1,17 +1,23 @@
+import dataclasses
 import pathlib
 from dataclasses import dataclass
-
-from dataclasses_json import dataclass_json
+from typing import Any, Dict
 
 from taipy.config import Config
 from taipy.repository import FileSystemRepository
 
 
-@dataclass_json
 @dataclass
 class TestModel:
     id: str
     name: str
+
+    def to_dict(self):
+        return dataclasses.asdict(self)
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]):
+        return TestModel(id=data["id"], name=data["name"])
 
 
 @dataclass

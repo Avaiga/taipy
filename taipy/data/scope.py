@@ -1,7 +1,9 @@
 from enum import Enum
 
+from taipy.common.repr_enum import ReprEnum
 
-class OrderedEnum(Enum):
+
+class OrderedEnum(ReprEnum):
     def __ge__(self, other):
         if self.__class__ is other.__class__:
             return self.value >= other.value

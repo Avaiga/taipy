@@ -1,7 +1,7 @@
-from enum import Enum
+from taipy.common.repr_enum import ReprEnum
 
 
-class Frequency(Enum):
+class Frequency(ReprEnum):
     DAILY = 1
     WEEKLY = 2
     MONTHLY = 3

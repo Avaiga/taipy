@@ -1,10 +1,8 @@
+import dataclasses
 from dataclasses import dataclass
-from typing import List, Optional
-
-from dataclasses_json import dataclass_json
+from typing import Any, Dict, List, Optional
 
 
-@dataclass_json
 @dataclass
 class TaskModel:
     """Hold the model of a Task.
@@ -29,3 +27,18 @@ class TaskModel:
     function_name: str
     function_module: str
     output_ids: List[str]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]):
+        return TaskModel(
+            id=data["id"],
+            parent_id=data["parent_id"],
+            config_name=data["config_name"],
+            input_ids=data["input_ids"],
+            function_name=data["function_name"],
+            function_module=data["function_module"],
+            output_ids=data["output_ids"],
+        )

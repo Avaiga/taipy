@@ -13,7 +13,6 @@ with open("docs/history.md") as history_file:
     history = history_file.read()
 
 requirements: List[str] = [
-    "dataclasses_json",
     "flask",
     "flask-cors",
     "flask-socketio",

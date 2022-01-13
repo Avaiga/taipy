@@ -1,12 +1,10 @@
+import dataclasses
 from dataclasses import dataclass
-from typing import Dict, List, Optional
-
-from dataclasses_json import dataclass_json
+from typing import Any, Dict, List, Optional
 
 from taipy.common.alias import Dag, PipelineId
 
 
-@dataclass_json
 @dataclass
 class PipelineModel:
     """
@@ -28,3 +26,18 @@ class PipelineModel:
     source_task_edges: Dag
     task_source_edges: Dag
     subscribers: List[Dict]
+
+    def to_dict(self) -> Dict[str, Any]:
+        return dataclasses.asdict(self)
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]):
+        return PipelineModel(
+            id=data["id"],
+            parent_id=data["parent_id"],
+            name=data["name"],
+            properties=data["properties"],
+            source_task_edges=data["source_task_edges"],
+            task_source_edges=data["task_source_edges"],
+            subscribers=data["subscribers"],
+        )

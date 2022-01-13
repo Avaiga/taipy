@@ -1,7 +1,7 @@
-from enum import Enum
+from taipy.common.repr_enum import ReprEnum
 
 
-class Status(Enum):
+class Status(ReprEnum):
     """Represents the status of a Job."""
 
     SUBMITTED = 1
