@@ -8,13 +8,16 @@ import random
 import re
 import typing as t
 import warnings
+from importlib import util
 from operator import attrgetter
 from types import FrameType, FunctionType
 
 import __main__
 import markdown as md_lib
 from flask import Blueprint, Flask, request
-from pyngrok import ngrok
+
+if util.find_spec("pyngrok"):
+    from pyngrok import ngrok
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
