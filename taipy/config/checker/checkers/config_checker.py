@@ -1,5 +1,5 @@
 import abc
-from typing import Any
+from typing import Any, List
 
 from taipy.config._config import _Config
 from taipy.config.checker.issue_collector import IssueCollector
@@ -22,3 +22,20 @@ class ConfigChecker:
 
     def _info(self, field: str, value: Any, message: str):
         self.collector.add_info(field, value, message, self.__class__.__name__)
+
+    def _check_children(self, parent_config_class, config_name: str, config_key: str, config_value, child_config_class):
+        if not config_value:
+            self._warning(
+                config_key,
+                config_value,
+                f"{config_key} field of {parent_config_class.__name__} {config_name} is empty.",
+            )
+        else:
+            if not (
+                isinstance(config_value, List) and all(map(lambda x: isinstance(x, child_config_class), config_value))
+            ):
+                self._error(
+                    config_key,
+                    config_value,
+                    f"{config_key} field of {parent_config_class.__name__} {config_name} must be populated with a list of {child_config_class.__name__} objects.",
+                )

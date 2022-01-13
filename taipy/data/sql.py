@@ -38,7 +38,7 @@ class SQLDataSource(DataSource):
 
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
+    REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
 
     def __init__(
         self,
@@ -58,7 +58,7 @@ class SQLDataSource(DataSource):
         if properties is None:
             properties = {}
 
-        if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
+        if missing := set(self.REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
@@ -105,10 +105,6 @@ class SQLDataSource(DataSource):
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
-
-    @classmethod
-    def required_properties(cls) -> List[str]:
-        return cls.__REQUIRED_PROPERTIES
 
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:

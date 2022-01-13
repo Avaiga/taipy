@@ -19,12 +19,12 @@ class TestDataSourceConfigChecker:
         config.data_sources["default"].storage_type = "csv"
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.errors) == 0
+        assert len(collector.errors) == 2
 
         config.data_sources["default"].storage_type = "sql"
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.errors) == 0
+        assert len(collector.errors) == 6
 
         config.data_sources["default"].storage_type = "pickle"
         collector = IssueCollector()
@@ -75,28 +75,28 @@ class TestDataSourceConfigChecker:
         config.data_sources["default"].storage_type = "csv"
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.warnings) == 2
+        assert len(collector.errors) == 2
 
         config.data_sources["default"].storage_type = "csv"
         config.data_sources["default"].properties = {"has_header": True}
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.warnings) == 1
+        assert len(collector.errors) == 1
 
         config.data_sources["default"].storage_type = "csv"
         config.data_sources["default"].properties = {"has_header": True, "path": "bar"}
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.warnings) == 0
+        assert len(collector.errors) == 0
 
         config.data_sources["default"].storage_type = "sql"
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.warnings) == 6
+        assert len(collector.errors) == 6
 
         required_properties = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
         config.data_sources["default"].storage_type = "sql"
         config.data_sources["default"].properties = {key: "" for key in required_properties}
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
-        assert len(collector.warnings) == 0
+        assert len(collector.errors) == 0

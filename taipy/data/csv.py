@@ -37,7 +37,7 @@ class CSVDataSource(DataSource):
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __REQUIRED_PATH_PROPERTY = "path"
     __REQUIRED_HAS_HEADER_PROPERTY = "has_header"
-    __REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
+    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
 
     def __init__(
         self,
@@ -56,7 +56,7 @@ class CSVDataSource(DataSource):
     ):
         if properties is None:
             properties = {}
-        if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
+        if missing := set(self.REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
@@ -80,10 +80,6 @@ class CSVDataSource(DataSource):
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
-
-    @classmethod
-    def required_properties(cls) -> List[str]:
-        return cls.__REQUIRED_PROPERTIES
 
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:

@@ -20,40 +20,12 @@ class TaskConfigChecker(ConfigChecker):
         return self.collector
 
     def _check_inputs(self, task_config_name: str, task_config: TaskConfig):
-        if not task_config.inputs:
-            self._warning(
-                task_config.INPUT_KEY,
-                task_config.inputs,
-                f"{task_config.INPUT_KEY} field of Task {task_config_name} is empty.",
-            )
-        else:
-            if not (
-                isinstance(task_config.inputs, List)
-                and all(map(lambda x: isinstance(x, DataSourceConfig), task_config.inputs))
-            ):
-                self._error(
-                    task_config.INPUT_KEY,
-                    task_config.inputs,
-                    f"{task_config.INPUT_KEY} field of Task {task_config_name} must be populated with a list of DataSourceConfig objects.",
-                )
+        self._check_children(TaskConfig, task_config_name, task_config.INPUT_KEY, task_config.inputs, DataSourceConfig)
 
     def _check_outputs(self, task_config_name: str, task_config: TaskConfig):
-        if not task_config.outputs:
-            self._warning(
-                task_config.OUTPUT_KEY,
-                task_config.outputs,
-                f"{task_config.OUTPUT_KEY} field of Task {task_config_name} is empty.",
-            )
-        else:
-            if not (
-                isinstance(task_config.outputs, List)
-                and all(map(lambda x: isinstance(x, DataSourceConfig), task_config.outputs))
-            ):
-                self._error(
-                    task_config.OUTPUT_KEY,
-                    task_config.outputs,
-                    f"{task_config.OUTPUT_KEY} field of Task {task_config_name} must be populated with a list of DataSourceConfig objects.",
-                )
+        self._check_children(
+            TaskConfig, task_config_name, task_config.OUTPUT_KEY, task_config.outputs, DataSourceConfig
+        )
 
     def _check_function(self, task_config_name: str, task_config: TaskConfig):
         if not task_config.function:

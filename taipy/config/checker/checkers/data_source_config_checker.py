@@ -11,8 +11,8 @@ class DataSourceConfigChecker(ConfigChecker):
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
         self.required_properties = {
-            "csv": CSVDataSource.required_properties(),
-            "sql": SQLDataSource.required_properties(),
+            "csv": CSVDataSource.REQUIRED_PROPERTIES,
+            "sql": SQLDataSource.REQUIRED_PROPERTIES,
         }
 
     def check(self) -> IssueCollector:
@@ -40,12 +40,11 @@ class DataSourceConfigChecker(ConfigChecker):
             )
 
     def _check_required_properties(self, data_source_config_name: str, data_source_config: DataSourceConfig):
-
         if storage_type := data_source_config.storage_type:
             if storage_type in self.required_properties.keys():
                 for required_property in self.required_properties[storage_type]:
                     if required_property not in data_source_config.properties.keys():
-                        self._warning(
+                        self._error(
                             "properties",
                             required_property,
                             f"properties field of DataSource {data_source_config_name} is missing the required property {required_property} for type {storage_type}",

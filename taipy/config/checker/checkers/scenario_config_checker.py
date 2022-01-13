@@ -21,22 +21,13 @@ class ScenarioConfigChecker(ConfigChecker):
         return self.collector
 
     def _check_pipelines(self, scenario_config_name: str, scenario_config: ScenarioConfig):
-        if not scenario_config.pipelines:
-            self._warning(
-                scenario_config.PIPELINE_KEY,
-                scenario_config.pipelines,
-                f"{scenario_config.PIPELINE_KEY} field of Scenario {scenario_config_name} is empty.",
-            )
-        else:
-            if not (
-                isinstance(scenario_config.pipelines, List)
-                and all(map(lambda x: isinstance(x, PipelineConfig), scenario_config.pipelines))
-            ):
-                self._error(
-                    scenario_config.PIPELINE_KEY,
-                    scenario_config.pipelines,
-                    f"{scenario_config.PIPELINE_KEY} field of Scenario {scenario_config_name} must be populated with a list of Pipeline objects.",
-                )
+        self._check_children(
+            ScenarioConfig,
+            scenario_config_name,
+            scenario_config.PIPELINE_KEY,
+            scenario_config.pipelines,
+            PipelineConfig,
+        )
 
     def _check_frequency(self, scenario_config_name: str, scenario_config: ScenarioConfig):
         if scenario_config.frequency and not isinstance(scenario_config.frequency, Frequency):
@@ -51,5 +42,5 @@ class ScenarioConfigChecker(ConfigChecker):
             self._info(
                 scenario_config.COMPARATOR_KEY,
                 scenario_config.comparators,
-                f"{scenario_config.COMPARATOR_KEY} field of Scenario {scenario_config_name} is empty.",
+                f"No scenario {scenario_config.COMPARATOR_KEY} defined for scenario {scenario_config_name}",
             )
