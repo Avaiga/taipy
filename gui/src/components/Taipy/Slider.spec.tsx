@@ -78,9 +78,8 @@ describe("Slider Component", () => {
         );
         const elts = getAllByText("Item 1");
         expect(elts).toHaveLength(2);
-        const tags = elts.map(elt => elt.tagName)
-        expect(tags).toContain("P")
-        expect(tags).toContain("P")
+        expect(elts[0].tagName).toBe("P")
+        expect(elts[1].tagName).toBe("P")
     });
     it("doesn't show text when_text_anchor is none", async () => {
         const { getAllByText } = render(
