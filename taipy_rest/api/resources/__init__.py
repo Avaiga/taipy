@@ -5,6 +5,11 @@ from taipy_rest.api.resources.pipeline import (
     PipelineResource,
     PipelineExecutor,
 )
+from taipy_rest.api.resources.scenario import (
+    ScenarioList,
+    ScenarioResource,
+    ScenarioExecutor,
+)
 
 __all__ = [
     "DataSourceResource",
@@ -15,4 +20,7 @@ __all__ = [
     "PipelineList",
     "PipelineResource",
     "PipelineExecutor",
+    "ScenarioList",
+    "ScenarioResource",
+    "ScenarioExecutor",
 ]
