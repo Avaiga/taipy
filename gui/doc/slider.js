@@ -27,7 +27,7 @@ class slider extends lovComp {
     max = 100;
 
     /**
-     * when a lov is defined, position of the selected label.<br>Possible values are <ul><li>bottom</li><li>top</li><li>left</li><li>right</li><li>none</li></ul>
+     * when a lov is defined, position of the selected label.<br>Possible values are <ul><li>bottom</li><li>top</li><li>left</li><li>right</li><li>none (no label displayed)</li></ul>
      */
     text_anchor = "bottom"
 
