@@ -60,4 +60,7 @@ setup(
     url="https://github.com/avaiga/taipy",
     version="0.1.2",
     zip_safe=False,
+    extras_require={
+        "ngrok": ["pyngrok>=5"],
+    },
 )
