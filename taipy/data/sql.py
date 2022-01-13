@@ -38,7 +38,7 @@ class SQLDataSource(DataSource):
 
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
+    REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
 
     def __init__(
         self,
@@ -58,7 +58,7 @@ class SQLDataSource(DataSource):
         if properties is None:
             properties = {}
 
-        if missing := set(self.__REQUIRED_PROPERTIES) - set(properties.keys()):
+        if missing := set(self.REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )

@@ -1,5 +1,3 @@
-from typing import Any
-
 from taipy.config import GlobalAppConfig
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.config_checker import ConfigChecker

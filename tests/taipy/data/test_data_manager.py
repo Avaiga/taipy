@@ -5,6 +5,7 @@ import pytest
 
 from taipy.common.alias import DataSourceId
 from taipy.config.config import Config
+from taipy.config.data_source_config import DataSourceConfig
 from taipy.data import CSVDataSource, InMemoryDataSource, PickleDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import InvalidDataSourceType, ModelNotFound
@@ -162,7 +163,7 @@ class TestDataManager:
 
     def test_create_raises_exception_with_wrong_type(self):
         dm = DataManager()
-        wrong_type_ds_config = Config.add_data_source(name="foo", storage_type="bar")
+        wrong_type_ds_config = DataSourceConfig(name="foo", storage_type="bar", scope=DataSourceConfig.DEFAULT_SCOPE)
         with pytest.raises(InvalidDataSourceType):
             dm._create_and_set(wrong_type_ds_config, None)
 
