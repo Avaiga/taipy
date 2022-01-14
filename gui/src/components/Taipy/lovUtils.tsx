@@ -16,11 +16,11 @@ export interface SelTreeProps extends LovProps {
     width?: string | number;
 }
 
-export interface LovProps extends TaipyBaseProps {
+export interface LovProps<T = string | string[], U = string> extends TaipyBaseProps {
     defaultLov?: string;
-    lov: LoV;
-    value?: string | string[];
-    defaultValue?: string;
+    lov?: LoV;
+    value?: T;
+    defaultValue?: U;
     height?: string | number;
 }
 
@@ -43,7 +43,7 @@ export const boxSx = { width: "100%" } as CSSProperties;
 export const paperBaseSx = { width: "100%", mb: 2, display: "grid", gridTemplateRows: "auto 1fr" } as CSSProperties;
 export const treeSelBaseSx = { width: "100%", bgcolor: "background.paper", overflowY: "auto" } as CSSProperties;
 
-export const useLovListMemo = (lov: LoV, defaultLov: string, tree = false): LovItem[] =>
+export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = false): LovItem[] =>
     useMemo(() => {
         if (lov) {
             if (lov.length && lov[0][0] === undefined) {
