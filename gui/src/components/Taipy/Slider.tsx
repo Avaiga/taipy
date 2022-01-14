@@ -15,6 +15,7 @@ interface SliderProps extends LovProps<number | string, number | string> {
     min?: number;
     max?: number;
     textAnchor?: string;
+    alwaysUpdate?: boolean;
 }
 
 const Slider = (props: SliderProps) => {
@@ -35,20 +36,28 @@ const Slider = (props: SliderProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const lovList = useLovListMemo(lov, defaultLov);
 
+    const update = useMemo(() => props.alwaysUpdate === undefined ? lovList.length === 0 : props.alwaysUpdate, [lovList, props.alwaysUpdate]);
+
     const min = lovList.length ? 0 : props.min;
     const max = lovList.length ? lovList.length - 1 : props.max;
 
     const handleRange = useCallback((e, val: number | number[]) => {
         setValue(val as number);
-    }, []);
+        if (update) {
+            const value = lovList.length ? lovList[val as number].id : val;
+            dispatch(createSendUpdateAction(tp_varname, value, propagate));
+        }
+    }, [lovList, update, tp_varname, dispatch, propagate]);
 
     const handleRangeCommitted = useCallback(
         (e, val: number | number[]) => {
             setValue(val as number);
-            const value = lovList.length ? lovList[val as number].id : val;
-            dispatch(createSendUpdateAction(tp_varname, value, propagate));
+            if (!update) {
+                const value = lovList.length ? lovList[val as number].id : val;
+                dispatch(createSendUpdateAction(tp_varname, value, propagate));
+            }
         },
-        [lovList, tp_varname, dispatch, propagate]
+        [lovList, update, tp_varname, dispatch, propagate]
     );
 
     const getLabel = useCallback(
