@@ -67,11 +67,11 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     assert len(cycle_manager.get_all()) == 0
 
-    cycle_1 = cycle_manager.create(Frequency.DAILY, name="fOo   ", key="value")
+    cycle_1 = cycle_manager.create(Frequency.DAILY, name="fOo   ", key="value", display_name="foo")
 
     assert cycle_1.id is not None
     assert cycle_1.name == "foo"
-    assert cycle_1.properties == {"key": "value"}
+    assert cycle_1.properties == {"key": "value", "display_name": "foo"}
     assert cycle_1.creation_date is not None
     assert cycle_1.start_date is not None
     assert cycle_1.end_date is not None
@@ -95,7 +95,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     assert cycle_3.id is not None
     assert cycle_3.name == "bar-xea"
-    assert cycle_3.properties == {}
+    assert cycle_3.properties["display_name"] == cycle_3.start_date.isoformat()
     assert isinstance(cycle_3.creation_date, datetime)
     assert cycle_3.frequency == Frequency.MONTHLY
 
@@ -103,7 +103,6 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     assert len(cycle_manager.get_all()) == 2
     assert cycle_manager.get(cycle_3_id).name == "bar-xea"
-    assert cycle_manager.get(cycle_3_id).properties == {}
 
     cycle_4 = cycle_manager.create(Frequency.YEARLY, "ξéà   ")
     cycle_4_id = cycle_4.id

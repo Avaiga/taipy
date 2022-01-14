@@ -134,6 +134,8 @@ def test_create_and_delete_scenario():
     creation_date_1 = datetime.now()
     creation_date_2 = creation_date_1 + timedelta(minutes=10)
 
+    display_name_1 = "display_name_1"
+
     scenario_manager = ScenarioManager()
 
     scenario_manager.delete_all()
@@ -141,7 +143,7 @@ def test_create_and_delete_scenario():
 
     scenario_config = Config.add_scenario("sc", [], Frequency.DAILY)
 
-    scenario_1 = scenario_manager.create(scenario_config, creation_date=creation_date_1)
+    scenario_1 = scenario_manager.create(scenario_config, creation_date=creation_date_1, display_name=display_name_1)
     assert scenario_1.config_name == "sc"
     assert scenario_1.pipelines == {}
     assert scenario_1.cycle.frequency == Frequency.DAILY
@@ -149,6 +151,7 @@ def test_create_and_delete_scenario():
     assert scenario_1.cycle.creation_date == creation_date_1
     assert scenario_1.cycle.start_date.date() == creation_date_1.date()
     assert scenario_1.cycle.end_date.date() == creation_date_1.date()
+    assert scenario_1.properties["display_name"] == display_name_1
 
     with pytest.raises(DeletingMasterScenario):
         scenario_manager.delete(scenario_1.id)
@@ -161,6 +164,7 @@ def test_create_and_delete_scenario():
     assert scenario_2.cycle.creation_date == creation_date_1
     assert scenario_2.cycle.start_date.date() == creation_date_2.date()
     assert scenario_2.cycle.end_date.date() == creation_date_2.date()
+    assert scenario_2.properties["display_name"] is None
 
     assert scenario_1 != scenario_2
     assert scenario_1.cycle == scenario_2.cycle

@@ -20,7 +20,9 @@ class CycleManager:
 
     repository = CycleRepository()
 
-    def create(self, frequency: Frequency, name: str = None, creation_date: datetime = None, **properties):
+    def create(
+        self, frequency: Frequency, name: str = None, creation_date: datetime = None, display_name=None, **properties
+    ):
         """
         Creates a new cycle.
 
@@ -28,11 +30,13 @@ class CycleManager:
             frequency (Frequency): The frequency of the new cycle.
             name (str): The name of the new cycle. Default: `None`.
             creation_date (datetime): The date and time when the cycle is created. Default: `None`.
+            display_name (Optional[str]): The display name of the cycle.
             properties (dict[str, str]): other properties. Default: `None`.
         """
         creation_date = creation_date if creation_date else datetime.now()
         start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
         end_date = CycleManager.get_end_date_of_cycle(frequency, start_date)
+        properties["display_name"] = display_name if display_name else start_date.isoformat()
         cycle = Cycle(
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
@@ -64,7 +68,9 @@ class CycleManager:
             logging.error(f"Cycle entity: {cycle_id} does not exist.")
             raise NonExistingCycle(cycle_id)
 
-    def get_or_create(self, frequency: Frequency, creation_date: datetime = None) -> Cycle:
+    def get_or_create(
+        self, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
+    ) -> Cycle:
         """
         Returns a cycle with the provided parameters.
 
@@ -73,8 +79,8 @@ class CycleManager:
 
         Parameters:
             frequency (Frequency): The frequency of the cycle.
-            creation_date (datetime): The creation date of the cycle. Default value : `None`.
-
+            creation_date (Optional[datetime]): The creation date of the cycle. Default value : `None`.
+            display_name (Optional[str]): The display name of the cycle.
         Returns:
             Cycle: a cycle that has the indicated parameters. A new cycle may be created.
         """
@@ -84,7 +90,7 @@ class CycleManager:
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return self.create(frequency=frequency, creation_date=creation_date)
+            return self.create(frequency=frequency, creation_date=creation_date, display_name=display_name)
 
     @staticmethod
     def get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):
