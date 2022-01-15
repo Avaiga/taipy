@@ -239,7 +239,7 @@ class Gui(object, metaclass=Singleton):
         if propagate:
             if not from_front:
                 ret_value = self._accessors._cast_string_value(var_name, value)
-                if isinstance(ret_value, t.Tuple):
+                if isinstance(ret_value, tuple):
                     value, url_path, dir_path = ret_value
                     if url_path is not None and dir_path is not None:
                         self.__image_paths[url_path] = dir_path
