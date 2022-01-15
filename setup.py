@@ -32,7 +32,6 @@ requirements: List[str] = [
 test_requirements = [
     "pytest>=3.8",
     "python-magic",
-    "python-magic-bin; sys.platform == 'win32'"
 ]
 
 setup(
