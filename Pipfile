@@ -23,7 +23,6 @@ pyarrow = "==6.0.1"
 python-dotenv = ">=0.19"
 mkdocs-macros-plugin = "*"
 python-magic = "*"
-python-magic-bin = "*"
 
 [dev-packages]
 pytest = "*"
