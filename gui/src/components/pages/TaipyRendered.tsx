@@ -36,7 +36,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     useEffect(() => {
         // Fetch JSX Flask Backend Render
         axios
-            .get<AxiosRenderer>(`${ENDPOINT}/flask-jsx${path}?client_id=${state.id || ""}`)
+            .get<AxiosRenderer>(`${ENDPOINT}/taipy-jsx${path}?client_id=${state.id || ""}`)
             .then((result) => {
                 // set rendered JSX and CSS style from fetch result
                 result.data.jsx && setJSX(result.data.jsx);

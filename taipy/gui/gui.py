@@ -14,7 +14,9 @@ from types import FrameType, FunctionType
 
 import __main__
 import markdown as md_lib
-from flask import Blueprint, Flask, request
+from flask import Blueprint, Flask, request, send_from_directory
+
+from taipy.gui.data.image_accessor import ImageAccessor
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
@@ -50,12 +52,13 @@ class Gui(object, metaclass=Singleton):
     __env_filename = "taipy.gui.env"
     __UI_BLOCK_NAME = "TaipyUiBlockVar"
     __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
+    __IMAGES_ROOT = "/taipy-images/"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
-    __reserved_routes: t.List[str] = ["initialize", "flask-jsx"]
+    __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-images"]
     _agregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
@@ -99,6 +102,8 @@ class Gui(object, metaclass=Singleton):
         self._path_mapping = path_mapping
         self._flask = flask
         self._css_file = css_file
+
+        self.__image_paths: t.Dict[str, str] = {}
 
         self._config = GuiConfig()
         self._accessors = _DataAccessors()
@@ -232,6 +237,13 @@ class Gui(object, metaclass=Singleton):
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
+            if not from_front:
+                ret_value = self._accessors._cast_string_value(var_name, value)
+                if isinstance(ret_value, t.Tuple):
+                    value, url_path, dir_path = ret_value
+                    if url_path is not None and dir_path is not None:
+                        self.__image_paths[url_path] = dir_path
+                        value = Gui.__IMAGES_ROOT + value
             attrsetter(self._get_data_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
@@ -240,6 +252,27 @@ class Gui(object, metaclass=Singleton):
         if self.__update_function:
             self.__update_function(self, var_name, value)
         self.__send_var_list_update(modified_vars, var_name if from_front else None)
+
+    def _get_image_content(self, var_name: str, value: t.Any, is_dynamic: bool) -> t.Any:
+        var_name = var_name if is_dynamic else Gui.__IMAGES_ROOT
+        self.register_data_accessor(ImageAccessor, var_name)
+        ret_value = self._accessors._cast_string_value(var_name, value)
+        if isinstance(ret_value, t.Tuple):
+            string_value, url_path, dir_path = ret_value
+            self.__image_paths[url_path] = dir_path
+            string_value = Gui.__IMAGES_ROOT + string_value
+        else:
+            string_value = ret_value
+        return string_value
+
+    def _serve_images(self, path) -> t.Any:
+        parts = path.split("/")
+        if len(parts) > 1:
+            file_name = parts[-1]
+            dir_path = self.__image_paths.get(path[: -len(file_name) - 1])
+            if dir_path:
+                return send_from_directory(dir_path + os.path.sep, file_name)
+        return ("", 404)
 
     def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):
         ws_dict = {}
@@ -675,8 +708,10 @@ class Gui(object, metaclass=Singleton):
             return
         self.__send_ws_navigate(to)
 
-    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
-        self._accessors._register(data_accessor_class)
+    def register_data_accessor(
+        self, data_accessor_class: t.Type[DataAccessor], var_name: t.Optional[str] = None
+    ) -> None:
+        self._accessors._register(data_accessor_class, var_name)
 
     def get_flask_app(self):
         return self._server.get_flask()
@@ -750,6 +785,11 @@ class Gui(object, metaclass=Singleton):
         pages_bp = Blueprint("taipy_pages", __name__)
         self._flask_blueprint.append(pages_bp)
 
+        # server URL Rule for taipy images
+        images_bp = Blueprint("taipy_images", __name__)
+        images_bp.add_url_rule(Gui.__IMAGES_ROOT + "<path:path>", view_func=self._serve_images)
+        self._flask_blueprint.append(images_bp)
+
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._flask_blueprint.append(
             self._server._get_default_blueprint(
@@ -766,10 +806,10 @@ class Gui(object, metaclass=Singleton):
         # (save rendered html to page.rendered_jsx for optimization)
         for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
-            pages_bp.add_url_rule(f"/flask-jsx/{page.route}/", view_func=self._server._render_page)
+            pages_bp.add_url_rule(f"/taipy-jsx/{page.route}/", view_func=self._server._render_page)
 
         # server URL Rule for flask rendered react-router
-        pages_bp.add_url_rule("/initialize/", view_func=self._server._render_route)
+        pages_bp.add_url_rule("/taipy-init/", view_func=self._server._render_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:

@@ -31,6 +31,8 @@ requirements: List[str] = [
 
 test_requirements = [
     "pytest>=3.8",
+    "python-magic",
+    "python-magic-bin"
 ]
 
 setup(
@@ -61,5 +63,6 @@ setup(
     zip_safe=False,
     extras_require={
         "ngrok": ["pyngrok>=5"],
+        "magic": ["python-magic", "python-magic-bin"],
     },
 )

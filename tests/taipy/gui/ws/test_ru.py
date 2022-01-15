@@ -16,7 +16,7 @@ def test_ru_selector(gui: Gui, helpers, csvdata):
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/flask-jsx/test/?client_id={sid}")
+    flask_client.get(f"/taipy-jsx/test/?client_id={sid}")
     with pytest.warns(UserWarning):
         ws_client.emit("message", {"type": "RU", "name": "", "payload": {"names": ["selected_val"]}})
     # assert for received message (message that would be sent to the frontend client)

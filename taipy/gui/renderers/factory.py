@@ -16,6 +16,7 @@ class Factory:
         "dialog": "open",
         "expandable": "title",
         "field": "value",
+        "image": "content",
         "input": "value",
         "layout": "columns",
         "navbar": "value",
@@ -136,6 +137,23 @@ class Factory:
             [
                 ("format"),
                 ("id"),
+            ]
+        ),
+        "image": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Image",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_name="label", with_update=False)
+        .set_classNames(class_name="taipy-image", config_class="image")
+        .set_image_content("content")
+        .set_attributes(
+            [
+                ("id"),
+                ("on_action", AttributeType.string, ""),
+                ("active", AttributeType.dynamic_boolean, True),
+                ("width"),
+                ("height"),
             ]
         ),
         "input": lambda control_type, attrs: Builder(

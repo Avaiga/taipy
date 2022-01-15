@@ -19,7 +19,7 @@ def test_variable_binding(helpers):
     gui.run(run_server=False)
     client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        jsx = client.get("/flask-jsx/test/").json["jsx"]
+        jsx = client.get("/taipy-jsx/test/").json["jsx"]
     for expected in ["<Button", f'defaultLabel="{z}"', "label={z}"]:
         assert expected in jsx
     assert gui.x == x
@@ -37,7 +37,7 @@ def test_properties_binding(helpers):
     gui.run(run_server=False)
     client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        jsx = client.get("/flask-jsx/test/").json["jsx"]
+        jsx = client.get("/taipy-jsx/test/").json["jsx"]
     for expected in ["<Button", 'defaultLabel="A nice button"']:
         assert expected in jsx
     helpers.test_cleanup()
@@ -53,7 +53,7 @@ def test_dict_binding(helpers):
     gui.run(run_server=False)
     client = gui._server.test_client()
     with pytest.warns(UserWarning):
-        jsx = client.get("/flask-jsx/TaiPy_root_page/").json["jsx"]
+        jsx = client.get("/taipy-jsx/TaiPy_root_page/").json["jsx"]
     for expected in ["<Field", 'defaultValue="test"']:
         assert expected in jsx
     helpers.test_cleanup()

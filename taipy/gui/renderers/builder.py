@@ -16,7 +16,6 @@ from ..utils import (
     get_client_var_name,
     getDataType,
     is_boolean_true,
-    _get_expr_var_name,
 )
 from ..types import AttributeType
 from .jsonencoder import TaipyJsonEncoder
@@ -25,7 +24,7 @@ from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
 class Builder:
 
-    __keys: dict[str, int] = {}
+    __keys: t.Dict[str, int] = {}
 
     def __init__(
         self,
@@ -507,6 +506,19 @@ class Builder:
         self.set_attribute("dataType", getDataType(value))
         return self
 
+    def set_image_content(self, var_name: t.Optional[str] = "content"):
+        content = self.__get_property(var_name)
+        if content is None:
+            return self
+        hash_name = self.__hashes.get(var_name)
+        value = self._gui._get_image_content(hash_name or var_name, content, hash_name is not None)
+        if hash_name is not None:
+            self.__set_react_attribute(
+                var_name,
+                get_client_var_name(hash_name),
+            )
+        return self.set_attribute(_to_camel_case("default_" + var_name), value)
+
     def set_lov(self, var_name="lov", property_name: t.Optional[str] = None):
         property_name = var_name if property_name is None else property_name
         self.__set_list_of_("default_" + property_name)
@@ -528,8 +540,8 @@ class Builder:
             self.__set_json_attribute(default_var_name, value)
         return self
 
-    def set_value_and_default(self, with_update=True, with_default=True):
-        var_name = self.default_property_name
+    def set_value_and_default(self, var_name: t.Optional[str] = None, with_update=True, with_default=True):
+        var_name = self.default_property_name if var_name is None else var_name
         if var_name in self.__hashes:
             self.__set_react_attribute(
                 var_name,
@@ -540,7 +552,9 @@ class Builder:
             if with_default:
                 self.__set_default_value(var_name)
         else:
-            self.set_attribute(var_name, self.__get_property(var_name))
+            value = self.__get_property(var_name)
+            if value is not None:
+                self.set_attribute(var_name, value)
         return self
 
     def set_page_id(self):

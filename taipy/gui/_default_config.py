@@ -29,6 +29,7 @@ style_config_default: StyleConfig = {
     "dialog": "",
     "expandable": "",
     "field": "",
+    "image": "",
     "input": "",
     "layout": "",
     "navbar": "",
