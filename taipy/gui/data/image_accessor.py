@@ -49,7 +49,7 @@ class ImageAccessor(DataAccessor):
                     return "Cannot be base64 encoded"
             else:
                 warnings.warn(
-                    f"python-magic and python-magic-bin packages need to be installed if you want to process images as array of bytes."
+                    "python-magic (and python-magic-bin for win) packages need to be installed if you want to process images as array of bytes."
                 )
                 return "Cannot guess content type"
 
