@@ -60,7 +60,7 @@ class _InvalidDataAccessor(DataAccessor):
 
 class _DataAccessors(object):
     def __init__(self) -> None:
-        self.__access_4_type: t.Dict[str, DataAccessor] = {}
+        self.__access_4_type: t.Dict[t.Type, DataAccessor] = {}
         self.__access_4_var: t.Dict[str, DataAccessor] = {}
 
         self.__invalid_data_accessor = _InvalidDataAccessor()
@@ -82,7 +82,7 @@ class _DataAccessors(object):
                         names,  # type: ignore
                     ]
                 # check existence
-                inst: DataAccessor = None
+                inst: t.Optional[DataAccessor] = None
                 for name in names:
                     inst = self.__access_4_type.get(name)
                     if inst:

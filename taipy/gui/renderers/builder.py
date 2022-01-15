@@ -506,7 +506,7 @@ class Builder:
         self.set_attribute("dataType", getDataType(value))
         return self
 
-    def set_image_content(self, var_name: t.Optional[str] = "content"):
+    def set_image_content(self, var_name: str = "content"):
         content = self.__get_property(var_name)
         if content is None:
             return self
