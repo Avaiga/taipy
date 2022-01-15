@@ -257,7 +257,7 @@ class Gui(object, metaclass=Singleton):
         var_name = var_name if is_dynamic else Gui.__IMAGES_ROOT
         self.register_data_accessor(ImageAccessor, var_name)
         ret_value = self._accessors._cast_string_value(var_name, value)
-        if isinstance(ret_value, t.Tuple):
+        if isinstance(ret_value, tuple):
             string_value, url_path, dir_path = ret_value
             self.__image_paths[url_path] = dir_path
             string_value = Gui.__IMAGES_ROOT + string_value
