@@ -8,12 +8,16 @@ import random
 import re
 import typing as t
 import warnings
+from importlib import util
 from operator import attrgetter
 from types import FrameType, FunctionType
 
 import __main__
 import markdown as md_lib
 from flask import Blueprint, Flask, request
+
+if util.find_spec("pyngrok"):
+    from pyngrok import ngrok
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
@@ -719,6 +723,13 @@ class Gui(object, metaclass=Singleton):
         # Special config for notebook runtime
         if _is_in_notebook():
             self._config.app_config["single_client"] = True
+
+        if run_server and app_config["ngrok_token"]:
+            ngrok.set_auth_token(app_config["ngrok_token"])
+            http_tunnel = ngrok.connect(app_config["port"], "http")
+            app_config["client_url"] = http_tunnel.public_url
+            app_config["use_reloader"] = False
+            print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Register taipy.gui markdown extensions for Markdown renderer
         Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})

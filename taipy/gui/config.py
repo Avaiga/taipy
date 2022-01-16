@@ -28,6 +28,7 @@ AppConfigOption = t.Literal[
     "browser_notification",
     "notification_duration",
     "single_client",
+    "ngrok_token",
 ]
 
 AppConfig = t.TypedDict(
@@ -50,6 +51,7 @@ AppConfig = t.TypedDict(
         "browser_notification": bool,
         "notification_duration": int,
         "single_client": bool,
+        "ngrok_token": str,
     },
     total=False,
 )
@@ -134,6 +136,8 @@ class GuiConfig(object):
             "-C", "--client-url", nargs="?", default="", const="", help="Specify backend endpoint on client side"
         )
 
+        parser.add_argument("--ngrok-token", nargs="?", default="", const="", help="Specify NGROK Authtoken")
+
         debug_group = parser.add_mutually_exclusive_group()
         debug_group.add_argument("--debug", help="Turn on debug", action="store_true")
         debug_group.add_argument("--no-debug", help="Turn off debug", action="store_true")
@@ -164,6 +168,8 @@ class GuiConfig(object):
             app_config["use_reloader"] = True
         if args.no_reloader:
             app_config["use_reloader"] = False
+        if args.ngrok_token:
+            app_config["ngrok_token"] = args.ngrok_token
 
     def build_app_config(self, root_dir, env_filename, kwargs):
         app_config = self.app_config
