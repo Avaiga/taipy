@@ -237,13 +237,6 @@ class Gui(object, metaclass=Singleton):
         modified_vars = [hash_expr]
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
-            if not from_front:
-                ret_value = self._accessors._cast_string_value(var_name, value)
-                if isinstance(ret_value, tuple):
-                    value, url_path, dir_path = ret_value
-                    if url_path is not None and dir_path is not None:
-                        self.__image_paths[url_path] = dir_path
-                        value = Gui.__IMAGES_ROOT + value
             attrsetter(self._get_data_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
@@ -251,7 +244,7 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.__update_function:
             self.__update_function(self, var_name, value)
-        self.__send_var_list_update(modified_vars, var_name if from_front else None)
+        self.__send_var_list_update(modified_vars, from_front, var_name)
 
     def _get_image_content(self, var_name: str, value: t.Any, is_dynamic: bool) -> t.Any:
         var_name = var_name if is_dynamic else Gui.__IMAGES_ROOT
@@ -274,17 +267,29 @@ class Gui(object, metaclass=Singleton):
                 return send_from_directory(dir_path + os.path.sep, file_name)
         return ("", 404)
 
-    def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):
+    def __send_var_list_update(
+        self,
+        modified_vars: list,
+        from_front: t.Optional[bool] = False,
+        front_var: t.Optional[str] = None,
+    ):
         ws_dict = {}
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
+            if not from_front and _var == front_var:
+                ret_value = self._accessors._cast_string_value(front_var, newvalue)
+                if isinstance(ret_value, tuple):
+                    newvalue, url_path, dir_path = ret_value
+                    if url_path is not None and dir_path is not None:
+                        self.__image_paths[url_path] = dir_path
+                        newvalue = Gui.__IMAGES_ROOT + newvalue
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
             if self._accessors._is_data_access(_var, newvalue):
                 ws_dict[_var + ".refresh"] = True
             else:
-                if _var != front_var:
+                if not from_front or _var != front_var:
                     if isinstance(newvalue, list):
                         newvalue = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
                     else:
