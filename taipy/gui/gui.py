@@ -106,8 +106,8 @@ class Gui(object, metaclass=Singleton):
 
         self.__evaluator = _Evaluator()
         self.__adapter = _Adapter()
-        self.__update_function = None
-        self.__action_function = None
+        self.on_update = None
+        self.on_action = None
         self.__directory_name_of_pages: t.List[str] = []
 
         # Load default config
@@ -237,8 +237,8 @@ class Gui(object, metaclass=Singleton):
             if var_name == hash_expr:
                 modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        if self.__update_function:
-            self.__update_function(self, var_name, value)
+        if self.on_update:
+            self.on_update(self, var_name, value)
         self.__send_var_list_update(modified_vars, var_name if from_front else None)
 
     def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):
@@ -389,10 +389,8 @@ class Gui(object, metaclass=Singleton):
         if action and hasattr(self, action):
             if self.__call_function_with_args(action_function=getattr(self, action), id=id, payload=payload):
                 return
-        if self.__action_function:
-            self.__call_function_with_args(
-                action_function=self.__action_function, id=id, payload=payload, action=action
-            )
+        if self.on_action:
+            self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
     def __call_function_with_args(*args, **kwargs):
         action_function = _get_dict_value(kwargs, "action_function")
@@ -591,12 +589,6 @@ class Gui(object, metaclass=Singleton):
             setattr(self, func_name, self._get_instance()._locals_bind[func_name])
             return True
         return False
-
-    def on_update(self, f) -> None:
-        self.__update_function = f
-
-    def on_action(self, f) -> None:
-        self.__action_function = f
 
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
