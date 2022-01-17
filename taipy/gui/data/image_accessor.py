@@ -40,7 +40,7 @@ class ImageAccessor(DataAccessor):
                 try:
                     mime = magic.from_buffer(value, mime=True)
                     if mime.startswith("image"):
-                        return f"data:{mime};base64," + base64.urlsafe_b64encode(value).decode("utf-8")
+                        return f"data:{mime};base64," + str(base64.b64encode(value), "utf-8")
                     else:
                         warnings.warn(f"{var_name} ({type(value)}) is not an image: {mime}")
                         return f"Invalid content: {mime}"

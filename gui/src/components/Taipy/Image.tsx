@@ -120,7 +120,7 @@ const Image = (props: ImageProps) => {
         return st;
     }, [width, height]);
 
-    const imgStyle = useMemo(() => ({ backgroundImage: `url(${content})` }), [content]);
+    const imgStyle = useMemo(() => ({ backgroundImage: `url("${content}")` }), [content]);
 
     const imgSx = useMemo(
         () =>
