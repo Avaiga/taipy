@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import datetime
 from typing import Callable, Dict, List, Set
 
 from taipy.common import protect_name
@@ -27,6 +28,7 @@ class Scenario:
         pipelines (List[Pipeline]): List of pipelines.
         properties (dict): Dictionary of additional properties of the scenario.
         scenario_id (str): Unique identifier of this scenario. Will be generated if None value provided.
+        creation_date (datetime): Date and time of the creation of the scenario.
         is_master (bool): True if the scenario is the master of its cycle. False otherwise.
         cycle (Cycle): Cycle of the scenario.
     """
@@ -40,6 +42,7 @@ class Scenario:
         pipelines: List[Pipeline],
         properties: Dict[str, str],
         scenario_id: ScenarioId = None,
+        creation_date=None,
         is_master: bool = False,
         cycle: Cycle = None,
     ):
@@ -47,6 +50,7 @@ class Scenario:
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
         self.properties = properties
+        self.creation_date = creation_date or datetime.now()
         self.master_scenario = is_master
         self.subscribers: Set[Callable] = set()
         self.cycle = cycle
@@ -92,6 +96,7 @@ class Scenario:
             self.config_name,
             [pipeline.id for pipeline in self.pipelines.values()],
             self.properties,
+            self.creation_date.isoformat(),
             self.master_scenario,
             fcts_to_dict(list(self.subscribers)),
             self.cycle.id if self.cycle else None,

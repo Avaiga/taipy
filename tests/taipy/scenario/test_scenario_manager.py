@@ -35,10 +35,10 @@ def test_set_and_get_scenario(cycle):
     pipeline_name_2 = "pipeline_name_2"
     pipeline_2 = Pipeline(pipeline_name_2, {}, [task_2], PipelineId("pipeline_id_2"))
     scenario_id_2 = ScenarioId("scenario_id_2")
-    scenario_2 = Scenario("scenario_name_2", [pipeline_2], {}, scenario_id_2, True, cycle)
+    scenario_2 = Scenario("scenario_name_2", [pipeline_2], {}, scenario_id_2, datetime.now(), True, cycle)
 
     pipeline_3 = Pipeline("pipeline_name_3", {}, [], PipelineId("pipeline_id_3"))
-    scenario_3_with_same_id = Scenario("scenario_name_3", [pipeline_3], {}, scenario_id_1, False, cycle)
+    scenario_3_with_same_id = Scenario("scenario_name_3", [pipeline_3], {}, scenario_id_1, datetime.now(), False, cycle)
 
     # No existing scenario
     scenario_manager = ScenarioManager()
