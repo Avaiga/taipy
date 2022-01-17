@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Milestones demos
-        run: gh workflow run run-all-demos.yml -R Avaiga/milestones
+        run: gh workflow run run-all-demos.yml -f username=$GITHUB_ACTOR -R Avaiga/milestones
         env:
           GITHUB_TOKEN: ${{ secrets.TRIGGERED_OTHER_ACTION }}
