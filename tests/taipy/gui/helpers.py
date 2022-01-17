@@ -29,9 +29,9 @@ class Helpers:
         client = gui._server.test_client()
         if check_warning:
             with pytest.warns(UserWarning):
-                response = client.get("/flask-jsx/test/")
+                response = client.get("/taipy-jsx/test/")
         else:
-            response = client.get("/flask-jsx/test/")
+            response = client.get("/taipy-jsx/test/")
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
         assert response.status_code == 200
         assert isinstance(response_data, t.Dict)

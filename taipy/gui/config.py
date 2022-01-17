@@ -65,6 +65,7 @@ StyleConfig = t.TypedDict(
         "dialog": str,
         "expandable": str,
         "field": str,
+        "image": str,
         "input": str,
         "layout": str,
         "navbar": str,

@@ -53,7 +53,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get<AxiosRouter>(`${ENDPOINT}/initialize/?client_id=${state.id || ""}`)
+            .get<AxiosRouter>(`${ENDPOINT}/taipy-init/?client_id=${state.id || ""}`)
             .then((result) => {
                 setJSX(result.data.router);
                 dispatch(createThemeAction(result.data.darkMode, true));

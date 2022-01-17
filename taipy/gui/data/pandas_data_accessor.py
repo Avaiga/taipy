@@ -16,7 +16,7 @@ if t.TYPE_CHECKING:
 
 class PandasDataAccessor(DataAccessor):
     @staticmethod
-    def get_supported_classes() -> t.Callable:  # type: ignore
+    def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
         return pd.DataFrame
 
     @staticmethod

@@ -1,27 +1,28 @@
 import { ComponentType } from "react";
 import { Route, Routes } from "react-router-dom";
-import Input from "./Input";
-import Field from "./Field";
+import Button from "./Button";
+import Chart from "./Chart";
 import DateSelector from "./DateSelector";
+import Dialog from "./Dialog";
+import Expandable from "./Expandable";
+import Field from "./Field";
+import Image from "./Image";
+import Input from "./Input";
+import Layout from "./Layout";
+import Link from "./Link";
+import MainPage from "../pages/MainPage";
+import NavBar from "./NavBar";
+import NotFound404 from "../pages/NotFound404";
+import PageContent from "../pages/PageContent";
+import Pane from "./Pane";
+import Part from "./Part";
+import Selector from "./Selector";
+import Slider from "./Slider";
+import StatusList from "./StatusList";
 import Table from "./Table";
 import TaipyRendered from "../pages/TaipyRendered";
-import NotFound404 from "../pages/NotFound404";
-import Link from "./Link";
-import Selector from "./Selector";
-import Dialog from "./Dialog";
-import Chart from "./Chart";
-import StatusList from "./StatusList";
 import Toggle from "./Toggle";
-import Slider from "./Slider";
-import Button from "./Button";
-import Layout from "./Layout";
-import NavBar from "./NavBar";
-import Part from "./Part";
-import MainPage from "../pages/MainPage";
-import PageContent from "../pages/PageContent";
-import Expandable from "./Expandable";
 import TreeView from "./TreeView";
-import Pane from "./Pane";
 
 // Need some more fidling to get the type right ...
 export const taipyComponents: Record<string, ComponentType> = {
@@ -32,6 +33,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Dialog: Dialog as ComponentType,
     Expandable: Expandable,
     Field: Field as ComponentType,
+    Image: Image as ComponentType,
     Input: Input as ComponentType,
     Layout: Layout,
     NavBar: NavBar as ComponentType,

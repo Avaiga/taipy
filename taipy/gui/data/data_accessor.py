@@ -60,7 +60,8 @@ class _InvalidDataAccessor(DataAccessor):
 
 class _DataAccessors(object):
     def __init__(self) -> None:
-        self.__access_4_type: t.Dict[str, DataAccessor] = {}
+        self.__access_4_type: t.Dict[t.Type, DataAccessor] = {}
+        self.__access_4_var: t.Dict[str, DataAccessor] = {}
 
         self.__invalid_data_accessor = _InvalidDataAccessor()
 
@@ -70,25 +71,38 @@ class _DataAccessors(object):
 
         self._register(PandasDataAccessor)
 
-    def _register(self, cls: t.Type[DataAccessor]) -> None:
+    def _register(self, cls: t.Type[DataAccessor], var_name: t.Optional[str] = None) -> None:
         if inspect.isclass(cls):
             if issubclass(cls, DataAccessor):
                 names = cls.get_supported_classes()
-                if not names:
+                if not var_name and not names:
                     raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
                 if names and not isinstance(names, (t.List, t.Tuple)):  # type: ignore
                     names = [
                         names,  # type: ignore
                     ]
+                # check existence
+                inst: t.Optional[DataAccessor] = None
                 for name in names:
-                    if inspect.isclass(cls):
-                        self.__access_4_type[name] = cls()  # type: ignore
-                    else:
-                        raise TypeError(f"{name.__name__} is not a class")
+                    inst = self.__access_4_type.get(name)
+                    if inst:
+                        break
+                if not inst and var_name:
+                    inst = self.__access_4_var.get(var_name)
+                if not inst:
+                    try:
+                        inst = cls()
+                    except Exception as e:
+                        raise TypeError(f"Class {cls.__name__} cannot be instanciated") from e
+                if inst:
+                    for name in names:
+                        self.__access_4_type[name] = inst  # type: ignore
+                    if var_name:
+                        self.__access_4_var[var_name] = inst  # type: ignore
             else:
-                raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessAbstract")
+                raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
         else:
-            raise AttributeError("The argument of 'DataAccessRegistry.register' should be a class")
+            raise AttributeError("The argument of 'DataAccessors.register' should be a class")
 
     def __get_instance(self, value: t.Any) -> DataAccessor:  # type: ignore
         try:
@@ -99,6 +113,8 @@ class _DataAccessors(object):
 
     def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         inst = _get_dict_value(self.__access_4_type, value.__class__)
+        if not inst:
+            inst = _get_dict_value(self.__access_4_var, var_name)
         return inst.cast_string_value(var_name, value) if inst else value
 
     def _is_data_access(self, var_name: str, value: t.Any) -> bool:
