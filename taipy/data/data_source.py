@@ -10,6 +10,7 @@ import pandas as pd
 
 from taipy.common import protect_name
 from taipy.common.alias import DataSourceId, JobId
+from taipy.data.filter_data_source import FilterDataSource
 from taipy.data.operator import JoinOperator, Operator
 from taipy.data.scope import Scope
 from taipy.exceptions.data_source import NoData
@@ -229,6 +230,9 @@ class DataSource:
     @abstractmethod
     def _write(self, data):
         return NotImplemented
+
+    def __getitem__(self, items):
+        return FilterDataSource(self.id, self._read())[items]
 
     @property
     def is_ready_for_reading(self):
