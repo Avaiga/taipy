@@ -1,4 +1,5 @@
-import React, { useState, useContext, useCallback, useEffect, useMemo } from "react";
+import React, { useState, useContext, useCallback, useEffect, useMemo, CSSProperties } from "react";
+import { Theme, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
 import List from "@mui/material/List";
@@ -8,8 +9,14 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import Avatar from "@mui/material/Avatar";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Chip from "@mui/material/Chip";
 
-import { TaipyImage } from "./utils";
+import { doNotPropagateEvent, TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { boxSx, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
@@ -24,7 +31,11 @@ interface ItemProps {
 }
 
 const SingleItem = ({ value, createClickHandler, selectedValue, item, disabled }: ItemProps) => (
-    <ListItemButton onClick={createClickHandler(value)} selected={selectedValue.indexOf(value) !== -1} disabled={disabled}>
+    <ListItemButton
+        onClick={createClickHandler(value)}
+        selected={selectedValue.indexOf(value) !== -1}
+        disabled={disabled}
+    >
         {typeof item === "string" ? (
             <ListItemText primary={item} />
         ) : (
@@ -38,7 +49,13 @@ const SingleItem = ({ value, createClickHandler, selectedValue, item, disabled }
 const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled }: ItemProps) => (
     <ListItemButton onClick={createClickHandler(value)} dense disabled={disabled}>
         <ListItemIcon>
-            <Checkbox disabled={disabled} edge="start" checked={selectedValue.indexOf(value) !== -1} tabIndex={-1} disableRipple />
+            <Checkbox
+                disabled={disabled}
+                edge="start"
+                checked={selectedValue.indexOf(value) !== -1}
+                tabIndex={-1}
+                disableRipple
+            />
         </ListItemIcon>
         {typeof item === "string" ? (
             <ListItemText primary={item} />
@@ -50,6 +67,23 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled
     </ListItemButton>
 );
 
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const getMenuProps = (width: string | number) => ({
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            width: width,
+        },
+    },
+});
+
+const getStyles = (id: string, ids: readonly string[], theme: Theme) => ({
+    fontWeight: ids.indexOf(id) === -1 ? theme.typography.fontWeightRegular : theme.typography.fontWeightMedium,
+});
+
+const renderBoxSx = { display: "flex", flexWrap: "wrap", gap: 0.5 } as CSSProperties;
+
 const Selector = (props: SelTreeProps) => {
     const {
         id,
@@ -59,6 +93,7 @@ const Selector = (props: SelTreeProps) => {
         defaultLov = "",
         filter = false,
         multiple = false,
+        dropdown = false,
         className,
         propagate = true,
         lov,
@@ -69,14 +104,19 @@ const Selector = (props: SelTreeProps) => {
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
+    const theme = useTheme();
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars, tp_varname);
 
     const lovList = useLovListMemo(lov, defaultLov);
-    const listSx = useMemo(() => ({...treeSelBaseSx, maxWidth: width}), [width]);
-    const paperSx = useMemo(() => height === undefined ? paperBaseSx : {...paperBaseSx, maxHeight: height}, [height]);
+    const listSx = useMemo(() => ({ ...treeSelBaseSx, maxWidth: width }), [width]);
+    const paperSx = useMemo(
+        () => (height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height }),
+        [height]
+    );
+    const controlSx = useMemo(() => ({ m: 1, width: width }), [width]);
 
     useEffect(() => {
         if (value !== undefined) {
@@ -115,50 +155,129 @@ const Selector = (props: SelTreeProps) => {
         [tp_varname, dispatch, multiple, propagate, active]
     );
 
+    const handleChange = (event: SelectChangeEvent<typeof selectedValue>) => {
+        const {
+            target: { value },
+        } = event;
+        // On autofill we get a stringified value.
+        const keys = typeof value === "string" ? value.split(",") : value;
+        setSelectedValue(keys);
+        dispatch(createSendUpdateAction(tp_varname, keys, propagate));
+    };
+
+    const handleDelete = useCallback(
+        (e) => {
+            const id = e.currentTarget.parentElement.getAttribute("data-id");
+            id &&
+                setSelectedValue((vals) => {
+                    const keys = vals.filter((valId) => valId !== id);
+                    dispatch(createSendUpdateAction(tp_varname, keys, propagate));
+                    return keys;
+                });
+        },
+        [tp_varname, propagate, dispatch]
+    );
+
     const createClickHandler = useCallback((key: string) => () => clickHandler(key), [clickHandler]);
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
     return (
         <Box id={id} sx={boxSx} className={className}>
-            <Paper sx={paperSx}>
-                <Box>
-                {filter && (
-                    <TextField
-                        margin="dense"
-                        placeholder="Search field"
-                        value={searchValue}
-                        onChange={handleInput}
-                        disabled={!active}
-                    />
-                )}
-                </Box>
-                <List sx={listSx}>
-                    {lovList
-                        .filter((elt) => showItem(elt, searchValue))
-                        .map((elt) =>
-                            multiple ? (
-                                <MultipleItem
-                                    key={elt.id}
-                                    value={elt.id}
-                                    item={elt.item}
-                                    selectedValue={selectedValue}
-                                    createClickHandler={createClickHandler}
-                                    disabled={!active}
-                                />
-                            ) : (
-                                <SingleItem
-                                    key={elt.id}
-                                    value={elt.id}
-                                    item={elt.item}
-                                    selectedValue={selectedValue}
-                                    createClickHandler={createClickHandler}
-                                    disabled={!active}
-                                />
-                            )
+            {dropdown ? (
+                <FormControl sx={controlSx}>
+                    <Select
+                        multiple={multiple}
+                        value={selectedValue}
+                        onChange={handleChange}
+                        input={<OutlinedInput />}
+                        renderValue={(selected) => (
+                            <Box sx={renderBoxSx}>
+                                {lovList
+                                    .filter((it) => selected.includes(it.id))
+                                    .map((item, idx) => {
+                                        if (multiple) {
+                                            const chipProps = {} as Record<string, unknown>;
+                                            if (typeof item.item === "string") {
+                                                chipProps.label = item.item;
+                                            } else {
+                                                chipProps.label = item.item.text || "";
+                                                chipProps.avatar = <Avatar src={item.item.path} />;
+                                            }
+                                            return (
+                                                <Chip
+                                                    key={item.id}
+                                                    {...chipProps}
+                                                    onDelete={handleDelete}
+                                                    data-id={item.id}
+                                                    onMouseDown={doNotPropagateEvent}
+                                                />
+                                            );
+                                        } else if (idx === 0) {
+                                            return typeof item.item === "string" ? (
+                                                item.item
+                                            ) : (
+                                                <LovImage item={item.item} />
+                                            );
+                                        } else {
+                                            return null;
+                                        }
+                                    })}
+                            </Box>
                         )}
-                </List>
-            </Paper>
+                        MenuProps={getMenuProps(width)}
+                    >
+                        {lovList.map((item) => (
+                            <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
+                                {typeof item.item === "string" ? (
+                                    item.item
+                                ) : (
+                                    <LovImage item={item.item as TaipyImage} />
+                                )}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            ) : (
+                <Paper sx={paperSx}>
+                    <Box>
+                        {filter && (
+                            <TextField
+                                margin="dense"
+                                placeholder="Search field"
+                                value={searchValue}
+                                onChange={handleInput}
+                                disabled={!active}
+                            />
+                        )}
+                    </Box>
+                    <List sx={listSx}>
+                        {lovList
+                            .filter((elt) => showItem(elt, searchValue))
+                            .map((elt) =>
+                                multiple ? (
+                                    <MultipleItem
+                                        key={elt.id}
+                                        value={elt.id}
+                                        item={elt.item}
+                                        selectedValue={selectedValue}
+                                        createClickHandler={createClickHandler}
+                                        disabled={!active}
+                                    />
+                                ) : (
+                                    <SingleItem
+                                        key={elt.id}
+                                        value={elt.id}
+                                        item={elt.item}
+                                        selectedValue={selectedValue}
+                                        createClickHandler={createClickHandler}
+                                        disabled={!active}
+                                    />
+                                )
+                            )}
+                    </List>
+                </Paper>
+            )}
         </Box>
     );
 };
