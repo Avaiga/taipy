@@ -69,7 +69,7 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const getMenuProps = (width: string | number, height ?: string | number) => ({
+const getMenuProps = (width: string | number, height?: string | number) => ({
     PaperProps: {
         style: {
             maxHeight: height || ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
