@@ -14,6 +14,7 @@ export interface SelTreeProps extends LovProps {
     filter?: boolean;
     multiple?: boolean;
     width?: string | number;
+    dropdown?: boolean;
 }
 
 export interface LovProps<T = string | string[], U = string> extends TaipyBaseProps {

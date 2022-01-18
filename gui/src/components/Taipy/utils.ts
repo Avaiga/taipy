@@ -1,3 +1,5 @@
+import { MouseEvent } from "react";
+
 export interface TaipyBaseProps {
     id?: string;
     tp_varname?: string;
@@ -48,3 +50,5 @@ export const getUpdateVars = (updateVars?: string) =>
               .filter((uv) => uv && uv.indexOf("=") > -1)
               .map((uv) => uv.split("=")[1].trim())
         : [];
+
+export const doNotPropagateEvent = (event: MouseEvent) => event.stopPropagation();
