@@ -16,10 +16,12 @@ class FilterDataSource:
             # TODO: current input: List, else??
             self.data_type = "custom"
 
-    def __data_is_dataframe(self) -> bool:
+    def data_is_dataframe(self) -> bool:
         return self.data_type == "dataframe"
 
     def __getitem__(self, key):
+        if isinstance(key, FilterDataSource):
+            key = key.data
         if FilterDataSource.__is_hashable(key):  # try hashable
             filtered_data = self.__getitem_hashable(key)
         elif isinstance(key, slice):
@@ -44,7 +46,7 @@ class FilterDataSource:
             return True
 
     def __getitem_hashable(self, key):
-        if self.__data_is_dataframe():
+        if self.data_is_dataframe():
             if key in self.data.columns:
                 return self.data[key]
         else:
@@ -54,7 +56,7 @@ class FilterDataSource:
         return self.data[key]
 
     def __getitem_dataframe(self, key: pd.DataFrame):
-        if self.__data_is_dataframe():
+        if self.data_is_dataframe():
             return self.data[key]
 
         filtered_data = deepcopy(self.data)
@@ -71,12 +73,12 @@ class FilterDataSource:
         return filtered_data
 
     def __getitem_bool_indexer(self, key):
-        if self.__data_is_dataframe():
+        if self.data_is_dataframe():
             return self.data[key]
         return [e for i, e in enumerate(self.data) if key[i]]
 
     def __getitem_iterable(self, keys):
-        if self.__data_is_dataframe():
+        if self.data_is_dataframe():
             return self.data[keys]
         filtered_data = []
         for e in self.data:
@@ -87,41 +89,77 @@ class FilterDataSource:
         return filtered_data
 
     def __eq__(self, value):
-        if self.__data_is_dataframe():
-            return self.data == value
-        return [e == value for e in self.data]
+        if self.data_is_dataframe():
+            filtered_data = self.data == value
+        else:
+            filtered_data = [e == value for e in self.data]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
     def __lt__(self, value):
-        if self.__data_is_dataframe():
-            return self.data < value
-        return [e < value for e in self.data]
+        if self.data_is_dataframe():
+            filtered_data = self.data < value
+        else:
+            filtered_data = [e < value for e in self.data]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
     def __le__(self, value):
-        if self.__data_is_dataframe():
-            return self.data <= value
-        return [e <= value for e in self.data]
+        if self.data_is_dataframe():
+            filtered_data = self.data <= value
+        else:
+            filtered_data = [e <= value for e in self.data]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
     def __gt__(self, value):
-        if self.__data_is_dataframe():
-            return self.data > value
-        return [e > value for e in self.data]
+        if self.data_is_dataframe():
+            filtered_data = self.data > value
+        else:
+            filtered_data = [e > value for e in self.data]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
     def __ge__(self, value):
-        if self.__data_is_dataframe():
-            return self.data >= value
-        return [e >= value for e in self.data]
+        if self.data_is_dataframe():
+            filtered_data = self.data >= value
+        else:
+            filtered_data = [e >= value for e in self.data]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
     def __ne__(self, value):
-        if self.__data_is_dataframe():
-            return self.data != value
-        return [e != value for e in self.data]
+        if self.data_is_dataframe():
+            filtered_data = self.data != value
+        else:
+            filtered_data = [e != value for e in self.data]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
-    def __repr__(self) -> str:
-        if self.__data_is_dataframe():
-            return f"FilterDataSource ({repr(self.data)})"
-        return f"FilterDataSource ({self.data})"
+    def __and__(self, other):
+        if self.data_is_dataframe():
+            if other.data_is_dataframe():
+                filtered_data = self.data & other.data
+            else:
+                return NotImplemented
+        else:
+            if other.data_is_dataframe():
+                return NotImplemented
+            else:
+                filtered_data = [s and o for s, o in zip(self.data, other.data)]
+        return FilterDataSource(self.data_source_id, filtered_data)
+
+    def __or__(self, other):
+        if self.data_is_dataframe():
+            if other.data_is_dataframe():
+                filtered_data = self.data | other.data
+            else:
+                return NotImplemented
+        else:
+            if other.data_is_dataframe():
+                return NotImplemented
+            else:
+                filtered_data = [s or o for s, o in zip(self.data, other.data)]
+        return FilterDataSource(self.data_source_id, filtered_data)
 
     def __str__(self) -> str:
-        if self.__data_is_dataframe():
+        if self.data_is_dataframe():
             return str(self.data)
-        return str(self.data)
+        list_to_string = ""
+        for e in self.data:
+            list_to_string += str(e) + "\n"
+        return list_to_string

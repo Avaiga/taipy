@@ -5,6 +5,7 @@ import pytest
 
 from taipy.common.alias import DataSourceId, JobId
 from taipy.data import DataSource, InMemoryDataSource, Scope
+from taipy.data.filter_data_source import FilterDataSource
 from taipy.data.manager import DataManager
 from taipy.data.operator import JoinOperator, Operator
 from taipy.exceptions.data_source import NoData
@@ -170,6 +171,13 @@ class TestDataSource:
         # Has been writen more than 30 minutes ago
         ds.last_edition_date = datetime.now() + timedelta(days=-1)
         assert ds.is_up_to_date is False
+
+    def test_pandas_filter(self, default_data_frame):
+        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        COLUMN_NAME_1 = "a"
+        COLUMN_NAME_2 = "b"
+        assert isinstance(df_ds[COLUMN_NAME_1], FilterDataSource)
+        assert isinstance(df_ds[[COLUMN_NAME_1, COLUMN_NAME_2]], FilterDataSource)
 
     def test_filter(self, default_data_frame):
         ds = FakeDataSource("fake ds")
