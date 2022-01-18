@@ -17,7 +17,7 @@ if t.TYPE_CHECKING:
 
 class Server:
 
-    __RE_JSX_RENDER_ROUTE = re.compile(r"/flask-jsx/(.*)/")
+    __RE_JSX_RENDER_ROUTE = re.compile(r"/taipy-jsx/(.*)/")
 
     def __init__(
         self,

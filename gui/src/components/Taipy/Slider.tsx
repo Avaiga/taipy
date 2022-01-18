@@ -92,12 +92,12 @@ const Slider = (props: SliderProps) => {
     const textAnchorSx = useMemo(() => {
         if (lovList.length) {
             if (textAnchor === "top" || textAnchor === "bottom") {
-                return { width: width, display: "grid", gap: "0.5em", textAlign: "center" } as SxProps;
+                return { width: width, display: "inline-grid", gap: "0.5em", textAlign: "center" } as SxProps;
             }
             if (textAnchor === "left" || textAnchor === "right") {
                 return {
                     width: width,
-                    display: "grid",
+                    display: "inline-grid",
                     gap: "1em",
                     gridTemplateColumns: textAnchor === "left" ? "auto 1fr" : "1fr auto",
                     alignItems: "center",

@@ -10,4 +10,4 @@ def test_folder_pages_binding(gui: Gui):
     gui.run(run_server=False)
     assert len(gui._config.routes) == 3  # 2 files -> 2 routes + 1 default route
     assert len(gui._config.pages) == 3  # 2 files -> 2 pages + 1 default page
-    assert len(gui._flask_blueprint) == 3
+    assert len(gui._flask_blueprint) == 4

@@ -109,6 +109,7 @@ class ScenarioManager:
             pipelines,
             config.properties,
             scenario_id,
+            creation_date,
             is_master=is_master_scenario,
             cycle=cycle,
         )

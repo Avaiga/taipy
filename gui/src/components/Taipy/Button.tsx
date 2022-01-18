@@ -24,14 +24,19 @@ const Button = (props: ButtonProps) => {
     }, [id, tp_onAction, dispatch]);
 
     useEffect(() => {
-        if (props.label !== undefined && value !== props.label) {
-            setValue(props.label);
-        }
-    }, [props.label, value]);
+        setValue((val) => {
+            if (props.label !== undefined && val !== props.label) {
+                return props.label;
+            }
+            return val;
+        });
+    }, [props.label]);
 
-    return <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
+    return (
+        <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
             {value}
         </MuiButton>
-}
+    );
+};
 
 export default Button;

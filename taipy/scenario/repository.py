@@ -1,4 +1,5 @@
 import pathlib
+from datetime import datetime
 from typing import List, Optional
 
 from taipy.common import utils
@@ -23,6 +24,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             name=scenario.config_name,
             pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
             properties=scenario.properties,
+            creation_date=scenario.creation_date.isoformat(),
             master_scenario=scenario.master_scenario,
             subscribers=utils.fcts_to_dict(scenario.subscribers),
             cycle=self.__to_cycle_id(scenario.cycle),
@@ -34,6 +36,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             config_name=model.name,
             pipelines=self.__to_pipelines(model.pipelines),
             properties=model.properties,
+            creation_date=datetime.fromisoformat(model.creation_date),
             is_master=model.master_scenario,
             cycle=self.__to_cycle(model.cycle),
         )

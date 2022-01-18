@@ -16,6 +16,8 @@ from taipy.scenario import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
 
+current_time = datetime.now()
+
 
 @pytest.fixture(scope="function")
 def csv_file(tmpdir_factory) -> str:
@@ -38,17 +40,26 @@ def cleanup_files():
 
 @pytest.fixture(scope="function")
 def current_datetime():
-    return datetime.now()
+    return current_time
 
 
 @pytest.fixture(scope="function")
 def scenario(cycle):
-    return Scenario("sc", [], {}, ScenarioId("sc_id"), is_master=False, cycle=None)
+    return Scenario("sc", [], {}, ScenarioId("sc_id"), current_time, is_master=False, cycle=None)
 
 
 @pytest.fixture(scope="function")
 def scenario_model(cycle):
-    return ScenarioModel(ScenarioId("sc_id"), "sc", [], {}, master_scenario=False, subscribers=[], cycle=None)
+    return ScenarioModel(
+        ScenarioId("sc_id"),
+        "sc",
+        [],
+        {},
+        creation_date=current_time.isoformat(),
+        master_scenario=False,
+        subscribers=[],
+        cycle=None,
+    )
 
 
 @pytest.fixture(scope="function")
