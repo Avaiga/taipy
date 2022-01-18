@@ -210,13 +210,13 @@ class Builder:
                 var_type = type(elt).__name__ if elt is not None else None
             if adapter is None:
                 adapter = self._gui._get_adapter_for_type(var_type)
-            lov_name = _get_dict_value(self.__hashes, var_name)
+            lov_name = self.__hashes.get(var_name)
             if lov_name:
                 if adapter is None:
                     adapter = self._gui._get_adapter_for_type(lov_name)
                 else:
                     self._gui._add_type_for_var(lov_name, var_type)
-            value_name = _get_dict_value(self.__hashes, "value")
+            value_name = self.__hashes.get("value")
             if value_name:
                 if adapter is None:
                     adapter = self._gui._get_adapter_for_type(value_name)
@@ -458,7 +458,7 @@ class Builder:
                 self.__update_vars.extend(
                     self.__set_list_attribute(
                         f"{name}{idx - 1}",
-                        _get_dict_value(self.__hashes, name_idx if sel is not None else name),
+                        self.__hashes.get(name_idx if sel is not None else name),
                         sel if sel is not None else default_sel,
                         int,
                     )
@@ -468,7 +468,7 @@ class Builder:
             sel = self.__get_property(name_idx)
 
     def get_list_attribute(self, name: str, list_type: AttributeType):
-        varname = _get_dict_value(self.__hashes, name)
+        varname = self.__hashes.get(name)
         if varname is None:
             list_val = self.__get_property(name)
             if isinstance(list_val, str):
@@ -506,6 +506,14 @@ class Builder:
         self.set_attribute("dataType", getDataType(value))
         return self
 
+    def set_file_content(self, var_name: str = "content"):
+        hash_name = self.__hashes.get(var_name)
+        if hash_name:
+            self.set_attribute("tp_varname", self._gui._get_expr_from_hash(hash_name))
+        else:
+            warnings.warn("{self.element_name} {var_name} should be binded")
+        return self
+
     def set_image_content(self, var_name: str = "content"):
         content = self.__get_property(var_name)
         if content is None:
@@ -522,7 +530,7 @@ class Builder:
     def set_lov(self, var_name="lov", property_name: t.Optional[str] = None):
         property_name = var_name if property_name is None else property_name
         self.__set_list_of_("default_" + property_name)
-        hash_name = _get_dict_value(self.__hashes, var_name)
+        hash_name = self.__hashes.get(var_name)
         if hash_name:
             self.__update_vars.append(f"{property_name}={hash_name}")
             self.__set_react_attribute(property_name, hash_name)
@@ -542,13 +550,14 @@ class Builder:
 
     def set_value_and_default(self, var_name: t.Optional[str] = None, with_update=True, with_default=True):
         var_name = self.default_property_name if var_name is None else var_name
-        if var_name in self.__hashes:
+        hash_name = self.__hashes.get(var_name)
+        if hash_name:
             self.__set_react_attribute(
                 var_name,
-                get_client_var_name(self.__hashes[var_name]),
+                get_client_var_name(hash_name),
             )
             if with_update:
-                self.set_attribute("tp_varname", self._gui._get_expr_from_hash(self.__hashes[var_name]))
+                self.set_attribute("tp_varname", self._gui._get_expr_from_hash(hash_name))
             if with_default:
                 self.__set_default_value(var_name)
         else:
@@ -626,7 +635,7 @@ class Builder:
                 if val is not None and val != _get_val(attr, 2, False):
                     self.__set_boolean_attribute(attr[0], val)
             elif type == AttributeType.dynamic_boolean:
-                dyn_var = _get_dict_value(self.__hashes, attr[0])
+                dyn_var = self.__hashes.get(attr[0])
                 val = self.__get_property(attr[0])
                 default_name = "default_" + attr[0] if dyn_var is not None else attr[0]
                 if val is not None and val != _get_val(attr, 2, False):
@@ -637,6 +646,8 @@ class Builder:
                 self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
             elif type == AttributeType.react:
                 self.__set_react_attribute(_to_camel_case(attr[0]), _get_val(attr, 2, None))
+            elif type == AttributeType.number:
+                self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.dict:
