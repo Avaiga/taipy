@@ -80,9 +80,7 @@ class TaipyHTMLParser(HTMLParser):
 class TaipyTag(object):
     def __init__(self, tag_name: str, properties: t.List[t.Tuple[str, str]]) -> None:
         self.control_type = tag_name
-        self.properties = {}
-        for prop in properties:
-            self.properties[prop[0]] = prop[1]
+        self.properties = {prop[0]: prop[1] for prop in properties}
         self.has_set_value = False
 
     def set_value(self, value: str) -> bool:

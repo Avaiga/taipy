@@ -29,7 +29,7 @@ as such or not, a callback function is called in your application.
             print(f"X was changed to: {x}")
 
     gui = Gui(page=Markdown(page))
-    gui.on_update(on_value_change)
+    gui.on_change = on_value_change
     if __name__ == '__main__':
         gui.run()
     ```
