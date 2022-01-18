@@ -28,7 +28,7 @@ def test_image_file_md(gui: Gui, helpers):
 
 
 def test_image_path_md(gui: Gui, helpers):
-    gui.bind_var_val("content", (pathlib.Path(__file__).parent / "fred.png").resolve().as_posix())
+    gui.bind_var_val("content", str((pathlib.Path(__file__).parent / "fred.png").resolve()))
     md_string = "<|{content}|image|>"
     expected_list = [
         "<Image",

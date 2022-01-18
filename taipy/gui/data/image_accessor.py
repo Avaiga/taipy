@@ -32,7 +32,7 @@ class ImageAccessor(DataAccessor):
             if path.is_file():
                 dir_path = path.resolve().parent
                 url_path = ImageAccessor._get_path(dir_path)
-                return (f"{url_path}/{path.name}", url_path, dir_path.as_posix())
+                return (f"{url_path}/{path.name}", url_path, str(dir_path))
             else:
                 return value
         else:
