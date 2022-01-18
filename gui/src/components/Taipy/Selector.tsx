@@ -69,10 +69,10 @@ const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const getMenuProps = (width: string | number) => ({
+const getMenuProps = (width: string | number, height ?: string | number) => ({
     PaperProps: {
         style: {
-            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+            maxHeight: height || ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
             width: width,
         },
     },
@@ -225,7 +225,7 @@ const Selector = (props: SelTreeProps) => {
                                     })}
                             </Box>
                         )}
-                        MenuProps={getMenuProps(width)}
+                        MenuProps={getMenuProps(width, height)}
                     >
                         {lovList.map((item) => (
                             <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
