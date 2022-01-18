@@ -284,6 +284,8 @@ class Gui(object, metaclass=Singleton):
                     if url_path is not None and dir_path is not None:
                         self.__image_paths[url_path] = dir_path
                         newvalue = Gui.__IMAGES_ROOT + newvalue
+                else:
+                    newvalue = ret_value
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
             if self._accessors._is_data_access(_var, newvalue):
