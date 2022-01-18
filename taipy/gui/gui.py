@@ -106,7 +106,7 @@ class Gui(object, metaclass=Singleton):
 
         self.__evaluator = _Evaluator()
         self.__adapter = _Adapter()
-        self.on_update = None
+        self.on_change = None
         self.on_action = None
         self.__directory_name_of_pages: t.List[str] = []
 
@@ -237,8 +237,8 @@ class Gui(object, metaclass=Singleton):
             if var_name == hash_expr:
                 modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        if self.on_update:
-            self.on_update(self, var_name, value)
+        if self.on_change:
+            self.on_change(self, var_name, value)
         self.__send_var_list_update(modified_vars, var_name if from_front else None)
 
     def __send_var_list_update(self, modified_vars: list, front_var: t.Optional[str] = None):

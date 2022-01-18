@@ -156,7 +156,7 @@ that dictionary as the value of the `properties` property.
 If the `propagate` property is set to `True`, then the application variable bound to a control
 is updated when the user modifies the value represented by the control.
 
-!!! info "Note that if there is a `on_update` function declared on the `Gui` instance, it will be invoked no
+!!! info "Note that if there is a `on_change` function declared on the `Gui` instance, it will be invoked no
 matter what the _propagate_ value is."
 
 ## Controls list
