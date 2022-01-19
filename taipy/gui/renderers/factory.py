@@ -151,9 +151,10 @@ class Factory:
         .set_attributes(
             [
                 ("id"),
-                ("on_action", AttributeType.string, ""),
+                ("on_action", AttributeType.string),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("multiple", AttributeType.boolean, False),
+                ("extensions", AttributeType.string, ".csv,.xlsx")
             ]
         ),
         "image": lambda control_type, attrs: Builder(

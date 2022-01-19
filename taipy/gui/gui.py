@@ -294,19 +294,15 @@ class Gui(object, metaclass=Singleton):
                 complete = part == total - 1
         if file:  # and allowed_file(file.filename)
             filename = secure_filename(file.filename)
-            file.save(pathlib.Path(self._get_app_config("upload_folder", ".")).joinpath(filename + suffix).resolve())
+            upload_path = pathlib.Path(self._get_app_config("upload_folder", "."))
+            file.save(upload_path.joinpath(filename + suffix).resolve())
             if complete:
-                file_path = str(pathlib.Path(self._get_app_config("upload_folder", ".")).joinpath(filename).resolve())
+                file_path = str(upload_path.joinpath(filename).resolve())
                 if part > 0:
                     try:
                         with open(file_path, "wb") as grouped_file:
-                            for nb in range(0, part):
-                                with open(
-                                    pathlib.Path(self._get_app_config("upload_folder", "."))
-                                    .joinpath(f"{filename}.part.{nb}")
-                                    .resolve(),
-                                    "rb",
-                                ) as part_file:
+                            for nb in range(0, part + 1):
+                                with open(upload_path.joinpath(f"{filename}.part.{nb}").resolve(), "rb") as part_file:
                                     grouped_file.write(part_file.read())
                     except EnvironmentError as ee:
                         warnings.warn(f"cannot group file after chunk upload {ee}")

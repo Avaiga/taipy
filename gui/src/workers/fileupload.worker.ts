@@ -8,16 +8,13 @@ const uploadFile = (
     total: number,
     fileName: string,
     multiple: boolean,
-    id: string
+    id: string,
+    progressCb: (uploaded: number) => void
 ) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${uploadUrl}?client_id=${id}`, false);
     xhr.onerror = (e) => self.postMessage({ message: "Error: " + e, error: true });
-    xhr.onload = (e) =>
-        self.postMessage({
-            progress: e.lengthComputable ? (e.loaded / e.total) * 100 : 0,
-            done: false,
-        } as FileUploadReturn);
+    xhr.onload = (e) => progressCb(e.lengthComputable ? e.loaded: 0);
     const fdata = new FormData();
     fdata.append("blob", blobOrFile, fileName);
     fdata.append("part", part.toString());
@@ -30,8 +27,17 @@ const uploadFile = (
 // 1MB chunk sizes.
 const BYTES_PER_CHUNK = 1024 * 1024;
 
+const getProgressCallback = (globalSize: number, offset: number) => (uploaded: number) => self.postMessage({
+    progress: (offset + uploaded) * 100 / globalSize,
+    done: false,
+} as FileUploadReturn);
+
 const process = (files: FileList, uploadUrl: string, varName: string, id: string) => {
     if (files) {
+        let globalSize = 0;
+        for (let i = 0; i < files.length; i++) {
+            globalSize += files[i].size;
+        }
         for (let i = 0; i < files.length; i++) {
             const blob = files[i];
             const size = blob.size;
@@ -42,17 +48,22 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
 
             while (start < size) {
                 const chunk = blob.slice(start, end);
+                const progressCallback = getProgressCallback(globalSize, start);
+                progressCallback(0);
 
                 uploadFile(
                     chunk,
                     uploadUrl,
                     varName,
-                    start / BYTES_PER_CHUNK,
+                    Math.floor(start / BYTES_PER_CHUNK),
                     tot,
                     blob.name,
                     i == 0 ? false : files.length > 0,
-                    id
+                    id,
+                    progressCallback
                 );
+
+                progressCallback(chunk.size);
 
                 start = end;
                 end = start + BYTES_PER_CHUNK;

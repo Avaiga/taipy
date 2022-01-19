@@ -9,7 +9,7 @@
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
     "apache-arrow": "^6.0.1",
-    "axios": "^0.24.0",
+    "axios": "^0.25.0",
     "date-fns": "^2.25.0",
     "date-fns-tz": "^1.1.6",
     "lodash": "^4.17.21",
@@ -62,7 +62,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/user-event": "^14.0.0-beta.8",
     "@types/css-mediaquery": "^0.1.1",
     "@types/jest": "^27.0.2",
     "@types/lodash": "^4.14.177",

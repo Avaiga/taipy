@@ -5,7 +5,7 @@ const worker = new Worker(new URL("./fileupload.worker.ts", import.meta.url) as 
 
 const UPLOAD_URL = "/taipy-uploads";
 
-const uploadFile = (
+export const uploadFile = (
     varName: string,
     files: FileList,
     progressCallback: (val: number) => void,
@@ -26,5 +26,3 @@ const uploadFile = (
         worker.postMessage({ files: files, uploadUrl: uploadUrl, varName: varName, id: id } as FileUploadData);
     });
 };
-
-export default uploadFile;
