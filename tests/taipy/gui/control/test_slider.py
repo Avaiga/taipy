@@ -8,6 +8,13 @@ def test_slider_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
+def test_slider_with_min_max(gui: Gui, helpers):
+    gui.bind_var_val("x", 0)
+    md_string = "<|{x}|slider|min=-10|max=10|>"
+    expected_list = ["<Slider", "min={-10.0}", "max={10.0}", 'defaultValue="0"']
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
 def test_slider_items_md(gui: Gui, helpers):
     gui.bind_var_val("x", "Item 1")
     md_string = "<|{x}|slider|lov=Item 1;Item 2;Item 3|text_anchor=left|>"
