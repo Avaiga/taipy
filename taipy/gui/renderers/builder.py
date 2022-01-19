@@ -161,13 +161,27 @@ class Builder:
             return self
         return self.__set_json_attribute(_to_camel_case(name), lof)
 
+    def __set_number_attribute(
+        self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
+    ):
+        value = self.__get_property(name, default_value)
+        if value is None:
+            if not optional:
+                warnings.warn(f"Property {name} is required for control {self.control_type}")
+            return self
+        try:
+            val = float(value)
+        except ValueError:
+            raise ValueError(f"Property {name} expects a number for control {self.control_type}")
+        return self.__set_react_attribute(_to_camel_case(name), val)
+
     def __set_string_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
         strattr = self.__get_property(name, default_value)
         if strattr is None:
             if not optional:
-                warnings.warn(f"property {name} is required for component {self.control_type}")
+                warnings.warn(f"Property {name} is required for control {self.control_type}")
             return self
         return self.set_attribute(_to_camel_case(name), strattr)
 
@@ -189,9 +203,8 @@ class Builder:
         if isinstance(lov, list):
             from_string = hasattr(self, "from_string") and self.from_string
             adapter = self.__get_property("adapter")
-            if not isinstance(adapter, FunctionType):
-                if adapter:
-                    warnings.warn("Component Selector Attribute Adapter is invalid")
+            if adapter and not isinstance(adapter, FunctionType):
+                warnings.warn("'adapter' property value is invalid")
                 adapter = None
             var_type = self.__get_property("type")
             if isinstance(var_type, t.Type):  # type: ignore
@@ -255,7 +268,7 @@ class Builder:
                 self.__set_default_value("value", ret_val)
         return self
 
-    def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):
+    def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
         value = self.__get_property("data")
 
         col_types = self._gui._accessors._get_col_types(self.__hashes.get("data", ""), value)
@@ -421,7 +434,7 @@ class Builder:
             if isinstance(layout, (dict, _MapDictionary)):
                 self.__set_json_attribute("layout", layout)
             else:
-                warnings.warn(f"Chart: layout attribute should be a dict\n'{str(layout)}'")
+                warnings.warn(f"Chart control: layout attribute should be a dict\n'{str(layout)}'")
 
     def set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
         value = self.__get_property(var_name, default_value)
@@ -633,6 +646,8 @@ class Builder:
                     self.__set_boolean_attribute(default_name, val)
                 if dyn_var is not None:
                     self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(dyn_var))
+            elif type == AttributeType.number:
+                self.__set_number_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
             elif type == AttributeType.react:
