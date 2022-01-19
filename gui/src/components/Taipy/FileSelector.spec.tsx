@@ -6,23 +6,7 @@ import userEvent from "@testing-library/user-event";
 import FileSelector from "./FileSelector";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
-import { uploadFile } from "../../workers/fileupload";
 
-// need to mock the worker as import.meta.url is not supported yet by jest
-jest.mock("../../workers/fileupload", () => {
-    return {
-        __esModule: true,
-        uploadFile: (
-            varName: string,
-            files: FileList,
-            progressCallback: (val: number) => void,
-            id: string,
-            uploadUrl: string
-        ) => new Promise((resolve, reject) => {
-            resolve("mocked");
-        }),
-    };
-});
 
 describe("FileSelector Component", () => {
     it("renders", async () => {

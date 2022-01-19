@@ -6,19 +6,17 @@ import { BrowserRouter } from "react-router-dom";
 
 import NavBar from './NavBar';
 import { LoV } from "./lovUtils";
-import { TaipyImage } from "./utils";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
 
 const lov: LoV = [
-    ["id1", "Item 1"],
-    ["id2", "Item 2"],
-    ["id3", "Item 3"],
-    ["id4", "Item 4"],
+    ["/", "Root"],
+    ["/id1", "Item 1"],
+    ["/id2", "Item 2"],
+    ["/id3", "Item 3"],
+    ["/id4", "Item 4"],
 ];
-const defLov = '[["id10","Default Item"]]';
-
-const imageItem: [string, string | TaipyImage] = ["ii1", {path:"/img/fred.png", text: "Image"}];
+const defLov = '[["/", "Root"],["/id10","Default Item"]]';
 
 describe("NavBar Component", () => {
     it("renders", async () => {
