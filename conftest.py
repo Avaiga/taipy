@@ -27,6 +27,14 @@ def csv_file(tmpdir_factory) -> str:
     return fn.strpath
 
 
+@pytest.fixture(scope="function")
+def excel_file(tmpdir_factory) -> str:
+    excel = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    fn = tmpdir_factory.mktemp("data").join("df.xlsx")
+    excel.to_excel(str(fn), index=False)
+    return fn.strpath
+
+
 @pytest.fixture(scope="session")
 def default_data_frame():
     return pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
