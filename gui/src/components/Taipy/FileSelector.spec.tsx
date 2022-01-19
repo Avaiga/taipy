@@ -55,7 +55,6 @@ describe("FileSelector Component", () => {
         expect(elt).not.toHaveClass("Mui-disabled");
     });
     it("dispatch a well formed message on file selection", async () => {
-        const user = userEvent.setup();
         const file = new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' });
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
@@ -72,7 +71,7 @@ describe("FileSelector Component", () => {
             payload: { value: "on_action" },
             type: "SEND_ACTION_ACTION",
         }));
-        inputElt && user.upload(inputElt, file);
+        inputElt && userEvent.upload(inputElt, file);
     });
     it("dispatch a well formed message on file drop", async () => {
         const file = new File(['(⌐□_□)'], 'chucknorris2.png', { type: 'image/png' });
