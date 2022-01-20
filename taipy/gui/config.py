@@ -53,7 +53,7 @@ AppConfig = t.TypedDict(
         "notification_duration": int,
         "single_client": bool,
         "ngrok_token": str,
-        "upload_folder": str,
+        "upload_folder": t.Union[str, None],
     },
     total=False,
 )
