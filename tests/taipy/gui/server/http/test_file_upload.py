@@ -29,7 +29,7 @@ def test_file_upload_no_filename(gui: Gui, helpers):
     file = (io.BytesIO(b"abcdef"), "")
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    ret = flask_client.post(f"/taipy-uploads?client_id={sid}", data={"var_name": "varname", "blob": "file"})
+    ret = flask_client.post(f"/taipy-uploads?client_id={sid}", data={"var_name": "varname", "blob": file})
     assert ret.status_code == 400
 
 
