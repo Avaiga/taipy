@@ -81,14 +81,18 @@ class DataSourceResource(Resource):
             datasource = manager.get(datasource_id)
             return {"datasource": schema.dump(datasource)}
         except NonExistingDataSource:
-            return make_response(jsonify({"message": f"DataSource {datasource_id} not found"}), 404)
+            return make_response(
+                jsonify({"message": f"DataSource {datasource_id} not found"}), 404
+            )
 
     def delete(self, datasource_id):
         try:
             manager = DataManager()
             manager.delete(datasource_id)
         except NonExistingDataSource:
-            return make_response(jsonify({"message": f"DataSource {datasource_id} not found"}), 404)
+            return make_response(
+                jsonify({"message": f"DataSource {datasource_id} not found"}), 404
+            )
         return {"msg": f"datasource {datasource_id} deleted"}
 
 

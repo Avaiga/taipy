@@ -67,14 +67,18 @@ class PipelineResource(Resource):
             pipeline = manager.get(pipeline_id)
             return {"pipeline": schema.dump(manager.repository.to_model(pipeline))}
         except NonExistingPipeline:
-            return make_response(jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404)
+            return make_response(
+                jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404
+            )
 
     def delete(self, pipeline_id):
         try:
             manager = PipelineManager()
             manager.delete(pipeline_id)
         except ModelNotFound:
-            return make_response(jsonify({"message": f"DataSource {pipeline_id} not found"}), 404)
+            return make_response(
+                jsonify({"message": f"DataSource {pipeline_id} not found"}), 404
+            )
 
         return {"msg": f"pipeline {pipeline_id} deleted"}
 
@@ -203,4 +207,6 @@ class PipelineExecutor(Resource):
             manager.submit(pipeline_id)
             return {"message": f"Executed pipeline {pipeline_id}"}
         except NonExistingPipeline:
-            return make_response(jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404)
+            return make_response(
+                jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404
+            )
