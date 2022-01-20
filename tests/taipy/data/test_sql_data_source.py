@@ -1,3 +1,4 @@
+from importlib import util
 from unittest import mock
 
 import pandas as pd
@@ -7,6 +8,9 @@ from taipy.common.alias import DataSourceId
 from taipy.data import SQLDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
+
+if not util.find_spec("pyodbc"):
+    pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
 
 
 class TestSQLDataSource:

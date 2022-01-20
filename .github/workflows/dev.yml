@@ -68,6 +68,10 @@ jobs:
         run: |
           tox -e airflow
 
+      - name: Pyodbc tests
+        run: |
+          tox -e pyodbc
+
   test-gui:
 
     strategy:
