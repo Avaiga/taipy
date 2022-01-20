@@ -6,6 +6,7 @@ import os
 import pathlib
 import random
 import re
+import tempfile
 import typing as t
 import warnings
 from importlib import util
@@ -294,7 +295,7 @@ class Gui(object, metaclass=Singleton):
                 complete = part == total - 1
         if file:  # and allowed_file(file.filename)
             filename = secure_filename(file.filename)
-            upload_path = pathlib.Path(self._get_app_config("upload_folder", "."))
+            upload_path = pathlib.Path(self._get_app_config("upload_folder", tempfile.gettempdir()))
             file.save(upload_path.joinpath(filename + suffix).resolve())
             if complete:
                 file_path = str(upload_path.joinpath(filename).resolve())

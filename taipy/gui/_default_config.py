@@ -20,7 +20,7 @@ app_config_default: AppConfig = {
     "notification_duration": 3000,
     "single_client": False,
     "ngrok_token": "",
-    "upload_folder": ".",
+    "upload_folder": None,
 }
 
 style_config_default: StyleConfig = {
