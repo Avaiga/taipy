@@ -48,11 +48,9 @@ const FileSelector = (props: FileSelectorProps) => {
                 uploadFile(tp_varname, files, setProgress, state.id).then(
                     (value) => {
                         setUpload(false);
-                        console.log(value);
                         tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
                     },
                     (reason) => {
-                        console.error(reason);
                         setUpload(false);
                     }
                 );

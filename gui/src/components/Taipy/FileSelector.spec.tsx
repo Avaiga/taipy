@@ -7,7 +7,6 @@ import FileSelector from "./FileSelector";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 
-
 describe("FileSelector Component", () => {
     it("renders", async () => {
         const { getByText } = render(<FileSelector label="toto" />);
@@ -39,7 +38,7 @@ describe("FileSelector Component", () => {
         expect(elt).not.toHaveClass("Mui-disabled");
     });
     it("dispatch a well formed message on file selection", async () => {
-        const file = new File(['(⌐□_□)'], 'chucknorris.png', { type: 'image/png' });
+        const file = new File(["(⌐□_□)"], "chucknorris.png", { type: "image/png" });
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
@@ -50,34 +49,27 @@ describe("FileSelector Component", () => {
         const elt = getByText("FileSelector");
         const inputElt = elt.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
-        waitFor(() => expect(dispatch).toHaveBeenCalledWith({
-            name: "",
-            payload: { value: "on_action" },
-            type: "SEND_ACTION_ACTION",
-        }));
         inputElt && userEvent.upload(inputElt, file);
-    });
-    it("dispatch a well formed message on file drop", async () => {
-        const file = new File(['(⌐□_□)'], 'chucknorris2.png', { type: 'image/png' });
-        const dispatch = jest.fn();
-        const state: TaipyState = INITIAL_STATE;
-        const { getByRole } = render(
-            <TaipyContext.Provider value={{ state, dispatch }}>
-                <FileSelector label="FileSelectorDrop" tp_onAction="on_action" />
-            </TaipyContext.Provider>
+        await waitFor(() =>
+            expect(dispatch).toHaveBeenCalledWith({
+                name: "",
+                payload: { value: "on_action" },
+                type: "SEND_ACTION_ACTION",
+            })
         );
+    });
+    it("dispatch a specific text on file drop", async () => {
+        const file = new File(["(⌐□_□)"], "chucknorris2.png", { type: "image/png" });
+        const { getByRole, getByText } = render(<FileSelector label="FileSelectorDrop" />);
         const elt = getByRole("button");
         const inputElt = elt.parentElement?.querySelector("input");
         expect(inputElt).toBeInTheDocument();
-        waitFor(() => expect(dispatch).toHaveBeenCalledWith({
-            name: "",
-            payload: { value: "on_action" },
-            type: "SEND_ACTION_ACTION",
-        }));
-        inputElt && fireEvent.drop(inputElt, {
-            dataTransfer: {
-              files: [file],
-            },
-          })
+        waitFor(() => getByText("Drop here to Upload"));
+        inputElt &&
+            fireEvent.drop(inputElt, {
+                dataTransfer: {
+                    files: [file],
+                },
+            });
     });
 });
