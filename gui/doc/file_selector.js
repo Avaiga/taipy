@@ -24,6 +24,7 @@ class file_selector extends shared {
 
     /**
      * allows multiple file upload
+     * @type {bool}
      */
     multiple = false;
 
@@ -32,4 +33,10 @@ class file_selector extends shared {
      * @type {str}
      */
     extensions = ".csv,.xlsx";
+
+    /**
+     * message displayed when hovering with dragged file(s)
+     * @type {str}
+     */
+    drop_message = "Drop here to Upload";
 }

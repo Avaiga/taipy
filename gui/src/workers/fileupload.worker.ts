@@ -14,7 +14,7 @@ const uploadFile = (
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${uploadUrl}?client_id=${id}`, false);
     xhr.onerror = (e) => self.postMessage({ message: "Error: " + e, error: true });
-    xhr.onload = (e) => progressCb(e.lengthComputable ? e.loaded: 0);
+    xhr.onload = (e) => progressCb(e.lengthComputable ? e.loaded : 0);
     const fdata = new FormData();
     fdata.append("blob", blobOrFile, fileName);
     fdata.append("part", part.toString());
@@ -27,10 +27,11 @@ const uploadFile = (
 // 1MB chunk sizes.
 const BYTES_PER_CHUNK = 1024 * 1024;
 
-const getProgressCallback = (globalSize: number, offset: number) => (uploaded: number) => self.postMessage({
-    progress: (offset + uploaded) * 100 / globalSize,
-    done: false,
-} as FileUploadReturn);
+const getProgressCallback = (globalSize: number, offset: number) => (uploaded: number) =>
+    self.postMessage({
+        progress: ((offset + uploaded) * 100) / globalSize,
+        done: false,
+    } as FileUploadReturn);
 
 const process = (files: FileList, uploadUrl: string, varName: string, id: string) => {
     if (files) {
@@ -38,6 +39,7 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
         for (let i = 0; i < files.length; i++) {
             globalSize += files[i].size;
         }
+        const uploadedFiles = [];
         for (let i = 0; i < files.length; i++) {
             const blob = files[i];
             const size = blob.size;
@@ -67,13 +69,14 @@ const process = (files: FileList, uploadUrl: string, varName: string, id: string
 
                 start = end;
                 end = start + BYTES_PER_CHUNK;
+                uploadedFiles.push(blob.name);
             }
-            self.postMessage({
-                progress: 100,
-                message: blob.name + " Uploaded Succesfully",
-                done: true,
-            } as FileUploadReturn);
         }
+        self.postMessage({
+            progress: 100,
+            message: uploadedFiles.join(", ") + " Uploaded Succesfully",
+            done: true,
+        } as FileUploadReturn);
     }
 };
 

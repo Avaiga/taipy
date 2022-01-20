@@ -4,7 +4,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import UploadFile from "@mui/icons-material/UploadFile";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { createSendActionNameAction } from "../../context/taipyReducers";
+import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import { TaipyBaseProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
@@ -15,6 +15,7 @@ interface FileSelectorProps extends TaipyBaseProps {
     label?: string;
     multiple?: boolean;
     extensions?: string;
+    dropMessage?: string;
 }
 
 const handleDragOver = (evt: DragEvent) => {
@@ -23,12 +24,10 @@ const handleDragOver = (evt: DragEvent) => {
     evt.dataTransfer && (evt.dataTransfer.dropEffect = "copy");
 };
 
-const DROP_MESSAGE = "Drop here to Upload";
-
 const defaultSx = { minWidth: "0px" };
 
 const FileSelector = (props: FileSelectorProps) => {
-    const { className, id, tp_onAction, defaultLabel = "", tp_varname = "", multiple = false, extensions } = props;
+    const { className, id, tp_onAction, defaultLabel = "", tp_varname = "", multiple = false, extensions = ".csv,.xlsx", dropMessage = "Drop here to Upload" } = props;
     const [label, setLabel] = useState(defaultLabel);
     const [dropLabel, setDropLabel] = useState("");
     const [dropSx, setDropSx] = useState(defaultSx);
@@ -49,9 +48,11 @@ const FileSelector = (props: FileSelectorProps) => {
                     (value) => {
                         setUpload(false);
                         tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
+                        dispatch(createAlertAction({atype: "success", message: value, browser: false, duration: 3000}))
                     },
                     (reason) => {
                         setUpload(false);
+                        dispatch(createAlertAction({atype: "error", message: reason, browser: false, duration: 3000}))
                     }
                 );
             }
@@ -93,9 +94,9 @@ const FileSelector = (props: FileSelectorProps) => {
                 ? { minWidth: (evt.currentTarget as HTMLElement).clientWidth + "px" }
                 : sx
         );
-        setDropLabel(DROP_MESSAGE);
+        setDropLabel(dropMessage);
         handleDragOver(evt);
-    }, []);
+    }, [dropMessage]);
 
     useEffect(() => {
         const fabElt = fabRef.current;
