@@ -1,8 +1,6 @@
 from unittest import mock
 
 from flask import url_for
-from taipy.config import DataSourceConfig
-from taipy.data import Scope
 
 
 def test_get_datasource(client):

@@ -158,8 +158,8 @@ class TaskList(Resource):
             task = manager.get_or_create(config)
 
             return {
-                "msg": "pipeline created",
-                "pipeline": schema.dump(manager.repository.to_model(task)),
+                "msg": "task created",
+                "task": schema.dump(manager.repository.to_model(task)),
             }, 201
         except AttributeError:
             return {"msg": f"Config name {config_name} not found"}, 404
