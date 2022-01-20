@@ -30,7 +30,7 @@ class DataSourceConfigChecker(ConfigChecker):
             self._error(
                 data_source_config.STORAGE_TYPE_KEY,
                 data_source_config.storage_type,
-                f"{data_source_config.STORAGE_TYPE_KEY} field of DataSource {data_source_config_name} must be either csv, sql, pickle or in_memory.",
+                f"{data_source_config.STORAGE_TYPE_KEY} field of DataSource {data_source_config_name} must be either csv, sql, pickle, excel or in_memory.",
             )
 
     def _check_scope(self, data_source_config_name: str, data_source_config: DataSourceConfig):
