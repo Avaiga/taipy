@@ -20,6 +20,7 @@ app_config_default: AppConfig = {
     "notification_duration": 3000,
     "single_client": False,
     "ngrok_token": "",
+    "upload_folder": None,
 }
 
 style_config_default: StyleConfig = {
@@ -28,6 +29,7 @@ style_config_default: StyleConfig = {
     "date_selector": "",
     "dialog": "",
     "expandable": "",
+    "file_selector": "",
     "field": "",
     "image": "",
     "input": "",

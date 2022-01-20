@@ -6,6 +6,7 @@ import os
 import pathlib
 import random
 import re
+import tempfile
 import typing as t
 import warnings
 from importlib import util
@@ -15,8 +16,7 @@ from types import FrameType, FunctionType
 import __main__
 import markdown as md_lib
 from flask import Blueprint, Flask, request, send_from_directory
-
-from taipy.gui.data.image_accessor import ImageAccessor
+from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
@@ -26,6 +26,7 @@ from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .data.data_scope import _DataScopes
+from .data.image_accessor import ImageAccessor
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -53,6 +54,7 @@ class Gui(object, metaclass=Singleton):
     __UI_BLOCK_NAME = "TaipyUiBlockVar"
     __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
     __IMAGES_ROOT = "/taipy-images/"
+    __UPLOAD_URL = "/taipy-uploads"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -258,7 +260,7 @@ class Gui(object, metaclass=Singleton):
             string_value = ret_value
         return string_value
 
-    def _serve_images(self, path) -> t.Any:
+    def __serve_images(self, path) -> t.Any:
         parts = path.split("/")
         if len(parts) > 1:
             file_name = parts[-1]
@@ -266,6 +268,55 @@ class Gui(object, metaclass=Singleton):
             if dir_path:
                 return send_from_directory(dir_path + os.path.sep, file_name)
         return ("", 404)
+
+    def __upload_files(self):
+        if "var_name" not in request.form:
+            warnings.warn("No var name")
+            return ("No var name", 400)
+        var_name = request.form["var_name"]
+        multiple = "multiple" in request.form and request.form["multiple"] == "True"
+        if "blob" not in request.files:
+            warnings.warn("No file part")
+            return ("No file part", 400)
+        file = request.files["blob"]
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == "":
+            warnings.warn("No selected file")
+            return ("No selected file", 400)
+        suffix = ""
+        complete = True
+        part = 0
+        if "total" in request.form:
+            total = int(request.form["total"])
+            if total > 1 and "part" in request.form:
+                part = int(request.form["part"])
+                suffix = f".part.{part}"
+                complete = part == total - 1
+        if file:  # and allowed_file(file.filename)
+            filename = secure_filename(file.filename)
+            upload_path = pathlib.Path(self._get_app_config("upload_folder", tempfile.gettempdir()))
+            file.save(upload_path.joinpath(filename + suffix).resolve())
+            if complete:
+                file_path = str(upload_path.joinpath(filename).resolve())
+                if part > 0:
+                    try:
+                        with open(file_path, "wb") as grouped_file:
+                            for nb in range(0, part + 1):
+                                with open(upload_path.joinpath(f"{filename}.part.{nb}").resolve(), "rb") as part_file:
+                                    grouped_file.write(part_file.read())
+                    except EnvironmentError as ee:
+                        warnings.warn(f"cannot group file after chunk upload {ee}")
+                        return
+                # notify the file is uploaded
+                if multiple:
+                    value = getattr(self._get_data_scope(), var_name)
+                    if not isinstance(value, t.List):
+                        value = [] if value is None else [value]
+                    value.append(file_path)
+                    file_path = value
+                setattr(self, var_name, file_path)
+        return ("", 200)
 
     def __send_var_list_update(
         self,
@@ -278,13 +329,13 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
             if not from_front and _var == front_var:
-                ret_value = self._accessors._cast_string_value(front_var, newvalue)
+                ret_value = self._accessors._cast_string_value(front_var, newvalue, False)
                 if isinstance(ret_value, tuple):
                     newvalue, url_path, dir_path = ret_value
                     if url_path is not None and dir_path is not None:
                         self.__image_paths[url_path] = dir_path
                         newvalue = Gui.__IMAGES_ROOT + newvalue
-                else:
+                elif ret_value is not None:
                     newvalue = ret_value
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
@@ -786,8 +837,13 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(Gui.__IMAGES_ROOT + "<path:path>", view_func=self._serve_images)
+        images_bp.add_url_rule(Gui.__IMAGES_ROOT + "<path:path>", view_func=self.__serve_images)
         self._flask_blueprint.append(images_bp)
+
+        # server URL for uploaded files
+        upload_bp = Blueprint("taipy_upload", __name__)
+        upload_bp.add_url_rule(Gui.__UPLOAD_URL, view_func=self.__upload_files, methods=["POST"])
+        self._flask_blueprint.append(upload_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._flask_blueprint.append(
