@@ -116,6 +116,19 @@ def default_task():
     return __default_task()
 
 
+@pytest.fixture
+def default_task_config():
+    return Config.add_task("task1", [], print, [])
+
+
+@pytest.fixture
+def default_task_config_list():
+    configs = []
+    for i in range(10):
+        configs.append(Config.add_task(f"task-{i}", [], print, []))
+    return configs
+
+
 def __default_pipeline():
     return Pipeline(
         config_name="foo",
