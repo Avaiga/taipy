@@ -5,6 +5,7 @@ from taipy.common.alias import DataSourceId, PipelineId, ScenarioId
 from taipy.config.data_source_config import DataSourceConfig
 from taipy.data import CSVDataSource, PickleDataSource, SQLDataSource
 from taipy.data.data_source import DataSource
+from taipy.data.excel import ExcelDataSource
 from taipy.data.in_memory import InMemoryDataSource
 from taipy.data.repository import DataRepository
 from taipy.data.scope import Scope
@@ -23,7 +24,7 @@ class DataManager:
     In particular, it is exposing methods for creating, storing, updating, retrieving, deleting data sources.
     """
 
-    __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource, SQLDataSource}
+    __DATA_SOURCE_CLASSES = {InMemoryDataSource, PickleDataSource, CSVDataSource, SQLDataSource, ExcelDataSource}
     __DATA_SOURCE_CLASS_MAP = {ds_class.storage_type(): ds_class for ds_class in __DATA_SOURCE_CLASSES}  # type: ignore
 
     def __init__(self):

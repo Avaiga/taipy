@@ -1,7 +1,8 @@
 import csv
+from collections import defaultdict
 from datetime import datetime
 from os.path import isfile
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 from openpyxl import load_workbook
@@ -10,6 +11,7 @@ from taipy.common.alias import DataSourceId, JobId
 from taipy.data.data_source import DataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
+from taipy.exceptions.data_source import NonExistingExcelSheet
 
 
 class ExcelDataSource(DataSource):
@@ -92,31 +94,68 @@ class ExcelDataSource(DataSource):
             return pd.DataFrame()
 
     def _read_as(self, custom_class):
-        excelfile = load_workbook(self.properties[self.__REQUIRED_PATH_PROPERTY])
-        res = list()
-        for row in excelfile[excelfile.sheetnames[0]].rows:
-            res.append([col.value for col in row])
-        if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
-            header = res.pop(0)
-            for i, line in enumerate(res):
-                res[i] = custom_class(**dict([[h, l] for h, l in zip(header, line)]))
-        else:
-            for i, line in enumerate(res):
-                res[i] = custom_class(*line)
-        return res
+        excel_file = load_workbook(self.properties[self.__REQUIRED_PATH_PROPERTY])
+
+        sheet_names = self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY]
+        sheet_names = sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
+        work_books = defaultdict()
+
+        for sheet_name in sheet_names:
+            if not (sheet_name in excel_file.sheetnames):
+                print("raised error")
+                raise NonExistingExcelSheet(sheet_name, self.properties[self.__REQUIRED_PATH_PROPERTY])
+
+            work_sheet = excel_file[sheet_name]
+            res = list()
+            for row in work_sheet.rows:
+                res.append([col.value for col in row])
+            if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+                header = res.pop(0)
+                for i, row in enumerate(res):
+                    res[i] = custom_class(**dict([[h, r] for h, r in zip(header, row)]))
+            else:
+                for i, row in enumerate(res):
+                    res[i] = custom_class(*row)
+            work_books[sheet_name] = res
+
+        if len(sheet_names) == 1:
+            return work_books[sheet_names[0]]
+
+        return work_books
 
     def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
         if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
             if column_names:
-                return pd.read_excel(self.properties[self.__REQUIRED_PATH_PROPERTY])[column_names]
-            return pd.read_excel(self.properties[self.__REQUIRED_PATH_PROPERTY])
+                return pd.read_excel(
+                    self.properties[self.__REQUIRED_PATH_PROPERTY],
+                    sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+                )[column_names]
+            return pd.read_excel(
+                self.properties[self.__REQUIRED_PATH_PROPERTY],
+                sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+            )
         else:
             if usecols:
-                return pd.read_excel(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None, usecols=usecols)
-            return pd.read_excel(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None)
+                return pd.read_excel(
+                    self.properties[self.__REQUIRED_PATH_PROPERTY],
+                    header=None,
+                    usecols=usecols,
+                    sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+                )
+            return pd.read_excel(
+                self.properties[self.__REQUIRED_PATH_PROPERTY],
+                header=None,
+                sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+            )
 
     def _write(self, data: Any):
-        pd.DataFrame(data).to_excel(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
+        if isinstance(data, Dict) and all(map(lambda x: isinstance(x, pd.DataFrame), data.values())):
+            writer = pd.ExcelWriter(self.properties[self.__REQUIRED_PATH_PROPERTY])
+            for key in data.keys():
+                data[key].to_excel(writer, key, index=False)
+            writer.save()
+        else:
+            pd.DataFrame(data).to_excel(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         if not columns:

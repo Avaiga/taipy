@@ -1,6 +1,7 @@
 import datetime
 import os
 import pathlib
+from typing import Dict
 from unittest import mock
 
 import numpy as np
@@ -11,7 +12,7 @@ from taipy.common.alias import DataSourceId
 from taipy.data.excel import ExcelDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
-from taipy.exceptions.data_source import NoData
+from taipy.exceptions.data_source import NoData, NonExistingExcelSheet
 
 
 class TestCSVDataSource:
@@ -61,7 +62,7 @@ class TestCSVDataSource:
 
         # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
         excel_data_source_as_pandas = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "sheet_name": "sheet_name_1"}
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "sheet_name": "Sheet1"}
         )
 
         data_pandas = excel_data_source_as_pandas.read()
@@ -75,17 +76,25 @@ class TestCSVDataSource:
                 self.integer = integer
                 self.text = text
 
+        non_existing_sheet_name_custom = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={"path": path, "has_header": True, "sheet_name": "abc", "exposed_type": MyCustomObject},
+        )
+        with pytest.raises(NonExistingExcelSheet):
+            non_existing_sheet_name_custom.read()
+
         excel_data_source_as_custom_object = ExcelDataSource(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "exposed_type": MyCustomObject, "sheet_name": "sheet_name_1"},
+            properties={"path": path, "has_header": True, "sheet_name": "Sheet1", "exposed_type": MyCustomObject},
         )
 
         data_custom = excel_data_source_as_custom_object.read()
         assert isinstance(data_custom, list)
         assert len(data_custom) == 5
 
-        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+        for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
             assert isinstance(row_custom, MyCustomObject)
             assert row_pandas["id"] == row_custom.id
             assert row_pandas["integer"] == row_custom.integer
@@ -97,10 +106,12 @@ class TestCSVDataSource:
         )
         with pytest.raises(NoData):
             not_existing_excel.read()
+
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+
         # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
         excel_data_source_as_pandas = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": "sheet_name_1"}
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": "Sheet1"}
         )
         data_pandas = excel_data_source_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -113,13 +124,21 @@ class TestCSVDataSource:
                 self.integer = integer
                 self.text = text
 
+        non_existing_sheet_name_custom = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={"path": path, "has_header": False, "sheet_name": "abc", "exposed_type": MyCustomObject},
+        )
+        with pytest.raises(NonExistingExcelSheet):
+            non_existing_sheet_name_custom.read()
+
         excel_data_source_as_custom_object = ExcelDataSource(
             "bar",
             Scope.PIPELINE,
             properties={
                 "path": path,
                 "has_header": False,
-                "sheet_name": "sheet_name_1",
+                "sheet_name": "Sheet1",
                 "exposed_type": MyCustomObject,
             },
         )
@@ -128,7 +147,7 @@ class TestCSVDataSource:
         assert isinstance(data_custom, list)
         assert len(data_custom) == 6
 
-        for (index, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
+        for (_, row_pandas), row_custom in zip(data_pandas.iterrows(), data_custom):
             assert isinstance(row_custom, MyCustomObject)
             assert row_pandas[0] == row_custom.id
             assert row_pandas[1] == row_custom.integer
@@ -144,7 +163,7 @@ class TestCSVDataSource:
     )
     def test_write(self, excel_file, default_data_frame, content, columns):
         excel_ds = ExcelDataSource(
-            "foo", Scope.PIPELINE, properties={"path": excel_file, "has_header": True, "sheet_name": "sheet_name_1"}
+            "foo", Scope.PIPELINE, properties={"path": excel_file, "has_header": True, "sheet_name": "Sheet1"}
         )
         assert np.array_equal(excel_ds.read().values, default_data_frame.values)
         if not columns:
@@ -160,3 +179,161 @@ class TestCSVDataSource:
 
         excel_ds.write(None)
         assert len(excel_ds.read()) == 0
+
+    def test_read_multi_sheet_with_header(self):
+        not_existing_excel = ExcelDataSource(
+            "foo",
+            Scope.PIPELINE,
+            properties={"path": "WRONG.csv", "has_header": True, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+        )
+        with pytest.raises(NoData):
+            not_existing_excel.read()
+
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        sheet_names = ["Sheet1", "Sheet2"]
+
+        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
+        excel_data_source_as_pandas = ExcelDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "sheet_name": sheet_names}
+        )
+
+        data_pandas = excel_data_source_as_pandas.read()
+        assert isinstance(data_pandas, Dict)
+        assert len(data_pandas) == 2
+        assert all(map(lambda sheet_name: len(data_pandas[sheet_name] == 5), sheet_names))
+        assert list(data_pandas.keys()) == sheet_names
+
+        # Create the same ExcelDataSource but with custom exposed_type
+        class MyCustomObject:
+            def __init__(self, id, integer, text):
+                self.id = id
+                self.integer = integer
+                self.text = text
+
+        non_existing_sheet_name_custom = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={
+                "path": path,
+                "has_header": True,
+                "sheet_name": ["Sheet1", "xyz"],
+                "exposed_type": MyCustomObject,
+            },
+        )
+        with pytest.raises(NonExistingExcelSheet):
+            non_existing_sheet_name_custom.read()
+
+        excel_data_source_as_custom_object = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={"path": path, "has_header": True, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
+        )
+
+        data_custom = excel_data_source_as_custom_object.read()
+        assert isinstance(data_custom, Dict)
+        assert len(data_custom) == 2
+        assert all(map(lambda sheet_name: len(data_custom[sheet_name]) == 5, sheet_names))
+        assert list(data_custom.keys()) == sheet_names
+
+        for sheet_name in sheet_names:
+            sheet_data_pandas, sheet_data_custom = data_pandas[sheet_name], data_custom[sheet_name]
+            for (_, row_pandas), row_custom in zip(sheet_data_pandas.iterrows(), sheet_data_custom):
+                assert isinstance(row_custom, MyCustomObject)
+                assert row_pandas["id"] == row_custom.id
+                assert row_pandas["integer"] == row_custom.integer
+                assert row_pandas["text"] == row_custom.text
+
+    def test_read_multi_sheet_without_header(self):
+        not_existing_excel = ExcelDataSource(
+            "foo",
+            Scope.PIPELINE,
+            properties={"path": "WRONG.csv", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+        )
+        with pytest.raises(NoData):
+            not_existing_excel.read()
+
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        sheet_names = ["Sheet1", "Sheet2"]
+
+        # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
+        excel_data_source_as_pandas = ExcelDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": sheet_names}
+        )
+        data_pandas = excel_data_source_as_pandas.read()
+        assert isinstance(data_pandas, Dict)
+        assert len(data_pandas) == 2
+        assert all(map(lambda sheet_name: len(data_pandas[sheet_name]) == 6, sheet_names))
+        assert list(data_pandas.keys()) == sheet_names
+
+        # Create the same CSVDataSource but with custom exposed_type
+        class MyCustomObject:
+            def __init__(self, id, integer, text):
+                self.id = id
+                self.integer = integer
+                self.text = text
+
+        non_existing_sheet_name_custom = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={
+                "path": path,
+                "has_header": False,
+                "sheet_name": ["Sheet1", "xyz"],
+                "exposed_type": MyCustomObject,
+            },
+        )
+        with pytest.raises(NonExistingExcelSheet):
+            non_existing_sheet_name_custom.read()
+
+        excel_data_source_as_custom_object = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={
+                "path": path,
+                "has_header": False,
+                "sheet_name": sheet_names,
+                "exposed_type": MyCustomObject,
+            },
+        )
+
+        data_custom = excel_data_source_as_custom_object.read()
+        assert isinstance(data_custom, Dict)
+        assert len(data_custom) == 2
+        assert all(map(lambda sheet_name: len(data_custom[sheet_name]) == 6, sheet_names))
+        assert list(data_custom.keys()) == sheet_names
+
+        for sheet_name in sheet_names:
+            sheet_data_pandas, sheet_data_custom = data_pandas[sheet_name], data_custom[sheet_name]
+            for (_, row_pandas), row_custom in zip(sheet_data_pandas.iterrows(), sheet_data_custom):
+                assert isinstance(row_custom, MyCustomObject)
+                assert row_pandas[0] == row_custom.id
+                assert row_pandas[1] == row_custom.integer
+                assert row_pandas[2] == row_custom.text
+
+    @pytest.mark.parametrize(
+        "content,columns",
+        [
+            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None),
+            ([[11, 22, 33], [44, 55, 66]], None),
+            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"]),
+        ],
+    )
+    def test_write_multi_sheet(self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content, columns):
+        sheet_names = ["Sheet1", "Sheet2"]
+
+        excel_ds = ExcelDataSource(
+            "foo",
+            Scope.PIPELINE,
+            properties={"path": excel_file_with_multi_sheet, "has_header": True, "sheet_name": sheet_names},
+        )
+
+        for sheet_name in sheet_names:
+            assert np.array_equal(excel_ds.read()[sheet_name].values, default_multi_sheet_data_frame[sheet_name].values)
+
+        multi_sheet_content = {sheet_name: pd.DataFrame(content) for sheet_name in sheet_names}
+
+        excel_ds.write(multi_sheet_content)
+        data_pandas = excel_ds.read()
+
+        for sheet_name in sheet_names:
+            assert np.array_equal(data_pandas[sheet_name].values, multi_sheet_content[sheet_name].values)

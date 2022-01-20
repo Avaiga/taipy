@@ -26,6 +26,11 @@ class TestDataSourceConfigChecker:
         DataSourceConfigChecker(config, collector).check()
         assert len(collector.errors) == 6
 
+        config.data_sources["default"].storage_type = "excel"
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.errors) == 3
+
         config.data_sources["default"].storage_type = "pickle"
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
@@ -97,6 +102,39 @@ class TestDataSourceConfigChecker:
         required_properties = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
         config.data_sources["default"].storage_type = "sql"
         config.data_sources["default"].properties = {key: "" for key in required_properties}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+
+        config.data_sources["default"].storage_type = "excel"
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.errors) == 3
+
+        config.data_sources["default"].storage_type = "excel"
+        config.data_sources["default"].properties = {"has_header": True}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.errors) == 2
+
+        config.data_sources["default"].storage_type = "excel"
+        config.data_sources["default"].properties = {"has_header": True, "path": "bar"}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.errors) == 1
+
+        config.data_sources["default"].storage_type = "excel"
+        config.data_sources["default"].properties = {"has_header": True, "path": "bar", "sheet_name": "sheet_name_1"}
+        collector = IssueCollector()
+        DataSourceConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+
+        config.data_sources["default"].storage_type = "excel"
+        config.data_sources["default"].properties = {
+            "has_header": True,
+            "path": "bar",
+            "sheet_name": ["sheet_name_1", "sheet_name_2"],
+        }
         collector = IssueCollector()
         DataSourceConfigChecker(config, collector).check()
         assert len(collector.errors) == 0

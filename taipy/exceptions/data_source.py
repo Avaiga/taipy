@@ -45,3 +45,12 @@ class NonExistingDataSource(Exception):
 
     def __init__(self, data_source_id: str):
         self.message = f"DataSource: {data_source_id} does not exist."
+
+
+class NonExistingExcelSheet(Exception):
+    """
+    Raised if a requested Sheet name does not exist in the provided Excel file.
+    """
+
+    def __init__(self, sheet_name: str, excel_file_name: str):
+        self.message = f"{sheet_name} does not exist in {excel_file_name}."
