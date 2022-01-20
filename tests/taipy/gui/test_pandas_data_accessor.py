@@ -21,6 +21,22 @@ def test_simple_data(gui: Gui, helpers, small_dataframe):
     assert len(data) == 3
 
 
+def test_simple_data_with_arrow(gui: Gui, helpers, small_dataframe):
+    accessor = PandasDataAccessor()
+    pd = pandas.DataFrame(data=small_dataframe)
+    assert accessor.is_data_access("x", pd)
+    with pytest.warns(UserWarning):
+        no_value = accessor.cast_string_value("x", pd)
+    assert no_value is None
+    ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1}, DataFormat.APACHE_ARROW)
+    assert ret_data
+    value = ret_data["value"]
+    assert value
+    assert value["rowcount"] == 3
+    data = value["data"]
+    assert isinstance(data, bytes)
+
+
 def test_slice(gui: Gui, helpers, small_dataframe):
     accessor = PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
