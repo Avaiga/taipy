@@ -1,9 +1,11 @@
 import os
 import shutil
+import uuid
 
 import pytest
 from dotenv import load_dotenv
 from taipy.common.alias import DataSourceId
+from taipy.config import Config, DataSourceConfig, PipelineConfig
 from taipy.data import InMemoryDataSource, Scope
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
@@ -69,6 +71,19 @@ def default_datasource():
     )
 
 
+@pytest.fixture
+def default_datasource_config():
+    return Config.add_data_source(uuid.uuid4().hex, "in_memory", Scope.PIPELINE)
+
+
+@pytest.fixture
+def default_datasource_config_list():
+    configs = []
+    for i in range(10):
+        configs.append(Config.add_data_source(f"ds-{i}", "in_memory", Scope.PIPELINE))
+    return configs
+
+
 def __default_task():
     input_ds = InMemoryDataSource(
         "input_ds",
@@ -109,9 +124,26 @@ def __default_pipeline():
     )
 
 
+def __task_config():
+    return Config.add_task("task1", [], print, [])
+
+
 @pytest.fixture
 def default_pipeline():
     return __default_pipeline()
+
+
+@pytest.fixture
+def default_pipeline_config():
+    return Config.add_pipeline(uuid.uuid4().hex, __task_config())
+
+
+@pytest.fixture
+def default_pipeline_config_list():
+    configs = []
+    for i in range(10):
+        configs.append(Config.add_pipeline(uuid.uuid4().hex, __task_config()))
+    return configs
 
 
 @pytest.fixture

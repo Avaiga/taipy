@@ -138,3 +138,5 @@ Dockerfile.dev
 .databkp/
 
 *.db
+
+setup/
