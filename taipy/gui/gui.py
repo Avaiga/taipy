@@ -328,13 +328,13 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
             if not from_front and _var == front_var:
-                ret_value = self._accessors._cast_string_value(front_var, newvalue)
+                ret_value = self._accessors._cast_string_value(front_var, newvalue, False)
                 if isinstance(ret_value, tuple):
                     newvalue, url_path, dir_path = ret_value
                     if url_path is not None and dir_path is not None:
                         self.__image_paths[url_path] = dir_path
                         newvalue = Gui.__IMAGES_ROOT + newvalue
-                else:
+                elif ret_value is not None:
                     newvalue = ret_value
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
