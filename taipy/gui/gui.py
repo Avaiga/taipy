@@ -47,7 +47,15 @@ from .utils._evaluator import _Evaluator
 
 
 class Gui(object, metaclass=Singleton):
-    """The class that handles the Graphical User Interface."""
+    """The class that handles the Graphical User Interface.
+
+    Attributes:
+
+        on_action (t.FunctionType): The default function that is called when a control
+            triggers an action, as the result of an interaction with the end-user.
+        on_change (t.FunctionType): The function that is called when a control
+            modifies the variable it is bound to, as the result of an interaction with the end-user.
+    """
 
     __root_page_name = "TaiPy_root_page"
     __env_filename = "taipy.gui.env"
@@ -77,7 +85,7 @@ class Gui(object, metaclass=Singleton):
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        page: t.Optional[PageRenderer] = None,
+        page: t.Optional[t.Union[str, PageRenderer]] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
@@ -85,17 +93,22 @@ class Gui(object, metaclass=Singleton):
     ):
         """Initializes a new Gui instance.
 
-        Args:
+        Parameters:
+
+            page (t.Union[str, PageRenderer], optional): An optional `PageRenderer` instance
+                that is used when there is a single page in this interface, referenced as the
+                root page (located at `/`).
+
+                If `page` is a raw string, a `Markdown` page renderer is built from that string.
+
+                Note that if `pages` is provided, those pages are added as well.
+
             css_file (string):  An optional pathname to a CSS file that gets used as a style sheet in
                 all the pages.
 
-                The default value is a file that has the same basename as the Python
+                The default value is a file that has the same base name as the Python
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
-
-            page (PageRenderer): An optional `PageRenderer` class that is used when there
-                is a single page in this interface, referenced as the root page (in `/`).
-                Note that if `pages` is provided, those pages are added as well.
         """
         self._server = Server(
             self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
@@ -576,7 +589,7 @@ class Gui(object, metaclass=Singleton):
     def add_page(
         self,
         name: str,
-        renderer: PageRenderer,
+        renderer: t.Union[str, PageRenderer],
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -590,7 +603,11 @@ class Gui(object, metaclass=Singleton):
             raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character')
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
-        if not isinstance(renderer, PageRenderer):
+        if isinstance(renderer, str):
+            from .renderers import Markdown
+
+            renderer = Markdown(renderer)
+        elif not isinstance(renderer, PageRenderer):
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid PageRenderer')
         # Init a new page
         new_page = Page()
@@ -601,7 +618,7 @@ class Gui(object, metaclass=Singleton):
         self._config.pages.append(new_page)
         self._config.routes.append(name)
 
-    def add_pages(self, pages: t.Union[dict[str, PageRenderer], str] = None) -> None:
+    def add_pages(self, pages: t.Union[dict[str, t.Union[str, PageRenderer]], str] = None) -> None:
         if isinstance(pages, dict):
             for k, v in pages.items():
                 if k == "/":
@@ -642,14 +659,18 @@ class Gui(object, metaclass=Singleton):
 
     def add_partial(
         self,
-        renderer: PageRenderer,
+        renderer: t.Union[str, PageRenderer],
     ) -> Partial:
         # Init a new partial
         new_partial = Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
-        if not isinstance(renderer, PageRenderer):
+        if isinstance(renderer, str):
+            from .renderers import Markdown
+
+            renderer = Markdown(renderer)
+        elif not isinstance(renderer, PageRenderer):
             raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
         new_partial.renderer = renderer
         # Append partial to _config
