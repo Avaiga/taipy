@@ -29,6 +29,7 @@ style_config_default: StyleConfig = {
     "date_selector": "",
     "dialog": "",
     "expandable": "",
+    "file_download": "",
     "file_selector": "",
     "field": "",
     "image": "",

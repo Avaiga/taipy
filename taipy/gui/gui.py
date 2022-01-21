@@ -26,7 +26,7 @@ from .config import AppConfigOption, GuiConfig
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .data.data_scope import _DataScopes
-from .data.image_accessor import ImageAccessor
+from .data.content_accessor import ContentAccessor
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -53,14 +53,14 @@ class Gui(object, metaclass=Singleton):
     __env_filename = "taipy.gui.env"
     __UI_BLOCK_NAME = "TaipyUiBlockVar"
     __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
-    __IMAGES_ROOT = "/taipy-images/"
+    __CONTENT_ROOT = "/taipy-content/"
     __UPLOAD_URL = "/taipy-uploads"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
-    __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-images"]
+    __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-content", "taipy-uploads"]
     _agregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
     # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
@@ -105,9 +105,8 @@ class Gui(object, metaclass=Singleton):
         self._flask = flask
         self._css_file = css_file
 
-        self.__image_paths: t.Dict[str, str] = {}
-
         self._config = GuiConfig()
+        self.__contentAccessor = ContentAccessor()
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
 
@@ -248,25 +247,24 @@ class Gui(object, metaclass=Singleton):
             self.on_change(self, var_name, value)
         self.__send_var_list_update(modified_vars, from_front, var_name)
 
-    def _get_image_content(self, var_name: str, value: t.Any, is_dynamic: bool) -> t.Any:
-        var_name = var_name if is_dynamic else Gui.__IMAGES_ROOT
-        self.register_data_accessor(ImageAccessor, var_name)
-        ret_value = self._accessors._cast_string_value(var_name, value)
+    def _get_content(self, var_name: str, value: t.Any, is_dynamic: bool, image: bool) -> t.Any:
+        var_name = self.__contentAccessor.register_var(var_name, image, is_dynamic)
+        ret_value = self.__contentAccessor.get_info(var_name, value)
         if isinstance(ret_value, tuple):
-            string_value, url_path, dir_path = ret_value
-            self.__image_paths[url_path] = dir_path
-            string_value = Gui.__IMAGES_ROOT + string_value
+            string_value = Gui.__CONTENT_ROOT + ret_value[0]
         else:
             string_value = ret_value
         return string_value
 
-    def __serve_images(self, path) -> t.Any:
+    def __serve_content(self, path: str) -> t.Any:
         parts = path.split("/")
         if len(parts) > 1:
             file_name = parts[-1]
-            dir_path = self.__image_paths.get(path[: -len(file_name) - 1])
+            (dir_path, as_attachment) = self.__contentAccessor.get_content_path(
+                path[: -len(file_name) - 1], file_name, request.args.get("varname"), request.args.get("bypass")
+            )
             if dir_path:
-                return send_from_directory(dir_path + os.path.sep, file_name)
+                return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
         return ("", 404)
 
     def __upload_files(self):
@@ -329,13 +327,10 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
             if not from_front and _var == front_var:
-                ret_value = self._accessors._cast_string_value(front_var, newvalue, False)
+                ret_value = self.__contentAccessor.get_info(front_var, newvalue)
                 if isinstance(ret_value, tuple):
-                    newvalue, url_path, dir_path = ret_value
-                    if url_path is not None and dir_path is not None:
-                        self.__image_paths[url_path] = dir_path
-                        newvalue = Gui.__IMAGES_ROOT + newvalue
-                elif ret_value is not None:
+                    newvalue = Gui.__CONTENT_ROOT + ret_value[0]
+                else:
                     newvalue = ret_value
             if isinstance(newvalue, datetime.datetime):
                 newvalue = dateToISO(newvalue)
@@ -758,10 +753,8 @@ class Gui(object, metaclass=Singleton):
             return
         self.__send_ws_navigate(to)
 
-    def register_data_accessor(
-        self, data_accessor_class: t.Type[DataAccessor], var_name: t.Optional[str] = None
-    ) -> None:
-        self._accessors._register(data_accessor_class, var_name)
+    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
+        self._accessors._register(data_accessor_class)
 
     def get_flask_app(self):
         return self._server.get_flask()
@@ -837,7 +830,7 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(Gui.__IMAGES_ROOT + "<path:path>", view_func=self.__serve_images)
+        images_bp.add_url_rule(Gui.__CONTENT_ROOT + "<path:path>", view_func=self.__serve_content)
         self._flask_blueprint.append(images_bp)
 
         # server URL for uploaded files
