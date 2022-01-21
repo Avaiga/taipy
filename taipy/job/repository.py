@@ -4,20 +4,23 @@ from datetime import datetime
 from taipy.common.utils import fcts_to_dict, load_fct
 from taipy.config.config import Config
 from taipy.exceptions import InvalidSubscriber
+from taipy.job import Job
+from taipy.job.job_model import JobModel
 from taipy.repository import FileSystemRepository
-from taipy.task import Job
 from taipy.task.repository import TaskRepository
-from taipy.task.scheduler.job_model import JobModel
 
 
 class JobRepository(FileSystemRepository[JobModel, Job]):
+    def __init__(self, dir_name="jobs"):
+        super().__init__(model=JobModel, dir_name=dir_name)
+
     def to_model(self, job):
         return JobModel(
             job.id,
             job.task.id,
             job.status,
             job.creation_date.isoformat(),
-            fcts_to_dict(job._subscribers),
+            [],
             self.__to_names(job.exceptions),
         )
 
@@ -26,11 +29,11 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
 
         job.status = model.status
         job.creation_date = datetime.fromisoformat(model.creation_date) if model.creation_date else None
-        for it in model.subscribers:
-            try:
-                job._subscribers.append(load_fct(it.get("fct_module"), it.get("fct_name")))
-            except AttributeError:
-                raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be load.")
+        # for it in model.subscribers:
+        #     try:
+        #         job._subscribers.append(load_fct(it.get("fct_module"), it.get("fct_name")))
+        #     except AttributeError:
+        #         raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be load.")
         job.__exceptions = []
 
         return job

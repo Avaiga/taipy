@@ -8,8 +8,10 @@ from taipy.data import Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound, NonExistingTask
 from taipy.exceptions.task import MultipleTaskFromSameConfigWithSameParent
+from taipy.job import JobManager
+from taipy.scheduler.abstract_scheduler import AbstractScheduler
+from taipy.scheduler.Scheduler_factory import SchedulerFactory
 from taipy.task.repository import TaskRepository
-from taipy.task.scheduler import TaskScheduler
 from taipy.task.task import Task
 
 
@@ -19,15 +21,27 @@ class TaskManager:
 
     Attributes:
         tasks (Dict[(TaskId, Task)]): A dictionary that associates every task with its identifier.
-        task_scheduler (TaskScheduler): The task scheduler that can run tasks.
+        scheduler (AbstractScheduler): The scheduler for submitting tasks.
         data_manager (DataManager): The Data Manager that interacts with data sources.
         repository (TaskRepository): The repository where tasks are saved.
     """
 
-    tasks: Dict[(TaskId, Task)] = {}
-    task_scheduler: TaskScheduler = TaskScheduler()
-    data_manager: DataManager = task_scheduler.data_manager
     repository: TaskRepository = TaskRepository()
+    _scheduler = None
+
+    @property
+    def scheduler(self) -> AbstractScheduler:
+        if not self._scheduler:
+            self._scheduler = SchedulerFactory.build_scheduler()
+        return self._scheduler
+
+    @property
+    def job_manager(self) -> JobManager:
+        return self.scheduler.job_manager
+
+    @property
+    def data_manager(self) -> DataManager:
+        return self.scheduler.data_manager
 
     def delete_all(self):
         """
@@ -165,7 +179,11 @@ class TaskManager:
         ModelNotFound error if no pipeline corresponds to pipeline_id.
         """
         task = self.get(task_id)
-        jobs = self.task_scheduler.get_jobs()
+
+        jobs = self.job_manager.get_all()
+        for job in jobs:
+            if job.task.id == task.id:
+                self.job_manager.delete(job)
 
         if scenario_id:
             self.remove_if_parent_id_eq(task.input.values(), scenario_id)
@@ -174,9 +192,6 @@ class TaskManager:
             self.remove_if_parent_id_eq(task.input.values(), pipeline_id)
             self.remove_if_parent_id_eq(task.output.values(), pipeline_id)
 
-        for job in jobs:
-            if job.task.id == task.id:
-                self.task_scheduler.delete(job)
         self.delete(task_id)
 
     def remove_if_parent_id_eq(self, data_sources, id_):

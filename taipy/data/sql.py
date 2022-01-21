@@ -113,7 +113,7 @@ class SQLDataSource(DataSource):
 
     def _read_as(self, query, custom_class):
         with self.__engine.connect() as connection:
-            query_result = connection.execute(text(query))
+            query_result = connection.dispatch(text(query))
         return list(map(lambda row: custom_class(**row), query_result))
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
@@ -164,7 +164,7 @@ class SQLDataSource(DataSource):
                 markers = markers
                 ins = "INSERT INTO {tablename} VALUES {markers}"
                 ins = ins.format(tablename=write_table.name, markers=markers)
-                connection.execute(ins, list(data))
+                connection.dispatch(ins, list(data))
             except:
                 transaction.rollback()
                 raise
@@ -189,7 +189,7 @@ class SQLDataSource(DataSource):
                 ins = "INSERT INTO {tablename} VALUES ({markers})"
                 ins = ins.format(tablename=write_table.name, markers=markers)
 
-                connection.execute(ins, data)
+                connection.dispatch(ins, data)
             except:
                 transaction.rollback()
                 raise
@@ -208,7 +208,7 @@ class SQLDataSource(DataSource):
         """
         with connection.begin() as transaction:
             try:
-                connection.execute(write_table.insert(), data)
+                connection.dispatch(write_table.insert(), data)
             except:
                 transaction.rollback()
                 raise

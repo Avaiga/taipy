@@ -31,11 +31,6 @@ class JobConfig:
     MODE_VALUE_AIRFLOW = "airflow"
     DEFAULT_MODE = MODE_VALUE_STANDALONE
 
-    PARALLEL_EXECUTION_KEY = "parallel_execution"
-    PARALLEL_EXECUTION_TRUE = True
-    PARALLEL_EXECUTION_FALSE = False
-    DEFAULT_PARALLEL_EXECUTION = PARALLEL_EXECUTION_FALSE
-
     NB_OF_WORKERS_KEY = "nb_of_workers"
     DEFAULT_NB_OF_WORKERS = 1
 
@@ -60,7 +55,6 @@ class JobConfig:
     def __init__(
         self,
         mode: str = None,
-        parallel_execution: bool = None,
         nb_of_workers: int = None,
         hostname: str = None,
         airflow_dags_folder: str = None,
@@ -72,7 +66,6 @@ class JobConfig:
     ):
         self.mode = mode
 
-        self.parallel_execution = parallel_execution
         self.nb_of_workers = nb_of_workers
 
         self.hostname = hostname
@@ -91,7 +84,6 @@ class JobConfig:
     def default_config(cls):
         return JobConfig(
             cls.DEFAULT_MODE,
-            cls.DEFAULT_PARALLEL_EXECUTION,
             cls.DEFAULT_NB_OF_WORKERS,
             cls.DEFAULT_HOSTNAME,
             cls.DEFAULT_AIRFLOW_DAG_FOLDER,
@@ -105,8 +97,6 @@ class JobConfig:
         as_dict = {}
         if self.mode is not None:
             as_dict[self.MODE_KEY] = self.mode
-        if self.parallel_execution is not None:
-            as_dict[self.PARALLEL_EXECUTION_KEY] = self.parallel_execution
         if self.nb_of_workers is not None:
             as_dict[self.NB_OF_WORKERS_KEY] = self.nb_of_workers
         if self.hostname is not None:
@@ -128,7 +118,6 @@ class JobConfig:
     def from_dict(cls, config_as_dict: Dict[str, Any]):
         config = JobConfig()
         config.mode = config_as_dict.pop(cls.MODE_KEY, None)
-        config.parallel_execution = config_as_dict.pop(cls.PARALLEL_EXECUTION_KEY, None)
         config.nb_of_workers = config_as_dict.pop(cls.NB_OF_WORKERS_KEY, None)
         config.hostname = config_as_dict.pop(cls.HOSTNAME_KEY, None)
         config.airflow_dags_folder = config_as_dict.pop(cls.AIRFLOW_DAGS_FOLDER_KEY, None)
@@ -141,7 +130,6 @@ class JobConfig:
 
     def update(self, config_as_dict):
         self.mode = config_as_dict.pop(self.MODE_KEY, self.mode)
-        self.parallel_execution = config_as_dict.pop(self.PARALLEL_EXECUTION_KEY, self.parallel_execution)
         self.nb_of_workers = config_as_dict.pop(self.NB_OF_WORKERS_KEY, self.nb_of_workers)
         self.hostname = config_as_dict.pop(self.HOSTNAME_KEY, self.hostname)
         self.airflow_dags_folder = config_as_dict.pop(self.AIRFLOW_DAGS_FOLDER_KEY, self.airflow_dags_folder)

@@ -3,7 +3,6 @@ import uuid
 from collections import defaultdict
 from typing import Callable, Dict, List, Optional, Set
 
-import networkx
 import networkx as nx
 
 from taipy.common import protect_name

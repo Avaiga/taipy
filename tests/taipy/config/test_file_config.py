@@ -11,7 +11,6 @@ def test_read_error_node_can_not_appear_twice():
     config = NamedTemporaryFile(
         """
 [JOB]
-parallel_execution = false
 nb_of_workers = 40
 
 [JOB]
@@ -27,7 +26,6 @@ nb_of_workers = 10
 def test_read_skip_configuration_outside_nodes():
     config = NamedTemporaryFile(
         """
-parallel_execution = true
 nb_of_workers = 10
     """
     )
@@ -48,7 +46,6 @@ storage_folder = ".data/"
 
 [JOB]
 mode = "standalone"
-parallel_execution = true
 nb_of_workers = 1
 hostname = "localhost"
 airflow_dags_folder = ".dags/"
@@ -103,7 +100,7 @@ owner = "Raymond Kopa"
     """.strip()
 
     Config.set_global_config(True, "my_broker_end_point")
-    Config.set_job_config(mode="standalone", parallel_execution=True)
+    Config.set_job_config(mode="standalone")
     Config.add_default_data_source(storage_type="in_memory", custom="default_custom_prop")
     ds1_cfg_v2 = Config.add_data_source("ds1", storage_type="pickle", default_data="ds1", custom="custom property")
     ds2_cfg_v2 = Config.add_data_source(

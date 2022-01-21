@@ -111,7 +111,7 @@ class TestSQLDataSource:
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = [
+            cursor_mock.dispatch.return_value = [
                 {"foo": "baz", "bar": "qux"},
                 {"foo": "quux", "bar": "quuz"},
                 {"foo": "corge"},
@@ -147,7 +147,7 @@ class TestSQLDataSource:
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = []
+            cursor_mock.dispatch.return_value = []
             data_2 = sql_data_source._read_as("fake query", MyCustomObject)
         assert isinstance(data_2, list)
         assert len(data_2) == 0
@@ -181,5 +181,5 @@ class TestSQLDataSource:
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = None
+            cursor_mock.dispatch.return_value = None
             ds._write(data)

@@ -1,17 +1,16 @@
 import logging
 from functools import partial
-from typing import Callable, List, Optional, Set, Union
+from typing import Callable, List, Optional, Union
 
-from taipy.airflow.airflow import Airflow
 from taipy.common.alias import PipelineId, ScenarioId
-from taipy.config import Config
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.data import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
+from taipy.job import Job
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.repository import PipelineRepository
-from taipy.task import Job
+from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.task.manager.task_manager import TaskManager
 
 
@@ -21,16 +20,11 @@ class PipelineManager:
     """
 
     task_manager = TaskManager()
-    data_manager = task_manager.data_manager
-    task_scheduler = task_manager.task_scheduler
-    airflow = Airflow()
-    __status_notifier: Set[Callable] = set()
+    repository = PipelineRepository()
 
-    def __init__(self):
-        """
-        Initializes a new pipeline manager.
-        """
-        self.repository = PipelineRepository()
+    @property
+    def scheduler(self) -> AbstractScheduler:
+        return self.task_manager.scheduler
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
@@ -169,16 +163,10 @@ class PipelineManager:
         callbacks = callbacks or []
         if isinstance(pipeline, Pipeline):
             pipeline = self.get(pipeline.id)
-        if isinstance(pipeline, str):
+        else:
             pipeline = self.get(pipeline)
         pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline) + callbacks
-        if not Config.job_config().is_standalone():
-            tasks = [task for task in pipeline.tasks.values()]
-            self.airflow.trigger(pipeline.id, tasks)
-        else:
-            for tasks in pipeline.get_sorted_tasks():
-                for task in tasks:
-                    self.task_scheduler.submit(task, pipeline_subscription_callback)
+        self.scheduler.submit(pipeline, pipeline_subscription_callback)
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:

@@ -120,7 +120,6 @@ class Config:
     def set_job_config(
         cls,
         mode: str = None,
-        parallel_execution: bool = None,
         nb_of_workers: int = None,
         hostname: str = None,
         airflow_dags_folder: str = None,
@@ -133,7 +132,6 @@ class Config:
         """Configures fields related to job execution."""
         job_config = JobConfig(
             mode,
-            parallel_execution,
             nb_of_workers,
             hostname,
             airflow_dags_folder,

@@ -15,7 +15,6 @@ def reset_configuration_singleton():
 
 def test_job_config():
     assert Config.job_config().mode == "standalone"
-    assert Config.job_config().parallel_execution is False
     assert Config.job_config().nb_of_workers == 1
     assert Config.job_config().hostname == "localhost"
     assert Config.job_config().airflow_dags_folder == ".dags/"
@@ -35,7 +34,6 @@ def test_job_config():
     )
 
     assert Config.job_config().mode == "airflow"
-    assert Config.job_config().parallel_execution is False
     assert Config.job_config().nb_of_workers == 2
     assert Config.job_config().hostname == "http://localhost:8080"
     assert Config.job_config().airflow_dags_folder == ".testDags/"
