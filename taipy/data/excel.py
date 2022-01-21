@@ -102,7 +102,6 @@ class ExcelDataSource(DataSource):
 
         for sheet_name in sheet_names:
             if not (sheet_name in excel_file.sheetnames):
-                print("raised error")
                 raise NonExistingExcelSheet(sheet_name, self.properties[self.__REQUIRED_PATH_PROPERTY])
 
             work_sheet = excel_file[sheet_name]
