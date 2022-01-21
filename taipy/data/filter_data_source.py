@@ -1,3 +1,4 @@
+import collections
 from copy import deepcopy
 from typing import Dict, Iterable, List, Union
 
@@ -6,23 +7,25 @@ from pandas.core.common import is_bool_indexer
 
 
 class FilterDataSource:
+    __DATAFRAME_DATA_TYPE = "dataframe"
+    __CUSTOM_DATA_TYPE = "custom"
+
     def __init__(self, data_source_id, data: Union[pd.DataFrame, List]) -> None:
         self.data_source_id = data_source_id
         self.data = data
         self.data_type = None
         if isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series):
-            self.data_type = "dataframe"
+            self.data_type = self.__DATAFRAME_DATA_TYPE
         else:
-            # TODO: current input: List, else??
-            self.data_type = "custom"
+            self.data_type = self.__CUSTOM_DATA_TYPE
 
     def data_is_dataframe(self) -> bool:
-        return self.data_type == "dataframe"
+        return self.data_type == self.__DATAFRAME_DATA_TYPE
 
     def __getitem__(self, key):
         if isinstance(key, FilterDataSource):
             key = key.data
-        if FilterDataSource.__is_hashable(key):  # try hashable
+        if isinstance(key, collections.Hashable):
             filtered_data = self.__getitem_hashable(key)
         elif isinstance(key, slice):
             filtered_data = self.__getitem_slice(key)
@@ -36,21 +39,10 @@ class FilterDataSource:
             filtered_data = None
         return FilterDataSource(self.data_source_id, filtered_data)
 
-    @staticmethod
-    def __is_hashable(value):
-        try:
-            hash(value)
-        except TypeError:
-            return False
-        else:
-            return True
-
     def __getitem_hashable(self, key):
         if self.data_is_dataframe():
-            if key in self.data.columns:
-                return self.data[key]
-        else:
-            return [getattr(e, key) for e in self.data]
+            return self.data.get(key)
+        return [getattr(e, key) for e in self.data]
 
     def __getitem_slice(self, key):
         return self.data[key]
@@ -60,7 +52,7 @@ class FilterDataSource:
             return self.data[key]
 
         filtered_data = deepcopy(self.data)
-        has_dict_element = all(map(lambda x: isinstance(x, Dict), filtered_data))
+        has_dict_element = all(isinstance(x, Dict) for x in filtered_data)
         if has_dict_element:
             for col in key.columns:
                 for i, row in enumerate(key[col]):
@@ -82,10 +74,7 @@ class FilterDataSource:
             return self.data[keys]
         filtered_data = []
         for e in self.data:
-            row = {}
-            for k in keys:
-                row[k] = getattr(e, k)
-            filtered_data.append(row)
+            filtered_data.append({k: getattr(e, k) for k in keys})
         return filtered_data
 
     def __eq__(self, value):
