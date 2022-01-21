@@ -10,8 +10,9 @@ def test_file_upload_no_varname(gui: Gui, helpers):
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    ret = flask_client.post(f"/taipy-uploads?client_id={sid}")
-    assert ret.status_code == 400
+    with pytest.warns(UserWarning): 
+        ret = flask_client.post(f"/taipy-uploads?client_id={sid}")
+        assert ret.status_code == 400
 
 
 def test_file_upload_no_blob(gui: Gui, helpers):
@@ -19,8 +20,9 @@ def test_file_upload_no_blob(gui: Gui, helpers):
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    ret = flask_client.post(f"/taipy-uploads?client_id={sid}", data={"var_name": "varname"})
-    assert ret.status_code == 400
+    with pytest.warns(UserWarning):
+        ret = flask_client.post(f"/taipy-uploads?client_id={sid}", data={"var_name": "varname"})
+        assert ret.status_code == 400
 
 
 def test_file_upload_no_filename(gui: Gui, helpers):
@@ -29,8 +31,9 @@ def test_file_upload_no_filename(gui: Gui, helpers):
     file = (io.BytesIO(b"abcdef"), "")
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    ret = flask_client.post(f"/taipy-uploads?client_id={sid}", data={"var_name": "varname", "blob": file})
-    assert ret.status_code == 400
+    with pytest.warns(UserWarning):
+        ret = flask_client.post(f"/taipy-uploads?client_id={sid}", data={"var_name": "varname", "blob": file})
+        assert ret.status_code == 400
 
 
 def test_file_upload_simple(gui: Gui, helpers):
