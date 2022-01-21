@@ -553,7 +553,7 @@ class Gui(object, metaclass=Singleton):
 
     def _get_valid_adapter_result(
         self, value: t.Any, index: t.Optional[str], id_only=False
-    ) -> t.Union[tuple[str, t.Union[str, TaipyImage]], str, None]:
+    ) -> t.Union[t.Tuple[str, ...], str, None]:
         return self.__adapter._get_valid_adapter_result(value, index, id_only)
 
     def _is_ui_blocked(self):

@@ -45,7 +45,7 @@ class Factory:
         .set_value_and_default(with_update=False)
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("on_action", AttributeType.string, ""),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
@@ -58,12 +58,12 @@ class Factory:
         .set_value_and_default(with_default=False)
         .set_attributes(
             [
-                ("id"),
-                ("title"),
+                ("id",),
+                ("title",),
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
                 ("layout", AttributeType.dict),
-                ("range_change"),
+                ("range_change",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("limit_rows", AttributeType.boolean),
             ]
@@ -85,7 +85,7 @@ class Factory:
         .set_attributes(
             [
                 ("with_time", AttributeType.boolean),
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         )
@@ -98,9 +98,9 @@ class Factory:
         .set_value_and_default()
         .set_attributes(
             [
-                ("id"),
-                ("title"),
-                ("cancel_action"),
+                ("id",),
+                ("title",),
+                ("cancel_action",),
                 ("cancel_label", AttributeType.string, "Cancel"),
                 ("validate_action", AttributeType.string, "validate"),
                 ("validate_label", AttributeType.string, "Validate"),
@@ -118,7 +118,7 @@ class Factory:
         .set_value_and_default()
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("expanded", AttributeType.dynamic_boolean, True),
             ]
         ),
@@ -131,8 +131,8 @@ class Factory:
         .set_dataType()
         .set_attributes(
             [
-                ("format"),
-                ("id"),
+                ("format",),
+                ("id",),
             ]
         ),
         "file_download": lambda control_type, attrs: Builder(
@@ -144,13 +144,13 @@ class Factory:
         .set_content("content", image=False)
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("on_action", AttributeType.string),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("render", AttributeType.dynamic_boolean, True),
                 ("auto", AttributeType.boolean, False),
                 ("bypass_preview", AttributeType.boolean, True),
-                ("name"),
+                ("name",),
             ]
         ),
         "file_selector": lambda control_type, attrs: Builder(
@@ -162,12 +162,12 @@ class Factory:
         .set_file_content()
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("on_action", AttributeType.string),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("multiple", AttributeType.boolean, False),
-                ("extensions"),
-                ("drop_message"),
+                ("extensions",),
+                ("drop_message",),
             ]
         ),
         "image": lambda control_type, attrs: Builder(
@@ -179,11 +179,11 @@ class Factory:
         .set_content("content")
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("on_action", AttributeType.string, ""),
                 ("active", AttributeType.dynamic_boolean, True),
-                ("width"),
-                ("height"),
+                ("width",),
+                ("height",),
             ]
         ),
         "input": lambda control_type, attrs: Builder(
@@ -196,7 +196,7 @@ class Factory:
         .set_propagate()
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         ),
@@ -206,9 +206,9 @@ class Factory:
         .set_value_and_default(with_default=False)
         .set_attributes(
             [
-                ("id"),
-                ("columns[mobile]"),
-                ("gap"),
+                ("id",),
+                ("columns[mobile]",),
+                ("gap",),
             ]
         ),
         "navbar": lambda control_type, attrs: Builder(
@@ -218,7 +218,7 @@ class Factory:
         .set_lov()
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         ),
@@ -233,7 +233,7 @@ class Factory:
         .set_propagate()
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         ),
@@ -243,9 +243,9 @@ class Factory:
         .set_value_and_default()
         .set_attributes(
             [
-                ("id"),
+                ("id",),
                 ("anchor", AttributeType.string, "left"),
-                ("close_action"),
+                ("close_action",),
                 ("persistent", AttributeType.boolean, False),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width", AttributeType.string_or_number, "30vw"),
@@ -257,7 +257,7 @@ class Factory:
         .set_page_id(),
         "part": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Part", attributes=attrs, default_value=""
-        ).set_attributes([("id"), ("render", AttributeType.dynamic_boolean, True)]),
+        ).set_attributes([("id",), ("render", AttributeType.dynamic_boolean, True)]),
         "selector": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Selector",
@@ -271,7 +271,7 @@ class Factory:
                 ("filter", AttributeType.boolean),
                 ("multiple", AttributeType.boolean),
                 ("dropdown", AttributeType.boolean, False),
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("height", AttributeType.string_or_number),
                 ("width", AttributeType.string_or_number),
@@ -290,7 +290,7 @@ class Factory:
             [
                 ("min", AttributeType.number, 0),
                 ("max", AttributeType.number, 100),
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width", AttributeType.string_or_number, 200),
             ]
@@ -307,7 +307,7 @@ class Factory:
         .set_value_and_default(with_update=False)
         .set_propagate()
         .set_attributes(
-            [("id"), ("active", AttributeType.dynamic_boolean, True), ("without_close", AttributeType.boolean, False)]
+            [("id",), ("active", AttributeType.dynamic_boolean, True), ("without_close", AttributeType.boolean, False)]
         ),
         "table": lambda control_type, attrs: Builder(
             control_type=control_type,
@@ -324,12 +324,12 @@ class Factory:
                 ("auto_loading", AttributeType.boolean),
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "80vh"),
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("editable", AttributeType.dynamic_boolean, True),
-                ("edit_action"),
-                ("delete_action"),
-                ("add_action"),
+                ("edit_action",),
+                ("delete_action",),
+                ("add_action",),
             ]
         )
         .set_refresh()
@@ -345,8 +345,8 @@ class Factory:
         .set_lov()
         .set_attributes(
             [
-                ("id"),
-                ("label"),
+                ("id",),
+                ("label",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("unselected_value", AttributeType.string, ""),
             ]
@@ -366,7 +366,7 @@ class Factory:
             [
                 ("filter", AttributeType.boolean),
                 ("multiple", AttributeType.boolean),
-                ("id"),
+                ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("height", AttributeType.string_or_number),
                 ("width", AttributeType.string_or_number),

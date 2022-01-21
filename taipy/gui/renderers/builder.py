@@ -44,7 +44,7 @@ class Builder:
         self.el = etree.Element(element_name)
         self._gui = Gui._get_instance()
 
-        self.default_property_name = Factory.get_default_property_name(control_type)
+        self.default_property_name = Factory.get_default_property_name(control_type) or ""
         default_property_value = self.attributes.get(self.default_property_name, None)
         if default_property_value is None:
             self.attributes[self.default_property_name] = default_value
@@ -244,7 +244,7 @@ class Builder:
                 adapter = (lambda x: (x, x)) if from_string else (lambda x: str(x))  # type: ignore
             ret_list = []
             if len(lov) > 0:
-                ret = self._gui._get_valid_adapter_result(lov[0], index=0)
+                ret = self._gui._get_valid_adapter_result(lov[0], index="0")
                 if ret is None:  # lov list is not a list of tuple(id, label)
                     for idx, elt in enumerate(lov):
                         ret = self._gui._run_adapter(adapter, elt, adapter.__name__, str(idx))
