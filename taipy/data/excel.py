@@ -149,7 +149,7 @@ class ExcelDataSource(DataSource):
             )
 
     def _write(self, data: Any):
-        if isinstance(data, Dict) and all(map(lambda x: isinstance(x, pd.DataFrame), data.values())):
+        if isinstance(data, Dict) and all([isinstance(x, pd.DataFrame) for x in data.values()]):
             writer = pd.ExcelWriter(self.properties[self.__REQUIRED_PATH_PROPERTY])
             for key in data.keys():
                 data[key].to_excel(writer, key, index=False)

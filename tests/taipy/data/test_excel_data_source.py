@@ -200,7 +200,7 @@ class TestCSVDataSource:
         data_pandas = excel_data_source_as_pandas.read()
         assert isinstance(data_pandas, Dict)
         assert len(data_pandas) == 2
-        assert all(map(lambda sheet_name: len(data_pandas[sheet_name] == 5), sheet_names))
+        assert all(len(data_pandas[sheet_name] == 5) for sheet_name in sheet_names)
         assert list(data_pandas.keys()) == sheet_names
 
         # Create the same ExcelDataSource but with custom exposed_type
@@ -232,7 +232,7 @@ class TestCSVDataSource:
         data_custom = excel_data_source_as_custom_object.read()
         assert isinstance(data_custom, Dict)
         assert len(data_custom) == 2
-        assert all(map(lambda sheet_name: len(data_custom[sheet_name]) == 5, sheet_names))
+        assert all(len(data_custom[sheet_name]) == 5 for sheet_name in sheet_names)
         assert list(data_custom.keys()) == sheet_names
 
         for sheet_name in sheet_names:
@@ -262,7 +262,7 @@ class TestCSVDataSource:
         data_pandas = excel_data_source_as_pandas.read()
         assert isinstance(data_pandas, Dict)
         assert len(data_pandas) == 2
-        assert all(map(lambda sheet_name: len(data_pandas[sheet_name]) == 6, sheet_names))
+        assert all(len(data_pandas[sheet_name]) == 6 for sheet_name in sheet_names)
         assert list(data_pandas.keys()) == sheet_names
 
         # Create the same CSVDataSource but with custom exposed_type
@@ -299,7 +299,7 @@ class TestCSVDataSource:
         data_custom = excel_data_source_as_custom_object.read()
         assert isinstance(data_custom, Dict)
         assert len(data_custom) == 2
-        assert all(map(lambda sheet_name: len(data_custom[sheet_name]) == 6, sheet_names))
+        assert all(len(data_custom[sheet_name]) == 6 for sheet_name in sheet_names)
         assert list(data_custom.keys()) == sheet_names
 
         for sheet_name in sheet_names:
