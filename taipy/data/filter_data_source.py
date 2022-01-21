@@ -57,11 +57,11 @@ class FilterDataSource:
             for col in key.columns:
                 for i, row in enumerate(key[col]):
                     filtered_data[i][col] = filtered_data[i][col] if row else None
-        else:
-            for col in key.columns:
-                for i, row in enumerate(key[col]):
-                    setattr(filtered_data[i], col, getattr(filtered_data[i], col) if row else None)
+            return filtered_data
 
+        for col in key.columns:
+            for i, row in enumerate(key[col]):
+                setattr(filtered_data[i], col, getattr(filtered_data[i], col) if row else None)
         return filtered_data
 
     def __getitem_bool_indexer(self, key):
