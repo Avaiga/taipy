@@ -118,3 +118,55 @@ owner = "Raymond Kopa"
     actual_config = tf.read().strip()
 
     assert actual_config == expected_config
+
+
+def test_all_entities_use_protected_name():
+    file_config = NamedTemporaryFile(
+        """
+        [DATA_SOURCE.default]
+        has_header = true
+
+        [DATA_SOURCE.my_dataSource]
+        path = "/data/csv"
+
+        [DATA_SOURCE.my_dataSource2]
+        path = "/data2/csv"
+
+        [TASK.my_Task]
+        inputs = ["my_dataSource"]
+        outputs = ["my_dataSource2"]
+        description = "task description"
+
+        [PIPELINE.my_Pipeline]
+        tasks = [ "my_Task",]
+        cron = "daily"
+
+        [SCENARIO.my_Scenario]
+        pipelines = [ "my_Pipeline",]
+        owner = "John Doe"
+        """
+    )
+    Config.load(file_config.filename)
+    data_source_1_config = Config.add_data_source(name="my_datasource")
+    data_source_2_config = Config.add_data_source(name="my_datasource2")
+    task_config = Config.add_task("my_task", data_source_1_config, print, data_source_2_config)
+    pipeline_config = Config.add_pipeline("my_pipeline", task_config)
+    Config.add_scenario("my_scenario", pipeline_config)
+
+    assert len(Config.data_sources()) == 3
+    assert Config.data_sources()["my_datasource"].path == "/data/csv"
+    assert Config.data_sources()["my_datasource2"].path == "/data2/csv"
+    assert Config.data_sources()["my_datasource"].name == "my_datasource"
+    assert Config.data_sources()["my_datasource2"].name == "my_datasource2"
+
+    assert len(Config.tasks()) == 2
+    assert Config.tasks()["my_task"].name == "my_task"
+    assert Config.tasks()["my_task"].description == "task description"
+
+    assert len(Config.pipelines()) == 2
+    assert Config.pipelines()["my_pipeline"].name == "my_pipeline"
+    assert Config.pipelines()["my_pipeline"].cron == "daily"
+
+    assert len(Config.scenarios()) == 2
+    assert Config.scenarios()["my_scenario"].name == "my_scenario"
+    assert Config.scenarios()["my_scenario"].owner == "John Doe"
