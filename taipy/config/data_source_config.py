@@ -20,7 +20,7 @@ class DataSourceConfig:
             - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
             - Other characters are replaced by dash characters ('-').
         storage_type (str): Storage type of the data sources created from the data source config. The possible values
-            are : "csv", "pickle", "sql" and "In_memory". Default value is "pickle".
+            are : "csv", "excel", "pickle", "sql" and "In_memory". Default value is "pickle".
             Note that the "in_memory" value can only be used when JobConfig.mode is "standalone".
         scope (Scope):  The usage scope of the data sources created from the data source config. Default value is
             Pipeline.
@@ -31,6 +31,7 @@ class DataSourceConfig:
     STORAGE_TYPE_VALUE_PICKLE = "pickle"
     STORAGE_TYPE_VALUE_SQL = "sql"
     STORAGE_TYPE_VALUE_CSV = "csv"
+    STORAGE_TYPE_VALUE_EXCEL = "excel"
     DEFAULT_STORAGE_TYPE = STORAGE_TYPE_VALUE_PICKLE
 
     SCOPE_KEY = "scope"

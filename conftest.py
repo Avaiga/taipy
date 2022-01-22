@@ -32,9 +32,41 @@ def csv_file(tmpdir_factory) -> str:
     return fn.strpath
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
+def excel_file(tmpdir_factory) -> str:
+    excel = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    fn = tmpdir_factory.mktemp("data").join("df.xlsx")
+    excel.to_excel(str(fn), index=False)
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
+def excel_file_with_multi_sheet(tmpdir_factory) -> str:
+    excel_multi_sheet = {
+        "Sheet1": pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]),
+        "Sheet2": pd.DataFrame([{"a": 7, "b": 8, "c": 9}, {"a": 10, "b": 11, "c": 12}]),
+    }
+    fn = tmpdir_factory.mktemp("data").join("df.xlsx")
+
+    writer = pd.ExcelWriter(str(fn))
+    for key in excel_multi_sheet.keys():
+        excel_multi_sheet[key].to_excel(writer, key, index=False)
+    writer.save()
+
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
 def default_data_frame():
     return pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+
+
+@pytest.fixture(scope="function")
+def default_multi_sheet_data_frame():
+    return {
+        "Sheet1": pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]),
+        "Sheet2": pd.DataFrame([{"a": 7, "b": 8, "c": 9}, {"a": 10, "b": 11, "c": 12}]),
+    }
 
 
 @pytest.fixture(autouse=True)

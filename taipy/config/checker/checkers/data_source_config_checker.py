@@ -3,6 +3,7 @@ from taipy.config.checker.checkers.config_checker import ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.data_source_config import DataSourceConfig
 from taipy.data.csv import CSVDataSource
+from taipy.data.excel import ExcelDataSource
 from taipy.data.scope import Scope
 from taipy.data.sql import SQLDataSource
 
@@ -13,6 +14,7 @@ class DataSourceConfigChecker(ConfigChecker):
         self.required_properties = {
             "csv": CSVDataSource.REQUIRED_PROPERTIES,
             "sql": SQLDataSource.REQUIRED_PROPERTIES,
+            "excel": ExcelDataSource.REQUIRED_PROPERTIES,
         }
 
     def check(self) -> IssueCollector:
@@ -24,11 +26,11 @@ class DataSourceConfigChecker(ConfigChecker):
         return self.collector
 
     def _check_storage_type(self, data_source_config_name: str, data_source_config: DataSourceConfig):
-        if data_source_config.storage_type not in ["csv", "pickle", "in_memory", "sql"]:
+        if data_source_config.storage_type not in ["csv", "pickle", "in_memory", "sql", "excel"]:
             self._error(
                 data_source_config.STORAGE_TYPE_KEY,
                 data_source_config.storage_type,
-                f"{data_source_config.STORAGE_TYPE_KEY} field of DataSource {data_source_config_name} must be either csv, sql, pickle or in_memory.",
+                f"{data_source_config.STORAGE_TYPE_KEY} field of DataSource {data_source_config_name} must be either csv, sql, pickle, excel or in_memory.",
             )
 
     def _check_scope(self, data_source_config_name: str, data_source_config: DataSourceConfig):
