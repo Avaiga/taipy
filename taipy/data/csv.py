@@ -35,6 +35,7 @@ class CSVDataSource(DataSource):
 
     __STORAGE_TYPE = "csv"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
+    __EXPOSED_TYPE_NUMPY = "numpy"
     __REQUIRED_PATH_PROPERTY = "path"
     __REQUIRED_HAS_HEADER_PROPERTY = "has_header"
     REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
@@ -83,11 +84,10 @@ class CSVDataSource(DataSource):
 
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
+            if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+                return self._read_as_pandas_dataframe().to_numpy()
             return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
-        try:
-            return self._read_as_pandas_dataframe()
-        except pd.errors.EmptyDataError:
-            return pd.DataFrame()
+        return self._read_as_pandas_dataframe()
 
     def _read_as(self, custom_class):
         with open(self.properties[self.__REQUIRED_PATH_PROPERTY]) as csvFile:
@@ -105,14 +105,17 @@ class CSVDataSource(DataSource):
             return res
 
     def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
-        if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
-            if column_names:
-                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])[column_names]
-            return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])
-        else:
-            if usecols:
-                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None, usecols=usecols)
-            return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None)
+        try:
+            if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+                if column_names:
+                    return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])[column_names]
+                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])
+            else:
+                if usecols:
+                    return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None, usecols=usecols)
+                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None)
+        except pd.errors.EmptyDataError:
+            return pd.DataFrame()
 
     def _write(self, data: Any):
         pd.DataFrame(data).to_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
