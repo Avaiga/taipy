@@ -16,7 +16,7 @@ from taipy.exceptions.data_source import NonExistingExcelSheet
 
 class ExcelDataSource(DataSource):
     """
-    A Data Source stored as a Excel file.
+    A Data Source stored as an Excel file (xlsx format).
 
     Attributes:
         config_name (str):  Name that identifies the data source.
@@ -40,8 +40,9 @@ class ExcelDataSource(DataSource):
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __REQUIRED_PATH_PROPERTY = "path"
     __REQUIRED_HAS_HEADER_PROPERTY = "has_header"
-    __REQUIRED_SHEET_NAME_PROPERTY = "sheet_name"
-    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY, __REQUIRED_SHEET_NAME_PROPERTY]
+    __SHEET_NAME_PROPERTY = "sheet_name"
+    __DEFAULT_SHEET_NAME = "Sheet1"
+    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
 
     def __init__(
         self,
@@ -64,6 +65,9 @@ class ExcelDataSource(DataSource):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
+        if self.__SHEET_NAME_PROPERTY not in properties.keys():
+            properties[self.__SHEET_NAME_PROPERTY] = self.__DEFAULT_SHEET_NAME
+
         super().__init__(
             config_name,
             scope,
@@ -96,7 +100,7 @@ class ExcelDataSource(DataSource):
     def _read_as(self, custom_class):
         excel_file = load_workbook(self.properties[self.__REQUIRED_PATH_PROPERTY])
 
-        sheet_names = self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY]
+        sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
         sheet_names = sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
         work_books = defaultdict()
 
@@ -127,11 +131,11 @@ class ExcelDataSource(DataSource):
             if column_names:
                 return pd.read_excel(
                     self.properties[self.__REQUIRED_PATH_PROPERTY],
-                    sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+                    sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                 )[column_names]
             return pd.read_excel(
                 self.properties[self.__REQUIRED_PATH_PROPERTY],
-                sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+                sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
             )
         else:
             if usecols:
@@ -139,12 +143,12 @@ class ExcelDataSource(DataSource):
                     self.properties[self.__REQUIRED_PATH_PROPERTY],
                     header=None,
                     usecols=usecols,
-                    sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+                    sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                 )
             return pd.read_excel(
                 self.properties[self.__REQUIRED_PATH_PROPERTY],
                 header=None,
-                sheet_name=self.properties[self.__REQUIRED_SHEET_NAME_PROPERTY],
+                sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
             )
 
     def _write(self, data: Any):
