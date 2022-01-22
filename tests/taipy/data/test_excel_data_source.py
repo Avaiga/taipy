@@ -48,9 +48,11 @@ class TestExcelDataSource:
             ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True})
 
     def test_read_with_header(self):
-        not_existing_csv = ExcelDataSource("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": True})
+        not_existing_excel = ExcelDataSource(
+            "foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx", "has_header": True}
+        )
         with pytest.raises(NoData):
-            not_existing_csv.read()
+            not_existing_excel.read()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
@@ -97,14 +99,14 @@ class TestExcelDataSource:
 
     def test_read_without_header(self):
         not_existing_excel = ExcelDataSource(
-            "foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": False}
+            "foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx", "has_header": False}
         )
         with pytest.raises(NoData):
             not_existing_excel.read()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
-        # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
+        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
         excel_data_source_as_pandas = ExcelDataSource(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False}
         )
@@ -113,7 +115,7 @@ class TestExcelDataSource:
         assert len(data_pandas) == 6
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path, header=None).to_numpy())
 
-        # Create the same CSVDataSource but with custom exposed_type
+        # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
                 self.id = id
@@ -179,7 +181,7 @@ class TestExcelDataSource:
         not_existing_excel = ExcelDataSource(
             "foo",
             Scope.PIPELINE,
-            properties={"path": "WRONG.csv", "has_header": True, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+            properties={"path": "WRONG.xlsx", "has_header": True, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
             not_existing_excel.read()
@@ -242,7 +244,7 @@ class TestExcelDataSource:
         not_existing_excel = ExcelDataSource(
             "foo",
             Scope.PIPELINE,
-            properties={"path": "WRONG.csv", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+            properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
             not_existing_excel.read()
@@ -250,7 +252,7 @@ class TestExcelDataSource:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         sheet_names = ["Sheet1", "Sheet2"]
 
-        # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
+        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
         excel_data_source_as_pandas = ExcelDataSource(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": sheet_names}
         )
@@ -260,7 +262,7 @@ class TestExcelDataSource:
         assert all(len(data_pandas[sheet_name]) == 6 for sheet_name in sheet_names)
         assert list(data_pandas.keys()) == sheet_names
 
-        # Create the same CSVDataSource but with custom exposed_type
+        # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
                 self.id = id

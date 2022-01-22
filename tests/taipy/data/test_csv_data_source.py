@@ -47,11 +47,21 @@ class TestCSVDataSource:
             not_existing_csv.read()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+
         # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
         csv_data_source_as_pandas = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path, "has_header": True})
         data_pandas = csv_data_source_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 10
+        assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path).to_numpy())
+
+        # Create CSVDataSource with numpy exposed_type
+        csv_data_source_as_numpy = CSVDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": "numpy"}
+        )
+        data_numpy = csv_data_source_as_numpy.read()
+        assert isinstance(data_numpy, np.ndarray)
+        assert len(data_numpy) == 10
 
         # Create the same CSVDataSource but with custom exposed_type
         class MyCustomObject:
