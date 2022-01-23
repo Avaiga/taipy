@@ -694,7 +694,7 @@ class Gui(object, metaclass=Singleton):
     def bind_func(self, func_name: str) -> bool:
         if (
             isinstance(func_name, str)
-            and not hasattr(self, func_name)
+            and (not hasattr(self, func_name) or (hasattr(self, func_name) and getattr(self, func_name) is None))
             and func_name in (self._get_instance()._locals_bind)
             and isinstance((self._get_instance()._locals_bind[func_name]), FunctionType)
         ):
@@ -844,6 +844,10 @@ class Gui(object, metaclass=Singleton):
         self._locals_bind: t.Dict[str, t.Any] = t.cast(
             FrameType, t.cast(FrameType, inspect.currentframe()).f_back
         ).f_locals
+
+        # bind on_change and on_action function if available
+        self.bind_func("on_change")
+        self.bind_func("on_action")
 
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
