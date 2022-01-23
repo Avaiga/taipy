@@ -182,13 +182,16 @@ const Selector = (props: SelTreeProps) => {
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
+    const dropdownValue = (dropdown &&
+        (multiple ? selectedValue : selectedValue.length > 0 ? selectedValue[0] : "")) as string[];
+
     return (
         <Box id={id} sx={boxSx} className={className}>
             {dropdown ? (
                 <FormControl sx={controlSx}>
                     <Select
                         multiple={multiple}
-                        value={selectedValue}
+                        value={dropdownValue}
                         onChange={handleChange}
                         input={<OutlinedInput />}
                         renderValue={(selected) => (

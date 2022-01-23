@@ -20,7 +20,6 @@ requirements: List[str] = [
     "networkx",
     "numpy",
     "pandas",
-    "pyodbc",
     "pytz",
     "sqlalchemy",
     "simple-websocket",
@@ -29,11 +28,7 @@ requirements: List[str] = [
     "Unidecode",
 ]
 
-test_requirements = [
-    "pytest>=3.8",
-    "python-magic",
-    "python-magic-bin; sys.platform == 'win32'"
-]
+test_requirements = ["pytest>=3.8", "python-magic", "python-magic-bin; sys.platform == 'win32'"]
 
 setup(
     author="Avaiga",
@@ -64,5 +59,6 @@ setup(
     extras_require={
         "ngrok": ["pyngrok>=5"],
         "magic": ["python-magic", "python-magic-bin; sys.platform == 'win32'"],
+        "mssql": ["pyodbc>=4"],
     },
 )

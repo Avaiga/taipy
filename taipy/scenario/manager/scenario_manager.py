@@ -8,6 +8,7 @@ from taipy.config.config import Config
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager.cycle_manager import CycleManager
+from taipy.data.manager import DataManager
 from taipy.exceptions.repository import ModelNotFound
 from taipy.exceptions.scenario import (
     DeletingMasterScenario,
@@ -18,10 +19,11 @@ from taipy.exceptions.scenario import (
     NonExistingScenario,
     NonExistingScenarioConfig,
 )
+from taipy.job.job import Job
 from taipy.pipeline.manager import PipelineManager
 from taipy.scenario.repository import ScenarioRepository
 from taipy.scenario.scenario import Scenario
-from taipy.task.scheduler.job import Job
+from taipy.task.manager import TaskManager
 
 
 class ScenarioManager:
@@ -32,9 +34,15 @@ class ScenarioManager:
 
     pipeline_manager = PipelineManager()
     cycle_manager = CycleManager()
-    task_manager = pipeline_manager.task_manager
-    data_manager = pipeline_manager.data_manager
     repository = ScenarioRepository()
+
+    @property
+    def data_manager(self) -> DataManager:
+        return self.task_manager.data_manager
+
+    @property
+    def task_manager(self) -> TaskManager:
+        return self.pipeline_manager.task_manager
 
     def subscribe(self, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
         """
@@ -159,7 +167,7 @@ class ScenarioManager:
         """
         if isinstance(scenario, Scenario):
             scenario = self.get(scenario.id)
-        if isinstance(scenario, str):
+        else:
             scenario = self.get(scenario)
         callbacks = self.__get_status_notifier_callbacks(scenario)
         for pipeline in scenario.pipelines.values():

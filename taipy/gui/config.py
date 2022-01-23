@@ -29,6 +29,7 @@ AppConfigOption = t.Literal[
     "notification_duration",
     "single_client",
     "ngrok_token",
+    "upload_folder",
 ]
 
 AppConfig = t.TypedDict(
@@ -52,6 +53,7 @@ AppConfig = t.TypedDict(
         "notification_duration": int,
         "single_client": bool,
         "ngrok_token": str,
+        "upload_folder": t.Union[str, None],
     },
     total=False,
 )
@@ -65,6 +67,7 @@ StyleConfig = t.TypedDict(
         "dialog": str,
         "expandable": str,
         "field": str,
+        "file_selector": str,
         "image": str,
         "input": str,
         "layout": str,

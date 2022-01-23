@@ -111,11 +111,11 @@ class _DataAccessors(object):
             warnings.warn(f"Can't find Data Accessor for type {value.__class__}")
         return self.__invalid_data_accessor
 
-    def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
+    def _cast_string_value(self, var_name: str, value: t.Any, show_warning: t.Optional[bool] = True) -> t.Any:
         inst = _get_dict_value(self.__access_4_type, value.__class__)
         if not inst:
             inst = _get_dict_value(self.__access_4_var, var_name)
-        return inst.cast_string_value(var_name, value) if inst else value
+        return inst.cast_string_value(var_name, value, show_warning) if inst else value
 
     def _is_data_access(self, var_name: str, value: t.Any) -> bool:
         inst = _get_dict_value(self.__access_4_type, value.__class__)

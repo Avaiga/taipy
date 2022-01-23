@@ -9,7 +9,7 @@
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
     "apache-arrow": "^6.0.1",
-    "axios": "^0.24.0",
+    "axios": "^0.25.0",
     "date-fns": "^2.25.0",
     "date-fns-tz": "^1.1.6",
     "lodash": "^4.17.21",

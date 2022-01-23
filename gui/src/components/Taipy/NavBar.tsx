@@ -46,6 +46,8 @@ const NavBar = (props: LovProps) => {
         [navigate, state.locations]
     );
 
+    const selectedVal = !isMobile && (lovList.find(it => it.id === location.pathname)?.id || lovList[0].id);
+
     return isMobile ? (<>
         <Drawer open={opened} onClose={() => setOpened(false)}>
             <List>
@@ -61,12 +63,12 @@ const NavBar = (props: LovProps) => {
             </List>
         </Drawer>
         <IconButton onClick={() => setOpened(o => !o)}>
-        <Menu />
-      </IconButton>
+            <Menu />
+        </IconButton>
         </>
     ) : (
         <Box sx={boxSx} className={className}>
-            <Tabs value={location.pathname} id={id} onChange={linkChange}>
+            <Tabs value={selectedVal} id={id} onChange={linkChange}>
                 {lovList.map((val) => (
                     <Tab
                         key={val.id}

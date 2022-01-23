@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 from taipy.common.alias import JobId
-from taipy.task import Status
+from taipy.job.status import Status
 
 
 @dataclass

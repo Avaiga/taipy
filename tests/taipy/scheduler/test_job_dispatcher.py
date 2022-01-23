@@ -12,8 +12,9 @@ from taipy.common.alias import JobId, TaskId
 from taipy.config.config import Config
 from taipy.data import Scope
 from taipy.data.manager import DataManager
-from taipy.task import Job, Task
-from taipy.task.scheduler.job_dispatcher import JobDispatcher
+from taipy.job import Job
+from taipy.scheduler.job_dispatcher import JobDispatcher
+from taipy.task import Task
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -31,7 +32,7 @@ def execute(lock):
     return None
 
 
-def test_can_execute_parallel():
+def test_can_execute_synchronous():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
@@ -40,17 +41,19 @@ def test_can_execute_parallel():
         config_name="name",
         input=[],
         function=partial(execute, lock),
-        output=[DataManager().get_or_create(Config.add_data_source("input1", "pickle", Scope.PIPELINE, data=21))],
+        output=[DataManager().get_or_create(Config.add_data_source("input1", default_data=21))],
         id=task_id,
     )
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(True, 1)
+    executor = JobDispatcher(2)
 
     with lock:
         assert executor.can_execute()
-        executor.execute(job)
+        executor.dispatch(job)
+        assert executor.can_execute()
+        executor.dispatch(job)
         assert not executor.can_execute()
 
     assert_true_after_10_second_max(lambda: executor.can_execute())
@@ -65,24 +68,24 @@ def test_can_execute_parallel_multiple_submit():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(True, 2)
+    executor = JobDispatcher(2)
 
     with lock:
         assert executor.can_execute()
-        executor.execute(job)
+        executor.dispatch(job)
         assert executor.can_execute()
 
 
-def test_can_execute_synchronous():
+def test_can_execute_synchronous_2():
     task_id = TaskId("task_id1")
     task = Task(config_name="name", input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(False, None)
+    executor = JobDispatcher(None)
 
     assert executor.can_execute()
-    executor.execute(job)
+    executor.dispatch(job)
     assert executor.can_execute()
 
 
@@ -92,8 +95,8 @@ def test_handle_exception_in_user_function():
     task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task)
 
-    executor = JobDispatcher(False, None)
-    executor.execute(job)
+    executor = JobDispatcher(None)
+    executor.dispatch(job)
     assert job.is_failed()
     assert "Something bad has happened" == str(job.exceptions[0])
 
@@ -107,8 +110,8 @@ def test_handle_exception_when_writing_datasource():
     task = Task(config_name="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task)
 
-    executor = JobDispatcher(False, None)
-    executor.execute(job)
+    executor = JobDispatcher(None)
+    executor.dispatch(job)
     assert job.is_failed()
     stack_trace = str(job.exceptions[0])
     assert "source" in stack_trace

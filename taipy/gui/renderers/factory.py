@@ -16,6 +16,7 @@ class Factory:
         "dialog": "open",
         "expandable": "title",
         "field": "value",
+        "file_selector": "content",
         "image": "content",
         "input": "value",
         "layout": "columns",
@@ -137,6 +138,24 @@ class Factory:
             [
                 ("format"),
                 ("id"),
+            ]
+        ),
+        "file_selector": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="FileSelector",
+            attributes=attrs,
+        )
+        .set_value_and_default(var_name="label", with_update=False)
+        .set_classNames(class_name="taipy-file-selector", config_class="file_selector")
+        .set_file_content()
+        .set_attributes(
+            [
+                ("id"),
+                ("on_action", AttributeType.string),
+                ("active", AttributeType.dynamic_boolean, True),
+                ("multiple", AttributeType.boolean, False),
+                ("extensions"),
+                ("drop_message"),
             ]
         ),
         "image": lambda control_type, attrs: Builder(

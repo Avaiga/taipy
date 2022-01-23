@@ -1,3 +1,4 @@
+from importlib import util
 from unittest import mock
 
 import pandas as pd
@@ -7,6 +8,9 @@ from taipy.common.alias import DataSourceId
 from taipy.data import SQLDataSource
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
+
+if not util.find_spec("pyodbc"):
+    pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
 
 
 class TestSQLDataSource:
@@ -107,7 +111,7 @@ class TestSQLDataSource:
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = [
+            cursor_mock.dispatch.return_value = [
                 {"foo": "baz", "bar": "qux"},
                 {"foo": "quux", "bar": "quuz"},
                 {"foo": "corge"},
@@ -143,7 +147,7 @@ class TestSQLDataSource:
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = []
+            cursor_mock.dispatch.return_value = []
             data_2 = sql_data_source._read_as("fake query", MyCustomObject)
         assert isinstance(data_2, list)
         assert len(data_2) == 0
@@ -177,5 +181,5 @@ class TestSQLDataSource:
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = None
+            cursor_mock.dispatch.return_value = None
             ds._write(data)

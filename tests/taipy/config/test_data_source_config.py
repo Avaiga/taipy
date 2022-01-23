@@ -42,6 +42,9 @@ def test_data_source_config_creation():
     with pytest.raises(ConfigurationIssueError):
         data_source2_config = Config.add_data_source("data_sources", storage_type="sql")
 
+    with pytest.raises(ConfigurationIssueError):
+        data_source2_config = Config.add_data_source("data_sources", storage_type="excel")
+
 
 def test_data_source_count():
     Config.add_data_source("data_sources1", "pickle")

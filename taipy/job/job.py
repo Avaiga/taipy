@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Callable, List
 
 from taipy.common.alias import JobId
-from taipy.task.scheduler.status import Status
+from taipy.job.status import Status
 from taipy.task.task import Task
 
 
@@ -166,16 +166,17 @@ class Job:
         """
         return self.is_completed() or self.is_failed() or self.is_cancelled()
 
-    def on_status_change(self, function, *functions):
+    def on_status_change(self, *functions):
         """Allows to be notified when the status of the job changes.
 
         Job passing through multiple statuses (Submitted, pending, etc.) before being finished.
         You can be triggered on each change through this function unless for the `Submitted` status.
 
         Args:
-            function: Callable that will be called on each status change.
-            functions: Other Callable like the previous.
+            functions: Callables that will be called on each status change.
         """
+        functions = list(functions)
+        function = functions.pop()
         self._subscribers.append(function)
 
         if self.status != Status.SUBMITTED:

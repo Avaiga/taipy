@@ -95,9 +95,8 @@ nb_of_workers = 2
     )
     Config.load(config_from_filename.filename)
 
-    Config.set_job_config(parallel_execution=True, nb_of_workers=21)
+    Config.set_job_config(nb_of_workers=21)
 
-    assert Config.job_config().parallel_execution is True  # From code config
     assert Config.job_config().nb_of_workers == 2  # From file config
 
 
@@ -108,10 +107,9 @@ def test_code_configuration_file_configuration_override_code_configuration():
 nb_of_workers = 2
     """
     )
-    Config.set_job_config(parallel_execution=True, nb_of_workers=21)
+    Config.set_job_config(nb_of_workers=21)
     Config.load(config_from_filename.filename)
 
-    assert Config.job_config().parallel_execution is True  # From code config
     assert Config.job_config().nb_of_workers == 2  # From file config
 
 
@@ -124,7 +122,6 @@ has_header = true
 path = "/data/csv"
 
 [JOB]
-parallel_execution = true
 nb_of_workers = 10
 
 [TAIPY]
@@ -133,20 +130,17 @@ notification = false
     )
 
     # Default config is applied
-    assert Config.job_config().parallel_execution is False
     assert Config.job_config().nb_of_workers == 1
     assert Config.global_config().notification is False
 
     # Code config is applied
     Config.set_job_config(nb_of_workers=-1)
     Config.set_global_config(notification=True)
-    assert Config.job_config().parallel_execution is False
     assert Config.global_config().notification is True
     assert Config.job_config().nb_of_workers == -1
 
     # File config is applied
     Config.load(file_config.filename)
-    assert Config.job_config().parallel_execution is True
     assert Config.global_config().notification is False
     assert Config.job_config().nb_of_workers == 10
     assert Config.data_sources()["my_datasource"].has_header

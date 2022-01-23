@@ -7,14 +7,19 @@ import pytest
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.common.frequency import Frequency
-from taipy.config import Config
+from taipy.config import Config, GlobalAppConfig, JobConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.cycle_model import CycleModel
-from taipy.pipeline import Pipeline
+from taipy.cycle.manager import CycleManager
+from taipy.data.manager import DataManager
+from taipy.job import JobManager
+from taipy.pipeline import Pipeline, PipelineManager
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.scenario import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
+from taipy.scheduler.scheduler import Scheduler
+from taipy.task.manager import TaskManager
 
 current_time = datetime.now()
 
@@ -27,9 +32,41 @@ def csv_file(tmpdir_factory) -> str:
     return fn.strpath
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
+def excel_file(tmpdir_factory) -> str:
+    excel = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    fn = tmpdir_factory.mktemp("data").join("df.xlsx")
+    excel.to_excel(str(fn), index=False)
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
+def excel_file_with_multi_sheet(tmpdir_factory) -> str:
+    excel_multi_sheet = {
+        "Sheet1": pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]),
+        "Sheet2": pd.DataFrame([{"a": 7, "b": 8, "c": 9}, {"a": 10, "b": 11, "c": 12}]),
+    }
+    fn = tmpdir_factory.mktemp("data").join("df.xlsx")
+
+    writer = pd.ExcelWriter(str(fn))
+    for key in excel_multi_sheet.keys():
+        excel_multi_sheet[key].to_excel(writer, key, index=False)
+    writer.save()
+
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
 def default_data_frame():
     return pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+
+
+@pytest.fixture(scope="function")
+def default_multi_sheet_data_frame():
+    return {
+        "Sheet1": pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]),
+        "Sheet2": pd.DataFrame([{"a": 7, "b": 8, "c": 9}, {"a": 10, "b": 11, "c": 12}]),
+    }
 
 
 @pytest.fixture(autouse=True)
@@ -101,33 +138,31 @@ def pipeline_model():
 
 @pytest.fixture(scope="function", autouse=True)
 def setup():
+    delete_everything()
+
+
+def delete_everything():
+    task_manager = TaskManager()
+    task_manager._scheduler = None
     scenario_manager = ScenarioManager()
-    pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    task_scheduler = task_manager.task_scheduler
-    data_manager = scenario_manager.data_manager
-    cycle_manager = scenario_manager.cycle_manager
+    pipeline_manager = PipelineManager()
+    job_manager = JobManager()
+    data_manager = DataManager()
+    cycle_manager = CycleManager()
     scenario_manager.delete_all()
     pipeline_manager.delete_all()
     data_manager.delete_all()
     task_manager.delete_all()
-    task_scheduler.delete_all()
+    job_manager.delete_all()
     cycle_manager.delete_all()
+    Config._python_config.global_config = GlobalAppConfig()
+    Config._python_config.job_config = JobConfig()
     Config._python_config.data_sources.clear()
     Config._python_config.tasks.clear()
+    Config._python_config.pipelines.clear()
+    Config._python_config.scenarios.clear()
 
 
 @pytest.fixture(scope="function", autouse=True)
 def teardown():
-    scenario_manager = ScenarioManager()
-    pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    task_scheduler = task_manager.task_scheduler
-    data_manager = scenario_manager.data_manager
-    scenario_manager.delete_all()
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-    task_scheduler.delete_all()
-    Config._python_config.data_sources.clear()
-    Config._python_config.tasks.clear()
+    delete_everything()

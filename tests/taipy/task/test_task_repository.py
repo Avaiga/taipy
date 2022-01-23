@@ -7,7 +7,8 @@ from taipy.data import CSVDataSource, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.data_source import NonExistingDataSource
-from taipy.task import Task, TaskManager
+from taipy.task import Task
+from taipy.task.manager import TaskManager
 from taipy.task.task_model import TaskModel
 
 data_source = CSVDataSource(
@@ -38,7 +39,7 @@ task_model = TaskModel(
 )
 
 
-class TestDataRepository:
+class TestTaskRepository:
     def test_save_and_load(self, tmpdir):
         repository = TaskManager().repository
         repository.base_path = tmpdir

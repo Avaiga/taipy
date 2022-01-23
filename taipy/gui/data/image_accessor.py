@@ -26,13 +26,13 @@ class ImageAccessor(DataAccessor):
     def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
         return []
 
-    def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
+    def cast_string_value(self, var_name: str, value: t.Any, show_warning: t.Optional[bool] = True) -> t.Any:
         if isinstance(value, str):
             path = pathlib.Path(value)
             if path.is_file():
                 dir_path = path.resolve().parent
                 url_path = ImageAccessor._get_path(dir_path)
-                return (f"{url_path}/{path.name}", url_path, dir_path.as_posix())
+                return (f"{url_path}/{path.name}", url_path, str(dir_path))
             else:
                 return value
         else:
