@@ -52,7 +52,7 @@ def test_file_upload_simple(gui: Gui, helpers):
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    created_file =  upload_path / file_name
+    created_file = upload_path / file_name
     assert created_file.exists()
 
 
