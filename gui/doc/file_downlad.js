@@ -1,9 +1,9 @@
 /**
- * A file_selector control that allows to upload files by selection or drop.
+ * A file_download control that allows to download files automagically or by clicking on a button.
  *
- * @element file_selector
+ * @element file_download
  */
-class file_selector extends shared {
+class file_download extends shared {
     /**
      * the image
      * @type {dynamic(url | path | file), default property}
@@ -17,13 +17,13 @@ class file_selector extends shared {
     label;
 
     /**
-     * name of a function that will be triggered.<br> parameters of that function are all optional:<ul><li>gui instance</li><li>id</li><li>action</li></ul>
+     * name of a function that will be triggered when the download is initiated.<br> parameters of that function are all optional:<ul><li>gui instance</li><li>id</li><li>action</li></ul>
      * @type {str}
      */
     on_action;
 
     /**
-     * download the file as s0on as the page is loaded
+     * download the file as soon as the page is loaded
      * @type {bool}
      */
     auto = false;
