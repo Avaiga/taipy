@@ -1,6 +1,7 @@
 import tempfile
 import pytest
 from taipy.gui import Gui
+from taipy.gui.utils import _get_non_existent_file_path
 import io
 import pathlib
 
@@ -41,14 +42,17 @@ def test_file_upload_simple(gui: Gui, helpers):
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    file = (io.BytesIO(b"abcdef"), "test.jpg")
+    file_name = "test.jpg"
+    file = (io.BytesIO(b"abcdef"), file_name)
+    upload_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir()))
+    file_name = _get_non_existent_file_path(upload_path, file_name).name
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}",
         data={"var_name": "varname", "blob": file},
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    created_file = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test.jpg"
+    created_file =  upload_path / file_name
     assert created_file.exists()
 
 
@@ -57,15 +61,18 @@ def test_file_upload_multi_part(gui: Gui, helpers):
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
-    file0 = (io.BytesIO(b"abcdef"), "test.jpg")
-    file1 = (io.BytesIO(b"abcdef"), "test.jpg")
+    file_name = "test2.jpg"
+    file0 = (io.BytesIO(b"abcdef"), file_name)
+    file1 = (io.BytesIO(b"abcdef"), file_name)
+    upload_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir()))
+    file_name = _get_non_existent_file_path(upload_path, file_name).name
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}",
         data={"var_name": "varname", "blob": file0, "total": "2", "part": "0"},
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    file0_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test.jpg.part.0"
+    file0_path = upload_path / f"{file_name}.part.0"
     assert file0_path.exists()
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}",
@@ -73,9 +80,9 @@ def test_file_upload_multi_part(gui: Gui, helpers):
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    file1_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test.jpg.part.1"
+    file1_path = upload_path / f"{file_name}.part.1"
     assert file1_path.exists()
-    file_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test.jpg"
+    file_path = upload_path / file_name
     assert file_path.exists()
 
 
