@@ -12,7 +12,9 @@ def test_get_scenario(client, default_scenario):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.scenario.manager.scenario_manager.ScenarioManager.get") as manager_mock:
+    with mock.patch(
+        "taipy.scenario.manager.scenario_manager.ScenarioManager.get"
+    ) as manager_mock:
         manager_mock.return_value = default_scenario
 
         # test get_scenario
@@ -43,7 +45,9 @@ def test_create_scenario(client, default_scenario_config):
     rep = client.post(scenarios_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy_rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+    with mock.patch(
+        "taipy_rest.api.resources.scenario.ScenarioList.fetch_config"
+    ) as config_mock:
         config_mock.return_value = default_scenario_config
         scenarios_url = url_for("api.scenarios", config_name="bar")
         rep = client.post(scenarios_url)
@@ -52,7 +56,9 @@ def test_create_scenario(client, default_scenario_config):
 
 def test_get_all_scenarios(client, default_pipeline, default_scenario_config_list):
     for ds in range(10):
-        with mock.patch("taipy_rest.api.resources.scenario.ScenarioList.fetch_config") as config_mock:
+        with mock.patch(
+            "taipy_rest.api.resources.scenario.ScenarioList.fetch_config"
+        ) as config_mock:
             config_mock.return_value = default_scenario_config_list[ds]
             scenarios_url = url_for("api.scenarios", config_name=config_mock.name)
             client.post(scenarios_url)
@@ -71,7 +77,9 @@ def test_execute_scenario(client, default_scenario):
     rep = client.post(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.scenario.manager.scenario_manager.ScenarioManager.get") as manager_mock:
+    with mock.patch(
+        "taipy.scenario.manager.scenario_manager.ScenarioManager.get"
+    ) as manager_mock:
         manager_mock.return_value = default_scenario
 
         # test get_scenario

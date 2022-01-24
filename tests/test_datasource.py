@@ -55,7 +55,9 @@ def test_create_datasource(client, default_datasource_config):
     rep = client.post(datasources_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy_rest.api.resources.datasource.DataSourceList.fetch_config") as config_mock:
+    with mock.patch(
+        "taipy_rest.api.resources.datasource.DataSourceList.fetch_config"
+    ) as config_mock:
         config_mock.return_value = default_datasource_config
         datasources_url = url_for("api.datasources", config_name="bar")
         rep = client.post(datasources_url)
@@ -64,7 +66,9 @@ def test_create_datasource(client, default_datasource_config):
 
 def test_get_all_datasources(client, default_datasource_config_list):
     for ds in range(10):
-        with mock.patch("taipy_rest.api.resources.datasource.DataSourceList.fetch_config") as config_mock:
+        with mock.patch(
+            "taipy_rest.api.resources.datasource.DataSourceList.fetch_config"
+        ) as config_mock:
             config_mock.return_value = default_datasource_config_list[ds]
             datasources_url = url_for("api.datasources", config_name=config_mock.name)
             client.post(datasources_url)

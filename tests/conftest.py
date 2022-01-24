@@ -161,14 +161,21 @@ def default_pipeline_config_list():
 
 @pytest.fixture
 def default_scenario_config():
-    return Config.add_scenario(uuid.uuid4().hex, [Config.add_pipeline(uuid.uuid4().hex, __task_config())])
+    return Config.add_scenario(
+        uuid.uuid4().hex, [Config.add_pipeline(uuid.uuid4().hex, __task_config())]
+    )
 
 
 @pytest.fixture
 def default_scenario_config_list():
     configs = []
     for i in range(10):
-        configs.append(Config.add_scenario(uuid.uuid4().hex, [Config.add_pipeline(uuid.uuid4().hex, __task_config())]))
+        configs.append(
+            Config.add_scenario(
+                uuid.uuid4().hex,
+                [Config.add_pipeline(uuid.uuid4().hex, __task_config())],
+            )
+        )
     return configs
 
 
