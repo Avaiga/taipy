@@ -6,7 +6,7 @@ import UploadFile from "@mui/icons-material/UploadFile";
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
-import { TaipyBaseProps } from "./utils";
+import { noDisplayStyle, TaipyBaseProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 
 interface FileSelectorProps extends TaipyBaseProps {
@@ -27,8 +27,17 @@ const handleDragOver = (evt: DragEvent) => {
 const defaultSx = { minWidth: "0px" };
 
 const FileSelector = (props: FileSelectorProps) => {
-    const { className, id, tp_onAction, defaultLabel = "", tp_varname = "", multiple = false, extensions = ".csv,.xlsx", dropMessage = "Drop here to Upload" } = props;
-    const [label, setLabel] = useState(defaultLabel);
+    const {
+        className,
+        id,
+        tp_onAction,
+        defaultLabel = "",
+        tp_varname = "",
+        multiple = false,
+        extensions = ".csv,.xlsx",
+        dropMessage = "Drop here to Upload",
+        label,
+    } = props;
     const [dropLabel, setDropLabel] = useState("");
     const [dropSx, setDropSx] = useState(defaultSx);
     const [upload, setUpload] = useState(false);
@@ -48,11 +57,15 @@ const FileSelector = (props: FileSelectorProps) => {
                     (value) => {
                         setUpload(false);
                         tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
-                        dispatch(createAlertAction({atype: "success", message: value, browser: false, duration: 3000}))
+                        dispatch(
+                            createAlertAction({ atype: "success", message: value, browser: false, duration: 3000 })
+                        );
                     },
                     (reason) => {
                         setUpload(false);
-                        dispatch(createAlertAction({atype: "error", message: reason, browser: false, duration: 3000}))
+                        dispatch(
+                            createAlertAction({ atype: "error", message: reason, browser: false, duration: 3000 })
+                        );
                     }
                 );
             }
@@ -64,15 +77,6 @@ const FileSelector = (props: FileSelectorProps) => {
         (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files, e),
         [handleFiles]
     );
-
-    useEffect(() => {
-        setLabel((val) => {
-            if (props.label !== undefined && val !== props.label) {
-                return props.label;
-            }
-            return val;
-        });
-    }, [props.label]);
 
     const handleDrop = useCallback(
         (e: DragEvent) => {
@@ -88,15 +92,18 @@ const FileSelector = (props: FileSelectorProps) => {
         setDropSx(defaultSx);
     }, []);
 
-    const handleDragOverWithLabel = useCallback((evt: DragEvent) => {
-        setDropSx((sx) =>
-            sx.minWidth === defaultSx.minWidth
-                ? { minWidth: (evt.currentTarget as HTMLElement).clientWidth + "px" }
-                : sx
-        );
-        setDropLabel(dropMessage);
-        handleDragOver(evt);
-    }, [dropMessage]);
+    const handleDragOverWithLabel = useCallback(
+        (evt: DragEvent) => {
+            setDropSx((sx) =>
+                sx.minWidth === defaultSx.minWidth
+                    ? { minWidth: (evt.currentTarget as HTMLElement).clientWidth + "px" }
+                    : sx
+            );
+            setDropLabel(dropMessage);
+            handleDragOver(evt);
+        },
+        [dropMessage]
+    );
 
     useEffect(() => {
         const fabElt = fabRef.current;
@@ -118,7 +125,7 @@ const FileSelector = (props: FileSelectorProps) => {
     return (
         <label htmlFor={id + "upload-file"} className={className}>
             <input
-                style={{ display: "none" }}
+                style={noDisplayStyle}
                 id={id + "upload-file"}
                 name="upload-file"
                 type="file"
@@ -137,7 +144,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 ref={fabRef}
                 sx={dropSx}
             >
-                <UploadFile /> {dropLabel || label}
+                <UploadFile /> {dropLabel || label || defaultLabel}
             </Fab>
             {upload ? <LinearProgress value={progress} /> : null}
         </label>
