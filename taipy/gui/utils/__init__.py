@@ -10,3 +10,4 @@ from .isnotebook import _is_in_notebook
 from .killable_thread import KillableThread
 from .MapDictionary import _MapDictionary
 from .Singleton import Singleton
+from .filename import _get_non_existent_file_path

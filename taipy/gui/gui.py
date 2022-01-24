@@ -36,6 +36,7 @@ from .utils import (
     ISOToDate,
     Singleton,
     _get_dict_value,
+    _get_non_existent_file_path,
     _is_in_notebook,
     _MapDictionary,
     attrsetter,
@@ -292,16 +293,15 @@ class Gui(object, metaclass=Singleton):
                 suffix = f".part.{part}"
                 complete = part == total - 1
         if file:  # and allowed_file(file.filename)
-            filename = secure_filename(file.filename)
-            upload_path = pathlib.Path(self._get_app_config("upload_folder", tempfile.gettempdir()))
-            file.save(upload_path.joinpath(filename + suffix).resolve())
+            upload_path = pathlib.Path(self._get_app_config("upload_folder", tempfile.gettempdir())).resolve()
+            file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
+            file.save(str(upload_path / (file_path.name + suffix)))
             if complete:
-                file_path = str(upload_path.joinpath(filename).resolve())
                 if part > 0:
                     try:
                         with open(file_path, "wb") as grouped_file:
                             for nb in range(0, part + 1):
-                                with open(upload_path.joinpath(f"{filename}.part.{nb}").resolve(), "rb") as part_file:
+                                with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
                                     grouped_file.write(part_file.read())
                     except EnvironmentError as ee:
                         warnings.warn(f"cannot group file after chunk upload {ee}")
@@ -311,7 +311,7 @@ class Gui(object, metaclass=Singleton):
                     value = getattr(self._get_data_scope(), var_name)
                     if not isinstance(value, t.List):
                         value = [] if value is None else [value]
-                    value.append(file_path)
+                    value.append(str(file_path))
                     file_path = value
                 setattr(self, var_name, file_path)
         return ("", 200)
