@@ -54,7 +54,8 @@ class TestSQLDataSource:
 
     @mock.patch("taipy.data.sql.SQLDataSource._read_as", return_value="custom")
     @mock.patch("taipy.data.sql.SQLDataSource._read_as_pandas_dataframe", return_value="pandas")
-    def test_read(self, mock_read_as, mock_read_as_pandas_dataframe):
+    @mock.patch("taipy.data.sql.SQLDataSource._read_as_numpy", return_value="numpy")
+    def test_read(self, mock_read_as, mock_read_as_pandas_dataframe, mock_read_as_numpy):
 
         # Create SQLDataSource without exposed_type (Default is pandas.DataFrame)
         sql_data_source_as_pandas = SQLDataSource(
@@ -87,6 +88,23 @@ class TestSQLDataSource:
             },
         )
         assert sql_data_source_as_custom_object._read() == "custom"
+
+        # Create the same SQLDataSource but with numpy exposed_type
+        sql_data_source_as_numpy_object = SQLDataSource(
+            "foo",
+            Scope.PIPELINE,
+            properties={
+                "db_username": "a",
+                "db_password": "a",
+                "db_name": "a",
+                "db_engine": "mssql",
+                "read_query": "SELECT * from table_name",
+                "write_table": "foo",
+                "exposed_type": "numpy",
+            },
+        )
+
+        assert sql_data_source_as_numpy_object._read() == "numpy"
 
     def test_read_as(self):
         class MyCustomObject:

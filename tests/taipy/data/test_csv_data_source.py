@@ -62,6 +62,7 @@ class TestCSVDataSource:
         data_numpy = csv_data_source_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 10
+        assert np.array_equal(data_numpy, pd.read_csv(path).to_numpy())
 
         # Create the same CSVDataSource but with custom exposed_type
         class MyCustomObject:
@@ -94,6 +95,15 @@ class TestCSVDataSource:
         data_pandas = csv_data_source_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 11
+
+        # Create CSVDataSource with numpy exposed_type
+        csv_data_source_as_numpy = CSVDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
+        )
+        data_numpy = csv_data_source_as_numpy.read()
+        assert isinstance(data_numpy, np.ndarray)
+        assert len(data_numpy) == 11
+        assert np.array_equal(data_numpy, pd.read_csv(path, header=None).to_numpy())
 
         # Create the same CSVDataSource but with custom exposed_type
         class MyCustomObject:

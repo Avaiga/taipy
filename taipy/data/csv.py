@@ -83,17 +83,10 @@ class CSVDataSource(DataSource):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        # if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-        #     if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
-        #         return self._read_as_pandas_dataframe().to_numpy()
-        #     return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-            return (
-                self._read_as_pandas_dataframe().to_numpy()
-                if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY
-                else self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
-            )
-
+            if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+                return self._read_as_numpy()
+            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
         return self._read_as_pandas_dataframe()
 
     def _read_as(self, custom_class):
@@ -110,6 +103,9 @@ class CSVDataSource(DataSource):
                 for line in reader:
                     res.append(custom_class(*line))
             return res
+
+    def _read_as_numpy(self):
+        return self._read_as_pandas_dataframe().to_numpy()
 
     def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
         try:

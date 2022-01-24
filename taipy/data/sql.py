@@ -37,6 +37,7 @@ class SQLDataSource(DataSource):
     """
 
     __STORAGE_TYPE = "sql"
+    __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
 
@@ -107,14 +108,22 @@ class SQLDataSource(DataSource):
         return cls.__STORAGE_TYPE
 
     def _read(self):
+        # if self.__EXPOSED_TYPE_PROPERTY in self.properties:
+        #     return self._read_as(self.read_query, self.properties[self.__EXPOSED_TYPE_PROPERTY])
+        # return self._read_as_pandas_dataframe()
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-            return self._read_as(self.read_query, self.properties[self.__EXPOSED_TYPE_PROPERTY])
+            if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+                return self._read_as_numpy()
+            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
         return self._read_as_pandas_dataframe()
 
     def _read_as(self, query, custom_class):
         with self.__engine.connect() as connection:
             query_result = connection.dispatch(text(query))
         return list(map(lambda row: custom_class(**row), query_result))
+
+    def _read_as_numpy(self):
+        return self._read_as_pandas_dataframe().to_numpy()
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
         if columns:
