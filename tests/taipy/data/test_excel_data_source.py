@@ -66,6 +66,16 @@ class TestExcelDataSource:
         assert len(data_pandas) == 5
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path).to_numpy())
 
+        # Create ExcelDataSource with numpy exposed_type
+        excel_data_source_as_numpy = ExcelDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": "numpy"}
+        )
+
+        data_numpy = excel_data_source_as_numpy.read()
+        assert isinstance(data_numpy, np.ndarray)
+        assert len(data_numpy) == 5
+        assert np.array_equal(data_numpy, pd.read_excel(path).to_numpy())
+
         # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
@@ -114,6 +124,16 @@ class TestExcelDataSource:
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 6
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path, header=None).to_numpy())
+
+        # Create ExcelDataSource with numpy exposed_type
+        excel_data_source_as_numpy = ExcelDataSource(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
+        )
+
+        data_numpy = excel_data_source_as_numpy.read()
+        assert isinstance(data_numpy, np.ndarray)
+        assert len(data_numpy) == 6
+        assert np.array_equal(data_numpy, pd.read_excel(path, header=None).to_numpy())
 
         # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
@@ -197,8 +217,27 @@ class TestExcelDataSource:
         data_pandas = excel_data_source_as_pandas.read()
         assert isinstance(data_pandas, Dict)
         assert len(data_pandas) == 2
-        assert all(len(data_pandas[sheet_name] == 5) for sheet_name in sheet_names)
+        assert all(
+            len(data_pandas[sheet_name] == 5) and isinstance(data_pandas[sheet_name], pd.DataFrame)
+            for sheet_name in sheet_names
+        )
         assert list(data_pandas.keys()) == sheet_names
+
+        # Create ExcelDataSource with numpy exposed_type
+        excel_data_source_as_numpy = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={"path": path, "has_header": True, "sheet_name": sheet_names, "exposed_type": "numpy"},
+        )
+
+        data_numpy = excel_data_source_as_numpy.read()
+        assert isinstance(data_numpy, Dict)
+        assert len(data_numpy) == 2
+        assert all(
+            len(data_numpy[sheet_name] == 5) and isinstance(data_numpy[sheet_name], np.ndarray)
+            for sheet_name in sheet_names
+        )
+        assert list(data_numpy.keys()) == sheet_names
 
         # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
@@ -261,6 +300,22 @@ class TestExcelDataSource:
         assert len(data_pandas) == 2
         assert all(len(data_pandas[sheet_name]) == 6 for sheet_name in sheet_names)
         assert list(data_pandas.keys()) == sheet_names
+
+        # Create ExcelDataSource with numpy exposed_type
+        excel_data_source_as_numpy = ExcelDataSource(
+            "bar",
+            Scope.PIPELINE,
+            properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "numpy"},
+        )
+
+        data_numpy = excel_data_source_as_numpy.read()
+        assert isinstance(data_numpy, Dict)
+        assert len(data_numpy) == 2
+        assert all(
+            len(data_numpy[sheet_name] == 6) and isinstance(data_numpy[sheet_name], np.ndarray)
+            for sheet_name in sheet_names
+        )
+        assert list(data_numpy.keys()) == sheet_names
 
         # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
