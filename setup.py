@@ -26,6 +26,7 @@ requirements: List[str] = [
     "toml",
     "tzlocal",
     "Unidecode",
+    "openpyxl",
 ]
 
 test_requirements = ["pytest>=3.8", "python-magic", "python-magic-bin; sys.platform == 'win32'"]
