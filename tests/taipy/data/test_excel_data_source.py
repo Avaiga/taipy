@@ -43,9 +43,9 @@ class TestExcelDataSource:
         with pytest.raises(MissingRequiredProperty):
             ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"path": "path"})
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True})
+            ExcelDataSource(
+                "foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True, "sheet_name": "Sheet1"}
+            )
 
     def test_read_with_header(self):
         not_existing_csv = ExcelDataSource("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": True})

@@ -37,8 +37,6 @@ class TestCSVDataSource:
         with pytest.raises(MissingRequiredProperty):
             CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"path": "path"})
-        with pytest.raises(MissingRequiredProperty):
             CSVDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True})
 
     def test_read_with_header(self):
