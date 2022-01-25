@@ -62,19 +62,21 @@ class ContentAccessor:
         image = self.__vars.get(var_name)
         if image is None:
             return value
-        if isinstance(value, str):
-            value = pathlib.Path(value)
-        if isinstance(value, pathlib.Path):
-            if value.is_file():
+        if isinstance(value, (str, pathlib.Path)):
+            if isinstance(value, str):
+                path = pathlib.Path(value)
+            else:
+                path = value
+            if path.is_file():
                 if image:
-                    mime = self.__get_mime_from_file(value)
+                    mime = self.__get_mime_from_file(path)
                     if mime and not mime.startswith("image"):
-                        warnings.warn(f"{var_name} ({value}) is not an image: {mime}")
+                        warnings.warn(f"{var_name} ({path}) is not an image: {mime}")
                         return f"Invalid content: {mime}"
-                dir_path = value.resolve().parent
+                dir_path = path.resolve().parent
                 url_path = self.get_path(dir_path)
                 self.__content_paths[url_path] = dir_path
-                return (f"{url_path}/{value.name}",)
+                return (f"{url_path}/{path.name}",)
             else:
                 return value
         else:
