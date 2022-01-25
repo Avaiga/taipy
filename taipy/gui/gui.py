@@ -585,7 +585,7 @@ class Gui(object, metaclass=Singleton):
 
         return _taipy_on_cancel_block_ui
 
-    def __validate_function_signature(self, func_name: str, range: range):
+    def __validate_function_signature(self, func_name: str, range: range) -> None:
         if (
             (func := getattr(self, func_name, None)) is not None
             and isinstance(func, FunctionType)
