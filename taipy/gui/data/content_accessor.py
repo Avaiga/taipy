@@ -12,7 +12,7 @@ from ..utils import _get_non_existent_file_path
 if util.find_spec("magic"):
     import magic
 
-    _is_magic = True
+    _has_magic_module = True
 
 
 class ContentAccessor:
@@ -43,7 +43,7 @@ class ContentAccessor:
         return var_name
 
     def __get_mime_from_file(self, path: pathlib.Path):
-        if _is_magic:
+        if _has_magic_module:
             try:
                 return magic.from_file(str(path), mime=True)
             except Exception as e:
@@ -57,7 +57,7 @@ class ContentAccessor:
         newvalue = value
         mime = None
         if not isinstance(newvalue, (str, pathlib.Path)) and (
-            getsizeof(newvalue) > self.__data_url_max_size or not _is_magic
+            getsizeof(newvalue) > self.__data_url_max_size or not _has_magic_module
         ):
             # write data to file
             file_name = "TaiPyContent.bin"
@@ -93,7 +93,7 @@ class ContentAccessor:
             else:
                 return value
         else:
-            if _is_magic:
+            if _has_magic_module:
                 try:
                     mime = magic.from_buffer(value, mime=True)
                     if not image or mime.startswith("image"):
