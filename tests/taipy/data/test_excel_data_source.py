@@ -222,6 +222,10 @@ class TestExcelDataSource:
             for sheet_name in sheet_names
         )
         assert list(data_pandas.keys()) == sheet_names
+        for sheet_name in sheet_names:
+            assert np.array_equal(
+                data_pandas[sheet_name].to_numpy(), pd.read_excel(path, sheet_name=sheet_name).to_numpy()
+            )
 
         # Create ExcelDataSource with numpy exposed_type
         excel_data_source_as_numpy = ExcelDataSource(
@@ -238,6 +242,8 @@ class TestExcelDataSource:
             for sheet_name in sheet_names
         )
         assert list(data_numpy.keys()) == sheet_names
+        for sheet_name in sheet_names:
+            assert np.array_equal(data_pandas[sheet_name], pd.read_excel(path, sheet_name=sheet_name).to_numpy())
 
         # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
@@ -300,6 +306,10 @@ class TestExcelDataSource:
         assert len(data_pandas) == 2
         assert all(len(data_pandas[sheet_name]) == 6 for sheet_name in sheet_names)
         assert list(data_pandas.keys()) == sheet_names
+        for sheet_name in sheet_names:
+            assert np.array_equal(
+                data_pandas[sheet_name].to_numpy(), pd.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
+            )
 
         # Create ExcelDataSource with numpy exposed_type
         excel_data_source_as_numpy = ExcelDataSource(
@@ -316,6 +326,10 @@ class TestExcelDataSource:
             for sheet_name in sheet_names
         )
         assert list(data_numpy.keys()) == sheet_names
+        for sheet_name in sheet_names:
+            assert np.array_equal(
+                data_pandas[sheet_name], pd.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
+            )
 
         # Create the same ExcelDataSource but with custom exposed_type
         class MyCustomObject:
