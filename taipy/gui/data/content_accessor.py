@@ -61,7 +61,7 @@ class ContentAccessor:
         ):
             # write data to file
             file_name = "TaiPyContent.bin"
-            if _is_magic:
+            if _has_magic_module:
                 try:
                     mime = magic.from_buffer(value, mime=True)
                     file_name = "TaiPyContent." + mime.split("/")[-1]
