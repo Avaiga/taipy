@@ -288,7 +288,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         }
         case Types.SetTimeZone: {
             let timeZone = (action.payload.timeZone as string) || "client";
-            if (action.payload.fromBackend) {
+            if (!action.payload.fromBackend) {
                 timeZone = getLocalStorageValue("timeZone", timeZone);
             }
             if (!timeZone || timeZone === "client") {
@@ -442,7 +442,7 @@ export const createThemeAction = (dark: boolean, fromBackend = false): TaipyActi
 export const createTimeZoneAction = (timeZone: string, fromBackend = false): TaipyAction => ({
     type: Types.SetTimeZone,
     name: "timeZone",
-    payload: { value: timeZone, fromBackend: fromBackend },
+    payload: { timeZone: timeZone, fromBackend: fromBackend },
 });
 
 const getAlertType = (aType: string) => {

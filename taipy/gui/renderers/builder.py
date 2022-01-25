@@ -635,7 +635,7 @@ class Builder:
             self.set_attribute("kind", "theme")
         return self
 
-    def set_attributes(self, attributes: list[tuple]):
+    def set_attributes(self, attributes: t.List[tuple]):
         def _get_val(attr, index, default_val):
             return attr[index] if len(attr) > index else default_val
 
