@@ -58,6 +58,19 @@ class Helpers:
         logging.getLogger().debug(payload["payload"]["value"])
 
     @staticmethod
+    def assert_outward_ws_multiple_message(received_message, type, array_len: int):
+        assert isinstance(received_message, dict)
+        assert "name" in received_message and received_message["name"] == "message"
+        assert "args" in received_message
+        args = received_message["args"]
+        assert "type" in args and args["type"] == type
+        assert "payload" in args
+        payload = args["payload"]
+        assert isinstance(payload, list)
+        assert len(payload) == array_len
+        logging.getLogger().debug(payload)
+
+    @staticmethod
     def create_scope_and_get_sid(gui: Gui) -> str:
         sid = "test"
         gui._scopes.create_scope(sid)

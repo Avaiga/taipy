@@ -23,7 +23,8 @@ python-dotenv = ">=0.19"
 mkdocs-macros-plugin = "*"
 python-magic = "*"
 python-magic-bin = {version = "*", sys_platform = "== 'win32'"}
-openpyxl = "*"
+openpyxl = "==3.0.9"
+requests = "*"
 
 [dev-packages]
 pytest = "*"

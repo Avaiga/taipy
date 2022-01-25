@@ -133,10 +133,9 @@ class PandasDataAccessor(DataAccessor):
             ret["data"] = data.to_dict(orient=orient)
         return ret
 
-    def cast_string_value(self, var_name: str, value: t.Any, show_warning: t.Optional[bool] = True) -> t.Any:
+    def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         if isinstance(value, pd.DataFrame):
-            if show_warning:
-                warnings.warn("Error: cannot update value for dataframe: " + var_name)
+            warnings.warn("Error: cannot update value for dataframe: " + var_name)
             return None
         return value
 
