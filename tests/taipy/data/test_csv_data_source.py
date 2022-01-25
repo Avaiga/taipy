@@ -46,7 +46,7 @@ class TestCSVDataSource:
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         # Create CSVDataSource without exposed_type (Default is pandas.DataFrame)
-        csv_data_source_as_pandas = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path, "has_header": True})
+        csv_data_source_as_pandas = CSVDataSource("bar", Scope.PIPELINE, properties={"path": path})
         data_pandas = csv_data_source_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 10
@@ -59,7 +59,7 @@ class TestCSVDataSource:
                 self.text = text
 
         csv_data_source_as_custom_object = CSVDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": MyCustomObject}
+            "bar", Scope.PIPELINE, properties={"path": path, "exposed_type": MyCustomObject}
         )
         data_custom = csv_data_source_as_custom_object.read()
         assert isinstance(data_custom, list)

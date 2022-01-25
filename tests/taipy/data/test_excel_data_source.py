@@ -55,9 +55,7 @@ class TestExcelDataSource:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
         # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
-        excel_data_source_as_pandas = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True}
-        )
+        excel_data_source_as_pandas = ExcelDataSource("bar", Scope.PIPELINE, properties={"path": path})
 
         data_pandas = excel_data_source_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -74,7 +72,7 @@ class TestExcelDataSource:
         non_existing_sheet_name_custom = ExcelDataSource(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "sheet_name": "abc", "exposed_type": MyCustomObject},
+            properties={"path": path, "sheet_name": "abc", "exposed_type": MyCustomObject},
         )
         with pytest.raises(NonExistingExcelSheet):
             non_existing_sheet_name_custom.read()
@@ -82,7 +80,7 @@ class TestExcelDataSource:
         excel_data_source_as_custom_object = ExcelDataSource(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "exposed_type": MyCustomObject},
+            properties={"path": path, "exposed_type": MyCustomObject},
         )
 
         data_custom = excel_data_source_as_custom_object.read()
@@ -179,7 +177,7 @@ class TestExcelDataSource:
         not_existing_excel = ExcelDataSource(
             "foo",
             Scope.PIPELINE,
-            properties={"path": "WRONG.csv", "has_header": True, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+            properties={"path": "WRONG.csv", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
             not_existing_excel.read()
@@ -189,7 +187,7 @@ class TestExcelDataSource:
 
         # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
         excel_data_source_as_pandas = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "sheet_name": sheet_names}
+            "bar", Scope.PIPELINE, properties={"path": path, "sheet_name": sheet_names}
         )
 
         data_pandas = excel_data_source_as_pandas.read()
@@ -210,7 +208,6 @@ class TestExcelDataSource:
             Scope.PIPELINE,
             properties={
                 "path": path,
-                "has_header": True,
                 "sheet_name": ["Sheet1", "xyz"],
                 "exposed_type": MyCustomObject,
             },
