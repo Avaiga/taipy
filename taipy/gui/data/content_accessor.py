@@ -2,40 +2,32 @@ import typing as t
 import warnings
 import base64
 import pathlib
+import tempfile
 from importlib import util
+from pathlib import Path
+from sys import getsizeof
+
+from ..utils import _get_non_existent_file_path
 
 if util.find_spec("magic"):
     import magic
 
+    _is_magic = True
+
 
 class ContentAccessor:
-    def __init__(self) -> None:
+    def __init__(self, data_url_max_size: int) -> None:
         self.__content_paths: t.Dict[str, pathlib.Path] = {}
         self.__paths: t.Dict[pathlib.Path, str] = {}
         self.__vars: t.Dict[str, bool] = {}
+        self.__data_url_max_size = data_url_max_size
+        self.__temp_dir_path = Path(tempfile.gettempdir())
 
     def get_path(self, path: pathlib.Path) -> str:
         url_path = self.__paths.get(path)
         if url_path is None:
             self.__paths[path] = url_path = "taipyStatic" + str(len(self.__paths))
         return url_path
-
-    def __getHeaders(
-        self, path: pathlib.Path, file_name: str, var_name: t.Union[str, None], bypass: bool
-    ) -> t.Dict[str, t.Any]:
-        image = self.__vars.get(var_name) if var_name else True
-        if not image:
-            file = path / file_name
-            mime = None
-            if not bypass and util.find_spec("magic"):
-                mime = self.__get_mime_from_file(file)
-            mime = "application/octet-stream" if not mime else mime
-            return {
-                "Content-Type": f"{mime}; charset=utf-8",
-                "Content-Disposition": f'attachment; filename="{file_name}"; filename*="{file_name}"',
-                "Content-Length": file.stat().st_size,
-            }
-        return {}
 
     def get_content_path(
         self, url_path: str, file_name: str, var_name: t.Union[str, None], bypass: t.Union[str, None]
@@ -51,7 +43,7 @@ class ContentAccessor:
         return var_name
 
     def __get_mime_from_file(self, path: pathlib.Path):
-        if util.find_spec("magic"):
+        if _is_magic:
             try:
                 return magic.from_file(str(path), mime=True)
             except Exception as e:
@@ -62,14 +54,35 @@ class ContentAccessor:
         image = self.__vars.get(var_name)
         if image is None:
             return value
-        if isinstance(value, (str, pathlib.Path)):
-            if isinstance(value, str):
-                path = pathlib.Path(value)
+        newvalue = value
+        mime = None
+        if not isinstance(newvalue, (str, pathlib.Path)) and (
+            getsizeof(newvalue) > self.__data_url_max_size or not _is_magic
+        ):
+            # write data to file
+            file_name = "TaiPyContent.bin"
+            if _is_magic:
+                try:
+                    mime = magic.from_buffer(value, mime=True)
+                    file_name = "TaiPyContent." + mime.split("/")[-1]
+                except Exception as e:
+                    warnings.warn(f"{var_name} ({type(value)}) cannot be typed.\n{e}")
+            file_path = _get_non_existent_file_path(self.__temp_dir_path, file_name)
+            try:
+                with open(file_path, "wb") as temp_file:
+                    temp_file.write(value)
+            except Exception as e:
+                warnings.warn(f"{var_name} ({type(value)}) cannot be written to file {file_path}.\n{e}")
+            newvalue = file_path
+        if isinstance(newvalue, (str, pathlib.Path)):
+            if isinstance(newvalue, str):
+                path = pathlib.Path(newvalue)
             else:
-                path = value
+                path = newvalue
             if path.is_file():
                 if image:
-                    mime = self.__get_mime_from_file(path)
+                    if not mime:
+                        mime = self.__get_mime_from_file(path)
                     if mime and not mime.startswith("image"):
                         warnings.warn(f"{var_name} ({path}) is not an image: {mime}")
                         return f"Invalid content: {mime}"
@@ -80,7 +93,7 @@ class ContentAccessor:
             else:
                 return value
         else:
-            if util.find_spec("magic"):
+            if _is_magic:
                 try:
                     mime = magic.from_buffer(value, mime=True)
                     if not image or mime.startswith("image"):
