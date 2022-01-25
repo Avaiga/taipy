@@ -108,9 +108,6 @@ class SQLDataSource(DataSource):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        # if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-        #     return self._read_as(self.read_query, self.properties[self.__EXPOSED_TYPE_PROPERTY])
-        # return self._read_as_pandas_dataframe()
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
             if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
                 return self._read_as_numpy()
