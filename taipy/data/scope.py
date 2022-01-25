@@ -1,5 +1,3 @@
-from enum import Enum
-
 from taipy.common.repr_enum import ReprEnum
 
 
