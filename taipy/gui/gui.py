@@ -320,13 +320,14 @@ class Gui(object, metaclass=Singleton):
                         warnings.warn(f"cannot group file after chunk upload {ee}")
                         return
                 # notify the file is uploaded
+                newvalue = str(file_path)
                 if multiple:
                     value = getattr(self._get_data_scope(), var_name)
                     if not isinstance(value, t.List):
                         value = [] if value is None else [value]
-                    value.append(str(file_path))
-                    file_path = value
-                setattr(self, var_name, str(file_path))
+                    value.append(newvalue)
+                    newvalue = value
+                setattr(self, var_name, newvalue)
         return ("", 200)
 
     def __send_var_list_update(
