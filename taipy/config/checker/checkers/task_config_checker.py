@@ -3,7 +3,7 @@ from typing import List
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.config_checker import ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.data_source_config import DataSourceConfig
+from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.task_config import TaskConfig
 
 
@@ -20,12 +20,10 @@ class TaskConfigChecker(ConfigChecker):
         return self.collector
 
     def _check_inputs(self, task_config_name: str, task_config: TaskConfig):
-        self._check_children(TaskConfig, task_config_name, task_config.INPUT_KEY, task_config.inputs, DataSourceConfig)
+        self._check_children(TaskConfig, task_config_name, task_config.INPUT_KEY, task_config.inputs, DataNodeConfig)
 
     def _check_outputs(self, task_config_name: str, task_config: TaskConfig):
-        self._check_children(
-            TaskConfig, task_config_name, task_config.OUTPUT_KEY, task_config.outputs, DataSourceConfig
-        )
+        self._check_children(TaskConfig, task_config_name, task_config.OUTPUT_KEY, task_config.outputs, DataNodeConfig)
 
     def _check_function(self, task_config_name: str, task_config: TaskConfig):
         if not task_config.function:

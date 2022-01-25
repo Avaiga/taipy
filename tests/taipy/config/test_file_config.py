@@ -53,18 +53,18 @@ airflow_folder = ".airflow/"
 start_airflow = false
 airflow_api_retry = 10
 
-[DATA_SOURCE.default]
+[DATA_NODE.default]
 storage_type = "in_memory"
 scope = "PIPELINE"
 custom = "default_custom_prop"
 
-[DATA_SOURCE.ds1]
+[DATA_NODE.ds1]
 storage_type = "pickle"
 scope = "PIPELINE"
 custom = "custom property"
 default_data = "ds1"
 
-[DATA_SOURCE.ds2]
+[DATA_NODE.ds2]
 storage_type = "in_memory"
 scope = "SCENARIO"
 custom = "default_custom_prop"
@@ -101,9 +101,9 @@ owner = "Raymond Kopa"
 
     Config.set_global_config(True, "my_broker_end_point")
     Config.set_job_config(mode="standalone")
-    Config.add_default_data_source(storage_type="in_memory", custom="default_custom_prop")
-    ds1_cfg_v2 = Config.add_data_source("ds1", storage_type="pickle", default_data="ds1", custom="custom property")
-    ds2_cfg_v2 = Config.add_data_source(
+    Config.add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
+    ds1_cfg_v2 = Config.add_data_node("ds1", storage_type="pickle", default_data="ds1", custom="custom property")
+    ds2_cfg_v2 = Config.add_data_node(
         "ds2", storage_type="in_memory", scope=Scope.SCENARIO, foo="bar", default_data="ds2"
     )
     t1_cfg_v2 = Config.add_task("t1", ds1_cfg_v2, print, ds2_cfg_v2, description="t1 description")
@@ -120,18 +120,18 @@ owner = "Raymond Kopa"
 def test_all_entities_use_protected_name():
     file_config = NamedTemporaryFile(
         """
-        [DATA_SOURCE.default]
+        [DATA_NODE.default]
         has_header = true
 
-        [DATA_SOURCE.my_dataSource]
+        [DATA_NODE.my_dataNode]
         path = "/data/csv"
 
-        [DATA_SOURCE.my_dataSource2]
+        [DATA_NODE.my_dataNode2]
         path = "/data2/csv"
 
         [TASK.my_Task]
-        inputs = ["my_dataSource"]
-        outputs = ["my_dataSource2"]
+        inputs = ["my_dataNode"]
+        outputs = ["my_dataNode2"]
         description = "task description"
 
         [PIPELINE.my_Pipeline]
@@ -144,17 +144,17 @@ def test_all_entities_use_protected_name():
         """
     )
     Config.load(file_config.filename)
-    data_source_1_config = Config.add_data_source(name="my_datasource")
-    data_source_2_config = Config.add_data_source(name="my_datasource2")
-    task_config = Config.add_task("my_task", data_source_1_config, print, data_source_2_config)
+    data_node_1_config = Config.add_data_node(name="my_datanode")
+    data_node_2_config = Config.add_data_node(name="my_datanode2")
+    task_config = Config.add_task("my_task", data_node_1_config, print, data_node_2_config)
     pipeline_config = Config.add_pipeline("my_pipeline", task_config)
     Config.add_scenario("my_scenario", pipeline_config)
 
-    assert len(Config.data_sources()) == 3
-    assert Config.data_sources()["my_datasource"].path == "/data/csv"
-    assert Config.data_sources()["my_datasource2"].path == "/data2/csv"
-    assert Config.data_sources()["my_datasource"].name == "my_datasource"
-    assert Config.data_sources()["my_datasource2"].name == "my_datasource2"
+    assert len(Config.data_nodes()) == 3
+    assert Config.data_nodes()["my_datanode"].path == "/data/csv"
+    assert Config.data_nodes()["my_datanode2"].path == "/data2/csv"
+    assert Config.data_nodes()["my_datanode"].name == "my_datanode"
+    assert Config.data_nodes()["my_datanode2"].name == "my_datanode2"
 
     assert len(Config.tasks()) == 2
     assert Config.tasks()["my_task"].name == "my_task"

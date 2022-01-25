@@ -1,7 +1,7 @@
 from taipy.config._config import _Config
 from taipy.config.checker import IssueCollector
 from taipy.config.checker.checkers.task_config_checker import TaskConfigChecker
-from taipy.config.data_source_config import DataSourceConfig
+from taipy.config.data_node_config import DataNodeConfig
 
 
 class TestTaskConfigChecker:
@@ -24,13 +24,13 @@ class TestTaskConfigChecker:
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].inputs = [DataSourceConfig("bar")]
+        config.tasks["default"].inputs = [DataNodeConfig("bar")]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].inputs = [DataSourceConfig("bar"), "bar"]
+        config.tasks["default"].inputs = [DataNodeConfig("bar"), "bar"]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
@@ -45,13 +45,13 @@ class TestTaskConfigChecker:
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].outputs = [DataSourceConfig("bar")]
+        config.tasks["default"].outputs = [DataNodeConfig("bar")]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].outputs = [DataSourceConfig("bar"), "bar"]
+        config.tasks["default"].outputs = [DataNodeConfig("bar"), "bar"]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1

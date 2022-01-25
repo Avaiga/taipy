@@ -3,7 +3,7 @@ from enum import Enum
 
 class Operator(Enum):
     """
-    The operator of filtering of a Data Source.
+    The operator of filtering of a Data Node.
     """
 
     EQUAL = 1

@@ -2,34 +2,34 @@ import pathlib
 from datetime import datetime
 
 from taipy.config.config import Config
-from taipy.data import DataSource
-from taipy.data.data_source_model import DataSourceModel
+from taipy.data import DataNode
+from taipy.data.data_node_model import DataNodeModel
 from taipy.repository import FileSystemRepository
 
 
-class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
-    def __init__(self, class_map, dir_name="data_sources"):
-        super().__init__(model=DataSourceModel, dir_name=dir_name)
+class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
+    def __init__(self, class_map, dir_name="data_nodes"):
+        super().__init__(model=DataNodeModel, dir_name=dir_name)
         self.class_map = class_map
 
-    def to_model(self, data_source: DataSource):
-        return DataSourceModel(
-            data_source.id,
-            data_source.config_name,
-            data_source.scope,
-            data_source.storage_type(),
-            data_source.name,
-            data_source.parent_id,
-            data_source.last_edition_date.isoformat() if data_source.last_edition_date else None,
-            data_source.job_ids,
-            data_source.validity_days,
-            data_source.validity_hours,
-            data_source.validity_minutes,
-            data_source.edition_in_progress,
-            data_source.properties,
+    def to_model(self, data_node: DataNode):
+        return DataNodeModel(
+            data_node.id,
+            data_node.config_name,
+            data_node.scope,
+            data_node.storage_type(),
+            data_node.name,
+            data_node.parent_id,
+            data_node.last_edition_date.isoformat() if data_node.last_edition_date else None,
+            data_node.job_ids,
+            data_node.validity_days,
+            data_node.validity_hours,
+            data_node.validity_minutes,
+            data_node.edition_in_progress,
+            data_node.properties,
         )
 
-    def from_model(self, model: DataSourceModel):
+    def from_model(self, model: DataNodeModel):
         return self.class_map[model.storage_type](
             config_name=model.config_name,
             scope=model.scope,
@@ -42,7 +42,7 @@ class DataRepository(FileSystemRepository[DataSourceModel, DataSource]):
             validity_hours=model.validity_hours,
             validity_minutes=model.validity_minutes,
             edition_in_progress=model.edition_in_progress,
-            properties=model.data_source_properties,
+            properties=model.data_node_properties,
         )
 
     @property

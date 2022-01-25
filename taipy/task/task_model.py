@@ -11,13 +11,13 @@ class TaskModel:
     The tuple `(config_name, parent_id)` forms a unique key.
 
     Attributes:
-        id: Identifier of a Data Source.
+        id: Identifier of a Data Node.
         parent_id: Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        config_name: Name of the Data Source Config.
-        input: Input data source of the Task, saved as its ID string representation.
+        config_name: Name of the Data Node Config.
+        input: Input data node of the Task, saved as its ID string representation.
         function_name: Name of the task function.
         function_module: Module name of the task function.
-        output: Output data source of the Task, saved as its ID string representation.
+        output: Output data node of the Task, saved as its ID string representation.
     """
 
     id: str

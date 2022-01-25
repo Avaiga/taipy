@@ -1,5 +1,5 @@
 from taipy.common import protect_name
-from taipy.config import DataSourceConfig, GlobalAppConfig, JobConfig, PipelineConfig, ScenarioConfig, TaskConfig
+from taipy.config import DataNodeConfig, GlobalAppConfig, JobConfig, PipelineConfig, ScenarioConfig, TaskConfig
 from taipy.config._config import _Config
 from taipy.config.config import Config
 from taipy.data import Scope
@@ -25,7 +25,7 @@ def _test_default_job_config(job_config: JobConfig):
     assert len(job_config.properties) == 0
 
 
-def _test_default_data_source_config(ds_config: DataSourceConfig):
+def _test_default_data_node_config(ds_config: DataNodeConfig):
     assert ds_config is not None
     assert ds_config.name is not None
     assert ds_config.name == protect_name(ds_config.name)
@@ -71,11 +71,11 @@ def test_default_configuration():
     _test_default_job_config(Config.job_config())
     _test_default_job_config(JobConfig().default_config())
 
-    _test_default_data_source_config(default_config.data_sources[_Config.DEFAULT_KEY])
-    _test_default_data_source_config(Config.data_sources()[_Config.DEFAULT_KEY])
-    _test_default_data_source_config(DataSourceConfig.default_config("DEFAULT_KEY"))
-    assert len(default_config.data_sources) == 1
-    assert len(Config.data_sources()) == 1
+    _test_default_data_node_config(default_config.data_nodes[_Config.DEFAULT_KEY])
+    _test_default_data_node_config(Config.data_nodes()[_Config.DEFAULT_KEY])
+    _test_default_data_node_config(DataNodeConfig.default_config("DEFAULT_KEY"))
+    assert len(default_config.data_nodes) == 1
+    assert len(Config.data_nodes()) == 1
 
     _test_default_task_config(default_config.tasks[_Config.DEFAULT_KEY])
     _test_default_task_config(Config.tasks()[_Config.DEFAULT_KEY])

@@ -5,7 +5,7 @@ import toml  # type: ignore
 
 from taipy.common import protect_name
 from taipy.common.frequency import Frequency
-from taipy.config import DataSourceConfig, GlobalAppConfig, JobConfig, ScenarioConfig
+from taipy.config import DataNodeConfig, GlobalAppConfig, JobConfig, ScenarioConfig
 from taipy.config._config import _Config
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.task_config import TaskConfig
@@ -18,7 +18,7 @@ class TomlSerializer:
 
     GLOBAL_NODE_NAME = "TAIPY"
     JOB_NODE_NAME = "JOB"
-    DATA_SOURCE_NODE_NAME = "DATA_SOURCE"
+    DATA_NODE_NAME = "DATA_NODE"
     TASK_NODE_NAME = "TASK"
     PIPELINE_NODE_NAME = "PIPELINE"
     SCENARIO_NODE_NAME = "SCENARIO"
@@ -28,7 +28,7 @@ class TomlSerializer:
         config = {
             cls.GLOBAL_NODE_NAME: configuration.global_config.to_dict(),
             cls.JOB_NODE_NAME: configuration.job_config.to_dict(),
-            cls.DATA_SOURCE_NODE_NAME: cls.__to_dict(configuration.data_sources),
+            cls.DATA_NODE_NAME: cls.__to_dict(configuration.data_nodes),
             cls.TASK_NODE_NAME: cls.__to_dict(configuration.tasks),
             cls.PIPELINE_NODE_NAME: cls.__to_dict(configuration.pipelines),
             cls.SCENARIO_NODE_NAME: cls.__to_dict(configuration.scenarios),
@@ -48,7 +48,7 @@ class TomlSerializer:
             return config.name
         if isinstance(config, Frequency):
             return config.name
-        if isinstance(config, DataSourceConfig):
+        if isinstance(config, DataNodeConfig):
             return config.name
         if isinstance(config, TaskConfig):
             return config.name
@@ -82,8 +82,8 @@ class TomlSerializer:
         config = _Config()
         config.global_config = GlobalAppConfig.from_dict(config_as_dict.get(cls.GLOBAL_NODE_NAME, {}))
         config.job_config = JobConfig.from_dict(config_as_dict.get(cls.JOB_NODE_NAME, {}))
-        config.data_sources = cls.extract_node(config_as_dict, DataSourceConfig, cls.DATA_SOURCE_NODE_NAME, None)
-        config.tasks = cls.extract_node(config_as_dict, TaskConfig, cls.TASK_NODE_NAME, config.data_sources)
+        config.data_nodes = cls.extract_node(config_as_dict, DataNodeConfig, cls.DATA_NODE_NAME, None)
+        config.tasks = cls.extract_node(config_as_dict, TaskConfig, cls.TASK_NODE_NAME, config.data_nodes)
         config.pipelines = cls.extract_node(config_as_dict, PipelineConfig, cls.PIPELINE_NODE_NAME, config.tasks)
         config.scenarios = cls.extract_node(config_as_dict, ScenarioConfig, cls.SCENARIO_NODE_NAME, config.pipelines)
         return config

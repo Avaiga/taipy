@@ -2,24 +2,24 @@ from time import sleep
 
 import pytest
 
-from taipy.common.alias import DataSourceId
-from taipy.data.in_memory import InMemoryDataSource
+from taipy.common.alias import DataNodeId
+from taipy.data.in_memory import InMemoryDataNode
 from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
-from taipy.exceptions.data_source import NoData
+from taipy.exceptions.data_node import NoData
 
 
-class TestInMemoryDataSourceEntity:
+class TestInMemoryDataNodeEntity:
     def test_create(self):
-        ds = InMemoryDataSource(
+        ds = InMemoryDataNode(
             "foobar BaZy",
             Scope.SCENARIO,
-            DataSourceId("id_uio"),
+            DataNodeId("id_uio"),
             "my name",
             "parent_id",
-            properties={"default_data": "In memory Data Source"},
+            properties={"default_data": "In memory Data Node"},
         )
-        assert isinstance(ds, InMemoryDataSource)
+        assert isinstance(ds, InMemoryDataNode)
         assert ds.storage_type() == "in_memory"
         assert ds.config_name == "foobar_bazy"
         assert ds.scope == Scope.SCENARIO
@@ -29,18 +29,18 @@ class TestInMemoryDataSourceEntity:
         assert ds.last_edition_date is not None
         assert ds.job_ids == []
         assert ds.is_ready_for_reading
-        assert ds.read() == "In memory Data Source"
-        assert ds.default_data == "In memory Data Source"
+        assert ds.read() == "In memory Data Node"
+        assert ds.default_data == "In memory Data Node"
 
-        ds_2 = InMemoryDataSource("foo", Scope.PIPELINE)
+        ds_2 = InMemoryDataNode("foo", Scope.PIPELINE)
         assert ds_2.last_edition_date is None
         assert not ds_2.is_ready_for_reading
 
     def test_read_and_write(self):
-        no_data_ds = InMemoryDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"))
+        no_data_ds = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"))
         with pytest.raises(NoData):
             no_data_ds.read()
-        in_mem_ds = InMemoryDataSource("foo", Scope.PIPELINE, properties={"default_data": "bar"})
+        in_mem_ds = InMemoryDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar"})
         assert isinstance(in_mem_ds.read(), str)
         assert in_mem_ds.read() == "bar"
         in_mem_ds.properties["default_data"] = "baz"  # this modifies the default data value but not the data itself

@@ -6,9 +6,9 @@ from functools import partial
 from typing import Any, List, Optional
 
 from taipy.common.alias import JobId
-from taipy.data import DataSource
+from taipy.data import DataNode
 from taipy.data.manager import DataManager
-from taipy.exceptions.job import DataSourceWritingError
+from taipy.exceptions.job import DataNodeWritingError
 from taipy.job import JobManager
 from taipy.job.job import Job
 from taipy.scheduler.executor.synchronous import Synchronous
@@ -54,8 +54,8 @@ class JobDispatcher:
     @classmethod
     def _call_function(cls, job_id: JobId, task: Task):
         try:
-            inputs: List[DataSource] = list(task.input.values())
-            outputs: List[DataSource] = list(task.output.values())
+            inputs: List[DataNode] = list(task.input.values())
+            outputs: List[DataNode] = list(task.output.values())
             fct = task.function
             results = fct(*cls.__read_inputs(inputs))
             return cls.__write_data(outputs, results, job_id)
@@ -63,33 +63,33 @@ class JobDispatcher:
             return [e]
 
     @classmethod
-    def __read_inputs(cls, inputs: List[DataSource]) -> List[Any]:
+    def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
         return [DataManager().get(ds.id).read() for ds in inputs]
 
     @classmethod
-    def __write_data(cls, outputs: List[DataSource], results, job_id: JobId):
+    def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
         try:
             _results = cls.__extract_results(outputs, results)
             exceptions = []
             for res, ds in zip(_results, outputs):
                 try:
-                    data_source = DataManager().get(ds.id)
-                    data_source.write(res, job_id=job_id)
-                    DataManager().set(data_source)
+                    data_node = DataManager().get(ds.id)
+                    data_node.write(res, job_id=job_id)
+                    DataManager().set(data_node)
                 except Exception as e:
-                    exceptions.append(DataSourceWritingError(f"Error writing in datasource id {ds.id}: {e}"))
+                    exceptions.append(DataNodeWritingError(f"Error writing in datanode id {ds.id}: {e}"))
                     logging.error(f"Error writing output {e}")
             return exceptions
         except Exception as e:
             return [e]
 
     @staticmethod
-    def __extract_results(outputs: List[DataSource], results: Any) -> List[Any]:
+    def __extract_results(outputs: List[DataNode], results: Any) -> List[Any]:
         _results: List[Any] = [results] if len(outputs) == 1 else results
 
         if len(_results) != len(outputs):
             logging.error("Error: wrong number of result or task output")
-            raise DataSourceWritingError("Error: wrong number of result or task output")
+            raise DataNodeWritingError("Error: wrong number of result or task output")
 
         return _results
 

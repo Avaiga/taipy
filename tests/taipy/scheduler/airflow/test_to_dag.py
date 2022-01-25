@@ -66,16 +66,16 @@ def test_multiple_tasks():
 
 def test_submit():
     string_to_copy = "foo"
-    input_ = Config.add_data_source("input_data_source")
-    output_u = Config.add_data_source("output_data_source")
+    input_ = Config.add_data_node("input_data_node")
+    output_u = Config.add_data_node("output_data_node")
     task_config = Config.add_task("name_1", input_, return_identity, output_u)
     task = TaskManager().get_or_create(task_config)
-    task.input["input_data_source"].write(string_to_copy)
-    DataManager().set(task.input["input_data_source"])
+    task.input["input_data_node"].write(string_to_copy)
+    DataManager().set(task.input["input_data_node"])
 
     original_path = sys.path
     submit("foo", task.id, Config.global_config().storage_folder)
-    assert DataManager().get(task.output["output_data_source"].id).read() == string_to_copy
+    assert DataManager().get(task.output["output_data_node"].id).read() == string_to_copy
     sys.path = original_path
 
 

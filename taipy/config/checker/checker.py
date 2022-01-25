@@ -1,4 +1,4 @@
-from taipy.config.checker.checkers.data_source_config_checker import DataSourceConfigChecker
+from taipy.config.checker.checkers.data_node_config_checker import DataNodeConfigChecker
 from taipy.config.checker.checkers.gLobal_config_checker import GlobalConfigChecker
 from taipy.config.checker.checkers.pipeline_config_checker import PipelineConfigChecker
 from taipy.config.checker.checkers.scenario_config_checker import ScenarioConfigChecker
@@ -11,7 +11,7 @@ class Checker:
 
     default_checkers = {
         GlobalConfigChecker,
-        DataSourceConfigChecker,
+        DataNodeConfigChecker,
         TaskConfigChecker,
         PipelineConfigChecker,
         ScenarioConfigChecker,

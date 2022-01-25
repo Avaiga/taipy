@@ -68,7 +68,7 @@ class PipelineManager:
 
     def delete_all(self):
         """
-        Deletes all data sources.
+        Deletes all data nodes.
         """
         self.repository.delete_all()
 
@@ -95,7 +95,7 @@ class PipelineManager:
         Raises:
             MultiplePipelineFromSameConfigWithSameParent: if more than one pipeline already exists with the
                 same config, and the same parent id (scenario_id, or pipeline_id depending on the scope of
-                the data source).
+                the data node).
         """
         pipeline_id = Pipeline.new_id(pipeline_config.name)
         tasks = [
@@ -186,7 +186,7 @@ class PipelineManager:
 
     def hard_delete(self, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
         """
-        Deletes the pipeline given as parameter and the nested tasks, data sources, and jobs.
+        Deletes the pipeline given as parameter and the nested tasks, data nodes, and jobs.
 
         Deletes the pipeline given as parameter and propagate the hard deletion. The hard delete is propagated to a
         nested task if the task is not shared by another pipeline or if a scenario id is given as parameter, by another
