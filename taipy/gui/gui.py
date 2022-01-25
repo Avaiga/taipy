@@ -326,7 +326,7 @@ class Gui(object, metaclass=Singleton):
                         value = [] if value is None else [value]
                     value.append(str(file_path))
                     file_path = value
-                setattr(self, var_name, file_path)
+                setattr(self, var_name, str(file_path))
         return ("", 200)
 
     def __send_var_list_update(
