@@ -189,8 +189,6 @@ class TestExcelDataSource:
         else:
             excel_ds.write_with_column_names(content, columns)
             df = pd.DataFrame(content, columns=columns)
-        print(f"excel_ds: \n{excel_ds.read()}")
-        print(f"df: \n{df.values}")
 
         assert np.array_equal(excel_ds.read().values, df.values)
 
