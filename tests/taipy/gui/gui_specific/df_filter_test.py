@@ -7,7 +7,7 @@ from taipy.gui.data.utils import df_data_filter
 def test_data_filter_1(csvdata):
     df, x, y = df_data_filter(csvdata, None, "Daily hospital occupancy", 1000)
     assert df.shape[0] == 1264
-    assert x == "tAiPy_index"
+    assert x == "tAiPy_index_0"
     assert y == "Daily hospital occupancy"
 
 
