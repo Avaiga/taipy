@@ -1,10 +1,12 @@
+import importlib
+
 from flask import jsonify, make_response, request
 from flask_restful import Resource
 from taipy.config import Config
 
 from taipy.data.manager.data_manager import DataManager
 from taipy.data.scope import Scope
-from taipy.exceptions.repository import ModelNotFound
+from taipy.exceptions.data_source import NonExistingDataSource
 
 from taipy_rest.api.schemas import (
     CSVDataSourceConfigSchema,
@@ -14,6 +16,7 @@ from taipy_rest.api.schemas import (
     SQLDataSourceConfigSchema,
     DataSourceConfigSchema,
 )
+from taipy_rest.config import TAIPY_SETUP_FILE
 
 ds_schema_map = {
     "csv": CSVDataSourceConfigSchema,
@@ -77,7 +80,7 @@ class DataSourceResource(Resource):
             manager = DataManager()
             datasource = manager.get(datasource_id)
             return {"datasource": schema.dump(datasource)}
-        except ModelNotFound:
+        except NonExistingDataSource:
             return make_response(
                 jsonify({"message": f"DataSource {datasource_id} not found"}), 404
             )
@@ -86,7 +89,7 @@ class DataSourceResource(Resource):
         try:
             manager = DataManager()
             manager.delete(datasource_id)
-        except ModelNotFound:
+        except NonExistingDataSource:
             return make_response(
                 jsonify({"message": f"DataSource {datasource_id} not found"}), 404
             )
@@ -137,6 +140,14 @@ class DataSourceList(Resource):
                   datasource: DataSourceConfigSchema
     """
 
+    def __init__(self):
+        spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
+
+    def fetch_config(self, config_name):
+        return getattr(self.module, config_name)
+
     def get(self):
         schema = DataSourceSchema(many=True)
         manager = DataManager()
@@ -144,17 +155,21 @@ class DataSourceList(Resource):
         return schema.dump(datasources)
 
     def post(self):
-        req = request.json
-        try:
-            req["scope"] = Scope[req.get("scope", "").upper()].value
-        except KeyError:
-            return make_response(jsonify({"message": "Invalid scope"}), 400)
-        schema = ds_schema_map.get(req.get("storage_type"))()
-        manager = DataManager()
-        datasource_config = Config.add_data_source(**schema.load(req))
-        manager._create_and_set(datasource_config, None)
+        args = request.args
+        config_name = args.get("config_name")
 
-        return {
-            "msg": "datasource created",
-            "datasource": schema.dump(datasource_config),
-        }, 201
+        if not config_name:
+            return {"msg": "Config name is mandatory"}, 400
+
+        try:
+            config = self.fetch_config(config_name)
+            schema = ds_schema_map.get(config.storage_type)()
+            manager = DataManager()
+            manager.get_or_create(config)
+
+            return {
+                "msg": "datasource created",
+                "datasource": schema.dump(config),
+            }, 201
+        except AttributeError:
+            return {"msg": f"Config name {config_name} not found"}, 404

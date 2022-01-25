@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, pre_dump
 
 
 class DataSourceSchema(Schema):
@@ -21,6 +21,11 @@ class DataSourceConfigSchema(Schema):
     name = fields.String()
     storage_type = fields.String()
     scope = fields.Integer()
+
+    @pre_dump
+    def serialize_scope(self, obj, **kwargs):
+        obj.scope = obj.scope.value
+        return obj
 
 
 class CSVDataSourceConfigSchema(DataSourceConfigSchema):

@@ -1,3 +1,5 @@
+import importlib
+
 from flask import jsonify, make_response, request
 from flask_restful import Resource
 from taipy.pipeline import PipelineManager
@@ -8,6 +10,8 @@ from taipy.exceptions.repository import ModelNotFound
 
 from taipy_rest.api.schemas import ScenarioSchema, ScenarioResponseSchema
 from taipy.scenario.scenario import Scenario
+
+from taipy_rest.config import TAIPY_SETUP_FILE
 
 
 class ScenarioResource(Resource):
@@ -125,6 +129,14 @@ class ScenarioList(Resource):
                   scenario: ScenarioSchema
     """
 
+    def __init__(self):
+        spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
+
+    def fetch_config(self, config_name):
+        return getattr(self.module, config_name)
+
     def get(self):
         schema = ScenarioResponseSchema(many=True)
         manager = ScenarioManager()
@@ -133,16 +145,25 @@ class ScenarioList(Resource):
         return schema.dump(scenarios_model)
 
     def post(self):
-        schema = ScenarioSchema()
+        args = request.args
+        config_name = args.get("config_name")
+
         response_schema = ScenarioResponseSchema()
         manager = ScenarioManager()
-        scenario = self.__create_scenario_from_schema(schema.load(request.json))
-        manager.set(scenario)
 
-        return {
-            "msg": "scenario created",
-            "scenario": response_schema.dump(manager.repository.to_model(scenario)),
-        }, 201
+        if not config_name:
+            return {"msg": "Config name is mandatory"}, 400
+
+        try:
+            config = self.fetch_config(config_name)
+            scenario = manager.create(config)
+
+            return {
+                "msg": "scenario created",
+                "scenario": response_schema.dump(manager.repository.to_model(scenario)),
+            }, 201
+        except AttributeError:
+            return {"msg": f"Config name {config_name} not found"}, 404
 
     def __create_scenario_from_schema(self, scenario_schema: ScenarioSchema):
         pipeline_manager = PipelineManager()

@@ -8,6 +8,8 @@ from taipy.exceptions.repository import ModelNotFound
 
 from taipy_rest.api.schemas import PipelineSchema, PipelineResponseSchema
 from taipy.pipeline.pipeline import Pipeline
+from taipy_rest.config import TAIPY_SETUP_FILE
+import importlib
 
 
 class PipelineResource(Resource):
@@ -125,6 +127,14 @@ class PipelineList(Resource):
                   pipeline: PipelineSchema
     """
 
+    def __init__(self):
+        spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
+
+    def fetch_config(self, config_name):
+        return getattr(self.module, config_name)
+
     def get(self):
         schema = PipelineResponseSchema(many=True)
         manager = PipelineManager()
@@ -133,16 +143,24 @@ class PipelineList(Resource):
         return schema.dump(pipelines_model)
 
     def post(self):
-        schema = PipelineSchema()
+        args = request.args
+        config_name = args.get("config_name")
+
         response_schema = PipelineResponseSchema()
         manager = PipelineManager()
-        pipeline = self.__create_pipeline_from_schema(schema.load(request.json))
-        manager.set(pipeline)
+        if not config_name:
+            return {"msg": "Config name is mandatory"}, 400
 
-        return {
-            "msg": "pipeline created",
-            "pipeline": response_schema.dump(manager.repository.to_model(pipeline)),
-        }, 201
+        try:
+            config = self.fetch_config(config_name)
+            pipeline = manager.get_or_create(config)
+
+            return {
+                "msg": "pipeline created",
+                "pipeline": response_schema.dump(manager.repository.to_model(pipeline)),
+            }, 201
+        except AttributeError:
+            return {"msg": f"Config name {config_name} not found"}, 404
 
     def __create_pipeline_from_schema(self, pipeline_schema: PipelineSchema):
         task_manager = TaskManager()

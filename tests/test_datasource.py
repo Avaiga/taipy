@@ -44,22 +44,34 @@ def test_delete_datasource(client):
         assert rep.status_code == 200
 
 
-def test_create_datasource(client, datasource_data):
-    # test bad data
+def test_create_datasource(client, default_datasource_config):
+    # without config param
     datasources_url = url_for("api.datasources")
-    data = {"bad": "data"}
-    rep = client.post(datasources_url, json=data)
+    rep = client.post(datasources_url)
     assert rep.status_code == 400
 
-    rep = client.post(datasources_url, json=datasource_data)
-    assert rep.status_code == 201
+    # config does not exist
+    datasources_url = url_for("api.datasources", config_name="foo")
+    rep = client.post(datasources_url)
+    assert rep.status_code == 404
+
+    with mock.patch(
+        "taipy_rest.api.resources.datasource.DataSourceList.fetch_config"
+    ) as config_mock:
+        config_mock.return_value = default_datasource_config
+        datasources_url = url_for("api.datasources", config_name="bar")
+        rep = client.post(datasources_url)
+        assert rep.status_code == 201
 
 
-def test_get_all_datasources(client, datasource_data):
-    datasources_url = url_for("api.datasources")
-
+def test_get_all_datasources(client, default_datasource_config_list):
     for ds in range(10):
-        client.post(datasources_url, json=datasource_data)
+        with mock.patch(
+            "taipy_rest.api.resources.datasource.DataSourceList.fetch_config"
+        ) as config_mock:
+            config_mock.return_value = default_datasource_config_list[ds]
+            datasources_url = url_for("api.datasources", config_name=config_mock.name)
+            client.post(datasources_url)
 
     rep = client.get(datasources_url)
     assert rep.status_code == 200

@@ -1,3 +1,5 @@
+import importlib
+
 from flask import jsonify, make_response, request
 from flask_restful import Resource
 
@@ -10,6 +12,8 @@ from taipy_rest.api.schemas import TaskSchema
 from taipy.task.task import Task
 from taipy.common.utils import load_fct
 from taipy.task.scheduler import TaskScheduler
+
+from taipy_rest.config import TAIPY_SETUP_FILE
 
 
 class TaskResource(Resource):
@@ -125,6 +129,14 @@ class TaskList(Resource):
                   task: TaskSchema
     """
 
+    def __init__(self):
+        spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
+        self.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.module)
+
+    def fetch_config(self, config_name):
+        return getattr(self.module, config_name)
+
     def get(self):
         schema = TaskSchema(many=True)
         manager = TaskManager()
@@ -133,16 +145,24 @@ class TaskList(Resource):
         return schema.dump(tasks_model)
 
     def post(self):
+        args = request.args
+        config_name = args.get("config_name")
+
         schema = TaskSchema()
         manager = TaskManager()
-        data = schema.load(request.json)
-        task = self.__create_task_from_schema(data)
-        manager.repository.save(task)
+        if not config_name:
+            return {"msg": "Config name is mandatory"}, 400
 
-        return {
-            "msg": "task created",
-            "task": schema.dump(data),
-        }, 201
+        try:
+            config = self.fetch_config(config_name)
+            task = manager.get_or_create(config)
+
+            return {
+                "msg": "task created",
+                "task": schema.dump(manager.repository.to_model(task)),
+            }, 201
+        except AttributeError:
+            return {"msg": f"Config name {config_name} not found"}, 404
 
     def __create_task_from_schema(self, task_schema: TaskSchema):
         data_manager = DataManager()
