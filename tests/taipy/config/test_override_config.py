@@ -5,24 +5,24 @@ from tests.taipy.config.named_temporary_file import NamedTemporaryFile
 def test_override_default_configuration_with_code_configuration():
     assert Config.job_config().nb_of_workers == 1
     assert not Config.global_config().notification
-    assert len(Config.data_sources()) == 1
+    assert len(Config.data_nodes()) == 1
     assert len(Config.tasks()) == 1
     assert len(Config.pipelines()) == 1
     assert len(Config.scenarios()) == 1
 
     Config.set_job_config(nb_of_workers=-1)
     Config.set_global_config(notification=True)
-    foo_config = Config.add_data_source("foo", "in_memory")
+    foo_config = Config.add_data_node("foo", "in_memory")
     bar_config = Config.add_task("bar", [foo_config], print, [])
     baz_config = Config.add_pipeline("baz", [bar_config])
     qux_config = Config.add_scenario("qux", [baz_config])
 
     assert Config.job_config().nb_of_workers == -1
     assert Config.global_config().notification
-    assert len(Config.data_sources()) == 2
-    assert "default" in Config.data_sources()
-    assert foo_config.name in Config.data_sources()
-    assert Config.data_sources()[foo_config.name].storage_type == "in_memory"
+    assert len(Config.data_nodes()) == 2
+    assert "default" in Config.data_nodes()
+    assert foo_config.name in Config.data_nodes()
+    assert Config.data_nodes()[foo_config.name].storage_type == "in_memory"
     assert len(Config.tasks()) == 2
     assert "default" in Config.tasks()
     assert bar_config.name in Config.tasks()
@@ -51,7 +51,7 @@ notification = true
 [JOB]
 nb_of_workers = -1
 
-[DATA_SOURCE.foo]
+[DATA_NODE.foo]
 
 [TASK.bar]
 
@@ -63,7 +63,7 @@ nb_of_workers = -1
 
     assert Config.job_config().nb_of_workers == 1
     assert not Config.global_config().notification
-    assert len(Config.data_sources()) == 1
+    assert len(Config.data_nodes()) == 1
     assert len(Config.tasks()) == 1
     assert len(Config.pipelines()) == 1
     assert len(Config.scenarios()) == 1
@@ -72,9 +72,9 @@ nb_of_workers = -1
 
     assert Config.job_config().nb_of_workers == -1
     assert Config.global_config().notification
-    assert len(Config.data_sources()) == 2
-    assert "default" in Config.data_sources()
-    assert "foo" in Config.data_sources()
+    assert len(Config.data_nodes()) == 2
+    assert "default" in Config.data_nodes()
+    assert "foo" in Config.data_nodes()
     assert len(Config.tasks()) == 2
     assert "default" in Config.tasks()
     assert "bar" in Config.tasks()
@@ -116,9 +116,9 @@ nb_of_workers = 2
 def test_override_default_configuration_with_multiple_configurations():
     file_config = NamedTemporaryFile(
         """
-[DATA_SOURCE.default]
+[DATA_NODE.default]
 has_header = true
-[DATA_SOURCE.my_datasource]
+[DATA_NODE.my_datanode]
 path = "/data/csv"
 
 [JOB]
@@ -143,6 +143,6 @@ notification = false
     Config.load(file_config.filename)
     assert Config.global_config().notification is False
     assert Config.job_config().nb_of_workers == 10
-    assert Config.data_sources()["my_datasource"].has_header
-    assert Config.data_sources()["my_datasource"].path == "/data/csv"
-    assert Config.data_sources()["my_datasource"].not_defined is None
+    assert Config.data_nodes()["my_datanode"].has_header
+    assert Config.data_nodes()["my_datanode"].path == "/data/csv"
+    assert Config.data_nodes()["my_datanode"].not_defined is None

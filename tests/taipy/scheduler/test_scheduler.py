@@ -112,7 +112,7 @@ def test_submit_task_returns_single_iterable_output():
     assert task_with_list.output[f"{task_with_list.config_name}-output0"].read() == [42, 21]
 
 
-def test_data_source_not_written_due_to_wrong_result_nb():
+def test_data_node_not_written_due_to_wrong_result_nb():
     def return_2tuple():
         return lambda nb1, nb2: (multiply(nb1, nb2), multiply(nb1, nb2) / 2)
 
@@ -214,11 +214,11 @@ def test_blocked_task():
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    foo_cfg = Config.add_data_source("foo", default_data=1)
+    foo_cfg = Config.add_data_node("foo", default_data=1)
     foo = data_manager.get_or_create(foo_cfg)
-    bar_cfg = Config.add_data_source("bar")
+    bar_cfg = Config.add_data_node("bar")
     bar = data_manager.get_or_create(bar_cfg)
-    baz_cfg = Config.add_data_source("baz")
+    baz_cfg = Config.add_data_node("baz")
     baz = data_manager.get_or_create(baz_cfg)
     task_1 = Task("by_2", [foo], partial(lock_multiply, lock_1, 2), [bar])
     task_2 = Task("by_3", [bar], partial(lock_multiply, lock_2, 3), [baz])
@@ -267,12 +267,12 @@ def test_task_scheduler_create_parallel_dispatcher():
 def _create_task(function, nb_outputs=1):
     output_ds_config_name = str(uuid.uuid4())
     input_ds = [
-        DataManager().get_or_create(Config.add_data_source("input1", "in_memory", Scope.PIPELINE, default_data=21)),
-        DataManager().get_or_create(Config.add_data_source("input2", "in_memory", Scope.PIPELINE, default_data=2)),
+        DataManager().get_or_create(Config.add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)),
+        DataManager().get_or_create(Config.add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)),
     ]
     output_ds = [
         DataManager().get_or_create(
-            Config.add_data_source(f"{output_ds_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+            Config.add_data_node(f"{output_ds_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]

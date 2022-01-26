@@ -6,24 +6,24 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from taipy.common.alias import DataSourceId
-from taipy.data.excel import ExcelDataSource
+from taipy.common.alias import DataNodeId
+from taipy.data.excel import ExcelDataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
-from taipy.exceptions.data_source import NoData, NonExistingExcelSheet
+from taipy.exceptions.data_node import NoData, NonExistingExcelSheet
 
 
-class TestExcelDataSource:
+class TestExcelDataNode:
     def test_create(self):
-        path = "data/source/path"
+        path = "data/node/path"
         sheet_names = ["sheet_name_1", "sheet_name_2"]
-        ds = ExcelDataSource(
+        ds = ExcelDataNode(
             "fOo BAr",
             Scope.PIPELINE,
             name="super name",
             properties={"path": path, "has_header": False, "sheet_name": sheet_names},
         )
-        assert isinstance(ds, ExcelDataSource)
+        assert isinstance(ds, ExcelDataNode)
         assert ds.storage_type() == "excel"
         assert ds.config_name == "foo_bar"
         assert ds.name == "super name"
@@ -39,65 +39,63 @@ class TestExcelDataSource:
 
     def test_create_with_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):
-            ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"))
+            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"))
         with pytest.raises(MissingRequiredProperty):
-            ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={})
+            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"path": "path"})
+            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"path": "path"})
         with pytest.raises(MissingRequiredProperty):
-            ExcelDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties={"has_header": True})
+            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"has_header": True})
+        with pytest.raises(MissingRequiredProperty):
+            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"path": "path", "has_header": True})
 
     def test_read_with_header(self):
-        not_existing_excel = ExcelDataSource(
-            "foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx", "has_header": True}
-        )
+        not_existing_excel = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx"})
         with pytest.raises(NoData):
             not_existing_excel.read()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
-        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
-        excel_data_source_as_pandas = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True}
-        )
+        # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+        excel_data_node_as_pandas = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path})
 
-        data_pandas = excel_data_source_as_pandas.read()
+        data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 5
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path).to_numpy())
 
-        # Create ExcelDataSource with numpy exposed_type
-        excel_data_source_as_numpy = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": "numpy"}
+        # Create ExcelDataNode with numpy exposed_type
+        excel_data_node_as_numpy = ExcelDataNode(
+            "bar", Scope.PIPELINE, properties={"path": path, "exposed_type": "numpy"}
         )
 
-        data_numpy = excel_data_source_as_numpy.read()
+        data_numpy = excel_data_node_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 5
         assert np.array_equal(data_numpy, pd.read_excel(path).to_numpy())
 
-        # Create the same ExcelDataSource but with custom exposed_type
+        # Create the same ExcelDataNode but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
                 self.id = id
                 self.integer = integer
                 self.text = text
 
-        non_existing_sheet_name_custom = ExcelDataSource(
+        non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "sheet_name": "abc", "exposed_type": MyCustomObject},
+            properties={"path": path, "sheet_name": "abc", "exposed_type": MyCustomObject},
         )
         with pytest.raises(NonExistingExcelSheet):
             non_existing_sheet_name_custom.read()
 
-        excel_data_source_as_custom_object = ExcelDataSource(
+        excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "exposed_type": MyCustomObject},
+            properties={"path": path, "exposed_type": MyCustomObject},
         )
 
-        data_custom = excel_data_source_as_custom_object.read()
+        data_custom = excel_data_node_as_custom_object.read()
         assert isinstance(data_custom, list)
         assert len(data_custom) == 5
 
@@ -108,7 +106,7 @@ class TestExcelDataSource:
             assert row_pandas["text"] == row_custom.text
 
     def test_read_without_header(self):
-        not_existing_excel = ExcelDataSource(
+        not_existing_excel = ExcelDataNode(
             "foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx", "has_header": False}
         )
         with pytest.raises(NoData):
@@ -116,33 +114,31 @@ class TestExcelDataSource:
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
-        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
-        excel_data_source_as_pandas = ExcelDataSource(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False}
-        )
-        data_pandas = excel_data_source_as_pandas.read()
+        # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+        excel_data_node_as_pandas = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path, "has_header": False})
+        data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 6
         assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path, header=None).to_numpy())
 
-        # Create ExcelDataSource with numpy exposed_type
-        excel_data_source_as_numpy = ExcelDataSource(
+        # Create ExcelDataNode with numpy exposed_type
+        excel_data_node_as_numpy = ExcelDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
         )
 
-        data_numpy = excel_data_source_as_numpy.read()
+        data_numpy = excel_data_node_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 6
         assert np.array_equal(data_numpy, pd.read_excel(path, header=None).to_numpy())
 
-        # Create the same ExcelDataSource but with custom exposed_type
+        # Create the same ExcelDataNode but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
                 self.id = id
                 self.integer = integer
                 self.text = text
 
-        non_existing_sheet_name_custom = ExcelDataSource(
+        non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={"path": path, "has_header": False, "sheet_name": "abc", "exposed_type": MyCustomObject},
@@ -150,7 +146,7 @@ class TestExcelDataSource:
         with pytest.raises(NonExistingExcelSheet):
             non_existing_sheet_name_custom.read()
 
-        excel_data_source_as_custom_object = ExcelDataSource(
+        excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={
@@ -160,7 +156,7 @@ class TestExcelDataSource:
             },
         )
 
-        data_custom = excel_data_source_as_custom_object.read()
+        data_custom = excel_data_node_as_custom_object.read()
         assert isinstance(data_custom, list)
         assert len(data_custom) == 6
 
@@ -179,7 +175,7 @@ class TestExcelDataSource:
         ],
     )
     def test_write(self, excel_file, default_data_frame, content, columns):
-        excel_ds = ExcelDataSource(
+        excel_ds = ExcelDataNode(
             "foo", Scope.PIPELINE, properties={"path": excel_file, "has_header": True, "sheet_name": "Sheet1"}
         )
         assert np.array_equal(excel_ds.read().values, default_data_frame.values)
@@ -196,7 +192,7 @@ class TestExcelDataSource:
         assert len(excel_ds.read()) == 0
 
     def test_read_multi_sheet_with_header(self):
-        not_existing_excel = ExcelDataSource(
+        not_existing_excel = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
             properties={"path": "WRONG.xlsx", "has_header": True, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
@@ -207,12 +203,12 @@ class TestExcelDataSource:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         sheet_names = ["Sheet1", "Sheet2"]
 
-        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
-        excel_data_source_as_pandas = ExcelDataSource(
+        # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+        excel_data_node_as_pandas = ExcelDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "sheet_name": sheet_names}
         )
 
-        data_pandas = excel_data_source_as_pandas.read()
+        data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, Dict)
         assert len(data_pandas) == 2
         assert all(
@@ -225,14 +221,14 @@ class TestExcelDataSource:
                 data_pandas[sheet_name].to_numpy(), pd.read_excel(path, sheet_name=sheet_name).to_numpy()
             )
 
-        # Create ExcelDataSource with numpy exposed_type
-        excel_data_source_as_numpy = ExcelDataSource(
+        # Create ExcelDataNode with numpy exposed_type
+        excel_data_node_as_numpy = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={"path": path, "has_header": True, "sheet_name": sheet_names, "exposed_type": "numpy"},
         )
 
-        data_numpy = excel_data_source_as_numpy.read()
+        data_numpy = excel_data_node_as_numpy.read()
         assert isinstance(data_numpy, Dict)
         assert len(data_numpy) == 2
         assert all(
@@ -243,14 +239,14 @@ class TestExcelDataSource:
         for sheet_name in sheet_names:
             assert np.array_equal(data_pandas[sheet_name], pd.read_excel(path, sheet_name=sheet_name).to_numpy())
 
-        # Create the same ExcelDataSource but with custom exposed_type
+        # Create the same ExcelDataNode but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
                 self.id = id
                 self.integer = integer
                 self.text = text
 
-        non_existing_sheet_name_custom = ExcelDataSource(
+        non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={
@@ -263,13 +259,13 @@ class TestExcelDataSource:
         with pytest.raises(NonExistingExcelSheet):
             non_existing_sheet_name_custom.read()
 
-        excel_data_source_as_custom_object = ExcelDataSource(
+        excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={"path": path, "has_header": True, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
         )
 
-        data_custom = excel_data_source_as_custom_object.read()
+        data_custom = excel_data_node_as_custom_object.read()
         assert isinstance(data_custom, Dict)
         assert len(data_custom) == 2
         assert all(len(data_custom[sheet_name]) == 5 for sheet_name in sheet_names)
@@ -284,7 +280,7 @@ class TestExcelDataSource:
                 assert row_pandas["text"] == row_custom.text
 
     def test_read_multi_sheet_without_header(self):
-        not_existing_excel = ExcelDataSource(
+        not_existing_excel = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
             properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
@@ -295,11 +291,11 @@ class TestExcelDataSource:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         sheet_names = ["Sheet1", "Sheet2"]
 
-        # Create ExcelDataSource without exposed_type (Default is pandas.DataFrame)
-        excel_data_source_as_pandas = ExcelDataSource(
+        # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
+        excel_data_node_as_pandas = ExcelDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "sheet_name": sheet_names}
         )
-        data_pandas = excel_data_source_as_pandas.read()
+        data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, Dict)
         assert len(data_pandas) == 2
         assert all(len(data_pandas[sheet_name]) == 6 for sheet_name in sheet_names)
@@ -309,14 +305,14 @@ class TestExcelDataSource:
                 data_pandas[sheet_name].to_numpy(), pd.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
             )
 
-        # Create ExcelDataSource with numpy exposed_type
-        excel_data_source_as_numpy = ExcelDataSource(
+        # Create ExcelDataNode with numpy exposed_type
+        excel_data_node_as_numpy = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={"path": path, "has_header": False, "sheet_name": sheet_names, "exposed_type": "numpy"},
         )
 
-        data_numpy = excel_data_source_as_numpy.read()
+        data_numpy = excel_data_node_as_numpy.read()
         assert isinstance(data_numpy, Dict)
         assert len(data_numpy) == 2
         assert all(
@@ -329,14 +325,14 @@ class TestExcelDataSource:
                 data_pandas[sheet_name], pd.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
             )
 
-        # Create the same ExcelDataSource but with custom exposed_type
+        # Create the same ExcelDataNode but with custom exposed_type
         class MyCustomObject:
             def __init__(self, id, integer, text):
                 self.id = id
                 self.integer = integer
                 self.text = text
 
-        non_existing_sheet_name_custom = ExcelDataSource(
+        non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={
@@ -349,7 +345,7 @@ class TestExcelDataSource:
         with pytest.raises(NonExistingExcelSheet):
             non_existing_sheet_name_custom.read()
 
-        excel_data_source_as_custom_object = ExcelDataSource(
+        excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
             properties={
@@ -360,7 +356,7 @@ class TestExcelDataSource:
             },
         )
 
-        data_custom = excel_data_source_as_custom_object.read()
+        data_custom = excel_data_node_as_custom_object.read()
         assert isinstance(data_custom, Dict)
         assert len(data_custom) == 2
         assert all(len(data_custom[sheet_name]) == 6 for sheet_name in sheet_names)
@@ -385,7 +381,7 @@ class TestExcelDataSource:
     def test_write_multi_sheet(self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content, columns):
         sheet_names = ["Sheet1", "Sheet2"]
 
-        excel_ds = ExcelDataSource(
+        excel_ds = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
             properties={"path": excel_file_with_multi_sheet, "has_header": True, "sheet_name": sheet_names},

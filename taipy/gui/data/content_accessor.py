@@ -62,8 +62,11 @@ class ContentAccessor:
         image = self.__vars.get(var_name)
         if image is None:
             return value
-        if isinstance(value, str):
-            path = pathlib.Path(value)
+        if isinstance(value, (str, pathlib.Path)):
+            if isinstance(value, str):
+                path = pathlib.Path(value)
+            else:
+                path = value
             if path.is_file():
                 if image:
                     mime = self.__get_mime_from_file(path)

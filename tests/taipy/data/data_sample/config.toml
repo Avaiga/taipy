@@ -1,5 +1,5 @@
-[DATA_SOURCE.default]
+[DATA_NODE.default]
 has_header = false
 
-[DATA_SOURCE.foo]
+[DATA_NODE.foo]
 path = "path_from_config_file"

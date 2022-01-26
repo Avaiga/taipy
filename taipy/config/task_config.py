@@ -2,7 +2,7 @@ from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.common import protect_name
-from taipy.config.data_source_config import DataSourceConfig
+from taipy.config.data_node_config import DataNodeConfig
 
 
 class TaskConfig:
@@ -16,10 +16,10 @@ class TaskConfig:
             - Space characters are replaced by underscore characters ('_').
             - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
             - Other characters are replaced by dash characters ('-').
-        inputs (list): List of data source config inputs. Default value: [].
-        outputs (list): List of data source config outputs. Default value: [].
+        inputs (list): List of data node config inputs. Default value: [].
+        outputs (list): List of data node config outputs. Default value: [].
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
-            (exposed_type field) of the inputs data sources and returning results compatible with the exposed types
+            (exposed_type field) of the inputs data nodes and returning results compatible with the exposed types
             (exposed_type field) of the outputs list. Default value: None.
         properties (dict): Dictionary of additional properties.
     """
@@ -31,19 +31,19 @@ class TaskConfig:
     def __init__(
         self,
         name: str = None,
-        inputs: Union[DataSourceConfig, List[DataSourceConfig]] = None,
+        inputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
         function=None,
-        outputs: Union[DataSourceConfig, List[DataSourceConfig]] = None,
+        outputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
         **properties,
     ):
         self.name = protect_name(name) if name else name
         self.properties = properties
         if inputs:
-            self.inputs = [inputs] if isinstance(inputs, DataSourceConfig) else copy(inputs)
+            self.inputs = [inputs] if isinstance(inputs, DataNodeConfig) else copy(inputs)
         else:
             self.inputs = []
         if outputs:
-            self.outputs = [outputs] if isinstance(outputs, DataSourceConfig) else copy(outputs)
+            self.outputs = [outputs] if isinstance(outputs, DataNodeConfig) else copy(outputs)
         else:
             self.outputs = []
         self.function = function
@@ -67,7 +67,7 @@ class TaskConfig:
         }
 
     @classmethod
-    def from_dict(cls, name: str, config_as_dict: Dict[str, Any], ds_configs: Dict[str, DataSourceConfig]):
+    def from_dict(cls, name: str, config_as_dict: Dict[str, Any], ds_configs: Dict[str, DataNodeConfig]):
         config = TaskConfig(name)
         config.name = protect_name(name)
         if inputs := config_as_dict.pop(cls.INPUT_KEY, None):
@@ -80,11 +80,11 @@ class TaskConfig:
         return config
 
     @property
-    def input(self) -> List[DataSourceConfig]:
+    def input(self) -> List[DataNodeConfig]:
         return list(self.inputs)
 
     @property
-    def output(self) -> List[DataSourceConfig]:
+    def output(self) -> List[DataNodeConfig]:
         return list(self.outputs)
 
     def update(self, config_as_dict, default_task_cfg=None):

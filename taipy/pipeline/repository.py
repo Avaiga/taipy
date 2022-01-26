@@ -18,26 +18,26 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
         super().__init__(model=PipelineModel, dir_name=dir_name)
 
     def to_model(self, pipeline: Pipeline) -> PipelineModel:
-        source_task_edges = defaultdict(list)
-        task_source_edges = defaultdict(list)
+        datanode_task_edges = defaultdict(list)
+        task_datanode_edges = defaultdict(list)
         for task in pipeline.tasks.values():
             for predecessor in task.input.values():
-                source_task_edges[str(predecessor.id)].append(str(task.id))
+                datanode_task_edges[str(predecessor.id)].append(str(task.id))
             for successor in task.output.values():
-                task_source_edges[str(task.id)].append(str(successor.id))
+                task_datanode_edges[str(task.id)].append(str(successor.id))
         return PipelineModel(
             pipeline.id,
             pipeline.parent_id,
             pipeline.config_name,
             pipeline.properties,
-            Dag(dict(source_task_edges)),
-            Dag(dict(task_source_edges)),
+            Dag(dict(datanode_task_edges)),
+            Dag(dict(task_datanode_edges)),
             utils.fcts_to_dict(pipeline.subscribers),
         )
 
     def from_model(self, model: PipelineModel) -> Pipeline:
         try:
-            tasks = self.__to_tasks(model.task_source_edges.keys())
+            tasks = self.__to_tasks(model.task_datanode_edges.keys())
             pipeline = Pipeline(model.name, model.properties, tasks, model.id, model.parent_id)
             pipeline.subscribers = {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers}
             return pipeline

@@ -6,11 +6,11 @@ from typing import Dict, Optional
 from taipy.common import protect_name
 from taipy.common.alias import TaskId
 from taipy.data import Scope
-from taipy.data.data_source import DataSource
+from taipy.data.data_node import DataNode
 
 
 class Task:
-    """Holds user function that will be executed, its parameters qs data sources and outputs as data sources.
+    """Holds user function that will be executed, its parameters qs data nodes and outputs as data nodes.
 
     This element bring together the user code as function, parameters and outputs.
 
@@ -23,11 +23,11 @@ class Task:
             - Unicode characters are replaced by a corresponding alphanumeric character using unicode library.
             - Other characters are replaced by dash character '-'.
         input:
-            Data source input as list.
+            Data node input as list.
         function:
-            Taking data from input data source and return data that should go inside of the output data source.
+            Taking data from input data node and return data that should go inside of the output data node.
         output:
-            Data source output result of the function as optional list.
+            Data node output result of the function as optional list.
         id:
             Unique identifier of this task. Generated if `None`.
         parent_id:
@@ -40,9 +40,9 @@ class Task:
     def __init__(
         self,
         config_name: str,
-        input: Iterable[DataSource],
+        input: Iterable[DataNode],
         function,
-        output: Optional[Iterable[DataSource]] = None,
+        output: Optional[Iterable[DataNode]] = None,
         id: TaskId = None,
         parent_id: Optional[str] = None,
     ):
@@ -63,11 +63,11 @@ class Task:
         vars(self).update(state)
 
     @property
-    def output(self) -> Dict[str, DataSource]:
+    def output(self) -> Dict[str, DataNode]:
         return self.__output
 
     @property
-    def input(self) -> Dict[str, DataSource]:
+    def input(self) -> Dict[str, DataNode]:
         return self.__input
 
     def __getattr__(self, attribute_name):
@@ -76,16 +76,16 @@ class Task:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:
             return self.output[protected_attribute_name]
-        logging.error(f"{attribute_name} is not a data source of task {self.id}")
+        logging.error(f"{attribute_name} is not a data node of task {self.id}")
         raise AttributeError
 
     @property
     def scope(self) -> Scope:
-        """Retrieve the lowest scope of the task based on its data source.
+        """Retrieve the lowest scope of the task based on its data node.
 
         Returns:
-           Lowest `scope` present in input and output data source or GLOBAL if there are no neither input or output.
+           Lowest `scope` present in input and output data node or GLOBAL if there are no neither input or output.
         """
-        data_sources = list(self.input.values()) + list(self.output.values())
-        scope = min(ds.scope for ds in data_sources) if len(data_sources) != 0 else Scope.GLOBAL
+        data_nodes = list(self.input.values()) + list(self.output.values())
+        scope = min(ds.scope for ds in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return scope

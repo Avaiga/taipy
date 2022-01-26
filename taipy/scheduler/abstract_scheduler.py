@@ -11,7 +11,7 @@ class AbstractScheduler:
     """Creates and schedules Jobs.
 
     Attributes:
-        data_manager: DataManager is an element that retrieves and deals with Data Source.
+        data_manager: DataManager is an element that retrieves and deals with Data Node.
 
     """
 

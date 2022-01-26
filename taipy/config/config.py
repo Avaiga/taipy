@@ -8,7 +8,7 @@ from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
 from taipy.config.checker.checker import Checker
 from taipy.config.checker.issue_collector import IssueCollector
-from taipy.config.data_source_config import DataSourceConfig
+from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.global_app import GlobalAppConfig
 from taipy.config.job_config import JobConfig
 from taipy.config.pipeline_config import PipelineConfig
@@ -40,9 +40,9 @@ class Config:
         return cls._applied_config.job_config
 
     @classmethod
-    def data_sources(cls) -> Dict[str, DataSourceConfig]:
-        """Returns data source configs by config name."""
-        return cls._applied_config.data_sources
+    def data_nodes(cls) -> Dict[str, DataNodeConfig]:
+        """Returns data node configs by config name."""
+        return cls._applied_config.data_nodes
 
     @classmethod
     def tasks(cls) -> Dict[str, TaskConfig]:
@@ -146,34 +146,34 @@ class Config:
         return cls._applied_config.job_config
 
     @classmethod
-    def add_data_source(
+    def add_data_node(
         cls,
         name: str,
-        storage_type: str = DataSourceConfig.DEFAULT_STORAGE_TYPE,
-        scope: Scope = DataSourceConfig.DEFAULT_SCOPE,
+        storage_type: str = DataNodeConfig.DEFAULT_STORAGE_TYPE,
+        scope: Scope = DataNodeConfig.DEFAULT_SCOPE,
         **properties,
     ):
-        """Adds a new data source configuration."""
-        ds_config = DataSourceConfig(name, storage_type, scope, **properties)
-        cls._python_config.data_sources[ds_config.name] = ds_config
+        """Adds a new data node configuration."""
+        ds_config = DataNodeConfig(name, storage_type, scope, **properties)
+        cls._python_config.data_nodes[ds_config.name] = ds_config
         cls.__compile_configs()
-        return cls._applied_config.data_sources[ds_config.name]
+        return cls._applied_config.data_nodes[ds_config.name]
 
     @classmethod
-    def add_default_data_source(cls, storage_type: str, scope=Scope.PIPELINE, **properties):
-        """Configures the default data source configuration."""
-        data_source_config = DataSourceConfig(_Config.DEFAULT_KEY, storage_type, scope, **properties)
-        cls._python_config.data_sources[_Config.DEFAULT_KEY] = data_source_config
+    def add_default_data_node(cls, storage_type: str, scope=Scope.PIPELINE, **properties):
+        """Configures the default data node configuration."""
+        data_node_config = DataNodeConfig(_Config.DEFAULT_KEY, storage_type, scope, **properties)
+        cls._python_config.data_nodes[_Config.DEFAULT_KEY] = data_node_config
         cls.__compile_configs()
-        return cls._applied_config.data_sources[_Config.DEFAULT_KEY]
+        return cls._applied_config.data_nodes[_Config.DEFAULT_KEY]
 
     @classmethod
     def add_task(
         cls,
         name: str,
-        input: Union[DataSourceConfig, List[DataSourceConfig]],
+        input: Union[DataNodeConfig, List[DataNodeConfig]],
         function,
-        output: Union[DataSourceConfig, List[DataSourceConfig]],
+        output: Union[DataNodeConfig, List[DataNodeConfig]],
         **properties,
     ):
         """Adds a new task configuration."""
@@ -185,9 +185,9 @@ class Config:
     @classmethod
     def add_default_task(
         cls,
-        input: Union[DataSourceConfig, List[DataSourceConfig]],
+        input: Union[DataNodeConfig, List[DataNodeConfig]],
         function,
-        output: Union[DataSourceConfig, List[DataSourceConfig]],
+        output: Union[DataNodeConfig, List[DataNodeConfig]],
         **properties,
     ):
         """Configures the default task configuration."""
