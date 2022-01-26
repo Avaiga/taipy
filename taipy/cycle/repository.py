@@ -10,8 +10,8 @@ from taipy.config.config import Config  # isort:skip
 
 
 class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
-    def __init__(self, dir_name="cycles"):
-        super().__init__(model=CycleModel, dir_name=dir_name)
+    def __init__(self):
+        super().__init__(model=CycleModel, dir_name="cycles")
 
     def to_model(self, cycle: Cycle) -> CycleModel:
         return CycleModel(

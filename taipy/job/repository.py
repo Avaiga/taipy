@@ -1,9 +1,7 @@
 import pathlib
 from datetime import datetime
 
-from taipy.common.utils import fcts_to_dict, load_fct
 from taipy.config.config import Config
-from taipy.exceptions import InvalidSubscriber
 from taipy.job import Job
 from taipy.job.job_model import JobModel
 from taipy.repository import FileSystemRepository
@@ -11,8 +9,8 @@ from taipy.task.repository import TaskRepository
 
 
 class JobRepository(FileSystemRepository[JobModel, Job]):
-    def __init__(self, dir_name="jobs"):
-        super().__init__(model=JobModel, dir_name=dir_name)
+    def __init__(self):
+        super().__init__(model=JobModel, dir_name="jobs")
 
     def to_model(self, job):
         return JobModel(
