@@ -14,8 +14,8 @@ def reset_configuration_singleton():
 
 
 def test_task_config_creation():
-    input_config = Config.add_data_source("input")
-    output_config = Config.add_data_source("output")
+    input_config = Config.add_data_node("input")
+    output_config = Config.add_data_node("output")
     task_config = Config.add_task("tasks1", input_config, print, output_config)
 
     assert list(Config.tasks()) == ["default", task_config.name]
@@ -25,8 +25,8 @@ def test_task_config_creation():
 
 
 def test_task_count():
-    input_config = Config.add_data_source("input")
-    output_config = Config.add_data_source("output")
+    input_config = Config.add_data_node("input")
+    output_config = Config.add_data_node("output")
     Config.add_task("tasks1", input_config, print, output_config)
     assert len(Config.tasks()) == 2
 
@@ -38,8 +38,8 @@ def test_task_count():
 
 
 def test_task_getitem():
-    input_config = Config.add_data_source("input")
-    output_config = Config.add_data_source("output")
+    input_config = Config.add_data_node("input")
+    output_config = Config.add_data_node("output")
     task_name = "tasks1"
     task = Config.add_task(task_name, input_config, print, output_config)
 
@@ -51,8 +51,8 @@ def test_task_getitem():
 
 
 def test_task_creation_no_duplication():
-    input_config = Config.add_data_source("input")
-    output_config = Config.add_data_source("output")
+    input_config = Config.add_data_node("input")
+    output_config = Config.add_data_node("output")
     Config.add_task("tasks1", input_config, print, output_config)
 
     assert len(Config.tasks()) == 2

@@ -1,5 +1,3 @@
-from enum import Enum
-
 from taipy.common.repr_enum import ReprEnum
 
 
@@ -27,7 +25,7 @@ class OrderedEnum(ReprEnum):
 
 class Scope(OrderedEnum):
     """
-    The scope of usage of a Data Source.
+    The scope of usage of a Data Node.
     """
 
     GLOBAL = 4

@@ -1,29 +1,29 @@
 import pytest
 
 from taipy.config import Config
-from taipy.config.data_source_config import DataSourceConfig
-from taipy.data import CSVDataSource, DataSource, InMemoryDataSource, Scope
+from taipy.config.data_node_config import DataNodeConfig
+from taipy.data import CSVDataNode, DataNode, InMemoryDataNode, Scope
 from taipy.task import Task
 
 
 @pytest.fixture
 def output():
-    return [DataSource("name_1"), DataSource("name_2"), DataSource("name_3")]
+    return [DataNode("name_1"), DataNode("name_2"), DataNode("name_3")]
 
 
 @pytest.fixture
 def output_config():
-    return [DataSourceConfig("name_1"), DataSourceConfig("name_2"), DataSourceConfig("name_3")]
+    return [DataNodeConfig("name_1"), DataNodeConfig("name_2"), DataNodeConfig("name_3")]
 
 
 @pytest.fixture
 def input():
-    return [DataSource("input_name_1"), DataSource("input_name_2"), DataSource("input_name_3")]
+    return [DataNode("input_name_1"), DataNode("input_name_2"), DataNode("input_name_3")]
 
 
 @pytest.fixture
 def input_config():
-    return [DataSourceConfig("input_name_1"), DataSourceConfig("input_name_2"), DataSourceConfig("input_name_3")]
+    return [DataNodeConfig("input_name_1"), DataNodeConfig("input_name_2"), DataNodeConfig("input_name_3")]
 
 
 def test_create_task():
@@ -37,7 +37,7 @@ def test_create_task():
     assert task_1.config_name == "name_1-x"
 
     path = "my/csv/path"
-    foo_ds = CSVDataSource("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
+    foo_ds = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
     task = Task("namE 1", [foo_ds], print, [])
     assert task.config_name == "name_1"
     assert task.id is not None
@@ -48,7 +48,7 @@ def test_create_task():
         task.bar
 
     path = "my/csv/path"
-    abc_ds = InMemoryDataSource("abc_dsξyₓéà", Scope.SCENARIO, properties={"path": path})
+    abc_ds = InMemoryDataNode("abc_dsξyₓéà", Scope.SCENARIO, properties={"path": path})
     task = Task("namE 1éà", [abc_ds], print, [], parent_id="parent_id")
     assert task.config_name == "name_1ea"
     assert task.id is not None
@@ -93,22 +93,22 @@ def test_can_not_change_task_config_output(output_config):
 
 
 def test_can_not_update_task_output_values(output_config):
-    data_source = DataSource("data_source")
+    data_node = DataNode("data_node")
     task_config = Config.add_task("name_1", [], print, output=output_config)
 
-    task_config.output.append(data_source)
+    task_config.output.append(data_node)
     assert task_config.output == output_config
 
-    task_config.output[0] = data_source
-    assert task_config.output[0] != data_source
+    task_config.output[0] = data_node
+    assert task_config.output[0] != data_node
 
 
 def test_can_not_update_task_input_values(input_config):
-    data_source_config = DataSourceConfig("data_source")
+    data_node_config = DataNodeConfig("data_node")
     task_config = Config.add_task("name_1", input_config, print, [])
 
-    task_config.input.append(data_source_config)
+    task_config.input.append(data_node_config)
     assert task_config.input == input_config
 
-    task_config.input[0] = data_source_config
-    assert task_config.input[0] != data_source_config
+    task_config.input[0] = data_node_config
+    assert task_config.input[0] != data_node_config

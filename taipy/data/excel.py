@@ -7,30 +7,30 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import pandas as pd
 from openpyxl import load_workbook
 
-from taipy.common.alias import DataSourceId, JobId
-from taipy.data.data_source import DataSource
+from taipy.common.alias import DataNodeId, JobId
+from taipy.data.data_node import DataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
-from taipy.exceptions.data_source import NonExistingExcelSheet
+from taipy.exceptions.data_node import NonExistingExcelSheet
 
 
-class ExcelDataSource(DataSource):
+class ExcelDataNode(DataNode):
     """
-    A Data Source stored as an Excel file (xlsx format).
+    A Data Node stored as an Excel file (xlsx format).
 
     Attributes:
-        config_name (str):  Name that identifies the data source.
+        config_name (str):  Name that identifies the data node.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
             - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
             - Other characters are replaced by dash characters ('-').
-        scope (Scope):  The usage scope of this data source.
-        id (str): Unique identifier of this data source.
-        name (str): User-readable name of the data source.
+        scope (Scope):  The usage scope of this data node.
+        id (str): Unique identifier of this data node.
+        name (str): User-readable name of the data node.
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
-        job_ids (List[str]): Ordered list of jobs that have written this data source.
+        job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
         properties (list): List of additional arguments. Note that the properties parameter should at least contain
             values for "path" properties.
@@ -48,7 +48,7 @@ class ExcelDataSource(DataSource):
         self,
         config_name: str,
         scope: Scope,
-        id: Optional[DataSourceId] = None,
+        id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,

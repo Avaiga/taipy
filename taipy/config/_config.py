@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Dict
 
-from taipy.config.data_source_config import DataSourceConfig
+from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.global_app import GlobalAppConfig
 from taipy.config.job_config import JobConfig
 
@@ -16,7 +16,7 @@ class _Config:
     def __init__(self):
         self.global_config: GlobalAppConfig = GlobalAppConfig()
         self.job_config: JobConfig = JobConfig()
-        self.data_sources: Dict[str, DataSourceConfig] = {}
+        self.data_nodes: Dict[str, DataNodeConfig] = {}
         self.tasks: Dict[str, TaskConfig] = {}
         self.pipelines: Dict[str, PipelineConfig] = {}
         self.scenarios: Dict[str, ScenarioConfig] = {}
@@ -26,7 +26,7 @@ class _Config:
         config = _Config()
         config.global_config = GlobalAppConfig.default_config()
         config.job_config = JobConfig().default_config()
-        config.data_sources = {cls.DEFAULT_KEY: DataSourceConfig.default_config(cls.DEFAULT_KEY)}
+        config.data_nodes = {cls.DEFAULT_KEY: DataNodeConfig.default_config(cls.DEFAULT_KEY)}
         config.tasks = {cls.DEFAULT_KEY: TaskConfig.default_config(cls.DEFAULT_KEY)}
         config.pipelines = {cls.DEFAULT_KEY: PipelineConfig.default_config(cls.DEFAULT_KEY)}
         config.scenarios = {cls.DEFAULT_KEY: ScenarioConfig.default_config(cls.DEFAULT_KEY)}
@@ -35,7 +35,7 @@ class _Config:
     def update(self, other_config):
         self.global_config.update(other_config.global_config.to_dict())
         self.job_config.update(other_config.job_config.to_dict())
-        self.__update_entity_configs(self.data_sources, other_config.data_sources, DataSourceConfig)
+        self.__update_entity_configs(self.data_nodes, other_config.data_nodes, DataNodeConfig)
         self.__update_entity_configs(self.tasks, other_config.tasks, TaskConfig)
         self.__update_entity_configs(self.pipelines, other_config.pipelines, PipelineConfig)
         self.__update_entity_configs(self.scenarios, other_config.scenarios, ScenarioConfig)

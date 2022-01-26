@@ -123,12 +123,12 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 def _create_task(function, nb_outputs=1):
     output_ds_config_name = str(uuid.uuid4())
-    input1_ds_config = Config.add_data_source("input1", "in_memory", Scope.PIPELINE, default_data=21)
+    input1_ds_config = Config.add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)
     DataManager().get_or_create(input1_ds_config)
-    input2_ds_config = Config.add_data_source("input2", "in_memory", Scope.PIPELINE, default_data=2)
+    input2_ds_config = Config.add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)
     DataManager().get_or_create(input2_ds_config)
     output_ds_configs = [
-        Config.add_data_source(f"{output_ds_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+        Config.add_data_node(f"{output_ds_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         for i in range(nb_outputs)
     ]
     [DataManager().get_or_create(cfg) for cfg in output_ds_configs]

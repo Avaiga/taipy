@@ -6,7 +6,7 @@ from taipy.common import utils
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.common.frequency import Frequency
 from taipy.config.config import Config
-from taipy.data import InMemoryDataSource, Scope
+from taipy.data import InMemoryDataNode, Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import (
@@ -29,8 +29,8 @@ def test_set_and_get_scenario(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
 
-    input_2 = InMemoryDataSource("foo", Scope.PIPELINE)
-    output_2 = InMemoryDataSource("foo", Scope.PIPELINE)
+    input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
+    output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     task_name = "task"
     task_2 = Task(task_name, [input_2], print, [output_2], TaskId("task_id_2"))
     pipeline_name_2 = "pipeline_name_2"
@@ -191,17 +191,17 @@ def mult_by_4(nb: int):
     return nb * 4
 
 
-def test_scenario_manager_only_creates_data_source_once():
+def test_scenario_manager_only_creates_data_node_once():
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
     task_manager = scenario_manager.task_manager
     data_manager = scenario_manager.data_manager
     cycle_manager = scenario_manager.cycle_manager
 
-    ds_config_1 = Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    ds_config_2 = Config.add_data_source("bar", "in_memory", Scope.SCENARIO, default_data=0)
-    ds_config_6 = Config.add_data_source("baz", "in_memory", Scope.PIPELINE, default_data=0)
-    ds_config_4 = Config.add_data_source("qux", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    ds_config_2 = Config.add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
+    ds_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_config_4 = Config.add_data_node("qux", "in_memory", Scope.PIPELINE, default_data=0)
 
     task_mult_by_2_config = Config.add_task("mult by 2", [ds_config_1], mult_by_2, ds_config_2)
     task_mult_by_3_config = Config.add_task("mult by 3", [ds_config_2], mult_by_3, ds_config_6)
@@ -245,9 +245,9 @@ def test_notification_subscribe_unsubscribe(mocker):
                 [
                     Config.add_task(
                         "mult by 2",
-                        [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                         mult_by_2,
-                        Config.add_data_source("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        Config.add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
@@ -291,9 +291,9 @@ def test_scenario_notification_subscribe_all():
                 [
                     Config.add_task(
                         "mult by 2",
-                        [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                         mult_by_2,
-                        Config.add_data_source("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        Config.add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
@@ -357,8 +357,8 @@ def test_hard_delete():
     job_manager = scheduler.job_manager
     data_manager = scenario_manager.data_manager
 
-    ds_input_config = Config.add_data_source("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    ds_output_config = Config.add_data_source("my_output", "in_memory", scope=Scope.SCENARIO)
+    ds_input_config = Config.add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    ds_output_config = Config.add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.add_task("task_config", ds_input_config, print, ds_output_config)
     pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
     scenario_config = Config.add_scenario("scenario_config", [pipeline_config])
@@ -384,8 +384,8 @@ def test_hard_delete():
     task_manager.delete_all()
     job_manager.delete_all()
 
-    ds_input_config_1 = Config.add_data_source("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    ds_output_config_1 = Config.add_data_source("my_output_1", "in_memory")
+    ds_input_config_1 = Config.add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    ds_output_config_1 = Config.add_data_node("my_output_1", "in_memory")
     task_config_1 = Config.add_task("task_config_1", ds_input_config_1, print, ds_output_config_1)
     pipeline_config_1 = Config.add_pipeline("pipeline_config_2", [task_config_1])
     scenario_config_1 = Config.add_scenario("scenario_config_2", [pipeline_config_1])
@@ -405,8 +405,8 @@ def test_hard_delete():
     assert len(data_manager.get_all()) == 0
     assert len(job_manager.get_all()) == 0
 
-    ds_input_config_2 = Config.add_data_source("my_input_2", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    ds_output_config_2 = Config.add_data_source("my_output_2", "in_memory", scope=Scope.SCENARIO)
+    ds_input_config_2 = Config.add_data_node("my_input_2", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    ds_output_config_2 = Config.add_data_node("my_output_2", "in_memory", scope=Scope.SCENARIO)
     task_config_2 = Config.add_task("task_config_2", ds_input_config_2, print, ds_output_config_2)
     pipeline_config_2 = Config.add_pipeline("pipeline_config_2", [task_config_2])
     scenario_config_2 = Config.add_scenario("scenario_config_2", [pipeline_config_2])
@@ -432,10 +432,10 @@ def test_hard_delete():
     task_manager.delete_all()
     job_manager.delete_all()
 
-    ds_input_config_3 = Config.add_data_source(
+    ds_input_config_3 = Config.add_data_node(
         "my_input_3", "in_memory", scope=Scope.BUSINESS_CYCLE, default_data="testing"
     )
-    ds_output_config_3 = Config.add_data_source("my_output_3", "in_memory", scope=Scope.BUSINESS_CYCLE)
+    ds_output_config_3 = Config.add_data_node("my_output_3", "in_memory", scope=Scope.BUSINESS_CYCLE)
     task_config_3 = Config.add_task("task_config", ds_input_config_3, print, ds_output_config_3)
     pipeline_config_3 = Config.add_pipeline("pipeline_config", [task_config_3])
     scenario_config_3 = Config.add_scenario("scenario_config_3", [pipeline_config_3])
@@ -464,8 +464,8 @@ def test_hard_delete():
     task_manager.delete_all()
     job_manager.delete_all()
 
-    ds_input_config_4 = Config.add_data_source("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    ds_output_config_4 = Config.add_data_source("my_output_4", "in_memory", scope=Scope.GLOBAL)
+    ds_input_config_4 = Config.add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    ds_output_config_4 = Config.add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
     task_config_4 = Config.add_task("task_config_4", ds_input_config_4, print, ds_output_config_4)
     pipeline_config_4 = Config.add_pipeline("pipeline_config", [task_config_4])
     scenario_config_4 = Config.add_scenario("scenario_config_4", [pipeline_config_4])
@@ -490,25 +490,25 @@ def test_hard_delete():
 
 
 def test_submit():
-    data_source_1 = InMemoryDataSource("foo", Scope.PIPELINE, "s1")
-    data_source_2 = InMemoryDataSource("bar", Scope.PIPELINE, "s2")
-    data_source_3 = InMemoryDataSource("baz", Scope.PIPELINE, "s3")
-    data_source_4 = InMemoryDataSource("qux", Scope.PIPELINE, "s4")
-    data_source_5 = InMemoryDataSource("quux", Scope.PIPELINE, "s5")
-    data_source_6 = InMemoryDataSource("quuz", Scope.PIPELINE, "s6")
-    data_source_7 = InMemoryDataSource("corge", Scope.PIPELINE, "s7")
-    data_source_8 = InMemoryDataSource("fum", Scope.PIPELINE, "s8")
+    data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
+    data_node_3 = InMemoryDataNode("baz", Scope.PIPELINE, "s3")
+    data_node_4 = InMemoryDataNode("qux", Scope.PIPELINE, "s4")
+    data_node_5 = InMemoryDataNode("quux", Scope.PIPELINE, "s5")
+    data_node_6 = InMemoryDataNode("quuz", Scope.PIPELINE, "s6")
+    data_node_7 = InMemoryDataNode("corge", Scope.PIPELINE, "s7")
+    data_node_8 = InMemoryDataNode("fum", Scope.PIPELINE, "s8")
     task_1 = Task(
         "grault",
-        [data_source_1, data_source_2],
+        [data_node_1, data_node_2],
         print,
-        [data_source_3, data_source_4],
+        [data_node_3, data_node_4],
         TaskId("t1"),
     )
-    task_2 = Task("garply", [data_source_3], print, [data_source_5], TaskId("t2"))
-    task_3 = Task("waldo", [data_source_5, data_source_4], print, [data_source_6], TaskId("t3"))
-    task_4 = Task("fred", [data_source_4], print, [data_source_7], TaskId("t4"))
-    task_5 = Task("thud", [data_source_6], print, [data_source_8], TaskId("t5"))
+    task_2 = Task("garply", [data_node_3], print, [data_node_5], TaskId("t2"))
+    task_3 = Task("waldo", [data_node_5, data_node_4], print, [data_node_6], TaskId("t3"))
+    task_4 = Task("fred", [data_node_4], print, [data_node_7], TaskId("t4"))
+    task_5 = Task("thud", [data_node_6], print, [data_node_8], TaskId("t5"))
     pipeline_1 = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
     pipeline_2 = Pipeline("xyzzy", {}, [task_5], PipelineId("p2"))
 
@@ -611,9 +611,9 @@ def test_scenarios_comparison():
                 [
                     Config.add_task(
                         "mult by 2",
-                        [Config.add_data_source("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                         mult_by_2,
-                        Config.add_data_source("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        Config.add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )

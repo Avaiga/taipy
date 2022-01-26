@@ -29,9 +29,9 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
             id=TaskId(model.id),
             parent_id=model.parent_id,
             config_name=model.config_name,
-            input=self.__to_data_source(model.input_ids),
+            input=self.__to_data_node(model.input_ids),
             function=load_fct(model.function_module, model.function_name),
-            output=self.__to_data_source(model.output_ids),
+            output=self.__to_data_node(model.output_ids),
         )
 
     @property
@@ -39,9 +39,9 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
         return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
 
     @staticmethod
-    def __to_ids(data_sources):
-        return [i.id for i in data_sources]
+    def __to_ids(data_nodes):
+        return [i.id for i in data_nodes]
 
     @staticmethod
-    def __to_data_source(data_sources_ids):
-        return [DataManager().get(i) for i in data_sources_ids]
+    def __to_data_node(data_nodes_ids):
+        return [DataManager().get(i) for i in data_nodes_ids]

@@ -85,7 +85,7 @@ class ScenarioManager:
         self.set(scenario)
 
     def delete_all(self):
-        """Deletes all data sources."""
+        """Deletes all data nodes."""
         self.repository.delete_all()
 
     def create(
@@ -244,11 +244,11 @@ class ScenarioManager:
 
     def compare(self, *scenarios: Scenario, ds_config_name: str = None):
         """
-        Compares the data sources of given scenarios with known datasource config name.
+        Compares the data nodes of given scenarios with known datanode config name.
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
-            ds_config_name (Optional[str]) : config name of the DataSource to compare scenarios, if no ds_config_name is
+            ds_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no ds_config_name is
             provided, the scenarios will be compared based on all the previously defined comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
@@ -274,8 +274,8 @@ class ScenarioManager:
                 ds_comparators = scenario_config.comparators
 
             for ds_config_name, comparators in ds_comparators.items():
-                datasources = [scenario.__getattr__(ds_config_name).read() for scenario in scenarios]
-                results[ds_config_name] = {comparator.__name__: comparator(*datasources) for comparator in comparators}
+                datanodes = [scenario.__getattr__(ds_config_name).read() for scenario in scenarios]
+                results[ds_config_name] = {comparator.__name__: comparator(*datanodes) for comparator in comparators}
 
             return results
 
@@ -284,7 +284,7 @@ class ScenarioManager:
 
     def hard_delete(self, scenario_id: ScenarioId):
         """
-        Deletes the scenario given as parameter and the nested pipelines, tasks, data sources, and jobs.
+        Deletes the scenario given as parameter and the nested pipelines, tasks, data nodes, and jobs.
 
         Deletes the scenario given as parameter and propagate the hard deletion. The hard delete is propagated to a
         nested pipeline if the pipeline is not shared by another scenario.
