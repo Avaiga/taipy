@@ -49,7 +49,7 @@ const Slider = (props: SliderProps) => {
         (e, val: number | number[]) => {
             setValue(val as number);
             if (update) {
-                const value = lovList.length ? lovList[val as number].id : val;
+                const value = lovList.length > (val as number) ? lovList[val as number].id : val;
                 dispatch(createSendUpdateAction(tp_varname, value, propagate));
             }
         },
@@ -60,7 +60,7 @@ const Slider = (props: SliderProps) => {
         (e, val: number | number[]) => {
             setValue(val as number);
             if (!update) {
-                const value = lovList.length ? lovList[val as number].id : val;
+                const value = lovList.length > (val as number) ? lovList[val as number].id : val;
                 dispatch(createSendUpdateAction(tp_varname, value, propagate));
             }
         },
@@ -129,10 +129,7 @@ const Slider = (props: SliderProps) => {
                 }
             }
         }
-        if (lovList.length > 0) {
-            return true;
-        }
-        return false;
+        return lovList.length > 0;
     }, [props.labels, lovList, getLabel]);
 
     const textAnchorSx = useMemo(() => {
