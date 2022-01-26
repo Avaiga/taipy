@@ -48,7 +48,7 @@ class TestExcelDataNode:
             ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"sheet_name": "sheet_name"})
         with pytest.raises(MissingRequiredProperty):
             ExcelDataNode(
-                "foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"sheet_name": "sheet_name", "has_header": True}
+                "foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"has_header": True, "sheet_name": "Sheet1"}
             )
 
     def test_read_with_header(self):
@@ -177,9 +177,7 @@ class TestExcelDataNode:
         ],
     )
     def test_write(self, excel_file, default_data_frame, content, columns):
-        excel_ds = ExcelDataNode(
-            "foo", Scope.PIPELINE, properties={"path": excel_file, "has_header": True, "sheet_name": "Sheet1"}
-        )
+        excel_ds = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": excel_file, "sheet_name": "Sheet1"})
         assert np.array_equal(excel_ds.read().values, default_data_frame.values)
         if not columns:
             excel_ds.write(content)
@@ -227,7 +225,7 @@ class TestExcelDataNode:
         excel_data_node_as_numpy = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "sheet_name": sheet_names, "exposed_type": "numpy"},
+            properties={"path": path, "sheet_name": sheet_names, "exposed_type": "numpy"},
         )
 
         data_numpy = excel_data_node_as_numpy.read()
@@ -385,7 +383,7 @@ class TestExcelDataNode:
         excel_ds = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={"path": excel_file_with_multi_sheet, "has_header": True, "sheet_name": sheet_names},
+            properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names},
         )
 
         for sheet_name in sheet_names:

@@ -142,20 +142,24 @@ class ExcelDataNode(DataNode):
                     return pd.read_excel(
                         self.properties[self.__REQUIRED_PATH_PROPERTY],
                         sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
-                    )
-                else:
-                    if usecols:
-                        return pd.read_excel(
-                            self.properties[self.__REQUIRED_PATH_PROPERTY],
-                            header=None,
-                            usecols=usecols,
-                            sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
-                        )
+                    )[column_names]
+                return pd.read_excel(
+                    self.properties[self.__REQUIRED_PATH_PROPERTY],
+                    sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
+                )
+            else:
+                if usecols:
                     return pd.read_excel(
                         self.properties[self.__REQUIRED_PATH_PROPERTY],
                         header=None,
+                        usecols=usecols,
                         sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                     )
+                return pd.read_excel(
+                    self.properties[self.__REQUIRED_PATH_PROPERTY],
+                    header=None,
+                    sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
+                )
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
