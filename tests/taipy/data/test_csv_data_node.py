@@ -37,7 +37,7 @@ class TestCSVDataNode:
         with pytest.raises(MissingRequiredProperty):
             CSVDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            CSVDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"path": "path"})
+            CSVDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"has_header": True})
 
     def test_read_with_header(self):
         not_existing_csv = CSVDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": True})
@@ -112,7 +112,7 @@ class TestCSVDataNode:
         ],
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
-        csv_ds = CSVDataNode("foo", Scope.PIPELINE, properties={"path": csv_file, "has_header": True})
+        csv_ds = CSVDataNode("foo", Scope.PIPELINE, properties={"path": csv_file})
         assert np.array_equal(csv_ds.read().values, default_data_frame.values)
         if not columns:
             csv_ds.write(content)
