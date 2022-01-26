@@ -30,14 +30,14 @@ class CSVDataNode(DataNode):
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
         properties (list): List of additional arguments. Note that the properties parameter should at least contain
-            values for "path" and "has_header" properties.
+            a value for "path" properties.
     """
 
     __STORAGE_TYPE = "csv"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __REQUIRED_PATH_PROPERTY = "path"
-    __REQUIRED_HAS_HEADER_PROPERTY = "has_header"
-    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
+    __HAS_HEADER_PROPERTY = "has_header"
+    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY]
 
     def __init__(
         self,
@@ -60,6 +60,9 @@ class CSVDataNode(DataNode):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
+        if self.__HAS_HEADER_PROPERTY not in properties.keys():
+            properties[self.__HAS_HEADER_PROPERTY] = True
+
         super().__init__(
             config_name,
             scope,
@@ -92,7 +95,7 @@ class CSVDataNode(DataNode):
     def _read_as(self, custom_class):
         with open(self.properties[self.__REQUIRED_PATH_PROPERTY]) as csvFile:
             res = list()
-            if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+            if self.properties[self.__HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
                 for line in reader:
                     res.append(custom_class(**line))
@@ -105,7 +108,7 @@ class CSVDataNode(DataNode):
             return res
 
     def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
-        if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+        if self.properties[self.__HAS_HEADER_PROPERTY]:
             if column_names:
                 return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])[column_names]
             return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])

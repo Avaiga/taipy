@@ -43,9 +43,9 @@ class TestExcelDataNode:
         with pytest.raises(MissingRequiredProperty):
             ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"path": "path"})
-        with pytest.raises(MissingRequiredProperty):
-            ExcelDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"has_header": True})
+            ExcelDataNode(
+                "foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"has_header": True, "sheet_name": "Sheet1"}
+            )
 
     def test_read_with_header(self):
         not_existing_csv = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.csv", "has_header": True})
@@ -55,7 +55,7 @@ class TestExcelDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
-        excel_data_node_as_pandas = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path, "has_header": True})
+        excel_data_node_as_pandas = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path})
 
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
@@ -72,7 +72,7 @@ class TestExcelDataNode:
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "sheet_name": "abc", "exposed_type": MyCustomObject},
+            properties={"path": path, "sheet_name": "abc", "exposed_type": MyCustomObject},
         )
         with pytest.raises(NonExistingExcelSheet):
             non_existing_sheet_name_custom.read()
@@ -80,7 +80,7 @@ class TestExcelDataNode:
         excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "exposed_type": MyCustomObject},
+            properties={"path": path, "exposed_type": MyCustomObject},
         )
 
         data_custom = excel_data_node_as_custom_object.read()
@@ -173,7 +173,7 @@ class TestExcelDataNode:
         not_existing_excel = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={"path": "WRONG.csv", "has_header": True, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
+            properties={"path": "WRONG.csv", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
             not_existing_excel.read()
@@ -183,7 +183,7 @@ class TestExcelDataNode:
 
         # Create ExcelDataNode without exposed_type (Default is pandas.DataFrame)
         excel_data_node_as_pandas = ExcelDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "sheet_name": sheet_names}
+            "bar", Scope.PIPELINE, properties={"path": path, "sheet_name": sheet_names}
         )
 
         data_pandas = excel_data_node_as_pandas.read()
@@ -204,7 +204,6 @@ class TestExcelDataNode:
             Scope.PIPELINE,
             properties={
                 "path": path,
-                "has_header": True,
                 "sheet_name": ["Sheet1", "xyz"],
                 "exposed_type": MyCustomObject,
             },
@@ -215,7 +214,7 @@ class TestExcelDataNode:
         excel_data_node_as_custom_object = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
-            properties={"path": path, "has_header": True, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
+            properties={"path": path, "sheet_name": sheet_names, "exposed_type": MyCustomObject},
         )
 
         data_custom = excel_data_node_as_custom_object.read()

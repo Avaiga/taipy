@@ -33,16 +33,16 @@ class ExcelDataNode(DataNode):
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
         properties (list): List of additional arguments. Note that the properties parameter should at least contain
-            values for "path" and "has_header" properties.
+           a value for "path" properties.
     """
 
     __STORAGE_TYPE = "excel"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __REQUIRED_PATH_PROPERTY = "path"
-    __REQUIRED_HAS_HEADER_PROPERTY = "has_header"
+    __HAS_HEADER_PROPERTY = "has_header"
     __SHEET_NAME_PROPERTY = "sheet_name"
     __DEFAULT_SHEET_NAME = "Sheet1"
-    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY, __REQUIRED_HAS_HEADER_PROPERTY]
+    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY]
 
     def __init__(
         self,
@@ -67,6 +67,8 @@ class ExcelDataNode(DataNode):
             )
         if self.__SHEET_NAME_PROPERTY not in properties.keys():
             properties[self.__SHEET_NAME_PROPERTY] = self.__DEFAULT_SHEET_NAME
+        if self.__HAS_HEADER_PROPERTY not in properties.keys():
+            properties[self.__HAS_HEADER_PROPERTY] = True
 
         super().__init__(
             config_name,
@@ -112,7 +114,7 @@ class ExcelDataNode(DataNode):
             res = list()
             for row in work_sheet.rows:
                 res.append([col.value for col in row])
-            if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+            if self.properties[self.__HAS_HEADER_PROPERTY]:
                 header = res.pop(0)
                 for i, row in enumerate(res):
                     res[i] = custom_class(**dict([[h, r] for h, r in zip(header, row)]))
@@ -127,7 +129,7 @@ class ExcelDataNode(DataNode):
         return work_books
 
     def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
-        if self.properties[self.__REQUIRED_HAS_HEADER_PROPERTY]:
+        if self.properties[self.__HAS_HEADER_PROPERTY]:
             if column_names:
                 return pd.read_excel(
                     self.properties[self.__REQUIRED_PATH_PROPERTY],

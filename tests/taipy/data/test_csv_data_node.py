@@ -37,8 +37,6 @@ class TestCSVDataNode:
         with pytest.raises(MissingRequiredProperty):
             CSVDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={})
         with pytest.raises(MissingRequiredProperty):
-            CSVDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"path": "path"})
-        with pytest.raises(MissingRequiredProperty):
             CSVDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties={"has_header": True})
 
     def test_read_with_header(self):
@@ -48,7 +46,7 @@ class TestCSVDataNode:
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         # Create CSVDataNode without exposed_type (Default is pandas.DataFrame)
-        csv_data_node_as_pandas = CSVDataNode("bar", Scope.PIPELINE, properties={"path": path, "has_header": True})
+        csv_data_node_as_pandas = CSVDataNode("bar", Scope.PIPELINE, properties={"path": path})
         data_pandas = csv_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 10
@@ -61,7 +59,7 @@ class TestCSVDataNode:
                 self.text = text
 
         csv_data_node_as_custom_object = CSVDataNode(
-            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": MyCustomObject}
+            "bar", Scope.PIPELINE, properties={"path": path, "exposed_type": MyCustomObject}
         )
         data_custom = csv_data_node_as_custom_object.read()
         assert isinstance(data_custom, list)
@@ -114,7 +112,7 @@ class TestCSVDataNode:
         ],
     )
     def test_write(self, csv_file, default_data_frame, content, columns):
-        csv_ds = CSVDataNode("foo", Scope.PIPELINE, properties={"path": csv_file, "has_header": True})
+        csv_ds = CSVDataNode("foo", Scope.PIPELINE, properties={"path": csv_file})
         assert np.array_equal(csv_ds.read().values, default_data_frame.values)
         if not columns:
             csv_ds.write(content)
