@@ -32,7 +32,7 @@ import { createRequestTableUpdateAction, createSendActionNameAction } from "../.
 import {
     addDeleteColumn,
     alignCell,
-    boxSx,
+    baseBoxSx,
     EditableCell,
     EDIT_COL,
     getClassName,
@@ -73,6 +73,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         editAction = "",
         deleteAction = "",
         addAction = "",
+        width = "100vw",
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -290,6 +291,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         }
         return ret;
     }, [value]);
+
+    const boxSx = useMemo(() => ({...baseBoxSx, width: width}), [width]);
 
     return (
         <Box id={id} sx={boxSx}>

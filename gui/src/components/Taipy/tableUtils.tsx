@@ -86,6 +86,7 @@ export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelectProps {
     columns: string;
     refresh?: boolean;
     height?: string;
+    width?: string;
     pageSize?: number;
     editAction?: string;
     deleteAction?: string;
@@ -110,7 +111,7 @@ export interface TaipyPaginatedTableProps extends TaipyTableProps {
     showAll?: boolean;
 }
 
-export const boxSx = { width: "100%" };
+export const baseBoxSx = { width: "100%" };
 export const paperSx = { width: "100%", mb: 2 };
 export const tableSx = { minWidth: 250 };
 export const headBoxSx = { display: "flex", alignItems: "flex-start" };
