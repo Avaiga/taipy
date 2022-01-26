@@ -120,7 +120,7 @@ class Gui(object, metaclass=Singleton):
         self._css_file = css_file
 
         self._config = GuiConfig()
-        self.__contentAccessor = ContentAccessor()
+        self.__content_accessor = None
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
 
@@ -144,6 +144,11 @@ class Gui(object, metaclass=Singleton):
     @staticmethod
     def _get_instance() -> Gui:
         return Gui._instances[Gui]
+
+    def __get_content_accessor(self):
+        if self.__content_accessor is None:
+            self.__content_accessor = ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
+        return self.__content_accessor
 
     def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
         return self._config._get_app_config(name, default_value)
@@ -262,8 +267,8 @@ class Gui(object, metaclass=Singleton):
         self.__send_var_list_update(modified_vars, from_front, var_name)
 
     def _get_content(self, var_name: str, value: t.Any, is_dynamic: bool, image: bool) -> t.Any:
-        var_name = self.__contentAccessor.register_var(var_name, image, is_dynamic)
-        ret_value = self.__contentAccessor.get_info(var_name, value)
+        var_name = self.__get_content_accessor().register_var(var_name, image, is_dynamic)
+        ret_value = self.__get_content_accessor().get_info(var_name, value)
         if isinstance(ret_value, tuple):
             string_value = Gui.__CONTENT_ROOT + ret_value[0]
         else:
@@ -274,7 +279,7 @@ class Gui(object, metaclass=Singleton):
         parts = path.split("/")
         if len(parts) > 1:
             file_name = parts[-1]
-            (dir_path, as_attachment) = self.__contentAccessor.get_content_path(
+            (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
                 path[: -len(file_name) - 1], file_name, request.args.get("varname"), request.args.get("bypass")
             )
             if dir_path:
@@ -341,7 +346,7 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
             if not from_front and _var == front_var:
-                ret_value = self.__contentAccessor.get_info(front_var, newvalue)
+                ret_value = self.__get_content_accessor().get_info(front_var, newvalue)
                 if isinstance(ret_value, tuple):
                     newvalue = Gui.__CONTENT_ROOT + ret_value[0]
                 else:

@@ -30,6 +30,7 @@ AppConfigOption = t.Literal[
     "single_client",
     "ngrok_token",
     "upload_folder",
+    "data_url_max_size",
 ]
 
 AppConfig = t.TypedDict(
@@ -54,6 +55,7 @@ AppConfig = t.TypedDict(
         "single_client": bool,
         "ngrok_token": str,
         "upload_folder": t.Union[str, None],
+        "data_url_max_size": t.Union[int, None],
     },
     total=False,
 )
