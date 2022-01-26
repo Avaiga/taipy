@@ -592,7 +592,7 @@ class Builder:
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
             return self.__set_dict_attribute(var_name)
         return self
-        
+
     def set_page_id(self):
         return self.__set_string_attribute("page_id")
 
