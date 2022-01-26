@@ -106,7 +106,7 @@ class TestFilterDataNode:
         print(f"Expected: {[(i, (d.a, d.b)) for i, d in enumerate(expected_filtered_custom_ds)]}")
         print(f"Result: {[(i, (d.a, d.b)) for i, d in enumerate(filtered_custom_ds.data)]}")
         print(bool_df)
-
+        assert False
         assert all([e_d.a == d.a and e_d.b == d.b for e_d, d in zip(expected_filtered_custom_ds, filtered_custom_ds)])
 
         bool_1d_index = [True if i < 5 else False for i in range(10)]
