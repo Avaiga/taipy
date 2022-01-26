@@ -28,7 +28,13 @@ class slider extends lovComp {
 
     /**
      * when a lov is defined, position of the selected label.<br>Possible values are <ul><li>bottom</li><li>top</li><li>left</li><li>right</li><li>none (no label displayed)</li></ul>
+     *  @type {str}
      */
     text_anchor = "bottom"
 
+    /**
+     * labels for specific points of the slider. If true, use the labels of the lov if present. If a dict, key is lov id or index, value is label.
+     * @type {bool|dict}
+     */
+    labels;
 }

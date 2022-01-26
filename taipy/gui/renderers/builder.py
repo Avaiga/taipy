@@ -133,7 +133,9 @@ class Builder:
         boolattr = self.__get_property(name, default_value)
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
-        return self.__set_react_attribute(_to_camel_case(name), boolattr)
+        if isinstance(boolattr, bool):
+            return self.__set_react_attribute(_to_camel_case(name), boolattr)
+        return self
 
     def __set_dict_attribute(self, name: str):
         dict_attr = self.__get_property(name)
@@ -584,8 +586,13 @@ class Builder:
         return self
 
     def set_labels(self, var_name: str = "labels"):
-        return self.__set_dict_attribute(var_name)
-
+        value = self.__get_property(var_name)
+        if value:
+            if is_boolean_true(value):
+                return self.__set_react_attribute(_to_camel_case(var_name), True)
+            return self.__set_dict_attribute(var_name)
+        return self
+        
     def set_page_id(self):
         return self.__set_string_attribute("page_id")
 
