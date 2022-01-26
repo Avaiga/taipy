@@ -51,18 +51,24 @@ class FilterDataNode:
         if self.data_is_dataframe():
             return self.data[key]
 
-        filtered_data = deepcopy(self.data)
-        has_dict_element = all(isinstance(x, Dict) for x in filtered_data)
+        has_dict_element = all(isinstance(x, Dict) for x in self.data)
         if has_dict_element:
+            filtered_data_dict: Dict[str, List] = dict()
             for col in key.columns:
+                filtered_data_dict[col] = list()
                 for i, row in enumerate(key[col]):
-                    filtered_data[i][col] = filtered_data[i][col] if row else None
-            return filtered_data
+                    if row:
+                        filtered_data_dict[col].append(self.data[i][col])
+                    else:
+                        filtered_data_dict[col].append(None)
+            return filtered_data_dict
 
+        # filtered_data_list = deepcopy(self.data)
+        filtered_data_list = self.data
         for col in key.columns:
             for i, row in enumerate(key[col]):
-                setattr(filtered_data[i], col, getattr(filtered_data[i], col) if row else None)
-        return filtered_data
+                setattr(filtered_data_list[i], col, getattr(filtered_data_list[i], col) if row else None)
+        return filtered_data_list
 
     def __getitem_bool_indexer(self, key):
         if self.data_is_dataframe():
