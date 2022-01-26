@@ -8,19 +8,31 @@ from pandas.core.common import is_bool_indexer
 
 class FilterDataNode:
     __DATAFRAME_DATA_TYPE = "dataframe"
+    __MULTI_SHEET_EXCEL_DATA_TYPE = "multi_sheet_excel"
     __CUSTOM_DATA_TYPE = "custom"
 
     def __init__(self, data_node_id, data: Union[pd.DataFrame, List]) -> None:
         self.data_node_id = data_node_id
         self.data = data
         self.data_type = None
-        if isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series):
+        if self.is_pandas_object():
             self.data_type = self.__DATAFRAME_DATA_TYPE
+        elif self.is_multi_sheet_excel():
+            self.data_type = self.__MULTI_SHEET_EXCEL_DATA_TYPE
         else:
             self.data_type = self.__CUSTOM_DATA_TYPE
 
+    def is_pandas_object(self) -> bool:
+        return isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series)
+
+    def is_multi_sheet_excel(self) -> bool:
+        return isinstance(self.data, Dict) and all([isinstance(e, pd.DataFrame) for e in self.data.values()])
+
     def data_is_dataframe(self) -> bool:
         return self.data_type == self.__DATAFRAME_DATA_TYPE
+
+    def data_is_multi_sheet_excel(self) -> bool:
+        return self.data_type == self.__MULTI_SHEET_EXCEL_DATA_TYPE
 
     def __getitem__(self, key):
         if isinstance(key, FilterDataNode):
@@ -40,7 +52,7 @@ class FilterDataNode:
         return FilterDataNode(self.data_node_id, filtered_data)
 
     def __getitem_hashable(self, key):
-        if self.data_is_dataframe():
+        if self.data_is_dataframe() or self.data_is_multi_sheet_excel():
             return self.data.get(key)
         return [getattr(e, key) for e in self.data]
 

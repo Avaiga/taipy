@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+import numpy as np
 import pandas as pd
 
 from taipy.data.data_node import DataNode
@@ -33,8 +34,22 @@ class FakeCustomDataNode(DataNode):
         return self.data
 
 
+class FakeMultiSheetExcelDataNode(DataNode):
+    def __init__(self, config_name, default_data_frame, **kwargs):
+        super().__init__(config_name, **kwargs)
+        self.data = {
+            "Sheet1": default_data_frame,
+            "Sheet2": default_data_frame,
+        }
+
+    def _read(self):
+        return self.data
+
+
 class TestFilterDataNode:
     def test_get_item(self, default_data_frame):
+
+        # get item for DataFrame data_type
         default_data_frame[1] = [100, 100]
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
@@ -74,6 +89,7 @@ class TestFilterDataNode:
         assert filtered_df_ds.data.shape == default_data_frame[["a", "b"]].shape
         assert filtered_df_ds.data.to_dict() == default_data_frame[["a", "b"]].to_dict()
 
+        # get item for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"]
@@ -85,14 +101,14 @@ class TestFilterDataNode:
         filtered_custom_ds = custom_ds[0:5]
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, CustomClass), filtered_custom_ds.data))
+        assert all([isinstance(x, CustomClass) for x in filtered_custom_ds.data])
         assert len(filtered_custom_ds.data) == 5
 
         bool_df = pd.DataFrame({"a": [i for i in range(10)], "b": [i * 2 for i in range(10)]}) > 4
         filtered_custom_ds = custom_ds[bool_df]
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, CustomClass), filtered_custom_ds.data))
+        assert all([isinstance(x, CustomClass) for x in filtered_custom_ds.data])
 
         bool_1d_index = [True if i < 5 else False for i in range(10)]
         filtered_custom_ds = custom_ds[bool_1d_index]
@@ -104,9 +120,17 @@ class TestFilterDataNode:
         filtered_custom_ds = custom_ds[["a", "b"]]
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, Dict), filtered_custom_ds.data))
+        assert all([isinstance(x, Dict) for x in filtered_custom_ds.data])
         assert len(filtered_custom_ds.data) == 10
         assert filtered_custom_ds.data == [{"a": i, "b": i * 2} for i in range(10)]
+
+        # get item for Multi-sheet Excel data_type
+        multi_sheet_excel_ds = FakeMultiSheetExcelDataNode("fake multi-sheet excel ds", default_data_frame)
+        filtered_multi_sheet_excel_ds = multi_sheet_excel_ds["Sheet1"]
+        assert isinstance(filtered_multi_sheet_excel_ds, FilterDataNode)
+        assert isinstance(filtered_multi_sheet_excel_ds.data, pd.DataFrame)
+        assert len(filtered_multi_sheet_excel_ds.data) == len(default_data_frame)
+        assert np.array_equal(filtered_multi_sheet_excel_ds.data.to_numpy(), default_data_frame.to_numpy())
 
     def test_equal(self, default_data_frame):
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
