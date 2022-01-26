@@ -3,15 +3,15 @@ from time import sleep
 
 import pytest
 
-from taipy.common.alias import DataSourceId, JobId
-from taipy.data import DataSource, InMemoryDataSource, Scope
-from taipy.data.filter_data_source import FilterDataSource
+from taipy.common.alias import DataNodeId, JobId
+from taipy.data import DataNode, InMemoryDataNode, Scope
+from taipy.data.filter_data_node import FilterDataNode
 from taipy.data.manager import DataManager
 from taipy.data.operator import JoinOperator, Operator
-from taipy.exceptions.data_source import NoData
+from taipy.exceptions.data_node import NoData
 
 
-class FakeDataSource(InMemoryDataSource):
+class FakeDataNode(InMemoryDataNode):
     read_has_been_called = 0
     write_has_been_called = 0
 
@@ -24,10 +24,10 @@ class FakeDataSource(InMemoryDataSource):
     def _write(self, data):
         self.write_has_been_called += 1
 
-    write = DataSource.write  # Make sure that the writing behavior comes from DataSource
+    write = DataNode.write  # Make sure that the writing behavior comes from DataNode
 
 
-class FakeDataframeDataSource(DataSource):
+class FakeDataframeDataNode(DataNode):
     COLUMN_NAME_1 = "a"
     COLUMN_NAME_2 = "b"
 
@@ -39,7 +39,7 @@ class FakeDataframeDataSource(DataSource):
         return self.data
 
 
-class FakeListDataSource(DataSource):
+class FakeListDataNode(DataNode):
     class Row:
         def __init__(self, value):
             self.value = value
@@ -52,9 +52,9 @@ class FakeListDataSource(DataSource):
         return self.data
 
 
-class TestDataSource:
+class TestDataNode:
     def test_create_with_default_values(self):
-        ds = DataSource("fOo BAr")
+        ds = DataNode("fOo BAr")
         assert ds.config_name == "foo_bar"
         assert ds.scope == Scope.PIPELINE
         assert ds.id is not None
@@ -67,10 +67,10 @@ class TestDataSource:
 
     def test_create(self):
         a_date = datetime.now()
-        ds = DataSource(
+        ds = DataNode(
             "fOo BAr é@",
             Scope.SCENARIO,
-            DataSourceId("an_id"),
+            DataNodeId("an_id"),
             "a name",
             "a_scenario_id",
             a_date,
@@ -90,7 +90,7 @@ class TestDataSource:
         assert ds.properties["prop"] == "erty"
 
     def test_read_write(self):
-        ds = FakeDataSource("fOo BAr")
+        ds = FakeDataNode("fOo BAr")
         with pytest.raises(NoData):
             ds.read()
         assert ds.write_has_been_called == 0
@@ -125,7 +125,7 @@ class TestDataSource:
         assert ds.job_ids == [job_id]
 
     def test_ready_for_reading(self):
-        ds = DataSource("fOo BAr")
+        ds = DataNode("fOo BAr")
         assert ds.last_edition_date is None
         assert not ds.is_ready_for_reading
         assert ds.job_ids == []
@@ -152,7 +152,7 @@ class TestDataSource:
 
     def test_is_up_to_date_no_validity_period(self):
         # Test Never been writen
-        ds = InMemoryDataSource("foo", Scope.PIPELINE, DataSourceId("id"), "name", "parent_id")
+        ds = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id")
         assert ds.is_up_to_date is False
 
         # test has been writen
@@ -161,7 +161,7 @@ class TestDataSource:
 
     def test_is_up_to_date_with_30_min_validity_period(self):
         # Test Never been writen
-        ds = InMemoryDataSource("foo", Scope.PIPELINE, DataSourceId("id"), "name", "parent_id", validity_minutes=30)
+        ds = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id", validity_minutes=30)
         assert ds.is_up_to_date is False
 
         # Has been writen less than 30 minutes ago
@@ -173,14 +173,14 @@ class TestDataSource:
         assert ds.is_up_to_date is False
 
     def test_pandas_filter(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
         COLUMN_NAME_1 = "a"
         COLUMN_NAME_2 = "b"
-        assert isinstance(df_ds[COLUMN_NAME_1], FilterDataSource)
-        assert isinstance(df_ds[[COLUMN_NAME_1, COLUMN_NAME_2]], FilterDataSource)
+        assert isinstance(df_ds[COLUMN_NAME_1], FilterDataNode)
+        assert isinstance(df_ds[[COLUMN_NAME_1, COLUMN_NAME_2]], FilterDataNode)
 
     def test_filter(self, default_data_frame):
-        ds = FakeDataSource("fake ds")
+        ds = FakeDataNode("fake ds")
         ds.write("Any data")
 
         assert NotImplemented == ds.filter((("any", 0, Operator.EQUAL)), JoinOperator.OR)
@@ -190,7 +190,7 @@ class TestDataSource:
         assert NotImplemented == ds.filter((("any", 0, Operator.GREATER_THAN)))
         assert NotImplemented == ds.filter((("any", 0, Operator.GREATER_OR_EQUAL)))
 
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         COLUMN_NAME_1 = "a"
         COLUMN_NAME_2 = "b"
@@ -252,7 +252,7 @@ class TestDataSource:
         ) == len(
             default_data_frame[(default_data_frame[COLUMN_NAME_1] > 10) | (default_data_frame[COLUMN_NAME_1] < -10)]
         )
-        list_ds = FakeListDataSource("fake list ds")
+        list_ds = FakeListDataNode("fake list ds")
 
         KEY_NAME = "value"
 
@@ -319,9 +319,9 @@ class TestDataSource:
             == 6
         )
 
-    def test_datasource_update_after_writing(self):
+    def test_data_node_update_after_writing(self):
         dm = DataManager()
-        ds = FakeDataSource("foo")
+        ds = FakeDataNode("foo")
 
         dm.set(ds)
         assert not dm.get(ds.id).is_ready_for_reading

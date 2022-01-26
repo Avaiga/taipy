@@ -4,8 +4,8 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-from taipy.common.alias import DataSourceId
-from taipy.data import SQLDataSource
+from taipy.common.alias import DataNodeId
+from taipy.data import SQLDataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 
@@ -13,9 +13,9 @@ if not util.find_spec("pyodbc"):
     pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
 
 
-class TestSQLDataSource:
+class TestSQLDataNode:
     def test_create(self):
-        ds = SQLDataSource(
+        ds = SQLDataNode(
             "fOo BAr",
             Scope.PIPELINE,
             properties={
@@ -27,7 +27,7 @@ class TestSQLDataSource:
                 "write_table": "foo",
             },
         )
-        assert isinstance(ds, SQLDataSource)
+        assert isinstance(ds, SQLDataNode)
         assert ds.storage_type() == "sql"
         assert ds.config_name == "foo_bar"
         assert ds.scope == Scope.PIPELINE
@@ -48,16 +48,16 @@ class TestSQLDataSource:
     )
     def test_create_with_missing_parameters(self, properties):
         with pytest.raises(MissingRequiredProperty):
-            SQLDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"))
+            SQLDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"))
         with pytest.raises(MissingRequiredProperty):
-            SQLDataSource("foo", Scope.PIPELINE, DataSourceId("ds_id"), properties=properties)
+            SQLDataNode("foo", Scope.PIPELINE, DataNodeId("ds_id"), properties=properties)
 
-    @mock.patch("taipy.data.sql.SQLDataSource._read_as", return_value="custom")
-    @mock.patch("taipy.data.sql.SQLDataSource._read_as_pandas_dataframe", return_value="pandas")
+    @mock.patch("taipy.data.sql.SQLDataNode._read_as", return_value="custom")
+    @mock.patch("taipy.data.sql.SQLDataNode._read_as_pandas_dataframe", return_value="pandas")
     def test_read(self, mock_read_as, mock_read_as_pandas_dataframe):
 
-        # Create SQLDataSource without exposed_type (Default is pandas.DataFrame)
-        sql_data_source_as_pandas = SQLDataSource(
+        # Create SQLDataNode without exposed_type (Default is pandas.DataFrame)
+        sql_data_node_as_pandas = SQLDataNode(
             "foo",
             Scope.PIPELINE,
             properties={
@@ -70,10 +70,10 @@ class TestSQLDataSource:
             },
         )
 
-        assert sql_data_source_as_pandas._read() == "pandas"
+        assert sql_data_node_as_pandas._read() == "pandas"
 
-        # Create the same SQLDataSource but with custom exposed_type
-        sql_data_source_as_custom_object = SQLDataSource(
+        # Create the same SQLDataNode but with custom exposed_type
+        sql_data_node_as_custom_object = SQLDataNode(
             "foo",
             Scope.PIPELINE,
             properties={
@@ -86,7 +86,7 @@ class TestSQLDataSource:
                 "exposed_type": "Whatever",
             },
         )
-        assert sql_data_source_as_custom_object._read() == "custom"
+        assert sql_data_node_as_custom_object._read() == "custom"
 
     def test_read_as(self):
         class MyCustomObject:
@@ -96,13 +96,13 @@ class TestSQLDataSource:
                 self.args = args
                 self.kwargs = kwargs
 
-        sql_data_source = SQLDataSource(
+        sql_data_node = SQLDataNode(
             "foo",
             Scope.PIPELINE,
             properties={
                 "db_username": "sa",
                 "db_password": "foobar",
-                "db_name": "datasource",
+                "db_name": "datanode",
                 "db_engine": "mssql",
                 "read_query": "SELECT * from table_name",
                 "write_table": "foo",
@@ -119,7 +119,7 @@ class TestSQLDataSource:
                 {"KWARGS_KEY": "KWARGS_VALUE"},
                 {},
             ]
-            data = sql_data_source._read_as("fake query", MyCustomObject)
+            data = sql_data_node._read_as("fake query", MyCustomObject)
 
         assert isinstance(data, list)
         assert isinstance(data[0], MyCustomObject)
@@ -148,7 +148,7 @@ class TestSQLDataSource:
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.dispatch.return_value = []
-            data_2 = sql_data_source._read_as("fake query", MyCustomObject)
+            data_2 = sql_data_node._read_as("fake query", MyCustomObject)
         assert isinstance(data_2, list)
         assert len(data_2) == 0
 
@@ -166,13 +166,13 @@ class TestSQLDataSource:
         ],
     )
     def test_write(self, data):
-        ds = SQLDataSource(
+        ds = SQLDataNode(
             "foo",
             Scope.PIPELINE,
             properties={
                 "db_username": "sa",
                 "db_password": "foobar",
-                "db_name": "datasource",
+                "db_name": "datanode",
                 "db_engine": "mssql",
                 "read_query": "SELECT * from foo",
                 "write_table": "foo",

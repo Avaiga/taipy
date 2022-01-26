@@ -1,7 +1,7 @@
-from taipy.exceptions.data_source import (
-    InvalidDataSourceType,
+from taipy.exceptions.data_node import (
+    InvalidDataNodeType,
     MissingRequiredProperty,
-    NonExistingDataSource,
+    NonExistingDataNode,
     UnknownDatabaseEngine,
 )
 from taipy.exceptions.job import InvalidSubscriber, JobNotDeletedException, NonExistingJob

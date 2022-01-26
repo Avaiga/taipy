@@ -28,9 +28,9 @@ class Builder:
 
     def __init__(
         self,
-        control_type,
-        element_name,
-        attributes,
+        control_type: str,
+        element_name: str,
+        attributes: t.Union[t.Dict[str, t.Any], None],
         default_value="<Empty>",
     ):
         from ..gui import Gui
@@ -40,11 +40,11 @@ class Builder:
         self.element_name = element_name
         self.attributes = attributes or {}
         self.__hashes = {}
-        self.__update_vars = []
+        self.__update_vars: t.List[str] = []
         self.el = etree.Element(element_name)
         self._gui = Gui._get_instance()
 
-        self.default_property_name = Factory.get_default_property_name(control_type)
+        self.default_property_name = Factory.get_default_property_name(control_type) or ""
         default_property_value = self.attributes.get(self.default_property_name, None)
         if default_property_value is None:
             self.attributes[self.default_property_name] = default_value
@@ -75,6 +75,8 @@ class Builder:
                 self.attributes[k] = val
             if hashname:
                 self.__hashes[k] = hashname
+        # set classname
+        self.__set_classNames()
         # define a unique key
         self.set_attribute("key", Builder._get_key(self.element_name))
 
@@ -242,7 +244,7 @@ class Builder:
                 adapter = (lambda x: (x, x)) if from_string else (lambda x: str(x))  # type: ignore
             ret_list = []
             if len(lov) > 0:
-                ret = self._gui._get_valid_adapter_result(lov[0], index=0)
+                ret = self._gui._get_valid_adapter_result(lov[0], index="0")
                 if ret is None:  # lov list is not a list of tuple(id, label)
                     for idx, elt in enumerate(lov):
                         ret = self._gui._run_adapter(adapter, elt, adapter.__name__, str(idx))
@@ -501,13 +503,11 @@ class Builder:
             self.__set_react_attribute(_to_camel_case(name), varname)
         return self
 
-    def set_classNames(self, class_name="", config_class="input"):
-        classes = []
-        if class_name:
-            classes.append(class_name)
-        cl = _get_dict_value(self._gui._config.style_config, config_class)
+    def __set_classNames(self):
+        classes = ["taipy-" + self.control_type.replace("_", "-")]
+        cl = self._gui._config.style_config.get(self.control_type)
         if cl:
-            classes.append(self._gui._config.style_config[config_class])
+            classes.append(cl)
         cl = self.__get_property("classname")
         if cl:
             classes.append(str(cl))
@@ -522,22 +522,23 @@ class Builder:
     def set_file_content(self, var_name: str = "content"):
         hash_name = self.__hashes.get(var_name)
         if hash_name:
-            self.set_attribute("tp_varname", self._gui._get_expr_from_hash(hash_name))
+            self.__set_tp_varname(hash_name)
         else:
             warnings.warn("{self.element_name} {var_name} should be binded")
         return self
 
-    def set_image_content(self, var_name: str = "content"):
+    def set_content(self, var_name: str = "content", image=True):
         content = self.__get_property(var_name)
         if content is None:
             return self
         hash_name = self.__hashes.get(var_name)
-        value = self._gui._get_image_content(hash_name or var_name, content, hash_name is not None)
+        value = self._gui._get_content(hash_name or var_name, content, hash_name is not None, image)
         if hash_name is not None:
             self.__set_react_attribute(
                 var_name,
                 get_client_var_name(hash_name),
             )
+            self.__set_tp_varname(hash_name)
         return self.set_attribute(_to_camel_case("default_" + var_name), value)
 
     def set_lov(self, var_name="lov", property_name: t.Optional[str] = None):
@@ -561,6 +562,9 @@ class Builder:
             self.__set_json_attribute(default_var_name, value)
         return self
 
+    def __set_tp_varname(self, hash_name: str):
+        return self.set_attribute("tp_varname", self._gui._get_expr_from_hash(hash_name))
+
     def set_value_and_default(self, var_name: t.Optional[str] = None, with_update=True, with_default=True):
         var_name = self.default_property_name if var_name is None else var_name
         hash_name = self.__hashes.get(var_name)
@@ -570,7 +574,7 @@ class Builder:
                 get_client_var_name(hash_name),
             )
             if with_update:
-                self.set_attribute("tp_varname", self._gui._get_expr_from_hash(hash_name))
+                self.__set_tp_varname(hash_name)
             if with_default:
                 self.__set_default_value(var_name)
         else:
@@ -635,7 +639,7 @@ class Builder:
             self.set_attribute("kind", "theme")
         return self
 
-    def set_attributes(self, attributes: list[tuple]):
+    def set_attributes(self, attributes: t.List[tuple]):
         def _get_val(attr, index, default_val):
             return attr[index] if len(attr) > index else default_val
 

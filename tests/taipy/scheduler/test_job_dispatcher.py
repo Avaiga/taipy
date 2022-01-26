@@ -41,7 +41,7 @@ def test_can_execute_synchronous():
         config_name="name",
         input=[],
         function=partial(execute, lock),
-        output=[DataManager().get_or_create(Config.add_data_source("input1", default_data=21))],
+        output=[DataManager().get_or_create(Config.add_data_node("input1", default_data=21))],
         id=task_id,
     )
     job_id = JobId("id1")
@@ -101,11 +101,11 @@ def test_handle_exception_in_user_function():
     assert "Something bad has happened" == str(job.exceptions[0])
 
 
-def test_handle_exception_when_writing_datasource():
+def test_handle_exception_when_writing_datanode():
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     output = MagicMock()
-    output.config_name = "my_raising_datasource"
+    output.config_name = "my_raising_datanode"
     output.write.side_effect = ValueError()
     task = Task(config_name="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task)
@@ -114,7 +114,7 @@ def test_handle_exception_when_writing_datasource():
     executor.dispatch(job)
     assert job.is_failed()
     stack_trace = str(job.exceptions[0])
-    assert "source" in stack_trace
+    assert "node" in stack_trace
 
 
 def _error():

@@ -6,6 +6,7 @@ import DateSelector from "./DateSelector";
 import Dialog from "./Dialog";
 import Expandable from "./Expandable";
 import Field from "./Field";
+import FileDownload from "./FileDownload";
 import FileSelector from "./FileSelector";
 import Image from "./Image";
 import Input from "./Input";
@@ -34,6 +35,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Dialog: Dialog as ComponentType,
     Expandable: Expandable,
     Field: Field as ComponentType,
+    FileDownload: FileDownload as ComponentType,
     FileSelector: FileSelector as ComponentType,
     Image: Image as ComponentType,
     Input: Input as ComponentType,

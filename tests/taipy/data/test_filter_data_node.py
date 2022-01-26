@@ -2,11 +2,11 @@ from typing import Dict, List
 
 import pandas as pd
 
-from taipy.data.data_source import DataSource
-from taipy.data.filter_data_source import FilterDataSource
+from taipy.data.data_node import DataNode
+from taipy.data.filter_data_node import FilterDataNode
 
 
-class FakeDataframeDataSource(DataSource):
+class FakeDataframeDataNode(DataNode):
     COLUMN_NAME_1 = "a"
     COLUMN_NAME_2 = "b"
 
@@ -24,7 +24,7 @@ class CustomClass:
         self.b = b
 
 
-class FakeCustomDataSource(DataSource):
+class FakeCustomDataNode(DataNode):
     def __init__(self, config_name, **kwargs):
         super().__init__(config_name, **kwargs)
         self.data = [CustomClass(i, i * 2) for i in range(10)]
@@ -33,238 +33,238 @@ class FakeCustomDataSource(DataSource):
         return self.data
 
 
-class TestFilterDataSource:
+class TestFilterDataNode:
     def test_get_item(self, default_data_frame):
         default_data_frame[1] = [100, 100]
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"]
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert len(filtered_df_ds.data) == len(default_data_frame["a"])
         assert filtered_df_ds.data.to_dict() == default_data_frame["a"].to_dict()
 
         filtered_df_ds = df_ds[1]
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert len(filtered_df_ds.data) == len(default_data_frame[1])
         assert filtered_df_ds.data.to_dict() == default_data_frame[1].to_dict()
 
         filtered_df_ds = df_ds[0:2]
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert filtered_df_ds.data.shape == default_data_frame[0:2].shape
         assert len(filtered_df_ds.data) == 2
 
         bool_df = default_data_frame.copy(deep=True) > 4
         filtered_df_ds = df_ds[bool_df]
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
 
         bool_1d_index = [True, False]
         filtered_df_ds = df_ds[bool_1d_index]
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert filtered_df_ds.data.to_dict() == default_data_frame[bool_1d_index].to_dict()
         assert len(filtered_df_ds.data) == 1
 
         filtered_df_ds = df_ds[["a", "b"]]
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert filtered_df_ds.data.shape == default_data_frame[["a", "b"]].shape
         assert filtered_df_ds.data.to_dict() == default_data_frame[["a", "b"]].to_dict()
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"]
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert len(filtered_custom_ds.data) == 10
         assert filtered_custom_ds.data == [i for i in range(10)]
 
         filtered_custom_ds = custom_ds[0:5]
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, CustomClass), filtered_custom_ds.data))
         assert len(filtered_custom_ds.data) == 5
 
         bool_df = pd.DataFrame({"a": [i for i in range(10)], "b": [i * 2 for i in range(10)]}) > 4
         filtered_custom_ds = custom_ds[bool_df]
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, CustomClass), filtered_custom_ds.data))
 
         bool_1d_index = [True if i < 5 else False for i in range(10)]
         filtered_custom_ds = custom_ds[bool_1d_index]
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert len(filtered_custom_ds.data) == 5
         assert filtered_custom_ds.data == custom_ds._read()[:5]
 
         filtered_custom_ds = custom_ds[["a", "b"]]
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, Dict), filtered_custom_ds.data))
         assert len(filtered_custom_ds.data) == 10
         assert filtered_custom_ds.data == [{"a": i, "b": i * 2} for i in range(10)]
 
     def test_equal(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] == 1
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] == 1))
 
         filtered_df_ds = df_ds[["a", "b"]] == 1
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] == 1))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] == 0
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [True] + [False for i in range(9)]
 
     def test_not_equal(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] != 1
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] != 1))
 
         filtered_df_ds = df_ds[["a", "b"]] != 1
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] != 1))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] != 0
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [False] + [True for _ in range(9)]
 
     def test_larger_than(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] > 2
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] > 2))
 
         filtered_df_ds = df_ds[["a", "b"]] > 2
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] > 2))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] > 5
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [False for _ in range(6)] + [True for _ in range(4)]
 
     def test_larger_equal_to(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] >= 4
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] >= 4))
 
         filtered_df_ds = df_ds[["a", "b"]] >= 4
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] >= 4))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] >= 5
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [False for _ in range(5)] + [True for _ in range(5)]
 
     def test_lesser_than(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] < 5
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] < 5))
 
         filtered_df_ds = df_ds[["a", "b"]] < 5
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] < 5))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] < 5
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [True for _ in range(5)] + [False for _ in range(5)]
 
     def test_lesser_equal_to(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] <= 5
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] <= 5))
 
         filtered_df_ds = df_ds[["a", "b"]] <= 5
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] <= 5))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] <= 5
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [True for _ in range(6)] + [False for _ in range(4)]
 
     def test_and(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = (df_ds["a"] >= 2) & (df_ds["a"] <= 5)
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] >= 2) & (default_data_frame["a"] <= 5))
 
         filtered_df_ds = (df_ds[["a", "b"]] >= 2) & (df_ds[["a", "b"]] <= 5)
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] >= 2) & (default_data_frame[["a", "b"]] <= 5))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = (custom_ds["a"] >= 2) & (custom_ds["a"] <= 5)
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [False for _ in range(2)] + [True for _ in range(4)] + [
@@ -272,24 +272,24 @@ class TestFilterDataSource:
         ]
 
     def test_or(self, default_data_frame):
-        df_ds = FakeDataframeDataSource("fake dataframe ds", default_data_frame)
+        df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = (df_ds["a"] < 2) | (df_ds["a"] > 5)
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.Series)
         assert filtered_df_ds.data.dtype == bool
         assert all(filtered_df_ds.data == (default_data_frame["a"] < 2) | (default_data_frame["a"] > 5))
 
         filtered_df_ds = (df_ds[["a", "b"]] < 2) | (df_ds[["a", "b"]] > 5)
-        assert isinstance(filtered_df_ds, FilterDataSource)
+        assert isinstance(filtered_df_ds, FilterDataNode)
         assert isinstance(filtered_df_ds.data, pd.DataFrame)
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] < 2) | (default_data_frame[["a", "b"]] > 5))
 
-        custom_ds = FakeCustomDataSource("fake custom ds")
+        custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = (custom_ds["a"] < 2) | (custom_ds["a"] > 5)
-        assert isinstance(filtered_custom_ds, FilterDataSource)
+        assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
         assert filtered_custom_ds.data == [True for _ in range(2)] + [False for _ in range(4)] + [
@@ -297,5 +297,5 @@ class TestFilterDataSource:
         ]
 
     def test_to_string(self):
-        filter_ds = FilterDataSource("ds_id", [])
+        filter_ds = FilterDataNode("ds_id", [])
         assert isinstance(str(filter_ds), str)

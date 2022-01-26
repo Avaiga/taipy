@@ -22,7 +22,7 @@ class TaskManager:
     Attributes:
         tasks (Dict[(TaskId, Task)]): A dictionary that associates every task with its identifier.
         scheduler (AbstractScheduler): The scheduler for submitting tasks.
-        data_manager (DataManager): The Data Manager that interacts with data sources.
+        data_manager (DataManager): The Data Manager that interacts with data nodes.
         repository (TaskRepository): The repository where tasks are saved.
     """
 
@@ -76,8 +76,8 @@ class TaskManager:
             task (Task): The task to save.
         """
         logging.info(f"Task: {task.id} created or updated.")
-        self.__save_data_sources(task.input.values())
-        self.__save_data_sources(task.output.values())
+        self.__save_data_nodes(task.input.values())
+        self.__save_data_nodes(task.output.values())
         self.repository.save(task)
 
     def get_or_create(
@@ -102,13 +102,13 @@ class TaskManager:
         Raises:
             MultipleTaskFromSameConfigWithSameParent: if more than one task already exists with the same
                 configuration, and the same parent id (scenario or pipeline identifier, depending on the
-                scope of the data source). TODO: This comment makes no sense - Data Source scope
+                scope of the data node). TODO: This comment makes no sense - Data Node scope
         """
-        data_sources = {
+        data_nodes = {
             ds_config: self.data_manager.get_or_create(ds_config, scenario_id, pipeline_id)
             for ds_config in set(itertools.chain(task_config.input, task_config.output))
         }
-        scope = min(ds.scope for ds in data_sources.values()) if len(data_sources) != 0 else Scope.GLOBAL
+        scope = min(ds.scope for ds in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
         tasks_from_config_name = self._get_all_by_config_name(task_config.name)
         tasks_from_parent = [task for task in tasks_from_config_name if task.parent_id == parent_id]
@@ -118,8 +118,8 @@ class TaskManager:
             logging.error("Multiple tasks from same config exist with the same parent_id.")
             raise MultipleTaskFromSameConfigWithSameParent
         else:
-            inputs = [data_sources[input_config] for input_config in task_config.input]
-            outputs = [data_sources[output_config] for output_config in task_config.output]
+            inputs = [data_nodes[input_config] for input_config in task_config.input]
+            outputs = [data_nodes[output_config] for output_config in task_config.output]
             task = Task(task_config.name, inputs, task_config.function, outputs, parent_id=parent_id)
             self.set(task)
             return task
@@ -144,8 +144,8 @@ class TaskManager:
             logging.error(f"Task: {task_id} does not exist.")
             raise NonExistingTask(task_id)
 
-    def __save_data_sources(self, data_sources):
-        for i in data_sources:
+    def __save_data_nodes(self, data_nodes):
+        for i in data_nodes:
             self.data_manager.set(i)
 
     def _get_all_by_config_name(self, config_name: str) -> List[Task]:
@@ -164,10 +164,10 @@ class TaskManager:
         self, task_id: TaskId, scenario_id: Optional[ScenarioId] = None, pipeline_id: Optional[PipelineId] = None
     ):
         """
-        Deletes the task given as parameter and the nested data sources, and jobs.
+        Deletes the task given as parameter and the nested data nodes, and jobs.
 
         Deletes the task given as parameter and propagate the hard deletion. The hard delete is propagated to a
-        nested data sources if the data sources is not shared by another pipeline or if a scenario id is given as
+        nested data nodes if the data nodes is not shared by another pipeline or if a scenario id is given as
         parameter, by another scenario.
 
         Parameters:
@@ -194,7 +194,7 @@ class TaskManager:
 
         self.delete(task_id)
 
-    def remove_if_parent_id_eq(self, data_sources, id_):
-        for data_source in data_sources:
-            if data_source.parent_id == id_:
-                self.data_manager.delete(data_source.id)
+    def remove_if_parent_id_eq(self, data_nodes, id_):
+        for data_node in data_nodes:
+            if data_node.parent_id == id_:
+                self.data_manager.delete(data_node.id)

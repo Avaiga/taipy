@@ -9,58 +9,58 @@ import numpy as np
 import pandas as pd
 
 from taipy.common import protect_name
-from taipy.common.alias import DataSourceId, JobId
-from taipy.data.filter_data_source import FilterDataSource
+from taipy.common.alias import DataNodeId, JobId
+from taipy.data.filter_data_node import FilterDataNode
 from taipy.data.operator import JoinOperator, Operator
 from taipy.data.scope import Scope
-from taipy.exceptions.data_source import NoData
+from taipy.exceptions.data_node import NoData
 
 
-class DataSource:
+class DataNode:
     """
-    Data Source represents a reference to a dataset but not the data itself.
+    Data Node represents a reference to a dataset but not the data itself.
 
-    A Data Source holds meta data related to the dataset it refers. In particular, a data source holds the name, the
-    scope, the parent_id, the last edition date and additional properties of the data. A data Source is also made to
+    A Data Node holds meta data related to the dataset it refers. In particular, a data node holds the name, the
+    scope, the parent_id, the last edition date and additional properties of the data. A data Node is also made to
     contain information and methods needed to access the dataset. This information depends on the type of storage and it
-    is hold by children classes (such as SQL Data Source, CSV Data Source, ...). It is strongly recommended to
-    only instantiate children classes of Data Source through a Data Manager.
+    is hold by children classes (such as SQL Data Node, CSV Data Node, ...). It is strongly recommended to
+    only instantiate children classes of Data Node through a Data Manager.
 
     Attributes:
-        config_name (str):  Name that identifies the data source.
+        config_name (str):  Name that identifies the data node.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
             - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
             - Other characters are replaced by dash characters ('-').
-        scope (Scope):  The usage scope of this data source.
-        id (str): Unique identifier of this data source.
-        name (str): User-readable name of the data source.
+        scope (Scope):  The usage scope of this data node.
+        id (str): Unique identifier of this data node.
+        name (str): User-readable name of the data node.
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
-        job_ids (List[str]): Ordered list of jobs that have written this data source.
-        validity_days (Optional[int]): Number of days to be added to the data source validity duration. If
-            validity_days, validity_hours, and validity_minutes are all set to None, The data_source is always up to
+        job_ids (List[str]): Ordered list of jobs that have written this data node.
+        validity_days (Optional[int]): Number of days to be added to the data node validity duration. If
+            validity_days, validity_hours, and validity_minutes are all set to None, The data_node is always up to
             date.
-        validity_hours (Optional[int]): Number of hours to be added to the data source validity duration. If
-            validity_days, validity_hours, and validity_minutes are all set to None, The data_source is always up to
+        validity_hours (Optional[int]): Number of hours to be added to the data node validity duration. If
+            validity_days, validity_hours, and validity_minutes are all set to None, The data_node is always up to
             date.
-        validity_minutes (Optional[int]): Number of minutes to be added to the data source validity duration. If
-            validity_days, validity_hours, and validity_minutes are all set to None, The data_source is always up to
+        validity_minutes (Optional[int]): Number of minutes to be added to the data node validity duration. If
+            validity_days, validity_hours, and validity_minutes are all set to None, The data_node is always up to
             date.
-        edition_in_progress (bool) : True if a task computing the data source has been submitted and not completed yet.
+        edition_in_progress (bool) : True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
         properties (list): List of additional arguments.
     """
 
-    __ID_PREFIX = "DATASOURCE"
+    __ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
 
     def __init__(
         self,
         config_name,
         scope: Scope = Scope.PIPELINE,
-        id: Optional[DataSourceId] = None,
+        id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
@@ -72,7 +72,7 @@ class DataSource:
         **kwargs,
     ):
         self.config_name = protect_name(config_name)
-        self.id = id or DataSourceId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.name = name or self.id
         self.parent_id = parent_id
         self.scope = scope
@@ -103,7 +103,7 @@ class DataSource:
         protected_attribute_name = protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
-        logging.error(f"{attribute_name} is not an attribute of data source {self.id}")
+        logging.error(f"{attribute_name} is not an attribute of data node {self.id}")
         raise AttributeError
 
     @classmethod
@@ -142,14 +142,14 @@ class DataSource:
             return data
         if not ((type(operators[0]) == list) or (type(operators[0]) == tuple)):
             if isinstance(data, pd.DataFrame):
-                return DataSource.filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
+                return DataNode.filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, List):
-                return DataSource.filter_list_per_key_value(data, operators[0], operators[1], operators[2])
+                return DataNode.filter_list_per_key_value(data, operators[0], operators[1], operators[2])
         else:
             if isinstance(data, pd.DataFrame):
-                return DataSource.filter_dataframe(data, operators, join_operator=join_operator)
+                return DataNode.filter_dataframe(data, operators, join_operator=join_operator)
             if isinstance(data, List):
-                return DataSource.filter_list(data, operators, join_operator=join_operator)
+                return DataNode.filter_list(data, operators, join_operator=join_operator)
         return NotImplemented
 
     @staticmethod
@@ -162,8 +162,8 @@ class DataSource:
         else:
             return NotImplemented
         for key, value, operator in operators:
-            filtered_df_data.append(DataSource.filter_dataframe_per_key_value(df_data, key, value, operator))
-        return DataSource.dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
+            filtered_df_data.append(DataNode.filter_dataframe_per_key_value(df_data, key, value, operator))
+        return DataNode.dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
 
     @staticmethod
     def filter_dataframe_per_key_value(df_data: pd.DataFrame, key: str, value, operator: Operator):
@@ -190,11 +190,11 @@ class DataSource:
     def filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         filtered_list_data = []
         for key, value, operator in operators:
-            filtered_list_data.append(DataSource.filter_list_per_key_value(list_data, key, value, operator))
+            filtered_list_data.append(DataNode.filter_list_per_key_value(list_data, key, value, operator))
         if len(filtered_list_data) == 0:
             return filtered_list_data
         if join_operator == JoinOperator.AND:
-            return DataSource.list_intersect(filtered_list_data)
+            return DataNode.list_intersect(filtered_list_data)
         elif join_operator == JoinOperator.OR:
             return list(set(np.concatenate(filtered_list_data)))
         else:
@@ -232,7 +232,7 @@ class DataSource:
         return NotImplemented
 
     def __getitem__(self, items):
-        return FilterDataSource(self.id, self._read())[items]
+        return FilterDataNode(self.id, self._read())[items]
 
     @property
     def is_ready_for_reading(self):

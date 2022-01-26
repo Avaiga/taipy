@@ -157,7 +157,7 @@ def delete_everything():
     cycle_manager.delete_all()
     Config._python_config.global_config = GlobalAppConfig()
     Config._python_config.job_config = JobConfig()
-    Config._python_config.data_sources.clear()
+    Config._python_config.data_nodes.clear()
     Config._python_config.tasks.clear()
     Config._python_config.pipelines.clear()
     Config._python_config.scenarios.clear()

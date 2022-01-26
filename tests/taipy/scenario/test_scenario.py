@@ -1,6 +1,6 @@
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.data import Scope
-from taipy.data.in_memory import InMemoryDataSource
+from taipy.data.in_memory import InMemoryDataNode
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
 from taipy.task import Task
@@ -65,8 +65,8 @@ def test_add_cycle_to_scenario(cycle):
 
 
 def test_to_model(cycle, current_datetime):
-    input_ds = InMemoryDataSource("input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"})
-    output = InMemoryDataSource("output_name", Scope.PIPELINE, "output_id", {"data": ""})
+    input_ds = InMemoryDataNode("input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"})
+    output = InMemoryDataNode("output_name", Scope.PIPELINE, "output_id", {"data": ""})
     task = Task("task", [input_ds], print, [output], TaskId("task_id"))
     pipeline_entity = Pipeline("pipeline_name", {"big_pty": "big value"}, [task], PipelineId("pipeline_id"))
     scenario_entity = Scenario(

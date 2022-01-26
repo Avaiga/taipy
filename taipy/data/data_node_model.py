@@ -7,24 +7,24 @@ from taipy.data.scope import Scope
 
 
 @dataclass
-class DataSourceModel:
+class DataNodeModel:
     """
-    The model of a DataSource.
+    The model of a DataNode.
 
-    A model refers to the structure of a Data Source stored in a database.
+    A model refers to the structure of a Data Node stored in a database.
 
     Attributes:
-        id (str): Identifier of a DataSource.
-        config_name (int): Name of the `DataSourceConfig`.
-        scope (taipy.data.source.scope.Scope): Scope of the usage of a DataSource.
-        type (str):  Name of the class that represents a DataSource.
-        name (str): User-readable name of the data source.
+        id (str): Identifier of a DataNode.
+        config_name (int): Name of the `DataNodeConfig`.
+        scope (taipy.data.node.scope.Scope): Scope of the usage of a DataNode.
+        type (str):  Name of the class that represents a DataNode.
+        name (str): User-readable name of the data node.
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (str): ISO format of the last edition date and time.
-        job_ids (List[str]): List of jobs that computed the data source.
-        edition_in_progress (bool): True if a task computing this data source has been submitted and not completed yet.
+        job_ids (List[str]): List of jobs that computed the data node.
+        edition_in_progress (bool): True if a task computing this data node has been submitted and not completed yet.
             False otherwise.
-        data_source_properties (Dict[str, Any]): Additional properties of the data source.
+        data_node_properties (Dict[str, Any]): Additional properties of the data node.
 
     Note:
         The tuple `(config_name, parent_id)` forms a unique key.
@@ -42,14 +42,14 @@ class DataSourceModel:
     validity_hours: Optional[int]
     validity_minutes: Optional[int]
     edition_in_progress: bool
-    data_source_properties: Dict[str, Any]
+    data_node_properties: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
         return {**dataclasses.asdict(self), "scope": repr(self.scope)}
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return DataSourceModel(
+        return DataNodeModel(
             id=data["id"],
             config_name=data["config_name"],
             scope=Scope.from_repr(data["scope"]),
@@ -62,5 +62,5 @@ class DataSourceModel:
             validity_hours=int(data["validity_hours"]) if data["validity_hours"] else None,
             validity_minutes=int(data["validity_minutes"]) if data["validity_minutes"] else None,
             edition_in_progress=bool(data["edition_in_progress"]),
-            data_source_properties=data["data_source_properties"],
+            data_node_properties=data["data_node_properties"],
         )

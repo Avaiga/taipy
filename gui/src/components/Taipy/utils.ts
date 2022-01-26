@@ -52,3 +52,5 @@ export const getUpdateVars = (updateVars?: string) =>
         : [];
 
 export const doNotPropagateEvent = (event: MouseEvent) => event.stopPropagation();
+
+export const noDisplayStyle = { display: "none" };

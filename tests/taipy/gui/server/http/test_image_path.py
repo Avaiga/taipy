@@ -13,8 +13,8 @@ def test_image_path_not_found(gui: Gui, helpers):
 
 
 def test_image_path_found(gui: Gui, helpers):
-    url = gui._get_image_content(
-        "img", str((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve()), False
+    url = gui._get_content(
+        "img", str((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve()), False, True
     )
     gui.run(run_server=False)
     flask_client = gui._server.test_client()

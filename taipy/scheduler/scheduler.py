@@ -61,10 +61,10 @@ class Scheduler(AbstractScheduler):
              obj: Task or Job
 
         Returns:
-             True if one of its input data source is blocked
+             True if one of its input data node is blocked
         """
-        data_sources = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
-        return any(not self.data_manager.get(ds.id).is_ready_for_reading for ds in data_sources)
+        data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
+        return any(not self.data_manager.get(ds.id).is_ready_for_reading for ds in data_nodes)
 
     def __run(self):
         with self.lock:

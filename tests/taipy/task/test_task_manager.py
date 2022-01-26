@@ -2,7 +2,7 @@ import pytest
 
 from taipy.common.alias import TaskId
 from taipy.config.config import Config
-from taipy.data import InMemoryDataSource, Scope
+from taipy.data import InMemoryDataNode, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.task import NonExistingTask
@@ -13,8 +13,8 @@ from taipy.task.manager.task_manager import TaskManager
 def test_create_and_save():
     tm = TaskManager()
     dm = DataManager()
-    input_configs = [Config.add_data_source("my_input", "in_memory")]
-    output_configs = Config.add_data_source("my_output", "in_memory")
+    input_configs = [Config.add_data_node("my_input", "in_memory")]
+    output_configs = Config.add_data_node("my_output", "in_memory")
     task_config = Config.add_task("foo", input_configs, print, output_configs)
     task = tm.get_or_create(task_config)
     assert task.id is not None
@@ -38,11 +38,11 @@ def test_create_and_save():
     assert task_retrieved_from_manager.function == task.function
 
 
-def test_do_not_recreate_existing_data_source():
+def test_do_not_recreate_existing_data_node():
     tm = TaskManager()
     dm = DataManager()
-    input_config = Config.add_data_source("my_input", "in_memory")
-    output_config = Config.add_data_source("my_output", "in_memory")
+    input_config = Config.add_data_node("my_input", "in_memory")
+    output_config = Config.add_data_node("my_output", "in_memory")
 
     dm._create_and_set(input_config, "pipeline_id")
     assert len(dm.get_all()) == 1
@@ -54,8 +54,8 @@ def test_do_not_recreate_existing_data_source():
 
 def test_do_not_recreate_existing_task():
     tm = TaskManager()
-    input_config_scope_pipeline = Config.add_data_source("my_input", "in_memory")
-    output_config_scope_pipeline = Config.add_data_source("my_output", "in_memory")
+    input_config_scope_pipeline = Config.add_data_node("my_input", "in_memory")
+    output_config_scope_pipeline = Config.add_data_node("my_output", "in_memory")
     task_config = Config.add_task("foo", input_config_scope_pipeline, print, output_config_scope_pipeline)
     # task_config scope is Pipeline
 
@@ -76,8 +76,8 @@ def test_do_not_recreate_existing_task():
     assert task_2.id != task_3.id
     assert task_3.id == task_4.id
 
-    input_config_scope_scenario = Config.add_data_source("my_input_2", "in_memory", Scope.SCENARIO)
-    output_config_scope_scenario = Config.add_data_source("my_output_2", "in_memory", Scope.SCENARIO)
+    input_config_scope_scenario = Config.add_data_node("my_input_2", "in_memory", Scope.SCENARIO)
+    output_config_scope_scenario = Config.add_data_node("my_output_2", "in_memory", Scope.SCENARIO)
     task_config_2 = Config.add_task("bar", input_config_scope_scenario, print, output_config_scope_scenario)
     # task_config_2 scope is Scenario
 
@@ -169,14 +169,14 @@ def test_set_and_get_task():
     assert task_manager.get(second_task).id == second_task.id
 
 
-def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
+def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     task_manager = TaskManager()
 
-    embedded_1 = Config.add_data_source("ds_1", "in_memory")
-    embedded_2 = Config.add_data_source("ds_2", "in_memory")
-    embedded_3 = Config.add_data_source("a_ds_3", "in_memory")
-    embedded_4 = Config.add_data_source("ds_4", "in_memory")
-    embedded_5 = Config.add_data_source("1_ds_4", "in_memory")
+    embedded_1 = Config.add_data_node("ds_1", "in_memory")
+    embedded_2 = Config.add_data_node("ds_2", "in_memory")
+    embedded_3 = Config.add_data_node("a_ds_3", "in_memory")
+    embedded_4 = Config.add_data_node("ds_4", "in_memory")
+    embedded_5 = Config.add_data_node("1_ds_4", "in_memory")
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
@@ -186,16 +186,16 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
     assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
     assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
 
-    data_sources = {
-        embedded_1: InMemoryDataSource(embedded_1.name, Scope.PIPELINE),
-        embedded_2: InMemoryDataSource(embedded_2.name, Scope.PIPELINE),
-        embedded_3: InMemoryDataSource(embedded_3.name, Scope.PIPELINE),
-        embedded_4: InMemoryDataSource(embedded_4.name, Scope.PIPELINE),
-        embedded_5: InMemoryDataSource(embedded_5.name, Scope.PIPELINE),
+    data_nodes = {
+        embedded_1: InMemoryDataNode(embedded_1.name, Scope.PIPELINE),
+        embedded_2: InMemoryDataNode(embedded_2.name, Scope.PIPELINE),
+        embedded_3: InMemoryDataNode(embedded_3.name, Scope.PIPELINE),
+        embedded_4: InMemoryDataNode(embedded_4.name, Scope.PIPELINE),
+        embedded_5: InMemoryDataNode(embedded_5.name, Scope.PIPELINE),
     }
 
     task_config = Config.add_task("name_2", input, print, output)
-    task = task_manager.get_or_create(task_config, data_sources)
+    task = task_manager.get_or_create(task_config, data_nodes)
 
     assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
     assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
@@ -203,7 +203,7 @@ def test_ensure_conservation_of_order_of_data_sources_on_task_creation():
 
 def test_get_all_by_config_name():
     tm = TaskManager()
-    input_configs = [Config.add_data_source("my_input", "in_memory")]
+    input_configs = [Config.add_data_node("my_input", "in_memory")]
     assert len(tm._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
     task_config_1 = Config.add_task("foo", input_configs, print, [])
     assert len(tm._get_all_by_config_name("foo")) == 0
@@ -223,8 +223,8 @@ def test_get_all_by_config_name():
 
 def test_delete_raise_exception():
     task_manager = TaskManager()
-    ds_input_config_1 = Config.add_data_source("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    ds_output_config_1 = Config.add_data_source("my_output_1", "in_memory")
+    ds_input_config_1 = Config.add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    ds_output_config_1 = Config.add_data_node("my_output_1", "in_memory")
     task_config_1 = Config.add_task("task_config_1", ds_input_config_1, print, ds_output_config_1)
     task_1 = task_manager.get_or_create(task_config_1)
     task_manager.delete(task_1.id)
@@ -237,8 +237,8 @@ def test_hard_delete():
     task_manager = TaskManager()
     data_manager = task_manager.data_manager
 
-    ds_input_config_1 = Config.add_data_source("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    ds_output_config_1 = Config.add_data_source("my_output_1", "in_memory")
+    ds_input_config_1 = Config.add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    ds_output_config_1 = Config.add_data_node("my_output_1", "in_memory")
     task_config_1 = Config.add_task("task_config_1", ds_input_config_1, print, ds_output_config_1)
     task_1 = task_manager.get_or_create(task_config_1)
 

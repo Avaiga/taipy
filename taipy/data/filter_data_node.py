@@ -6,12 +6,12 @@ import pandas as pd
 from pandas.core.common import is_bool_indexer
 
 
-class FilterDataSource:
+class FilterDataNode:
     __DATAFRAME_DATA_TYPE = "dataframe"
     __CUSTOM_DATA_TYPE = "custom"
 
-    def __init__(self, data_source_id, data: Union[pd.DataFrame, List]) -> None:
-        self.data_source_id = data_source_id
+    def __init__(self, data_node_id, data: Union[pd.DataFrame, List]) -> None:
+        self.data_node_id = data_node_id
         self.data = data
         self.data_type = None
         if isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series):
@@ -23,7 +23,7 @@ class FilterDataSource:
         return self.data_type == self.__DATAFRAME_DATA_TYPE
 
     def __getitem__(self, key):
-        if isinstance(key, FilterDataSource):
+        if isinstance(key, FilterDataNode):
             key = key.data
         if isinstance(key, collections.Hashable):
             filtered_data = self.__getitem_hashable(key)
@@ -37,7 +37,7 @@ class FilterDataSource:
             filtered_data = self.__getitem_iterable(key)
         else:
             filtered_data = None
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __getitem_hashable(self, key):
         if self.data_is_dataframe():
@@ -82,42 +82,42 @@ class FilterDataSource:
             filtered_data = self.data == value
         else:
             filtered_data = [e == value for e in self.data]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __lt__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data < value
         else:
             filtered_data = [e < value for e in self.data]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __le__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data <= value
         else:
             filtered_data = [e <= value for e in self.data]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __gt__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data > value
         else:
             filtered_data = [e > value for e in self.data]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __ge__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data >= value
         else:
             filtered_data = [e >= value for e in self.data]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __ne__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data != value
         else:
             filtered_data = [e != value for e in self.data]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __and__(self, other):
         if self.data_is_dataframe():
@@ -130,7 +130,7 @@ class FilterDataSource:
                 return NotImplemented
             else:
                 filtered_data = [s and o for s, o in zip(self.data, other.data)]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __or__(self, other):
         if self.data_is_dataframe():
@@ -143,7 +143,7 @@ class FilterDataSource:
                 return NotImplemented
             else:
                 filtered_data = [s or o for s, o in zip(self.data, other.data)]
-        return FilterDataSource(self.data_source_id, filtered_data)
+        return FilterDataNode(self.data_node_id, filtered_data)
 
     def __str__(self) -> str:
         if self.data_is_dataframe():

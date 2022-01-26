@@ -3,12 +3,12 @@ import os
 import pytest
 
 from taipy.config import Config
-from taipy.data import PickleDataSource
+from taipy.data import PickleDataNode
 from taipy.data.scope import Scope
-from taipy.exceptions.data_source import NoData
+from taipy.exceptions.data_node import NoData
 
 
-class TestPickleDataSourceEntity:
+class TestPickleDataNodeEntity:
     @pytest.fixture(scope="function", autouse=True)
     def remove_pickle_files(self):
         yield
@@ -19,9 +19,9 @@ class TestPickleDataSourceEntity:
             os.remove(f)
 
     def test_create(self):
-        ds = PickleDataSource("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
+        ds = PickleDataNode("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
         assert os.path.isfile(Config.global_config().storage_folder + "pickles/" + ds.id + ".p")
-        assert isinstance(ds, PickleDataSource)
+        assert isinstance(ds, PickleDataNode)
         assert ds.storage_type() == "pickle"
         assert ds.config_name == "foobar_bazxyxea"
         assert ds.scope == Scope.PIPELINE
@@ -37,7 +37,7 @@ class TestPickleDataSourceEntity:
         assert ds.job_ids == []
 
     def test_create_with_file_name(self):
-        ds = PickleDataSource("foo", Scope.PIPELINE, properties={"default_data": "bar", "file_path": "foo.FILE.p"})
+        ds = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar", "file_path": "foo.FILE.p"})
         assert os.path.isfile("foo.FILE.p")
         assert ds.read() == "bar"
         ds.write("qux")
@@ -46,10 +46,10 @@ class TestPickleDataSourceEntity:
         assert ds.read() == 1998
 
     def test_read_and_write(self):
-        no_data_ds = PickleDataSource("foo", Scope.PIPELINE)
+        no_data_ds = PickleDataNode("foo", Scope.PIPELINE)
         with pytest.raises(NoData):
             no_data_ds.read()
-        pickle_str = PickleDataSource("foo", Scope.PIPELINE, properties={"default_data": "bar"})
+        pickle_str = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar"})
         assert isinstance(pickle_str.read(), str)
         assert pickle_str.read() == "bar"
         assert pickle_str.default_data == "bar"
@@ -60,10 +60,10 @@ class TestPickleDataSourceEntity:
         pickle_str.write(1998)
         assert pickle_str.read() == 1998
         assert isinstance(pickle_str.read(), int)
-        pickle_int = PickleDataSource("foo", Scope.PIPELINE, properties={"default_data": 197})
+        pickle_int = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": 197})
         assert isinstance(pickle_int.read(), int)
         assert pickle_int.read() == 197
-        pickle_dict = PickleDataSource(
+        pickle_dict = PickleDataNode(
             "foo", Scope.PIPELINE, properties={"default_data": {"bar": 12, "baz": "qux", "quux": [13]}}
         )
         assert isinstance(pickle_dict.read(), dict)

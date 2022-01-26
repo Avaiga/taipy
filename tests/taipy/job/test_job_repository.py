@@ -2,8 +2,8 @@ import datetime
 
 import pytest
 
-from taipy.common.alias import DataSourceId, JobId, TaskId
-from taipy.data import CSVDataSource, Scope
+from taipy.common.alias import DataNodeId, JobId, TaskId
+from taipy.data import CSVDataNode, Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound
 from taipy.job import Job, JobManager, Status
@@ -11,10 +11,10 @@ from taipy.job.job_model import JobModel
 from taipy.task import Task
 from taipy.task.manager import TaskManager
 
-data_source = CSVDataSource(
-    "test_data_source",
+data_node = CSVDataNode(
+    "test_data_node",
     Scope.PIPELINE,
-    DataSourceId("ds_id"),
+    DataNodeId("ds_id"),
     "name",
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
@@ -26,7 +26,7 @@ data_source = CSVDataSource(
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_name", [data_source], print, [], TaskId("task_id"), parent_id="parent_id")
+task = Task("config_name", [data_node], print, [], TaskId("task_id"), parent_id="parent_id")
 
 job = Job(JobId("id"), task)
 
@@ -47,7 +47,7 @@ class TestJobRepository:
         repository.save(job)
         with pytest.raises(ModelNotFound):
             repository.load("id")
-        DataManager().set(data_source)
+        DataManager().set(data_node)
         TaskManager().set(task)
         j = repository.load("id")
         assert j.id == job.id
@@ -57,6 +57,6 @@ class TestJobRepository:
         assert repository.to_model(job) == job_model
         with pytest.raises(ModelNotFound):
             repository.from_model(job_model)
-        DataManager().set(data_source)
+        DataManager().set(data_node)
         TaskManager().set(task)
         assert repository.from_model(job_model).id == job.id

@@ -16,9 +16,9 @@ class NonExistingJob(RuntimeError):
         self.message = f"Job: {job_id} does not exist."
 
 
-class DataSourceWritingError(RuntimeError):
+class DataNodeWritingError(RuntimeError):
     """
-    Raised if an error happens during the writing in a data source.
+    Raised if an error happens during the writing in a data node.
     """
 
     pass

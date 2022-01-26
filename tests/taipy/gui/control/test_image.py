@@ -32,7 +32,7 @@ def test_image_path_md(gui: Gui, helpers):
     md_string = "<|{content}|image|>"
     expected_list = [
         "<Image",
-        'defaultContent="/taipy-images/taipyStatic0/fred.png',
+        'defaultContent="/taipy-content/taipyStatic0/fred.png',
         'tp_onAction=""',
     ]
     helpers.test_control_md(gui, md_string, expected_list)

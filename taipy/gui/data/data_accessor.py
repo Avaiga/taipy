@@ -71,11 +71,11 @@ class _DataAccessors(object):
 
         self._register(PandasDataAccessor)
 
-    def _register(self, cls: t.Type[DataAccessor], var_name: t.Optional[str] = None) -> None:
+    def _register(self, cls: t.Type[DataAccessor]) -> None:
         if inspect.isclass(cls):
             if issubclass(cls, DataAccessor):
                 names = cls.get_supported_classes()
-                if not var_name and not names:
+                if not names:
                     raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
                 if names and not isinstance(names, (t.List, t.Tuple)):  # type: ignore
                     names = [
@@ -87,8 +87,6 @@ class _DataAccessors(object):
                     inst = self.__access_4_type.get(name)
                     if inst:
                         break
-                if not inst and var_name:
-                    inst = self.__access_4_var.get(var_name)
                 if not inst:
                     try:
                         inst = cls()
@@ -97,8 +95,6 @@ class _DataAccessors(object):
                 if inst:
                     for name in names:
                         self.__access_4_type[name] = inst  # type: ignore
-                    if var_name:
-                        self.__access_4_var[var_name] = inst  # type: ignore
             else:
                 raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
         else:
@@ -111,11 +107,11 @@ class _DataAccessors(object):
             warnings.warn(f"Can't find Data Accessor for type {value.__class__}")
         return self.__invalid_data_accessor
 
-    def _cast_string_value(self, var_name: str, value: t.Any, show_warning: t.Optional[bool] = True) -> t.Any:
+    def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         inst = _get_dict_value(self.__access_4_type, value.__class__)
         if not inst:
             inst = _get_dict_value(self.__access_4_var, var_name)
-        return inst.cast_string_value(var_name, value, show_warning) if inst else value
+        return inst.cast_string_value(var_name, value) if inst else value
 
     def _is_data_access(self, var_name: str, value: t.Any) -> bool:
         inst = _get_dict_value(self.__access_4_type, value.__class__)

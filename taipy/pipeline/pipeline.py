@@ -8,7 +8,7 @@ import networkx as nx
 from taipy.common import protect_name
 from taipy.common.alias import Dag, PipelineId
 from taipy.common.utils import fcts_to_dict
-from taipy.data import DataSource
+from taipy.data import DataNode
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.task.task import Task
 
@@ -78,14 +78,14 @@ class Pipeline:
         dag = self.__build_dag()
         if not nx.is_directed_acyclic_graph(dag):
             return False
-        is_data_source = True
+        is_data_node = True
         for nodes in nx.topological_generations(dag):
             for node in nodes:
-                if is_data_source and not isinstance(node, DataSource):
+                if is_data_node and not isinstance(node, DataNode):
                     return False
-                if not is_data_source and not isinstance(node, Task):
+                if not is_data_node and not isinstance(node, Task):
                     return False
-            is_data_source = not is_data_source
+            is_data_node = not is_data_node
         return True
 
     def __build_dag(self):
@@ -104,20 +104,20 @@ class Pipeline:
         self.subscribers.remove(callback)
 
     def to_model(self) -> PipelineModel:
-        source_task_edges = defaultdict(list)
-        task_source_edges = defaultdict(list)
+        datanode_task_edges = defaultdict(list)
+        task_datanode_edges = defaultdict(list)
         for task in self.tasks.values():
             for predecessor in task.input.values():
-                source_task_edges[str(predecessor.id)].append(str(task.id))
+                datanode_task_edges[str(predecessor.id)].append(str(task.id))
             for successor in task.output.values():
-                task_source_edges[str(task.id)].append(str(successor.id))
+                task_datanode_edges[str(task.id)].append(str(successor.id))
         return PipelineModel(
             self.id,
             self.parent_id,
             self.config_name,
             self.properties,
-            Dag(dict(source_task_edges)),
-            Dag(dict(task_source_edges)),
+            Dag(dict(datanode_task_edges)),
+            Dag(dict(task_datanode_edges)),
             fcts_to_dict(list(self.subscribers)),
         )
 

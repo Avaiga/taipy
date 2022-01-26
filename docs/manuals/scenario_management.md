@@ -18,7 +18,7 @@
 
 !!! abstract "TODO JRM"
 
-### Data source
+### Data node
 
 !!! abstract "TODO JRM"
 
@@ -32,7 +32,7 @@ Taipy is an application builder. The purpose of configuring the application back
 application entities and how they behave at runtime.
 
 The configuration includes configuration for global application, job executions, scenarios, pipelines, tasks and data
-sources. As an example, the data source configurations may have name, storage type, credentials, format, path, scope,
+nodes. As an example, the data node configurations may have name, storage type, credentials, format, path, scope,
 or any custom property.
 
 !!! info "Four methods to configure taipy are possible:"
@@ -67,7 +67,7 @@ Here is the toml export file of all (not None) default values :
     airflow_dags_folder = ".dags/"
     airflow_folder = ".airflow/"
 
-    [DATA_SOURCE.default]
+    [DATA_NODE.default]
     storage_type = "pickle"
     scope = "PIPELINE"
 
@@ -93,7 +93,7 @@ provided, the default configuration applies.
 !!! example "Example"
 
         ```py linenums="1"
-        dataset_cfg =Config.add_data_source(name="dataset", storage_type="csv", path="./the/path/to/my/dataset.csv")
+        dataset_cfg =Config.add_data_node(name="dataset", storage_type="csv", path="./the/path/to/my/dataset.csv")
         task_cfg = Config.add_task(name="my_task", inputs=data_set_cfg, my_function, outputs=[])
         ```
 
@@ -120,11 +120,11 @@ Here is an example of a toml file :
     mode = "remote"
     nb_of_workers = 5
 
-    [DATA_SOURCE.Default]
+    [DATA_NODE.Default]
     storage=local_file_system
     type=embedded
 
-    [DATA_SOURCE.Historical_data_set]
+    [DATA_NODE.Historical_data_set]
     type=csv
     path="folder/subfolder/file.csv"
 
@@ -160,19 +160,19 @@ Taipy also provides a method to export the configuration applied after the compi
     airflow_folder = "./airflow"
     airflow_db_endpoint = "db"
 
-    [DATA_SOURCE.default]
+    [DATA_NODE.default]
     custom = "default_custom_property"
 
-    [DATA_SOURCE.dataset]
+    [DATA_NODE.dataset]
     storage_type = "csv"
     custom = "custom property"
     Path = "the/path/to/my/dataset.csv"
 
-    [DATA_SOURCE.forecasts]
+    [DATA_NODE.forecasts]
     storage_type = "csv"
     Path = "the/path/to/my/forecasts.csv"
 
-    [DATA_SOURCE.date]
+    [DATA_NODE.date]
     scope = "SCENARIO"
     default_data = "15/03/2022"
 
@@ -219,7 +219,7 @@ Here is a possible example of a workflow for the developer.
 !!! abstract "TODO JRM"
 
     -   Add reference to the ref manual
-    -   Describe config nodes (Global, job, data source, ...)
+    -   Describe config nodes (Global, job, data node, ...)
     -   List all the fields and for each field provide possible values, examples
 
 ## Scenario Management
