@@ -581,6 +581,14 @@ class Gui(object, metaclass=Singleton):
 
         return _taipy_on_cancel_block_ui
 
+    def __validate_function_signature(self, func_name: str, range: range) -> None:
+        if (
+            (func := getattr(self, func_name, None)) is not None
+            and isinstance(func, FunctionType)
+            and func.__code__.co_argcount not in range
+        ):
+            warnings.warn(f"Function {func_name} has invalid signature")
+
     # Public methods
     def add_page(
         self,
@@ -690,7 +698,7 @@ class Gui(object, metaclass=Singleton):
     def bind_func(self, func_name: str) -> bool:
         if (
             isinstance(func_name, str)
-            and not hasattr(self, func_name)
+            and getattr(self, func_name, None) is None
             and func_name in (self._get_instance()._locals_bind)
             and isinstance((self._get_instance()._locals_bind[func_name]), FunctionType)
         ):
@@ -838,6 +846,14 @@ class Gui(object, metaclass=Singleton):
         self._locals_bind: t.Dict[str, t.Any] = t.cast(
             FrameType, t.cast(FrameType, inspect.currentframe()).f_back
         ).f_locals
+
+        # bind on_change and on_action function if available
+        self.bind_func("on_change")
+        self.bind_func("on_action")
+
+        # validate on_change and on_action function signature
+        self.__validate_function_signature("on_change", range(3, 4))
+        self.__validate_function_signature("on_action", range(5))
 
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
