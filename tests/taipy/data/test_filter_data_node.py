@@ -93,6 +93,8 @@ class TestFilterDataNode:
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
         assert all(map(lambda x: isinstance(x, CustomClass), filtered_custom_ds.data))
+        print([(i, (d.a, d.b)) for i, d in enumerate(filtered_custom_ds.data)])
+        print(bool_df)
 
         bool_1d_index = [True if i < 5 else False for i in range(10)]
         filtered_custom_ds = custom_ds[bool_1d_index]
