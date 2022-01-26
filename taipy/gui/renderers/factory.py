@@ -297,6 +297,7 @@ class Factory:
         )
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
+        .set_labels()
         .set_string_with_check("text_anchor", Factory.__TEXT_ANCHORS + [Factory.__TEXT_ANCHOR_NONE], "bottom")
         .set_propagate(),
         "status": lambda control_type, attrs: Builder(
