@@ -1,7 +1,10 @@
+from datetime import datetime
+
 import pytest
 
 from taipy.config._config import _Config
 from taipy.config.config import Config
+from taipy.data.manager import DataManager
 from taipy.exceptions.configuration import ConfigurationIssueError
 
 
@@ -73,3 +76,16 @@ def test_data_node_creation_no_duplication():
 
     Config.add_data_node("data_nodes1", "pickle")
     assert len(Config.data_nodes()) == 2
+
+
+def test_date_source_create_with_datetime():
+    data_manager = DataManager()
+    data_source_config = Config.add_data_node(
+        name="datetime_data", my_property=datetime(1991, 1, 1), foo="hello", test=1, dict={"type": "Datetime", 2: "daw"}
+    )
+    ds = data_manager.get_or_create(data_source_config)
+    ds = data_manager.get(ds)
+    assert ds.foo == "hello"
+    assert ds.my_property == datetime(1991, 1, 1)
+    assert ds.test == 1
+    assert ds.dict.get("type") == "Datetime"

@@ -2,6 +2,7 @@ import json
 import pathlib
 import shutil
 from abc import abstractmethod
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
@@ -17,9 +18,22 @@ class CustomEncoder(json.JSONEncoder):
         result: Json
         if isinstance(o, Enum):
             result = o.value
+        elif isinstance(o, datetime):
+            result = {"__type__": "Datetime", "__value__": o.isoformat()}
         else:
             result = json.JSONEncoder.default(self, o)
         return result
+
+
+class CustomDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+    def object_hook(self, source):
+        if source.get("__type__") == "Datetime":
+            return datetime.fromisoformat(source.get("__value__"))
+        else:
+            return source
 
 
 class FileSystemRepository(Generic[ModelType, Entity]):
@@ -110,6 +124,6 @@ class FileSystemRepository(Generic[ModelType, Entity]):
 
     def __to_entity(self, filepath):
         with open(filepath, "r") as f:
-            data = json.load(f)
+            data = json.load(f, cls=CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
         return self.from_model(model)
