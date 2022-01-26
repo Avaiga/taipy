@@ -30,7 +30,7 @@ class CSVDataSource(DataSource):
         job_ids (List[str]): Ordered list of jobs that have written this data source.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
         properties (list): List of additional arguments. Note that the properties parameter should at least contain
-            values for "path" properties.
+            a value for "path" properties.
     """
 
     __STORAGE_TYPE = "csv"
