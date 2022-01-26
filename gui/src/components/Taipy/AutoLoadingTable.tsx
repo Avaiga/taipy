@@ -29,7 +29,7 @@ import {
     getsortByIndex,
     Order,
     TaipyTableProps,
-    boxSx,
+    baseBoxSx,
     paperSx,
     tableSx,
     RowType,
@@ -135,6 +135,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         tp_varname,
         refresh = false,
         height = "60vh",
+        width = "100vw",
         tp_updatevars,
         selected = [],
         pageSize = 100,
@@ -373,6 +374,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             props.lineStyle,
         ]
     );
+
+    const boxSx = useMemo(() => ({...baseBoxSx, width: width}), [width]);
 
     return (
         <Box sx={boxSx} id={id}>
