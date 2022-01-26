@@ -1,5 +1,4 @@
 import collections
-from copy import deepcopy
 from typing import Dict, Iterable, List, Union
 
 import pandas as pd
@@ -51,24 +50,14 @@ class FilterDataNode:
         if self.data_is_dataframe():
             return self.data[key]
 
-        has_dict_element = all(isinstance(x, Dict) for x in self.data)
-        if has_dict_element:
-            filtered_data_dict: Dict[str, List] = dict()
-            for col in key.columns:
-                filtered_data_dict[col] = list()
-                for i, row in enumerate(key[col]):
-                    if row:
-                        filtered_data_dict[col].append(self.data[i][col])
-                    else:
-                        filtered_data_dict[col].append(None)
-            return filtered_data_dict
-
-        # filtered_data_list = deepcopy(self.data)
-        filtered_data_list = self.data
-        for col in key.columns:
-            for i, row in enumerate(key[col]):
-                setattr(filtered_data_list[i], col, getattr(filtered_data_list[i], col) if row else None)
-        return filtered_data_list
+        if self.data_is_list_of_dict():
+            return self._reduce_on_key(
+                key,
+                collections.defaultdict(list),
+                lambda row, col, acc: acc[col].append(row[col]),
+                lambda row, col, acc: acc[col].append(None),
+            )
+        return self._reduce_on_key(key, [], lambda row, col, acc: acc.append(row))
 
     def __getitem_bool_indexer(self, key):
         if self.data_is_dataframe():
@@ -158,3 +147,15 @@ class FilterDataNode:
         for e in self.data:
             list_to_string += str(e) + "\n"
         return list_to_string
+
+    def data_is_list_of_dict(self) -> bool:
+        return all(isinstance(x, Dict) for x in self.data)
+
+    def _reduce_on_key(self, key, acc, on_true, on_false=None):
+        for col in key.columns:
+            for i, row in enumerate(key[col]):
+                if row:
+                    on_true(self.data[i], col, acc)
+                elif on_false:
+                    on_false(self.data[i], col, acc)
+        return acc
