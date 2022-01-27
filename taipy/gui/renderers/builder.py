@@ -133,19 +133,21 @@ class Builder:
         boolattr = self.__get_property(name, default_value)
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
-        return self.__set_react_attribute(_to_camel_case(name), boolattr)
+        if isinstance(boolattr, bool):
+            return self.__set_react_attribute(_to_camel_case(name), boolattr)
+        return self
 
     def __set_dict_attribute(self, name: str):
-        dict_attr = _get_dict_value(self.attributes, name)
+        dict_attr = self.__get_property(name)
         if dict_attr:
             if isinstance(dict_attr, str):
                 vals = [x.strip().split(":") for x in dict_attr.split(";")]
                 dict_attr = {}
                 for val in vals:
                     if len(val) > 1:
-                        value = val[2].strip()
+                        value = val[1].strip()
                         self._gui.bind_func(value)
-                        dict_attr[val[1].strip()] = value
+                        dict_attr[val[0].strip()] = value
             if isinstance(dict_attr, (dict, _MapDictionary)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
@@ -581,6 +583,14 @@ class Builder:
             value = self.__get_property(var_name)
             if value is not None:
                 self.set_attribute(var_name, value)
+        return self
+
+    def set_labels(self, var_name: str = "labels"):
+        value = self.__get_property(var_name)
+        if value:
+            if is_boolean_true(value):
+                return self.__set_react_attribute(_to_camel_case(var_name), True)
+            return self.__set_dict_attribute(var_name)
         return self
 
     def set_page_id(self):

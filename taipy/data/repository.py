@@ -8,8 +8,8 @@ from taipy.repository import FileSystemRepository
 
 
 class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
-    def __init__(self, class_map, dir_name="data_nodes"):
-        super().__init__(model=DataNodeModel, dir_name=dir_name)
+    def __init__(self, class_map):
+        super().__init__(model=DataNodeModel, dir_name="data_nodes")
         self.class_map = class_map
 
     def to_model(self, data_node: DataNode):

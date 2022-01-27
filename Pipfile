@@ -25,6 +25,7 @@ python-magic = "*"
 python-magic-bin = {version = "*", sys_platform = "== 'win32'"}
 openpyxl = "==3.0.9"
 requests = "*"
+rdp = ">=0.8"
 
 [dev-packages]
 pytest = "*"

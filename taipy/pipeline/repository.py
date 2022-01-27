@@ -14,8 +14,8 @@ from taipy.task.manager import TaskManager
 
 
 class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
-    def __init__(self, dir_name="pipelines"):
-        super().__init__(model=PipelineModel, dir_name=dir_name)
+    def __init__(self):
+        super().__init__(model=PipelineModel, dir_name="pipelines")
 
     def to_model(self, pipeline: Pipeline) -> PipelineModel:
         datanode_task_edges = defaultdict(list)
