@@ -31,6 +31,7 @@ AppConfigOption = t.Literal[
     "ngrok_token",
     "upload_folder",
     "data_url_max_size",
+    "flask_log",
 ]
 
 AppConfig = t.TypedDict(
@@ -56,6 +57,7 @@ AppConfig = t.TypedDict(
         "ngrok_token": str,
         "upload_folder": t.Union[str, None],
         "data_url_max_size": t.Union[int, None],
+        "flask_log": bool,
     },
     total=False,
 )
