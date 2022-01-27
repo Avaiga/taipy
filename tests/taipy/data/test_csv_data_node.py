@@ -1,7 +1,5 @@
-import datetime
 import os
 import pathlib
-from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -50,6 +48,16 @@ class TestCSVDataNode:
         data_pandas = csv_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 10
+        assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path).to_numpy())
+
+        # Create CSVDataNode with numpy exposed_type
+        csv_data_node_as_numpy = CSVDataNode(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": True, "exposed_type": "numpy"}
+        )
+        data_numpy = csv_data_node_as_numpy.read()
+        assert isinstance(data_numpy, np.ndarray)
+        assert len(data_numpy) == 10
+        assert np.array_equal(data_numpy, pd.read_csv(path).to_numpy())
 
         # Create the same CSVDataNode but with custom exposed_type
         class MyCustomObject:
@@ -82,6 +90,16 @@ class TestCSVDataNode:
         data_pandas = csv_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 11
+        assert np.array_equal(data_pandas.to_numpy(), pd.read_csv(path, header=None).to_numpy())
+
+        # Create CSVDataNode with numpy exposed_type
+        csv_data_node_as_numpy = CSVDataNode(
+            "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": "numpy"}
+        )
+        data_numpy = csv_data_node_as_numpy.read()
+        assert isinstance(data_numpy, np.ndarray)
+        assert len(data_numpy) == 11
+        assert np.array_equal(data_numpy, pd.read_csv(path, header=None).to_numpy())
 
         # Create the same CSVDataNode but with custom exposed_type
         class MyCustomObject:
