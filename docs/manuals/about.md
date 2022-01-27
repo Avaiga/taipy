@@ -22,3 +22,8 @@ Graphical User Interface (GUI) section will provide you with all the information
 you need to create pages that you can display and interact with.
 
 [:material-arrow-right: GUI user manual](gui/user.md)
+
+
+## Deployment
+
+[:material-arrow-right: Heroku Deployment manual](deployment/heroku/getting-started.md)
