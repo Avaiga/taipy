@@ -22,3 +22,9 @@ def test_image_path_found(gui: Gui, helpers):
     sid = helpers.create_scope_and_get_sid(gui)
     ret = flask_client.get(f"{url}?client_id={sid}")
     assert ret.status_code == 200
+
+
+def test_image_data_too_big(gui: Gui, helpers):
+    with open((pathlib.Path(__file__).parent.parent.parent / "resources" / "taipan.jpg"), "rb") as big_file:
+        url = gui._get_content("img", big_file.read(), False, True)
+        assert not url.startswith("data:")

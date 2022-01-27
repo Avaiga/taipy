@@ -21,6 +21,7 @@ app_config_default: AppConfig = {
     "single_client": False,
     "ngrok_token": "",
     "upload_folder": None,
+    "flask_log": False,
 }
 
 style_config_default: StyleConfig = {

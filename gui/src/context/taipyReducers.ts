@@ -2,7 +2,7 @@ import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
-import { merge } from "lodash";
+import merge from "lodash/merge";
 
 import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";

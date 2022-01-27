@@ -16,6 +16,7 @@ interface SliderProps extends LovProps<number | string, number | string> {
     max?: number;
     textAnchor?: string;
     alwaysUpdate?: boolean;
+    labels?: string | boolean;
 }
 
 const Slider = (props: SliderProps) => {
@@ -36,24 +37,30 @@ const Slider = (props: SliderProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const lovList = useLovListMemo(lov, defaultLov);
 
-    const update = useMemo(() => props.alwaysUpdate === undefined ? lovList.length === 0 : props.alwaysUpdate, [lovList, props.alwaysUpdate]);
+    const update = useMemo(
+        () => (props.alwaysUpdate === undefined ? lovList.length === 0 : props.alwaysUpdate),
+        [lovList, props.alwaysUpdate]
+    );
 
     const min = lovList.length ? 0 : props.min;
     const max = lovList.length ? lovList.length - 1 : props.max;
 
-    const handleRange = useCallback((e, val: number | number[]) => {
-        setValue(val as number);
-        if (update) {
-            const value = lovList.length ? lovList[val as number].id : val;
-            dispatch(createSendUpdateAction(tp_varname, value, propagate));
-        }
-    }, [lovList, update, tp_varname, dispatch, propagate]);
+    const handleRange = useCallback(
+        (e, val: number | number[]) => {
+            setValue(val as number);
+            if (update) {
+                const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
+                dispatch(createSendUpdateAction(tp_varname, value, propagate));
+            }
+        },
+        [lovList, update, tp_varname, dispatch, propagate]
+    );
 
     const handleRangeCommitted = useCallback(
         (e, val: number | number[]) => {
             setValue(val as number);
             if (!update) {
-                const value = lovList.length ? lovList[val as number].id : val;
+                const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
                 dispatch(createSendUpdateAction(tp_varname, value, propagate));
             }
         },
@@ -62,7 +69,7 @@ const Slider = (props: SliderProps) => {
 
     const getLabel = useCallback(
         (value) =>
-            lovList.length ? (
+            lovList.length && lovList.length > value ? (
                 typeof lovList[value].item === "string" ? (
                     <Typography>{lovList[value].item}</Typography>
                 ) : (
@@ -88,6 +95,42 @@ const Slider = (props: SliderProps) => {
         },
         [lovList, textAnchor, getLabel]
     );
+
+    const marks = useMemo(() => {
+        if (props.labels) {
+            if (typeof props.labels === "boolean") {
+                if (lovList.length) {
+                    return lovList.map((it, idx) => ({ value: idx, label: getLabel(idx) }));
+                }
+            } else {
+                try {
+                    const labels = JSON.parse(props.labels);
+                    const marks: Array<{ value: number; label: string }> = [];
+                    Object.keys(labels).forEach((key) => {
+                        if (labels[key]) {
+                            let idx = lovList.findIndex((it) => it.id === key);
+                            if (idx == -1) {
+                                try {
+                                    idx = parseInt(key, 10);
+                                } catch (e) {
+                                    // too bad
+                                }
+                            }
+                            if (idx != -1) {
+                                marks.push({ value: idx, label: labels[key] });
+                            }
+                        }
+                    });
+                    if (marks.length) {
+                        return marks;
+                    }
+                } catch (e) {
+                    // won't happen
+                }
+            }
+        }
+        return lovList.length > 0;
+    }, [props.labels, lovList, getLabel]);
 
     const textAnchorSx = useMemo(() => {
         if (lovList.length) {
@@ -155,7 +198,7 @@ const Slider = (props: SliderProps) => {
                 min={min}
                 max={max}
                 step={1}
-                marks={lovList.length > 0}
+                marks={marks}
                 valueLabelFormat={getLabel}
             />
             {getText(value, false)}

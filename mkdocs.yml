@@ -6,13 +6,13 @@ repo_name: taipy
 copyright: © 2022 Avaiga
 nav:
   - Home: index.md
-  - 'Getting started': 
+  - 'Getting started':
     - 'Installation': 'getting_started/installation.md'
     - 'Creating a Taipy application': 'getting_started/creating_a_taipy_application.md'
   - 'User Manual':
     - "About Taipy's User Manual": 'manuals/about.md'
     - 'Scenario management': 'manuals/scenario_management.md'
-    - Graphical User Interface: 
+    - Graphical User Interface:
         - 'About': 'manuals/gui/user.md'
         - 'Pages': 'manuals/gui/user_pages.md'
         - 'Controls': 'manuals/gui/user_controls.md'
@@ -22,6 +22,13 @@ nav:
         - 'Dialogs': 'manuals/gui/user_dialogs.md'
         - 'Notifications': 'manuals/gui/user_notifications.md'
         - 'GUI References': 'manuals/gui/user_gui.md'
+    - Deployment:
+        - Prepare your application for deployment: 'manuals/deployment/prepare-taipy-for-deployment.md'
+        - Heroku:
+            - 'Getting started': 'manuals/deployment/heroku/getting-started.md'
+            - 'Setup': 'manuals/deployment/heroku/setup.md'
+            - 'Based on Git': 'manuals/deployment/heroku/git.md'
+            - 'Based on Docker': 'manuals/deployment/heroku/docker.md'
   - 'Reference Manual': 'manuals/reference.md'
   - 'Contributing':
     - 'About contributions': 'contributing/about_contributing.md'

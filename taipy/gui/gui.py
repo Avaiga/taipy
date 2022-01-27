@@ -23,10 +23,10 @@ if util.find_spec("pyngrok"):
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
+from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .data.data_scope import _DataScopes
-from .data.content_accessor import ContentAccessor
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -120,7 +120,7 @@ class Gui(object, metaclass=Singleton):
         self._css_file = css_file
 
         self._config = GuiConfig()
-        self.__contentAccessor = ContentAccessor()
+        self.__content_accessor = None
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
 
@@ -144,6 +144,11 @@ class Gui(object, metaclass=Singleton):
     @staticmethod
     def _get_instance() -> Gui:
         return Gui._instances[Gui]
+
+    def __get_content_accessor(self):
+        if self.__content_accessor is None:
+            self.__content_accessor = ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
+        return self.__content_accessor
 
     def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
         return self._config._get_app_config(name, default_value)
@@ -258,12 +263,15 @@ class Gui(object, metaclass=Singleton):
                 modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.on_change:
-            self.on_change(self, var_name, value)
+            try:
+                self.on_change(self, var_name, value)
+            except Exception as e:
+                warnings.warn(f"on_change function invocation exception: {e}")
         self.__send_var_list_update(modified_vars, from_front, var_name)
 
     def _get_content(self, var_name: str, value: t.Any, is_dynamic: bool, image: bool) -> t.Any:
-        var_name = self.__contentAccessor.register_var(var_name, image, is_dynamic)
-        ret_value = self.__contentAccessor.get_info(var_name, value)
+        var_name = self.__get_content_accessor().register_var(var_name, image, is_dynamic)
+        ret_value = self.__get_content_accessor().get_info(var_name, value)
         if isinstance(ret_value, tuple):
             string_value = Gui.__CONTENT_ROOT + ret_value[0]
         else:
@@ -274,7 +282,7 @@ class Gui(object, metaclass=Singleton):
         parts = path.split("/")
         if len(parts) > 1:
             file_name = parts[-1]
-            (dir_path, as_attachment) = self.__contentAccessor.get_content_path(
+            (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
                 path[: -len(file_name) - 1], file_name, request.args.get("varname"), request.args.get("bypass")
             )
             if dir_path:
@@ -341,7 +349,7 @@ class Gui(object, metaclass=Singleton):
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
             if not from_front and _var == front_var:
-                ret_value = self.__contentAccessor.get_info(front_var, newvalue)
+                ret_value = self.__get_content_accessor().get_info(front_var, newvalue)
                 if isinstance(ret_value, tuple):
                     newvalue = Gui.__CONTENT_ROOT + ret_value[0]
                 else:
@@ -520,7 +528,7 @@ class Gui(object, metaclass=Singleton):
                     return False
                 return True
             except Exception as e:
-                warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
+                warnings.warn(f"on_action '{action_function.__name__}' function invocation exception: {e}")
         return False
 
     # Proxy methods for Evaluator
@@ -914,6 +922,7 @@ class Gui(object, metaclass=Singleton):
                 port=app_config["port"],
                 debug=app_config["debug"],
                 use_reloader=app_config["use_reloader"],
+                flask_log=app_config["flask_log"],
             )
 
     def stop(self):
