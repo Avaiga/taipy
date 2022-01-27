@@ -3,9 +3,9 @@ from unittest import mock
 from flask import url_for
 
 
-def test_get_datasource(client):
+def test_get_datanode(client):
     # test 404
-    user_url = url_for("api.datasource_by_id", datasource_id="foo")
+    user_url = url_for("api.datanode_by_id", datanode_id="foo")
     rep = client.get(user_url)
     assert rep.status_code == 404
 
@@ -27,53 +27,53 @@ def test_get_datasource(client):
     with mock.patch("taipy.data.manager.data_manager.DataManager.get") as manager_mock:
         manager_mock.return_value = data
 
-        # test get_datasource
-        rep = client.get(url_for("api.datasource_by_id", datasource_id="foo"))
+        # test get_datanode
+        rep = client.get(url_for("api.datanode_by_id", datanode_id="foo"))
         assert rep.status_code == 200
 
 
-def test_delete_datasource(client):
+def test_delete_datanode(client):
     # test 404
-    user_url = url_for("api.datasource_by_id", datasource_id="foo")
+    user_url = url_for("api.datanode_by_id", datanode_id="foo")
     rep = client.get(user_url)
     assert rep.status_code == 404
 
     with mock.patch("taipy.data.manager.data_manager.DataManager.delete"):
-        # test get_datasource
-        rep = client.delete(url_for("api.datasource_by_id", datasource_id="foo"))
+        # test get_datanode
+        rep = client.delete(url_for("api.datanode_by_id", datanode_id="foo"))
         assert rep.status_code == 200
 
 
-def test_create_datasource(client, default_datasource_config):
+def test_create_datanode(client, default_datanode_config):
     # without config param
-    datasources_url = url_for("api.datasources")
-    rep = client.post(datasources_url)
+    datanodes_url = url_for("api.datanodes")
+    rep = client.post(datanodes_url)
     assert rep.status_code == 400
 
     # config does not exist
-    datasources_url = url_for("api.datasources", config_name="foo")
-    rep = client.post(datasources_url)
+    datanodes_url = url_for("api.datanodes", config_name="foo")
+    rep = client.post(datanodes_url)
     assert rep.status_code == 404
 
     with mock.patch(
-        "taipy_rest.api.resources.datasource.DataSourceList.fetch_config"
+        "taipy_rest.api.resources.datanode.DataNodeList.fetch_config"
     ) as config_mock:
-        config_mock.return_value = default_datasource_config
-        datasources_url = url_for("api.datasources", config_name="bar")
-        rep = client.post(datasources_url)
+        config_mock.return_value = default_datanode_config
+        datanodes_url = url_for("api.datanodes", config_name="bar")
+        rep = client.post(datanodes_url)
         assert rep.status_code == 201
 
 
-def test_get_all_datasources(client, default_datasource_config_list):
+def test_get_all_datanodes(client, default_datanode_config_list):
     for ds in range(10):
         with mock.patch(
-            "taipy_rest.api.resources.datasource.DataSourceList.fetch_config"
+            "taipy_rest.api.resources.datanode.DataNodeList.fetch_config"
         ) as config_mock:
-            config_mock.return_value = default_datasource_config_list[ds]
-            datasources_url = url_for("api.datasources", config_name=config_mock.name)
-            client.post(datasources_url)
+            config_mock.return_value = default_datanode_config_list[ds]
+            datanodes_url = url_for("api.datanodes", config_name=config_mock.name)
+            client.post(datanodes_url)
 
-    rep = client.get(datasources_url)
+    rep = client.get(datanodes_url)
     assert rep.status_code == 200
 
     results = rep.get_json()

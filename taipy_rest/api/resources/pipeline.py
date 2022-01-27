@@ -77,7 +77,7 @@ class PipelineResource(Resource):
             manager.delete(pipeline_id)
         except ModelNotFound:
             return make_response(
-                jsonify({"message": f"DataSource {pipeline_id} not found"}), 404
+                jsonify({"message": f"DataNode {pipeline_id} not found"}), 404
             )
 
         return {"msg": f"pipeline {pipeline_id} deleted"}

@@ -4,9 +4,9 @@ import uuid
 
 import pytest
 from dotenv import load_dotenv
-from taipy.common.alias import DataSourceId
-from taipy.config import Config, DataSourceConfig, PipelineConfig
-from taipy.data import InMemoryDataSource, Scope
+from taipy.common.alias import DataNodeId
+from taipy.config import Config, DataNodeConfig, PipelineConfig
+from taipy.data import InMemoryDataNode, Scope
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
 from taipy.task import Task
@@ -22,7 +22,7 @@ def app():
 
 
 @pytest.fixture
-def datasource_data():
+def datanode_data():
     return {
         "name": "foo",
         "storage_type": "in_memory",
@@ -60,11 +60,11 @@ def scenario_data():
 
 
 @pytest.fixture
-def default_datasource():
-    return InMemoryDataSource(
+def default_datanode():
+    return InMemoryDataNode(
         "input_ds",
         Scope.SCENARIO,
-        DataSourceId("id_uio"),
+        DataNodeId("id_uio"),
         "my name",
         "parent_id",
         properties={"default_data": "In memory Data Source"},
@@ -72,32 +72,36 @@ def default_datasource():
 
 
 @pytest.fixture
-def default_datasource_config():
-    return Config.add_data_source(uuid.uuid4().hex, "in_memory", Scope.PIPELINE)
+def default_datanode_config():
+    return Config.add_data_node(uuid.uuid4().hex, "in_memory", Scope.PIPELINE)
 
 
 @pytest.fixture
-def default_datasource_config_list():
+def default_datanode_config_list():
     configs = []
     for i in range(10):
-        configs.append(Config.add_data_source(f"ds-{i}", "in_memory", Scope.PIPELINE))
+        configs.append(
+            Config.add_data_node(
+                name=f"ds-{i}", storage_type="in_memory", scope=Scope.PIPELINE
+            )
+        )
     return configs
 
 
 def __default_task():
-    input_ds = InMemoryDataSource(
+    input_ds = InMemoryDataNode(
         "input_ds",
         Scope.SCENARIO,
-        DataSourceId("id_uio"),
+        DataNodeId("id_uio"),
         "my name",
         "parent_id",
         properties={"default_data": "In memory Data Source"},
     )
 
-    output_ds = InMemoryDataSource(
+    output_ds = InMemoryDataNode(
         "output_ds",
         Scope.SCENARIO,
-        DataSourceId("id_uio"),
+        DataNodeId("id_uio"),
         "my name",
         "parent_id",
         properties={"default_data": "In memory Data Source"},

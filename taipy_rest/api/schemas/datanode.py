@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, pre_dump
 
 
-class DataSourceSchema(Schema):
+class DataNodeSchema(Schema):
 
     config_name = fields.String()
     scope = fields.String()
@@ -17,7 +17,7 @@ class DataSourceSchema(Schema):
     properties = fields.Dict()
 
 
-class DataSourceConfigSchema(Schema):
+class DataNodeConfigSchema(Schema):
     name = fields.String()
     storage_type = fields.String()
     scope = fields.Integer()
@@ -28,21 +28,21 @@ class DataSourceConfigSchema(Schema):
         return obj
 
 
-class CSVDataSourceConfigSchema(DataSourceConfigSchema):
+class CSVDataNodeConfigSchema(DataNodeConfigSchema):
     path = fields.String()
     has_header = fields.Boolean()
 
 
-class InMemoryDataSourceConfigSchema(DataSourceConfigSchema):
+class InMemoryDataNodeConfigSchema(DataNodeConfigSchema):
     default_data = fields.Inferred()
 
 
-class PickleDataSourceConfigSchema(DataSourceConfigSchema):
+class PickleDataNodeConfigSchema(DataNodeConfigSchema):
     path = fields.String()
     default_data = fields.Inferred()
 
 
-class SQLDataSourceConfigSchema(DataSourceConfigSchema):
+class SQLDataNodeConfigSchema(DataNodeConfigSchema):
     db_username = fields.String()
     db_password = fields.String()
     db_name = fields.String()

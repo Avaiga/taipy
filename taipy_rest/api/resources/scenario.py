@@ -79,7 +79,7 @@ class ScenarioResource(Resource):
             manager.delete(scenario_id)
         except ModelNotFound:
             return make_response(
-                jsonify({"message": f"DataSource {scenario_id} not found"}), 404
+                jsonify({"message": f"DataNode {scenario_id} not found"}), 404
             )
 
         return {"msg": f"scenario {scenario_id} deleted"}

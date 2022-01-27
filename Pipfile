@@ -19,6 +19,7 @@ Flask-SQLAlchemy = "*"
 Flask-JWT-Extended = "*"
 uwsgi = "*"
 black = "*"
+taipy = {git = "https://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@github.com/avaiga/taipy.git"}
 
 [dev-packages]
 pytest = "*"
@@ -29,3 +30,6 @@ pytest-mock = "*"
 
 [requires]
 python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true

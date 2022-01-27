@@ -6,38 +6,38 @@ from taipy.config import Config
 
 from taipy.data.manager.data_manager import DataManager
 from taipy.data.scope import Scope
-from taipy.exceptions.data_source import NonExistingDataSource
+from taipy.exceptions.data_node import NonExistingDataNode
 
 from taipy_rest.api.schemas import (
-    CSVDataSourceConfigSchema,
-    DataSourceSchema,
-    InMemoryDataSourceConfigSchema,
-    PickleDataSourceConfigSchema,
-    SQLDataSourceConfigSchema,
-    DataSourceConfigSchema,
+    CSVDataNodeConfigSchema,
+    DataNodeSchema,
+    InMemoryDataNodeConfigSchema,
+    PickleDataNodeConfigSchema,
+    SQLDataNodeConfigSchema,
+    DataNodeConfigSchema,
 )
 from taipy_rest.config import TAIPY_SETUP_FILE
 
 ds_schema_map = {
-    "csv": CSVDataSourceConfigSchema,
-    "pickle": PickleDataSourceConfigSchema,
-    "in_memory": InMemoryDataSourceConfigSchema,
-    "sql": SQLDataSourceConfigSchema,
+    "csv": CSVDataNodeConfigSchema,
+    "pickle": PickleDataNodeConfigSchema,
+    "in_memory": InMemoryDataNodeConfigSchema,
+    "sql": SQLDataNodeConfigSchema,
 }
 
 
-class DataSourceResource(Resource):
+class DataNodeResource(Resource):
     """Single object resource
 
     ---
     get:
       tags:
         - api
-      summary: Get a datasource
-      description: Get a single datasource by ID
+      summary: Get a datanode
+      description: Get a single datanode by ID
       parameters:
         - in: path
-          name: datasource_id
+          name: datanode_id
           schema:
             type: string
       responses:
@@ -47,17 +47,17 @@ class DataSourceResource(Resource):
               schema:
                 type: object
                 properties:
-                  datasource: DataSourceSchema
+                  datanode: DataNodeSchema
         404:
-          description: datasource does not exist
+          description: datanode does not exist
     delete:
       tags:
         - api
-      summary: Delete a datasource
-      description: Delete a single datasource by ID
+      summary: Delete a datanode
+      description: Delete a single datanode by ID
       parameters:
         - in: path
-          name: datasource_id
+          name: datanode_id
           schema:
             type: integer
       responses:
@@ -69,42 +69,42 @@ class DataSourceResource(Resource):
                 properties:
                   msg:
                     type: string
-                    example: datasource deleted
+                    example: datanode deleted
         404:
-          description: datasource does not exist
+          description: datanode does not exist
     """
 
-    def get(self, datasource_id):
+    def get(self, datanode_id):
         try:
-            schema = DataSourceSchema()
+            schema = DataNodeSchema()
             manager = DataManager()
-            datasource = manager.get(datasource_id)
-            return {"datasource": schema.dump(datasource)}
-        except NonExistingDataSource:
+            datanode = manager.get(datanode_id)
+            return {"datanode": schema.dump(datanode)}
+        except NonExistingDataNode:
             return make_response(
-                jsonify({"message": f"DataSource {datasource_id} not found"}), 404
+                jsonify({"message": f"DataNode {datanode_id} not found"}), 404
             )
 
-    def delete(self, datasource_id):
+    def delete(self, datanode_id):
         try:
             manager = DataManager()
-            manager.delete(datasource_id)
-        except NonExistingDataSource:
+            manager.delete(datanode_id)
+        except NonExistingDataNode:
             return make_response(
-                jsonify({"message": f"DataSource {datasource_id} not found"}), 404
+                jsonify({"message": f"DataNode {datanode_id} not found"}), 404
             )
-        return {"msg": f"datasource {datasource_id} deleted"}
+        return {"msg": f"datanode {datanode_id} deleted"}
 
 
-class DataSourceList(Resource):
+class DataNodeList(Resource):
     """Creation and get_all
 
     ---
     get:
       tags:
         - api
-      summary: Get a list of datasources
-      description: Get a list of paginated datasources
+      summary: Get a list of datanodes
+      description: Get a list of paginated datanodes
       responses:
         200:
           content:
@@ -116,17 +116,17 @@ class DataSourceList(Resource):
                       results:
                         type: array
                         items:
-                          $ref: '#/components/schemas/DataSourceSchema'
+                          $ref: '#/components/schemas/DataNodeSchema'
     post:
       tags:
         - api
-      summary: Create a datasource
-      description: Create a new datasource
+      summary: Create a datanode
+      description: Create a new datanode
       requestBody:
         content:
           application/json:
             schema:
-              DataSourceConfigSchema
+              DataNodeConfigSchema
       responses:
         201:
           content:
@@ -136,8 +136,8 @@ class DataSourceList(Resource):
                 properties:
                   msg:
                     type: string
-                    example: datasource created
-                  datasource: DataSourceConfigSchema
+                    example: datanode created
+                  datanode: DataNodeConfigSchema
     """
 
     def __init__(self):
@@ -149,10 +149,10 @@ class DataSourceList(Resource):
         return getattr(self.module, config_name)
 
     def get(self):
-        schema = DataSourceSchema(many=True)
+        schema = DataNodeSchema(many=True)
         manager = DataManager()
-        datasources = manager.get_all()
-        return schema.dump(datasources)
+        datanodes = manager.get_all()
+        return schema.dump(datanodes)
 
     def post(self):
         args = request.args
@@ -168,8 +168,8 @@ class DataSourceList(Resource):
             manager.get_or_create(config)
 
             return {
-                "msg": "datasource created",
-                "datasource": schema.dump(config),
+                "msg": "datanode created",
+                "datanode": schema.dump(config),
             }, 201
         except AttributeError:
             return {"msg": f"Config name {config_name} not found"}, 404
