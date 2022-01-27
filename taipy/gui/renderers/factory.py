@@ -292,7 +292,9 @@ class Factory:
                 ("max", AttributeType.number, 100),
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
-                ("width", AttributeType.string_or_number, 200),
+                ("width", AttributeType.string, "300px"),
+                ("height"),
+                ("orientation"),
             ]
         )
         .get_adapter("lov")  # need to be called before set_lov

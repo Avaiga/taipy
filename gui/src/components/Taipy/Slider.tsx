@@ -11,12 +11,14 @@ import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { TaipyImage } from "./utils";
 
 interface SliderProps extends LovProps<number | string, number | string> {
-    width?: number | string;
+    width?: string;
+    height?: string;
     min?: number;
     max?: number;
     textAnchor?: string;
     alwaysUpdate?: boolean;
     labels?: string | boolean;
+    orientation?: string;
 }
 
 const Slider = (props: SliderProps) => {
@@ -29,7 +31,7 @@ const Slider = (props: SliderProps) => {
         lov,
         defaultLov = "",
         textAnchor = "bottom",
-        width = 300,
+        width = "300px",
     } = props;
     const [value, setValue] = useState(0);
     const { dispatch } = useContext(TaipyContext);
@@ -44,6 +46,7 @@ const Slider = (props: SliderProps) => {
 
     const min = lovList.length ? 0 : props.min;
     const max = lovList.length ? lovList.length - 1 : props.max;
+    const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
 
     const handleRange = useCallback(
         (e, val: number | number[]) => {
@@ -133,13 +136,14 @@ const Slider = (props: SliderProps) => {
     }, [props.labels, lovList, getLabel]);
 
     const textAnchorSx = useMemo(() => {
+        const sx = horizontalOrientation ? { width: width } : { height: props.height || width };
         if (lovList.length) {
             if (textAnchor === "top" || textAnchor === "bottom") {
-                return { width: width, display: "inline-grid", gap: "0.5em", textAlign: "center" } as SxProps;
+                return { ...sx, display: "inline-grid", gap: "0.5em", textAlign: "center" } as SxProps;
             }
             if (textAnchor === "left" || textAnchor === "right") {
                 return {
-                    width: width,
+                    ...sx,
                     display: "inline-grid",
                     gap: "1em",
                     gridTemplateColumns: textAnchor === "left" ? "auto 1fr" : "1fr auto",
@@ -147,8 +151,8 @@ const Slider = (props: SliderProps) => {
                 } as SxProps;
             }
         }
-        return { width: width, display: "inline-block" };
-    }, [lovList, textAnchor, width]);
+        return { ...sx, display: "inline-block" };
+    }, [lovList, horizontalOrientation, textAnchor, width, props.height]);
 
     useEffect(() => {
         if (props.value === undefined) {
@@ -200,6 +204,7 @@ const Slider = (props: SliderProps) => {
                 step={1}
                 marks={marks}
                 valueLabelFormat={getLabel}
+                orientation={horizontalOrientation ? undefined : "vertical"}
             />
             {getText(value, false)}
         </Box>
