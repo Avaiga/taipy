@@ -49,7 +49,7 @@ const Slider = (props: SliderProps) => {
         (e, val: number | number[]) => {
             setValue(val as number);
             if (update) {
-                const value = lovList.length > (val as number) ? lovList[val as number].id : val;
+                const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
                 dispatch(createSendUpdateAction(tp_varname, value, propagate));
             }
         },
@@ -60,7 +60,7 @@ const Slider = (props: SliderProps) => {
         (e, val: number | number[]) => {
             setValue(val as number);
             if (!update) {
-                const value = lovList.length > (val as number) ? lovList[val as number].id : val;
+                const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
                 dispatch(createSendUpdateAction(tp_varname, value, propagate));
             }
         },
@@ -69,7 +69,7 @@ const Slider = (props: SliderProps) => {
 
     const getLabel = useCallback(
         (value) =>
-            lovList.length > value ? (
+            lovList.length && lovList.length > value ? (
                 typeof lovList[value].item === "string" ? (
                     <Typography>{lovList[value].item}</Typography>
                 ) : (
