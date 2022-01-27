@@ -32,7 +32,7 @@ export interface TaipyImage {
     text: string;
 }
 
-export const getArrayValue = <T,>(arr: T[], idx: number, defVal?: T): T | undefined =>
+export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined =>
     (arr && idx < arr.length && arr[idx]) || defVal;
 
 export const getUpdateVar = (updateVars: string, name: string) => {
@@ -54,3 +54,16 @@ export const getUpdateVars = (updateVars?: string) =>
 export const doNotPropagateEvent = (event: MouseEvent) => event.stopPropagation();
 
 export const noDisplayStyle = { display: "none" };
+
+const RE_ONLY_NUMBERS = /^\d+(\.\d*)?$/;
+export const getCssSize = (val: string | number) => {
+    if (typeof val === "number") {
+        return "" + val + "px";
+    } else {
+        val = val.trim();
+        if (RE_ONLY_NUMBERS.test(val)) {
+            return val + "px";
+        }
+    }
+    return val;
+};

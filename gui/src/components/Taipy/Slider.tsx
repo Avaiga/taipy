@@ -8,7 +8,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
-import { TaipyImage } from "./utils";
+import { getCssSize, TaipyImage } from "./utils";
 
 interface SliderProps extends LovProps<number | string, number | string> {
     width?: string;
@@ -136,7 +136,7 @@ const Slider = (props: SliderProps) => {
     }, [props.labels, lovList, getLabel]);
 
     const textAnchorSx = useMemo(() => {
-        const sx = horizontalOrientation ? { width: width } : { height: props.height || width };
+        const sx = horizontalOrientation ? { width: getCssSize(width) } : { height: getCssSize(props.height || width) };
         if (lovList.length) {
             if (textAnchor === "top" || textAnchor === "bottom") {
                 return { ...sx, display: "inline-grid", gap: "0.5em", textAlign: "center" } as SxProps;
