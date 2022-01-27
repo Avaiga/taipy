@@ -49,27 +49,35 @@ class FilterDataNode:
     def __getitem_dataframe(self, key: pd.DataFrame):
         if self.data_is_dataframe():
             return self.data[key]
-
         if self.data_is_list_of_dict():
-            return self._reduce_on_key(
-                key,
-                collections.defaultdict(list),
-                (lambda row, col, acc: acc[col].append(row[col])),
-                (lambda row, col, acc: acc[col].append(None)),
-            )
-        return self._reduce_on_key(key, [], (lambda row, col, acc: acc.append(row)))
+            filtered_data = list()
+            for i, row in key.iterrows():
+                filtered_row = dict()
+                for col in row.index:
+                    filtered_row[col] = self.data[i][col] if row[col] else None
+                    filtered_data.append(filtered_row)
+            return filtered_data
+
+        # if self.data_is_list_of_dict():
+        #     return self._reduce_on_key(
+        #         key,
+        #         collections.defaultdict(list),
+        #         (lambda row, col, acc: acc[col].append(row[col])),
+        #         (lambda row, col, acc: acc[col].append(None)),
+        #     )
+        # return self._reduce_on_key(key, [], (lambda row, col, acc: acc.append(row)))
 
     def data_is_list_of_dict(self) -> bool:
         return all(isinstance(x, Dict) for x in self.data)
 
-    def _reduce_on_key(self, key, acc, on_true, on_false=None):
-        for col in key.columns:
-            for i, row in enumerate(key[col]):
-                if row:
-                    on_true(self.data[i], col, acc)
-                elif on_false:
-                    on_false(self.data[i], col, acc)
-        return acc
+    # def _reduce_on_key(self, key, acc, on_true, on_false=None):
+    #     for col in key.columns:
+    #         for i, row in enumerate(key[col]):
+    #             if row:
+    #                 on_true(self.data[i], col, acc)
+    #             elif on_false:
+    #                 on_false(self.data[i], col, acc)
+    #     return acc
 
     def __getitem_bool_indexer(self, key):
         if self.data_is_dataframe():
