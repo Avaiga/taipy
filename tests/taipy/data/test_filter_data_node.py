@@ -101,6 +101,14 @@ class TestFilterDataNode:
         assert isinstance(filtered_custom_ds.data, List)
         assert all([isinstance(x, Dict) for x in filtered_custom_ds.data])
 
+        filtered_custom_ds = custom_ds["a"][bool_df]
+        assert isinstance(filtered_custom_ds, FilterDataNode)
+        assert filtered_custom_ds.data is None
+
+        filtered_custom_ds = custom_ds[0:10][bool_df]
+        assert isinstance(filtered_custom_ds, FilterDataNode)
+        assert filtered_custom_ds.data is None
+
         # from copy import deepcopy
 
         # expected_filtered_custom_ds = deepcopy(custom_ds._read())

@@ -57,6 +57,7 @@ class FilterDataNode:
                     filtered_row[col] = self.data[i][col] if row[col] else None
                     filtered_data.append(filtered_row)
             return filtered_data
+        return None
 
         # if self.data_is_list_of_dict():
         #     return self._reduce_on_key(
