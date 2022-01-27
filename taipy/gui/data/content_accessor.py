@@ -50,7 +50,7 @@ class ContentAccessor:
                 warnings.warn(f"({path}) cannot read mime type.\n{e}")
         return None
 
-    def get_info(self, var_name: str, value: t.Any) -> t.Union[str, t.Tuple[str], t.Any]:
+    def get_info(self, var_name: str, value: t.Any) -> t.Union[str, t.Tuple[str], t.Any]:  # noqa: C901
         if value is None:
             return value
         image = self.__vars.get(var_name)
