@@ -26,7 +26,11 @@ class FilterDataNode:
         return isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series)
 
     def is_multi_sheet_excel(self) -> bool:
-        return isinstance(self.data, Dict) and all([isinstance(e, pd.DataFrame) for e in self.data.values()])
+        if isinstance(self.data, Dict):
+            has_df_children = all([isinstance(e, pd.DataFrame) for e in self.data.values()])
+            has_list_children = all([isinstance(e, List) for e in self.data.values()])
+            return has_df_children or has_list_children
+        return False
 
     def data_is_dataframe(self) -> bool:
         return self.data_type == self.__DATAFRAME_DATA_TYPE

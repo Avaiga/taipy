@@ -34,12 +34,24 @@ class FakeCustomDataNode(DataNode):
         return self.data
 
 
-class FakeMultiSheetExcelDataNode(DataNode):
+class FakeMultiSheetExcelDataFrameDataNode(DataNode):
     def __init__(self, config_name, default_data_frame, **kwargs):
         super().__init__(config_name, **kwargs)
         self.data = {
             "Sheet1": default_data_frame,
             "Sheet2": default_data_frame,
+        }
+
+    def _read(self):
+        return self.data
+
+
+class FakeMultiSheetExcelCustomDataNode(DataNode):
+    def __init__(self, config_name, **kwargs):
+        super().__init__(config_name, **kwargs)
+        self.data = {
+            "Sheet1": [CustomClass(i, i * 2) for i in range(10)],
+            "Sheet2": [CustomClass(i, i * 2) for i in range(10)],
         }
 
     def _read(self):
@@ -125,12 +137,27 @@ class TestFilterDataNode:
         assert filtered_custom_ds.data == [{"a": i, "b": i * 2} for i in range(10)]
 
         # get item for Multi-sheet Excel data_type
-        multi_sheet_excel_ds = FakeMultiSheetExcelDataNode("fake multi-sheet excel ds", default_data_frame)
-        filtered_multi_sheet_excel_ds = multi_sheet_excel_ds["Sheet1"]
-        assert isinstance(filtered_multi_sheet_excel_ds, FilterDataNode)
-        assert isinstance(filtered_multi_sheet_excel_ds.data, pd.DataFrame)
-        assert len(filtered_multi_sheet_excel_ds.data) == len(default_data_frame)
-        assert np.array_equal(filtered_multi_sheet_excel_ds.data.to_numpy(), default_data_frame.to_numpy())
+        multi_sheet_excel_df_ds = FakeMultiSheetExcelDataFrameDataNode(
+            "fake multi-sheet excel df ds", default_data_frame
+        )
+        filtered_multi_sheet_excel_df_ds = multi_sheet_excel_df_ds["Sheet1"]
+        assert isinstance(filtered_multi_sheet_excel_df_ds, FilterDataNode)
+        assert isinstance(filtered_multi_sheet_excel_df_ds.data, pd.DataFrame)
+        assert len(filtered_multi_sheet_excel_df_ds.data) == len(default_data_frame)
+        assert np.array_equal(filtered_multi_sheet_excel_df_ds.data.to_numpy(), default_data_frame.to_numpy())
+
+        multi_sheet_excel_custom_ds = FakeMultiSheetExcelCustomDataNode("fake multi-sheet excel custom ds")
+        filtered_multi_sheet_excel_custom_ds = multi_sheet_excel_custom_ds["Sheet1"]
+        assert isinstance(filtered_multi_sheet_excel_custom_ds, FilterDataNode)
+        assert isinstance(filtered_multi_sheet_excel_custom_ds.data, List)
+        assert len(filtered_multi_sheet_excel_custom_ds.data) == 10
+        expected_value = [CustomClass(i, i * 2) for i in range(10)]
+        assert all(
+            [
+                expected.a == filtered.a and expected.b == filtered.b
+                for expected, filtered in zip(expected_value, filtered_multi_sheet_excel_custom_ds.data)
+            ]
+        )
 
     def test_equal(self, default_data_frame):
         # equal to for pandas dataframe data_type
