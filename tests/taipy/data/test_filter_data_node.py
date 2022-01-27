@@ -133,6 +133,7 @@ class TestFilterDataNode:
         assert np.array_equal(filtered_multi_sheet_excel_ds.data.to_numpy(), default_data_frame.to_numpy())
 
     def test_equal(self, default_data_frame):
+        # equal to for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] == 1
@@ -147,15 +148,23 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] == 1))
 
+        # equal to for custom list data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] == 0
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
-        assert filtered_custom_ds.data == [True] + [False for i in range(9)]
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
+        assert filtered_custom_ds.data == [True] + [False for _ in range(9)]
+
+        filtered_custom_ds = custom_ds[["a", "b"]] == 0
+        assert isinstance(filtered_custom_ds, FilterDataNode)
+        assert isinstance(filtered_custom_ds.data, List)
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
+        assert filtered_custom_ds.data == [False for _ in range(10)]
 
     def test_not_equal(self, default_data_frame):
+        # not equal to for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] != 1
@@ -170,15 +179,23 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] != 1))
 
+        # not equal to for custom list data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] != 0
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [False] + [True for _ in range(9)]
 
+        filtered_custom_ds = custom_ds[["a", "b"]] != 0
+        assert isinstance(filtered_custom_ds, FilterDataNode)
+        assert isinstance(filtered_custom_ds.data, List)
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
+        assert filtered_custom_ds.data == [True for _ in range(10)]
+
     def test_larger_than(self, default_data_frame):
+        # larger than for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] > 2
@@ -193,15 +210,17 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] > 2))
 
+        # larger than for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] > 5
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [False for _ in range(6)] + [True for _ in range(4)]
 
     def test_larger_equal_to(self, default_data_frame):
+        # larger than or equal to for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] >= 4
@@ -216,15 +235,17 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] >= 4))
 
+        # larger than or equal to for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] >= 5
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [False for _ in range(5)] + [True for _ in range(5)]
 
     def test_lesser_than(self, default_data_frame):
+        # lesser than for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] < 5
@@ -239,15 +260,17 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] < 5))
 
+        # lesser than for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] < 5
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [True for _ in range(5)] + [False for _ in range(5)]
 
     def test_lesser_equal_to(self, default_data_frame):
+        # lesser than or equal to for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = df_ds["a"] <= 5
@@ -262,15 +285,17 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] <= 5))
 
+        # lesser than or equal to for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = custom_ds["a"] <= 5
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [True for _ in range(6)] + [False for _ in range(4)]
 
     def test_and(self, default_data_frame):
+        # and comparator for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = (df_ds["a"] >= 2) & (df_ds["a"] <= 5)
@@ -285,17 +310,19 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] >= 2) & (default_data_frame[["a", "b"]] <= 5))
 
+        # and comparator for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = (custom_ds["a"] >= 2) & (custom_ds["a"] <= 5)
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [False for _ in range(2)] + [True for _ in range(4)] + [
             False for _ in range(4)
         ]
 
     def test_or(self, default_data_frame):
+        # or comparator for pandas dataframe data_type
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)
 
         filtered_df_ds = (df_ds["a"] < 2) | (df_ds["a"] > 5)
@@ -310,12 +337,13 @@ class TestFilterDataNode:
         assert all(filtered_df_ds.data.dtypes == bool)
         assert all(filtered_df_ds.data == (default_data_frame[["a", "b"]] < 2) | (default_data_frame[["a", "b"]] > 5))
 
+        # or comparator for custom data_type
         custom_ds = FakeCustomDataNode("fake custom ds")
 
         filtered_custom_ds = (custom_ds["a"] < 2) | (custom_ds["a"] > 5)
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all(map(lambda x: isinstance(x, bool), filtered_custom_ds.data))
+        assert all([isinstance(x, bool) for x in filtered_custom_ds.data])
         assert filtered_custom_ds.data == [True for _ in range(2)] + [False for _ in range(4)] + [
             True for _ in range(4)
         ]
