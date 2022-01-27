@@ -274,7 +274,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             return { ...state, id: id };
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
-            if (action.payload.fromBackend) {
+            if (!action.payload.fromBackend) {
                 mode = getLocalStorageValue("theme", mode, ["light", "dark"]);
             }
             localStorage && localStorage.setItem("theme", mode);
