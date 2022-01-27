@@ -15,7 +15,7 @@ COPY Pipfile setup.py tox.ini ./
 RUN pip install -U pip
 RUN pip install pipenv
 RUN pipenv install
-RUN pip install git+https://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@github.com/avaiga/taipy.git@v0.10.0#egg=taipy --pre
+RUN pip install git+https://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@github.com/avaiga/taipy.git@v0.11.0#egg=taipy --pre
 RUN pip install requests
 RUN pip install -e .
 
