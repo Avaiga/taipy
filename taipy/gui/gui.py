@@ -23,10 +23,10 @@ if util.find_spec("pyngrok"):
 
 from ._default_config import app_config_default, style_config_default
 from .config import AppConfigOption, GuiConfig
+from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .data.data_scope import _DataScopes
-from .data.content_accessor import ContentAccessor
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -258,7 +258,10 @@ class Gui(object, metaclass=Singleton):
                 modified_vars.extend(self._re_evaluate_expr(var_name))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.on_change:
-            self.on_change(self, var_name, value)
+            try:
+                self.on_change(self, var_name, value)
+            except Exception as e:
+                warnings.warn(f"on_change function invocation exception: {e}")
         self.__send_var_list_update(modified_vars, from_front, var_name)
 
     def _get_content(self, var_name: str, value: t.Any, is_dynamic: bool, image: bool) -> t.Any:
@@ -520,7 +523,7 @@ class Gui(object, metaclass=Singleton):
                     return False
                 return True
             except Exception as e:
-                warnings.warn(f"on action '{action_function.__name__}' exception: {e}")
+                warnings.warn(f"on_action '{action_function.__name__}' function invocation exception: {e}")
         return False
 
     # Proxy methods for Evaluator
@@ -914,6 +917,7 @@ class Gui(object, metaclass=Singleton):
                 port=app_config["port"],
                 debug=app_config["debug"],
                 use_reloader=app_config["use_reloader"],
+                flask_log=app_config["flask_log"],
             )
 
     def stop(self):
