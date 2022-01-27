@@ -1,10 +1,10 @@
-from taipy_rest.api.schemas.datasource import (
-    CSVDataSourceConfigSchema,
-    DataSourceSchema,
-    InMemoryDataSourceConfigSchema,
-    PickleDataSourceConfigSchema,
-    SQLDataSourceConfigSchema,
-    DataSourceConfigSchema,
+from taipy_rest.api.schemas.datanode import (
+    CSVDataNodeConfigSchema,
+    DataNodeSchema,
+    InMemoryDataNodeConfigSchema,
+    PickleDataNodeConfigSchema,
+    SQLDataNodeConfigSchema,
+    DataNodeConfigSchema,
 )
 
 from taipy_rest.api.schemas.task import TaskSchema
@@ -13,7 +13,7 @@ from taipy_rest.api.schemas.scenario import ScenarioSchema, ScenarioResponseSche
 
 
 __all__ = [
-    "DataSourceSchema",
+    "DataNodeSchema",
     "TaskSchema",
     "PipelineSchema",
     "PipelineResponseSchema",

@@ -1,7 +1,19 @@
+import importlib
+
 from flask import Flask
 
 from taipy_rest import api
 from taipy_rest.extensions import apispec, db, migrate
+from taipy.gui import Gui, Markdown
+from taipy_rest.config import TAIPY_SETUP_FILE
+import os
+
+
+# def _routes(app):
+#     routes = []
+#     for route in app.url_map.iter_rules():
+#         routes.append('%s' % route)
+#     return routes
 
 
 def create_app(testing=False):
@@ -15,7 +27,13 @@ def create_app(testing=False):
     configure_extensions(app)
     configure_apispec(app)
     register_blueprints(app)
+    # spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
+    # module = importlib.util.module_from_spec(spec)
+    # spec.loader.exec_module(module)
 
+    abs_folder, _ = TAIPY_SETUP_FILE.rsplit("/", 1)
+    gui = Gui(flask=app, pages={"demo": Markdown(os.path.join(abs_folder, "demo.md"))})
+    gui.run(run_server=False)
     return app
 
 

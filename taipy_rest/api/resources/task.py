@@ -11,7 +11,7 @@ from taipy.exceptions.repository import ModelNotFound
 from taipy_rest.api.schemas import TaskSchema
 from taipy.task.task import Task
 from taipy.common.utils import load_fct
-from taipy.task.scheduler import TaskScheduler
+from taipy.scheduler.scheduler import Scheduler
 
 from taipy_rest.config import TAIPY_SETUP_FILE
 
@@ -79,7 +79,7 @@ class TaskResource(Resource):
             manager.delete(task_id)
         except ModelNotFound:
             return make_response(
-                jsonify({"message": f"DataSource {task_id} not found"}), 404
+                jsonify({"message": f"DataNode {task_id} not found"}), 404
             )
 
         return {"msg": f"task {task_id} deleted"}
@@ -210,7 +210,7 @@ class TaskExecutor(Resource):
         try:
             manager = TaskManager()
             task = manager.get(task_id)
-            TaskScheduler().submit(task)
+            Scheduler().submit_task(task)
             return {"message": f"Executed task {task_id}"}
         except NonExistingTask:
             return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)

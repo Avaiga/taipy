@@ -3,8 +3,8 @@ from flask_restful import Api
 from marshmallow import ValidationError
 
 from taipy_rest.api.resources import (
-    DataSourceList,
-    DataSourceResource,
+    DataNodeList,
+    DataNodeResource,
     TaskList,
     TaskResource,
     TaskExecutor,
@@ -16,7 +16,7 @@ from taipy_rest.api.resources import (
     ScenarioExecutor,
 )
 from taipy_rest.api.schemas import (
-    DataSourceSchema,
+    DataNodeSchema,
     TaskSchema,
     PipelineSchema,
     ScenarioSchema,
@@ -28,11 +28,11 @@ blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 api = Api(blueprint)
 
 api.add_resource(
-    DataSourceResource,
-    "/datasources/<string:datasource_id>",
-    endpoint="datasource_by_id",
+    DataNodeResource,
+    "/datanodes/<string:datanode_id>",
+    endpoint="datanode_by_id",
 )
-api.add_resource(DataSourceList, "/datasources", endpoint="datasources")
+api.add_resource(DataNodeList, "/datanodes", endpoint="datanodes")
 
 api.add_resource(
     TaskResource,
@@ -69,9 +69,9 @@ api.add_resource(
 
 @blueprint.before_app_first_request
 def register_views():
-    apispec.spec.components.schema("DataSourceSchema", schema=DataSourceSchema)
-    apispec.spec.path(view=DataSourceResource, app=current_app)
-    apispec.spec.path(view=DataSourceList, app=current_app)
+    apispec.spec.components.schema("DataNodeSchema", schema=DataNodeSchema)
+    apispec.spec.path(view=DataNodeResource, app=current_app)
+    apispec.spec.path(view=DataNodeList, app=current_app)
 
     apispec.spec.components.schema("TaskSchema", schema=TaskSchema)
     apispec.spec.path(view=TaskResource, app=current_app)

@@ -14,5 +14,5 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 TAIPY_SETUP_FILE = os.getenv(
     "TAIPY_SETUP_FILE",
-    os.path.join(pathlib.Path(__file__).parent.absolute(), "setup/taipy_setup.py"),
+    os.path.join(pathlib.Path(__file__).parent.absolute(), "setup/demo.py"),
 )
