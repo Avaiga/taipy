@@ -1,5 +1,4 @@
 import collections
-from copy import deepcopy
 from typing import Dict, Iterable, List, Union
 
 import pandas as pd
@@ -66,19 +65,18 @@ class FilterDataNode:
     def __getitem_dataframe(self, key: pd.DataFrame):
         if self.data_is_dataframe():
             return self.data[key]
-
-        filtered_data = deepcopy(self.data)
-        has_dict_element = all(isinstance(x, Dict) for x in filtered_data)
-        if has_dict_element:
-            for col in key.columns:
-                for i, row in enumerate(key[col]):
-                    filtered_data[i][col] = filtered_data[i][col] if row else None
+        if self.data_is_list_of_dict():
+            filtered_data = list()
+            for i, row in key.iterrows():
+                filtered_row = dict()
+                for col in row.index:
+                    filtered_row[col] = self.data[i][col] if row[col] else None
+                filtered_data.append(filtered_row)
             return filtered_data
+        return None
 
-        for col in key.columns:
-            for i, row in enumerate(key[col]):
-                setattr(filtered_data[i], col, getattr(filtered_data[i], col) if row else None)
-        return filtered_data
+    def data_is_list_of_dict(self) -> bool:
+        return all(isinstance(x, Dict) for x in self.data)
 
     def __getitem_bool_indexer(self, key):
         if self.data_is_dataframe():

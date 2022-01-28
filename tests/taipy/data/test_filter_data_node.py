@@ -117,10 +117,25 @@ class TestFilterDataNode:
         assert len(filtered_custom_ds.data) == 5
 
         bool_df = pd.DataFrame({"a": [i for i in range(10)], "b": [i * 2 for i in range(10)]}) > 4
-        filtered_custom_ds = custom_ds[bool_df]
+        filtered_custom_ds = custom_ds[["a", "b"]][bool_df]
         assert isinstance(filtered_custom_ds, FilterDataNode)
         assert isinstance(filtered_custom_ds.data, List)
-        assert all([isinstance(x, CustomClass) for x in filtered_custom_ds.data])
+        assert all([isinstance(x, Dict) for x in filtered_custom_ds.data])
+        for i, row in bool_df.iterrows():
+            for col in row.index:
+                print(i, col, row[col])
+                if row[col]:
+                    assert filtered_custom_ds.data[i][col] == custom_ds[["a", "b"]].data[i][col]
+                else:
+                    assert filtered_custom_ds.data[i][col] is None
+
+        filtered_custom_ds = custom_ds["a"][bool_df]
+        assert isinstance(filtered_custom_ds, FilterDataNode)
+        assert filtered_custom_ds.data is None
+
+        filtered_custom_ds = custom_ds[0:10][bool_df]
+        assert isinstance(filtered_custom_ds, FilterDataNode)
+        assert filtered_custom_ds.data is None
 
         bool_1d_index = [True if i < 5 else False for i in range(10)]
         filtered_custom_ds = custom_ds[bool_1d_index]
