@@ -159,10 +159,8 @@ const Selector = (props: SelTreeProps) => {
         const {
             target: { value },
         } = event;
-        // On autofill we get a stringified value.
-        const keys = typeof value === "string" ? value.split(",") : value;
-        setSelectedValue(keys);
-        dispatch(createSendUpdateAction(tp_varname, keys, propagate));
+        setSelectedValue(Array.isArray(value) ? value : [value]);
+        dispatch(createSendUpdateAction(tp_varname, value, propagate));
     };
 
     const handleDelete = useCallback(
