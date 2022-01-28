@@ -1,5 +1,5 @@
-from pathlib import Path
 import typing as t
+from pathlib import Path
 
 
 def _get_non_existent_file_path(dir_path: Path, file_name: str) -> Path:

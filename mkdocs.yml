@@ -11,7 +11,10 @@ nav:
     - 'Creating a Taipy application': 'getting_started/creating_a_taipy_application.md'
   - 'User Manual':
     - "About Taipy's User Manual": 'manuals/about.md'
-    - 'Scenario management': 'manuals/scenario_management.md'
+    - Taipy core:
+        - 'Core concepts': 'manuals/core/user_core_concepts.md'
+        - 'Core features': 'manuals/core/user_core_features.md'
+        - 'Core configuration': 'manuals/core/user_core_configuration.md'
     - Graphical User Interface:
         - 'About': 'manuals/gui/user.md'
         - 'Pages': 'manuals/gui/user_pages.md'

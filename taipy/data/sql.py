@@ -32,7 +32,7 @@ class SQLDataNode(DataNode):
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
-        properties (list): List of additional arguments. Note that the properties parameter should at least contain
+        properties (list): List of additional arguments. Note that properties should at least contain
             values for "db_username", "db_password", "db_name", "db_engine" and "query" properties.
     """
 

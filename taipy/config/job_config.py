@@ -8,8 +8,6 @@ class JobConfig:
     Parameters:
         mode (str): Field representing the Taipy operating mode. Possible values are "standalone", "airflow". Default
             value: "standalone".
-        parallel_execution (bool): Boolean to activate/deactivate the possibility to run multiple tasks in parallel.
-            Default value is false.
         nb_of_workers (int): Maximum number of running workers to execute jobs. Must be a positive integer.
             Default value : 1
         hostname (str): Hostname. Default value is "localhost".

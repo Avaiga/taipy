@@ -2,7 +2,9 @@ from taipy.common.repr_enum import ReprEnum
 
 
 class Status(ReprEnum):
-    """Represents the status of a Job."""
+    """Enumeration representing the execution status of a Job. The possible values are SUBMITTED, BLOCKED, PENDING,
+    RUNNING, CANCELLED, FAILED, COMPLETED
+    """
 
     SUBMITTED = 1
     BLOCKED = 2
