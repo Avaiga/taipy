@@ -120,7 +120,7 @@ const Selector = (props: SelTreeProps) => {
 
     useEffect(() => {
         if (value !== undefined) {
-            setSelectedValue(Array.isArray(value) ? value : [value]);
+            setSelectedValue(Array.isArray(value) ? value.map((v) => "" + v) : ["" + value]);
         } else if (defaultValue) {
             let parsedValue;
             try {

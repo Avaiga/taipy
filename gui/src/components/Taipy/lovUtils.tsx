@@ -29,13 +29,15 @@ type LoVElt = [string, string | TaipyImage, LoVElt[]?];
 
 export type LoV = LoVElt[];
 
-const getLovItem = (elt: LoVElt, tree = false): LovItem => {
-    const it: LovItem = {
-        id: elt[0],
-        item: elt[1] || elt[0],
-    };
+const getLovItem = (elt: LoVElt | string, tree = false): LovItem => {
+    const it: LovItem = Array.isArray(elt)
+        ? {
+              id: elt[0],
+              item: elt[1] || elt[0],
+          }
+        : { id: "" + elt, item: "" + elt };
     if (tree) {
-        it.children = elt.length > 2 ? elt[2]?.map((e) => getLovItem(e, true)) : [];
+        it.children = Array.isArray(elt) && elt.length > 2 ? elt[2]?.map((e) => getLovItem(e, true)) : [];
     }
     return it;
 };
@@ -47,7 +49,7 @@ export const treeSelBaseSx = { width: "100%", bgcolor: "background.paper", overf
 export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = false): LovItem[] =>
     useMemo(() => {
         if (lov) {
-            if (lov.length && lov[0][0] === undefined) {
+            if (!Array.isArray(lov)) {
                 console.debug("lov wrong format ", lov);
                 return [];
             }
