@@ -28,9 +28,9 @@ class PageRenderer(ABC):
         If `content` is a path to a readable file, the file is read entirely as the text template.
         """
         self._content: t.Union[None, str] = None
-        self.__proceses_content(content)
+        self.__process_content(content)
 
-    def __proceses_content(self, content: str) -> None:
+    def __process_content(self, content: str) -> None:
         if path.exists(content) and path.isfile(content):
             with open(t.cast(str, content), "r") as f:
                 self._content = f.read()
@@ -38,7 +38,7 @@ class PageRenderer(ABC):
             self._content = content
 
     def set_content(self, content: str) -> None:
-        self.__proceses_content(content)
+        self.__process_content(content)
 
     @abstractmethod
     def render(self) -> str:
