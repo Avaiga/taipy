@@ -687,7 +687,7 @@ class Gui(object, metaclass=Singleton):
         new_partial.renderer = renderer
         # Append partial to _config
         self._config.partials.append(new_partial)
-        self._config.partial_routes.append(new_partial.route)
+        self._config.partial_routes.append(str(new_partial.route))
         return new_partial
 
     # Main binding method (bind in markdown declaration)
