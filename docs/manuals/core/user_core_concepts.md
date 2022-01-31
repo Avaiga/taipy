@@ -140,10 +140,13 @@ _pipeline_ for computing a training model, and a _pipeline_ dedicated to scoring
 
 !!! example "In the example"
 
-    We want to have two pipelines. A first sales pipeline (boxed in the green on the picture) is
-    made of training and predict tasks. A second production pipeline (in the dark grey rectangle on the picture) made
-    of the planning task. Indeed, the two pipelines could represent two different workflows that can be run
+    We want to have two pipelines.
+
+    A first sales pipeline (boxed in the green on the picture) is made of training and predict tasks.
+    A second production pipeline (in the dark grey rectangle on the picture) made of the planning task.
+    Indeed, the two pipelines could represent two different workflows that can be run
     independently, on different schedule or by different users.
+
     ![pipelines](pipelines.svg){ align=left }
 
 Note that the various pipelines do not require to be disjointed.
@@ -198,5 +201,7 @@ called _master scenario_. There is only one _master scenario_ per cycle.
     scenarios for the February cycle (one with the low capacity assumption and one with the high capacity assumption).
     As a user of the application, I can decide to apply the low capacity scenario in production for February.
     For that, I promote my low capacity scenario as master for the February cycle.
+
+    ![cycles](cycles.svg){ width="500" }
 
 # Scope
