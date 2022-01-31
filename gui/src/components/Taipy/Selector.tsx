@@ -1,4 +1,4 @@
-import React, { useState, useContext, useCallback, useEffect, useMemo, CSSProperties } from "react";
+import React, { useState, useContext, useCallback, useEffect, useMemo, CSSProperties, MouseEvent } from "react";
 import { Theme, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
@@ -19,35 +19,11 @@ import Chip from "@mui/material/Chip";
 import { doNotPropagateEvent, TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { boxSx, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
+import { boxSx, ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 
-interface ItemProps {
-    value: string;
-    createClickHandler: (key: string) => () => void;
-    selectedValue: string[];
-    item: string | TaipyImage;
-    disabled: boolean;
-}
-
-const SingleItem = ({ value, createClickHandler, selectedValue, item, disabled }: ItemProps) => (
-    <ListItemButton
-        onClick={createClickHandler(value)}
-        selected={selectedValue.indexOf(value) !== -1}
-        disabled={disabled}
-    >
-        {typeof item === "string" ? (
-            <ListItemText primary={item} />
-        ) : (
-            <ListItemAvatar>
-                <LovImage item={item} />
-            </ListItemAvatar>
-        )}
-    </ListItemButton>
-);
-
-const MultipleItem = ({ value, createClickHandler, selectedValue, item, disabled }: ItemProps) => (
-    <ListItemButton onClick={createClickHandler(value)} dense disabled={disabled}>
+const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
+    <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>
         <ListItemIcon>
             <Checkbox
                 disabled={disabled}
@@ -133,8 +109,9 @@ const Selector = (props: SelTreeProps) => {
     }, [defaultValue, value]);
 
     const clickHandler = useCallback(
-        (key: string) => {
-            active &&
+        (evt: MouseEvent<HTMLElement>) => {
+            if (active) {
+                const {id: key = ""} = evt.currentTarget.dataset;
                 setSelectedValue((keys) => {
                     if (multiple) {
                         const newKeys = [...keys];
@@ -151,6 +128,7 @@ const Selector = (props: SelTreeProps) => {
                         return [key];
                     }
                 });
+            }
         },
         [tp_varname, dispatch, multiple, propagate, active]
     );
@@ -175,8 +153,6 @@ const Selector = (props: SelTreeProps) => {
         },
         [tp_varname, propagate, dispatch]
     );
-
-    const createClickHandler = useCallback((key: string) => () => clickHandler(key), [clickHandler]);
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
@@ -262,7 +238,7 @@ const Selector = (props: SelTreeProps) => {
                                         value={elt.id}
                                         item={elt.item}
                                         selectedValue={selectedValue}
-                                        createClickHandler={createClickHandler}
+                                        clickHandler={clickHandler}
                                         disabled={!active}
                                     />
                                 ) : (
@@ -271,7 +247,7 @@ const Selector = (props: SelTreeProps) => {
                                         value={elt.id}
                                         item={elt.item}
                                         selectedValue={selectedValue}
-                                        createClickHandler={createClickHandler}
+                                        clickHandler={clickHandler}
                                         disabled={!active}
                                     />
                                 )

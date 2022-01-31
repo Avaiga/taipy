@@ -23,6 +23,7 @@ enum Types {
     Navigate = "NAVIGATE",
     ClientId = "CLIENT_ID",
     MultipleMessages = "MULTIPLE_MESSAGES",
+    MenuMargin = "MENU_MARGIN",
 }
 export interface TaipyState {
     socket?: Socket;
@@ -37,6 +38,7 @@ export interface TaipyState {
     block?: BlockMessage;
     to?: string;
     id: string;
+    marginLeft: number;
 }
 
 export interface TaipyBaseAction {
@@ -92,6 +94,10 @@ interface IdMessage {
 
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
+interface TaipyMarginAction extends TaipyBaseAction {
+    marginLeft: number;
+}
+
 export interface FormatConfig {
     timeZone: string;
     dateTime: string;
@@ -133,6 +139,7 @@ export const INITIAL_STATE: TaipyState = {
     locations: {},
     timeZone: TIMEZONE_CLIENT,
     id: getLocalStorageValue("TaipyClientId", ""),
+    marginLeft: 0,
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -303,6 +310,10 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             return state;
         }
+        case Types.MenuMargin: {
+            const mAction = baseAction as TaipyMarginAction;
+            return state.marginLeft !== mAction.marginLeft ? { ...state, marginLeft: mAction.marginLeft } : state;
+        }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -337,10 +348,14 @@ export const createSendUpdateAction = (name: string | undefined, value: unknown,
     payload: { value: value },
 });
 
-export const createSendActionNameAction = (name: string | undefined, value: unknown): TaipyAction => ({
+export const createSendActionNameAction = (
+    name: string | undefined,
+    value: unknown,
+    ...args: unknown[]
+): TaipyAction => ({
     type: Types.Action,
     name: name || "",
-    payload: { value: value },
+    payload: { value: value, args: args },
 });
 
 export const createRequestChartUpdateAction = (
@@ -370,7 +385,7 @@ export const createRequestTableUpdateAction = (
     sort?: string,
     aggregates?: string[],
     applies?: Record<string, unknown>,
-    styles?: Record<string, unknown>,
+    styles?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -399,7 +414,7 @@ export const createRequestInfiniteTableUpdateAction = (
     sort?: string,
     aggregates?: string[],
     applies?: Record<string, unknown>,
-    styles?: Record<string, unknown>,
+    styles?: Record<string, unknown>
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -484,6 +499,11 @@ export const createNavigateAction = (to?: string): TaipyNavigateAction => ({
 export const createIdAction = (id: string): TaipyIdAction => ({
     type: Types.ClientId,
     id: id,
+});
+
+export const createMenuMargin = (margin: number): TaipyMarginAction => ({
+    type: Types.MenuMargin,
+    marginLeft: margin,
 });
 
 export const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
