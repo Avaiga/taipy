@@ -222,11 +222,10 @@ class Factory:
         .set_lov()
         .set_attributes(
             [
-                ("bar", AttributeType.boolean),
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("label", AttributeType.string),
-                ("width", AttributeType.string, "100vw"),
+                ("width", AttributeType.string),
                 ("on_action", AttributeType.string, "on_menu_action"),
                 ("inactive_ids", AttributeType.dynamic_list),
             ]

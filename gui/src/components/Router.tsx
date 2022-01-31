@@ -27,6 +27,7 @@ import { JSXReactRouterComponents } from "./Taipy";
 import Alert from "./Taipy/Alert";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
+import { Box } from "@mui/material";
 
 interface AxiosRouter {
     router: string;
@@ -80,11 +81,13 @@ const Router = () => {
                         <CssBaseline />
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <BrowserRouter>
+                                <Box style={{marginLeft: state.marginLeft}}>
                                 <JsxParser
                                     disableKeyGeneration={true}
                                     components={JSXReactRouterComponents as Record<string, ComponentType>}
                                     jsx={JSX}
                                 />
+                                </Box>
                                 <Alert alert={state.alert} />
                                 <UIBlocker block={state.block} />
                                 <Navigate to={state.to} />

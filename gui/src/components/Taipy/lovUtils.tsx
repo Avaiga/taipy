@@ -1,8 +1,12 @@
-import React, { CSSProperties, useMemo } from "react";
+import React, { CSSProperties, useMemo, MouseEvent } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
 
 import { TaipyBaseProps, TaipyImage } from "./utils";
+import { getInitials } from "../../utils";
 
 export interface LovItem {
     id: string;
@@ -79,3 +83,35 @@ export const showItem = (elt: LovItem, searchValue: string) => {
             .indexOf(searchValue.toLowerCase()) > -1
     );
 };
+
+export interface ItemProps {
+    value: string;
+    clickHandler: (evt: MouseEvent<HTMLElement>) => void;
+    selectedValue: string[] | string;
+    item: string | TaipyImage;
+    disabled: boolean;
+    withAvatar?: boolean;
+}
+
+export const SingleItem = ({ value, clickHandler, selectedValue, item, disabled, withAvatar = false }: ItemProps) => (
+    <ListItemButton
+        onClick={clickHandler}
+        data-id={value}
+        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
+        disabled={disabled}
+    >
+        {typeof item === "string" ? (
+            withAvatar ? (
+                <ListItemAvatar>
+                    <CardHeader sx={cardSx} avatar={<Avatar>{getInitials(item)}</Avatar>} title={item} />
+                </ListItemAvatar>
+            ) : (
+                <ListItemText primary={item} />
+            )
+        ) : (
+            <ListItemAvatar>
+                <LovImage item={item} />
+            </ListItemAvatar>
+        )}
+    </ListItemButton>
+);

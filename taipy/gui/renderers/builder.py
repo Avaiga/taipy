@@ -553,7 +553,7 @@ class Builder:
         if isinstance(loi, str):
             loi = [s.strip() for s in loi.split(";") if s.strip()]
         if isinstance(loi, list):
-            self.__set_json_attribute("default_" + var_name, loi)
+            self.__set_json_attribute(_to_camel_case("default_" + var_name), loi)
         if hash_name:
             self.__update_vars.append(f"{var_name}={hash_name}")
             self.__set_react_attribute(var_name, hash_name)

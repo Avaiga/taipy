@@ -1,47 +1,18 @@
-import React, { useCallback, useContext, useMemo, useState, MouseEvent } from "react";
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AppBar from "@mui/material/AppBar";
-import MuiMenu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import React, { useCallback, useContext, useMemo, useState, MouseEvent, useEffect, useRef } from "react";
+import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItemIcon from "@mui/material/ListItemIcon";
 
-import { LovProps, useLovListMemo, LovItem, LovImage } from "./lovUtils";
+import { LovProps, useLovListMemo, SingleItem } from "./lovUtils";
 import { TaipyContext } from "../../context/taipyContext";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-import { Button } from "@mui/material";
-
-const renderMenu = (
-    lov: LovItem[],
-    active: boolean,
-    selectedValue: string,
-    inactiveIds: string[],
-    onClick: (evt: MouseEvent<HTMLDivElement>) => void
-) => {
-    return lov.map((li) => {
-        const children = li.children ? renderMenu(li.children, active, selectedValue, inactiveIds, onClick) : [];
-        return (
-            <MenuItem key={li.id} disabled={!active || inactiveIds.includes(li.id)} selected={li.id === selectedValue}>
-                <ListItemButton data-id={li.id} onClick={onClick}>
-                    {typeof li.item === "string" ? (
-                        <ListItemText primary={li.item} />
-                    ) : (
-                        <ListItemAvatar>
-                            <LovImage item={li.item} />
-                        </ListItemAvatar>
-                    )}
-                </ListItemButton>
-
-                {children}
-            </MenuItem>
-        );
-    });
-};
+import { createMenuMargin, createSendActionNameAction } from "../../context/taipyReducers";
+import { Box, useTheme } from "@mui/material";
 
 interface MenuProps extends LovProps<string> {
-    bar?: boolean;
     label?: string;
     width?: string;
     tp_onAction?: string;
@@ -49,11 +20,15 @@ interface MenuProps extends LovProps<string> {
     defaultInactiveIds?: string;
 }
 
+const baseDrawerSx = { overflowX: "hidden", maxHeight: "100vh" };
+
 const Menu = (props: MenuProps) => {
-    const { id, bar = true, label, width = "100vw", tp_onAction, defaultLov = "" } = props;
+    const { id, label, tp_onAction, defaultLov = "" } = props;
     const [selectedValue, setSelectedValue] = useState<string>("");
-    const [anchorEl, setAnchorEl] = useState(null);
+    const [opened, setOpened] = useState(false);
     const { dispatch } = useContext(TaipyContext);
+    const boxRef = useRef<HTMLDivElement>(null);
+    const theme = useTheme();
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -75,22 +50,59 @@ const Menu = (props: MenuProps) => {
         return [];
     }, [props.inactiveIds, props.defaultInactiveIds]);
 
-    const handleClick = useCallback((event) => setAnchorEl(event.currentTarget), []);
-    const handleClose = useCallback(() => setAnchorEl(null), []);
-    const handleAction = useCallback((e) => {
-        const { id } = e.currentTarget.dataset;
+    const clickHandler = useCallback(
+        (evt: MouseEvent<HTMLElement>) => {
+            if (active) {
+                const { id: key = "" } = evt.currentTarget.dataset;
+                setSelectedValue(() => {
+                    dispatch(createSendActionNameAction(id, tp_onAction, key));
+                    return key;
+                });
+            }
+        },
+        [id, tp_onAction, dispatch, active]
+    );
+
+    const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
+        evt.stopPropagation();
+        setOpened((o) => !o);
     }, []);
 
-    return bar ? (
-        <AppBar sx={{width: width}}>{
-            lovList.map(elt => <Button key={elt.id} data-id={elt.id}></Button>)
-            }</AppBar>
-    ) : (
-        <>
-            {label ? <Button onClick={handleClick}>{label}</Button> : <IconButton onClick={handleClick}><MoreVertIcon /></IconButton>}
-            <MuiMenu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-                {renderMenu(lovList, !!active, selectedValue, inactiveIds, handleAction)}
-            </MuiMenu>
-        </>
+    const drawerSx = useMemo(() => {
+        const w = opened ? props.width : `calc(${theme.spacing(9)} + 1px)`;
+        return w ? { ...baseDrawerSx, width: w } : baseDrawerSx;
+    }, [opened, props.width, theme]);
+
+    useEffect(() => {
+        drawerSx && boxRef.current && dispatch(createMenuMargin(boxRef.current.offsetWidth));
+        return () => dispatch(createMenuMargin(0));
+    }, [boxRef, drawerSx, dispatch]);
+
+    return (
+        <Drawer variant="permanent" anchor="left">
+            <Box sx={drawerSx} ref={boxRef}>
+                <List>
+                    <ListItemButton key="taipy_menu_0" onClick={openHandler}>
+                        <ListItemIcon>
+                            <MenuIco />
+                        </ListItemIcon>
+                        {opened && label ? <ListItemText primary={label} /> : null}
+                    </ListItemButton>
+                    {lovList.map((elt) => (
+                        <SingleItem
+                            key={elt.id}
+                            value={elt.id}
+                            item={elt.item}
+                            selectedValue={selectedValue}
+                            clickHandler={clickHandler}
+                            disabled={!active || inactiveIds.includes(elt.id)}
+                            withAvatar={true}
+                        />
+                    ))}
+                </List>
+            </Box>
+        </Drawer>
     );
 };
+
+export default Menu;
