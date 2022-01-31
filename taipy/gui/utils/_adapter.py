@@ -7,7 +7,7 @@ from types import FunctionType
 import __main__
 
 from ..taipyimage import TaipyImage
-from . import _get_dict_value, _MapDictionary
+from . import _MapDictionary
 
 
 class _Adapter:
@@ -26,19 +26,19 @@ class _Adapter:
         self.__type_for_variable[var_name] = type_name
 
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
-        return _get_dict_value(self.__adapter_for_type, type_name)
+        return self.__adapter_for_type.get(type_name)
 
     def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
         adapter = None
-        type_name = _get_dict_value(self.__type_for_variable, var_name)
+        type_name = self.__type_for_variable.get(var_name)
         if not isinstance(type_name, str):
-            adapter = _get_dict_value(self.__adapter_for_type, var_name)
+            adapter = self.__adapter_for_type.get(var_name)
             if isinstance(adapter, FunctionType):
                 type_name = var_name
             else:
                 type_name = type(value).__name__
         if adapter is None:
-            adapter = _get_dict_value(self.__adapter_for_type, type_name)
+            adapter = self.__adapter_for_type.get(type_name)
         if isinstance(adapter, FunctionType):
             ret = self._run_adapter(adapter, value, var_name, index, id_only)
             if ret is not None:
@@ -97,7 +97,7 @@ class _Adapter:
             label = self.__get_label(value)
             if label is None:
                 return None
-            if len(value) > 2 and isinstance(value[2], list):
+            if isinstance(value, (list, tuple)) and len(value) > 2 and isinstance(value[2], list):
                 return (id, label, self.__get_children(value))  # type: ignore
             else:
                 return (id, label)  # type: ignore
