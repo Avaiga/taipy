@@ -1,66 +1,44 @@
-import React, { useCallback, useContext, useMemo, useState, MouseEvent, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useMemo, useState, MouseEvent, useRef, CSSProperties } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
-import ListItemIcon from "@mui/material/ListItemIcon";
+import Avatar from "@mui/material/Avatar";
+import CardHeader from "@mui/material/CardHeader";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Box from "@mui/material/Box";
+import Tooltip from '@mui/material/Tooltip';
+import { useTheme } from "@mui/material";
 
-import { LovProps, useLovListMemo, SingleItem } from "./lovUtils";
+import { SingleItem } from "./lovUtils";
 import { TaipyContext } from "../../context/taipyContext";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-import { createMenuMargin, createSendActionNameAction } from "../../context/taipyReducers";
-import { Box, useTheme } from "@mui/material";
+import { createSendActionNameAction } from "../../context/taipyReducers";
+import { MenuProps } from "../../utils/lov";
 
-interface MenuProps extends LovProps<string> {
-    label?: string;
-    width?: string;
-    tp_onAction?: string;
-    inactiveIds?: string[];
-    defaultInactiveIds?: string;
-}
-
-const baseDrawerSx = { overflowX: "hidden", maxHeight: "100vh" };
+const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
+const headerSx = { padding: 0 };
+const avatarSx = { bgcolor: "white" };
+const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { id, label, tp_onAction, defaultLov = "" } = props;
+    const { label, tp_onAction, lov, width, inactiveIds = [], active, className } = props;
     const [selectedValue, setSelectedValue] = useState<string>("");
     const [opened, setOpened] = useState(false);
     const { dispatch } = useContext(TaipyContext);
     const boxRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
 
-    const active = useDynamicProperty(props.active, props.defaultActive, true);
-
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, props.tp_updatevars, props.tp_varname);
-
-    const lovList = useLovListMemo(props.lov, defaultLov, true);
-
-    const inactiveIds = useMemo(() => {
-        if (props.inactiveIds) {
-            return props.inactiveIds;
-        }
-        if (props.defaultInactiveIds) {
-            try {
-                return JSON.parse(props.defaultInactiveIds) as string[];
-            } catch (e) {
-                // too bad
-            }
-        }
-        return [];
-    }, [props.inactiveIds, props.defaultInactiveIds]);
-
     const clickHandler = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
                 setSelectedValue(() => {
-                    dispatch(createSendActionNameAction(id, tp_onAction, key));
+                    dispatch(createSendActionNameAction("menu", tp_onAction, key));
                     return key;
                 });
             }
         },
-        [id, tp_onAction, dispatch, active]
+        [tp_onAction, dispatch, active]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {
@@ -68,27 +46,40 @@ const Menu = (props: MenuProps) => {
         setOpened((o) => !o);
     }, []);
 
-    const drawerSx = useMemo(() => {
-        const w = opened ? props.width : `calc(${theme.spacing(9)} + 1px)`;
-        return w ? { ...baseDrawerSx, width: w } : baseDrawerSx;
-    }, [opened, props.width, theme]);
+    const [drawerSx, titleProps] = useMemo(() => {
+        const drawerWidth = opened ? width : `calc(${theme.spacing(9)} + 1px)`;
+        const titleWidth = opened ? `calc(${width} - ${theme.spacing(10)})`: undefined;
+        return [{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+                width: drawerWidth,
+                boxSizing: "border-box",
+                transition: "width 0.5s",
+            },
+            transition: "width 0.5s",
+        }, {...baseTitleProps, width: titleWidth}];
+    }, [opened, width, theme]);
 
-    useEffect(() => {
-        drawerSx && boxRef.current && dispatch(createMenuMargin(boxRef.current.offsetWidth));
-        return () => dispatch(createMenuMargin(0));
-    }, [boxRef, drawerSx, dispatch]);
-
-    return (
-        <Drawer variant="permanent" anchor="left">
-            <Box sx={drawerSx} ref={boxRef}>
+    return lov && lov.length ? (
+        <Drawer variant="permanent" anchor="left" sx={drawerSx} className={className}>
+            <Box ref={boxRef} style={boxDrawerStyle}>
                 <List>
                     <ListItemButton key="taipy_menu_0" onClick={openHandler}>
-                        <ListItemIcon>
-                            <MenuIco />
-                        </ListItemIcon>
-                        {opened && label ? <ListItemText primary={label} /> : null}
+                        <ListItemAvatar>
+                            <CardHeader
+                                sx={headerSx}
+                                avatar={
+                                    <Tooltip title={label || false}><Avatar sx={avatarSx}>
+                                        <MenuIco />
+                                    </Avatar></Tooltip>
+                                }
+                                title={label}
+                                titleTypographyProps={titleProps}
+                            />
+                        </ListItemAvatar>
                     </ListItemButton>
-                    {lovList.map((elt) => (
+                    {lov.map((elt) => (
                         <SingleItem
                             key={elt.id}
                             value={elt.id}
@@ -97,12 +88,13 @@ const Menu = (props: MenuProps) => {
                             clickHandler={clickHandler}
                             disabled={!active || inactiveIds.includes(elt.id)}
                             withAvatar={true}
+                            titleTypographyProps={titleProps}
                         />
                     ))}
                 </List>
             </Box>
         </Drawer>
-    );
+    ) : null;
 };
 
 export default Menu;

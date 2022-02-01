@@ -491,7 +491,7 @@ class Gui(object, metaclass=Singleton):
 
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
-            action = _get_dict_value(payload, "action")
+            action = payload.get("action")
         else:
             action = str(payload)
         if action and hasattr(self, action):
@@ -501,10 +501,10 @@ class Gui(object, metaclass=Singleton):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
     def __call_function_with_args(*args, **kwargs):
-        action_function = _get_dict_value(kwargs, "action_function")
-        id = _get_dict_value(kwargs, "id")
-        action = _get_dict_value(kwargs, "action")
-        payload = _get_dict_value(kwargs, "payload")
+        action_function = kwargs.get("action_function")
+        id = kwargs.get("id")
+        action = kwargs.get("action")
+        payload = kwargs.get("payload")
         pself = args[0]
 
         if isinstance(action_function, FunctionType):

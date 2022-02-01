@@ -27,11 +27,6 @@ export interface TaipyInputProps extends TaipyBaseProps {
     defaultValue?: string;
 }
 
-export interface TaipyImage {
-    path: string;
-    text: string;
-}
-
 export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined =>
     (arr && idx < arr.length && arr[idx]) || defVal;
 

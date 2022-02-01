@@ -9,8 +9,9 @@ import TextField from "@mui/material/TextField";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { boxSx, LovImage, LovItem, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
+import { boxSx, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { LovItem } from "../../utils/lov";
 
 const renderTree = (lov: LovItem[], active: boolean, searchValue: string) => {
     return lov.map((li) => {

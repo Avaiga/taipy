@@ -5,12 +5,12 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Avatar from "@mui/material/Avatar";
 
-import { TaipyImage } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import ThemeToggle from "./ThemeToggle";
 import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty } from "../../utils/hooks";
+import { TaipyImage } from "../../utils/lov";
 
 interface ToggleProps extends LovProps {
     style?: CSSProperties;

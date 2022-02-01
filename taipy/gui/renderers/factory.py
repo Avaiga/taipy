@@ -214,7 +214,7 @@ class Factory:
         ),
         "menu": lambda control_type, attrs: Builder(
             control_type=control_type,
-            element_name="Menu",
+            element_name="MenuCtl",
             attributes=attrs,
         )
         .set_value_and_default(with_default=False)
