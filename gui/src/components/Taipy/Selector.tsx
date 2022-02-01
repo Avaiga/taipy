@@ -16,11 +16,12 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
 
-import { doNotPropagateEvent, TaipyImage } from "./utils";
+import { doNotPropagateEvent } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { boxSx, ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { TaipyImage } from "../../utils/lov";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
     <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>

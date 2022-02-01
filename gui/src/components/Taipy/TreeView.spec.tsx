@@ -5,9 +5,9 @@ import userEvent from "@testing-library/user-event";
 
 import TreeView from './TreeView';
 import { LoV } from "./lovUtils";
-import { TaipyImage } from "./utils";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
+import { TaipyImage } from "../../utils/lov";
 
 const lov: LoV = [
     ["id1", "Item 1", [["id1.1", "Item 1.1"], ["id1.2", "Item 1.2"]]],

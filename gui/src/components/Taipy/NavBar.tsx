@@ -10,11 +10,11 @@ import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/icons-material/Menu";
 import { useLocation, useNavigate } from "react-router";
 
-import { LovItem, LovProps, useLovListMemo } from "./lovUtils";
+import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
-import { TaipyImage } from "./utils";
 import Link from "./Link";
+import { LovItem, TaipyImage } from "../../utils/lov";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 

@@ -13,7 +13,7 @@ import Input from "./Input";
 import Layout from "./Layout";
 import Link from "./Link";
 import MainPage from "../pages/MainPage";
-import Menu from "./Menu";
+import MenuCtl from "./MenuCtl";
 import NavBar from "./NavBar";
 import NotFound404 from "../pages/NotFound404";
 import PageContent from "../pages/PageContent";
@@ -41,7 +41,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     Image: Image as ComponentType,
     Input: Input as ComponentType,
     Layout: Layout,
-    Menu: Menu as ComponentType,
+    MenuCtl: MenuCtl as ComponentType,
     NavBar: NavBar as ComponentType,
     PageContent: PageContent,
     Pane: Pane,

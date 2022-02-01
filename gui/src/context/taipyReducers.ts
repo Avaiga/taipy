@@ -6,6 +6,7 @@ import merge from "lodash/merge";
 
 import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
+import { MenuProps } from "../utils/lov";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -23,8 +24,9 @@ enum Types {
     Navigate = "NAVIGATE",
     ClientId = "CLIENT_ID",
     MultipleMessages = "MULTIPLE_MESSAGES",
-    MenuMargin = "MENU_MARGIN",
+    SetMenu = "SET_MENU",
 }
+
 export interface TaipyState {
     socket?: Socket;
     isSocketConnected?: boolean;
@@ -38,7 +40,7 @@ export interface TaipyState {
     block?: BlockMessage;
     to?: string;
     id: string;
-    marginLeft: number;
+    menu: MenuProps;
 }
 
 export interface TaipyBaseAction {
@@ -94,8 +96,8 @@ interface IdMessage {
 
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
-interface TaipyMarginAction extends TaipyBaseAction {
-    marginLeft: number;
+interface TaipySetMenuAction extends TaipyBaseAction {
+    menu: MenuProps;
 }
 
 export interface FormatConfig {
@@ -139,7 +141,7 @@ export const INITIAL_STATE: TaipyState = {
     locations: {},
     timeZone: TIMEZONE_CLIENT,
     id: getLocalStorageValue("TaipyClientId", ""),
-    marginLeft: 0,
+    menu: {},
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -310,9 +312,9 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             return state;
         }
-        case Types.MenuMargin: {
-            const mAction = baseAction as TaipyMarginAction;
-            return state.marginLeft !== mAction.marginLeft ? { ...state, marginLeft: mAction.marginLeft } : state;
+        case Types.SetMenu: {
+            const mAction = baseAction as TaipySetMenuAction;
+            return { ...state, menu: mAction.menu };
         }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
@@ -324,7 +326,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             sendWsMessage(state.socket, "U", action.name, action.payload.value, state.id, action.propagate);
             break;
         case Types.Action:
-            sendWsMessage(state.socket, "A", action.name, action.payload.value, state.id);
+            sendWsMessage(state.socket, "A", action.name, action.payload, state.id);
             break;
         case Types.RequestDataUpdate:
             sendWsMessage(state.socket, "DU", action.name, action.payload, state.id);
@@ -355,7 +357,7 @@ export const createSendActionNameAction = (
 ): TaipyAction => ({
     type: Types.Action,
     name: name || "",
-    payload: { value: value, args: args },
+    payload: { action: value, args: args },
 });
 
 export const createRequestChartUpdateAction = (
@@ -501,9 +503,9 @@ export const createIdAction = (id: string): TaipyIdAction => ({
     id: id,
 });
 
-export const createMenuMargin = (margin: number): TaipyMarginAction => ({
-    type: Types.MenuMargin,
-    marginLeft: margin,
+export const createSetMenuAction = (menu: MenuProps): TaipySetMenuAction => ({
+    type: Types.SetMenu,
+    menu: menu,
 });
 
 export const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({

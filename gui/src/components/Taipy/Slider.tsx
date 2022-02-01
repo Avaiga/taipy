@@ -8,7 +8,8 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
-import { getCssSize, TaipyImage } from "./utils";
+import { getCssSize } from "./utils";
+import { TaipyImage } from "../../utils/lov";
 
 interface SliderProps extends LovProps<number | string, number | string> {
     width?: string;

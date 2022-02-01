@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import CssBaseline from "@mui/material/CssBaseline";
+import Box from "@mui/material/Box";
 import { SnackbarProvider } from "notistack";
 import { BrowserRouter } from "react-router-dom";
 
@@ -27,7 +28,7 @@ import { JSXReactRouterComponents } from "./Taipy";
 import Alert from "./Taipy/Alert";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
-import { Box } from "@mui/material";
+import Menu from "./Taipy/Menu";
 
 interface AxiosRouter {
     router: string;
@@ -36,6 +37,9 @@ interface AxiosRouter {
     locations: Record<string, string>;
     blockUI: boolean;
 }
+
+const mainSx = { flexGrow: 1, bgcolor: "background.default"};
+const containerSx = { display: "flex" };
 
 const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
@@ -78,15 +82,18 @@ const Router = () => {
             <HelmetProvider>
                 <ThemeProvider theme={state.theme}>
                     <SnackbarProvider maxSnack={5}>
-                        <CssBaseline />
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <BrowserRouter>
-                                <Box style={{marginLeft: state.marginLeft}}>
-                                <JsxParser
-                                    disableKeyGeneration={true}
-                                    components={JSXReactRouterComponents as Record<string, ComponentType>}
-                                    jsx={JSX}
-                                />
+                                <Box style={containerSx}>
+                                    <CssBaseline />
+                                    <Menu {...state.menu} />
+                                    <Box component="main" sx={mainSx}>
+                                        <JsxParser
+                                            disableKeyGeneration={true}
+                                            components={JSXReactRouterComponents as Record<string, ComponentType>}
+                                            jsx={JSX}
+                                        />
+                                    </Box>
                                 </Box>
                                 <Alert alert={state.alert} />
                                 <UIBlocker block={state.block} />
