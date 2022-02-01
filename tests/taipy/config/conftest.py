@@ -13,7 +13,7 @@ def reset_configuration_singleton():
     yield
     Config._python_config = _Config()
     Config._file_config = None
-    Config._env_config = None
+    Config._env_file_config = None
     Config._applied_config = _Config.default_config()
 
     os.environ = _env

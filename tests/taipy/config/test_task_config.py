@@ -1,3 +1,6 @@
+import os
+from unittest import mock
+
 import pytest
 
 from taipy.config._config import _Config
@@ -9,7 +12,7 @@ def reset_configuration_singleton():
     yield
     Config._python_config = _Config()
     Config._file_config = _Config()
-    Config._env_config = _Config()
+    Config._env_file_config = _Config()
     Config._applied_config = _Config.default_config()
 
 
@@ -59,3 +62,12 @@ def test_task_creation_no_duplication():
 
     Config.add_task("tasks1", input_config, print, output_config)
     assert len(Config.tasks()) == 2
+
+
+def test_task_config_with_env_variable_value():
+    input_config = Config.add_data_node("input")
+    output_config = Config.add_data_node("output")
+
+    with mock.patch.dict(os.environ, {"FOO": "plop", "BAR": "baz"}):
+        Config.add_task("task_name", input_config, print, output_config, prop="ENV[BAR]")
+        assert Config.tasks()["task_name"].prop == "baz"

@@ -1,3 +1,6 @@
+import os
+from unittest import mock
+
 import pytest
 
 from taipy.config._config import _Config
@@ -9,7 +12,7 @@ def reset_configuration_singleton():
     yield
     Config._python_config = _Config()
     Config._file_config = _Config()
-    Config._env_config = _Config()
+    Config._env_file_config = _Config()
     Config._applied_config = _Config.default_config()
 
 
@@ -53,3 +56,9 @@ def test_pipeline_creation_no_duplication():
 
     Config.add_pipeline("pipelines1", [task1_config, task2_config])
     assert len(Config.pipelines()) == 2
+
+
+def test_pipeline_config_with_env_variable_value():
+    with mock.patch.dict(os.environ, {"FOO": "bar"}):
+        Config.add_pipeline("pipeline_name", [task1_config, task2_config], prop="ENV[FOO]")
+        assert Config.pipelines()["pipeline_name"].prop == "bar"

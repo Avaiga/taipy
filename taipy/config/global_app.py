@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
+
+from taipy.config.config_template_handler import ConfigTemplateHandler as tpl
 
 
 class GlobalAppConfig:
@@ -32,17 +34,17 @@ class GlobalAppConfig:
 
     def __init__(
         self,
-        notification: bool = None,
+        notification: Union[bool, str] = None,
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
         **properties
     ):
-        self.properties = properties
         self.notification = notification
         self.broker_endpoint = broker_endpoint
         self.root_folder = root_folder
         self.storage_folder = storage_folder
+        self.properties = properties
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return self.properties.get(item)
@@ -80,8 +82,10 @@ class GlobalAppConfig:
         return config
 
     def update(self, config_as_dict):
-        self.notification = config_as_dict.pop(self.NOTIFICATION_KEY, self.notification)
-        self.broker_endpoint = config_as_dict.pop(self.BROKER_ENDPOINT_KEY, self.broker_endpoint)
-        self.root_folder = config_as_dict.pop(self.ROOT_FOLDER_KEY, self.root_folder)
-        self.storage_folder = config_as_dict.pop(self.STORAGE_FOLDER_KEY, self.storage_folder)
+        self.notification = tpl.replace_templates(config_as_dict.pop(self.NOTIFICATION_KEY, self.notification), bool)
+        self.broker_endpoint = tpl.replace_templates(config_as_dict.pop(self.BROKER_ENDPOINT_KEY, self.broker_endpoint))
+        self.root_folder = tpl.replace_templates(config_as_dict.pop(self.ROOT_FOLDER_KEY, self.root_folder))
+        self.storage_folder = tpl.replace_templates(config_as_dict.pop(self.STORAGE_FOLDER_KEY, self.storage_folder))
         self.properties.update(config_as_dict)
+        for k, v in self.properties.items():
+            self.properties[k] = tpl.replace_templates(v)

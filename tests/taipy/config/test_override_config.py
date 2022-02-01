@@ -1,4 +1,11 @@
+import os
+from unittest import mock
+
+import pytest
+
+from taipy.config import DataNodeConfig
 from taipy.config.config import Config
+from taipy.exceptions.configuration import InconsistentEnvVariableError, MissingEnvVariableError
 from tests.taipy.config.named_temporary_file import NamedTemporaryFile
 
 
@@ -40,6 +47,24 @@ def test_override_default_configuration_with_code_configuration():
     assert qux_config.name in Config.scenarios()
     assert len(Config.scenarios()[qux_config.name].pipelines) == 1
     assert Config.scenarios()[qux_config.name].pipelines[0].name == baz_config.name
+
+
+def test_override_default_config_with_code_config_including_env_variable_values():
+    assert not Config.global_config().notification
+    Config.set_global_config(notification=True)
+    assert Config.global_config().notification
+
+    with mock.patch.dict(os.environ, {"ENV_VAR": "False"}):
+        Config.set_global_config(notification="ENV[ENV_VAR]")
+        assert not Config.global_config().notification
+
+    with mock.patch.dict(os.environ, {"ENV_VAR": "true"}):
+        Config.set_global_config(notification="ENV[ENV_VAR]")
+        assert Config.global_config().notification
+
+    with mock.patch.dict(os.environ, {"ENV_VAR": "foo"}):
+        with pytest.raises(InconsistentEnvVariableError):
+            Config.set_global_config(notification="ENV[ENV_VAR]")
 
 
 def test_override_default_configuration_with_file_configuration():
@@ -86,6 +111,31 @@ nb_of_workers = -1
     assert "qux" in Config.scenarios()
 
 
+def test_override_default_config_with_file_config_including_env_variable_values():
+    tf = NamedTemporaryFile(
+        """
+[JOB]
+nb_of_workers = "ENV[FOO]"
+start_airflow = "ENV[BAR]"
+"""
+    )
+    assert Config.job_config().nb_of_workers == 1
+    assert not Config.job_config().start_airflow
+
+    with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
+        Config.load(tf.filename)
+        assert Config.job_config().nb_of_workers == 6
+        assert Config.job_config().start_airflow
+
+    with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
+        with pytest.raises(InconsistentEnvVariableError):
+            Config.load(tf.filename)
+
+    with mock.patch.dict(os.environ, {"FOO": "5"}):
+        with pytest.raises(MissingEnvVariableError):
+            Config.load(tf.filename)
+
+
 def test_code_configuration_do_not_override_file_configuration():
     config_from_filename = NamedTemporaryFile(
         """
@@ -100,7 +150,21 @@ nb_of_workers = 2
     assert Config.job_config().nb_of_workers == 2  # From file config
 
 
-def test_code_configuration_file_configuration_override_code_configuration():
+def test_code_configuration_do_not_override_file_configuration_including_env_variable_values():
+    config_from_filename = NamedTemporaryFile(
+        """
+[JOB]
+nb_of_workers = 2
+    """
+    )
+    Config.load(config_from_filename.filename)
+
+    with mock.patch.dict(os.environ, {"FOO": "21"}):
+        Config.set_job_config(nb_of_workers="ENV[FOO]")
+        assert Config.job_config().nb_of_workers == 2  # From file config
+
+
+def test_file_configuration_override_code_configuration():
     config_from_filename = NamedTemporaryFile(
         """
 [JOB]
@@ -111,6 +175,20 @@ nb_of_workers = 2
     Config.load(config_from_filename.filename)
 
     assert Config.job_config().nb_of_workers == 2  # From file config
+
+
+def test_file_configuration_override_code_configuration_including_env_variable_values():
+    config_from_filename = NamedTemporaryFile(
+        """
+[JOB]
+nb_of_workers = "ENV[FOO]"
+    """
+    )
+    Config.set_job_config(nb_of_workers=21)
+
+    with mock.patch.dict(os.environ, {"FOO": "2"}):
+        Config.load(config_from_filename.filename)
+        assert Config.job_config().nb_of_workers == 2  # From file config
 
 
 def test_override_default_configuration_with_multiple_configurations():
@@ -146,3 +224,41 @@ notification = false
     assert Config.data_nodes()["my_datanode"].has_header
     assert Config.data_nodes()["my_datanode"].path == "/data/csv"
     assert Config.data_nodes()["my_datanode"].not_defined is None
+
+
+def test_override_default_configuration_with_multiple_configurations_including_environment_varaible_values():
+    file_config = NamedTemporaryFile(
+        """
+[DATA_NODE.default]
+has_header = true
+[DATA_NODE.my_datanode]
+path = "ENV[FOO]"
+
+[JOB]
+nb_of_workers = 10
+
+[TAIPY]
+notification = false
+    """
+    )
+
+    with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/toto/data/csv"}):
+        # Default config is applied
+        assert Config.job_config().nb_of_workers == 1
+        assert Config.global_config().notification is False
+
+        # Code config is applied
+        Config.set_job_config(nb_of_workers=-1)
+        Config.set_global_config(notification=True)
+        Config.add_data_node("my_datanode", path="ENV[BAR]")
+        assert Config.global_config().notification is True
+        assert Config.job_config().nb_of_workers == -1
+        assert Config.data_nodes()["my_datanode"].path == "/toto/data/csv"
+
+        # File config is applied
+        Config.load(file_config.filename)
+        assert Config.global_config().notification is False
+        assert Config.job_config().nb_of_workers == 10
+        assert Config.data_nodes()["my_datanode"].has_header
+        assert Config.data_nodes()["my_datanode"].path == "/data/csv"
+        assert Config.data_nodes()["my_datanode"].not_defined is None

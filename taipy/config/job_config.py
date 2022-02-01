@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
+
+from taipy.config.config_template_handler import ConfigTemplateHandler as tpl
 
 
 class JobConfig:
@@ -53,13 +55,13 @@ class JobConfig:
     def __init__(
         self,
         mode: str = None,
-        nb_of_workers: int = None,
+        nb_of_workers: Union[int, str] = None,
         hostname: str = None,
         airflow_dags_folder: str = None,
         airflow_folder: str = None,
         airflow_db_endpoint: str = None,
-        start_airflow: bool = None,
-        airflow_api_retry: int = None,
+        start_airflow: Union[bool, str] = None,
+        airflow_api_retry: Union[int, str] = None,
         **properties
     ):
         self.mode = mode
@@ -126,16 +128,24 @@ class JobConfig:
         config.properties = config_as_dict
         return config
 
-    def update(self, config_as_dict):
-        self.mode = config_as_dict.pop(self.MODE_KEY, self.mode)
-        self.nb_of_workers = config_as_dict.pop(self.NB_OF_WORKERS_KEY, self.nb_of_workers)
-        self.hostname = config_as_dict.pop(self.HOSTNAME_KEY, self.hostname)
-        self.airflow_dags_folder = config_as_dict.pop(self.AIRFLOW_DAGS_FOLDER_KEY, self.airflow_dags_folder)
-        self.airflow_folder = config_as_dict.pop(self.AIRFLOW_FOLDER_KEY, self.airflow_folder)
-        self.airflow_db_endpoint = config_as_dict.pop(self.AIRFLOW_DB_ENDPOINT_KEY, self.airflow_db_endpoint)
-        self.start_airflow = config_as_dict.pop(self.START_AIRFLOW_KEY, self.start_airflow)
-        self.airflow_api_retry = config_as_dict.pop(self.AIRFLOW_API_RETRY_KEY, self.airflow_api_retry)
-        self.properties.update(config_as_dict)
+    def update(self, cfg_as_dict):
+        self.mode = tpl.replace_templates(cfg_as_dict.pop(self.MODE_KEY, self.mode))
+        self.nb_of_workers = tpl.replace_templates(cfg_as_dict.pop(self.NB_OF_WORKERS_KEY, self.nb_of_workers), int)
+        self.hostname = tpl.replace_templates(cfg_as_dict.pop(self.HOSTNAME_KEY, self.hostname))
+        self.airflow_dags_folder = tpl.replace_templates(
+            cfg_as_dict.pop(self.AIRFLOW_DAGS_FOLDER_KEY, self.airflow_dags_folder)
+        )
+        self.airflow_folder = tpl.replace_templates(cfg_as_dict.pop(self.AIRFLOW_FOLDER_KEY, self.airflow_folder))
+        self.airflow_db_endpoint = tpl.replace_templates(
+            cfg_as_dict.pop(self.AIRFLOW_DB_ENDPOINT_KEY, self.airflow_db_endpoint)
+        )
+        self.start_airflow = tpl.replace_templates(cfg_as_dict.pop(self.START_AIRFLOW_KEY, self.start_airflow), bool)
+        self.airflow_api_retry = tpl.replace_templates(
+            cfg_as_dict.pop(self.AIRFLOW_API_RETRY_KEY, self.airflow_api_retry), int
+        )
+        self.properties.update(cfg_as_dict)
+        for k, v in self.properties.items():
+            self.properties[k] = tpl.replace_templates(v)
 
     def is_standalone(self) -> bool:
         """True if the config is set to standalone execution"""

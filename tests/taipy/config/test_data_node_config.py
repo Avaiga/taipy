@@ -1,9 +1,12 @@
+import os
 from datetime import datetime
+from unittest import mock
 
 import pytest
 
 from taipy.config._config import _Config
 from taipy.config.config import Config
+from taipy.data import Scope
 from taipy.data.manager import DataManager
 from taipy.exceptions.configuration import ConfigurationIssueError
 
@@ -13,7 +16,7 @@ def reset_configuration_singleton():
     yield
     Config._python_config = _Config()
     Config._file_config = _Config()
-    Config._env_config = _Config()
+    Config._env_file_config = _Config()
     Config._applied_config = _Config.default_config()
 
 
@@ -78,14 +81,20 @@ def test_data_node_creation_no_duplication():
     assert len(Config.data_nodes()) == 2
 
 
-def test_date_source_create_with_datetime():
+def test_date_node_create_with_datetime():
     data_manager = DataManager()
-    data_source_config = Config.add_data_node(
+    data_node_config = Config.add_data_node(
         name="datetime_data", my_property=datetime(1991, 1, 1), foo="hello", test=1, dict={"type": "Datetime", 2: "daw"}
     )
-    ds = data_manager.get_or_create(data_source_config)
+    ds = data_manager.get_or_create(data_node_config)
     ds = data_manager.get(ds)
     assert ds.foo == "hello"
     assert ds.my_property == datetime(1991, 1, 1)
     assert ds.test == 1
     assert ds.dict.get("type") == "Datetime"
+
+
+def test_data_node_with_env_variable_value():
+    with mock.patch.dict(os.environ, {"BAR": "baz"}):
+        Config.add_data_node("data_node", prop="ENV[BAR]")
+        assert Config.data_nodes()["data_node"].prop == "baz"

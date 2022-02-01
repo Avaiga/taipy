@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.common import protect_name
 from taipy.common.frequency import Frequency
+from taipy.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.exceptions.scenario import NonExistingComparator
 
@@ -88,6 +89,8 @@ class ScenarioConfig:
         if self.comparators is None and default_scenario_cfg:
             self.comparators = default_scenario_cfg.comparators
         self.properties.update(config_as_dict)
+        for k, v in self.properties.items():
+            self.properties[k] = tpl.replace_templates(v)
 
     def add_comparator(self, ds_config_name: str, comparator: Callable):
         self.comparators[ds_config_name].append(comparator)

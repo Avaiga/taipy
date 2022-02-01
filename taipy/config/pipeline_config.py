@@ -2,6 +2,7 @@ from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
 from taipy.common import protect_name
+from taipy.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.config.task_config import TaskConfig
 
 
@@ -61,3 +62,5 @@ class PipelineConfig:
         if self.tasks is None and default_pipeline_cfg:
             self.tasks = default_pipeline_cfg.tasks
         self.properties.update(config_as_dict)
+        for k, v in self.properties.items():
+            self.properties[k] = tpl.replace_templates(v)

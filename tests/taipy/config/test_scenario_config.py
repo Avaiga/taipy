@@ -1,3 +1,6 @@
+import os
+from unittest import mock
+
 import pytest
 
 from taipy.common.frequency import Frequency
@@ -11,7 +14,7 @@ def reset_configuration_singleton():
     yield
     Config._python_config = _Config()
     Config._file_config = _Config()
-    Config._env_config = _Config()
+    Config._env_file_config = _Config()
     Config._applied_config = _Config.default_config()
 
 
@@ -95,3 +98,9 @@ def test_scenario_get_set_and_remove_comparators():
 
     with pytest.raises(NonExistingComparator):
         scenario_config_2.delete_comparator("ds_config_3")
+
+
+def test_scenario_config_with_env_variable_value():
+    with mock.patch.dict(os.environ, {"FOO": "bar"}):
+        Config.add_scenario("scenario_name", [pipeline1_config, pipeline2_config], prop="ENV[FOO]")
+        assert Config.scenarios()["scenario_name"].prop == "bar"

@@ -25,7 +25,7 @@ class Config:
     ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
     _python_config = _Config()
     _file_config = None
-    _env_config = None
+    _env_file_config = None
     _applied_config = _Config.default_config()
     collector = IssueCollector()
 
@@ -103,7 +103,7 @@ class Config:
     @classmethod
     def set_global_config(
         cls,
-        notification: bool = None,
+        notification: Union[bool, str] = None,
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
@@ -120,13 +120,13 @@ class Config:
     def set_job_config(
         cls,
         mode: str = None,
-        nb_of_workers: int = None,
+        nb_of_workers: Union[int, str] = None,
         hostname: str = None,
         airflow_dags_folder: str = None,
         airflow_folder: str = None,
         airflow_db_endpoint: str = None,
-        start_airflow: bool = None,
-        airflow_api_retry: int = None,
+        start_airflow: Union[bool, str] = None,
+        airflow_api_retry: Union[int, str] = None,
         **properties,
     ):
         """Configures fields related to job execution."""
@@ -244,22 +244,22 @@ class Config:
         return cls._applied_config.scenarios[_Config.DEFAULT_KEY]
 
     @classmethod
-    def _load_from_environment(cls):
+    def _load_environment_file_config(cls):
         if config_filename := os.environ.get(cls.ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
             logging.info(f"Filename '{config_filename}' provided by environment variable")
-            cls._env_config = TomlSerializer().read(config_filename)
+            cls._env_file_config = TomlSerializer().read(config_filename)
             logging.info(f"Successful loaded configuration filename '{config_filename}'")
 
     @classmethod
     def __compile_configs(cls):
-        Config._load_from_environment()
+        Config._load_environment_file_config()
         cls._applied_config = _Config.default_config()
         if cls._python_config:
             cls._applied_config.update(cls._python_config)
         if cls._file_config:
             cls._applied_config.update(cls._file_config)
-        if cls._env_config:
-            cls._applied_config.update(cls._env_config)
+        if cls._env_file_config:
+            cls._applied_config.update(cls._env_file_config)
         cls.collector = Checker().check(cls._applied_config)
         cls.__log_message(cls)
 
@@ -275,4 +275,4 @@ class Config:
             raise ConfigurationIssueError
 
 
-Config._load_from_environment()
+Config._load_environment_file_config()
