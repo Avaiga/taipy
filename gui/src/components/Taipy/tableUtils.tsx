@@ -68,14 +68,17 @@ const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: F
     return <>{formatValue(val as RowValue, col, formatConf)}</>;
 };
 
-export const alignCell = (col: ColumnDesc): Partial<TableCellProps> => {
+export const getCellProps = (col: ColumnDesc): Partial<TableCellProps> => {
+    const ret:Partial<TableCellProps> = {};
     switch (col.type) {
         case "int64":
         case "float64":
-            return { align: "right" };
-        default:
-            return {};
+            ret.align = "right"
     }
+    if (col.width) {
+        ret.width = col.width;
+    }
+    return ret;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

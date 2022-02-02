@@ -21,7 +21,7 @@ class Factory:
         "image": "content",
         "input": "value",
         "layout": "columns",
-        "menu": "value",
+        "menu": "lov",
         "navbar": "value",
         "number": "value",
         "pane": "open",
@@ -217,15 +217,15 @@ class Factory:
             element_name="MenuCtl",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False)
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_attributes(
             [
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
-                ("label", AttributeType.string),
-                ("width", AttributeType.string),
+                ("label"),
+                ("width"),
+                ("width[mobile]",),
                 ("on_action", AttributeType.string, "on_menu_action"),
                 ("inactive_ids", AttributeType.dynamic_list),
             ]

@@ -47,6 +47,6 @@ describe("Button Component", () => {
             </TaipyContext.Provider>);
         const elt = getByText("Button");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {"value": "on_action"}, "type": "SEND_ACTION_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({"name": "", "payload": {args: [], action: "on_action"}, "type": "SEND_ACTION_ACTION"});
     });
 });

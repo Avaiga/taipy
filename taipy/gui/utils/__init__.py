@@ -5,7 +5,6 @@ from .datatype import getDataType
 from .date import ISOToDate, dateToISO
 from .expr_var_name import _get_expr_var_name
 from .getdatecolstrname import _get_date_col_str_name
-from .getdictvalue import _get_dict_value
 from .isnotebook import _is_in_notebook
 from .killable_thread import KillableThread
 from .MapDictionary import _MapDictionary

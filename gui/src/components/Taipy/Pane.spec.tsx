@@ -140,7 +140,7 @@ describe("Pane Component", () => {
         elt && userEvent.click(elt);
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { value: "testCloseAction" },
+            payload: { action: "testCloseAction", args: [] },
             type: "SEND_ACTION_ACTION",
         });
     });

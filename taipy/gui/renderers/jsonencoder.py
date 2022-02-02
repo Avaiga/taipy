@@ -10,4 +10,4 @@ class TaipyJsonEncoder(JSONEncoder):
             return o.to_dict()
         elif isinstance(o, _MapDictionary):
             return o._dict
-        return o
+        return JSONEncoder.default(self, o)
