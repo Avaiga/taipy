@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useState, MouseEvent, useRef, CSSProperties } from "react";
+import React, { useCallback, useContext, useMemo, useState, MouseEvent, CSSProperties } from "react";
 import MenuIco from "@mui/icons-material/Menu";
 import ListItemButton from "@mui/material/ListItemButton";
 import Drawer from "@mui/material/Drawer";
@@ -21,11 +21,10 @@ const avatarSx = { bgcolor: "white" };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, tp_onAction, lov, width, inactiveIds = [], active, className } = props;
-    const [selectedValue, setSelectedValue] = useState<string>("");
+    const { label, tp_onAction, lov, width, inactiveIds = [], active = true, className } = props;
+    const [selectedValue, setSelectedValue] = useState("");
     const [opened, setOpened] = useState(false);
     const { dispatch } = useContext(TaipyContext);
-    const boxRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
 
     const clickHandler = useCallback(
@@ -63,7 +62,7 @@ const Menu = (props: MenuProps) => {
 
     return lov && lov.length ? (
         <Drawer variant="permanent" anchor="left" sx={drawerSx} className={className}>
-            <Box ref={boxRef} style={boxDrawerStyle}>
+            <Box style={boxDrawerStyle}>
                 <List>
                     <ListItemButton key="taipy_menu_0" onClick={openHandler}>
                         <ListItemAvatar>

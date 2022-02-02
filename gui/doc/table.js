@@ -51,9 +51,16 @@ class table extends shared {
      * HTML component width (CSS property)
      * @type {str|int|float}
      */
-    width = "100vw";
+     width = "100vw";
 
     /**
+     * column width 
+     * @attr width[<column>]
+     * @type {column_indexed(str)}
+     */
+     width_;
+
+     /**
      * HTML component height (CSS property)
      * @type {str|int|float}
      */

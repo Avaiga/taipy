@@ -69,7 +69,7 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
 
 const cardSx = { padding: 0 } as CSSProperties;
 export const LovImage = ({ item, titleTypographyProps }: { item: TaipyImage, titleTypographyProps?: TypographyProps }) => (
-    <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar src={item.path} /></Tooltip>} title={item.text} titleTypographyProps={titleTypographyProps} />
+    <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar alt={item.text} src={item.path} /></Tooltip>} title={item.text} titleTypographyProps={titleTypographyProps} />
 );
 
 export const showItem = (elt: LovItem, searchValue: string) => {

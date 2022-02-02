@@ -15,7 +15,6 @@ export interface MenuProps {
     tp_onAction?: string;
     inactiveIds?: string[];
     lov?: LovItem[];
-    value?: string;
     active?: boolean;
     className?: string;
 }

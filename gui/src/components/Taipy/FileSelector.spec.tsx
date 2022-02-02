@@ -53,7 +53,7 @@ describe("FileSelector Component", () => {
         await waitFor(() =>
             expect(dispatch).toHaveBeenCalledWith({
                 name: "",
-                payload: { value: "on_action" },
+                payload: { args: [], action: "on_action" },
                 type: "SEND_ACTION_ACTION",
             })
         );

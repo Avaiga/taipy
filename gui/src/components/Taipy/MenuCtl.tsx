@@ -1,26 +1,32 @@
-import React, {
-    useContext,
-    useMemo,
-    useEffect,
-} from "react";
+import React, { useContext, useMemo, useEffect } from "react";
 
 import { LovProps, useLovListMemo } from "./lovUtils";
 import { TaipyContext } from "../../context/taipyContext";
-import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { createSetMenuAction } from "../../context/taipyReducers";
 import { MenuProps } from "../../utils/lov";
 
 interface MenuCtlProps extends LovProps<string> {
     label?: string;
     width?: string;
+    width_Mobile_?: string;
     tp_onAction?: string;
     inactiveIds?: string[];
     defaultInactiveIds?: string;
 }
 
 const MenuCtl = (props: MenuCtlProps) => {
-    const { id, label, tp_onAction, defaultLov = "", width = "15vw", defaultValue, value, className } = props;
+    const {
+        id,
+        label,
+        tp_onAction,
+        defaultLov = "",
+        width = "15vw",
+        className,
+        width_Mobile_ = "85vw",
+    } = props;
     const { dispatch } = useContext(TaipyContext);
+    const isMobile = useIsMobile();
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -43,18 +49,30 @@ const MenuCtl = (props: MenuCtlProps) => {
     }, [props.inactiveIds, props.defaultInactiveIds]);
 
     useEffect(() => {
-        dispatch(createSetMenuAction({
-            label: label,
-            tp_onAction: tp_onAction,
-            active: active,
-            lov: lovList,
-            inactiveIds: inactiveIds,
-            value: value || defaultValue,
-            width: width,
-            className: className,
-        } as MenuProps));
+        dispatch(
+            createSetMenuAction({
+                label: label,
+                tp_onAction: tp_onAction,
+                active: active,
+                lov: lovList,
+                inactiveIds: inactiveIds,
+                width: isMobile ? width_Mobile_ : width,
+                className: className,
+            } as MenuProps)
+        );
         return () => dispatch(createSetMenuAction({}));
-    }, [label, tp_onAction, active, lovList, inactiveIds, value, defaultValue, width, className, dispatch]);
+    }, [
+        label,
+        tp_onAction,
+        active,
+        lovList,
+        inactiveIds,
+        width,
+        width_Mobile_,
+        isMobile,
+        className,
+        dispatch,
+    ]);
 
     return <></>;
 };

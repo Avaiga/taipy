@@ -22,7 +22,7 @@ def test_selector_md_2(gui: Gui, helpers):
     md_string = "<|{selected_val}|selector|lov=Item 1;Item 2; This is a another value|>"
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;Item 1&quot;, &quot;Item 1&quot;], [&quot;Item 2&quot;, &quot;Item 2&quot;], [&quot; This is a another value&quot;, &quot; This is a another value&quot;]]"',
+        'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
         'tp_varname="selected_val"',
         "value={selected_val}",
@@ -88,7 +88,7 @@ def test_selector_html_2_1(gui: Gui, helpers):
     html_string = '<taipy:selector value="{selected_val}" lov="Item 1;Item 2; This is a another value" />'
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;Item 1&quot;, &quot;Item 1&quot;], [&quot;Item 2&quot;, &quot;Item 2&quot;], [&quot; This is a another value&quot;, &quot; This is a another value&quot;]]"',
+        'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
         'tp_varname="selected_val"',
         "value={selected_val}",
@@ -101,7 +101,7 @@ def test_selector_html_2_2(gui: Gui, helpers):
     html_string = '<taipy:selector lov="Item 1;Item 2; This is a another value">{selected_val}</taipy:selector>'
     expected_list = [
         "<Selector",
-        'defaultLov="[[&quot;Item 1&quot;, &quot;Item 1&quot;], [&quot;Item 2&quot;, &quot;Item 2&quot;], [&quot; This is a another value&quot;, &quot; This is a another value&quot;]]"',
+        'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
         'tp_varname="selected_val"',
         "value={selected_val}",

@@ -3,7 +3,6 @@ import typing as t
 import warnings
 from abc import ABC, abstractmethod
 
-from ..utils import _get_dict_value
 from .data_format import DataFormat
 
 if t.TYPE_CHECKING:
@@ -108,13 +107,13 @@ class _DataAccessors(object):
         return self.__invalid_data_accessor
 
     def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
-        inst = _get_dict_value(self.__access_4_type, value.__class__)
+        inst = self.__access_4_type.get(value.__class__)
         if not inst:
-            inst = _get_dict_value(self.__access_4_var, var_name)
+            inst = self.__access_4_var.get(var_name)
         return inst.cast_string_value(var_name, value) if inst else value
 
     def _is_data_access(self, var_name: str, value: t.Any) -> bool:
-        inst = _get_dict_value(self.__access_4_type, value.__class__)
+        inst = self.__access_4_type.get(value.__class__)
         return inst and inst.is_data_access(var_name, value)
 
     def _get_data(self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:

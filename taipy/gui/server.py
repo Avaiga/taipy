@@ -6,9 +6,11 @@ import re
 import typing as t
 
 import __main__
-from flask import Blueprint, Flask, jsonify, render_template, render_template_string, request, send_from_directory
+from flask import Blueprint, Flask, jsonify, render_template, render_template_string, request, send_from_directory, json
 from flask_cors import CORS
 from flask_socketio import SocketIO
+
+from taipy.gui.renderers.jsonencoder import TaipyJsonEncoder
 
 from .utils import KillableThread, _is_in_notebook
 
@@ -34,8 +36,17 @@ class Server:
         self.css_file = css_file
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
             self._flask.config["SECRET_KEY"] = "TaIpY"
+        # set json encoder (for Taipy specific types)
+        self._flask.json_encoder = TaipyJsonEncoder
         # Add cors for frontend access
-        self._ws = SocketIO(self._flask, async_mode=None, cors_allowed_origins="*", ping_timeout=10, ping_interval=5)
+        self._ws = SocketIO(
+            self._flask,
+            async_mode=None,
+            cors_allowed_origins="*",
+            ping_timeout=10,
+            ping_interval=5,
+            json=json,
+        )
         CORS(self._flask)
 
         self.__path_mapping = path_mapping
