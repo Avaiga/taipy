@@ -2,11 +2,12 @@ import os
 import shutil
 import uuid
 
+import pandas as pd
 import pytest
 from dotenv import load_dotenv
 from taipy.common.alias import DataNodeId
 from taipy.config import Config, DataNodeConfig, PipelineConfig
-from taipy.data import InMemoryDataNode, Scope
+from taipy.data import InMemoryDataNode, Scope, CSVDataNode, PickleDataNode
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
 from taipy.task import Task
@@ -67,7 +68,23 @@ def default_datanode():
         DataNodeId("id_uio"),
         "my name",
         "parent_id",
-        properties={"default_data": "In memory Data Source"},
+        properties={"default_data": [1, 2, 3, 4, 5, 6]},
+    )
+
+
+@pytest.fixture
+def default_df_datanode():
+    return InMemoryDataNode(
+        "input_ds",
+        Scope.SCENARIO,
+        DataNodeId("id_uio2"),
+        "my name",
+        "parent_id",
+        properties={
+            "default_data": pd.DataFrame(
+                [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}]
+            )
+        },
     )
 
 

@@ -1,3 +1,5 @@
+from enum import Enum
+
 from marshmallow import Schema, fields, pre_dump
 
 
@@ -49,3 +51,14 @@ class SQLDataNodeConfigSchema(DataNodeConfigSchema):
     db_engine = fields.String()
     read_query = fields.String()
     write_table = fields.String()
+
+
+class OperatorSchema(Schema):
+    key = fields.String()
+    value = fields.Inferred()
+    operator = fields.String()
+
+
+class DataNodeFilterSchema(DataNodeConfigSchema):
+    operators = fields.List(fields.Nested(OperatorSchema))
+    join_operator = fields.String(default="AND")

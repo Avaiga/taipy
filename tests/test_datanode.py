@@ -3,30 +3,14 @@ from unittest import mock
 from flask import url_for
 
 
-def test_get_datanode(client):
+def test_get_datanode(client, default_datanode):
     # test 404
     user_url = url_for("api.datanode_by_id", datanode_id="foo")
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    data = {
-        "config_name": "foo",
-        "validity_minutes": None,
-        "edition_in_progress": False,
-        "scope": "Scope.PIPELINE",
-        "job_ids": [],
-        "validity_days": None,
-        "parent_id": None,
-        "name": "DATASOURCE_foo_09d756d4-e2f1-42c9-a9b4-2cef9f293462",
-        "properties": {"default_data": ["1991-01-01T00:00:00"]},
-        "validity_hours": None,
-        "id": "foo",
-        "last_edition_date": "2021-12-28 21:17:54.652829",
-    }
-
     with mock.patch("taipy.data.manager.data_manager.DataManager.get") as manager_mock:
-        manager_mock.return_value = data
-
+        manager_mock.return_value = default_datanode
         # test get_datanode
         rep = client.get(url_for("api.datanode_by_id", datanode_id="foo"))
         assert rep.status_code == 200
@@ -78,3 +62,39 @@ def test_get_all_datanodes(client, default_datanode_config_list):
 
     results = rep.get_json()
     assert len(results) == 10
+
+
+def test_read_datanode(client, default_df_datanode):
+    with mock.patch("taipy.data.manager.data_manager.DataManager.get") as config_mock:
+        config_mock.side_effect = [default_df_datanode]
+        # without operators
+        datanodes_url = url_for("api.datanode_reader", datanode_id="foo")
+        rep = client.get(datanodes_url)
+        assert rep.status_code == 200
+
+        # TODO: Revisit filter test
+        # operators = {"operators": [{"key": "a", "value": 5, "operator": "LESS_THAN"}]}
+        # rep = client.get(datanodes_url, json=operators)
+        # assert rep.status_code == 200
+
+
+def test_write_datanode(client, default_datanode):
+    with mock.patch("taipy.data.manager.data_manager.DataManager.get") as config_mock:
+        config_mock.return_value = default_datanode
+        # Get DataNode
+        datanodes_read_url = url_for(
+            "api.datanode_reader", datanode_id=default_datanode.id
+        )
+        rep = client.get(datanodes_read_url)
+        assert rep.status_code == 200
+        assert rep.json == {"data": [1, 2, 3, 4, 5, 6]}
+
+        datanodes_write_url = url_for(
+            "api.datanode_writer", datanode_id=default_datanode.id
+        )
+        rep = client.put(datanodes_write_url, json=[1, 2, 3])
+        assert rep.status_code == 200
+
+        rep = client.get(datanodes_read_url)
+        assert rep.status_code == 200
+        assert rep.json == {"data": [1, 2, 3]}
