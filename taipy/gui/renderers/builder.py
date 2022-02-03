@@ -10,7 +10,7 @@ from types import FunctionType
 
 from ..page import Partial
 from ..types import AttributeType
-from ..utils import _get_dict_value, _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
+from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
 
@@ -79,9 +79,9 @@ class Builder:
 
     @staticmethod
     def _get_key(name: str) -> str:
-        key_index = _get_dict_value(Builder.__keys, name)
-        Builder.__keys[name] = (key_index or 0) + 1
-        return name + "." + (str(key_index) if key_index else "0")
+        key_index = Builder.__keys.get(name, 0)
+        Builder.__keys[name] = key_index + 1
+        return f"{name}.{key_index}"
 
     @staticmethod
     def _reset_key() -> None:
@@ -91,7 +91,7 @@ class Builder:
         lof = self.__get_property(name)
         if isinstance(lof, str):
             self.from_string = True
-            lof = [(s, s) for s in lof.split(";")]
+            lof = [s for s in lof.split(";")]
         return lof
 
     def __get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
@@ -100,11 +100,11 @@ class Builder:
         for key in self.attributes.keys():
             m = index_re.match(key)
             if m:
-                ret[m.group(1)] = _get_dict_value(self.attributes, key)
+                ret[m.group(1)] = self.attributes.get(key)
         return ret
 
     def __get_property(self, name: str, default_value: t.Any = None) -> t.Any:
-        prop = _get_dict_value(self.attributes, name)
+        prop = self.attributes.get(name)
         if prop is None:
             prop = default_value
         return prop
@@ -198,7 +198,7 @@ class Builder:
         property_name = var_name if property_name is None else property_name
         lov = self.__get_list_of_(var_name)
         if isinstance(lov, list):
-            from_string = hasattr(self, "from_string") and self.from_string
+            from_string = getattr(self, "from_string", False)
             adapter = self.__get_property("adapter")
             if adapter and not isinstance(adapter, FunctionType):
                 warnings.warn("'adapter' property value is invalid")
@@ -277,6 +277,14 @@ class Builder:
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
         if columns is not None:
+            width = self.__get_name_indexed_property("width")
+            for k, v in width.items():
+                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
+                if col_desc:
+                    if col_desc.get("width") is None:
+                        col_desc["width"] = str(v)
+                else:
+                    warnings.warn(f"{self.element_name} width[{k}] is not in the list of displayed columns")
             group_by = self.__get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if is_boolean_true(v):
@@ -426,7 +434,7 @@ class Builder:
         return self
 
     def set_chart_layout(self):
-        layout = _get_dict_value(self.attributes, "layout")
+        layout = self.attributes.get("layout")
         if layout:
             if isinstance(layout, (dict, _MapDictionary)):
                 self.__set_json_attribute("layout", layout)
@@ -543,6 +551,20 @@ class Builder:
         if hash_name:
             self.__update_vars.append(f"{property_name}={hash_name}")
             self.__set_react_attribute(property_name, hash_name)
+        return self
+
+    def __set_dynamic_string_list(self, var_name: str, default_value: t.Any):
+        hash_name = self.__hashes.get(var_name)
+        loi = self.__get_property(var_name)
+        if loi is None:
+            loi = default_value
+        if isinstance(loi, str):
+            loi = [s.strip() for s in loi.split(";") if s.strip()]
+        if isinstance(loi, list):
+            self.__set_json_attribute(_to_camel_case("default_" + var_name), loi)
+        if hash_name:
+            self.__update_vars.append(f"{var_name}={hash_name}")
+            self.__set_react_attribute(var_name, hash_name)
         return self
 
     def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None):
@@ -674,6 +696,8 @@ class Builder:
                 self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
             elif type == AttributeType.dict:
                 self.__set_dict_attribute(attr[0])
+            elif type == AttributeType.dynamic_list:
+                self.__set_dynamic_string_list(attr[0], _get_val(attr, 2, None))
         return self
 
     def set_attribute(self, name, value):

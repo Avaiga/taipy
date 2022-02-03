@@ -22,7 +22,7 @@ def test_slider_items_md(gui: Gui, helpers):
         "<Slider",
         'tp_varname="x"',
         "value={x}",
-        'defaultLov="[[&quot;Item 1&quot;, &quot;Item 1&quot;], [&quot;Item 2&quot;, &quot;Item 2&quot;], [&quot;Item 3&quot;, &quot;Item 3&quot;]]"',
+        'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
         'textAnchor="left"',
     ]

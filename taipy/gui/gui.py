@@ -35,7 +35,6 @@ from .types import WsType
 from .utils import (
     ISOToDate,
     Singleton,
-    _get_dict_value,
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDictionary,
@@ -213,7 +212,7 @@ class Gui(object, metaclass=Singleton):
                     message.get("propagate", True),
                 )
             elif msg_type == WsType.ACTION.value:
-                self.__on_action(_get_dict_value(message, "name"), message["payload"])
+                self.__on_action(message.get("name"), message["payload"])
             elif msg_type == WsType.DATA_UPDATE.value:
                 self.__request_data_update(message["name"], message["payload"])
             elif msg_type == WsType.REQUEST_UPDATE.value:
@@ -226,7 +225,7 @@ class Gui(object, metaclass=Singleton):
             warnings.warn(f"Can't access: {message}\n{ke}")
 
     def __set_client_id(self, message: dict):
-        self._scopes._set_client_id(_get_dict_value(message, "client_id"))
+        self._scopes._set_client_id(message.get("client_id"))
 
     def __get_or_create_scope(self, id: str):
         if not id:
@@ -491,7 +490,7 @@ class Gui(object, metaclass=Singleton):
 
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         if isinstance(payload, dict):
-            action = _get_dict_value(payload, "action")
+            action = payload.get("action")
         else:
             action = str(payload)
         if action and hasattr(self, action):
@@ -501,10 +500,10 @@ class Gui(object, metaclass=Singleton):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
     def __call_function_with_args(*args, **kwargs):
-        action_function = _get_dict_value(kwargs, "action_function")
-        id = _get_dict_value(kwargs, "id")
-        action = _get_dict_value(kwargs, "action")
-        payload = _get_dict_value(kwargs, "payload")
+        action_function = kwargs.get("action_function")
+        id = kwargs.get("id")
+        action = kwargs.get("action")
+        payload = kwargs.get("payload")
         pself = args[0]
 
         if isinstance(action_function, FunctionType):

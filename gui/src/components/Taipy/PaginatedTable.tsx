@@ -31,7 +31,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
     addDeleteColumn,
-    alignCell,
+    getCellProps,
     baseBoxSx,
     EditableCell,
     EDIT_COL,
@@ -292,7 +292,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return ret;
     }, [value]);
 
-    const boxSx = useMemo(() => ({...baseBoxSx, width: width}), [width]);
+    const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
         <Box id={id} sx={boxSx}>
@@ -308,7 +308,11 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         <TableHead>
                             <TableRow>
                                 {colsOrder.map((col, idx) => (
-                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
+                                    <TableCell
+                                        key={col + idx}
+                                        sortDirection={orderBy === columns[col].dfid && order}
+                                        width={columns[col].width}
+                                    >
                                         {columns[col].dfid === EDIT_COL ? (
                                             active && editable && addAction ? (
                                                 <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
@@ -372,7 +376,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         {colsOrder.map((col, cidx) => (
                                             <TableCell
                                                 key={"val" + index + "-" + cidx}
-                                                {...alignCell(columns[col])}
+                                                {...getCellProps(columns[col])}
                                                 className={getClassName(rows[index], columns[col].style)}
                                             >
                                                 <EditableCell

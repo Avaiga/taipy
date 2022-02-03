@@ -26,3 +26,4 @@ class AttributeType(Enum):
     react = "react"
     dict = "dict"
     dynamic_boolean = "dynamicbool"
+    dynamic_list = "dynamiclist"

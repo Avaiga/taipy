@@ -25,7 +25,7 @@ import {
 } from "../../context/taipyReducers";
 import {
     ColumnDesc,
-    alignCell,
+    getCellProps,
     getsortByIndex,
     Order,
     TaipyTableProps,
@@ -97,7 +97,7 @@ const Row = ({
                     component="div"
                     variant="body"
                     key={"val" + index + "-" + cidx}
-                    {...alignCell(columns[col])}
+                    {...getCellProps(columns[col])}
                     sx={cellStyles[cidx]}
                     className={getClassName(rows[index], columns[col].style)}
                 >
@@ -245,7 +245,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     useEffect(() => {
         if (headerRow.current) {
             Array.from(headerRow.current.cells).forEach((cell, idx) => {
-                columns[colsOrder[idx]].width = cell.offsetWidth;
+                columns[colsOrder[idx]].widthHint = cell.offsetWidth;
             });
         }
     }, [columns, colsOrder]);
@@ -350,7 +350,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns: columns,
             rows: rows,
             classes: {},
-            cellStyles: colsOrder.map((col) => ({ width: columns[col].width, height: ROW_HEIGHT - 32 })),
+            cellStyles: colsOrder.map((col) => ({ width: columns[col].width || columns[col].widthHint, height: ROW_HEIGHT - 32 })),
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
@@ -391,7 +391,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <TableHead>
                             <TableRow ref={headerRow}>
                                 {colsOrder.map((col, idx) => (
-                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order}>
+                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order} width={columns[col].width}>
                                         {columns[col].dfid === EDIT_COL ? (
                                             active && editable && addAction ? (
                                                 <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>

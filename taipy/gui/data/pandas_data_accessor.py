@@ -6,7 +6,7 @@ import pandas as pd
 from pandas.core.frame import DataFrame
 import pyarrow as pa
 
-from ..utils import _get_date_col_str_name, _get_dict_value
+from ..utils import _get_date_col_str_name
 from .data_accessor import DataAccessor
 from .data_format import DataFormat
 
@@ -149,20 +149,20 @@ class PandasDataAccessor(DataAccessor):
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         if isinstance(value, pd.DataFrame):
-            aggregates = _get_dict_value(payload, "aggregates")
-            applies = _get_dict_value(payload, "applies")
+            aggregates = payload.get("aggregates")
+            applies = payload.get("applies")
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {}
                 for k, v in applies.items():
                     applies_with_fn[k] = getattr(guiApp, v) if hasattr(guiApp, v) else v
-                for col in _get_dict_value(payload, "columns") or []:
+                for col in payload.get("columns", []):
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"
                 try:
                     value = value.groupby(aggregates).agg(applies_with_fn)
                 except Exception:
                     warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
-            paged = not _get_dict_value(payload, "alldata")
+            paged = not payload.get("alldata")
             if paged:
                 keys = payload.keys()
                 ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
@@ -170,8 +170,8 @@ class PandasDataAccessor(DataAccessor):
                     ret_payload["infinite"] = payload["infinite"]
             else:
                 ret_payload["alldata"] = payload["alldata"]
-                nb_rows_max = _get_dict_value(payload, "width")
-            columns = _get_dict_value(payload, "columns")
+                nb_rows_max = payload.get("width")
+            columns = payload.get("columns")
             if paged:
                 # real number of rows is needed to calculate the number of pages
                 rowcount = len(value)
@@ -196,17 +196,17 @@ class PandasDataAccessor(DataAccessor):
                 if end < 0 or end >= rowcount:
                     end = rowcount - 1
                 # deal with sort
-                order_by = _get_dict_value(payload, "orderby")
+                order_by = payload.get("orderby")
                 if isinstance(order_by, str) and len(order_by):
                     new_indexes = value[order_by].values.argsort(axis=0)
-                    if _get_dict_value(payload, "sort") == "desc":
+                    if payload.get("sort") == "desc":
                         # reverse order
                         new_indexes = new_indexes[::-1]
                     new_indexes = new_indexes[slice(start, end + 1)]
                 else:
                     new_indexes = slice(start, end + 1)
                 value = self.__build_transferred_cols(
-                    guiApp, columns, value.iloc[new_indexes], styles=_get_dict_value(payload, "styles")
+                    guiApp, columns, value.iloc[new_indexes], styles=payload.get("styles")
                 )
                 dictret = self.__format_data(value, data_format, "records", start, rowcount)
             else:

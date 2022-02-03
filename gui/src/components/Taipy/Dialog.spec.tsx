@@ -168,7 +168,7 @@ describe("Dialog Component", () => {
         userEvent.click(getByText("testValidate"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { value: "testValidateAction" },
+            payload: { action: "testValidateAction", args: [] },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -193,7 +193,7 @@ describe("Dialog Component", () => {
         userEvent.click(getByText("testCancel"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { value: "testCancelAction" },
+            payload: { action: "testCancelAction", args: [] },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -217,7 +217,7 @@ describe("Dialog Component", () => {
         userEvent.click(getByTestId("CloseIcon"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { value: "testValidateAction" },
+            payload: { action: "testValidateAction", args: [] },
             type: "SEND_ACTION_ACTION",
         });
     });
@@ -242,7 +242,7 @@ describe("Dialog Component", () => {
         userEvent.click(getByTestId("CloseIcon"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { value: "testCancelAction" },
+            payload: { action: "testCancelAction", args: [] },
             type: "SEND_ACTION_ACTION",
         });
     });

@@ -21,6 +21,7 @@ class Factory:
         "image": "content",
         "input": "value",
         "layout": "columns",
+        "menu": "lov",
         "navbar": "value",
         "number": "value",
         "pane": "open",
@@ -211,6 +212,26 @@ class Factory:
                 ("gap",),
             ]
         ),
+        "menu": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="MenuCtl",
+            attributes=attrs,
+        )
+        .get_adapter("lov")  # need to be called before set_lov
+        .set_lov()
+        .set_attributes(
+            [
+                ("id",),
+                ("active", AttributeType.dynamic_boolean, True),
+                ("label"),
+                ("width"),
+                ("width[mobile]",),
+                ("on_action", AttributeType.string, "on_menu_action"),
+                ("inactive_ids", AttributeType.dynamic_list),
+            ]
+        )
+        .set_refresh_on_update()
+        .set_propagate(),
         "navbar": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="NavBar", attributes=attrs, default_value=""
         )

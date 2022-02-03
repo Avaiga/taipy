@@ -1,14 +1,15 @@
-import React, { CSSProperties, useMemo } from "react";
+import React, { CSSProperties, useMemo, MouseEvent } from "react";
 import Avatar from "@mui/material/Avatar";
 import CardHeader from "@mui/material/CardHeader";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Tooltip from "@mui/material/Tooltip";
+import {TypographyProps} from "@mui/material";
 
-import { TaipyBaseProps, TaipyImage } from "./utils";
-
-export interface LovItem {
-    id: string;
-    item: string | TaipyImage;
-    children?: LovItem[];
-}
+import { TaipyBaseProps } from "./utils";
+import { getInitials } from "../../utils";
+import { LovItem, TaipyImage } from "../../utils/lov";
 
 export interface SelTreeProps extends LovProps {
     filter?: boolean;
@@ -67,8 +68,8 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
     }, [lov, defaultLov, tree]);
 
 const cardSx = { padding: 0 } as CSSProperties;
-export const LovImage = ({ item }: { item: TaipyImage }) => (
-    <CardHeader sx={cardSx} avatar={<Avatar alt={item.text} src={item.path} />} title={item.text} />
+export const LovImage = ({ item, titleTypographyProps }: { item: TaipyImage, titleTypographyProps?: TypographyProps }) => (
+    <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar alt={item.text} src={item.path} /></Tooltip>} title={item.text} titleTypographyProps={titleTypographyProps} />
 );
 
 export const showItem = (elt: LovItem, searchValue: string) => {
@@ -79,3 +80,36 @@ export const showItem = (elt: LovItem, searchValue: string) => {
             .indexOf(searchValue.toLowerCase()) > -1
     );
 };
+
+export interface ItemProps {
+    value: string;
+    clickHandler: (evt: MouseEvent<HTMLElement>) => void;
+    selectedValue: string[] | string;
+    item: string | TaipyImage;
+    disabled: boolean;
+    withAvatar?: boolean;
+    titleTypographyProps?: TypographyProps;
+}
+
+export const SingleItem = ({ value, clickHandler, selectedValue, item, disabled, withAvatar = false, titleTypographyProps }: ItemProps) => (
+    <ListItemButton
+        onClick={clickHandler}
+        data-id={value}
+        selected={Array.isArray(selectedValue) ? selectedValue.indexOf(value) !== -1 : selectedValue === value}
+        disabled={disabled}
+    >
+        {typeof item === "string" ? (
+            withAvatar ? (
+                <ListItemAvatar>
+                    <CardHeader sx={cardSx} avatar={<Tooltip title={item}><Avatar>{getInitials(item)}</Avatar></Tooltip>} title={item} titleTypographyProps={titleTypographyProps} />
+                </ListItemAvatar>
+            ) : (
+                <ListItemText primary={item} />
+            )
+        ) : (
+            <ListItemAvatar>
+                <LovImage item={item} titleTypographyProps={titleTypographyProps} />
+            </ListItemAvatar>
+        )}
+    </ListItemButton>
+);
