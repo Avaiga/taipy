@@ -5,7 +5,7 @@ import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import Popover, { PopoverOrigin } from "@mui/material/Popover";
 
 import Status, { StatusType } from "./Status";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 
 const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
@@ -67,7 +67,7 @@ interface StatusDel extends StatusType {
     id?: string;
 }
 
-interface StatusListProps extends TaipyBaseProps {
+interface StatusListProps extends TaipyActiveProps {
     value: StatusType[] | StatusType;
     defaultValue?: string;
     withoutClose?: boolean;

@@ -6,10 +6,10 @@ import UploadFile from "@mui/icons-material/UploadFile";
 import { TaipyContext } from "../../context/taipyContext";
 import { createAlertAction, createSendActionNameAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
-import { noDisplayStyle, TaipyBaseProps } from "./utils";
+import { noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 
-interface FileSelectorProps extends TaipyBaseProps {
+interface FileSelectorProps extends TaipyActiveProps {
     tp_onAction?: string;
     defaultLabel?: string;
     label?: string;

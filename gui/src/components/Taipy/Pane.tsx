@@ -10,14 +10,14 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 
 type AnchorType = "left" | "bottom" | "right" | "top" | undefined;
 
-interface PaneProps extends TaipyBaseProps {
+interface PaneProps extends TaipyActiveProps {
     children?: ReactNode;
     open?: boolean;
-    defaultOpen?: string;
+    defaultOpen?: string | boolean;
     anchor?: AnchorType;
     persistent?: boolean;
     closeAction?: string;
@@ -62,7 +62,7 @@ const Pane = (props: PaneProps) => {
         className,
     } = props;
     const { dispatch } = useContext(TaipyContext);
-    const [open, setOpen] = useState(defaultOpen === "true");
+    const [open, setOpen] = useState(defaultOpen === "true" || defaultOpen === true);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 

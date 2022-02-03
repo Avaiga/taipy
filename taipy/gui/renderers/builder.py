@@ -12,7 +12,7 @@ from ..page import Partial
 from ..types import AttributeType
 from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from .jsonencoder import TaipyJsonEncoder
-from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case
+from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case, _get_tuple_val
 
 
 class Builder:
@@ -88,7 +88,7 @@ class Builder:
         Builder.__keys = {}
 
     def __get_list_of_(self, name: str):
-        lof = self.__get_property(name)
+        lof = self.attributes.get(name)
         if isinstance(lof, str):
             self.from_string = True
             lof = [s for s in lof.split(";")]
@@ -103,15 +103,9 @@ class Builder:
                 ret[m.group(1)] = self.attributes.get(key)
         return ret
 
-    def __get_property(self, name: str, default_value: t.Any = None) -> t.Any:
-        prop = self.attributes.get(name)
-        if prop is None:
-            prop = default_value
-        return prop
-
     def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
         names = [n if index is None else f"{n}[{index}]" for n in names]  # type: ignore
-        return [self.__get_property(name) for name in names]
+        return [self.attributes.get(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self._gui._is_expression(value):
@@ -123,7 +117,7 @@ class Builder:
         return (value, None)
 
     def __set_boolean_attribute(self, name: str, default_value=False):
-        boolattr = self.__get_property(name, default_value)
+        boolattr = self.attributes.get(name, default_value)
         if isinstance(boolattr, str):
             boolattr = is_boolean_true(boolattr)
         if isinstance(boolattr, bool):
@@ -131,7 +125,7 @@ class Builder:
         return self
 
     def __set_dict_attribute(self, name: str):
-        dict_attr = self.__get_property(name)
+        dict_attr = self.attributes.get(name)
         if dict_attr:
             if isinstance(dict_attr, str):
                 vals = [x.strip().split(":") for x in dict_attr.split(";")]
@@ -161,7 +155,7 @@ class Builder:
     def __set_number_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
-        value = self.__get_property(name, default_value)
+        value = self.attributes.get(name, default_value)
         if value is None:
             if not optional:
                 warnings.warn(f"Property {name} is required for control {self.control_type}")
@@ -175,7 +169,7 @@ class Builder:
     def __set_string_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
-        strattr = self.__get_property(name, default_value)
+        strattr = self.attributes.get(name, default_value)
         if strattr is None:
             if not optional:
                 warnings.warn(f"Property {name} is required for control {self.control_type}")
@@ -183,7 +177,7 @@ class Builder:
         return self.set_attribute(_to_camel_case(name), strattr)
 
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
-        attr = self.__get_property(name, default_value)
+        attr = self.attributes.get(name, default_value)
         if attr is None:
             return self
         if isinstance(attr, numbers.Number):
@@ -199,17 +193,17 @@ class Builder:
         lov = self.__get_list_of_(var_name)
         if isinstance(lov, list):
             from_string = getattr(self, "from_string", False)
-            adapter = self.__get_property("adapter")
+            adapter = self.attributes.get("adapter")
             if adapter and not isinstance(adapter, FunctionType):
                 warnings.warn("'adapter' property value is invalid")
                 adapter = None
-            var_type = self.__get_property("type")
+            var_type = self.attributes.get("type")
             if isinstance(var_type, t.Type):  # type: ignore
                 var_type = var_type.__name__
             if not isinstance(var_type, str):
                 elt = None
                 if len(lov) == 0:
-                    value = self.__get_property("value")
+                    value = self.attributes.get("value")
                     if isinstance(value, list):
                         if len(value) > 0:
                             elt = value[0]
@@ -250,7 +244,7 @@ class Builder:
             self.attributes["default_" + property_name] = ret_list
 
             ret_list = []
-            value = self.__get_property("value")
+            value = self.attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self._gui._run_adapter(adapter, val, adapter.__name__, "-1", id_only=True)
@@ -260,13 +254,13 @@ class Builder:
                 self.__set_default_value("value", ret_list)
             else:
                 ret_val = ret_list[0] if len(ret_list) else ""
-                if ret_val == "-1" and self.__get_property("unselected_value") is not None:
-                    ret_val = self.__get_property("unselected_value")
+                if ret_val == "-1" and self.attributes.get("unselected_value") is not None:
+                    ret_val = self.attributes.get("unselected_value")
                 self.__set_default_value("value", ret_val)
         return self
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
-        value = self.__get_property("data")
+        value = self.attributes.get("data")
 
         col_types = self._gui._accessors._get_col_types(self.__hashes.get("data", ""), value)
         columns = _get_columns_dict(
@@ -310,7 +304,7 @@ class Builder:
                         col_desc["apply"] = value
                 else:
                     warnings.warn(f"{self.element_name} apply[{k}] is not in the list of displayed columns")
-            line_style = self.__get_property("style")
+            line_style = self.attributes.get("style")
             if line_style:
                 if isinstance(line_style, FunctionType):
                     value = self.__hashes.get("style")
@@ -406,7 +400,7 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:5] if t])
-        value = self.__get_property("data")
+        value = self.attributes.get("data")
         columns = _get_columns_dict(value, list(columns), self._gui._accessors._get_col_types("", value))
         if columns is not None:
             self.attributes["columns"] = columns
@@ -442,7 +436,7 @@ class Builder:
                 warnings.warn(f"Chart control: layout attribute should be a dict\n'{str(layout)}'")
 
     def set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
-        value = self.__get_property(var_name, default_value)
+        value = self.attributes.get(var_name, default_value)
         if value is not None:
             value = str(value).lower()
             self.attributes[var_name] = value
@@ -467,10 +461,10 @@ class Builder:
 
     def set_chart_selected(self, max=0):
         name = "selected"
-        default_sel = self.__get_property(name)
+        default_sel = self.attributes.get(name)
         idx = 1
         name_idx = f"{name}[{idx}]"
-        sel = self.__get_property(name_idx)
+        sel = self.attributes.get(name_idx)
         while idx <= max:
             if sel is not None or default_sel is not None:
                 self.__update_vars.extend(
@@ -483,12 +477,12 @@ class Builder:
                 )
             idx += 1
             name_idx = f"{name}[{idx}]"
-            sel = self.__get_property(name_idx)
+            sel = self.attributes.get(name_idx)
 
     def get_list_attribute(self, name: str, list_type: AttributeType):
         varname = self.__hashes.get(name)
         if varname is None:
-            list_val = self.__get_property(name)
+            list_val = self.attributes.get(name)
             if isinstance(list_val, str):
                 list_val = [s for s in list_val.split(";")]
             if isinstance(list_val, list):
@@ -511,14 +505,14 @@ class Builder:
         cl = self._gui._config.style_config.get(self.control_type)
         if cl:
             classes.append(cl)
-        cl = self.__get_property("classname")
+        cl = self.attributes.get("classname")
         if cl:
             classes.append(str(cl))
 
         return self.set_attribute("className", " ".join(classes))
 
     def set_dataType(self):
-        value = self.__get_property("value")
+        value = self.attributes.get("value")
         self.set_attribute("dataType", getDataType(value))
         return self
 
@@ -531,7 +525,7 @@ class Builder:
         return self
 
     def set_content(self, var_name: str = "content", image=True):
-        content = self.__get_property(var_name)
+        content = self.attributes.get(var_name)
         if content is None:
             return self
         hash_name = self.__hashes.get(var_name)
@@ -555,7 +549,7 @@ class Builder:
 
     def __set_dynamic_string_list(self, var_name: str, default_value: t.Any):
         hash_name = self.__hashes.get(var_name)
-        loi = self.__get_property(var_name)
+        loi = self.attributes.get(var_name)
         if loi is None:
             loi = default_value
         if isinstance(loi, str):
@@ -567,14 +561,36 @@ class Builder:
             self.__set_react_attribute(var_name, hash_name)
         return self
 
-    def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None):
+    def __set_dynamic_number_attribute(self, var_name: str, default_value: t.Any):
+        hash_name = self.__hashes.get(var_name)
+        numVal = self.attributes.get(var_name)
+        if numVal is None:
+            numVal = default_value
+        if isinstance(numVal, str):
+            try:
+                numVal = float(numVal)
+            except Exception as e:
+                warnings.warn(f"{self.element_name} {var_name} cannot be transformed into a number\n{e}")
+                numVal = 0
+        if isinstance(numVal, (int, float)):
+            self.__set_react_attribute(_to_camel_case("default_" + var_name), numVal)
+        elif numVal is not None:
+            warnings.warn(f"{self.element_name} {var_name} value is not not valid {numVal}")
+        if hash_name:
+            self.__update_vars.append(f"{var_name}={hash_name}")
+            self.__set_react_attribute(var_name, hash_name)
+        return self
+
+    def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None, native_type: bool = False):
         if value is None:
-            value = self.__get_property(var_name)
+            value = self.attributes.get(var_name)
         default_var_name = _to_camel_case("default_" + var_name)
         if isinstance(value, datetime.datetime):
             self.set_attribute(default_var_name, dateToISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
+        elif native_type and isinstance(value, (int, float)):
+            self.__set_react_attribute(default_var_name, value)
         else:
             self.__set_json_attribute(default_var_name, value)
         return self
@@ -582,7 +598,13 @@ class Builder:
     def __set_tp_varname(self, hash_name: str):
         return self.set_attribute("tp_varname", self._gui._get_expr_from_hash(hash_name))
 
-    def set_value_and_default(self, var_name: t.Optional[str] = None, with_update=True, with_default=True):
+    def set_value_and_default(
+        self,
+        var_name: t.Optional[str] = None,
+        with_update=True,
+        with_default=True,
+        native_type: bool = False,
+    ):
         var_name = self.default_property_name if var_name is None else var_name
         hash_name = self.__hashes.get(var_name)
         if hash_name:
@@ -593,15 +615,34 @@ class Builder:
             if with_update:
                 self.__set_tp_varname(hash_name)
             if with_default:
-                self.__set_default_value(var_name)
+                if native_type:
+                    val = self.attributes.get(var_name)
+                    if native_type and isinstance(val, str):
+                        try:
+                            val = float(val)
+                        except Exception as e:
+                            # keep as str
+                            pass
+                    self.__set_default_value(var_name, val, native_type=native_type)
+                else:
+                    self.__set_default_value(var_name)
         else:
-            value = self.__get_property(var_name)
+            value = self.attributes.get(var_name)
             if value is not None:
+                if native_type:
+                    if isinstance(value, str):
+                        try:
+                            val = float(value)
+                        except Exception as e:
+                            # keep as str
+                            pass
+                    if isinstance(val, (int, float)):
+                        return self.__set_react_attribute(var_name, val)
                 self.set_attribute(var_name, value)
         return self
 
     def set_labels(self, var_name: str = "labels"):
-        value = self.__get_property(var_name)
+        value = self.attributes.get(var_name)
         if value:
             if is_boolean_true(value):
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
@@ -614,9 +655,9 @@ class Builder:
     def set_partial(self):
         if self.element_name != "Dialog" and self.element_name != "Pane":
             return self
-        partial = self.__get_property("partial")
+        partial = self.attributes.get("partial")
         if partial:
-            page_id = self.__get_property("page_id")
+            page_id = self.attributes.get("page_id")
             if page_id:
                 warnings.warn("Dialog control: page_id and partial should not be defined at the same time")
             if isinstance(partial, Partial):
@@ -624,7 +665,7 @@ class Builder:
         return self
 
     def set_propagate(self):
-        val = self.__get_property("propagate", self._gui._config.app_config["propagate"])
+        val = self.attributes.get("propagate", self._gui._config.app_config["propagate"])
         if val is not True:
             return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
         return self
@@ -641,7 +682,7 @@ class Builder:
         return self
 
     def set_table_pagesize_options(self, default_size=[50, 100, 500]):
-        page_size_options = self.__get_property("page_size_options", default_size)
+        page_size_options = self.attributes.get("page_size_options", default_size)
         if isinstance(page_size_options, str):
             try:
                 page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
@@ -659,45 +700,42 @@ class Builder:
         return self
 
     def set_kind(self):
-        theme = self.__get_property("theme", False)
+        theme = self.attributes.get("theme", False)
         if theme:
             self.set_attribute("kind", "theme")
         return self
 
     def set_attributes(self, attributes: t.List[tuple]):
-        def _get_val(attr, index, default_val):
-            return attr[index] if len(attr) > index else default_val
-
         for attr in attributes:
             if not isinstance(attr, tuple):
                 attr = (attr,)
-            type = _get_val(attr, 1, AttributeType.string)
+            type = _get_tuple_val(attr, 1, AttributeType.string)
             if type == AttributeType.boolean:
-                val = self.__get_property(attr[0])
-                if val is not None and val != _get_val(attr, 2, False):
+                val = self.attributes.get(attr[0])
+                if val is not None and val != _get_tuple_val(attr, 2, False):
                     self.__set_boolean_attribute(attr[0], val)
             elif type == AttributeType.dynamic_boolean:
                 dyn_var = self.__hashes.get(attr[0])
-                val = self.__get_property(attr[0])
+                val = self.attributes.get(attr[0])
                 default_name = "default_" + attr[0] if dyn_var is not None else attr[0]
-                if val is not None and val != _get_val(attr, 2, False):
+                if val is not None and val != _get_tuple_val(attr, 2, False):
                     self.__set_boolean_attribute(default_name, val)
                 if dyn_var is not None:
                     self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(dyn_var))
             elif type == AttributeType.number:
-                self.__set_number_attribute(attr[0], _get_val(attr, 2, None))
+                self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
+            elif type == AttributeType.dynamic_number:
+                self.__set_dynamic_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif type == AttributeType.string:
-                self.__set_string_attribute(attr[0], _get_val(attr, 2, None), _get_val(attr, 3, True))
+                self.__set_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif type == AttributeType.react:
-                self.__set_react_attribute(_to_camel_case(attr[0]), _get_val(attr, 2, None))
-            elif type == AttributeType.number:
-                self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
+                self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
             elif type == AttributeType.string_or_number:
-                self.__set_string_or_number_attribute(attr[0], _get_val(attr, 2, None))
+                self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif type == AttributeType.dict:
                 self.__set_dict_attribute(attr[0])
             elif type == AttributeType.dynamic_list:
-                self.__set_dynamic_string_list(attr[0], _get_val(attr, 2, None))
+                self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
         return self
 
     def set_attribute(self, name, value):
@@ -705,9 +743,6 @@ class Builder:
             name = "tp_" + name
         self.el.set(name, value)
         return self
-
-    def build(self):
-        return self.el, self.m.start(0), self.m.end(0)
 
     def build_to_string(self):
         el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))

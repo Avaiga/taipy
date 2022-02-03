@@ -6,11 +6,11 @@ import { isValid } from "date-fns";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
 import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 
-interface DateSelectorProps extends TaipyBaseProps {
+interface DateSelectorProps extends TaipyActiveProps {
     withTime?: boolean;
     format?: string;
     date: string;

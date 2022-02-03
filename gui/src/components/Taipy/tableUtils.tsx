@@ -11,7 +11,7 @@ import Switch from "@mui/material/Switch";
 
 import { FormatConfig } from "../../context/taipyReducers";
 import { getDateTimeString, getNumberString } from "../../utils/index";
-import { TaipyBaseProps, TaipyMultiSelectProps } from "./utils";
+import { TaipyActiveProps, TaipyMultiSelectProps } from "./utils";
 
 export interface ColumnDesc {
     dfid: string;
@@ -84,7 +84,7 @@ export const getCellProps = (col: ColumnDesc): Partial<TableCellProps> => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type TableValueType = Record<string, Record<string, any>>;
 
-export interface TaipyTableProps extends TaipyBaseProps, TaipyMultiSelectProps {
+export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps {
     data?: TableValueType;
     columns: string;
     refresh?: boolean;

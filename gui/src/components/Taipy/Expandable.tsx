@@ -5,9 +5,9 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useDynamicProperty } from "../../utils/hooks";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 
-interface ExpandableProps extends TaipyBaseProps {
+interface ExpandableProps extends TaipyActiveProps {
     expanded?: boolean;
     defaultExpanded?: boolean;
     children?: ReactNode;

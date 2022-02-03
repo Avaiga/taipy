@@ -11,7 +11,7 @@ def test_pane_md(gui: Gui, helpers):
     expected_list = [
         "<Pane",
         'anchor="left"',
-        'defaultOpen="false"',
+        "defaultOpen={false}",
         "persistent={false}",
         'tp_varname="show_pane"',
         "open={show_pane}",
@@ -27,7 +27,7 @@ def test_pane_html(gui: Gui, helpers):
     expected_list = [
         "<Pane",
         'anchor="left"',
-        'defaultOpen="false"',
+        "defaultOpen={false}",
         "persistent={false}",
         'tp_varname="show_pane"',
         "open={show_pane}",
