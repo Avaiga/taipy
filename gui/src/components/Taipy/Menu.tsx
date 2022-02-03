@@ -54,9 +54,9 @@ const Menu = (props: MenuProps) => {
             "& .MuiDrawer-paper": {
                 width: drawerWidth,
                 boxSizing: "border-box",
-                transition: "width 0.5s",
+                transition: "width 0.3s",
             },
-            transition: "width 0.5s",
+            transition: "width 0.3s",
         }, {...baseTitleProps, width: titleWidth}];
     }, [opened, width, theme]);
 

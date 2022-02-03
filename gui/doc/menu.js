@@ -54,7 +54,7 @@ class menu {
     width_mobile_ = "85vw";
 
     /**
-     * Indicats if this component is active.<br/>An inactive component provides no user interaction.
+     * Indicates if this component is active.<br/>An inactive component provides no user interaction.
      *
      * @type {dynamic(bool)}
      */
