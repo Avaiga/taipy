@@ -22,6 +22,8 @@ jobs:
           python-version: ${{ matrix.python-versions }}
 
       - name: test with tox
+        env:
+          TOX_PARALLEL_NO_SPINNER: 1	
         run: |
           pip install tox
           tox -p all
