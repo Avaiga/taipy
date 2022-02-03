@@ -620,7 +620,7 @@ class Builder:
                     if native_type and isinstance(val, str):
                         try:
                             val = float(val)
-                        except Exception as e:
+                        except Exception:
                             # keep as str
                             pass
                     self.__set_default_value(var_name, val, native_type=native_type)
@@ -633,7 +633,7 @@ class Builder:
                     if isinstance(value, str):
                         try:
                             val = float(value)
-                        except Exception as e:
+                        except Exception:
                             # keep as str
                             pass
                     if isinstance(val, (int, float)):
