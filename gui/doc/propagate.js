@@ -8,7 +8,7 @@ class propagate extends shared {
      propagate = "App config";
 
      /**
-      * Indicats if this component is active.<br/>An inactive component provides no user interaction.
+      * Indicates if this component is active.<br/>An inactive component provides no user interaction.
       *
       * @type {dynamic(bool)}
       */
