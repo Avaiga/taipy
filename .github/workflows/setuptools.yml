@@ -1,0 +1,54 @@
+name: Setuptools
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  standard-packages:
+    timeout-minutes: 10
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Install Taipy without dependencies
+        run: |
+          pip install .
+          rm -r taipy gui  # Removal of Taipy code to ensure the use of the installed package
+
+          pip install pytest pytest-mock
+          pytest
+
+  optionals-packages:
+    timeout-minutes: 10
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Add optionals dependencies
+        run: |
+          # Extract optionals packages before installing them
+          grep -n 'setup(' setup.py | cut -d ":" -f 1 | xargs -I% bash -c "expr % - 1" | xargs -I% bash -c 'head -n% setup.py' > setup_packages.py
+          echo "[print(k) for k in extras_require.keys()]" >> setup_packages.py
+          python setup_packages.py | xargs -I% bash -c "pip install .[%]"
+
+          rm -r taipy gui  # Removal of Taipy code to ensure the use of the installed package
+
+          # Run test with optionals packages installed
+          pip install pytest pytest-mock
+          pytest > pytest_res
+
+          # Only one skip is allowed by Airflow
+          # Another by the pipeline manager
+          # The other skips should be remove with to dependencies
+          tail pytest_res | grep "2 skipped"

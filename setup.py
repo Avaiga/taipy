@@ -2,8 +2,6 @@
 
 """The setup script."""
 
-from typing import List
-
 from setuptools import find_packages, setup
 
 with open("README.md") as readme_file:
@@ -12,25 +10,35 @@ with open("README.md") as readme_file:
 with open("docs/history.md") as history_file:
     history = history_file.read()
 
-requirements: List[str] = [
+requirements = [
     "flask",
     "flask-cors",
     "flask-socketio",
     "markdown",
     "networkx",
     "numpy",
+    "openpyxl",
     "pandas",
+    "pyarrow",
+    "python-dotenv",
+    "python-magic",
+    "python-magic-bin; sys.platform == 'win32'",
     "pytz",
-    "sqlalchemy",
+    "requests",
     "simple-websocket",
+    "sqlalchemy",
     "toml",
     "tzlocal",
     "Unidecode",
-    "openpyxl",
-    "requests",
+    "rdp",
 ]
 
-test_requirements = ["pytest>=3.8", "python-magic", "python-magic-bin; sys.platform == 'win32'"]
+test_requirements = ["pytest>=3.8"]
+
+extras_require = {
+    "ngrok": ["pyngrok>=5"],
+    "mssql": ["pyodbc>=4"],
+}
 
 setup(
     author="Avaiga",
@@ -58,9 +66,5 @@ setup(
     url="https://github.com/avaiga/taipy",
     version="0.1.2",
     zip_safe=False,
-    extras_require={
-        "ngrok": ["pyngrok>=5"],
-        "magic": ["python-magic", "python-magic-bin; sys.platform == 'win32'"],
-        "mssql": ["pyodbc>=4"],
-    },
+    extras_require=extras_require,
 )
