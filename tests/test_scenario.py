@@ -2,8 +2,6 @@ from unittest import mock
 
 import pytest
 from flask import url_for
-from taipy.pipeline.manager import pipeline_manager
-from taipy.scenario.manager import ScenarioManager
 
 
 def test_get_scenario(client, default_scenario):

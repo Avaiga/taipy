@@ -16,6 +16,8 @@ from taipy_rest.api.resources.scenario import (
     ScenarioExecutor,
 )
 
+from taipy_rest.api.resources.cycle import CycleResource, CycleList
+
 __all__ = [
     "DataNodeResource",
     "DataNodeList",
@@ -30,4 +32,6 @@ __all__ = [
     "ScenarioList",
     "ScenarioResource",
     "ScenarioExecutor",
+    "CycleResource",
+    "CycleList",
 ]
