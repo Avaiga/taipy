@@ -32,7 +32,6 @@ style_config_default: StyleConfig = {
     "expandable": "",
     "file_download": "",
     "file_selector": "",
-    "field": "",
     "image": "",
     "input": "",
     "layout": "",
@@ -43,6 +42,7 @@ style_config_default: StyleConfig = {
     "slider": "",
     "status": "",
     "table": "",
+    "text": "",
     "toggle": "",
     "tree": "",
 }

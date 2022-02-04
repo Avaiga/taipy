@@ -153,7 +153,7 @@ class Preprocessor(MdPreprocessor):
                     warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
 
         if control_name is None:
-            control_name = "field"
+            control_name = MarkdownFactory.DEFAULT_CONTROL
         if default_prop_value is not None:
             default_prop_name = MarkdownFactory.get_default_property_name(control_name)
             # Set property only if it is not already defined

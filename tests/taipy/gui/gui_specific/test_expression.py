@@ -4,21 +4,21 @@ import pandas as pd  # type: ignore
 from taipy.gui import Gui
 
 
-def test_expression_field_control_str(gui: Gui, helpers):
+def test_expression_text_control_str(gui: Gui, helpers):
     gui.bind_var_val("x", "Hello World!")
     md_string = "<|{x}|>"
     expected_list = ["<Field", 'dataType="str"', 'defaultValue="Hello World!"', "value={x}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_expression_field_control_int(gui: Gui, helpers):
+def test_expression_text_control_int(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
     md_string = "<|{x}|>"
     expected_list = ["<Field", 'dataType="int"', 'defaultValue="10"', "value={x}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_expression_field_control_1(gui: Gui, helpers):
+def test_expression_text_control_1(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
     gui.bind_var_val("y", 20)
     md_string = "<|{x + y}|>"
@@ -26,7 +26,7 @@ def test_expression_field_control_1(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_expression_field_control_2(gui: Gui, helpers):
+def test_expression_text_control_2(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
     gui.bind_var_val("y", 20)
     md_string = "<|x + y = {x + y}|>"
@@ -34,7 +34,7 @@ def test_expression_field_control_2(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_expression_field_control_3(gui: Gui, helpers):
+def test_expression_text_control_3(gui: Gui, helpers):
     gui.bind_var_val("x", "Mickey Mouse")
     gui.bind_var_val("y", "Donald Duck")
     md_string = "<|Hello {x} and {y}|>"
@@ -47,7 +47,7 @@ def test_expression_field_control_3(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_expression_field_gt_operator(gui: Gui, helpers):
+def test_expression_text_gt_operator(gui: Gui, helpers):
     gui.bind_var_val("x", 0)
     md_string = "<|{x > 0}|>"
     expected_list = ["<Field", 'dataType="bool"', 'defaultValue="false"', "value={tp_x_0_0}"]
