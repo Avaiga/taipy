@@ -3,10 +3,10 @@ import MuiButton from "@mui/material/Button";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 import { useDynamicProperty } from "../../utils/hooks";
 
-interface ButtonProps extends TaipyBaseProps {
+interface ButtonProps extends TaipyActiveProps {
     tp_onAction?: string;
     label: string;
     defaultLabel?: string;

@@ -12,10 +12,10 @@ import { SxProps } from "@mui/system";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import TaipyRendered from "../pages/TaipyRendered";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 import { useDynamicProperty } from "../../utils/hooks";
 
-interface DialogProps extends TaipyBaseProps {
+interface DialogProps extends TaipyActiveProps {
     title: string;
     cancelAction?: string;
     validateAction?: string;
@@ -23,7 +23,7 @@ interface DialogProps extends TaipyBaseProps {
     validateLabel?: string;
     pageId: string;
     open?: boolean;
-    defaultOpen?: string;
+    defaultOpen?: string | boolean;
     children?: ReactNode;
     height?: string | number;
     width?: string | number;
@@ -83,7 +83,7 @@ const Dialog = (props: DialogProps) => {
         <MuiDialog
             id={id}
             onClose={handleClose}
-            open={open === undefined ? defaultOpen === "true" : !!open}
+            open={open === undefined ? defaultOpen === "true" || defaultOpen === true : !!open}
             className={className}
             PaperProps={paperProps}
         >

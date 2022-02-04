@@ -22,7 +22,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { getArrayValue, getUpdateVar, TaipyBaseProps } from "./utils";
+import { getArrayValue, getUpdateVar, TaipyActiveProps } from "./utils";
 import {
     createRequestChartUpdateAction,
     createSendActionNameAction,
@@ -33,7 +33,7 @@ import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../..
 
 const Plot = lazy(() => import("react-plotly.js"));
 
-interface ChartProp extends TaipyBaseProps {
+interface ChartProp extends TaipyActiveProps {
     title?: string;
     width?: string | number;
     height?: string | number;

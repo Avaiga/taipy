@@ -19,6 +19,7 @@ class Factory:
         "file_download": "content",
         "file_selector": "content",
         "image": "content",
+        "indicator": "display",
         "input": "value",
         "layout": "columns",
         "menu": "lov",
@@ -96,7 +97,7 @@ class Factory:
             element_name="Dialog",
             attributes=attrs,
         )
-        .set_value_and_default()
+        .set_value_and_default(native_type=True)
         .set_attributes(
             [
                 ("id",),
@@ -187,6 +188,21 @@ class Factory:
                 ("height",),
             ]
         ),
+        "indicator": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Indicator",
+            attributes=attrs,
+        )
+        .set_value_and_default(with_update=False, native_type=True)
+        .set_attributes(
+            [
+                ("id",),
+                ("min", AttributeType.number),
+                ("max", AttributeType.number),
+                ("value", AttributeType.dynamic_number),
+                ("format",),
+            ]
+        ),
         "input": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Input",
@@ -261,7 +277,7 @@ class Factory:
         "pane": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Pane", attributes=attrs, default_value=""
         )
-        .set_value_and_default()
+        .set_value_and_default(native_type=True)
         .set_attributes(
             [
                 ("id",),
@@ -306,7 +322,7 @@ class Factory:
             attributes=attrs,
             default_value=0,
         )
-        .set_value_and_default()
+        .set_value_and_default(native_type=True)
         .set_attributes(
             [
                 ("min", AttributeType.number, 0),

@@ -4,14 +4,14 @@ from taipy.gui import Gui
 def test_slider_md(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
     md_string = "<|{x}|slider|>"
-    expected_list = ["<Slider", 'tp_varname="x"', 'defaultValue="10"', "value={x}"]
+    expected_list = ["<Slider", 'tp_varname="x"', "defaultValue={10}", "value={x}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_slider_with_min_max(gui: Gui, helpers):
     gui.bind_var_val("x", 0)
     md_string = "<|{x}|slider|min=-10|max=10|>"
-    expected_list = ["<Slider", "min={-10.0}", "max={10.0}", 'defaultValue="0"']
+    expected_list = ["<Slider", "min={-10.0}", "max={10.0}", "defaultValue={0}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -46,12 +46,12 @@ def test_slider_text_anchor_default_md(gui: Gui, helpers):
 def test_slider_html_1(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
     html_string = '<taipy:slider value="{x}" />'
-    expected_list = ["<Slider", 'tp_varname="x"', 'defaultValue="10"', "value={x}"]
+    expected_list = ["<Slider", 'tp_varname="x"', "defaultValue={10}", "value={x}"]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_slider_html_2(gui: Gui, helpers):
     gui.bind_var_val("x", 10)
     html_string = "<taipy:slider>{x}</taipy:slider>"
-    expected_list = ["<Slider", 'tp_varname="x"', 'defaultValue="10"', "value={x}"]
+    expected_list = ["<Slider", 'tp_varname="x"', "defaultValue={10}", "value={x}"]
     helpers.test_control_html(gui, html_string, expected_list)

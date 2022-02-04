@@ -4,11 +4,11 @@ import Fab from "@mui/material/Fab";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
 import { useDynamicProperty } from "../../utils/hooks";
-import { noDisplayStyle, TaipyBaseProps } from "./utils";
+import { noDisplayStyle, TaipyActiveProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 
-interface FileDownloadProps extends TaipyBaseProps {
+interface FileDownloadProps extends TaipyActiveProps {
     content?: string;
     defaultContent: string;
     name?: string;

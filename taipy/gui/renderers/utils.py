@@ -11,6 +11,10 @@ def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.
     return dico[key]
 
 
+def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
+    return attr[index] if len(attr) > index else default_val
+
+
 def _get_columns_dict(
     value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDictionary],

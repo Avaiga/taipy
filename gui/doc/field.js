@@ -10,12 +10,13 @@ class field extends shared {
 
     /**
      * a value
-     * @type {any, default property}
+     * @type {dynamic(any), default property}
      */
     value;
 
     /**
      * format for the value<br> depending of the type of the value, we support<ul><li>date/time formatting</li><li>number formatting (printf syntax)</li></ul>
+     * @type {str}
      */
     format
 

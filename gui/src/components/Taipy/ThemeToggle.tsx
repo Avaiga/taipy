@@ -7,11 +7,11 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import WbSunny from "@mui/icons-material/WbSunny";
 import Brightness3 from "@mui/icons-material/Brightness3";
 
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createThemeAction } from "../../context/taipyReducers";
 
-interface ThemeToggleProps extends TaipyBaseProps {
+interface ThemeToggleProps extends TaipyActiveProps {
     style?: CSSProperties;
     label?: string;
 }

@@ -6,9 +6,9 @@ import Typography from "@mui/material/Typography";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
-import { TaipyBaseProps } from "./utils";
+import { TaipyActiveProps } from "./utils";
 
-interface ImageProps extends TaipyBaseProps {
+interface ImageProps extends TaipyActiveProps {
     tp_onAction?: string;
     label?: string;
     defaultLabel?: string;

@@ -9,6 +9,7 @@ import Field from "./Field";
 import FileDownload from "./FileDownload";
 import FileSelector from "./FileSelector";
 import Image from "./Image";
+import Indicator from "./Indicator";
 import Input from "./Input";
 import Layout from "./Layout";
 import Link from "./Link";
@@ -39,6 +40,7 @@ export const taipyComponents: Record<string, ComponentType> = {
     FileDownload: FileDownload as ComponentType,
     FileSelector: FileSelector as ComponentType,
     Image: Image as ComponentType,
+    Indicator: Indicator as ComponentType,
     Input: Input as ComponentType,
     Layout: Layout,
     MenuCtl: MenuCtl as ComponentType,
