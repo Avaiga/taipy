@@ -1,4 +1,9 @@
-from taipy_rest.api.resources.datanode import DataNodeList, DataNodeResource
+from taipy_rest.api.resources.datanode import (
+    DataNodeList,
+    DataNodeResource,
+    DataNodeReader,
+    DataNodeWriter,
+)
 from taipy_rest.api.resources.task import TaskList, TaskResource, TaskExecutor
 from taipy_rest.api.resources.pipeline import (
     PipelineList,
@@ -14,6 +19,8 @@ from taipy_rest.api.resources.scenario import (
 __all__ = [
     "DataNodeResource",
     "DataNodeList",
+    "DataNodeReader",
+    "DataNodeWriter",
     "TaskList",
     "TaskResource",
     "TaskExecutor",

@@ -5,6 +5,8 @@ from marshmallow import ValidationError
 from taipy_rest.api.resources import (
     DataNodeList,
     DataNodeResource,
+    DataNodeReader,
+    DataNodeWriter,
     TaskList,
     TaskResource,
     TaskExecutor,
@@ -32,6 +34,19 @@ api.add_resource(
     "/datanodes/<string:datanode_id>",
     endpoint="datanode_by_id",
 )
+
+api.add_resource(
+    DataNodeReader,
+    "/datanodes/<string:datanode_id>/read",
+    endpoint="datanode_reader",
+)
+
+api.add_resource(
+    DataNodeWriter,
+    "/datanodes/<string:datanode_id>/write",
+    endpoint="datanode_writer",
+)
+
 api.add_resource(DataNodeList, "/datanodes", endpoint="datanodes")
 
 api.add_resource(

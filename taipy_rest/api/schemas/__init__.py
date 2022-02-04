@@ -5,6 +5,7 @@ from taipy_rest.api.schemas.datanode import (
     PickleDataNodeConfigSchema,
     SQLDataNodeConfigSchema,
     DataNodeConfigSchema,
+    DataNodeFilterSchema,
 )
 
 from taipy_rest.api.schemas.task import TaskSchema
@@ -14,6 +15,7 @@ from taipy_rest.api.schemas.scenario import ScenarioSchema, ScenarioResponseSche
 
 __all__ = [
     "DataNodeSchema",
+    "DataNodeFilterSchema",
     "TaskSchema",
     "PipelineSchema",
     "PipelineResponseSchema",
