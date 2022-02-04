@@ -1,13 +1,15 @@
 import os
 import shutil
 import uuid
+from datetime import datetime, timedelta
 
 import pandas as pd
 import pytest
 from dotenv import load_dotenv
 from taipy.common.alias import DataNodeId
-from taipy.config import Config, DataNodeConfig, PipelineConfig
-from taipy.data import InMemoryDataNode, Scope, CSVDataNode, PickleDataNode
+from taipy.config import Config
+from taipy.cycle import Cycle
+from taipy.data import InMemoryDataNode, Scope
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
 from taipy.task import Task
@@ -206,6 +208,38 @@ def default_scenario():
         config_name="foo",
         properties={},
         pipelines=[__default_pipeline()],
+    )
+
+
+@pytest.fixture
+def default_cycle_config():
+    return Config.add_cycle(
+        uuid.uuid4().hex, [Config.add_(uuid.uuid4().hex, __task_config())]
+    )
+
+
+@pytest.fixture
+def default_cycle_config_list():
+    configs = []
+    for i in range(10):
+        configs.append(
+            Config.add_cycle(
+                uuid.uuid4().hex,
+                [Config.add_pipeline(uuid.uuid4().hex, __task_config())],
+            )
+        )
+    return configs
+
+
+@pytest.fixture
+def default_cycle():
+    now = datetime.now()
+    return Cycle(
+        name="foo",
+        properties={},
+        creation_date=now,
+        start_date=now,
+        end_date=now + timedelta(days=5),
     )
 
 
