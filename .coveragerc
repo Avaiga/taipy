@@ -1,0 +1,2 @@
+[run]
+omit = taipy_rest/setup/*

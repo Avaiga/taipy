@@ -7,8 +7,10 @@ import pandas as pd
 import pytest
 from dotenv import load_dotenv
 from taipy.common.alias import DataNodeId
+from taipy.common.frequency import Frequency
 from taipy.config import Config
 from taipy.cycle import Cycle
+from taipy.cycle.manager import CycleManager
 from taipy.data import InMemoryDataNode, Scope
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
@@ -67,7 +69,7 @@ def default_datanode():
     return InMemoryDataNode(
         "input_ds",
         Scope.SCENARIO,
-        DataNodeId("id_uio"),
+        DataNodeId("foo"),
         "my name",
         "parent_id",
         properties={"default_data": [1, 2, 3, 4, 5, 6]},
@@ -211,36 +213,43 @@ def default_scenario():
     )
 
 
-@pytest.fixture
-def default_cycle_config():
-    return Config.add_cycle(
-        uuid.uuid4().hex, [Config.add_(uuid.uuid4().hex, __task_config())]
-    )
-
-
-@pytest.fixture
-def default_cycle_config_list():
-    configs = []
-    for i in range(10):
-        configs.append(
-            Config.add_cycle(
-                uuid.uuid4().hex,
-                [Config.add_pipeline(uuid.uuid4().hex, __task_config())],
-            )
-        )
-    return configs
-
-
-@pytest.fixture
-def default_cycle():
+def __create_cycle(name="foo"):
     now = datetime.now()
     return Cycle(
-        name="foo",
+        name=name,
+        frequency=Frequency.DAILY,
         properties={},
         creation_date=now,
         start_date=now,
         end_date=now + timedelta(days=5),
     )
+
+
+@pytest.fixture
+def create_cycle_list():
+    cycles = []
+    manager = CycleManager()
+    for i in range(10):
+        c = __create_cycle(f"cycle-{1}")
+        manager.set(c)
+    return cycles
+
+
+@pytest.fixture
+def cycle_data():
+    return {
+        "name": "foo",
+        "frequency": "daily",
+        "properties": {},
+        "creation_date": "2022-02-03T22:17:27.317114",
+        "start_date": "2022-02-03T22:17:27.317114",
+        "end_date": "2022-02-08T22:17:27.317114",
+    }
+
+
+@pytest.fixture
+def default_cycle():
+    return __create_cycle()
 
 
 @pytest.fixture(autouse=True)

@@ -1,7 +1,9 @@
 import importlib
+from datetime import datetime
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
+from taipy.common.frequency import Frequency
 
 from taipy.cycle.manager import CycleManager
 from taipy.exceptions.cycle import NonExistingCycle
@@ -158,9 +160,11 @@ class CycleList(Resource):
     def __create_cycle_from_schema(self, cycle_schema: CycleSchema):
         return Cycle(
             id=cycle_schema.get("id"),
-            frequency=cycle_schema.get("frequency"),
+            frequency=Frequency(
+                getattr(Frequency, cycle_schema.get("frequency", "").upper())
+            ),
             properties=cycle_schema.get("properties", {}),
-            creation_date=cycle_schema.get("creation_date"),
-            start_date=cycle_schema.get("start_date"),
-            end_date=cycle_schema.get("end_date"),
+            creation_date=datetime.fromisoformat(cycle_schema.get("creation_date")),
+            start_date=datetime.fromisoformat(cycle_schema.get("start_date")),
+            end_date=datetime.fromisoformat(cycle_schema.get("end_date")),
         )
