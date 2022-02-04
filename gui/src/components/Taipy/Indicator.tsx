@@ -42,7 +42,7 @@ const getValue = (value: number, min: number, max: number) => {
 };
 
 const Indicator = (props: IndicatorProps) => {
-    const { min = 0, max = 100, value, defaultValue = 0, display, defaultDisplay, format } = props;
+    const { min = 0, max = 100, display, defaultDisplay, format, value, defaultValue = 0 } = props;
 
     const getLabel = useCallback(() => {
         const dsp = display === undefined ? (defaultDisplay === undefined ? "" : defaultDisplay) : display;
@@ -58,7 +58,7 @@ const Indicator = (props: IndicatorProps) => {
         <MySlider
             min={0}
             max={100}
-            defaultValue={getValue(value === undefined ? defaultValue : value, min, max)}
+            value={getValue(value === undefined ? defaultValue : value, min, max)}
             disabled={true}
             valueLabelDisplay="on"
             valueLabelFormat={getLabel}

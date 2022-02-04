@@ -8,6 +8,8 @@ from .builder import Builder
 
 class Factory:
 
+    DEFAULT_CONTROL = "text"
+
     __CONTROL_DEFAULT_PROP_NAME = {
         "button": "label",
         "chart": "data",
@@ -15,7 +17,6 @@ class Factory:
         "date_selector": "date",
         "dialog": "open",
         "expandable": "title",
-        "field": "value",
         "file_download": "content",
         "file_selector": "content",
         "image": "content",
@@ -31,6 +32,7 @@ class Factory:
         "slider": "value",
         "status": "value",
         "table": "data",
+        "text": "value",
         "toggle": "value",
         "tree": "value",
     }
@@ -122,19 +124,6 @@ class Factory:
             [
                 ("id",),
                 ("expanded", AttributeType.dynamic_boolean, True),
-            ]
-        ),
-        "field": lambda control_type, attrs: Builder(
-            control_type=control_type,
-            element_name="Field",
-            attributes=attrs,
-        )
-        .set_value_and_default(with_update=False)
-        .set_dataType()
-        .set_attributes(
-            [
-                ("format",),
-                ("id",),
             ]
         ),
         "file_download": lambda control_type, attrs: Builder(
@@ -377,6 +366,19 @@ class Factory:
         .get_list_attribute("selected", AttributeType.number)
         .set_refresh_on_update()
         .set_table_pagesize_options(),
+        "text": lambda control_type, attrs: Builder(
+            control_type=control_type,
+            element_name="Field",
+            attributes=attrs,
+        )
+        .set_value_and_default(with_update=False)
+        .set_dataType()
+        .set_attributes(
+            [
+                ("format",),
+                ("id",),
+            ]
+        ),
         "toggle": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Toggle", attributes=attrs, default_value=""
         )

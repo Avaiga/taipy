@@ -513,8 +513,7 @@ class Builder:
 
     def set_dataType(self):
         value = self.attributes.get("value")
-        self.set_attribute("dataType", getDataType(value))
-        return self
+        return self.set_attribute("dataType", getDataType(value))
 
     def set_file_content(self, var_name: str = "content"):
         hash_name = self.__hashes.get(var_name)
