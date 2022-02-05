@@ -88,7 +88,7 @@ describe("TreeView Component", () => {
             </TaipyContext.Provider>);
         const elt = getByText("Item 1");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: ["id1"]}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: ["id1"], type: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
     //multiple
     it("selects 2 items", async () => {
@@ -108,7 +108,7 @@ describe("TreeView Component", () => {
         const elt3 = getByText("Item 3");
         userEvent.click(elt3, {ctrlKey: true});
         userEvent.click(elt2, {ctrlKey: true});
-        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: ["id3", "id1"]}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: ["id3", "id1"], type: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
     //filter
     it("displays an input when filter", async () => {

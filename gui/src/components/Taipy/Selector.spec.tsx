@@ -86,7 +86,7 @@ describe("Selector Component", () => {
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
-            payload: { value: "id1" },
+            payload: { value: "id1", type: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -131,7 +131,7 @@ describe("Selector Component", () => {
             userEvent.click(elt2);
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "varname",
-                payload: { value: ["id1", "id3"] },
+                payload: { value: ["id1", "id3"], type: "" },
                 propagate: true,
                 type: "SEND_UPDATE_ACTION",
             });

@@ -92,7 +92,7 @@ describe("Toggle Component", () => {
             </TaipyContext.Provider>);
         const elt = getByText("Item 1");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: "id1"}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: "id1", type: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
     it("dispatch unselected_value on deselection", async () => {
         const dispatch = jest.fn();
@@ -102,6 +102,6 @@ describe("Toggle Component", () => {
             </TaipyContext.Provider>);
         const elt = getByText("Item 2");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: "uv"}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: "uv", type: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
 });

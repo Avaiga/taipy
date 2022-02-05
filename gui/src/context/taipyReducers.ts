@@ -323,7 +323,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const msgAction = baseAction as TaipyMultipleMessageAction;
             return msgAction.actions.reduce((pState, act) => taipyReducer(pState, act), state);
         case Types.SendUpdate:
-            sendWsMessage(state.socket, "U", action.name, action.payload.value, state.id, action.propagate);
+            sendWsMessage(state.socket, "U", action.name, action.payload, state.id, action.propagate);
             break;
         case Types.Action:
             sendWsMessage(state.socket, "A", action.name, action.payload, state.id);
@@ -343,11 +343,11 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
-export const createSendUpdateAction = (name: string | undefined, value: unknown, propagate = true): TaipyAction => ({
+export const createSendUpdateAction = (name: string | undefined, value: unknown, propagate = true, type = ""): TaipyAction => ({
     type: Types.SendUpdate,
     name: name || "",
     propagate: propagate,
-    payload: { value: value },
+    payload: { value: value, type: type },
 });
 
 export const createSendActionNameAction = (

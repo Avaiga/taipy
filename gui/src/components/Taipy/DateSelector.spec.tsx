@@ -126,7 +126,7 @@ describe("DateSelector Component", () => {
         await userEvent.type(elt, "01012001", { delay: 1 });
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "",
-            payload: { value: "2001-01-01T00:00:00.000Z" },
+            payload: { value: "2001-01-01T00:00:00.000Z", type: "date" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -202,7 +202,7 @@ describe("DateSelector with time Component", () => {
         await userEvent.type(elt, "01/01/2001 01:01 am", { delay: 1 });
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: "2001-01-01T01:01:00.000Z" },
+            payload: { value: "2001-01-01T01:01:00.000Z", type: "date" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });

@@ -20,14 +20,20 @@ export const setStyle = (styleString: string): void => {
 export const getClientServerTimeZoneOffset = (tz: string): number =>
     (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;
 
-export const getDateTime = (value: string | undefined, tz: string): Date => utcToZonedTime(value || new Date(), tz);
+export const getDateTime = (value: string | undefined, tz: string): Date | null => {
+    try {
+        return utcToZonedTime(value || new Date(), tz);
+    } catch(e) {
+        return null;
+    }
+};
 
 export const getDateTimeString = (
     value: string,
     datetimeformat: string | undefined,
     formatConf: FormatConfig
 ): string =>
-    format(getDateTime(value, formatConf.timeZone), datetimeformat || formatConf.dateTime, {
+    format(getDateTime(value, formatConf.timeZone) || "", datetimeformat || formatConf.dateTime, {
         timeZone: formatConf.timeZone,
     });
 
