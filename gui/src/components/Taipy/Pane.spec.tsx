@@ -160,7 +160,7 @@ describe("Pane Component", () => {
         userEvent.click(but);
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: false },
+            payload: { value: false, type: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });

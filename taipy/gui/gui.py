@@ -208,7 +208,8 @@ class Gui(object, metaclass=Singleton):
             if msg_type == WsType.UPDATE.value:
                 self.__front_end_update(
                     message["name"],
-                    message["payload"],
+                    message.get("payload", {}).get("value"),
+                    message.get("payload", {}).get("type"),
                     message.get("propagate", True),
                 )
             elif msg_type == WsType.ACTION.value:
@@ -233,20 +234,18 @@ class Gui(object, metaclass=Singleton):
             self.__send_ws_id(id)
         self._scopes.create_scope(id)
 
-    def __front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
+    def __front_end_update(self, var_name: str, value: t.Any, value_type: t.Optional[str], propagate=True) -> None:
         # Check if Variable is type datetime
         currentvalue = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
         if isinstance(value, str):
-            if isinstance(currentvalue, datetime.datetime):
+            if isinstance(currentvalue, datetime.datetime) or value_type == "date":
                 value = ISOToDate(value)
-            elif isinstance(currentvalue, int):
-                value = int(value) if value else 0
-            elif isinstance(currentvalue, float):
-                value = float(value) if value else 0.0
-            elif isinstance(currentvalue, complex):
-                value = complex(value) if value else 0
-            elif isinstance(currentvalue, bool):
+            elif isinstance(currentvalue, bool) or value_type == "bool":
                 value = bool(value)
+            elif isinstance(currentvalue, int) or value_type == "int":
+                value = int(value) if value else 0
+            elif isinstance(currentvalue, float) or value_type == "float":
+                value = float(value) if value else 0.0
             elif self._accessors._cast_string_value(var_name, currentvalue) is None:
                 return
         self.__update_var(var_name, value, propagate, True)

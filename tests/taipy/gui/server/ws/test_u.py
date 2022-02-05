@@ -26,12 +26,12 @@ def ws_u_assert_template(gui, helpers, value_before_update, value_after_update, 
 def test_ws_u_string(gui: Gui, helpers):
     value_before_update = "a random string"
     value_after_update = "a random string is added"
-    payload = value_after_update
+    payload = {"value": value_after_update}
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
 
 
 def test_ws_u_number(gui: Gui, helpers):
     value_before_update = 10
     value_after_update = 11
-    payload = str(value_after_update)
+    payload = {"value": str(value_after_update)}
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)

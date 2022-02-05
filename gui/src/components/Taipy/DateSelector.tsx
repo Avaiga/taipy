@@ -45,7 +45,7 @@ const DateSelector = (props: DateSelectorProps) => {
                     newDate.setHours(hours);
                     newDate.setMinutes(minutes);
                 }
-                dispatch(createSendUpdateAction(tp_varname, newDate.toISOString(), propagate));
+                dispatch(createSendUpdateAction(tp_varname, newDate.toISOString(), propagate, "date"));
             }
         },
         [tp_varname, dispatch, withTime, propagate, tz]

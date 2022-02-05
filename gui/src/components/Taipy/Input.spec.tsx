@@ -47,7 +47,7 @@ describe("Input Component", () => {
             </TaipyContext.Provider>);
         const elt = getByDisplayValue("Val");
         userEvent.clear(elt);
-        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: "", type: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
 });
 
@@ -92,6 +92,6 @@ describe("Number Component", () => {
         const elt = getByDisplayValue("33");
         userEvent.clear(elt);
         userEvent.type(elt, "666")
-        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: "666"}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: "666", type: ""}, propagate: true, "type": "SEND_UPDATE_ACTION"});
     });
 });
