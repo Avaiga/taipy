@@ -631,12 +631,12 @@ class Builder:
                 if native_type:
                     if isinstance(value, str):
                         try:
-                            val = float(value)
+                            value = float(value)
                         except Exception:
                             # keep as str
                             pass
-                    if isinstance(val, (int, float)):
-                        return self.__set_react_attribute(var_name, val)
+                    if isinstance(value, (int, float)):
+                        return self.__set_react_attribute(var_name, value)
                 self.set_attribute(var_name, value)
         return self
 
