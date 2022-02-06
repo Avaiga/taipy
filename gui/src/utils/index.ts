@@ -23,7 +23,7 @@ export const getClientServerTimeZoneOffset = (tz: string): number =>
 export const getDateTime = (value: string | undefined, tz: string): Date | null => {
     try {
         return utcToZonedTime(value || new Date(), tz);
-    } catch(e) {
+    } catch (e) {
         return null;
     }
 };
@@ -37,8 +37,14 @@ export const getDateTimeString = (
         timeZone: formatConf.timeZone,
     });
 
-export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string =>
-    numberformat || formatConf.number ? sprintf(numberformat || formatConf.number, value) : value.toLocaleString();
+export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string => {
+    try {
+        return numberformat || formatConf.number ? sprintf(numberformat || formatConf.number, value) : value.toLocaleString();
+    } catch (e) {
+        console.info("getNumberString: " + (e as Error).message || e);
+        return (typeof value === "number" && value.toLocaleString()) || (typeof value === "string" && value as string) || ""
+    }
+};
 
 export const formatWSValue = (
     value: string | number,
