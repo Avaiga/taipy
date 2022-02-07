@@ -39,11 +39,12 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
             "height": "60vh",
         },
     )
-    md_string = "<|{csvdata}|table|properties=table_properties|not auto_loading|>"
+    md_string = "<|{csvdata}|table|properties=table_properties|auto_loading|not editable|>"
     expected_list = [
         "<Table",
         "allowAllRows={true}",
-        "autoLoading={false}",
+        "autoLoading={true}",
+        "editable={false}",
         'columns="{&quot;Entity&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;}, &quot;Code&quot;: {&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;}, &quot;Daily hospital occupancy&quot;: {&quot;index&quot;: 3, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;}, &quot;Day_str&quot;: {&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime64[ns]&quot;, &quot;dfid&quot;: &quot;Day&quot;}}"',
         'height="60vh"',
         'width="60vw"',
@@ -95,11 +96,12 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
             "height": "60vh",
         },
     )
-    html_string = '<taipy:table data="{csvdata}" properties="table_properties" auto_loading="False" />'
+    html_string = '<taipy:table data="{csvdata}" properties="table_properties" auto_loading="Yes" show_all="Sure" />'
     expected_list = [
         "<Table",
         "allowAllRows={true}",
-        "autoLoading={false}",
+        "autoLoading={true}",
+        "showAll={true}",
         'columns="{&quot;Entity&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Entity&quot;}, &quot;Code&quot;: {&quot;index&quot;: 2, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Code&quot;}, &quot;Daily hospital occupancy&quot;: {&quot;index&quot;: 3, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Daily hospital occupancy&quot;, &quot;format&quot;: &quot;%.3f&quot;}, &quot;Day_str&quot;: {&quot;index&quot;: 0, &quot;format&quot;: &quot;dd/MM/yyyy&quot;, &quot;title&quot;: &quot;Date of measure&quot;, &quot;type&quot;: &quot;datetime64[ns]&quot;, &quot;dfid&quot;: &quot;Day&quot;}}"',
         'height="60vh"',
         'width="60vw"',

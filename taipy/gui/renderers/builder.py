@@ -116,13 +116,12 @@ class Builder:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
 
-    def __set_boolean_attribute(self, name: str, default_value=False):
+    def __get_boolean_attribute(self, name: str, default_value=False):
         boolattr = self.attributes.get(name, default_value)
-        if isinstance(boolattr, str):
-            boolattr = is_boolean_true(boolattr)
-        if isinstance(boolattr, bool):
-            return self.__set_react_attribute(_to_camel_case(name), boolattr)
-        return self
+        return is_boolean_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
+
+    def __set_boolean_attribute(self, name: str, value: bool):
+        return self.__set_react_attribute(_to_camel_case(name), value)
 
     def __set_dict_attribute(self, name: str):
         dict_attr = self.attributes.get(name)
@@ -670,9 +669,9 @@ class Builder:
         return self
 
     def set_propagate(self):
-        val = self.attributes.get("propagate", self._gui._config.app_config["propagate"])
-        if val is not True:
-            return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
+        val = self.__get_boolean_attribute("propagate", self._gui._config.app_config.get("propagate"))
+        if not val:
+            return self.__set_boolean_attribute("propagate", False)
         return self
 
     def set_refresh(self):
@@ -716,17 +715,19 @@ class Builder:
                 attr = (attr,)
             type = _get_tuple_val(attr, 1, AttributeType.string)
             if type == AttributeType.boolean:
-                val = self.attributes.get(attr[0])
-                if val is not None and val != _get_tuple_val(attr, 2, False):
+                def_val = _get_tuple_val(attr, 2, False)
+                val = self.__get_boolean_attribute(attr[0], def_val)
+                if val != def_val:
                     self.__set_boolean_attribute(attr[0], val)
             elif type == AttributeType.dynamic_boolean:
-                dyn_var = self.__hashes.get(attr[0])
-                val = self.attributes.get(attr[0])
-                default_name = "default_" + attr[0] if dyn_var is not None else attr[0]
-                if val is not None and val != _get_tuple_val(attr, 2, False):
+                hash_name = self.__hashes.get(attr[0])
+                def_val = _get_tuple_val(attr, 2, False)
+                val = self.__get_boolean_attribute(attr[0], def_val)
+                default_name = "default_" + attr[0] if hash_name is not None else attr[0]
+                if val != def_val:
                     self.__set_boolean_attribute(default_name, val)
-                if dyn_var is not None:
-                    self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(dyn_var))
+                if hash_name is not None:
+                    self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(hash_name))
             elif type == AttributeType.number:
                 self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif type == AttributeType.dynamic_number:
