@@ -19,6 +19,8 @@ class Builder:
 
     __keys: t.Dict[str, int] = {}
 
+    __ONE_COLUMN_CHART = ["pie"]
+
     def __init__(
         self,
         control_type: str,
@@ -374,6 +376,8 @@ class Builder:
         if not trace[6]:
             # type
             trace[6] = default_type
+        else:
+            trace[6] = str(trace[6]).strip().lower()
         if not trace[8]:
             # xaxis
             trace[8] = "x"
@@ -385,14 +389,17 @@ class Builder:
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
-        while len([x for x in indexed_trace if x]):
-            self.__check_dict(indexed_trace, 11, names)
-            self.__check_dict(indexed_trace, 12, names)
-            traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
-            idx += 1
-            indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        if len([x for x in indexed_trace if x]):
+            while len([x for x in indexed_trace if x]):
+                self.__check_dict(indexed_trace, 11, names)
+                self.__check_dict(indexed_trace, 12, names)
+                traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
+                idx += 1
+                indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        else:
+            traces.append(trace)
         # filter traces where we don't have at least x and y
-        traces = [t for t in traces if t[0] and t[1]]
+        traces = [t for t in traces if t[0] and (t[6] in Builder.__ONE_COLUMN_CHART or t[1])]
         if not len(traces) and trace[0] and trace[1]:
             traces.append(trace)
 

@@ -82,6 +82,8 @@ const selectedPropRe = /selected(\d+)/;
 
 const defaultChartConfig = { responsive: true };
 
+const ONE_COLUMN_CHART = ["pie"];
+
 const Chart = (props: ChartProp) => {
     const {
         title = "",
@@ -207,25 +209,32 @@ const Chart = (props: ChartProp) => {
     const dataPl = useMemo(
         () =>
             config.traces.map((trace, idx) => {
-                const ret = {
+                let ret = {
                     type: config.types[idx],
                     mode: config.modes[idx],
                     name:
                         getArrayValue(config.names, idx) ||
                         (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
-                    marker: getArrayValue(config.markers, idx, {}),
-                    x: getValue(data, trace, 0),
-                    y: getValue(data, trace, 1),
-                    z: getValue(data, trace, 2),
-                    text: getValue(data, config.texts, idx),
-                    xaxis: config.xaxis[idx],
-                    yaxis: config.yaxis[idx],
-                    hovertext: getValue(data, config.labels, idx),
-                    selectedpoints: getArrayValue(selected, idx, []),
-                    orientation: getArrayValue(config.orientations, idx),
-                    line: getArrayValue(config.lines, idx),
-                    textposition: getArrayValue(config.textAnchors, idx),
                 } as Record<string, unknown>;
+                if (ONE_COLUMN_CHART.includes(config.types[idx])) {
+                    ret = { ...ret, values: getValue(data, trace, 0), labels: getValue(data, config.labels, idx) };
+                } else {
+                    ret = {
+                        ...ret,
+                        marker: getArrayValue(config.markers, idx, {}),
+                        x: getValue(data, trace, 0),
+                        y: getValue(data, trace, 1),
+                        z: getValue(data, trace, 2),
+                        text: getValue(data, config.texts, idx),
+                        xaxis: config.xaxis[idx],
+                        yaxis: config.yaxis[idx],
+                        hovertext: getValue(data, config.labels, idx),
+                        selectedpoints: getArrayValue(selected, idx, []),
+                        orientation: getArrayValue(config.orientations, idx),
+                        line: getArrayValue(config.lines, idx),
+                        textposition: getArrayValue(config.textAnchors, idx),
+                    };
+                }
                 const selectedMarker = getArrayValue(config.selectedMarkers, idx);
                 if (selectedMarker) {
                     ret.selected = { marker: selectedMarker };
