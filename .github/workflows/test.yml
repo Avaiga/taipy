@@ -23,13 +23,13 @@ jobs:
 
       - name: test with tox
         env:
-          TOX_PARALLEL_NO_SPINNER: 1	
+          TOX_PARALLEL_NO_SPINNER: 1
         run: |
           pip install tox
           tox -p all
 
       - name: Code coverage
-        if: matrix.os == 'ubuntu-18.04'
+        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request'
         uses: orgoro/coverage@v2
         with:
           coverageFile: coverage.xml
@@ -61,6 +61,7 @@ jobs:
       - run: npm test
 
       - name: Code coverage
+        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request'
         uses: artiomtr/jest-coverage-report-action@v2.0-rc.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
