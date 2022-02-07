@@ -189,3 +189,111 @@ Taipy also provides a method to export the configuration applied after the compi
     owner = "John Doe"
 
 ```
+
+# Environment variable
+
+Configuration can be set dynamically using environment variables through the syntax `ENV[MY_VARIABLE]`.
+At runtime, Taipy will search `MY_VARIABLE` in the environment variables then use it.
+
+This is especially useful if you want to use secret strings such as host names, user names or passwords.
+For example, if you are using Airflow as scheduler, you can hide the password from the
+configuration file using an environment variable:
+```
+[JOB]
+airflow_password = "ENV[PASS]"
+```
+
+
+# Job execution configuration
+
+## Standalone
+
+By default, Taipy execute each `Task` one by one synchronously.
+
+You can ensure this behavior by setting:
+```
+[JOB]
+mode = "standalone"
+nb_of_workers = 1
+```
+
+To execute tasks in parallel, you can allow Taipy to use multiple processes by setting the `nb_of_workers` property to a positive integer greater then 1, for example:
+```
+[JOB]
+mode = "standalone"
+nb_of_workers = 8
+```
+
+
+## Using Airflow
+
+Taipy tasks can run with Airflow. For that, you need to specify:
+```
+[JOB]
+mode = "airflow"
+```
+
+### Start Airflow from Taipy
+
+To start Airflow within Taipy, you can use the following configuration:
+```
+[JOB]
+start_airflow = True
+```
+
+By default, Airflow creates a local folder `.airflow` to store its dependencies.
+You can change this location with the `airflow_folder` config:
+```
+[JOB]
+airflow_folder = "my_custom_path"
+```
+
+!!! warning "Production setting"
+    Taipy starts Airflow in `standalone` mode. It is an Airflow development mode and not recommended for production.
+
+
+### Use an external Airflow
+
+The default configuration is to use an external Airflow. You can specify it by setting:
+```
+[JOB]
+start_airflow = False
+```
+
+By default, Taipy is connected to Airflow on `localhost:8080`. You can change it:
+```
+[JOB]
+hostname = "my_remote_airflow:port"
+```
+
+Taipy _Task_ are converted in Airflow _DAG_ through the Airflow DAG Folder.
+By default, this folder is `.dags`, but you can update it:
+```
+[JOB]
+airflow_dags_folder = "/dags"
+```
+
+!!! note "Remote Airflow"
+    The Airflow _Dag_ generation can only be accomplished through this folder.
+    If Taipy and Airflow are not on the same machine or if Airflow uses remote workers,
+    you should mount this folder as shared.
+
+
+Airflow can take time before loading _DAGS_.
+In order to wait for Airflow to be ready to schedule tasks, Taipy requests the scheduling several times until the request is actually accepted.
+Depending on your Airflow configuration, you can update the number of retries:
+```
+[JOB]
+airflow_api_retry = 10
+```
+
+Taipy authentication with Airflow is based on [basic_auth](https://airflow.apache.org/docs/apache-airflow/stable/security/api.html#basic-authentication).
+If Airflow is not started by Taipy, you should provide this configuration:
+```
+[JOB]
+airflow_user = "user"
+airflow_password = "pass"
+```
+
+!!! note "Security"
+    To ensure you are not exposing your company's secrets, we recommend using [environment-based configuration](#environment-variable) for `airflow_user` and `airflow_password`.

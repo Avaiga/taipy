@@ -1,6 +1,6 @@
 import logging
 import uuid
-from typing import Callable, Dict, Iterable, List
+from typing import Callable, Iterable, List
 
 from taipy.common.alias import JobId
 from taipy.exceptions import JobNotDeletedException, ModelNotFound, NonExistingJob

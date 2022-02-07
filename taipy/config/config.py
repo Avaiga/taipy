@@ -124,9 +124,10 @@ class Config:
         hostname: str = None,
         airflow_dags_folder: str = None,
         airflow_folder: str = None,
-        airflow_db_endpoint: str = None,
         start_airflow: Union[bool, str] = None,
         airflow_api_retry: Union[int, str] = None,
+        airflow_user: str = None,
+        airflow_password: str = None,
         **properties,
     ):
         """Configures fields related to job execution."""
@@ -136,9 +137,10 @@ class Config:
             hostname,
             airflow_dags_folder,
             airflow_folder,
-            airflow_db_endpoint,
             start_airflow,
             airflow_api_retry,
+            airflow_user,
+            airflow_password,
             **properties,
         )
         cls._python_config.job_config = job_config
