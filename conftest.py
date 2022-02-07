@@ -18,7 +18,6 @@ from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.scenario import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
-from taipy.scheduler.scheduler import Scheduler
 from taipy.task.manager import TaskManager
 
 current_time = datetime.now()

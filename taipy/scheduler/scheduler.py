@@ -29,7 +29,7 @@ class Scheduler(AbstractScheduler):
              callbacks: Optional list of functions that should be executed once the job is done.
 
         Returns:
-            Job created.
+            The created Jobs.
         """
         res = []
         tasks = pipeline.get_sorted_tasks()
@@ -55,13 +55,13 @@ class Scheduler(AbstractScheduler):
         return job
 
     def is_blocked(self, obj: Union[Task, Job]) -> bool:
-        """Returns True if the Job cannot be executed
+        """Returns True if the Job cannot be executed.
 
         Args:
-             obj: Task or Job
+             obj: Task or Job.
 
         Returns:
-             True if one of its input data node is blocked
+             True if one of its input data node is blocked.
         """
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
         return any(not self.data_manager.get(ds.id).is_ready_for_reading for ds in data_nodes)
