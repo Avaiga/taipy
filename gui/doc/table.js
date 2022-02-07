@@ -51,16 +51,16 @@ class table extends shared {
      * HTML component width (CSS property)
      * @type {str|int|float}
      */
-     width = "100vw";
+    width = "100vw";
 
     /**
-     * column width 
+     * column width
      * @attr width[<column>]
      * @type {column_indexed(str)}
      */
-     width_;
+    width_;
 
-     /**
+    /**
      * HTML component height (CSS property)
      * @type {str|int|float}
      */
@@ -113,4 +113,23 @@ class table extends shared {
      * @type {column_indexed(str)}
      */
     style;
+
+    /**
+     * HTML component width (CSS property)
+     * @type {str|int|float}
+     */
+    width = "100vw";
+
+    /**
+     * nan_value replacement, default is "".
+     * @attr nan_value
+     * @type {str}
+     */
+    nan_value;
+    /**
+     * nan_value replacement, default is "".
+     * @attr nan_value[<column>]
+     * @type {column_indexed(str)}
+     */
+    nan_value_;
 }

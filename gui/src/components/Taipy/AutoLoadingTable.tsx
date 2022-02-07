@@ -58,6 +58,7 @@ interface RowData {
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
     lineStyle?: string;
+    nanValue?: string;
 }
 
 const Row = ({
@@ -75,6 +76,7 @@ const Row = ({
         onValidation,
         onDeletion,
         lineStyle,
+        nanValue,
     },
 }: {
     index: number;
@@ -108,6 +110,7 @@ const Row = ({
                         rowIndex={index}
                         onValidation={onValidation}
                         onDeletion={onDeletion}
+                        nanValue={columns[col].nanValue || nanValue}
                     />
                 </TableCell>
             ))}
@@ -214,24 +217,30 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, styles] = useMemo(() => {
+    const [colsOrder, columns, styles, handleNan] = useMemo(() => {
+        let hNan = !!props.nanValue;
         if (props.columns) {
-            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-            addDeleteColumn(!!(active && editable && deleteAction), columns);
-            const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
-            const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
-                if (columns[col].style) {
-                    pv[columns[col].dfid] = columns[col].style;
+            try {
+                const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+                addDeleteColumn(!!(active && editable && deleteAction), columns);
+                const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
+                const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
+                    if (columns[col].style) {
+                        pv[columns[col].dfid] = columns[col].style;
+                    }
+                    hNan = hNan || !!columns[col].nanValue;
+                    return pv;
+                }, {});
+                if (props.lineStyle) {
+                    styles[LINE_STYLE] = props.lineStyle;
                 }
-                return pv;
-            }, {});
-            if (props.lineStyle) {
-                styles[LINE_STYLE] = props.lineStyle;
+                return [colsOrder, columns, styles, hNan];
+            } catch (e) {
+                console.info("ATable.columns: " + ((e as Error).message || e));
             }
-            return [colsOrder, columns, styles];
         }
-        return [[], {}, {}];
-    }, [active, editable, deleteAction, props.columns, props.lineStyle]);
+        return [[], {}, {}, hNan];
+    }, [active, editable, deleteAction, props.columns, props.lineStyle, props.nanValue]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -290,12 +299,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         order,
                         aggregates,
                         applies,
-                        styles
+                        styles,
+                        handleNan
                     )
                 );
             });
         },
-        [aggregates, styles, tp_varname, orderBy, order, id, colsOrder, columns, dispatch]
+        [aggregates, styles, tp_varname, orderBy, order, id, colsOrder, columns, handleNan, dispatch]
     );
 
     const onAddRowClick = useCallback(
@@ -350,13 +360,17 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns: columns,
             rows: rows,
             classes: {},
-            cellStyles: colsOrder.map((col) => ({ width: columns[col].width || columns[col].widthHint, height: ROW_HEIGHT - 32 })),
+            cellStyles: colsOrder.map((col) => ({
+                width: columns[col].width || columns[col].widthHint,
+                height: ROW_HEIGHT - 32,
+            })),
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
             onValidation: active && editable && editAction ? onCellValidation : undefined,
             onDeletion: active && editable && deleteAction ? onRowDeletion : undefined,
             lineStyle: props.lineStyle,
+            nanValue: props.nanValue,
         }),
         [
             rows,
@@ -372,10 +386,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             deleteAction,
             onRowDeletion,
             props.lineStyle,
+            props.nanValue,
         ]
     );
 
-    const boxSx = useMemo(() => ({...baseBoxSx, width: width}), [width]);
+    const boxSx = useMemo(() => ({ ...baseBoxSx, width: width }), [width]);
 
     return (
         <Box sx={boxSx} id={id}>
@@ -391,7 +406,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <TableHead>
                             <TableRow ref={headerRow}>
                                 {colsOrder.map((col, idx) => (
-                                    <TableCell key={col + idx} sortDirection={orderBy === columns[col].dfid && order} width={columns[col].width}>
+                                    <TableCell
+                                        key={col + idx}
+                                        sortDirection={orderBy === columns[col].dfid && order}
+                                        width={columns[col].width}
+                                    >
                                         {columns[col].dfid === EDIT_COL ? (
                                             active && editable && addAction ? (
                                                 <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>

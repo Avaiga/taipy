@@ -132,6 +132,7 @@ describe("AutoLoadingTable Component", () => {
                 infinite: true,
                 orderby: "",
                 pagekey: "Infinite--asc",
+                handlenan: false,
                 sort: "asc",
                 start: 0,
                 aggregates: [],

@@ -64,7 +64,7 @@ class Builder:
                 # Bind potential function
                 self._gui.bind_func(val)
             # Try to evaluate as expressions
-            if val is not None:
+            if val is not None or hashname:
                 self.attributes[k] = val
             if hashname:
                 self.__hashes[k] = hashname
@@ -259,6 +259,16 @@ class Builder:
                 self.__set_default_value("value", ret_val)
         return self
 
+    def __update_col_desc_from_indexed(self, columns: dict[str, t.Any], name: str):
+        col_value = self.__get_name_indexed_property(name)
+        for k, v in col_value.items():
+            col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
+            if col_desc:
+                if col_desc.get(_to_camel_case(name)) is None:
+                    col_desc[_to_camel_case(name)] = str(v)
+            else:
+                warnings.warn(f"{self.element_name} {name}[{k}] is not in the list of displayed columns")
+
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
         value = self.attributes.get("data")
 
@@ -271,14 +281,8 @@ class Builder:
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
         if columns is not None:
-            width = self.__get_name_indexed_property("width")
-            for k, v in width.items():
-                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
-                if col_desc:
-                    if col_desc.get("width") is None:
-                        col_desc["width"] = str(v)
-                else:
-                    warnings.warn(f"{self.element_name} width[{k}] is not in the list of displayed columns")
+            self.__update_col_desc_from_indexed(columns, "nan_value")
+            self.__update_col_desc_from_indexed(columns, "width")
             group_by = self.__get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if is_boolean_true(v):
@@ -525,9 +529,9 @@ class Builder:
 
     def set_content(self, var_name: str = "content", image=True):
         content = self.attributes.get(var_name)
-        if content is None:
-            return self
         hash_name = self.__hashes.get(var_name)
+        if content is None and not hash_name:
+            return self
         value = self._gui._get_content(hash_name or var_name, content, hash_name is not None, image)
         if hash_name is not None:
             self.__set_react_attribute(
@@ -571,7 +575,7 @@ class Builder:
             except Exception as e:
                 warnings.warn(f"{self.element_name} {var_name} cannot be transformed into a number\n{e}")
                 numVal = 0
-        if isinstance(numVal, (int, float)):
+        if isinstance(numVal, numbers.Number):
             self.__set_react_attribute(_to_camel_case("default_" + var_name), numVal)
         elif numVal is not None:
             warnings.warn(f"{self.element_name} {var_name} value is not not valid {numVal}")
@@ -588,8 +592,10 @@ class Builder:
             self.set_attribute(default_var_name, dateToISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
-        elif native_type and isinstance(value, (int, float)):
+        elif native_type and isinstance(value, numbers.Number):
             self.__set_react_attribute(default_var_name, value)
+        elif value is None:
+            self.__set_react_attribute(default_var_name, "null")
         else:
             self.__set_json_attribute(default_var_name, value)
         return self

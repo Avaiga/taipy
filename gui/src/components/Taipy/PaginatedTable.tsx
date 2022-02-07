@@ -90,24 +90,30 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
 
-    const [colsOrder, columns, styles] = useMemo(() => {
+    const [colsOrder, columns, styles, handleNan] = useMemo(() => {
+        let hNan = !!props.nanValue;
         if (props.columns) {
-            const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-            addDeleteColumn(!!(active && editable && deleteAction), columns);
-            const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
-            const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
-                if (columns[col].style) {
-                    pv[columns[col].dfid] = columns[col].style;
+            try {
+                const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
+                addDeleteColumn(!!(active && editable && deleteAction), columns);
+                const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
+                const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
+                    if (columns[col].style) {
+                        pv[columns[col].dfid] = columns[col].style;
+                    }
+                    hNan = hNan || !!columns[col].nanValue;
+                    return pv;
+                }, {});
+                if (props.lineStyle) {
+                    styles[LINE_STYLE] = props.lineStyle;
                 }
-                return pv;
-            }, {});
-            if (props.lineStyle) {
-                styles[LINE_STYLE] = props.lineStyle;
+                return [colsOrder, columns, styles, hNan];
+            } catch (e) {
+                console.info("PTable.columns: " + ((e as Error).message || e));
             }
-            return [colsOrder, columns, styles];
         }
-        return [[], {}, {}];
-    }, [active, editable, deleteAction, props.columns, props.lineStyle]);
+        return [[], {}, {}, hNan];
+    }, [active, editable, deleteAction, props.columns, props.lineStyle, props.nanValue]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
 
@@ -161,7 +167,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     order,
                     aggregates,
                     applies,
-                    styles
+                    styles,
+                    handleNan
                 )
             );
         } else {
@@ -181,6 +188,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         orderBy,
         tp_varname,
         id,
+        handleNan,
         dispatch,
     ]);
 
@@ -390,6 +398,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     onDeletion={
                                                         active && editable && deleteAction ? onRowDeletion : undefined
                                                     }
+                                                    nanValue={columns[col].nanValue || props.nanValue}
                                                 />
                                             </TableCell>
                                         ))}
