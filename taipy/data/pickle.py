@@ -69,6 +69,8 @@ class PickleDataNode(DataNode):
             **properties,
         )
         self.__pickle_file_path = self.__build_path()
+        if not self.last_edition_date and os.path.exists(self.__pickle_file_path):
+            self.unlock_edition()
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
 

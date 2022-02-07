@@ -126,7 +126,7 @@ class DataNode:
     def lock_edition(self):
         self.edition_in_progress = True
 
-    def unlock_edition(self, at: Optional[datetime] = None, job_id: Optional[JobId] = None):
+    def unlock_edition(self, at: datetime = None, job_id: JobId = None):
         self.last_edition_date = at or datetime.now()
         self.edition_in_progress = False
         if job_id:
@@ -239,7 +239,7 @@ class DataNode:
         if self.edition_in_progress:
             return False
         if not self.last_edition_date:
-            # Never been written so it is not up to date
+            # Never been written so it is not up-to-date
             return False
         return True
 
