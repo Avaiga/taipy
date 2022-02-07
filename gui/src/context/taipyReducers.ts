@@ -343,7 +343,12 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
-export const createSendUpdateAction = (name: string | undefined, value: unknown, propagate = true, type = ""): TaipyAction => ({
+export const createSendUpdateAction = (
+    name: string | undefined,
+    value: unknown,
+    propagate = true,
+    type = ""
+): TaipyAction => ({
     type: Types.SendUpdate,
     name: name || "",
     propagate: propagate,
@@ -387,7 +392,8 @@ export const createRequestTableUpdateAction = (
     sort?: string,
     aggregates?: string[],
     applies?: Record<string, unknown>,
-    styles?: Record<string, unknown>
+    styles?: Record<string, unknown>,
+    handleNan?: boolean
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -402,6 +408,7 @@ export const createRequestTableUpdateAction = (
         aggregates: aggregates,
         applies: applies,
         styles: styles,
+        handlenan: handleNan,
     },
 });
 
@@ -416,7 +423,8 @@ export const createRequestInfiniteTableUpdateAction = (
     sort?: string,
     aggregates?: string[],
     applies?: Record<string, unknown>,
-    styles?: Record<string, unknown>
+    styles?: Record<string, unknown>,
+    handleNan?: boolean
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -432,6 +440,7 @@ export const createRequestInfiniteTableUpdateAction = (
         aggregates: aggregates,
         applies: applies,
         styles: styles,
+        handlenan: handleNan,
     },
 });
 

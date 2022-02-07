@@ -22,6 +22,7 @@ export interface ColumnDesc {
     width?: number | string;
     notEditable?: boolean;
     style?: string;
+    nanValue?: string;
 }
 
 export type Order = "asc" | "desc";
@@ -46,7 +47,7 @@ export const getsortByIndex = (cols: Record<string, ColumnDesc>) => (key1: strin
 
 export const defaultDateFormat = "yyyy/MM/dd";
 
-const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig): string => {
+const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string): string => {
     if (val === null || val === undefined) {
         return "";
     }
@@ -55,25 +56,28 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig): 
             return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf);
         case "int64":
         case "float64":
+            if (val === "NaN") {
+                return nanValue || "";
+            }
             return getNumberString(val as number, col.format, formatConf);
         default:
             return val as string;
     }
 };
 
-const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig) => {
+const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
         return <Switch checked={val as boolean} title={"" + val} />;
     }
-    return <>{formatValue(val as RowValue, col, formatConf)}</>;
+    return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
 };
 
 export const getCellProps = (col: ColumnDesc): Partial<TableCellProps> => {
-    const ret:Partial<TableCellProps> = {};
+    const ret: Partial<TableCellProps> = {};
     switch (col.type) {
         case "int64":
         case "float64":
-            ret.align = "right"
+            ret.align = "right";
     }
     if (col.width) {
         ret.width = col.width;
@@ -97,6 +101,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     editable?: boolean;
     defaultEditable?: boolean;
     lineStyle?: string;
+    nanValue?: string;
     defaultKey?: string; // for testing purposes only
 }
 
@@ -134,6 +139,7 @@ interface EditableCellProps {
     formatConfig: FormatConfig;
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
+    nanValue?: string;
 }
 
 export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnDesc>) => {
@@ -153,7 +159,7 @@ const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems
 export const iconInRowSx = { height: "1em" } as CSSProperties;
 
 export const EditableCell = (props: EditableCellProps) => {
-    const { onValidation, value, colDesc, formatConfig, rowIndex, onDeletion } = props;
+    const { onValidation, value, colDesc, formatConfig, rowIndex, onDeletion, nanValue } = props;
     const [val, setVal] = useState(value);
     const [edit, setEdit] = useState(false);
     const [deletion, setDeletion] = useState(false);
@@ -252,6 +258,6 @@ export const EditableCell = (props: EditableCellProps) => {
             ) : null}
         </Box>
     ) : (
-        renderCellValue(value, colDesc, formatConfig)
+        renderCellValue(value, colDesc, formatConfig, nanValue)
     );
 };

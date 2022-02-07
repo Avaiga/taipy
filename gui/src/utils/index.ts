@@ -20,9 +20,12 @@ export const setStyle = (styleString: string): void => {
 export const getClientServerTimeZoneOffset = (tz: string): number =>
     (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;
 
-export const getDateTime = (value: string | undefined, tz: string): Date | null => {
+export const getDateTime = (value: string | null | undefined, tz: string): Date | null => {
+    if (value === null || value === undefined) {
+        return null;
+    }
     try {
-        return utcToZonedTime(value || new Date(), tz);
+        return utcToZonedTime(value, tz);
     } catch (e) {
         return null;
     }
@@ -39,10 +42,16 @@ export const getDateTimeString = (
 
 export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string => {
     try {
-        return numberformat || formatConf.number ? sprintf(numberformat || formatConf.number, value) : value.toLocaleString();
+        return numberformat || formatConf.number
+            ? sprintf(numberformat || formatConf.number, value)
+            : value.toLocaleString();
     } catch (e) {
         console.info("getNumberString: " + (e as Error).message || e);
-        return (typeof value === "number" && value.toLocaleString()) || (typeof value === "string" && value as string) || ""
+        return (
+            (typeof value === "number" && value.toLocaleString()) ||
+            (typeof value === "string" && (value as string)) ||
+            ""
+        );
     }
 };
 
