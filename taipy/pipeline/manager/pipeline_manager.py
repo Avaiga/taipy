@@ -160,6 +160,23 @@ class PipelineManager:
         """
         return cls.repository.load_all()
 
+    # def submit(self, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None):
+    #     """
+    #     Submits the pipeline corresponding to the pipeline or the identifier given as parameter for execution.
+
+    #     All the tasks of pipeline will be submitted for execution.
+
+    #     Parameters:
+    #         pipeline (Union[PipelineId, Pipeline]): the pipeline or its id to submit.
+    #     """
+    #     callbacks = callbacks or []
+    #     if isinstance(pipeline, Pipeline):
+    #         pipeline = self.get(pipeline.id)
+    #     else:
+    #         pipeline = self.get(pipeline)
+    #     pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline) + callbacks
+    #     self.scheduler.submit(pipeline, pipeline_subscription_callback)
+
     @classmethod
     def submit(cls, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None):
         """
