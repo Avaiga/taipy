@@ -92,7 +92,7 @@ describe("Chart Component", () => {
             name: "",
             payload: {
                 alldata: true,
-                pageKey: "Day-Daily hospital occupancy",
+                pagekey: "Day-Daily hospital occupancy",
                 columns: ["Day", "Daily hospital occupancy"],
                 id: "chart",
             },
