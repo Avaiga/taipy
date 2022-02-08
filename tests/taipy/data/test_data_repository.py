@@ -39,7 +39,7 @@ data_node_model = DataNodeModel(
 
 class TestDataRepository:
     def test_save_and_load(self, tmpdir):
-        repository = DataManager().repository
+        repository = DataManager.repository
         repository.base_path = tmpdir
         repository.save(data_node)
         ds = repository.load("ds_id")
@@ -48,6 +48,6 @@ class TestDataRepository:
         assert isinstance(ds, DataNode)
 
     def test_from_and_to_model(self):
-        repository = DataManager().repository
+        repository = DataManager.repository
         assert repository.to_model(data_node) == data_node_model
         assert repository.from_model(data_node_model) == data_node

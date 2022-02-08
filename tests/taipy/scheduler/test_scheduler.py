@@ -44,27 +44,27 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_submit_task():
     scheduler = Scheduler()
-    data_manager = scheduler.data_manager
+    # data_manager = scheduler.DataManager
 
     before_creation = datetime.now()
     sleep(0.1)
     task = _create_task(multiply)
     output_ds_id = task.output[f"{task.config_name}-output0"].id
 
-    assert data_manager.get(output_ds_id).last_edition_date > before_creation
-    assert data_manager.get(output_ds_id).job_ids == []
-    assert data_manager.get(output_ds_id).is_ready_for_reading
+    assert DataManager.get(output_ds_id).last_edition_date > before_creation
+    assert DataManager.get(output_ds_id).job_ids == []
+    assert DataManager.get(output_ds_id).is_ready_for_reading
 
     before_submission_creation = datetime.now()
     sleep(0.1)
     job = scheduler.submit_task(task)
     sleep(0.1)
     after_submission_creation = datetime.now()
-    assert data_manager.get(output_ds_id).read() == 42
-    assert data_manager.get(output_ds_id).last_edition_date > before_submission_creation
-    assert data_manager.get(output_ds_id).last_edition_date < after_submission_creation
-    assert data_manager.get(output_ds_id).job_ids == [job.id]
-    assert data_manager.get(output_ds_id).is_ready_for_reading
+    assert DataManager.get(output_ds_id).read() == 42
+    assert DataManager.get(output_ds_id).last_edition_date > before_submission_creation
+    assert DataManager.get(output_ds_id).last_edition_date < after_submission_creation
+    assert DataManager.get(output_ds_id).job_ids == [job.id]
+    assert DataManager.get(output_ds_id).is_ready_for_reading
     assert job.is_completed()
 
 
@@ -207,19 +207,17 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 def test_blocked_task():
     scheduler = Scheduler(Config.set_job_config(nb_of_workers=2))
-    task_manager = TaskManager()
-    data_manager = task_manager.data_manager
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
     foo_cfg = Config.add_data_node("foo", default_data=1)
-    foo = data_manager.get_or_create(foo_cfg)
+    foo = DataManager.get_or_create(foo_cfg)
     bar_cfg = Config.add_data_node("bar")
-    bar = data_manager.get_or_create(bar_cfg)
+    bar = DataManager.get_or_create(bar_cfg)
     baz_cfg = Config.add_data_node("baz")
-    baz = data_manager.get_or_create(baz_cfg)
+    baz = DataManager.get_or_create(baz_cfg)
     task_1 = Task("by_2", [foo], partial(lock_multiply, lock_1, 2), [bar])
     task_2 = Task("by_3", [bar], partial(lock_multiply, lock_2, 3), [baz])
 
@@ -235,16 +233,16 @@ def test_blocked_task():
         with lock_1:
             job_1 = scheduler.submit_task(task_1)  # job 1 is submitted and locked
             assert job_1.is_running()  # so it is still running
-            assert not data_manager.get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
+            assert not DataManager.get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
         assert_true_after_10_second_max(job_1.is_completed)  # job1 unlocked and can complete
-        assert data_manager.get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
-        assert data_manager.get(task_1.bar.id).read() == 2  # the data is computed and written
+        assert DataManager.get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
+        assert DataManager.get(task_1.bar.id).read() == 2  # the data is computed and written
         assert job_2.is_running()  # And job 2 can run
         assert len(scheduler.blocked_jobs) == 0
     assert_true_after_10_second_max(job_2.is_completed)  # job 2 unlocked so it can complete
-    assert data_manager.get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
-    assert data_manager.get(task_2.baz.id).read() == 6  # the data is computed and written
+    assert DataManager.get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
+    assert DataManager.get(task_2.baz.id).read() == 6  # the data is computed and written
 
 
 class MyScheduler(Scheduler):
@@ -267,11 +265,11 @@ def test_task_scheduler_create_parallel_dispatcher():
 def _create_task(function, nb_outputs=1):
     output_ds_config_name = str(uuid.uuid4())
     input_ds = [
-        DataManager().get_or_create(Config.add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)),
-        DataManager().get_or_create(Config.add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)),
+        DataManager.get_or_create(Config.add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)),
+        DataManager.get_or_create(Config.add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)),
     ]
     output_ds = [
-        DataManager().get_or_create(
+        DataManager.get_or_create(
             Config.add_data_node(f"{output_ds_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)

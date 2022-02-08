@@ -19,7 +19,7 @@ class PipelineManager:
     The Pipeline Manager is responsible for managing all pipeline-related capabilities.
     """
 
-    task_manager = TaskManager()
+    task_manager = TaskManager
     repository = PipelineRepository()
 
     @property
@@ -99,8 +99,7 @@ class PipelineManager:
         """
         pipeline_id = Pipeline.new_id(pipeline_config.name)
         tasks = [
-            self.task_manager.get_or_create(t_config, scenario_id, pipeline_id)
-            for t_config in pipeline_config.tasks_configs
+            TaskManager.get_or_create(t_config, scenario_id, pipeline_id) for t_config in pipeline_config.tasks_configs
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
@@ -202,7 +201,7 @@ class PipelineManager:
         pipeline = self.get(pipeline_id)
         for task in pipeline.tasks.values():
             if scenario_id and task.parent_id == scenario_id:
-                self.task_manager.hard_delete(task.id, scenario_id)
+                TaskManager.hard_delete(task.id, scenario_id)
             elif task.parent_id == pipeline.id:
-                self.task_manager.hard_delete(task.id, None, pipeline_id)
+                TaskManager.hard_delete(task.id, None, pipeline_id)
         self.delete(pipeline_id)

@@ -55,4 +55,4 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
 
     @staticmethod
     def __to_tasks(task_ids):
-        return [TaskManager().get(TaskId(i)) for i in task_ids]
+        return [TaskManager.get(TaskId(i)) for i in task_ids]

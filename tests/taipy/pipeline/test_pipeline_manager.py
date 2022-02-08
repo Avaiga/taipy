@@ -12,6 +12,7 @@ from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
+from taipy.job.job_manager import JobManager
 from taipy.pipeline import Pipeline
 from taipy.pipeline.manager import PipelineManager
 from taipy.scenario import ScenarioManager
@@ -30,7 +31,6 @@ def airflow_config():
 
 def test_set_and_get_pipeline():
     pipeline_manager = PipelineManager()
-    task_manager = TaskManager()
 
     pipeline_id_1 = PipelineId("id1")
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
@@ -67,7 +67,7 @@ def test_set_and_get_pipeline():
         pipeline_manager.get(pipeline_2)
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
-    task_manager.set(task_2)
+    TaskManager.set(task_2)
     pipeline_manager.set(pipeline_2)
     assert pipeline_manager.get(pipeline_id_1).id == pipeline_1.id
     assert pipeline_manager.get(pipeline_id_1).config_name == pipeline_1.config_name
@@ -81,7 +81,7 @@ def test_set_and_get_pipeline():
     assert pipeline_manager.get(pipeline_2).id == pipeline_2.id
     assert pipeline_manager.get(pipeline_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get(pipeline_2).tasks) == 1
-    assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
+    assert TaskManager.get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
     pipeline_manager.set(pipeline_1)
@@ -97,7 +97,7 @@ def test_set_and_get_pipeline():
     assert pipeline_manager.get(pipeline_2).id == pipeline_2.id
     assert pipeline_manager.get(pipeline_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get(pipeline_2).tasks) == 1
-    assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
+    assert TaskManager.get(task_2.id).id == task_2.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
@@ -114,7 +114,7 @@ def test_set_and_get_pipeline():
     assert pipeline_manager.get(pipeline_2).id == pipeline_2.id
     assert pipeline_manager.get(pipeline_2).config_name == pipeline_2.config_name
     assert len(pipeline_manager.get(pipeline_2).tasks) == 1
-    assert pipeline_manager.task_manager.get(task_2.id).id == task_2.id
+    assert TaskManager.get(task_2.id).id == task_2.id
 
 
 def test_submit():
@@ -150,7 +150,6 @@ def test_submit():
             return MockScheduler()
 
     pipeline_manager = MockPipelineManager()
-    task_manager = TaskManager()
 
     # pipeline does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingPipeline):
@@ -167,10 +166,10 @@ def test_submit():
 
     # pipeline, and tasks does exist. We expect the tasks to be submitted
     # in a specific order
-    task_manager.set(task_1)
-    task_manager.set(task_2)
-    task_manager.set(task_3)
-    task_manager.set(task_4)
+    TaskManager.set(task_1)
+    TaskManager.set(task_2)
+    TaskManager.set(task_3)
+    TaskManager.set(task_4)
 
     pipeline_manager.submit(pipeline.id)
     calls_ids = [t.id for t in pipeline_manager.scheduler.submit_calls]
@@ -194,8 +193,6 @@ def mult_by_3(nb: int):
 def test_get_or_create_data():
     # only create intermediate data node once
     pipeline_manager = PipelineManager()
-    task_manager = pipeline_manager.task_manager
-    data_manager = task_manager.data_manager
 
     ds_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     ds_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
@@ -206,13 +203,13 @@ def test_get_or_create_data():
     pipeline_config = Config.add_pipeline("by 6", [task_config_mult_by_2, task_config_mult_by_3])
     # ds_1 ---> mult by 2 ---> ds_2 ---> mult by 3 ---> ds_6
 
-    assert len(data_manager.get_all()) == 0
-    assert len(task_manager.get_all()) == 0
+    assert len(DataManager.get_all()) == 0
+    assert len(TaskManager.get_all()) == 0
 
     pipeline = pipeline_manager.get_or_create(pipeline_config)
 
-    assert len(data_manager.get_all()) == 3
-    assert len(task_manager.get_all()) == 2
+    assert len(DataManager.get_all()) == 3
+    assert len(TaskManager.get_all()) == 2
     assert len(pipeline.get_sorted_tasks()) == 2
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 0
@@ -465,10 +462,6 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 def test_hard_delete():
     scenario_manager = ScenarioManager()
     pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    scheduler = task_manager.scheduler
-    job_manager = scheduler.job_manager
-    data_manager = scenario_manager.data_manager
 
     #  test hard delete with pipeline at pipeline level
     ds_input_config_1 = Config.add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
@@ -479,14 +472,14 @@ def test_hard_delete():
     pipeline_manager.submit(pipeline_1.id)
 
     assert len(pipeline_manager.get_all()) == 1
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
     pipeline_manager.hard_delete(pipeline_1.id)
     assert len(pipeline_manager.get_all()) == 0
-    assert len(task_manager.get_all()) == 0
-    assert len(data_manager.get_all()) == 0
-    assert len(job_manager.get_all()) == 0
+    assert len(TaskManager.get_all()) == 0
+    assert len(DataManager.get_all()) == 0
+    assert len(JobManager.get_all()) == 0
 
     #  test hard delete with pipeline at scenario level
     ds_input_config_2 = Config.add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -497,20 +490,20 @@ def test_hard_delete():
     pipeline_manager.submit(pipeline_2.id)
 
     assert len(pipeline_manager.get_all()) == 1
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
     pipeline_manager.hard_delete(pipeline_2.id)
     assert len(pipeline_manager.get_all()) == 0
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
 
     scenario_manager.delete_all()
     pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-    job_manager.delete_all()
+    DataManager.delete_all()
+    TaskManager.delete_all()
+    JobManager.delete_all()
 
     #  test hard delete with pipeline at business level
     ds_input_config_3 = Config.add_data_node(
@@ -523,20 +516,20 @@ def test_hard_delete():
     pipeline_manager.submit(pipeline_3.id)
 
     assert len(pipeline_manager.get_all()) == 1
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
     pipeline_manager.hard_delete(pipeline_3.id)
     assert len(pipeline_manager.get_all()) == 0
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
 
     scenario_manager.delete_all()
     pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-    job_manager.delete_all()
+    DataManager.delete_all()
+    TaskManager.delete_all()
+    JobManager.delete_all()
 
     #  test hard delete with pipeline at global level
     ds_input_config_4 = Config.add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
@@ -547,20 +540,20 @@ def test_hard_delete():
     pipeline_manager.submit(pipeline_4.id)
 
     assert len(pipeline_manager.get_all()) == 1
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
     pipeline_manager.hard_delete(pipeline_4.id)
     assert len(pipeline_manager.get_all()) == 0
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
 
     scenario_manager.delete_all()
     pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-    job_manager.delete_all()
+    DataManager.delete_all()
+    TaskManager.delete_all()
+    JobManager.delete_all()
 
     ds_input_config_5 = Config.add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     ds_output_config_5 = Config.add_data_node("my_output_5", "in_memory", scope=Scope.GLOBAL)
@@ -570,14 +563,14 @@ def test_hard_delete():
     pipeline_manager.submit(pipeline_5.id)
 
     assert len(pipeline_manager.get_all()) == 1
-    assert len(task_manager.get_all()) == 1
-    assert len(data_manager.get_all()) == 2
-    assert len(job_manager.get_all()) == 1
+    assert len(TaskManager.get_all()) == 1
+    assert len(DataManager.get_all()) == 2
+    assert len(JobManager.get_all()) == 1
     pipeline_manager.hard_delete(pipeline_5.id)
     assert len(pipeline_manager.get_all()) == 0
-    assert len(task_manager.get_all()) == 0
-    assert len(data_manager.get_all()) == 1
-    assert len(job_manager.get_all()) == 0
+    assert len(TaskManager.get_all()) == 0
+    assert len(DataManager.get_all()) == 1
+    assert len(JobManager.get_all()) == 0
 
 
 # TODO REACTIVATE
@@ -586,7 +579,7 @@ def test_generate_json():
     class Response:
         status_code = 200
 
-    TaskManager()._scheduler = None
+    TaskManager._scheduler = None
     Config.set_job_config(mode=Config.job_config().MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
 
     ds_input_config = Config.add_data_node(name="test_data_node_input")
@@ -596,7 +589,7 @@ def test_generate_json():
     pm = PipelineManager()
     pipeline = pm.get_or_create(pipeline_config)
     pipeline.task_config.test_data_node_input.write("foo")
-    DataManager().set(pipeline.task_config.test_data_node_input)
+    DataManager.set(pipeline.task_config.test_data_node_input)
     with mock.patch("taipy.scheduler.airflow.airflow_scheduler.requests.get") as get, mock.patch(
         "taipy.scheduler.airflow.airflow_scheduler.requests.patch"
     ) as patch, mock.patch("taipy.scheduler.airflow.airflow_scheduler.requests.post") as post:

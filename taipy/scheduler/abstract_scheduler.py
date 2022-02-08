@@ -15,10 +15,6 @@ class AbstractScheduler:
 
     """
 
-    def __init__(self):
-        self.data_manager: DataManager = DataManager()
-        self.job_manager: JobManager = JobManager()
-
     @abstractmethod
     def submit(self, pipeline, callbacks: Optional[Iterable[Callable]]) -> List[Job]:
         return NotImplemented

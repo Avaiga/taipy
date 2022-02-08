@@ -27,29 +27,25 @@ class TaskManager:
     """
 
     repository: TaskRepository = TaskRepository()
-    _scheduler = None
+    scheduler = SchedulerFactory.build_scheduler()
+    job_manager = JobManager
+    data_manager = DataManager
 
-    @property
-    def scheduler(self) -> AbstractScheduler:
-        if not self._scheduler:
-            self._scheduler = SchedulerFactory.build_scheduler()
-        return self._scheduler
+    # @property
+    # def scheduler(self) -> AbstractScheduler:
+    #     if not self._scheduler:
+    #         self._scheduler = SchedulerFactory.build_scheduler()
+    #     return self._scheduler
 
-    @property
-    def job_manager(self) -> JobManager:
-        return self.scheduler.job_manager
-
-    @property
-    def data_manager(self) -> DataManager:
-        return self.scheduler.data_manager
-
-    def delete_all(self):
+    @classmethod
+    def delete_all(cls):
         """
         Deletes all the persisted tasks.
         """
-        self.repository.delete_all()
+        cls.repository.delete_all()
 
-    def delete(self, task_id: TaskId):
+    @classmethod
+    def delete(cls, task_id: TaskId):
         """Deletes the cycle provided as parameter.
 
         Parameters:
@@ -57,18 +53,20 @@ class TaskManager:
         Raises:
             ModelNotFound error if no task corresponds to task_id.
         """
-        self.repository.delete(task_id)
+        cls.repository.delete(task_id)
 
-    def get_all(self):
+    @classmethod
+    def get_all(cls):
         """
         Returns the list of all existing tasks.
 
         Returns:
             List: The list of tasks handled by this Task Manager.
         """
-        return self.repository.load_all()
+        return cls.repository.load_all()
 
-    def set(self, task: Task):
+    @classmethod
+    def set(cls, task: Task):
         """
         Saves or updates a task.
 
@@ -76,12 +74,13 @@ class TaskManager:
             task (Task): The task to save.
         """
         logging.info(f"Task: {task.id} created or updated.")
-        self.__save_data_nodes(task.input.values())
-        self.__save_data_nodes(task.output.values())
-        self.repository.save(task)
+        cls.__save_data_nodes(task.input.values())
+        cls.__save_data_nodes(task.output.values())
+        cls.repository.save(task)
 
+    @classmethod
     def get_or_create(
-        self,
+        cls,
         task_config: TaskConfig,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
@@ -105,12 +104,12 @@ class TaskManager:
                 scope of the data node). TODO: This comment makes no sense - Data Node scope
         """
         data_nodes = {
-            ds_config: self.data_manager.get_or_create(ds_config, scenario_id, pipeline_id)
+            ds_config: DataManager.get_or_create(ds_config, scenario_id, pipeline_id)
             for ds_config in set(itertools.chain(task_config.input, task_config.output))
         }
         scope = min(ds.scope for ds in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        tasks_from_config_name = self._get_all_by_config_name(task_config.name)
+        tasks_from_config_name = cls._get_all_by_config_name(task_config.name)
         tasks_from_parent = [task for task in tasks_from_config_name if task.parent_id == parent_id]
         if len(tasks_from_parent) == 1:
             return tasks_from_parent[0]
@@ -121,10 +120,11 @@ class TaskManager:
             inputs = [data_nodes[input_config] for input_config in task_config.input]
             outputs = [data_nodes[output_config] for output_config in task_config.output]
             task = Task(task_config.name, inputs, task_config.function, outputs, parent_id=parent_id)
-            self.set(task)
+            cls.set(task)
             return task
 
-    def get(self, task: Union[Task, TaskId]) -> Task:
+    @classmethod
+    def get(cls, task: Union[Task, TaskId]) -> Task:
         """
         Gets a task given the Task or the identifier.
 
@@ -139,16 +139,18 @@ class TaskManager:
         """
         try:
             task_id = task.id if isinstance(task, Task) else task
-            return self.repository.load(task_id)
+            return cls.repository.load(task_id)
         except ModelNotFound:
             logging.error(f"Task: {task_id} does not exist.")
             raise NonExistingTask(task_id)
 
-    def __save_data_nodes(self, data_nodes):
+    @classmethod
+    def __save_data_nodes(cls, data_nodes):
         for i in data_nodes:
-            self.data_manager.set(i)
+            DataManager.set(i)
 
-    def _get_all_by_config_name(self, config_name: str) -> List[Task]:
+    @classmethod
+    def _get_all_by_config_name(cls, config_name: str) -> List[Task]:
         """
         Returns the list of all existing tasks with the corresponding config name.
 
@@ -158,10 +160,11 @@ class TaskManager:
         Returns:
             List of tasks of this config name
         """
-        return self.repository.search_all("config_name", config_name)
+        return cls.repository.search_all("config_name", config_name)
 
+    @classmethod
     def hard_delete(
-        self, task_id: TaskId, scenario_id: Optional[ScenarioId] = None, pipeline_id: Optional[PipelineId] = None
+        cls, task_id: TaskId, scenario_id: Optional[ScenarioId] = None, pipeline_id: Optional[PipelineId] = None
     ):
         """
         Deletes the task given as parameter and the nested data nodes, and jobs.
@@ -178,23 +181,24 @@ class TaskManager:
         Raises:
         ModelNotFound error if no pipeline corresponds to pipeline_id.
         """
-        task = self.get(task_id)
+        task = cls.get(task_id)
 
-        jobs = self.job_manager.get_all()
+        jobs = JobManager.get_all()
         for job in jobs:
             if job.task.id == task.id:
-                self.job_manager.delete(job)
+                JobManager.delete(job)
 
         if scenario_id:
-            self.remove_if_parent_id_eq(task.input.values(), scenario_id)
-            self.remove_if_parent_id_eq(task.output.values(), scenario_id)
+            cls.remove_if_parent_id_eq(task.input.values(), scenario_id)
+            cls.remove_if_parent_id_eq(task.output.values(), scenario_id)
         if pipeline_id:
-            self.remove_if_parent_id_eq(task.input.values(), pipeline_id)
-            self.remove_if_parent_id_eq(task.output.values(), pipeline_id)
+            cls.remove_if_parent_id_eq(task.input.values(), pipeline_id)
+            cls.remove_if_parent_id_eq(task.output.values(), pipeline_id)
 
-        self.delete(task_id)
+        cls.delete(task_id)
 
-    def remove_if_parent_id_eq(self, data_nodes, id_):
+    @classmethod
+    def remove_if_parent_id_eq(cls, data_nodes, id_):
         for data_node in data_nodes:
             if data_node.parent_id == id_:
-                self.data_manager.delete(data_node.id)
+                DataManager.delete(data_node.id)

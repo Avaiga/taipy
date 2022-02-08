@@ -41,19 +41,19 @@ task_model = TaskModel(
 
 class TestTaskRepository:
     def test_save_and_load(self, tmpdir):
-        repository = TaskManager().repository
+        repository = TaskManager.repository
         repository.base_path = tmpdir
         repository.save(task)
         with pytest.raises(NonExistingDataNode):
             repository.load("id")
-        DataManager().set(data_node)
+        DataManager.set(data_node)
         t = repository.load("id")
         assert t.id == task.id
 
     def test_from_and_to_model(self):
-        repository = TaskManager().repository
+        repository = TaskManager.repository
         assert repository.to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):
             repository.from_model(task_model)
-        DataManager().set(data_node)
+        DataManager.set(data_node)
         assert repository.from_model(task_model).id == task.id

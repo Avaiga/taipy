@@ -82,12 +82,11 @@ def test_data_node_creation_no_duplication():
 
 
 def test_date_node_create_with_datetime():
-    data_manager = DataManager()
     data_node_config = Config.add_data_node(
         name="datetime_data", my_property=datetime(1991, 1, 1), foo="hello", test=1, dict={"type": "Datetime", 2: "daw"}
     )
-    ds = data_manager.get_or_create(data_node_config)
-    ds = data_manager.get(ds)
+    ds = DataManager.get_or_create(data_node_config)
+    ds = DataManager.get(ds)
     assert ds.foo == "hello"
     assert ds.my_property == datetime(1991, 1, 1)
     assert ds.test == 1

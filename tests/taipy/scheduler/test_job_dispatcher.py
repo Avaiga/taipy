@@ -41,7 +41,7 @@ def test_can_execute_synchronous():
         config_name="name",
         input=[],
         function=partial(execute, lock),
-        output=[DataManager().get_or_create(Config.add_data_node("input1", default_data=21))],
+        output=[DataManager.get_or_create(Config.add_data_node("input1", default_data=21))],
         id=task_id,
     )
     job_id = JobId("id1")

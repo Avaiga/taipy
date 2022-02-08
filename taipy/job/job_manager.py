@@ -16,10 +16,10 @@ class JobManager:
     This class provides methods for creating, storing, updating, retrieving and deleting jobs.
     """
 
-    def __init__(self):
-        self.repository = JobRepository()
+    repository = JobRepository()
 
-    def create(self, task: Task, callbacks: Iterable[Callable]) -> Job:
+    @classmethod
+    def create(cls, task: Task, callbacks: Iterable[Callable]) -> Job:
         """Returns a new job representing a unique execution of the provided task.
 
         Args:
@@ -30,20 +30,22 @@ class JobManager:
             A new job, that is created for executing given task.
         """
         job = Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
-        self.set(job)
+        cls.set(job)
         job.on_status_change(*callbacks)
         return job
 
-    def set(self, job: Job):
+    @classmethod
+    def set(cls, job: Job):
         """
         Saves or updates a job.
 
         Parameters:
             job (Job): The job to save.
         """
-        self.repository.save(job)
+        cls.repository.save(job)
 
-    def get(self, job_id: JobId) -> Job:
+    @classmethod
+    def get(cls, job_id: JobId) -> Job:
         """Gets the job from the job id given as parameter.
 
         Returns:
@@ -53,40 +55,44 @@ class JobManager:
             NonExistingJob: if not found.
         """
         try:
-            return self.repository.load(job_id)
+            return cls.repository.load(job_id)
         except ModelNotFound:
             logging.error(f"Job: {job_id} does not exist.")
             raise NonExistingJob(job_id)
 
-    def get_all(self) -> List[Job]:
+    @classmethod
+    def get_all(cls) -> List[Job]:
         """Gets all the existing jobs.
 
         Returns:
             List of all jobs.
         """
-        return self.repository.load_all()
+        return cls.repository.load_all()
 
-    def delete(self, job: Job, force=False):
+    @classmethod
+    def delete(cls, job: Job, force=False):
         """Deletes the job if it is finished.
 
         Raises:
             JobNotDeletedException: if the job is not finished.
         """
         if job.is_finished() or force:
-            self.repository.delete(job.id)
+            cls.repository.delete(job.id)
         else:
             err = JobNotDeletedException(job.id)
             logging.warning(err)
             raise err
 
-    def delete_all(self):
+    @classmethod
+    def delete_all(cls):
         """Deletes all jobs."""
-        self.repository.delete_all()
+        cls.repository.delete_all()
 
-    def get_latest_job(self, task: Task) -> Job:
+    @classmethod
+    def get_latest_job(cls, task: Task) -> Job:
         """Allows to retrieve the latest computed job of a task.
 
         Returns:
             The latest computed job of the task.
         """
-        return max(filter(lambda job: task in job, self.get_all()))
+        return max(filter(lambda job: task in job, cls.get_all()))

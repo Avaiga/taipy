@@ -320,12 +320,11 @@ class TestDataNode:
         )
 
     def test_data_node_update_after_writing(self):
-        dm = DataManager()
         ds = FakeDataNode("foo")
 
-        dm.set(ds)
-        assert not dm.get(ds.id).is_ready_for_reading
+        DataManager.set(ds)
+        assert not DataManager.get(ds.id).is_ready_for_reading
         ds.write("Any data")
 
         assert ds.is_ready_for_reading
-        assert dm.get(ds.id).is_ready_for_reading
+        assert DataManager.get(ds.id).is_ready_for_reading

@@ -23,8 +23,7 @@ class JobDispatcher:
     a homogeneous way to execute jobs.
     """
 
-    def __init__(self, max_number_of_parallel_execution: Optional[int]):
-        self.job_manager = JobManager()
+    def __init__(self, max_number_of_parallel_execution):
         self._executor, self._nb_worker_available = self.__create(max_number_of_parallel_execution or 1)
 
     def can_execute(self) -> bool:
@@ -38,7 +37,7 @@ class JobDispatcher:
             job: Element to execute.
         """
         job.running()
-        self.job_manager.set(job)
+        JobManager.set(job)
         self._nb_worker_available -= 1
         future = self._executor.submit(self._call_function, job.id, job.task)
         future.add_done_callback(self.__release_worker)
@@ -49,7 +48,7 @@ class JobDispatcher:
 
     def __update_status(self, job, ft):
         job.update_status(ft)
-        self.job_manager.set(job)
+        JobManager.set(job)
 
     @classmethod
     def _call_function(cls, job_id: JobId, task: Task):
@@ -64,7 +63,7 @@ class JobDispatcher:
 
     @classmethod
     def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
-        return [DataManager().get(ds.id).read() for ds in inputs]
+        return [DataManager.get(ds.id).read() for ds in inputs]
 
     @classmethod
     def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
@@ -73,9 +72,9 @@ class JobDispatcher:
             exceptions = []
             for res, ds in zip(_results, outputs):
                 try:
-                    data_node = DataManager().get(ds.id)
+                    data_node = DataManager.get(ds.id)
                     data_node.write(res, job_id=job_id)
-                    DataManager().set(data_node)
+                    DataManager.set(data_node)
                 except Exception as e:
                     exceptions.append(DataNodeWritingError(f"Error writing in datanode id {ds.id}: {e}"))
                     logging.error(f"Error writing output {e}")
