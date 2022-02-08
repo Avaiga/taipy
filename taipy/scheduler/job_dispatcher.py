@@ -3,7 +3,7 @@ __all__ = ["JobDispatcher"]
 import logging
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from taipy.common.alias import JobId
 from taipy.data import DataNode

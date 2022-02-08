@@ -18,10 +18,9 @@ def _test_default_job_config(job_config: JobConfig):
     assert job_config is not None
     assert job_config.mode == "standalone"
     assert job_config.nb_of_workers == 1
-    assert job_config.hostname == "localhost"
+    assert job_config.hostname == "localhost:8080"
     assert job_config.airflow_folder == ".airflow/"
     assert job_config.airflow_dags_folder == ".dags/"
-    assert job_config.airflow_db_endpoint is None
     assert len(job_config.properties) == 0
 
 

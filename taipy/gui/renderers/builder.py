@@ -19,6 +19,8 @@ class Builder:
 
     __keys: t.Dict[str, int] = {}
 
+    __ONE_COLUMN_CHART = ["pie"]
+
     def __init__(
         self,
         control_type: str,
@@ -64,7 +66,7 @@ class Builder:
                 # Bind potential function
                 self._gui.bind_func(val)
             # Try to evaluate as expressions
-            if val is not None:
+            if val is not None or hashname:
                 self.attributes[k] = val
             if hashname:
                 self.__hashes[k] = hashname
@@ -116,13 +118,12 @@ class Builder:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
 
-    def __set_boolean_attribute(self, name: str, default_value=False):
+    def __get_boolean_attribute(self, name: str, default_value=False):
         boolattr = self.attributes.get(name, default_value)
-        if isinstance(boolattr, str):
-            boolattr = is_boolean_true(boolattr)
-        if isinstance(boolattr, bool):
-            return self.__set_react_attribute(_to_camel_case(name), boolattr)
-        return self
+        return is_boolean_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
+
+    def __set_boolean_attribute(self, name: str, value: bool):
+        return self.__set_react_attribute(_to_camel_case(name), value)
 
     def __set_dict_attribute(self, name: str):
         dict_attr = self.attributes.get(name)
@@ -259,6 +260,16 @@ class Builder:
                 self.__set_default_value("value", ret_val)
         return self
 
+    def __update_col_desc_from_indexed(self, columns: dict[str, t.Any], name: str):
+        col_value = self.__get_name_indexed_property(name)
+        for k, v in col_value.items():
+            col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
+            if col_desc:
+                if col_desc.get(_to_camel_case(name)) is None:
+                    col_desc[_to_camel_case(name)] = str(v)
+            else:
+                warnings.warn(f"{self.element_name} {name}[{k}] is not in the list of displayed columns")
+
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
         value = self.attributes.get("data")
 
@@ -271,14 +282,8 @@ class Builder:
             _add_to_dict_and_get(self.attributes, "number_format", number_format),
         )
         if columns is not None:
-            width = self.__get_name_indexed_property("width")
-            for k, v in width.items():
-                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
-                if col_desc:
-                    if col_desc.get("width") is None:
-                        col_desc["width"] = str(v)
-                else:
-                    warnings.warn(f"{self.element_name} width[{k}] is not in the list of displayed columns")
+            self.__update_col_desc_from_indexed(columns, "nan_value")
+            self.__update_col_desc_from_indexed(columns, "width")
             group_by = self.__get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if is_boolean_true(v):
@@ -374,6 +379,8 @@ class Builder:
         if not trace[6]:
             # type
             trace[6] = default_type
+        else:
+            trace[6] = str(trace[6]).strip().lower()
         if not trace[8]:
             # xaxis
             trace[8] = "x"
@@ -385,14 +392,17 @@ class Builder:
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
-        while len([x for x in indexed_trace if x]):
-            self.__check_dict(indexed_trace, 11, names)
-            self.__check_dict(indexed_trace, 12, names)
-            traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
-            idx += 1
-            indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        if len([x for x in indexed_trace if x]):
+            while len([x for x in indexed_trace if x]):
+                self.__check_dict(indexed_trace, 11, names)
+                self.__check_dict(indexed_trace, 12, names)
+                traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
+                idx += 1
+                indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
+        else:
+            traces.append(trace)
         # filter traces where we don't have at least x and y
-        traces = [t for t in traces if t[0] and t[1]]
+        traces = [t for t in traces if t[0] and (t[6] in Builder.__ONE_COLUMN_CHART or t[1])]
         if not len(traces) and trace[0] and trace[1]:
             traces.append(trace)
 
@@ -525,9 +535,9 @@ class Builder:
 
     def set_content(self, var_name: str = "content", image=True):
         content = self.attributes.get(var_name)
-        if content is None:
-            return self
         hash_name = self.__hashes.get(var_name)
+        if content is None and not hash_name:
+            return self
         value = self._gui._get_content(hash_name or var_name, content, hash_name is not None, image)
         if hash_name is not None:
             self.__set_react_attribute(
@@ -571,7 +581,7 @@ class Builder:
             except Exception as e:
                 warnings.warn(f"{self.element_name} {var_name} cannot be transformed into a number\n{e}")
                 numVal = 0
-        if isinstance(numVal, (int, float)):
+        if isinstance(numVal, numbers.Number):
             self.__set_react_attribute(_to_camel_case("default_" + var_name), numVal)
         elif numVal is not None:
             warnings.warn(f"{self.element_name} {var_name} value is not not valid {numVal}")
@@ -588,8 +598,10 @@ class Builder:
             self.set_attribute(default_var_name, dateToISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
-        elif native_type and isinstance(value, (int, float)):
+        elif native_type and isinstance(value, numbers.Number):
             self.__set_react_attribute(default_var_name, value)
+        elif value is None:
+            self.__set_react_attribute(default_var_name, "null")
         else:
             self.__set_json_attribute(default_var_name, value)
         return self
@@ -664,9 +676,9 @@ class Builder:
         return self
 
     def set_propagate(self):
-        val = self.attributes.get("propagate", self._gui._config.app_config["propagate"])
-        if val is not True:
-            return self.__set_boolean_attribute("propagate", self._gui._config.app_config["propagate"])
+        val = self.__get_boolean_attribute("propagate", self._gui._config.app_config.get("propagate"))
+        if not val:
+            return self.__set_boolean_attribute("propagate", False)
         return self
 
     def set_refresh(self):
@@ -710,17 +722,19 @@ class Builder:
                 attr = (attr,)
             type = _get_tuple_val(attr, 1, AttributeType.string)
             if type == AttributeType.boolean:
-                val = self.attributes.get(attr[0])
-                if val is not None and val != _get_tuple_val(attr, 2, False):
+                def_val = _get_tuple_val(attr, 2, False)
+                val = self.__get_boolean_attribute(attr[0], def_val)
+                if val != def_val:
                     self.__set_boolean_attribute(attr[0], val)
             elif type == AttributeType.dynamic_boolean:
-                dyn_var = self.__hashes.get(attr[0])
-                val = self.attributes.get(attr[0])
-                default_name = "default_" + attr[0] if dyn_var is not None else attr[0]
-                if val is not None and val != _get_tuple_val(attr, 2, False):
+                hash_name = self.__hashes.get(attr[0])
+                def_val = _get_tuple_val(attr, 2, False)
+                val = self.__get_boolean_attribute(attr[0], def_val)
+                default_name = "default_" + attr[0] if hash_name is not None else attr[0]
+                if val != def_val:
                     self.__set_boolean_attribute(default_name, val)
-                if dyn_var is not None:
-                    self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(dyn_var))
+                if hash_name is not None:
+                    self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(hash_name))
             elif type == AttributeType.number:
                 self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif type == AttributeType.dynamic_number:

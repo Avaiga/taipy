@@ -1,6 +1,7 @@
 from types import FunctionType
 import typing as t
 import warnings
+import numpy as np
 
 import pandas as pd
 from pandas.core.frame import DataFrame
@@ -104,6 +105,7 @@ class PandasDataAccessor(DataAccessor):
         start: t.Optional[int] = None,
         rowcount: t.Optional[int] = None,
         data_extraction: t.Optional[bool] = None,
+        handle_nan: t.Optional[bool] = False,
     ) -> t.Dict[str, t.Any]:
         ret: t.Dict[str, t.Any] = {
             "format": str(data_format.value),
@@ -130,7 +132,8 @@ class PandasDataAccessor(DataAccessor):
             ret["data"] = buf.to_pybytes()
             ret["orient"] = orient
         else:
-            ret["data"] = data.to_dict(orient=orient)
+            # workaround for python built in json encoder that does not yet support ignore_nan
+            ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)
         return ret
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
@@ -208,7 +211,9 @@ class PandasDataAccessor(DataAccessor):
                 value = self.__build_transferred_cols(
                     guiApp, columns, value.iloc[new_indexes], styles=payload.get("styles")
                 )
-                dictret = self.__format_data(value, data_format, "records", start, rowcount)
+                dictret = self.__format_data(
+                    value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
+                )
             else:
                 # view with the requested columns
                 if nb_rows_max and nb_rows_max < len(value) / 2:

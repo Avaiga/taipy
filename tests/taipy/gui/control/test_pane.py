@@ -12,7 +12,26 @@ def test_pane_md(gui: Gui, helpers):
         "<Pane",
         'anchor="left"',
         "defaultOpen={false}",
-        "persistent={false}",
+        'tp_varname="show_pane"',
+        "open={show_pane}",
+        "<h1",
+        "This is a Pane</h1></Pane>",
+    ]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
+def test_pane_persistent_md(gui: Gui, helpers):
+    gui.bind_var_val("show_pane", False)
+    md_string = """
+<|{show_pane}|pane|persistent|
+# This is a Pane
+|>
+"""
+    expected_list = [
+        "<Pane",
+        'anchor="left"',
+        "defaultOpen={false}",
+        "persistent={true}",
         'tp_varname="show_pane"',
         "open={show_pane}",
         "<h1",
@@ -28,7 +47,6 @@ def test_pane_html(gui: Gui, helpers):
         "<Pane",
         'anchor="left"',
         "defaultOpen={false}",
-        "persistent={false}",
         'tp_varname="show_pane"',
         "open={show_pane}",
         "<h1",

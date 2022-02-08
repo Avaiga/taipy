@@ -51,11 +51,11 @@ class ContentAccessor:
         return None
 
     def get_info(self, var_name: str, value: t.Any) -> t.Union[str, t.Tuple[str], t.Any]:  # noqa: C901
-        if value is None:
-            return value
         image = self.__vars.get(var_name)
         if image is None:
             return value
+        if value is None:
+            return ""
         newvalue = value
         mime = None
         if not isinstance(newvalue, (str, pathlib.Path)) and (

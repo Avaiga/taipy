@@ -35,6 +35,14 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: Add an ssh key for cloning
+        run: |
+          mkdir -p ~/.ssh
+          ls ~/.ssh
+          echo "${{ secrets.SSH_KEY_TAIPY_AIRFLOW }}" > ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+
       - name: Add optionals dependencies
         run: |
           # Extract optionals packages before installing them
@@ -47,8 +55,8 @@ jobs:
           # Run test with optionals packages installed
           pip install pytest pytest-mock
           pytest > pytest_res
+          cat pytest_res
 
-          # Only one skip is allowed by Airflow
-          # Another by the pipeline manager
+          # Only one skip is allowed in the pipeline manager
           # The other skips should be remove with to dependencies
-          tail pytest_res | grep "2 skipped"
+          tail pytest_res | grep "1 skipped"

@@ -25,6 +25,9 @@ nav:
         - 'Dialogs': 'manuals/gui/user_dialogs.md'
         - 'Notifications': 'manuals/gui/user_notifications.md'
         - 'GUI References': 'manuals/gui/user_gui.md'
+    - Docker:
+        - 'Standalone Application': 'manuals/docker/standalone.md'
+        - 'Running with Airflow': 'manuals/docker/airflow.md'
     - Deployment:
         - Prepare your application for deployment: 'manuals/deployment/prepare-taipy-for-deployment.md'
         - Heroku:

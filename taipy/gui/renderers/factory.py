@@ -359,6 +359,7 @@ class Factory:
                 ("edit_action",),
                 ("delete_action",),
                 ("add_action",),
+                ("nan_value",),
             ]
         )
         .set_refresh()

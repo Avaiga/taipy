@@ -7,13 +7,25 @@ import pandas as pd
 import pytest
 
 from taipy.common.alias import DataNodeId
+from taipy.config import Config
 from taipy.data.excel import ExcelDataNode
+from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 from taipy.exceptions.data_node import NoData, NonExistingExcelSheet
 
 
 class TestExcelDataNode:
+    def test_new_excel_data_node_with_existing_file_is_ready_for_reading(self):
+        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_name", "excel", path="NOT_EXISTING.csv")
+        not_ready_dn = DataManager().get_or_create(not_ready_dn_cfg)
+        assert not not_ready_dn.is_ready_for_reading
+
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
+        ready_dn_cfg = Config.add_data_node("ready_data_node_config_name", "excel", path=path)
+        ready_dn = DataManager().get_or_create(ready_dn_cfg)
+        assert ready_dn.is_ready_for_reading
+
     def test_create(self):
         path = "data/node/path"
         sheet_names = ["sheet_name_1", "sheet_name_2"]

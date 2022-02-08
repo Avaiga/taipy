@@ -47,11 +47,12 @@ storage_folder = ".data/"
 [JOB]
 mode = "standalone"
 nb_of_workers = 1
-hostname = "localhost"
+hostname = "localhost:8080"
 airflow_dags_folder = ".dags/"
 airflow_folder = ".airflow/"
 start_airflow = false
 airflow_api_retry = 10
+airflow_user = "admin"
 
 [DATA_NODE.default]
 storage_type = "in_memory"
