@@ -29,7 +29,7 @@ jobs:
           tox -p all
 
       - name: Code coverage
-        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request'
+        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
         uses: orgoro/coverage@v2
         with:
           coverageFile: coverage.xml

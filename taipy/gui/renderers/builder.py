@@ -12,7 +12,7 @@ from ..page import Partial
 from ..types import AttributeType
 from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
 from .jsonencoder import TaipyJsonEncoder
-from .utils import _add_to_dict_and_get, _get_columns_dict, _to_camel_case, _get_tuple_val
+from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
 
 
 class Builder:
@@ -260,7 +260,7 @@ class Builder:
                 self.__set_default_value("value", ret_val)
         return self
 
-    def __update_col_desc_from_indexed(self, columns: dict[str, t.Any], name: str):
+    def __update_col_desc_from_indexed(self, columns: t.Dict[str, t.Any], name: str):
         col_value = self.__get_name_indexed_property(name)
         for k, v in col_value.items():
             col_desc = next((x for x in columns.values() if x["dfid"] == k), None)

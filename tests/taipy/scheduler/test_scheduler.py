@@ -136,7 +136,7 @@ def test_submit_task_in_parallel():
         assert task.output[f"{task.config_name}-output0"].read() == 0
         assert job.is_running()
 
-    assert_true_after_10_second_max(job.is_completed)
+    assert_true_after_20_second_max(job.is_completed)
 
 
 def test_submit_task_multithreading_multiple_task():
@@ -159,12 +159,12 @@ def test_submit_task_multithreading_multiple_task():
             assert job_1.is_running()
             assert job_2.is_running()
 
-        assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
+        assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
         assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
+    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
     assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
@@ -194,12 +194,12 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
                 assert job_1.is_running()
                 assert job_2.is_pending()
 
-            assert_true_after_10_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
+            assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
             assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
             assert job_1.is_completed()
             assert job_2.is_running()
 
-    assert_true_after_10_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
+    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
     assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
     assert job_1.is_completed()
     assert job_2.is_completed()
@@ -237,12 +237,12 @@ def test_blocked_task():
             assert job_1.is_running()  # so it is still running
             assert not data_manager.get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
-        assert_true_after_10_second_max(job_1.is_completed)  # job1 unlocked and can complete
+        assert_true_after_20_second_max(job_1.is_completed)  # job1 unlocked and can complete
         assert data_manager.get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert data_manager.get(task_1.bar.id).read() == 2  # the data is computed and written
         assert job_2.is_running()  # And job 2 can run
         assert len(scheduler.blocked_jobs) == 0
-    assert_true_after_10_second_max(job_2.is_completed)  # job 2 unlocked so it can complete
+    assert_true_after_20_second_max(job_2.is_completed)  # job 2 unlocked so it can complete
     assert data_manager.get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert data_manager.get(task_2.baz.id).read() == 6  # the data is computed and written
 
@@ -285,9 +285,9 @@ def _create_task(function, nb_outputs=1):
     )
 
 
-def assert_true_after_10_second_max(assertion):
+def assert_true_after_20_second_max(assertion):
     start = datetime.now()
-    while (datetime.now() - start).seconds < 10:
+    while (datetime.now() - start).seconds < 20:
         sleep(0.1)  # Limit CPU usage
         if assertion():
             return
