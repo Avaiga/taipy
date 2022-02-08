@@ -26,7 +26,8 @@ class PipelineManager:
     def scheduler(self) -> AbstractScheduler:
         return self.task_manager.scheduler
 
-    def subscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+    @classmethod
+    def subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
         Subscribes a function to be called when the status of a Job changes.
         If pipeline is not passed, the subscription is added to all pipelines.
@@ -35,14 +36,15 @@ class PipelineManager:
             Notification will be available only for jobs created after this subscription.
         """
         if pipeline is None:
-            pipelines = self.get_all()
+            pipelines = cls.get_all()
             for pln in pipelines:
-                self.__add_subscriber(callback, pln)
+                cls.__add_subscriber(callback, pln)
             return
 
-        self.__add_subscriber(callback, pipeline)
+        cls.__add_subscriber(callback, pipeline)
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+    @classmethod
+    def unsubscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
         """
         Unsubscribes a function that is called when the status of a Job changes.
         If pipeline is not passed, the subscription is removed to all pipelines.
@@ -51,28 +53,32 @@ class PipelineManager:
             The function will continue to be called for ongoing jobs.
         """
         if pipeline is None:
-            pipelines = self.get_all()
+            pipelines = cls.get_all()
             for pln in pipelines:
-                self.__remove_subscriber(callback, pln)
+                cls.__remove_subscriber(callback, pln)
             return
 
-        self.__remove_subscriber(callback, pipeline)
+        cls.__remove_subscriber(callback, pipeline)
 
-    def __add_subscriber(self, callback, pipeline):
+    @classmethod
+    def __add_subscriber(cls, callback, pipeline):
         pipeline.add_subscriber(callback)
-        self.set(pipeline)
+        cls.set(pipeline)
 
-    def __remove_subscriber(self, callback, pipeline):
+    @classmethod
+    def __remove_subscriber(cls, callback, pipeline):
         pipeline.remove_subscriber(callback)
-        self.set(pipeline)
+        cls.set(pipeline)
 
-    def delete_all(self):
+    @classmethod
+    def delete_all(cls):
         """
         Deletes all data nodes.
         """
-        self.repository.delete_all()
+        cls.repository.delete_all()
 
-    def delete(self, pipeline_id: PipelineId):
+    @classmethod
+    def delete(cls, pipeline_id: PipelineId):
         """Deletes the pipeline provided as parameter.
 
         Parameters:
@@ -80,9 +86,10 @@ class PipelineManager:
         Raises:
             ModelNotFound error if no pipeline corresponds to pipeline_id.
         """
-        self.repository.delete(pipeline_id)
+        cls.repository.delete(pipeline_id)
 
-    def get_or_create(self, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
+    @classmethod
+    def get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         """
         Returns a pipeline created from the pipeline configuration.
 
@@ -103,7 +110,7 @@ class PipelineManager:
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
-        pipelines_from_config_name = self._get_all_by_config_name(pipeline_config.name)
+        pipelines_from_config_name = cls._get_all_by_config_name(pipeline_config.name)
         pipelines_from_parent = [pipeline for pipeline in pipelines_from_config_name if pipeline.parent_id == parent_id]
         if len(pipelines_from_parent) == 1:
             return pipelines_from_parent[0]
@@ -112,19 +119,21 @@ class PipelineManager:
             raise MultiplePipelineFromSameConfigWithSameParent
         else:
             pipeline = Pipeline(pipeline_config.name, pipeline_config.properties, tasks, pipeline_id, parent_id)
-            self.set(pipeline)
+            cls.set(pipeline)
             return pipeline
 
-    def set(self, pipeline: Pipeline):
+    @classmethod
+    def set(cls, pipeline: Pipeline):
         """
         Saves or updates a pipeline.
 
         Parameters:
             pipeline (Pipeline): the pipeline to save or update.
         """
-        self.repository.save(pipeline)
+        cls.repository.save(pipeline)
 
-    def get(self, pipeline: Union[Pipeline, PipelineId]) -> Pipeline:
+    @classmethod
+    def get(cls, pipeline: Union[Pipeline, PipelineId]) -> Pipeline:
         """
         Gets a pipeline.
 
@@ -136,21 +145,23 @@ class PipelineManager:
         """
         try:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
-            return self.repository.load(pipeline_id)
+            return cls.repository.load(pipeline_id)
         except ModelNotFound:
             logging.error(f"Pipeline entity: {pipeline_id} does not exist.")
             raise NonExistingPipeline(pipeline_id)
 
-    def get_all(self) -> List[Pipeline]:
+    @classmethod
+    def get_all(cls) -> List[Pipeline]:
         """
         Returns all existing pipelines.
 
         Returns:
             List[Pipeline]: the list of all pipelines managed by this pipeline manager.
         """
-        return self.repository.load_all()
+        return cls.repository.load_all()
 
-    def submit(self, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None):
+    @classmethod
+    def submit(cls, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None):
         """
         Submits the pipeline corresponding to the pipeline or the identifier given as parameter for execution.
 
@@ -161,17 +172,18 @@ class PipelineManager:
         """
         callbacks = callbacks or []
         if isinstance(pipeline, Pipeline):
-            pipeline = self.get(pipeline.id)
+            pipeline = cls.get(pipeline.id)
         else:
-            pipeline = self.get(pipeline)
-        pipeline_subscription_callback = self.__get_status_notifier_callbacks(pipeline) + callbacks
-        self.scheduler.submit(pipeline, pipeline_subscription_callback)
+            pipeline = cls.get(pipeline)
+        pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
+        TaskManager.scheduler.submit(pipeline, pipeline_subscription_callback)
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:
         return [partial(c, pipeline) for c in pipeline.subscribers]
 
-    def _get_all_by_config_name(self, config_name: str) -> List[Pipeline]:
+    @classmethod
+    def _get_all_by_config_name(cls, config_name: str) -> List[Pipeline]:
         """
         Returns all the existing pipelines for a configuration.
 
@@ -181,9 +193,10 @@ class PipelineManager:
             List[Pipeline]: the list of all pipelines, managed by this pipeline manager,
                 that use the indicated configuration name.
         """
-        return self.repository.search_all("config_name", config_name)
+        return cls.repository.search_all("config_name", config_name)
 
-    def hard_delete(self, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
+    @classmethod
+    def hard_delete(cls, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
         """
         Deletes the pipeline given as parameter and the nested tasks, data nodes, and jobs.
 
@@ -198,10 +211,10 @@ class PipelineManager:
         Raises:
         ModelNotFound error if no pipeline corresponds to pipeline_id.
         """
-        pipeline = self.get(pipeline_id)
+        pipeline = cls.get(pipeline_id)
         for task in pipeline.tasks.values():
             if scenario_id and task.parent_id == scenario_id:
                 TaskManager.hard_delete(task.id, scenario_id)
             elif task.parent_id == pipeline.id:
                 TaskManager.hard_delete(task.id, None, pipeline_id)
-        self.delete(pipeline_id)
+        cls.delete(pipeline_id)
