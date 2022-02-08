@@ -28,6 +28,7 @@ requirements = [
     "sqlalchemy",
     "toml",
     "tzlocal",
+    "backports.zoneinfo;python_version<'3.9'",
     "Unidecode",
     "rdp",
 ]
