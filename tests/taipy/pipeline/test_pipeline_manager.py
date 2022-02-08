@@ -460,8 +460,7 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 
 
 def test_hard_delete():
-    scenario_manager = ScenarioManager()
-    pipeline_manager = scenario_manager.pipeline_manager
+    pipeline_manager = ScenarioManager.pipeline_manager
 
     #  test hard delete with pipeline at pipeline level
     ds_input_config_1 = Config.add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
@@ -499,7 +498,7 @@ def test_hard_delete():
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 1
 
-    scenario_manager.delete_all()
+    ScenarioManager.delete_all()
     pipeline_manager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
@@ -525,7 +524,7 @@ def test_hard_delete():
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 1
 
-    scenario_manager.delete_all()
+    ScenarioManager.delete_all()
     pipeline_manager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
@@ -549,7 +548,7 @@ def test_hard_delete():
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 1
 
-    scenario_manager.delete_all()
+    ScenarioManager.delete_all()
     pipeline_manager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
