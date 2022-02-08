@@ -6,6 +6,7 @@ from taipy.common import utils
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.common.frequency import Frequency
 from taipy.config.config import Config
+from taipy.cycle.manager.cycle_manager import CycleManager
 from taipy.data import InMemoryDataNode, Scope
 from taipy.data.manager.data_manager import DataManager
 from taipy.exceptions import NonExistingTask
@@ -73,7 +74,7 @@ def test_set_and_get_scenario(cycle):
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     TaskManager.set(task_2)
     ScenarioManager.pipeline_manager.set(pipeline_2)
-    ScenarioManager.cycle_manager.set(cycle)
+    CycleManager.set(cycle)
     ScenarioManager.set(scenario_2)
     assert len(ScenarioManager.get_all()) == 2
     assert ScenarioManager.get(scenario_id_1).id == scenario_1.id
@@ -91,7 +92,7 @@ def test_set_and_get_scenario(cycle):
     assert TaskManager.get(task_2.id).id == task_2.id
     assert ScenarioManager.get(scenario_id_2).cycle == cycle
     assert ScenarioManager.get(scenario_2).cycle == cycle
-    assert ScenarioManager.cycle_manager.get(cycle.id).id == cycle.id
+    assert CycleManager.get(cycle.id).id == cycle.id
 
     # We save the first scenario again. We expect nothing to change
     ScenarioManager.set(scenario_1)
@@ -109,7 +110,7 @@ def test_set_and_get_scenario(cycle):
     assert ScenarioManager.get(scenario_2).config_name == scenario_2.config_name
     assert len(ScenarioManager.get(scenario_2).pipelines) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
-    assert ScenarioManager.cycle_manager.get(cycle.id).id == cycle.id
+    assert CycleManager.get(cycle.id).id == cycle.id
 
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
@@ -194,7 +195,6 @@ def mult_by_4(nb: int):
 
 def test_scenario_manager_only_creates_data_node_once():
     pipeline_manager = ScenarioManager.pipeline_manager
-    cycle_manager = ScenarioManager.cycle_manager
 
     ds_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     ds_config_2 = Config.add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
@@ -214,7 +214,7 @@ def test_scenario_manager_only_creates_data_node_once():
     assert len(TaskManager.get_all()) == 0
     assert len(pipeline_manager.get_all()) == 0
     assert len(ScenarioManager.get_all()) == 0
-    assert len(cycle_manager.get_all()) == 0
+    assert len(CycleManager.get_all()) == 0
 
     scenario = ScenarioManager.create(scenario_config)
 
@@ -309,20 +309,19 @@ def test_scenario_notification_subscribe_all():
 
 
 def test_get_set_master_scenario():
-    cycle_manager = ScenarioManager.cycle_manager
 
-    cycle_1 = cycle_manager.create(Frequency.DAILY)
+    cycle_1 = CycleManager.create(Frequency.DAILY)
 
     scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), is_master=False, cycle=cycle_1)
     scenario_2 = Scenario("sc_2", [], {}, ScenarioId("sc_2"), is_master=False, cycle=cycle_1)
 
     ScenarioManager.delete_all()
-    cycle_manager.delete_all()
+    CycleManager.delete_all()
 
     assert len(ScenarioManager.get_all()) == 0
-    assert len(cycle_manager.get_all()) == 0
+    assert len(CycleManager.get_all()) == 0
 
-    cycle_manager.set(cycle_1)
+    CycleManager.set(cycle_1)
 
     ScenarioManager.set(scenario_1)
     ScenarioManager.set(scenario_2)

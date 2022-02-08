@@ -10,14 +10,13 @@ from taipy.exceptions.cycle import NonExistingCycle
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
-    cycle_manager = CycleManager()
-    cycle_manager.repository.base_path = tmpdir
+    CycleManager.repository.base_path = tmpdir
 
-    assert len(cycle_manager.get_all()) == 0
+    assert len(CycleManager.get_all()) == 0
 
-    cycle_manager.set(cycle)
+    CycleManager.set(cycle)
 
-    cycle_1 = cycle_manager.get(cycle.id)
+    cycle_1 = CycleManager.get(cycle.id)
 
     assert cycle_1.id == cycle.id
     assert cycle_1.name == cycle.name
@@ -27,16 +26,16 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
     assert cycle_1.end_date == cycle.end_date
     assert cycle_1.frequency == cycle.frequency
 
-    assert len(cycle_manager.get_all()) == 1
-    assert cycle_manager.get(cycle.id) == cycle
-    assert cycle_manager.get(cycle.id).name == cycle.name
-    assert isinstance(cycle_manager.get(cycle.id).creation_date, datetime)
-    assert cycle_manager.get(cycle.id).creation_date == cycle.creation_date
-    assert cycle_manager.get(cycle.id).frequency == Frequency.DAILY
+    assert len(CycleManager.get_all()) == 1
+    assert CycleManager.get(cycle.id) == cycle
+    assert CycleManager.get(cycle.id).name == cycle.name
+    assert isinstance(CycleManager.get(cycle.id).creation_date, datetime)
+    assert CycleManager.get(cycle.id).creation_date == cycle.creation_date
+    assert CycleManager.get(cycle.id).frequency == Frequency.DAILY
 
     cycle_2_id = CycleId("cycle_2")
     with pytest.raises(NonExistingCycle):
-        assert cycle_manager.get(cycle_2_id)
+        assert CycleManager.get(cycle_2_id)
 
     cycle_3 = Cycle(
         Frequency.MONTHLY,
@@ -47,11 +46,11 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
         name="   bar/ξéà   ",
         id=cycle_1.id,
     )
-    cycle_manager.set(cycle_3)
+    CycleManager.set(cycle_3)
 
-    cycle_3 = cycle_manager.get(cycle_1.id)
+    cycle_3 = CycleManager.get(cycle_1.id)
 
-    assert len(cycle_manager.get_all()) == 1
+    assert len(CycleManager.get_all()) == 1
     assert cycle_3.id == cycle_1.id
     assert cycle_3.name == cycle_3.name
     assert cycle_3.properties == cycle_3.properties
@@ -62,12 +61,11 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
 
 
 def test_create_and_delete_cycle_entity(tmpdir):
-    cycle_manager = CycleManager()
-    cycle_manager.repository.base_path = tmpdir
+    CycleManager.repository.base_path = tmpdir
 
-    assert len(cycle_manager.get_all()) == 0
+    assert len(CycleManager.get_all()) == 0
 
-    cycle_1 = cycle_manager.create(Frequency.DAILY, name="fOo   ", key="value", display_name="foo")
+    cycle_1 = CycleManager.create(Frequency.DAILY, name="fOo   ", key="value", display_name="foo")
 
     assert cycle_1.id is not None
     assert cycle_1.name == "foo"
@@ -81,17 +79,17 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     cycle_1_id = cycle_1.id
 
-    assert len(cycle_manager.get_all()) == 1
-    assert cycle_manager.get(cycle_1_id) == cycle_1
-    assert cycle_manager.get(cycle_1_id).name == "foo"
-    assert isinstance(cycle_manager.get(cycle_1_id).creation_date, datetime)
-    assert cycle_manager.get(cycle_1_id).frequency == Frequency.DAILY
+    assert len(CycleManager.get_all()) == 1
+    assert CycleManager.get(cycle_1_id) == cycle_1
+    assert CycleManager.get(cycle_1_id).name == "foo"
+    assert isinstance(CycleManager.get(cycle_1_id).creation_date, datetime)
+    assert CycleManager.get(cycle_1_id).frequency == Frequency.DAILY
 
     cycle_2_id = CycleId("cycle_2")
     with pytest.raises(NonExistingCycle):
-        assert cycle_manager.get(cycle_2_id)
+        assert CycleManager.get(cycle_2_id)
 
-    cycle_3 = cycle_manager.create(Frequency.MONTHLY, "   bar/ξéà   ")
+    cycle_3 = CycleManager.create(Frequency.MONTHLY, "   bar/ξéà   ")
 
     assert cycle_3.id is not None
     assert cycle_3.name == "bar-xea"
@@ -101,22 +99,22 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     cycle_3_id = cycle_3.id
 
-    assert len(cycle_manager.get_all()) == 2
-    assert cycle_manager.get(cycle_3_id).name == "bar-xea"
+    assert len(CycleManager.get_all()) == 2
+    assert CycleManager.get(cycle_3_id).name == "bar-xea"
 
-    cycle_4 = cycle_manager.create(Frequency.YEARLY, "ξéà   ")
+    cycle_4 = CycleManager.create(Frequency.YEARLY, "ξéà   ")
     cycle_4_id = cycle_4.id
 
-    assert len(cycle_manager.get_all()) == 3
+    assert len(CycleManager.get_all()) == 3
 
-    cycle_manager.delete(cycle_4_id)
+    CycleManager.delete(cycle_4_id)
 
-    assert len(cycle_manager.get_all()) == 2
+    assert len(CycleManager.get_all()) == 2
     with pytest.raises(NonExistingCycle):
-        cycle_manager.get(cycle_4_id)
+        CycleManager.get(cycle_4_id)
 
-    cycle_manager.delete_all()
-    assert len(cycle_manager.get_all()) == 0
+    CycleManager.delete_all()
+    assert len(CycleManager.get_all()) == 0
 
 
 def test_get_cycle_start_date_and_end_date():

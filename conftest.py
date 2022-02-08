@@ -144,13 +144,12 @@ def setup():
 def delete_everything():
     TaskManager._scheduler = None
     pipeline_manager = PipelineManager()
-    cycle_manager = CycleManager()
     ScenarioManager.delete_all()
     pipeline_manager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
     JobManager.delete_all()
-    cycle_manager.delete_all()
+    CycleManager.delete_all()
     Config._python_config.global_config = GlobalAppConfig()
     Config._python_config.job_config = JobConfig()
     Config._python_config.data_nodes.clear()

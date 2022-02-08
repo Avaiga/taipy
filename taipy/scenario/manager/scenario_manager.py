@@ -33,7 +33,7 @@ class ScenarioManager:
     """
 
     pipeline_manager = PipelineManager()
-    cycle_manager = CycleManager()
+    cycle_manager = CycleManager
     repository = ScenarioRepository()
     task_manager = TaskManager
     data_manager = DataManager
@@ -107,7 +107,7 @@ class ScenarioManager:
         """
         scenario_id = Scenario.new_id(config.name)
         pipelines = [cls.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
-        cycle = cls.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
+        cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
         config.properties["display_name"] = display_name
         scenario = Scenario(
