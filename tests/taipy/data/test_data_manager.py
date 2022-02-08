@@ -13,6 +13,19 @@ from taipy.exceptions.data_node import NonExistingDataNode
 
 
 class TestDataManager:
+    def test_create_data_node_and_modify_properties_does_not_modify_config(self):
+        dm = DataManager()
+        ds_config = Config.add_data_node(name="name", foo="bar")
+        ds = dm._create_and_set(ds_config, None)
+        assert ds_config.properties.get("foo") == "bar"
+        assert ds_config.properties.get("baz") is None
+
+        ds.properties["baz"] = "qux"
+        assert ds_config.properties.get("foo") == "bar"
+        assert ds_config.properties.get("baz") is None
+        assert ds.properties.get("foo") == "bar"
+        assert ds.properties.get("baz") == "qux"
+
     def test_create_and_get_csv_data_node(self):
         dm = DataManager()
         # Test we can instantiate a CsvDataNode from DataNodeConfig with :

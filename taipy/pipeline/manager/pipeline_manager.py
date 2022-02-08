@@ -112,7 +112,7 @@ class PipelineManager:
             logging.error("Multiple pipelines from same config exist with the same parent_id.")
             raise MultiplePipelineFromSameConfigWithSameParent
         else:
-            pipeline = Pipeline(pipeline_config.name, pipeline_config.properties, tasks, pipeline_id, parent_id)
+            pipeline = Pipeline(pipeline_config.name, dict(**pipeline_config.properties), tasks, pipeline_id, parent_id)
             self.set(pipeline)
             return pipeline
 

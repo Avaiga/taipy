@@ -239,6 +239,34 @@ def test_get_or_create_data():
         pipeline.WRONG.write(7)
 
 
+def test_create_pipeline_and_modify_properties_does_not_modify_config():
+    pipeline_manager = PipelineManager()
+
+    ds_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    ds_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
+    ds_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
+
+    task_config_mult_by_2 = Config.add_task("mult by 2", [ds_config_1], mult_by_2, ds_config_2)
+    task_config_mult_by_3 = Config.add_task("mult by 3", [ds_config_2], mult_by_3, ds_config_6)
+    pipeline_config = Config.add_pipeline("by 6", [task_config_mult_by_2, task_config_mult_by_3], foo="bar")
+
+    assert len(pipeline_config.properties) == 1
+    assert pipeline_config.properties.get("foo") == "bar"
+
+    pipeline = pipeline_manager.get_or_create(pipeline_config, None)
+    assert len(pipeline_config.properties) == 1
+    assert pipeline_config.properties.get("foo") == "bar"
+    assert len(pipeline.properties) == 1
+    assert pipeline.properties.get("foo") == "bar"
+
+    pipeline.properties["baz"] = "qux"
+    assert len(pipeline_config.properties) == 1
+    assert pipeline_config.properties.get("foo") == "bar"
+    assert len(pipeline.properties) == 2
+    assert pipeline.properties.get("foo") == "bar"
+    assert pipeline.properties.get("baz") == "qux"
+
+
 def test_pipeline_notification_subscribe_unsubscribe(mocker):
     pipeline_manager = PipelineManager()
 
