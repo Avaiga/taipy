@@ -6,15 +6,17 @@ from datetime import datetime, timedelta
 import pandas as pd
 import pytest
 from dotenv import load_dotenv
-from taipy.common.alias import DataNodeId
+from taipy.common.alias import DataNodeId, JobId
 from taipy.common.frequency import Frequency
 from taipy.config import Config
 from taipy.cycle import Cycle
 from taipy.cycle.manager import CycleManager
 from taipy.data import InMemoryDataNode, Scope
+from taipy.job import Job, JobManager
 from taipy.pipeline import Pipeline
 from taipy.scenario import Scenario
 from taipy.task import Task
+from taipy.task.manager import TaskManager
 
 from taipy_rest.app import create_app
 
@@ -250,6 +252,28 @@ def cycle_data():
 @pytest.fixture
 def default_cycle():
     return __create_cycle()
+
+
+def __create_job():
+    task_manager = TaskManager()
+    task = __default_task()
+    task_manager.set(task)
+    return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
+
+
+@pytest.fixture
+def default_job():
+    return __create_job()
+
+
+@pytest.fixture
+def create_job_list():
+    jobs = []
+    manager = JobManager()
+    for i in range(10):
+        c = __create_job()
+        manager.set(c)
+    return jobs
 
 
 @pytest.fixture(autouse=True)
