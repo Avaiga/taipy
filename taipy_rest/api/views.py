@@ -18,6 +18,8 @@ from taipy_rest.api.resources import (
     ScenarioExecutor,
     CycleResource,
     CycleList,
+    JobResource,
+    JobList,
 )
 from taipy_rest.api.schemas import (
     DataNodeSchema,
@@ -25,6 +27,7 @@ from taipy_rest.api.schemas import (
     PipelineSchema,
     ScenarioSchema,
     CycleSchema,
+    JobSchema,
 )
 from taipy_rest.extensions import apispec
 
@@ -89,7 +92,14 @@ api.add_resource(
     "/cycles/<string:cycle_id>",
     endpoint="cycle_by_id",
 )
-api.add_resource(CycleList, "/cycle", endpoint="cycles")
+api.add_resource(CycleList, "/cycles", endpoint="cycles")
+
+api.add_resource(
+    JobResource,
+    "/jobs/<string:job_id>",
+    endpoint="job_by_id",
+)
+api.add_resource(JobList, "/jobs", endpoint="jobs")
 
 
 @blueprint.before_app_first_request
@@ -116,6 +126,10 @@ def register_views():
     apispec.spec.components.schema("CycleSchema", schema=CycleSchema)
     apispec.spec.path(view=CycleResource, app=current_app)
     apispec.spec.path(view=CycleList, app=current_app)
+
+    apispec.spec.components.schema("JobSchema", schema=JobSchema)
+    apispec.spec.path(view=JobResource, app=current_app)
+    apispec.spec.path(view=JobList, app=current_app)
 
 
 @blueprint.errorhandler(ValidationError)
