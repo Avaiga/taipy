@@ -19,7 +19,17 @@ import Chip from "@mui/material/Chip";
 import { doNotPropagateEvent } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { boxSx, ItemProps, LovImage, paperBaseSx, SelTreeProps, showItem, SingleItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
+import {
+    boxSx,
+    ItemProps,
+    LovImage,
+    paperBaseSx,
+    SelTreeProps,
+    showItem,
+    SingleItem,
+    treeSelBaseSx,
+    useLovListMemo,
+} from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { TaipyImage } from "../../utils/lov";
 
@@ -112,7 +122,7 @@ const Selector = (props: SelTreeProps) => {
     const clickHandler = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             if (active) {
-                const {id: key = ""} = evt.currentTarget.dataset;
+                const { id: key = "" } = evt.currentTarget.dataset;
                 setSelectedValue((keys) => {
                     if (multiple) {
                         const newKeys = [...keys];
@@ -172,7 +182,9 @@ const Selector = (props: SelTreeProps) => {
                         renderValue={(selected) => (
                             <Box sx={renderBoxSx}>
                                 {lovList
-                                    .filter((it) => selected.includes(it.id))
+                                    .filter((it) =>
+                                        Array.isArray(selected) ? selected.includes(it.id) : selected === it.id
+                                    )
                                     .map((item, idx) => {
                                         if (multiple) {
                                             const chipProps = {} as Record<string, unknown>;
