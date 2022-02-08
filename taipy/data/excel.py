@@ -10,7 +10,7 @@ from taipy.common.alias import DataNodeId, JobId
 from taipy.data.data_node import DataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
-from taipy.exceptions.data_node import NonExistingExcelSheet
+from taipy.exceptions.data_node import NonExistingExcelSheet, NotMatchSheetNameAndCustomObject
 
 
 class ExcelDataNode(DataNode):
@@ -69,6 +69,8 @@ class ExcelDataNode(DataNode):
             properties[self.__SHEET_NAME_PROPERTY] = self.__DEFAULT_SHEET_NAME
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
             properties[self.__HAS_HEADER_PROPERTY] = True
+        if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
+            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties)
 
         super().__init__(
             config_name,
@@ -87,6 +89,21 @@ class ExcelDataNode(DataNode):
         if not self.last_edition_date and isfile(self.properties[self.__REQUIRED_PATH_PROPERTY]):
             self.unlock_edition()
 
+    def __exposed_types_to_dict(self, properties):
+        if properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+            return properties[self.__EXPOSED_TYPE_PROPERTY]
+        if isinstance(properties[self.__EXPOSED_TYPE_PROPERTY], Dict):
+            return properties[self.__EXPOSED_TYPE_PROPERTY]
+        sheet_names = self.__sheet_name_to_list(properties[self.__SHEET_NAME_PROPERTY])
+        if isinstance(properties[self.__EXPOSED_TYPE_PROPERTY], List):
+            if len(sheet_names) == len(properties[self.__EXPOSED_TYPE_PROPERTY]):
+                return {
+                    sheet_name: custom_obj
+                    for sheet_name, custom_obj in zip(sheet_names, properties[self.__EXPOSED_TYPE_PROPERTY])
+                }
+            raise NotMatchSheetNameAndCustomObject
+        return {sheet_name: properties[self.__EXPOSED_TYPE_PROPERTY] for sheet_name in sheet_names}
+
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
@@ -95,19 +112,19 @@ class ExcelDataNode(DataNode):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
             if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
                 return self._read_as_numpy()
-            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
+            return self._read_as()
         return self._read_as_pandas_dataframe()
 
-    def __sheet_name_to_list(self):
-        sheet_names = self.properties[self.__SHEET_NAME_PROPERTY]
+    def __sheet_name_to_list(self, sheet_names=None):
+        sheet_names = sheet_names if sheet_names else self.properties[self.__SHEET_NAME_PROPERTY]
         return sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
 
-    def _read_as(self, custom_class):
+    def _read_as(self):
         excel_file = load_workbook(self.properties[self.__REQUIRED_PATH_PROPERTY])
-        sheet_names = self.__sheet_name_to_list()
+        custom_class_dict = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         work_books = defaultdict()
 
-        for sheet_name in sheet_names:
+        for sheet_name, custom_class in custom_class_dict.items():
             if not (sheet_name in excel_file.sheetnames):
                 raise NonExistingExcelSheet(sheet_name, self.properties[self.__REQUIRED_PATH_PROPERTY])
 
@@ -124,8 +141,8 @@ class ExcelDataNode(DataNode):
                     res[i] = custom_class(*row)
             work_books[sheet_name] = res
 
-        if len(sheet_names) == 1:
-            return work_books[sheet_names[0]]
+        if len(custom_class_dict) == 1:
+            return work_books[list(custom_class_dict.keys())[0]]
 
         return work_books
 
