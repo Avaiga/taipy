@@ -15,7 +15,7 @@ class DataAccessor(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
+    def get_supported_classes() -> t.Union[str, t.List[str], t.Tuple[str]]:
         pass
 
     @abstractmethod
@@ -39,8 +39,8 @@ class DataAccessor(ABC):
 
 class _InvalidDataAccessor(DataAccessor):
     @staticmethod
-    def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
-        return type(None)
+    def get_supported_classes() -> t.Union[str, t.List[str], t.Tuple[str]]:
+        return str(type(None))
 
     def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
         return None
@@ -59,8 +59,7 @@ class _InvalidDataAccessor(DataAccessor):
 
 class _DataAccessors(object):
     def __init__(self) -> None:
-        self.__access_4_type: t.Dict[t.Type, DataAccessor] = {}
-        self.__access_4_var: t.Dict[str, DataAccessor] = {}
+        self.__access_4_type: t.Dict[str, DataAccessor] = {}
 
         self.__invalid_data_accessor = _InvalidDataAccessor()
 
@@ -99,21 +98,19 @@ class _DataAccessors(object):
         else:
             raise AttributeError("The argument of 'DataAccessors.register' should be a class")
 
-    def __get_instance(self, value: t.Any) -> DataAccessor:  # type: ignore
-        try:
-            return self.__access_4_type[value.__class__]
-        except Exception:
-            warnings.warn(f"Can't find Data Accessor for type {value.__class__}")
-        return self.__invalid_data_accessor
+    def __get_instance(self, value: t.Any, var_type: t.Optional[str] = None) -> DataAccessor:  # type: ignore
+        access = self.__access_4_type.get(var_type or type(value).__name__)
+        if access is None:
+            warnings.warn(f"Can't find Data Accessor for type {var_type or type(value).__name__}")
+            return self.__invalid_data_accessor
+        return access
 
     def _cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
-        inst = self.__access_4_type.get(value.__class__)
-        if not inst:
-            inst = self.__access_4_var.get(var_name)
+        inst = self.__access_4_type.get(type(value).__name__)
         return inst.cast_string_value(var_name, value) if inst else value
 
     def _is_data_access(self, var_name: str, value: t.Any) -> bool:
-        inst = self.__access_4_type.get(value.__class__)
+        inst = self.__access_4_type.get(type(value).__name__)
         return inst and inst.is_data_access(var_name, value)
 
     def _get_data(self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:

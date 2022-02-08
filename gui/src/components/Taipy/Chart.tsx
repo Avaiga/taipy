@@ -38,7 +38,7 @@ interface ChartProp extends TaipyActiveProps {
     width?: string | number;
     height?: string | number;
     config: string;
-    data?: TraceValueType;
+    data?: Record<string, TraceValueType>;
     refresh?: boolean;
     layout?: string;
     rangeChange?: string;
@@ -94,7 +94,7 @@ const Chart = (props: ChartProp) => {
         tp_varname,
         tp_updatevars,
         id,
-        data,
+        data = {},
         rangeChange,
         propagate = true,
         limitRows = false,
@@ -102,6 +102,7 @@ const Chart = (props: ChartProp) => {
     const { dispatch } = useContext(TaipyContext);
     const [selected, setSelected] = useState<number[][]>([]);
     const plotRef = useRef<HTMLDivElement>(null);
+    const dataKey = useRef("default");
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
@@ -164,13 +165,15 @@ const Chart = (props: ChartProp) => {
     }, [props.config]);
 
     useEffect(() => {
-        if (!data || !!refresh) {
-            const back_cols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+        if (!data[dataKey.current] || !!refresh) {
+            const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+            dataKey.current = backCols.join("-");
             dispatch(
                 createRequestChartUpdateAction(
                     tp_varname,
                     id,
-                    back_cols,
+                    dataKey.current,
+                    backCols,
                     limitRows ? plotRef.current?.clientWidth : undefined
                 )
             );
@@ -206,43 +209,42 @@ const Chart = (props: ChartProp) => {
     const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
-    const dataPl = useMemo(
-        () =>
-            config.traces.map((trace, idx) => {
-                let ret = {
-                    type: config.types[idx],
-                    mode: config.modes[idx],
-                    name:
-                        getArrayValue(config.names, idx) ||
-                        (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
-                } as Record<string, unknown>;
-                if (ONE_COLUMN_CHART.includes(config.types[idx])) {
-                    ret = { ...ret, values: getValue(data, trace, 0), labels: getValue(data, config.labels, idx) };
-                } else {
-                    ret = {
-                        ...ret,
-                        marker: getArrayValue(config.markers, idx, {}),
-                        x: getValue(data, trace, 0),
-                        y: getValue(data, trace, 1),
-                        z: getValue(data, trace, 2),
-                        text: getValue(data, config.texts, idx),
-                        xaxis: config.xaxis[idx],
-                        yaxis: config.yaxis[idx],
-                        hovertext: getValue(data, config.labels, idx),
-                        selectedpoints: getArrayValue(selected, idx, []),
-                        orientation: getArrayValue(config.orientations, idx),
-                        line: getArrayValue(config.lines, idx),
-                        textposition: getArrayValue(config.textAnchors, idx),
-                    };
-                }
-                const selectedMarker = getArrayValue(config.selectedMarkers, idx);
-                if (selectedMarker) {
-                    ret.selected = { marker: selectedMarker };
-                }
-                return ret as Data;
-            }),
-        [data, config, selected]
-    );
+    const dataPl = useMemo(() => {
+        const datum = data && data[dataKey.current];
+        return config.traces.map((trace, idx) => {
+            let ret = {
+                type: config.types[idx],
+                mode: config.modes[idx],
+                name:
+                    getArrayValue(config.names, idx) ||
+                    (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
+            } as Record<string, unknown>;
+            if (ONE_COLUMN_CHART.includes(config.types[idx])) {
+                ret = { ...ret, values: getValue(datum, trace, 0), labels: getValue(datum, config.labels, idx) };
+            } else {
+                ret = {
+                    ...ret,
+                    marker: getArrayValue(config.markers, idx, {}),
+                    x: getValue(datum, trace, 0),
+                    y: getValue(datum, trace, 1),
+                    z: getValue(datum, trace, 2),
+                    text: getValue(datum, config.texts, idx),
+                    xaxis: config.xaxis[idx],
+                    yaxis: config.yaxis[idx],
+                    hovertext: getValue(datum, config.labels, idx),
+                    selectedpoints: getArrayValue(selected, idx, []),
+                    orientation: getArrayValue(config.orientations, idx),
+                    line: getArrayValue(config.lines, idx),
+                    textposition: getArrayValue(config.textAnchors, idx),
+                };
+            }
+            const selectedMarker = getArrayValue(config.selectedMarkers, idx);
+            if (selectedMarker) {
+                ret.selected = { marker: selectedMarker };
+            }
+            return ret as Data;
+        });
+    }, [data, config, selected]);
 
     const plotConfig = useMemo(
         () => (active ? defaultChartConfig : { ...defaultChartConfig, staticPlot: true }),
@@ -260,7 +262,7 @@ const Chart = (props: ChartProp) => {
     }, []);
 
     const getRealIndex = useCallback(
-        (index: number) => (data?.tp_index ? (data.tp_index[index] as number) : index),
+        (index: number) => (data[dataKey.current].tp_index ? (data[dataKey.current].tp_index[index] as number) : index),
         [data]
     );
 

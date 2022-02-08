@@ -8,32 +8,34 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 
 const chartValue = {
-    Code: ["AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT"],
-    Day_str: [
-        "2020-04-01T00:00:00.000000Z",
-        "2020-04-02T00:00:00.000000Z",
-        "2020-04-03T00:00:00.000000Z",
-        "2020-04-04T00:00:00.000000Z",
-        "2020-04-05T00:00:00.000000Z",
-        "2020-04-06T00:00:00.000000Z",
-        "2020-04-07T00:00:00.000000Z",
-        "2020-04-08T00:00:00.000000Z",
-        "2020-04-09T00:00:00.000000Z",
-        "2020-04-10T00:00:00.000000Z",
-    ],
-    Entity: [
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-        "Austria",
-    ],
-    "Daily hospital occupancy": [856, 823, 829, 826, 712, 824, 857, 829, 820, 771],
+    default: {
+        Code: ["AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT", "AUT"],
+        Day_str: [
+            "2020-04-01T00:00:00.000000Z",
+            "2020-04-02T00:00:00.000000Z",
+            "2020-04-03T00:00:00.000000Z",
+            "2020-04-04T00:00:00.000000Z",
+            "2020-04-05T00:00:00.000000Z",
+            "2020-04-06T00:00:00.000000Z",
+            "2020-04-07T00:00:00.000000Z",
+            "2020-04-08T00:00:00.000000Z",
+            "2020-04-09T00:00:00.000000Z",
+            "2020-04-10T00:00:00.000000Z",
+        ],
+        Entity: [
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+            "Austria",
+        ],
+        "Daily hospital occupancy": [856, 823, 829, 826, 712, 824, 857, 829, 820, 771],
+    },
 };
 const chartConfig = JSON.stringify({
     columns: { Day_str: { dfid: "Day" }, "Daily hospital occupancy": { dfid: "Daily hospital occupancy" } },
@@ -41,7 +43,7 @@ const chartConfig = JSON.stringify({
     xaxis: ["x"],
     yaxis: ["y"],
     types: ["scatter"],
-    modes: ["lines+markers"]
+    modes: ["lines+markers"],
 });
 
 describe("Chart Component", () => {
@@ -51,7 +53,9 @@ describe("Chart Component", () => {
         expect(elt.tagName).toBe("DIV");
     });
     it("displays the right info for class", async () => {
-        const { getByTestId } = render(<Chart data={chartValue} config={chartConfig} testId="test" className="taipy-chart" />);
+        const { getByTestId } = render(
+            <Chart data={chartValue} config={chartConfig} testId="test" className="taipy-chart" />
+        );
         const elt = getByTestId("test");
         expect(elt).toHaveClass("taipy-chart");
     });
@@ -73,7 +77,7 @@ describe("Chart Component", () => {
     it("dispatch 2 well formed messages at first render", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const selProps = {"selected0": JSON.stringify([2, 4, 6])}
+        const selProps = { selected0: JSON.stringify([2, 4, 6]) };
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <Chart id="chart" data={undefined} config={chartConfig} tp_updatevars="varname=varname" {...selProps} />
@@ -88,8 +92,9 @@ describe("Chart Component", () => {
             name: "",
             payload: {
                 alldata: true,
+                pageKey: "Day-Daily hospital occupancy",
                 columns: ["Day", "Daily hospital occupancy"],
-                id: "chart"
+                id: "chart",
             },
             type: "REQUEST_DATA_UPDATE",
         });
@@ -123,13 +128,23 @@ describe("Chart Component", () => {
         const state: TaipyState = { ...INITIAL_STATE, data: { table: undefined } };
         const { getByLabelText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart id="table" data={state.data.table as undefined} config={chartConfig} tp_updatevars="varname=varname" />
+                <Chart
+                    id="table"
+                    data={state.data.table as undefined}
+                    config={chartConfig}
+                    tp_updatevars="varname=varname"
+                />
             </TaipyContext.Provider>
         );
         const newState = { ...state, data: { ...state.data, table: chartValue } };
         rerender(
             <TaipyContext.Provider value={{ state: newState, dispatch }}>
-                <Chart id="table" data={newState.data.table as TraceValueType} config={chartConfig} tp_updatevars="varname=varname" />
+                <Chart
+                    id="table"
+                    data={newState.data.table as Record<string, TraceValueType>}
+                    config={chartConfig}
+                    tp_updatevars="varname=varname"
+                />
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("Go to next page");
@@ -152,9 +167,7 @@ describe("Chart Component", () => {
         const { getAllByText, rerender } = render(
             <Chart data={undefined} config={chartConfig} tp_updatevars="varname=varname" />
         );
-        rerender(
-            <Chart data={chartValue} config={chartConfig} tp_updatevars="varname=varname" />
-        );
+        rerender(<Chart data={chartValue} config={chartConfig} tp_updatevars="varname=varname" />);
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
