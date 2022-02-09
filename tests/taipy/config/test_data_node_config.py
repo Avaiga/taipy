@@ -6,8 +6,7 @@ import pytest
 
 from taipy.config._config import _Config
 from taipy.config.config import Config
-from taipy.data import Scope
-from taipy.data.manager import DataManager
+from taipy.data.data_manager import DataManager
 from taipy.exceptions.configuration import ConfigurationIssueError
 
 

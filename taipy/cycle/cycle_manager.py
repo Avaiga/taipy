@@ -6,7 +6,7 @@ from typing import Optional
 from taipy.common.alias import CycleId
 from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.repository import CycleRepository
+from taipy.cycle.cycle_repository import CycleRepository
 from taipy.exceptions.cycle import NonExistingCycle
 from taipy.exceptions.repository import ModelNotFound
 
@@ -52,7 +52,7 @@ class CycleManager:
         """
         self.repository.save(cycle)
 
-    def get(self, cycle_id: CycleId) -> Optional[Cycle]:
+    def get(self, cycle_id: CycleId) -> Cycle:
         """
         Gets the cycle corresponding to the identifier given as parameter.
 
@@ -62,8 +62,7 @@ class CycleManager:
             ModelNotFound: if no cycle corresponds to `cycle_id`.
         """
         try:
-            cycle = self.repository.load(cycle_id)
-            return cycle
+            return self.repository.load(cycle_id)
         except ModelNotFound:
             logging.error(f"Cycle entity: {cycle_id} does not exist.")
             raise NonExistingCycle(cycle_id)

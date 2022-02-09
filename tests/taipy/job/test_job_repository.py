@@ -3,13 +3,16 @@ import datetime
 import pytest
 
 from taipy.common.alias import DataNodeId, JobId, TaskId
-from taipy.data import CSVDataNode, Scope
-from taipy.data.manager import DataManager
+from taipy.data.csv import CSVDataNode
+from taipy.data.data_manager import DataManager
+from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound
-from taipy.job import Job, JobManager, Status
+from taipy.job.job import Job
+from taipy.job.job_manager import JobManager
 from taipy.job.job_model import JobModel
-from taipy.task import Task
-from taipy.task.manager import TaskManager
+from taipy.job.status import Status
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 
 data_node = CSVDataNode(
     "test_data_node",
@@ -33,7 +36,7 @@ job = Job(JobId("id"), task)
 job_model = JobModel(
     id=JobId("id"),
     task_id=task.id,
-    status=Status.SUBMITTED,
+    status=Status(Status.SUBMITTED),
     creation_date=job.creation_date.isoformat(),
     subscribers=[],
     exceptions=[],

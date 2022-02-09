@@ -60,7 +60,7 @@ class JobConfig:
     def __init__(
         self,
         mode: str = None,
-        nb_of_workers: Union[int, str] = None,
+        nb_of_workers: Union[int, str] = None,  # ENV[nb_worker]
         hostname: str = None,
         airflow_dags_folder: str = None,
         airflow_folder: str = None,

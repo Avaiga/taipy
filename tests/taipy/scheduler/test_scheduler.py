@@ -9,14 +9,14 @@ from time import sleep
 
 import pytest
 
-from taipy.config import Config
 from taipy.config._config import _Config
-from taipy.data.manager import DataManager
+from taipy.config.config import Config
+from taipy.data.data_manager import DataManager
 from taipy.data.scope import Scope
 from taipy.scheduler.executor.synchronous import Synchronous
 from taipy.scheduler.scheduler import Scheduler
-from taipy.task import Task
-from taipy.task.manager import TaskManager
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 
 
 @pytest.fixture(scope="function", autouse=True)

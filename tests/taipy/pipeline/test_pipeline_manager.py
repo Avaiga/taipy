@@ -7,17 +7,17 @@ import pytest
 from taipy.common import utils
 from taipy.common.alias import PipelineId, TaskId
 from taipy.config.config import Config
+from taipy.data.data_manager import DataManager
 from taipy.data.in_memory import InMemoryDataNode
-from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
-from taipy.pipeline import Pipeline
-from taipy.pipeline.manager import PipelineManager
-from taipy.scenario import ScenarioManager
+from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_manager import PipelineManager
+from taipy.scenario.scenario_manager import ScenarioManager
 from taipy.scheduler.scheduler import Scheduler
-from taipy.task import Task
-from taipy.task.manager import TaskManager
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 from tests.taipy.utils.NotifyMock import NotifyMock
 
 

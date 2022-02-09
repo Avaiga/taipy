@@ -5,8 +5,8 @@ import pandas as pd
 import pytest
 
 from taipy.common.alias import DataNodeId
-from taipy.data import SQLDataNode
 from taipy.data.scope import Scope
+from taipy.data.sql import SQLDataNode
 from taipy.exceptions import MissingRequiredProperty
 
 if not util.find_spec("pyodbc"):

@@ -5,10 +5,10 @@ from typing import Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
-from taipy.common import protect_name
 from taipy.common.alias import Dag, PipelineId
+from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.common.utils import fcts_to_dict
-from taipy.data import DataNode
+from taipy.data.data_node import DataNode
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.task.task import Task
 
@@ -32,7 +32,7 @@ class Pipeline:
         parent_id (str):  Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
     """
 
-    __ID_PREFIX = "PIPELINE"
+    ID_PREFIX = "PIPELINE"
     __SEPARATOR = "_"
 
     def __init__(
@@ -56,9 +56,7 @@ class Pipeline:
 
     @staticmethod
     def new_id(config_name: str) -> PipelineId:
-        return PipelineId(
-            Pipeline.__SEPARATOR.join([Pipeline.__ID_PREFIX, protect_name(config_name), str(uuid.uuid4())])
-        )
+        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, protect_name(config_name), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = protect_name(attribute_name)

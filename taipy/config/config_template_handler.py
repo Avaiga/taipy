@@ -1,7 +1,7 @@
 import os
 import re
 
-from taipy.data import Scope
+from taipy.data.scope import Scope
 from taipy.exceptions.configuration import InconsistentEnvVariableError, MissingEnvVariableError
 
 

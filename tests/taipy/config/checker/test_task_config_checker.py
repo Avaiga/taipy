@@ -1,6 +1,6 @@
 from taipy.config._config import _Config
-from taipy.config.checker import IssueCollector
 from taipy.config.checker.checkers.task_config_checker import TaskConfigChecker
+from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.data_node_config import DataNodeConfig
 
 

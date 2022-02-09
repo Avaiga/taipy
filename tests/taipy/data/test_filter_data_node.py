@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from taipy.data.data_node import DataNode
-from taipy.data.filter_data_node import FilterDataNode
+from taipy.data.filter import FilterDataNode
 
 
 class FakeDataframeDataNode(DataNode):

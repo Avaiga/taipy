@@ -3,7 +3,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from taipy.config import Config
+from taipy.config.config import Config
 from taipy.repository import FileSystemRepository
 
 

@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 
-from taipy.config import DataNodeConfig
 from taipy.config.config import Config
+from taipy.config.data_node_config import DataNodeConfig
 from taipy.exceptions.configuration import InconsistentEnvVariableError, MissingEnvVariableError
 from tests.taipy.config.named_temporary_file import NamedTemporaryFile
 

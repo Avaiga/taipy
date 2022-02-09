@@ -1,11 +1,11 @@
 import pytest
 
 from taipy.common.alias import PipelineId, TaskId
-from taipy.data import InMemoryDataNode
 from taipy.data.data_node import DataNode
+from taipy.data.in_memory import InMemoryDataNode
 from taipy.data.scope import Scope
-from taipy.pipeline import Pipeline
-from taipy.task import Task
+from taipy.pipeline.pipeline import Pipeline
+from taipy.task.task import Task
 
 
 def test_create_pipeline():

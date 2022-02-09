@@ -3,12 +3,12 @@ import datetime
 import pytest
 
 from taipy.common.alias import DataNodeId, JobId, TaskId
-from taipy.data import CSVDataNode, Scope
-from taipy.data.manager import DataManager
-from taipy.exceptions import ModelNotFound
+from taipy.data.csv import CSVDataNode
+from taipy.data.data_manager import DataManager
+from taipy.data.scope import Scope
 from taipy.exceptions.data_node import NonExistingDataNode
-from taipy.task import Task
-from taipy.task.manager import TaskManager
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 from taipy.task.task_model import TaskModel
 
 data_node = CSVDataNode(

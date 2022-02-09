@@ -6,11 +6,11 @@ from functools import partial
 from typing import Any, List, Optional, Union
 
 from taipy.common.alias import JobId
-from taipy.data import DataNode
-from taipy.data.manager import DataManager
+from taipy.data.data_manager import DataManager
+from taipy.data.data_node import DataNode
 from taipy.exceptions.job import DataNodeWritingError
-from taipy.job import JobManager
 from taipy.job.job import Job
+from taipy.job.job_manager import JobManager
 from taipy.scheduler.executor.synchronous import Synchronous
 from taipy.task.task import Task
 

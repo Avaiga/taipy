@@ -3,13 +3,16 @@ from typing import Any, Dict, Optional
 
 import toml  # type: ignore
 
-from taipy.common import protect_name
 from taipy.common.frequency import Frequency
-from taipy.config import DataNodeConfig, GlobalAppConfig, JobConfig, ScenarioConfig
+from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.config._config import _Config
+from taipy.config.data_node_config import DataNodeConfig
+from taipy.config.global_app_config import GlobalAppConfig
+from taipy.config.job_config import JobConfig
 from taipy.config.pipeline_config import PipelineConfig
+from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
-from taipy.data import Scope
+from taipy.data.scope import Scope
 from taipy.exceptions.configuration import LoadingError
 
 

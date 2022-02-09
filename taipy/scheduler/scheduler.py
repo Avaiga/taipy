@@ -18,7 +18,7 @@ class Scheduler(AbstractScheduler):
         super().__init__()
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
-        self._dispatcher = JobDispatcher(job_config.nb_of_workers)
+        self._dispatcher = JobDispatcher(job_config.nb_of_workers)  # type: ignore
         self.lock = Lock()
 
     def submit(self, pipeline, callbacks: Optional[Iterable[Callable]] = None) -> List[Job]:

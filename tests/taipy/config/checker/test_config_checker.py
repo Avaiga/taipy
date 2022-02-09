@@ -1,7 +1,7 @@
-from taipy.config import Issue
 from taipy.config._config import _Config
-from taipy.config.checker import IssueCollector
 from taipy.config.checker.checkers.config_checker import ConfigChecker
+from taipy.config.checker.issue import Issue
+from taipy.config.checker.issue_collector import IssueCollector
 
 
 class MyCustomChecker(ConfigChecker):

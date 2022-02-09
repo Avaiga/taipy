@@ -2,8 +2,8 @@ import pathlib
 from datetime import datetime
 
 from taipy.config.config import Config
-from taipy.data import DataNode
-from taipy.data.data_node_model import DataNodeModel
+from taipy.data.data_model import DataNodeModel
+from taipy.data.data_node import DataNode
 from taipy.repository import FileSystemRepository
 
 

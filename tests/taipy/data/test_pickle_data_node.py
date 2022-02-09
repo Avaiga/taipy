@@ -3,9 +3,9 @@ import pathlib
 
 import pytest
 
-from taipy.config import Config
-from taipy.data import PickleDataNode
-from taipy.data.manager import DataManager
+from taipy.config.config import Config
+from taipy.data.data_manager import DataManager
+from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
 from taipy.exceptions.data_node import NoData
 

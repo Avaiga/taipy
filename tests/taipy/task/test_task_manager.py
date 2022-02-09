@@ -2,12 +2,13 @@ import pytest
 
 from taipy.common.alias import TaskId
 from taipy.config.config import Config
-from taipy.data import InMemoryDataNode, Scope
-from taipy.data.manager import DataManager
+from taipy.data.data_manager import DataManager
+from taipy.data.in_memory import InMemoryDataNode
+from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.task import NonExistingTask
-from taipy.task import Task
-from taipy.task.manager.task_manager import TaskManager
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 
 
 def test_create_and_save():

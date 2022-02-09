@@ -3,8 +3,8 @@ from time import sleep
 import pytest
 
 from taipy.common.alias import DataNodeId
+from taipy.data.data_manager import DataManager
 from taipy.data.in_memory import InMemoryDataNode
-from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.data_node import NoData
 

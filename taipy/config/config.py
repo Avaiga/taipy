@@ -9,7 +9,7 @@ from taipy.config._config import _Config
 from taipy.config.checker.checker import Checker
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.data_node_config import DataNodeConfig
-from taipy.config.global_app import GlobalAppConfig
+from taipy.config.global_app_config import GlobalAppConfig
 from taipy.config.job_config import JobConfig
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.scenario_config import ScenarioConfig
@@ -108,7 +108,7 @@ class Config:
         root_folder: str = None,
         storage_folder: str = None,
         **properties,
-    ):
+    ) -> GlobalAppConfig:
         """Configures fields related to global application."""
         cls._python_config.global_config = GlobalAppConfig(
             notification, broker_endpoint, root_folder, storage_folder, **properties
@@ -199,17 +199,17 @@ class Config:
         return cls._applied_config.tasks[_Config.DEFAULT_KEY]
 
     @classmethod
-    def add_pipeline(cls, name: str, tasks_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def add_pipeline(cls, name: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
         """Adds a new pipeline configuration."""
-        pipeline_config = PipelineConfig(name, tasks_configs, **properties)
+        pipeline_config = PipelineConfig(name, task_configs, **properties)
         cls._python_config.pipelines[pipeline_config.name] = pipeline_config
         cls.__compile_configs()
         return cls._applied_config.pipelines[pipeline_config.name]
 
     @classmethod
-    def add_default_pipeline(cls, tasks_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def add_default_pipeline(cls, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
         """Configures the default pipeline configuration."""
-        pipeline_config = PipelineConfig(_Config.DEFAULT_KEY, tasks_configs, **properties)
+        pipeline_config = PipelineConfig(_Config.DEFAULT_KEY, task_configs, **properties)
         cls._python_config.pipelines[_Config.DEFAULT_KEY] = pipeline_config
         cls.__compile_configs()
         return cls._applied_config.pipelines[_Config.DEFAULT_KEY]

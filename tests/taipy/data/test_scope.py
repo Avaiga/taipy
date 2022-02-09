@@ -1,7 +1,7 @@
 import pytest
 
-from taipy.config import Config
-from taipy.data import Scope
+from taipy.config.config import Config
+from taipy.data.scope import Scope
 
 
 def test_scope():

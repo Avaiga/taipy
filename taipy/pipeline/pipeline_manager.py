@@ -4,14 +4,14 @@ from typing import Callable, List, Optional, Union
 
 from taipy.common.alias import PipelineId, ScenarioId
 from taipy.config.pipeline_config import PipelineConfig
-from taipy.data import Scope
+from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
-from taipy.job import Job
+from taipy.job.job import Job
 from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.repository import PipelineRepository
+from taipy.pipeline.pipeline_repository import PipelineRepository
 from taipy.scheduler.abstract_scheduler import AbstractScheduler
-from taipy.task.manager.task_manager import TaskManager
+from taipy.task.task_manager import TaskManager
 
 
 class PipelineManager:
@@ -68,7 +68,7 @@ class PipelineManager:
 
     def delete_all(self):
         """
-        Deletes all data nodes.
+        Deletes all pipelines.
         """
         self.repository.delete_all()
 
@@ -86,16 +86,13 @@ class PipelineManager:
         """
         Returns a pipeline created from the pipeline configuration.
 
-        created from the pipeline_config, by scenario_id if it already
-        exists, or creates and returns a new pipeline.
-
         Parameters:
             pipeline_config (PipelineConfig): The pipeline configuration object.
             scenario_id (Optional[ScenarioId]): id of the scenario creating the pipeline. Default value : `None`.
         Raises:
             MultiplePipelineFromSameConfigWithSameParent: if more than one pipeline already exists with the
                 same config, and the same parent id (scenario_id, or pipeline_id depending on the scope of
-                the data node).
+                the data nodes).
         """
         pipeline_id = Pipeline.new_id(pipeline_config.name)
         tasks = [

@@ -7,18 +7,24 @@ import pytest
 
 from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
 from taipy.common.frequency import Frequency
-from taipy.config import Config, GlobalAppConfig, JobConfig
+from taipy.config.config import Config
+from taipy.config.global_app_config import GlobalAppConfig
+from taipy.config.job_config import JobConfig
 from taipy.cycle.cycle import Cycle
+from taipy.cycle.cycle_manager import CycleManager
 from taipy.cycle.cycle_model import CycleModel
-from taipy.cycle.manager import CycleManager
-from taipy.data.manager import DataManager
-from taipy.job import JobManager
-from taipy.pipeline import Pipeline, PipelineManager
+from taipy.data.data_manager import DataManager
+from taipy.data.in_memory import InMemoryDataNode
+from taipy.data.scope import Scope
+from taipy.job.job_manager import JobManager
+from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.pipeline.pipeline_model import PipelineModel
-from taipy.scenario import ScenarioManager
 from taipy.scenario.scenario import Scenario
+from taipy.scenario.scenario_manager import ScenarioManager
 from taipy.scenario.scenario_model import ScenarioModel
-from taipy.task.manager import TaskManager
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 
 current_time = datetime.now()
 
@@ -82,6 +88,17 @@ def current_datetime():
 @pytest.fixture(scope="function")
 def scenario(cycle):
     return Scenario("sc", [], {}, ScenarioId("sc_id"), current_time, is_master=False, cycle=None)
+
+
+@pytest.fixture(scope="function")
+def data_node():
+    return InMemoryDataNode("data_node_config_name", Scope.PIPELINE)
+
+
+@pytest.fixture(scope="function")
+def task(data_node):
+    ds = InMemoryDataNode("ds_config_name", Scope.PIPELINE)
+    return Task("task_config_name", [data_node], print, [ds])
 
 
 @pytest.fixture(scope="function")

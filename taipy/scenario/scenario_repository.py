@@ -6,9 +6,9 @@ from taipy.common import utils
 from taipy.common.alias import CycleId, PipelineId
 from taipy.config.config import Config
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.manager import CycleManager
-from taipy.pipeline.manager.pipeline_manager import PipelineManager
+from taipy.cycle.cycle_manager import CycleManager
 from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.repository import FileSystemRepository
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel

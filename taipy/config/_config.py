@@ -2,7 +2,7 @@ from copy import copy
 from typing import Dict
 
 from taipy.config.data_node_config import DataNodeConfig
-from taipy.config.global_app import GlobalAppConfig
+from taipy.config.global_app_config import GlobalAppConfig
 from taipy.config.job_config import JobConfig
 
 from .pipeline_config import PipelineConfig

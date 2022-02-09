@@ -1,5 +1,5 @@
-from taipy.scenario.repository import ScenarioRepository
 from taipy.scenario.scenario import Scenario
+from taipy.scenario.scenario_repository import ScenarioRepository
 
 
 def test_save_and_load(tmpdir, scenario):

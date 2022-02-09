@@ -3,9 +3,9 @@ import uuid
 from datetime import datetime
 from typing import Dict
 
-from taipy.common import protect_name
 from taipy.common.alias import CycleId
 from taipy.common.frequency import Frequency
+from taipy.common.unicode_to_python_variable_name import protect_name
 
 
 class Cycle:
@@ -22,7 +22,7 @@ class Cycle:
         id (str): Unique identifier of the cycle
     """
 
-    __ID_PREFIX = "CYCLE"
+    ID_PREFIX = "CYCLE"
     __SEPARATOR = "_"
 
     def __init__(
@@ -52,7 +52,7 @@ class Cycle:
 
     @staticmethod
     def new_id(name: str) -> CycleId:
-        return CycleId(Cycle.__SEPARATOR.join([Cycle.__ID_PREFIX, protect_name(name), str(uuid.uuid4())]))
+        return CycleId(Cycle.__SEPARATOR.join([Cycle.ID_PREFIX, protect_name(name), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = protect_name(attribute_name)

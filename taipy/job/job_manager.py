@@ -5,7 +5,7 @@ from typing import Callable, Iterable, List
 from taipy.common.alias import JobId
 from taipy.exceptions import JobNotDeletedException, ModelNotFound, NonExistingJob
 from taipy.job.job import Job
-from taipy.job.repository import JobRepository
+from taipy.job.job_repository import JobRepository
 from taipy.task.task import Task
 
 
@@ -16,8 +16,8 @@ class JobManager:
     This class provides methods for creating, storing, updating, retrieving and deleting jobs.
     """
 
-    def __init__(self):
-        self.repository = JobRepository()
+    repository = JobRepository()
+    ID_PREFIX = "JOB_"
 
     def create(self, task: Task, callbacks: Iterable[Callable]) -> Job:
         """Returns a new job representing a unique execution of the provided task.
@@ -29,7 +29,7 @@ class JobManager:
         Returns:
             A new job, that is created for executing given task.
         """
-        job = Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
+        job = Job(id=JobId(f"{self.ID_PREFIX}{uuid.uuid4()}"), task=task)
         self.set(job)
         job.on_status_change(*callbacks)
         return job
@@ -83,7 +83,7 @@ class JobManager:
         """Deletes all jobs."""
         self.repository.delete_all()
 
-    def get_latest_job(self, task: Task) -> Job:
+    def get_latest(self, task: Task) -> Job:
         """Allows to retrieve the latest computed job of a task.
 
         Returns:

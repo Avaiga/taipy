@@ -3,12 +3,14 @@ from typing import List, Optional, Union
 
 from taipy.common.alias import DataNodeId, PipelineId, ScenarioId
 from taipy.config.data_node_config import DataNodeConfig
-from taipy.data import CSVDataNode, PickleDataNode, SQLDataNode
+from taipy.data.csv import CSVDataNode
 from taipy.data.data_node import DataNode
+from taipy.data.data_repository import DataRepository
 from taipy.data.excel import ExcelDataNode
 from taipy.data.in_memory import InMemoryDataNode
-from taipy.data.repository import DataRepository
+from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
+from taipy.data.sql import SQLDataNode
 from taipy.exceptions import ModelNotFound
 from taipy.exceptions.data_node import (
     InvalidDataNodeType,
@@ -26,9 +28,7 @@ class DataManager:
 
     __DATA_NODE_CLASSES = {InMemoryDataNode, PickleDataNode, CSVDataNode, SQLDataNode, ExcelDataNode}
     __DATA_NODE_CLASS_MAP = {ds_class.storage_type(): ds_class for ds_class in __DATA_NODE_CLASSES}  # type: ignore
-
-    def __init__(self):
-        self.repository = DataRepository(self.__DATA_NODE_CLASS_MAP)
+    repository = DataRepository(__DATA_NODE_CLASS_MAP)
 
     def delete_all(self):
         """Deletes all data nodes."""
