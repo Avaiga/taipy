@@ -368,6 +368,7 @@ export const createSendActionNameAction = (
 export const createRequestChartUpdateAction = (
     name: string | undefined,
     id: string | undefined,
+    dataKey: string,
     columns: string[],
     width: number | undefined
 ): TaipyAction => ({
@@ -375,6 +376,7 @@ export const createRequestChartUpdateAction = (
     name: name || "",
     payload: {
         id: id,
+        pagekey: dataKey,
         columns: columns,
         alldata: true,
         width: width,
