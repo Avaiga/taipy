@@ -64,7 +64,7 @@ class GlobalAppConfig:
         config.broker_endpoint = cls.DEFAULT_BROKER_ENDPOINT
         config.root_folder = cls.DEFAULT_ROOT_FOLDER
         config.storage_folder = cls.DEFAULT_STORAGE_FOLDER
-        config.safe_clean_entities = cls.CLEAN_ENTITIES_ENABLED_DEFAULT_VALUE
+        config.clean_entities_enabled = cls.CLEAN_ENTITIES_ENABLED_DEFAULT_VALUE
         return config
 
     def to_dict(self):
