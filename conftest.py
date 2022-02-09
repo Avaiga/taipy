@@ -18,6 +18,7 @@ from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.scenario import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_model import ScenarioModel
+from taipy.scheduler.scheduler_factory import SchedulerFactory
 from taipy.task.manager import TaskManager
 
 current_time = datetime.now()
@@ -141,7 +142,7 @@ def setup():
 
 
 def delete_everything():
-    TaskManager._scheduler = None
+    TaskManager.scheduler = SchedulerFactory.build_scheduler()
     ScenarioManager.delete_all()
     PipelineManager.delete_all()
     DataManager.delete_all()
