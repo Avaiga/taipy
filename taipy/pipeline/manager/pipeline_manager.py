@@ -10,7 +10,6 @@ from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSamePare
 from taipy.job import Job
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.repository import PipelineRepository
-from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.task.manager.task_manager import TaskManager
 
 
@@ -19,13 +18,7 @@ class PipelineManager:
     The Pipeline Manager is responsible for managing all pipeline-related capabilities.
     """
 
-    task_manager = TaskManager
     repository = PipelineRepository()
-    scheduler = task_manager.scheduler
-
-    # @property
-    # def scheduler(self) -> AbstractScheduler:
-    #     return self.task_manager.scheduler
 
     @classmethod
     def subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):

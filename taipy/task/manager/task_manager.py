@@ -9,7 +9,6 @@ from taipy.data.manager import DataManager
 from taipy.exceptions import ModelNotFound, NonExistingTask
 from taipy.exceptions.task import MultipleTaskFromSameConfigWithSameParent
 from taipy.job import JobManager
-from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.scheduler.scheduler_factory import SchedulerFactory
 from taipy.task.repository import TaskRepository
 from taipy.task.task import Task
@@ -28,9 +27,8 @@ class TaskManager:
 
     repository: TaskRepository = TaskRepository()
     scheduler = SchedulerFactory.build_scheduler()
-    job_manager = JobManager
-    data_manager = DataManager
 
+    # TODO: find replacement
     # @property
     # def scheduler(self) -> AbstractScheduler:
     #     if not self._scheduler:

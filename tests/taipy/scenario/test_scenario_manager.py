@@ -47,7 +47,6 @@ def test_set_and_get_scenario(cycle):
     scenario_3_with_same_id = Scenario("scenario_name_3", [pipeline_3], {}, scenario_id_1, datetime.now(), False, cycle)
 
     # No existing scenario
-    # scenario_manager = ScenarioManager()
     assert len(ScenarioManager.get_all()) == 0
     with pytest.raises(NonExistingScenario):
         ScenarioManager.get(scenario_id_1)
@@ -137,14 +136,13 @@ def test_set_and_get_scenario(cycle):
 
 
 def test_create_scenario_does_not_modify_config():
-    scenario_manager = ScenarioManager()
     creation_date_1 = datetime.now()
     display_name_1 = "display_name_1"
     scenario_config = Config.add_scenario("sc", [], Frequency.DAILY)
     assert scenario_config.properties.get("display_name") is None
     assert len(scenario_config.properties) == 0
 
-    scenario = scenario_manager.create(scenario_config, creation_date=creation_date_1, display_name=display_name_1)
+    scenario = ScenarioManager.create(scenario_config, creation_date=creation_date_1, display_name=display_name_1)
     assert len(scenario_config.properties) == 0
     assert len(scenario.properties) == 1
     assert scenario.properties.get("display_name") == display_name_1
@@ -535,12 +533,6 @@ def test_submit():
 
     TaskManager.scheduler = MockScheduler()
 
-    # class MockPipelineManager(PipelineManager):
-    #     @property
-    #     def scheduler(self):
-    #         return MockScheduler()
-
-    # scenario does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingScenario):
         ScenarioManager.submit(scenario.id)
     with pytest.raises(NonExistingScenario):

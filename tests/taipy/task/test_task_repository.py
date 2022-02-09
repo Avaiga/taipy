@@ -5,7 +5,6 @@ import pytest
 from taipy.common.alias import DataNodeId, JobId, TaskId
 from taipy.data import CSVDataNode, Scope
 from taipy.data.manager import DataManager
-from taipy.exceptions import ModelNotFound
 from taipy.exceptions.data_node import NonExistingDataNode
 from taipy.task import Task
 from taipy.task.manager import TaskManager

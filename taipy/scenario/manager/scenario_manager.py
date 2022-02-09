@@ -8,7 +8,6 @@ from taipy.config.config import Config
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.manager.cycle_manager import CycleManager
-from taipy.data.manager import DataManager
 from taipy.exceptions.repository import ModelNotFound
 from taipy.exceptions.scenario import (
     DeletingMasterScenario,
@@ -23,7 +22,6 @@ from taipy.job.job import Job
 from taipy.pipeline.manager import PipelineManager
 from taipy.scenario.repository import ScenarioRepository
 from taipy.scenario.scenario import Scenario
-from taipy.task.manager import TaskManager
 
 
 class ScenarioManager:
@@ -32,11 +30,7 @@ class ScenarioManager:
     methods for creating, storing, updating, retrieving, deleting, submitting scenarios.
     """
 
-    pipeline_manager = PipelineManager
-    cycle_manager = CycleManager
     repository = ScenarioRepository()
-    task_manager = TaskManager
-    data_manager = DataManager
 
     @classmethod
     def subscribe(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -106,8 +100,8 @@ class ScenarioManager:
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.name)
-        pipelines = [cls.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
-        cycle = cls.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
+        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config.properties.copy()
         if display_name:

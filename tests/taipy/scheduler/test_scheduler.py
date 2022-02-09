@@ -44,7 +44,6 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_submit_task():
     scheduler = Scheduler()
-    # data_manager = scheduler.DataManager
 
     before_creation = datetime.now()
     sleep(0.1)

@@ -231,8 +231,6 @@ def test_get_or_create_data():
 
 
 def test_create_pipeline_and_modify_properties_does_not_modify_config():
-    pipeline_manager = PipelineManager()
-
     ds_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     ds_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
     ds_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
@@ -244,7 +242,7 @@ def test_create_pipeline_and_modify_properties_does_not_modify_config():
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
 
-    pipeline = pipeline_manager.get_or_create(pipeline_config, None)
+    pipeline = PipelineManager.get_or_create(pipeline_config, None)
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
     assert len(pipeline.properties) == 1

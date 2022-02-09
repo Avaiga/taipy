@@ -42,7 +42,7 @@ job_model = JobModel(
 
 class TestJobRepository:
     def test_save_and_load(self, tmpdir):
-        repository = JobManager().repository
+        repository = JobManager.repository
         repository.base_path = tmpdir
         repository.save(job)
         with pytest.raises(ModelNotFound):
@@ -53,7 +53,7 @@ class TestJobRepository:
         assert j.id == job.id
 
     def test_from_and_to_model(self):
-        repository = JobManager().repository
+        repository = JobManager.repository
         assert repository.to_model(job) == job_model
         with pytest.raises(ModelNotFound):
             repository.from_model(job_model)
