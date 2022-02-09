@@ -262,8 +262,12 @@ class Config:
             cls._applied_config.update(cls._file_config)
         if cls._env_file_config:
             cls._applied_config.update(cls._env_file_config)
+
+    @classmethod
+    def check(cls) -> IssueCollector:
         cls.collector = Checker().check(cls._applied_config)
         cls.__log_message(cls)
+        return cls.collector
 
     @staticmethod
     def __log_message(config):

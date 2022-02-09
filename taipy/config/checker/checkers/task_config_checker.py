@@ -14,9 +14,10 @@ class TaskConfigChecker(ConfigChecker):
     def check(self) -> IssueCollector:
         task_configs = self.config.tasks
         for task_config_name, task_config in task_configs.items():
-            self._check_inputs(task_config_name, task_config)
-            self._check_outputs(task_config_name, task_config)
-            self._check_function(task_config_name, task_config)
+            if task_config_name != "default":
+                self._check_inputs(task_config_name, task_config)
+                self._check_outputs(task_config_name, task_config)
+                self._check_function(task_config_name, task_config)
         return self.collector
 
     def _check_inputs(self, task_config_name: str, task_config: TaskConfig):

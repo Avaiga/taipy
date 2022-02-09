@@ -84,6 +84,11 @@ class TestTaipy:
             tp.configure_default_scenario(a, b, c, property=d)
             mck.assert_called_once_with(a, b, c, property=d)
 
+    def test_check_configuration(self):
+        with mock.patch("taipy.config.config.Config.check") as mck:
+            tp.check_configuration()
+            mck.assert_called_once_with()
+
     def test_set(self, scenario, cycle, pipeline, data_node, task):
         with mock.patch("taipy.data.data_manager.DataManager.set") as mck:
             tp.set(data_node)

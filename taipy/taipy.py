@@ -4,6 +4,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 from taipy.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.common.frequency import Frequency
+from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
 from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.global_app_config import GlobalAppConfig
@@ -440,3 +441,7 @@ class Taipy:
     ) -> ScenarioConfig:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
+
+    @staticmethod
+    def check_configuration() -> IssueCollector:
+        return Config.check()
