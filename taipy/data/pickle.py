@@ -73,10 +73,15 @@ class PickleDataNode(DataNode):
             self.unlock_edition()
         if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
             self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
+        print("create pickle")
 
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
+
+    @property
+    def path(self) -> str:
+        return self.__pickle_file_path
 
     def _read(self):
         return pickle.load(open(self.__pickle_file_path, "rb"))

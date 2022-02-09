@@ -1,14 +1,31 @@
 import datetime
+import os
+from time import sleep
 from unittest import mock
 
+from taipy import Taipy
 from taipy import Taipy as tp
 from taipy.common.alias import JobId, PipelineId, ScenarioId, TaskId
+from taipy.config.config import Config
 from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
+from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
 from taipy.job.job import Job
+
+
+def file_exists(file_path: str):
+    return os.path.exists(file_path)
+
+
+def assert_file_exists(file_path: str):
+    assert file_exists(file_path), f"File {file_path} does not exist"
+
+
+def assert_file_not_exists(file_path: str):
+    assert not file_exists(file_path), f"File {file_path} exists"
 
 
 class TestTaipy:
@@ -271,3 +288,25 @@ class TestTaipy:
         with mock.patch("taipy.pipeline.pipeline_manager.PipelineManager.get_or_create") as mck:
             tp.create_pipeline(pipeline_config)
             mck.assert_called_once_with(pipeline_config)
+
+    def test_clean_all_entities(self):
+        # Test with clean entities disabled
+        Config.set_global_config(clean_entities_enabled=False)
+        pickle_data_node = PickleDataNode(config_name="foo", scope=Scope.PIPELINE, properties={"default_data": "Data"})
+
+        assert_file_exists(pickle_data_node.path)
+        delete_count = Taipy.clean_all_entities()
+        # File should still exist after clean_all_entities since clean_entities_enabled is False
+        assert_file_exists(pickle_data_node.path)
+        assert delete_count == 0
+
+        # Test with clean entities enabled
+        Config.set_global_config(clean_entities_enabled=True)
+        delete_count = Taipy.clean_all_entities()
+        # File should not exist after clean_all_entities since clean_entities_enabled is True
+        assert_file_not_exists(pickle_data_node.path)
+        assert delete_count == 1
+
+        # Try clean again, delete_count should be 0 since there is nothing to be deleted
+        delete_count = Taipy.clean_all_entities()
+        assert delete_count == 0

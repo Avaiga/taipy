@@ -1,4 +1,6 @@
 """Main module."""
+import logging
+import os
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
@@ -12,7 +14,9 @@ from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
 from taipy.cycle.cycle import Cycle
+from taipy.data.data_manager import DataManager
 from taipy.data.data_node import DataNode
+from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.job.job import Job
@@ -440,3 +444,24 @@ class Taipy:
     ) -> ScenarioConfig:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
+
+    @staticmethod
+    def clean_all_entities() -> int:
+        """
+        Deletes all entities from the data folder.
+        return (int): Number of deleted entities.
+        """
+        if not Config.global_config().clean_entities_enabled:
+            logging.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
+            return 0
+        data_manager = DataManager()
+        data_nodes = data_manager.get_all()
+        delete_count = 0
+        # Clean all pickle files
+        for data_node in data_nodes:
+            if isinstance(data_node, PickleDataNode):
+                if os.path.exists(data_node.path):
+                    delete_count += 1
+                    os.remove(data_node.path)
+        data_manager.delete_all()
+        return delete_count

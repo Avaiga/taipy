@@ -16,6 +16,7 @@ def _test_default_global_app_config(global_config: GlobalAppConfig):
     assert global_config.root_folder == "./taipy/"
     assert global_config.storage_folder == ".data/"
     assert global_config.broker_endpoint is None
+    assert global_config.safe_clean_entities is False
     assert len(global_config.properties) == 0
 
 

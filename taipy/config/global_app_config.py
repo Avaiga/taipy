@@ -15,6 +15,7 @@ class GlobalAppConfig:
         storage_folder (str): Folder name used to store Taipy data. Default value is ".data/". It is used in conjunction
             with the root_folder field. That means the storage path is <root_folder><storage_folder> (Default
             path : "./taipy/.data/")
+        clean_entities_enabled (bool): Boolean field to activate/deactivate the clean entities feature. Default: false
         properties (dict): Dictionary of additional properties.
     """
 
@@ -32,18 +33,25 @@ class GlobalAppConfig:
     STORAGE_FOLDER_KEY = "storage_folder"
     DEFAULT_STORAGE_FOLDER = ".data/"
 
+    CLEAN_ENTITIES_ENABLED_KEY = "clean_entities_enabled"
+    CLEAN_ENTITIES_ENABLED_VALUE_TRUE = True
+    CLEAN_ENTITIES_ENABLED_VALUE_FALSE = False
+    CLEAN_ENTITIES_ENABLED_DEFAULT_VALUE = CLEAN_ENTITIES_ENABLED_VALUE_FALSE
+
     def __init__(
         self,
         notification: Union[bool, str] = None,
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
+        clean_entities_enabled: bool = None,
         **properties
     ):
         self.notification = notification
         self.broker_endpoint = broker_endpoint
         self.root_folder = root_folder
         self.storage_folder = storage_folder
+        self.clean_entities_enabled = clean_entities_enabled
         self.properties = properties
 
     def __getattr__(self, item: str) -> Optional[Any]:
@@ -56,6 +64,7 @@ class GlobalAppConfig:
         config.broker_endpoint = cls.DEFAULT_BROKER_ENDPOINT
         config.root_folder = cls.DEFAULT_ROOT_FOLDER
         config.storage_folder = cls.DEFAULT_STORAGE_FOLDER
+        config.safe_clean_entities = cls.CLEAN_ENTITIES_ENABLED_DEFAULT_VALUE
         return config
 
     def to_dict(self):
@@ -68,6 +77,8 @@ class GlobalAppConfig:
             as_dict[self.ROOT_FOLDER_KEY] = self.root_folder
         if self.storage_folder:
             as_dict[self.STORAGE_FOLDER_KEY] = self.storage_folder
+        if self.clean_entities_enabled:
+            as_dict[self.CLEAN_ENTITIES_ENABLED_KEY] = self.clean_entities_enabled
         as_dict.update(self.properties)
         return as_dict
 
@@ -78,6 +89,7 @@ class GlobalAppConfig:
         config.broker_endpoint = config_as_dict.pop(cls.BROKER_ENDPOINT_KEY, None)
         config.root_folder = config_as_dict.pop(cls.ROOT_FOLDER_KEY, None)
         config.storage_folder = config_as_dict.pop(cls.STORAGE_FOLDER_KEY, None)
+        config.clean_entities_enabled = config_as_dict.pop(cls.CLEAN_ENTITIES_ENABLED_KEY, None)
         config.properties = config_as_dict
         return config
 
@@ -86,6 +98,9 @@ class GlobalAppConfig:
         self.broker_endpoint = tpl.replace_templates(config_as_dict.pop(self.BROKER_ENDPOINT_KEY, self.broker_endpoint))
         self.root_folder = tpl.replace_templates(config_as_dict.pop(self.ROOT_FOLDER_KEY, self.root_folder))
         self.storage_folder = tpl.replace_templates(config_as_dict.pop(self.STORAGE_FOLDER_KEY, self.storage_folder))
+        self.clean_entities_enabled = tpl.replace_templates(
+            config_as_dict.pop(self.CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled)
+        )
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():
             self.properties[k] = tpl.replace_templates(v)
