@@ -24,6 +24,7 @@ from taipy.pipeline import Pipeline, PipelineManager
 from taipy.scenario.manager import ScenarioManager
 from taipy.scenario.scenario import Scenario
 from taipy.scheduler.scheduler import Scheduler
+from taipy.scheduler.scheduler_factory import SchedulerFactory
 from taipy.task import Task
 from taipy.task.manager.task_manager import TaskManager
 from tests.taipy.utils.NotifyMock import NotifyMock
@@ -73,7 +74,7 @@ def test_set_and_get_scenario(cycle):
 
     # Save a second scenario. Now, we expect to have a total of two scenarios stored
     TaskManager.set(task_2)
-    ScenarioManager.pipeline_manager.set(pipeline_2)
+    PipelineManager.set(pipeline_2)
     CycleManager.set(cycle)
     ScenarioManager.set(scenario_2)
     assert len(ScenarioManager.get_all()) == 2
@@ -115,7 +116,7 @@ def test_set_and_get_scenario(cycle):
     # We save a third scenario with same id as the first one.
     # We expect the first scenario to be updated
     TaskManager.set(scenario_2.pipelines[pipeline_name_2].tasks[task_name])
-    ScenarioManager.pipeline_manager.set(pipeline_3)
+    PipelineManager.set(pipeline_3)
     ScenarioManager.set(scenario_3_with_same_id)
     assert len(ScenarioManager.get_all()) == 2
     assert ScenarioManager.get(scenario_id_1).id == scenario_1.id
@@ -194,8 +195,6 @@ def mult_by_4(nb: int):
 
 
 def test_scenario_manager_only_creates_data_node_once():
-    pipeline_manager = ScenarioManager.pipeline_manager
-
     ds_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     ds_config_2 = Config.add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
     ds_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
@@ -212,7 +211,7 @@ def test_scenario_manager_only_creates_data_node_once():
 
     assert len(DataManager.get_all()) == 0
     assert len(TaskManager.get_all()) == 0
-    assert len(pipeline_manager.get_all()) == 0
+    assert len(PipelineManager.get_all()) == 0
     assert len(ScenarioManager.get_all()) == 0
     assert len(CycleManager.get_all()) == 0
 
@@ -220,7 +219,7 @@ def test_scenario_manager_only_creates_data_node_once():
 
     assert len(DataManager.get_all()) == 5
     assert len(TaskManager.get_all()) == 3
-    assert len(pipeline_manager.get_all()) == 2
+    assert len(PipelineManager.get_all()) == 2
     assert len(ScenarioManager.get_all()) == 1
     assert scenario.foo.read() == 1
     assert scenario.bar.read() == 0
@@ -343,8 +342,6 @@ def test_get_set_master_scenario():
 
 
 def test_hard_delete():
-    pipeline_manager = ScenarioManager.pipeline_manager
-
     ds_input_config = Config.add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     ds_output_config = Config.add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.add_task("task_config", ds_input_config, print, ds_output_config)
@@ -355,19 +352,19 @@ def test_hard_delete():
 
     # test delete relevant entities with scenario scope
     assert len(TaskManager.get_all()) == 1
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(ScenarioManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 1
     ScenarioManager.hard_delete(scenario.id)
     assert len(ScenarioManager.get_all()) == 0
-    assert len(pipeline_manager.get_all()) == 0
+    assert len(PipelineManager.get_all()) == 0
     assert len(TaskManager.get_all()) == 0
     assert len(DataManager.get_all()) == 0
     assert len(JobManager.get_all()) == 0
 
     ScenarioManager.delete_all()
-    pipeline_manager.delete_all()
+    PipelineManager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
     JobManager.delete_all()
@@ -382,13 +379,13 @@ def test_hard_delete():
 
     # test delete relevant entities with pipeline scope
     assert len(TaskManager.get_all()) == 1
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(ScenarioManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 1
     ScenarioManager.hard_delete(scenario_1.id)
     assert len(ScenarioManager.get_all()) == 0
-    assert len(pipeline_manager.get_all()) == 0
+    assert len(PipelineManager.get_all()) == 0
     assert len(TaskManager.get_all()) == 0
     assert len(DataManager.get_all()) == 0
     assert len(JobManager.get_all()) == 0
@@ -403,19 +400,19 @@ def test_hard_delete():
 
     # test delete relevant entities with pipeline scope
     assert len(TaskManager.get_all()) == 1
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(ScenarioManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 1
     ScenarioManager.hard_delete(scenario_2.id)  # Do not delete because of pipeline scope
     assert len(ScenarioManager.get_all()) == 0
-    assert len(pipeline_manager.get_all()) == 0
+    assert len(PipelineManager.get_all()) == 0
     assert len(TaskManager.get_all()) == 0
     assert len(DataManager.get_all()) == 1
     assert len(JobManager.get_all()) == 0
 
     ScenarioManager.delete_all()
-    pipeline_manager.delete_all()
+    PipelineManager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
     JobManager.delete_all()
@@ -434,20 +431,20 @@ def test_hard_delete():
 
     # test delete relevant entities with cycle scope
     assert len(ScenarioManager.get_all()) == 2
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(TaskManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 2
     ScenarioManager.hard_delete(scenario_3.id)  # Only delete scenario 3
     assert len(ScenarioManager.get_all()) == 1
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(TaskManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 2
     assert ScenarioManager.get(scenario_4.id) is not None
 
     ScenarioManager.delete_all()
-    pipeline_manager.delete_all()
+    PipelineManager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
     JobManager.delete_all()
@@ -464,13 +461,13 @@ def test_hard_delete():
 
     # test delete relevant entities with global scope
     assert len(ScenarioManager.get_all()) == 2
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(TaskManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 2
     ScenarioManager.hard_delete(scenario_5.id)  # Only delete scenario 5
     assert len(ScenarioManager.get_all()) == 1
-    assert len(pipeline_manager.get_all()) == 1
+    assert len(PipelineManager.get_all()) == 1
     assert len(TaskManager.get_all()) == 1
     assert len(DataManager.get_all()) == 2
     assert len(JobManager.get_all()) == 2
@@ -514,13 +511,12 @@ def test_submit():
             self.submit_calls.append(task.id)
             return super().submit_task(task, callbacks)
 
-    class MockPipelineManager(PipelineManager):
-        @property
-        def scheduler(self):
-            return MockScheduler()
+    TaskManager.scheduler = MockScheduler()
 
-    ScenarioManager.pipeline_manager = MockPipelineManager()
-    pipeline_manager = ScenarioManager.pipeline_manager
+    # class MockPipelineManager(PipelineManager):
+    #     @property
+    #     def scheduler(self):
+    #         return MockScheduler()
 
     # scenario does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingScenario):
@@ -538,8 +534,8 @@ def test_submit():
 
     # scenario and pipeline do exist, but tasks does not exist.
     # We expect an exception to be raised
-    pipeline_manager.set(pipeline_1)
-    pipeline_manager.set(pipeline_2)
+    PipelineManager.set(pipeline_1)
+    PipelineManager.set(pipeline_2)
     with pytest.raises(NonExistingTask):
         ScenarioManager.submit(scenario.id)
     with pytest.raises(NonExistingTask):
@@ -554,7 +550,7 @@ def test_submit():
     TaskManager.set(task_4)
     TaskManager.set(task_5)
     ScenarioManager.submit(scenario.id)
-    submit_calls = pipeline_manager.scheduler.submit_calls
+    submit_calls = TaskManager.scheduler.submit_calls
     assert len(submit_calls) == 5
     assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
     assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
@@ -563,13 +559,15 @@ def test_submit():
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
     ScenarioManager.submit(scenario)
-    submit_calls = pipeline_manager.scheduler.submit_calls
+    submit_calls = TaskManager.scheduler.submit_calls
     assert len(submit_calls) == 10
     assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
     assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_3.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
+
+    TaskManager.scheduler = SchedulerFactory.build_scheduler()
 
 
 def test_scenarios_comparison():
@@ -579,10 +577,8 @@ def test_scenarios_comparison():
     def addition(inp, out):
         return inp + out
 
-    pipeline_manager = ScenarioManager.pipeline_manager
-
     ScenarioManager.delete_all()
-    pipeline_manager.delete_all()
+    PipelineManager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
 

@@ -32,7 +32,7 @@ class ScenarioManager:
     methods for creating, storing, updating, retrieving, deleting, submitting scenarios.
     """
 
-    pipeline_manager = PipelineManager()
+    pipeline_manager = PipelineManager
     cycle_manager = CycleManager
     repository = ScenarioRepository()
     task_manager = TaskManager
@@ -106,7 +106,7 @@ class ScenarioManager:
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.name)
-        pipelines = [cls.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
         cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
         config.properties["display_name"] = display_name
@@ -173,7 +173,7 @@ class ScenarioManager:
             scenario = cls.get(scenario)
         callbacks = cls.__get_status_notifier_callbacks(scenario)
         for pipeline in scenario.pipelines.values():
-            cls.pipeline_manager.submit(pipeline, callbacks)
+            PipelineManager.submit(pipeline, callbacks)
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:
@@ -311,5 +311,5 @@ class ScenarioManager:
         else:
             for pipeline in scenario.pipelines.values():
                 if pipeline.parent_id == scenario.id or pipeline.parent_id == pipeline.id:
-                    cls.pipeline_manager.hard_delete(pipeline.id, scenario.id)
+                    PipelineManager.hard_delete(pipeline.id, scenario.id)
             cls.repository.delete(scenario_id)

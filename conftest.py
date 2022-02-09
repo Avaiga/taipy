@@ -142,9 +142,8 @@ def setup():
 
 def delete_everything():
     TaskManager._scheduler = None
-    pipeline_manager = PipelineManager()
     ScenarioManager.delete_all()
-    pipeline_manager.delete_all()
+    PipelineManager.delete_all()
     DataManager.delete_all()
     TaskManager.delete_all()
     JobManager.delete_all()

@@ -21,10 +21,11 @@ class PipelineManager:
 
     task_manager = TaskManager
     repository = PipelineRepository()
+    scheduler = task_manager.scheduler
 
-    @property
-    def scheduler(self) -> AbstractScheduler:
-        return self.task_manager.scheduler
+    # @property
+    # def scheduler(self) -> AbstractScheduler:
+    #     return self.task_manager.scheduler
 
     @classmethod
     def subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
