@@ -38,7 +38,7 @@ test_requirements = ["pytest>=3.8"]
 extras_require = {
     "ngrok": ["pyngrok>=5"],
     "mssql": ["pyodbc>=4"],
-    "airflow": ["taipy-airflow@git+ssh://git@github.com/Avaiga/taipy-airflow.git@feature/795-create-airflow-package"],
+    "airflow": ["taipy-airflow@git+ssh://git@github.com/Avaiga/taipy-airflow.git@develop"],
 }
 
 setup(
