@@ -136,6 +136,26 @@ def test_set_and_get_scenario(cycle):
     assert TaskManager.get(task_2.id).id == task_2.id
 
 
+def test_create_scenario_does_not_modify_config():
+    scenario_manager = ScenarioManager()
+    creation_date_1 = datetime.now()
+    display_name_1 = "display_name_1"
+    scenario_config = Config.add_scenario("sc", [], Frequency.DAILY)
+    assert scenario_config.properties.get("display_name") is None
+    assert len(scenario_config.properties) == 0
+
+    scenario = scenario_manager.create(scenario_config, creation_date=creation_date_1, display_name=display_name_1)
+    assert len(scenario_config.properties) == 0
+    assert len(scenario.properties) == 1
+    assert scenario.properties.get("display_name") == display_name_1
+
+    scenario.properties["foo"] = "bar"
+    assert len(scenario_config.properties) == 0
+    assert len(scenario.properties) == 2
+    assert scenario.properties.get("foo") == "bar"
+    assert scenario.properties.get("display_name") == display_name_1
+
+
 def test_create_and_delete_scenario():
     creation_date_1 = datetime.now()
     creation_date_2 = creation_date_1 + timedelta(minutes=10)
@@ -155,6 +175,8 @@ def test_create_and_delete_scenario():
     assert scenario_1.cycle.creation_date == creation_date_1
     assert scenario_1.cycle.start_date.date() == creation_date_1.date()
     assert scenario_1.cycle.end_date.date() == creation_date_1.date()
+    assert scenario_1.creation_date == creation_date_1
+    assert scenario_1.display_name == display_name_1
     assert scenario_1.properties["display_name"] == display_name_1
 
     with pytest.raises(DeletingMasterScenario):
@@ -168,7 +190,7 @@ def test_create_and_delete_scenario():
     assert scenario_2.cycle.creation_date == creation_date_1
     assert scenario_2.cycle.start_date.date() == creation_date_2.date()
     assert scenario_2.cycle.end_date.date() == creation_date_2.date()
-    assert scenario_2.properties["display_name"] is None
+    assert scenario_2.properties.get("display_name") is None
 
     assert scenario_1 != scenario_2
     assert scenario_1.cycle == scenario_2.cycle

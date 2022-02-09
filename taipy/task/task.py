@@ -1,7 +1,6 @@
 import logging
 import uuid
-from collections.abc import Iterable
-from typing import Dict, Optional
+from typing import Dict, Iterable, Optional
 
 from taipy.common import protect_name
 from taipy.common.alias import TaskId

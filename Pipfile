@@ -22,6 +22,7 @@ simple-websocket = ">=0.3"
 sqlalchemy = ">=1.3"
 toml = ">=0.10"
 tzlocal = ">=3.0"
+"backports.zoneinfo" = {version=">=0.2.0", markers="python_version < '3.9'", extras=["tzdata"]}
 unidecode = ">=1.3"
 
 [dev-packages]

@@ -91,8 +91,8 @@ class ScenarioManager:
     def create(
         cls,
         config: ScenarioConfig,
-        creation_date: Optional[datetime.datetime] = None,
-        display_name: Optional[str] = None,
+        creation_date: datetime.datetime = None,
+        display_name: str = None,
     ) -> Scenario:
         """
         Creates and returns a new scenario from the scenario configuration provided as parameter.
@@ -106,20 +106,21 @@ class ScenarioManager:
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.name)
-        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
-        cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
+        pipelines = [cls.pipeline_manager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        cycle = cls.cycle_manager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
-        config.properties["display_name"] = display_name
+        props = config.properties.copy()
+        if display_name:
+            props["display_name"] = display_name
         scenario = Scenario(
             config.name,
             pipelines,
-            config.properties,
+            props,
             scenario_id,
             creation_date,
             is_master=is_master_scenario,
             cycle=cycle,
         )
-
         cls.set(scenario)
         return scenario
 

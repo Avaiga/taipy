@@ -54,3 +54,9 @@ class NonExistingExcelSheet(Exception):
 
     def __init__(self, sheet_name: str, excel_file_name: str):
         self.message = f"{sheet_name} does not exist in {excel_file_name}."
+
+
+class NotMatchSheetNameAndCustomObject(Exception):
+    """
+    Raised if a provided list of sheet names does not match with the provided list of custom objects.
+    """
