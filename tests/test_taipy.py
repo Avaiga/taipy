@@ -1,14 +1,42 @@
 import datetime
+import os
+from copyreg import pickle
+from time import sleep
 from unittest import mock
 
+from pytest import TempdirFactory
+
+from taipy import Taipy
 from taipy import Taipy as tp
 from taipy.common.alias import JobId, PipelineId, ScenarioId, TaskId
+from taipy.common.frequency import Frequency
+from taipy.config.config import Config
 from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
+from taipy.cycle.cycle_manager import CycleManager
+from taipy.data.data_manager import DataManager
+from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
 from taipy.job.job import Job
+from taipy.job.job_manager import JobManager
+from taipy.pipeline.pipeline_manager import PipelineManager
+from taipy.scenario.scenario_manager import ScenarioManager
+from taipy.scheduler.scheduler import Scheduler
+from taipy.task.task_manager import TaskManager
+
+
+def file_exists(file_path):
+    return os.path.exists(file_path)
+
+
+def assert_file_exists(file_path):
+    assert file_exists(file_path), f"File {file_path} does not exist"
+
+
+def assert_file_not_exists(file_path):
+    assert not file_exists(file_path), f"File {file_path} exists"
 
 
 class TestTaipy:
@@ -25,10 +53,10 @@ class TestTaipy:
             export.assert_called_once_with(file_name)
 
     def test_configure_global_app(self):
-        a, b, c, d, e = "foo", "bar", "baz", "qux", "quux"
+        a, b, c, d, e, f = "foo", "bar", "baz", "qux", "quux", "grault"
         with mock.patch("taipy.config.config.Config.set_global_config") as set_global:
-            tp.configure_global_app(a, b, c, d, property=e)
-            set_global.assert_called_once_with(a, b, c, d, property=e)
+            tp.configure_global_app(a, b, c, d, e, property=f)
+            set_global.assert_called_once_with(a, b, c, d, e, property=f)
 
     def test_configure_job_executions(self):
         a, b, c, d, e, f, g, h, i = "foo", "bar", "baz", "qux", "quux", "quz", "corge", "grault", "garphy"
@@ -276,3 +304,70 @@ class TestTaipy:
         with mock.patch("taipy.pipeline.pipeline_manager.PipelineManager.get_or_create") as mck:
             tp.create_pipeline(pipeline_config)
             mck.assert_called_once_with(pipeline_config)
+
+    def test_clean_all_entities(self, cycle):
+        data_node_1_config = Config.add_data_node(name="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+        data_node_2_config = Config.add_data_node(
+            name="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
+        )
+        task_config = Config.add_task("my_task", data_node_1_config, print, data_node_2_config, scope=Scope.SCENARIO)
+        pipeline_config = Config.add_pipeline("my_pipeline", task_config)
+        scenario_config = Config.add_scenario("my_scenario", pipeline_config)
+        CycleManager.set(cycle)
+
+        scenario = ScenarioManager.create(scenario_config)
+        ScenarioManager.submit(scenario)
+
+        pickle_data_node = scenario.d2
+        # Initial assertion
+        assert isinstance(pickle_data_node, PickleDataNode)
+        assert_file_exists(pickle_data_node.path)
+        assert len(DataManager.get_all()) == 2
+        assert len(TaskManager.get_all()) == 1
+        assert len(PipelineManager.get_all()) == 1
+        assert len(ScenarioManager.get_all()) == 1
+        assert len(CycleManager.get_all()) == 1
+        assert len(JobManager.get_all()) == 1
+
+        # Test with clean entities disabled
+        Config.set_global_config(clean_entities_enabled=False)
+        success = Taipy.clean_all_entities()
+        # Everything should be the same after clean_all_entities since clean_entities_enabled is False
+        assert_file_exists(pickle_data_node.path)
+        assert len(DataManager.get_all()) == 2
+        assert len(TaskManager.get_all()) == 1
+        assert len(PipelineManager.get_all()) == 1
+        assert len(ScenarioManager.get_all()) == 1
+        assert len(CycleManager.get_all()) == 1
+        assert len(JobManager.get_all()) == 1
+        assert not success
+
+        # Test with clean entities enabled
+        Config.set_global_config(clean_entities_enabled=True)
+        success = Taipy.clean_all_entities()
+        # File should not exist after clean_all_entities since clean_entities_enabled is True
+        assert_file_not_exists(pickle_data_node.path)
+        assert len(DataManager.get_all()) == 0
+        assert len(TaskManager.get_all()) == 0
+        assert len(PipelineManager.get_all()) == 0
+        assert len(ScenarioManager.get_all()) == 0
+        assert len(CycleManager.get_all()) == 0
+        assert len(JobManager.get_all()) == 0
+        assert success
+
+    def test_clean_all_entities_with_user_pickle_files(self, pickle_file_path):
+        user_pickle = PickleDataNode(
+            config_name="d1", properties={"default_data": "foo", "file_path": pickle_file_path}, scope=Scope.SCENARIO
+        )
+        generated_pickle = PickleDataNode(config_name="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
+
+        # File already exists so it does not write any
+        assert len(DataManager.get_all()) == 1
+        assert file_exists(user_pickle.path)
+        assert_file_exists(generated_pickle.path)
+
+        Config.set_global_config(clean_entities_enabled=True)
+        Taipy.clean_all_entities()
+        assert len(DataManager.get_all()) == 0
+        assert_file_exists(user_pickle.path)
+        assert_file_not_exists(generated_pickle.path)

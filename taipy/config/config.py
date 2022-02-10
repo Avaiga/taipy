@@ -107,11 +107,12 @@ class Config:
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
+        clean_entities_enabled: Union[bool, str] = None,
         **properties,
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""
         cls._python_config.global_config = GlobalAppConfig(
-            notification, broker_endpoint, root_folder, storage_folder, **properties
+            notification, broker_endpoint, root_folder, storage_folder, clean_entities_enabled, **properties
         )
         cls.__compile_configs()
         return cls._applied_config.global_config

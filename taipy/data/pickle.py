@@ -78,6 +78,14 @@ class PickleDataNode(DataNode):
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
 
+    @property
+    def path(self) -> str:
+        return self.__pickle_file_path
+
+    @property
+    def is_generated_file(self) -> bool:
+        return self.__PICKLE_FILE_NAME not in self.properties
+
     def _read(self):
         return pickle.load(open(self.__pickle_file_path, "rb"))
 

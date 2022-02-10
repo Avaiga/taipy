@@ -1,4 +1,6 @@
 """Main module."""
+import logging
+import os
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
@@ -16,6 +18,7 @@ from taipy.cycle.cycle import Cycle
 from taipy.cycle.cycle_manager import CycleManager
 from taipy.data.data_manager import DataManager
 from taipy.data.data_node import DataNode
+from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.job.job import Job
@@ -342,10 +345,13 @@ class Taipy:
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
+        clean_entities_enabled: Union[bool, str] = None,
         **properties
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""
-        return Config.set_global_config(notification, broker_endpoint, root_folder, storage_folder, **properties)
+        return Config.set_global_config(
+            notification, broker_endpoint, root_folder, storage_folder, clean_entities_enabled, **properties
+        )
 
     @staticmethod
     def configure_job_executions(
@@ -439,6 +445,33 @@ class Taipy:
     ) -> ScenarioConfig:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
+
+    @staticmethod
+    def clean_all_entities() -> bool:
+        """
+        Deletes all entities from the data folder.
+        return (bool): True if the operation succeeded, False otherwise.
+        """
+        if not Config.global_config().clean_entities_enabled:
+            logging.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
+            return False
+
+        data_nodes = DataManager().get_all()
+
+        # Clean all pickle files
+        for data_node in data_nodes:
+            if isinstance(data_node, PickleDataNode):
+                if os.path.exists(data_node.path) and data_node.is_generated_file:
+                    os.remove(data_node.path)
+
+        # Clean all entities
+        DataManager.delete_all()
+        TaskManager.delete_all()
+        PipelineManager.delete_all()
+        ScenarioManager.delete_all()
+        CycleManager.delete_all()
+        JobManager.delete_all()
+        return True
 
     @staticmethod
     def check_configuration() -> IssueCollector:
