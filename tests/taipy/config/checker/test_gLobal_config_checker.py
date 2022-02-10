@@ -1,7 +1,7 @@
-from taipy.config import Config, GlobalAppConfig
 from taipy.config._config import _Config
-from taipy.config.checker import IssueCollector
 from taipy.config.checker.checkers.gLobal_config_checker import GlobalConfigChecker
+from taipy.config.checker.issue_collector import IssueCollector
+from taipy.config.global_app_config import GlobalAppConfig
 
 
 class TestGlobalConfigChecker:

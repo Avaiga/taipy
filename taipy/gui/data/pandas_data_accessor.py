@@ -17,8 +17,8 @@ if t.TYPE_CHECKING:
 
 class PandasDataAccessor(DataAccessor):
     @staticmethod
-    def get_supported_classes() -> t.Union[t.Type, t.List[t.Type], t.Tuple[t.Type]]:
-        return pd.DataFrame
+    def get_supported_classes() -> t.Union[str, t.List[str], t.Tuple[str]]:
+        return pd.DataFrame.__name__
 
     @staticmethod
     def __style_function(
@@ -154,28 +154,24 @@ class PandasDataAccessor(DataAccessor):
         if isinstance(value, pd.DataFrame):
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
+            columns = payload.get("columns", [])
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {}
                 for k, v in applies.items():
                     applies_with_fn[k] = getattr(guiApp, v) if hasattr(guiApp, v) else v
-                for col in payload.get("columns", []):
+                for col in columns:
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"
                 try:
                     value = value.groupby(aggregates).agg(applies_with_fn)
                 except Exception:
                     warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
-            paged = not payload.get("alldata")
+            ret_payload["pagekey"] = payload.get("pagekey", "unknown page")
+            paged = not payload.get("alldata", False)
             if paged:
-                keys = payload.keys()
-                ret_payload["pagekey"] = payload["pagekey"] if "pagekey" in keys else "unknown page"
-                if "infinite" in keys:
-                    ret_payload["infinite"] = payload["infinite"]
-            else:
-                ret_payload["alldata"] = payload["alldata"]
-                nb_rows_max = payload.get("width")
-            columns = payload.get("columns")
-            if paged:
+                inf = payload.get("infinite")
+                if inf is not None:
+                    ret_payload["infinite"] = inf
                 # real number of rows is needed to calculate the number of pages
                 rowcount = len(value)
                 # here we'll deal with start and end values from payload if present
@@ -215,6 +211,8 @@ class PandasDataAccessor(DataAccessor):
                     value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
                 )
             else:
+                ret_payload["alldata"] = True
+                nb_rows_max = payload.get("width")
                 # view with the requested columns
                 if nb_rows_max and nb_rows_max < len(value) / 2:
                     value = value.copy()

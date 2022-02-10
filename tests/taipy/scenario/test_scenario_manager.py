@@ -6,9 +6,10 @@ from taipy.common import utils
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.common.frequency import Frequency
 from taipy.config.config import Config
-from taipy.cycle.manager.cycle_manager import CycleManager
-from taipy.data import InMemoryDataNode, Scope
-from taipy.data.manager.data_manager import DataManager
+from taipy.cycle.cycle_manager import CycleManager
+from taipy.data.data_manager import DataManager
+from taipy.data.in_memory import InMemoryDataNode
+from taipy.data.scope import Scope
 from taipy.exceptions import NonExistingTask
 from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.exceptions.scenario import (
@@ -20,13 +21,14 @@ from taipy.exceptions.scenario import (
     NonExistingScenarioConfig,
 )
 from taipy.job.job_manager import JobManager
-from taipy.pipeline import Pipeline, PipelineManager
-from taipy.scenario.manager import ScenarioManager
+from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.scenario.scenario import Scenario
+from taipy.scenario.scenario_manager import ScenarioManager
 from taipy.scheduler.scheduler import Scheduler
 from taipy.scheduler.scheduler_factory import SchedulerFactory
-from taipy.task import Task
-from taipy.task.manager.task_manager import TaskManager
+from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 from tests.taipy.utils.NotifyMock import NotifyMock
 
 
@@ -620,19 +622,19 @@ def test_scenarios_comparison():
     scenario_2 = ScenarioManager.create(scenario_config)
 
     with pytest.raises(InsufficientScenarioToCompare):
-        ScenarioManager.compare(scenario_1, ds_config_name="bar")
+        ScenarioManager.compare(scenario_1, data_node_config_name="bar")
 
     scenario_3 = Scenario("awesome_scenario_config", [], {})
     with pytest.raises(DifferentScenarioConfigs):
-        ScenarioManager.compare(scenario_1, scenario_3, ds_config_name="bar")
+        ScenarioManager.compare(scenario_1, scenario_3, data_node_config_name="bar")
 
     ScenarioManager.submit(scenario_1.id)
     ScenarioManager.submit(scenario_2.id)
 
-    bar_comparison = ScenarioManager.compare(scenario_1, scenario_2, ds_config_name="bar")["bar"]
+    bar_comparison = ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="bar")["bar"]
     assert bar_comparison["subtraction"] == 0
 
-    foo_comparison = ScenarioManager.compare(scenario_1, scenario_2, ds_config_name="foo")["foo"]
+    foo_comparison = ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="foo")["foo"]
     assert len(foo_comparison.keys()) == 2
     assert foo_comparison["addition"] == 2
     assert foo_comparison["subtraction"] == 0
@@ -643,4 +645,4 @@ def test_scenarios_comparison():
         ScenarioManager.compare(scenario_3, scenario_3)
 
     with pytest.raises(NonExistingComparator):
-        ScenarioManager.compare(scenario_1, scenario_2, ds_config_name="abc")
+        ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="abc")

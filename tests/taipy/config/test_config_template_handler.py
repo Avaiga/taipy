@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from taipy.config.config_template_handler import ConfigTemplateHandler
-from taipy.data import Scope
+from taipy.data.scope import Scope
 from taipy.exceptions.configuration import InconsistentEnvVariableError
 
 

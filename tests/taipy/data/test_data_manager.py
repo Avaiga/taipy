@@ -6,8 +6,11 @@ import pytest
 from taipy.common.alias import DataNodeId
 from taipy.config.config import Config
 from taipy.config.data_node_config import DataNodeConfig
-from taipy.data import CSVDataNode, InMemoryDataNode, PickleDataNode, Scope
-from taipy.data.manager import DataManager
+from taipy.data.csv import CSVDataNode
+from taipy.data.data_manager import DataManager
+from taipy.data.in_memory import InMemoryDataNode
+from taipy.data.pickle import PickleDataNode
+from taipy.data.scope import Scope
 from taipy.exceptions import InvalidDataNodeType, ModelNotFound
 from taipy.exceptions.data_node import NonExistingDataNode
 

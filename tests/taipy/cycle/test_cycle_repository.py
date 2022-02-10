@@ -2,7 +2,7 @@ from datetime import datetime
 
 from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.repository import CycleRepository
+from taipy.cycle.cycle_repository import CycleRepository
 
 
 def test_save_and_load(tmpdir, cycle):

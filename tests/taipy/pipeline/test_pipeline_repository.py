@@ -1,4 +1,5 @@
-from taipy.pipeline import Pipeline, PipelineManager
+from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_manager import PipelineManager
 
 
 class TestPipelineRepository:

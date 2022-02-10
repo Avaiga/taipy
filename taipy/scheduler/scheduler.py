@@ -7,7 +7,7 @@ from typing import Callable, Iterable, List, Optional, Union
 
 from taipy.config.config import Config
 from taipy.config.job_config import JobConfig
-from taipy.data.manager.data_manager import DataManager
+from taipy.data.data_manager import DataManager
 from taipy.job.job import Job
 from taipy.job.job_manager import JobManager
 from taipy.scheduler.abstract_scheduler import AbstractScheduler
@@ -20,7 +20,7 @@ class Scheduler(AbstractScheduler):
         super().__init__()
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
-        self._dispatcher = JobDispatcher(job_config.nb_of_workers)
+        self._dispatcher = JobDispatcher(job_config.nb_of_workers)  # type: ignore
         self.lock = Lock()
 
     def submit(self, pipeline, callbacks: Optional[Iterable[Callable]] = None) -> List[Job]:

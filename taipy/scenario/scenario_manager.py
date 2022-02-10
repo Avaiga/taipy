@@ -7,7 +7,8 @@ from taipy.common.alias import ScenarioId
 from taipy.config.config import Config
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.manager.cycle_manager import CycleManager
+from taipy.cycle.cycle_manager import CycleManager
+from taipy.data.data_manager import DataManager
 from taipy.exceptions.repository import ModelNotFound
 from taipy.exceptions.scenario import (
     DeletingMasterScenario,
@@ -19,9 +20,10 @@ from taipy.exceptions.scenario import (
     NonExistingScenarioConfig,
 )
 from taipy.job.job import Job
-from taipy.pipeline.manager import PipelineManager
-from taipy.scenario.repository import ScenarioRepository
+from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.scenario.scenario import Scenario
+from taipy.scenario.scenario_repository import ScenarioRepository
+from taipy.task.task_manager import TaskManager
 
 
 class ScenarioManager:
@@ -78,7 +80,7 @@ class ScenarioManager:
 
     @classmethod
     def delete_all(cls):
-        """Deletes all data nodes."""
+        """Deletes all scenarios."""
         cls.repository.delete_all()
 
     @classmethod
@@ -138,8 +140,8 @@ class ScenarioManager:
         Raises:
             NonExistingScenario : No scenario corresponds to scenario_id.
         """
+        scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         try:
-            scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
             return cls.repository.load(scenario_id)
         except ModelNotFound:
             logging.error(f"Scenario entity: {scenario_id} does not exist.")
@@ -246,13 +248,13 @@ class ScenarioManager:
         cls.repository.delete(scenario_id)
 
     @classmethod
-    def compare(cls, *scenarios: Scenario, ds_config_name: str = None):
+    def compare(cls, *scenarios: Scenario, data_node_config_name: str = None):
         """
         Compares the data nodes of given scenarios with known datanode config name.
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
-            ds_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no ds_config_name is
+            data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no ds_config_name is
             provided, the scenarios will be compared based on all the previously defined comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
@@ -269,17 +271,19 @@ class ScenarioManager:
 
         if scenario_config := Config.scenarios().get(scenarios[0].config_name, None):
             results = {}
-            if ds_config_name:
-                if ds_config_name in scenario_config.comparators.keys():
-                    ds_comparators = {ds_config_name: scenario_config.comparators[ds_config_name]}
+            if data_node_config_name:
+                if data_node_config_name in scenario_config.comparators.keys():
+                    ds_comparators = {data_node_config_name: scenario_config.comparators[data_node_config_name]}
                 else:
                     raise NonExistingComparator
             else:
                 ds_comparators = scenario_config.comparators
 
-            for ds_config_name, comparators in ds_comparators.items():
-                datanodes = [scenario.__getattr__(ds_config_name).read() for scenario in scenarios]
-                results[ds_config_name] = {comparator.__name__: comparator(*datanodes) for comparator in comparators}
+            for data_node_config_name, comparators in ds_comparators.items():
+                datanodes = [scenario.__getattr__(data_node_config_name).read() for scenario in scenarios]
+                results[data_node_config_name] = {
+                    comparator.__name__: comparator(*datanodes) for comparator in comparators
+                }
 
             return results
 

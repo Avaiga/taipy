@@ -1,6 +1,6 @@
 from importlib import util
 
-from taipy.config import Config
+from taipy.config.config import Config
 from taipy.exceptions.scheduler import DependencyNotInstalled
 from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.scheduler.scheduler import Scheduler

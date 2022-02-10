@@ -7,14 +7,14 @@ from time import sleep
 import pytest
 
 from taipy.common.alias import JobId
-from taipy.config import Config
 from taipy.config._config import _Config
-from taipy.data.manager import DataManager
+from taipy.config.config import Config
+from taipy.data.data_manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions.job import JobNotDeletedException, NonExistingJob
 from taipy.job.job_manager import JobManager
 from taipy.scheduler.scheduler import Scheduler
-from taipy.task.manager import TaskManager
+from taipy.task.task_manager import TaskManager
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -58,11 +58,11 @@ def test_get_latest_job():
     task = _create_task(multiply)
 
     job_1 = scheduler.submit_task(task)
-    assert JobManager.get_latest_job(task) == job_1
+    assert JobManager.get_latest(task) == job_1
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
     job_2 = scheduler.submit_task(task)
-    assert JobManager.get_latest_job(task).id == job_2.id
+    assert JobManager.get_latest(task).id == job_2.id
 
 
 def test_raise_on_job_unknown():

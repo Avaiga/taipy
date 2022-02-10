@@ -1,3 +1,5 @@
+from copy import copy
+
 from taipy.common.frequency import Frequency
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.scenario_config_checker import ScenarioConfigChecker
@@ -11,31 +13,37 @@ class TestScenarioConfigChecker:
         config = _Config.default_config()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
+        assert len(collector.warnings) == 0
+        assert len(collector.infos) == 0
+
+        config.scenarios["new"] = copy(config.scenarios["default"])
+        ScenarioConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
         assert len(collector.warnings) == 1
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].pipelines = "bar"
+        config.scenarios["new"].pipelines = "bar"
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 0
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].pipelines = ["bar"]
+        config.scenarios["new"].pipelines = ["bar"]
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 0
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].pipelines = ["bar", PipelineConfig("bar")]
+        config.scenarios["new"].pipelines = ["bar", PipelineConfig("bar")]
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 0
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].pipelines = [PipelineConfig("bar")]
+        config.scenarios["new"].pipelines = [PipelineConfig("bar")]
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
@@ -48,18 +56,24 @@ class TestScenarioConfigChecker:
         config.scenarios["default"].frequency = "bar"
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+        assert len(collector.warnings) == 0
+        assert len(collector.infos) == 0
+
+        config.scenarios["new"] = copy(config.scenarios["default"])
+        ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 1
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].frequency = 1
+        config.scenarios["new"].frequency = 1
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 1
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].frequency = Frequency.DAILY
+        config.scenarios["new"].frequency = Frequency.DAILY
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
@@ -72,10 +86,16 @@ class TestScenarioConfigChecker:
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
+        assert len(collector.warnings) == 0
+        assert len(collector.infos) == 0
+
+        config.scenarios["new"] = copy(config.scenarios["default"])
+        ScenarioConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
         assert len(collector.warnings) == 1
         assert len(collector.infos) == 1
 
-        config.scenarios["default"].comparators = {"bar": "abc"}
+        config.scenarios["new"].comparators = {"bar": "abc"}
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 0

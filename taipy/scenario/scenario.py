@@ -3,11 +3,11 @@ import uuid
 from datetime import datetime
 from typing import Callable, Dict, List, Set
 
-from taipy.common import protect_name
 from taipy.common.alias import ScenarioId
+from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.common.utils import fcts_to_dict
 from taipy.cycle.cycle import Cycle
-from taipy.pipeline import Pipeline
+from taipy.pipeline.pipeline import Pipeline
 from taipy.scenario.scenario_model import ScenarioModel
 
 
@@ -33,7 +33,7 @@ class Scenario:
         cycle (Cycle): Cycle of the scenario.
     """
 
-    __ID_PREFIX = "SCENARIO"
+    ID_PREFIX = "SCENARIO"
     __SEPARATOR = "_"
 
     def __init__(
@@ -61,9 +61,7 @@ class Scenario:
     @staticmethod
     def new_id(config_name: str) -> ScenarioId:
         """Generates a unique scenario identifier."""
-        return ScenarioId(
-            Scenario.__SEPARATOR.join([Scenario.__ID_PREFIX, protect_name(config_name), str(uuid.uuid4())])
-        )
+        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, protect_name(config_name), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = protect_name(attribute_name)

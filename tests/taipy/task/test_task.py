@@ -1,9 +1,12 @@
 import pytest
 
-from taipy.config import Config
+from taipy.config.config import Config
 from taipy.config.data_node_config import DataNodeConfig
-from taipy.data import CSVDataNode, DataNode, InMemoryDataNode, Scope
-from taipy.task import Task
+from taipy.data.csv import CSVDataNode
+from taipy.data.data_node import DataNode
+from taipy.data.in_memory import InMemoryDataNode
+from taipy.data.scope import Scope
+from taipy.task.task import Task
 
 
 @pytest.fixture

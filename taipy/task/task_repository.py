@@ -2,8 +2,8 @@ import pathlib
 
 from taipy.common.alias import TaskId
 from taipy.common.utils import load_fct
-from taipy.config import Config
-from taipy.data.manager import DataManager
+from taipy.config.config import Config
+from taipy.data.data_manager import DataManager
 from taipy.repository import FileSystemRepository
 from taipy.task.task import Task
 from taipy.task.task_model import TaskModel

@@ -2,10 +2,10 @@ import pathlib
 from datetime import datetime
 
 from taipy.config.config import Config
-from taipy.job import Job
+from taipy.job.job import Job
 from taipy.job.job_model import JobModel
 from taipy.repository import FileSystemRepository
-from taipy.task.repository import TaskRepository
+from taipy.task.task_repository import TaskRepository
 
 
 class JobRepository(FileSystemRepository[JobModel, Job]):

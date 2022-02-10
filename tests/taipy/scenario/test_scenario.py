@@ -1,9 +1,9 @@
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
-from taipy.data import Scope
 from taipy.data.in_memory import InMemoryDataNode
-from taipy.pipeline import Pipeline
-from taipy.scenario import Scenario
-from taipy.task import Task
+from taipy.data.scope import Scope
+from taipy.pipeline.pipeline import Pipeline
+from taipy.scenario.scenario import Scenario
+from taipy.task.task import Task
 
 
 def test_create_scenario(cycle, current_datetime):

@@ -3,15 +3,16 @@ import logging
 from typing import Dict, List, Optional, Union
 
 from taipy.common.alias import PipelineId, ScenarioId, TaskId
-from taipy.config import TaskConfig
-from taipy.data import Scope
-from taipy.data.manager import DataManager
+from taipy.config.task_config import TaskConfig
+from taipy.data.data_manager import DataManager
+from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound, NonExistingTask
 from taipy.exceptions.task import MultipleTaskFromSameConfigWithSameParent
-from taipy.job import JobManager
+from taipy.job.job_manager import JobManager
+from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.scheduler.scheduler_factory import SchedulerFactory
-from taipy.task.repository import TaskRepository
 from taipy.task.task import Task
+from taipy.task.task_repository import TaskRepository
 
 
 class TaskManager:
@@ -54,7 +55,7 @@ class TaskManager:
         cls.repository.delete(task_id)
 
     @classmethod
-    def get_all(cls):
+    def get_all(cls) -> List[Task]:
         """
         Returns the list of all existing tasks.
 
@@ -187,16 +188,16 @@ class TaskManager:
                 JobManager.delete(job)
 
         if scenario_id:
-            cls.remove_if_parent_id_eq(task.input.values(), scenario_id)
-            cls.remove_if_parent_id_eq(task.output.values(), scenario_id)
+            cls._remove_if_parent_id_eq(task.input.values(), scenario_id)
+            cls._remove_if_parent_id_eq(task.output.values(), scenario_id)
         if pipeline_id:
-            cls.remove_if_parent_id_eq(task.input.values(), pipeline_id)
-            cls.remove_if_parent_id_eq(task.output.values(), pipeline_id)
+            cls._remove_if_parent_id_eq(task.input.values(), pipeline_id)
+            cls._remove_if_parent_id_eq(task.output.values(), pipeline_id)
 
         cls.delete(task_id)
 
     @classmethod
-    def remove_if_parent_id_eq(cls, data_nodes, id_):
+    def _remove_if_parent_id_eq(cls, data_nodes, id_):
         for data_node in data_nodes:
             if data_node.parent_id == id_:
                 DataManager.delete(data_node.id)

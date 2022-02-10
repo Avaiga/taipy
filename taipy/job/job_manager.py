@@ -5,7 +5,7 @@ from typing import Callable, Iterable, List
 from taipy.common.alias import JobId
 from taipy.exceptions import JobNotDeletedException, ModelNotFound, NonExistingJob
 from taipy.job.job import Job
-from taipy.job.repository import JobRepository
+from taipy.job.job_repository import JobRepository
 from taipy.task.task import Task
 
 
@@ -17,6 +17,7 @@ class JobManager:
     """
 
     repository = JobRepository()
+    ID_PREFIX = "JOB_"
 
     @classmethod
     def create(cls, task: Task, callbacks: Iterable[Callable]) -> Job:
@@ -29,7 +30,7 @@ class JobManager:
         Returns:
             A new job, that is created for executing given task.
         """
-        job = Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
+        job = Job(id=JobId(f"{cls.ID_PREFIX}{uuid.uuid4()}"), task=task)
         cls.set(job)
         job.on_status_change(*callbacks)
         return job
@@ -89,7 +90,7 @@ class JobManager:
         cls.repository.delete_all()
 
     @classmethod
-    def get_latest_job(cls, task: Task) -> Job:
+    def get_latest(cls, task: Task) -> Job:
         """Allows to retrieve the latest computed job of a task.
 
         Returns:

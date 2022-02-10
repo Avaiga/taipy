@@ -2,10 +2,10 @@ import logging
 import uuid
 from typing import Dict, Iterable, Optional
 
-from taipy.common import protect_name
 from taipy.common.alias import TaskId
-from taipy.data import Scope
+from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.data.data_node import DataNode
+from taipy.data.scope import Scope
 
 
 class Task:
@@ -33,7 +33,7 @@ class Task:
             Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
     """
 
-    __ID_PREFIX = "TASK"
+    ID_PREFIX = "TASK"
     __ID_SEPARATOR = "_"
 
     def __init__(
@@ -46,7 +46,7 @@ class Task:
         parent_id: Optional[str] = None,
     ):
         self.config_name = protect_name(config_name)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.parent_id = parent_id
         self.__input = {ds.config_name: ds for ds in input}
         self.__output = {ds.config_name: ds for ds in output or []}
@@ -87,4 +87,4 @@ class Task:
         """
         data_nodes = list(self.input.values()) + list(self.output.values())
         scope = min(ds.scope for ds in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
-        return scope
+        return Scope(scope)

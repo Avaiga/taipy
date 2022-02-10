@@ -1,5 +1,3 @@
-from typing import List
-
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.config_checker import ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -14,7 +12,8 @@ class PipelineConfigChecker(ConfigChecker):
     def check(self) -> IssueCollector:
         pipeline_configs = self.config.pipelines
         for pipeline_config_name, pipeline_config in pipeline_configs.items():
-            self._check_tasks(pipeline_config_name, pipeline_config)
+            if pipeline_config_name != "default":
+                self._check_tasks(pipeline_config_name, pipeline_config)
         return self.collector
 
     def _check_tasks(self, pipeline_config_name: str, pipeline_config: PipelineConfig):

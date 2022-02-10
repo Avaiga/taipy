@@ -10,7 +10,7 @@ from taipy.exceptions.pipeline import NonExistingPipeline
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.repository import FileSystemRepository
-from taipy.task.manager import TaskManager
+from taipy.task.task_manager import TaskManager
 
 
 class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):

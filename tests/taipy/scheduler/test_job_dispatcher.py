@@ -10,11 +10,10 @@ import pytest
 
 from taipy.common.alias import JobId, TaskId
 from taipy.config.config import Config
-from taipy.data import Scope
-from taipy.data.manager import DataManager
-from taipy.job import Job
+from taipy.data.data_manager import DataManager
+from taipy.job.job import Job
 from taipy.scheduler.job_dispatcher import JobDispatcher
-from taipy.task import Task
+from taipy.task.task import Task
 
 
 @pytest.fixture(scope="function", autouse=True)

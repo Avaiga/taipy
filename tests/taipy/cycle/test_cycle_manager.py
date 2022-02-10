@@ -5,7 +5,7 @@ import pytest
 from taipy.common.alias import CycleId
 from taipy.common.frequency import Frequency
 from taipy.cycle.cycle import Cycle
-from taipy.cycle.manager.cycle_manager import CycleManager
+from taipy.cycle.cycle_manager import CycleManager
 from taipy.exceptions.cycle import NonExistingCycle
 
 

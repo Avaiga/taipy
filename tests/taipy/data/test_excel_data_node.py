@@ -7,9 +7,9 @@ import pandas as pd
 import pytest
 
 from taipy.common.alias import DataNodeId
-from taipy.config import Config
+from taipy.config.config import Config
+from taipy.data.data_manager import DataManager
 from taipy.data.excel import ExcelDataNode
-from taipy.data.manager import DataManager
 from taipy.data.scope import Scope
 from taipy.exceptions import MissingRequiredProperty
 from taipy.exceptions.data_node import NoData, NonExistingExcelSheet, NotMatchSheetNameAndCustomObject

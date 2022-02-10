@@ -2,8 +2,8 @@ from collections import defaultdict
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from taipy.common import protect_name
 from taipy.common.frequency import Frequency
+from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.config.pipeline_config import PipelineConfig
 from taipy.exceptions.scenario import NonExistingComparator

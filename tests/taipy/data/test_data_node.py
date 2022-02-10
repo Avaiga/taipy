@@ -4,10 +4,12 @@ from time import sleep
 import pytest
 
 from taipy.common.alias import DataNodeId, JobId
-from taipy.data import DataNode, InMemoryDataNode, Scope
-from taipy.data.filter_data_node import FilterDataNode
-from taipy.data.manager import DataManager
+from taipy.data.data_manager import DataManager
+from taipy.data.data_node import DataNode
+from taipy.data.filter import FilterDataNode
+from taipy.data.in_memory import InMemoryDataNode
 from taipy.data.operator import JoinOperator, Operator
+from taipy.data.scope import Scope
 from taipy.exceptions.data_node import NoData
 
 

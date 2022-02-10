@@ -6,8 +6,7 @@ import pytest
 
 from taipy.config._config import _Config
 from taipy.config.config import Config
-from taipy.data import Scope
-from taipy.data.manager import DataManager
+from taipy.data.data_manager import DataManager
 from taipy.exceptions.configuration import ConfigurationIssueError
 
 
@@ -20,7 +19,7 @@ def reset_configuration_singleton():
     Config._applied_config = _Config.default_config()
 
 
-def test_data_node_config_creation():
+def test_data_node_config_check():
     data_node_config = Config.add_data_node("data_nodes1", "pickle")
     assert list(Config.data_nodes()) == ["default", data_node_config.name]
 
@@ -37,18 +36,23 @@ def test_data_node_config_creation():
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="bar")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", scope="bar")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="csv")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="sql")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="excel")
+        Config.check()
 
 
 def test_data_node_count():

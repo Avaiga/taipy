@@ -8,9 +8,9 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from taipy.common import protect_name
 from taipy.common.alias import DataNodeId, JobId
-from taipy.data.filter_data_node import FilterDataNode
+from taipy.common.unicode_to_python_variable_name import protect_name
+from taipy.data.filter import FilterDataNode
 from taipy.data.operator import JoinOperator, Operator
 from taipy.data.scope import Scope
 from taipy.exceptions.data_node import NoData
@@ -53,13 +53,13 @@ class DataNode:
         properties (list): List of additional arguments.
     """
 
-    __ID_PREFIX = "DATANODE"
+    ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
 
     def __init__(
         self,
         config_name,
-        scope: Scope = Scope.PIPELINE,
+        scope: Scope = Scope(Scope.PIPELINE),
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         parent_id: Optional[str] = None,
@@ -72,7 +72,7 @@ class DataNode:
         **kwargs,
     ):
         self.config_name = protect_name(config_name)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.__ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.name = name or self.id
         self.parent_id = parent_id
         self.scope = scope
@@ -117,7 +117,7 @@ class DataNode:
         return self._read()
 
     def write(self, data, job_id: Optional[JobId] = None):
-        from taipy.data.manager import DataManager
+        from taipy.data.data_manager import DataManager
 
         self._write(data)
         self.unlock_edition(job_id=job_id)

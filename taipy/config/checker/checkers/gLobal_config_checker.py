@@ -1,7 +1,7 @@
-from taipy.config import GlobalAppConfig
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.config_checker import ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
+from taipy.config.global_app_config import GlobalAppConfig
 
 
 class GlobalConfigChecker(ConfigChecker):
