@@ -23,6 +23,7 @@ from taipy.pipeline.pipeline_model import PipelineModel
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_manager import ScenarioManager
 from taipy.scenario.scenario_model import ScenarioModel
+from taipy.scheduler.scheduler_factory import SchedulerFactory
 from taipy.task.task import Task
 from taipy.task.task_manager import TaskManager
 
@@ -158,19 +159,13 @@ def setup():
 
 
 def delete_everything():
-    task_manager = TaskManager()
-    task_manager._scheduler = None
-    scenario_manager = ScenarioManager()
-    pipeline_manager = PipelineManager()
-    job_manager = JobManager()
-    data_manager = DataManager()
-    cycle_manager = CycleManager()
-    scenario_manager.delete_all()
-    pipeline_manager.delete_all()
-    data_manager.delete_all()
-    task_manager.delete_all()
-    job_manager.delete_all()
-    cycle_manager.delete_all()
+    TaskManager.scheduler = SchedulerFactory.build_scheduler()
+    ScenarioManager.delete_all()
+    PipelineManager.delete_all()
+    DataManager.delete_all()
+    TaskManager.delete_all()
+    JobManager.delete_all()
+    CycleManager.delete_all()
     Config._python_config.global_config = GlobalAppConfig()
     Config._python_config.job_config = JobConfig()
     Config._python_config.data_nodes.clear()

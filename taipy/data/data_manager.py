@@ -30,11 +30,13 @@ class DataManager:
     __DATA_NODE_CLASS_MAP = {ds_class.storage_type(): ds_class for ds_class in __DATA_NODE_CLASSES}  # type: ignore
     repository = DataRepository(__DATA_NODE_CLASS_MAP)
 
-    def delete_all(self):
+    @classmethod
+    def delete_all(cls):
         """Deletes all data nodes."""
-        self.repository.delete_all()
+        cls.repository.delete_all()
 
-    def delete(self, data_node_id: str):
+    @classmethod
+    def delete(cls, data_node_id: str):
         """
         Deletes the data node provided as parameter.
 
@@ -44,10 +46,11 @@ class DataManager:
         Raises:
             ModelNotFound: Raised if no data node corresponds to data_node_id.
         """
-        self.repository.delete(data_node_id)
+        cls.repository.delete(data_node_id)
 
+    @classmethod
     def get_or_create(
-        self,
+        cls,
         data_node_config: DataNodeConfig,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
@@ -69,7 +72,7 @@ class DataManager:
         """
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        ds_from_data_node_config = self._get_all_by_config_name(data_node_config.name)
+        ds_from_data_node_config = cls._get_all_by_config_name(data_node_config.name)
         ds_from_parent = [ds for ds in ds_from_data_node_config if ds.parent_id == parent_id]
         if len(ds_from_parent) == 1:
             return ds_from_parent[0]
@@ -77,18 +80,20 @@ class DataManager:
             logging.error("Multiple data nodes from same config exist with the same parent_id.")
             raise MultipleDataNodeFromSameConfigWithSameParent
         else:
-            return self._create_and_set(data_node_config, parent_id)
+            return cls._create_and_set(data_node_config, parent_id)
 
-    def set(self, data_node: DataNode):
+    @classmethod
+    def set(cls, data_node: DataNode):
         """
         Saves or Updates the data node given as parameter.
 
         Parameters:
             data_node (DataNode) : data node to save or update.
         """
-        self.repository.save(data_node)
+        cls.repository.save(data_node)
 
-    def get(self, data_node: Union[DataNode, DataNodeId]) -> DataNode:
+    @classmethod
+    def get(cls, data_node: Union[DataNode, DataNodeId]) -> DataNode:
         """
         Gets the data node corresponding to the DataNode or the identifier given as parameter.
 
@@ -100,26 +105,30 @@ class DataManager:
         """
         try:
             data_node_id = data_node.id if isinstance(data_node, DataNode) else data_node
-            return self.repository.load(data_node_id)
+            return cls.repository.load(data_node_id)
         except ModelNotFound:
             logging.error(f"DataNode: {data_node_id} does not exist.")
             raise NonExistingDataNode(data_node_id)
 
-    def get_all(self) -> List[DataNode]:
+    @classmethod
+    def get_all(cls) -> List[DataNode]:
         """Returns the list of all existing data nodes."""
-        return self.repository.load_all()
+        return cls.repository.load_all()
 
-    def _get_all_by_config_name(self, config_name: str) -> List[DataNode]:
-        return self.repository.search_all("config_name", config_name)
+    @classmethod
+    def _get_all_by_config_name(cls, config_name: str) -> List[DataNode]:
+        return cls.repository.search_all("config_name", config_name)
 
-    def _create_and_set(self, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
-        data_node = self.__create(data_node_config, parent_id)
-        self.set(data_node)
+    @classmethod
+    def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
+        data_node = cls.__create(data_node_config, parent_id)
+        cls.set(data_node)
         return data_node
 
-    def __create(self, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
+    @classmethod
+    def __create(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
         try:
-            return self.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
+            return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
                 config_name=data_node_config.name,
                 scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,

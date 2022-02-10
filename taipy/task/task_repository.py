@@ -44,4 +44,4 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
 
     @staticmethod
     def __to_data_node(data_nodes_ids):
-        return [DataManager().get(i) for i in data_nodes_ids]
+        return [DataManager.get(i) for i in data_nodes_ids]
