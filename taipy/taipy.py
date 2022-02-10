@@ -447,7 +447,7 @@ class Taipy:
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
 
     @staticmethod
-    def clean_all_entities(cls) -> bool:
+    def clean_all_entities() -> bool:
         """
         Deletes all entities from the data folder.
         return (bool): True if the operation succeeded, False otherwise.
