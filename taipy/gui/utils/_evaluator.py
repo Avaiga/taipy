@@ -9,7 +9,7 @@ from operator import attrgetter
 
 import __main__
 
-from . import _get_expr_var_name, attrsetter
+from . import _get_expr_var_name, attrsetter, get_client_var_name
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -21,9 +21,9 @@ class _Evaluator:
     __EXPR_RE = re.compile(r"\{(.*?)\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
-    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_]*)$")
+    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9]*)$")
 
-    def __init__(self) -> None:
+    def __init__(self, default_bindings: t.Dict[str, t.Any]) -> None:
         # key = expression, value = hashed value of the expression
         self.__expr_to_hash: t.Dict[str, str] = {}
         # key = hashed value of the expression, value = expression
@@ -36,12 +36,16 @@ class _Evaluator:
         # key = expression, value = list of related variables
         # "{x + y}": ["x", "y"]
         self.__expr_to_var_list: t.Dict[str, t.List[str]] = {}
+        # instead of binding everywhere the types
+        self.__default_bindings = default_bindings
+        # expr to holders
+        self.__expr_to_holders: t.Dict[str, t.Set[str]] = {}
 
     def get_hash_from_expr(self, expr: str) -> str:
-        return self.__expr_to_hash[expr] if expr in self.__expr_to_hash else expr
+        return self.__expr_to_hash.get(expr, expr)
 
     def get_expr_from_hash(self, hash: str) -> str:
-        return self.__hash_to_expr[hash]
+        return self.__hash_to_expr.get(hash, hash)
 
     def _is_expression(self, expr: str) -> bool:
         return len(_Evaluator.__EXPR_IS_EXPR.findall(expr)) != 0
@@ -61,14 +65,17 @@ class _Evaluator:
                     args = [x.arg for x in node.args]
                 elif isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
-                    if var_name not in args:
+                    if (
+                        var_name not in args
+                        and var_name not in dir(builtins)
+                        and var_name not in self.__default_bindings.keys()
+                    ):
                         gui.bind_var(var_name)
                         try:
                             var_val[var_name] = attrgetter(var_name)(gui._get_data_scope())
                             var_list.append(var_name)
                         except AttributeError:
-                            if var_name not in dir(builtins):
-                                warnings.warn(f"Variable '{var_name}' is not defined (in expression '{expr}')")
+                            warnings.warn(f"Variable '{var_name}' is not defined (in expression '{expr}')")
         return var_val, var_list
 
     def __save_expression(
@@ -89,20 +96,56 @@ class _Evaluator:
             expr_hash = self.__expr_to_hash[expr] = _get_expr_var_name(expr)
             gui.bind_var_val(expr_hash, expr_evaluated)
         else:
-            self.__expr_to_hash[expr] = expr
+            self.__expr_to_hash[expr] = expr_hash
         self.__hash_to_expr[expr_hash] = expr
         for var in var_val:
-            if var not in self.__var_to_expr_list:
-                self.__var_to_expr_list[var] = [expr]
-            else:
-                self.__var_to_expr_list[var].append(expr)
+            if var not in self.__default_bindings.keys():
+                lst = self.__var_to_expr_list.get(var)
+                if lst is None:
+                    self.__var_to_expr_list[var] = [expr]
+                else:
+                    lst.append(expr)
         if expr not in self.__expr_to_var_list:
             self.__expr_to_var_list[expr] = var_list
         return expr_hash
 
-    def evaluate_expr(
-        self, gui: Gui, expr: str, re_evaluated: t.Optional[bool] = True, get_hash: t.Optional[bool] = False
-    ) -> t.Any:
+    def evaluate_bind_holder(self, gui: Gui, holder_name: str, expr: str) -> str:
+        expr_holder = f"{holder_name}({expr},'{self.__expr_to_hash.get(expr)}')"
+        a_set = self.__expr_to_holders.get(expr)
+        if a_set:
+            a_set.add(expr_holder)
+        else:
+            self.__expr_to_holders[expr] = set([expr_holder])
+        hash_name = f"{holder_name}_{self.__expr_to_hash.get(expr)}"
+        self.__expr_to_hash[expr_holder] = hash_name
+        a_list = self.__var_to_expr_list.get(expr)
+        if a_list:
+            a_list.append(expr_holder)
+        else:
+            self.__var_to_expr_list[expr] = [expr_holder]
+        var_val, var_list = self._analyze_expression(gui, f"{{{expr_holder}}}")
+        self.__expr_to_var_list[expr_holder] = var_list
+        setattr(gui._get_data_scope(), hash_name, self.__evaluate_holder(gui, expr_holder, var_val))
+        return hash_name
+
+    def evaluate_holders(self, gui: Gui, expr: str) -> t.List[str]:
+        lst = []
+        for hld in self.__expr_to_holders.get(expr, []):
+            hash = self.__expr_to_hash.get(hld)
+            var_val, _ = self._analyze_expression(gui, f"{{{hash}}}")
+            setattr(gui._get_data_scope(), hash, self.__evaluate_holder(gui, hld, var_val))
+            lst.append(hash)
+        return lst
+
+    def __evaluate_holder(self, gui: Gui, expr_holder: str, var_val: t.Dict[str, t.List[str]]) -> t.Any:
+        try:
+            # evaluate expressions
+            return eval(expr_holder, self.__default_bindings, var_val)
+        except Exception:
+            warnings.warn(f"Cannot evaluate expression '{expr_holder}'")
+        return None
+
+    def evaluate_expr(self, gui: Gui, expr: str, bind=False) -> t.Any:
         if not self._is_expression(expr):
             return expr
         var_val, var_list = self._analyze_expression(gui, expr)
@@ -119,29 +162,24 @@ class _Evaluator:
             is_edge_case = True
         # validate whether expression has already been evaluated
         if expr in self.__expr_to_hash and hasattr(gui._get_data_scope(), self.__expr_to_hash[expr]):
-            if get_hash:
-                return self.__expr_to_hash[expr]
-            return "{" + self.__expr_to_hash[expr] + "}"
+            return self.__expr_to_hash[expr]
         try:
             # evaluate expressions
-            expr_evaluated = eval(expr_string if not is_edge_case else expr, {}, var_val)
+            expr_evaluated = eval(expr_string if not is_edge_case else expr, self.__default_bindings, var_val)
         except Exception:
             warnings.warn(f"Cannot evaluate expression '{expr if is_edge_case else expr_string}'")
             expr_evaluated = None
+        if bind:
+            gui.bind_var_val(expr_hash, expr_evaluated)
         # save the expression if it needs to be re-evaluated
-        if re_evaluated:
-            var_name = self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_val, var_list)
-            if get_hash:
-                return var_name
-            return "{" + var_name + "}"
-        return expr_evaluated
+        return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_val, var_list)
 
-    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.List[str]:
+    def re_evaluate_expr(self, gui: Gui, var_name: str) -> t.Set[str]:
         """
         This function will execute when the _update_var function is handling
         an expression with only a single variable
         """
-        modified_vars: t.List[str] = []
+        modified_vars: t.Set[str] = set()
         if var_name not in self.__var_to_expr_list.keys():
             return modified_vars
         for expr in self.__var_to_expr_list[var_name]:
@@ -156,7 +194,10 @@ class _Evaluator:
             else:
                 expr_string = expr
 
-            expr_evaluated = eval(expr_string, {}, eval_dict)
-            attrsetter(gui._get_data_scope(), hash_expr, expr_evaluated)
-            modified_vars.append(hash_expr)
+            try:
+                expr_evaluated = eval(expr_string, self.__default_bindings, eval_dict)
+                attrsetter(gui._get_data_scope(), hash_expr, expr_evaluated)
+            except Exception as e:
+                warnings.warn(f"Problem evaluating {expr_string}: {e}")
+            modified_vars.add(hash_expr)
         return modified_vars

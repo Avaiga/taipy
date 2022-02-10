@@ -8,11 +8,11 @@ def test_selector_md_1(gui: Gui, helpers):
     expected_list = [
         "<Selector",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
-        'defaultValue="[&quot;-1&quot;, &quot;-1&quot;]"',
+        'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'tp_varname="selected_val"',
-        "value={selected_val}",
+        'tp_varname="TaipyLovValue_selected_val"',
+        "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -24,8 +24,8 @@ def test_selector_md_2(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'tp_varname="selected_val"',
-        "value={selected_val}",
+        'tp_varname="TaipyLovValue_selected_val"',
+        "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -42,11 +42,11 @@ def test_selector_md_3(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
         'defaultValue="[&quot;1&quot;]"',
-        "lov={scenario_list}",
+        "lov={TaipyLov_scenario_list}",
         "propagate={false}",
-        'tp_updatevars="lov=scenario_list"',
-        'tp_varname="selected_obj"',
-        "value={selected_obj}",
+        'tp_updatevars="lov=TaipyLov_scenario_list"',
+        'tp_varname="TaipyLovValue_selected_obj"',
+        "value={TaipyLovValue_selected_obj}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -58,11 +58,11 @@ def test_selector_html_1_1(gui: Gui, helpers):
     expected_list = [
         "<Selector",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
-        'defaultValue="[&quot;-1&quot;, &quot;-1&quot;]"',
+        'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'tp_varname="selected_val"',
-        "value={selected_val}",
+        'tp_varname="TaipyLovValue_selected_val"',
+        "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -74,11 +74,11 @@ def test_selector_html_1_2(gui: Gui, helpers):
     expected_list = [
         "<Selector",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;], [&quot;l3&quot;, &quot;v3&quot;]]"',
-        'defaultValue="[&quot;-1&quot;, &quot;-1&quot;]"',
+        'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'tp_varname="selected_val"',
-        "value={selected_val}",
+        'tp_varname="TaipyLovValue_selected_val"',
+        "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -90,8 +90,8 @@ def test_selector_html_2_1(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'tp_varname="selected_val"',
-        "value={selected_val}",
+        'tp_varname="TaipyLovValue_selected_val"',
+        "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -103,7 +103,7 @@ def test_selector_html_2_2(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'tp_varname="selected_val"',
-        "value={selected_val}",
+        'tp_varname="TaipyLovValue_selected_val"',
+        "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

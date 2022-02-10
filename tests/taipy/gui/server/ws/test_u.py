@@ -32,6 +32,6 @@ def test_ws_u_string(gui: Gui, helpers):
 
 def test_ws_u_number(gui: Gui, helpers):
     value_before_update = 10
-    value_after_update = 11
-    payload = {"value": str(value_after_update)}
+    value_after_update = "11"
+    payload = {"value": value_after_update}
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)

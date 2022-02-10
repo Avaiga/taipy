@@ -8,10 +8,6 @@ from taipy.gui.data.pandas_data_accessor import PandasDataAccessor
 def test_simple_data(gui: Gui, helpers, small_dataframe):
     accessor = PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
-    assert accessor.is_data_access("x", pd)
-    with pytest.warns(UserWarning):
-        no_value = accessor.cast_string_value("x", pd)
-    assert no_value is None
     ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1}, DataFormat.JSON)
     assert ret_data
     value = ret_data["value"]
@@ -24,10 +20,6 @@ def test_simple_data(gui: Gui, helpers, small_dataframe):
 def test_simple_data_with_arrow(gui: Gui, helpers, small_dataframe):
     accessor = PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
-    assert accessor.is_data_access("x", pd)
-    with pytest.warns(UserWarning):
-        no_value = accessor.cast_string_value("x", pd)
-    assert no_value is None
     ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1}, DataFormat.APACHE_ARROW)
     assert ret_data
     value = ret_data["value"]

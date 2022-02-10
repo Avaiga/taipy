@@ -17,8 +17,8 @@ if t.TYPE_CHECKING:
 
 class PandasDataAccessor(DataAccessor):
     @staticmethod
-    def get_supported_classes() -> t.Union[str, t.List[str], t.Tuple[str]]:
-        return pd.DataFrame.__name__
+    def get_supported_classes() -> t.List[str]:
+        return [pd.DataFrame.__name__]
 
     @staticmethod
     def __style_function(
@@ -136,12 +136,6 @@ class PandasDataAccessor(DataAccessor):
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)
         return ret
 
-    def cast_string_value(self, var_name: str, value: t.Any) -> t.Any:
-        if isinstance(value, pd.DataFrame):
-            warnings.warn("Error: cannot update value for dataframe: " + var_name)
-            return None
-        return value
-
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
         if isinstance(value, pd.DataFrame):
             return value.dtypes.apply(lambda x: x.name).to_dict()
@@ -223,6 +217,3 @@ class PandasDataAccessor(DataAccessor):
                 dictret = self.__format_data(value, data_format, "list", data_extraction=True)
             ret_payload["value"] = dictret
         return ret_payload
-
-    def is_data_access(self, var_name: str, value: t.Any) -> bool:
-        return isinstance(value, pd.DataFrame)

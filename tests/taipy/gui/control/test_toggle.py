@@ -14,13 +14,13 @@ def test_toggle_md_2(gui: Gui, helpers):
     expected_list = [
         "<Toggle",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;]]"',
-        'defaultValue="-1"',
+        'defaultValue="l1"',
         'label="Label"',
-        "lov={lov}",
-        'tp_updatevars="lov=lov"',
-        'tp_varname="x"',
+        "lov={TaipyLov_lov}",
+        'tp_updatevars="lov=TaipyLov_lov"',
+        'tp_varname="TaipyLovValue_x"',
         'unselectedValue=""',
-        "value={x}",
+        "value={TaipyLovValue_x}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -38,12 +38,12 @@ def test_toggle_html_2(gui: Gui, helpers):
     expected_list = [
         "<Toggle",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;]]"',
-        'defaultValue="-1"',
+        'defaultValue="l1"',
         'label="Label"',
-        "lov={lov}",
-        'tp_updatevars="lov=lov"',
-        'tp_varname="x"',
+        "lov={TaipyLov_lov}",
+        'tp_updatevars="lov=TaipyLov_lov"',
+        'tp_varname="TaipyLovValue_x"',
         'unselectedValue=""',
-        "value={x}",
+        "value={TaipyLovValue_x}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

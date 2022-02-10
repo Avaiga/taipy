@@ -14,6 +14,7 @@ from operator import attrgetter
 from types import FrameType, FunctionType
 
 import __main__
+from iniconfig import ParseError
 import markdown as md_lib
 from flask import Blueprint, Flask, request, send_from_directory
 from werkzeug.utils import secure_filename
@@ -39,7 +40,13 @@ from .utils import (
     _is_in_notebook,
     _MapDictionary,
     attrsetter,
-    dateToISO,
+    TaipyBase,
+    TaipyBool,
+    TaipyData,
+    TaipyDate,
+    TaipyLov,
+    TaipyLovValue,
+    TaipyNumber,
     get_client_var_name,
 )
 from .utils._adapter import _Adapter
@@ -123,7 +130,7 @@ class Gui(object, metaclass=Singleton):
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
 
-        self.__evaluator = _Evaluator()
+        self.__evaluator = _Evaluator({t.__name__: t for t in TaipyBase.__subclasses__()})
         self.__adapter = _Adapter()
         self.on_change = None
         self.on_action = None
@@ -209,7 +216,6 @@ class Gui(object, metaclass=Singleton):
                 self.__front_end_update(
                     message["name"],
                     message.get("payload", {}).get("value"),
-                    message.get("payload", {}).get("type"),
                     message.get("propagate", True),
                 )
             elif msg_type == WsType.ACTION.value:
@@ -234,31 +240,44 @@ class Gui(object, metaclass=Singleton):
             self.__send_ws_id(id)
         self._scopes.create_scope(id)
 
-    def __front_end_update(self, var_name: str, value: t.Any, value_type: t.Optional[str], propagate=True) -> None:
+    def __front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
         # Check if Variable is type datetime
-        currentvalue = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
+        current_value = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
         if isinstance(value, str):
-            if isinstance(currentvalue, datetime.datetime) or value_type == "date":
+            if isinstance(current_value, TaipyDate):
                 value = ISOToDate(value)
-            elif isinstance(currentvalue, bool) or value_type == "bool":
+            elif isinstance(current_value, TaipyBool):
                 value = bool(value)
-            elif isinstance(currentvalue, int) or value_type == "int":
-                value = int(value) if value else 0
-            elif isinstance(currentvalue, float) or value_type == "float":
-                value = float(value) if value else 0.0
-            elif self._accessors._cast_string_value(var_name, currentvalue) is None:
+            elif isinstance(current_value, TaipyNumber):
+                try:
+                    value = float(value) if value else 0.0
+                except ParseError as e:
+                    warnings.warn(f"{e}")
+                    value = 0.0
+            elif isinstance(current_value, TaipyLovValue):
+                # find a way to get the full object from the id via adapter
+                pass
+            elif isinstance(current_value, TaipyData):
                 return
-        self.__update_var(var_name, value, propagate, True)
+        self.__update_var(
+            var_name, value, propagate, True, current_value if isinstance(current_value, TaipyBase) else None
+        )
 
-    def __update_var(self, var_name: str, value: t.Any, propagate=True, from_front=False) -> None:
+    def __update_var(
+        self, var_name: str, value: t.Any, propagate=True, from_front=False, holder: TaipyBase = None
+    ) -> None:
+        if holder:
+            var_name = holder.get_name()
         hash_expr = self._get_hash_from_expr(var_name)
-        modified_vars = [hash_expr]
+        modified_vars = set([hash_expr])
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
             attrsetter(self._get_data_scope(), hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
-                modified_vars.extend(self._re_evaluate_expr(var_name))
+                modified_vars.update(self._re_evaluate_expr(var_name))
+        elif holder:
+            modified_vars.update(self._evaluate_holders(hash_expr))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.on_change:
             try:
@@ -338,7 +357,7 @@ class Gui(object, metaclass=Singleton):
 
     def __send_var_list_update(
         self,
-        modified_vars: list,
+        modified_vars: set,
         from_front: t.Optional[bool] = False,
         front_var: t.Optional[str] = None,
     ):
@@ -346,23 +365,24 @@ class Gui(object, metaclass=Singleton):
         for _var in modified_vars:
             newvalue = attrgetter(_var)(self._get_data_scope())
             self._scopes.broadcast_data(_var, newvalue)
-            if not from_front and _var == front_var:
-                ret_value = self.__get_content_accessor().get_info(front_var, newvalue)
-                if isinstance(ret_value, tuple):
-                    newvalue = Gui.__CONTENT_ROOT + ret_value[0]
-                else:
-                    newvalue = ret_value
-            if isinstance(newvalue, datetime.datetime):
-                newvalue = dateToISO(newvalue)
-            if self._accessors._is_data_access(_var, newvalue):
+            if isinstance(newvalue, TaipyData):
                 ws_dict[_var + ".refresh"] = True
             else:
-                if not from_front or _var != front_var:
-                    if isinstance(newvalue, list):
-                        newvalue = [self._run_adapter_for_var(_var, elt, str(idx)) for idx, elt in enumerate(newvalue)]
+                if not from_front and _var == front_var:
+                    ret_value = self.__get_content_accessor().get_info(front_var, newvalue)
+                    if isinstance(ret_value, tuple):
+                        newvalue = Gui.__CONTENT_ROOT + ret_value[0]
                     else:
-                        newvalue = self._run_adapter_for_var(_var, newvalue, id_only=True)
-                if isinstance(newvalue, _MapDictionary):
+                        newvalue = ret_value
+                if not from_front or _var != front_var:
+                    if isinstance(newvalue, TaipyLov):
+                        newvalue = [
+                            self._run_adapter_for_var(newvalue.get_name(), elt, str(idx))
+                            for idx, elt in enumerate(newvalue.get())
+                        ]
+                    elif isinstance(newvalue, TaipyLovValue):
+                        newvalue = self._run_adapter_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                if isinstance(newvalue, (dict, _MapDictionary)):
                     continue  # this var has no transformer
                 ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
@@ -370,10 +390,10 @@ class Gui(object, metaclass=Singleton):
 
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
-        var_name = self._get_hash_from_expr(var_name)
         newvalue = attrgetter(var_name)(self._get_data_scope())
-        ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
-        self.__send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
+        if isinstance(newvalue, TaipyData):
+            ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
+            self.__send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
     def __request_var_update(self, payload):
         if "names" in payload and isinstance(payload["names"], list):
@@ -530,12 +550,10 @@ class Gui(object, metaclass=Singleton):
         return False
 
     # Proxy methods for Evaluator
-    def _evaluate_expr(
-        self, expr: str, re_evaluated: t.Optional[bool] = True, get_hash: t.Optional[bool] = False
-    ) -> t.Any:
-        return self.__evaluator.evaluate_expr(self, expr, re_evaluated, get_hash)
+    def _evaluate_expr(self, expr: str, bind=False) -> t.Any:
+        return self.__evaluator.evaluate_expr(self, expr, bind)
 
-    def _re_evaluate_expr(self, var_name: str) -> t.List[str]:
+    def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
 
     def _get_hash_from_expr(self, expr: str) -> str:
@@ -543,6 +561,12 @@ class Gui(object, metaclass=Singleton):
 
     def _get_expr_from_hash(self, hash: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash)
+
+    def _evaluate_bind_holder(self, holder_name: str, expr: str) -> str:
+        return self.__evaluator.evaluate_bind_holder(self, holder_name, expr)
+
+    def _evaluate_holders(self, expr: str) -> t.List[str]:
+        return self.__evaluator.evaluate_holders(self, expr)
 
     def _is_expression(self, expr: str) -> bool:
         return self.__evaluator._is_expression(expr)
