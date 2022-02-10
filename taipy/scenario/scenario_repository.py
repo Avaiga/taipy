@@ -53,11 +53,11 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
 
     @staticmethod
     def __to_pipelines(pipeline_ids) -> List[Pipeline]:
-        return [PipelineManager().get(i) for i in pipeline_ids]
+        return [PipelineManager.get(i) for i in pipeline_ids]
 
     @staticmethod
     def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
-        return CycleManager().get(cycle_id) if cycle_id else None
+        return CycleManager.get(cycle_id) if cycle_id else None
 
     @staticmethod
     def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:

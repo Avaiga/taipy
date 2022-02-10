@@ -1,3 +1,5 @@
+from copy import copy
+
 from taipy.config._config import _Config
 from taipy.config.checker.checkers.task_config_checker import TaskConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -6,31 +8,37 @@ from taipy.config.data_node_config import DataNodeConfig
 
 class TestTaskConfigChecker:
     def test_check_inputs(self):
-        collector = IssueCollector()
         config = _Config.default_config()
+        collector = IssueCollector()
+        TaskConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+        assert len(collector.warnings) == 0
+
+        config.tasks["new"] = config.tasks["default"]
+        collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
         assert len(collector.warnings) == 3
 
-        config.tasks["default"].inputs = "bar"
+        config.tasks["new"].inputs = "bar"
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].inputs = ["bar"]
+        config.tasks["new"].inputs = ["bar"]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].inputs = [DataNodeConfig("bar")]
+        config.tasks["new"].inputs = [DataNodeConfig("bar")]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].inputs = [DataNodeConfig("bar"), "bar"]
+        config.tasks["new"].inputs = [DataNodeConfig("bar"), "bar"]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
@@ -42,16 +50,22 @@ class TestTaskConfigChecker:
         config.tasks["default"].outputs = "bar"
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+        assert len(collector.warnings) == 0
+
+        config.tasks["new"] = config.tasks["default"]
+        collector = IssueCollector()
+        TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].outputs = [DataNodeConfig("bar")]
+        config.tasks["new"].outputs = [DataNodeConfig("bar")]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].outputs = [DataNodeConfig("bar"), "bar"]
+        config.tasks["new"].outputs = [DataNodeConfig("bar"), "bar"]
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
@@ -63,13 +77,24 @@ class TestTaskConfigChecker:
 
         config = _Config.default_config()
 
-        config.tasks["default"].function = "bar"
+        collector = IssueCollector()
+        TaskConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+        assert len(collector.warnings) == 0
+
+        config.tasks["new"] = copy(config.tasks["default"])
+        collector = IssueCollector()
+        TaskConfigChecker(config, collector).check()
+        assert len(collector.errors) == 0
+        assert len(collector.warnings) == 3
+
+        config.tasks["new"].function = "bar"
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 2
 
-        config.tasks["default"].function = mock_func
+        config.tasks["new"].function = mock_func
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0

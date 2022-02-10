@@ -19,7 +19,7 @@ def reset_configuration_singleton():
     Config._applied_config = _Config.default_config()
 
 
-def test_data_node_config_creation():
+def test_data_node_config_check():
     data_node_config = Config.add_data_node("data_nodes1", "pickle")
     assert list(Config.data_nodes()) == ["default", data_node_config.name]
 
@@ -36,18 +36,23 @@ def test_data_node_config_creation():
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="bar")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", scope="bar")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="csv")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="sql")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
         Config.add_data_node("data_nodes", storage_type="excel")
+        Config.check()
 
 
 def test_data_node_count():
@@ -81,12 +86,11 @@ def test_data_node_creation_no_duplication():
 
 
 def test_date_node_create_with_datetime():
-    data_manager = DataManager()
     data_node_config = Config.add_data_node(
         name="datetime_data", my_property=datetime(1991, 1, 1), foo="hello", test=1, dict={"type": "Datetime", 2: "daw"}
     )
-    ds = data_manager.get_or_create(data_node_config)
-    ds = data_manager.get(ds)
+    ds = DataManager.get_or_create(data_node_config)
+    ds = DataManager.get(ds)
     assert ds.foo == "hello"
     assert ds.my_property == datetime(1991, 1, 1)
     assert ds.test == 1

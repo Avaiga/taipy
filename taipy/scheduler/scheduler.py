@@ -7,7 +7,9 @@ from typing import Callable, Iterable, List, Optional, Union
 
 from taipy.config.config import Config
 from taipy.config.job_config import JobConfig
+from taipy.data.data_manager import DataManager
 from taipy.job.job import Job
+from taipy.job.job_manager import JobManager
 from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.scheduler.job_dispatcher import JobDispatcher
 from taipy.task.task import Task
@@ -41,15 +43,15 @@ class Scheduler(AbstractScheduler):
     def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
         for ds in task.output.values():
             ds.lock_edition()
-            self.data_manager.set(ds)
-        job = self.job_manager.create(task, itertools.chain([self.on_status_change], callbacks or []))
+            DataManager.set(ds)
+        job = JobManager.create(task, itertools.chain([self.on_status_change], callbacks or []))
         if self.is_blocked(job):
             job.blocked()
-            self.job_manager.set(job)
+            JobManager.set(job)
             self.blocked_jobs.append(job)
         else:
             job.pending()
-            self.job_manager.set(job)
+            JobManager.set(job)
             self.jobs_to_run.put(job)
             self.__run()
         return job
@@ -64,7 +66,7 @@ class Scheduler(AbstractScheduler):
              True if one of its input data node is blocked.
         """
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
-        return any(not self.data_manager.get(ds.id).is_ready_for_reading for ds in data_nodes)
+        return any(not DataManager.get(ds.id).is_ready_for_reading for ds in data_nodes)
 
     def __run(self):
         with self.lock:
@@ -90,7 +92,7 @@ class Scheduler(AbstractScheduler):
         jobs_to_unblock = [job for job in self.blocked_jobs if not self.is_blocked(job)]
         for job in jobs_to_unblock:
             job.pending()
-            self.job_manager.set(job)
+            JobManager.set(job)
             self.blocked_jobs.remove(job)
             self.jobs_to_run.put(job)
 

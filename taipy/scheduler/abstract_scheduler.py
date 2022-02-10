@@ -3,7 +3,6 @@ from typing import Callable, Iterable, List, Optional
 
 from taipy.data.data_manager import DataManager
 from taipy.job.job import Job
-from taipy.job.job_manager import JobManager
 from taipy.task.task import Task
 
 
@@ -14,10 +13,6 @@ class AbstractScheduler:
         data_manager: DataManager is an element that retrieves and deals with Data Node.
 
     """
-
-    def __init__(self):
-        self.data_manager: DataManager = DataManager()
-        self.job_manager: JobManager = JobManager()
 
     @abstractmethod
     def submit(self, pipeline, callbacks: Optional[Iterable[Callable]]) -> List[Job]:

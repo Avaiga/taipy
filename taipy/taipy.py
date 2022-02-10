@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 from taipy.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.common.frequency import Frequency
+from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.config import Config
 from taipy.config.data_node_config import DataNodeConfig
 from taipy.config.global_app_config import GlobalAppConfig
@@ -14,27 +15,24 @@ from taipy.config.pipeline_config import PipelineConfig
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.config.task_config import TaskConfig
 from taipy.cycle.cycle import Cycle
+from taipy.cycle.cycle_manager import CycleManager
 from taipy.data.data_manager import DataManager
 from taipy.data.data_node import DataNode
 from taipy.data.pickle import PickleDataNode
 from taipy.data.scope import Scope
 from taipy.exceptions import ModelNotFound
 from taipy.job.job import Job
+from taipy.job.job_manager import JobManager
 from taipy.pipeline.pipeline import Pipeline
+from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_manager import ScenarioManager
 from taipy.task.task import Task
+from taipy.task.task_manager import TaskManager
 
 
 class Taipy:
     """Main Taipy class"""
-
-    scenario_manager = ScenarioManager()
-    cycle_manager = scenario_manager.cycle_manager
-    pipeline_manager = scenario_manager.pipeline_manager
-    task_manager = scenario_manager.task_manager
-    data_manager = scenario_manager.data_manager
-    job_manager = pipeline_manager.scheduler.job_manager
 
     @classmethod
     def set(cls, entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
@@ -45,15 +43,15 @@ class Taipy:
             entity: The entity to save.
         """
         if isinstance(entity, Cycle):
-            return cls.cycle_manager.set(entity)
+            return CycleManager.set(entity)
         if isinstance(entity, Scenario):
-            return cls.scenario_manager.set(entity)
+            return ScenarioManager.set(entity)
         if isinstance(entity, Pipeline):
-            return cls.pipeline_manager.set(entity)
+            return PipelineManager.set(entity)
         if isinstance(entity, Task):
-            return cls.task_manager.set(entity)
+            return TaskManager.set(entity)
         if isinstance(entity, DataNode):
-            return cls.data_manager.set(entity)
+            return DataManager.set(entity)
 
     @classmethod
     def submit(cls, entity: Union[Scenario, Pipeline]):
@@ -66,9 +64,9 @@ class Taipy:
             entity (Union[Scenario, ScenarioId]) : the entity or its identifier to submit.
         """
         if isinstance(entity, Scenario):
-            return cls.scenario_manager.submit(entity)
+            return ScenarioManager.submit(entity)
         if isinstance(entity, Pipeline):
-            return cls.pipeline_manager.submit(entity)
+            return PipelineManager.submit(entity)
 
     @classmethod
     def get(
@@ -86,18 +84,18 @@ class Taipy:
         Raises:
             ModelNotFound: if no entity corresponds to `entity_id`.
         """
-        if id.startswith(cls.job_manager.ID_PREFIX):
-            return cls.job_manager.get(JobId(id))
+        if id.startswith(JobManager.ID_PREFIX):
+            return JobManager.get(JobId(id))
         if id.startswith(Cycle.ID_PREFIX):
-            return cls.cycle_manager.get(CycleId(id))
+            return CycleManager.get(CycleId(id))
         if id.startswith(Scenario.ID_PREFIX):
-            return cls.scenario_manager.get(ScenarioId(id))
+            return ScenarioManager.get(ScenarioId(id))
         if id.startswith(Pipeline.ID_PREFIX):
-            return cls.pipeline_manager.get(PipelineId(id))
+            return PipelineManager.get(PipelineId(id))
         if id.startswith(Task.ID_PREFIX):
-            return cls.task_manager.get(TaskId(id))
+            return TaskManager.get(TaskId(id))
         if id.startswith(DataNode.ID_PREFIX):
-            return cls.data_manager.get(DataNodeId(id))
+            return DataManager.get(DataNodeId(id))
         raise ModelNotFound("NOT_DETERMINED", id)
 
     @classmethod
@@ -108,7 +106,7 @@ class Taipy:
         Returns:
             List: The list of tasks handled by this Task Manager.
         """
-        return cls.task_manager.get_all()
+        return TaskManager.get_all()
 
     @classmethod
     def delete_scenario(cls, scenario_id: ScenarioId):
@@ -124,7 +122,7 @@ class Taipy:
         Raises:
         ModelNotFound error if no scenario corresponds to scenario_id.
         """
-        return cls.scenario_manager.hard_delete(scenario_id)
+        return ScenarioManager.hard_delete(scenario_id)
 
     @classmethod
     def get_scenarios(cls, cycle: Optional[Cycle] = None) -> List[Scenario]:
@@ -135,8 +133,8 @@ class Taipy:
              cycle (Optional[Cycle]) : Cycle of the scenarios to return.
         """
         if not cycle:
-            return cls.scenario_manager.get_all()
-        return cls.scenario_manager.get_all_by_cycle(cycle)
+            return ScenarioManager.get_all()
+        return ScenarioManager.get_all_by_cycle(cycle)
 
     @classmethod
     def get_master(cls, cycle: Cycle) -> Optional[Scenario]:
@@ -146,12 +144,12 @@ class Taipy:
         Parameters:
              cycle (Cycle) : cycle of the master scenario to return.
         """
-        return cls.scenario_manager.get_master(cycle)
+        return ScenarioManager.get_master(cycle)
 
     @classmethod
     def get_all_masters(cls) -> List[Scenario]:
         """Returns the list of all master scenarios."""
-        return cls.scenario_manager.get_all_masters()
+        return ScenarioManager.get_all_masters()
 
     @classmethod
     def set_master(cls, scenario: Scenario):
@@ -162,7 +160,7 @@ class Taipy:
         Parameters:
             scenario (Scenario) : scenario to promote as master.
         """
-        return cls.scenario_manager.set_master(scenario)
+        return ScenarioManager.set_master(scenario)
 
     @classmethod
     def compare_scenarios(cls, *scenarios: Scenario, data_node_config_name: str = None):
@@ -180,7 +178,7 @@ class Taipy:
             DifferentScenarioConfigs: The provided scenarios do not share the same scenario_config
             NonExistingScenarioConfig: Cannot find the shared scenario config of the provided scenarios
         """
-        cls.scenario_manager.compare(*scenarios, data_node_config_name=data_node_config_name)
+        ScenarioManager.compare(*scenarios, data_node_config_name=data_node_config_name)
 
     @classmethod
     def subscribe_scenario(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -191,7 +189,7 @@ class Taipy:
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        return cls.scenario_manager.subscribe(callback, scenario)
+        return ScenarioManager.subscribe(callback, scenario)
 
     @classmethod
     def unsubscribe_scenario(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -202,7 +200,7 @@ class Taipy:
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        return cls.scenario_manager.unsubscribe(callback, scenario)
+        return ScenarioManager.unsubscribe(callback, scenario)
 
     @classmethod
     def subscribe_pipeline(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -213,7 +211,7 @@ class Taipy:
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        return cls.pipeline_manager.subscribe(callback, pipeline)
+        return PipelineManager.subscribe(callback, pipeline)
 
     @classmethod
     def unsubscribe_pipeline(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -224,7 +222,7 @@ class Taipy:
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        return cls.pipeline_manager.unsubscribe(callback, pipeline)
+        return PipelineManager.unsubscribe(callback, pipeline)
 
     @classmethod
     def delete_pipeline(cls, pipeline_id: PipelineId):
@@ -240,7 +238,7 @@ class Taipy:
         Raises:
         ModelNotFound error if no pipeline corresponds to pipeline_id.
         """
-        return cls.pipeline_manager.hard_delete(pipeline_id)
+        return PipelineManager.hard_delete(pipeline_id)
 
     @classmethod
     def get_pipelines(cls) -> List[Pipeline]:
@@ -250,7 +248,7 @@ class Taipy:
         Returns:
             List[Pipeline]: the list of all pipelines managed by this pipeline manager.
         """
-        return cls.pipeline_manager.get_all()
+        return PipelineManager.get_all()
 
     @classmethod
     def get_jobs(cls) -> List[Job]:
@@ -259,7 +257,7 @@ class Taipy:
         Returns:
             List of all jobs.
         """
-        return cls.job_manager.get_all()
+        return JobManager.get_all()
 
     @classmethod
     def delete_job(cls, job: Job, force=False):
@@ -268,12 +266,12 @@ class Taipy:
         Raises:
             JobNotDeletedException: if the job is not finished.
         """
-        return cls.job_manager.delete(job, force)
+        return JobManager.delete(job, force)
 
     @classmethod
     def delete_jobs(cls):
         """Deletes all jobs."""
-        cls.job_manager.delete_all()
+        JobManager.delete_all()
 
     @classmethod
     def get_latest_job(cls, task: Task) -> Job:
@@ -282,12 +280,12 @@ class Taipy:
         Returns:
             The latest computed job of the task.
         """
-        return cls.job_manager.get_latest(task)
+        return JobManager.get_latest(task)
 
     @classmethod
     def get_data_nodes(cls) -> List[DataNode]:
         """Returns the list of all existing data nodes."""
-        return cls.data_manager.get_all()
+        return DataManager.get_all()
 
     @classmethod
     def create_scenario(cls, config: ScenarioConfig, creation_date: datetime = None, name: str = None) -> Scenario:
@@ -302,7 +300,7 @@ class Taipy:
             creation_date (Optional[datetime.datetime]) : Creation date. Current date time used as default value.
             name (Optional[str]) : Display name of the scenario.
         """
-        return cls.scenario_manager.create(config, creation_date, name)
+        return ScenarioManager.create(config, creation_date, name)
 
     @classmethod
     def create_pipeline(cls, config: PipelineConfig) -> Pipeline:
@@ -313,7 +311,7 @@ class Taipy:
             config (PipelineConfig): The pipeline configuration object.
 
         """
-        return cls.pipeline_manager.get_or_create(config)
+        return PipelineManager.get_or_create(config)
 
     @staticmethod
     def load_configuration(filename):
@@ -448,7 +446,7 @@ class Taipy:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
 
-    @classmethod
+    @staticmethod
     def clean_all_entities(cls) -> bool:
         """
         Deletes all entities from the data folder.
@@ -458,7 +456,7 @@ class Taipy:
             logging.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
             return False
 
-        data_nodes = cls.data_manager.get_all()
+        data_nodes = DataManager().get_all()
 
         # Clean all pickle files
         for data_node in data_nodes:
@@ -467,10 +465,14 @@ class Taipy:
                     os.remove(data_node.path)
 
         # Clean all entities
-        cls.data_manager.delete_all()
-        cls.task_manager.delete_all()
-        cls.pipeline_manager.delete_all()
-        cls.scenario_manager.delete_all()
-        cls.cycle_manager.delete_all()
-        cls.job_manager.delete_all()
+        DataManager().delete_all()
+        TaskManager().delete_all()
+        PipelineManager().delete_all()
+        ScenarioManager().delete_all()
+        CycleManager().delete_all()
+        JobManager().delete_all()
         return True
+
+    @staticmethod
+    def check_configuration() -> IssueCollector:
+        return Config.check()

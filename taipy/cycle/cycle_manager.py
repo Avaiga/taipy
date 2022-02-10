@@ -20,8 +20,9 @@ class CycleManager:
 
     repository = CycleRepository()
 
+    @classmethod
     def create(
-        self, frequency: Frequency, name: str = None, creation_date: datetime = None, display_name=None, **properties
+        cls, frequency: Frequency, name: str = None, creation_date: datetime = None, display_name=None, **properties
     ):
         """
         Creates a new cycle.
@@ -40,19 +41,21 @@ class CycleManager:
         cycle = Cycle(
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
-        self.set(cycle)
+        cls.set(cycle)
         return cycle
 
-    def set(self, cycle: Cycle):
+    @classmethod
+    def set(cls, cycle: Cycle):
         """
         Saves or updates a cycle.
 
         Parameters:
             cycle (Cycle): The cycle to save.
         """
-        self.repository.save(cycle)
+        cls.repository.save(cycle)
 
-    def get(self, cycle_id: CycleId) -> Cycle:
+    @classmethod
+    def get(cls, cycle_id: CycleId) -> Cycle:
         """
         Gets the cycle corresponding to the identifier given as parameter.
 
@@ -62,13 +65,14 @@ class CycleManager:
             ModelNotFound: if no cycle corresponds to `cycle_id`.
         """
         try:
-            return self.repository.load(cycle_id)
+            return cls.repository.load(cycle_id)
         except ModelNotFound:
             logging.error(f"Cycle entity: {cycle_id} does not exist.")
             raise NonExistingCycle(cycle_id)
 
+    @classmethod
     def get_or_create(
-        self, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
+        cls, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
     ) -> Cycle:
         """
         Returns a cycle with the provided parameters.
@@ -85,11 +89,11 @@ class CycleManager:
         """
         creation_date = creation_date if creation_date else datetime.now()
         start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
-        cycles = self.repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
+        cycles = cls.repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return self.create(frequency=frequency, creation_date=creation_date, display_name=display_name)
+            return cls.create(frequency=frequency, creation_date=creation_date, display_name=display_name)
 
     @staticmethod
     def get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):
@@ -119,19 +123,22 @@ class CycleManager:
             end_date = end_date.replace(month=12, day=31) + timedelta(days=1)
         return end_date - timedelta(microseconds=1)
 
-    def get_all(self):
+    @classmethod
+    def get_all(cls):
         """
         Returns all the existing cycles.
         """
-        return self.repository.load_all()
+        return cls.repository.load_all()
 
-    def delete_all(self):
+    @classmethod
+    def delete_all(cls):
         """
         Deletes all cycles.
         """
-        self.repository.delete_all()
+        cls.repository.delete_all()
 
-    def delete(self, cycle_id: CycleId):
+    @classmethod
+    def delete(cls, cycle_id: CycleId):
         """
         Deletes a cycle.
 
@@ -140,4 +147,4 @@ class CycleManager:
         Raises:
             ModelNotFound: if no cycle corresponds to `cycle_id`.
         """
-        self.repository.delete(cycle_id)
+        cls.repository.delete(cycle_id)
