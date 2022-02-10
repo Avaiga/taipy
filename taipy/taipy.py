@@ -465,12 +465,12 @@ class Taipy:
                     os.remove(data_node.path)
 
         # Clean all entities
-        DataManager().delete_all()
-        TaskManager().delete_all()
-        PipelineManager().delete_all()
-        ScenarioManager().delete_all()
-        CycleManager().delete_all()
-        JobManager().delete_all()
+        DataManager.delete_all()
+        TaskManager.delete_all()
+        PipelineManager.delete_all()
+        ScenarioManager.delete_all()
+        CycleManager.delete_all()
+        JobManager.delete_all()
         return True
 
     @staticmethod
