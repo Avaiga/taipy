@@ -28,13 +28,13 @@ class PickleDataNode(DataNode):
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
         properties (list): List of additional arguments. Note that at the creation of the data node, if the property
-            default_data is present, the data node is automatically written with the corresponding default_data value.
-            If the property file_path is present, data will be stored using the corresponding value as the name of the
+            "default_data" is present, the data node is automatically written with the corresponding default_data value.
+            If the property "path" is present, data will be stored using the corresponding value as the name of the
             file.
     """
 
     __STORAGE_TYPE = "pickle"
-    __PICKLE_FILE_NAME = "file_path"
+    __PICKLE_FILE_NAME = "path"
     __DEFAULT_DATA_VALUE = "default_data"
 
     def __init__(

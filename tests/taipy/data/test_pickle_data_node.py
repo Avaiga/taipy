@@ -39,17 +39,17 @@ class TestPickleDataNodeEntity:
         assert ds.job_ids == []
 
     def test_new_pickle_data_node_with_existing_file_is_ready_for_reading(self):
-        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_name", "pickle", file_path="NOT_EXISTING.p")
+        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_name", "pickle", path="NOT_EXISTING.p")
         not_ready_dn = DataManager.get_or_create(not_ready_dn_cfg)
         assert not not_ready_dn.is_ready_for_reading
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
-        ready_dn_cfg = Config.add_data_node("ready_data_node_config_name", "pickle", file_path=path)
+        ready_dn_cfg = Config.add_data_node("ready_data_node_config_name", "pickle", path=path)
         ready_dn = DataManager.get_or_create(ready_dn_cfg)
         assert ready_dn.is_ready_for_reading
 
     def test_create_with_file_name(self):
-        ds = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar", "file_path": "foo.FILE.p"})
+        ds = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar", "path": "foo.FILE.p"})
         assert os.path.isfile("foo.FILE.p")
         assert ds.read() == "bar"
         ds.write("qux")

@@ -357,7 +357,7 @@ class TestTaipy:
 
     def test_clean_all_entities_with_user_pickle_files(self, pickle_file_path):
         user_pickle = PickleDataNode(
-            config_name="d1", properties={"default_data": "foo", "file_path": pickle_file_path}, scope=Scope.SCENARIO
+            config_name="d1", properties={"default_data": "foo", "path": pickle_file_path}, scope=Scope.SCENARIO
         )
         generated_pickle = PickleDataNode(config_name="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
 
