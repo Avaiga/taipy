@@ -1,4 +1,5 @@
 import os
+import pickle
 import shutil
 from datetime import datetime
 
@@ -58,6 +59,14 @@ def excel_file_with_multi_sheet(tmpdir_factory) -> str:
         excel_multi_sheet[key].to_excel(writer, key, index=False)
     writer.save()
 
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
+def pickle_file(tmpdir_factory) -> str:
+    data = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    fn = tmpdir_factory.mktemp("data").join("df.p")
+    pickle.dump(data, open(str(fn), "wb"))
     return fn.strpath
 
 

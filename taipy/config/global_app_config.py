@@ -36,7 +36,7 @@ class GlobalAppConfig:
     CLEAN_ENTITIES_ENABLED_KEY = "clean_entities_enabled"
     CLEAN_ENTITIES_ENABLED_VALUE_TRUE = True
     CLEAN_ENTITIES_ENABLED_VALUE_FALSE = False
-    CLEAN_ENTITIES_ENABLED_DEFAULT_VALUE = CLEAN_ENTITIES_ENABLED_VALUE_FALSE
+    DEFAULT_CLEAN_ENTITIES_ENABLED = CLEAN_ENTITIES_ENABLED_VALUE_FALSE
 
     def __init__(
         self,
@@ -44,7 +44,7 @@ class GlobalAppConfig:
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
-        clean_entities_enabled: bool = None,
+        clean_entities_enabled: Union[bool, str] = None,
         **properties
     ):
         self.notification = notification
@@ -64,7 +64,7 @@ class GlobalAppConfig:
         config.broker_endpoint = cls.DEFAULT_BROKER_ENDPOINT
         config.root_folder = cls.DEFAULT_ROOT_FOLDER
         config.storage_folder = cls.DEFAULT_STORAGE_FOLDER
-        config.clean_entities_enabled = cls.CLEAN_ENTITIES_ENABLED_DEFAULT_VALUE
+        config.clean_entities_enabled = cls.DEFAULT_CLEAN_ENTITIES_ENABLED
         return config
 
     def to_dict(self):
@@ -77,7 +77,7 @@ class GlobalAppConfig:
             as_dict[self.ROOT_FOLDER_KEY] = self.root_folder
         if self.storage_folder:
             as_dict[self.STORAGE_FOLDER_KEY] = self.storage_folder
-        if self.clean_entities_enabled:
+        if self.clean_entities_enabled is not None:
             as_dict[self.CLEAN_ENTITIES_ENABLED_KEY] = self.clean_entities_enabled
         as_dict.update(self.properties)
         return as_dict
@@ -99,7 +99,7 @@ class GlobalAppConfig:
         self.root_folder = tpl.replace_templates(config_as_dict.pop(self.ROOT_FOLDER_KEY, self.root_folder))
         self.storage_folder = tpl.replace_templates(config_as_dict.pop(self.STORAGE_FOLDER_KEY, self.storage_folder))
         self.clean_entities_enabled = tpl.replace_templates(
-            config_as_dict.pop(self.CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled)
+            config_as_dict.pop(self.CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled), bool
         )
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():

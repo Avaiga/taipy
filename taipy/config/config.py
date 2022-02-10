@@ -107,7 +107,7 @@ class Config:
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
-        clean_entities_enabled: bool = None,
+        clean_entities_enabled: Union[bool, str] = None,
         **properties,
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""

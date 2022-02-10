@@ -43,6 +43,7 @@ notification = true
 broker_endpoint = "my_broker_end_point"
 root_folder = "./taipy/"
 storage_folder = ".data/"
+clean_entities_enabled = true
 
 [JOB]
 mode = "standalone"
@@ -100,7 +101,7 @@ frequency = "QUARTERLY"
 owner = "Raymond Kopa"
     """.strip()
 
-    Config.set_global_config(True, "my_broker_end_point")
+    Config.set_global_config(True, "my_broker_end_point", clean_entities_enabled=True)
     Config.set_job_config(mode="standalone")
     Config.add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
     ds1_cfg_v2 = Config.add_data_node("ds1", storage_type="pickle", default_data="ds1", custom="custom property")

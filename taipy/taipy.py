@@ -347,10 +347,13 @@ class Taipy:
         broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
+        clean_entities_enabled: Union[bool, str] = None,
         **properties
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""
-        return Config.set_global_config(notification, broker_endpoint, root_folder, storage_folder, **properties)
+        return Config.set_global_config(
+            notification, broker_endpoint, root_folder, storage_folder, clean_entities_enabled, **properties
+        )
 
     @staticmethod
     def configure_job_executions(
@@ -445,23 +448,29 @@ class Taipy:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
 
-    @staticmethod
-    def clean_all_entities() -> int:
+    @classmethod
+    def clean_all_entities(cls) -> bool:
         """
         Deletes all entities from the data folder.
-        return (int): Number of deleted entities.
+        return (bool): True if the operation succeeded, False otherwise.
         """
         if not Config.global_config().clean_entities_enabled:
             logging.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
-            return 0
-        data_manager = DataManager()
-        data_nodes = data_manager.get_all()
-        delete_count = 0
+            return False
+
+        data_nodes = cls.data_manager.get_all()
+
         # Clean all pickle files
         for data_node in data_nodes:
             if isinstance(data_node, PickleDataNode):
-                if os.path.exists(data_node.path):
-                    delete_count += 1
+                if os.path.exists(data_node.path) and data_node.is_generated_file:
                     os.remove(data_node.path)
-        data_manager.delete_all()
-        return delete_count
+
+        # Clean all entities
+        cls.data_manager.delete_all()
+        cls.task_manager.delete_all()
+        cls.pipeline_manager.delete_all()
+        cls.scenario_manager.delete_all()
+        cls.cycle_manager.delete_all()
+        cls.job_manager.delete_all()
+        return True
