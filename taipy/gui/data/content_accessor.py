@@ -18,8 +18,8 @@ if util.find_spec("magic"):
 class ContentAccessor:
     def __init__(self, data_url_max_size: int) -> None:
         self.__content_paths: t.Dict[str, pathlib.Path] = {}
+        self.__url_is_image: t.Dict[str, bool] = {}
         self.__paths: t.Dict[pathlib.Path, str] = {}
-        self.__vars: t.Dict[str, bool] = {}
         self.__data_url_max_size = data_url_max_size
         self.__temp_dir_path = Path(tempfile.gettempdir())
 
@@ -30,17 +30,12 @@ class ContentAccessor:
         return url_path
 
     def get_content_path(
-        self, url_path: str, file_name: str, var_name: t.Union[str, None], bypass: t.Union[str, None]
+        self, url_path: str, file_name: str, bypass: t.Union[str, None]
     ) -> t.Tuple[t.Union[pathlib.Path, None], bool]:
         content_path = self.__content_paths.get(url_path)
         if not content_path:
             return (None, True)
-        return (content_path, bypass is not None or self.__vars.get(var_name, True) if var_name else True)
-
-    def register_var(self, var_name: str, image: bool, is_dynamic: bool):
-        var_name = var_name if is_dynamic else f"//contentaccessor//{len(self.__vars)}"
-        self.__vars[var_name] = image
-        return var_name
+        return (content_path, bypass is not None or self.__url_is_image.get(f"{url_path}/{file_name}", False))
 
     def __get_mime_from_file(self, path: pathlib.Path):
         if _has_magic_module:
@@ -50,10 +45,7 @@ class ContentAccessor:
                 warnings.warn(f"({path}) cannot read mime type.\n{e}")
         return None
 
-    def get_info(self, var_name: str, value: t.Any) -> t.Union[str, t.Tuple[str], t.Any]:  # noqa: C901
-        image = self.__vars.get(var_name)
-        if image is None:
-            return value
+    def get_info(self, var_name: str, value: t.Any, image: bool) -> t.Union[str, t.Tuple[str], t.Any]:  # noqa: C901
         if value is None:
             return ""
         newvalue = value
@@ -91,9 +83,11 @@ class ContentAccessor:
                 dir_path = path.resolve().parent
                 url_path = self.get_path(dir_path)
                 self.__content_paths[url_path] = dir_path
-                return (f"{url_path}/{path.name}",)
+                file_url = f"{url_path}/{path.name}"
+                self.__url_is_image[file_url] = image
+                return (file_url,)
             else:
-                return value
+                return str(value)
         else:
             if _has_magic_module:
                 try:

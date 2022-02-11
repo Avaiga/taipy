@@ -47,5 +47,14 @@ class TaipyDate(TaipyBase):
 class TaipyLovValue(TaipyBase):
     pass
 
+
 class TaipyLov(TaipyBase):
+    pass
+
+
+class TaipyContent(TaipyBase):
+    pass
+
+
+class TaipyContentImage(TaipyBase):
     pass

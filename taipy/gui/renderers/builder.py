@@ -33,24 +33,25 @@ class Builder:
         from ..gui import Gui
         from .factory import Factory
 
-        self.control_type = control_type
-        self.element_name = element_name
-        self.attributes = attributes or {}
+        self.el = etree.Element(element_name)
+
+        self.__control_type = control_type
+        self.__element_name = element_name
+        self.__attributes = attributes or {}
         self.__hashes = {}
         self.__update_vars: t.List[str] = []
-        self.el = etree.Element(element_name)
-        self._gui = Gui._get_instance()
+        self.__gui = Gui._get_instance()
 
-        self.default_property_name = Factory.get_default_property_name(control_type) or ""
-        default_property_value = self.attributes.get(self.default_property_name, None)
+        self.__default_property_name = Factory.get_default_property_name(control_type) or ""
+        default_property_value = self.__attributes.get(self.__default_property_name, None)
         if default_property_value is None:
-            self.attributes[self.default_property_name] = default_value
+            self.__attributes[self.__default_property_name] = default_value
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
-        if "properties" in self.attributes:
-            (properties_dict_name, _) = self.__parse_attribute_value(self.attributes["properties"])
-            self._gui.bind_var(properties_dict_name)
-            properties_dict = getattr(self._gui, properties_dict_name)
+        if "properties" in self.__attributes:
+            (properties_dict_name, _) = self.__parse_attribute_value(self.__attributes["properties"])
+            self.__gui.bind_var(properties_dict_name)
+            properties_dict = getattr(self.__gui, properties_dict_name)
             if not isinstance(properties_dict, _MapDictionary):
                 raise Exception(
                     f"Can't find properties configuration dictionary {properties_dict_name}!"
@@ -58,24 +59,24 @@ class Builder:
                 )
             # Iterate through properties_dict and append to self.attributes
             for k, v in properties_dict.items():
-                self.attributes[k] = v
+                self.__attributes[k] = v
 
         # Bind potential function and expressions in self.attributes
-        for k, v in self.attributes.items():
+        for k, v in self.__attributes.items():
             # need to unescape the double quotes that were escaped during preprocessing
             (val, hashname) = self.__parse_attribute_value(v.replace('\\"', '"') if isinstance(v, str) else v)
             if isinstance(val, str):
                 # Bind potential function
-                self._gui.bind_func(val)
+                self.__gui.bind_func(val)
             # Try to evaluate as expressions
             if val is not None or hashname:
-                self.attributes[k] = val
+                self.__attributes[k] = val
             if hashname:
                 self.__hashes[k] = hashname
         # set classname
         self.__set_classNames()
         # define a unique key
-        self.set_attribute("key", Builder._get_key(self.element_name))
+        self.set_attribute("key", Builder._get_key(self.__element_name))
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
@@ -92,7 +93,7 @@ class Builder:
         Builder.__keys = {}
 
     def __get_list_of_(self, name: str):
-        lof = self.attributes.get(name)
+        lof = self.__attributes.get(name)
         if isinstance(lof, str):
             self.from_string = True
             lof = [s for s in lof.split(";")]
@@ -101,34 +102,34 @@ class Builder:
     def __get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
         ret = {}
         index_re = re.compile(name + r"\[(.*)\]$")
-        for key in self.attributes.keys():
+        for key in self.__attributes.keys():
             m = index_re.match(key)
             if m:
-                ret[m.group(1)] = self.attributes.get(key)
+                ret[m.group(1)] = self.__attributes.get(key)
         return ret
 
     def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
         names = [n if index is None else f"{n}[{index}]" for n in names]  # type: ignore
-        return [self.attributes.get(name) for name in names]
+        return [self.__attributes.get(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:
-        if isinstance(value, str) and self._gui._is_expression(value):
-            hash_value = self._gui._evaluate_expr(value)
+        if isinstance(value, str) and self.__gui._is_expression(value):
+            hash_value = self.__gui._evaluate_expr(value)
             try:
-                return (attrgetter(hash_value)(self._gui._get_data_scope()), hash_value)
+                return (attrgetter(hash_value)(self.__gui._get_data_scope()), hash_value)
             except AttributeError:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
 
     def __get_boolean_attribute(self, name: str, default_value=False):
-        boolattr = self.attributes.get(name, default_value)
+        boolattr = self.__attributes.get(name, default_value)
         return is_boolean_true(boolattr) if isinstance(boolattr, str) else bool(boolattr)
 
     def __set_boolean_attribute(self, name: str, value: bool):
         return self.__set_react_attribute(_to_camel_case(name), value)
 
     def __set_dict_attribute(self, name: str):
-        dict_attr = self.attributes.get(name)
+        dict_attr = self.__attributes.get(name)
         if dict_attr:
             if isinstance(dict_attr, str):
                 vals = [x.strip().split(":") for x in dict_attr.split(";")]
@@ -136,12 +137,12 @@ class Builder:
                 for val in vals:
                     if len(val) > 1:
                         value = val[1].strip()
-                        self._gui.bind_func(value)
+                        self.__gui.bind_func(value)
                         dict_attr[val[0].strip()] = value
             if isinstance(dict_attr, (dict, _MapDictionary)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
-                warnings.warn(f"{self.element_name} {name} should be a dict\n'{str(dict_attr)}'")
+                warnings.warn(f"{self.__element_name} {name} should be a dict\n'{str(dict_attr)}'")
         return self
 
     def __set_json_attribute(self, name, value):
@@ -151,36 +152,36 @@ class Builder:
         lof = self.__get_list_of_(name)
         if not isinstance(lof, (list, tuple)):
             if lof is not None:
-                warnings.warn(f"{self.element_name} {name} should be a list")
+                warnings.warn(f"{self.__element_name} {name} should be a list")
             return self
         return self.__set_json_attribute(_to_camel_case(name), lof)
 
     def __set_number_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
-        value = self.attributes.get(name, default_value)
+        value = self.__attributes.get(name, default_value)
         if value is None:
             if not optional:
-                warnings.warn(f"Property {name} is required for control {self.control_type}")
+                warnings.warn(f"Property {name} is required for control {self.__control_type}")
             return self
         try:
             val = float(value)
         except ValueError:
-            raise ValueError(f"Property {name} expects a number for control {self.control_type}")
+            raise ValueError(f"Property {name} expects a number for control {self.__control_type}")
         return self.__set_react_attribute(_to_camel_case(name), val)
 
     def __set_string_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
     ):
-        strattr = self.attributes.get(name, default_value)
+        strattr = self.__attributes.get(name, default_value)
         if strattr is None:
             if not optional:
-                warnings.warn(f"Property {name} is required for control {self.control_type}")
+                warnings.warn(f"Property {name} is required for control {self.__control_type}")
             return self
         return self.set_attribute(_to_camel_case(name), strattr)
 
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
-        attr = self.attributes.get(name, default_value)
+        attr = self.__attributes.get(name, default_value)
         if attr is None:
             return self
         if isinstance(attr, numbers.Number):
@@ -196,17 +197,17 @@ class Builder:
         lov = self.__get_list_of_(var_name)
         if isinstance(lov, list):
             from_string = getattr(self, "from_string", False)
-            adapter = self.attributes.get("adapter")
+            adapter = self.__attributes.get("adapter")
             if adapter and not isinstance(adapter, FunctionType):
                 warnings.warn("'adapter' property value is invalid")
                 adapter = None
-            var_type = self.attributes.get("type")
+            var_type = self.__attributes.get("type")
             if isinstance(var_type, t.Type):  # type: ignore
                 var_type = var_type.__name__
             if not isinstance(var_type, str):
                 elt = None
                 if len(lov) == 0:
-                    value = self.attributes.get("value")
+                    value = self.__attributes.get("value")
                     if isinstance(value, list):
                         if len(value) > 0:
                             elt = value[0]
@@ -216,49 +217,49 @@ class Builder:
                     elt = lov[0]
                 var_type = type(elt).__name__ if elt is not None else None
             if adapter is None:
-                adapter = self._gui._get_adapter_for_type(var_type)
+                adapter = self.__gui._get_adapter_for_type(var_type)
             lov_name = self.__hashes.get(var_name)
             if lov_name:
                 if adapter is None:
-                    adapter = self._gui._get_adapter_for_type(lov_name)
+                    adapter = self.__gui._get_adapter_for_type(lov_name)
                 else:
-                    self._gui._add_type_for_var(lov_name, var_type)
+                    self.__gui._add_type_for_var(lov_name, var_type)
             value_name = self.__hashes.get("value")
             if value_name:
                 if adapter is None:
-                    adapter = self._gui._get_adapter_for_type(value_name)
+                    adapter = self.__gui._get_adapter_for_type(value_name)
                 else:
-                    self._gui._add_type_for_var(value_name, var_type)
+                    self.__gui._add_type_for_var(value_name, var_type)
             if adapter is not None:
-                self._gui._add_adapter_for_type(var_type, adapter)
+                self.__gui._add_adapter_for_type(var_type, adapter)
 
             if adapter is None:
                 adapter = (lambda x: (x, x)) if from_string else (lambda x: str(x))  # type: ignore
             ret_list = []
             if len(lov) > 0:
-                ret = self._gui._get_valid_adapter_result(lov[0], index="0")
+                ret = self.__gui._get_valid_adapter_result(lov[0], index="0")
                 if ret is None:  # lov list is not a list of tuple(id, label)
                     for idx, elt in enumerate(lov):
-                        ret = self._gui._run_adapter(adapter, elt, adapter.__name__, str(idx))
+                        ret = self.__gui._run_adapter(adapter, elt, adapter.__name__, str(idx))
                         if ret is not None:
                             ret_list.append(ret)
                 else:
                     ret_list = lov
-            self.attributes["default_" + property_name] = ret_list
+            self.__attributes["default_" + property_name] = ret_list
 
             ret_list = []
-            value = self.attributes.get("value")
+            value = self.__attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self._gui._run_adapter(adapter, val, adapter.__name__, "-1", id_only=True)
+                ret = self.__gui._run_adapter(adapter, val, adapter.__name__, "-1", id_only=True)
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
                 self.__set_default_value("value", ret_list)
             else:
                 ret_val = ret_list[0] if len(ret_list) else ""
-                if ret_val == "-1" and self.attributes.get("unselected_value") is not None:
-                    ret_val = self.attributes.get("unselected_value")
+                if ret_val == "-1" and self.__attributes.get("unselected_value") is not None:
+                    ret_val = self.__attributes.get("unselected_value")
                 self.__set_default_value("value", ret_val)
         return self
 
@@ -270,18 +271,18 @@ class Builder:
                 if col_desc.get(_to_camel_case(name)) is None:
                     col_desc[_to_camel_case(name)] = str(v)
             else:
-                warnings.warn(f"{self.element_name} {name}[{k}] is not in the list of displayed columns")
+                warnings.warn(f"{self.__element_name} {name}[{k}] is not in the list of displayed columns")
 
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
-        data = self.attributes.get("data")
+        data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
-        col_types = self._gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
+        col_types = self.__gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
         columns = _get_columns_dict(
             data,
-            _add_to_dict_and_get(self.attributes, "columns", {}),
+            _add_to_dict_and_get(self.__attributes, "columns", {}),
             col_types,
-            _add_to_dict_and_get(self.attributes, "date_format", date_format),
-            _add_to_dict_and_get(self.attributes, "number_format", number_format),
+            _add_to_dict_and_get(self.__attributes, "date_format", date_format),
+            _add_to_dict_and_get(self.__attributes, "number_format", number_format),
         )
         if columns is not None:
             self.__update_col_desc_from_indexed(columns, "nan_value")
@@ -293,7 +294,7 @@ class Builder:
                     if col_desc:
                         col_desc["groupBy"] = True
                     else:
-                        warnings.warn(f"{self.element_name} group_by[{k}] is not in the list of displayed columns")
+                        warnings.warn(f"{self.__element_name} group_by[{k}] is not in the list of displayed columns")
             apply = self.__get_name_indexed_property("apply")
             for k, v in apply.items():
                 col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
@@ -301,29 +302,29 @@ class Builder:
                     if isinstance(v, FunctionType):
                         value = self.__hashes.get(f"apply[{k}]")
                         # bind the function to its hashed value
-                        self._gui.bind_var_val(value, v)
+                        self.__gui.bind_var_val(value, v)
                     else:
                         value = str(v).strip()
-                        if value and value not in self._gui._agregate_functions:
+                        if value and value not in self.__gui._agregate_functions:
                             # Bind potential function
-                            self._gui.bind_func(value)
+                            self.__gui.bind_func(value)
                     if value:
                         col_desc["apply"] = value
                 else:
-                    warnings.warn(f"{self.element_name} apply[{k}] is not in the list of displayed columns")
-            line_style = self.attributes.get("style")
+                    warnings.warn(f"{self.__element_name} apply[{k}] is not in the list of displayed columns")
+            line_style = self.__attributes.get("style")
             if line_style:
                 if isinstance(line_style, FunctionType):
                     value = self.__hashes.get("style")
                     # bind the function to its hashed value
-                    self._gui.bind_var_val(value, line_style)
+                    self.__gui.bind_var_val(value, line_style)
                 else:
                     value = str(line_style).strip()
                     if value:
                         # Bind potential function
-                        self._gui.bind_func(value)
+                        self.__gui.bind_func(value)
                 if value in col_types.keys():
-                    warnings.warn(f"{self.element_name} style={value} cannot be a column's name")
+                    warnings.warn(f"{self.__element_name} style={value} cannot be a column's name")
                 elif value:
                     self.set_attribute("lineStyle", value)
             styles = self.__get_name_indexed_property("style")
@@ -333,25 +334,25 @@ class Builder:
                     if isinstance(v, FunctionType):
                         value = self.__hashes.get(f"style[{k}]")
                         # bind the function to its hashed value
-                        self._gui.bind_var_val(value, v)
+                        self.__gui.bind_var_val(value, v)
                     else:
                         value = str(v).strip()
                         if value:
                             # Bind potential function
-                            self._gui.bind_func(value)
+                            self.__gui.bind_func(value)
                     if value in col_types.keys():
-                        warnings.warn(f"{self.element_name} style[{k}]={value} cannot be a column's name")
+                        warnings.warn(f"{self.__element_name} style[{k}]={value} cannot be a column's name")
                     elif value:
                         col_desc["style"] = value
                 else:
-                    warnings.warn(f"{self.element_name} style[{k}] is not in the list of displayed columns")
-            self.attributes["columns"] = columns
+                    warnings.warn(f"{self.__element_name} style[{k}] is not in the list of displayed columns")
+            self.__attributes["columns"] = columns
             self.__set_json_attribute("columns", columns)
         return self
 
     def __check_dict(self, values: t.List[t.Any], index: int, names: t.Tuple[str]) -> None:
         if values[index] is not None and not isinstance(values[index], (dict, _MapDictionary)):
-            warnings.warn(f"{self.element_name} {names[index]} should be a dict")
+            warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
             values[index] = None
 
     def get_chart_config(self, default_type="scatter", default_mode="lines+markers"):
@@ -412,13 +413,13 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:5] if t])
-        data = self.attributes.get("data")
+        data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
         columns = _get_columns_dict(
-            data, list(columns), self._gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
+            data, list(columns), self.__gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
         )
         if columns is not None:
-            self.attributes["columns"] = columns
+            self.__attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
 
             ret_dict = {
@@ -443,7 +444,7 @@ class Builder:
         return self
 
     def set_chart_layout(self):
-        layout = self.attributes.get("layout")
+        layout = self.__attributes.get("layout")
         if layout:
             if isinstance(layout, (dict, _MapDictionary)):
                 self.__set_json_attribute("layout", layout)
@@ -451,12 +452,12 @@ class Builder:
                 warnings.warn(f"Chart control: layout attribute should be a dict\n'{str(layout)}'")
 
     def set_string_with_check(self, var_name: str, values: t.List[str], default_value: t.Optional[str] = None):
-        value = self.attributes.get(var_name, default_value)
+        value = self.__attributes.get(var_name, default_value)
         if value is not None:
             value = str(value).lower()
-            self.attributes[var_name] = value
+            self.__attributes[var_name] = value
             if value not in values:
-                warnings.warn(f"{self.element_name} {var_name}={value} should be in {values}")
+                warnings.warn(f"{self.__element_name} {var_name}={value} should be in {values}")
             else:
                 self.__set_string_attribute(var_name, default_value)
         return self
@@ -471,15 +472,15 @@ class Builder:
             else:
                 self.__set_json_attribute(name, val)
         else:
-            warnings.warn(f"{self.element_name} {name} should be a list of {elt_type}")
+            warnings.warn(f"{self.__element_name} {name} should be a list of {elt_type}")
         return []
 
     def set_chart_selected(self, max=0):
         name = "selected"
-        default_sel = self.attributes.get(name)
+        default_sel = self.__attributes.get(name)
         idx = 1
         name_idx = f"{name}[{idx}]"
-        sel = self.attributes.get(name_idx)
+        sel = self.__attributes.get(name_idx)
         while idx <= max:
             if sel is not None or default_sel is not None:
                 self.__update_vars.extend(
@@ -492,12 +493,12 @@ class Builder:
                 )
             idx += 1
             name_idx = f"{name}[{idx}]"
-            sel = self.attributes.get(name_idx)
+            sel = self.__attributes.get(name_idx)
 
     def get_list_attribute(self, name: str, list_type: AttributeType):
         varname = self.__hashes.get(name)
         if varname is None:
-            list_val = self.attributes.get(name)
+            list_val = self.__attributes.get(name)
             if isinstance(list_val, str):
                 list_val = [s for s in list_val.split(";")]
             if isinstance(list_val, list):
@@ -508,7 +509,7 @@ class Builder:
                     list_val = [int(v) for v in list_val]
             else:
                 if list_val is not None:
-                    warnings.warn(f"{self.element_name} {name} should be a list")
+                    warnings.warn(f"{self.__element_name} {name} should be a list")
                 list_val = []
             self.__set_react_attribute(_to_camel_case(name), list_val)
         else:
@@ -516,18 +517,18 @@ class Builder:
         return self
 
     def __set_classNames(self):
-        classes = ["taipy-" + self.control_type.replace("_", "-")]
-        cl = self._gui._config.style_config.get(self.control_type)
+        classes = ["taipy-" + self.__control_type.replace("_", "-")]
+        cl = self.__gui._config.style_config.get(self.__control_type)
         if cl:
             classes.append(cl)
-        cl = self.attributes.get("classname")
+        cl = self.__attributes.get("classname")
         if cl:
             classes.append(str(cl))
 
         return self.set_attribute("className", " ".join(classes))
 
     def set_dataType(self):
-        value = self.attributes.get("value")
+        value = self.__attributes.get("value")
         return self.set_attribute("dataType", getDataType(value))
 
     def set_file_content(self, var_name: str = "content"):
@@ -539,17 +540,18 @@ class Builder:
         return self
 
     def set_content(self, var_name: str = "content", image=True):
-        content = self.attributes.get(var_name)
+        content = self.__attributes.get(var_name)
         hash_name = self.__hashes.get(var_name)
-        if content is None and not hash_name:
+        if content is None and hash_name is None:
             return self
-        value = self._gui._get_content(hash_name or var_name, content, hash_name is not None, image)
-        if hash_name is not None:
+        if hash_name:
+            hash_name = self.__get_typed_hash_name(hash_name, AttributeType.image if image else AttributeType.content)
+        value = self.__gui._get_content(hash_name or var_name, content, image)
+        if hash_name:
             self.__set_react_attribute(
                 var_name,
                 get_client_var_name(hash_name),
             )
-            self.__set_tp_varname(hash_name)
         return self.set_attribute(_to_camel_case("default_" + var_name), value)
 
     def set_lov(self, var_name="lov", property_name: t.Optional[str] = None):
@@ -564,7 +566,7 @@ class Builder:
 
     def __set_dynamic_string_list(self, var_name: str, default_value: t.Any):
         hash_name = self.__hashes.get(var_name)
-        loi = self.attributes.get(var_name)
+        loi = self.__attributes.get(var_name)
         if loi is None:
             loi = default_value
         if isinstance(loi, str):
@@ -578,19 +580,19 @@ class Builder:
 
     def __set_dynamic_number_attribute(self, var_name: str, default_value: t.Any):
         hash_name = self.__hashes.get(var_name)
-        numVal = self.attributes.get(var_name)
+        numVal = self.__attributes.get(var_name)
         if numVal is None:
             numVal = default_value
         if isinstance(numVal, str):
             try:
                 numVal = float(numVal)
             except Exception as e:
-                warnings.warn(f"{self.element_name} {var_name} cannot be transformed into a number\n{e}")
+                warnings.warn(f"{self.__element_name} {var_name} cannot be transformed into a number\n{e}")
                 numVal = 0
         if isinstance(numVal, numbers.Number):
             self.__set_react_attribute(_to_camel_case("default_" + var_name), numVal)
         elif numVal is not None:
-            warnings.warn(f"{self.element_name} {var_name} value is not not valid {numVal}")
+            warnings.warn(f"{self.__element_name} {var_name} value is not not valid {numVal}")
         if hash_name:
             hash_name = self.__get_typed_hash_name(hash_name, AttributeType.number)
             self.__update_vars.append(f"{var_name}={hash_name}")
@@ -599,7 +601,7 @@ class Builder:
 
     def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None, native_type: bool = False):
         if value is None:
-            value = self.attributes.get(var_name)
+            value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case("default_" + var_name)
         if isinstance(value, datetime.datetime):
             self.set_attribute(default_var_name, dateToISO(value))
@@ -625,7 +627,7 @@ class Builder:
         var_type: t.Optional[AttributeType] = None,
         default_val: t.Any = None,
     ):
-        var_name = self.default_property_name if var_name is None else var_name
+        var_name = self.__default_property_name if var_name is None else var_name
         if var_type == AttributeType.dynamic_boolean:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
         hash_name = self.__hashes.get(var_name)
@@ -639,7 +641,7 @@ class Builder:
                 self.__set_tp_varname(hash_name)
             if with_default:
                 if native_type:
-                    val = self.attributes.get(var_name)
+                    val = self.__attributes.get(var_name)
                     if native_type and isinstance(val, str):
                         try:
                             val = float(val)
@@ -650,7 +652,7 @@ class Builder:
                 else:
                     self.__set_default_value(var_name)
         else:
-            value = self.attributes.get(var_name)
+            value = self.__attributes.get(var_name)
             if value is not None:
                 if native_type:
                     if isinstance(value, str):
@@ -665,7 +667,7 @@ class Builder:
         return self
 
     def set_labels(self, var_name: str = "labels"):
-        value = self.attributes.get(var_name)
+        value = self.__attributes.get(var_name)
         if value:
             if is_boolean_true(value):
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
@@ -676,19 +678,19 @@ class Builder:
         return self.__set_string_attribute("page_id")
 
     def set_partial(self):
-        if self.element_name != "Dialog" and self.element_name != "Pane":
+        if self.__element_name != "Dialog" and self.__element_name != "Pane":
             return self
-        partial = self.attributes.get("partial")
+        partial = self.__attributes.get("partial")
         if partial:
-            page_id = self.attributes.get("page_id")
+            page_id = self.__attributes.get("page_id")
             if page_id:
                 warnings.warn("Dialog control: page_id and partial should not be defined at the same time")
             if isinstance(partial, Partial):
-                self.attributes["page_id"] = partial.route
+                self.__attributes["page_id"] = partial.route
         return self
 
     def set_propagate(self):
-        val = self.__get_boolean_attribute("propagate", self._gui._config.app_config.get("propagate"))
+        val = self.__get_boolean_attribute("propagate", self.__gui._config.app_config.get("propagate"))
         if not val:
             return self.__set_boolean_attribute("propagate", False)
         return self
@@ -696,7 +698,7 @@ class Builder:
     def set_refresh(self):
         return self.__set_react_attribute(
             "refresh",
-            get_client_var_name(self.__hashes.get(self.default_property_name, self.default_property_name) + ".refresh"),
+            get_client_var_name(self.__hashes.get(self.__default_property_name, self.__default_property_name) + ".refresh"),
         )
 
     def set_refresh_on_update(self):
@@ -705,16 +707,16 @@ class Builder:
         return self
 
     def set_table_pagesize_options(self, default_size=[50, 100, 500]):
-        page_size_options = self.attributes.get("page_size_options", default_size)
+        page_size_options = self.__attributes.get("page_size_options", default_size)
         if isinstance(page_size_options, str):
             try:
                 page_size_options = [int(s.strip()) for s in page_size_options.split(";")]
             except Exception as e:
-                warnings.warn(f"{self.element_name} page_size_options: invalid value {page_size_options}\n{e}")
+                warnings.warn(f"{self.__element_name} page_size_options: invalid value {page_size_options}\n{e}")
         if isinstance(page_size_options, list):
             self.__set_json_attribute("pageSizeOptions", page_size_options)
         else:
-            warnings.warn(f"{self.element_name} page_size_options should be a list")
+            warnings.warn(f"{self.__element_name} page_size_options should be a list")
         return self
 
     def set_type(self, type_name: str):
@@ -723,7 +725,7 @@ class Builder:
         return self
 
     def set_kind(self):
-        theme = self.attributes.get("theme", False)
+        theme = self.__attributes.get("theme", False)
         if theme:
             self.set_attribute("kind", "theme")
         return self
@@ -731,8 +733,8 @@ class Builder:
     def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[AttributeType]) -> str:
         taipy_type = _get_taipy_type(var_type)
         if taipy_type:
-            expr = self._gui._get_expr_from_hash(hash_name)
-            hash_name = self._gui._evaluate_bind_holder(taipy_type, expr)
+            expr = self.__gui._get_expr_from_hash(hash_name)
+            hash_name = self.__gui._evaluate_bind_holder(taipy_type, expr)
         return hash_name
 
     def set_attributes(self, attributes: t.List[tuple]):
@@ -783,4 +785,4 @@ class Builder:
         el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))
         el_str = el_str.replace("<?xml version='1.0' encoding='utf8'?>\n", "")
         el_str = el_str.replace("/>", ">")
-        return el_str, self.element_name
+        return el_str, self.__element_name

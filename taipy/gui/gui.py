@@ -47,6 +47,8 @@ from .utils import (
     TaipyLov,
     TaipyLovValue,
     TaipyNumber,
+    TaipyContent,
+    TaipyContentImage,
     get_client_var_name,
 )
 from .utils._adapter import _Adapter
@@ -214,22 +216,20 @@ class Gui(object, metaclass=Singleton):
             self.__set_client_id(message)
             if msg_type == WsType.UPDATE.value:
                 self.__front_end_update(
-                    message["name"],
+                    message.get("name"),
                     message.get("payload", {}).get("value"),
                     message.get("propagate", True),
                 )
             elif msg_type == WsType.ACTION.value:
-                self.__on_action(message.get("name"), message["payload"])
+                self.__on_action(message.get("name"), message.get("payload"))
             elif msg_type == WsType.DATA_UPDATE.value:
-                self.__request_data_update(message["name"], message["payload"])
+                self.__request_data_update(message.get("name"), message.get("payload"))
             elif msg_type == WsType.REQUEST_UPDATE.value:
-                self.__request_var_update(message["payload"])
+                self.__request_var_update(message.get("payload"))
             elif msg_type == WsType.CLIENT_ID.value:
-                self.__get_or_create_scope(message["payload"])
-        except TypeError as te:
-            warnings.warn(f"Decoding Message has failed: {message}\n{te}")
-        except KeyError as ke:
-            warnings.warn(f"Can't access: {message}\n{ke}")
+                self.__get_or_create_scope(message.get("payload", ""))
+        except Exception as e:
+            warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
     def __set_client_id(self, message: dict):
         self._scopes._set_client_id(message.get("client_id"))
@@ -259,13 +259,9 @@ class Gui(object, metaclass=Singleton):
                 pass
             elif isinstance(current_value, TaipyData):
                 return
-        self.__update_var(
-            var_name, value, propagate, True, current_value if isinstance(current_value, TaipyBase) else None
-        )
+        self.__update_var(var_name, value, propagate, current_value if isinstance(current_value, TaipyBase) else None)
 
-    def __update_var(
-        self, var_name: str, value: t.Any, propagate=True, from_front=False, holder: TaipyBase = None
-    ) -> None:
+    def __update_var(self, var_name: str, value: t.Any, propagate=True, holder: TaipyBase = None) -> None:
         if holder:
             var_name = holder.get_name()
         hash_expr = self._get_hash_from_expr(var_name)
@@ -284,11 +280,10 @@ class Gui(object, metaclass=Singleton):
                 self.on_change(self, var_name, value)
             except Exception as e:
                 warnings.warn(f"on_change function invocation exception: {e}")
-        self.__send_var_list_update(modified_vars, from_front, var_name)
+        self.__send_var_list_update(list(modified_vars), var_name)
 
-    def _get_content(self, var_name: str, value: t.Any, is_dynamic: bool, image: bool) -> t.Any:
-        var_name = self.__get_content_accessor().register_var(var_name, image, is_dynamic)
-        ret_value = self.__get_content_accessor().get_info(var_name, value)
+    def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
+        ret_value = self.__get_content_accessor().get_info(var_name, value, image)
         if isinstance(ret_value, tuple):
             string_value = Gui.__CONTENT_ROOT + ret_value[0]
         else:
@@ -300,7 +295,7 @@ class Gui(object, metaclass=Singleton):
         if len(parts) > 1:
             file_name = parts[-1]
             (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
-                path[: -len(file_name) - 1], file_name, request.args.get("varname"), request.args.get("bypass")
+                path[: -len(file_name) - 1], file_name, request.args.get("bypass")
             )
             if dir_path:
                 return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
@@ -357,14 +352,13 @@ class Gui(object, metaclass=Singleton):
 
     def __send_var_list_update(
         self,
-        modified_vars: set,
-        from_front: t.Optional[bool] = False,
+        modified_vars: t.List[str],
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
         values = {v: attrgetter(v)(self._get_data_scope()) for v in modified_vars}
         for v in values.values():
-            if isinstance(v, TaipyData):
+            if isinstance(v, TaipyData) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
         for _var in modified_vars:
             newvalue = values.get(_var)
@@ -372,20 +366,21 @@ class Gui(object, metaclass=Singleton):
             if isinstance(newvalue, TaipyData):
                 ws_dict[newvalue.get_name() + ".refresh"] = True
             else:
-                if not from_front and _var == front_var:
-                    ret_value = self.__get_content_accessor().get_info(front_var, newvalue)
+                if isinstance(newvalue, (TaipyContent, TaipyContentImage)):
+                    ret_value = self.__get_content_accessor().get_info(
+                        front_var, newvalue.get(), isinstance(newvalue, TaipyContentImage)
+                    )
                     if isinstance(ret_value, tuple):
                         newvalue = Gui.__CONTENT_ROOT + ret_value[0]
                     else:
                         newvalue = ret_value
-                if not from_front or _var != front_var:
-                    if isinstance(newvalue, TaipyLov):
-                        newvalue = [
-                            self._run_adapter_for_var(newvalue.get_name(), elt, str(idx))
-                            for idx, elt in enumerate(newvalue.get())
-                        ]
-                    elif isinstance(newvalue, TaipyLovValue):
-                        newvalue = self._run_adapter_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                elif isinstance(newvalue, TaipyLov):
+                    newvalue = [
+                        self._run_adapter_for_var(newvalue.get_name(), elt, str(idx))
+                        for idx, elt in enumerate(newvalue.get())
+                    ]
+                elif isinstance(newvalue, TaipyLovValue):
+                    newvalue = self._run_adapter_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
                 if isinstance(newvalue, (dict, _MapDictionary)):
                     continue  # this var has no transformer
                 ws_dict[_var] = newvalue
@@ -399,8 +394,8 @@ class Gui(object, metaclass=Singleton):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
 
-    def __request_var_update(self, payload):
-        if "names" in payload and isinstance(payload["names"], list):
+    def __request_var_update(self, payload: t.Any):
+        if isinstance(payload, dict) and isinstance(payload.get("names"), list):
             self.__send_var_list_update(payload["names"])
 
     def __send_ws(self, payload: dict) -> None:

@@ -8,7 +8,7 @@ def test_image_url_md(gui: Gui, helpers):
     md_string = "<|{content}|image|>"
     expected_list = [
         "<Image",
-        "content={content}",
+        "content={TaipyContentImage_content}",
         'defaultContent="some_url"',
         'tp_onAction=""',
     ]

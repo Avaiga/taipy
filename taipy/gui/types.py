@@ -1,7 +1,16 @@
 from enum import Enum
 import typing as t
 
-from taipy.gui.utils.types import TaipyBool, TaipyData, TaipyDate, TaipyLov, TaipyLovValue, TaipyNumber
+from .utils import (
+    TaipyBool,
+    TaipyContent,
+    TaipyContentImage,
+    TaipyData,
+    TaipyDate,
+    TaipyLov,
+    TaipyLovValue,
+    TaipyNumber,
+)
 
 
 class WsType(Enum):
@@ -35,6 +44,8 @@ class AttributeType(Enum):
     date = "date"
     lov_value = "lovvalue"
     lov = "lov"
+    content = "content"
+    image = "image"
 
 
 def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[str]:
@@ -50,4 +61,8 @@ def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[str]:
         return TaipyLovValue.__name__
     elif a_type == AttributeType.lov:
         return TaipyLov.__name__
+    elif a_type == AttributeType.content:
+        return TaipyContent.__name__
+    elif a_type == AttributeType.image:
+        return TaipyContentImage.__name__
     return None
