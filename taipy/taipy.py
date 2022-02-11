@@ -178,7 +178,7 @@ class Taipy:
             DifferentScenarioConfigs: The provided scenarios do not share the same scenario_config
             NonExistingScenarioConfig: Cannot find the shared scenario config of the provided scenarios
         """
-        ScenarioManager.compare(*scenarios, data_node_config_name=data_node_config_name)
+        return ScenarioManager.compare(*scenarios, data_node_config_name=data_node_config_name)
 
     @classmethod
     def subscribe_scenario(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -271,7 +271,7 @@ class Taipy:
     @classmethod
     def delete_jobs(cls):
         """Deletes all jobs."""
-        JobManager.delete_all()
+        return JobManager.delete_all()
 
     @classmethod
     def get_latest_job(cls, task: Task) -> Job:
