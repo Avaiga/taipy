@@ -126,7 +126,7 @@ class _Evaluator:
             self.__var_to_expr_list[expr] = [expr_holder]
         var_val, var_list = self._analyze_expression(gui, f"{{{expr_holder}}}")
         self.__expr_to_var_list[expr_holder] = var_list
-        setattr(gui._get_data_scope(), hash_name, self.__evaluate_holder(gui, expr_holder, var_val))
+        setattr(gui._get_data_scope(), hash_name, self.__evaluate_holder(expr_holder, var_val))
         return hash_name
 
     def evaluate_holders(self, gui: Gui, expr: str) -> t.List[str]:
@@ -134,11 +134,11 @@ class _Evaluator:
         for hld in self.__expr_to_holders.get(expr, []):
             hash = self.__expr_to_hash.get(hld)
             var_val, _ = self._analyze_expression(gui, f"{{{hld}}}")
-            setattr(gui._get_data_scope(), hash, self.__evaluate_holder(gui, hld, var_val))
+            setattr(gui._get_data_scope(), hash, self.__evaluate_holder(hld, var_val))
             lst.append(hash)
         return lst
 
-    def __evaluate_holder(self, gui: Gui, expr_holder: str, var_val: t.Dict[str, t.List[str]]) -> t.Any:
+    def __evaluate_holder(self, expr_holder: str, var_val: t.Dict[str, t.List[str]]) -> t.Any:
         try:
             # evaluate expressions
             return eval(expr_holder, self.__default_bindings, var_val)
