@@ -450,7 +450,9 @@ class Taipy:
     def clean_all_entities() -> bool:
         """
         Deletes all entities from the data folder.
-        return (bool): True if the operation succeeded, False otherwise.
+
+        Returns:
+            bool: True if the operation succeeded, False otherwise.
         """
         if not Config.global_config().clean_entities_enabled:
             logging.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
@@ -475,4 +477,10 @@ class Taipy:
 
     @staticmethod
     def check_configuration() -> IssueCollector:
+        """
+        Checks configuration.
+
+        Returns:
+            IssueCollector: Collector containing the info, the warning and the error messages.
+        """
         return Config.check()
