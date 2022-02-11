@@ -103,10 +103,12 @@ class _Adapter:
                 return (id, label)  # type: ignore
 
     def __get_id(self, value: t.Any, index: t.Optional[str]) -> str:
-        if hasattr(value, "id"):
+        if isinstance(value, str):
+            return value
+        elif hasattr(value, "id"):
             return str(value.id)
         elif hasattr(value, "__getitem__") and "id" in value:
-            return str(value["id"])
+            return str(value.get("id"))
         elif index is not None:
             return index
         else:

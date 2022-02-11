@@ -70,8 +70,8 @@ def test_expression_table_control(gui: Gui, helpers):
         "<Table",
         'columns="{&quot;Letters&quot;: {&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;}, &quot;Numbers&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Numbers&quot;}}"',
         "refresh={tp_pd_concat_series_1_series_2_axis_1__0__refresh}",
-        'tp_varname="pd.concat([series_1, series_2], axis=1)"',
-        "data={tp_pd_concat_series_1_series_2_axis_1__0}",
+        'tp_varname="TaipyData_tp_pd_concat_series_1_series_2_axis_1__0"',
+        "data={TaipyData_tp_pd_concat_series_1_series_2_axis_1__0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
     assert isinstance(gui._get_data_scope().tp_pd_concat_series_1_series_2_axis_1__0, pd.DataFrame)
@@ -92,8 +92,9 @@ def test_lambda_expression_selector(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
         'defaultValue="[&quot;1&quot;]"',
-        'tp_updatevars="lov=lov"',
-        'tp_varname="sel"',
-        "value={sel}",
+        'tp_updatevars="lov=TaipyLov_lov"',
+        'lov={TaipyLov_lov}',
+        'tp_varname="TaipyLovValue_sel"',
+        "value={TaipyLovValue_sel}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)

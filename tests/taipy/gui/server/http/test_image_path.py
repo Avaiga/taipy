@@ -14,7 +14,7 @@ def test_image_path_not_found(gui: Gui, helpers):
 
 def test_image_path_found(gui: Gui, helpers):
     url = gui._get_content(
-        "img", str((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve()), False, True
+        "img", str((pathlib.Path(__file__).parent.parent.parent / "resources" / "fred.png").resolve()), True
     )
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
@@ -26,5 +26,5 @@ def test_image_path_found(gui: Gui, helpers):
 
 def test_image_data_too_big(gui: Gui, helpers):
     with open((pathlib.Path(__file__).parent.parent.parent / "resources" / "taipan.jpg"), "rb") as big_file:
-        url = gui._get_content("img", big_file.read(), False, True)
+        url = gui._get_content("img", big_file.read(), True)
         assert not url.startswith("data:")

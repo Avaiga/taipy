@@ -19,28 +19,29 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test/?client_id={sid}")
-    with pytest.warns(UserWarning):
-        ws_client.emit(
-            "message",
-            {
-                "type": "DU",
-                "name": "csvdata",
-                "payload": {
-                    "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
-                    "pagekey": "0-100--asc",
-                    "start": 0,
-                    "end": 10,
-                    "orderby": "",
-                    "sort": "asc",
-                },
+    ws_client.emit(
+        "message",
+        {
+            "client_id": sid,
+            "type": "DU",
+            "name": "TaipyData_csvdata",
+            "payload": {
+                "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
+                "pagekey": "0-100--asc",
+                "start": 0,
+                "end": 10,
+                "orderby": "",
+                "sort": "asc",
             },
-        )
+        },
+    )
     # assert for received message (message that would be sent to the frontend client)
     received_messages = ws_client.get_received()
+    assert received_messages
     helpers.assert_outward_ws_message(
         received_messages[0],
         "MU",
-        "csvdata",
+        "TaipyData_csvdata",
         {
             "data": [
                 {

@@ -27,7 +27,7 @@ class Factory:
         "navbar": "value",
         "number": "value",
         "pane": "open",
-        "part": "type",
+        "part": "render",
         "selector": "value",
         "slider": "value",
         "status": "value",
@@ -59,7 +59,7 @@ class Factory:
             element_name="Chart",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False)
+        .set_value_and_default(with_default=False, var_type=AttributeType.data)
         .set_attributes(
             [
                 ("id",),
@@ -85,7 +85,7 @@ class Factory:
             attributes=attrs,
             default_value=datetime.fromtimestamp(0),
         )
-        .set_value_and_default()
+        .set_value_and_default(var_type=AttributeType.date)
         .set_attributes(
             [
                 ("with_time", AttributeType.boolean),
@@ -99,7 +99,7 @@ class Factory:
             element_name="Dialog",
             attributes=attrs,
         )
-        .set_value_and_default(native_type=True)
+        .set_value_and_default(var_type=AttributeType.dynamic_boolean)
         .set_attributes(
             [
                 ("id",),
@@ -266,7 +266,7 @@ class Factory:
         "pane": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Pane", attributes=attrs, default_value=""
         )
-        .set_value_and_default(native_type=True)
+        .set_value_and_default(var_type=AttributeType.dynamic_boolean)
         .set_attributes(
             [
                 ("id",),
@@ -283,13 +283,15 @@ class Factory:
         .set_page_id(),
         "part": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Part", attributes=attrs, default_value=""
-        ).set_attributes([("id",), ("render", AttributeType.dynamic_boolean, True)]),
+        )
+        .set_value_and_default(with_update=False, var_type=AttributeType.dynamic_boolean, default_val=True)
+        .set_attributes([("id",)]),
         "selector": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="Selector",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False)
+        .set_value_and_default(with_default=False, var_type=AttributeType.lov_value)
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_attributes(
@@ -343,7 +345,7 @@ class Factory:
             element_name="Table",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False)
+        .set_value_and_default(with_default=False, var_type=AttributeType.data)
         .get_dataframe_attributes()
         .set_attributes(
             [
@@ -383,7 +385,7 @@ class Factory:
         "toggle": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="Toggle", attributes=attrs, default_value=""
         )
-        .set_value_and_default(with_default=False)
+        .set_value_and_default(with_default=False, var_type=AttributeType.lov_value)
         .get_adapter("lov", multi_selection=False)  # need to be called before set_lov
         .set_lov()
         .set_attributes(

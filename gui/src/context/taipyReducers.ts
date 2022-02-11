@@ -1,6 +1,6 @@
+import { Dispatch } from "react";
 import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
-import { Dispatch } from "react";
 import { io, Socket } from "socket.io-client";
 import merge from "lodash/merge";
 
@@ -343,16 +343,11 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
-export const createSendUpdateAction = (
-    name: string | undefined,
-    value: unknown,
-    propagate = true,
-    type = ""
-): TaipyAction => ({
+export const createSendUpdateAction = (name: string | undefined, value: unknown, propagate = true): TaipyAction => ({
     type: Types.SendUpdate,
     name: name || "",
     propagate: propagate,
-    payload: { value: value, type: type },
+    payload: { value: value },
 });
 
 export const createSendActionNameAction = (
@@ -362,7 +357,10 @@ export const createSendActionNameAction = (
 ): TaipyAction => ({
     type: Types.Action,
     name: name || "",
-    payload: { action: value, args: args },
+    payload:
+        typeof value === "object" && !Array.isArray(value) && value !== null
+            ? { ...(value as object), args: args }
+            : { action: value, args: args },
 });
 
 export const createRequestChartUpdateAction = (

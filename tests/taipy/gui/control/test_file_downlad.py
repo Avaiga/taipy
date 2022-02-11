@@ -8,7 +8,7 @@ def test_file_download_url_md(gui: Gui, helpers):
     md_string = "<|{content}|file_download|>"
     expected_list = [
         "<FileDownload",
-        "content={content}",
+        "content={TaipyContent_content}",
         'defaultContent="some_url"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)

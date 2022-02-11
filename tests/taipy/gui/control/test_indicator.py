@@ -12,7 +12,7 @@ def test_indicator_md(gui: Gui, helpers):
         'format="%.2f"',
         "max={20.0}",
         "min={1.0}",
-        "value={val}",
+        "value={TaipyNumber_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -28,6 +28,6 @@ def test_menu_html(gui: Gui, helpers):
         'format="%.2f"',
         "max={20.0}",
         "min={1.0}",
-        "value={val}",
+        "value={TaipyNumber_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

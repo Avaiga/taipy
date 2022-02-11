@@ -1,4 +1,5 @@
 from datetime import datetime
+import warnings
 
 from dateutil import parser
 from pytz import utc
@@ -11,7 +12,7 @@ def dateToISO(date: datetime) -> str:
     except Exception:
         # astimezone() fails on Windows for pre-epoch times
         # See https://bugs.python.org/issue36759
-        print("There is some problems with date parsing to ISO!")
+        warnings.warn("There is some problems with date parsing to ISO!")
         return date.isoformat()
 
 

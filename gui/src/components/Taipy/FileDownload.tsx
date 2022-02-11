@@ -22,7 +22,7 @@ interface FileDownloadProps extends TaipyActiveProps {
 }
 
 const FileDownload = (props: FileDownloadProps) => {
-    const { id, className, auto, name, bypassPreview, tp_varname, tp_onAction, label, defaultLabel = "" } = props;
+    const { id, className, auto, name, bypassPreview, tp_onAction, label, defaultLabel = "" } = props;
     const aRef = useRef<HTMLAnchorElement>(null);
     const { dispatch } = useContext(TaipyContext);
 
@@ -52,12 +52,9 @@ const FileDownload = (props: FileDownloadProps) => {
         if (bypassPreview) {
             usp.append("bypass", "");
         }
-        if (tp_varname) {
-            usp.append("varname", tp_varname);
-        }
         const ret = usp.toString();
         return [ret.length ? url + "?" + ret : url, !!bypassPreview && (name || true)];
-    }, [props.content, bypassPreview, tp_varname, name, props.defaultContent]);
+    }, [props.content, bypassPreview, name, props.defaultContent]);
 
     const aProps = useMemo(() => (bypassPreview ? {} : { target: "_blank", rel: "noreferrer" }), [bypassPreview]);
 
