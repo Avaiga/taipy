@@ -106,7 +106,7 @@ class CycleList(Resource):
                       results:
                         type: array
                         items:
-                          $ref: '#/components/schemas/CycleResponseSchema'
+                          $ref: '#/components/schemas/CycleSchema'
     post:
       tags:
         - api
