@@ -116,7 +116,7 @@ class _Evaluator:
             a_set.add(expr_holder)
         else:
             self.__expr_to_holders[expr] = set([expr_holder])
-        hash_name = f"{holder_name}_{self.__expr_to_hash.get(expr)}"
+        hash_name = f"{holder_name}_{get_client_var_name(self.__expr_to_hash.get(expr))}"
         self.__expr_to_hash[expr_holder] = hash_name
         a_list = self.__var_to_expr_list.get(expr)
         if a_list:

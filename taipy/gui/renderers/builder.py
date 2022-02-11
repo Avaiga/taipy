@@ -734,7 +734,7 @@ class Builder:
             expr = self._gui._get_expr_from_hash(hash_name)
             hash_name = self._gui._evaluate_bind_holder(
                 taipy_type, expr
-            )  # f"{{{taipy_type}({expr},'{hash_name}')}}", bind=True)
+            )
         return hash_name
 
     def set_attributes(self, attributes: t.List[tuple]):
