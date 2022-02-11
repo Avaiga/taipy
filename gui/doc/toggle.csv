@@ -1,0 +1,4 @@
+﻿Name,Type,Default,Doc
+*value,>,,
+theme,bool,FALSE,"If set, this toggle control acts as a way to set the application Theme (dark or light)."
+>lovComp,,,

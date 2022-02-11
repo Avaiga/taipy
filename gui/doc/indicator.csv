@@ -1,0 +1,9 @@
+﻿Name,Type,Default,Doc
+*display,dynamic(any),None,"The label to be displayed.
+This can be formatted if it is a numerical value."
+value,"dynamic(int,float)",_min_,"The location of the label on the [<i>min</i>, <i>max</i>] range."
+min,int|float,0,The minimum value of the range.
+max,int|float,100,The maximum value of the range.
+format,str?,None,"The format to use when displaying the value.
+This uses the <code>printf</code> syntax."
+>shared,,,

@@ -3,7 +3,7 @@ name: Documentation Generation
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
     Deploy-Doc:
@@ -30,9 +30,7 @@ jobs:
             -   name: Build controls doc
                 working-directory: ./gui
                 run: |
-                    npm i web-component-analyzer
-                    npm run doc
-                    pipenv run python ../tools/mkdocs/generate_controls_ref.py
+                    pipenv run python ../tools/mkdocs/generate_viselements.py
             -   name: Build doc and deploy
                 run: |
                     pipenv run mkdocs gh-deploy --force

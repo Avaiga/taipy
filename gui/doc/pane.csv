@@ -1,0 +1,24 @@
+﻿Name,Type,Default,Doc
+*open,bool,FALSE,"If <i>True</i>, this pane is visible on the page.
+If <i>False</i>, the pane is hidden."
+close_action,str,None,"The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).
+All parameters of that function are optional:
+<ul>
+<li>gui instance</li>
+<li>id</li>
+<li>action</li>
+</ul>
+If this property is set to None, no function is called when this pane is closed."
+partial,Partial,None,"A <i>Partial</i> object that holds the content of this pane.
+This should not be defined if <i>page_id</i> is set."
+page_id,str,None,"The page identifier to show as the content of this pane.
+This should not be defined if <i>partial</i> is set."
+anchor,str,"""left""","Anchor side of the pane.
+Valid values are ""left"", ""right"", ""top"" or ""bottom""."
+width,str,"""30vw""","Width, in CSS units, of this pane.
+This is used only if <i>anchor</i> is ""left"" or ""right""."
+height,str,"""30vh""","Height, in CSS units, of this pane.
+This is used only if <i>anchor</i> is ""top"" or ""bottom""."
+persistent,bool,FALSE,"If <i>True</i>, the pane appears next to the page.
+If <i>False</i>, the pane covers the page where it appeared."
+>shared,,,

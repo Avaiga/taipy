@@ -1,0 +1,2 @@
+﻿Name,Type,Default,Doc
+*value,dynamic(any),None,The numerical value represented by this control.

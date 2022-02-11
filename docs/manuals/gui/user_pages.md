@@ -94,7 +94,7 @@ are significative).
     ```
 
 !!! example "The _default property_ rule"
-    The default property name for the control type [`button`](controls/button.md) is _label_. In Taipy,
+    The default property name for the control type [`button`](viselements/button.md) is _label_. In Taipy,
     the Markdown text
     ```
     <|button|label=Some text|>
@@ -123,8 +123,8 @@ are significative).
     ```
 
 There are a very few exceptions to the `<|control_type|...|>` syntax, that are described
-in their respective documentation section. The most obvious exception being the
-[`field`](controls/field.md) control, that can be created without even mentioning it's
+in their respective documentation section. The most obvious exception is the
+[`text`](viselements/text.md) control, that can be created without even mentioning it's
 type.
 
 ### HTML specifics

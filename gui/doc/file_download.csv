@@ -1,0 +1,17 @@
+﻿Name,Type,Default,Doc
+*content,dynamic(url | path | file),None,The content of the file.
+label,dynamic(str),None,The label of the button.
+on_action,str,,"The name of a function that is triggered when the download is initiated.
+All the parameters of that function are optional:
+<ul>
+<li>gui instance</li>
+<li>id</li>
+<li>action</li>
+</ul>"
+auto,bool,FALSE,"If <i>True</i>, the download starts as soon as the page is loaded."
+render,dynamic(bool),TRUE,"If <i>True</i>, the control is displayed.
+If <i>False</i>, the control is not displayed."
+bypass_preview,bool,TRUE,"If <i>False</i>, allows the browser to try to show the content in a different tab.
+The file download is always performed."
+name,str,None,"A name proposition for the file to save, that the user can change."
+>shared,,,

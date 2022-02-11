@@ -25,7 +25,7 @@ class Preprocessor(MdPreprocessor):
     #     <control_type> prop_name="prop_value" ...
     # Note that if a value is provided before the control_type, it is set
     # as the default property value for that control type.
-    # The default control type is 'field'.
+    # The default control type is 'text'.
     # ----------------------------------------------------------------------
     # Control in Markdown
     __CONTROL_RE = re.compile(r"<\|(.*?)\|>")

@@ -18,7 +18,10 @@ nav:
     - Graphical User Interface:
         - 'About': 'manuals/gui/user.md'
         - 'Pages': 'manuals/gui/user_pages.md'
-        - 'Controls': 'manuals/gui/user_controls.md'
+        - 'Visual Elements':
+           - 'Introduction': 'manuals/gui/user_viselements.md'
+           - 'Controls': 'manuals/gui/user_controls.md'
+           - 'Blocks': 'manuals/gui/user_blocks.md'
         - 'Binding variables': 'manuals/gui/user_binding.md'
         - 'Styling': 'manuals/gui/user_styling.md'
         - 'Callbacks': 'manuals/gui/user_callbacks.md'

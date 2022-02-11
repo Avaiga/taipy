@@ -26,12 +26,6 @@ wheels/
 .installed.cfg
 *.egg
 
-# GUI generation
-taipy_webapp/
-# Doc generation
-docs/manuals/gui/user_controls.md
-docs/manuals/gui/controls/*.md
-
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -146,3 +140,11 @@ data_sources
 pipelines
 tasks
 pickles
+
+# GUI generation
+taipy_webapp/
+# Doc generation
+docs/manuals/gui/user_controls.md
+docs/manuals/gui/user_blocks.md
+docs/manuals/gui/viselements/*.md
+!gui/doc/*.csv

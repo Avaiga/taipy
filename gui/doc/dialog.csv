@@ -1,0 +1,31 @@
+﻿Name,Type,Default,Doc
+*open,bool,FALSE,"If <i>True</i>, the dialog is visible. If <i>False</i>, it is hidden."
+cancel_action,str,None,"Name of a function that is triggered hen the cancel button Is pressed.
+The parameters of that function are all optional:
+<ul>
+<li>gui instance</li>
+<li>id</li>
+<li>action</li>
+</ul>
+
+If <i>cancel_action</i> is empty, the button is not shown."
+cancel_label,str,"""cancel""",The text of the cancel button.
+validate_action,str,"""validate""","Name of a function that is triggered when the validate button is pressed.
+The parameters of that function are all optional:
+<ul>
+<li>gui instance</li>
+<li>id</li>
+<li>action</li>
+</ul>
+
+If <i>cancel_action</i> is empty, the button is not shown."
+validate_label,str,"""Validate""",The text of the validate button.
+partial,Partial,None,"A Partial object that holds the content of the dialog.
+This should be defined if <i>page_id</i> is set."
+page_id,str,None,"The page identifier to show as the content of the dialog.
+This should not be defined if <i>partial</i> is set."
+width,str|int|float,None,"The width, in CSS units, of this dialog.
+(CSS property)"
+height,str|int|float,None,"The height, in CSS units, of this dialog.
+(CSS property)"
+>shared,,,

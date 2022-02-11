@@ -1,0 +1,14 @@
+﻿Name,Type,Default,Doc
+*content,dynamic(str),None,The path or the list of paths of the uploaded files.
+label,str,None,The label of the button.
+on_action,str,None,"The name of the function that will be triggered.
+All the parameters of that function are optional:
+<ul>
+<li>gui instance</li>
+<li>id</li>
+<li>action</li>
+</ul>"
+multiple,bool,FALSE,"If set to <i>True</i>, multiple files can be uploaded."
+extensions,str,""".csv,.xlsx""??",The list of file extensions that can be uploaded.
+drop_message,str,"""Drop here to Upload""??",The message that is displayed when the user drags a file above the button.
+>shared,,,

@@ -1,0 +1,7 @@
+﻿Name,Type,Default,Doc
+propagate,bool,<i>App config</i>,"Allows the control's main value to be automatically propagated.
+The default value is defined at the application configuration level.
+If <i>True</i>, any change to the control's value is immediately reflected in the bound application variable."
+active,dynamic(bool),None,"Indicates if this component is active.
+An inactive component allows no user interaction."
+>shared,,,

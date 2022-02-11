@@ -1,0 +1,35 @@
+﻿Name,Type,Default,Doc
+*value,any,None,The data to be represented in this table.
+page_size,int,100,
+allow_all_rows,bool,FALSE,
+show_all,bool,FALSE,
+auto_loading,bool,FALSE,data will be loaded on demand
+width[<i>col_name</i>],str,None,"The width, in CSS units, of the indicated column."
+selected,list[int]|str,None,The list of the selected indices. ??
+page_size_options,List[int]|str,"[50, 100, 500]",The list of available page sizes that users can choose.
+columns,"str|List[str]|Dict[str, Dict[str, str|int]]","""All columns""??","The list of the column names.
+<ul>
+<li>str: separated list of column names.</li>
+<li>List[str]</li>
+<li>dict:
+<pre>{""col name"": {format: ""format"", index: 1}}</pre>
+if index is specified, it represents the display order of the columns.
+If <i>index</i> is not specified, the list order defines the index</li>
+</ul>"
+date_format,str,"""MM/dd/yyyy""",The date format that is used for all date columns when format is not defined.??
+number_format,str,None,
+group_by[<i>col_name</i>],bool,FALSE,"Indicates, if <i>True</i>, that the given column can be aggregated.
+See [below](#aggregation) for details."
+apply[<i>col_name</i>],str,"""first""","The name of the aggregation function to use.
+This is used only if <i>group_by[column_name]</i> is set to <i>True</i>.
+See [below](#aggregation) for details.
+"
+style,str,None,"Allows the styling of table lines.
+See [below](#styling) for details."
+style[<i>col_name</i>],str,None,"Allows the styling of table cells.
+See [below](#styling) for details."
+width,str|int|float,100vw,"The width, in CSS units, of this table control."
+height,str|int|float,100vw,"The height, in CSS units, of this table control."
+nan_value,str,"""""",The replacement text for NaN (not-a-number) values.
+nan_value[<i>col_name</i>],str,"""""",The replacement text for NaN (not-a-number) values for the indicated column.
+>shared,,,

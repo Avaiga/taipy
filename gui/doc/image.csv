@@ -1,0 +1,13 @@
+﻿Name,Type,Default,Doc
+*content,dynamic(url | path | file),None,The image source.
+label,dynamic(str),None,The label for this image.
+on_action,str,"""""","The name of a function that is triggered when the user clicks on the image.
+All the parameters of that function are optional:
+<ul>
+<li>gui instance</li>
+<li>id</li>
+<li>action</li>
+</ul>"
+width,str|int|float,"""300px""","The width, in CSS units, of this element."
+height,str|int|float,None,"The height, in CSS units, of this element."
+>shared,,,

@@ -34,7 +34,6 @@
     "test": "cross-env TZ=UTC jest",
     "lint": "eslint --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "doc": "web-component-analyzer doc --format markdown --outDir generateddoc",
     "coverage": "npm test -- --coverage"
   },
   "husky": {
