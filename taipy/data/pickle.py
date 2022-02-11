@@ -70,7 +70,7 @@ class PickleDataNode(DataNode):
             **properties,
         )
         self.__pickle_file_path = self.__build_path()
-        if not self.last_edition_date and os.path.exists(self.__pickle_file_path):
+        if not self._last_edition_date and os.path.exists(self.__pickle_file_path):
             self.unlock_edition()
         if default_value is not None and not os.path.exists(self.__pickle_file_path):
             self.write(default_value)
@@ -94,7 +94,7 @@ class PickleDataNode(DataNode):
         pickle.dump(data, open(self.__pickle_file_path, "wb"))
 
     def __build_path(self):
-        if file_name := self.properties.get(self.__PICKLE_FILE_NAME):
+        if file_name := self._properties.get(self.__PICKLE_FILE_NAME):
             return file_name
         from taipy.config.config import Config
 

@@ -8,7 +8,6 @@ from taipy.config.config import Config
 from taipy.config.scenario_config import ScenarioConfig
 from taipy.cycle.cycle import Cycle
 from taipy.cycle.cycle_manager import CycleManager
-from taipy.data.data_manager import DataManager
 from taipy.exceptions.repository import ModelNotFound
 from taipy.exceptions.scenario import (
     DeletingMasterScenario,
@@ -23,7 +22,6 @@ from taipy.job.job import Job
 from taipy.pipeline.pipeline_manager import PipelineManager
 from taipy.scenario.scenario import Scenario
 from taipy.scenario.scenario_repository import ScenarioRepository
-from taipy.task.task_manager import TaskManager
 
 
 class ScenarioManager:
@@ -225,9 +223,9 @@ class ScenarioManager:
         if scenario.cycle:
             master_scenario = cls.get_master(scenario.cycle)
             if master_scenario:
-                master_scenario.master_scenario = False
+                master_scenario._master_scenario = False
                 cls.set(master_scenario)
-            scenario.master_scenario = True
+            scenario._master_scenario = True
             cls.set(scenario)
         else:
             raise DoesNotBelongToACycle

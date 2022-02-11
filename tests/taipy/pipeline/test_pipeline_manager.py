@@ -1,4 +1,5 @@
 import json
+from multiprocessing import Process
 from pathlib import Path
 from unittest import mock
 
@@ -249,6 +250,7 @@ def test_create_pipeline_and_modify_properties_does_not_modify_config():
     assert pipeline.properties.get("foo") == "bar"
 
     pipeline.properties["baz"] = "qux"
+    PipelineManager.set(pipeline)
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
     assert len(pipeline.properties) == 2
@@ -257,6 +259,8 @@ def test_create_pipeline_and_modify_properties_does_not_modify_config():
 
 
 def test_pipeline_notification_subscribe_unsubscribe(mocker):
+    mocker.patch("taipy.common.reload.reload", side_effect=lambda m, o: o)
+
     pipeline_config = Config.add_pipeline(
         "by 6",
         [
@@ -279,7 +283,7 @@ def test_pipeline_notification_subscribe_unsubscribe(mocker):
     notify_2.__module__ = "notify_2"
     # Mocking this because NotifyMock is a class that does not loads correctly when getting the pipeline
     # from the storage.
-    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_2])
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_1, notify_2])
 
     # test subscription
     callback = mock.MagicMock()
@@ -625,3 +629,17 @@ def test_generate_json():
     assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
 
     PipelineManager.scheduler.stop()
+
+
+def test_automatic_reload():
+    ds_input_config = Config.add_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
+    ds_output_config = Config.add_data_node("output", "pickle")
+    task_config = Config.add_task("task_config", ds_input_config, mult_by_2, ds_output_config)
+    pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
+    pipeline = PipelineManager.get_or_create(pipeline_config)
+
+    p1 = Process(target=PipelineManager.submit, args=(pipeline,))
+    p1.start()
+    p1.join()
+
+    assert 2 == pipeline.output.read()

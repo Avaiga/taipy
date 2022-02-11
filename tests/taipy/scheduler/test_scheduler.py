@@ -160,12 +160,13 @@ def test_submit_task_multithreading_multiple_task():
 
         assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
         assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
+        assert_true_after_20_second_max(job_2.is_completed)
         assert job_1.is_running()
         assert job_2.is_completed()
 
     assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
     assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
-    assert job_1.is_completed()
+    assert_true_after_20_second_max(job_1.is_completed)
     assert job_2.is_completed()
 
 
@@ -195,13 +196,13 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
             assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
             assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
-            assert job_1.is_completed()
+            assert_true_after_20_second_max(job_1.is_completed)
             assert job_2.is_running()
 
     assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
     assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
     assert job_1.is_completed()
-    assert job_2.is_completed()
+    assert_true_after_20_second_max(job_2.is_completed)
 
 
 def test_blocked_task():
@@ -286,6 +287,9 @@ def assert_true_after_20_second_max(assertion):
     start = datetime.now()
     while (datetime.now() - start).seconds < 20:
         sleep(0.1)  # Limit CPU usage
-        if assertion():
-            return
+        try:
+            if assertion():
+                return
+        except Exception as e:
+            print("Raise (test_scheduler):", e)
     assert assertion()

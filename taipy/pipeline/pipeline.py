@@ -6,6 +6,7 @@ from typing import Callable, Dict, List, Optional, Set
 import networkx as nx
 
 from taipy.common.alias import Dag, PipelineId
+from taipy.common.reload import reload, self_reload
 from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.common.utils import fcts_to_dict
 from taipy.data.data_node import DataNode
@@ -42,14 +43,35 @@ class Pipeline:
         tasks: List[Task],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,
+        subscribers: Set[Callable] = None,
     ):
         self.config_name = protect_name(config_name)
-        self.properties = properties
         self.tasks = {task.config_name: task for task in tasks}
         self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
         self.parent_id = parent_id
         self.is_consistent = self.__is_consistent()
-        self.subscribers: Set[Callable] = set()
+
+        self._subscribers = subscribers or set()
+        self._properties = properties
+
+    def __getstate__(self):
+        return self.id
+
+    def __setstate__(self, id):
+        from taipy.pipeline.pipeline_manager import PipelineManager
+
+        p = PipelineManager.get(id)
+        self.__dict__ = p.__dict__
+
+    @property  # type: ignore
+    @self_reload("pipeline")
+    def subscribers(self):
+        return self._subscribers
+
+    @property  # type: ignore
+    def properties(self):
+        self._properties = reload("pipeline", self)._properties
+        return self._properties
 
     def __eq__(self, other):
         return self.id == other.id
@@ -96,10 +118,12 @@ class Pipeline:
         return graph
 
     def add_subscriber(self, callback: Callable):
-        self.subscribers.add(callback)
+        self._subscribers = reload("pipeline", self)._subscribers
+        self._subscribers.add(callback)
 
     def remove_subscriber(self, callback: Callable):
-        self.subscribers.remove(callback)
+        self._subscribers = reload("pipeline", self)._subscribers
+        self._subscribers.remove(callback)
 
     def to_model(self) -> PipelineModel:
         datanode_task_edges = defaultdict(list)
@@ -113,10 +137,10 @@ class Pipeline:
             self.id,
             self.parent_id,
             self.config_name,
-            self.properties,
+            self._properties,
             Dag(dict(datanode_task_edges)),
             Dag(dict(task_datanode_edges)),
-            fcts_to_dict(list(self.subscribers)),
+            fcts_to_dict(list(self._subscribers)),
         )
 
     def get_sorted_tasks(self) -> List[List[Task]]:

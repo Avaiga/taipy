@@ -87,7 +87,7 @@ class SQLDataNode(DataNode):
             edition_in_progress,
             **properties,
         )
-        if not self.last_edition_date:
+        if not self._last_edition_date:
             self.unlock_edition()
 
     @staticmethod

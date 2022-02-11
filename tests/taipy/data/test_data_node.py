@@ -171,7 +171,8 @@ class TestDataNode:
         assert ds.is_up_to_date is True
 
         # Has been writen more than 30 minutes ago
-        ds.last_edition_date = datetime.now() + timedelta(days=-1)
+        ds._last_edition_date = datetime.now() + timedelta(days=-1)
+        DataManager().set(ds)
         assert ds.is_up_to_date is False
 
     def test_pandas_filter(self, default_data_frame):
@@ -330,3 +331,48 @@ class TestDataNode:
 
         assert ds.is_ready_for_reading
         assert DataManager.get(ds.id).is_ready_for_reading
+
+    def test_auto_reload(self):
+        dm = DataManager()
+        ds = FakeDataNode("foo")
+
+        dm.set(ds)
+        ds_bis = dm.get(ds)
+
+        ds._name = "new_name"
+        ds._validity_days = 3
+        ds._validity_hours = 2
+        ds._validity_minutes = 1
+        ds.write("Any data")
+
+        assert ds.last_edition_date is not None
+        assert ds.last_edition_date == ds_bis.last_edition_date
+        assert ds.name == ds_bis.name == "new_name"
+        assert ds._validity_days != ds_bis._validity_days
+        assert ds._validity_hours != ds_bis._validity_hours
+        assert ds._validity_minutes != ds_bis._validity_minutes
+        assert ds.write_has_been_called == 1
+        assert ds.validity() == ds_bis.validity() == 3 * 24 * 60 + 2 * 60 + 1
+        assert ds.expiration_date() == ds_bis.expiration_date()
+        assert ds.expiration_date() > ds.last_edition_date
+
+        assert ds.job_ids == ds_bis.job_ids
+
+        ds.lock_edition()
+        dm.set(ds)
+        assert ds.edition_in_progress == ds_bis.edition_in_progress is True
+
+        ds.unlock_edition()
+        dm.set(ds)
+        assert ds.edition_in_progress == ds_bis.edition_in_progress is False
+
+    def test_expiration_date_raise_if_never_write(self):
+        ds = FakeDataNode("foo")
+
+        with pytest.raises(NoData):
+            ds.expiration_date()
+
+    def test_validity_null_if_never_write(self):
+        ds = FakeDataNode("foo")
+
+        assert ds.validity() == 0

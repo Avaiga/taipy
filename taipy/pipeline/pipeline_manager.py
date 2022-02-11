@@ -10,7 +10,6 @@ from taipy.exceptions.pipeline import MultiplePipelineFromSameConfigWithSamePare
 from taipy.job.job import Job
 from taipy.pipeline.pipeline import Pipeline
 from taipy.pipeline.pipeline_repository import PipelineRepository
-from taipy.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.task.task_manager import TaskManager
 
 

@@ -23,10 +23,10 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             id=scenario.id,
             name=scenario.config_name,
             pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
-            properties=scenario.properties,
+            properties=scenario._properties,
             creation_date=scenario.creation_date.isoformat(),
-            master_scenario=scenario.master_scenario,
-            subscribers=utils.fcts_to_dict(scenario.subscribers),
+            master_scenario=scenario._master_scenario,
+            subscribers=utils.fcts_to_dict(scenario._subscribers),
             cycle=self.__to_cycle_id(scenario.cycle),
         )
 
@@ -39,8 +39,8 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             creation_date=datetime.fromisoformat(model.creation_date),
             is_master=model.master_scenario,
             cycle=self.__to_cycle(model.cycle),
+            subscribers={utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},
         )
-        scenario.subscribers = {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers}
         return scenario
 
     @property

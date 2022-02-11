@@ -23,6 +23,7 @@ class TestDataManager:
         assert ds_config.properties.get("baz") is None
 
         ds.properties["baz"] = "qux"
+        DataManager.set(ds)
         assert ds_config.properties.get("foo") == "bar"
         assert ds_config.properties.get("baz") is None
         assert ds.properties.get("foo") == "bar"

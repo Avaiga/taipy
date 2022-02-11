@@ -18,15 +18,15 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             data_node.config_name,
             data_node.scope,
             data_node.storage_type(),
-            data_node.name,
+            data_node._name,
             data_node.parent_id,
-            data_node.last_edition_date.isoformat() if data_node.last_edition_date else None,
-            data_node.job_ids,
-            data_node.validity_days,
-            data_node.validity_hours,
-            data_node.validity_minutes,
-            data_node.edition_in_progress,
-            data_node.properties,
+            data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
+            data_node._job_ids,
+            data_node._validity_days,
+            data_node._validity_hours,
+            data_node._validity_minutes,
+            data_node._edition_in_progress,
+            data_node._properties,
         )
 
     def from_model(self, model: DataNodeModel):

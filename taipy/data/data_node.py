@@ -1,3 +1,4 @@
+import functools
 import logging
 import uuid
 from abc import abstractmethod
@@ -9,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from taipy.common.alias import DataNodeId, JobId
+from taipy.common.reload import reload, self_reload
 from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.data.filter import FilterDataNode
 from taipy.data.operator import JoinOperator, Operator
@@ -73,16 +75,63 @@ class DataNode:
     ):
         self.config_name = protect_name(config_name)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_name, str(uuid.uuid4())]))
-        self.name = name or self.id
         self.parent_id = parent_id
         self.scope = scope
-        self.last_edition_date = last_edition_date
-        self.job_ids = job_ids or []
-        self.properties = kwargs
-        self.edition_in_progress = edition_in_progress
-        self.validity_days = validity_days
-        self.validity_hours = validity_hours
-        self.validity_minutes = validity_minutes
+
+        self._last_edition_date = last_edition_date
+        self._name = name or self.id
+        self._edition_in_progress = edition_in_progress
+        self._job_ids = job_ids or []
+        self._properties = kwargs
+
+        self._validity_days = validity_days
+        self._validity_hours = validity_hours
+        self._validity_minutes = validity_minutes
+
+    @self_reload("data")
+    def validity(self) -> int:
+        """
+        Number of minutes where the Data Node is up-to-date.
+        """
+        minutes = self._validity_minutes or 0
+        hours = self._validity_hours or 0
+        days = self._validity_days or 0
+        return minutes + hours * 60 + days * 60 * 24
+
+    @self_reload("data")
+    def expiration_date(self) -> datetime:
+        if not self._last_edition_date:
+            raise NoData
+
+        return self._last_edition_date + timedelta(
+            minutes=self._validity_minutes or 0, hours=self._validity_hours or 0, days=self._validity_days or 0
+        )  # type: ignore
+
+    @property  # type: ignore
+    @self_reload("data")
+    def name(self):
+        return self._name
+
+    @property  # type: ignore
+    @self_reload("data")
+    def edition_in_progress(self):
+        return self._edition_in_progress
+
+    @property  # type: ignore
+    @self_reload("data")
+    def job_ids(self):
+        return self._job_ids
+
+    @property  # type: ignore
+    def properties(self):
+        r = reload("data", self)
+        self._properties = r._properties
+        return self._properties
+
+    @property  # type: ignore
+    @self_reload("data")
+    def last_edition_date(self):
+        return self._last_edition_date
 
     def __eq__(self, other):
         return self.id == other.id
@@ -124,13 +173,13 @@ class DataNode:
         DataManager.set(self)
 
     def lock_edition(self):
-        self.edition_in_progress = True
+        self._edition_in_progress = True
 
     def unlock_edition(self, at: datetime = None, job_id: JobId = None):
-        self.last_edition_date = at or datetime.now()
-        self.edition_in_progress = False
+        self._last_edition_date = at or datetime.now()
+        self._edition_in_progress = False
         if job_id:
-            self.job_ids.append(job_id)
+            self._job_ids.append(job_id)
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """
@@ -234,27 +283,26 @@ class DataNode:
     def __getitem__(self, items):
         return FilterDataNode(self.id, self._read())[items]
 
-    @property
+    @property  # type: ignore
+    @self_reload("data")
     def is_ready_for_reading(self):
-        if self.edition_in_progress:
+        if self._edition_in_progress:
             return False
-        if not self.last_edition_date:
+        if not self._last_edition_date:
             # Never been written so it is not up-to-date
             return False
         return True
 
-    @property
+    @property  # type: ignore
+    @self_reload("data")
     def is_up_to_date(self):
-        if not self.last_edition_date:
+        if not self._last_edition_date:
             # Never been written so it is not up to date
             return False
-        if not self.validity_days and not self.validity_hours and not self.validity_minutes:
+        if not self._validity_days and not self._validity_hours and not self._validity_minutes:
             # No validity period so it is up to date
             return True
-        expiration_date = self.last_edition_date + timedelta(
-            minutes=self.validity_minutes or 0, hours=self.validity_hours or 0, days=self.validity_days or 0
-        )
-        if datetime.now() > expiration_date:
+        if datetime.now() > self.expiration_date():
             # expiration_date has been passed
             return False
         return True

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from multiprocessing import Process
 
 import pytest
 
@@ -150,6 +151,7 @@ def test_create_scenario_does_not_modify_config():
     assert scenario.properties.get("display_name") == display_name_1
 
     scenario.properties["foo"] = "bar"
+    ScenarioManager.set(scenario)
     assert len(scenario_config.properties) == 0
     assert len(scenario.properties) == 2
     assert scenario.properties.get("foo") == "bar"
@@ -254,6 +256,8 @@ def test_scenario_manager_only_creates_data_node_once():
 
 
 def test_notification_subscribe_unsubscribe(mocker):
+    mocker.patch("taipy.common.reload.reload", side_effect=lambda m, o: o)
+
     scenario_config = Config.add_scenario(
         "Awesome scenario",
         [
@@ -275,8 +279,7 @@ def test_notification_subscribe_unsubscribe(mocker):
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
-    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_2])
-
+    mocker.patch.object(utils, "load_fct", side_effect=[notify_1, notify_1, notify_2])
     # test subscribing notification
     ScenarioManager.subscribe(notify_1, scenario)
     ScenarioManager.submit(scenario.id)
@@ -330,7 +333,6 @@ def test_scenario_notification_subscribe_all():
 
 
 def test_get_set_master_scenario():
-
     cycle_1 = CycleManager.create(Frequency.DAILY)
 
     scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), is_master=False, cycle=cycle_1)
@@ -646,3 +648,28 @@ def test_scenarios_comparison():
 
     with pytest.raises(NonExistingComparator):
         ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="abc")
+
+
+def test_automatic_reload():
+    scenario_config = Config.add_scenario(
+        "Awesome scenario",
+        [
+            Config.add_pipeline(
+                "by 6",
+                [
+                    Config.add_task(
+                        "mult by 2",
+                        [Config.add_data_node("foo", "pickle", Scope.PIPELINE, default_data=1)],
+                        mult_by_2,
+                        Config.add_data_node("bar", "pickle", Scope.SCENARIO),
+                    )
+                ],
+            )
+        ],
+    )
+    scenario = ScenarioManager.create(scenario_config)
+    p = Process(target=ScenarioManager.submit, args=(scenario,))
+    p.start()
+    p.join()
+
+    assert 2 == scenario.bar.read()

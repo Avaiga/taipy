@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Callable, Dict, List, Set
 
 from taipy.common.alias import ScenarioId
+from taipy.common.reload import reload, self_reload
 from taipy.common.unicode_to_python_variable_name import protect_name
 from taipy.common.utils import fcts_to_dict
 from taipy.cycle.cycle import Cycle
@@ -45,15 +46,41 @@ class Scenario:
         creation_date=None,
         is_master: bool = False,
         cycle: Cycle = None,
+        subscribers: Set[Callable] = None,
     ):
         self.config_name = protect_name(config_name)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
-        self.properties = properties
         self.creation_date = creation_date or datetime.now()
-        self.master_scenario = is_master
-        self.subscribers: Set[Callable] = set()
         self.cycle = cycle
+
+        self._subscribers = subscribers or set()
+        self._master_scenario = is_master
+        self._properties = properties
+
+    def __getstate__(self):
+        return self.id
+
+    def __setstate__(self, id):
+        from taipy.scenario.scenario_manager import ScenarioManager
+
+        sc = ScenarioManager.get(id)
+        self.__dict__ = sc.__dict__
+
+    @property  # type: ignore
+    @self_reload("scenario")
+    def master_scenario(self):
+        return self._master_scenario
+
+    @property  # type: ignore
+    @self_reload("scenario")
+    def subscribers(self):
+        return self._subscribers
+
+    @property  # type: ignore
+    def properties(self):
+        self._properties = reload("scenario", self)._properties
+        return self._properties
 
     def __eq__(self, other):
         return self.id == other.id
@@ -82,20 +109,22 @@ class Scenario:
 
     def add_subscriber(self, callback: Callable):
         """Adds callback function to be called when executing the scenario each time a scenario job changes status"""
-        self.subscribers.add(callback)
+        self._subscribers = reload("scenario", self)._subscribers
+        self._subscribers.add(callback)
 
     def remove_subscriber(self, callback: Callable):
         """Removes callback function"""
-        self.subscribers.remove(callback)
+        self._subscribers = reload("scenario", self)._subscribers
+        self._subscribers.remove(callback)
 
     def to_model(self) -> ScenarioModel:
         return ScenarioModel(
             self.id,
             self.config_name,
             [pipeline.id for pipeline in self.pipelines.values()],
-            self.properties,
+            self._properties,
             self.creation_date.isoformat(),
-            self.master_scenario,
-            fcts_to_dict(list(self.subscribers)),
+            self._master_scenario,
+            fcts_to_dict(list(self._subscribers)),
             self.cycle.id if self.cycle else None,
         )

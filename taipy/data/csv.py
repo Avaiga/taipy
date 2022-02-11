@@ -78,7 +78,7 @@ class CSVDataNode(DataNode):
             edition_in_progress,
             **properties,
         )
-        if not self.last_edition_date and isfile(self.properties[self.__REQUIRED_PATH_PROPERTY]):
+        if not self._last_edition_date and isfile(self._properties[self.__REQUIRED_PATH_PROPERTY]):
             self.unlock_edition()
 
     @classmethod
@@ -132,6 +132,6 @@ class CSVDataNode(DataNode):
         else:
             df = pd.DataFrame(data, columns=columns)
         df.to_csv(self.path, index=False)
-        self.last_edition_date = datetime.now()
+        self._last_edition_date = datetime.now()
         if job_id:
             self.job_ids.append(job_id)
