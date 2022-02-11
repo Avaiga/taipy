@@ -34,7 +34,6 @@ class TestPickleDataNodeEntity:
         assert ds.job_ids == []
         assert ds.is_ready_for_reading
         assert ds.read() == "Data"
-        assert ds.default_data == "Data"
         assert ds.last_edition_date is not None
         assert ds.job_ids == []
 
@@ -64,7 +63,6 @@ class TestPickleDataNodeEntity:
         pickle_str = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar"})
         assert isinstance(pickle_str.read(), str)
         assert pickle_str.read() == "bar"
-        assert pickle_str.default_data == "bar"
         pickle_str.properties["default_data"] = "baz"  # this modifies the default data value but not the data itself
         assert pickle_str.read() == "bar"
         pickle_str.write("qux")

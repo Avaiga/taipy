@@ -27,7 +27,7 @@ class PickleDataNode(DataNode):
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
-        properties (list): List of additional arguments. Note that at the creation of the data node, if the property
+        properties (dict): Dict of additional arguments. Note that at the creation of the data node, if the property
             "default_data" is present, the data node is automatically written with the corresponding default_data value.
             If the property "path" is present, data will be stored using the corresponding value as the name of the
             file.
@@ -54,6 +54,7 @@ class PickleDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
+        default_value = properties.pop(self.__DEFAULT_DATA_VALUE, None)
         super().__init__(
             config_name,
             scope,
@@ -71,8 +72,8 @@ class PickleDataNode(DataNode):
         self.__pickle_file_path = self.__build_path()
         if not self.last_edition_date and os.path.exists(self.__pickle_file_path):
             self.unlock_edition()
-        if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and not os.path.exists(self.__pickle_file_path):
-            self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
+        if default_value is not None and not os.path.exists(self.__pickle_file_path):
+            self.write(default_value)
 
     @classmethod
     def storage_type(cls) -> str:

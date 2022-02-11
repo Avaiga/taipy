@@ -264,8 +264,8 @@ def test_task_scheduler_create_parallel_dispatcher():
 def _create_task(function, nb_outputs=1):
     output_ds_config_name = str(uuid.uuid4())
     input_ds = [
-        DataManager.get_or_create(Config.add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)),
-        DataManager.get_or_create(Config.add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)),
+        DataManager.get_or_create(Config.add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
+        DataManager.get_or_create(Config.add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
     ]
     output_ds = [
         DataManager.get_or_create(

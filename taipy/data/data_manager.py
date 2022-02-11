@@ -132,7 +132,7 @@ class DataManager:
                 config_name=data_node_config.name,
                 scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,
-                properties=data_node_config.properties,
+                properties=data_node_config.properties.copy(),
             )
         except KeyError:
             logging.error(f"Cannot create Data node. " f"Type {data_node_config.storage_type} does not exist.")

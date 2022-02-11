@@ -30,7 +30,6 @@ class TestInMemoryDataNodeEntity:
         assert ds.job_ids == []
         assert ds.is_ready_for_reading
         assert ds.read() == "In memory Data Node"
-        assert ds.default_data == "In memory Data Node"
 
         ds_2 = InMemoryDataNode("foo", Scope.PIPELINE)
         assert ds_2.last_edition_date is None

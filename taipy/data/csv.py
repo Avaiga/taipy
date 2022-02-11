@@ -29,7 +29,7 @@ class CSVDataNode(DataNode):
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
-        properties (list): List of additional arguments. Note that the properties parameter should at least contain
+        properties (dict): Dict of additional arguments. Note that the properties parameter should at least contain
             a value for "path" properties.
     """
 

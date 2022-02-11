@@ -29,7 +29,7 @@ class InMemoryDataNode(DataNode):
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
-        properties (list): List of additional arguments. Note that at the creation of the In Memory data node, if the
+        properties (dict): Dict of additional arguments. Note that at the creation of the In Memory data node, if the
             property default_data is present, the data node is automatically written with the corresponding
             default_data value.
     """
@@ -56,6 +56,7 @@ class InMemoryDataNode(DataNode):
             job_ids = []
         if properties is None:
             properties = {}
+        default_value = properties.pop(self.__DEFAULT_DATA_VALUE, None)
         super().__init__(
             config_name,
             scope,
@@ -70,8 +71,8 @@ class InMemoryDataNode(DataNode):
             edition_in_progress,
             **properties
         )
-        if self.properties.get(self.__DEFAULT_DATA_VALUE) is not None and self.id not in in_memory_storage:
-            self.write(self.properties.get(self.__DEFAULT_DATA_VALUE))
+        if default_value is not None and self.id not in in_memory_storage:
+            self.write(default_value)
 
     @classmethod
     def storage_type(cls) -> str:

@@ -84,7 +84,7 @@ class TestDataManager:
         # - a parent id
         # - some default data
         in_memory_ds_config = Config.add_data_node(
-            name="baz", storage_type="in_memory", scope=Scope.SCENARIO, default_data="qux"
+            name="baz", storage_type="in_memory", scope=Scope.SCENARIO, default_data="qux", other_data="foo"
         )
         in_mem_ds = DataManager._create_and_set(in_memory_ds_config, "Scenario_id")
 
@@ -106,7 +106,7 @@ class TestDataManager:
         assert DataManager.get(in_mem_ds.id).is_ready_for_reading
         assert DataManager.get(in_mem_ds.id).is_ready_for_reading == in_mem_ds.is_ready_for_reading
         assert len(DataManager.get(in_mem_ds.id).properties) == 1
-        assert DataManager.get(in_mem_ds.id).properties.get("default_data") == "qux"
+        assert DataManager.get(in_mem_ds.id).properties.get("other_data") == "foo"
         assert DataManager.get(in_mem_ds.id).properties == in_mem_ds.properties
 
         assert DataManager.get(in_mem_ds) is not None
@@ -124,7 +124,7 @@ class TestDataManager:
         assert DataManager.get(in_mem_ds).is_ready_for_reading
         assert DataManager.get(in_mem_ds).is_ready_for_reading == in_mem_ds.is_ready_for_reading
         assert len(DataManager.get(in_mem_ds).properties) == 1
-        assert DataManager.get(in_mem_ds).properties.get("default_data") == "qux"
+        assert DataManager.get(in_mem_ds).properties.get("other_data") == "foo"
         assert DataManager.get(in_mem_ds).properties == in_mem_ds.properties
 
     def test_create_and_get_pickle_data_node(self):

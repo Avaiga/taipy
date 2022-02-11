@@ -50,7 +50,7 @@ class DataNode:
             date.
         edition_in_progress (bool) : True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
-        properties (list): List of additional arguments.
+        properties (dict): Dict of additional arguments.
     """
 
     ID_PREFIX = "DATANODE"
