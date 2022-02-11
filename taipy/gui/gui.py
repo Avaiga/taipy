@@ -252,7 +252,7 @@ class Gui(object, metaclass=Singleton):
                 try:
                     value = float(value) if value else 0.0
                 except ParseError as e:
-                    warnings.warn(f"{e}")
+                    warnings.warn(f"{var_name}: Parsing {value} as float:\n{e}")
                     value = 0.0
             elif isinstance(current_value, TaipyLovValue):
                 # find a way to get the full object from the id via adapter
