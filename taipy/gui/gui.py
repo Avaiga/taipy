@@ -362,11 +362,15 @@ class Gui(object, metaclass=Singleton):
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
+        values = {v: attrgetter(v)(self._get_data_scope()) for v in modified_vars}
+        for v in values.values():
+            if isinstance(v, TaipyData):
+                modified_vars.remove(v.get_name())
         for _var in modified_vars:
-            newvalue = attrgetter(_var)(self._get_data_scope())
+            newvalue = values.get(_var)
             self._scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, TaipyData):
-                ws_dict[_var + ".refresh"] = True
+                ws_dict[newvalue.get_name() + ".refresh"] = True
             else:
                 if not from_front and _var == front_var:
                     ret_value = self.__get_content_accessor().get_info(front_var, newvalue)

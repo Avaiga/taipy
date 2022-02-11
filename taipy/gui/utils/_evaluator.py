@@ -110,13 +110,14 @@ class _Evaluator:
         return expr_hash
 
     def evaluate_bind_holder(self, gui: Gui, holder_name: str, expr: str) -> str:
-        expr_holder = f"{holder_name}({expr},'{self.__expr_to_hash.get(expr)}')"
+        expr_hash = self.__expr_to_hash.get(expr)
+        expr_holder = f"{holder_name}({expr_hash},'{expr_hash}')"
         a_set = self.__expr_to_holders.get(expr)
         if a_set:
             a_set.add(expr_holder)
         else:
             self.__expr_to_holders[expr] = set([expr_holder])
-        hash_name = f"{holder_name}_{get_client_var_name(self.__expr_to_hash.get(expr))}"
+        hash_name = f"{holder_name}_{get_client_var_name(expr_hash)}"
         self.__expr_to_hash[expr_holder] = hash_name
         a_list = self.__var_to_expr_list.get(expr)
         if a_list:
@@ -132,7 +133,7 @@ class _Evaluator:
         lst = []
         for hld in self.__expr_to_holders.get(expr, []):
             hash = self.__expr_to_hash.get(hld)
-            var_val, _ = self._analyze_expression(gui, f"{{{hash}}}")
+            var_val, _ = self._analyze_expression(gui, f"{{{hld}}}")
             setattr(gui._get_data_scope(), hash, self.__evaluate_holder(gui, hld, var_val))
             lst.append(hash)
         return lst

@@ -357,7 +357,10 @@ export const createSendActionNameAction = (
 ): TaipyAction => ({
     type: Types.Action,
     name: name || "",
-    payload: { action: value, args: args },
+    payload:
+        typeof value === "object" && !Array.isArray(value) && value !== null
+            ? { ...(value as object), args: args }
+            : { action: value, args: args },
 });
 
 export const createRequestChartUpdateAction = (
