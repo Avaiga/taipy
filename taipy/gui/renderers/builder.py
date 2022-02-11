@@ -732,9 +732,7 @@ class Builder:
         taipy_type = _get_taipy_type(var_type)
         if taipy_type:
             expr = self._gui._get_expr_from_hash(hash_name)
-            hash_name = self._gui._evaluate_bind_holder(
-                taipy_type, expr
-            )
+            hash_name = self._gui._evaluate_bind_holder(taipy_type, expr)
         return hash_name
 
     def set_attributes(self, attributes: t.List[tuple]):
