@@ -144,7 +144,7 @@ def test_submit():
             self.submit_calls.append(task)
             return None
 
-    TaskManager.scheduler = MockScheduler()
+    TaskManager.scheduler = MockScheduler
 
     # pipeline does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingPipeline):
@@ -167,15 +167,15 @@ def test_submit():
     TaskManager.set(task_4)
 
     PipelineManager.submit(pipeline.id)
-    calls_ids = [t.id for t in TaskManager.scheduler.submit_calls]
+    calls_ids = [t.id for t in TaskManager.scheduler().submit_calls]
     tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
     assert calls_ids == tasks_ids
 
     PipelineManager.submit(pipeline)
-    calls_ids = [t.id for t in TaskManager.scheduler.submit_calls]
+    calls_ids = [t.id for t in TaskManager.scheduler().submit_calls]
     tasks_ids = tasks_ids * 2
     assert set(calls_ids) == set(tasks_ids)
-    TaskManager.scheduler = SchedulerFactory.build_scheduler()
+    TaskManager.scheduler = SchedulerFactory.build_scheduler
 
 
 def mult_by_2(nb: int):
@@ -591,44 +591,6 @@ def test_hard_delete():
     assert len(TaskManager.get_all()) == 0
     assert len(DataManager.get_all()) == 1
     assert len(JobManager.get_all()) == 0
-
-
-# TODO REACTIVATE
-@pytest.mark.skip(reason="TEMPORARY DEACTIVATED until TaskManager and others become real singleton")
-def test_generate_json():
-    class Response:
-        status_code = 200
-
-    TaskManager._scheduler = None
-    Config.set_job_config(mode=Config.job_config().MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
-
-    ds_input_config = Config.add_data_node(name="test_data_node_input")
-    ds_output_config = Config.add_data_node(name="test_data_node_output")
-    task_config = Config.add_task("task_config", ds_input_config, print, ds_output_config)
-    pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
-    pipeline = PipelineManager.get_or_create(pipeline_config)
-    pipeline.task_config.test_data_node_input.write("foo")
-    DataManager.set(pipeline.task_config.test_data_node_input)
-    with mock.patch("taipy.scheduler.airflow.airflow_scheduler.requests.get") as get, mock.patch(
-        "taipy.scheduler.airflow.airflow_scheduler.requests.patch"
-    ) as patch, mock.patch("taipy.scheduler.airflow.airflow_scheduler.requests.post") as post:
-        get.return_value = Response()
-        PipelineManager.scheduler.get_credentials = mock.MagicMock()
-        PipelineManager.submit(pipeline.id)
-
-        get.assert_called_once()
-        post.assert_called_once()
-        patch.assert_called_once()
-
-    dag_as_json = Path(Config.job_config().airflow_dags_folder).resolve() / "taipy" / f"{pipeline.id}.json"
-    data = json.loads(dag_as_json.read_text())
-
-    assert data["path"] == PipelineManager.scheduler.generate_airflow_path()
-    assert data["dag_id"] == pipeline.id
-    assert data["storage_folder"] == PipelineManager.scheduler.generate_storage_folder_path()
-    assert data["tasks"] == [task.id for task in pipeline.tasks.values()]
-
-    PipelineManager.scheduler.stop()
 
 
 def test_automatic_reload():

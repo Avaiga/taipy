@@ -27,14 +27,13 @@ class TaskManager:
     """
 
     repository: TaskRepository = TaskRepository()
-    scheduler = SchedulerFactory.build_scheduler()
+    _scheduler = None
 
-    # TODO: find replacement
-    # @property
-    # def scheduler(self) -> AbstractScheduler:
-    #     if not self._scheduler:
-    #         self._scheduler = SchedulerFactory.build_scheduler()
-    #     return self._scheduler
+    @classmethod
+    def scheduler(cls) -> AbstractScheduler:
+        if not cls._scheduler:
+            cls._scheduler = SchedulerFactory.build_scheduler()
+        return cls._scheduler
 
     @classmethod
     def delete_all(cls):

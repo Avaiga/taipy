@@ -535,7 +535,7 @@ def test_submit():
             self.submit_calls.append(task.id)
             return super().submit_task(task, callbacks)
 
-    TaskManager.scheduler = MockScheduler()
+    TaskManager.scheduler = MockScheduler
 
     with pytest.raises(NonExistingScenario):
         ScenarioManager.submit(scenario.id)
@@ -568,7 +568,7 @@ def test_submit():
     TaskManager.set(task_4)
     TaskManager.set(task_5)
     ScenarioManager.submit(scenario.id)
-    submit_calls = TaskManager.scheduler.submit_calls
+    submit_calls = TaskManager.scheduler().submit_calls
     assert len(submit_calls) == 5
     assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
     assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
@@ -577,7 +577,7 @@ def test_submit():
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
     ScenarioManager.submit(scenario)
-    submit_calls = TaskManager.scheduler.submit_calls
+    submit_calls = TaskManager.scheduler().submit_calls
     assert len(submit_calls) == 10
     assert set(submit_calls) == {task_1.id, task_2.id, task_4.id, task_3.id, task_5.id}
     assert submit_calls.index(task_2.id) < submit_calls.index(task_3.id)
@@ -585,7 +585,7 @@ def test_submit():
     assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
-    TaskManager.scheduler = SchedulerFactory.build_scheduler()
+    TaskManager.scheduler = SchedulerFactory.build_scheduler
 
 
 def test_scenarios_comparison():

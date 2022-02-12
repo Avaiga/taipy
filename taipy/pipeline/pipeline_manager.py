@@ -167,7 +167,7 @@ class PipelineManager:
         else:
             pipeline = cls.get(pipeline)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
-        TaskManager.scheduler.submit(pipeline, pipeline_subscription_callback)
+        TaskManager.scheduler().submit(pipeline, pipeline_subscription_callback)
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:

@@ -168,7 +168,7 @@ def setup():
 
 
 def delete_everything():
-    TaskManager.scheduler = SchedulerFactory.build_scheduler()
+    TaskManager.scheduler = SchedulerFactory.build_scheduler
     ScenarioManager.delete_all()
     PipelineManager.delete_all()
     DataManager.delete_all()

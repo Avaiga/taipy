@@ -57,6 +57,5 @@ jobs:
           pytest > pytest_res
           cat pytest_res
 
-          # Only one skip is allowed in the pipeline manager
-          # The other skips should be remove with to dependencies
-          tail pytest_res | grep "1 skipped"
+          # Ensure that no tests are skipped
+          tail -n1 pytest_res | grep --invert-match "skipped"
