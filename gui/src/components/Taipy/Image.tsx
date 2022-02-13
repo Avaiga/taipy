@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { styled, SxProps, Theme } from "@mui/material/styles";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
@@ -114,11 +114,7 @@ const Image = (props: ImageProps) => {
         });
     }, [props.content]);
 
-    const style = useMemo(() => {
-        const st = { width: width } as CSSProperties;
-        st.height = height;
-        return st;
-    }, [width, height]);
+    const style = useMemo(() => ({ width: width, height: height }), [width, height]);
 
     const imgStyle = useMemo(() => ({ backgroundImage: `url("${content}")` }), [content]);
 
@@ -138,7 +134,7 @@ const Image = (props: ImageProps) => {
             focusRipple
             style={style}
             onClick={handleClick}
-            disabled={!active || !tp_onAction}
+            disabled={!active}
             className={className}
             id={id}
         >

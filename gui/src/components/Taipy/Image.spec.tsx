@@ -12,7 +12,6 @@ describe("Image Component", () => {
         const { getByRole } = render(<Image defaultContent="/url/toto.png" />);
         const elt = getByRole("button");
         expect(elt.tagName).toBe("BUTTON");
-        expect(elt).toBeDisabled();
     });
     it("displays the right info for string", async () => {
         const { getByRole } = render(<Image defaultContent="/url/toto.png" className="taipy-image" />);

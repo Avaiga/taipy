@@ -1,8 +1,9 @@
 from abc import ABC
 from datetime import datetime
 import typing as t
+import warnings
 
-from . import dateToISO
+from . import dateToISO, ISOToDate
 
 
 class TaipyBase(ABC):
@@ -16,6 +17,12 @@ class TaipyBase(ABC):
     def get_name(self):
         return self.__hash_name
 
+    def set(self, data: t.Any):
+        self.__data = data
+
+    def cast_value(self, value: t.Any):
+        return value
+
 
 class TaipyData(TaipyBase):
     pass
@@ -23,7 +30,10 @@ class TaipyData(TaipyBase):
 
 class TaipyBool(TaipyBase):
     def get(self):
-        return bool(super().get())
+        return self.cast_value(super().get())
+
+    def cast_value(self, value: t.Any):
+        return bool(value)
 
 
 class TaipyNumber(TaipyBase):
@@ -32,6 +42,16 @@ class TaipyNumber(TaipyBase):
             return float(super().get())
         except ValueError:
             raise ValueError(f"Variable {self.get_name()} should hold a number")
+
+    def cast_value(self, value: t.Any):
+        if isinstance(value, str):
+            try:
+                return float(value) if value else 0.0
+            except Exception as e:
+                warnings.warn(f"{self.get_name()}: Parsing {value} as float:\n{e}")
+                return 0.0
+        else:
+            super().cast_value(value)
 
 
 class TaipyDate(TaipyBase):
@@ -42,6 +62,11 @@ class TaipyDate(TaipyBase):
         elif val is not None:
             val = str(val)
         return val
+
+    def cast_value(self, value: t.Any):
+        if isinstance(value, str):
+            return ISOToDate(value)
+        return super().cast_value(value)
 
 
 class TaipyLovValue(TaipyBase):

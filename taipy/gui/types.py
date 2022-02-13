@@ -2,6 +2,7 @@ from enum import Enum
 import typing as t
 
 from .utils import (
+    TaipyBase,
     TaipyBool,
     TaipyContent,
     TaipyContentImage,
@@ -37,32 +38,22 @@ class AttributeType(Enum):
     json = "json"
     react = "react"
     dict = "dict"
-    dynamic_number = "dynamicnumber"
-    dynamic_boolean = "dynamicbool"
+    dynamic_number = TaipyNumber
+    dynamic_boolean = TaipyBool
     dynamic_list = "dynamiclist"
-    data = "data"
-    date = "date"
-    lov_value = "lovvalue"
-    lov = "lov"
-    content = "content"
-    image = "image"
+    data = TaipyData
+    date = TaipyDate
+    lov_value = TaipyLovValue
+    lov = TaipyLov
+    content = TaipyContent
+    image = TaipyContentImage
 
 
-def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[str]:
-    if a_type == AttributeType.data:
-        return TaipyData.__name__
-    elif a_type == AttributeType.boolean or a_type == AttributeType.dynamic_boolean:
-        return TaipyBool.__name__
-    elif a_type == AttributeType.number or a_type == AttributeType.dynamic_number:
-        return TaipyNumber.__name__
-    elif a_type == AttributeType.date:
-        return TaipyDate.__name__
-    elif a_type == AttributeType.lov_value:
-        return TaipyLovValue.__name__
-    elif a_type == AttributeType.lov:
-        return TaipyLov.__name__
-    elif a_type == AttributeType.content:
-        return TaipyContent.__name__
-    elif a_type == AttributeType.image:
-        return TaipyContentImage.__name__
+def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[t.Type[TaipyBase]]:
+    if isinstance(a_type, AttributeType) and isinstance(a_type.value, TaipyBase.__class__):
+        return a_type.value
+    if a_type == AttributeType.boolean:
+        return TaipyBool
+    elif a_type == AttributeType.number:
+        return TaipyNumber
     return None

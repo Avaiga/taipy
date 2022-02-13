@@ -48,7 +48,7 @@ describe("Slider Component", () => {
         fireEvent.change(elt, { target: { value: 99 } });
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { value: 50 },
+            payload: { value: 50, relvar: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -56,7 +56,7 @@ describe("Slider Component", () => {
         fireEvent.change(elt, { target: { value: 0 } });
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { value: 1 },
+            payload: { value: 1, relvar: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -64,7 +64,7 @@ describe("Slider Component", () => {
         fireEvent.change(elt, { target: { value: 30 } });
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { value: 30 },
+            payload: { value: 30, relvar: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -105,7 +105,7 @@ describe("Slider Component", () => {
         fireEvent.change(elt, { target: { value: 99 } });
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
-            payload: { value: 99 },
+            payload: { value: 99, relvar: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });

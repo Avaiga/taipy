@@ -12,6 +12,7 @@ import { createSendUpdateAction } from "../../context/taipyReducers";
 import { boxSx, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
+import { getUpdateVar } from "./utils";
 
 const renderTree = (lov: LovItem[], active: boolean, searchValue: string) => {
     return lov.map((li) => {
@@ -85,9 +86,9 @@ const TreeView = (props: SelTreeProps) => {
     const clickHandler = useCallback(
         (event: SyntheticEvent, nodeIds: string[] | string) => {
             setSelectedValue(nodeIds);
-            dispatch(createSendUpdateAction(tp_varname, Array.isArray(nodeIds) ? nodeIds : [nodeIds], propagate));
+            dispatch(createSendUpdateAction(tp_varname, Array.isArray(nodeIds) ? nodeIds : [nodeIds], propagate, getUpdateVar(tp_updatevars, "lov")));
         },
-        [tp_varname, dispatch, propagate]
+        [tp_varname, dispatch, propagate, tp_updatevars]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);

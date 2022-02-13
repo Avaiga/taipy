@@ -14,7 +14,9 @@ describe("Input Component", () => {
         expect(elt.tagName).toBe("INPUT");
     });
     it("displays the right info for string", async () => {
-        const { getByDisplayValue } = render(<Input value="toto" type="text" defaultValue="titi" className="taipy-input" />);
+        const { getByDisplayValue } = render(
+            <Input value="toto" type="text" defaultValue="titi" className="taipy-input" />
+        );
         const elt = getByDisplayValue("toto");
         expect(elt.parentElement?.parentElement).toHaveClass("taipy-input");
     });
@@ -42,12 +44,19 @@ describe("Input Component", () => {
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByDisplayValue } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+        const { getByDisplayValue } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value="Val" type="text" tp_varname="varname" />
-            </TaipyContext.Provider>);
+            </TaipyContext.Provider>
+        );
         const elt = getByDisplayValue("Val");
         userEvent.clear(elt);
-        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: ""}, propagate: true, type: "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "varname",
+            payload: { value: "", relvar: "" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
+        });
     });
 });
 
@@ -58,7 +67,9 @@ describe("Number Component", () => {
         expect(elt.tagName).toBe("INPUT");
     });
     it("displays the right info for string", async () => {
-        const { getByDisplayValue } = render(<Input value="12" type="number" defaultValue="1" className="taipy-number" />);
+        const { getByDisplayValue } = render(
+            <Input value="12" type="number" defaultValue="1" className="taipy-number" />
+        );
         const elt = getByDisplayValue(12);
         expect(elt.parentElement?.parentElement).toHaveClass("taipy-number");
     });
@@ -86,12 +97,19 @@ describe("Number Component", () => {
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByDisplayValue } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+        const { getByDisplayValue } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
                 <Input value={"33"} type="number" tp_varname="varname" />
-            </TaipyContext.Provider>);
+            </TaipyContext.Provider>
+        );
         const elt = getByDisplayValue("33");
         userEvent.clear(elt);
-        userEvent.type(elt, "666")
-        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: "666"}, propagate: true, type: "SEND_UPDATE_ACTION"});
+        userEvent.type(elt, "666");
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "varname",
+            payload: { value: "666", relvar: "" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
+        });
     });
 });
