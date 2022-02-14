@@ -58,4 +58,11 @@ jobs:
           cat pytest_res
 
           # Ensure that no tests are skipped
+          echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"
+          echo "OK"
+
+          # Ensure no warnings
+          echo "Ensure that no warnings are issued"
+          tail -n1 pytest_res | grep --invert-match "warning"
+          echo "OK"

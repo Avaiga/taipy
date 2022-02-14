@@ -1,4 +1,4 @@
-import collections
+from collections.abc import Hashable
 from typing import Dict, Iterable, List, Union
 
 import pandas as pd
@@ -40,7 +40,7 @@ class FilterDataNode:
     def __getitem__(self, key):
         if isinstance(key, FilterDataNode):
             key = key.data
-        if isinstance(key, collections.Hashable):
+        if isinstance(key, Hashable):
             filtered_data = self.__getitem_hashable(key)
         elif isinstance(key, slice):
             filtered_data = self.__getitem_slice(key)
