@@ -152,28 +152,51 @@ class TestDataNode:
         assert ds.is_ready_for_reading
         assert ds.job_ids == [job_id]
 
-    def test_is_up_to_date_no_validity_period(self):
+    def test_is_in_cache_no_validity_period_cacheable_false(self):
         # Test Never been writen
-        ds = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id")
-        assert ds.is_up_to_date is False
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id")
+        assert not dn.is_in_cache
 
         # test has been writen
-        ds.write("My data")
-        assert ds.is_up_to_date is True
+        dn.write("My data")
+        assert dn.is_in_cache is False
 
-    def test_is_up_to_date_with_30_min_validity_period(self):
+    def test_is_in_cache_no_validity_period_cacheable_true(self):
         # Test Never been writen
-        ds = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id", validity_minutes=30)
-        assert ds.is_up_to_date is False
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", None, properties={"cacheable": True})
+        assert dn.is_in_cache is False
+
+        # test has been writen
+        dn.write("My data")
+        assert dn.is_in_cache is True
+
+    def test_is_in_cache_with_30_min_validity_period_cacheable_false(self):
+        # Test Never been writen
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id", validity_minutes=30)
+        assert dn.is_in_cache is False
 
         # Has been writen less than 30 minutes ago
-        ds.write("My data")
-        assert ds.is_up_to_date is True
+        dn.write("My data")
+        assert dn.is_in_cache is False
 
         # Has been writen more than 30 minutes ago
-        ds._last_edition_date = datetime.now() + timedelta(days=-1)
-        DataManager().set(ds)
-        assert ds.is_up_to_date is False
+        dn._last_edition_date = datetime.now() + timedelta(days=-1)
+        DataManager.set(dn)
+        assert dn.is_in_cache is False
+
+    def test_is_in_cache_with_30_min_validity_period_cacheable_true(self):
+        # Test Never been writen
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, properties={"cacheable": True}, validity_minutes=30)
+        assert dn.is_in_cache is False
+
+        # Has been writen less than 30 minutes ago
+        dn.write("My data")
+        assert dn.is_in_cache is True
+
+        # Has been writen more than 30 minutes ago
+        dn._last_edition_date = datetime.now() + timedelta(days=-1)
+        DataManager().set(dn)
+        assert dn.is_in_cache is False
 
     def test_pandas_filter(self, default_data_frame):
         df_ds = FakeDataframeDataNode("fake dataframe ds", default_data_frame)

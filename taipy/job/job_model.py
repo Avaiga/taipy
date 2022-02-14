@@ -11,6 +11,7 @@ class JobModel:
     id: JobId
     task_id: str
     status: Status
+    force: bool
     creation_date: str
     subscribers: List[Dict]
     exceptions: List[str]
@@ -24,6 +25,7 @@ class JobModel:
             id=data["id"],
             task_id=data["task_id"],
             status=Status.from_repr(data["status"]),
+            force=data["force"],
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             exceptions=data["exceptions"],

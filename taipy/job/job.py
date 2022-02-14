@@ -28,20 +28,22 @@ class Job:
     Attributes:
         id: Id of the Job.
         task: Task that is executed by the job.
+        force: Boolean to enforce the execution whatever the cache data nodes.
         status: Current status of the job.
         creation_date: Date of the object creation.
     """
 
-    def __init__(self, id: JobId, task: Task):
+    def __init__(self, id: JobId, task: Task, force=False):
         self.id = id
         self.task = task
+        self.force = force
         self.status = Status.SUBMITTED
         self.creation_date = datetime.now()
         self._subscribers: List[Callable] = []
         self.__exceptions: List[Exception] = []
 
     def __contains__(self, task: Task):
-        """Allows to know if the Job contains a specific task.
+        """Returns true if the Job contains a specific task.
 
         Returns:
             True if the Job is based on this task.
@@ -102,8 +104,13 @@ class Job:
         """Sets the status to completed and notifies subscribers."""
         self.status = Status.COMPLETED
 
+    @_run_callbacks
+    def skipped(self):
+        """Sets the status to skipped and notifies subscribers."""
+        self.status = Status.SKIPPED
+
     def is_failed(self) -> bool:
-        """Allows to know if the job failed.
+        """Returns true if the job failed.
 
         Returns:
             True if the job has failed.
@@ -111,7 +118,7 @@ class Job:
         return self.status == Status.FAILED
 
     def is_blocked(self) -> bool:
-        """Allows to know if the job is blocked.
+        """Returns true if the job is blocked.
 
         Returns:
             True if the job is blocked.
@@ -119,7 +126,7 @@ class Job:
         return self.status == Status.BLOCKED
 
     def is_cancelled(self) -> bool:
-        """Allows to know if the job is cancelled.
+        """Returns true if the job is cancelled.
 
         Returns:
             True if the job is cancelled.
@@ -127,7 +134,7 @@ class Job:
         return self.status == Status.CANCELLED
 
     def is_submitted(self) -> bool:
-        """Allows to know if the job is submitted.
+        """Returns true if the job is submitted.
 
         Returns:
             True if the job is submitted.
@@ -135,15 +142,23 @@ class Job:
         return self.status == Status.SUBMITTED
 
     def is_completed(self) -> bool:
-        """Allows to know if the job is completed.
+        """Returns true if the job is completed.
 
         Returns:
             True if the job is completed.
         """
         return self.status == Status.COMPLETED
 
+    def is_skipped(self) -> bool:
+        """Returns true if the job is skipped.
+
+        Returns:
+            True if the job is skipped.
+        """
+        return self.status == Status.SKIPPED
+
     def is_running(self) -> bool:
-        """Allows to know if the job is running.
+        """Returns true if the job is running.
 
         Returns:
             True if the job is running.
@@ -151,7 +166,7 @@ class Job:
         return self.status == Status.RUNNING
 
     def is_pending(self) -> bool:
-        """Allows to know if the job is pending.
+        """Returns true if the job is pending.
 
         Returns:
             True if the job is pending.
@@ -159,12 +174,12 @@ class Job:
         return self.status == Status.PENDING
 
     def is_finished(self) -> bool:
-        """Allows to know if the job is finished.
+        """Returns true if the job is finished.
 
         Returns:
             True if the job is finished.
         """
-        return self.is_completed() or self.is_failed() or self.is_cancelled()
+        return self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped()
 
     def on_status_change(self, *functions):
         """Allows to be notified when the status of the job changes.

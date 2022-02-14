@@ -128,11 +128,19 @@ class DataManager:
     @classmethod
     def __create(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
         try:
+            props = data_node_config.properties.copy()
+            days = props.pop("validity_days", None)
+            hours = props.pop("validity_hours", None)
+            minutes = props.pop("validity_minutes", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
                 config_name=data_node_config.name,
                 scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,
-                properties=data_node_config.properties.copy(),
+                validity_days=days,
+                validity_hours=hours,
+                validity_minutes=minutes,
+                properties=props,
+
             )
         except KeyError:
             logging.error(f"Cannot create Data node. " f"Type {data_node_config.storage_type} does not exist.")

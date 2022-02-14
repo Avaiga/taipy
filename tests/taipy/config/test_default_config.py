@@ -36,7 +36,8 @@ def _test_default_data_node_config(ds_config: DataNodeConfig):
     assert ds_config.name == protect_name(ds_config.name)
     assert ds_config.storage_type == "pickle"
     assert ds_config.scope == Scope.PIPELINE
-    assert len(ds_config.properties) == 0
+    assert not ds_config.cacheable
+    assert len(ds_config.properties) == 1
 
 
 def _test_default_task_config(task_config: TaskConfig):

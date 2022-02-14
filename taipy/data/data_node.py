@@ -12,6 +12,7 @@ import pandas as pd
 from taipy.common.alias import DataNodeId, JobId
 from taipy.common.reload import reload, self_reload
 from taipy.common.unicode_to_python_variable_name import protect_name
+from taipy.config.data_node_config import DataNodeConfig
 from taipy.data.filter import FilterDataNode
 from taipy.data.operator import JoinOperator, Operator
 from taipy.data.scope import Scope
@@ -295,12 +296,14 @@ class DataNode:
 
     @property  # type: ignore
     @self_reload("data")
-    def is_up_to_date(self):
+    def is_in_cache(self):
+        if not self._properties.get(DataNodeConfig.IS_CACHEABLE_KEY):
+            return False
         if not self._last_edition_date:
-            # Never been written so it is not up to date
+            # Never been written so it is not up-to-date
             return False
         if not self._validity_days and not self._validity_hours and not self._validity_minutes:
-            # No validity period so it is up to date
+            # No validity period and cacheable so it is up-to-date
             return True
         if datetime.now() > self.expiration_date():
             # expiration_date has been passed

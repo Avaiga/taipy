@@ -48,8 +48,8 @@ class Task:
         self.config_name = protect_name(config_name)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_name, str(uuid.uuid4())]))
         self.parent_id = parent_id
-        self.__input = {ds.config_name: ds for ds in input}
-        self.__output = {ds.config_name: ds for ds in output or []}
+        self.__input = {dn.config_name: dn for dn in input}
+        self.__output = {dn.config_name: dn for dn in output or []}
         self.function = function
 
     def __hash__(self):
@@ -86,5 +86,5 @@ class Task:
            Lowest `scope` present in input and output data node or GLOBAL if there are no neither input or output.
         """
         data_nodes = list(self.input.values()) + list(self.output.values())
-        scope = min(ds.scope for ds in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
+        scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return Scope(scope)

@@ -58,17 +58,20 @@ airflow_user = "admin"
 [DATA_NODE.default]
 storage_type = "in_memory"
 scope = "PIPELINE"
+cacheable = false
 custom = "default_custom_prop"
 
 [DATA_NODE.ds1]
 storage_type = "pickle"
 scope = "PIPELINE"
+cacheable = false
 custom = "custom property"
 default_data = "ds1"
 
 [DATA_NODE.ds2]
 storage_type = "in_memory"
 scope = "SCENARIO"
+cacheable = false
 custom = "default_custom_prop"
 foo = "bar"
 default_data = "ds2"

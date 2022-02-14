@@ -38,11 +38,16 @@ class DataNodeConfig:
     SCOPE_KEY = "scope"
     DEFAULT_SCOPE = Scope.PIPELINE
 
+    IS_CACHEABLE_KEY = "cacheable"
+    DEFAULT_IS_CACHEABLE_VALUE = False
+
     def __init__(self, name: str = None, storage_type: str = None, scope: Scope = None, **properties):
         self.name = protect_name(name) if name else None
         self.storage_type = storage_type
         self.scope = scope
         self.properties = properties
+        if self.properties.get(self.IS_CACHEABLE_KEY) is None:
+            self.properties[self.IS_CACHEABLE_KEY] = self.DEFAULT_IS_CACHEABLE_VALUE
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return self.properties.get(item)

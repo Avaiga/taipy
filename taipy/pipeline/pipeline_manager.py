@@ -152,7 +152,9 @@ class PipelineManager:
         return cls.repository.load_all()
 
     @classmethod
-    def submit(cls, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None):
+    def submit(
+        cls, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None, force: bool = False
+    ):
         """
         Submits the pipeline corresponding to the pipeline or the identifier given as parameter for execution.
 
@@ -160,6 +162,8 @@ class PipelineManager:
 
         Parameters:
             pipeline (Union[PipelineId, Pipeline]): the pipeline or its id to submit.
+            callbacks: Callbacks on job status changes.
+            force: Boolean to enforce re execution of the tasks whatever the cache data nodes.
         """
         callbacks = callbacks or []
         if isinstance(pipeline, Pipeline):
@@ -167,7 +171,7 @@ class PipelineManager:
         else:
             pipeline = cls.get(pipeline)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
-        TaskManager.scheduler().submit(pipeline, pipeline_subscription_callback)
+        TaskManager.scheduler().submit(pipeline, callbacks=pipeline_subscription_callback, force=force)
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:

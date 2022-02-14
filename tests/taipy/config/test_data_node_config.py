@@ -74,6 +74,7 @@ def test_data_node_getitem():
     assert Config.data_nodes()[data_node_name].storage_type == data_node_config.storage_type
     assert Config.data_nodes()[data_node_name].scope == data_node_config.scope
     assert Config.data_nodes()[data_node_name].properties == data_node_config.properties
+    assert Config.data_nodes()[data_node_name].cacheable == data_node_config.cacheable
 
 
 def test_data_node_creation_no_duplication():

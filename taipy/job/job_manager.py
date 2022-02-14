@@ -20,17 +20,17 @@ class JobManager:
     ID_PREFIX = "JOB_"
 
     @classmethod
-    def create(cls, task: Task, callbacks: Iterable[Callable]) -> Job:
+    def create(cls, task: Task, callbacks: Iterable[Callable], force=False) -> Job:
         """Returns a new job representing a unique execution of the provided task.
 
         Args:
             task (Task): The task to execute.
             callbacks (Iterable[Callable]): Iterable of callable to be executed on job status change.
-
+            force: Boolean to enforce re execution of the task whatever the cache of the output data nodes.
         Returns:
             A new job, that is created for executing given task.
         """
-        job = Job(id=JobId(f"{cls.ID_PREFIX}{uuid.uuid4()}"), task=task)
+        job = Job(id=JobId(f"{cls.ID_PREFIX}{uuid.uuid4()}"), task=task, force=force)
         cls.set(job)
         job.on_status_change(*callbacks)
         return job

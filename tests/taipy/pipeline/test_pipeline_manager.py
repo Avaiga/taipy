@@ -140,7 +140,7 @@ def test_submit():
     class MockScheduler(Scheduler):
         submit_calls = []
 
-        def submit_task(self, task: Task, callbacks=None):
+        def submit_task(self, task: Task, callbacks=None, force=False):
             self.submit_calls.append(task)
             return None
 

@@ -61,7 +61,7 @@ class Taipy:
         All the tasks of the entity task/pipeline/scenario will be submitted for execution.
 
         Parameters:
-            entity (Union[Scenario, ScenarioId]) : the entity or its identifier to submit.
+            entity (Union[Scenario, Pipeline]) : the entity to submit.
         """
         if isinstance(entity, Scenario):
             return ScenarioManager.submit(entity)

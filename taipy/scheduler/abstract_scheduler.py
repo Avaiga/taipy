@@ -15,11 +15,11 @@ class AbstractScheduler:
     """
 
     @abstractmethod
-    def submit(self, pipeline, callbacks: Optional[Iterable[Callable]]) -> List[Job]:
+    def submit(self, pipeline, callbacks: Optional[Iterable[Callable]], force: bool = False) -> List[Job]:
         return NotImplemented
 
     @abstractmethod
-    def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
+    def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
         return NotImplemented
 
     @abstractmethod

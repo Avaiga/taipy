@@ -55,6 +55,7 @@ def test_comparison(task):
 
 def test_status_job(job):
     assert job.is_submitted()
+    assert job.is_skipped() is False
     assert job.is_pending() is False
     assert job.is_blocked() is False
     assert job.is_cancelled() is False
@@ -74,6 +75,8 @@ def test_status_job(job):
     assert job.is_pending()
     job.blocked()
     assert job.is_blocked()
+    job.skipped()
+    assert job.is_skipped()
 
 
 def test_notification_job(job):
@@ -85,6 +88,10 @@ def test_notification_job(job):
     subscribe.reset_mock()
 
     job.completed()
+    subscribe.assert_called_once_with(job)
+    subscribe.reset_mock()
+
+    job.skipped()
     subscribe.assert_called_once_with(job)
 
 

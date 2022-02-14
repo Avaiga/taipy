@@ -17,6 +17,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
             job.id,
             job.task.id,
             job.status,
+            job.force,
             job.creation_date.isoformat(),
             [],
             self.__to_names(job.exceptions),
@@ -26,6 +27,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
         job = Job(id=model.id, task=TaskRepository().load(model.task_id))
 
         job.status = model.status
+        job.force = model.force
         job.creation_date = datetime.fromisoformat(model.creation_date) if model.creation_date else None
         # for it in model.subscribers:
         #     try:

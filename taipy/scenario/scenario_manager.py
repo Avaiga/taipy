@@ -153,7 +153,7 @@ class ScenarioManager:
         return cls.repository.load_all()
 
     @classmethod
-    def submit(cls, scenario: Union[Scenario, ScenarioId]):
+    def submit(cls, scenario: Union[Scenario, ScenarioId], force: bool = False):
         """
         Submits the scenario corresponding to the scenario of the identifier given as parameter for execution.
 
@@ -161,6 +161,7 @@ class ScenarioManager:
 
         Parameters:
             scenario (Union[Scenario, ScenarioId]) : the scenario or its identifier to submit.
+            force: Boolean to enforce re execution of the tasks whatever the cache data nodes.
         """
         if isinstance(scenario, Scenario):
             scenario = cls.get(scenario.id)
@@ -168,7 +169,7 @@ class ScenarioManager:
             scenario = cls.get(scenario)
         callbacks = cls.__get_status_notifier_callbacks(scenario)
         for pipeline in scenario.pipelines.values():
-            PipelineManager.submit(pipeline, callbacks)
+            PipelineManager.submit(pipeline, callbacks=callbacks, force=force)
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:

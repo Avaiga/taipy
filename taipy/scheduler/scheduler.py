@@ -25,12 +25,13 @@ class Scheduler(AbstractScheduler):
         self._dispatcher = JobDispatcher(job_config.nb_of_workers)  # type: ignore
         self.lock = Lock()
 
-    def submit(self, pipeline, callbacks: Optional[Iterable[Callable]] = None) -> List[Job]:
+    def submit(self, pipeline, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> List[Job]:
         """Submit pipeline for execution.
 
         Args:
              pipeline: Pipeline to be transformed into Job(s) for execution.
              callbacks: Optional list of functions that should be executed once the job is done.
+             force: Boolean to enforce re execution of the tasks whatever the cache data nodes.
 
         Returns:
             The created Jobs.
@@ -39,13 +40,13 @@ class Scheduler(AbstractScheduler):
         tasks = pipeline.get_sorted_tasks()
         for ts in tasks:
             for task in ts:
-                res.append(self.submit_task(task, callbacks))
+                res.append(self.submit_task(task, callbacks, force))
         return res
 
-    def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None) -> Job:
-        for ds in task.output.values():
-            ds.lock_edition()
-            DataManager.set(ds)
+    def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
+        for dn in task.output.values():
+            dn.lock_edition()
+            DataManager.set(dn)
         job = JobManager.create(task, itertools.chain([self.on_status_change], callbacks or []))
         if self.is_blocked(job):
             job.blocked()
@@ -58,17 +59,18 @@ class Scheduler(AbstractScheduler):
             self.__run()
         return job
 
-    def is_blocked(self, obj: Union[Task, Job]) -> bool:
-        """Returns True if the Job cannot be executed.
+    @staticmethod
+    def is_blocked(obj: Union[Task, Job]) -> bool:
+        """Returns True if the execution of the job or the task is blocked by the execution of another job.
 
         Args:
              obj: Task or Job.
 
         Returns:
-             True if one of its input data node is blocked.
+             True if one of its input data nodes is blocked.
         """
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
-        return any(not DataManager.get(ds.id).is_ready_for_reading for ds in data_nodes)
+        return any(not DataManager.get(dn.id).is_ready_for_reading for dn in data_nodes)
 
     def __run(self):
         with self.lock:

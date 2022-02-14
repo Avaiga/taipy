@@ -2,8 +2,9 @@ __all__ = ["JobDispatcher"]
 
 import logging
 from concurrent.futures import ProcessPoolExecutor
+from datetime import datetime
 from functools import partial
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 from taipy.common.alias import JobId
 from taipy.data.data_manager import DataManager
@@ -36,12 +37,16 @@ class JobDispatcher:
         Args:
             job: Element to execute.
         """
-        job.running()
-        JobManager.set(job)
-        self._nb_worker_available -= 1
-        future = self._executor.submit(self._call_function, job.id, job.task)
-        future.add_done_callback(self.__release_worker)
-        future.add_done_callback(partial(self.__update_status, job))
+        if job.force or self._needs_to_run(job.task):
+            job.running()
+            JobManager.set(job)
+            self._nb_worker_available -= 1
+            future = self._executor.submit(self._call_function, job.id, job.task)
+            future.add_done_callback(self.__release_worker)
+            future.add_done_callback(partial(self.__update_status, job))
+        else:
+            job.skipped()
+            JobManager.set(job)
 
     def __release_worker(self, _):
         self._nb_worker_available += 1
@@ -49,6 +54,27 @@ class JobDispatcher:
     def __update_status(self, job, ft):
         job.update_status(ft)
         JobManager.set(job)
+
+    @staticmethod
+    def _needs_to_run(task: Task) -> bool:
+        """Returns True if the task outputs are in cache and if the output's last edition date is prior the input's last
+        edition date.
+
+        Args:
+             task: Task
+        Returns:
+             True if the task needs to run.
+        """
+        if len(task.output) == 0:
+            return True
+        are_outputs_in_cache = all(DataManager().get(dn.id).is_in_cache for dn in task.output.values())
+        if not are_outputs_in_cache:
+            return True
+        if len(task.input) == 0:
+            return False
+        input_last_edition = max(DataManager().get(dn.id).last_edition_date for dn in task.input.values())
+        output_last_edition = min(DataManager().get(dn.id).last_edition_date for dn in task.output.values())
+        return input_last_edition > output_last_edition
 
     @classmethod
     def _call_function(cls, job_id: JobId, task: Task):
@@ -63,20 +89,20 @@ class JobDispatcher:
 
     @classmethod
     def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
-        return [DataManager.get(ds.id).read() for ds in inputs]
+        return [DataManager.get(dn.id).read() for dn in inputs]
 
     @classmethod
     def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
         try:
             _results = cls.__extract_results(outputs, results)
             exceptions = []
-            for res, ds in zip(_results, outputs):
+            for res, dn in zip(_results, outputs):
                 try:
-                    data_node = DataManager.get(ds.id)
+                    data_node = DataManager.get(dn.id)
                     data_node.write(res, job_id=job_id)
                     DataManager.set(data_node)
                 except Exception as e:
-                    exceptions.append(DataNodeWritingError(f"Error writing in datanode id {ds.id}: {e}"))
+                    exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
                     logging.error(f"Error writing output {e}")
             return exceptions
         except Exception as e:
