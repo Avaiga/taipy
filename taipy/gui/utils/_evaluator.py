@@ -9,7 +9,7 @@ from operator import attrgetter
 
 import __main__
 
-from . import _get_expr_var_name, attrsetter, get_client_var_name
+from . import _get_expr_var_name, attrsetter, get_client_var_name, TaipyBase
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -39,7 +39,7 @@ class _Evaluator:
         # instead of binding everywhere the types
         self.__default_bindings = default_bindings
         # expr to holders
-        self.__expr_to_holders: t.Dict[str, t.Set[str]] = {}
+        self.__expr_to_holders: t.Dict[str, t.Set[t.Type[TaipyBase]]] = {}
 
     def get_hash_from_expr(self, expr: str) -> str:
         return self.__expr_to_hash.get(expr, expr)
@@ -109,41 +109,53 @@ class _Evaluator:
             self.__expr_to_var_list[expr] = var_list
         return expr_hash
 
-    def evaluate_bind_holder(self, gui: Gui, holder_name: str, expr: str) -> str:
-        expr_hash = self.__expr_to_hash.get(expr)
-        expr_holder = f"{holder_name}({expr_hash},'{expr_hash}')"
+    def evaluate_bind_holder(self, gui: Gui, holder: t.Type[TaipyBase], expr: str) -> str:
+        expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
+        hash_name = self.__get_holder_hash(holder, expr_hash)
+        expr_lit = expr.replace("'", "\\'")
+        holder_expr = f"{holder.__name__}({expr},'{expr_lit}')"
+        self.__evaluate_holder(gui, holder, expr)
+        # define dependencies
         a_set = self.__expr_to_holders.get(expr)
         if a_set:
-            a_set.add(expr_holder)
+            a_set.add(holder)
         else:
-            self.__expr_to_holders[expr] = set([expr_holder])
-        hash_name = f"{holder_name}_{get_client_var_name(expr_hash)}"
-        self.__expr_to_hash[expr_holder] = hash_name
+            self.__expr_to_holders[expr] = set([holder])
+        self.__expr_to_hash[holder_expr] = hash_name
+        self.__expr_to_var_list[holder_expr] = [expr]
         a_list = self.__var_to_expr_list.get(expr)
         if a_list:
-            a_list.append(expr_holder)
+            a_list.append(holder_expr)
         else:
-            self.__var_to_expr_list[expr] = [expr_holder]
-        var_val, var_list = self._analyze_expression(gui, f"{{{expr_holder}}}")
-        self.__expr_to_var_list[expr_holder] = var_list
-        setattr(gui._get_data_scope(), hash_name, self.__evaluate_holder(expr_holder, var_val))
+            self.__var_to_expr_list[expr] = [holder_expr]
         return hash_name
 
     def evaluate_holders(self, gui: Gui, expr: str) -> t.List[str]:
         lst = []
         for hld in self.__expr_to_holders.get(expr, []):
-            hash = self.__expr_to_hash.get(hld)
-            var_val, _ = self._analyze_expression(gui, f"{{{hld}}}")
-            setattr(gui._get_data_scope(), hash, self.__evaluate_holder(hld, var_val))
+            hash = self.__get_holder_hash(hld, self.__expr_to_hash.get(expr))
+            self.__evaluate_holder(gui, hld, expr)
             lst.append(hash)
         return lst
 
-    def __evaluate_holder(self, expr_holder: str, var_val: t.Dict[str, t.List[str]]) -> t.Any:
+    @staticmethod
+    def __get_holder_hash(holder: t.Type[TaipyBase], expr_hash: str) -> str:
+        return f"{holder.__name__}_{get_client_var_name(expr_hash)}"
+
+    def __evaluate_holder(self, gui: Gui, holder: t.Type[TaipyBase], expr: str) -> TaipyBase:
         try:
-            # evaluate expressions
-            return eval(expr_holder, self.__default_bindings, var_val)
-        except Exception:
-            warnings.warn(f"Cannot evaluate expression '{expr_holder}'")
+            expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
+            holder_hash = self.__get_holder_hash(holder, expr_hash)
+            expr_value = getattr(gui._get_data_scope(), expr_hash)
+            holder_value = getattr(gui._get_data_scope(), holder_hash, None)
+            if not isinstance(holder_value, TaipyBase):
+                holder_value = holder(expr_value, expr_hash)
+                setattr(gui._get_data_scope(), holder_hash, holder_value)
+            else:
+                holder_value.set(expr_value)
+            return holder_value
+        except Exception as e:
+            warnings.warn(f"Cannot evaluate expression {holder.__name__}({expr_hash},'{expr_hash}') for {expr}\n{e}")
         return None
 
     def evaluate_expr(self, gui: Gui, expr: str, bind=False) -> t.Any:
@@ -186,8 +198,11 @@ class _Evaluator:
         for expr in self.__var_to_expr_list[var_name]:
             if expr == var_name:
                 continue
-            hash_expr = self.__expr_to_hash[expr]
-            expr_var_list = self.__expr_to_var_list[expr]  # ["x", "y"]
+            hash_expr = self.__expr_to_hash.get(expr, "UnknownExpr")
+            expr_var_list = self.__expr_to_var_list.get(expr)  # ["x", "y"]
+            if expr_var_list is None:
+                warnings.warn(f"Someting is amiss with expression list for {expr}")
+                continue
             eval_dict = {v: attrgetter(v)(gui._get_data_scope()) for v in expr_var_list}
 
             if self._is_expression(expr):

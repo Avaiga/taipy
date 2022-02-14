@@ -79,14 +79,14 @@ describe("Selector Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Selector lov={lov} tp_varname="varname" />
+                <Selector lov={lov} tp_varname="varname" tp_updatevars="lov=lov" />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
-            payload: { value: "id1" },
+            payload: { value: "id1", relvar: "lov" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -131,7 +131,7 @@ describe("Selector Component", () => {
             userEvent.click(elt2);
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "varname",
-                payload: { value: ["id1", "id3"] },
+                payload: { value: ["id1", "id3"], relvar: "" },
                 propagate: true,
                 type: "SEND_UPDATE_ACTION",
             });

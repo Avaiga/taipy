@@ -11,6 +11,7 @@ import ThemeToggle from "./ThemeToggle";
 import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty } from "../../utils/hooks";
 import { TaipyImage } from "../../utils/lov";
+import { getUpdateVar } from "./utils";
 
 interface ToggleProps extends LovProps {
     style?: CSSProperties;
@@ -31,6 +32,7 @@ const Toggle = (props: ToggleProps) => {
         lov,
         defaultLov = "",
         unselectedValue = "",
+        tp_updatevars = "",
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
@@ -39,8 +41,8 @@ const Toggle = (props: ToggleProps) => {
     const lovList = useLovListMemo(lov, defaultLov);
 
     const changeValue = useCallback(
-        (evt: MouseEvent, val: string) => dispatch(createSendUpdateAction(tp_varname, val === null ? unselectedValue : val, propagate)),
-        [unselectedValue, tp_varname, propagate, dispatch]
+        (evt: MouseEvent, val: string) => dispatch(createSendUpdateAction(tp_varname, val === null ? unselectedValue : val, propagate, getUpdateVar(tp_updatevars, "lov"))),
+        [unselectedValue, tp_varname, propagate, dispatch, tp_updatevars]
     );
 
     return kind === "theme"  ? (

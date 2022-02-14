@@ -16,7 +16,7 @@ import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
 
-import { doNotPropagateEvent } from "./utils";
+import { doNotPropagateEvent, getUpdateVar } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import {
@@ -132,25 +132,25 @@ const Selector = (props: SelTreeProps) => {
                         } else {
                             newKeys.splice(p, 1);
                         }
-                        dispatch(createSendUpdateAction(tp_varname, newKeys, propagate));
+                        dispatch(createSendUpdateAction(tp_varname, newKeys, propagate, getUpdateVar(tp_updatevars, "lov")));
                         return newKeys;
                     } else {
-                        dispatch(createSendUpdateAction(tp_varname, key, propagate));
+                        dispatch(createSendUpdateAction(tp_varname, key, propagate, getUpdateVar(tp_updatevars, "lov")));
                         return [key];
                     }
                 });
             }
         },
-        [tp_varname, dispatch, multiple, propagate, active]
+        [active, tp_varname, dispatch, multiple, propagate, tp_updatevars]
     );
 
-    const handleChange = (event: SelectChangeEvent<typeof selectedValue>) => {
+    const handleChange = useCallback((event: SelectChangeEvent<typeof selectedValue>) => {
         const {
             target: { value },
         } = event;
         setSelectedValue(Array.isArray(value) ? value : [value]);
-        dispatch(createSendUpdateAction(tp_varname, value, propagate));
-    };
+        dispatch(createSendUpdateAction(tp_varname, value, propagate, getUpdateVar(tp_updatevars, "lov")));
+    }, [dispatch, tp_varname, propagate, tp_updatevars]);
 
     const handleDelete = useCallback(
         (e) => {
@@ -158,11 +158,11 @@ const Selector = (props: SelTreeProps) => {
             id &&
                 setSelectedValue((vals) => {
                     const keys = vals.filter((valId) => valId !== id);
-                    dispatch(createSendUpdateAction(tp_varname, keys, propagate));
+                    dispatch(createSendUpdateAction(tp_varname, keys, propagate, getUpdateVar(tp_updatevars, "lov")));
                     return keys;
                 });
         },
-        [tp_varname, propagate, dispatch]
+        [tp_varname, propagate, dispatch, tp_updatevars]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);

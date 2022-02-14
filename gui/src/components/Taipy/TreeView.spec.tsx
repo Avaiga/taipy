@@ -1,48 +1,55 @@
 import React from "react";
-import {render} from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
-import TreeView from './TreeView';
+import TreeView from "./TreeView";
 import { LoV } from "./lovUtils";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
 import { TaipyImage } from "../../utils/lov";
 
 const lov: LoV = [
-    ["id1", "Item 1", [["id1.1", "Item 1.1"], ["id1.2", "Item 1.2"]]],
+    [
+        "id1",
+        "Item 1",
+        [
+            ["id1.1", "Item 1.1"],
+            ["id1.2", "Item 1.2"],
+        ],
+    ],
     ["id2", "Item 2"],
     ["id3", "Item 3"],
     ["id4", "Item 4"],
 ];
 const defLov = '[["id10","Default Item"]]';
 
-const imageItem: [string, string | TaipyImage] = ["ii1", {path:"/img/fred.png", text: "Image"}];
+const imageItem: [string, string | TaipyImage] = ["ii1", { path: "/img/fred.png", text: "Image" }];
 
 describe("TreeView Component", () => {
     it("renders", async () => {
-        const {getByText} = render(<TreeView lov={lov} />);
+        const { getByText } = render(<TreeView lov={lov} />);
         const elt = getByText("Item 1");
         expect(elt.tagName).toBe("DIV");
-    })
+    });
     it("uses the class", async () => {
-        const {getByText} = render(<TreeView lov={lov} className="taipy-tree" />);
+        const { getByText } = render(<TreeView lov={lov} className="taipy-tree" />);
         const elt = getByText("Item 1");
         expect(elt.parentElement?.parentElement?.parentElement?.parentElement?.parentElement).toHaveClass("taipy-tree");
-    })
+    });
     it("can display an image", async () => {
-        const lovWithImage = [...lov, imageItem]
-        const {getByAltText} = render(<TreeView lov={lovWithImage} />);
+        const lovWithImage = [...lov, imageItem];
+        const { getByAltText } = render(<TreeView lov={lovWithImage} />);
         const elt = getByAltText("Image");
         expect(elt.tagName).toBe("IMG");
-    })
+    });
     it("shows a tree", async () => {
         const { getByText, queryAllByText } = render(<TreeView lov={lov} filter={true} />);
         const elt = getByText("Item 1");
-        expect(queryAllByText(/Item 1\./)).toHaveLength(0)
+        expect(queryAllByText(/Item 1\./)).toHaveLength(0);
         userEvent.click(elt);
         getByText("Item 1.2");
-        expect(queryAllByText(/Item 1\./)).toHaveLength(2)
+        expect(queryAllByText(/Item 1\./)).toHaveLength(2);
     });
     it("displays the right info for lov vs defaultLov", async () => {
         const { getByText, queryAllByText } = render(<TreeView lov={lov} defaultLov={defLov} />);
@@ -54,12 +61,12 @@ describe("TreeView Component", () => {
         getByText("Default Item");
     });
     it("shows a selection at start", async () => {
-        const {getByText} = render(<TreeView defaultValue="id1" lov={lov} />);
+        const { getByText } = render(<TreeView defaultValue="id1" lov={lov} />);
         const elt = getByText("Item 1");
         expect(elt.parentElement).toHaveClass("Mui-selected");
     });
     it("shows a selection at start through value", async () => {
-        const {getByText} = render(<TreeView defaultValue="id1" value="id2" lov={lov} />);
+        const { getByText } = render(<TreeView defaultValue="id1" value="id2" lov={lov} />);
         const elt = getByText("Item 1");
         expect(elt.parentElement).not.toHaveClass("Mui-selected");
         const elt2 = getByText("Item 2");
@@ -68,27 +75,34 @@ describe("TreeView Component", () => {
     it("is disabled", async () => {
         const { getAllByRole } = render(<TreeView lov={lov} active={false} />);
         const elts = getAllByRole("treeitem");
-        elts.forEach(elt => expect(elt.firstElementChild).toHaveClass("Mui-disabled"));
+        elts.forEach((elt) => expect(elt.firstElementChild).toHaveClass("Mui-disabled"));
     });
     it("is enabled by default", async () => {
         const { getAllByRole } = render(<TreeView lov={lov} />);
         const elts = getAllByRole("treeitem");
-        elts.forEach(elt => expect(elt.firstElementChild).not.toHaveClass("Mui-disabled"));
+        elts.forEach((elt) => expect(elt.firstElementChild).not.toHaveClass("Mui-disabled"));
     });
     it("is enabled by active", async () => {
         const { getAllByRole } = render(<TreeView lov={lov} active={true} />);
         const elts = getAllByRole("treeitem");
-        elts.forEach(elt => expect(elt.firstElementChild).not.toHaveClass("Mui-disabled"));
+        elts.forEach((elt) => expect(elt.firstElementChild).not.toHaveClass("Mui-disabled"));
     });
     it("dispatch a well formed message base", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>
-                <TreeView lov={lov} tp_varname="varname"/>
-            </TaipyContext.Provider>);
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <TreeView lov={lov} tp_varname="varname" />
+            </TaipyContext.Provider>
+        );
         const elt = getByText("Item 1");
         userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledWith({name: "varname", payload: {value: ["id1"]}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        expect(dispatch).toHaveBeenCalledWith({
+            name: "varname",
+            payload: { value: ["id1"], relvar: "" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
+        });
     });
     //multiple
     it("selects 2 items", async () => {
@@ -98,17 +112,24 @@ describe("TreeView Component", () => {
     it("dispatch a well formed message for multiple", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
                 <TreeView lov={lov} tp_varname="varname" multiple={true} />
-            </TaipyContext.Provider>);
+            </TaipyContext.Provider>
+        );
         const elt = getByText("Item 1");
         userEvent.click(elt);
         const elt2 = getByText("Item 2");
-        userEvent.click(elt2, {ctrlKey: true});
+        userEvent.click(elt2, { ctrlKey: true });
         const elt3 = getByText("Item 3");
-        userEvent.click(elt3, {ctrlKey: true});
-        userEvent.click(elt2, {ctrlKey: true});
-        expect(dispatch).toHaveBeenLastCalledWith({name: "varname", payload: {value: ["id3", "id1"]}, propagate: true, "type": "SEND_UPDATE_ACTION"});
+        userEvent.click(elt3, { ctrlKey: true });
+        userEvent.click(elt2, { ctrlKey: true });
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "varname",
+            payload: { value: ["id3", "id1"], relvar: "" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
+        });
     });
     //filter
     it("displays an input when filter", async () => {

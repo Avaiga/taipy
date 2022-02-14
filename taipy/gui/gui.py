@@ -14,7 +14,6 @@ from operator import attrgetter
 from types import FrameType, FunctionType
 
 import __main__
-from iniconfig import ParseError
 import markdown as md_lib
 from flask import Blueprint, Flask, request, send_from_directory
 from werkzeug.utils import secure_filename
@@ -34,19 +33,15 @@ from .server import Server
 from .taipyimage import TaipyImage
 from .types import WsType
 from .utils import (
-    ISOToDate,
     Singleton,
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDictionary,
     attrsetter,
     TaipyBase,
-    TaipyBool,
     TaipyData,
-    TaipyDate,
     TaipyLov,
     TaipyLovValue,
-    TaipyNumber,
     TaipyContent,
     TaipyContentImage,
     get_client_var_name,
@@ -179,8 +174,6 @@ class Gui(object, metaclass=Singleton):
     def _get_data_scope(self):
         return self._scopes.get_scope()
 
-    # TODO: Check name value to avoid conflicting with Flask,
-    # or, simply, compose with Flask instead of inherit from it.
     def _bind(self, name: str, value: t.Any) -> None:
         if hasattr(self, name):
             raise ValueError(f"Variable '{name}' is already bound")
@@ -215,10 +208,12 @@ class Gui(object, metaclass=Singleton):
         try:
             self.__set_client_id(message)
             if msg_type == WsType.UPDATE.value:
+                payload = message.get("payload", {})
                 self.__front_end_update(
                     message.get("name"),
-                    message.get("payload", {}).get("value"),
+                    payload.get("value"),
                     message.get("propagate", True),
+                    payload.get("relvar"),
                 )
             elif msg_type == WsType.ACTION.value:
                 self.__on_action(message.get("name"), message.get("payload"))
@@ -240,25 +235,35 @@ class Gui(object, metaclass=Singleton):
             self.__send_ws_id(id)
         self._scopes.create_scope(id)
 
-    def __front_end_update(self, var_name: str, value: t.Any, propagate=True) -> None:
-        # Check if Variable is type datetime
+    def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
+        # Check if Variable is a managed type
         current_value = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
-        if isinstance(value, str):
-            if isinstance(current_value, TaipyDate):
-                value = ISOToDate(value)
-            elif isinstance(current_value, TaipyBool):
-                value = bool(value)
-            elif isinstance(current_value, TaipyNumber):
-                try:
-                    value = float(value) if value else 0.0
-                except ParseError as e:
-                    warnings.warn(f"{var_name}: Parsing {value} as float:\n{e}")
-                    value = 0.0
-            elif isinstance(current_value, TaipyLovValue):
-                # find a way to get the full object from the id via adapter
-                pass
-            elif isinstance(current_value, TaipyData):
-                return
+        if isinstance(current_value, TaipyData):
+            return
+        elif rel_var and isinstance(current_value, TaipyLovValue):
+            lov_holder = attrgetter(self._get_hash_from_expr(rel_var))(self._get_data_scope())
+            if isinstance(lov_holder, TaipyLov):
+                if isinstance(value, list):
+                    val = value
+                else:
+                    val = [value]
+
+                def mapping(v):
+                    ret = v
+                    for elt in lov_holder.get():
+                        if v == self._run_adapter_for_var(lov_holder.get_name(), elt, id_only=True):
+                            ret = elt
+                            break
+                    return ret
+
+                ret_val = map(mapping, val)
+                if isinstance(value, list):
+                    value = TaipyLovValue(list(ret_val), current_value.get_name())
+                else:
+                    value = TaipyLovValue(next(ret_val), current_value.get_name())
+
+        elif isinstance(current_value, TaipyBase):
+            value = current_value.cast_value(value)
         self.__update_var(var_name, value, propagate, current_value if isinstance(current_value, TaipyBase) else None)
 
     def __update_var(self, var_name: str, value: t.Any, propagate=True, holder: TaipyBase = None) -> None:
@@ -277,7 +282,7 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if self.on_change:
             try:
-                self.on_change(self, var_name, value)
+                self.on_change(self, var_name, value.get() if isinstance(value, TaipyBase) else value)
             except Exception as e:
                 warnings.warn(f"on_change function invocation exception: {e}")
         self.__send_var_list_update(list(modified_vars), var_name)
@@ -561,8 +566,8 @@ class Gui(object, metaclass=Singleton):
     def _get_expr_from_hash(self, hash: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash)
 
-    def _evaluate_bind_holder(self, holder_name: str, expr: str) -> str:
-        return self.__evaluator.evaluate_bind_holder(self, holder_name, expr)
+    def _evaluate_bind_holder(self, holder: t.Type[TaipyBase], expr: str) -> str:
+        return self.__evaluator.evaluate_bind_holder(self, holder, expr)
 
     def _evaluate_holders(self, expr: str) -> t.List[str]:
         return self.__evaluator.evaluate_holders(self, expr)
@@ -713,7 +718,7 @@ class Gui(object, metaclass=Singleton):
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:
-        if not hasattr(self, var_name) and var_name in self._locals_bind:
+        if not hasattr(self, var_name) and var_name in self._locals_bind.keys():
             self._bind(var_name, self._locals_bind[var_name])
             return True
         return False
@@ -728,10 +733,10 @@ class Gui(object, metaclass=Singleton):
         if (
             isinstance(func_name, str)
             and getattr(self, func_name, None) is None
-            and func_name in (self._get_instance()._locals_bind)
-            and isinstance((self._get_instance()._locals_bind[func_name]), FunctionType)
+            and func_name in self._locals_bind.keys()
+            and isinstance((self._locals_bind[func_name]), FunctionType)
         ):
-            setattr(self, func_name, self._get_instance()._locals_bind[func_name])
+            setattr(self, func_name, self._locals_bind[func_name])
             return True
         return False
 

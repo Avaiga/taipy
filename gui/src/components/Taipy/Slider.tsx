@@ -8,7 +8,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
-import { getCssSize } from "./utils";
+import { getCssSize, getUpdateVar } from "./utils";
 import { TaipyImage } from "../../utils/lov";
 
 interface SliderProps extends LovProps<number | string, number | string> {
@@ -33,6 +33,7 @@ const Slider = (props: SliderProps) => {
         defaultLov = "",
         textAnchor = "bottom",
         width = "300px",
+        tp_updatevars = "",
     } = props;
     const [value, setValue] = useState(0);
     const { dispatch } = useContext(TaipyContext);
@@ -54,10 +55,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(tp_varname, value, propagate));
+                dispatch(createSendUpdateAction(tp_varname, value, propagate, getUpdateVar(tp_updatevars, "lov")));
             }
         },
-        [lovList, update, tp_varname, dispatch, propagate]
+        [lovList, update, tp_varname, dispatch, propagate, tp_updatevars]
     );
 
     const handleRangeCommitted = useCallback(
@@ -65,10 +66,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (!update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(tp_varname, value, propagate));
+                dispatch(createSendUpdateAction(tp_varname, value, propagate, getUpdateVar(tp_updatevars, "lov")));
             }
         },
-        [lovList, update, tp_varname, dispatch, propagate]
+        [lovList, update, tp_varname, dispatch, propagate, tp_updatevars]
     );
 
     const getLabel = useCallback(
