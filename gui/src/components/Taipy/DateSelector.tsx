@@ -97,7 +97,7 @@ const DateSelector = (props: DateSelectorProps) => {
                     value={props.date}
                     format={props.format}
                     id={id + "-field"}
-                    className={getSuffixedClassNames(className, "-picker")}
+                    className={getSuffixedClassNames(className, "-text")}
                 />
             )}
         </Box>

@@ -416,9 +416,9 @@ class Builder:
         )
         # set default columns if not defined
         cols = tuple(columns.keys())
-        for i, t in enumerate(traces):
-            if not t[0] or t[6] in Builder.__ONE_COLUMN_CHART or not t[1]:
-                traces[i] = tuple(v or (cols[i] if i < 3 and i < len(cols) else v) for i, v in enumerate(t))
+        for i, tr in enumerate(traces):
+            if not tr[0] or tr[6] in Builder.__ONE_COLUMN_CHART or not tr[1]:
+                traces[i] = tuple(v or (cols[i] if i < 3 and i < len(cols) else v) for i, v in enumerate(tr))
 
         if columns is not None:
             self.__attributes["columns"] = columns
