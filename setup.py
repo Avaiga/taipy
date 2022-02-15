@@ -15,9 +15,7 @@ requirements = [
     "flask-cors",
     "flask-socketio",
     "markdown",
-    "networkx",
     "numpy",
-    "openpyxl",
     "pandas",
     "pyarrow",
     "python-dotenv",
@@ -25,11 +23,9 @@ requirements = [
     "python-magic-bin;platform_system=='Windows'",
     "pytz",
     "simple-websocket",
-    "sqlalchemy",
     "toml",
     "tzlocal",
     "backports.zoneinfo;python_version<'3.9'",
-    "Unidecode",
     "rdp",
 ]
 
@@ -37,8 +33,6 @@ test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "ngrok": ["pyngrok>=5"],
-    "mssql": ["pyodbc>=4"],
-    "airflow": ["taipy-airflow@git+ssh://git@github.com/Avaiga/taipy-airflow.git@develop"],
 }
 
 setup(
