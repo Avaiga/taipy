@@ -5,7 +5,6 @@ services:
   web:
     image: taipy_rest
     build: .
-#    command: tail -F anything
     command: flask run -h 0.0.0.0
     env_file:
       - ./.flaskenv
