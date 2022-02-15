@@ -15,7 +15,7 @@ class ArrayDictDataAccessor(PandasDataAccessor):
         return [t.__name__ for t in ArrayDictDataAccessor.__types]
 
     def __get_dataframe(self, value: t.Any) -> pd.DataFrame:
-        if len(value):
+        if isinstance(value, (list)):
             if isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
             elif isinstance(value[0], list):
