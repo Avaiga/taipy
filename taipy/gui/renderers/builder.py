@@ -404,10 +404,6 @@ class Builder:
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         else:
             traces.append(trace)
-        # filter traces where we don't have at least x and y
-        traces = [t for t in traces if t[0] and (t[6] in Builder.__ONE_COLUMN_CHART or t[1])]
-        if not len(traces) and trace[0] and trace[1]:
-            traces.append(trace)
 
         # configure columns
         columns = set()
@@ -418,6 +414,12 @@ class Builder:
         columns = _get_columns_dict(
             data, list(columns), self.__gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
         )
+        # set default columns if not defined
+        cols = tuple(columns.keys())
+        for i, t in enumerate(traces):
+            if not t[0] or t[6] in Builder.__ONE_COLUMN_CHART or not t[1]:
+                traces[i] = tuple(v or (cols[i] if i < 3 and i < len(cols) else v) for i, v in enumerate(t))
+
         if columns is not None:
             self.__attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
@@ -698,7 +700,9 @@ class Builder:
     def set_refresh(self):
         return self.__set_react_attribute(
             "refresh",
-            get_client_var_name(self.__hashes.get(self.__default_property_name, self.__default_property_name) + ".refresh"),
+            get_client_var_name(
+                self.__hashes.get(self.__default_property_name, self.__default_property_name) + ".refresh"
+            ),
         )
 
     def set_refresh_on_update(self):

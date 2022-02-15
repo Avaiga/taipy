@@ -30,7 +30,6 @@ from .data.data_scope import _DataScopes
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
-from .taipyimage import TaipyImage
 from .types import WsType
 from .utils import (
     Singleton,
@@ -48,6 +47,7 @@ from .utils import (
 )
 from .utils._adapter import _Adapter
 from .utils._evaluator import _Evaluator
+from .utils._state import State
 
 
 class Gui(object, metaclass=Singleton):
@@ -126,11 +126,10 @@ class Gui(object, metaclass=Singleton):
         self.__content_accessor = None
         self._accessors = _DataAccessors()
         self._scopes = _DataScopes()
+        self.__state = None
 
         self.__evaluator = _Evaluator({t.__name__: t for t in TaipyBase.__subclasses__()})
         self.__adapter = _Adapter()
-        self.on_change = None
-        self.on_action = None
         self.__directory_name_of_pages: t.List[str] = []
 
         # Load default config
@@ -152,6 +151,11 @@ class Gui(object, metaclass=Singleton):
         if self.__content_accessor is None:
             self.__content_accessor = ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
         return self.__content_accessor
+
+    def __get_state(self):
+        if self.__state is None:
+            self.__state = State(self)
+        return self.__state
 
     def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
         return self._config._get_app_config(name, default_value)
@@ -280,9 +284,11 @@ class Gui(object, metaclass=Singleton):
         elif holder:
             modified_vars.update(self._evaluate_holders(hash_expr))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        if self.on_change:
+        if hasattr(self, "on_change") and isinstance(self.on_change, FunctionType):
             try:
-                self.on_change(self, var_name, value.get() if isinstance(value, TaipyBase) else value)
+                self.on_change(
+                    self.__get_state(), var_name, value.get() if isinstance(value, TaipyBase) else value
+                )
             except Exception as e:
                 warnings.warn(f"on_change function invocation exception: {e}")
         self.__send_var_list_update(list(modified_vars), var_name)
@@ -519,15 +525,14 @@ class Gui(object, metaclass=Singleton):
         if action and hasattr(self, action):
             if self.__call_function_with_args(action_function=getattr(self, action), id=id, payload=payload):
                 return
-        if self.on_action:
+        if hasattr(self, "on_action") and isinstance(self.on_action, FunctionType):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
-    def __call_function_with_args(*args, **kwargs):
+    def __call_function_with_args(self, **kwargs):
         action_function = kwargs.get("action_function")
         id = kwargs.get("id")
         action = kwargs.get("action")
         payload = kwargs.get("payload")
-        pself = args[0]
 
         if isinstance(action_function, FunctionType):
             try:
@@ -535,16 +540,16 @@ class Gui(object, metaclass=Singleton):
                 if argcount == 0:
                     action_function()
                 elif argcount == 1:
-                    action_function(pself)
+                    action_function(self.__get_state())
                 elif argcount == 2:
-                    action_function(pself, id)
+                    action_function(self.__get_state(), id)
                 elif argcount == 3:
                     if action is not None:
-                        action_function(pself, id, action)
+                        action_function(self.__get_state(), id, action)
                     else:
-                        action_function(pself, id, payload)
+                        action_function(self.__get_state(), id, payload)
                 elif argcount == 4 and action is not None:
-                    action_function(pself, id, action, payload)
+                    action_function(self.__get_state(), id, action, payload)
                 else:
                     warnings.warn(f"Wrong signature for action '{action_function.__name__}'")
                     return False
@@ -732,9 +737,8 @@ class Gui(object, metaclass=Singleton):
     def bind_func(self, func_name: str) -> bool:
         if (
             isinstance(func_name, str)
-            and getattr(self, func_name, None) is None
-            and func_name in self._locals_bind.keys()
-            and isinstance((self._locals_bind[func_name]), FunctionType)
+            and not hasattr(self, func_name)
+            and isinstance(self._locals_bind.get(func_name, None), FunctionType)
         ):
             setattr(self, func_name, self._locals_bind[func_name])
             return True

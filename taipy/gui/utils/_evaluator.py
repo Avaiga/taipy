@@ -7,12 +7,10 @@ import typing as t
 import warnings
 from operator import attrgetter
 
-import __main__
-
-from . import _get_expr_var_name, attrsetter, get_client_var_name, TaipyBase
-
 if t.TYPE_CHECKING:
     from ..gui import Gui
+
+from . import _get_expr_var_name, attrsetter, get_client_var_name, TaipyBase
 
 
 class _Evaluator:
@@ -122,6 +120,8 @@ class _Evaluator:
         else:
             self.__expr_to_holders[expr] = set([holder])
         self.__expr_to_hash[holder_expr] = hash_name
+        # expression is only the first part ...
+        expr = expr.split(".")[0]
         self.__expr_to_var_list[holder_expr] = [expr]
         a_list = self.__var_to_expr_list.get(expr)
         if a_list:
@@ -146,7 +146,7 @@ class _Evaluator:
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)
-            expr_value = getattr(gui._get_data_scope(), expr_hash)
+            expr_value = attrgetter(expr_hash)(gui._get_data_scope())
             holder_value = getattr(gui._get_data_scope(), holder_hash, None)
             if not isinstance(holder_value, TaipyBase):
                 holder_value = holder(expr_value, expr_hash)
@@ -193,6 +193,7 @@ class _Evaluator:
         an expression with only a single variable
         """
         modified_vars: t.Set[str] = set()
+        var_name = var_name.split(".")[0]
         if var_name not in self.__var_to_expr_list.keys():
             return modified_vars
         for expr in self.__var_to_expr_list[var_name]:

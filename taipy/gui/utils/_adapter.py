@@ -4,8 +4,6 @@ import typing as t
 import warnings
 from types import FunctionType
 
-import __main__
-
 from ..taipyimage import TaipyImage
 from . import _MapDictionary
 
@@ -79,17 +77,17 @@ class _Adapter:
         self, value: t.Any, index: t.Optional[str], id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
         if (
-            isinstance(value, tuple)
+            isinstance(value, (list, tuple))
             and len(value) > 1
-            and isinstance(value[0], str)
+            and isinstance(value[0], (str, int, float, bool))
             and isinstance(value[1], (str, TaipyImage))
         ):
             if id_only:
-                return value[0]
+                return str(value[0])
             elif len(value) > 2 and isinstance(value[2], list):
-                return (value[0], TaipyImage.get_dict_or(value[1]), value[2])  # type: ignore
+                return (str(value[0]), TaipyImage.get_dict_or(value[1]), value[2])  # type: ignore
             else:
-                return (value[0], TaipyImage.get_dict_or(value[1]))  # type: ignore
+                return (str(value[0]), TaipyImage.get_dict_or(value[1]))  # type: ignore
         else:
             id = self.__get_id(value, index)
             if id_only:
@@ -103,8 +101,10 @@ class _Adapter:
                 return (id, label)  # type: ignore
 
     def __get_id(self, value: t.Any, index: t.Optional[str]) -> str:
-        if isinstance(value, str):
-            return value
+        if isinstance(value, (str, int, float, bool)):
+            return str(value)
+        elif isinstance(value, (list, tuple)):
+            return self.__get_id(value[0], index)
         elif hasattr(value, "id"):
             return str(value.id)
         elif hasattr(value, "__getitem__") and "id" in value:
@@ -117,6 +117,8 @@ class _Adapter:
     def __get_label(self, value: t.Any) -> t.Union[str, t.Dict, None]:
         if isinstance(value, (str, TaipyImage)):
             return TaipyImage.get_dict_or(value)
+        elif isinstance(value, (list, tuple)) and len(value) > 1:
+            return self.__get_label(value[1])
         elif hasattr(value, "label"):
             return TaipyImage.get_dict_or(value.label)
         elif hasattr(value, "__getitem__") and "label" in value:

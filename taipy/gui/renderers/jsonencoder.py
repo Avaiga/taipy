@@ -1,5 +1,6 @@
 from datetime import datetime
 from json import JSONEncoder
+from pathlib import Path
 import warnings
 
 from ..taipyimage import TaipyImage
@@ -16,6 +17,8 @@ class TaipyJsonEncoder(JSONEncoder):
             return o.get()
         elif isinstance(o, datetime):
             return dateToISO(o)
+        elif isinstance(o, Path):
+            return str(o)
         try:
             return JSONEncoder.default(self, o)
         except Exception as e:
