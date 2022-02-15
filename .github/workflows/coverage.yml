@@ -30,7 +30,7 @@ jobs:
                     pipenv lock
                     pipenv install --system --dev --python 3.9
                     pip install requests openpyxl
-                    pip install git+https://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@github.com/avaiga/taipy.git@v0.11.0#egg=taipy --pre
+                    pip install git+https://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@github.com/avaiga/taipy.git#egg=taipy --pre
 
             -   name: Build coverage file
                 run: |
