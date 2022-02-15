@@ -13,7 +13,8 @@ def test_date_md_1(gui: Gui, helpers):
 def test_date_md_2(gui: Gui, helpers):
     gui.bind_var_val("date", datetime.strptime("15 Dec 2020", "%d %b %Y"))
     md_string = "<|{date}|date|with_time|>"
-    expected_list = ["<DateSelector", 'defaultDate="2020-12-', 'tp_varname="TaipyDate_date"', "date={TaipyDate_date}", "withTime={true}"]
+    expected_list = ["<DateSelector", 'defaultDate="2020-12-',
+                     'tp_varname="TaipyDate_date"', "date={TaipyDate_date}", "withTime={true}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
