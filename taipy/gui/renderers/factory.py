@@ -70,6 +70,7 @@ class Factory:
                 ("range_change",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("limit_rows", AttributeType.boolean),
+                ("render", AttributeType.dynamic_boolean, True),
             ]
         )
         .get_chart_config("scatter", "lines+markers")

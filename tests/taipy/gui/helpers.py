@@ -73,5 +73,5 @@ class Helpers:
     @staticmethod
     def create_scope_and_get_sid(gui: Gui) -> str:
         sid = "test"
-        gui._scopes.create_scope(sid)
+        gui._get_user_data()._get_or_create_scope(sid)
         return sid

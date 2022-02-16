@@ -21,3 +21,4 @@ from .types import (
     TaipyContent,
     TaipyContentImage,
 )
+from .attributes import delscopeattr, getscopeattr, getscopeattr_drill, getuserattr, hasscopeattr, hasuserattr, setscopeattr, setscopeattr_drill

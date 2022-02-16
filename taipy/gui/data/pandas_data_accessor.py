@@ -9,9 +9,7 @@ import pyarrow as pa
 from ..utils import _get_date_col_str_name
 from .data_accessor import DataAccessor
 from .data_format import DataFormat
-
-if t.TYPE_CHECKING:
-    from ..gui import Gui
+from ..utils._user_data import _UserData
 
 
 class PandasDataAccessor(DataAccessor):
@@ -45,7 +43,7 @@ class PandasDataAccessor(DataAccessor):
         return ""
 
     def __build_transferred_cols(
-        self, guiApp: t.Any, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
+        self, user_data: _UserData, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = data.dtypes[data.dtypes.index.isin(payload_cols)]
@@ -59,8 +57,8 @@ class PandasDataAccessor(DataAccessor):
             is_copied = True
             for k, v in styles.items():
                 applied = False
-                if hasattr(guiApp, v):
-                    style_fn = getattr(guiApp, v)
+                if hasattr(user_data, v):
+                    style_fn = getattr(user_data, v)
                     if isinstance(style_fn, FunctionType):
                         applied = self.__apply_user_function(style_fn, k if k in cols else None, v, data)
                 if not applied:
@@ -141,7 +139,7 @@ class PandasDataAccessor(DataAccessor):
         return None
 
     def get_data(  # noqa: C901
-        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, user_data: _UserData, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         if isinstance(value, pd.DataFrame):
@@ -151,7 +149,7 @@ class PandasDataAccessor(DataAccessor):
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {}
                 for k, v in applies.items():
-                    applies_with_fn[k] = getattr(guiApp, v) if hasattr(guiApp, v) else v
+                    applies_with_fn[k] = getattr(user_data, v) if hasattr(user_data, v) else v
                 for col in columns:
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"
@@ -198,7 +196,7 @@ class PandasDataAccessor(DataAccessor):
                 else:
                     new_indexes = slice(start, end + 1)
                 value = self.__build_transferred_cols(
-                    guiApp, columns, value.iloc[new_indexes], styles=payload.get("styles")
+                    user_data, columns, value.iloc[new_indexes], styles=payload.get("styles")
                 )
                 dictret = self.__format_data(
                     value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
@@ -212,7 +210,7 @@ class PandasDataAccessor(DataAccessor):
                     value["tp_index"] = value.index
                     # we need to be more clever than this :-)
                     value = value.iloc[:: (len(value) // nb_rows_max)]
-                value = self.__build_transferred_cols(guiApp, columns, value)
+                value = self.__build_transferred_cols(user_data, columns, value)
                 dictret = self.__format_data(value, data_format, "list", data_extraction=True)
             ret_payload["value"] = dictret
         return ret_payload

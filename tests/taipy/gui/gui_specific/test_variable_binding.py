@@ -22,10 +22,10 @@ def test_variable_binding(helpers):
         jsx = client.get("/taipy-jsx/test/").json["jsx"]
     for expected in ["<Button", f'defaultLabel="{z}"', "label={z}"]:
         assert expected in jsx
-    assert gui.x == x
-    assert gui.y == y
-    assert gui.z == z
-    assert isinstance(gui.another_function, FunctionType)
+    assert gui._get_user_data().x == x
+    assert gui._get_user_data().y == y
+    assert gui._get_user_data().z == z
+    assert isinstance(gui._get_user_data().another_function, FunctionType)
     helpers.test_cleanup()
 
 

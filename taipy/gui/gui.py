@@ -26,7 +26,6 @@ from .config import AppConfigOption, GuiConfig
 from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
-from .data.data_scope import _DataScopes
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
 from .server import Server
@@ -36,7 +35,6 @@ from .utils import (
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDictionary,
-    attrsetter,
     TaipyBase,
     TaipyData,
     TaipyLov,
@@ -44,10 +42,19 @@ from .utils import (
     TaipyContent,
     TaipyContentImage,
     get_client_var_name,
+    delscopeattr,
+    hasscopeattr,
+    getscopeattr,
+    getscopeattr_drill,
+    setscopeattr,
+    setscopeattr_drill,
+    hasuserattr,
+    getuserattr,
 )
 from .utils._adapter import _Adapter
 from .utils._evaluator import _Evaluator
 from .utils._state import State
+from .utils._user_data import _UserData
 
 
 class Gui(object, metaclass=Singleton):
@@ -125,8 +132,8 @@ class Gui(object, metaclass=Singleton):
         self._config = GuiConfig()
         self.__content_accessor = None
         self._accessors = _DataAccessors()
-        self._scopes = _DataScopes()
-        self.__state = None
+        self.__state: State = None
+        self.__user_data = _UserData(self)
 
         self.__evaluator = _Evaluator({t.__name__: t for t in TaipyBase.__subclasses__()})
         self.__adapter = _Adapter()
@@ -152,10 +159,8 @@ class Gui(object, metaclass=Singleton):
             self.__content_accessor = ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
         return self.__content_accessor
 
-    def __get_state(self):
-        if self.__state is None:
-            self.__state = State(self)
-        return self.__state
+    def _get_user_data(self):
+        return self.__user_data
 
     def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
         return self._config._get_app_config(name, default_value)
@@ -175,42 +180,12 @@ class Gui(object, metaclass=Singleton):
             return res
         return None
 
-    def _get_data_scope(self):
-        return self._scopes.get_scope()
-
     def _bind(self, name: str, value: t.Any) -> None:
-        if hasattr(self, name):
-            raise ValueError(f"Variable '{name}' is already bound")
-        if not name.isidentifier():
-            raise ValueError(f"Variable name '{name}' is invalid")
-        if isinstance(value, dict):
-            setattr(self._get_data_scope(), name, _MapDictionary(value))
-            self._bind_global(name, _MapDictionary(value))
-        else:
-            setattr(self._get_data_scope(), name, value)
-            self._bind_global(name, value)
-        prop = property(self.__value_getter(name), lambda s, v: s.__update_var(name, v))  # Getter, Setter
-        setattr(Gui, name, prop)
-
-    def _bind_global(self, name: str, value: t.Any) -> None:
-        global_scope = self._scopes.get_global_scope()
-        if hasattr(global_scope, name):
-            return
-        setattr(global_scope, name, value)
-
-    def __value_getter(self, name):
-        def __getter(elt: Gui) -> t.Any:
-            value = getattr(elt._get_data_scope(), name)
-            if isinstance(value, _MapDictionary):
-                return _MapDictionary(value._dict, lambda s, v: elt.__update_var(f"{name}.{s}", v))
-            else:
-                return value
-
-        return __getter
+        self._get_user_data()._bind(name, value)
 
     def _manage_message(self, msg_type: WsType, message: dict) -> None:
         try:
-            self.__set_client_id(message)
+            self._get_user_data()._set_client_id(message)
             if msg_type == WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
@@ -226,26 +201,17 @@ class Gui(object, metaclass=Singleton):
             elif msg_type == WsType.REQUEST_UPDATE.value:
                 self.__request_var_update(message.get("payload"))
             elif msg_type == WsType.CLIENT_ID.value:
-                self.__get_or_create_scope(message.get("payload", ""))
+                self._get_user_data()._get_or_create_scope(message.get("payload", ""))
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
-    def __set_client_id(self, message: dict):
-        self._scopes._set_client_id(message.get("client_id"))
-
-    def __get_or_create_scope(self, id: str):
-        if not id:
-            id = f"{datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')}-{random.random()}"
-            self.__send_ws_id(id)
-        self._scopes.create_scope(id)
-
     def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
         # Check if Variable is a managed type
-        current_value = attrgetter(self._get_hash_from_expr(var_name))(self._get_data_scope())
+        current_value = getscopeattr_drill(self, self._get_hash_from_expr(var_name))
         if isinstance(current_value, TaipyData):
             return
         elif rel_var and isinstance(current_value, TaipyLovValue):
-            lov_holder = attrgetter(self._get_hash_from_expr(rel_var))(self._get_data_scope())
+            lov_holder = getscopeattr_drill(self, self._get_hash_from_expr(rel_var))
             if isinstance(lov_holder, TaipyLov):
                 if isinstance(value, list):
                     val = value
@@ -268,16 +234,16 @@ class Gui(object, metaclass=Singleton):
 
         elif isinstance(current_value, TaipyBase):
             value = current_value.cast_value(value)
-        self.__update_var(var_name, value, propagate, current_value if isinstance(current_value, TaipyBase) else None)
+        self._update_var(var_name, value, propagate, current_value if isinstance(current_value, TaipyBase) else None)
 
-    def __update_var(self, var_name: str, value: t.Any, propagate=True, holder: TaipyBase = None) -> None:
+    def _update_var(self, var_name: str, value: t.Any, propagate=True, holder: TaipyBase = None) -> None:
         if holder:
             var_name = holder.get_name()
         hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = set([hash_expr])
         # Use custom attrsetter function to allow value binding for MapDictionary
         if propagate:
-            attrsetter(self._get_data_scope(), hash_expr, value)
+            setscopeattr_drill(self, hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
                 modified_vars.update(self._re_evaluate_expr(var_name))
@@ -287,7 +253,7 @@ class Gui(object, metaclass=Singleton):
         if hasattr(self, "on_change") and isinstance(self.on_change, FunctionType):
             try:
                 self.on_change(
-                    self.__get_state(), var_name, value.get() if isinstance(value, TaipyBase) else value
+                    self.__state, var_name, value.get() if isinstance(value, TaipyBase) else value._dict if isinstance(value, _MapDictionary) else value
                 )
             except Exception as e:
                 warnings.warn(f"on_change function invocation exception: {e}")
@@ -353,12 +319,12 @@ class Gui(object, metaclass=Singleton):
                 # notify the file is uploaded
                 newvalue = str(file_path)
                 if multiple:
-                    value = getattr(self._get_data_scope(), var_name)
+                    value = getscopeattr(self, var_name)
                     if not isinstance(value, t.List):
                         value = [] if value is None else [value]
                     value.append(newvalue)
                     newvalue = value
-                setattr(self, var_name, newvalue)
+                setattr(self._get_user_data(), var_name, newvalue)
         return ("", 200)
 
     def __send_var_list_update(
@@ -367,13 +333,13 @@ class Gui(object, metaclass=Singleton):
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
-        values = {v: attrgetter(v)(self._get_data_scope()) for v in modified_vars}
+        values = {v: getscopeattr_drill(self, v) for v in modified_vars}
         for v in values.values():
             if isinstance(v, TaipyData) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
         for _var in modified_vars:
             newvalue = values.get(_var)
-            self._scopes.broadcast_data(_var, newvalue)
+            # self._scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, TaipyData):
                 ws_dict[newvalue.get_name() + ".refresh"] = True
             else:
@@ -400,7 +366,7 @@ class Gui(object, metaclass=Singleton):
 
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for MapDictionary
-        newvalue = attrgetter(var_name)(self._get_data_scope())
+        newvalue = getscopeattr_drill(self, var_name)
         if isinstance(newvalue, TaipyData):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
@@ -425,7 +391,7 @@ class Gui(object, metaclass=Singleton):
         else:
             grouping_message.append(payload)
 
-    def __send_ws_id(self, id: str) -> None:
+    def _send_ws_id(self, id: str) -> None:
         self.__send_ws(
             {
                 "type": WsType.CLIENT_ID.value,
@@ -480,17 +446,14 @@ class Gui(object, metaclass=Singleton):
         self.__send_ws({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def __get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or self._scopes.get_single_client():
+        if not hasattr(request, "sid") or self._get_user_data()._get_single_client():
             return None
         return request.sid  # type: ignore
 
     def __get_message_grouping(self):
-        scope = self._get_data_scope()
-        if scope is self._scopes.get_global_scope():
-            return
-        if not hasattr(scope, Gui.__MESSAGE_GROUPING_NAME):
+        if not hasscopeattr(self, Gui.__MESSAGE_GROUPING_NAME):
             return None
-        return getattr(scope, Gui.__MESSAGE_GROUPING_NAME)
+        return getscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
 
     def __enter__(self):
         self.__hold_messages()
@@ -513,7 +476,7 @@ class Gui(object, metaclass=Singleton):
     def __send_messages(self):
         grouping_message = self.__get_message_grouping()
         if grouping_message is not None:
-            delattr(self._get_data_scope(), Gui.__MESSAGE_GROUPING_NAME)
+            delscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
             if len(grouping_message):
                 self.__send_ws({"type": WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
@@ -522,10 +485,10 @@ class Gui(object, metaclass=Singleton):
             action = payload.get("action")
         else:
             action = str(payload)
-        if action and hasattr(self, action):
-            if self.__call_function_with_args(action_function=getattr(self, action), id=id, payload=payload):
+        if action and hasuserattr(self, action):
+            if self.__call_function_with_args(action_function=getuserattr(self, action), id=id, payload=payload):
                 return
-        if hasattr(self, "on_action") and isinstance(self.on_action, FunctionType):
+        if hasattr(self, "on_action"):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
     def __call_function_with_args(self, **kwargs):
@@ -540,16 +503,16 @@ class Gui(object, metaclass=Singleton):
                 if argcount == 0:
                     action_function()
                 elif argcount == 1:
-                    action_function(self.__get_state())
+                    action_function(self.__state)
                 elif argcount == 2:
-                    action_function(self.__get_state(), id)
+                    action_function(self.__state, id)
                 elif argcount == 3:
                     if action is not None:
-                        action_function(self.__get_state(), id, action)
+                        action_function(self.__state, id, action)
                     else:
-                        action_function(self.__get_state(), id, payload)
+                        action_function(self.__state, id, payload)
                 elif argcount == 4 and action is not None:
-                    action_function(self.__get_state(), id, action, payload)
+                    action_function(self.__state, id, action, payload)
                 else:
                     warnings.warn(f"Wrong signature for action '{action_function.__name__}'")
                     return False
@@ -610,12 +573,12 @@ class Gui(object, metaclass=Singleton):
         return self.__adapter._get_valid_adapter_result(value, index, id_only)
 
     def _is_ui_blocked(self):
-        return getattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+        return getscopeattr(self, Gui.__UI_BLOCK_NAME, False)
 
     def __get_on_cancel_block_ui(self, callback: t.Optional[str]):
         def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
-            if hasattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME):
-                setattr(guiApp._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+            if hasscopeattr(self, Gui.__UI_BLOCK_NAME):
+                setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
             self.__on_action(id, callback)
 
         return _taipy_on_cancel_block_ui
@@ -723,24 +686,28 @@ class Gui(object, metaclass=Singleton):
 
     # Main binding method (bind in markdown declaration)
     def bind_var(self, var_name: str) -> bool:
-        if not hasattr(self, var_name) and var_name in self._locals_bind.keys():
+        if not hasattr(self._get_user_data(), var_name) and var_name in self._locals_bind.keys():
             self._bind(var_name, self._locals_bind[var_name])
             return True
         return False
 
     def bind_var_val(self, var_name: str, value: t.Any) -> bool:
-        if not hasattr(self, var_name):
+        if not hasattr(self._get_user_data(), var_name):
             self._bind(var_name, value)
             return True
         return False
 
+    def __bind_local_func(self, name: str):
+        if isinstance(self._locals_bind.get(name, None), FunctionType):
+            setattr(self, name, self._locals_bind[name])
+
     def bind_func(self, func_name: str) -> bool:
         if (
             isinstance(func_name, str)
-            and not hasattr(self, func_name)
+            and not hasuserattr(self, func_name)
             and isinstance(self._locals_bind.get(func_name, None), FunctionType)
         ):
-            setattr(self, func_name, self._locals_bind[func_name])
+            setattr(self._get_user_data(), func_name, self._locals_bind[func_name])
             return True
         return False
 
@@ -795,18 +762,18 @@ class Gui(object, metaclass=Singleton):
             self.bind_func(action_name)
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
-        setattr(self, def_action_name, func)
+        setscopeattr(self, def_action_name, func)
 
-        if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
-            setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, True)
+        if hasscopeattr(self, Gui.__UI_BLOCK_NAME):
+            setscopeattr(self, Gui.__UI_BLOCK_NAME, True)
         else:
             self._bind(Gui.__UI_BLOCK_NAME, True)
         self.__send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
 
     def unblock_ui(self):
         """Unblocks the UI"""
-        if hasattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME):
-            setattr(self._get_data_scope(), Gui.__UI_BLOCK_NAME, False)
+        if hasscopeattr(self, Gui.__UI_BLOCK_NAME):
+            setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
 
     def navigate(self, to: t.Optional[str] = ""):
@@ -852,7 +819,7 @@ class Gui(object, metaclass=Singleton):
                 css_file=self._css_file,
                 root_page_name=Gui.__root_page_name,
             )
-            self._scopes = _DataScopes()
+            self._get_user_data()._new_scopes()
             self.__evaluator = _Evaluator()
 
         app_config = self._config.app_config
@@ -885,9 +852,11 @@ class Gui(object, metaclass=Singleton):
             FrameType, t.cast(FrameType, inspect.currentframe()).f_back
         ).f_locals
 
+        self.__state = State(self)
+
         # bind on_change and on_action function if available
-        self.bind_func("on_change")
-        self.bind_func("on_action")
+        self.__bind_local_func("on_change")
+        self.__bind_local_func("on_action")
 
         # validate on_change and on_action function signature
         self.__validate_function_signature("on_change", range(3, 4))
@@ -943,7 +912,7 @@ class Gui(object, metaclass=Singleton):
         self._accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
 
         # Use multi user or not
-        self._scopes.set_single_client(app_config["single_client"])
+        self._get_user_data()._set_single_client(bool(app_config["single_client"]))
 
         # Start Flask Server
         if run_server:

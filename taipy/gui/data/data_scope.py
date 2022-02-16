@@ -43,9 +43,6 @@ class _DataScopes:
     def get_all_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__scopes
 
-    def get_global_scope(self) -> SimpleNamespace:
-        return self.__scopes["global"]
-
     def broadcast_data(self, name, value):
         if self.__single_client:
             return

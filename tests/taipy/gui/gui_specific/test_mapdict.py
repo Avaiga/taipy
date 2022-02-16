@@ -1,3 +1,4 @@
+from taipy.gui.gui import Gui
 from taipy.gui.utils import _MapDictionary
 
 
@@ -70,6 +71,7 @@ def test_mapdict_update():
     print("")
     pass
 
+
 def test_mapdict_update_full_dictionary_1():
     values = {"a": 1, "b": 2}
     update_values = {"a": 3, "b": 5}
@@ -80,8 +82,10 @@ def test_mapdict_update_full_dictionary_1():
     assert md["a"] == 3
     assert md["b"] == 5
 
+
 def test_mapdict_update_full_dictionary_2():
     temp_values = {}
+
     def update(k, v):
         temp_values[k] = v
     values = {"a": 1, "b": 2}
@@ -92,3 +96,12 @@ def test_mapdict_update_full_dictionary_2():
     md.update(update_values)
     assert temp_values["a"] == 3
     assert temp_values["b"] == 5
+
+
+def test_mapdict_set(gui: Gui):
+    d = {"a": 1}  # noqa: F841
+    gui.run(run_server=False)
+    assert isinstance(gui._Gui__state.d, _MapDictionary)
+    gui._Gui__state.d = {"b": 2}
+    assert isinstance(gui._Gui__state.d, _MapDictionary)
+

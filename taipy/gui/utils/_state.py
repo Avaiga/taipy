@@ -1,19 +1,24 @@
 import typing as t
 
+from .MapDictionary import _MapDictionary
+
+if t.TYPE_CHECKING:
+    from ..gui import Gui
+
 
 class State:
     __attrs = ("_gui", "_user_var_list")
 
-    def __init__(self, gui: t.Any) -> None:
+    def __init__(self, gui: "Gui") -> None:
         super().__setattr__(State.__attrs[1], list(gui._locals_bind.keys()))
         super().__setattr__(State.__attrs[0], gui)
 
     def __getattribute__(self, name: str) -> t.Any:
         if name in super().__getattribute__(State.__attrs[1]):
             gui = super().__getattribute__(State.__attrs[0])
-            if not hasattr(gui, name):
+            if not hasattr(gui._get_user_data(), name):
                 gui.bind_var(name)
-            return getattr(gui, name)
+            return getattr(gui._get_user_data(), name)
         else:
             raise AttributeError(f"Local script has no attribute '{name}'.")
 
@@ -23,9 +28,9 @@ class State:
         else:
             if name in super().__getattribute__(State.__attrs[1]):
                 gui = super().__getattribute__(State.__attrs[0])
-                if not hasattr(gui, name):
+                if not hasattr(gui._get_user_data(), name):
                     gui.bind_var(name)
-                setattr(gui, name, value)
+                setattr(gui._get_user_data(), name, value)
             else:
                 raise AttributeError(f"Local script has no attribute '{name}'.")
 
