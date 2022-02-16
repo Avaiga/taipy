@@ -34,16 +34,16 @@ from .taipyimage import TaipyImage
 from .types import WsType
 from .utils import (
     Singleton,
-    TaipyBase,
-    TaipyContent,
-    TaipyContentImage,
-    TaipyData,
-    TaipyLov,
-    TaipyLovValue,
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDictionary,
     attrsetter,
+    TaipyBase,
+    TaipyData,
+    TaipyLov,
+    TaipyLovValue,
+    TaipyContent,
+    TaipyContentImage,
     get_client_var_name,
 )
 from .utils._adapter import _Adapter
