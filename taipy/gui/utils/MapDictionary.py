@@ -71,8 +71,8 @@ class _MapDictionary(object):
     def items(self):
         return self._dict.items()
 
-    def get(self, key: t.Any, value: t.Union[None, str] = None) -> t.Union[t.Any, None]:
-        return self._dict.get(key, value)
+    def get(self, key: t.Any, default_value: t.Optional[str] = None) -> t.Union[t.Any, None]:
+        return self._dict.get(key, default_value)
 
     def clear(self) -> None:
         self._dict.clear()
