@@ -143,7 +143,7 @@ class Server:
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         # TODO: assign global scopes to current scope if the page has been rendered
-        page.render()
+        page.render(self._gui)
         if (
             render_path_name == self._root_page_name
             and page.rendered_jsx is not None

@@ -48,6 +48,7 @@ from .utils import (
 )
 from .utils._adapter import _Adapter
 from .utils._evaluator import _Evaluator
+from .renderers._markdown import TaipyMarkdownExtension
 
 
 class Gui(object, metaclass=Singleton):
@@ -75,14 +76,9 @@ class Gui(object, metaclass=Singleton):
     __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-content", "taipy-uploads"]
     _agregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
-    # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
-    #
     # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
     # There's a section that explicitly lists these extensions in
     #      docs/gui/user_pages.md#markdown-specifics
-    _markdown = md_lib.Markdown(
-        extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"]
-    )
 
     def __init__(
         self,
@@ -136,6 +132,9 @@ class Gui(object, metaclass=Singleton):
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
+        self._markdown = md_lib.Markdown(
+            extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html", TaipyMarkdownExtension(gui=self)]
+        )
 
         if page:
             self.add_page(name=Gui.__root_page_name, renderer=page)
@@ -872,9 +871,6 @@ class Gui(object, metaclass=Singleton):
             app_config["client_url"] = http_tunnel.public_url
             app_config["use_reloader"] = False
             print(f" * NGROK Public Url: {http_tunnel.public_url}")
-
-        # Register taipy.gui markdown extensions for Markdown renderer
-        Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
 
         # Save all local variables of the parent frame (usually __main__)
         self._locals_bind: t.Dict[str, t.Any] = t.cast(

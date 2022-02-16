@@ -5,7 +5,9 @@ from abc import ABC, abstractmethod
 from os import path
 
 from ._html import TaipyHTMLParser
-from ._markdown import makeTaipyExtension
+
+if t.TYPE_CHECKING:
+    from ..gui import Gui
 
 
 class PageRenderer(ABC):
@@ -41,7 +43,7 @@ class PageRenderer(ABC):
         self.__process_content(content)
 
     @abstractmethod
-    def render(self) -> str:
+    def render(self, gui: Gui) -> str:
         pass
 
 
@@ -49,7 +51,7 @@ class EmptyPageRenderer(PageRenderer):
     def __init__(self) -> None:
         super().__init__("<PageContent />")
 
-    def render(self) -> str:
+    def render(self, gui: Gui) -> str:
         return str(self._content)
 
 
@@ -67,10 +69,8 @@ class Markdown(PageRenderer):
         super().__init__(content)
 
     # Generate JSX from Markdown
-    def render(self) -> str:
-        from ..gui import Gui
-
-        return Gui._markdown.convert(t.cast(str, self._content))
+    def render(self, gui: Gui) -> str:
+        return gui._markdown.convert(t.cast(str, self._content))
 
 
 class Html(PageRenderer):
@@ -92,7 +92,7 @@ class Html(PageRenderer):
         self._content = str(self._content).replace("{{taipy_base_url}}", f"/{base_url}")
 
     # Generate JSX from HTML
-    def render(self) -> str:
+    def render(self, gui: Gui) -> str:
         parser = TaipyHTMLParser()
         parser.feed(t.cast(str, self._content))
         self.head = parser.head
