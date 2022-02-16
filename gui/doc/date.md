@@ -12,13 +12,13 @@ a date selector that represents it:
     === "Markdown"
 
         ```
-        <|{dt}|date_selector|>
+        <|{dt}|date|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:date_selector>{dt}</taipy:date_selector>
+        <taipy:date>{dt}</taipy:date>
         ```
 
 ### Using only the date
@@ -30,13 +30,13 @@ If you don't need to use the date, you can do so:
     === "Markdown"
 
         ```
-        <|{dt}|date_selector|not with_time|>
+        <|{dt}|date|not with_time|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:date_selector with_time="false">{dt}</taipy:date_selector>
+        <taipy:date with_time="false">{dt}</taipy:date>
         ```
 
 

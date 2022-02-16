@@ -54,8 +54,10 @@ class _DataAccessors(object):
         self.__data_format = DataFormat.JSON
 
         from .pandas_data_accessor import PandasDataAccessor
+        from .array_dict_data_accessor import ArrayDictDataAccessor
 
         self._register(PandasDataAccessor)
+        self._register(ArrayDictDataAccessor)
 
     def _register(self, cls: t.Type[DataAccessor]) -> None:
         if inspect.isclass(cls):

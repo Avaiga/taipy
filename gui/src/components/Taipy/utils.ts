@@ -68,3 +68,5 @@ export const getCssSize = (val: string | number) => {
     }
     return val;
 };
+
+export const getSuffixedClassNames = (names: string | undefined, suffix: string) => (names || "").split(/\s+/).map(n => n+suffix).join(" ")

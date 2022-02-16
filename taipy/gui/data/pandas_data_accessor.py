@@ -4,7 +4,6 @@ import warnings
 import numpy as np
 
 import pandas as pd
-from pandas.core.frame import DataFrame
 import pyarrow as pa
 
 from ..utils import _get_date_col_str_name
@@ -99,7 +98,7 @@ class PandasDataAccessor(DataAccessor):
 
     def __format_data(
         self,
-        data: DataFrame,
+        data: pd.DataFrame,
         data_format: DataFormat,
         orient: str = None,
         start: t.Optional[int] = None,
