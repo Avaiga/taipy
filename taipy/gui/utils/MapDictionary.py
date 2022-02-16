@@ -11,11 +11,8 @@ class _MapDictionary(object):
 
     local_vars = ("_dict", "_update_var")
 
-    def __init__(self, dict_import, app_update_var=None):
-        # Verify if dict_import is a dictionary
-        if not isinstance(dict_import, dict):
-            raise TypeError("should have a dict")
-        self._dict: dict = dict_import
+    def __init__(self, dict_import: dict, app_update_var=None):
+        self._dict = dict_import
         # Bind app update var function
         self._update_var = app_update_var
 
@@ -74,7 +71,7 @@ class _MapDictionary(object):
     def items(self):
         return self._dict.items()
 
-    def get(self, key: t.Any, value: None) -> t.Union[t.Any, None]:
+    def get(self, key: t.Any, value: t.Union[None, str] = None) -> t.Union[t.Any, None]:
         return self._dict.get(key, value)
 
     def clear(self) -> None:

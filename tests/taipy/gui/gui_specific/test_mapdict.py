@@ -69,3 +69,26 @@ def test_mapdict_update():
     assert update_values[1] == 3
     print("")
     pass
+
+def test_mapdict_update_full_dictionary_1():
+    values = {"a": 1, "b": 2}
+    update_values = {"a": 3, "b": 5}
+    md = _MapDictionary(values)
+    assert md["a"] == 1
+    assert md["b"] == 2
+    md.update(update_values)
+    assert md["a"] == 3
+    assert md["b"] == 5
+
+def test_mapdict_update_full_dictionary_2():
+    temp_values = {}
+    def update(k, v):
+        temp_values[k] = v
+    values = {"a": 1, "b": 2}
+    update_values = {"a": 3, "b": 5}
+    md = _MapDictionary(values, update)
+    assert md["a"] == 1
+    assert md["b"] == 2
+    md.update(update_values)
+    assert temp_values["a"] == 3
+    assert temp_values["b"] == 5
