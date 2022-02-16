@@ -34,16 +34,16 @@ from .taipyimage import TaipyImage
 from .types import WsType
 from .utils import (
     Singleton,
+    TaipyBase,
+    TaipyContent,
+    TaipyContentImage,
+    TaipyData,
+    TaipyLov,
+    TaipyLovValue,
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDictionary,
     attrsetter,
-    TaipyBase,
-    TaipyData,
-    TaipyLov,
-    TaipyLovValue,
-    TaipyContent,
-    TaipyContentImage,
     get_client_var_name,
 )
 from .utils._adapter import _Adapter
@@ -198,7 +198,7 @@ class Gui(object, metaclass=Singleton):
         def __getter(elt: Gui) -> t.Any:
             value = getattr(elt._get_data_scope(), name)
             if isinstance(value, _MapDictionary):
-                return _MapDictionary(value._dict, lambda s, v: elt.__update_var(name + "." + s, v))
+                return _MapDictionary(value._dict, lambda s, v: elt.__update_var(f"{name}.{s}", v))
             else:
                 return value
 
