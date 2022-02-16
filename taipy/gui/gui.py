@@ -202,7 +202,7 @@ class Gui(object, metaclass=Singleton):
         def __getter(elt: Gui) -> t.Any:
             value = getattr(elt._get_data_scope(), name)
             if isinstance(value, _MapDictionary):
-                return _MapDictionary(value._dict, lambda s, v: elt.__update_var(name + "." + s, v))
+                return _MapDictionary(value._dict, lambda s, v: elt.__update_var(f"{name}.{s}", v))
             else:
                 return value
 
