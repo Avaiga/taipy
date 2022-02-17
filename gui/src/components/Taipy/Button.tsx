@@ -5,15 +5,12 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
 import { useDynamicProperty } from "../../utils/hooks";
-import { stringImage, TaipyImage } from "../../utils/image";
-import Image from "./Image";
+import { stringImage, TaipyImage, TaipyImageComp } from "../../utils/image";
 
 interface ButtonProps extends TaipyActiveProps {
     tp_onAction?: string;
     label: string;
     defaultLabel?: string;
-    width?: string;
-    height?: string;
 }
 
 const Button = (props: ButtonProps) => {
@@ -43,22 +40,14 @@ const Button = (props: ButtonProps) => {
         });
     }, [props.label, defaultLabel]);
 
-    return typeof value === "string" ? (
+    return (
         <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
-            {value}
+            {typeof value === "string" ? (
+                value
+            ) : (
+                <TaipyImageComp img={value as TaipyImage} className={getSuffixedClassNames(className, "-image")} />
+            )}
         </MuiButton>
-    ) : (
-        <Image
-            defaultContent=""
-            content={value.path}
-            active={active}
-            className={className + " " + getSuffixedClassNames(className, "-image")}
-            id={id}
-            label={value.text}
-            tp_onAction={tp_onAction} 
-            height={props.height}
-            width={props.width}
-        />
     );
 };
 
