@@ -6,5 +6,5 @@ min,int|float,0,The minimum value of the range.
 max,int|float,100,The maximum value of the range.
 format,str?,None,"The format to use when displaying the value.
 This uses the <code>printf</code> syntax."
-orientation,str,"""horizontal""","The orientation of this slider.
+orientation,str,"""horizontal""","The orientation of this slider."
 >shared,,,
