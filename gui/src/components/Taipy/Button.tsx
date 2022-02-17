@@ -5,7 +5,7 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
 import { useDynamicProperty } from "../../utils/hooks";
-import { stringImage, TaipyImage, TaipyImageComp } from "../../utils/image";
+import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 
 interface ButtonProps extends TaipyActiveProps {
     tp_onAction?: string;
@@ -15,7 +15,7 @@ interface ButtonProps extends TaipyActiveProps {
 
 const Button = (props: ButtonProps) => {
     const { className, id, tp_onAction, defaultLabel } = props;
-    const [value, setValue] = useState<stringImage>("");
+    const [value, setValue] = useState<stringIcon>("");
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -28,7 +28,7 @@ const Button = (props: ButtonProps) => {
         setValue((val) => {
             if (props.label === undefined && defaultLabel) {
                 try {
-                    return JSON.parse(defaultLabel) as TaipyImage;
+                    return JSON.parse(defaultLabel) as Icon;
                 } catch (e) {
                     return defaultLabel;
                 }
@@ -45,7 +45,7 @@ const Button = (props: ButtonProps) => {
             {typeof value === "string" ? (
                 value
             ) : (
-                <TaipyImageComp img={value as TaipyImage} className={getSuffixedClassNames(className, "-image")} />
+                <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
             )}
         </MuiButton>
     );

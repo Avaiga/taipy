@@ -1,8 +1,8 @@
-import { stringImage } from "./image";
+import { stringIcon } from "./icon";
 
 export interface LovItem {
     id: string;
-    item: stringImage;
+    item: stringIcon;
     children?: LovItem[];
 }
 

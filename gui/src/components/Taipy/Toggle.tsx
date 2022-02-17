@@ -10,7 +10,7 @@ import ThemeToggle from "./ThemeToggle";
 import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty } from "../../utils/hooks";
 import { getUpdateVar } from "./utils";
-import { TaipyImage, TaipyImageComp } from "../../utils/image";
+import { Icon, IconAvatar } from "../../utils/icon";
 
 interface ToggleProps extends LovProps {
     style?: CSSProperties;
@@ -61,7 +61,7 @@ const Toggle = (props: ToggleProps) => {
                             {typeof v.item === "string" ? (
                                 <Typography>{v.item}</Typography>
                             ) : (
-                                <TaipyImageComp id={v.id} img={v.item as TaipyImage} />
+                                <IconAvatar id={v.id} img={v.item as Icon} />
                             )}
                         </ToggleButton>
                     ))}
