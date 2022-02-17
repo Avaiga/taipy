@@ -98,12 +98,14 @@ def test_map_dict_update_full_dictionary_2():
     assert temp_values["b"] == 5
 
 
-def test_map_dict_set(gui: Gui):
+def test_map_dict_set(gui: Gui, helpers):
     d = {"a": 1}  # noqa: F841
     gui.run(run_server=False)
-    assert isinstance(gui._Gui__state.d, _MapDict)
-    gui._Gui__state.d = {"b": 2}
-    assert isinstance(gui._Gui__state.d, _MapDict)
-    assert len(gui._Gui__state.d) == 1
-    assert gui._Gui__state.d.get("a", None) is None
-    assert gui._Gui__state.d.get("b", None) == 2
+    sid = helpers.create_scope_and_get_sid(gui)
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
+        assert isinstance(gui._Gui__state.d, _MapDict)
+        gui._Gui__state.d = {"b": 2}
+        assert isinstance(gui._Gui__state.d, _MapDict)
+        assert len(gui._Gui__state.d) == 1
+        assert gui._Gui__state.d.get("a", None) is None
+        assert gui._Gui__state.d.get("b", None) == 2
