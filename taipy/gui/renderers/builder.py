@@ -107,7 +107,7 @@ class Builder:
         return ret
 
     def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
-        names = [n if index is None else f"{n}[{index}]" for n in names]  # type: ignore
+        names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
         return [self.__attributes.get(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:
@@ -348,10 +348,11 @@ class Builder:
             self.__set_json_attribute("columns", columns)
         return self
 
-    def __check_dict(self, values: t.List[t.Any], index: int, names: t.Tuple[str]) -> None:
-        if values[index] is not None and not isinstance(values[index], (dict, _MapDict)):
-            warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
-            values[index] = None
+    def __check_dict(self, values: t.List[t.Any], indexes: t.Tuple[int], names: t.Tuple[str]) -> None:
+        for index in indexes:
+            if values[index] is not None and not isinstance(values[index], (dict, _MapDict)):
+                warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
+                values[index] = None
 
     def get_chart_config(self, default_type="scatter", default_mode="lines+markers"):
         names = (
@@ -372,6 +373,7 @@ class Builder:
             "name",
             "line",
             "text_anchor",
+            "extend_data",
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[5]:
@@ -388,15 +390,13 @@ class Builder:
         if not trace[9]:
             # yaxis
             trace[9] = "y"
-        self.__check_dict(trace, 11, names)
-        self.__check_dict(trace, 12, names)
+        self.__check_dict(trace, (11, 12, 17), names)
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
             while len([x for x in indexed_trace if x]):
-                self.__check_dict(indexed_trace, 11, names)
-                self.__check_dict(indexed_trace, 12, names)
+                self.__check_dict(indexed_trace, (11, 12, 17), names)
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
@@ -437,6 +437,7 @@ class Builder:
                 "names": [t[14] for t in traces],
                 "lines": [t[15] if isinstance(t[15], dict) else {"dash": t[15]} for t in traces],
                 "textAnchors": [t[16] for t in traces],
+                "extendData": [t[17] for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)
