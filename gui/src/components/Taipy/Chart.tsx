@@ -46,7 +46,6 @@ interface ChartProp extends TaipyActiveProps {
     testId?: string;
     render?: boolean;
     defaultRender?: boolean;
-    extendData?: string;
     //[key: `selected_${number}`]: number[];
 }
 
