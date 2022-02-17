@@ -252,12 +252,18 @@ class Gui(object, metaclass=Singleton):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
         if hasattr(self, "on_change") and isinstance(self.on_change, FunctionType):
             try:
-                self.on_change(
-                    self.__state, var_name, value.get() if isinstance(
+                argcount = self.on_change.__code__.co_argcount
+                args = [None for _ in range(argcount)]
+                if argcount > 0:
+                    args[0] = self.__state
+                if argcount > 1:
+                    args[1] = var_name
+                if argcount > 2:
+                    args[2] = value.get() if isinstance(
                         value, TaipyBase) else value._dict if isinstance(value, _MapDict) else value
-                )
+                self.on_change(*args)
             except Exception as e:
-                warnings.warn(f"on_change function invocation exception: {e}")
+                warnings.warn(f"on_change: function invocation exception: {e}")
         self.__send_var_list_update(list(modified_vars), var_name)
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
@@ -486,9 +492,12 @@ class Gui(object, metaclass=Singleton):
             action = payload.get("action")
         else:
             action = str(payload)
-        if action and hasuserattr(self, action):
-            if self.__call_function_with_args(action_function=getuserattr(self, action), id=id, payload=payload):
-                return
+        if action:
+            if hasuserattr(self, action):
+                if self.__call_function_with_args(action_function=getuserattr(self, action), id=id, payload=payload, action=action):
+                    return
+            else:
+                warnings.warn(f"on_action: '{action}' is not a function")
         if hasattr(self, "on_action"):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
@@ -501,25 +510,23 @@ class Gui(object, metaclass=Singleton):
         if isinstance(action_function, FunctionType):
             try:
                 argcount = action_function.__code__.co_argcount
-                if argcount == 0:
-                    action_function()
-                elif argcount == 1:
-                    action_function(self.__state)
-                elif argcount == 2:
-                    action_function(self.__state, id)
-                elif argcount == 3:
-                    if action is not None:
-                        action_function(self.__state, id, action)
+                args = [None for _ in range(argcount)]
+                if argcount > 0:
+                    args[0] = self.__state
+                if argcount > 1:
+                    args[1] = id
+                if argcount > 2:
+                    if action is None:
+                        args[2] = payload
                     else:
-                        action_function(self.__state, id, payload)
-                elif argcount == 4 and action is not None:
-                    action_function(self.__state, id, action, payload)
-                else:
-                    warnings.warn(f"Wrong signature for action '{action_function.__name__}'")
-                    return False
+                        args[2] = action
+                if argcount > 3:
+                    if action is not None:
+                        args[3] = payload
+                action_function(*args)
                 return True
             except Exception as e:
-                warnings.warn(f"on_action '{action_function.__name__}' function invocation exception: {e}")
+                warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
         return False
 
     # Proxy methods for Evaluator
@@ -583,14 +590,6 @@ class Gui(object, metaclass=Singleton):
             self.__on_action(id, callback)
 
         return _taipy_on_cancel_block_ui
-
-    def __validate_function_signature(self, func_name: str, range: range) -> None:
-        if (
-            (func := getattr(self, func_name, None)) is not None
-            and isinstance(func, FunctionType)
-            and func.__code__.co_argcount not in range
-        ):
-            warnings.warn(f"Function {func_name} has invalid signature")
 
     # Public methods
     def add_page(
@@ -699,8 +698,17 @@ class Gui(object, metaclass=Singleton):
         return False
 
     def __bind_local_func(self, name: str):
-        if isinstance(self.__locals_bind.get(name, None), FunctionType):
-            setattr(self, name, self.__locals_bind[name])
+        func = getattr(self, name, None)
+        if func is not None and not isinstance(func, FunctionType):
+            warnings.warn(f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
+            func = None
+        if func is None:
+            func = self.__locals_bind.get(name)
+        if func is not None:
+            if isinstance(func, FunctionType):
+                setattr(self, name, func)
+            else:
+                warnings.warn(f"{name}: {func} should be a function")
 
     def bind_func(self, func_name: str) -> bool:
         if (
@@ -858,10 +866,6 @@ class Gui(object, metaclass=Singleton):
         # bind on_change and on_action function if available
         self.__bind_local_func("on_change")
         self.__bind_local_func("on_action")
-
-        # validate on_change and on_action function signature
-        self.__validate_function_signature("on_change", range(3, 4))
-        self.__validate_function_signature("on_action", range(5))
 
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
