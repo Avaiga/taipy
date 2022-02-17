@@ -241,7 +241,7 @@ class Gui(object, metaclass=Singleton):
             var_name = holder.get_name()
         hash_expr = self._get_hash_from_expr(var_name)
         modified_vars = set([hash_expr])
-        # Use custom attrsetter function to allow value binding for MapDictionary
+        # Use custom attrsetter function to allow value binding for _MapDict
         if propagate:
             setscopeattr_drill(self, hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
@@ -366,7 +366,7 @@ class Gui(object, metaclass=Singleton):
         self.__send_ws_update_with_dict(ws_dict)
 
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
-        # Use custom attrgetter function to allow value binding for MapDictionary
+        # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = getscopeattr_drill(self, var_name)
         if isinstance(newvalue, TaipyData):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
