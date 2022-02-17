@@ -109,5 +109,5 @@ def test_file_upload_multiple(gui: Gui, helpers):
     assert ret.status_code == 200
     created_file = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test2.jpg"
     assert created_file.exists()
-    value = getattr(gui, var_name)
+    value = getattr(gui._bindings()._get_all_scopes()[sid], var_name)
     assert len(value) == 2

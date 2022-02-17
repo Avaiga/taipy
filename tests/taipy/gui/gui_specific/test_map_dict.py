@@ -1,11 +1,12 @@
-from taipy.gui.utils import _MapDictionary
+from taipy.gui.gui import Gui
+from taipy.gui.utils import _MapDict
 
 
-def test_mapdict():
+def test_map_dict():
 
     d = {"a": 1, "b": 2, "c": 3}
-    md = _MapDictionary(d)
-    md_copy = _MapDictionary(d).copy()
+    md = _MapDict(d)
+    md_copy = _MapDict(d).copy()
     assert len(md) == 3
     assert md.__getitem__("a") == d["a"]
     md.__setitem__("a", 4)
@@ -47,14 +48,14 @@ def test_mapdict():
     assert v1 == 5
 
     try:
-        md = _MapDictionary("not_a_dict")
+        md = _MapDict("not_a_dict")
         assert False
     except Exception:
         assert True
     pass
 
 
-def test_mapdict_update():
+def test_map_dict_update():
     update_values = {}
 
     def update(k, v):
@@ -63,32 +64,48 @@ def test_mapdict_update():
         pass
 
     d = {"a": 1, "b": "2"}
-    md = _MapDictionary(d, update)
+    md = _MapDict(d, update)
     md.__setitem__("a", 3)
     assert update_values[0] == "a"
     assert update_values[1] == 3
     print("")
     pass
 
-def test_mapdict_update_full_dictionary_1():
+
+def test_map_dict_update_full_dictionary_1():
     values = {"a": 1, "b": 2}
     update_values = {"a": 3, "b": 5}
-    md = _MapDictionary(values)
+    md = _MapDict(values)
     assert md["a"] == 1
     assert md["b"] == 2
     md.update(update_values)
     assert md["a"] == 3
     assert md["b"] == 5
 
-def test_mapdict_update_full_dictionary_2():
+
+def test_map_dict_update_full_dictionary_2():
     temp_values = {}
+
     def update(k, v):
         temp_values[k] = v
     values = {"a": 1, "b": 2}
     update_values = {"a": 3, "b": 5}
-    md = _MapDictionary(values, update)
+    md = _MapDict(values, update)
     assert md["a"] == 1
     assert md["b"] == 2
     md.update(update_values)
     assert temp_values["a"] == 3
     assert temp_values["b"] == 5
+
+
+def test_map_dict_set(gui: Gui, helpers):
+    d = {"a": 1}  # noqa: F841
+    gui.run(run_server=False)
+    sid = helpers.create_scope_and_get_sid(gui)
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
+        assert isinstance(gui._Gui__state.d, _MapDict)
+        gui._Gui__state.d = {"b": 2}
+        assert isinstance(gui._Gui__state.d, _MapDict)
+        assert len(gui._Gui__state.d) == 1
+        assert gui._Gui__state.d.get("a", None) is None
+        assert gui._Gui__state.d.get("b", None) == 2

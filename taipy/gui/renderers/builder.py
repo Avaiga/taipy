@@ -5,14 +5,12 @@ import re
 import typing as t
 import warnings
 import xml.etree.ElementTree as etree
-from operator import attrgetter
 from types import FunctionType
-
-from taipy.gui.utils.types import TaipyData
 
 from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
-from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
+from ..utils import _MapDict, dateToISO, get_client_var_name, getDataType, is_boolean_true, getscopeattr_drill, getuserattr
+from ..utils.types import TaipyData
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
 
@@ -51,8 +49,8 @@ class Builder:
         if "properties" in self.__attributes:
             (properties_dict_name, _) = self.__parse_attribute_value(self.__attributes["properties"])
             self.__gui.bind_var(properties_dict_name)
-            properties_dict = getattr(self.__gui, properties_dict_name)
-            if not isinstance(properties_dict, _MapDictionary):
+            properties_dict = getuserattr(self.__gui, properties_dict_name)
+            if not isinstance(properties_dict, _MapDict):
                 raise Exception(
                     f"Can't find properties configuration dictionary {properties_dict_name}!"
                     f" Please review your GUI templates!"
@@ -116,7 +114,7 @@ class Builder:
         if isinstance(value, str) and self.__gui._is_expression(value):
             hash_value = self.__gui._evaluate_expr(value)
             try:
-                return (attrgetter(hash_value)(self.__gui._get_data_scope()), hash_value)
+                return (getscopeattr_drill(self.__gui, hash_value), hash_value)
             except AttributeError:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
@@ -139,7 +137,7 @@ class Builder:
                         value = val[1].strip()
                         self.__gui.bind_func(value)
                         dict_attr[val[0].strip()] = value
-            if isinstance(dict_attr, (dict, _MapDictionary)):
+            if isinstance(dict_attr, (dict, _MapDict)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
                 warnings.warn(f"{self.__element_name} {name} should be a dict\n'{str(dict_attr)}'")
@@ -351,7 +349,7 @@ class Builder:
         return self
 
     def __check_dict(self, values: t.List[t.Any], index: int, names: t.Tuple[str]) -> None:
-        if values[index] is not None and not isinstance(values[index], (dict, _MapDictionary)):
+        if values[index] is not None and not isinstance(values[index], (dict, _MapDict)):
             warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
             values[index] = None
 
@@ -448,7 +446,7 @@ class Builder:
     def set_chart_layout(self):
         layout = self.__attributes.get("layout")
         if layout:
-            if isinstance(layout, (dict, _MapDictionary)):
+            if isinstance(layout, (dict, _MapDict)):
                 self.__set_json_attribute("layout", layout)
             else:
                 warnings.warn(f"Chart control: layout attribute should be a dict\n'{str(layout)}'")

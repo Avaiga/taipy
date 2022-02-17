@@ -44,6 +44,9 @@ interface ChartProp extends TaipyActiveProps {
     rangeChange?: string;
     limitRows?: boolean;
     testId?: string;
+    render?: boolean;
+    defaultRender?: boolean;
+    extendData?: string;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -105,6 +108,7 @@ const Chart = (props: ChartProp) => {
     const dataKey = useRef("default");
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const render = useDynamicProperty(props.render, props.defaultRender, true);
 
     // get props.selected[i] values
     useEffect(() => {
@@ -206,6 +210,17 @@ const Chart = (props: ChartProp) => {
         } as Layout;
     }, [title, config.columns, config.traces, props.layout]);
 
+    const extendData = useMemo(() => {
+        if (props.extendData) {
+            try {
+                return JSON.parse(props.extendData);
+            } catch (e) {
+                console.info("Cannot parse Chart.props.extendData: " + ((e as Error).message || e));
+            }
+        }
+        return {};
+    }, [props.extendData]);
+
     const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
@@ -252,7 +267,7 @@ const Chart = (props: ChartProp) => {
             }
             return ret as Data;
         });
-    }, [data, config, selected]);
+    }, [data, config, selected, extendData]);
 
     const plotConfig = useMemo(
         () => (active ? defaultChartConfig : { ...defaultChartConfig, staticPlot: true }),
@@ -294,7 +309,7 @@ const Chart = (props: ChartProp) => {
         [getRealIndex, dispatch, tp_updatevars, propagate]
     );
 
-    return (
+    return render ? (
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                 <Plot
@@ -310,7 +325,7 @@ const Chart = (props: ChartProp) => {
                 />
             </Suspense>
         </Box>
-    );
+    ) : null;
 };
 
 export default Chart;

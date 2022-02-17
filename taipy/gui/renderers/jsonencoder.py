@@ -4,14 +4,14 @@ from pathlib import Path
 import warnings
 
 from ..taipyimage import TaipyImage
-from ..utils import _MapDictionary, TaipyBase, dateToISO
+from ..utils import _MapDict, TaipyBase, dateToISO
 
 
 class TaipyJsonEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, TaipyImage):
             return o.to_dict()
-        elif isinstance(o, _MapDictionary):
+        elif isinstance(o, _MapDict):
             return o._dict
         elif isinstance(o, TaipyBase):
             return o.get()
