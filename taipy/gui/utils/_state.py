@@ -20,7 +20,7 @@ class State:
                 gui.bind_var(name)
             return getattr(gui._bindings(), name)
         else:
-            raise AttributeError(f"Local script has no attribute '{name}'.")
+            raise AttributeError(f"Script has no attribute '{name}'.")
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name in State.__attrs:
@@ -32,7 +32,7 @@ class State:
                     gui.bind_var(name)
                 setattr(gui._bindings(), name, value)
             else:
-                raise AttributeError(f"Local script has no attribute '{name}'.")
+                raise AttributeError(f"Script has no attribute '{name}'.")
 
     def __enter__(self):
         return super().__getattribute__(State.__attrs[0]).__enter__()

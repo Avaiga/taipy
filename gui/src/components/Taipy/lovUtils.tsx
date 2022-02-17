@@ -9,7 +9,8 @@ import {TypographyProps} from "@mui/material";
 
 import { TaipyActiveProps } from "./utils";
 import { getInitials } from "../../utils";
-import { LovItem, TaipyImage } from "../../utils/lov";
+import { LovItem } from "../../utils/lov";
+import { stringImage, TaipyImage } from "../../utils/image";
 
 export interface SelTreeProps extends LovProps {
     filter?: boolean;
@@ -26,7 +27,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     height?: string | number;
 }
 
-type LoVElt = [string, string | TaipyImage, LoVElt[]?];
+type LoVElt = [string, stringImage, LoVElt[]?];
 
 export type LoV = LoVElt[];
 
@@ -85,7 +86,7 @@ export interface ItemProps {
     value: string;
     clickHandler: (evt: MouseEvent<HTMLElement>) => void;
     selectedValue: string[] | string;
-    item: string | TaipyImage;
+    item: stringImage;
     disabled: boolean;
     withAvatar?: boolean;
     titleTypographyProps?: TypographyProps;

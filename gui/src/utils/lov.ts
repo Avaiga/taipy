@@ -1,11 +1,8 @@
-export interface TaipyImage {
-    path: string;
-    text: string;
-}
+import { stringImage } from "./image";
 
 export interface LovItem {
     id: string;
-    item: string | TaipyImage;
+    item: stringImage;
     children?: LovItem[];
 }
 

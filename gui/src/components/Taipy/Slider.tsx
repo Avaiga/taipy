@@ -9,7 +9,7 @@ import { createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
-import { TaipyImage } from "../../utils/lov";
+import { TaipyImage } from "../../utils/image";
 
 interface SliderProps extends LovProps<number | string, number | string> {
     width?: string;

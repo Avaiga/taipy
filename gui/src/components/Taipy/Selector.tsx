@@ -31,7 +31,7 @@ import {
     useLovListMemo,
 } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-import { TaipyImage } from "../../utils/lov";
+import { TaipyImage } from "../../utils/image";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
     <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>

@@ -8,7 +8,7 @@ import CardHeader from "@mui/material/CardHeader";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Box from "@mui/material/Box";
 import Tooltip from '@mui/material/Tooltip';
-import { useTheme } from "@mui/material";
+import { Theme, useTheme } from "@mui/material";
 
 import { SingleItem } from "./lovUtils";
 import { TaipyContext } from "../../context/taipyContext";
@@ -17,7 +17,7 @@ import { MenuProps } from "../../utils/lov";
 
 const boxDrawerStyle = { overflowX: "hidden" } as CSSProperties;
 const headerSx = { padding: 0 };
-const avatarSx = { bgcolor: "white" };
+const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {

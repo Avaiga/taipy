@@ -14,7 +14,8 @@ import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
 import Link from "./Link";
-import { LovItem, TaipyImage } from "../../utils/lov";
+import { LovItem } from "../../utils/lov";
+import { TaipyImage } from "../../utils/image";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
