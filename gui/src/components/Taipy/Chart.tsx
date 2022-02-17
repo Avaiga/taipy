@@ -46,7 +46,6 @@ interface ChartProp extends TaipyActiveProps {
     testId?: string;
     render?: boolean;
     defaultRender?: boolean;
-    extendData?: string;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -65,6 +64,7 @@ interface ChartConfig {
     lines: Partial<ScatterLine>[];
     texts: string[];
     textAnchors: string[];
+    extendData: Record<string, unknown>[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -164,6 +164,7 @@ const Chart = (props: ChartProp) => {
                 lines: [],
                 texts: [],
                 textAnchors: [],
+                extendData: [],
             } as ChartConfig;
         }
     }, [props.config]);
@@ -210,17 +211,6 @@ const Chart = (props: ChartProp) => {
         } as Layout;
     }, [title, config.columns, config.traces, props.layout]);
 
-    const extendData = useMemo(() => {
-        if (props.extendData) {
-            try {
-                return JSON.parse(props.extendData);
-            } catch (e) {
-                console.info("Cannot parse Chart.props.extendData: " + ((e as Error).message || e));
-            }
-        }
-        return {};
-    }, [props.extendData]);
-
     const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
@@ -228,6 +218,7 @@ const Chart = (props: ChartProp) => {
         const datum = data && data[dataKey.current];
         return config.traces.map((trace, idx) => {
             const ret = {
+                ...getArrayValue(config.extendData, idx, {}),
                 type: config.types[idx],
                 mode: config.modes[idx],
                 name:
@@ -267,7 +258,7 @@ const Chart = (props: ChartProp) => {
             }
             return ret as Data;
         });
-    }, [data, config, selected, extendData]);
+    }, [data, config, selected]);
 
     const plotConfig = useMemo(
         () => (active ? defaultChartConfig : { ...defaultChartConfig, staticPlot: true }),
