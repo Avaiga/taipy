@@ -700,7 +700,8 @@ class Gui(object, metaclass=Singleton):
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
         if func is not None and not isinstance(func, FunctionType):
-            warnings.warn(f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
+            warnings.warn(
+                f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
             func = None
         if func is None:
             func = self.__locals_bind.get(name)
