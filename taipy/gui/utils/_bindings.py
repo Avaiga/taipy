@@ -2,14 +2,14 @@ from datetime import datetime
 from random import random
 import typing as t
 
-from .MapDictionary import _MapDictionary
+from ._map_dict import _MapDict
 from ..data.data_scope import _DataScopes
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-class _UserData:
+class _Bindings:
     def __init__(self, gui: "Gui") -> None:
         self.__gui = gui
         self.__scopes = _DataScopes()
@@ -20,22 +20,22 @@ class _UserData:
         if not name.isidentifier():
             raise ValueError(f"Variable name '{name}' is invalid")
         if isinstance(value, dict):
-            setattr(self._get_data_scope(), name, _MapDictionary(value))
+            setattr(self._get_data_scope(), name, _MapDict(value))
         else:
             setattr(self._get_data_scope(), name, value)
         # prop = property(self.__value_getter(name), self.__value_setter(name))
-        setattr(_UserData, name, self.__get_property(name))
+        setattr(_Bindings, name, self.__get_property(name))
 
     def __get_property(self, name):
-        def __setter(ud: _UserData, value: t.Any):
+        def __setter(ud: _Bindings, value: t.Any):
             if isinstance(value, dict):
-                value = _MapDictionary(value, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
+                value = _MapDict(value, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
             ud.__gui._update_var(name, value)
 
-        def __getter(ud: _UserData) -> t.Any:
+        def __getter(ud: _Bindings) -> t.Any:
             value = getattr(ud._get_data_scope(), name)
-            if isinstance(value, _MapDictionary):
-                return _MapDictionary(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
+            if isinstance(value, _MapDict):
+                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
             else:
                 return value
         return property(__getter, __setter)  # Getter, Setter

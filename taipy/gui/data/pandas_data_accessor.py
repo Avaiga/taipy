@@ -9,7 +9,7 @@ import pyarrow as pa
 from ..utils import _get_date_col_str_name
 from .data_accessor import DataAccessor
 from .data_format import DataFormat
-from ..utils._user_data import _UserData
+from ..utils._bindings import _Bindings
 
 
 class PandasDataAccessor(DataAccessor):
@@ -43,7 +43,7 @@ class PandasDataAccessor(DataAccessor):
         return ""
 
     def __build_transferred_cols(
-        self, user_data: _UserData, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
+        self, user_data: _Bindings, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
             col_types = data.dtypes[data.dtypes.index.isin(payload_cols)]
@@ -139,7 +139,7 @@ class PandasDataAccessor(DataAccessor):
         return None
 
     def get_data(  # noqa: C901
-        self, user_data: _UserData, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, user_data: _Bindings, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         if isinstance(value, pd.DataFrame):

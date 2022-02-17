@@ -5,7 +5,7 @@ import warnings
 from types import FunctionType
 
 from ..taipyimage import TaipyImage
-from . import _MapDictionary
+from . import _MapDict
 
 
 class _Adapter:
@@ -49,7 +49,7 @@ class _Adapter:
         if value is None:
             return None
         try:
-            result = adapter(value if not isinstance(value, _MapDictionary) else value._dict)
+            result = adapter(value if not isinstance(value, _MapDict) else value._dict)
             result = self._get_valid_adapter_result(result, index, id_only)
             if result is None:
                 warnings.warn(
