@@ -6,27 +6,27 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from taipy.common.alias import CycleId, Dag, PipelineId, ScenarioId
-from taipy.common.frequency import Frequency
-from taipy.config.config import Config
-from taipy.config.global_app_config import GlobalAppConfig
-from taipy.config.job_config import JobConfig
-from taipy.cycle.cycle import Cycle
-from taipy.cycle.cycle_manager import CycleManager
-from taipy.cycle.cycle_model import CycleModel
-from taipy.data.data_manager import DataManager
-from taipy.data.in_memory import InMemoryDataNode
-from taipy.data.scope import Scope
-from taipy.job.job_manager import JobManager
-from taipy.pipeline.pipeline import Pipeline
-from taipy.pipeline.pipeline_manager import PipelineManager
-from taipy.pipeline.pipeline_model import PipelineModel
-from taipy.scenario.scenario import Scenario
-from taipy.scenario.scenario_manager import ScenarioManager
-from taipy.scenario.scenario_model import ScenarioModel
-from taipy.scheduler.scheduler_factory import SchedulerFactory
-from taipy.task.task import Task
-from taipy.task.task_manager import TaskManager
+from taipy.core.common.alias import CycleId, Dag, PipelineId, ScenarioId
+from taipy.core.common.frequency import Frequency
+from taipy.core.config.config import Config
+from taipy.core.config.global_app_config import GlobalAppConfig
+from taipy.core.config.job_config import JobConfig
+from taipy.core.cycle.cycle import Cycle
+from taipy.core.cycle.cycle_manager import CycleManager
+from taipy.core.cycle.cycle_model import CycleModel
+from taipy.core.data.data_manager import DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.scope import Scope
+from taipy.core.job.job_manager import JobManager
+from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.pipeline.pipeline_manager import PipelineManager
+from taipy.core.pipeline.pipeline_model import PipelineModel
+from taipy.core.scenario.scenario import Scenario
+from taipy.core.scenario.scenario_manager import ScenarioManager
+from taipy.core.scenario.scenario_model import ScenarioModel
+from taipy.core.scheduler.scheduler_factory import SchedulerFactory
+from taipy.core.task.task import Task
+from taipy.core.task.task_manager import TaskManager
 
 current_time = datetime.now()
 
