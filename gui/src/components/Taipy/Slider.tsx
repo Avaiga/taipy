@@ -9,7 +9,7 @@ import { createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
-import { TaipyImage } from "../../utils/lov";
+import { Icon } from "../../utils/icon";
 
 interface SliderProps extends LovProps<number | string, number | string> {
     width?: string;
@@ -78,7 +78,7 @@ const Slider = (props: SliderProps) => {
                 typeof lovList[value].item === "string" ? (
                     <Typography>{lovList[value].item}</Typography>
                 ) : (
-                    <LovImage item={lovList[value].item as TaipyImage} />
+                    <LovImage item={lovList[value].item as Icon} />
                 )
             ) : (
                 <>{value}</>

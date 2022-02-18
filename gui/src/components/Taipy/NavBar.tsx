@@ -14,7 +14,8 @@ import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
 import Link from "./Link";
-import { LovItem, TaipyImage } from "../../utils/lov";
+import { LovItem } from "../../utils/lov";
+import { Icon } from "../../utils/icon";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
@@ -55,7 +56,7 @@ const NavBar = (props: LovProps) => {
                     <ListItem key={val.id} onClick={() => setOpened(false)} disabled={!active}>
                         <ListItemText>
                             <Link href={val.id}>
-                                {(typeof val.item === "string" ? val.item : (val.item as TaipyImage).text) || val.id}
+                                {(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
                             </Link>
                         </ListItemText>
                     </ListItem>
@@ -74,7 +75,7 @@ const NavBar = (props: LovProps) => {
                         key={val.id}
                         value={val.id}
                         disabled={!active}
-                        label={(typeof val.item === "string" ? val.item : (val.item as TaipyImage).text) || val.id}
+                        label={(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
                     />
                 ))}
             </Tabs>

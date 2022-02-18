@@ -1,5 +1,5 @@
 ﻿Name,Type,Default,Doc
-*label,dynamic(str),"""""",The label displayed in the button.
+*label,dynamic(str|Icon),"""""",The label displayed in the button.
 on_action,str,,"The name of a function that is triggered when the button is pressed.
 The parameters of that function are all optional:
 <ul>

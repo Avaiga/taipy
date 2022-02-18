@@ -240,7 +240,7 @@ const Chart = (props: ChartProp) => {
                     ret.y = ys;
                 } else {
                     ret.x = Array.from(Array(xs.length).keys());
-                    ret.y = ret.x;
+                    ret.y = xs;
                 }
                 ret.z = getValue(datum, trace, 2);
                 ret.text = getValue(datum, config.texts, idx);

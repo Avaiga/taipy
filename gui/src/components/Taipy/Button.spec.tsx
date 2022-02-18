@@ -24,6 +24,13 @@ describe("Button Component", () => {
         );
         getByText("titi");
     });
+    it("displays an image", async () => {
+        const { getByAltText } = render(
+            <Button defaultLabel={JSON.stringify({path: "/image/fred.png", text: "fred"})} label={undefined as unknown as string} />
+        );
+        const img = getByAltText("fred");
+        expect(img.tagName).toBe("IMG")
+    });
     it("is disabled", async () => {
         const { getByText } = render(<Button label="val" active={false} />);
         const elt = getByText("val");
