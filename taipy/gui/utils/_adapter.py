@@ -52,9 +52,7 @@ class _Adapter:
             result = adapter(value if not isinstance(value, _MapDict) else value._dict)
             result = self._get_valid_adapter_result(result, index, id_only)
             if result is None:
-                warnings.warn(
-                    f"Adapter for {var_name} does not return a valid result. It should return a tuple (id, label) or a label with label being a string or a Icon instance"
-                )
+                warnings.warn(f"Adapter for {var_name} did not return a valid result. Please check the documentation on List of Values Adapters.")
             else:
                 if not id_only and len(result) > 2 and isinstance(result[2], list):
                     result = (result[0], result[1], self.__adapter_on_tree(adapter, result[2], str(index) + "."))
