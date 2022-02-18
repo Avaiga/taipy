@@ -76,7 +76,6 @@ ENV/
 .DS_Store
 
 # Demo Testing File
-*.csv
 object_selection.py
 dataset
 

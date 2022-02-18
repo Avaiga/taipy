@@ -7,36 +7,20 @@ from setuptools import find_packages, setup
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open("docs/history.md") as history_file:
-    history = history_file.read()
-
 requirements = [
-    "flask",
-    "flask-cors",
-    "flask-socketio",
-    "markdown",
     "networkx",
     "numpy",
     "openpyxl",
     "pandas",
-    "pyarrow",
-    "python-dotenv",
-    "python-magic;platform_system!='Windows'",
-    "python-magic-bin;platform_system=='Windows'",
-    "pytz",
     "simple-websocket",
     "sqlalchemy",
     "toml",
-    "tzlocal",
-    "backports.zoneinfo;python_version<'3.9'",
     "Unidecode",
-    "rdp",
 ]
 
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
-    "ngrok": ["pyngrok>=5"],
     "mssql": ["pyodbc>=4"],
     "airflow": ["taipy-airflow@git+ssh://git@github.com/Avaiga/taipy-airflow.git@develop"],
 }
@@ -58,7 +42,7 @@ setup(
     description="AI Platform for Business Applications.",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + "\n\n" + history,
+    long_description=readme,
     include_package_data=True,
     keywords="taipy",
     name="taipy",
