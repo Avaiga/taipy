@@ -1,0 +1,74 @@
+name: Setuptools
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  standard-packages:
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-versions: [ '3.8', '3.9', '3.10' ]
+        os: [ubuntu-18.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Install Taipy without dependencies
+        run: |
+          pip install .
+          rm -r taipy  # Removal of Taipy code to ensure the use of the installed package
+
+          pip install pytest pytest-mock
+          pytest
+
+  optionals-packages:
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        python-versions: [ '3.8', '3.9', '3.10' ]
+        os: [ ubuntu-18.04 ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Add an ssh key for cloning
+        run: |
+          mkdir -p ~/.ssh
+          ls ~/.ssh
+          echo "${{ secrets.SSH_KEY_TAIPY_AIRFLOW }}" > ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+
+      - name: Add optionals dependencies
+        run: |
+          # Extract optionals packages before installing them
+          grep -n 'setup(' setup.py | cut -d ":" -f 1 | xargs -I% bash -c "expr % - 1" | xargs -I% bash -c 'head -n% setup.py' > setup_packages.py
+          echo "[print(k) for k in extras_require.keys()]" >> setup_packages.py
+          python setup_packages.py | xargs -I% bash -c "pip install .[%]"
+
+          rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
+
+          # Run test with optionals packages installed
+          pip install pytest pytest-mock
+          pytest > pytest_res
+          cat pytest_res
+
+          echo "Ensure that no tests are skipped"
+          tail -n1 pytest_res | grep --invert-match "skipped"
+
+          echo "Ensure that no warnings are issued"
+          tail -n1 pytest_res | grep --invert-match "warning"

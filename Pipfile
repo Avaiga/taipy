@@ -1,0 +1,34 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+networkx = ">=2.6"
+numpy = ">=1.21"
+openpyxl = ">=3.0"
+pandas = ">=1.3"
+sqlalchemy = ">=1.3"
+toml = ">=0.10"
+unidecode = ">=1.3"
+
+[dev-packages]
+black = "*"
+flake8 = "*"
+flake8-docstrings = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-mock = "3.6.1"
+tox = "==3.24.3"
+#twine = "*"
+types-toml = "0.10.0"
+autopep8 = "*"
+
+[requires]
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
