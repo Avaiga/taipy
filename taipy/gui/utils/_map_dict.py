@@ -9,7 +9,7 @@ class _MapDict(object):
     Also perform update operation
     """
 
-    local_vars = ("_dict", "_update_var")
+    __local_vars = ("_dict", "_update_var")
 
     def __init__(self, dict_import: dict, app_update_var=None):
         self._dict = dict_import
@@ -57,7 +57,7 @@ class _MapDict(object):
         return self._dict.get(attr)
 
     def __setattr__(self, attr, value):
-        if attr in _MapDict.local_vars:
+        if attr in _MapDict.__local_vars:
             super().__setattr__(attr, value)
         else:
             self.__setitem__(attr, value)
