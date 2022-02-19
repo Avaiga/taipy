@@ -93,7 +93,7 @@ class Html(PageRenderer):
 
     # Generate JSX from HTML
     def render(self, gui: Gui) -> str:
-        parser = TaipyHTMLParser()
+        parser = TaipyHTMLParser(gui)
         parser.feed(t.cast(str, self._content))
         self.head = parser.head
         return parser.get_jsx()

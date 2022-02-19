@@ -9,7 +9,15 @@ from types import FunctionType
 
 from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
-from ..utils import _MapDict, dateToISO, get_client_var_name, getDataType, is_boolean_true, getscopeattr_drill, getuserattr
+from ..utils import (
+    _MapDict,
+    dateToISO,
+    get_client_var_name,
+    getDataType,
+    getscopeattr_drill,
+    getuserattr,
+    is_boolean_true,
+)
 from ..utils.types import TaipyData
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
@@ -23,6 +31,7 @@ class Builder:
 
     def __init__(
         self,
+        gui,
         control_type: str,
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
@@ -38,7 +47,7 @@ class Builder:
         self.__attributes = attributes or {}
         self.__hashes = {}
         self.__update_vars: t.List[str] = []
-        self.__gui = Gui._get_instance()
+        self.__gui: Gui = gui
 
         self.__default_property_name = Factory.get_default_property_name(control_type) or ""
         default_property_value = self.__attributes.get(self.__default_property_name, None)

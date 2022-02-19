@@ -32,7 +32,6 @@ from .renderers._markdown import TaipyMarkdownExtension
 from .server import Server
 from .types import WsType
 from .utils import (
-    Singleton,
     TaipyBase,
     TaipyContent,
     TaipyContentImage,
@@ -58,7 +57,7 @@ from .utils._evaluator import _Evaluator
 from .utils._state import State
 
 
-class Gui(object, metaclass=Singleton):
+class Gui:
     """The class that handles the Graphical User Interface.
 
     Attributes:
@@ -157,10 +156,6 @@ class Gui(object, metaclass=Singleton):
             self.add_pages(pages)
         if env_filename is not None:
             self.__env_filename = env_filename
-
-    @staticmethod
-    def _get_instance() -> Gui:
-        return Gui._instances[Gui]
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -534,9 +529,7 @@ class Gui(object, metaclass=Singleton):
                 action_function(*args)
                 return True
             except Exception as e:
-                warnings.warn(
-                    f"on_action: '{action_function.__name__}' function invocation exception: {e}"
-                )
+                warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
 
         return False
 
@@ -890,7 +883,7 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(f'{Gui.__CONTENT_ROOT}<path:path>', view_func=self.__serve_content)
+        images_bp.add_url_rule(f"{Gui.__CONTENT_ROOT}<path:path>", view_func=self.__serve_content)
 
         self._flask_blueprint.append(images_bp)
 
