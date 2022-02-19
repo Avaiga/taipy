@@ -14,7 +14,7 @@ def test_variable_binding(helpers):
     x = 10
     y = 20
     z = "button label"
-    gui = Gui(__name__)
+    gui = Gui()
     gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
@@ -30,7 +30,7 @@ def test_variable_binding(helpers):
 
 
 def test_properties_binding(helpers):
-    gui = Gui(__name__)
+    gui = Gui()
     modifier = "nice "  # noqa: F841
     button_properties = {"label": "A {modifier}button"}  # noqa: F841
     gui.add_page("test", Markdown("<|button|properties=button_properties|>"))
@@ -49,7 +49,7 @@ def test_dict_binding(helpers):
     """
 
     d = {"k": "test"}  # noqa: F841
-    gui = Gui(__name__, Markdown("<|{d.k}|>"))
+    gui = Gui(page = Markdown("<|{d.k}|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
     with pytest.warns(UserWarning):
