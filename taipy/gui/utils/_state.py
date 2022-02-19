@@ -14,25 +14,23 @@ class State:
         super().__setattr__(State.__attrs[0], gui)
 
     def __getattribute__(self, name: str) -> t.Any:
-        if name in super().__getattribute__(State.__attrs[1]):
-            gui = super().__getattribute__(State.__attrs[0])
-            if not hasattr(gui._bindings(), name):
-                gui.bind_var(name)
-            return getattr(gui._bindings(), name)
-        else:
+        if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
+        gui = super().__getattribute__(State.__attrs[0])
+        if not hasattr(gui._bindings(), name):
+            gui.bind_var(name)
+        return getattr(gui._bindings(), name)
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name in State.__attrs:
             super().__setattr__(name, value)
         else:
-            if name in super().__getattribute__(State.__attrs[1]):
-                gui = super().__getattribute__(State.__attrs[0])
-                if not hasattr(gui._bindings(), name):
-                    gui.bind_var(name)
-                setattr(gui._bindings(), name, value)
-            else:
+            if name not in super().__getattribute__(State.__attrs[1]):
                 raise AttributeError(f"Variable '{name}' is not defined.")
+            gui = super().__getattribute__(State.__attrs[0])
+            if not hasattr(gui._bindings(), name):
+                gui.bind_var(name)
+            setattr(gui._bindings(), name, value)
 
     def __enter__(self):
         return super().__getattribute__(State.__attrs[0]).__enter__()

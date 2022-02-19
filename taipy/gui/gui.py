@@ -81,7 +81,7 @@ class Gui(object, metaclass=Singleton):
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-content", "taipy-uploads"]
-    _agregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
+    _aggregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
     # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
     # There's a section that explicitly lists these extensions in
@@ -330,7 +330,7 @@ class Gui(object, metaclass=Singleton):
                 if part > 0:
                     try:
                         with open(file_path, "wb") as grouped_file:
-                            for nb in range(0, part + 1):
+                            for nb in range(part + 1):
                                 with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
                                     grouped_file.write(part_file.read())
                     except EnvironmentError as ee:
@@ -501,10 +501,7 @@ class Gui(object, metaclass=Singleton):
                 self.__send_ws({"type": WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
-        if isinstance(payload, dict):
-            action = payload.get("action")
-        else:
-            action = str(payload)
+        action = payload.get("action") if isinstance(payload, dict) else str(payload)
         if action:
             if hasuserattr(self, action):
                 if self.__call_function_with_args(
@@ -531,17 +528,16 @@ class Gui(object, metaclass=Singleton):
                 if argcount > 1:
                     args[1] = id
                 if argcount > 2:
-                    if action is None:
-                        args[2] = payload
-                    else:
-                        args[2] = action
-                if argcount > 3:
-                    if action is not None:
-                        args[3] = payload
+                    args[2] = payload if action is None else action
+                if argcount > 3 and action is not None:
+                    args[3] = payload
                 action_function(*args)
                 return True
             except Exception as e:
-                warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
+                warnings.warn(
+                    f"on_action: '{action_function.__name__}' function invocation exception: {e}"
+                )
+
         return False
 
     # Proxy methods for Evaluator
@@ -894,7 +890,8 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(Gui.__CONTENT_ROOT + "<path:path>", view_func=self.__serve_content)
+        images_bp.add_url_rule(f'{Gui.__CONTENT_ROOT}<path:path>', view_func=self.__serve_content)
+
         self._flask_blueprint.append(images_bp)
 
         # server URL for uploaded files

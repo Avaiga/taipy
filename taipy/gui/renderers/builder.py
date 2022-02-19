@@ -303,7 +303,7 @@ class Builder:
                         self.__gui.bind_var_val(value, v)
                     else:
                         value = str(v).strip()
-                        if value and value not in self.__gui._agregate_functions:
+                        if value and value not in self.__gui._aggregate_functions:
                             # Bind potential function
                             self.__gui.bind_func(value)
                     if value:
