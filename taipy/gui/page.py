@@ -4,8 +4,8 @@ from __future__ import annotations
 import typing as t
 
 if t.TYPE_CHECKING:
-    from .renderers import PageRenderer
     from .gui import Gui
+    from .renderers import PageRenderer
 
 
 class Page(object):
@@ -35,7 +35,7 @@ class Page(object):
             raise RuntimeError(f"Can't render JSX for {self.route} due to missing renderer!")
         self.rendered_jsx = self.renderer.render(gui)
         if hasattr(self.renderer, "head"):
-            self.head = str(self.renderer.head) # type: ignore
+            self.head = str(self.renderer.head)  # type: ignore
 
 
 class Partial(Page):
