@@ -82,10 +82,6 @@ class Gui:
     __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-content", "taipy-uploads"]
     _aggregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
-    # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
-    # There's a section that explicitly lists these extensions in
-    #      docs/gui/user_pages.md#markdown-specifics
-
     def __init__(
         self,
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
@@ -137,6 +133,11 @@ class Gui:
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
+
+        # Load Markdown extension
+        # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
+        # There's a section that explicitly lists these extensions in
+        #      docs/gui/user_pages.md#markdown-specifics
         self._markdown = md_lib.Markdown(
             extensions=[
                 "fenced_code",
