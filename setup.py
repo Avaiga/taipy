@@ -54,7 +54,7 @@ setup(
     long_description=readme + "\n\n" + history,
     include_package_data=True,
     keywords="taipy",
-    name="taipy",
+    name="taipy-gui",
     packages=find_packages(include=["taipy", "taipy.*"]),
     test_suite="tests",
     tests_require=test_requirements,

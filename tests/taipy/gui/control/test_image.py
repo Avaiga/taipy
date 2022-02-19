@@ -44,7 +44,7 @@ def test_image_bad_file_md(gui: Gui, helpers):
         md_string = "<|{content}|image|>"
         expected_list = [
             "<Image",
-            'defaultContent="Invalid content: text/x-python',
+            'defaultContent="Invalid content: text/x',
             'tp_onAction=""',
         ]
         helpers.test_control_md(gui, md_string, expected_list)

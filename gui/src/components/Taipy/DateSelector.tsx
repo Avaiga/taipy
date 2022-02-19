@@ -2,20 +2,26 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import DatePicker from "@mui/lab/DatePicker";
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
 import { isValid } from "date-fns";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { TaipyActiveProps } from "./utils";
+import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
 import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import Field from "./Field";
 
 interface DateSelectorProps extends TaipyActiveProps {
     withTime?: boolean;
     format?: string;
     date: string;
     defaultDate?: string;
+    defaultEditable?: boolean;
+    editable?: boolean;
 }
+
+const boxSx = {display: "inline-block"};
 
 const DateSelector = (props: DateSelectorProps) => {
     const { className, tp_varname, withTime = false, id, propagate = true } = props;
@@ -25,6 +31,7 @@ const DateSelector = (props: DateSelectorProps) => {
     const [value, setValue] = useState(() => getDateTime(props.defaultDate, tz));
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
 
     const handleChange = useCallback(
         (v) => {
@@ -63,22 +70,37 @@ const DateSelector = (props: DateSelectorProps) => {
         }
     }, [props.date, tz]);
 
-    return withTime ? (
-        <DateTimePicker
-            value={value}
-            onChange={handleChange}
-            renderInput={renderInput}
-            className={className}
-            disabled={!active}
-        />
-    ) : (
-        <DatePicker
-            value={value}
-            onChange={handleChange}
-            renderInput={renderInput}
-            className={className}
-            disabled={!active}
-        />
+    return (
+        <Box id={id} className={className} sx={boxSx}>
+            {editable ? (
+                withTime ? (
+                    <DateTimePicker
+                        value={value}
+                        onChange={handleChange}
+                        renderInput={renderInput}
+                        className={getSuffixedClassNames(className, "-picker")}
+                        disabled={!active}
+                    />
+                ) : (
+                    <DatePicker
+                        value={value}
+                        onChange={handleChange}
+                        renderInput={renderInput}
+                        className={getSuffixedClassNames(className, "-picker")}
+                        disabled={!active}
+                    />
+                )
+            ) : (
+                <Field
+                    dataType="datetime.datetime"
+                    defaultValue={props.defaultDate}
+                    value={props.date}
+                    format={props.format}
+                    id={id + "-field"}
+                    className={getSuffixedClassNames(className, "-text")}
+                />
+            )}
+        </Box>
     );
 };
 

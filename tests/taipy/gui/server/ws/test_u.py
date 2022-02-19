@@ -2,7 +2,7 @@ import pytest
 from taipy.gui import Gui, Markdown
 
 
-def ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload):
+def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_update, payload):
     # Bind test variable
     var = value_before_update  # noqa: F841
     # Bind a page so that the variable will be evaluated as expression
@@ -14,13 +14,13 @@ def ws_u_assert_template(gui, helpers, value_before_update, value_after_update, 
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = helpers.create_scope_and_get_sid(gui)
     flask_client.get(f"/taipy-jsx/test/?client_id={sid}")
-    assert gui._scopes.get_all_scopes()[sid].var == value_before_update
-    with pytest.warns(UserWarning):
-        ws_client.emit("message", {"type": "U", "name": "var", "payload": payload})
-    assert gui._scopes.get_all_scopes()[sid].var == value_after_update
+    assert gui._bindings()._get_all_scopes()[sid].var == value_before_update
+    ws_client.emit("message", {"client_id": sid, "type": "U", "name": "var", "payload": payload})
+    assert gui._bindings()._get_all_scopes()[sid].var == value_after_update
     # assert for received message (message that would be sent to the frontend client)
-    received_message = ws_client.get_received()[0]
-    helpers.assert_outward_ws_message(received_message, "MU", "var", value_after_update)
+    received_message = ws_client.get_received()
+    assert len(received_message)
+    helpers.assert_outward_ws_message(received_message[0], "MU", "var", value_after_update)
 
 
 def test_ws_u_string(gui: Gui, helpers):

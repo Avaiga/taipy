@@ -1,10 +1,10 @@
 import typing as t
 
 
-class TaipyImage:
+class Icon:
     @staticmethod
     def get_dict_or(value: t.Union[str, t.Any]) -> t.Union[str, dict]:
-        return value.to_dict() if isinstance(value, TaipyImage) else value
+        return value.to_dict() if isinstance(value, Icon) else value
 
     def __init__(self, path: str, text: t.Optional[str] = None) -> None:
         self.path = path

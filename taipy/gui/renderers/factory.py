@@ -14,7 +14,7 @@ class Factory:
         "button": "label",
         "chart": "data",
         "content": "value",
-        "date_selector": "date",
+        "date": "date",
         "dialog": "open",
         "expandable": "title",
         "file_download": "content",
@@ -70,6 +70,7 @@ class Factory:
                 ("range_change",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("limit_rows", AttributeType.boolean),
+                ("render", AttributeType.dynamic_boolean, True),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
@@ -79,7 +80,7 @@ class Factory:
         "content": lambda control_type, attrs: Builder(
             control_type=control_type, element_name="PageContent", attributes=attrs
         ),
-        "date_selector": lambda control_type, attrs: Builder(
+        "date": lambda control_type, attrs: Builder(
             control_type=control_type,
             element_name="DateSelector",
             attributes=attrs,
@@ -91,6 +92,7 @@ class Factory:
                 ("with_time", AttributeType.boolean),
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("editable", AttributeType.dynamic_boolean, True),
             ]
         )
         .set_propagate(),
@@ -190,6 +192,7 @@ class Factory:
                 ("max", AttributeType.number),
                 ("value", AttributeType.dynamic_number),
                 ("format",),
+                ("orientation"),
             ]
         ),
         "input": lambda control_type, attrs: Builder(

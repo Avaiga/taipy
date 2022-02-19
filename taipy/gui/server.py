@@ -6,7 +6,7 @@ import re
 import typing as t
 
 import __main__
-from flask import Blueprint, Flask, jsonify, render_template, render_template_string, request, send_from_directory, json
+from flask import Blueprint, Flask, json, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
@@ -61,12 +61,10 @@ class Server:
 
         @self._ws.on("connect")
         def ws_connect():
-            # gui._scopes.create_scope()
             pass
 
         @self._ws.on("disconnect")
         def ws_disconnect():
-            # gui._scopes.delete_scope()
             pass
 
     def _get_default_blueprint(

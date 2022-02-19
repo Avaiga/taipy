@@ -41,7 +41,8 @@ def test_file_download_any_file_md(gui: Gui, helpers):
         md_string = "<|{content}|file_download|>"
         expected_list = [
             "<FileDownload",
-            'defaultContent="data:text/x-python;base64,',
+            'defaultContent="data:text/x',
+            'python;base64,',
         ]
         helpers.test_control_md(gui, md_string, expected_list)
 

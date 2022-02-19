@@ -31,7 +31,7 @@ import {
     useLovListMemo,
 } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
-import { TaipyImage } from "../../utils/lov";
+import { Icon } from "../../utils/icon";
 
 const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: ItemProps) => (
     <ListItemButton onClick={clickHandler} data-id={value} dense disabled={disabled}>
@@ -222,7 +222,7 @@ const Selector = (props: SelTreeProps) => {
                                 {typeof item.item === "string" ? (
                                     item.item
                                 ) : (
-                                    <LovImage item={item.item as TaipyImage} />
+                                    <LovImage item={item.item as Icon} />
                                 )}
                             </MenuItem>
                         ))}

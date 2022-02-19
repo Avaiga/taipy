@@ -19,7 +19,7 @@ def test_data_filter_2(csvdata):
 
 
 def test_data_filter_3(csvdata):
-    csvdata["DayInt"] = pd.to_datetime(csvdata["Day"]).astype(np.int64)
+    csvdata["DayInt"] = pd.to_datetime(csvdata["Day"]).view(np.int64)
     df, x, y = df_data_filter(csvdata[:1500], "DayInt", "Daily hospital occupancy", 100)
     assert df.shape[0] == 121
     assert x == "DayInt"

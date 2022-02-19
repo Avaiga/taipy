@@ -1,4 +1,9 @@
-class _MapDictionary(object):
+from __future__ import annotations
+
+import typing as t
+
+
+class _MapDict(object):
     """
     Provide class binding, can utilize getattr, setattr functionality
     Also perform update operation
@@ -6,13 +11,10 @@ class _MapDictionary(object):
 
     local_vars = ("_dict", "_update_var")
 
-    def __init__(self, dict_import, app_update_var=None):
+    def __init__(self, dict_import: dict, app_update_var=None):
         self._dict = dict_import
         # Bind app update var function
         self._update_var = app_update_var
-        # Verify if dict_import is a dictionary
-        if not isinstance(dict_import, dict):
-            raise TypeError("should have a dict")
 
     def __len__(self):
         return self._dict.__len__()
@@ -24,9 +26,9 @@ class _MapDictionary(object):
         value = self._dict.__getitem__(key)
         if isinstance(value, dict):
             if self._update_var:
-                return _MapDictionary(value, lambda s, v: self._update_var(key + "." + s, v))
+                return _MapDict(value, lambda s, v: self._update_var(f"{key}.{s}", v))
             else:
-                return _MapDictionary(value)
+                return _MapDict(value)
         return value
 
     def __setitem__(self, key, value):
@@ -55,7 +57,7 @@ class _MapDictionary(object):
         return self._dict.get(attr)
 
     def __setattr__(self, attr, value):
-        if attr in _MapDictionary.local_vars:
+        if attr in _MapDict.local_vars:
             super().__setattr__(attr, value)
         else:
             self.__setitem__(attr, value)
@@ -69,23 +71,26 @@ class _MapDictionary(object):
     def items(self):
         return self._dict.items()
 
-    def get(self):
-        return self._dict.get()
+    def get(self, key: t.Any, default_value: t.Optional[str] = None) -> t.Union[t.Any, None]:
+        return self._dict.get(key, default_value)
 
-    def clear(self):
-        return self._dict.clear()
+    def clear(self) -> None:
+        self._dict.clear()
 
-    def setdefault(self, key, value=None):
+    def setdefault(self, key, value=None) -> t.Union[t.Any, None]:
         return self._dict.setdefault(key, value)
 
-    def pop(self, key, default=None):
+    def pop(self, key, default=None) -> t.Any:
         return self._dict.pop(key, default)
 
-    def popitem(self):
+    def popitem(self) -> tuple:
         return self._dict.popitem()
 
-    def copy(self):
-        return _MapDictionary(self._dict.copy(), self._update_var)
+    def copy(self) -> _MapDict:
+        return _MapDict(self._dict.copy(), self._update_var)
 
-    def update(self):
-        return self._dict.update()
+    def update(self, d: dict) -> None:
+        current_keys = self.keys()
+        for k, v in d.items():
+            if k not in current_keys or self[k] != v:
+                self.__setitem__(k, v)

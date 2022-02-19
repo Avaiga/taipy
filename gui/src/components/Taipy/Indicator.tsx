@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
 import { sprintf } from "sprintf-js";
@@ -13,27 +13,8 @@ interface IndicatorProps extends TaipyBaseProps {
     display?: number | string;
     defaultDisplay: number | string;
     format?: string;
+    orientation?: string;
 }
-
-const MySlider = styled(Slider)({
-    "&.Mui-disabled": {
-        color: "transparent",
-    },
-    "& .MuiSlider-markLabel": {
-        transform: "initial",
-    },
-    "& span:nth-of-type(6)": {
-        transform: "translateX(-100%)",
-    },
-    "& .MuiSlider-rail": {
-        background: "linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(0,255,0,1) 100%)",
-        opacity: "unset",
-    },
-    "& .MuiSlider-track": {
-        border: "none",
-        backgroundColor: "transparent",
-    },
-});
 
 const getValue = (value: number, min: number, max: number) => {
     const dir = max - min >= 0;
@@ -43,6 +24,8 @@ const getValue = (value: number, min: number, max: number) => {
 
 const Indicator = (props: IndicatorProps) => {
     const { min = 0, max = 100, display, defaultDisplay, format, value, defaultValue = 0 } = props;
+
+    const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
 
     const getLabel = useCallback(() => {
         const dsp = display === undefined ? (defaultDisplay === undefined ? "" : defaultDisplay) : display;
@@ -54,8 +37,44 @@ const Indicator = (props: IndicatorProps) => {
         { value: 100, label: "" + max },
     ];
 
+    const TpSlider = useMemo(
+        () =>
+            styled(Slider)({
+                "&.Mui-disabled": {
+                    color: "transparent",
+                },
+                "& .MuiSlider-markLabel": {
+                    transform: "initial",
+                },
+                "& span:nth-of-type(6)": {
+                    transform: horizontalOrientation ? "translateX(-100%)" : "translateY(100%)",
+                },
+                "& .MuiSlider-rail": {
+                    background: `linear-gradient(${
+                        horizontalOrientation ? 90 : 0
+                    }deg, rgba(255,0,0,1) 0%, rgba(0,255,0,1) 100%)`,
+                    opacity: "unset",
+                },
+                "& .MuiSlider-track": {
+                    border: "none",
+                    backgroundColor: "transparent",
+                },
+                "& .MuiSlider-valueLabel": {
+                    top: "unset"
+                },
+                "& .MuiSlider-valueLabel.MuiSlider-valueLabelOpen": {
+                    transform: horizontalOrientation ? "": "translate(calc(50% + 10px))"
+                },
+                "& .MuiSlider-valueLabel:before": {
+                    left: horizontalOrientation ? "50%" : "0",
+                    bottom: horizontalOrientation ? "0": "50%",
+                }
+            }),
+        [horizontalOrientation]
+    );
+
     return (
-        <MySlider
+        <TpSlider
             min={0}
             max={100}
             value={getValue(value === undefined ? defaultValue : value, min, max)}
@@ -63,7 +82,8 @@ const Indicator = (props: IndicatorProps) => {
             valueLabelDisplay="on"
             valueLabelFormat={getLabel}
             marks={marks}
-        ></MySlider>
+            orientation={horizontalOrientation ? undefined : "vertical"}
+        ></TpSlider>
     );
 };
 

@@ -1,7 +1,7 @@
 import typing as t
 import warnings
 
-from ..utils import _get_date_col_str_name, _MapDictionary
+from ..utils import _get_date_col_str_name, _MapDict
 from ..types import NumberTypes
 
 
@@ -17,7 +17,7 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
 
 def _get_columns_dict(
     value: t.Any,
-    columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDictionary],
+    columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
     col_types: t.Optional[t.Dict[str, str]] = None,
     date_format: t.Optional[str] = None,
     number_format: t.Optional[str] = None,
@@ -36,7 +36,7 @@ def _get_columns_dict(
                 coldict[col] = {"index": idx}
                 idx += 1
         columns = coldict
-    if isinstance(columns, _MapDictionary):
+    if isinstance(columns, _MapDict):
         columns = columns._dict
     if not isinstance(columns, dict):
         warnings.warn("Error: columns attributes should be a string, list, tuple or dict")

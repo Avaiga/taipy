@@ -3,15 +3,14 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Avatar from "@mui/material/Avatar";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
 import ThemeToggle from "./ThemeToggle";
 import { LovProps, useLovListMemo } from "./lovUtils";
 import { useDynamicProperty } from "../../utils/hooks";
-import { TaipyImage } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
+import { Icon, IconAvatar } from "../../utils/icon";
 
 interface ToggleProps extends LovProps {
     style?: CSSProperties;
@@ -62,7 +61,7 @@ const Toggle = (props: ToggleProps) => {
                             {typeof v.item === "string" ? (
                                 <Typography>{v.item}</Typography>
                             ) : (
-                                <Avatar alt={(v.item as TaipyImage).text || v.id} src={(v.item as TaipyImage).path} />
+                                <IconAvatar id={v.id} img={v.item as Icon} />
                             )}
                         </ToggleButton>
                     ))}

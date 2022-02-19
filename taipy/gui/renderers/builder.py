@@ -5,14 +5,12 @@ import re
 import typing as t
 import warnings
 import xml.etree.ElementTree as etree
-from operator import attrgetter
 from types import FunctionType
-
-from taipy.gui.utils.types import TaipyData
 
 from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
-from ..utils import _MapDictionary, dateToISO, get_client_var_name, getDataType, is_boolean_true
+from ..utils import _MapDict, dateToISO, get_client_var_name, getDataType, is_boolean_true, getscopeattr_drill, getuserattr
+from ..utils.types import TaipyData
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
 
@@ -51,8 +49,8 @@ class Builder:
         if "properties" in self.__attributes:
             (properties_dict_name, _) = self.__parse_attribute_value(self.__attributes["properties"])
             self.__gui.bind_var(properties_dict_name)
-            properties_dict = getattr(self.__gui, properties_dict_name)
-            if not isinstance(properties_dict, _MapDictionary):
+            properties_dict = getuserattr(self.__gui, properties_dict_name)
+            if not isinstance(properties_dict, _MapDict):
                 raise Exception(
                     f"Can't find properties configuration dictionary {properties_dict_name}!"
                     f" Please review your GUI templates!"
@@ -109,14 +107,14 @@ class Builder:
         return ret
 
     def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
-        names = [n if index is None else f"{n}[{index}]" for n in names]  # type: ignore
+        names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
         return [self.__attributes.get(name) for name in names]
 
     def __parse_attribute_value(self, value) -> t.Tuple:
         if isinstance(value, str) and self.__gui._is_expression(value):
             hash_value = self.__gui._evaluate_expr(value)
             try:
-                return (attrgetter(hash_value)(self.__gui._get_data_scope()), hash_value)
+                return (getscopeattr_drill(self.__gui, hash_value), hash_value)
             except AttributeError:
                 warnings.warn(f"Expression '{value}' cannot be evaluated")
         return (value, None)
@@ -139,7 +137,7 @@ class Builder:
                         value = val[1].strip()
                         self.__gui.bind_func(value)
                         dict_attr[val[0].strip()] = value
-            if isinstance(dict_attr, (dict, _MapDictionary)):
+            if isinstance(dict_attr, (dict, _MapDict)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
                 warnings.warn(f"{self.__element_name} {name} should be a dict\n'{str(dict_attr)}'")
@@ -350,10 +348,11 @@ class Builder:
             self.__set_json_attribute("columns", columns)
         return self
 
-    def __check_dict(self, values: t.List[t.Any], index: int, names: t.Tuple[str]) -> None:
-        if values[index] is not None and not isinstance(values[index], (dict, _MapDictionary)):
-            warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
-            values[index] = None
+    def __check_dict(self, values: t.List[t.Any], indexes: t.Tuple[int], names: t.Tuple[str]) -> None:
+        for index in indexes:
+            if values[index] is not None and not isinstance(values[index], (dict, _MapDict)):
+                warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
+                values[index] = None
 
     def get_chart_config(self, default_type="scatter", default_mode="lines+markers"):
         names = (
@@ -374,6 +373,7 @@ class Builder:
             "name",
             "line",
             "text_anchor",
+            "extend_data",
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[5]:
@@ -390,23 +390,17 @@ class Builder:
         if not trace[9]:
             # yaxis
             trace[9] = "y"
-        self.__check_dict(trace, 11, names)
-        self.__check_dict(trace, 12, names)
+        self.__check_dict(trace, (11, 12, 17), names)
         traces = []
         idx = 1
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
             while len([x for x in indexed_trace if x]):
-                self.__check_dict(indexed_trace, 11, names)
-                self.__check_dict(indexed_trace, 12, names)
+                self.__check_dict(indexed_trace, (11, 12, 17), names)
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
                 indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         else:
-            traces.append(trace)
-        # filter traces where we don't have at least x and y
-        traces = [t for t in traces if t[0] and (t[6] in Builder.__ONE_COLUMN_CHART or t[1])]
-        if not len(traces) and trace[0] and trace[1]:
             traces.append(trace)
 
         # configure columns
@@ -418,6 +412,12 @@ class Builder:
         columns = _get_columns_dict(
             data, list(columns), self.__gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
         )
+        # set default columns if not defined
+        cols = tuple(columns.keys())
+        for i, tr in enumerate(traces):
+            if not tr[0] or tr[6] in Builder.__ONE_COLUMN_CHART or not tr[1]:
+                traces[i] = tuple(v or (cols[i] if i < 3 and i < len(cols) else v) for i, v in enumerate(tr))
+
         if columns is not None:
             self.__attributes["columns"] = columns
             reverse_cols = {cd["dfid"]: c for c, cd in columns.items()}
@@ -437,6 +437,7 @@ class Builder:
                 "names": [t[14] for t in traces],
                 "lines": [t[15] if isinstance(t[15], dict) else {"dash": t[15]} for t in traces],
                 "textAnchors": [t[16] for t in traces],
+                "extendData": [t[17] for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)
@@ -446,7 +447,7 @@ class Builder:
     def set_chart_layout(self):
         layout = self.__attributes.get("layout")
         if layout:
-            if isinstance(layout, (dict, _MapDictionary)):
+            if isinstance(layout, (dict, _MapDict)):
                 self.__set_json_attribute("layout", layout)
             else:
                 warnings.warn(f"Chart control: layout attribute should be a dict\n'{str(layout)}'")
@@ -698,7 +699,9 @@ class Builder:
     def set_refresh(self):
         return self.__set_react_attribute(
             "refresh",
-            get_client_var_name(self.__hashes.get(self.__default_property_name, self.__default_property_name) + ".refresh"),
+            get_client_var_name(
+                self.__hashes.get(self.__default_property_name, self.__default_property_name) + ".refresh"
+            ),
         )
 
     def set_refresh_on_update(self):

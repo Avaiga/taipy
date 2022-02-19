@@ -9,7 +9,8 @@ import {TypographyProps} from "@mui/material";
 
 import { TaipyActiveProps } from "./utils";
 import { getInitials } from "../../utils";
-import { LovItem, TaipyImage } from "../../utils/lov";
+import { LovItem } from "../../utils/lov";
+import { stringIcon, Icon } from "../../utils/icon";
 
 export interface SelTreeProps extends LovProps {
     filter?: boolean;
@@ -26,7 +27,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     height?: string | number;
 }
 
-type LoVElt = [string, string | TaipyImage, LoVElt[]?];
+type LoVElt = [string, stringIcon, LoVElt[]?];
 
 export type LoV = LoVElt[];
 
@@ -68,14 +69,14 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
     }, [lov, defaultLov, tree]);
 
 const cardSx = { padding: 0 } as CSSProperties;
-export const LovImage = ({ item, titleTypographyProps }: { item: TaipyImage, titleTypographyProps?: TypographyProps }) => (
+export const LovImage = ({ item, titleTypographyProps }: { item: Icon, titleTypographyProps?: TypographyProps }) => (
     <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar alt={item.text} src={item.path} /></Tooltip>} title={item.text} titleTypographyProps={titleTypographyProps} />
 );
 
 export const showItem = (elt: LovItem, searchValue: string) => {
     return (
         !searchValue ||
-        ((typeof elt.item === "string" ? (elt.item as string) : (elt.item as TaipyImage).text) || elt.id)
+        ((typeof elt.item === "string" ? (elt.item as string) : (elt.item as Icon).text) || elt.id)
             .toLowerCase()
             .indexOf(searchValue.toLowerCase()) > -1
     );
@@ -85,7 +86,7 @@ export interface ItemProps {
     value: string;
     clickHandler: (evt: MouseEvent<HTMLElement>) => void;
     selectedValue: string[] | string;
-    item: string | TaipyImage;
+    item: stringIcon;
     disabled: boolean;
     withAvatar?: boolean;
     titleTypographyProps?: TypographyProps;

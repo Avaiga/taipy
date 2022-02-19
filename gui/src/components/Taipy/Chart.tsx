@@ -44,6 +44,8 @@ interface ChartProp extends TaipyActiveProps {
     rangeChange?: string;
     limitRows?: boolean;
     testId?: string;
+    render?: boolean;
+    defaultRender?: boolean;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -62,6 +64,7 @@ interface ChartConfig {
     lines: Partial<ScatterLine>[];
     texts: string[];
     textAnchors: string[];
+    extendData: Record<string, unknown>[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -105,6 +108,7 @@ const Chart = (props: ChartProp) => {
     const dataKey = useRef("default");
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const render = useDynamicProperty(props.render, props.defaultRender, true);
 
     // get props.selected[i] values
     useEffect(() => {
@@ -160,6 +164,7 @@ const Chart = (props: ChartProp) => {
                 lines: [],
                 texts: [],
                 textAnchors: [],
+                extendData: [],
             } as ChartConfig;
         }
     }, [props.config]);
@@ -212,7 +217,8 @@ const Chart = (props: ChartProp) => {
     const dataPl = useMemo(() => {
         const datum = data && data[dataKey.current];
         return config.traces.map((trace, idx) => {
-            let ret = {
+            const ret = {
+                ...getArrayValue(config.extendData, idx, {}),
                 type: config.types[idx],
                 mode: config.modes[idx],
                 name:
@@ -220,23 +226,31 @@ const Chart = (props: ChartProp) => {
                     (config.columns[trace[1]] ? config.columns[trace[1]].dfid : undefined),
             } as Record<string, unknown>;
             if (ONE_COLUMN_CHART.includes(config.types[idx])) {
-                ret = { ...ret, values: getValue(datum, trace, 0), labels: getValue(datum, config.labels, idx) };
+                ret.values = getValue(datum, trace, 0);
+                const lbl = getValue(datum, config.labels, idx);
+                if (lbl.length) {
+                    ret.labels = lbl;
+                }
             } else {
-                ret = {
-                    ...ret,
-                    marker: getArrayValue(config.markers, idx, {}),
-                    x: getValue(datum, trace, 0),
-                    y: getValue(datum, trace, 1),
-                    z: getValue(datum, trace, 2),
-                    text: getValue(datum, config.texts, idx),
-                    xaxis: config.xaxis[idx],
-                    yaxis: config.yaxis[idx],
-                    hovertext: getValue(datum, config.labels, idx),
-                    selectedpoints: getArrayValue(selected, idx, []),
-                    orientation: getArrayValue(config.orientations, idx),
-                    line: getArrayValue(config.lines, idx),
-                    textposition: getArrayValue(config.textAnchors, idx),
-                };
+                ret.marker = getArrayValue(config.markers, idx, {});
+                const xs = getValue(datum, trace, 0);
+                const ys = getValue(datum, trace, 1);
+                if (ys.length) {
+                    ret.x = xs;
+                    ret.y = ys;
+                } else {
+                    ret.x = Array.from(Array(xs.length).keys());
+                    ret.y = xs;
+                }
+                ret.z = getValue(datum, trace, 2);
+                ret.text = getValue(datum, config.texts, idx);
+                ret.xaxis = config.xaxis[idx];
+                ret.yaxis = config.yaxis[idx];
+                ret.hovertext = getValue(datum, config.labels, idx);
+                ret.selectedpoints = getArrayValue(selected, idx, []);
+                ret.orientation = getArrayValue(config.orientations, idx);
+                ret.line = getArrayValue(config.lines, idx);
+                ret.textposition = getArrayValue(config.textAnchors, idx);
             }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
@@ -286,7 +300,7 @@ const Chart = (props: ChartProp) => {
         [getRealIndex, dispatch, tp_updatevars, propagate]
     );
 
-    return (
+    return render ? (
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
             <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
                 <Plot
@@ -302,7 +316,7 @@ const Chart = (props: ChartProp) => {
                 />
             </Suspense>
         </Box>
-    );
+    ) : null;
 };
 
 export default Chart;

@@ -12,8 +12,7 @@ as Taipy controls that are typically linked to some
 value that is managed by the whole Taipy application.
 """
 
-from typing import Optional
-
 from .data import DataAccessor
 from .gui import Gui
-from .taipyimage import TaipyImage
+from .icon import Icon
+from .renderers import Html, Markdown

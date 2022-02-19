@@ -5,14 +5,11 @@ import builtins
 import re
 import typing as t
 import warnings
-from operator import attrgetter
-
-import __main__
-
-from . import _get_expr_var_name, attrsetter, get_client_var_name, TaipyBase
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
+
+from . import _get_expr_var_name, get_client_var_name, TaipyBase, getscopeattr_drill, getscopeattr, setscopeattr, hasscopeattr
 
 
 class _Evaluator:
@@ -72,7 +69,7 @@ class _Evaluator:
                     ):
                         gui.bind_var(var_name)
                         try:
-                            var_val[var_name] = attrgetter(var_name)(gui._get_data_scope())
+                            var_val[var_name] = getscopeattr_drill(gui, var_name)
                             var_list.append(var_name)
                         except AttributeError:
                             warnings.warn(f"Variable '{var_name}' is not defined (in expression '{expr}')")
@@ -122,6 +119,8 @@ class _Evaluator:
         else:
             self.__expr_to_holders[expr] = set([holder])
         self.__expr_to_hash[holder_expr] = hash_name
+        # expression is only the first part ...
+        expr = expr.split(".")[0]
         self.__expr_to_var_list[holder_expr] = [expr]
         a_list = self.__var_to_expr_list.get(expr)
         if a_list:
@@ -146,11 +145,11 @@ class _Evaluator:
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)
-            expr_value = getattr(gui._get_data_scope(), expr_hash)
-            holder_value = getattr(gui._get_data_scope(), holder_hash, None)
+            expr_value = getscopeattr_drill(gui, expr_hash)
+            holder_value = getscopeattr(gui, holder_hash, None)
             if not isinstance(holder_value, TaipyBase):
                 holder_value = holder(expr_value, expr_hash)
-                setattr(gui._get_data_scope(), holder_hash, holder_value)
+                setscopeattr(gui, holder_hash, holder_value)
             else:
                 holder_value.set(expr_value)
             return holder_value
@@ -174,7 +173,7 @@ class _Evaluator:
             expr_hash = expr if _Evaluator.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
         # validate whether expression has already been evaluated
-        if expr in self.__expr_to_hash and hasattr(gui._get_data_scope(), self.__expr_to_hash[expr]):
+        if expr in self.__expr_to_hash and hasscopeattr(gui, self.__expr_to_hash[expr]):
             return self.__expr_to_hash[expr]
         try:
             # evaluate expressions
@@ -193,6 +192,7 @@ class _Evaluator:
         an expression with only a single variable
         """
         modified_vars: t.Set[str] = set()
+        var_name = var_name.split(".")[0]
         if var_name not in self.__var_to_expr_list.keys():
             return modified_vars
         for expr in self.__var_to_expr_list[var_name]:
@@ -203,7 +203,7 @@ class _Evaluator:
             if expr_var_list is None:
                 warnings.warn(f"Someting is amiss with expression list for {expr}")
                 continue
-            eval_dict = {v: attrgetter(v)(gui._get_data_scope()) for v in expr_var_list}
+            eval_dict = {v: getscopeattr_drill(gui, v) for v in expr_var_list}
 
             if self._is_expression(expr):
                 expr_string = 'f"' + expr.replace('"', '\\"') + '"'
@@ -212,7 +212,7 @@ class _Evaluator:
 
             try:
                 expr_evaluated = eval(expr_string, self.__default_bindings, eval_dict)
-                attrsetter(gui._get_data_scope(), hash_expr, expr_evaluated)
+                setscopeattr(gui, hash_expr, expr_evaluated)
             except Exception as e:
                 warnings.warn(f"Problem evaluating {expr_string}: {e}")
             modified_vars.add(hash_expr)

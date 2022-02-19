@@ -7,7 +7,7 @@ import TreeView from "./TreeView";
 import { LoV } from "./lovUtils";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
-import { TaipyImage } from "../../utils/lov";
+import { stringIcon } from "../../utils/icon";
 
 const lov: LoV = [
     [
@@ -24,7 +24,7 @@ const lov: LoV = [
 ];
 const defLov = '[["id10","Default Item"]]';
 
-const imageItem: [string, string | TaipyImage] = ["ii1", { path: "/img/fred.png", text: "Image" }];
+const imageItem: [string, stringIcon] = ["ii1", { path: "/img/fred.png", text: "Image" }];
 
 describe("TreeView Component", () => {
     it("renders", async () => {
