@@ -11,9 +11,9 @@ from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
 from ..utils import (
     _MapDict,
-    dateToISO,
+    date_to_ISO,
     get_client_var_name,
-    getDataType,
+    get_data_type,
     getscopeattr_drill,
     getuserattr,
     is_boolean_true,
@@ -539,7 +539,7 @@ class Builder:
 
     def set_dataType(self):
         value = self.__attributes.get("value")
-        return self.set_attribute("dataType", getDataType(value))
+        return self.set_attribute("dataType", get_data_type(value))
 
     def set_file_content(self, var_name: str = "content"):
         hash_name = self.__hashes.get(var_name)
@@ -614,7 +614,7 @@ class Builder:
             value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case("default_" + var_name)
         if isinstance(value, datetime.datetime):
-            self.set_attribute(default_var_name, dateToISO(value))
+            self.set_attribute(default_var_name, date_to_ISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
         elif native_type and isinstance(value, numbers.Number):
