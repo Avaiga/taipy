@@ -5,9 +5,9 @@ from ..builder import Builder
 
 class Postprocessor(Treeprocessor):
     @staticmethod
-    def extend(md, gui):
+    def extend(md, gui, priority):
         instance = Postprocessor(md)
-        md.treeprocessors.register(instance, "taipy", 200)
+        md.treeprocessors.register(instance, "taipy", priority)
         instance._gui = gui
 
     def run(self, root):

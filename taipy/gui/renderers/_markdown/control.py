@@ -8,9 +8,9 @@ class ControlPattern(InlineProcessor):
     __PATTERN = MarkdownFactory._TAIPY_START + "([a-zA-Z][\\.a-zA-Z_$0-9]*)(.*?)" + MarkdownFactory._TAIPY_END
 
     @staticmethod
-    def extend(md, gui):
+    def extend(md, gui, priority):
         instance = ControlPattern(ControlPattern.__PATTERN, md)
-        md.inlinePatterns.register(instance, "taipy", 205)
+        md.inlinePatterns.register(instance, "taipy", priority)
         instance._gui = gui
 
     def handleMatch(self, m, data):

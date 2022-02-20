@@ -19,7 +19,7 @@ class TaipyMarkdownExtension(Extension):
         if not isinstance(gui, Gui):
             raise RuntimeError("Gui instance is not bindded to Markdown Extension")
         md.registerExtension(self)
-        Preprocessor.extend(md, gui)
-        ControlPattern.extend(md, gui)
-        StartBlockProcessor.extend(md, gui)
-        Postprocessor.extend(md, gui)
+        Preprocessor.extend(md, gui, 210)
+        ControlPattern.extend(md, gui, 205)
+        StartBlockProcessor.extend(md, gui, 175)
+        Postprocessor.extend(md, gui, 200)

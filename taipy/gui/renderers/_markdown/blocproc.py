@@ -14,9 +14,9 @@ class StartBlockProcessor(BlockProcessor):
     )  # start or end tag
 
     @staticmethod
-    def extend(md, gui):
+    def extend(md, gui, priority):
         instance = StartBlockProcessor(md.parser)
-        md.parser.blockprocessors.register(instance, "taipy", 175)
+        md.parser.blockprocessors.register(instance, "taipy", priority)
         instance._gui = gui
 
     def test(self, parent, block):

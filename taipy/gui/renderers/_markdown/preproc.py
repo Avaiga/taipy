@@ -47,9 +47,9 @@ class Preprocessor(MdPreprocessor):
     __PROPERTY_RE = re.compile(r"((?:don'?t|not)\s+)?([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)\s*(?:=(.*))?$")
 
     @staticmethod
-    def extend(md, gui):
+    def extend(md, gui, priority):
         instance = Preprocessor(md)
-        md.preprocessors.register(instance, "taipy", 210)
+        md.preprocessors.register(instance, "taipy", priority)
         instance._gui = gui
 
     def _make_prop_pair(self, prop_name: str, prop_value: str) -> Tuple[str, str]:
