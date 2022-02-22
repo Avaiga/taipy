@@ -147,7 +147,7 @@ class PandasDataAccessor(DataAccessor):
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {}
                 for k, v in applies.items():
-                    applies_with_fn[k] = v if v in gui._agregate_functions else gui._get_user_function(v)
+                    applies_with_fn[k] = v if v in gui._aggregate_functions else gui._get_user_function(v)
                 for col in columns:
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"
