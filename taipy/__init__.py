@@ -1,4 +1,4 @@
-"""Top-level package for Taipy."""
+"""Top-level package for Taipy Gui."""
 
 __author__ = """Avaiga"""
 __email__ = "taipy.dev@avaiga.com"

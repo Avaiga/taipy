@@ -4,7 +4,7 @@ from pathlib import Path
 import warnings
 
 from ..icon import Icon
-from ..utils import _MapDict, TaipyBase, dateToISO
+from ..utils import _MapDict, TaipyBase, date_to_ISO
 
 
 class TaipyJsonEncoder(JSONEncoder):
@@ -16,7 +16,7 @@ class TaipyJsonEncoder(JSONEncoder):
         elif isinstance(o, TaipyBase):
             return o.get()
         elif isinstance(o, datetime):
-            return dateToISO(o)
+            return date_to_ISO(o)
         elif isinstance(o, Path):
             return str(o)
         try:

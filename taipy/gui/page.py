@@ -4,6 +4,7 @@ from __future__ import annotations
 import typing as t
 
 if t.TYPE_CHECKING:
+    from .gui import Gui
     from .renderers import PageRenderer
 
 
@@ -29,12 +30,12 @@ class Page(object):
         self.route: t.Union[str, None] = None
         self.head: t.Union[str, None] = None
 
-    def render(self):
+    def render(self, gui: Gui):
         if self.renderer is None:
             raise RuntimeError(f"Can't render JSX for {self.route} due to missing renderer!")
-        self.rendered_jsx = self.renderer.render()
+        self.rendered_jsx = self.renderer.render(gui)
         if hasattr(self.renderer, "head"):
-            self.head = str(self.renderer.head)
+            self.head = str(self.renderer.head)  # type: ignore
 
 
 class Partial(Page):

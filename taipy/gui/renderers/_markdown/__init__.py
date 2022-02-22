@@ -7,20 +7,19 @@ from .control import ControlPattern
 from .postproc import Postprocessor
 from .preproc import Preprocessor
 
-__all__ = ["makeTaipyExtension"]
 
+class TaipyMarkdownExtension(Extension):
 
-class TaipyExtension(Extension):
+    config = {"gui": ["", "Gui object for extension"]}
+
     def extendMarkdown(self, md):
+        from ...gui import Gui
+
+        gui = self.config["gui"][0]
+        if not isinstance(gui, Gui):
+            raise RuntimeError("Gui instance is not bindded to Markdown Extension")
         md.registerExtension(self)
-        # md.preprocessors.add("taipy", Preprocessor(md), "_begin")
-        md.preprocessors.register(Preprocessor(md), "taipy", 210)
-        ControlPattern.extendMarkdown(md)
-        md.parser.blockprocessors.register(
-            StartBlockProcessor(md.parser), "taipy", 175
-        )  # process the block tags (layout and co)
-        md.treeprocessors.register(Postprocessor(md), "taipy", 200)
-
-
-def makeTaipyExtension(*args: Any, **kwargs: Any) -> Extension:
-    return TaipyExtension(*args, **kwargs)
+        Preprocessor.extend(md, gui, 210)
+        ControlPattern.extend(md, gui, 205)
+        StartBlockProcessor.extend(md, gui, 175)
+        Postprocessor.extend(md, gui, 200)

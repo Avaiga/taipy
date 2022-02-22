@@ -9,8 +9,9 @@ class TaipyHTMLParser(HTMLParser):
 
     __TAIPY_NAMESPACE_RE = re.compile(r"taipy:([a-zA-Z\_]*)")
 
-    def __init__(self):
+    def __init__(self, gui):
         super().__init__()
+        self._gui = gui
         self.body = ""
         self.head = []
         self.taipy_tag = None
@@ -68,7 +69,7 @@ class TaipyHTMLParser(HTMLParser):
             self.body += data
 
     def parse_taipy_tag(self) -> None:
-        tp_string, tp_element_name = self.taipy_tag.parse()
+        tp_string, tp_element_name = self.taipy_tag.parse(self._gui)
         self.append_data(tp_string)
         self.tag_mapping[f"taipy:{self.taipy_tag.control_type}"] = tp_element_name
         self.taipy_tag = None
@@ -93,7 +94,7 @@ class TaipyTag(object):
         self.has_set_value = True
         return True
 
-    def parse(self) -> t.Tuple[str, str]:
+    def parse(self, gui) -> t.Tuple[str, str]:
         for k, v in self.properties.items():
             self.properties[k] = v if v is not None else "true"
-        return HtmlFactory.create_element(self.control_type, self.properties)
+        return HtmlFactory.create_element(gui, self.control_type, self.properties)

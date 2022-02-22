@@ -4,6 +4,12 @@ from ..builder import Builder
 
 
 class Postprocessor(Treeprocessor):
+    @staticmethod
+    def extend(md, gui, priority):
+        instance = Postprocessor(md)
+        md.treeprocessors.register(instance, "taipy", priority)
+        instance._gui = gui
+
     def run(self, root):
         MD_PARA_CLASSNAME = "md-para"
         for p in root.iter():

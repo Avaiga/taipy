@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-import datetime
 import inspect
 import os
 import pathlib
-import random
 import re
 import tempfile
 import typing as t
 import warnings
 from importlib import util
-from operator import attrgetter
 from types import FrameType, FunctionType
 
 import __main__
@@ -28,36 +25,36 @@ from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
 from .page import Page, Partial
 from .renderers import EmptyPageRenderer, PageRenderer
+from .renderers._markdown import TaipyMarkdownExtension
 from .server import Server
 from .types import WsType
 from .utils import (
-    Singleton,
-    _get_non_existent_file_path,
-    _is_in_notebook,
-    _MapDict,
     TaipyBase,
+    TaipyContent,
+    TaipyContentImage,
     TaipyData,
     TaipyLov,
     TaipyLovValue,
-    TaipyContent,
-    TaipyContentImage,
-    get_client_var_name,
+    _get_non_existent_file_path,
+    _is_in_notebook,
+    _MapDict,
     delscopeattr,
-    hasscopeattr,
+    get_client_var_name,
     getscopeattr,
     getscopeattr_drill,
+    getuserattr,
+    hasscopeattr,
+    hasuserattr,
     setscopeattr,
     setscopeattr_drill,
-    hasuserattr,
-    getuserattr,
 )
 from .utils._adapter import _Adapter
+from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._state import State
-from .utils._bindings import _Bindings
 
 
-class Gui(object, metaclass=Singleton):
+class Gui:
     """The class that handles the Graphical User Interface.
 
     Attributes:
@@ -80,16 +77,7 @@ class Gui(object, metaclass=Singleton):
     __RE_PAGE_NAME = re.compile(r"^[\w\-\/]+$")
 
     __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-content", "taipy-uploads"]
-    _agregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
-
-    # Static variable _markdown for Markdown renderer reference (taipy.gui will be registered later in Gui.run function)
-    #
-    # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
-    # There's a section that explicitly lists these extensions in
-    #      docs/gui/user_pages.md#markdown-specifics
-    _markdown = md_lib.Markdown(
-        extensions=["fenced_code", "meta", "admonition", "sane_lists", "tables", "attr_list", "md_in_html"]
-    )
+    _aggregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
     def __init__(
         self,
@@ -143,16 +131,29 @@ class Gui(object, metaclass=Singleton):
         self._flask_blueprint: t.List[Blueprint] = []
         self._config.load_config(app_config_default, style_config_default)
 
+        # Load Markdown extension
+        # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
+        # There's a section that explicitly lists these extensions in
+        #      docs/gui/user_pages.md#markdown-specifics
+        self._markdown = md_lib.Markdown(
+            extensions=[
+                "fenced_code",
+                "meta",
+                "admonition",
+                "sane_lists",
+                "tables",
+                "attr_list",
+                "md_in_html",
+                TaipyMarkdownExtension(gui=self),
+            ]
+        )
+
         if page:
             self.add_page(name=Gui.__root_page_name, renderer=page)
         if pages is not None:
             self.add_pages(pages)
         if env_filename is not None:
             self.__env_filename = env_filename
-
-    @staticmethod
-    def _get_instance() -> Gui:
-        return Gui._instances[Gui]
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -259,8 +260,13 @@ class Gui(object, metaclass=Singleton):
                 if argcount > 1:
                     args[1] = var_name
                 if argcount > 2:
-                    args[2] = value.get() if isinstance(
-                        value, TaipyBase) else value._dict if isinstance(value, _MapDict) else value
+                    args[2] = (
+                        value.get()
+                        if isinstance(value, TaipyBase)
+                        else value._dict
+                        if isinstance(value, _MapDict)
+                        else value
+                    )
                 self.on_change(*args)
             except Exception as e:
                 warnings.warn(f"on_change: function invocation exception: {e}")
@@ -317,7 +323,7 @@ class Gui(object, metaclass=Singleton):
                 if part > 0:
                     try:
                         with open(file_path, "wb") as grouped_file:
-                            for nb in range(0, part + 1):
+                            for nb in range(part + 1):
                                 with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
                                     grouped_file.write(part_file.read())
                     except EnvironmentError as ee:
@@ -488,13 +494,12 @@ class Gui(object, metaclass=Singleton):
                 self.__send_ws({"type": WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
-        if isinstance(payload, dict):
-            action = payload.get("action")
-        else:
-            action = str(payload)
+        action = payload.get("action") if isinstance(payload, dict) else str(payload)
         if action:
             if hasuserattr(self, action):
-                if self.__call_function_with_args(action_function=getuserattr(self, action), id=id, payload=payload, action=action):
+                if self.__call_function_with_args(
+                    action_function=getuserattr(self, action), id=id, payload=payload, action=action
+                ):
                     return
             else:
                 warnings.warn(f"on_action: '{action}' is not a function")
@@ -516,17 +521,14 @@ class Gui(object, metaclass=Singleton):
                 if argcount > 1:
                     args[1] = id
                 if argcount > 2:
-                    if action is None:
-                        args[2] = payload
-                    else:
-                        args[2] = action
-                if argcount > 3:
-                    if action is not None:
-                        args[3] = payload
+                    args[2] = payload if action is None else action
+                if argcount > 3 and action is not None:
+                    args[3] = payload
                 action_function(*args)
                 return True
             except Exception as e:
                 warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
+
         return False
 
     # Proxy methods for Evaluator
@@ -701,7 +703,8 @@ class Gui(object, metaclass=Singleton):
         func = getattr(self, name, None)
         if func is not None and not isinstance(func, FunctionType):
             warnings.warn(
-                f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script.")
+                f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script."
+            )
             func = None
         if func is None:
             func = self.__locals_bind.get(name)
@@ -854,9 +857,6 @@ class Gui(object, metaclass=Singleton):
             app_config["use_reloader"] = False
             print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
-        # Register taipy.gui markdown extensions for Markdown renderer
-        Gui._markdown.registerExtensions(extensions=["taipy.gui"], configs={})
-
         # Save all local variables of the parent frame (usually __main__)
         self.__locals_bind: t.Dict[str, t.Any] = t.cast(
             FrameType, t.cast(FrameType, inspect.currentframe()).f_back
@@ -881,7 +881,8 @@ class Gui(object, metaclass=Singleton):
 
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
-        images_bp.add_url_rule(Gui.__CONTENT_ROOT + "<path:path>", view_func=self.__serve_content)
+        images_bp.add_url_rule(f"{Gui.__CONTENT_ROOT}<path:path>", view_func=self.__serve_content)
+
         self._flask_blueprint.append(images_bp)
 
         # server URL for uploaded files

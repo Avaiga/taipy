@@ -9,7 +9,15 @@ from types import FunctionType
 
 from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
-from ..utils import _MapDict, dateToISO, get_client_var_name, getDataType, is_boolean_true, getscopeattr_drill, getuserattr
+from ..utils import (
+    _MapDict,
+    date_to_ISO,
+    get_client_var_name,
+    get_data_type,
+    getscopeattr_drill,
+    getuserattr,
+    is_boolean_true,
+)
 from ..utils.types import TaipyData
 from .jsonencoder import TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
@@ -23,6 +31,7 @@ class Builder:
 
     def __init__(
         self,
+        gui,
         control_type: str,
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
@@ -38,7 +47,7 @@ class Builder:
         self.__attributes = attributes or {}
         self.__hashes = {}
         self.__update_vars: t.List[str] = []
-        self.__gui = Gui._get_instance()
+        self.__gui: Gui = gui
 
         self.__default_property_name = Factory.get_default_property_name(control_type) or ""
         default_property_value = self.__attributes.get(self.__default_property_name, None)
@@ -303,7 +312,7 @@ class Builder:
                         self.__gui.bind_var_val(value, v)
                     else:
                         value = str(v).strip()
-                        if value and value not in self.__gui._agregate_functions:
+                        if value and value not in self.__gui._aggregate_functions:
                             # Bind potential function
                             self.__gui.bind_func(value)
                     if value:
@@ -530,7 +539,7 @@ class Builder:
 
     def set_dataType(self):
         value = self.__attributes.get("value")
-        return self.set_attribute("dataType", getDataType(value))
+        return self.set_attribute("dataType", get_data_type(value))
 
     def set_file_content(self, var_name: str = "content"):
         hash_name = self.__hashes.get(var_name)
@@ -605,7 +614,7 @@ class Builder:
             value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case("default_" + var_name)
         if isinstance(value, datetime.datetime):
-            self.set_attribute(default_var_name, dateToISO(value))
+            self.set_attribute(default_var_name, date_to_ISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
         elif native_type and isinstance(value, numbers.Number):

@@ -13,6 +13,12 @@ class StartBlockProcessor(BlockProcessor):
         MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)" + MarkdownFactory._TAIPY_END
     )  # start or end tag
 
+    @staticmethod
+    def extend(md, gui, priority):
+        instance = StartBlockProcessor(md.parser)
+        md.parser.blockprocessors.register(instance, "taipy", priority)
+        instance._gui = gui
+
     def test(self, parent, block):
         return re.match(StartBlockProcessor.__RE_FENCE_START, block)
 
@@ -39,7 +45,7 @@ class StartBlockProcessor(BlockProcessor):
                     1,
                 )
                 # render fenced area inside a new div
-                e = MarkdownFactory.create_element(original_match.group(1), original_match.group(2))
+                e = MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))
                 parent.append(e)
                 self.parser.parseBlocks(e, blocks[0 : block_num + 1])
                 # remove used blocks

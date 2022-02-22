@@ -14,9 +14,5 @@ value that is managed by the whole Taipy application.
 
 from .data import DataAccessor
 from .gui import Gui
-from .renderers import Html, Markdown, makeTaipyExtension
 from .icon import Icon
-
-
-def makeExtension(*args, **kwargs):
-    return makeTaipyExtension(*args, **kwargs)
+from .renderers import Html, Markdown
