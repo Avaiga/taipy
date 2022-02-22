@@ -20,6 +20,9 @@ class TestPickleDataNodeEntity:
             print(f"deleting file {f}")
             os.remove(f)
 
+    def test_exists_in_data_manager(self):
+        assert PickleDataNode in DataManager._DATA_NODE_CLASSES
+
     def test_create(self):
         dn = PickleDataNode("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
         assert os.path.isfile(Config.global_config().storage_folder + "pickles/" + dn.id + ".p")
