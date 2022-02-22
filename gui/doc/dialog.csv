@@ -21,8 +21,8 @@ The parameters of that function are all optional:
 If <i>cancel_action</i> is empty, the button is not shown."
 validate_label,str,"""Validate""",The text of the validate button.
 partial,Partial,None,"A Partial object that holds the content of the dialog.
-This should be defined if <i>page_id</i> is set."
-page_id,str,None,"The page identifier to show as the content of the dialog.
+This should not be defined if <i>page</i> is set."
+page,str,None,"The page name to show as the content of the dialog.
 This should not be defined if <i>partial</i> is set."
 width,str|int|float,None,"The width, in CSS units, of this dialog.
 (CSS property)"

@@ -7,7 +7,7 @@ selected,dynamic(list[int]|str),None,List of the selected point indices.
 layout,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/layout/"">layout object</a>."
 extend_data,"indexed(dict[str, any])",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/"">data object where dynamic data will be overridden.</a>."
 render,bool,True,"If <i>True</i>, this chart is visible on the page.
-range_change,FunctionType?,None,"Callback function called when the visible part of the x axis changes.
+range_change,Callable?,None,"Callback function called when the visible part of the x axis changes.
 The function receives three parameters:
 <ul>
 <li>`id` (optional[str]): the identifier of the chart control.</li>

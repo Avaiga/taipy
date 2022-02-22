@@ -1,4 +1,3 @@
-from types import FunctionType
 import pandas as pd  # type: ignore
 
 from taipy.gui import Gui

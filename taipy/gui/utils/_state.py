@@ -33,7 +33,8 @@ class State:
             setattr(gui._bindings(), name, value)
 
     def __enter__(self):
-        return super().__getattribute__(State.__attrs[0]).__enter__()
+        super().__getattribute__(State.__attrs[0]).__enter__()
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         return super().__getattribute__(State.__attrs[0]).__exit__(exc_type, exc_value, traceback)

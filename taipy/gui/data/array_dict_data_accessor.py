@@ -4,6 +4,7 @@ import pandas as pd
 
 from .data_format import DataFormat
 from .pandas_data_accessor import PandasDataAccessor
+from ..gui import Gui
 
 
 class ArrayDictDataAccessor(PandasDataAccessor):
@@ -28,7 +29,7 @@ class ArrayDictDataAccessor(PandasDataAccessor):
         return None
 
     def get_data(  # noqa: C901
-        self, guiApp: t.Any, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, guiApp: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         if isinstance(value, ArrayDictDataAccessor.__types):
             return super().get_data(guiApp, var_name, self.__get_dataframe(value), payload, data_format)

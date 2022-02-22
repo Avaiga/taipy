@@ -10,8 +10,8 @@ All parameters of that function are optional:
 </ul>
 If this property is set to None, no function is called when this pane is closed."
 partial,Partial,None,"A <i>Partial</i> object that holds the content of this pane.
-This should not be defined if <i>page_id</i> is set."
-page_id,str,None,"The page identifier to show as the content of this pane.
+This should not be defined if <i>page</i> is set."
+page,str,None,"The page name to show as the content of this pane.
 This should not be defined if <i>partial</i> is set."
 anchor,str,"""left""","Anchor side of the pane.
 Valid values are ""left"", ""right"", ""top"" or ""bottom""."

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import typing as t
 import warnings
-from types import FunctionType
 
 from ..icon import Icon
 from . import _MapDict
@@ -10,20 +9,20 @@ from . import _MapDict
 
 class _Adapter:
     def __init__(self):
-        self.__adapter_for_type: t.Dict[str, FunctionType] = {}
+        self.__adapter_for_type: t.Dict[str, t.Callable] = {}
         self.__type_for_variable: t.Dict[str, str] = {}
         self.__list_for_variable: t.Dict[str, str] = {}
 
     def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
         self.__list_for_variable[var_name] = list_name
 
-    def _add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
+    def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter_for_type[type_name] = adapter
 
     def _add_type_for_var(self, var_name: str, type_name: str) -> None:
         self.__type_for_variable[var_name] = type_name
 
-    def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
+    def _get_adapter_for_type(self, type_name: str) -> t.Optional[t.Callable]:
         return self.__adapter_for_type.get(type_name)
 
     def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
@@ -31,20 +30,20 @@ class _Adapter:
         type_name = self.__type_for_variable.get(var_name)
         if not isinstance(type_name, str):
             adapter = self.__adapter_for_type.get(var_name)
-            if isinstance(adapter, FunctionType):
+            if callable(adapter):
                 type_name = var_name
             else:
                 type_name = type(value).__name__
         if adapter is None:
             adapter = self.__adapter_for_type.get(type_name)
-        if isinstance(adapter, FunctionType):
+        if callable(adapter):
             ret = self._run_adapter(adapter, value, var_name, index, id_only)
             if ret is not None:
                 return ret
         return value
 
     def _run_adapter(
-        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
+        self, adapter: t.Callable, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
         if value is None:
             return None
@@ -61,7 +60,7 @@ class _Adapter:
             warnings.warn(f"Can't run adapter for {var_name}: {e}")
         return None
 
-    def __adapter_on_tree(self, adapter: FunctionType, tree: t.List[t.Any], prefix: str):
+    def __adapter_on_tree(self, adapter: t.Callable, tree: t.List[t.Any], prefix: str):
         ret_list = []
         for idx, elt in enumerate(tree):
             ret = self._run_adapter(adapter, elt, adapter.__name__, prefix + str(idx))
