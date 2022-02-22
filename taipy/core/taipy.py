@@ -133,8 +133,7 @@ class Taipy:
             ModelNotFound : if no entity corresponds to `entity_id`
         """
         if id.startswith(JobManager.ID_PREFIX):
-            if job := cls.get(JobId(id)):
-                return JobManager.delete(job)
+            return JobManager.delete(cls.get(JobId(id)))
         if id.startswith(Cycle.ID_PREFIX):
             return CycleManager.delete(CycleId(id))
         if id.startswith(Scenario.ID_PREFIX):
@@ -358,7 +357,7 @@ class Taipy:
         root_folder: str = None,
         storage_folder: str = None,
         clean_entities_enabled: Union[bool, str] = None,
-        **properties
+        **properties,
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""
         return Config.set_global_config(
@@ -398,7 +397,7 @@ class Taipy:
         has_header: bool = True,
         sheet_name: Union[List[str], str] = "Sheet1",
         scope: Scope = Scope.PIPELINE,
-        **properties
+        **properties,
     ):
         """Configures a new data node configuration with Excel storage type."""
         return Config.add_data_node(
@@ -408,7 +407,7 @@ class Taipy:
             path=path,
             has_header=has_header,
             sheet_name=sheet_name,
-            **properties
+            **properties,
         )
 
     @staticmethod
@@ -449,7 +448,7 @@ class Taipy:
         write_table: str,
         db_port: int = 143,
         scope: Scope = Scope.PIPELINE,
-        **properties
+        **properties,
     ):
         """Configures a new data node configuration with SQL storage type."""
         return Config.add_data_node(
@@ -463,7 +462,7 @@ class Taipy:
             read_query=read_query,
             write_table=write_table,
             db_port=db_port,
-            **properties
+            **properties,
         )
 
     @staticmethod
@@ -472,7 +471,7 @@ class Taipy:
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        **properties
+        **properties,
     ) -> TaskConfig:
         """Configures a new task configuration."""
         return Config.add_task(name, function, input, output, **properties)
@@ -482,7 +481,7 @@ class Taipy:
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        **properties
+        **properties,
     ) -> TaskConfig:
         """Configures the default behavior of a task configuration."""
         return Config.add_default_task(function, input, output, **properties)
@@ -505,7 +504,7 @@ class Taipy:
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-        **properties
+        **properties,
     ) -> ScenarioConfig:
         """Configures a new scenario configuration."""
         return Config.add_scenario(name, pipeline_configs, frequency, comparators, **properties)
@@ -517,7 +516,7 @@ class Taipy:
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         pipeline_name: Optional[str] = None,
-        **properties
+        **properties,
     ) -> ScenarioConfig:
         """Configures a new scenario configuration from a list of tasks."""
         return Config.add_scenario_from_tasks(name, task_configs, frequency, comparators, pipeline_name, **properties)
@@ -527,7 +526,7 @@ class Taipy:
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-        **properties
+        **properties,
     ) -> ScenarioConfig:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
