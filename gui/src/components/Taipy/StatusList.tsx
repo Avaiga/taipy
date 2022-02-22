@@ -92,7 +92,7 @@ const StatusList = (props: StatusListProps) => {
         } else {
             val = value;
         }
-        if (!Array.isArray(val)) {
+        if (!Array.isArray(val) || (val.length && typeof val[0] !== "object")) {
             val = [val];
         }
         val = val.map((v) => {
