@@ -1,5 +1,5 @@
 ﻿Name,Type,Default,Doc
-*value,dict|list[dict],None,"The different statuses to represent.
+*value,dict|list[dict]|tuple|list[tuple],None,"The different statuses to represent.
 See below."
 without_close,bool,FALSE,"If <i>True</i>, the user cannot hide the child statuses."
 >shared,,,

@@ -6,12 +6,12 @@ import userEvent from "@testing-library/user-event";
 import { StatusType } from "./Status";
 import StatusList from './StatusList';
 
-const statuses: StatusType[] = [
+const statuses = [
     {status: "info", message: "info"},
-    {status: "error", message: "error"},
+    ["error", "error"],
     {status: "warning", message: "warning"},
     {status: "success", message: "success"},
-];
+] as Array<[string, string] | StatusType>;
 
 describe("StatusList Component", () => {
     it("renders", async () => {

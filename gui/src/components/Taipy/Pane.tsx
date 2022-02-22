@@ -21,7 +21,7 @@ interface PaneProps extends TaipyActiveProps {
     anchor?: AnchorType;
     persistent?: boolean;
     closeAction?: string;
-    pageId?: string;
+    page?: string;
     height?: string | number;
     width?: string | number;
 }
@@ -53,7 +53,7 @@ const Pane = (props: PaneProps) => {
         anchor = "left",
         persistent = false,
         closeAction,
-        pageId,
+        page,
         defaultOpen,
         height = "30vh",
         width = "30vw",
@@ -109,7 +109,7 @@ const Pane = (props: PaneProps) => {
                     <Divider />
                 </>
             ) : null}
-            {pageId ? <TaipyRendered path={"/" + pageId} /> : null}
+            {page ? <TaipyRendered path={"/" + page} /> : null}
             {props.children}
         </Drawer>
     ) : null;

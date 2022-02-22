@@ -21,7 +21,7 @@ interface DialogProps extends TaipyActiveProps {
     validateAction?: string;
     cancelLabel?: string;
     validateLabel?: string;
-    pageId: string;
+    page: string;
     open?: boolean;
     defaultOpen?: string | boolean;
     children?: ReactNode;
@@ -45,7 +45,7 @@ const Dialog = (props: DialogProps) => {
         open,
         cancelAction,
         validateAction = "ValidateAction",
-        pageId,
+        page,
         cancelLabel = "Cancel",
         validateLabel = "Validate",
         className,
@@ -100,7 +100,7 @@ const Dialog = (props: DialogProps) => {
             </DialogTitle>
 
             <DialogContent dividers>
-                {pageId ? <TaipyRendered path={"/" + pageId} /> : null}
+                {page ? <TaipyRendered path={"/" + page} /> : null}
                 {props.children}
             </DialogContent>
             <DialogActions>

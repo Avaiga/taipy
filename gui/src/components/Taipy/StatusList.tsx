@@ -5,7 +5,7 @@ import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import Popover, { PopoverOrigin } from "@mui/material/Popover";
 
 import Status, { StatusType } from "./Status";
-import { TaipyActiveProps } from "./utils";
+import { TaipyBaseProps } from "./utils";
 
 const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
@@ -67,8 +67,8 @@ interface StatusDel extends StatusType {
     id?: string;
 }
 
-interface StatusListProps extends TaipyActiveProps {
-    value: StatusType[] | StatusType;
+interface StatusListProps extends TaipyBaseProps {
+    value: Array<[string, string] | StatusType> | [string, string] | StatusType;
     defaultValue?: string;
     withoutClose?: boolean;
 }
@@ -83,13 +83,28 @@ const StatusList = (props: StatusListProps) => {
     useEffect(() => {
         let val;
         if (value === undefined) {
-            val = (defaultValue ? JSON.parse(defaultValue) : []) as StatusType[] | StatusType;
+            try {
+                val = (defaultValue ? JSON.parse(defaultValue) : []) as StatusType[] | StatusType;
+            } catch (e) {
+                console.info(`Cannot parse status value: ${(e as Error).message || e}`);
+                val = [] as StatusType[];
+            }
         } else {
             val = value;
         }
-        if (!Array.isArray(val)) {
+        if (!Array.isArray(val) || (val.length && typeof val[0] !== "object")) {
             val = [val];
         }
+        val = val.map((v) => {
+            if (Array.isArray(v)) {
+                return { status: v[0] || "", message: v[1] || "" };
+            } else if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
+                return { status: "" + v, message: "" + v };
+            } else {
+                return { status: v.status || "", message: v.message || "" };
+            }
+        });
+
         setValues(val as StatusDel[]);
         setMultiple(val.length > 1);
     }, [value, defaultValue]);
@@ -118,10 +133,7 @@ const StatusList = (props: StatusListProps) => {
     }, []);
 
     const globalProps = useMemo(
-        () =>
-            multiple
-                ? { onClose: onOpen, icon: opened ? <ArrowUpward /> : <ArrowDownward /> }
-                : {},
+        () => (multiple ? { onClose: onOpen, icon: opened ? <ArrowUpward /> : <ArrowDownward /> } : {}),
         [multiple, opened, onOpen]
     );
 

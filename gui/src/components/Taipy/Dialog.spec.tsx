@@ -30,7 +30,7 @@ describe("Dialog Component", () => {
     it("renders when value is true", async () => {
         const { getByText } = render(
             <HelmetProvider>
-                <Dialog title="Dialog-Test-Title" pageId="pageId" open={true} />
+                <Dialog title="Dialog-Test-Title" page="page" open={true} />
             </HelmetProvider>
         );
         const elt = getByText("Dialog-Test-Title");
@@ -40,7 +40,7 @@ describe("Dialog Component", () => {
     it("renders nothing when value is false", async () => {
         const { queryAllByText } = render(
             <HelmetProvider>
-                <Dialog title="Dialog-Test-Title" pageId="pageId" open={false} />
+                <Dialog title="Dialog-Test-Title" page="page" open={false} />
             </HelmetProvider>
         );
         expect(queryAllByText("Dialog-Test-Title")).toHaveLength(0);
@@ -51,7 +51,7 @@ describe("Dialog Component", () => {
     it("displays the right info for class", async () => {
         const wrapper = render(
             <HelmetProvider>
-                <Dialog title="Dialog-Test-Title" pageId="pageId" open={true} className="taipy-dialog" />
+                <Dialog title="Dialog-Test-Title" page="page" open={true} className="taipy-dialog" />
             </HelmetProvider>
         );
         const elt = document.querySelector(".MuiDialog-root");
@@ -62,7 +62,7 @@ describe("Dialog Component", () => {
             <HelmetProvider>
                 <Dialog
                     title="Dialog-Test-Title"
-                    pageId="pageId"
+                    page="page"
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
                 />
@@ -75,7 +75,7 @@ describe("Dialog Component", () => {
             <HelmetProvider>
                 <Dialog
                     title="Dialog-Test-Title"
-                    pageId="pageId"
+                    page="page"
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
                 />
@@ -88,7 +88,7 @@ describe("Dialog Component", () => {
             <HelmetProvider>
                 <Dialog
                     title="Dialog-Test-Title"
-                    pageId="pageId"
+                    page="page"
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
                     cancelAction={"testCancelAction"}
@@ -102,7 +102,7 @@ describe("Dialog Component", () => {
             <HelmetProvider>
                 <Dialog
                     title="Dialog-Test-Title"
-                    pageId="pageId"
+                    page="page"
                     open={true}
                     active={false}
                     validateLabel="testValidate"
@@ -119,7 +119,7 @@ describe("Dialog Component", () => {
             <HelmetProvider>
                 <Dialog
                     title="Dialog-Test-Title"
-                    pageId="pageId"
+                    page="page"
                     open={true}
                     validateLabel="testValidate"
                     cancelAction="testCancelAction"
@@ -135,7 +135,7 @@ describe("Dialog Component", () => {
             <HelmetProvider>
                 <Dialog
                     title="Dialog-Test-Title"
-                    pageId="pageId"
+                    page="page"
                     open={true}
                     active={true}
                     validateLabel="testValidate"
@@ -156,7 +156,7 @@ describe("Dialog Component", () => {
                     <Dialog
                         id="testId"
                         title="Dialog-Test-Title"
-                        pageId="pageId"
+                        page="page"
                         open={true}
                         active={true}
                         validateLabel="testValidate"
@@ -181,7 +181,7 @@ describe("Dialog Component", () => {
                     <Dialog
                         id="testId"
                         title="Dialog-Test-Title"
-                        pageId="pageId"
+                        page="page"
                         open={true}
                         active={true}
                         cancelLabel="testCancel"
@@ -206,7 +206,7 @@ describe("Dialog Component", () => {
                     <Dialog
                         id="testId"
                         title="Dialog-Test-Title"
-                        pageId="pageId"
+                        page="page"
                         open={true}
                         active={true}
                         validateAction="testValidateAction"
@@ -230,7 +230,7 @@ describe("Dialog Component", () => {
                     <Dialog
                         id="testId"
                         title="Dialog-Test-Title"
-                        pageId="pageId"
+                        page="page"
                         open={true}
                         active={true}
                         cancelLabel="testCancel"

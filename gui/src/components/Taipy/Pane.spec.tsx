@@ -30,7 +30,7 @@ describe("Pane Component", () => {
     it("renders when value is true", async () => {
         const { getByRole } = render(
             <HelmetProvider>
-                <Pane pageId="pageId" open={true} />
+                <Pane page="page" open={true} />
             </HelmetProvider>
         );
         const elt = getByRole("presentation");
@@ -40,7 +40,7 @@ describe("Pane Component", () => {
     it("renders nothing when value is false", async () => {
         const { queryAllByRole } = render(
             <HelmetProvider>
-                <Pane pageId="pageId" open={false} />
+                <Pane page="page" open={false} />
             </HelmetProvider>
         );
         expect(queryAllByRole("presentation")).toHaveLength(0);
@@ -51,7 +51,7 @@ describe("Pane Component", () => {
     it("displays the right info for class", async () => {
         const { getByRole } = render(
             <HelmetProvider>
-                <Pane pageId="pageId" open={true} className="taipy-pane" />
+                <Pane page="page" open={true} className="taipy-pane" />
             </HelmetProvider>
         );
         const elt = getByRole("presentation");
@@ -60,7 +60,7 @@ describe("Pane Component", () => {
     it("displays the default value", async () => {
         const { getByRole } = render(
             <HelmetProvider>
-                <Pane pageId="pageId" defaultOpen="true" open={undefined as unknown as boolean} />
+                <Pane page="page" defaultOpen="true" open={undefined as unknown as boolean} />
             </HelmetProvider>
         );
         expect(getByRole("presentation")).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe("Pane Component", () => {
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane pageId="pageId" open={true} active={false} closeAction="testCloseAction" />
+                    <Pane page="page" open={true} active={false} closeAction="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -86,7 +86,7 @@ describe("Pane Component", () => {
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane pageId="pageId" open={true} closeAction="testCloseAction" />
+                    <Pane page="page" open={true} closeAction="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -101,7 +101,7 @@ describe("Pane Component", () => {
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane pageId="pageId" open={true} active={true} closeAction="testCloseAction" />
+                    <Pane page="page" open={true} active={true} closeAction="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -116,7 +116,7 @@ describe("Pane Component", () => {
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane pageId="pageId" open={true} active={false} persistent={true} closeAction="testCloseAction" />
+                    <Pane page="page" open={true} active={false} persistent={true} closeAction="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -131,7 +131,7 @@ describe("Pane Component", () => {
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane id="testId" pageId="pageId" open={true} closeAction="testCloseAction" />
+                    <Pane id="testId" page="page" open={true} closeAction="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -150,7 +150,7 @@ describe("Pane Component", () => {
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane id="testId" pageId="pageId" open={true} persistent={true} tp_varname="varname" />
+                    <Pane id="testId" page="page" open={true} persistent={true} tp_varname="varname" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );

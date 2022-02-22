@@ -3,12 +3,12 @@ from taipy.gui import Gui, Markdown
 
 def test_dialog_md_1(gui: Gui, helpers):
     gui.bind_var_val("dialog_open", False)
-    md_string = "<|dialog|title=This is a Dialog|open={dialog_open}|page_id=page_test|validate_action=validate_action|cancel_action=cancel_action|>"
+    md_string = "<|dialog|title=This is a Dialog|open={dialog_open}|page=page_test|validate_action=validate_action|cancel_action=cancel_action|>"
     expected_list = [
         "<Dialog",
         'cancelAction="cancel_action"',
         'cancelLabel="Cancel"',
-        'pageId="page_test"',
+        'page="page_test"',
         'title="This is a Dialog"',
         'tp_varname="TaipyBool_dialog_open"',
         'validateAction="validate_action"',
@@ -26,7 +26,7 @@ def test_dialog_md_2(gui: Gui, helpers):
     expected_list = [
         "<Dialog",
         'cancelLabel="Cancel"',
-        'pageId="TaiPy_partials',
+        'page="TaiPy_partials',
         'title="Another Dialog"',
         'tp_varname="TaipyBool_dialog_open"',
         'validateAction="validate_action"',
@@ -38,12 +38,12 @@ def test_dialog_md_2(gui: Gui, helpers):
 
 def test_dialog_html_1(gui: Gui, helpers, csvdata):
     gui.bind_var_val("dialog_open", False)
-    html_string = '<taipy:dialog title="This is a Dialog" open="{dialog_open}" page_id="page1" validate_action="validate_action" cancel_action="cancel_action" />'
+    html_string = '<taipy:dialog title="This is a Dialog" open="{dialog_open}" page="page1" validate_action="validate_action" cancel_action="cancel_action" />'
     expected_list = [
         "<Dialog",
         'cancelAction="cancel_action"',
         'cancelLabel="Cancel"',
-        'pageId="page1"',
+        'page="page1"',
         'title="This is a Dialog"',
         'tp_varname="TaipyBool_dialog_open"',
         'validateAction="validate_action"',
@@ -61,7 +61,7 @@ def test_dialog_html_2(gui: Gui, helpers, csvdata):
     expected_list = [
         "<Dialog",
         'cancelLabel="Cancel"',
-        'pageId="TaiPy_partials',
+        'page="TaiPy_partials',
         'title="Another Dialog"',
         'tp_varname="TaipyBool_dialog_open"',
         'validateAction="validate_action"',

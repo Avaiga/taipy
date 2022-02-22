@@ -106,9 +106,11 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default(var_type=AttributeType.dynamic_boolean)
+        .set_partial()  # partial should be set before page
         .set_attributes(
             [
                 ("id",),
+                ("page",),
                 ("title",),
                 ("cancel_action",),
                 ("cancel_label", AttributeType.string, "Cancel"),
@@ -119,11 +121,9 @@ class Factory:
                 ("height", AttributeType.string_or_number),
             ]
         )
-        .set_propagate()
-        .set_partial()  # partial should be set before page_id
-        .set_page_id(),
+        .set_propagate(),
         "expandable": lambda gui, control_type, attrs: Builder(
-            gui=gui, control_type=control_type, element_name="Expandable", attributes=attrs, default_value=""
+            gui=gui, control_type=control_type, element_name="Expandable", attributes=attrs, default_value=None
         )
         .set_value_and_default()
         .set_attributes(
@@ -219,7 +219,7 @@ class Factory:
             ]
         ),
         "layout": lambda gui, control_type, attrs: Builder(
-            gui=gui, control_type=control_type, element_name="Layout", attributes=attrs, default_value=""
+            gui=gui, control_type=control_type, element_name="Layout", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False)
         .set_attributes(
@@ -251,7 +251,7 @@ class Factory:
         .set_refresh_on_update()
         .set_propagate(),
         "navbar": lambda gui, control_type, attrs: Builder(
-            gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=""
+            gui=gui, control_type=control_type, element_name="NavBar", attributes=attrs, default_value=None
         )
         .get_adapter("lov", multi_selection=False)  # need to be called before set_lov
         .set_lov()
@@ -278,12 +278,14 @@ class Factory:
             ]
         ),
         "pane": lambda gui, control_type, attrs: Builder(
-            gui=gui, control_type=control_type, element_name="Pane", attributes=attrs, default_value=""
+            gui=gui, control_type=control_type, element_name="Pane", attributes=attrs, default_value=None
         )
         .set_value_and_default(var_type=AttributeType.dynamic_boolean)
+        .set_partial()  # partial should be set before page
         .set_attributes(
             [
                 ("id",),
+                ("page",),
                 ("anchor", AttributeType.string, "left"),
                 ("close_action",),
                 ("persistent", AttributeType.boolean, False),
@@ -292,11 +294,9 @@ class Factory:
                 ("height", AttributeType.string_or_number, "30vh"),
             ]
         )
-        .set_propagate()
-        .set_partial()  # partial should be set before page_id
-        .set_page_id(),
+        .set_propagate(),
         "part": lambda gui, control_type, attrs: Builder(
-            gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=""
+            gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_update=False, var_type=AttributeType.dynamic_boolean, default_val=True)
         .set_attributes([("id",)]),
@@ -353,9 +353,8 @@ class Factory:
             attributes=attrs,
         )
         .set_value_and_default(with_update=False)
-        .set_propagate()
         .set_attributes(
-            [("id",), ("active", AttributeType.dynamic_boolean, True), ("without_close", AttributeType.boolean, False)]
+            [("id",), ("without_close", AttributeType.boolean, False)]
         ),
         "table": lambda gui, control_type, attrs: Builder(
             gui=gui,
@@ -402,7 +401,7 @@ class Factory:
             ]
         ),
         "toggle": lambda gui, control_type, attrs: Builder(
-            gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=""
+            gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=AttributeType.lov_value)
         .get_adapter("lov", multi_selection=False)  # need to be called before set_lov

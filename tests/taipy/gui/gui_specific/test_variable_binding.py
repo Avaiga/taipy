@@ -1,5 +1,4 @@
 import pytest
-from types import FunctionType
 from taipy.gui import Gui, Markdown
 
 
@@ -25,7 +24,7 @@ def test_variable_binding(helpers):
     assert gui._bindings().x == x
     assert gui._bindings().y == y
     assert gui._bindings().z == z
-    assert isinstance(gui._bindings().another_function, FunctionType)
+    assert callable(gui._get_user_function("another_function"))
     helpers.test_cleanup()
 
 

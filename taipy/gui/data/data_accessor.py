@@ -3,12 +3,8 @@ import typing as t
 import warnings
 from abc import ABC, abstractmethod
 
-from taipy.gui.utils.types import TaipyData
-
+from ..utils import TaipyData
 from .data_format import DataFormat
-
-if t.TYPE_CHECKING:
-    from ..gui import Gui
 
 
 class DataAccessor(ABC):

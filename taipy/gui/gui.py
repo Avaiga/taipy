@@ -8,7 +8,7 @@ import tempfile
 import typing as t
 import warnings
 from importlib import util
-from types import FrameType, FunctionType
+from types import FrameType
 
 import __main__
 import markdown as md_lib
@@ -59,9 +59,9 @@ class Gui:
 
     Attributes:
 
-        on_action (t.FunctionType): The default function that is called when a control
+        on_action (Callable): The default function that is called when a control
             triggers an action, as the result of an interaction with the end-user.
-        on_change (t.FunctionType): The function that is called when a control
+        on_change (Callable): The function that is called when a control
             modifies the variable it is bound to, as the result of an interaction with the end-user.
     """
 
@@ -122,8 +122,9 @@ class Gui:
         self._accessors = _DataAccessors()
         self.__state: State = None
         self.__bindings = _Bindings(self)
+        self.__locals_bind: t.Dict[str, t.Any] = {}
 
-        self.__evaluator = _Evaluator({t.__name__: t for t in TaipyBase.__subclasses__()})
+        self.__evaluator: _Evaluator = None
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
 
@@ -251,7 +252,7 @@ class Gui:
         elif holder:
             modified_vars.update(self._evaluate_holders(hash_expr))
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        if hasattr(self, "on_change") and isinstance(self.on_change, FunctionType):
+        if hasattr(self, "on_change") and callable(self.on_change):
             try:
                 argcount = self.on_change.__code__.co_argcount
                 args = [None for _ in range(argcount)]
@@ -382,7 +383,7 @@ class Gui:
         newvalue = getscopeattr_drill(self, var_name)
         if isinstance(newvalue, TaipyData):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
-            self.__send_ws_update_with_dict({var_name: ret_payload, var_name + ".refresh": False})
+            self.__send_ws_update_with_dict({var_name: ret_payload, newvalue.get_name() + ".refresh": False})
 
     def __request_var_update(self, payload: t.Any):
         if isinstance(payload, dict) and isinstance(payload.get("names"), list):
@@ -493,14 +494,19 @@ class Gui:
             if len(grouping_message):
                 self.__send_ws({"type": WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
+    def _get_user_function(self, func_name: str):
+        func = getscopeattr(self, func_name, None)
+        if not callable(func):
+            func = self.__locals_bind.get(func_name)
+        if callable(func):
+            return func
+        return func_name
+
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         action = payload.get("action") if isinstance(payload, dict) else str(payload)
         if action:
-            if hasuserattr(self, action):
-                if self.__call_function_with_args(
-                    action_function=getuserattr(self, action), id=id, payload=payload, action=action
-                ):
-                    return
+            if self.__call_function_with_args(action_function=self._get_user_function(action), id=id, payload=payload, action=action):
+                return
             else:
                 warnings.warn(f"on_action: '{action}' is not a function")
         if hasattr(self, "on_action"):
@@ -512,7 +518,7 @@ class Gui:
         action = kwargs.get("action")
         payload = kwargs.get("payload")
 
-        if isinstance(action_function, FunctionType):
+        if callable(action_function):
             try:
                 argcount = action_function.__code__.co_argcount
                 args = [None for _ in range(argcount)]
@@ -560,20 +566,20 @@ class Gui:
     def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
         self.__adapter._add_list_for_variable(var_name, list_name)
 
-    def _add_adapter_for_type(self, type_name: str, adapter: FunctionType) -> None:
+    def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter._add_adapter_for_type(type_name, adapter)
 
     def _add_type_for_var(self, var_name: str, type_name: str) -> None:
         self.__adapter._add_type_for_var(var_name, type_name)
 
-    def _get_adapter_for_type(self, type_name: str) -> t.Optional[FunctionType]:
+    def _get_adapter_for_type(self, type_name: str) -> t.Optional[t.Callable]:
         return self.__adapter._get_adapter_for_type(type_name)
 
     def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
         return self.__adapter._run_adapter_for_var(var_name, value, index, id_only)
 
     def _run_adapter(
-        self, adapter: FunctionType, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
+        self, adapter: t.Callable, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
         return self.__adapter._run_adapter(adapter, value, var_name, index, id_only)
 
@@ -701,7 +707,7 @@ class Gui:
 
     def __bind_local_func(self, name: str):
         func = getattr(self, name, None)
-        if func is not None and not isinstance(func, FunctionType):
+        if func is not None and not callable(func):
             warnings.warn(
                 f"{self.__class__.__name__}.{name}: {func} should be a function; looking for {name} in the script."
             )
@@ -709,20 +715,10 @@ class Gui:
         if func is None:
             func = self.__locals_bind.get(name)
         if func is not None:
-            if isinstance(func, FunctionType):
+            if callable(func):
                 setattr(self, name, func)
             else:
                 warnings.warn(f"{name}: {func} should be a function")
-
-    def bind_func(self, func_name: str) -> bool:
-        if (
-            isinstance(func_name, str)
-            and not hasuserattr(self, func_name)
-            and isinstance(self.__locals_bind.get(func_name, None), FunctionType)
-        ):
-            setattr(self._bindings(), func_name, self.__locals_bind[func_name])
-            return True
-        return False
 
     def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
         self._config.load_config(app_config=app_config, style_config=style_config)
@@ -761,7 +757,7 @@ class Gui:
 
     def block_ui(
         self,
-        callback: t.Optional[t.Union[str, FunctionType]] = None,
+        callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):
         """Blocks the UI
@@ -770,9 +766,7 @@ class Gui:
             action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action will be provided to the user.
             message (string): The message to show. Default: Work in Progress...
         """
-        action_name = callback.__name__ if isinstance(callback, FunctionType) else callback
-        if action_name:
-            self.bind_func(action_name)
+        action_name = callback.__name__ if callable(callback) else callback
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
         setscopeattr(self, def_action_name, func)
@@ -833,7 +827,6 @@ class Gui:
                 root_page_name=Gui.__root_page_name,
             )
             self._bindings()._new_scopes()
-            self.__evaluator = _Evaluator()
 
         app_config = self._config.app_config
 
@@ -863,6 +856,11 @@ class Gui:
         ).f_locals
 
         self.__state = State(self, self.__locals_bind.keys())
+
+        # base global ctx is TaipyHolder classes + script modules and callables
+        glob_ctx = {t.__name__: t for t in TaipyBase.__subclasses__()}
+        glob_ctx.update({k: v for k, v in self.__locals_bind.items() if inspect.ismodule(v) or callable(v)})
+        self.__evaluator: _Evaluator = _Evaluator(glob_ctx)
 
         # bind on_change and on_action function if available
         self.__bind_local_func("on_change")
