@@ -32,7 +32,9 @@ class GenericDataNode(DataNode):
 
     __STORAGE_TYPE = "generic"
     _REQUIRED_READ_FUNCTION_PROPERTY = "read_fct"
+    __READ_FUNCTION_PARAMS_PROPERTY = "read_fct_params"
     _REQUIRED_WRITE_FUNCTION_PROPERTY = "write_fct"
+    __WRITE_FUNCTION_PARAMS_PROPERTY = "write_fct_params"
     REQUIRED_PROPERTIES = [_REQUIRED_READ_FUNCTION_PROPERTY, _REQUIRED_WRITE_FUNCTION_PROPERTY]
 
     def __init__(
@@ -79,7 +81,11 @@ class GenericDataNode(DataNode):
         return cls.__STORAGE_TYPE
 
     def _read(self):
+        if self.__READ_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
+            return self.properties[self._REQUIRED_READ_FUNCTION_PROPERTY](**self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY])
         return self.properties[self._REQUIRED_READ_FUNCTION_PROPERTY]()
 
     def _write(self, data: Any):
+        if self.__WRITE_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
+            return self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY](data, **self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY])
         return self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY](data)
