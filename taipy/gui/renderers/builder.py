@@ -51,7 +51,7 @@ class Builder:
 
         self.__default_property_name = Factory.get_default_property_name(control_type) or ""
         default_property_value = self.__attributes.get(self.__default_property_name, None)
-        if default_property_value is None:
+        if default_property_value is None and default_value is not None:
             self.__attributes[self.__default_property_name] = default_value
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
