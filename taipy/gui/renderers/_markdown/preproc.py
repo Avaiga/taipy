@@ -30,9 +30,9 @@ class Preprocessor(MdPreprocessor):
     # Control in Markdown
     __CONTROL_RE = re.compile(r"<\|(.*?)\|>")
     # Opening tag
-    __OPENING_TAG_RE = re.compile(r"<\|((?:(?!\|>).)*)\s*$")
+    __OPENING_TAG_RE = re.compile(r"<([0-9a-zA-Z\_\.]*)\|((?:(?!\|>).)*)\s*$")
     # Closing tag
-    __CLOSING_TAG_RE = re.compile(r"^\s*\|>")
+    __CLOSING_TAG_RE = re.compile(r"^\s*\|([0-9a-zA-Z\_\.]*)>")
     # Link in Markdown
     __LINK_RE = re.compile(r"(\[[^\]]*?\]\([^\)]*?\))")
     # Split properties and control type
@@ -67,10 +67,10 @@ class Preprocessor(MdPreprocessor):
             if m is not None:
                 tag = "part"
                 properties: List[Tuple[str, str]] = []
-                if m.group(1):
-                    tag, properties = self._process_control(m.group(1), line_count)
+                if m.group(2):
+                    tag, properties = self._process_control(m.group(2), line_count)
                 if tag in MarkdownFactory._TAIPY_BLOCK_TAGS:
-                    tag_queue.append((tag, line_count))
+                    tag_queue.append((tag, line_count, m.group(1) or None))
                     line = line[: m.start()] + "\n" + MarkdownFactory._TAIPY_START + tag + ".start"
                     for property in properties:
                         prop_value = property[1].replace('"', '\\"')
@@ -103,10 +103,18 @@ class Preprocessor(MdPreprocessor):
             m = Preprocessor.__CLOSING_TAG_RE.search(new_line)
             if m is not None:
                 if len(tag_queue):
+                    open_tag, open_tag_line_count, open_tag_identifier = tag_queue.pop()
+                    close_tag_identifier = m.group(1)
+                    if close_tag_identifier and not open_tag_identifier:
+                        warnings.warn(f"Missing opening '{open_tag}' tag identifier '{close_tag_identifier}' in line {open_tag_line_count}")
+                    if open_tag_identifier and not close_tag_identifier:
+                        warnings.warn(f"Missing closing '{open_tag}' tag identifier '{open_tag_identifier}' in line {line_count}")
+                    if close_tag_identifier and open_tag_identifier and close_tag_identifier != open_tag_identifier:
+                        warnings.warn(f"Unmatched '{open_tag}' tag identifier in line {open_tag_line_count} and line {line_count}")
                     new_line = (
                         new_line[: m.start()]
                         + MarkdownFactory._TAIPY_START
-                        + tag_queue.pop()[0]
+                        + open_tag
                         + ".end"
                         + MarkdownFactory._TAIPY_END
                         + new_line[m.end() :]
@@ -125,7 +133,7 @@ class Preprocessor(MdPreprocessor):
         if new_lines and new_lines[0] != "":
             new_lines.insert(0, "")
         # Check for tags left unclosed (but close them anyway)
-        for tag, line_no in tag_queue:
+        for tag, line_no, _ in tag_queue:
             new_lines.append(MarkdownFactory._TAIPY_START + tag + ".end" + MarkdownFactory._TAIPY_END)
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
