@@ -60,14 +60,12 @@ class Builder:
             if prop_hash is None:
                 self.__gui.bind_var(prop_dict)
                 prop_dict = getscopeattr(self.__gui, prop_dict)
-            if not isinstance(prop_dict, _MapDict):
-                raise Exception(
-                    f"Can't find properties configuration dictionary {self.__attributes['properties'] if prop_hash is None else prop_hash}!"
-                    f" Please review your GUI templates!"
-                )
-            # Iterate through prop_dict and append to self.attributes
-            for k, v in prop_dict.items():
-                self.__attributes[k] = v
+            if isinstance(prop_dict, _MapDict):
+                # Iterate through prop_dict and append to self.attributes
+                for k, v in prop_dict.items():
+                    self.__attributes[k] = v
+            else:
+                warnings.warn(f"{self.__control_type}.properties ({self.__attributes['properties'] if prop_hash is None else prop_hash}) should be a dict.")
 
         # Bind potential function and expressions in self.attributes
         for k, v in self.__attributes.items():
