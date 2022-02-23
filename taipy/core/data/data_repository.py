@@ -23,18 +23,14 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
     def to_model(self, data_node: DataNode):
         properties = data_node._properties.data.copy()
         if data_node.storage_type() == GenericDataNode.storage_type():
-            properties[self.READ_FCT_NAME_KEY] = data_node._properties[
-                GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY
-            ].__name__
-            properties[self.READ_FCT_MODULE_KEY] = data_node._properties[
-                GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY
-            ].__module__
-            properties[self.WRITE_FCT_NAME_KEY] = data_node._properties[
-                GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY
-            ].__name__
-            properties[self.WRITE_FCT_MODULE_KEY] = data_node._properties[
-                GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY
-            ].__module__
+            read_fct = data_node._properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY]
+            properties[self.READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
+            properties[self.READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
+            
+            write_fct = data_node._properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY]
+            properties[self.WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
+            properties[self.WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
+            
             del (
                 properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY],
                 properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY],
@@ -58,17 +54,27 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
 
     def from_model(self, model: DataNodeModel):
         if model.storage_type == GenericDataNode.storage_type():
-            model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = load_fct(
-                model.data_node_properties[self.READ_FCT_MODULE_KEY], model.data_node_properties[self.READ_FCT_NAME_KEY]
-            )
-            model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = load_fct(
-                model.data_node_properties[self.WRITE_FCT_MODULE_KEY],
-                model.data_node_properties[self.WRITE_FCT_NAME_KEY],
-            )
+            if model.data_node_properties[self.READ_FCT_MODULE_KEY]:
+                model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = load_fct(
+                    model.data_node_properties[self.READ_FCT_MODULE_KEY], 
+                    model.data_node_properties[self.READ_FCT_NAME_KEY]
+                )
+            else:
+                model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = None
+            
+            if model.data_node_properties[self.WRITE_FCT_MODULE_KEY]:
+                model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = load_fct(
+                    model.data_node_properties[self.WRITE_FCT_MODULE_KEY],
+                    model.data_node_properties[self.WRITE_FCT_NAME_KEY],
+                )
+            else:
+                model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = None
+
             del model.data_node_properties[self.READ_FCT_NAME_KEY]
             del model.data_node_properties[self.READ_FCT_MODULE_KEY]
             del model.data_node_properties[self.WRITE_FCT_NAME_KEY]
             del model.data_node_properties[self.WRITE_FCT_MODULE_KEY]
+            
         return self.class_map[model.storage_type](
             config_name=model.config_name,
             scope=model.scope,

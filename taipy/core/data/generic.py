@@ -1,5 +1,4 @@
 from datetime import datetime
-from os.path import isfile
 from typing import Any, Dict, List, Optional
 
 from taipy.core.common.alias import DataNodeId, JobId
@@ -81,11 +80,15 @@ class GenericDataNode(DataNode):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if self.__READ_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
-            return self.properties[self._REQUIRED_READ_FUNCTION_PROPERTY](**self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY])
-        return self.properties[self._REQUIRED_READ_FUNCTION_PROPERTY]()
+        if read_fct := self.properties[self._REQUIRED_READ_FUNCTION_PROPERTY]:
+            if self.__READ_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
+                return read_fct(**self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY])
+            return read_fct()
+        raise NotImplementedError
 
     def _write(self, data: Any):
-        if self.__WRITE_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
-            return self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY](data, **self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY])
-        return self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY](data)
+        if write_fct := self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY]:
+            if self.__WRITE_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
+                return write_fct(data, **self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY])
+            return write_fct(data)
+        raise NotImplementedError

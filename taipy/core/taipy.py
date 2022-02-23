@@ -412,7 +412,7 @@ class Taipy:
 
     @staticmethod
     def configure_generic_data_node(
-        name: str, read_fct: Callable, write_fct: Callable, scope: Scope = Scope.PIPELINE, **properties
+        name: str, read_fct: Callable = None, write_fct: Callable = None, scope: Scope = Scope.PIPELINE, **properties
     ):
         """Configures a new data node configuration with Generic storage type."""
         return Config.add_data_node(
