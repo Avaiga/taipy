@@ -133,7 +133,7 @@ class Preprocessor(MdPreprocessor):
         if new_lines and new_lines[0] != "":
             new_lines.insert(0, "")
         # Check for tags left unclosed (but close them anyway)
-        for tag, line_no in tag_queue:
+        for tag, line_no, _ in tag_queue:
             new_lines.append(MarkdownFactory._TAIPY_START + tag + ".end" + MarkdownFactory._TAIPY_END)
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
