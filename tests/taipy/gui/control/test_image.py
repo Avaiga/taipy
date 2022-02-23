@@ -10,7 +10,6 @@ def test_image_url_md(gui: Gui, helpers):
         "<Image",
         "content={TaipyContentImage_content}",
         'defaultContent="some_url"',
-        'tp_onAction=""',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -22,7 +21,6 @@ def test_image_file_md(gui: Gui, helpers):
         expected_list = [
             "<Image",
             'defaultContent="data:image/png;base64,',
-            'tp_onAction=""',
         ]
         helpers.test_control_md(gui, md_string, expected_list)
 
@@ -33,7 +31,6 @@ def test_image_path_md(gui: Gui, helpers):
     expected_list = [
         "<Image",
         'defaultContent="/taipy-content/taipyStatic0/fred.png',
-        'tp_onAction=""',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -45,17 +42,16 @@ def test_image_bad_file_md(gui: Gui, helpers):
         expected_list = [
             "<Image",
             'defaultContent="Invalid content: text/x',
-            'tp_onAction=""',
         ]
         helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_image_url_html(gui: Gui, helpers):
     gui.bind_var_val("content", "some_url")
-    html_string = '<taipy:image content="{content}" />'
+    html_string = '<taipy:image content="{content}" on_action="action" />'
     expected_list = [
         "<Image",
         'defaultContent="some_url"',
-        'tp_onAction=""',
+        'tp_onAction="action"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

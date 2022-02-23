@@ -14,7 +14,7 @@ interface ButtonProps extends TaipyActiveProps {
 }
 
 const Button = (props: ButtonProps) => {
-    const { className, id, tp_onAction, defaultLabel } = props;
+    const { className, id, tp_onAction = "", defaultLabel } = props;
     const [value, setValue] = useState<stringIcon>("");
     const { dispatch } = useContext(TaipyContext);
 
