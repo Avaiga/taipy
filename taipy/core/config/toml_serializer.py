@@ -1,4 +1,3 @@
-import logging
 from typing import Any, Dict, Optional
 
 import toml  # type: ignore
@@ -69,7 +68,6 @@ class TomlSerializer:
             return cls.__from_dict(dict(toml.load(filename)))
         except toml.TomlDecodeError as e:
             error_msg = f"Can not load configuration {e}"
-            logging.error(error_msg)
             raise LoadingError(error_msg)
 
     @staticmethod

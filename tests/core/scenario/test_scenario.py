@@ -1,4 +1,4 @@
-from taipy.core import Taipy as tp
+import taipy.core.taipy as tp
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope

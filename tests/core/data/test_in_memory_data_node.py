@@ -35,7 +35,8 @@ class TestInMemoryDataNodeEntity:
     def test_read_and_write(self):
         no_data_dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))
         with pytest.raises(NoData):
-            no_data_dn.read()
+            assert no_data_dn.read() is None
+            no_data_dn.read_or_raise()
         in_mem_dn = InMemoryDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar"})
         assert isinstance(in_mem_dn.read(), str)
         assert in_mem_dn.read() == "bar"

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.common.reload import reload, self_reload
 from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.common.wrapper import Properties
@@ -57,6 +58,7 @@ class DataNode:
 
     ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
+    __logger = TaipyLogger.get_logger()
     REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -161,10 +163,17 @@ class DataNode:
     def storage_type(cls) -> str:
         return NotImplemented
 
-    def read(self):
+    def read_or_raise(self):
         if not self.last_edition_date:
             raise NoData
         return self._read()
+
+    def read(self):
+        try:
+            return self.read_or_raise()
+        except NoData:
+            self.__logger.warning(f"Data node {self.id} is being read but has never been written.")
+            return None
 
     def write(self, data, job_id: Optional[JobId] = None):
         from taipy.core.data.data_manager import DataManager

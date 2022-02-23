@@ -8,7 +8,7 @@ import pandas as pd
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import MissingRequiredProperty
+from taipy.core.exceptions.data_node import MissingRequiredProperty
 
 
 class CSVDataNode(DataNode):

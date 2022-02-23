@@ -1,6 +1,6 @@
 import pytest
 
-from taipy.core import Taipy as tp
+import taipy.core.taipy as tp
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode

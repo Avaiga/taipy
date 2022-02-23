@@ -1,10 +1,12 @@
 __all__ = ["Job"]
 
+import traceback
 from concurrent.futures import Future
 from datetime import datetime
 from typing import Callable, List
 
 from taipy.core.common.alias import JobId
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.job.status import Status
 from taipy.core.task.task import Task
 
@@ -41,6 +43,7 @@ class Job:
         self.creation_date = datetime.now()
         self._subscribers: List[Callable] = []
         self._exceptions: List[Exception] = []
+        self.__logger = TaipyLogger.get_logger()
 
     def __contains__(self, task: Task):
         """Returns true if the Job contains a specific task.
@@ -202,9 +205,13 @@ class Job:
             self.on_status_change(*functions)
 
     def update_status(self, ft: Future):
-        """Update the Job status based on if an exception was raised or not."""
+        """Update the Job status based on its execution."""
         self._exceptions = ft.result()
         if self._exceptions:
             self.failed()
+            self.__logger.error(f" {len(self._exceptions)} errors occurred during execution of job {self.id}")
+            for e in self.exceptions:
+                self.__logger.error("".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__)))
         else:
             self.completed()
+            self.__logger.info(f"job {self.id} is completed.")

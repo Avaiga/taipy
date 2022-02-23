@@ -1,10 +1,10 @@
 __all__ = ["Config"]
 
-import logging
 import os
 from typing import Callable, Dict, List, Optional, Union
 
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.config._config import _Config
 from taipy.core.config.checker.checker import Checker
 from taipy.core.config.checker.issue_collector import IssueCollector
@@ -23,6 +23,7 @@ class Config:
     """Singleton entry point to configure Taipy application and retrieve the configuration values."""
 
     ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
+    __logger = TaipyLogger.get_logger()
     _python_config = _Config()
     _file_config = None
     _env_file_config = None
@@ -67,9 +68,7 @@ class Config:
         Parameters:
             filename (str or Path): File to load.
         """
-        logging.info(f"Loading configuration filename '{filename}'")
         cls._file_config = TomlSerializer().read(filename)
-        logging.info(f"Successful loaded configuration filename '{filename}'")
         cls.__compile_configs()
 
     @classmethod
@@ -253,9 +252,9 @@ class Config:
     @classmethod
     def _load_environment_file_config(cls):
         if config_filename := os.environ.get(cls.ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
-            logging.info(f"Filename '{config_filename}' provided by environment variable")
+            cls.__logger.info(f"Loading configuration provided by environment variable. Filename: '{config_filename}'")
             cls._env_file_config = TomlSerializer().read(config_filename)
-            logging.info(f"Successful loaded configuration filename '{config_filename}'")
+            cls.__logger.info(f"Configuration '{config_filename}' successfully loaded.")
 
     @classmethod
     def __compile_configs(cls):
@@ -274,14 +273,14 @@ class Config:
         cls.__log_message(cls)
         return cls.collector
 
-    @staticmethod
-    def __log_message(config):
+    @classmethod
+    def __log_message(cls, config):
         for issue in config.collector.warnings:
-            logging.warning(str(issue))
+            cls.__logger.warning(str(issue))
         for issue in config.collector.infos:
-            logging.info(str(issue))
+            cls.__logger.info(str(issue))
         for issue in config.collector.errors:
-            logging.error(str(issue))
+            cls.__logger.error(str(issue))
         if len(config.collector.errors) != 0:
             raise ConfigurationIssueError
 

@@ -1,13 +1,12 @@
 import calendar
-import logging
 from datetime import datetime, time, timedelta
 from typing import Optional
 
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_repository import CycleRepository
-from taipy.core.exceptions.cycle import NonExistingCycle
 from taipy.core.exceptions.repository import ModelNotFound
 
 
@@ -19,6 +18,7 @@ class CycleManager:
     """
 
     repository = CycleRepository()
+    __logger = TaipyLogger.get_logger()
 
     @classmethod
     def create(
@@ -66,7 +66,7 @@ class CycleManager:
         try:
             return cls.repository.load(cycle_id)
         except ModelNotFound:
-            logging.error(f"Cycle entity: {cycle_id} does not exist.")
+            cls.__logger.warning(f"Cycle entity: {cycle_id} does not exist.")
             return default
 
     @classmethod

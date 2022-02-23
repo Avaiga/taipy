@@ -5,8 +5,7 @@ from taipy.core.config.config import Config
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import ModelNotFound
-from taipy.core.exceptions.task import NonExistingTask
+from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.task.task import Task
 from taipy.core.task.task_manager import TaskManager
 

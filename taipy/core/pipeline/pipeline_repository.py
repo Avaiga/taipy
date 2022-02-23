@@ -1,4 +1,3 @@
-import logging
 import pathlib
 from collections import defaultdict
 
@@ -48,11 +47,9 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
             )
             return pipeline
         except NonExistingTask as err:
-            logging.error(err.message)
             raise err
         except KeyError:
             pipeline_err = NonExistingPipeline(model.id)
-            logging.error(pipeline_err.message)
             raise pipeline_err
 
     @property

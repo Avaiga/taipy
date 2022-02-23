@@ -1,12 +1,12 @@
 import itertools
-import logging
 from typing import Dict, List, Optional, Union
 
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import ModelNotFound
+from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.exceptions.task import MultipleTaskFromSameConfigWithSameParent
 from taipy.core.job.job_manager import JobManager
 from taipy.core.scheduler.abstract_scheduler import AbstractScheduler
@@ -27,6 +27,7 @@ class TaskManager:
     """
 
     repository: TaskRepository = TaskRepository()
+    __logger = TaipyLogger.get_logger()
     _scheduler = None
 
     @classmethod
@@ -71,7 +72,6 @@ class TaskManager:
         Args:
             task (Task): The task to save.
         """
-        logging.info(f"Task: {task.id} created or updated.")
         cls.__save_data_nodes(task.input.values())
         cls.__save_data_nodes(task.output.values())
         cls.repository.save(task)
@@ -112,7 +112,6 @@ class TaskManager:
         if len(tasks_from_parent) == 1:
             return tasks_from_parent[0]
         elif len(tasks_from_parent) > 1:
-            logging.error("Multiple tasks from same config exist with the same parent_id.")
             raise MultipleTaskFromSameConfigWithSameParent
         else:
             inputs = [data_nodes[input_config] for input_config in task_config.input]
@@ -134,7 +133,7 @@ class TaskManager:
             task_id = task.id if isinstance(task, Task) else task
             return cls.repository.load(task_id)
         except ModelNotFound:
-            logging.error(f"Task: {task_id} does not exist.")
+            cls.__logger.warning(f"Task: {task_id} does not exist.")
             return default
 
     @classmethod

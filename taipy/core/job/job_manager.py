@@ -1,10 +1,10 @@
-import logging
 import uuid
 from typing import Callable, Iterable, List
 
 from taipy.core.common.alias import JobId
-from taipy.core.exceptions import ModelNotFound
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.exceptions.job import JobNotDeletedException
+from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.job.job import Job
 from taipy.core.job.job_repository import JobRepository
 from taipy.core.task.task import Task
@@ -17,6 +17,7 @@ class JobManager:
     This class provides methods for creating, storing, updating, retrieving and deleting jobs.
     """
 
+    __logger = TaipyLogger.get_logger()
     repository = JobRepository()
     ID_PREFIX = "JOB_"
 
@@ -57,7 +58,7 @@ class JobManager:
         try:
             return cls.repository.load(job_id)
         except ModelNotFound:
-            logging.error(f"Job: {job_id} does not exist.")
+            cls.__logger.warning(f"Job: {job_id} does not exist.")
             return default
 
     @classmethod
@@ -80,7 +81,7 @@ class JobManager:
             cls.repository.delete(job.id)
         else:
             err = JobNotDeletedException(job.id)
-            logging.warning(err)
+            cls.__logger.warning(err)
             raise err
 
     @classmethod

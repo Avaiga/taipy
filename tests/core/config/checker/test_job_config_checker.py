@@ -1,9 +1,9 @@
+import taipy.core.taipy as tp
 from taipy.core.config.checker.checkers.job_config_checker import JobConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.config import Config
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data.data_manager import DataManager
-from taipy.core.taipy import Taipy as tp
 
 
 class TestJobConfigChecker:

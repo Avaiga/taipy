@@ -8,7 +8,7 @@ class MissingRequiredProperty(Exception):
 
 class InvalidDataNodeType(Exception):
     """
-    Raised if a data node does not exist.
+    Raised if a data node storage type does not exist.
     """
 
     pass

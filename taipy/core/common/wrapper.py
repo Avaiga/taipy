@@ -8,7 +8,7 @@ class Properties(UserDict):
 
     def __setitem__(self, key, value):
         super(Properties, self).__setitem__(key, value)
-        from taipy.core import Taipy as tp
+        import taipy.core.taipy as tp
 
         if hasattr(self, "parent"):
             tp.set(self.parent)
