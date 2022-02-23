@@ -1,7 +1,7 @@
-import logging
 from typing import List, Optional, Union
 
 from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
@@ -12,12 +12,8 @@ from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions import ModelNotFound
-from taipy.core.exceptions.data_node import (
-    InvalidDataNodeType,
-    MultipleDataNodeFromSameConfigWithSameParent,
-    NonExistingDataNode,
-)
+from taipy.core.exceptions.data_node import InvalidDataNodeType, MultipleDataNodeFromSameConfigWithSameParent
+from taipy.core.exceptions.repository import ModelNotFound
 
 
 class DataManager:
@@ -29,6 +25,7 @@ class DataManager:
 
     __DATA_NODE_CLASS_MAP = {c.storage_type(): c for c in DataNode.__subclasses__()}  # type: ignore
     repository = DataRepository(__DATA_NODE_CLASS_MAP)
+    __logger = TaipyLogger.get_logger()
 
     @classmethod
     def delete_all(cls):
@@ -77,7 +74,6 @@ class DataManager:
         if len(dn_from_parent) == 1:
             return dn_from_parent[0]
         elif len(dn_from_parent) > 1:
-            logging.error("Multiple data nodes from same config exist with the same parent_id.")
             raise MultipleDataNodeFromSameConfigWithSameParent
         else:
             return cls._create_and_set(data_node_config, parent_id)
@@ -105,7 +101,7 @@ class DataManager:
             data_node_id = data_node.id if isinstance(data_node, DataNode) else data_node
             return cls.repository.load(data_node_id)
         except ModelNotFound:
-            logging.error(f"DataNode: {data_node_id} does not exist.")
+            cls.__logger.warning(f"DataNode: {data_node_id} does not exist.")
             return default
 
     @classmethod
@@ -140,5 +136,4 @@ class DataManager:
                 properties=props,
             )
         except KeyError:
-            logging.error(f"Cannot create Data node. " f"Type {data_node_config.storage_type} does not exist.")
             raise InvalidDataNodeType(data_node_config.storage_type)

@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from taipy.core import Scope
 from taipy.core.common.alias import JobId, TaskId
 from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.scope import Scope
 from taipy.core.exceptions.data_node import NoData
 from taipy.core.exceptions.job import DataNodeWritingError
 from taipy.core.job.job import Job

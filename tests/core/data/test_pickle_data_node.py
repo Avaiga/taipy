@@ -59,7 +59,8 @@ class TestPickleDataNodeEntity:
     def test_read_and_write(self):
         no_data_dn = PickleDataNode("foo", Scope.PIPELINE)
         with pytest.raises(NoData):
-            no_data_dn.read()
+            assert no_data_dn.read() is None
+            no_data_dn.read_or_raise()
         pickle_str = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar"})
         assert isinstance(pickle_str.read(), str)
         assert pickle_str.read() == "bar"

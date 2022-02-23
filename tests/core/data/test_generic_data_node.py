@@ -1,16 +1,9 @@
-import os
-import pathlib
-
-import numpy as np
-import pandas as pd
 import pytest
 
 from taipy.core.common.alias import DataNodeId
-from taipy.core.config.config import Config
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import MissingRequiredProperty
-from taipy.core.exceptions.data_node import NoData
+from taipy.core.exceptions.data_node import MissingRequiredProperty
 
 
 def read_fct():

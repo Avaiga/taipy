@@ -1,4 +1,4 @@
-from taipy.core import Taipy as tp
+import taipy.core.taipy as tp
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle.cycle import Cycle
 

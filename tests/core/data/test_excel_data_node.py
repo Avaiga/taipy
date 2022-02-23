@@ -11,8 +11,12 @@ from taipy.core.config.config import Config
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import MissingRequiredProperty
-from taipy.core.exceptions.data_node import NoData, NonExistingExcelSheet, NotMatchSheetNameAndCustomObject
+from taipy.core.exceptions.data_node import (
+    MissingRequiredProperty,
+    NoData,
+    NonExistingExcelSheet,
+    NotMatchSheetNameAndCustomObject,
+)
 
 
 class TestExcelDataNode:
@@ -66,7 +70,8 @@ class TestExcelDataNode:
     def test_read_with_header(self):
         not_existing_excel = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx"})
         with pytest.raises(NoData):
-            not_existing_excel.read()
+            assert not_existing_excel.read() is None
+            not_existing_excel.read_or_raise()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
@@ -124,7 +129,8 @@ class TestExcelDataNode:
             "foo", Scope.PIPELINE, properties={"path": "WRONG.xlsx", "has_header": False}
         )
         with pytest.raises(NoData):
-            not_existing_excel.read()
+            assert not_existing_excel.read() is None
+            not_existing_excel.read_or_raise()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
@@ -210,7 +216,8 @@ class TestExcelDataNode:
             properties={"path": "WRONG.xlsx", "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
-            not_existing_excel.read()
+            assert not_existing_excel.read() is None
+            not_existing_excel.read_or_raise()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         sheet_names = ["Sheet1", "Sheet2"]
@@ -344,7 +351,8 @@ class TestExcelDataNode:
             properties={"path": "WRONG.xlsx", "has_header": False, "sheet_name": ["sheet_name_1", "sheet_name_2"]},
         )
         with pytest.raises(NoData):
-            not_existing_excel.read()
+            assert not_existing_excel.read() is None
+            not_existing_excel.read_or_raise()
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         sheet_names = ["Sheet1", "Sheet2"]

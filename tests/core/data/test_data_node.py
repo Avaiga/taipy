@@ -94,7 +94,8 @@ class TestDataNode:
     def test_read_write(self):
         dn = FakeDataNode("fOo BAr")
         with pytest.raises(NoData):
-            dn.read()
+            assert dn.read() is None
+            dn.read_or_raise()
         assert dn.write_has_been_called == 0
         assert dn.read_has_been_called == 0
         assert not dn.is_ready_for_reading

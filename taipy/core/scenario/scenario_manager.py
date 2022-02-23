@@ -1,14 +1,13 @@
 import datetime
-import logging
 from functools import partial
 from typing import Callable, List, Optional, Union
 
 from taipy.core.common.alias import ScenarioId
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.config.config import Config
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_manager import CycleManager
-from taipy.core.exceptions.pipeline import NonExistingPipeline
 from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.exceptions.scenario import (
     DeletingMasterScenario,
@@ -20,7 +19,6 @@ from taipy.core.exceptions.scenario import (
     NonExistingScenarioConfig,
 )
 from taipy.core.job.job import Job
-from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.pipeline.pipeline_manager import PipelineManager
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario.scenario_repository import ScenarioRepository
@@ -33,6 +31,7 @@ class ScenarioManager:
     """
 
     repository = ScenarioRepository()
+    __logger = TaipyLogger.get_logger()
 
     @classmethod
     def subscribe(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -143,7 +142,7 @@ class ScenarioManager:
         try:
             return cls.repository.load(scenario_id)
         except ModelNotFound:
-            logging.error(f"Scenario entity: {scenario_id} does not exist.")
+            cls.__logger.warning(f"Scenario entity: {scenario_id} does not exist.")
             return default
 
     @classmethod

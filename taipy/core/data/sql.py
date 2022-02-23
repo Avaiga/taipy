@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, table, text
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
+from taipy.core.exceptions.data_node import MissingRequiredProperty, UnknownDatabaseEngine
 
 
 class SQLDataNode(DataNode):

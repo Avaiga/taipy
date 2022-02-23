@@ -2,7 +2,7 @@ import datetime
 import os
 from unittest import mock
 
-from taipy.core import Taipy as tp
+import taipy.core.taipy as tp
 from taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
@@ -193,10 +193,22 @@ class TestTaipy:
     def test_submit(self, scenario, pipeline):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.submit") as mck:
             tp.submit(scenario)
-            mck.assert_called_once_with(scenario)
+            mck.assert_called_once_with(scenario, force=False)
         with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.submit") as mck:
             tp.submit(pipeline)
-            mck.assert_called_once_with(pipeline)
+            mck.assert_called_once_with(pipeline, force=False)
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.submit") as mck:
+            tp.submit(scenario, False)
+            mck.assert_called_once_with(scenario, force=False)
+        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.submit") as mck:
+            tp.submit(pipeline, False)
+            mck.assert_called_once_with(pipeline, force=False)
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.submit") as mck:
+            tp.submit(scenario, True)
+            mck.assert_called_once_with(scenario, force=True)
+        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.submit") as mck:
+            tp.submit(pipeline, True)
+            mck.assert_called_once_with(pipeline, force=True)
 
     def test_get_tasks(self):
         with mock.patch("taipy.core.task.task_manager.TaskManager.get_all") as mck:

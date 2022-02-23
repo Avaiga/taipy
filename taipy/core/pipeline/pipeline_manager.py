@@ -1,13 +1,12 @@
-import logging
 from functools import partial
 from typing import Callable, List, Optional, Union
 
 from taipy.core.common.alias import PipelineId, ScenarioId
+from taipy.core.common.logger import TaipyLogger
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions import ModelNotFound
 from taipy.core.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
-from taipy.core.exceptions.task import NonExistingTask
+from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.pipeline.pipeline_repository import PipelineRepository
@@ -20,6 +19,7 @@ class PipelineManager:
     """
 
     repository = PipelineRepository()
+    __logger = TaipyLogger.get_logger()
 
     @classmethod
     def subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -107,7 +107,6 @@ class PipelineManager:
         if len(pipelines_from_parent) == 1:
             return pipelines_from_parent[0]
         elif len(pipelines_from_parent) > 1:
-            logging.error("Multiple pipelines from same config exist with the same parent_id.")
             raise MultiplePipelineFromSameConfigWithSameParent
         else:
             pipeline = Pipeline(pipeline_config.name, dict(**pipeline_config.properties), tasks, pipeline_id, parent_id)
@@ -137,7 +136,7 @@ class PipelineManager:
             pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
             return cls.repository.load(pipeline_id)
         except ModelNotFound:
-            logging.error(f"Pipeline entity: {pipeline_id} does not exist.")
+            cls.__logger.warning(f"Pipeline entity: {pipeline_id} does not exist.")
             return default
 
     @classmethod
