@@ -48,10 +48,10 @@ class PandasDataAccessor(DataAccessor):
         self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
-            col_types = data.dtypes[data.dtypes.index.astype("string").isin(payload_cols)]
+            col_types = data.dtypes[data.dtypes.index.astype(str).isin(payload_cols)]
         else:
             col_types = data.dtypes
-        cols = col_types.index.astype("string").tolist()
+        cols = col_types.index.astype(str).tolist()
         is_copied = False
         if styles:
             # copy the df so that we don't "mess" with the user's data
@@ -66,7 +66,7 @@ class PandasDataAccessor(DataAccessor):
                     data[v] = v
                 cols.append(v)
         # deal with dates
-        datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
+        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
         if len(datecols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
@@ -74,10 +74,10 @@ class PandasDataAccessor(DataAccessor):
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
                 cols.append(newcol)
-                data[newcol] = data[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
+                data[newcol] = data[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype(str)
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
-        data = data.loc[:, data.dtypes[data.dtypes.index.astype("string").isin(cols)].index]
+        data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]
         return data
 
     def __apply_user_function(
