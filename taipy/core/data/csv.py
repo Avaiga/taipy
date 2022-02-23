@@ -38,7 +38,7 @@ class CSVDataNode(DataNode):
     __EXPOSED_TYPE_NUMPY = "numpy"
     __REQUIRED_PATH_PROPERTY = "path"
     __HAS_HEADER_PROPERTY = "has_header"
-    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY]
+    REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
 
     def __init__(
         self,

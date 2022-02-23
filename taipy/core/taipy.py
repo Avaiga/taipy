@@ -133,7 +133,7 @@ class Taipy:
             ModelNotFound : if no entity corresponds to `entity_id`
         """
         if id.startswith(JobManager.ID_PREFIX):
-            return JobManager.delete(cls.get(JobId(id)))
+            return JobManager.delete(cls.get(JobId(id)))  # type: ignore
         if id.startswith(Cycle.ID_PREFIX):
             return CycleManager.delete(CycleId(id))
         if id.startswith(Scenario.ID_PREFIX):

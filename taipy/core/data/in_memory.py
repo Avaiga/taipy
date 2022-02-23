@@ -36,6 +36,7 @@ class InMemoryDataNode(DataNode):
 
     __STORAGE_TYPE = "in_memory"
     __DEFAULT_DATA_VALUE = "default_data"
+    REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
         self,

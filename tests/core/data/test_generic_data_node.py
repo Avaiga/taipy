@@ -7,7 +7,6 @@ import pytest
 
 from taipy.core.common.alias import DataNodeId
 from taipy.core.config.config import Config
-from taipy.core.data.data_manager import DataManager
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions import MissingRequiredProperty
@@ -23,9 +22,6 @@ def write_fct(data):
 
 
 class TestGenericDataNode:
-    def test_exists_in_data_manager(self):
-        assert GenericDataNode in DataManager._DATA_NODE_CLASSES
-
     data = [i for i in range(10)]
 
     def test_create(self):

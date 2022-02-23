@@ -36,6 +36,7 @@ class PickleDataNode(DataNode):
     __STORAGE_TYPE = "pickle"
     __PICKLE_FILE_NAME = "path"
     __DEFAULT_DATA_VALUE = "default_data"
+    REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
         self,

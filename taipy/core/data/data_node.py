@@ -57,6 +57,7 @@ class DataNode:
 
     ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
+    REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
         self,

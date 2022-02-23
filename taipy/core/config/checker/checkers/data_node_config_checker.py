@@ -2,22 +2,16 @@ from taipy.core.config._config import _Config
 from taipy.core.config.checker.checkers.config_checker import ConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.excel import ExcelDataNode
+from taipy.core.data.data_node import DataNode
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.data.sql import SQLDataNode
 
 
 class DataNodeConfigChecker(ConfigChecker):
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
-        self.required_properties = {
-            "csv": CSVDataNode.REQUIRED_PROPERTIES,
-            "sql": SQLDataNode.REQUIRED_PROPERTIES,
-            "excel": ExcelDataNode.REQUIRED_PROPERTIES,
-            "generic": GenericDataNode.REQUIRED_PROPERTIES,
-        }
+        self.required_properties = {c.storage_type(): c.REQUIRED_PROPERTIES for c in DataNode.__subclasses__()}
+        self.storage_types = [c.storage_type() for c in DataNode.__subclasses__()]
 
     def check(self) -> IssueCollector:
         data_node_configs = self.config.data_nodes
@@ -31,7 +25,7 @@ class DataNodeConfigChecker(ConfigChecker):
         return self.collector
 
     def _check_storage_type(self, data_node_config_name: str, data_node_config: DataNodeConfig):
-        if data_node_config.storage_type not in ["csv", "pickle", "in_memory", "sql", "excel", "generic"]:
+        if data_node_config.storage_type not in self.storage_types:
             self._error(
                 data_node_config.STORAGE_TYPE_KEY,
                 data_node_config.storage_type,

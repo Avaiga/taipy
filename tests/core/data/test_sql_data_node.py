@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 
 from taipy.core.common.alias import DataNodeId
-from taipy.core.data.data_manager import DataManager
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
 from taipy.core.exceptions import MissingRequiredProperty
@@ -31,9 +30,6 @@ class TestSQLDataNode:
             "write_table": "foo",
         },
     ]
-
-    def test_exists_in_data_manager(self):
-        assert SQLDataNode in DataManager._DATA_NODE_CLASSES
 
     @pytest.mark.parametrize("properties", __properties)
     def test_create(self, properties):
