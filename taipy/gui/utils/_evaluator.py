@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import builtins
-import inspect
 import re
 import typing as t
 import warnings
@@ -83,8 +82,8 @@ class _Evaluator:
         self,
         gui: Gui,
         expr: str,
-        expr_hash: t.Union[None, str],
-        expr_evaluated: t.Union[t.Any, None],
+        expr_hash: t.Optional[str],
+        expr_evaluated: t.Optional[t.Any],
         var_val: t.Dict[str, t.Any],
         var_list: t.List[str],
     ):
@@ -161,7 +160,7 @@ class _Evaluator:
             warnings.warn(f"Cannot evaluate expression {holder.__name__}({expr_hash},'{expr_hash}') for {expr}: {e}")
         return None
 
-    def evaluate_expr(self, gui: Gui, expr: str, bind=False) -> t.Any:
+    def evaluate_expr(self, gui: Gui, expr: str) -> t.Any:
         if not self._is_expression(expr):
             return expr
         var_val, var_list = self._analyze_expression(gui, expr)
@@ -189,8 +188,6 @@ class _Evaluator:
         except Exception as e:
             warnings.warn(f"Cannot evaluate expression '{expr if is_edge_case else expr_string}': {e}")
             expr_evaluated = None
-        if bind:
-            gui.bind_var_val(expr_hash, expr_evaluated)
         # save the expression if it needs to be re-evaluated
         return self.__save_expression(gui, expr, expr_hash, expr_evaluated, var_val, var_list)
 

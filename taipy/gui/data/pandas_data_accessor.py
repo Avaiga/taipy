@@ -12,9 +12,12 @@ from ..gui import Gui
 
 
 class PandasDataAccessor(DataAccessor):
+
+    __types = (pd.DataFrame,)
+
     @staticmethod
     def get_supported_classes() -> t.List[str]:
-        return [pd.DataFrame.__name__]
+        return [t.__name__ for t in PandasDataAccessor.__types]
 
     @staticmethod
     def __style_function(
@@ -45,10 +48,10 @@ class PandasDataAccessor(DataAccessor):
         self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
     ) -> pd.DataFrame:
         if isinstance(payload_cols, list) and len(payload_cols):
-            col_types = data.dtypes[data.dtypes.index.isin(payload_cols)]
+            col_types = data.dtypes[data.dtypes.index.astype(str).isin(payload_cols)]
         else:
             col_types = data.dtypes
-        cols = col_types.index.tolist()
+        cols = col_types.index.astype(str).tolist()
         is_copied = False
         if styles:
             # copy the df so that we don't "mess" with the user's data
@@ -63,7 +66,7 @@ class PandasDataAccessor(DataAccessor):
                     data[v] = v
                 cols.append(v)
         # deal with dates
-        datecols = col_types[col_types.astype("string").str.startswith("datetime")].index.tolist()
+        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
         if len(datecols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
@@ -71,10 +74,10 @@ class PandasDataAccessor(DataAccessor):
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
                 cols.append(newcol)
-                data[newcol] = data[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype("string")
+                data[newcol] = data[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype(str)
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
-        data = data.loc[:, cols]
+        data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]
         return data
 
     def __apply_user_function(
@@ -132,7 +135,7 @@ class PandasDataAccessor(DataAccessor):
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, pd.DataFrame):
+        if isinstance(value, PandasDataAccessor.__types):
             return value.dtypes.apply(lambda x: x.name).to_dict()
         return None
 
@@ -140,7 +143,7 @@ class PandasDataAccessor(DataAccessor):
         self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
-        if isinstance(value, pd.DataFrame):
+        if isinstance(value, PandasDataAccessor.__types):
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
             columns = payload.get("columns", [])

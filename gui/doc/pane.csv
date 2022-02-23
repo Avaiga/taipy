@@ -1,7 +1,7 @@
 ﻿Name,Type,Default,Doc
 *open,bool,FALSE,"If <i>True</i>, this pane is visible on the page.
 If <i>False</i>, the pane is hidden."
-close_action,str,None,"The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).
+on_close,str,None,"The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).
 All parameters of that function are optional:
 <ul>
 <li>gui instance</li>

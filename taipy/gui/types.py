@@ -31,22 +31,23 @@ NumberTypes = set(["int", "int64", "float", "float64"])
 
 
 class AttributeType(Enum):
-    string = "string"
-    number = "number"
-    string_or_number = "string|number"
     boolean = "boolean"
-    json = "json"
-    react = "react"
+    content = TaipyContent
+    data = TaipyData
+    date = TaipyDate
     dict = "dict"
     dynamic_number = TaipyNumber
     dynamic_boolean = TaipyBool
     dynamic_list = "dynamiclist"
-    data = TaipyData
-    date = TaipyDate
-    lov_value = TaipyLovValue
-    lov = TaipyLov
-    content = TaipyContent
+    function = "function"
     image = TaipyContentImage
+    json = "json"
+    lov = TaipyLov
+    lov_value = TaipyLovValue
+    number = "number"
+    react = "react"
+    string = "string"
+    string_or_number = "string|number"
 
 
 def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[t.Type[TaipyBase]]:

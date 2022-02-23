@@ -2,9 +2,7 @@ from ._attributes import (
     delscopeattr,
     getscopeattr,
     getscopeattr_drill,
-    getuserattr,
     hasscopeattr,
-    hasuserattr,
     setscopeattr,
     setscopeattr_drill,
 )

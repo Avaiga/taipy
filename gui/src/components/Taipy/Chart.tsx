@@ -41,7 +41,7 @@ interface ChartProp extends TaipyActiveProps {
     data?: Record<string, TraceValueType>;
     refresh?: boolean;
     layout?: string;
-    rangeChange?: string;
+    tp_onRangeChange?: string;
     limitRows?: boolean;
     testId?: string;
     render?: boolean;
@@ -98,7 +98,7 @@ const Chart = (props: ChartProp) => {
         tp_updatevars,
         id,
         data = {},
-        rangeChange,
+        tp_onRangeChange,
         propagate = true,
         limitRows = false,
     } = props;
@@ -267,8 +267,8 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
-            rangeChange && dispatch(createSendActionNameAction(id, { action: rangeChange, ...eventData })),
-        [dispatch, rangeChange, id]
+        tp_onRangeChange && dispatch(createSendActionNameAction(id, { action: tp_onRangeChange, ...eventData })),
+        [dispatch, tp_onRangeChange, id]
     );
 
     const onAfterPlot = useCallback(() => {

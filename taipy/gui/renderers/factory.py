@@ -51,7 +51,7 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.string, ""),
+                ("on_action", AttributeType.function, ""),
                 ("active", AttributeType.dynamic_boolean, True),
             ]
         ),
@@ -69,7 +69,7 @@ class Factory:
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
                 ("layout", AttributeType.dict),
-                ("range_change",),
+                ("on_range_change", AttributeType.function),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("limit_rows", AttributeType.boolean),
                 ("render", AttributeType.dynamic_boolean, True),
@@ -112,9 +112,9 @@ class Factory:
                 ("id",),
                 ("page",),
                 ("title",),
-                ("cancel_action",),
+                ("on_cancel", AttributeType.function),
                 ("cancel_label", AttributeType.string, "Cancel"),
-                ("validate_action", AttributeType.string, "validate"),
+                ("on_validate", AttributeType.function, "validate"),
                 ("validate_label", AttributeType.string, "Validate"),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width", AttributeType.string_or_number),
@@ -143,7 +143,7 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.string),
+                ("on_action", AttributeType.function),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("render", AttributeType.dynamic_boolean, True),
                 ("auto", AttributeType.boolean, False),
@@ -162,7 +162,7 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.string),
+                ("on_action", AttributeType.function),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("multiple", AttributeType.boolean, False),
                 ("extensions",),
@@ -180,7 +180,7 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.string, ""),
+                ("on_action", AttributeType.function, ""),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width",),
                 ("height",),
@@ -244,7 +244,7 @@ class Factory:
                 ("label"),
                 ("width"),
                 ("width[mobile]",),
-                ("on_action", AttributeType.string, "on_menu_action"),
+                ("on_action", AttributeType.function, "on_menu_action"),
                 ("inactive_ids", AttributeType.dynamic_list),
             ]
         )
@@ -287,7 +287,7 @@ class Factory:
                 ("id",),
                 ("page",),
                 ("anchor", AttributeType.string, "left"),
-                ("close_action",),
+                ("on_close", AttributeType.function),
                 ("persistent", AttributeType.boolean, False),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width", AttributeType.string_or_number, "30vw"),
@@ -375,9 +375,9 @@ class Factory:
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("editable", AttributeType.dynamic_boolean, True),
-                ("edit_action",),
-                ("delete_action",),
-                ("add_action",),
+                ("on_edit", AttributeType.function),
+                ("on_delete", AttributeType.function),
+                ("on_add", AttributeType.function),
                 ("nan_value",),
             ]
         )

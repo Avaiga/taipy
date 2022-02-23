@@ -51,9 +51,11 @@ class _DataAccessors(object):
 
         from .pandas_data_accessor import PandasDataAccessor
         from .array_dict_data_accessor import ArrayDictDataAccessor
+        from .numpy_data_accessor import NumpyDataAccessor
 
         self._register(PandasDataAccessor)
         self._register(ArrayDictDataAccessor)
+        self._register(NumpyDataAccessor)
 
     def _register(self, cls: t.Type[DataAccessor]) -> None:
         if inspect.isclass(cls):
