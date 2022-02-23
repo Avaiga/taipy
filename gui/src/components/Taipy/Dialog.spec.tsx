@@ -91,7 +91,7 @@ describe("Dialog Component", () => {
                     page="page"
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
-                    cancelAction={"testCancelAction"}
+                    tp_onCancel={"testCancelAction"}
                 />
             </HelmetProvider>
         );
@@ -106,7 +106,7 @@ describe("Dialog Component", () => {
                     open={true}
                     active={false}
                     validateLabel="testValidate"
-                    cancelAction="testCancelAction"
+                    tp_onCancel="testCancelAction"
                     cancelLabel="testCancel"
                 />
             </HelmetProvider>
@@ -122,7 +122,7 @@ describe("Dialog Component", () => {
                     page="page"
                     open={true}
                     validateLabel="testValidate"
-                    cancelAction="testCancelAction"
+                    tp_onCancel="testCancelAction"
                     cancelLabel="testCancel"
                 />
             </HelmetProvider>
@@ -139,7 +139,7 @@ describe("Dialog Component", () => {
                     open={true}
                     active={true}
                     validateLabel="testValidate"
-                    cancelAction="testCancelAction"
+                    tp_onCancel="testCancelAction"
                     cancelLabel="testCancel"
                 />
             </HelmetProvider>
@@ -160,7 +160,7 @@ describe("Dialog Component", () => {
                         open={true}
                         active={true}
                         validateLabel="testValidate"
-                        validateAction="testValidateAction"
+                        tp_onValidate="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
@@ -185,7 +185,7 @@ describe("Dialog Component", () => {
                         open={true}
                         active={true}
                         cancelLabel="testCancel"
-                        cancelAction="testCancelAction"
+                        tp_onCancel="testCancelAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
@@ -209,7 +209,7 @@ describe("Dialog Component", () => {
                         page="page"
                         open={true}
                         active={true}
-                        validateAction="testValidateAction"
+                        tp_onValidate="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
@@ -234,7 +234,7 @@ describe("Dialog Component", () => {
                         open={true}
                         active={true}
                         cancelLabel="testCancel"
-                        cancelAction="testCancelAction"
+                        tp_onCancel="testCancelAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>

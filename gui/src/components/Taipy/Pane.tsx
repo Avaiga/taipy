@@ -20,7 +20,7 @@ interface PaneProps extends TaipyActiveProps {
     defaultOpen?: string | boolean;
     anchor?: AnchorType;
     persistent?: boolean;
-    closeAction?: string;
+    tp_onClose?: string;
     page?: string;
     height?: string | number;
     width?: string | number;
@@ -52,7 +52,7 @@ const Pane = (props: PaneProps) => {
         id,
         anchor = "left",
         persistent = false,
-        closeAction,
+        tp_onClose,
         page,
         defaultOpen,
         height = "30vh",
@@ -74,15 +74,15 @@ const Pane = (props: PaneProps) => {
 
     const handleClose = useCallback(() => {
         if (active) {
-            if (closeAction) {
-                dispatch(createSendActionNameAction(id, closeAction));
+            if (tp_onClose) {
+                dispatch(createSendActionNameAction(id, tp_onClose));
             } else if (tp_varname) {
                 dispatch(createSendUpdateAction(tp_varname, false, propagate));
             } else {
                 setOpen(false);
             }
         }
-    }, [active, dispatch, id, closeAction, tp_varname, propagate]);
+    }, [active, dispatch, id, tp_onClose, tp_varname, propagate]);
 
     useEffect(() => {
         if (props.open !== undefined) {

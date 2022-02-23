@@ -5,16 +5,6 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-def getuserattr(gui: "Gui", name: str, *more) -> t.Any:
-    if more:
-        return getattr(gui._bindings(), name, more[0])
-    return getattr(gui._bindings(), name)
-
-
-def hasuserattr(gui: "Gui", name: str) -> bool:
-    return hasattr(gui._bindings(), name)
-
-
 def getscopeattr(gui: "Gui", name: str, *more) -> t.Any:
     if more:
         return getattr(gui._bindings()._get_data_scope(), name, more[0])

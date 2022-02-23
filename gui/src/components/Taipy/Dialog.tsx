@@ -17,8 +17,8 @@ import { useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
-    cancelAction?: string;
-    validateAction?: string;
+    tp_onCancel?: string;
+    tp_onValidate?: string;
     cancelLabel?: string;
     validateLabel?: string;
     page: string;
@@ -43,8 +43,8 @@ const Dialog = (props: DialogProps) => {
         title,
         defaultOpen,
         open,
-        cancelAction,
-        validateAction = "ValidateAction",
+        tp_onCancel,
+        tp_onValidate = "ValidateAction",
         page,
         cancelLabel = "Cancel",
         validateLabel = "Validate",
@@ -57,12 +57,12 @@ const Dialog = (props: DialogProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
     const handleClose = useCallback(() => {
-        dispatch(createSendActionNameAction(id, cancelAction || validateAction));
-    }, [dispatch, id, cancelAction, validateAction]);
+        dispatch(createSendActionNameAction(id, tp_onCancel || tp_onValidate));
+    }, [dispatch, id, tp_onCancel, tp_onValidate]);
 
     const handleValidate = useCallback(() => {
-        dispatch(createSendActionNameAction(id, validateAction));
-    }, [dispatch, id, validateAction]);
+        dispatch(createSendActionNameAction(id, tp_onValidate));
+    }, [dispatch, id, tp_onValidate]);
 
     const paperProps = useMemo(() => {
         if (width !== undefined || height !== undefined) {
@@ -93,7 +93,7 @@ const Dialog = (props: DialogProps) => {
                     aria-label="close"
                     onClick={handleClose}
                     sx={closeSx}
-                    title={cancelAction ? cancelLabel : validateLabel}
+                    title={tp_onCancel ? cancelLabel : validateLabel}
                 >
                     <CloseIcon />
                 </IconButton>
@@ -104,7 +104,7 @@ const Dialog = (props: DialogProps) => {
                 {props.children}
             </DialogContent>
             <DialogActions>
-                {cancelAction && (
+                {tp_onCancel && (
                     <Button onClick={handleClose} disabled={!active}>
                         {cancelLabel}
                     </Button>

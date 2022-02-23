@@ -24,14 +24,16 @@ def _get_columns_dict(
 ):
     if col_types is None:
         return None
+    col_types_keys = [str(c) for c in col_types.keys()]
     if isinstance(columns, str):
         columns = [s.strip() for s in columns.split(";")]
     if isinstance(columns, (list, tuple)):
         coldict = {}
         idx = 0
         for col in columns:
-            if col not in col_types.keys():
-                warnings.warn(f'Error column "{col}" is not present in the dataframe "{value.head(0)}"')
+            if col not in col_types_keys:
+                warnings.warn(
+                    f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"')
             else:
                 coldict[col] = {"index": idx}
                 idx += 1
@@ -43,11 +45,12 @@ def _get_columns_dict(
         columns = {}
     if len(columns) == 0:
         idx = 0
-        for col in col_types.keys():
+        for col in col_types_keys:
             columns[col] = {"index": idx}
             idx += 1
     idx = 0
     for col, type in col_types.items():
+        col = str(col)
         if col in columns.keys():
             columns[col]["type"] = type
             columns[col]["dfid"] = col

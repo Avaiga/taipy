@@ -32,4 +32,45 @@ width,str|int|float,100vw,"The width, in CSS units, of this table control."
 height,str|int|float,100vw,"The height, in CSS units, of this table control."
 nan_value,str,"""""",The replacement text for NaN (not-a-number) values.
 nan_value[<i>col_name</i>],str,"""""",The replacement text for NaN (not-a-number) values for the indicated column.
+on_edit,str,None,"The name of a function that is be triggered when a cell edition is validated.
+All parameters of that function are optional:
+<ul>
+<li>gui state</li>
+<li>var_name</li>
+<li>action</li>
+<li>payload
+<ul>
+<li>index</li>
+<li>col</li>
+<li>value</li>
+</ul>
+</li>
+</ul>
+If this property is set to None, the user cannot edit cells."
+on_delete,str,None,"The name of a function that is be triggered when a row is deleted.
+All parameters of that function are optional:
+<ul>
+<li>gui state</li>
+<li>var_name</li>
+<li>action</li>
+<li>payload
+<ul>
+<li>index</li>
+</ul>
+</li>
+</ul>
+If this property is set to None, the user cannot delete rows."
+on_add,str,None,"The name of a function that is be triggered when the user request a row to be added.
+All parameters of that function are optional:
+<ul>
+<li>gui state</li>
+<li>var_name</li>
+<li>action</li>
+<li>payload
+<ul>
+<li>index</li>
+</ul>
+</li>
+</ul>
+If this property is set to None, the user cannot add rows."
 >shared,,,

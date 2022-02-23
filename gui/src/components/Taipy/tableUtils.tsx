@@ -95,9 +95,9 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     height?: string;
     width?: string;
     pageSize?: number;
-    editAction?: string;
-    deleteAction?: string;
-    addAction?: string;
+    tp_onEdit?: string;
+    tp_onDelete?: string;
+    tp_onAdd?: string;
     editable?: boolean;
     defaultEditable?: boolean;
     lineStyle?: string;

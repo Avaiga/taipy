@@ -14,8 +14,8 @@ from ..utils import (
     date_to_ISO,
     get_client_var_name,
     get_data_type,
+    getscopeattr,
     getscopeattr_drill,
-    getuserattr,
     is_boolean_true,
 )
 from ..utils.types import TaipyData
@@ -56,16 +56,17 @@ class Builder:
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.__attributes:
-            (properties_dict_name, _) = self.__parse_attribute_value(self.__attributes["properties"])
-            self.__gui.bind_var(properties_dict_name)
-            properties_dict = getuserattr(self.__gui, properties_dict_name)
-            if not isinstance(properties_dict, _MapDict):
+            (prop_dict, prop_hash) = self.__parse_attribute_value(self.__attributes["properties"])
+            if prop_hash is None:
+                self.__gui.bind_var(prop_dict)
+                prop_dict = getscopeattr(self.__gui, prop_dict)
+            if not isinstance(prop_dict, _MapDict):
                 raise Exception(
-                    f"Can't find properties configuration dictionary {properties_dict_name}!"
+                    f"Can't find properties configuration dictionary {self.__attributes['properties'] if prop_hash is None else prop_hash}!"
                     f" Please review your GUI templates!"
                 )
-            # Iterate through properties_dict and append to self.attributes
-            for k, v in properties_dict.items():
+            # Iterate through prop_dict and append to self.attributes
+            for k, v in prop_dict.items():
                 self.__attributes[k] = v
 
         # Bind potential function and expressions in self.attributes
@@ -77,7 +78,7 @@ class Builder:
                     hashname = _get_expr_var_name(v.__code__)
                     self.__gui.bind_var_val(hashname, v)
                 else:
-                    hashname = v.__name__
+                    hashname = _get_expr_var_name(v.__name__)
             elif isinstance(v, str):
                 # need to unescape the double quotes that were escaped during preprocessing
                 (val, hashname) = self.__parse_attribute_value(v.replace('\\"', '"'))
@@ -192,7 +193,26 @@ class Builder:
             if not optional:
                 warnings.warn(f"Property {name} is required for control {self.__control_type}")
             return self
-        return self.set_attribute(_to_camel_case(name), strattr)
+        return self.set_attribute(_to_camel_case(name), str(strattr))
+
+    def __set_function_attribute(
+        self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
+    ):
+        strattr = self.__attributes.get(name, default_value)
+        if strattr is None:
+            if not optional:
+                warnings.warn(f"Property {name} is required for control {self.__control_type}")
+            return self
+        elif callable(strattr):
+            strattr = self.__hashes.get(name)
+            if strattr is None:
+                return self
+        elif strattr:
+            strattr = str(strattr)
+            func = self.__gui._get_user_function(strattr)
+            if func == strattr:
+                warnings.warn(f" {self.__control_type}.{name}: {strattr} is not a function")
+        return self.set_attribute(_to_camel_case(name), strattr) if strattr else self
 
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
         attr = self.__attributes.get(name, default_value)
@@ -773,6 +793,8 @@ class Builder:
                 self.__set_dynamic_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
+            elif var_type == AttributeType.function:
+                self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == AttributeType.react:
                 self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
             elif var_type == AttributeType.string_or_number:

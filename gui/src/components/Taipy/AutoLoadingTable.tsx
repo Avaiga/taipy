@@ -143,9 +143,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         selected = [],
         pageSize = 100,
         defaultKey = "",
-        editAction = "",
-        deleteAction = "",
-        addAction = "",
+        tp_onEdit = "",
+        tp_onDelete = "",
+        tp_onAdd = "",
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
@@ -222,7 +222,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         if (props.columns) {
             try {
                 const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                addDeleteColumn(!!(active && editable && deleteAction), columns);
+                addDeleteColumn(!!(active && editable && tp_onDelete), columns);
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
                 const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                     if (columns[col].style) {
@@ -240,7 +240,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             }
         }
         return [[], {}, {}, hNan];
-    }, [active, editable, deleteAction, props.columns, props.lineStyle, props.nanValue]);
+    }, [active, editable, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -312,11 +312,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         () =>
             dispatch(
                 createSendActionNameAction(tp_varname, {
-                    action: addAction,
+                    action: tp_onAdd,
                     index: visibleStartIndex,
                 })
             ),
-        [visibleStartIndex, dispatch, tp_varname, addAction]
+        [visibleStartIndex, dispatch, tp_varname, tp_onAdd]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -325,24 +325,24 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         (value: RowValue, rowIndex: number, colName: string) =>
             dispatch(
                 createSendActionNameAction(tp_varname, {
-                    action: editAction,
+                    action: tp_onEdit,
                     value: value,
                     index: rowIndex,
                     col: colName,
                 })
             ),
-        [dispatch, tp_varname, editAction]
+        [dispatch, tp_varname, tp_onEdit]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
                 createSendActionNameAction(tp_varname, {
-                    action: deleteAction,
+                    action: tp_onDelete,
                     index: rowIndex,
                 })
             ),
-        [dispatch, tp_varname, deleteAction]
+        [dispatch, tp_varname, tp_onDelete]
     );
 
     const onTaipyItemsRendered = useCallback(
@@ -367,8 +367,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
-            onValidation: active && editable && editAction ? onCellValidation : undefined,
-            onDeletion: active && editable && deleteAction ? onRowDeletion : undefined,
+            onValidation: active && editable && tp_onEdit ? onCellValidation : undefined,
+            onDeletion: active && editable && tp_onDelete ? onRowDeletion : undefined,
             lineStyle: props.lineStyle,
             nanValue: props.nanValue,
         }),
@@ -381,9 +381,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns,
             selected,
             formatConfig,
-            editAction,
+            tp_onEdit,
             onCellValidation,
-            deleteAction,
+            tp_onDelete,
             onRowDeletion,
             props.lineStyle,
             props.nanValue,
@@ -412,7 +412,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         width={columns[col].width}
                                     >
                                         {columns[col].dfid === EDIT_COL ? (
-                                            active && editable && addAction ? (
+                                            active && editable && tp_onAdd ? (
                                                 <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
                                                     <AddIcon />
                                                 </IconButton>
