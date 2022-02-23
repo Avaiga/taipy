@@ -67,10 +67,11 @@ class Job:
 
     @property
     def exceptions(self) -> List[Exception]:
-        """Contains exceptions raised during the execution.
+        """The potential exceptions that were raised during the execution of this job.
 
         Returns:
-            Exceptions raised as list.
+            A list containing all the exceptions that were raised during the execution of this job.
+            If no exceptions were raised, then the list is empty.
         """
         return self._exceptions
 

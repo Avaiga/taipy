@@ -3,7 +3,7 @@ import os
 from unittest import mock
 
 from taipy.core import Taipy as tp
-from taipy.core.common.alias import JobId, PipelineId, ScenarioId, TaskId
+from taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
@@ -211,9 +211,15 @@ class TestTaipy:
 
     def test_delete_scenario(self):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.hard_delete") as mck:
-            scenario_id = ScenarioId("scenario_id")
-            tp.delete_scenario(scenario_id)
+            scenario_id = ScenarioId("SCENARIO_id")
+            tp.delete(scenario_id)
             mck.assert_called_once_with(scenario_id)
+
+    def test_delete(self):
+        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager.delete") as mck:
+            cycle_id = CycleId("CYCLE_id")
+            tp.delete(cycle_id)
+            mck.assert_called_once_with(cycle_id)
 
     def test_get_scenarios(self, cycle):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get_all") as mck:
@@ -283,8 +289,8 @@ class TestTaipy:
 
     def test_delete_pipeline(self):
         with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.hard_delete") as mck:
-            pipeline_id = PipelineId("pipeline_id")
-            tp.delete_pipeline(pipeline_id)
+            pipeline_id = PipelineId("PIPELINE_id")
+            tp.delete(pipeline_id)
             mck.assert_called_once_with(pipeline_id)
 
     def test_get_pipeline(self, pipeline):

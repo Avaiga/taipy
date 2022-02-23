@@ -45,7 +45,7 @@ setup(
     long_description=readme,
     include_package_data=True,
     keywords="taipy-core",
-    name="taipy_core",
+    name="taipy-core",
     packages=find_packages(include=["taipy", "taipy.*"]),
     test_suite="tests",
     tests_require=test_requirements,

@@ -29,6 +29,8 @@ def write_fct_with_params(data, inp):
     
 
 class TestGenericDataNode:
+    def test_exists_in_data_manager(self):
+        assert GenericDataNode in DataManager._DATA_NODE_CLASSES
 
     data = [i for i in range(10)]
 

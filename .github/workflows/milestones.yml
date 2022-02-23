@@ -1,4 +1,4 @@
-name: Triggered Milestones
+name: Trigger Milestones
 on:
   push:
     branches: [ develop ]
@@ -7,6 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Milestones demos
-        run: gh workflow run run-all-demos.yml -f usertonotify=$GITHUB_ACTOR -R Avaiga/milestones
+        run: gh workflow run run-all-demos.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/milestones
         env:
-          GITHUB_TOKEN: ${{ secrets.TRIGGERED_OTHER_ACTION }}
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}

@@ -81,13 +81,13 @@ class Taipy:
         Gets an entity given the identifier as parameter.
 
         Args:
-            entity (Union[TaskId, DataNodeId, PipelineId, ScenarioId]): The identifier of the entity to get.
+            id (Union[TaskId, DataNodeId, PipelineId, ScenarioId]): The identifier of the entity to get.
 
         Returns:
             The entity corresponding to the provided identifier.
 
         Raises:
-            ModelNotFound: if no entity corresponds to `entity_id`.
+            ModelNotFound: if no entity corresponds to `entity_id`
         """
         if id.startswith(JobManager.ID_PREFIX):
             return JobManager.get(JobId(id))
@@ -114,20 +114,37 @@ class Taipy:
         return TaskManager.get_all()
 
     @classmethod
-    def delete_scenario(cls, scenario_id: ScenarioId):
+    def delete(cls, id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
         """
-        Deletes the scenario given as parameter and the nested pipelines, tasks, data nodes, and jobs.
+        Deletes the entity given as parameter and the nested entities
 
-        Deletes the scenario given as parameter and propagate the hard deletion. The hard delete is propagated to a
-        nested pipeline if the pipeline is not shared by another scenario.
+        Deletes the entity given as parameter and propagate the deletion. The deletion is propagated to a
+        nested entity if the nested entity is not shared by another entity.
+
+        If a CycleId is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
+        If a ScenarioId is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
+        If a PipelineId is provided, the nested tasks, data nodes, and jobs are deleted.
+        If a TaskId is provided, the nested data nodes, and jobs are deleted.
 
         Parameters:
-        scenario_id (ScenarioId) : identifier of the scenario to hard delete.
+            id (Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]) : identifier of the entity to delete.
 
         Raises:
-        ModelNotFound error if no scenario corresponds to scenario_id.
+            ModelNotFound : if no entity corresponds to `entity_id`
         """
-        return ScenarioManager.hard_delete(scenario_id)
+        if id.startswith(JobManager.ID_PREFIX):
+            return JobManager.delete(cls.get(JobId(id)))
+        if id.startswith(Cycle.ID_PREFIX):
+            return CycleManager.delete(CycleId(id))
+        if id.startswith(Scenario.ID_PREFIX):
+            return ScenarioManager.hard_delete(ScenarioId(id))
+        if id.startswith(Pipeline.ID_PREFIX):
+            return PipelineManager.hard_delete(PipelineId(id))
+        if id.startswith(Task.ID_PREFIX):
+            return TaskManager.hard_delete(TaskId(id))
+        if id.startswith(DataNode.ID_PREFIX):
+            return DataManager.delete(DataNodeId(id))
+        raise ModelNotFound("NOT_DETERMINED", id)
 
     @classmethod
     def get_scenarios(cls, cycle: Optional[Cycle] = None) -> List[Scenario]:
@@ -228,22 +245,6 @@ class Taipy:
             The function will continue to be called for ongoing jobs.
         """
         return PipelineManager.unsubscribe(callback, pipeline)
-
-    @classmethod
-    def delete_pipeline(cls, pipeline_id: PipelineId):
-        """
-        Deletes the pipeline given as parameter and the nested tasks, data nodes, and jobs.
-
-        Deletes the pipeline given as parameter and propagate the hard deletion. The hard delete is propagated to a
-        nested task if the task is not shared by another pipeline.
-
-        Parameters:
-        pipeline_id (PipelineId) : identifier of the pipeline to hard delete.
-
-        Raises:
-        ModelNotFound error if no pipeline corresponds to pipeline_id.
-        """
-        return PipelineManager.hard_delete(pipeline_id)
 
     @classmethod
     def get_pipelines(cls) -> List[Pipeline]:
@@ -356,7 +357,7 @@ class Taipy:
         root_folder: str = None,
         storage_folder: str = None,
         clean_entities_enabled: Union[bool, str] = None,
-        **properties
+        **properties,
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""
         return Config.set_global_config(
@@ -396,7 +397,7 @@ class Taipy:
         has_header: bool = True,
         sheet_name: Union[List[str], str] = "Sheet1",
         scope: Scope = Scope.PIPELINE,
-        **properties
+        **properties,
     ):
         """Configures a new data node configuration with Excel storage type."""
         return Config.add_data_node(
@@ -406,7 +407,7 @@ class Taipy:
             path=path,
             has_header=has_header,
             sheet_name=sheet_name,
-            **properties
+            **properties,
         )
 
     @staticmethod
@@ -447,7 +448,7 @@ class Taipy:
         write_table: str,
         db_port: int = 143,
         scope: Scope = Scope.PIPELINE,
-        **properties
+        **properties,
     ):
         """Configures a new data node configuration with SQL storage type."""
         return Config.add_data_node(
@@ -461,7 +462,7 @@ class Taipy:
             read_query=read_query,
             write_table=write_table,
             db_port=db_port,
-            **properties
+            **properties,
         )
 
     @staticmethod
@@ -470,7 +471,7 @@ class Taipy:
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        **properties
+        **properties,
     ) -> TaskConfig:
         """Configures a new task configuration."""
         return Config.add_task(name, function, input, output, **properties)
@@ -480,7 +481,7 @@ class Taipy:
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
-        **properties
+        **properties,
     ) -> TaskConfig:
         """Configures the default behavior of a task configuration."""
         return Config.add_default_task(function, input, output, **properties)
@@ -503,7 +504,7 @@ class Taipy:
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-        **properties
+        **properties,
     ) -> ScenarioConfig:
         """Configures a new scenario configuration."""
         return Config.add_scenario(name, pipeline_configs, frequency, comparators, **properties)
@@ -515,7 +516,7 @@ class Taipy:
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         pipeline_name: Optional[str] = None,
-        **properties
+        **properties,
     ) -> ScenarioConfig:
         """Configures a new scenario configuration from a list of tasks."""
         return Config.add_scenario_from_tasks(name, task_configs, frequency, comparators, pipeline_name, **properties)
@@ -525,7 +526,7 @@ class Taipy:
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-        **properties
+        **properties,
     ) -> ScenarioConfig:
         """Configures the default behavior of a scenario configuration."""
         return Config.add_default_scenario(pipeline_configs, frequency, comparators, **properties)
