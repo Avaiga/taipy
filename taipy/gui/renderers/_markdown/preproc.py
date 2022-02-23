@@ -70,7 +70,7 @@ class Preprocessor(MdPreprocessor):
                 if m.group(2):
                     tag, properties = self._process_control(m.group(2), line_count)
                 if tag in MarkdownFactory._TAIPY_BLOCK_TAGS:
-                    tag_queue.append((tag, line_count, m.group(1)) if m.group(1) else (tag, line_count))
+                    tag_queue.append((tag, line_count, m.group(1) or None))
                     line = line[: m.start()] + "\n" + MarkdownFactory._TAIPY_START + tag + ".start"
                     for property in properties:
                         prop_value = property[1].replace('"', '\\"')
@@ -105,12 +105,13 @@ class Preprocessor(MdPreprocessor):
                 if len(tag_queue):
                     current_open_tag = tag_queue.pop()
                     close_tag_identifier = m.group(1)
-                    if close_tag_identifier and len(current_open_tag) == 2:
-                        warnings.warn(f"Missing opening {current_open_tag[0]} tag identifier '{close_tag_identifier}' in line {current_open_tag[1]}")
-                    if not close_tag_identifier and len(current_open_tag) == 3:
-                        warnings.warn(f"Missing closing {current_open_tag[0]} tag identifier '{current_open_tag[2]}' in line {line_count}")
-                    if close_tag_identifier and len(current_open_tag) == 3 and close_tag_identifier != current_open_tag[2]:
-                        warnings.warn(f"Unmatched {current_open_tag[0]} tag identifier in line {current_open_tag[1]} and line {line_count}")
+                    open_tag_identifier = current_open_tag[2]
+                    if close_tag_identifier and not open_tag_identifier:
+                        warnings.warn(f"Missing opening '{current_open_tag[0]}' tag identifier '{close_tag_identifier}' in line {current_open_tag[1]}")
+                    if open_tag_identifier and not close_tag_identifier:
+                        warnings.warn(f"Missing closing '{current_open_tag[0]}' tag identifier '{current_open_tag[2]}' in line {line_count}")
+                    if close_tag_identifier and open_tag_identifier and close_tag_identifier != current_open_tag[2]:
+                        warnings.warn(f"Unmatched '{current_open_tag[0]}' tag identifier in line {current_open_tag[1]} and line {line_count}")
                     new_line = (
                         new_line[: m.start()]
                         + MarkdownFactory._TAIPY_START
