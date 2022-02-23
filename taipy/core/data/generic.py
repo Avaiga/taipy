@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.data_node import MissingRequiredProperty
+from taipy.core.exceptions.data_node import MissingRequiredProperty, MissingReadFunction, MissingWriteFunction
 
 
 class GenericDataNode(DataNode):
@@ -84,11 +84,11 @@ class GenericDataNode(DataNode):
             if self.__READ_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
                 return read_fct(**self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY])
             return read_fct()
-        raise NotImplementedError
+        raise MissingReadFunction
 
     def _write(self, data: Any):
         if write_fct := self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY]:
             if self.__WRITE_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
                 return write_fct(data, **self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY])
             return write_fct(data)
-        raise NotImplementedError
+        raise MissingWriteFunction

@@ -3,7 +3,7 @@ import pytest
 from taipy.core.common.alias import DataNodeId
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.data_node import MissingRequiredProperty
+from taipy.core.exceptions.data_node import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 
 
 def read_fct():
@@ -99,7 +99,7 @@ class TestGenericDataNode:
         assert generic_dn_1.read() == self.data
         assert len(generic_dn_1.read()) == 11
         
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(MissingWriteFunction):
             generic_dn_1.write(self.data)
             
         generic_dn_2 = GenericDataNode("xyz", Scope.PIPELINE, properties={"read_fct": None, "write_fct": write_fct})
@@ -107,14 +107,14 @@ class TestGenericDataNode:
         generic_dn_2.write(self.data)
         assert len(self.data) == 12
         
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(MissingReadFunction):
             generic_dn_2.read()
         
         generic_dn_3 = GenericDataNode("bar", Scope.PIPELINE, properties={"read_fct": None, "write_fct": None})
         
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(MissingReadFunction):
             generic_dn_3.read()
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(MissingWriteFunction):
             generic_dn_3.write(self.data)
         
         
