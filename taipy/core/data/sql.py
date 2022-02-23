@@ -40,7 +40,7 @@ class SQLDataNode(DataNode):
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    REQUIRED_PROPERTIES = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
+    REQUIRED_PROPERTIES: List[str] = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
 
     def __init__(
         self,

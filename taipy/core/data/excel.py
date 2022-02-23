@@ -42,7 +42,7 @@ class ExcelDataNode(DataNode):
     __HAS_HEADER_PROPERTY = "has_header"
     __SHEET_NAME_PROPERTY = "sheet_name"
     __DEFAULT_SHEET_NAME = "Sheet1"
-    REQUIRED_PROPERTIES = [__REQUIRED_PATH_PROPERTY]
+    REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
 
     def __init__(
         self,

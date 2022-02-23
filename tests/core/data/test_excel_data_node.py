@@ -16,9 +16,6 @@ from taipy.core.exceptions.data_node import NoData, NonExistingExcelSheet, NotMa
 
 
 class TestExcelDataNode:
-    def test_exists_in_data_manager(self):
-        assert ExcelDataNode in DataManager._DATA_NODE_CLASSES
-
     def test_new_excel_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_name", "excel", path="NOT_EXISTING.csv")
         not_ready_dn = DataManager.get_or_create(not_ready_dn_cfg)
