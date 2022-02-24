@@ -793,7 +793,8 @@ def test_tags():
     assert not ScenarioManager.get_by_tag(cycle_1, "thd")
 
     assert len(ScenarioManager.get_all_by_tag("NOT_EXISTING")) == 0
-    assert ScenarioManager.get_all_by_tag("fst") == [scenario_1_tag, scenario_2_tags]
+    assert scenario_1_tag in ScenarioManager.get_all_by_tag("fst")
+    assert scenario_2_tags in ScenarioManager.get_all_by_tag("fst")
     assert ScenarioManager.get_all_by_tag("scd") == [scenario_2_tags]
     assert len(ScenarioManager.get_all_by_tag("thd")) == 0
 
