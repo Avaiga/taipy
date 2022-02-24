@@ -4,7 +4,7 @@ from taipy.gui import Gui
 def test_number_md_1(gui: Gui, helpers):
     md_string = "<|10|number|>"
     expected_list = ["<Input", 'value="10"', 'type="number"']
-    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
+    helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_number_md_2(gui: Gui, helpers):

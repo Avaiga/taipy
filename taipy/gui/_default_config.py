@@ -1,4 +1,4 @@
-from .config import AppConfig, StyleConfig
+from .config import AppConfig
 
 # Default config loaded by app.py
 app_config_default: AppConfig = {
@@ -22,27 +22,4 @@ app_config_default: AppConfig = {
     "ngrok_token": "",
     "upload_folder": None,
     "flask_log": False,
-}
-
-style_config_default: StyleConfig = {
-    "button": "",
-    "chart": "",
-    "date_selector": "",
-    "dialog": "",
-    "expandable": "",
-    "file_download": "",
-    "file_selector": "",
-    "image": "",
-    "input": "",
-    "layout": "",
-    "navbar": "",
-    "pane": "",
-    "part": "",
-    "selector": "",
-    "slider": "",
-    "status": "",
-    "table": "",
-    "text": "",
-    "toggle": "",
-    "tree": "",
 }

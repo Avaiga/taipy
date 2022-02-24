@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import typing as t
+import warnings
+
+from colorama import Fore
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -32,8 +35,19 @@ class Page(object):
 
     def render(self, gui: Gui):
         if self.renderer is None:
-            raise RuntimeError(f"Can't render Page {self.route} due to missing renderer!")
-        self.rendered_jsx = self.renderer.render(gui)
+            raise RuntimeError(f"Can't render page {self.route}: no renderer found")
+        with warnings.catch_warnings(record=True) as w:
+            warnings.resetwarnings()
+            self.rendered_jsx = self.renderer.render(gui)
+            if len(w) > 0:
+                print(Fore.RED)
+                print(
+                    message := f"--- {len(w)} warning(s) were found for page '{'/' if self.route == gui._get_root_page_name() else self.route}' {self.renderer._get_content_detail(gui)} ---",
+                    flush=True,
+                )
+                for i, wm in enumerate(w):
+                    print(f" - Warning {i + 1}: {wm.message}", flush=True)
+                print("-" * len(message), Fore.RESET, flush=True)
         if hasattr(self.renderer, "head"):
             self.head = str(self.renderer.head)  # type: ignore
 

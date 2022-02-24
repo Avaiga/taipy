@@ -9,8 +9,8 @@ import xml.etree.ElementTree as etree
 from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
 from ..utils import (
-    _MapDict,
     _get_expr_var_name,
+    _MapDict,
     date_to_ISO,
     get_client_var_name,
     get_data_type,
@@ -65,7 +65,9 @@ class Builder:
                 for k, v in prop_dict.items():
                     self.__attributes[k] = v
             else:
-                warnings.warn(f"{self.__control_type}.properties ({self.__attributes['properties'] if prop_hash is None else prop_hash}) should be a dict.")
+                warnings.warn(
+                    f"{self.__control_type}.properties ({self.__attributes['properties'] if prop_hash is None else prop_hash}) should be a dict."
+                )
 
         # Bind potential function and expressions in self.attributes
         for k, v in self.__attributes.items():
@@ -545,9 +547,6 @@ class Builder:
 
     def __set_classNames(self):
         classes = ["taipy-" + self.__control_type.replace("_", "-")]
-        cl = self.__gui._config.style_config.get(self.__control_type)
-        if cl:
-            classes.append(cl)
         cl = self.__attributes.get("classname")
         if cl:
             classes.append(str(cl))

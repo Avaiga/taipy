@@ -1,11 +1,4 @@
-from ._attributes import (
-    delscopeattr,
-    getscopeattr,
-    getscopeattr_drill,
-    hasscopeattr,
-    setscopeattr,
-    setscopeattr_drill,
-)
+from ._attributes import delscopeattr, getscopeattr, getscopeattr_drill, hasscopeattr, setscopeattr, setscopeattr_drill
 from ._map_dict import _MapDict
 from .boolean import is_boolean_true
 from .clientvarname import get_client_var_name
@@ -27,3 +20,4 @@ from .types import (
     TaipyLovValue,
     TaipyNumber,
 )
+from .varnamefromcontent import _varname_from_content

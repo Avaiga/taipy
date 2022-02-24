@@ -18,8 +18,8 @@ from werkzeug.utils import secure_filename
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
-from ._default_config import app_config_default, style_config_default
-from .config import AppConfigOption, GuiConfig
+from ._default_config import app_config_default
+from .config import AppConfig, AppConfigOption, GuiConfig
 from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
@@ -128,7 +128,7 @@ class Gui:
 
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
-        self._config.load_config(app_config_default, style_config_default)
+        self._config.load_config(app_config_default)
 
         # Load Markdown extension
         # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
@@ -503,7 +503,9 @@ class Gui:
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         action = payload.get("action") if isinstance(payload, dict) else str(payload)
         if action:
-            if self.__call_function_with_args(action_function=self._get_user_function(action), id=id, payload=payload, action=action):
+            if self.__call_function_with_args(
+                action_function=self._get_user_function(action), id=id, payload=payload, action=action
+            ):
                 return
             else:
                 warnings.warn(f"on_action: '{action}' is not a function")
@@ -596,6 +598,12 @@ class Gui:
             self.__on_action(id, callback)
 
         return _taipy_on_cancel_block_ui
+
+    def _get_locals_bind(self):
+        return self.__locals_bind
+
+    def _get_root_page_name(self):
+        return self.__root_page_name
 
     # Public methods
     def add_page(
@@ -718,8 +726,10 @@ class Gui:
             else:
                 warnings.warn(f"{name}: {func} should be a function")
 
-    def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
-        self._config.load_config(app_config=app_config, style_config=style_config)
+    def load_config(self, app_config: t.Optional[AppConfig] = None) -> None:
+        if app_config is None:
+            return
+        self._config.load_config(app_config=app_config)
 
     def show_notification(
         self,
@@ -849,16 +859,14 @@ class Gui:
             print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
-        self.__locals_bind: t.Dict[str, t.Any] = t.cast(
-            FrameType, t.cast(FrameType, inspect.currentframe()).f_back
-        ).f_locals
+        self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
 
         self.__state = State(self, self.__locals_bind.keys())
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in self.__locals_bind.items() if inspect.ismodule(v) or callable(v)})
-        self.__evaluator: _Evaluator = _Evaluator(glob_ctx)
+        self.__evaluator = _Evaluator(glob_ctx)
 
         # bind on_change and on_action function if available
         self.__bind_local_func("on_change")
