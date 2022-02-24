@@ -38,7 +38,7 @@ class Page(object):
             warnings.resetwarnings()
             self.rendered_jsx = self.renderer.render(gui)
             if w:
-                print("\033[1;31m")
+                print("\033[1;31m", flush=True)
                 print(
                     message := f"--- {len(w)} warning(s) were found for page '{'/' if self.route == gui._get_root_page_name() else self.route}' {self.renderer._get_content_detail(gui)} ---",
                     flush=True,
