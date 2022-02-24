@@ -1,15 +1,13 @@
 import uuid
 from datetime import datetime
-from typing import Callable, Dict, List, Set
+from typing import Any, Callable, Dict, List, Set
 
 from taipy.core.common.alias import ScenarioId
 from taipy.core.common.reload import reload, self_reload
 from taipy.core.common.unicode_to_python_variable_name import protect_name
-from taipy.core.common.utils import fcts_to_dict
 from taipy.core.common.wrapper import Properties
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scenario.scenario_model import ScenarioModel
 
 
 class Scenario:
@@ -41,12 +39,13 @@ class Scenario:
         self,
         config_name: str,
         pipelines: List[Pipeline],
-        properties: Dict[str, str],
+        properties: Dict[str, Any],
         scenario_id: ScenarioId = None,
         creation_date=None,
         is_master: bool = False,
         cycle: Cycle = None,
         subscribers: Set[Callable] = None,
+        tags: Set[str] = None,
     ):
         self.config_name = protect_name(config_name)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
@@ -56,6 +55,7 @@ class Scenario:
 
         self._subscribers = subscribers or set()
         self._master_scenario = is_master
+        self._tags = tags or set()
 
         self._properties = Properties(self, **properties)
 
@@ -77,6 +77,11 @@ class Scenario:
     @self_reload("scenario")
     def subscribers(self):
         return self._subscribers
+
+    @property  # type: ignore
+    @self_reload("scenario")
+    def tags(self):
+        return self._tags
 
     @property  # type: ignore
     def properties(self):
@@ -108,23 +113,25 @@ class Scenario:
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
 
     def add_subscriber(self, callback: Callable):
-        """Adds callback function to be called when executing the scenario each time a scenario job changes status"""
+        """Adds callback function to be called when executing the scenario each time a scenario job changes status."""
         self._subscribers = reload("scenario", self)._subscribers
         self._subscribers.add(callback)
 
+    def add_tag(self, tag: str):
+        """Adds tag to the set of tags."""
+        self._tags = reload("scenario", self)._tags
+        self._tags.add(tag)
+
+    def has_tag(self, tag: str) -> bool:
+        return tag in self.tags
+
     def remove_subscriber(self, callback: Callable):
-        """Removes callback function"""
+        """Removes callback function."""
         self._subscribers = reload("scenario", self)._subscribers
         self._subscribers.remove(callback)
 
-    def to_model(self) -> ScenarioModel:
-        return ScenarioModel(
-            self.id,
-            self.config_name,
-            [pipeline.id for pipeline in self.pipelines.values()],
-            self._properties.data,
-            self.creation_date.isoformat(),
-            self._master_scenario,
-            fcts_to_dict(list(self._subscribers)),
-            self.cycle.id if self.cycle else None,
-        )
+    def remove_tag(self, tag: str):
+        """Removes tag."""
+        self._tags = reload("scenario", self)._tags
+        if self.has_tag(tag):
+            self._tags.remove(tag)

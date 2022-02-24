@@ -1,6 +1,6 @@
 import uuid
 from collections import defaultdict
-from typing import Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
@@ -39,7 +39,7 @@ class Pipeline:
     def __init__(
         self,
         config_name: str,
-        properties: Dict[str, str],
+        properties: Dict[str, Any],
         tasks: List[Task],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,

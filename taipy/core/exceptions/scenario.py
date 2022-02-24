@@ -34,7 +34,7 @@ class DeletingMasterScenario(Exception):
 
 class DifferentScenarioConfigs(Exception):
     """
-    Scenarios must contains the same config
+    Scenarios must have the same config
     """
 
     pass
@@ -51,6 +51,14 @@ class InsufficientScenarioToCompare(Exception):
 class NonExistingComparator(Exception):
     """
     Must provide an existing comparator
+    """
+
+    pass
+
+
+class UnauthorizedTagError(Exception):
+    """
+    Must provide an authorized tag
     """
 
     pass

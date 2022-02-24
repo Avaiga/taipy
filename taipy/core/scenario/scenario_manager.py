@@ -17,6 +17,7 @@ from taipy.core.exceptions.scenario import (
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
+    UnauthorizedTagError,
 )
 from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline_manager import PipelineManager
@@ -30,6 +31,7 @@ class ScenarioManager:
     methods for creating, storing, updating, retrieving, deleting, submitting scenarios.
     """
 
+    AUTHORIZED_TAGS_KEY = "authorized_tags"
     repository = ScenarioRepository()
     __logger = TaipyLogger.get_logger()
 
@@ -97,7 +99,8 @@ class ScenarioManager:
 
         Parameters:
             config (ScenarioConfig) : Scenario configuration object.
-            creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as default value.
+            creation_date (Optional[datetime.datetime]) : Creation date of the scenario. Current date time is used as
+                default value.
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.name)
@@ -181,7 +184,7 @@ class ScenarioManager:
     @classmethod
     def get_master(cls, cycle: Cycle) -> Optional[Scenario]:
         """
-        Returns the master scenario of the cycle given as parameter. None is the cycle has no master scenario.
+        Returns the master scenario of the cycle given as parameter. None if the cycle has no master scenario.
 
         Parameters:
              cycle (Cycle) : cycle of the master scenario to return.
@@ -193,6 +196,36 @@ class ScenarioManager:
         return None
 
     @classmethod
+    def get_by_tag(cls, cycle: Cycle, tag: str) -> Optional[Scenario]:
+        """
+        Returns the scenario of the `cycle` given as parameter that is tagged by `tag` given as parameter.
+        None if the cycle has no scenario tagged by `tag`.
+
+        Parameters:
+             cycle (Cycle) : cycle of the scenario to return.
+             tag (str) : tag of the scenario to return.
+        """
+        scenarios = cls.get_all_by_cycle(cycle)
+        for scenario in scenarios:
+            if scenario.has_tag(tag):
+                return scenario
+        return None
+
+    @classmethod
+    def get_all_by_tag(cls, tag: str) -> List[Scenario]:
+        """
+        Returns the list of all existing scenarios tagged by `tag` given as parameter.
+
+        Parameters:
+             tag (str) : Tag of the scenarios to return.
+        """
+        scenarios = []
+        for scenario in cls.get_all():
+            if scenario.has_tag(tag):
+                scenarios.append(scenario)
+        return scenarios
+
+    @classmethod
     def get_all_by_cycle(cls, cycle: Cycle) -> List[Scenario]:
         """
         Returns the list of all existing scenarios that belong to the cycle given as parameter.
@@ -202,7 +235,7 @@ class ScenarioManager:
         """
         scenarios = []
         for scenario in cls.get_all():
-            if scenario.cycle == cycle:
+            if scenario.cycle and scenario.cycle == cycle:
                 scenarios.append(scenario)
         return scenarios
 
@@ -219,7 +252,7 @@ class ScenarioManager:
     def set_master(cls, scenario: Scenario):
         """
         Promotes scenario given as parameter as master scenario of its cycle. If the cycle already had a master scenario
-        it will be demoted and it will no longer be master for the cycle.
+        it will be demoted, and it will no longer be master for the cycle.
 
         Parameters:
             scenario (Scenario) : scenario to promote as master.
@@ -233,6 +266,39 @@ class ScenarioManager:
             cls.set(scenario)
         else:
             raise DoesNotBelongToACycle
+
+    @classmethod
+    def tag(cls, scenario: Scenario, tag: str):
+        """
+        Adds `tag` given as parameter to `scenario` given as parameter. If the scenario's cycle already have
+        another scenario tagged by `tag` the other scenario will be untagged.
+
+        Parameters:
+            scenario (Scenario) : scenario to tag.
+            tag (str) : Tag of the scenario to tag.
+        """
+        tags = scenario.properties.get(cls.AUTHORIZED_TAGS_KEY, set())
+        if len(tags) > 0 and tag not in tags:
+            raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_name}`")
+        if scenario.cycle:
+            old_tagged_scenario = cls.get_by_tag(scenario.cycle, tag)
+            if old_tagged_scenario:
+                old_tagged_scenario.remove_tag(tag)
+                cls.set(old_tagged_scenario)
+        scenario.add_tag(tag)
+        cls.set(scenario)
+
+    @classmethod
+    def untag(cls, scenario: Scenario, tag: str):
+        """
+        Removes `tag` given as parameter from `scenario` given as parameter.
+
+        Parameters:
+            scenario (Scenario) : scenario to untag.
+            tag (str) : Tag to remove from scenario.
+        """
+        scenario.remove_tag(tag)
+        cls.set(scenario)
 
     @classmethod
     def delete(cls, scenario_id: ScenarioId):
@@ -256,8 +322,9 @@ class ScenarioManager:
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
-            data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no dn_config_name is
-            provided, the scenarios will be compared based on all the previously defined comparators.
+            data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no
+                data_node_config_name is provided, the scenarios will be compared based on all the previously
+                defined comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
             NonExistingComparator: The provided comparator does not exist
@@ -271,7 +338,7 @@ class ScenarioManager:
         if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
             raise DifferentScenarioConfigs
 
-        if scenario_config := Config.scenarios().get(scenarios[0].config_name, None):
+        if scenario_config := ScenarioManager.__get_config(scenarios[0]):
             results = {}
             if data_node_config_name:
                 if data_node_config_name in scenario_config.comparators.keys():
@@ -282,15 +349,19 @@ class ScenarioManager:
                 dn_comparators = scenario_config.comparators
 
             for data_node_config_name, comparators in dn_comparators.items():
-                datanodes = [scenario.__getattr__(data_node_config_name).read() for scenario in scenarios]
+                data_nodes = [scenario.__getattr__(data_node_config_name).read() for scenario in scenarios]
                 results[data_node_config_name] = {
-                    comparator.__name__: comparator(*datanodes) for comparator in comparators
+                    comparator.__name__: comparator(*data_nodes) for comparator in comparators
                 }
 
             return results
 
         else:
             raise NonExistingScenarioConfig(scenarios[0].config_name)
+
+    @staticmethod
+    def __get_config(scenario: Scenario):
+        return Config.scenarios().get(scenario.config_name, None)
 
     @classmethod
     def hard_delete(cls, scenario_id: ScenarioId):

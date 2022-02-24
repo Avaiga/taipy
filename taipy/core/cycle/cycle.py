@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import Dict
+from typing import Any, Dict
 
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
@@ -28,7 +28,7 @@ class Cycle:
     def __init__(
         self,
         frequency: Frequency,
-        properties: Dict[str, str],
+        properties: Dict[str, Any],
         creation_date: datetime,
         start_date: datetime,
         end_date: datetime,

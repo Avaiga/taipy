@@ -19,6 +19,7 @@ from taipy.core.exceptions.scenario import (
     NonExistingComparator,
     NonExistingScenario,
     NonExistingScenarioConfig,
+    UnauthorizedTagError,
 )
 from taipy.core.exceptions.task import NonExistingTask
 from taipy.core.job.job_manager import JobManager
@@ -174,6 +175,7 @@ def test_create_and_delete_scenario():
     assert scenario_1.creation_date == creation_date_1
     assert scenario_1.display_name == display_name_1
     assert scenario_1.properties["display_name"] == display_name_1
+    assert scenario_1.tags == set()
 
     with pytest.raises(DeletingMasterScenario):
         ScenarioManager.delete(scenario_1.id)
@@ -187,6 +189,7 @@ def test_create_and_delete_scenario():
     assert scenario_2.cycle.start_date.date() == creation_date_2.date()
     assert scenario_2.cycle.end_date.date() == creation_date_2.date()
     assert scenario_2.properties.get("display_name") is None
+    assert scenario_2.tags == set()
 
     assert scenario_1 != scenario_2
     assert scenario_1.cycle == scenario_2.cycle
@@ -704,3 +707,151 @@ def test_automatic_reload():
     p.join()
 
     assert 2 == scenario.bar.read()
+
+
+def test_tags():
+    cycle_1 = CycleManager.create(Frequency.DAILY, name="today", creation_date=datetime.now())
+    cycle_2 = CycleManager.create(Frequency.DAILY, name="tomorrow", creation_date=datetime.now() + timedelta(days=1))
+    cycle_3 = CycleManager.create(Frequency.DAILY, name="yesterday", creation_date=datetime.now() + timedelta(days=-1))
+
+    scenario_no_tag = Scenario("SCENARIO_no_tag", [], {}, ScenarioId("SCENARIO_no_tag"), cycle=cycle_1)
+    scenario_1_tag = Scenario("SCENARIO_1_tag", [], {}, ScenarioId("SCENARIO_1_tag"), cycle=cycle_1, tags={"fst"})
+    scenario_2_tags = Scenario(
+        "SCENARIO_2_tags", [], {}, ScenarioId("SCENARIO_2_tags"), cycle=cycle_2, tags={"fst", "scd"}
+    )
+
+    # Test has_tag
+    assert len(scenario_no_tag.tags) == 0
+    assert not scenario_no_tag.has_tag("fst")
+    assert not scenario_no_tag.has_tag("scd")
+
+    assert len(scenario_1_tag.tags) == 1
+    assert scenario_1_tag.has_tag("fst")
+    assert not scenario_1_tag.has_tag("scd")
+
+    assert len(scenario_2_tags.tags) == 2
+    assert scenario_2_tags.has_tag("fst")
+    assert scenario_2_tags.has_tag("scd")
+
+    # test get and set serialize/deserialize tags
+    CycleManager.set(cycle_1)
+    CycleManager.set(cycle_2)
+    CycleManager.set(cycle_3)
+    ScenarioManager.set(scenario_no_tag)
+    ScenarioManager.set(scenario_1_tag)
+    ScenarioManager.set(scenario_2_tags)
+
+    assert len(ScenarioManager.get(ScenarioId("SCENARIO_no_tag")).tags) == 0
+    assert not ScenarioManager.get(ScenarioId("SCENARIO_no_tag")).has_tag("fst")
+    assert not ScenarioManager.get(ScenarioId("SCENARIO_no_tag")).has_tag("scd")
+
+    assert len(ScenarioManager.get(ScenarioId("SCENARIO_1_tag")).tags) == 1
+    assert "fst" in ScenarioManager.get(ScenarioId("SCENARIO_1_tag")).tags
+    assert "scd" not in ScenarioManager.get(ScenarioId("SCENARIO_1_tag")).tags
+
+    assert len(ScenarioManager.get(ScenarioId("SCENARIO_2_tags")).tags) == 2
+    assert "fst" in ScenarioManager.get(ScenarioId("SCENARIO_2_tags")).tags
+    assert "scd" in ScenarioManager.get(ScenarioId("SCENARIO_2_tags")).tags
+
+    # Test tag & untag
+
+    ScenarioManager.tag(scenario_no_tag, "thd")  # add new tag
+    ScenarioManager.untag(scenario_1_tag, "NOT_EXISTING_TAG")  # remove not existing tag does nothing
+    ScenarioManager.untag(scenario_1_tag, "fst")  # remove `fst` tag
+
+    assert len(scenario_no_tag.tags) == 1
+    assert not scenario_no_tag.has_tag("fst")
+    assert not scenario_no_tag.has_tag("scd")
+    assert scenario_no_tag.has_tag("thd")
+
+    assert len(scenario_1_tag.tags) == 0
+    assert not scenario_1_tag.has_tag("fst")
+    assert not scenario_1_tag.has_tag("scd")
+    assert not scenario_1_tag.has_tag("thd")
+
+    assert len(scenario_2_tags.tags) == 2
+    assert scenario_2_tags.has_tag("fst")
+    assert scenario_2_tags.has_tag("scd")
+    assert not scenario_2_tags.has_tag("thd")
+
+    ScenarioManager.untag(scenario_no_tag, "thd")
+    ScenarioManager.set(scenario_no_tag)
+    ScenarioManager.tag(scenario_1_tag, "fst")
+    ScenarioManager.set(scenario_1_tag)
+
+    # test getters
+    assert not ScenarioManager.get_by_tag(cycle_3, "fst")
+    assert not ScenarioManager.get_by_tag(cycle_3, "scd")
+    assert not ScenarioManager.get_by_tag(cycle_3, "thd")
+
+    assert ScenarioManager.get_by_tag(cycle_2, "fst") == scenario_2_tags
+    assert ScenarioManager.get_by_tag(cycle_2, "scd") == scenario_2_tags
+    assert not ScenarioManager.get_by_tag(cycle_2, "thd")
+
+    assert ScenarioManager.get_by_tag(cycle_1, "fst") == scenario_1_tag
+    assert not ScenarioManager.get_by_tag(cycle_1, "scd")
+    assert not ScenarioManager.get_by_tag(cycle_1, "thd")
+
+    assert len(ScenarioManager.get_all_by_tag("NOT_EXISTING")) == 0
+    assert ScenarioManager.get_all_by_tag("fst") == [scenario_1_tag, scenario_2_tags]
+    assert ScenarioManager.get_all_by_tag("scd") == [scenario_2_tags]
+    assert len(ScenarioManager.get_all_by_tag("thd")) == 0
+
+    # test tag cycle mgt
+
+    ScenarioManager.tag(scenario_no_tag, "fst")  # tag sc_no_tag should untag sc_1_tag with same cycle but not sc_2_tags
+
+    assert not ScenarioManager.get_by_tag(cycle_3, "fst")
+    assert not ScenarioManager.get_by_tag(cycle_3, "scd")
+    assert not ScenarioManager.get_by_tag(cycle_3, "thd")
+
+    assert ScenarioManager.get_by_tag(cycle_2, "fst") == scenario_2_tags
+    assert ScenarioManager.get_by_tag(cycle_2, "scd") == scenario_2_tags
+    assert not ScenarioManager.get_by_tag(cycle_2, "thd")
+
+    assert ScenarioManager.get_by_tag(cycle_1, "fst") == scenario_no_tag
+    assert not ScenarioManager.get_by_tag(cycle_1, "scd")
+    assert not ScenarioManager.get_by_tag(cycle_1, "thd")
+
+    assert len(ScenarioManager.get_all_by_tag("NOT_EXISTING")) == 0
+    assert len(ScenarioManager.get_all_by_tag("fst")) == 2
+    assert scenario_2_tags in ScenarioManager.get_all_by_tag("fst")
+    assert scenario_no_tag in ScenarioManager.get_all_by_tag("fst")
+    assert ScenarioManager.get_all_by_tag("scd") == [scenario_2_tags]
+    assert len(ScenarioManager.get_all_by_tag("thd")) == 0
+
+
+def test_authorized_tags():
+    scenario = Scenario("SCENARIO_1", [], {"authorized_tags": ["foo", "bar"]}, ScenarioId("SCENARIO_1"))
+    scenario_2_cfg = Config.add_scenario("SCENARIO_2", [], Frequency.DAILY, authorized_tags=["foo", "bar"])
+    scenario_2 = ScenarioManager.create(scenario_2_cfg)
+    ScenarioManager.set(scenario)
+
+    assert len(scenario.tags) == 0
+    assert len(scenario_2.tags) == 0
+
+    with pytest.raises(UnauthorizedTagError):
+        ScenarioManager.tag(scenario, "baz")
+        ScenarioManager.tag(scenario_2, "baz")
+    assert len(scenario.tags) == 0
+    assert len(scenario_2.tags) == 0
+
+    ScenarioManager.tag(scenario, "foo")
+    ScenarioManager.tag(scenario_2, "foo")
+    assert len(scenario.tags) == 1
+    assert len(scenario_2.tags) == 1
+
+    ScenarioManager.tag(scenario, "bar")
+    ScenarioManager.tag(scenario_2, "bar")
+    assert len(scenario.tags) == 2
+    assert len(scenario_2.tags) == 2
+
+    ScenarioManager.tag(scenario, "foo")
+    ScenarioManager.tag(scenario_2, "foo")
+    assert len(scenario.tags) == 2
+    assert len(scenario_2.tags) == 2
+
+    ScenarioManager.untag(scenario, "foo")
+    ScenarioManager.untag(scenario_2, "foo")
+    assert len(scenario.tags) == 1
+    assert len(scenario_2.tags) == 1

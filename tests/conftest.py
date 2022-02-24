@@ -97,7 +97,7 @@ def current_datetime():
 
 @pytest.fixture(scope="function")
 def scenario(cycle):
-    return Scenario("sc", [], {}, ScenarioId("sc_id"), current_time, is_master=False, cycle=None)
+    return Scenario("sc", [], {}, ScenarioId("sc_id"), current_time, is_master=False, tags={"foo"}, cycle=None)
 
 
 @pytest.fixture(scope="function")
@@ -121,6 +121,7 @@ def scenario_model(cycle):
         creation_date=current_time.isoformat(),
         master_scenario=False,
         subscribers=[],
+        tags=["foo"],
         cycle=None,
     )
 

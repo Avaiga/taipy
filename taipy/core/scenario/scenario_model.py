@@ -14,6 +14,7 @@ class ScenarioModel:
     creation_date: str
     master_scenario: bool
     subscribers: List[Dict]
+    tags: List[str]
     cycle: Optional[CycleId] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -29,5 +30,6 @@ class ScenarioModel:
             creation_date=data["creation_date"],
             master_scenario=data["master_scenario"],
             subscribers=data["subscribers"],
+            tags=data["tags"],
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,
         )

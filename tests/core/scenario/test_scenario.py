@@ -17,6 +17,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_1.creation_date is not None
     assert scenario_entity_1.is_master
     assert scenario_entity_1.cycle == cycle
+    assert scenario_entity_1.tags == set()
 
     scenario_entity_2 = Scenario("   bar/ξéà   ", [], {}, ScenarioId("baz"), creation_date=current_datetime)
     assert scenario_entity_2.id == "baz"
@@ -26,6 +27,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_2.creation_date == current_datetime
     assert not scenario_entity_2.is_master
     assert scenario_entity_2.cycle is None
+    assert scenario_entity_2.tags == set()
 
     pipeline_entity = Pipeline("qux", {}, [])
     scenario_entity_3 = Scenario("quux", [pipeline_entity], {})
@@ -34,6 +36,7 @@ def test_create_scenario(cycle, current_datetime):
     assert len(scenario_entity_3.pipelines) == 1
     assert scenario_entity_3.qux == pipeline_entity
     assert scenario_entity_3.properties == {}
+    assert scenario_entity_3.tags == set()
 
     pipeline_entity_1 = Pipeline("abcξyₓéà", {}, [])
     scenario_entity_4 = Scenario("abcx", [pipeline_entity_1], {})
@@ -42,6 +45,7 @@ def test_create_scenario(cycle, current_datetime):
     assert len(scenario_entity_4.pipelines) == 1
     assert scenario_entity_4.abcxyxea == pipeline_entity_1
     assert scenario_entity_4.properties == {}
+    assert scenario_entity_4.tags == set()
 
 
 def test_add_property_to_scenario():
@@ -72,27 +76,6 @@ def test_add_cycle_to_scenario(cycle):
     assert scenario.cycle == cycle
 
 
-def test_to_model(cycle, current_datetime):
-    input_dn = InMemoryDataNode("input_name", Scope.PIPELINE, "input_id", {"data": "this is some data"})
-    output = InMemoryDataNode("output_name", Scope.PIPELINE, "output_id", {"data": ""})
-    task = Task("task", print, [input_dn], [output], TaskId("task_id"))
-    pipeline_entity = Pipeline("pipeline_name", {"big_pty": "big value"}, [task], PipelineId("pipeline_id"))
-    scenario_entity = Scenario(
-        "scenario_name", [pipeline_entity], {"key": "value"}, ScenarioId("scenario_id"), current_datetime, True, cycle
-    )
-
-    model = scenario_entity.to_model()
-    assert model.id == "scenario_id"
-    assert model.name == "scenario_name"
-    assert len(model.pipelines) == 1
-    assert model.pipelines[0] == "pipeline_id"
-    assert len(model.properties) == 1
-    assert model.properties["key"] == "value"
-    assert model.creation_date == current_datetime.isoformat()
-    assert model.master_scenario
-    assert model.cycle == cycle.id
-
-
 def test_add_and_remove_subscriber():
     def mock_function():
         pass
@@ -104,3 +87,14 @@ def test_add_and_remove_subscriber():
 
     scenario.remove_subscriber(mock_function)
     assert len(scenario.subscribers) == 0
+
+
+def test_add_and_remove_tag():
+    scenario = Scenario("foo", [], {})
+
+    assert len(scenario.tags) == 0
+    scenario.add_tag("tag")
+    assert len(scenario.tags) == 1
+
+    scenario.remove_tag("tag")
+    assert len(scenario.tags) == 0
