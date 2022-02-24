@@ -8,12 +8,15 @@ if t.TYPE_CHECKING:
 
 class State:
     __attrs = ("_gui", "_user_var_list")
+    __methods = ("assign")
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
         super().__setattr__(State.__attrs[1], list(var_list))
         super().__setattr__(State.__attrs[0], gui)
 
     def __getattribute__(self, name: str) -> t.Any:
+        if name in State.__methods:
+            return super().__getattribute__(name)
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
         gui = super().__getattribute__(State.__attrs[0])
@@ -31,6 +34,11 @@ class State:
             if not hasattr(gui._bindings(), name):
                 gui.bind_var(name)
             setattr(gui._bindings(), name, value)
+
+    def assign(self, name: str, value: t.Any) -> t.Any:
+        val = getattr(self, name)
+        setattr(self, name, value)
+        return val
 
     def __enter__(self):
         super().__getattribute__(State.__attrs[0]).__enter__()
