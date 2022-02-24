@@ -147,16 +147,24 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
-def get_scenarios(cycle: Optional[Cycle] = None) -> List[Scenario]:
+def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> List[Scenario]:
     """
-    Returns the list of all existing scenarios filtered by cycle if given as parameter.
+    Returns the list of all existing scenarios filtered by cycle and/or tag if given as parameter.
 
     Parameters:
          cycle (Optional[Cycle]) : Cycle of the scenarios to return.
+         tag (Optional[str]) : Tag of the scenarios to return.
     """
-    if not cycle:
+    if not cycle and not tag:
         return ScenarioManager.get_all()
-    return ScenarioManager.get_all_by_cycle(cycle)
+    if cycle and not tag:
+        return ScenarioManager.get_all_by_cycle(cycle)
+    if not cycle and tag:
+        return ScenarioManager.get_all_by_tag(tag)
+    if cycle and tag:
+        cycles_scenarios = ScenarioManager.get_all_by_cycle(cycle)
+        return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
+    return []
 
 
 def get_master(cycle: Cycle) -> Optional[Scenario]:
@@ -183,6 +191,29 @@ def set_master(scenario: Scenario):
         scenario (Scenario) : scenario to promote as master.
     """
     return ScenarioManager.set_master(scenario)
+
+
+def tag(scenario: Scenario, tag: str):
+    """
+    Adds the tag to the scenario `scenario` given as parameter. If the scenario's cycle already have
+    another scenario tagged by `tag` the other scenario will be untagged.
+
+    Parameters:
+        scenario (Scenario) : scenario to tag.
+        tag (str) : Tag of the scenario to tag.
+    """
+    return ScenarioManager.tag(scenario, tag)
+
+
+def untag(scenario: Scenario, tag: str):
+    """
+    Removes `tag` given as parameter from the tag list of `scenario` given as parameter.
+
+    Parameters:
+        scenario (Scenario) : scenario to untag.
+        tag (str) : Tag to remove from scenario.
+    """
+    return ScenarioManager.untag(scenario, tag)
 
 
 def compare_scenarios(*scenarios: Scenario, data_node_config_name: str = None):

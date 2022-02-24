@@ -240,6 +240,9 @@ class TestTaipy:
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get_all_by_cycle") as mck:
             tp.get_scenarios(cycle)
             mck.assert_called_once_with(cycle)
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get_all_by_tag") as mck:
+            tp.get_scenarios(tag="tag")
+            mck.assert_called_once_with("tag")
 
     def test_get_scenario(self, scenario):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get") as mck:
@@ -261,6 +264,14 @@ class TestTaipy:
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.set_master") as mck:
             tp.set_master(scenario)
             mck.assert_called_once_with(scenario)
+
+    def test_tag_and_untag(self, scenario):
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.tag") as mck:
+            tp.tag(scenario, "tag")
+            mck.assert_called_once_with(scenario, "tag")
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.untag") as mck:
+            tp.untag(scenario, "tag")
+            mck.assert_called_once_with(scenario, "tag")
 
     def test_compare_scenarios(self, scenario):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.compare") as mck:

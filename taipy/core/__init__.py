@@ -50,7 +50,9 @@ from taipy.core.taipy import (
     submit,
     subscribe_pipeline,
     subscribe_scenario,
+    tag,
     unsubscribe_pipeline,
     unsubscribe_scenario,
+    untag,
 )
 from taipy.core.task.task import Task
