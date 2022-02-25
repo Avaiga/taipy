@@ -23,7 +23,7 @@ from .config import AppConfig, AppConfigOption, GuiConfig
 from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
-from .page import _Page, _Partial
+from .page import _Page, Partial
 from .renderers import EmptyPage, Page
 from .renderers._markdown import TaipyMarkdownExtension
 from .server import Server
@@ -680,9 +680,9 @@ class Gui:
     def add_partial(
         self,
         renderer: t.Union[str, Page],
-    ) -> _Partial:
+    ) -> Partial:
         # Init a new partial
-        new_partial = _Partial()
+        new_partial = Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')

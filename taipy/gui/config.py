@@ -8,7 +8,7 @@ import pytz
 import tzlocal
 from dotenv import dotenv_values
 
-from .page import _Page, _Partial
+from .page import _Page, Partial
 
 AppConfigOption = t.Literal[
     "port",
@@ -72,7 +72,7 @@ class GuiConfig(object):
     def __init__(self):
         self.pages: t.List[_Page] = []
         self.routes: t.List[str] = []
-        self.partials: t.List[_Partial] = []
+        self.partials: t.List[Partial] = []
         self.partial_routes: t.List[str] = []
         self.app_config: AppConfig = {}
 

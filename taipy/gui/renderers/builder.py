@@ -6,7 +6,7 @@ import typing as t
 import warnings
 import xml.etree.ElementTree as etree
 
-from ..page import _Partial
+from ..page import Partial
 from ..types import AttributeType, _get_taipy_type
 from ..utils import (
     _get_expr_var_name,
@@ -708,7 +708,7 @@ class Builder:
             page = self.__attributes.get("page")
             if page:
                 warnings.warn("Dialog control: page and partial should not be defined at the same time.")
-            if isinstance(partial, _Partial):
+            if isinstance(partial, Partial):
                 self.__attributes["page"] = partial.route
         return self
 

@@ -52,11 +52,11 @@ class _Page(object):
             self.head = str(self.renderer.head)  # type: ignore
 
 
-class _Partial(_Page):
+class Partial(_Page):
 
-    __partials: t.Dict[str, _Partial] = {}
+    __partials: t.Dict[str, Partial] = {}
 
     def __init__(self):
         super().__init__()
-        self.route = "TaiPy_partials_" + str(len(_Partial.__partials))
-        _Partial.__partials[self.route] = self
+        self.route = "TaiPy_partials_" + str(len(Partial.__partials))
+        Partial.__partials[self.route] = self
