@@ -57,12 +57,12 @@ class TaipyHTMLParser(HTMLParser):
     # @override
     def handle_endtag(self, tag) -> None:
         if not self._tag_queue:
-            warnings.warn(f"'{tag}' in line {self._line_count} is missing an opening tag")
+            warnings.warn(f"Closing '{tag}' at line {self._line_count} is missing an opening tag")
         else:
             opening_tag, opening_tag_line = self._tag_queue.pop()
             if opening_tag != tag:
                 warnings.warn(
-                    f"Opening tag '{opening_tag}' in line {opening_tag_line} has unmatched closing tag '{tag}' in line {self._line_count}"
+                    f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag '{tag}' at line {self._line_count}"
                 )
         if tag in ["head", "body", "html"]:
             return
@@ -96,7 +96,7 @@ class TaipyHTMLParser(HTMLParser):
             self.feed(data_line)
         while self._tag_queue:
             opening_tag, opening_tag_line = self._tag_queue.pop()
-            warnings.warn(f"'{opening_tag}' in line {opening_tag_line} is missing a closing tag")
+            warnings.warn(f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag")
 
 
 class TaipyTag(object):

@@ -23,8 +23,8 @@ from .config import AppConfig, AppConfigOption, GuiConfig
 from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
-from .page import Page, Partial
-from .renderers import EmptyPageRenderer, PageRenderer
+from .page import _Page, _Partial
+from .renderers import EmptyPage, Page
 from .renderers._markdown import TaipyMarkdownExtension
 from .server import Server
 from .types import WsType
@@ -82,7 +82,7 @@ class Gui:
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        page: t.Optional[t.Union[str, PageRenderer]] = None,
+        page: t.Optional[t.Union[str, Page]] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
@@ -92,7 +92,7 @@ class Gui:
 
         Parameters:
 
-            page (t.Union[str, PageRenderer], optional): An optional `PageRenderer` instance
+            page (t.Union[str, Page], optional): An optional `Page` instance
                 that is used when there is a single page in this interface, referenced as the
                 root page (located at `/`).
 
@@ -609,7 +609,7 @@ class Gui:
     def add_page(
         self,
         name: str,
-        renderer: t.Union[str, PageRenderer],
+        renderer: t.Union[str, Page],
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -627,10 +627,10 @@ class Gui:
             from .renderers import Markdown
 
             renderer = Markdown(renderer)
-        elif not isinstance(renderer, PageRenderer):
-            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid PageRenderer')
+        elif not isinstance(renderer, Page):
+            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid Page')
         # Init a new page
-        new_page = Page()
+        new_page = _Page()
         new_page.route = name
         new_page.renderer = renderer
         new_page.style = style
@@ -638,7 +638,7 @@ class Gui:
         self._config.pages.append(new_page)
         self._config.routes.append(name)
 
-    def add_pages(self, pages: t.Union[dict[str, t.Union[str, PageRenderer]], str] = None) -> None:
+    def add_pages(self, pages: t.Union[dict[str, t.Union[str, Page]], str] = None) -> None:
         if isinstance(pages, dict):
             for k, v in pages.items():
                 if k == "/":
@@ -679,10 +679,10 @@ class Gui:
 
     def add_partial(
         self,
-        renderer: t.Union[str, PageRenderer],
-    ) -> Partial:
+        renderer: t.Union[str, Page],
+    ) -> _Partial:
         # Init a new partial
-        new_partial = Partial()
+        new_partial = _Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
@@ -690,8 +690,8 @@ class Gui:
             from .renderers import Markdown
 
             renderer = Markdown(renderer)
-        elif not isinstance(renderer, PageRenderer):
-            raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
+        elif not isinstance(renderer, Page):
+            raise Exception(f'Partial name "{new_partial.route}" has invalid Page')
         new_partial.renderer = renderer
         # Append partial to _config
         self._config.partials.append(new_partial)
@@ -874,9 +874,9 @@ class Gui:
 
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
-            new_page = Page()
+            new_page = _Page()
             new_page.route = Gui.__root_page_name
-            new_page.renderer = EmptyPageRenderer()
+            new_page.renderer = EmptyPage()
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 

@@ -11,7 +11,7 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-class PageRenderer(ABC):
+class Page(ABC):
     """
     The base class that transform template text to actual pages that can be
     displayed on a Web browser.
@@ -23,15 +23,15 @@ class PageRenderer(ABC):
     """
 
     def __init__(self, content: str) -> None:
-        """Initializes a new PageRenderer with the indicated content.
+        """Initializes a new Page with the indicated content.
 
         Args:
             content (string): The text content or the path to the file holding the text to be transformed.
 
         If `content` is a path to a readable file, the file is read entirely as the text template.
         """
-        self._content: t.Union[None, str] = None
-        self._filepath: t.Union[None, str] = None
+        self._content: t.Optional[str] = None
+        self._filepath: t.Optional[str] = None
         self.__process_content(content)
 
     def __process_content(self, content: str) -> None:
@@ -58,7 +58,7 @@ class PageRenderer(ABC):
         pass
 
 
-class EmptyPageRenderer(PageRenderer):
+class EmptyPage(Page):
     def __init__(self) -> None:
         super().__init__("<PageContent />")
 
@@ -66,7 +66,7 @@ class EmptyPageRenderer(PageRenderer):
         return str(self._content)
 
 
-class Markdown(PageRenderer):
+class Markdown(Page):
     """
     The page renderer for _Markdown_ text.
     """
@@ -84,7 +84,7 @@ class Markdown(PageRenderer):
         return gui._markdown.convert(str(self._content))
 
 
-class Html(PageRenderer):
+class Html(Page):
     """
     The page renderer for _HTML_ text.
     """

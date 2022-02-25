@@ -8,7 +8,7 @@ import pytz
 import tzlocal
 from dotenv import dotenv_values
 
-from .page import Page, Partial
+from .page import _Page, _Partial
 
 AppConfigOption = t.Literal[
     "port",
@@ -70,9 +70,9 @@ class GuiConfig(object):
     )
 
     def __init__(self):
-        self.pages: t.List[Page] = []
+        self.pages: t.List[_Page] = []
         self.routes: t.List[str] = []
-        self.partials: t.List[Partial] = []
+        self.partials: t.List[_Partial] = []
         self.partial_routes: t.List[str] = []
         self.app_config: AppConfig = {}
 
@@ -103,7 +103,7 @@ class GuiConfig(object):
         # Verify user defined IANA Time Zone is valid
         if self.app_config["time_zone"] not in pytz.all_timezones_set:
             raise Exception(
-                "Time Zone configuration is not valid! Mistyped 'server', 'client' options or invalid IANA Time Zone!"
+                "Time Zone configuration is not valid! Mistyped 'server', 'client' options or invalid IANA Time Zone"
             )
         # return user defined IANA Time Zone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
         return self.app_config["time_zone"]
