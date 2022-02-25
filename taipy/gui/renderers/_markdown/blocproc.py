@@ -36,7 +36,7 @@ class StartBlockProcessor(BlockProcessor):
                     queue.pop()
                 elif match[1] == "start":
                     queue.append(match[0])
-            if len(queue) == 0:
+            if not queue:
                 # remove end fence
                 blocks[block_num] = re.sub(
                     MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + MarkdownFactory._TAIPY_END,
@@ -47,9 +47,9 @@ class StartBlockProcessor(BlockProcessor):
                 # render fenced area inside a new div
                 e = MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))
                 parent.append(e)
-                self.parser.parseBlocks(e, blocks[0 : block_num + 1])
+                self.parser.parseBlocks(e, blocks[: block_num + 1])
                 # remove used blocks
-                for i in range(0, block_num + 1):
+                for _ in range(block_num + 1):
                     blocks.pop(0)
                 return True  # or could have had no return statement
         # No closing marker!  Restore and do nothing

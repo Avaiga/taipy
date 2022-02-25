@@ -71,11 +71,12 @@ class Preprocessor(MdPreprocessor):
                     tag, properties = self._process_control(m.group(2), line_count)
                 if tag in MarkdownFactory._TAIPY_BLOCK_TAGS:
                     tag_queue.append((tag, line_count, m.group(1) or None))
-                    line = line[: m.start()] + "\n" + MarkdownFactory._TAIPY_START + tag + ".start"
+                    new_line_delimeter = "\n" if line.startswith("<|") else "\n\n"
+                    line = line[: m.start()] + new_line_delimeter + MarkdownFactory._TAIPY_START + tag + ".start"
                     for property in properties:
                         prop_value = property[1].replace('"', '\\"')
                         line += f' {property[0]}="{prop_value}"'
-                    line += MarkdownFactory._TAIPY_END + "\n"
+                    line += MarkdownFactory._TAIPY_END + new_line_delimeter
                 else:
                     warnings.warn(f"Invalid tag name '{tag}' in line {line_count}")
             # Other controls
@@ -149,22 +150,20 @@ class Preprocessor(MdPreprocessor):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:
                 default_prop_value = fragment
+            elif prop_match := Preprocessor.__PROPERTY_RE.match(fragment):
+                not_prefix = prop_match.group(1)
+                prop_name = prop_match.group(2)
+                val = prop_match.group(3)
+                if not_prefix and val:
+                    warnings.warn(f"Negated property {prop_name} value ignored at {line_count}")
+                prop_value = "True"
+                if not_prefix:
+                    prop_value = "False"
+                elif val:
+                    prop_value = val
+                properties.append(self._make_prop_pair(prop_name, prop_value))
             else:
-                prop_match = Preprocessor.__PROPERTY_RE.match(fragment)
-                if prop_match:
-                    not_prefix = prop_match.group(1)
-                    prop_name = prop_match.group(2)
-                    val = prop_match.group(3)
-                    if not_prefix and val:
-                        warnings.warn(f"Negated property {prop_name} value ignored at {line_count}")
-                    prop_value = "True"
-                    if not_prefix:
-                        prop_value = "False"
-                    elif val:
-                        prop_value = val
-                    properties.append(self._make_prop_pair(prop_name, prop_value))
-                else:
-                    warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
+                warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
 
         if control_name is None:
             control_name = MarkdownFactory.DEFAULT_CONTROL
