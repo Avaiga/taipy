@@ -54,7 +54,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
 
     @property
     def storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
+        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
     def __to_tasks(task_ids):

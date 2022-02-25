@@ -41,7 +41,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
 
     @property
     def storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
+        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
     def __serialize_exceptions(exceptions):

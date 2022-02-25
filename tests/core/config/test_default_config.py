@@ -67,33 +67,33 @@ def test_default_configuration():
     default_config = _Config.default_config()
 
     _test_default_global_app_config(default_config.global_config)
-    _test_default_global_app_config(Config.global_config())
+    _test_default_global_app_config(Config.global_config)
     _test_default_global_app_config(GlobalAppConfig().default_config())
 
     _test_default_job_config(default_config.job_config)
-    _test_default_job_config(Config.job_config())
+    _test_default_job_config(Config.job_config)
     _test_default_job_config(JobConfig().default_config())
 
     _test_default_data_node_config(default_config.data_nodes[_Config.DEFAULT_KEY])
-    _test_default_data_node_config(Config.data_nodes()[_Config.DEFAULT_KEY])
+    _test_default_data_node_config(Config.data_nodes[_Config.DEFAULT_KEY])
     _test_default_data_node_config(DataNodeConfig.default_config("DEFAULT_KEY"))
     assert len(default_config.data_nodes) == 1
-    assert len(Config.data_nodes()) == 1
+    assert len(Config.data_nodes) == 1
 
     _test_default_task_config(default_config.tasks[_Config.DEFAULT_KEY])
-    _test_default_task_config(Config.tasks()[_Config.DEFAULT_KEY])
+    _test_default_task_config(Config.tasks[_Config.DEFAULT_KEY])
     _test_default_task_config(TaskConfig.default_config("DEFAULT_KEY"))
     assert len(default_config.tasks) == 1
-    assert len(Config.tasks()) == 1
+    assert len(Config.tasks) == 1
 
     _test_default_pipeline_config(default_config.pipelines[_Config.DEFAULT_KEY])
-    _test_default_pipeline_config(Config.pipelines()[_Config.DEFAULT_KEY])
+    _test_default_pipeline_config(Config.pipelines[_Config.DEFAULT_KEY])
     _test_default_pipeline_config(PipelineConfig.default_config("DEFAULT_KEY"))
     assert len(default_config.pipelines) == 1
-    assert len(Config.pipelines()) == 1
+    assert len(Config.pipelines) == 1
 
     _test_default_scenario_config(default_config.scenarios[_Config.DEFAULT_KEY])
-    _test_default_scenario_config(Config.scenarios()[_Config.DEFAULT_KEY])
+    _test_default_scenario_config(Config.scenarios[_Config.DEFAULT_KEY])
     _test_default_scenario_config(ScenarioConfig.default_config("DEFAULT_KEY"))
     assert len(default_config.scenarios) == 1
-    assert len(Config.scenarios()) == 1
+    assert len(Config.scenarios) == 1

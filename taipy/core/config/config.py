@@ -3,6 +3,7 @@ __all__ = ["Config"]
 import os
 from typing import Callable, Dict, List, Optional, Union
 
+from taipy.core.common.classproperty import classproperty
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.logger import TaipyLogger
 from taipy.core.config._config import _Config
@@ -30,32 +31,32 @@ class Config:
     _applied_config = _Config.default_config()
     collector = IssueCollector()
 
-    @classmethod
-    def global_config(cls) -> GlobalAppConfig:
-        """Returns configuration values related to the global application."""
-        return cls._applied_config.global_config
-
-    @classmethod
+    @classproperty
     def job_config(cls) -> JobConfig:
         """Returns configuration values related to the job executions."""
         return cls._applied_config.job_config
 
-    @classmethod
+    @classproperty
+    def global_config(cls) -> GlobalAppConfig:
+        """Returns configuration values related to the global application."""
+        return cls._applied_config.global_config
+
+    @classproperty
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
         """Returns data node configs by config name."""
         return cls._applied_config.data_nodes
 
-    @classmethod
+    @classproperty
     def tasks(cls) -> Dict[str, TaskConfig]:
         """Returns task configs by config name."""
         return cls._applied_config.tasks
 
-    @classmethod
+    @classproperty
     def pipelines(cls) -> Dict[str, PipelineConfig]:
         """Returns pipeline configs by config name."""
         return cls._applied_config.pipelines
 
-    @classmethod
+    @classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """Returns scenario configs by config name."""
         return cls._applied_config.scenarios

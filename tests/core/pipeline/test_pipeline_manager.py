@@ -26,9 +26,9 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 @pytest.fixture()
 def airflow_config():
-    Config.set_job_config(mode=Config.job_config().MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
+    Config.set_job_config(mode=Config.job_config.MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
     yield
-    Config.set_job_config(mode=Config.job_config().DEFAULT_MODE)
+    Config.set_job_config(mode=Config.job_config.DEFAULT_MODE)
 
 
 def test_set_and_get_pipeline():

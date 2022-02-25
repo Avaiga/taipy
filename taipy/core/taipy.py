@@ -569,11 +569,11 @@ def clean_all_entities() -> bool:
     Returns:
         bool: True if the operation succeeded, False otherwise.
     """
-    if not Config.global_config().clean_entities_enabled:
+    if not Config.global_config.clean_entities_enabled:
         __logger.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
         return False
 
-    data_nodes = DataManager().get_all()
+    data_nodes = DataManager.get_all()
 
     # Clean all pickle files
     for data_node in data_nodes:

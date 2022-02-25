@@ -35,7 +35,7 @@ class MockRepository(FileSystemRepository):
 
     @property
     def storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
+        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
 
 class TestFileSystemStorage:

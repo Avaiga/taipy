@@ -22,7 +22,7 @@ class TestPickleDataNodeEntity:
 
     def test_create(self):
         dn = PickleDataNode("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
-        assert os.path.isfile(Config.global_config().storage_folder + "pickles/" + dn.id + ".p")
+        assert os.path.isfile(Config.global_config.storage_folder + "pickles/" + dn.id + ".p")
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
         assert dn.config_name == "foobar_bazxyxea"

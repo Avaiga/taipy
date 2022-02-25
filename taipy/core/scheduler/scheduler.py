@@ -20,7 +20,7 @@ class Scheduler(AbstractScheduler):
     def __init__(self, job_config: JobConfig = None):
         super().__init__()
         if not job_config:
-            job_config = Config.job_config()
+            job_config = Config.job_config
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
         self._dispatcher = JobDispatcher(job_config.nb_of_workers)  # type: ignore

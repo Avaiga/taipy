@@ -21,13 +21,13 @@ def reset_configuration_singleton():
 
 def test_data_node_config_check():
     data_node_config = Config.add_data_node("data_nodes1", "pickle")
-    assert list(Config.data_nodes()) == ["default", data_node_config.name]
+    assert list(Config.data_nodes) == ["default", data_node_config.name]
 
     data_node2_config = Config.add_data_node("data_nodes2", "pickle")
-    assert list(Config.data_nodes()) == ["default", data_node_config.name, data_node2_config.name]
+    assert list(Config.data_nodes) == ["default", data_node_config.name, data_node2_config.name]
 
     data_node3_config = Config.add_data_node("data_nodes3", "csv", has_header=True, path="")
-    assert list(Config.data_nodes()) == [
+    assert list(Config.data_nodes) == [
         "default",
         data_node_config.name,
         data_node2_config.name,
@@ -61,33 +61,33 @@ def test_data_node_config_check():
 
 def test_data_node_count():
     Config.add_data_node("data_nodes1", "pickle")
-    assert len(Config.data_nodes()) == 2
+    assert len(Config.data_nodes) == 2
 
     Config.add_data_node("data_nodes2", "pickle")
-    assert len(Config.data_nodes()) == 3
+    assert len(Config.data_nodes) == 3
 
     Config.add_data_node("data_nodes3", "pickle")
-    assert len(Config.data_nodes()) == 4
+    assert len(Config.data_nodes) == 4
 
 
 def test_data_node_getitem():
     data_node_name = "data_nodes1"
     data_node_config = Config.add_data_node(data_node_name, "pickle")
 
-    assert Config.data_nodes()[data_node_name].name == data_node_config.name
-    assert Config.data_nodes()[data_node_name].storage_type == data_node_config.storage_type
-    assert Config.data_nodes()[data_node_name].scope == data_node_config.scope
-    assert Config.data_nodes()[data_node_name].properties == data_node_config.properties
-    assert Config.data_nodes()[data_node_name].cacheable == data_node_config.cacheable
+    assert Config.data_nodes[data_node_name].name == data_node_config.name
+    assert Config.data_nodes[data_node_name].storage_type == data_node_config.storage_type
+    assert Config.data_nodes[data_node_name].scope == data_node_config.scope
+    assert Config.data_nodes[data_node_name].properties == data_node_config.properties
+    assert Config.data_nodes[data_node_name].cacheable == data_node_config.cacheable
 
 
 def test_data_node_creation_no_duplication():
     Config.add_data_node("data_nodes1", "pickle")
 
-    assert len(Config.data_nodes()) == 2
+    assert len(Config.data_nodes) == 2
 
     Config.add_data_node("data_nodes1", "pickle")
-    assert len(Config.data_nodes()) == 2
+    assert len(Config.data_nodes) == 2
 
 
 def test_date_node_create_with_datetime():
@@ -109,4 +109,4 @@ def test_date_node_create_with_datetime():
 def test_data_node_with_env_variable_value():
     with mock.patch.dict(os.environ, {"BAR": "baz"}):
         Config.add_data_node("data_node", prop="ENV[BAR]")
-        assert Config.data_nodes()["data_node"].prop == "baz"
+        assert Config.data_nodes["data_node"].prop == "baz"
