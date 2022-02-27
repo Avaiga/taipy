@@ -130,7 +130,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
         entity_id (Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]) : id of the entity to delete.
 
     Raises:
-        ModelNotFound : if no entity corresponds to `entity_id`
+        ModelNotFound : No entity corresponds to `entity_id`
     """
     if entity_id.startswith(JobManager.ID_PREFIX):
         return JobManager.delete(JobManager.get(JobId(entity_id)))  # type: ignore

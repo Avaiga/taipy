@@ -50,7 +50,7 @@ class TaskManager:
         Parameters:
             task_id (str): identifier of the task to delete.
         Raises:
-            ModelNotFound error if no task corresponds to task_id.
+            ModelNotFound: No task corresponds to task_id.
         """
         cls.repository.delete(task_id)
 
@@ -125,7 +125,7 @@ class TaskManager:
         """
         Gets a task given the Task or the identifier.
 
-        Args:
+        Parameters:
             task (Union[Task, TaskId]): The task identifier of the task to get.
             default: The default value to return if no task is found. None is returned if no default value is provided.
         """
@@ -166,12 +166,12 @@ class TaskManager:
         parameter, by another scenario.
 
         Parameters:
-        task_id (TaskId): identifier of the task to hard delete.
-        pipeline_id (PipelineId) : identifier of the optional parent pipeline.
-        scenario_id (ScenarioId) : identifier of the optional parent scenario.
+            task_id (TaskId): identifier of the task to hard delete.
+            scenario_id (ScenarioId) : identifier of the optional parent scenario.
+            pipeline_id (PipelineId) : identifier of the optional parent pipeline.
 
         Raises:
-        ModelNotFound error if no pipeline corresponds to pipeline_id.
+            ModelNotFound: No task corresponds to task_id.
         """
         task = cls.get(task_id)
 

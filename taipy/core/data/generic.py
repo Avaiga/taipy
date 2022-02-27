@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.data_node import MissingRequiredProperty, MissingReadFunction, MissingWriteFunction
+from taipy.core.exceptions.data_node import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 
 
 class GenericDataNode(DataNode):
@@ -26,7 +26,7 @@ class GenericDataNode(DataNode):
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
         properties (dict): Dict of additional arguments. Note that the properties parameter should at least contain
-           a value for "read_fct" and "write_fct" properties.
+            a value for "read_fct" and "write_fct" properties.
     """
 
     __STORAGE_TYPE = "generic"

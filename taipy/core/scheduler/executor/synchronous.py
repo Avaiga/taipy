@@ -10,6 +10,7 @@ class Synchronous(Executor):
 
     @staticmethod
     def submit(fn, /, *args, **kwargs):
+        """Execute the function submitted in a synchronous mode."""
         future: Future = Future()
 
         try:

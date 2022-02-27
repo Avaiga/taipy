@@ -79,7 +79,7 @@ class PipelineManager:
         Parameters:
             pipeline_id (str): identifier of the pipeline to delete.
         Raises:
-            ModelNotFound error if no pipeline corresponds to pipeline_id.
+            ModelNotFound: No pipeline corresponds to pipeline_id.
         """
         cls.repository.delete(pipeline_id)
 
@@ -162,7 +162,6 @@ class PipelineManager:
             pipeline (Union[PipelineId, Pipeline]): the pipeline or its id to submit.
             callbacks: Callbacks on job status changes.
             force: Boolean to enforce re execution of the tasks whatever the cache data nodes.
-
         Raises:
             NonExistingPipeline: if no pipeline corresponds to the pipeline identifier.
         """
@@ -201,11 +200,10 @@ class PipelineManager:
         scenario.
 
         Parameters:
-        pipeline_id (PipelineId) : identifier of the pipeline to hard delete.
-        scenario_id (ScenarioId) : identifier of the optional parent scenario.
-
+            pipeline_id (PipelineId) : identifier of the pipeline to hard delete.
+            scenario_id (ScenarioId) : identifier of the optional parent scenario.
         Raises:
-        ModelNotFound error if no pipeline corresponds to pipeline_id.
+            ModelNotFound: No pipeline corresponds to pipeline_id.
         """
         pipeline = cls.get(pipeline_id)
         for task in pipeline.tasks.values():

@@ -46,11 +46,7 @@ class Job:
         self.__logger = TaipyLogger.get_logger()
 
     def __contains__(self, task: Task):
-        """Returns true if the Job contains a specific task.
-
-        Returns:
-            True if the Job is based on this task.
-        """
+        """Returns True if the Job is based on this task."""
         return self.task.id == task.id
 
     def __lt__(self, other):

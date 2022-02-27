@@ -323,15 +323,14 @@ class ScenarioManager:
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
             data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no
-                data_node_config_name is provided, the scenarios will be compared based on all the previously
-                defined comparators.
+                dn_config_name is provided, the scenarios will be compared based on all the previously defined
+                comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
             NonExistingComparator: The provided comparator does not exist
             DifferentScenarioConfigs: The provided scenarios do not share the same scenario_config
             NonExistingScenarioConfig: Cannot find the shared scenario config of the provided scenarios
         """
-
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare
 
@@ -372,10 +371,10 @@ class ScenarioManager:
         nested pipeline if the pipeline is not shared by another scenario.
 
         Parameters:
-        scenario_id (ScenarioId) : identifier of the scenario to hard delete.
+            scenario_id (ScenarioId) : identifier of the scenario to hard delete.
 
         Raises:
-        ModelNotFound error if no scenario corresponds to scenario_id.
+            ModelNotFound: scenario_id does not correspond to any scenario
         """
         scenario = cls.get(scenario_id)
         if scenario.is_master:
