@@ -25,8 +25,7 @@ jobs:
       - name: Install Taipy without dependencies
         run: |
           pip install .
-          rm -r taipy gui  # Removal of Taipy code to ensure the use of the installed package
-
+          rm -r taipy  # Removal of Taipy code to ensure the use of the installed package
           pip install pytest pytest-mock
           pytest
 
