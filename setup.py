@@ -33,7 +33,7 @@ extras_require = {
     "python-magic-bin": ["python-magic-bin;platform_system=='Windows'"],
     "backports.zoneinfo": ["backports.zoneinfo;python_version<'3.9'"],
     "tzdata": ["tzdata;platform_system=='Windows"],
-    "rdp": ["rdp"],
+    "rdp": ["rdp>=0.8"],
 }
 
 setup(
