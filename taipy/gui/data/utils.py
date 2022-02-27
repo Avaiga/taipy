@@ -1,9 +1,17 @@
 from __future__ import annotations
 
 import typing as t
+from importlib import util
 
 import numpy as np
-from rdp import rdp
+
+_has_rdp_module = False
+
+if util.find_spec("rdp"):
+    from rdp import rdp
+
+    _has_rdp_module = True
+
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -16,6 +24,8 @@ def df_data_filter(
     expected_row_count: t.Union[None, int],
     margin_of_error: float = 0.3,
 ) -> t.Tuple[pd.DataFrame, t.Union[None, str], str]:
+    if not _has_rdp_module:
+        return None
     if expected_row_count is not None and __df_row_count(dataframe) <= expected_row_count * (1 + margin_of_error):
         return dataframe, x_column_name, y_column_name
     df = dataframe.copy()
