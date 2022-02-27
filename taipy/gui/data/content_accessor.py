@@ -1,13 +1,15 @@
-import typing as t
-import warnings
 import base64
 import pathlib
 import tempfile
+import typing as t
+import warnings
 from importlib import util
 from pathlib import Path
 from sys import getsizeof
 
 from ..utils import _get_non_existent_file_path
+
+_has_magic_module = False
 
 if util.find_spec("magic"):
     import magic
