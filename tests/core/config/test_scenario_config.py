@@ -37,39 +37,39 @@ def test_scenario_creation():
         "scenarios1", [pipeline1_config, pipeline2_config], comparators={"dn_cfg": [my_func]}
     )
 
-    assert list(Config.scenarios()) == ["default", scenario.name]
+    assert list(Config.scenarios) == ["default", scenario.name]
 
     scenario2 = Config.add_scenario("scenarios2", [pipeline1_config, pipeline2_config], Frequency.MONTHLY)
-    assert list(Config.scenarios()) == ["default", scenario.name, scenario2.name]
+    assert list(Config.scenarios) == ["default", scenario.name, scenario2.name]
 
 
 def test_scenario_count():
     Config.add_scenario("scenarios1", [pipeline1_config, pipeline2_config])
-    assert len(Config.scenarios()) == 2
+    assert len(Config.scenarios) == 2
 
     Config.add_scenario("scenarios2", [pipeline1_config, pipeline2_config])
-    assert len(Config.scenarios()) == 3
+    assert len(Config.scenarios) == 3
 
     Config.add_scenario("scenarios3", [pipeline1_config, pipeline2_config])
-    assert len(Config.scenarios()) == 4
+    assert len(Config.scenarios) == 4
 
 
 def test_scenario_getitem():
     scenario_name = "scenarios1"
     scenario = Config.add_scenario(scenario_name, [pipeline1_config, pipeline2_config])
 
-    assert Config.scenarios()[scenario_name].name == scenario.name
-    assert Config.scenarios()[scenario_name].pipelines == scenario.pipelines
-    assert Config.scenarios()[scenario_name].properties == scenario.properties
+    assert Config.scenarios[scenario_name].name == scenario.name
+    assert Config.scenarios[scenario_name].pipelines == scenario.pipelines
+    assert Config.scenarios[scenario_name].properties == scenario.properties
 
 
 def test_scenario_creation_no_duplication():
     Config.add_scenario("scenarios1", [pipeline1_config, pipeline2_config])
 
-    assert len(Config.scenarios()) == 2
+    assert len(Config.scenarios) == 2
 
     Config.add_scenario("scenarios1", [pipeline1_config, pipeline2_config])
-    assert len(Config.scenarios()) == 2
+    assert len(Config.scenarios) == 2
 
 
 def test_scenario_get_set_and_remove_comparators():
@@ -106,7 +106,7 @@ def test_scenario_get_set_and_remove_comparators():
 def test_scenario_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "bar"}):
         Config.add_scenario("scenario_name", [pipeline1_config, pipeline2_config], prop="ENV[FOO]")
-        assert Config.scenarios()["scenario_name"].prop == "bar"
+        assert Config.scenarios["scenario_name"].prop == "bar"
 
 
 def test_scenario_create_from_tasks():

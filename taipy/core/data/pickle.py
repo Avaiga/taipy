@@ -99,7 +99,7 @@ class PickleDataNode(DataNode):
             return file_name
         from taipy.core.config.config import Config
 
-        dir_path = pathlib.Path(Config.global_config().storage_folder) / "pickles"
+        dir_path = pathlib.Path(Config.global_config.storage_folder) / "pickles"
         if not dir_path.exists():
             dir_path.mkdir(parents=True, exist_ok=True)
         return dir_path / f"{self.id}.p"

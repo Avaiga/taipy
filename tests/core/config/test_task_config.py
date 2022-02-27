@@ -21,23 +21,23 @@ def test_task_config_creation():
     output_config = Config.add_data_node("output")
     task_config = Config.add_task("tasks1", print, input_config, output_config)
 
-    assert list(Config.tasks()) == ["default", task_config.name]
+    assert list(Config.tasks) == ["default", task_config.name]
 
     task2 = Config.add_task("tasks2", print, input_config, output_config)
-    assert list(Config.tasks()) == ["default", task_config.name, task2.name]
+    assert list(Config.tasks) == ["default", task_config.name, task2.name]
 
 
 def test_task_count():
     input_config = Config.add_data_node("input")
     output_config = Config.add_data_node("output")
     Config.add_task("tasks1", print, input_config, output_config)
-    assert len(Config.tasks()) == 2
+    assert len(Config.tasks) == 2
 
     Config.add_task("tasks2", print, input_config, output_config)
-    assert len(Config.tasks()) == 3
+    assert len(Config.tasks) == 3
 
     Config.add_task("tasks3", print, input_config, output_config)
-    assert len(Config.tasks()) == 4
+    assert len(Config.tasks) == 4
 
 
 def test_task_getitem():
@@ -46,11 +46,11 @@ def test_task_getitem():
     task_name = "tasks1"
     task = Config.add_task(task_name, print, input_config, output_config)
 
-    assert Config.tasks()[task_name].name == task.name
-    assert Config.tasks()[task_name].properties == task.properties
-    assert Config.tasks()[task_name].function == task.function
-    assert Config.tasks()[task_name].inputs == task.inputs
-    assert Config.tasks()[task_name].outputs == task.outputs
+    assert Config.tasks[task_name].name == task.name
+    assert Config.tasks[task_name].properties == task.properties
+    assert Config.tasks[task_name].function == task.function
+    assert Config.tasks[task_name].inputs == task.inputs
+    assert Config.tasks[task_name].outputs == task.outputs
 
 
 def test_task_creation_no_duplication():
@@ -58,10 +58,10 @@ def test_task_creation_no_duplication():
     output_config = Config.add_data_node("output")
     Config.add_task("tasks1", print, input_config, output_config)
 
-    assert len(Config.tasks()) == 2
+    assert len(Config.tasks) == 2
 
     Config.add_task("tasks1", print, input_config, output_config)
-    assert len(Config.tasks()) == 2
+    assert len(Config.tasks) == 2
 
 
 def test_task_config_with_env_variable_value():
@@ -70,4 +70,4 @@ def test_task_config_with_env_variable_value():
 
     with mock.patch.dict(os.environ, {"FOO": "plop", "BAR": "baz"}):
         Config.add_task("task_name", print, input_config, output_config, prop="ENV[BAR]")
-        assert Config.tasks()["task_name"].prop == "baz"
+        assert Config.tasks["task_name"].prop == "baz"

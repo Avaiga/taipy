@@ -26,11 +26,11 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             read_fct = data_node._properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY]
             properties[self.READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
             properties[self.READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
-            
+
             write_fct = data_node._properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY]
             properties[self.WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
             properties[self.WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
-            
+
             del (
                 properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY],
                 properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY],
@@ -56,12 +56,12 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
         if model.storage_type == GenericDataNode.storage_type():
             if model.data_node_properties[self.READ_FCT_MODULE_KEY]:
                 model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = load_fct(
-                    model.data_node_properties[self.READ_FCT_MODULE_KEY], 
-                    model.data_node_properties[self.READ_FCT_NAME_KEY]
+                    model.data_node_properties[self.READ_FCT_MODULE_KEY],
+                    model.data_node_properties[self.READ_FCT_NAME_KEY],
                 )
             else:
                 model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = None
-            
+
             if model.data_node_properties[self.WRITE_FCT_MODULE_KEY]:
                 model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = load_fct(
                     model.data_node_properties[self.WRITE_FCT_MODULE_KEY],
@@ -74,7 +74,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             del model.data_node_properties[self.READ_FCT_MODULE_KEY]
             del model.data_node_properties[self.WRITE_FCT_NAME_KEY]
             del model.data_node_properties[self.WRITE_FCT_MODULE_KEY]
-            
+
         return self.class_map[model.storage_type](
             config_name=model.config_name,
             scope=model.scope,
@@ -92,4 +92,4 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
 
     @property
     def storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
+        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore

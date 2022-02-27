@@ -23,42 +23,42 @@ task2_config = Config.add_task("task2", print, [], [])
 def test_pipeline_config_creation():
     pipeline_config = Config.add_pipeline("pipelines1", [task1_config, task2_config])
 
-    assert list(Config.pipelines()) == ["default", pipeline_config.name]
+    assert list(Config.pipelines) == ["default", pipeline_config.name]
 
     pipeline2_config = Config.add_pipeline("pipelines2", [task1_config, task2_config])
-    assert list(Config.pipelines()) == ["default", pipeline_config.name, pipeline2_config.name]
+    assert list(Config.pipelines) == ["default", pipeline_config.name, pipeline2_config.name]
 
 
 def test_pipeline_count():
     Config.add_pipeline("pipelines1", [task1_config, task2_config])
-    assert len(Config.pipelines()) == 2
+    assert len(Config.pipelines) == 2
 
     Config.add_pipeline("pipelines2", [task1_config, task2_config])
-    assert len(Config.pipelines()) == 3
+    assert len(Config.pipelines) == 3
 
     Config.add_pipeline("pipelines3", [task1_config, task2_config])
-    assert len(Config.pipelines()) == 4
+    assert len(Config.pipelines) == 4
 
 
 def test_pipeline_getitem():
     pipeline_config_name = "pipelines1"
     pipeline = Config.add_pipeline(pipeline_config_name, [task1_config, task2_config])
 
-    assert Config.pipelines()[pipeline_config_name].name == pipeline.name
-    assert Config.pipelines()[pipeline_config_name].tasks == pipeline.tasks
-    assert Config.pipelines()[pipeline_config_name].properties == pipeline.properties
+    assert Config.pipelines[pipeline_config_name].name == pipeline.name
+    assert Config.pipelines[pipeline_config_name].tasks == pipeline.tasks
+    assert Config.pipelines[pipeline_config_name].properties == pipeline.properties
 
 
 def test_pipeline_creation_no_duplication():
     Config.add_pipeline("pipelines1", [task1_config, task2_config])
 
-    assert len(Config.pipelines()) == 2
+    assert len(Config.pipelines) == 2
 
     Config.add_pipeline("pipelines1", [task1_config, task2_config])
-    assert len(Config.pipelines()) == 2
+    assert len(Config.pipelines) == 2
 
 
 def test_pipeline_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "bar"}):
         Config.add_pipeline("pipeline_name", [task1_config, task2_config], prop="ENV[FOO]")
-        assert Config.pipelines()["pipeline_name"].prop == "bar"
+        assert Config.pipelines["pipeline_name"].prop == "bar"

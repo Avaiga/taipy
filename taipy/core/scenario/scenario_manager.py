@@ -360,7 +360,7 @@ class ScenarioManager:
 
     @staticmethod
     def __get_config(scenario: Scenario):
-        return Config.scenarios().get(scenario.config_name, None)
+        return Config.scenarios.get(scenario.config_name, None)
 
     @classmethod
     def hard_delete(cls, scenario_id: ScenarioId):

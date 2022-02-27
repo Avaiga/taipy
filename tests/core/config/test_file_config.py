@@ -34,8 +34,8 @@ nb_of_workers = 10
 
     Config.load(config.filename)
 
-    assert not Config.job_config().parallel_execution
-    assert Config.job_config().nb_of_workers == 1
+    assert not Config.job_config.parallel_execution
+    assert Config.job_config.nb_of_workers == 1
 
 
 def test_write_configuration_file():
@@ -242,20 +242,20 @@ def test_all_entities_use_protected_name():
     pipeline_config = Config.add_pipeline("my_pipeline", task_config)
     Config.add_scenario("my_scenario", pipeline_config)
 
-    assert len(Config.data_nodes()) == 3
-    assert Config.data_nodes()["my_datanode"].path == "/data/csv"
-    assert Config.data_nodes()["my_datanode2"].path == "/data2/csv"
-    assert Config.data_nodes()["my_datanode"].name == "my_datanode"
-    assert Config.data_nodes()["my_datanode2"].name == "my_datanode2"
+    assert len(Config.data_nodes) == 3
+    assert Config.data_nodes["my_datanode"].path == "/data/csv"
+    assert Config.data_nodes["my_datanode2"].path == "/data2/csv"
+    assert Config.data_nodes["my_datanode"].name == "my_datanode"
+    assert Config.data_nodes["my_datanode2"].name == "my_datanode2"
 
-    assert len(Config.tasks()) == 2
-    assert Config.tasks()["my_task"].name == "my_task"
-    assert Config.tasks()["my_task"].description == "task description"
+    assert len(Config.tasks) == 2
+    assert Config.tasks["my_task"].name == "my_task"
+    assert Config.tasks["my_task"].description == "task description"
 
-    assert len(Config.pipelines()) == 2
-    assert Config.pipelines()["my_pipeline"].name == "my_pipeline"
-    assert Config.pipelines()["my_pipeline"].cron == "daily"
+    assert len(Config.pipelines) == 2
+    assert Config.pipelines["my_pipeline"].name == "my_pipeline"
+    assert Config.pipelines["my_pipeline"].cron == "daily"
 
-    assert len(Config.scenarios()) == 2
-    assert Config.scenarios()["my_scenario"].name == "my_scenario"
-    assert Config.scenarios()["my_scenario"].owner == "John Doe"
+    assert len(Config.scenarios) == 2
+    assert Config.scenarios["my_scenario"].name == "my_scenario"
+    assert Config.scenarios["my_scenario"].owner == "John Doe"

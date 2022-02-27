@@ -37,7 +37,7 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
 
     @property
     def storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config().storage_folder)  # type: ignore
+        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         cycles_by_frequency = self.__get_cycles_by_frequency(frequency)
