@@ -1,6 +1,8 @@
-from taipy.gui import Gui
 import os
 import pathlib
+from importlib import util
+
+from taipy.gui import Gui
 
 
 def test_file_download_url_md(gui: Gui, helpers):
@@ -22,6 +24,8 @@ def test_file_download_file_md(gui: Gui, helpers):
             "<FileDownload",
             'defaultContent="data:image/png;base64,',
         ]
+        if not util.find_spec("magic"):
+            expected_list = ["<FileDownload", 'defaultContent="/taipy-content/taipyStatic0/TaiPyContent.', ".bin"]
         helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -42,8 +46,10 @@ def test_file_download_any_file_md(gui: Gui, helpers):
         expected_list = [
             "<FileDownload",
             'defaultContent="data:text/x',
-            'python;base64,',
+            "python;base64,",
         ]
+        if not util.find_spec("magic"):
+            expected_list = ["<FileDownload", 'defaultContent="/taipy-content/taipyStatic0/TaiPyContent.', ".bin"]
         helpers.test_control_md(gui, md_string, expected_list)
 
 

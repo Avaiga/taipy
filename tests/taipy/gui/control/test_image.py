@@ -1,6 +1,8 @@
-from taipy.gui import Gui
 import os
 import pathlib
+from importlib import util
+
+from taipy.gui import Gui
 
 
 def test_image_url_md(gui: Gui, helpers):
@@ -22,6 +24,9 @@ def test_image_file_md(gui: Gui, helpers):
             "<Image",
             'defaultContent="data:image/png;base64,',
         ]
+        if not util.find_spec("magic"):
+            expected_list = ["<Image", 'defaultContent="/taipy-content/taipyStatic0/TaiPyContent.', ".bin"]
+        print(expected_list)
         helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -43,6 +48,8 @@ def test_image_bad_file_md(gui: Gui, helpers):
             "<Image",
             'defaultContent="Invalid content: text/x',
         ]
+        if not util.find_spec("magic"):
+            expected_list = ["<Image", 'defaultContent="/taipy-content/taipyStatic0/TaiPyContent.', ".bin"]
         helpers.test_control_md(gui, md_string, expected_list)
 
 
