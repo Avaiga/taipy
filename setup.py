@@ -19,8 +19,6 @@ requirements = [
     "pandas",
     "pyarrow",
     "python-dotenv",
-    "python-magic;platform_system!='Windows'",
-    "python-magic-bin;platform_system=='Windows'",
     "pytz",
     "simple-websocket",
     "toml",
@@ -33,6 +31,8 @@ test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "ngrok": ["pyngrok>=5"],
+    "python-magic": ["python-magic;platform_system!='Windows'"],
+    "python-magic-bin": ["python-magic-bin;platform_system=='Windows'"],
 }
 
 setup(
