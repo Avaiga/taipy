@@ -23,8 +23,6 @@ requirements = [
     "simple-websocket",
     "toml",
     "tzlocal",
-    "backports.zoneinfo;python_version<'3.9'",
-    "rdp",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -33,6 +31,9 @@ extras_require = {
     "ngrok": ["pyngrok>=5"],
     "python-magic": ["python-magic;platform_system!='Windows'"],
     "python-magic-bin": ["python-magic-bin;platform_system=='Windows'"],
+    "backports.zoneinfo": ["backports.zoneinfo;python_version<'3.9'"],
+    "tzdata": ["tzdata;platform_system=='Windows"],
+    "rdp": ["rdp"],
 }
 
 setup(
