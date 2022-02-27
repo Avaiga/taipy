@@ -25,7 +25,7 @@ def df_data_filter(
     margin_of_error: float = 0.3,
 ) -> t.Tuple[pd.DataFrame, t.Union[None, str], str]:
     if not _has_rdp_module:
-        return None
+        return dataframe
     if expected_row_count is not None and __df_row_count(dataframe) <= expected_row_count * (1 + margin_of_error):
         return dataframe, x_column_name, y_column_name
     df = dataframe.copy()
