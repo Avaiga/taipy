@@ -23,7 +23,7 @@ requirements = [
     "simple-websocket",
     "toml",
     "tzlocal",
-    "backports.zoneinfo[tzdata];python_version<'3.9'",
+    "backports.zoneinfo;python_version<'3.9'",
 ]
 
 test_requirements = ["pytest>=3.8"]
