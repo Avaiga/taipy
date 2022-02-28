@@ -48,6 +48,7 @@ class AttributeType(Enum):
     react = "react"
     string = "string"
     string_or_number = "string|number"
+    boolean_or_list = "boolean|list"
 
 
 def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[t.Type[TaipyBase]]:

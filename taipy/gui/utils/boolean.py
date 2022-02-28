@@ -3,3 +3,12 @@ import typing as t
 
 def is_boolean_true(s: t.Union[bool, str]) -> bool:
     return s if isinstance(s, bool) else s.lower() in ["true", "1", "t", "y", "yes", "yeah", "sure"]
+
+
+def is_boolean(s: t.Any) -> bool:
+    if isinstance(s, bool):
+        return True
+    elif isinstance(s, str):
+        return s.lower() in ["true", "1", "t", "y", "yes", "yeah", "sure", "false", "0", "f", "no"]
+    else:
+        return False
