@@ -9,16 +9,25 @@ import warnings
 if t.TYPE_CHECKING:
     from ..gui import Gui
 
-from . import _get_expr_var_name, get_client_var_name, TaipyBase, getscopeattr_drill, getscopeattr, setscopeattr, hasscopeattr
+from . import (
+    TaipyBase,
+    _get_expr_var_name,
+    get_client_var_name,
+    getscopeattr,
+    getscopeattr_drill,
+    hasscopeattr,
+    setscopeattr,
+)
 
 
 class _Evaluator:
 
     # Regex to separate content from inside curly braces when evaluating f string expressions
-    __EXPR_RE = re.compile(r"\{(.*?)\}")
+    __EXPR_RE = re.compile(r"\{(([^\}]*)([^\{]*))\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9]*)$")
+    __EXPR_EDGE_CASE_F_STRING = re.compile(r"[\{]*[a-zA-Z_][a-zA-Z0-9_]*:.+")
 
     def __init__(self, default_bindings: t.Dict[str, t.Any]) -> None:
         # key = expression, value = hashed value of the expression
@@ -48,7 +57,7 @@ class _Evaluator:
         return len(_Evaluator.__EXPR_IS_EXPR.findall(expr)) != 0
 
     def _fetch_expression_list(self, expr: str) -> t.List:
-        return _Evaluator.__EXPR_RE.findall(expr)
+        return [v[0] for v in _Evaluator.__EXPR_RE.findall(expr)]
 
     def _analyze_expression(self, gui: Gui, expr: str) -> t.Tuple[t.Dict[str, t.Any], t.List[str]]:
         var_val: t.Dict[str, t.Any] = {}
@@ -58,18 +67,15 @@ class _Evaluator:
         # Get a list of expressions (value that has been wrapped in curly braces {}) and find variables to bind
         for e in self._fetch_expression_list(expr):
             var_name = e.split(sep=".")[0]
-            st = ast.parse(e)
+            st = ast.parse(e if not _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else 'f"{' + e + '}"')
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
-            targets = [compr.target.id for node in ast.walk(st) if isinstance(
-                node, ast.ListComp) for compr in node.generators]
+            targets = [
+                compr.target.id for node in ast.walk(st) if isinstance(node, ast.ListComp) for compr in node.generators
+            ]
             for node in ast.walk(st):
                 if isinstance(node, ast.Name):
                     var_name = node.id.split(sep=".")[0]
-                    if (
-                        var_name not in args
-                        and var_name not in targets
-                        and var_name not in non_vars
-                    ):
+                    if var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             gui.bind_var(var_name)
                             var_val[var_name] = getscopeattr_drill(gui, var_name)
@@ -171,7 +177,7 @@ class _Evaluator:
         expr_string = 'f"' + expr.replace('"', '\\"') + '"'
         # simplify expression if it only contains var_name
         m = _Evaluator.__EXPR_IS_EDGE_CASE.match(expr)
-        if m:
+        if m and not _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(expr):
             expr = m.group(1)
             expr_hash = expr if _Evaluator.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True

@@ -64,7 +64,7 @@ interface ChartConfig {
     lines: Partial<ScatterLine>[];
     texts: string[];
     textAnchors: string[];
-    extendData: Record<string, unknown>[];
+    options: Record<string, unknown>[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -164,7 +164,7 @@ const Chart = (props: ChartProp) => {
                 lines: [],
                 texts: [],
                 textAnchors: [],
-                extendData: [],
+                options: [],
             } as ChartConfig;
         }
     }, [props.config]);
@@ -218,7 +218,7 @@ const Chart = (props: ChartProp) => {
         const datum = data && data[dataKey.current];
         return config.traces.map((trace, idx) => {
             const ret = {
-                ...getArrayValue(config.extendData, idx, {}),
+                ...getArrayValue(config.options, idx, {}),
                 type: config.types[idx],
                 mode: config.modes[idx],
                 name:

@@ -19,20 +19,19 @@ requirements = [
     "pandas",
     "pyarrow",
     "python-dotenv",
-    "python-magic;platform_system!='Windows'",
-    "python-magic-bin;platform_system=='Windows'",
     "pytz",
     "simple-websocket",
     "toml",
     "tzlocal",
     "backports.zoneinfo;python_version<'3.9'",
-    "rdp",
 ]
 
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "ngrok": ["pyngrok>=5"],
+    "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
+    "rdp": ["rdp>=0.8"],
 }
 
 setup(
