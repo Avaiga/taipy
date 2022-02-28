@@ -8,7 +8,8 @@ import pytz
 import tzlocal
 from dotenv import dotenv_values
 
-from .page import Page, Partial
+from ._page import _Page
+from .partial import Partial
 
 AppConfigOption = t.Literal[
     "port",
@@ -62,33 +63,6 @@ AppConfig = t.TypedDict(
     total=False,
 )
 
-StyleConfig = t.TypedDict(
-    "StyleConfig",
-    {
-        "button": str,
-        "chart": str,
-        "date_selector": str,
-        "dialog": str,
-        "expandable": str,
-        "file_download": str,
-        "file_selector": str,
-        "image": str,
-        "input": str,
-        "layout": str,
-        "navbar": str,
-        "pane": str,
-        "part": str,
-        "selector": str,
-        "slider": str,
-        "status": str,
-        "table": str,
-        "text": str,
-        "toggle": str,
-        "tree": str,
-    },
-    total=False,
-)
-
 
 class GuiConfig(object):
 
@@ -97,17 +71,15 @@ class GuiConfig(object):
     )
 
     def __init__(self):
-        self.pages: t.List[Page] = []
+        self.pages: t.List[_Page] = []
         self.routes: t.List[str] = []
         self.partials: t.List[Partial] = []
         self.partial_routes: t.List[str] = []
         self.app_config: AppConfig = {}
-        self.style_config: StyleConfig = {}
 
-    def load_config(self, app_config={}, style_config={}) -> None:
+    def load_config(self, app_config: AppConfig) -> None:
         self.app_config.update(app_config)
-        self.style_config.update(style_config)
-        # Run get_time_zone to verify user predefined IANA time_zone if available
+        # verify user timezone config is valid
         self.get_time_zone()
 
     def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
@@ -132,7 +104,7 @@ class GuiConfig(object):
         # Verify user defined IANA Time Zone is valid
         if self.app_config["time_zone"] not in pytz.all_timezones_set:
             raise Exception(
-                "Time Zone configuration is not valid! Mistyped 'server', 'client' options of invalid IANA Time Zone!"
+                "Time Zone configuration is not valid. Mistyped 'server', 'client' options or invalid IANA Time Zone"
             )
         # return user defined IANA Time Zone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
         return self.app_config["time_zone"]

@@ -1,5 +1,6 @@
 import re
 import typing as t
+import warnings
 from html.parser import HTMLParser
 
 from .factory import HtmlFactory
@@ -18,9 +19,12 @@ class TaipyHTMLParser(HTMLParser):
         self.tag_mapping = {}
         self.is_body = True
         self.head_tag = None
+        self._line_count = 0
+        self._tag_queue = []
 
     # @override
     def handle_starttag(self, tag, props) -> None:
+        self._tag_queue.append((tag, self._line_count))
         if tag == "html":
             return
         if self.head_tag is not None:
@@ -52,6 +56,14 @@ class TaipyHTMLParser(HTMLParser):
 
     # @override
     def handle_endtag(self, tag) -> None:
+        if not self._tag_queue:
+            warnings.warn(f"Closing '{tag}' at line {self._line_count} is missing an opening tag")
+        else:
+            opening_tag, opening_tag_line = self._tag_queue.pop()
+            if opening_tag != tag:
+                warnings.warn(
+                    f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag '{tag}' at line {self._line_count}"
+                )
         if tag in ["head", "body", "html"]:
             return
         if self.taipy_tag is not None:
@@ -76,6 +88,15 @@ class TaipyHTMLParser(HTMLParser):
 
     def get_jsx(self) -> str:
         return self.body
+
+    def feed_data(self, data: str):
+        data_lines = data.split("\n")
+        for line, data_line in enumerate(data_lines):
+            self._line_count = line + 1
+            self.feed(data_line)
+        while self._tag_queue:
+            opening_tag, opening_tag_line = self._tag_queue.pop()
+            warnings.warn(f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag")
 
 
 class TaipyTag(object):

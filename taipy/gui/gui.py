@@ -18,13 +18,14 @@ from werkzeug.utils import secure_filename
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
-from ._default_config import app_config_default, style_config_default
-from .config import AppConfigOption, GuiConfig
+from ._default_config import app_config_default
+from ._page import _Page
+from .config import AppConfig, AppConfigOption, GuiConfig
 from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
-from .page import Page, Partial
-from .renderers import EmptyPageRenderer, PageRenderer
+from .partial import Partial
+from .renderers import EmptyPage, Page
 from .renderers._markdown import TaipyMarkdownExtension
 from .server import Server
 from .types import WsType
@@ -82,7 +83,7 @@ class Gui:
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        page: t.Optional[t.Union[str, PageRenderer]] = None,
+        page: t.Optional[t.Union[str, Page]] = None,
         pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
@@ -92,11 +93,11 @@ class Gui:
 
         Parameters:
 
-            page (t.Union[str, PageRenderer], optional): An optional `PageRenderer` instance
+            page (t.Union[str, Page], optional): An optional `Page` instance
                 that is used when there is a single page in this interface, referenced as the
                 root page (located at `/`).
 
-                If `page` is a raw string, a `Markdown` page renderer is built from that string.
+                If `page` is a raw string, a `Markdown` Page is built from that string.
 
                 Note that if `pages` is provided, those pages are added as well.
 
@@ -128,7 +129,7 @@ class Gui:
 
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
-        self._config.load_config(app_config_default, style_config_default)
+        self._config.load_config(app_config_default)
 
         # Load Markdown extension
         # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
@@ -148,7 +149,7 @@ class Gui:
         )
 
         if page:
-            self.add_page(name=Gui.__root_page_name, renderer=page)
+            self.add_page(name=Gui.__root_page_name, page=page)
         if pages is not None:
             self.add_pages(pages)
         if env_filename is not None:
@@ -503,7 +504,9 @@ class Gui:
     def __on_action(self, id: t.Optional[str], payload: t.Any) -> None:
         action = payload.get("action") if isinstance(payload, dict) else str(payload)
         if action:
-            if self.__call_function_with_args(action_function=self._get_user_function(action), id=id, payload=payload, action=action):
+            if self.__call_function_with_args(
+                action_function=self._get_user_function(action), id=id, payload=payload, action=action
+            ):
                 return
             else:
                 warnings.warn(f"on_action: '{action}' is not a function")
@@ -597,11 +600,17 @@ class Gui:
 
         return _taipy_on_cancel_block_ui
 
+    def _get_locals_bind(self):
+        return self.__locals_bind
+
+    def _get_root_page_name(self):
+        return self.__root_page_name
+
     # Public methods
     def add_page(
         self,
         name: str,
-        renderer: t.Union[str, PageRenderer],
+        page: t.Union[str, Page],
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -615,27 +624,27 @@ class Gui:
             raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character')
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
-        if isinstance(renderer, str):
+        if isinstance(page, str):
             from .renderers import Markdown
 
-            renderer = Markdown(renderer)
-        elif not isinstance(renderer, PageRenderer):
-            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid PageRenderer')
+            page = Markdown(page)
+        elif not isinstance(page, Page):
+            raise Exception(f'"page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}')
         # Init a new page
-        new_page = Page()
+        new_page = _Page()
         new_page.route = name
-        new_page.renderer = renderer
+        new_page.renderer = page
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
 
-    def add_pages(self, pages: t.Union[dict[str, t.Union[str, PageRenderer]], str] = None) -> None:
+    def add_pages(self, pages: t.Union[dict[str, t.Union[str, Page]], str] = None) -> None:
         if isinstance(pages, dict):
             for k, v in pages.items():
                 if k == "/":
                     k = Gui.__root_page_name
-                self.add_page(name=k, renderer=v)
+                self.add_page(name=k, page=v)
         elif isinstance(folder_name := pages, str):
             if not hasattr(self, "_root_dir"):
                 self._root_dir = os.path.dirname(
@@ -657,10 +666,10 @@ class Gui:
                 if re_match := Gui.__RE_HTML.match(file_name):
                     renderers = Html(os.path.join(folder_path, file_name))
                     renderers.modify_taipy_base_url(folder_name)
-                    self.add_page(name=re_match.group(1), renderer=renderers)
+                    self.add_page(name=re_match.group(1), page=renderers)
                 elif re_match := Gui.__RE_MD.match(file_name):
                     renderers_md = Markdown(os.path.join(folder_path, file_name))
-                    self.add_page(name=re_match.group(1), renderer=renderers_md)
+                    self.add_page(name=re_match.group(1), page=renderers_md)
                 elif os.path.isdir(assets_folder := os.path.join(folder_path, file_name)):
                     assets_dir_name = f"{folder_name}/{file_name}"
                     self._flask_blueprint.append(
@@ -671,20 +680,20 @@ class Gui:
 
     def add_partial(
         self,
-        renderer: t.Union[str, PageRenderer],
+        page: t.Union[str, Page],
     ) -> Partial:
         # Init a new partial
         new_partial = Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
-        if isinstance(renderer, str):
+        if isinstance(page, str):
             from .renderers import Markdown
 
-            renderer = Markdown(renderer)
-        elif not isinstance(renderer, PageRenderer):
-            raise Exception(f'Partial name "{new_partial.route}" has invalid PageRenderer')
-        new_partial.renderer = renderer
+            page = Markdown(page)
+        elif not isinstance(page, Page):
+            raise Exception(f'Partial name "{new_partial.route}" has invalid Page')
+        new_partial.renderer = page
         # Append partial to _config
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial.route))
@@ -718,8 +727,10 @@ class Gui:
             else:
                 warnings.warn(f"{name}: {func} should be a function")
 
-    def load_config(self, app_config: t.Optional[dict] = {}, style_config: t.Optional[dict] = {}) -> None:
-        self._config.load_config(app_config=app_config, style_config=style_config)
+    def load_config(self, app_config: t.Optional[AppConfig] = None) -> None:
+        if app_config is None:
+            return
+        self._config.load_config(app_config=app_config)
 
     def show_notification(
         self,
@@ -849,16 +860,14 @@ class Gui:
             print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
-        self.__locals_bind: t.Dict[str, t.Any] = t.cast(
-            FrameType, t.cast(FrameType, inspect.currentframe()).f_back
-        ).f_locals
+        self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
 
         self.__state = State(self, self.__locals_bind.keys())
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in self.__locals_bind.items() if inspect.ismodule(v) or callable(v)})
-        self.__evaluator: _Evaluator = _Evaluator(glob_ctx)
+        self.__evaluator = _Evaluator(glob_ctx)
 
         # bind on_change and on_action function if available
         self.__bind_local_func("on_change")
@@ -866,9 +875,9 @@ class Gui:
 
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
-            new_page = Page()
+            new_page = _Page()
             new_page.route = Gui.__root_page_name
-            new_page.renderer = EmptyPageRenderer()
+            new_page.renderer = EmptyPage()
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 

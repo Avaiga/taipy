@@ -1,11 +1,12 @@
-from taipy.gui import Gui
 import pytest
+
+from taipy.gui import Gui
 
 
 def test_invalid_control_name(gui: Gui, helpers):
     md_string = "<|invalid|invalid|>"
     expected_list = ["<Field", 'value="invalid"']
-    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
+    helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_value_to_negated_property(gui: Gui, helpers):
@@ -41,4 +42,4 @@ def test_closing_unknown_block(gui: Gui, helpers):
 def test_md_link(gui: Gui, helpers):
     md_string = "[content](link)"
     expected_list = ["<a", 'href="link"', "content</a>"]
-    helpers.test_control_md(gui, md_string, expected_list, check_warning=False)
+    helpers.test_control_md(gui, md_string, expected_list)
