@@ -6,7 +6,7 @@ import typing as t
 import warnings
 import xml.etree.ElementTree as etree
 
-from ..page import Partial
+from ..partial import Partial
 from ..types import AttributeType, _get_taipy_type
 from ..utils import (
     _get_expr_var_name,

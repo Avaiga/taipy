@@ -1,4 +1,4 @@
-# Page and Partial for multipage support
+# _Page for multipage support
 from __future__ import annotations
 
 import logging
@@ -11,26 +11,12 @@ if t.TYPE_CHECKING:
 
 
 class _Page(object):
-    """A page that can be served by a `Gui` instance.
-
-    In order for `Gui` to serve pages to a Web browser, you must create instances of `_Page`.
-
-    Every page has a name, so it can be located in the address bar of the browser, and some
-    content that is generated from a text template.
-
-    Attributes:
-        renderer (Page):  The renderer to be used for this page.
-        route (string): The name of this page.
-        style (string): TBD
-        head: TBD
-    """
-
     def __init__(self):
-        self.rendered_jsx: t.Union[str, None] = None
-        self.renderer: t.Union[Page, None] = None
-        self.style: t.Union[str, None] = None
-        self.route: t.Union[str, None] = None
-        self.head: t.Union[str, None] = None
+        self.rendered_jsx: t.Optional[str] = None
+        self.renderer: t.Optional[Page] = None
+        self.style: t.Optional[str] = None
+        self.route: t.Optional[str] = None
+        self.head: t.Optional[str] = None
 
     def render(self, gui: Gui):
         if self.renderer is None:
@@ -50,13 +36,3 @@ class _Page(object):
                 logging.warn(s)
         if hasattr(self.renderer, "head"):
             self.head = str(self.renderer.head)  # type: ignore
-
-
-class Partial(_Page):
-
-    __partials: t.Dict[str, Partial] = {}
-
-    def __init__(self):
-        super().__init__()
-        self.route = "TaiPy_partials_" + str(len(Partial.__partials))
-        Partial.__partials[self.route] = self

@@ -19,11 +19,12 @@ if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
 from ._default_config import app_config_default
+from ._page import _Page
 from .config import AppConfig, AppConfigOption, GuiConfig
 from .data.content_accessor import ContentAccessor
 from .data.data_accessor import DataAccessor, _DataAccessors
 from .data.data_format import DataFormat
-from .page import _Page, Partial
+from .partial import Partial
 from .renderers import EmptyPage, Page
 from .renderers._markdown import TaipyMarkdownExtension
 from .server import Server
@@ -96,7 +97,7 @@ class Gui:
                 that is used when there is a single page in this interface, referenced as the
                 root page (located at `/`).
 
-                If `page` is a raw string, a `Markdown` page renderer is built from that string.
+                If `page` is a raw string, a `Markdown` Page is built from that string.
 
                 Note that if `pages` is provided, those pages are added as well.
 
@@ -148,7 +149,7 @@ class Gui:
         )
 
         if page:
-            self.add_page(name=Gui.__root_page_name, renderer=page)
+            self.add_page(name=Gui.__root_page_name, page=page)
         if pages is not None:
             self.add_pages(pages)
         if env_filename is not None:
@@ -609,7 +610,7 @@ class Gui:
     def add_page(
         self,
         name: str,
-        renderer: t.Union[str, Page],
+        page: t.Union[str, Page],
         style: t.Optional[str] = "",
     ) -> None:
         # Validate name
@@ -623,16 +624,16 @@ class Gui:
             raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character')
         if name in self._config.routes:
             raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
-        if isinstance(renderer, str):
+        if isinstance(page, str):
             from .renderers import Markdown
 
-            renderer = Markdown(renderer)
-        elif not isinstance(renderer, Page):
-            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" has invalid Page')
+            page = Markdown(page)
+        elif not isinstance(page, Page):
+            raise Exception(f'"page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}')
         # Init a new page
         new_page = _Page()
         new_page.route = name
-        new_page.renderer = renderer
+        new_page.renderer = page
         new_page.style = style
         # Append page to _config
         self._config.pages.append(new_page)
@@ -643,7 +644,7 @@ class Gui:
             for k, v in pages.items():
                 if k == "/":
                     k = Gui.__root_page_name
-                self.add_page(name=k, renderer=v)
+                self.add_page(name=k, page=v)
         elif isinstance(folder_name := pages, str):
             if not hasattr(self, "_root_dir"):
                 self._root_dir = os.path.dirname(
@@ -665,10 +666,10 @@ class Gui:
                 if re_match := Gui.__RE_HTML.match(file_name):
                     renderers = Html(os.path.join(folder_path, file_name))
                     renderers.modify_taipy_base_url(folder_name)
-                    self.add_page(name=re_match.group(1), renderer=renderers)
+                    self.add_page(name=re_match.group(1), page=renderers)
                 elif re_match := Gui.__RE_MD.match(file_name):
                     renderers_md = Markdown(os.path.join(folder_path, file_name))
-                    self.add_page(name=re_match.group(1), renderer=renderers_md)
+                    self.add_page(name=re_match.group(1), page=renderers_md)
                 elif os.path.isdir(assets_folder := os.path.join(folder_path, file_name)):
                     assets_dir_name = f"{folder_name}/{file_name}"
                     self._flask_blueprint.append(
@@ -679,20 +680,20 @@ class Gui:
 
     def add_partial(
         self,
-        renderer: t.Union[str, Page],
+        page: t.Union[str, Page],
     ) -> Partial:
         # Init a new partial
         new_partial = Partial()
         # Validate name
         if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
             warnings.warn(f'Partial name "{new_partial.route}" is already defined')
-        if isinstance(renderer, str):
+        if isinstance(page, str):
             from .renderers import Markdown
 
-            renderer = Markdown(renderer)
-        elif not isinstance(renderer, Page):
+            page = Markdown(page)
+        elif not isinstance(page, Page):
             raise Exception(f'Partial name "{new_partial.route}" has invalid Page')
-        new_partial.renderer = renderer
+        new_partial.renderer = page
         # Append partial to _config
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial.route))
