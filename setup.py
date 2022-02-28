@@ -30,8 +30,7 @@ test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "ngrok": ["pyngrok>=5"],
-    "python-magic": ["python-magic;platform_system!='Windows'"],
-    "python-magic-bin": ["python-magic-bin;platform_system=='Windows'"],
+    "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
     "rdp": ["rdp>=0.8"],
 }
 
