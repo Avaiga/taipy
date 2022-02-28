@@ -136,7 +136,7 @@ const TreeView = (props: TreeViewProps) => {
     const clickHandler = useCallback(
         (event: SyntheticEvent, nodeIds: string[] | string) => {
             setSelectedValue(nodeIds);
-            dispatch(
+            tp_varname && dispatch(
                 createSendUpdateAction(
                     tp_varname,
                     Array.isArray(nodeIds) ? nodeIds : [nodeIds],
@@ -151,6 +151,7 @@ const TreeView = (props: TreeViewProps) => {
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
     const handleNodeToggle = useCallback((event: React.SyntheticEvent, nodeIds: string[]) => {
+        const expVar = getUpdateVar(tp_updatevars, "expanded")
         if (oneExpanded) {
             setExpandedNodes(en => {
                 if (en.length < nodeIds.length) {
@@ -160,7 +161,7 @@ const TreeView = (props: TreeViewProps) => {
                 if (refreshExpanded) {
                     dispatch(
                         createSendUpdateAction(
-                            getUpdateVar(tp_updatevars, "expanded"),
+                            expVar,
                             nodeIds,
                             propagate,
                         )
@@ -173,7 +174,7 @@ const TreeView = (props: TreeViewProps) => {
             if (refreshExpanded) {
                 dispatch(
                     createSendUpdateAction(
-                        getUpdateVar(tp_updatevars, "expanded"),
+                        expVar,
                         nodeIds,
                         propagate,
                     )
