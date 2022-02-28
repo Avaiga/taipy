@@ -30,7 +30,7 @@ def test_tree_expended_md_1(gui: Gui, helpers):
 
 def test_tree_expended_md_2(gui: Gui, helpers):
     gui.bind_var_val("value", "Item 1")
-    gui.bind_var_val("expa", [])
+    gui.bind_var_val("expa", ["Item1"])
     md_string = "<|{value}|tree|lov=Item 1;Item 2;Item 3|expanded={expa}|>"
     expected_list = [
         "<TreeView",
@@ -38,6 +38,7 @@ def test_tree_expended_md_2(gui: Gui, helpers):
         'defaultValue="[&quot;Item 1&quot;]"',
         'tp_varname="value"',
         "value={value}",
+        'defaultExpanded="[&quot;Item1&quot;]"',
         "expanded={expa}",
         'tp_updatevars="expanded=expa"',
     ]
