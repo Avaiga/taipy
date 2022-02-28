@@ -1,2 +1,3 @@
 ﻿Name,Type,Default,Doc
+expanded,dynamic(bool|str[]),True,"if boolean value False: only one node can be expanded at one given level else it should be an array of the ids that need to be expanded"
 >selector,,,
