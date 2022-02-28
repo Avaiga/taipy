@@ -26,7 +26,6 @@ def test_image_file_md(gui: Gui, helpers):
         ]
         if not util.find_spec("magic"):
             expected_list = ["<Image", 'defaultContent="/taipy-content/taipyStatic0/TaiPyContent.', ".bin"]
-        print(expected_list)
         helpers.test_control_md(gui, md_string, expected_list)
 
 
