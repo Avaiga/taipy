@@ -89,6 +89,32 @@ And that's it ! Uwsgi is running on port 5000
 
 If you chose uwsgi as your wsgi server, the proper commands should be in your docker-compose file.
 
+#### Deploying on Heroku
+Make sure you have a working Docker installation (eg. docker ps) and that you’re logged in to Heroku (heroku login).
+
+Log in to Container Registry:
+
+```
+$ heroku container:login
+```
+
+Create a heroku app
+```
+$ heroku create
+```
+
+Build the image and push to Container Registry:
+```
+$ heroku container:push web
+```
+
+Then release the image:
+```
+$ heroku container:release web
+```
+
+You can now access **taipy rest** on the URL that was returned on the `heroku create` command.
+
 
 
 ### Documentation
