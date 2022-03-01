@@ -29,6 +29,7 @@ import Alert from "./Taipy/Alert";
 import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
 import Menu from "./Taipy/Menu";
+import GuiDownload from "./Taipy/GuiDownload";
 
 interface AxiosRouter {
     router: string;
@@ -98,6 +99,7 @@ const Router = () => {
                                 <Alert alert={state.alert} />
                                 <UIBlocker block={state.block} />
                                 <Navigate to={state.to} />
+                                <GuiDownload download={state.download} />
                             </BrowserRouter>
                         </LocalizationProvider>
                     </SnackbarProvider>

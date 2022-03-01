@@ -25,6 +25,7 @@ enum Types {
     ClientId = "CLIENT_ID",
     MultipleMessages = "MULTIPLE_MESSAGES",
     SetMenu = "SET_MENU",
+    DownloadFile = "DOWNLOAD_FILE",
 }
 
 export interface TaipyState {
@@ -41,6 +42,7 @@ export interface TaipyState {
     to?: string;
     id: string;
     menu: MenuProps;
+    download?: FileDownloadProps;
 }
 
 export interface TaipyBaseAction {
@@ -94,7 +96,15 @@ interface IdMessage {
     id: string;
 }
 
+export interface FileDownloadProps {
+    content?: string;
+    name?: string;
+    onAction?: string;
+}
+
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
+
+interface TaipyDownloadAction extends TaipyBaseAction, FileDownloadProps {}
 
 interface TaipySetMenuAction extends TaipyBaseAction {
     menu: MenuProps;
@@ -166,6 +176,8 @@ const messageToAction = (message: WsMessage) => {
             return createNavigateAction((message as unknown as NavigateMessage).to);
         } else if (message.type === "ID") {
             return createIdAction((message as unknown as IdMessage).id);
+        } else if (message.type === "DF") {
+            return createDownloadAction(message as unknown as FileDownloadProps);
         }
     }
     return {} as TaipyBaseAction;
@@ -315,6 +327,14 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.SetMenu: {
             const mAction = baseAction as TaipySetMenuAction;
             return { ...state, menu: mAction.menu };
+        }
+        case Types.DownloadFile: {
+            const dAction = baseAction as TaipyDownloadAction;
+            if (dAction.content === undefined) {
+                delete state.download;
+                return { ...state };
+            }
+            return { ...state, download: { content: dAction.content, name: dAction.name, onAction: dAction.onAction } };
         }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
@@ -512,6 +532,13 @@ export const createIdAction = (id: string): TaipyIdAction => ({
     id: id,
 });
 
+export const createDownloadAction = (dMessage?: FileDownloadProps): TaipyDownloadAction => ({
+    type: Types.DownloadFile,
+    content: dMessage?.content,
+    name: dMessage?.name,
+    onAction: dMessage?.onAction,
+});
+
 export const createSetMenuAction = (menu: MenuProps): TaipySetMenuAction => ({
     type: Types.SetMenu,
     menu: menu,
@@ -522,7 +549,7 @@ export const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultip
     actions: messages.map(messageToAction),
 });
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS";
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF";
 
 interface WsMessage {
     type: WsMessageType;
