@@ -39,8 +39,9 @@ class DataNodeModel:
     last_edition_date: Optional[str]
     job_ids: List[JobId]
     validity_days: Optional[int]
-    validity_hours: Optional[int]
-    validity_minutes: Optional[int]
+    # validity_hours: Optional[int]
+    # validity_minutes: Optional[int]
+    validity_seconds: Optional[int]
     edition_in_progress: bool
     data_node_properties: Dict[str, Any]
 
@@ -58,9 +59,11 @@ class DataNodeModel:
             parent_id=data["parent_id"],
             last_edition_date=data["last_edition_date"],
             job_ids=data["job_ids"],
-            validity_days=int(data["validity_days"]) if data["validity_days"] else None,
-            validity_hours=int(data["validity_hours"]) if data["validity_hours"] else None,
-            validity_minutes=int(data["validity_minutes"]) if data["validity_minutes"] else None,
+            # validity_days=int(data["validity_days"]) if data["validity_days"] else None,
+            # validity_hours=int(data["validity_hours"]) if data["validity_hours"] else None,
+            # validity_minutes=int(data["validity_minutes"]) if data["validity_minutes"] else None,
+            validity_days=int(data["validity_period"].days) if data["validity_period"] else None,
+            validity_seconds=int(data["validity_period"].seconds) if data["validity_period"] else None,
             edition_in_progress=bool(data["edition_in_progress"]),
             data_node_properties=data["data_node_properties"],
         )
