@@ -167,10 +167,12 @@ class PipelineManager:
         """
         callbacks = callbacks or []
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
+        # print(pipeline.get_sorted_tasks())
         pipeline = cls.get(pipeline_id)
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
+        # print(pipeline.get_sorted_tasks())
         TaskManager.scheduler().submit(pipeline, callbacks=pipeline_subscription_callback, force=force)
 
     @staticmethod

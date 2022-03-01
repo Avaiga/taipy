@@ -171,6 +171,21 @@ def test_submit():
     assert set(calls_ids) == set(tasks_ids)
     TaskManager.scheduler = SchedulerFactory.build_scheduler
 
+g = 0
+
+def do_nothing():
+    global g
+    g += 1
+    print('hello')
+
+def test_submit_scenario_from_tasks():
+    task_1_cfg = Task("my_task_1", do_nothing)
+    pipeline = Pipeline("my_pipeline", {}, [task_1_cfg])
+    PipelineManager.set(pipeline)
+    assert len(pipeline.get_sorted_tasks()) == 1
+    
+    PipelineManager.submit(pipeline)
+    assert g == 1
 
 def mult_by_2(nb: int):
     return nb * 2

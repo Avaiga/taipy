@@ -110,10 +110,14 @@ class Pipeline:
     def __build_dag(self):
         graph = nx.DiGraph()
         for task in self.tasks.values():
-            for predecessor in task.input.values():
-                graph.add_edges_from([(predecessor, task)])
-            for successor in task.output.values():
-                graph.add_edges_from([(task, successor)])
+            if has_input := task.input:
+                for predecessor in task.input.values():
+                    graph.add_edges_from([(predecessor, task)])
+            if has_output := task.output:
+                for successor in task.output.values():
+                    graph.add_edges_from([(task, successor)])
+            # if not has_input and not has_output:
+            #     graph.add_node(task)
         return graph
 
     def add_subscriber(self, callback: Callable):
