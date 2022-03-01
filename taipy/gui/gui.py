@@ -763,7 +763,7 @@ class Gui:
         """Sends a notification to the user interface.
 
         Args:
-            type (string): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
+            type (optional(string)): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
                 To remove the last notification, set this parameter to the empty string.
             message (string): The text message to display.
             browser_notification (optional(bool)): If set to `True`, the browser will also show the notification.
