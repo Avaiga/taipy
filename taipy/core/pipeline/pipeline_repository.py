@@ -29,20 +29,17 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
             pipeline.parent_id,
             pipeline.config_name,
             pipeline._properties.data,
-            # [task.id for task in pipeline.tasks.values()],
-            Dag(dict(datanode_task_edges)),
-            Dag(dict(task_datanode_edges)),
+            [task.id for task in pipeline.tasks.values()],
             utils.fcts_to_dict(pipeline._subscribers),
         )
 
     def from_model(self, model: PipelineModel) -> Pipeline:
         try:
-            tasks = self.__to_tasks(model.task_datanode_edges.keys())
+            tasks = self.__to_tasks(model.tasks)
             pipeline = Pipeline(
                 model.name,
                 model.properties,
                 tasks,
-                # model.tasks,
                 model.id,
                 model.parent_id,
                 {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},

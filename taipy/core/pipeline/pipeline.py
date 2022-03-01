@@ -116,8 +116,8 @@ class Pipeline:
             if has_output := task.output:
                 for successor in task.output.values():
                     graph.add_edges_from([(task, successor)])
-            # if not has_input and not has_output:
-            #     graph.add_node(task)
+            if not has_input and not has_output:
+                graph.add_node(task)
         return graph
 
     def add_subscriber(self, callback: Callable):
@@ -129,20 +129,12 @@ class Pipeline:
         self._subscribers.remove(callback)
 
     def to_model(self) -> PipelineModel:
-        datanode_task_edges = defaultdict(list)
-        task_datanode_edges = defaultdict(list)
-        for task in self.tasks.values():
-            for predecessor in task.input.values():
-                datanode_task_edges[str(predecessor.id)].append(str(task.id))
-            for successor in task.output.values():
-                task_datanode_edges[str(task.id)].append(str(successor.id))
         return PipelineModel(
             self.id,
             self.parent_id,
             self.config_name,
             self._properties.data,
-            Dag(dict(datanode_task_edges)),
-            Dag(dict(task_datanode_edges)),
+            [task.id for task in self.tasks.values()],
             fcts_to_dict(list(self._subscribers)),
         )
 

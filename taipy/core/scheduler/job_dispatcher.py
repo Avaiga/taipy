@@ -97,23 +97,23 @@ class JobDispatcher:
     @classmethod
     def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
         try:
-            _results = cls.__extract_results(outputs, results)
-            exceptions = []
-            for res, dn in zip(_results, outputs):
-                try:
-                    data_node = DataManager.get(dn.id)
-                    data_node.write(res, job_id=job_id)
-                    DataManager.set(data_node)
-                except Exception as e:
-                    exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
-            return exceptions
+            if outputs:
+                _results = cls.__extract_results(outputs, results)
+                exceptions = []
+                for res, dn in zip(_results, outputs):
+                    try:
+                        data_node = DataManager.get(dn.id)
+                        data_node.write(res, job_id=job_id)
+                        DataManager.set(data_node)
+                    except Exception as e:
+                        exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
+                return exceptions
         except Exception as e:
             return [e]
 
     @classmethod
     def __extract_results(cls, outputs: List[DataNode], results: Any) -> List[Any]:
         _results: List[Any] = [results] if len(outputs) == 1 else results
-
         if len(_results) != len(outputs):
             raise DataNodeWritingError("Error: wrong number of result or task output")
 

@@ -23,9 +23,7 @@ class PipelineModel:
     parent_id: Optional[str]
     name: str
     properties: Dict[str, Any]
-    # tasks: List[TaskId]
-    datanode_task_edges: Dag
-    task_datanode_edges: Dag
+    tasks: List[TaskId]
     subscribers: List[Dict]
 
     def to_dict(self) -> Dict[str, Any]:
@@ -38,8 +36,6 @@ class PipelineModel:
             parent_id=data["parent_id"],
             name=data["name"],
             properties=data["properties"],
-            # tasks=data['tasks'],
-            datanode_task_edges=data["datanode_task_edges"],
-            task_datanode_edges=data["task_datanode_edges"],
+            tasks=data['tasks'],
             subscribers=data["subscribers"],
         )

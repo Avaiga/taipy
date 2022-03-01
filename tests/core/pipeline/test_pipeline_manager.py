@@ -173,19 +173,60 @@ def test_submit():
 
 g = 0
 
-def do_nothing():
+def mock_function_no_input_no_output():
     global g
     g += 1
-    print('hello')
 
-def test_submit_scenario_from_tasks():
-    task_1_cfg = Task("my_task_1", do_nothing)
-    pipeline = Pipeline("my_pipeline", {}, [task_1_cfg])
-    PipelineManager.set(pipeline)
-    assert len(pipeline.get_sorted_tasks()) == 1
+def mock_function_one_input_no_output(inp):
+    global g
+    g += inp
     
-    PipelineManager.submit(pipeline)
+def mock_function_no_input_one_output():
+    global g
+    return g
+
+def test_submit_scenario_from_tasks_with_one_or_no_input_output():
+    # test no input and no output Task
+    task_no_input_no_output = Task("task_no_input_no_output", mock_function_no_input_no_output)
+    pipeline_1 = Pipeline("my_pipeline", {}, [task_no_input_no_output])
+    
+    TaskManager.set(task_no_input_no_output)
+    PipelineManager.set(pipeline_1)
+    assert len(pipeline_1.get_sorted_tasks()) == 1
+    
+    PipelineManager.submit(pipeline_1)
     assert g == 1
+
+    # test one input and no output Task
+    data_node_input = InMemoryDataNode('input_dn', Scope.PIPELINE, properties={'default_data': 2})
+    task_one_input_no_output = Task("task_one_input_no_output", mock_function_one_input_no_output, input=[data_node_input])
+    pipeline_2 = Pipeline("my_pipeline_2", {}, [task_one_input_no_output])
+    
+    DataManager.set(data_node_input)
+    data_node_input.unlock_edition()
+    
+    TaskManager.set(task_one_input_no_output)
+    PipelineManager.set(pipeline_2)
+    assert len(pipeline_2.get_sorted_tasks()) == 1
+    
+    PipelineManager.submit(pipeline_2)
+    assert g == 3
+    
+    #test no input and one output Task
+    data_node_output = InMemoryDataNode('output_dn', Scope.PIPELINE, properties={'default_data': None})
+    task_no_input_one_output = Task("task_no_input_one_output", mock_function_no_input_one_output, output=[data_node_output])
+    pipeline_3 = Pipeline('my_pipeline_3', {}, [task_no_input_one_output])
+    
+    DataManager.set(data_node_output)
+    assert data_node_output.read() is None
+    
+    TaskManager.set(task_no_input_one_output)
+    PipelineManager.set(pipeline_3)
+    assert len(pipeline_2.get_sorted_tasks()) == 1
+    
+    PipelineManager.submit(pipeline_3)
+    assert data_node_output.read() == 3
+    
 
 def mult_by_2(nb: int):
     return nb * 2
