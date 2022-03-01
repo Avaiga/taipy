@@ -36,6 +36,6 @@ class PipelineModel:
             parent_id=data["parent_id"],
             name=data["name"],
             properties=data["properties"],
-            tasks=data['tasks'],
+            tasks=data["tasks"],
             subscribers=data["subscribers"],
         )
