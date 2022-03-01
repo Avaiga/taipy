@@ -114,3 +114,19 @@ export const SingleItem = ({ value, clickHandler, selectedValue, item, disabled,
         )}
     </ListItemButton>
 );
+
+export const isLovParent = (lov: LovItem[] | undefined, id: string, childId: string, path:string[] = []): boolean => {
+    if (!lov) {
+        return false;
+    }
+    for(let i = 0; i < lov.length; i++) {
+        if (lov[i].id === id && !(lov[i].children || []).length) {
+            return false;
+        } else if (lov[i].id === childId) {
+            return path.includes(id);
+        } else if (isLovParent(lov[i].children, id, childId, [...path, lov[i].id])) {
+             return true;
+        }
+    }
+    return false;
+}

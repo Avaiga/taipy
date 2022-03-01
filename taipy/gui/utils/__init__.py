@@ -1,6 +1,6 @@
 from ._attributes import delscopeattr, getscopeattr, getscopeattr_drill, hasscopeattr, setscopeattr, setscopeattr_drill
 from ._map_dict import _MapDict
-from .boolean import is_boolean_true
+from .boolean import is_boolean_true, is_boolean
 from .clientvarname import get_client_var_name
 from .datatype import get_data_type
 from .date import ISO_to_date, date_to_ISO

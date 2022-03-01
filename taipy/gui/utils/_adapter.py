@@ -53,7 +53,7 @@ class _Adapter:
             if result is None:
                 warnings.warn(f"Adapter for {var_name} did not return a valid result. Please check the documentation on List of Values Adapters.")
             else:
-                if not id_only and len(result) > 2 and isinstance(result[2], list):
+                if not id_only and len(result) > 2 and isinstance(result[2], list) and len(result[2]) > 0:
                     result = (result[0], result[1], self.__adapter_on_tree(adapter, result[2], str(index) + "."))
                 return result
         except Exception as e:
@@ -65,8 +65,6 @@ class _Adapter:
         for idx, elt in enumerate(tree):
             ret = self._run_adapter(adapter, elt, adapter.__name__, prefix + str(idx))
             if ret is not None:
-                if len(ret) > 2 and isinstance(ret[2], list):
-                    ret = (ret[0], ret[1], self.__adapter_on_tree(adapter, ret[2], prefix + str(idx) + "."))
                 ret_list.append(ret)
         return ret_list
 

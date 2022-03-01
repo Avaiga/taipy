@@ -16,6 +16,7 @@ from ..utils import (
     get_data_type,
     getscopeattr,
     getscopeattr_drill,
+    is_boolean,
     is_boolean_true,
 )
 from ..utils.types import TaipyData
@@ -762,6 +763,21 @@ class Builder:
             hash_name = self.__gui._evaluate_bind_holder(taipy_type, expr)
         return hash_name
 
+    def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, var_type: AttributeType, update_main=True):
+        hash_name = self.__hashes.get(name)
+        val = self.__get_boolean_attribute(name, def_val)
+        default_name = "default_" + name if hash_name is not None else name
+        if val != def_val:
+            self.__set_boolean_attribute(default_name, val)
+        if hash_name is not None:
+            hash_name = self.__get_typed_hash_name(hash_name, var_type)
+            self.__set_react_attribute(_to_camel_case(name), get_client_var_name(hash_name))
+            if with_update:
+                if update_main:
+                    self.__set_tp_varname(hash_name)
+                else:
+                    self.__update_vars.append(f"{name}={hash_name}")
+
     def set_attributes(self, attributes: t.List[tuple]):
         for attr in attributes:
             if not isinstance(attr, tuple):
@@ -773,17 +789,8 @@ class Builder:
                 if val != def_val:
                     self.__set_boolean_attribute(attr[0], val)
             elif var_type == AttributeType.dynamic_boolean:
-                hash_name = self.__hashes.get(attr[0])
-                def_val = _get_tuple_val(attr, 2, False)
-                val = self.__get_boolean_attribute(attr[0], def_val)
-                default_name = "default_" + attr[0] if hash_name is not None else attr[0]
-                if val != def_val:
-                    self.__set_boolean_attribute(default_name, val)
-                if hash_name is not None:
-                    hash_name = self.__get_typed_hash_name(hash_name, var_type)
-                    self.__set_react_attribute(_to_camel_case(attr[0]), get_client_var_name(hash_name))
-                    if _get_tuple_val(attr, 3, False):
-                        self.__set_tp_varname(hash_name)
+                self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(
+                    attr, 2, False), _get_tuple_val(attr, 3, False), var_type)
             elif var_type == AttributeType.number:
                 self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == AttributeType.dynamic_number:
@@ -800,6 +807,12 @@ class Builder:
                 self.__set_dict_attribute(attr[0])
             elif var_type == AttributeType.dynamic_list:
                 self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
+            elif var_type == AttributeType.boolean_or_list:
+                if is_boolean(self.__attributes.get(attr[0])):
+                    self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(
+                        attr, 2, False), True, var_type, update_main=False)
+                else:
+                    self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
         return self
 
     def set_attribute(self, name, value):

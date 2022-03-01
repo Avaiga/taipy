@@ -9,7 +9,7 @@ import TextField from "@mui/material/TextField";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { boxSx, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
+import { boxSx, isLovParent, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
@@ -17,21 +17,28 @@ import { getUpdateVar } from "./utils";
 const renderTree = (lov: LovItem[], active: boolean, searchValue: string) => {
     return lov.map((li) => {
         const children = li.children ? renderTree(li.children, active, searchValue) : [];
-        if (!children.filter(c => c).length && !showItem(li, searchValue)) {
+        if (!children.filter((c) => c).length && !showItem(li, searchValue)) {
             return null;
         }
-        return <TreeItem
+        return (
+            <TreeItem
                 key={li.id}
                 nodeId={li.id}
-                label={typeof li.item === "string" ? li.item : li.item ? <LovImage item={li.item} />: "undefined item"}
+                label={typeof li.item === "string" ? li.item : li.item ? <LovImage item={li.item} /> : "undefined item"}
                 disabled={!active}
             >
                 {children}
             </TreeItem>
+        );
     });
+};
+
+interface TreeViewProps extends SelTreeProps {
+    defaultExpanded?: string | boolean;
+    expanded?: string[] | boolean;
 }
 
-const TreeView = (props: SelTreeProps) => {
+const TreeView = (props: TreeViewProps) => {
     const {
         id,
         defaultValue = "",
@@ -48,7 +55,10 @@ const TreeView = (props: SelTreeProps) => {
         height,
     } = props;
     const [searchValue, setSearchValue] = useState("");
-    const [selectedValue, setSelectedValue] = useState<string[] | string>(multiple ? []: "");
+    const [selectedValue, setSelectedValue] = useState<string[] | string>(multiple ? [] : "");
+    const [oneExpanded, setOneExpanded] = useState(false);
+    const [refreshExpanded, setRefreshExpanded] = useState(false);
+    const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -56,8 +66,48 @@ const TreeView = (props: SelTreeProps) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars, tp_varname);
 
     const lovList = useLovListMemo(lov, defaultLov, true);
-    const treeSx = useMemo(() => ({...treeSelBaseSx, maxWidth: width}), [width]);
-    const paperSx = useMemo(() => height === undefined ? paperBaseSx : {...paperBaseSx, maxHeight: height}, [height]);
+    const treeSx = useMemo(() => ({ ...treeSelBaseSx, maxWidth: width }), [width]);
+    const paperSx = useMemo(
+        () => (height === undefined ? paperBaseSx : { ...paperBaseSx, maxHeight: height }),
+        [height]
+    );
+
+    useEffect(() => {
+        let refExp = false;
+        let oneExp = false;
+        if (props.expanded === undefined) {
+            if (typeof props.defaultExpanded === "boolean") {
+                oneExp = !props.defaultExpanded;
+            } else if (typeof props.defaultExpanded === "string") {
+                try {
+                    const val = JSON.parse(props.defaultExpanded);
+                    if (Array.isArray(val)) {
+                        setExpandedNodes(val.map((v) => "" + v));
+                    } else {
+                        setExpandedNodes(["" + val]);
+                    }
+                    refExp = true;
+                } catch (e) {
+                    console.info(`Tree.expanded cannot parse property\n${(e as Error).message || e}`);
+                }
+            }
+        } else if (typeof props.expanded === "boolean") {
+            oneExp = !props.expanded;
+        } else {
+            try {
+                if (Array.isArray(props.expanded)) {
+                    setExpandedNodes(props.expanded.map((v) => "" + v));
+                } else {
+                    setExpandedNodes(["" + props.expanded]);
+                }
+                refExp = true;
+            } catch (e) {
+                console.info(`Tree.expanded wrongly formatted property\n${(e as Error).message || e}`);
+            }
+        }
+        setOneExpanded(oneExp);
+        setRefreshExpanded(refExp);
+    }, [props.defaultExpanded, props.expanded]);
 
     useEffect(() => {
         if (value !== undefined) {
@@ -86,16 +136,58 @@ const TreeView = (props: SelTreeProps) => {
     const clickHandler = useCallback(
         (event: SyntheticEvent, nodeIds: string[] | string) => {
             setSelectedValue(nodeIds);
-            dispatch(createSendUpdateAction(tp_varname, Array.isArray(nodeIds) ? nodeIds : [nodeIds], propagate, getUpdateVar(tp_updatevars, "lov")));
+            tp_varname && dispatch(
+                createSendUpdateAction(
+                    tp_varname,
+                    Array.isArray(nodeIds) ? nodeIds : [nodeIds],
+                    propagate,
+                    getUpdateVar(tp_updatevars, "lov")
+                )
+            );
         },
         [tp_varname, dispatch, propagate, tp_updatevars]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
+    const handleNodeToggle = useCallback((event: React.SyntheticEvent, nodeIds: string[]) => {
+        const expVar = getUpdateVar(tp_updatevars, "expanded")
+        if (oneExpanded) {
+            setExpandedNodes(en => {
+                if (en.length < nodeIds.length) {
+                    // node opened: keep only parent nodes
+                    nodeIds = nodeIds.filter((n, i) => i == 0 || isLovParent(lovList, n, nodeIds[0]));
+                }
+                if (refreshExpanded) {
+                    dispatch(
+                        createSendUpdateAction(
+                            expVar,
+                            nodeIds,
+                            propagate,
+                        )
+                    );
+                }
+                return nodeIds;
+            });
+        } else {
+            setExpandedNodes(nodeIds);
+            if (refreshExpanded) {
+                dispatch(
+                    createSendUpdateAction(
+                        expVar,
+                        nodeIds,
+                        propagate,
+                    )
+                );
+            }
+        }
+    }, [oneExpanded, refreshExpanded, lovList, propagate, tp_updatevars, dispatch]);
+
     const treeProps = useMemo(
         () =>
-            multiple ? { multiSelect: true as true | undefined, selected: selectedValue as string[] } : { selected: selectedValue as string },
+            multiple
+                ? { multiSelect: true as true | undefined, selected: selectedValue as string[] }
+                : { selected: selectedValue as string },
         [multiple, selectedValue]
     );
 
@@ -103,15 +195,15 @@ const TreeView = (props: SelTreeProps) => {
         <Box id={id} sx={boxSx} className={className}>
             <Paper sx={paperSx}>
                 <Box>
-                {filter && (
-                    <TextField
-                        margin="dense"
-                        placeholder="Search field"
-                        value={searchValue}
-                        onChange={handleInput}
-                        disabled={!active}
-                    />
-                )}
+                    {filter && (
+                        <TextField
+                            margin="dense"
+                            placeholder="Search field"
+                            value={searchValue}
+                            onChange={handleInput}
+                            disabled={!active}
+                        />
+                    )}
                 </Box>
                 <MuiTreeView
                     aria-label="tree"
@@ -119,6 +211,8 @@ const TreeView = (props: SelTreeProps) => {
                     defaultExpandIcon={<ChevronRightIcon />}
                     sx={treeSx}
                     onNodeSelect={clickHandler}
+                    expanded={expandedNodes}
+                    onNodeToggle={handleNodeToggle}
                     {...treeProps}
                 >
                     {renderTree(lovList, !!active, searchValue)}

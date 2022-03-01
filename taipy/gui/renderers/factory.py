@@ -430,6 +430,7 @@ class Factory:
             [
                 ("filter", AttributeType.boolean),
                 ("multiple", AttributeType.boolean),
+                ("expanded", AttributeType.boolean_or_list, True),
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("height", AttributeType.string_or_number),

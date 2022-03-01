@@ -149,4 +149,24 @@ describe("TreeView Component", () => {
         userEvent.clear(search);
         expect(queryAllByText(/Item /)).toHaveLength(4);
     });
+    // expanded
+    it("does not dispatch update message when expanded is boolean", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={true} tp_updatevars="expanded=tree_expanded" /></TaipyContext.Provider>);
+        const elt = getByText("Item 1");
+        userEvent.click(elt);
+        expect(dispatch).toHaveBeenCalledTimes(1);
+        expect(dispatch).toHaveBeenCalledWith({name: "", payload: {id: undefined, names:["tree_expanded"]}, type: "REQUEST_UPDATE"});
+    });
+    it("does dispatch update message when expanded is not boolean", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={[]} tp_updatevars="expanded=tree_expanded" /></TaipyContext.Provider>);
+        const elt = getByText("Item 1");
+        userEvent.click(elt);
+        expect(dispatch).toHaveBeenCalledTimes(2);
+        expect(dispatch).toHaveBeenCalledWith({name: "", payload: {id: undefined, names:["tree_expanded"]}, type: "REQUEST_UPDATE"});
+        expect(dispatch).toHaveBeenCalledWith({name:"tree_expanded", payload: {relvar: "", value: ["id1"]}, type: "SEND_UPDATE_ACTION", propagate: true});
+    });
 });
