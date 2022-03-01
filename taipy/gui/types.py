@@ -25,6 +25,7 @@ class WsType(Enum):
     NAVIGATE = "NA"
     CLIENT_ID = "ID"
     MULTIPLE_MESSAGE = "MS"
+    DOWNLOAD_FILE = "DF"
 
 
 NumberTypes = set(["int", "int64", "float", "float64"])

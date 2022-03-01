@@ -412,6 +412,16 @@ class Gui:
             }
         )
 
+    def _send_ws_download(self, content: str, name: str, on_action: str) -> None:
+        self.__send_ws(
+            {
+                "type": WsType.DOWNLOAD_FILE.value,
+                "content": content,
+                "name": name,
+                "on_action": on_action
+            }
+        )
+
     def __send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
         self.__send_ws(
             {
@@ -732,6 +742,17 @@ class Gui:
             return
         self._config.load_config(app_config=app_config)
 
+    def download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
+        """Donwloads content to the client.
+
+        Args:
+            content (Any): file path or file content
+            name (optional(str)): file name for the content on the client browser (default to content name)
+            on_action (optional(str)): function called when the download starts
+        """
+        content_str = self._get_content("Gui.download", content, False)
+        self._send_ws_download(content_str, name, on_action)
+
     def show_notification(
         self,
         type: str = "I",
@@ -742,14 +763,14 @@ class Gui:
         """Sends a notification to the user interface.
 
         Args:
-            type (string): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
+            type (optional(string)): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
                 To remove the last notification, set this parameter to the empty string.
             message (string): The text message to display.
-            browser_notification (bool): If set to `True`, the browser will also show the notification.
+            browser_notification (optional(bool)): If set to `True`, the browser will also show the notification.
                 If not specified or set to `None`, this parameter will user the value of
                 `app_config[browser_notification]`.
-            duration: The time, in milliseconds, during which the notification is shown.
-                If not specified or set to `None`, this parameter will user the value of
+            duration (optional(int)): The time, in milliseconds, during which the notification is shown.
+                If not specified or set to `None`, this parameter will use the value of
                 `app_config[notification_duration]`.
 
         Note that you can also call this function with _type_ set to the first letter or the alert type
