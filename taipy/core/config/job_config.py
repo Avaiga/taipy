@@ -104,7 +104,7 @@ class JobConfig:
 
     @staticmethod
     def _external_config(mode, **properties):
-        dep = f"taipy_{mode}"
+        dep = f"taipy.{mode}"
         if not util.find_spec(dep):
             raise DependencyNotInstalled(mode)
         return load_fct(dep + ".config", "Config")(**properties)
