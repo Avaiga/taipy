@@ -22,7 +22,6 @@ test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "mssql": ["pyodbc>=4"],
-    "airflow": ["taipy-airflow@git+ssh://git@github.com/Avaiga/taipy-airflow.git@develop"],
 }
 
 setup(
@@ -43,14 +42,13 @@ setup(
     install_requires=requirements,
     license="MIT license",
     long_description=readme,
-    include_package_data=True,
     keywords="taipy-core",
     name="taipy-core",
-    packages=find_packages(include=["taipy", "taipy.*"]),
+    packages=find_packages(include=["taipy.core", "taipy.core.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
-    version="0.1.0-SNAPSHOT",
+    version="1.0.0-WIP",
     zip_safe=False,
     extras_require=extras_require,
 )
