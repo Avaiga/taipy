@@ -42,6 +42,7 @@ interface ChartProp extends TaipyActiveProps {
     data?: Record<string, TraceValueType>;
     refresh?: boolean;
     layout?: string;
+    plotConfig?: string;
     tp_onRangeChange?: string;
     limitRows?: boolean;
     testId?: string;
@@ -84,7 +85,7 @@ const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number)
 
 const selectedPropRe = /selected(\d+)/;
 
-const defaultChartConfig = { responsive: true };
+const defaultChartConfig = { responsive: false };
 
 const ONE_COLUMN_CHART = ["pie"];
 
@@ -149,26 +150,29 @@ const Chart = (props: ChartProp) => {
 
     const config = useMemo(() => {
         if (props.config) {
-            return JSON.parse(props.config) as ChartConfig;
-        } else {
-            return {
-                columns: {} as Record<string, ColumnDesc>,
-                labels: [],
-                modes: [],
-                types: [],
-                traces: [],
-                xaxis: [],
-                yaxis: [],
-                markers: [],
-                selectedMarkers: [],
-                orientations: [],
-                names: [],
-                lines: [],
-                texts: [],
-                textAnchors: [],
-                options: [],
-            } as ChartConfig;
+            try {
+                return JSON.parse(props.config) as ChartConfig;
+            } catch (e) {
+                console.info(`Error while parsing Chart.config\n${(e as Error).message || e}`);
+            }
         }
+        return {
+            columns: {} as Record<string, ColumnDesc>,
+            labels: [],
+            modes: [],
+            types: [],
+            traces: [],
+            xaxis: [],
+            yaxis: [],
+            markers: [],
+            selectedMarkers: [],
+            orientations: [],
+            names: [],
+            lines: [],
+            texts: [],
+            textAnchors: [],
+            options: [],
+        } as ChartConfig;
     }, [props.config]);
 
     useEffect(() => {
@@ -191,7 +195,14 @@ const Chart = (props: ChartProp) => {
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
     const layout = useMemo(() => {
-        const playout = props.layout ? JSON.parse(props.layout) : {};
+        let playout = {} as Layout;
+        if (props.layout) {
+            try {
+                playout = JSON.parse(props.layout);
+            } catch (e) {
+                console.info(`Error while parsing Chart.layout\n${(e as Error).message || e}`);
+            }
+        }
         return {
             ...playout,
             title: title || playout.title,
@@ -262,10 +273,21 @@ const Chart = (props: ChartProp) => {
         });
     }, [data, config, selected]);
 
-    const plotConfig = useMemo(
-        () => (active ? defaultChartConfig : { ...defaultChartConfig, staticPlot: true }),
-        [active]
-    );
+    const plotConfig = useMemo(() => {
+        let plconf = {};
+        if (props.plotConfig) {
+            try {
+                plconf = JSON.parse(props.plotConfig);
+            } catch (e) {
+                console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
+            }
+        }
+        if (active) {
+            return { ...defaultChartConfig, ...plconf };
+        } else {
+            return { ...defaultChartConfig, ...plconf, staticPlot: true };
+        }
+    }, [active, props.plotConfig]);
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>

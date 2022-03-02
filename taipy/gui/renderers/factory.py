@@ -71,6 +71,7 @@ class Factory:
                 ("width", AttributeType.string_or_number, "100vw"),
                 ("height", AttributeType.string_or_number, "100vh"),
                 ("layout", AttributeType.dict),
+                ("plot_config", AttributeType.dict),
                 ("on_range_change", AttributeType.function),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("limit_rows", AttributeType.boolean),
@@ -384,7 +385,7 @@ class Factory:
         .set_value_and_default(with_update=False)
         .set_attributes(
             [
-                ("id",), 
+                ("id",),
                 ("without_close", AttributeType.boolean, False),
                 ("hover_text", AttributeType.dynamic_string),
             ]
