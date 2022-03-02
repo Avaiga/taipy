@@ -23,8 +23,6 @@ data_node = CSVDataNode(
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
     None,
-    None,
-    None,
     False,
     {"path": "/path", "has_header": True},
 )

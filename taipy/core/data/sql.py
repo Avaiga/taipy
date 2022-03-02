@@ -1,6 +1,6 @@
 import os
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
@@ -33,6 +33,9 @@ class SQLDataNode(DataNode):
         job_ids (List[str]): Ordered list of jobs that have written this data node.
         edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
+        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
+            timedelta object to represent the data node validity duration. If validity_period is set to None,
+            the data_node is always up to date.
         properties (dict): Dict of additional arguments. Note that properties should at least contain
             values for "db_username", "db_password", "db_name", "db_engine" and "query" properties.
     """
@@ -51,9 +54,7 @@ class SQLDataNode(DataNode):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        validity_days: Optional[int] = None,
-        validity_hours: Optional[int] = None,
-        validity_minutes: Optional[int] = None,
+        validity_period: Optional[timedelta] = None,
         edition_in_progress: bool = False,
         properties: Dict = None,
     ):
@@ -87,9 +88,7 @@ class SQLDataNode(DataNode):
             parent_id,
             last_edition_date,
             job_ids,
-            validity_days,
-            validity_hours,
-            validity_minutes,
+            validity_period,
             edition_in_progress,
             **properties,
         )

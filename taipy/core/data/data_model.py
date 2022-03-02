@@ -22,6 +22,15 @@ class DataNodeModel:
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (str): ISO format of the last edition date and time.
         job_ids (List[str]): List of jobs that computed the data node.
+        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
+            timedelta object to represent the data node validity duration. If validity_period is set to None,
+            the data_node is always up to date.
+        validity_days (Optional[float]): Number of days to be added to the data node validity duration. If
+            validity_days and validity_seconds are all set to None, The data_node is always up to
+            date.
+        validity_seconds (Optional[float]): Number of seconds to be added to the data node validity duration. If
+            validity_days and validity_seconds are all set to None, The data_node is always up to
+            date.
         edition_in_progress (bool): True if a task computing this data node has been submitted and not completed yet.
             False otherwise.
         data_node_properties (Dict[str, Any]): Additional properties of the data node.
@@ -38,9 +47,8 @@ class DataNodeModel:
     parent_id: Optional[str]
     last_edition_date: Optional[str]
     job_ids: List[JobId]
-    validity_days: Optional[int]
-    validity_hours: Optional[int]
-    validity_minutes: Optional[int]
+    validity_days: Optional[float]
+    validity_seconds: Optional[float]
     edition_in_progress: bool
     data_node_properties: Dict[str, Any]
 
@@ -58,9 +66,8 @@ class DataNodeModel:
             parent_id=data["parent_id"],
             last_edition_date=data["last_edition_date"],
             job_ids=data["job_ids"],
-            validity_days=int(data["validity_days"]) if data["validity_days"] else None,
-            validity_hours=int(data["validity_hours"]) if data["validity_hours"] else None,
-            validity_minutes=int(data["validity_minutes"]) if data["validity_minutes"] else None,
+            validity_days=data["validity_days"],
+            validity_seconds=data["validity_seconds"],
             edition_in_progress=bool(data["edition_in_progress"]),
             data_node_properties=data["data_node_properties"],
         )

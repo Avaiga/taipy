@@ -1,6 +1,6 @@
 import pathlib
 from copy import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from taipy.core.common.utils import load_fct
 from taipy.core.config.config import Config
@@ -45,9 +45,8 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             data_node.parent_id,
             data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
             data_node._job_ids,
-            data_node._validity_days,
-            data_node._validity_hours,
-            data_node._validity_minutes,
+            data_node._validity_period.days if data_node._validity_period else None,
+            data_node._validity_period.seconds if data_node._validity_period else None,
             data_node._edition_in_progress,
             properties,
         )
@@ -75,6 +74,10 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             del model.data_node_properties[self.WRITE_FCT_NAME_KEY]
             del model.data_node_properties[self.WRITE_FCT_MODULE_KEY]
 
+        validity_period = None
+        if model.validity_seconds is not None and model.validity_days is not None:
+            validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
+
         return self.class_map[model.storage_type](
             config_name=model.config_name,
             scope=model.scope,
@@ -83,9 +86,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             parent_id=model.parent_id,
             last_edition_date=datetime.fromisoformat(model.last_edition_date) if model.last_edition_date else None,
             job_ids=model.job_ids,
-            validity_days=model.validity_days,
-            validity_hours=model.validity_hours,
-            validity_minutes=model.validity_minutes,
+            validity_period=validity_period,
             edition_in_progress=model.edition_in_progress,
             properties=model.data_node_properties,
         )

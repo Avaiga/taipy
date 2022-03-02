@@ -16,8 +16,6 @@ data_node = CSVDataNode(
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
     None,
-    None,
-    None,
     False,
     {"path": "/path", "has_header": True},
 )
@@ -31,7 +29,6 @@ data_node_model = DataNodeModel(
     "parent_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0).isoformat(),
     [JobId("job_id")],
-    None,
     None,
     None,
     False,
