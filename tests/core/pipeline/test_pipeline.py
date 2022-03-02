@@ -92,8 +92,7 @@ def test_to_model():
     assert model.id == pipeline.id
     assert len(model.properties) == 1
     assert model.properties["foo"] == "bar"
-    assert model.datanode_task_edges[input.id] == [task.id]
-    assert model.task_datanode_edges[task.id] == [output.id]
+    assert model.tasks == [task.id]
 
 
 def test_get_sorted_tasks():

@@ -139,7 +139,6 @@ class SQLDataNode(DataNode):
         """
         Check data against a collection of types to handle insertion on the database.
         """
-        print("data")
         with self.__engine.connect() as connection:
             write_table = table(self.write_table)
             if isinstance(data, pd.DataFrame):
