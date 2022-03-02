@@ -75,7 +75,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             del model.data_node_properties[self.WRITE_FCT_MODULE_KEY]
 
         validity_period = None
-        if model.validity_seconds and model.validity_days:
+        if model.validity_seconds is not None and model.validity_days is not None:
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
 
         return self.class_map[model.storage_type](

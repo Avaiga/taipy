@@ -199,7 +199,21 @@ class TestDataNode:
         assert dn.is_in_cache is True
 
         # Has been writen more than 30 minutes ago
-        dn._last_edition_date = datetime.now() + timedelta(days=-1)
+        dn._last_edition_date = datetime.now() - timedelta(days=1)
+        DataManager().set(dn)
+        assert dn.is_in_cache is False
+
+    def test_is_in_cache_with_5_days_validity_period_cacheable_true(self):
+        # Test Never been writen
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, properties={"cacheable": True}, validity_period=timedelta(days=5))
+        assert dn.is_in_cache is False
+
+        # Has been writen less than 30 minutes ago
+        dn.write("My data")
+        assert dn.is_in_cache is True
+
+        # Has been writen more than 30 minutes ago
+        dn._last_edition_date = datetime.now() - timedelta(days=6)
         DataManager().set(dn)
         assert dn.is_in_cache is False
 
