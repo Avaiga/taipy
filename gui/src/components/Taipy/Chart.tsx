@@ -85,7 +85,7 @@ const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number)
 
 const selectedPropRe = /selected(\d+)/;
 
-const defaultChartConfig = { responsive: false };
+const defaultChartConfig = { responsive: true };
 
 const ONE_COLUMN_CHART = ["pie"];
 
