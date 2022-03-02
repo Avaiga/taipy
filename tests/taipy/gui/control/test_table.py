@@ -2,7 +2,7 @@ from taipy.gui import Gui
 
 
 def test_table_md_1(gui: Gui, helpers, csvdata):
-    gui.bind_var_val("csvdata", csvdata)
+    gui._bind_var_val("csvdata", csvdata)
     md_string = "<|{csvdata}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|>"
     expected_list = [
         "<Table",
@@ -13,15 +13,15 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'updateVarName="TaipyData_csvdata"',
-        "data={TaipyData_csvdata}",
+        'updateVarName="_TpD_csvdata"',
+        "data={_TpD_csvdata}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_table_md_2(gui: Gui, helpers, csvdata):
-    gui.bind_var_val("csvdata", csvdata)
-    gui.bind_var_val(
+    gui._bind_var_val("csvdata", csvdata)
+    gui._bind_var_val(
         "table_properties",
         {
             "page_size": 10,
@@ -52,14 +52,14 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'updateVarName="TaipyData_csvdata"',
-        "data={TaipyData_csvdata}",
+        'updateVarName="_TpD_csvdata"',
+        "data={_TpD_csvdata}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_table_html_1(gui: Gui, helpers, csvdata):
-    gui.bind_var_val("csvdata", csvdata)
+    gui._bind_var_val("csvdata", csvdata)
     html_string = '<taipy:table data="{csvdata}" page_size="10" page_size_options="10;30;100" columns="Day;Entity;Code;Daily hospital occupancy" date_format="eee dd MMM yyyy" />'
     expected_list = [
         "<Table",
@@ -70,15 +70,15 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'updateVarName="TaipyData_csvdata"',
-        "data={TaipyData_csvdata}",
+        'updateVarName="_TpD_csvdata"',
+        "data={_TpD_csvdata}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_table_html_2(gui: Gui, helpers, csvdata):
-    gui.bind_var_val("csvdata", csvdata)
-    gui.bind_var_val(
+    gui._bind_var_val("csvdata", csvdata)
+    gui._bind_var_val(
         "table_properties",
         {
             "page_size": 10,
@@ -109,7 +109,7 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'updateVarName="TaipyData_csvdata"',
-        "data={TaipyData_csvdata}",
+        'updateVarName="_TpD_csvdata"',
+        "data={_TpD_csvdata}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

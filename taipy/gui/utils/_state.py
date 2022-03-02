@@ -21,7 +21,7 @@ class State:
             raise AttributeError(f"Variable '{name}' is not defined.")
         gui = super().__getattribute__(State.__attrs[0])
         if not hasattr(gui._bindings(), name):
-            gui.bind_var(name)
+            gui._bind_var(name)
         return getattr(gui._bindings(), name)
 
     def __setattr__(self, name: str, value: t.Any) -> None:
@@ -32,7 +32,7 @@ class State:
                 raise AttributeError(f"Variable '{name}' is not defined.")
             gui = super().__getattribute__(State.__attrs[0])
             if not hasattr(gui._bindings(), name):
-                gui.bind_var(name)
+                gui._bind_var(name)
             setattr(gui._bindings(), name, value)
 
     def assign(self, name: str, value: t.Any) -> t.Any:

@@ -10,9 +10,8 @@ from flask import Blueprint, Flask, json, jsonify, render_template, render_templ
 from flask_cors import CORS
 from flask_socketio import SocketIO
 
-from taipy.gui.renderers.jsonencoder import TaipyJsonEncoder
-
-from .utils import KillableThread, _is_in_notebook
+from .renderers.jsonencoder import _TaipyJsonEncoder
+from .utils import _KillableThread, _is_in_notebook
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -37,7 +36,7 @@ class Server:
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
             self._flask.config["SECRET_KEY"] = "TaIpY"
         # set json encoder (for Taipy specific types)
-        self._flask.json_encoder = TaipyJsonEncoder
+        self._flask.json_encoder = _TaipyJsonEncoder
         # Add cors for frontend access
         self._ws = SocketIO(
             self._flask,
@@ -216,7 +215,7 @@ class Server:
         if _is_in_notebook() or run_in_thread:
             self._host = host
             self._port = port
-            self._thread = KillableThread(target=self._run_notebook)
+            self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
         self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)

@@ -2,7 +2,7 @@ import re
 import typing as t
 from datetime import datetime
 
-from ..types import AttributeType
+from ..types import _AttributeType
 from .builder import Builder
 
 
@@ -51,9 +51,9 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.function, ""),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("on_action", _AttributeType.function, ""),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -63,20 +63,20 @@ class Factory:
             element_name="Chart",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False, var_type=AttributeType.data)
+        .set_value_and_default(with_default=False, var_type=_AttributeType.data)
         .set_attributes(
             [
                 ("id",),
                 ("title",),
-                ("width", AttributeType.string_or_number, "100vw"),
-                ("height", AttributeType.string_or_number, "100vh"),
-                ("layout", AttributeType.dict),
-                ("plot_config", AttributeType.dict),
-                ("on_range_change", AttributeType.function),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("limit_rows", AttributeType.boolean),
-                ("render", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("width", _AttributeType.string_or_number, "100vw"),
+                ("height", _AttributeType.string_or_number, "100vh"),
+                ("layout", _AttributeType.dict),
+                ("plot_config", _AttributeType.dict),
+                ("on_range_change", _AttributeType.function),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("limit_rows", _AttributeType.boolean),
+                ("render", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
@@ -93,14 +93,14 @@ class Factory:
             attributes=attrs,
             default_value=datetime.fromtimestamp(0),
         )
-        .set_value_and_default(var_type=AttributeType.date)
+        .set_value_and_default(var_type=_AttributeType.date)
         .set_attributes(
             [
-                ("with_time", AttributeType.boolean),
+                ("with_time", _AttributeType.boolean),
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("editable", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("editable", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_propagate()
@@ -111,21 +111,21 @@ class Factory:
             element_name="Dialog",
             attributes=attrs,
         )
-        .set_value_and_default(var_type=AttributeType.dynamic_boolean)
+        .set_value_and_default(var_type=_AttributeType.dynamic_boolean)
         .set_partial()  # partial should be set before page
         .set_attributes(
             [
                 ("id",),
                 ("page",),
                 ("title",),
-                ("on_cancel", AttributeType.function),
-                ("cancel_label", AttributeType.string, "Cancel"),
-                ("on_validate", AttributeType.function, "validate"),
-                ("validate_label", AttributeType.string, "Validate"),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("width", AttributeType.string_or_number),
-                ("height", AttributeType.string_or_number),
-                ("hover_text", AttributeType.dynamic_string),
+                ("on_cancel", _AttributeType.function),
+                ("cancel_label", _AttributeType.string, "Cancel"),
+                ("on_validate", _AttributeType.function, "validate"),
+                ("validate_label", _AttributeType.string, "Validate"),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("width", _AttributeType.string_or_number),
+                ("height", _AttributeType.string_or_number),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_propagate()
@@ -137,8 +137,8 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("expanded", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("expanded", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -153,13 +153,13 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.function),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("render", AttributeType.dynamic_boolean, True),
-                ("auto", AttributeType.boolean, False),
-                ("bypass_preview", AttributeType.boolean, True),
+                ("on_action", _AttributeType.function),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("render", _AttributeType.dynamic_boolean, True),
+                ("auto", _AttributeType.boolean, False),
+                ("bypass_preview", _AttributeType.boolean, True),
                 ("name",),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -174,12 +174,12 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.function),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("multiple", AttributeType.boolean, False),
+                ("on_action", _AttributeType.function),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("multiple", _AttributeType.boolean, False),
                 ("extensions",),
                 ("drop_message",),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -194,11 +194,11 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", AttributeType.function, ""),
-                ("active", AttributeType.dynamic_boolean, True),
+                ("on_action", _AttributeType.function, ""),
+                ("active", _AttributeType.dynamic_boolean, True),
                 ("width",),
                 ("height",),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -212,12 +212,12 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("min", AttributeType.number),
-                ("max", AttributeType.number),
-                ("value", AttributeType.dynamic_number),
+                ("min", _AttributeType.number),
+                ("max", _AttributeType.number),
+                ("value", _AttributeType.dynamic_number),
                 ("format",),
                 ("orientation"),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -233,8 +233,8 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -260,13 +260,13 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
+                ("active", _AttributeType.dynamic_boolean, True),
                 ("label"),
                 ("width"),
                 ("width[mobile]",),
-                ("on_action", AttributeType.function, "on_menu_action"),
-                ("inactive_ids", AttributeType.dynamic_list),
-                ("hover_text", AttributeType.dynamic_string),
+                ("on_action", _AttributeType.function, "on_menu_action"),
+                ("inactive_ids", _AttributeType.dynamic_list),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update()
@@ -279,8 +279,8 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -297,27 +297,27 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
         "pane": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Pane", attributes=attrs, default_value=None
         )
-        .set_value_and_default(var_type=AttributeType.dynamic_boolean)
+        .set_value_and_default(var_type=_AttributeType.dynamic_boolean)
         .set_partial()  # partial should be set before page
         .set_attributes(
             [
                 ("id",),
                 ("page",),
-                ("anchor", AttributeType.string, "left"),
-                ("on_close", AttributeType.function),
-                ("persistent", AttributeType.boolean, False),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("width", AttributeType.string_or_number, "30vw"),
-                ("height", AttributeType.string_or_number, "30vh"),
-                ("hover_text", AttributeType.dynamic_string),
+                ("anchor", _AttributeType.string, "left"),
+                ("on_close", _AttributeType.function),
+                ("persistent", _AttributeType.boolean, False),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("width", _AttributeType.string_or_number, "30vw"),
+                ("height", _AttributeType.string_or_number, "30vh"),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_propagate()
@@ -325,7 +325,7 @@ class Factory:
         "part": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=None
         )
-        .set_value_and_default(with_update=False, var_type=AttributeType.dynamic_boolean, default_val=True)
+        .set_value_and_default(with_update=False, var_type=_AttributeType.dynamic_boolean, default_val=True)
         .set_attributes([("id",)]),
         "selector": lambda gui, control_type, attrs: Builder(
             gui=gui,
@@ -333,19 +333,19 @@ class Factory:
             element_name="Selector",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False, var_type=AttributeType.lov_value)
+        .set_value_and_default(with_default=False, var_type=_AttributeType.lov_value)
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_attributes(
             [
-                ("filter", AttributeType.boolean),
-                ("multiple", AttributeType.boolean),
-                ("dropdown", AttributeType.boolean, False),
+                ("filter", _AttributeType.boolean),
+                ("multiple", _AttributeType.boolean),
+                ("dropdown", _AttributeType.boolean, False),
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("height", AttributeType.string_or_number),
-                ("width", AttributeType.string_or_number),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("height", _AttributeType.string_or_number),
+                ("width", _AttributeType.string_or_number),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update()
@@ -360,14 +360,14 @@ class Factory:
         .set_value_and_default(native_type=True)
         .set_attributes(
             [
-                ("min", AttributeType.number, 0),
-                ("max", AttributeType.number, 100),
+                ("min", _AttributeType.number, 0),
+                ("max", _AttributeType.number, 100),
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("width", AttributeType.string, "300px"),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("width", _AttributeType.string, "300px"),
                 ("height"),
                 ("orientation"),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .get_adapter("lov")  # need to be called before set_lov
@@ -386,8 +386,8 @@ class Factory:
         .set_attributes(
             [
                 ("id",),
-                ("without_close", AttributeType.boolean, False),
-                ("hover_text", AttributeType.dynamic_string),
+                ("without_close", _AttributeType.boolean, False),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
@@ -397,29 +397,29 @@ class Factory:
             element_name="Table",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False, var_type=AttributeType.data)
+        .set_value_and_default(with_default=False, var_type=_AttributeType.data)
         .get_dataframe_attributes()
         .set_attributes(
             [
-                ("page_size", AttributeType.react, 100),
-                ("allow_all_rows", AttributeType.boolean),
-                ("show_all", AttributeType.boolean),
-                ("auto_loading", AttributeType.boolean),
-                ("width", AttributeType.string_or_number, "100vw"),
-                ("height", AttributeType.string_or_number, "80vh"),
+                ("page_size", _AttributeType.react, 100),
+                ("allow_all_rows", _AttributeType.boolean),
+                ("show_all", _AttributeType.boolean),
+                ("auto_loading", _AttributeType.boolean),
+                ("width", _AttributeType.string_or_number, "100vw"),
+                ("height", _AttributeType.string_or_number, "80vh"),
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("editable", AttributeType.dynamic_boolean, True),
-                ("on_edit", AttributeType.function),
-                ("on_delete", AttributeType.function),
-                ("on_add", AttributeType.function),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("editable", _AttributeType.dynamic_boolean, True),
+                ("on_edit", _AttributeType.function),
+                ("on_delete", _AttributeType.function),
+                ("on_add", _AttributeType.function),
                 ("nan_value",),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh()
         .set_propagate()
-        .get_list_attribute("selected", AttributeType.number)
+        .get_list_attribute("selected", _AttributeType.number)
         .set_refresh_on_update()
         .set_table_pagesize_options(),
         "text": lambda gui, control_type, attrs: Builder(
@@ -434,23 +434,23 @@ class Factory:
             [
                 ("format",),
                 ("id",),
-                ("hover_text", AttributeType.dynamic_string),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update(),
         "toggle": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )
-        .set_value_and_default(with_default=False, var_type=AttributeType.lov_value)
+        .set_value_and_default(with_default=False, var_type=_AttributeType.lov_value)
         .get_adapter("lov", multi_selection=False)  # need to be called before set_lov
         .set_lov()
         .set_attributes(
             [
                 ("id",),
                 ("label",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("unselected_value", AttributeType.string, ""),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("unselected_value", _AttributeType.string, ""),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_kind()
@@ -467,14 +467,14 @@ class Factory:
         .set_lov()
         .set_attributes(
             [
-                ("filter", AttributeType.boolean),
-                ("multiple", AttributeType.boolean),
-                ("expanded", AttributeType.boolean_or_list, True),
+                ("filter", _AttributeType.boolean),
+                ("multiple", _AttributeType.boolean),
+                ("expanded", _AttributeType.boolean_or_list, True),
                 ("id",),
-                ("active", AttributeType.dynamic_boolean, True),
-                ("height", AttributeType.string_or_number),
-                ("width", AttributeType.string_or_number),
-                ("hover_text", AttributeType.dynamic_string),
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("height", _AttributeType.string_or_number),
+                ("width", _AttributeType.string_or_number),
+                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update()

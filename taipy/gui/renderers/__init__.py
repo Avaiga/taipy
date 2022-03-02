@@ -58,7 +58,7 @@ class Page(ABC):
         pass
 
 
-class EmptyPage(Page):
+class _EmptyPage(Page):
     def __init__(self) -> None:
         super().__init__("<PageContent />")
 

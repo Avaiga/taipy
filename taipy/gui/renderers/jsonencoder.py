@@ -4,16 +4,16 @@ from pathlib import Path
 import warnings
 
 from ..icon import Icon
-from ..utils import _MapDict, TaipyBase, date_to_ISO
+from ..utils import _MapDict, _TaipyBase, date_to_ISO
 
 
-class TaipyJsonEncoder(JSONEncoder):
+class _TaipyJsonEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, Icon):
             return o.to_dict()
         elif isinstance(o, _MapDict):
             return o._dict
-        elif isinstance(o, TaipyBase):
+        elif isinstance(o, _TaipyBase):
             return o.get()
         elif isinstance(o, (date, datetime, time)):
             return date_to_ISO(o)

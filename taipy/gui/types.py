@@ -2,19 +2,19 @@ from enum import Enum
 import typing as t
 
 from .utils import (
-    TaipyBase,
-    TaipyBool,
-    TaipyContent,
-    TaipyContentImage,
-    TaipyData,
-    TaipyDate,
-    TaipyLov,
-    TaipyLovValue,
-    TaipyNumber,
+    _TaipyBase,
+    _TaipyBool,
+    _TaipyContent,
+    _TaipyContentImage,
+    _TaipyData,
+    _TaipyDate,
+    _TaipyLov,
+    _TaipyLovValue,
+    _TaipyNumber,
 )
 
 
-class WsType(Enum):
+class _WsType(Enum):
     ACTION = "A"
     MULTIPLE_UPDATE = "MU"
     REQUEST_UPDATE = "RU"
@@ -31,21 +31,21 @@ class WsType(Enum):
 NumberTypes = set(["int", "int64", "float", "float64"])
 
 
-class AttributeType(Enum):
+class _AttributeType(Enum):
     boolean = "boolean"
-    content = TaipyContent
-    data = TaipyData
-    date = TaipyDate
+    content = _TaipyContent
+    data = _TaipyData
+    date = _TaipyDate
     dict = "dict"
-    dynamic_number = TaipyNumber
-    dynamic_boolean = TaipyBool
+    dynamic_number = _TaipyNumber
+    dynamic_boolean = _TaipyBool
     dynamic_list = "dynamiclist"
     dynamic_string = "dynamicstring"
     function = "function"
-    image = TaipyContentImage
+    image = _TaipyContentImage
     json = "json"
-    lov = TaipyLov
-    lov_value = TaipyLovValue
+    lov = _TaipyLov
+    lov_value = _TaipyLovValue
     number = "number"
     react = "react"
     string = "string"
@@ -53,11 +53,11 @@ class AttributeType(Enum):
     boolean_or_list = "boolean|list"
 
 
-def _get_taipy_type(a_type: t.Optional[AttributeType]) -> t.Optional[t.Type[TaipyBase]]:
-    if isinstance(a_type, AttributeType) and isinstance(a_type.value, TaipyBase.__class__):
+def _get_taipy_type(a_type: t.Optional[_AttributeType]) -> t.Optional[t.Type[_TaipyBase]]:
+    if isinstance(a_type, _AttributeType) and isinstance(a_type.value, _TaipyBase.__class__):
         return a_type.value
-    if a_type == AttributeType.boolean:
-        return TaipyBool
-    elif a_type == AttributeType.number:
-        return TaipyNumber
+    if a_type == _AttributeType.boolean:
+        return _TaipyBool
+    elif a_type == _AttributeType.number:
+        return _TaipyNumber
     return None

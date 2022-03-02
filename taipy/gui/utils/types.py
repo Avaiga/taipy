@@ -6,7 +6,7 @@ import warnings
 from . import date_to_ISO, ISO_to_date
 
 
-class TaipyBase(ABC):
+class _TaipyBase(ABC):
     def __init__(self, data: t.Any, hash_name: str) -> None:
         self.__data = data
         self.__hash_name = hash_name
@@ -23,20 +23,30 @@ class TaipyBase(ABC):
     def cast_value(self, value: t.Any):
         return value
 
+    @staticmethod
+    def get_hash():
+        return "TaipyBase"
 
-class TaipyData(TaipyBase):
-    pass
+
+class _TaipyData(_TaipyBase):
+    @staticmethod
+    def get_hash():
+        return "_TpD"
 
 
-class TaipyBool(TaipyBase):
+class _TaipyBool(_TaipyBase):
     def get(self):
         return self.cast_value(super().get())
 
     def cast_value(self, value: t.Any):
         return bool(value)
 
+    @staticmethod
+    def get_hash():
+        return "_TpB"
 
-class TaipyNumber(TaipyBase):
+
+class _TaipyNumber(_TaipyBase):
     def get(self):
         try:
             return float(super().get())
@@ -53,8 +63,12 @@ class TaipyNumber(TaipyBase):
         else:
             super().cast_value(value)
 
+    @staticmethod
+    def get_hash():
+        return "_TpN"
 
-class TaipyDate(TaipyBase):
+
+class _TaipyDate(_TaipyBase):
     def get(self):
         val = super().get()
         if isinstance(val, datetime):
@@ -68,18 +82,30 @@ class TaipyDate(TaipyBase):
             return ISO_to_date(value)
         return super().cast_value(value)
 
-
-class TaipyLovValue(TaipyBase):
-    pass
-
-
-class TaipyLov(TaipyBase):
-    pass
+    @staticmethod
+    def get_hash():
+        return "_TpDt"
 
 
-class TaipyContent(TaipyBase):
-    pass
+class _TaipyLovValue(_TaipyBase):
+    @staticmethod
+    def get_hash():
+        return "_TpLv"
 
 
-class TaipyContentImage(TaipyBase):
-    pass
+class _TaipyLov(_TaipyBase):
+    @staticmethod
+    def get_hash():
+        return "_TpL"
+
+
+class _TaipyContent(_TaipyBase):
+    @staticmethod
+    def get_hash():
+        return "_TpC"
+
+
+class _TaipyContentImage(_TaipyBase):
+    @staticmethod
+    def get_hash():
+        return "_TpCi"

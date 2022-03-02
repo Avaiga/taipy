@@ -8,7 +8,7 @@ from .postproc import Postprocessor
 from .preproc import Preprocessor
 
 
-class TaipyMarkdownExtension(Extension):
+class _TaipyMarkdownExtension(Extension):
 
     config = {"gui": ["", "Gui object for extension"]}
 

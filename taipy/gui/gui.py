@@ -21,21 +21,21 @@ if util.find_spec("pyngrok"):
 from ._default_config import app_config_default
 from ._page import _Page
 from .config import AppConfig, AppConfigOption, GuiConfig
-from .data.content_accessor import ContentAccessor
-from .data.data_accessor import DataAccessor, _DataAccessors
-from .data.data_format import DataFormat
+from .data.content_accessor import _ContentAccessor
+from .data.data_accessor import _DataAccessor, _DataAccessors
+from .data.data_format import _DataFormat
 from .partial import Partial
-from .renderers import EmptyPage, Page
-from .renderers._markdown import TaipyMarkdownExtension
+from .renderers import _EmptyPage, Page
+from .renderers._markdown import _TaipyMarkdownExtension
 from .server import Server
-from .types import WsType
+from .types import _WsType
 from .utils import (
-    TaipyBase,
-    TaipyContent,
-    TaipyContentImage,
-    TaipyData,
-    TaipyLov,
-    TaipyLovValue,
+    _TaipyBase,
+    _TaipyContent,
+    _TaipyContentImage,
+    _TaipyData,
+    _TaipyLov,
+    _TaipyLovValue,
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDict,
@@ -144,7 +144,7 @@ class Gui:
                 "tables",
                 "attr_list",
                 "md_in_html",
-                TaipyMarkdownExtension(gui=self),
+                _TaipyMarkdownExtension(gui=self),
             ]
         )
 
@@ -157,7 +157,7 @@ class Gui:
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
-            self.__content_accessor = ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
+            self.__content_accessor = _ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
         return self.__content_accessor
 
     def _bindings(self):
@@ -184,10 +184,10 @@ class Gui:
     def _bind(self, name: str, value: t.Any) -> None:
         self._bindings()._bind(name, value)
 
-    def _manage_message(self, msg_type: WsType, message: dict) -> None:
+    def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
             self._bindings()._set_client_id(message)
-            if msg_type == WsType.UPDATE.value:
+            if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
                     message.get("name"),
@@ -195,13 +195,13 @@ class Gui:
                     message.get("propagate", True),
                     payload.get("relvar"),
                 )
-            elif msg_type == WsType.ACTION.value:
+            elif msg_type == _WsType.ACTION.value:
                 self.__on_action(message.get("name"), message.get("payload"))
-            elif msg_type == WsType.DATA_UPDATE.value:
+            elif msg_type == _WsType.DATA_UPDATE.value:
                 self.__request_data_update(message.get("name"), message.get("payload"))
-            elif msg_type == WsType.REQUEST_UPDATE.value:
+            elif msg_type == _WsType.REQUEST_UPDATE.value:
                 self.__request_var_update(message.get("payload"))
-            elif msg_type == WsType.CLIENT_ID.value:
+            elif msg_type == _WsType.CLIENT_ID.value:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
@@ -209,11 +209,11 @@ class Gui:
     def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
         # Check if Variable is a managed type
         current_value = getscopeattr_drill(self, self._get_hash_from_expr(var_name))
-        if isinstance(current_value, TaipyData):
+        if isinstance(current_value, _TaipyData):
             return
-        elif rel_var and isinstance(current_value, TaipyLovValue):
+        elif rel_var and isinstance(current_value, _TaipyLovValue):
             lov_holder = getscopeattr_drill(self, self._get_hash_from_expr(rel_var))
-            if isinstance(lov_holder, TaipyLov):
+            if isinstance(lov_holder, _TaipyLov):
                 if isinstance(value, list):
                     val = value
                 else:
@@ -230,15 +230,15 @@ class Gui:
 
                 ret_val = map(mapping, val)
                 if isinstance(value, list):
-                    value = TaipyLovValue(list(ret_val), current_value.get_name())
+                    value = _TaipyLovValue(list(ret_val), current_value.get_name())
                 else:
-                    value = TaipyLovValue(next(ret_val), current_value.get_name())
+                    value = _TaipyLovValue(next(ret_val), current_value.get_name())
 
-        elif isinstance(current_value, TaipyBase):
+        elif isinstance(current_value, _TaipyBase):
             value = current_value.cast_value(value)
-        self._update_var(var_name, value, propagate, current_value if isinstance(current_value, TaipyBase) else None)
+        self._update_var(var_name, value, propagate, current_value if isinstance(current_value, _TaipyBase) else None)
 
-    def _update_var(self, var_name: str, value: t.Any, propagate=True, holder: TaipyBase = None) -> None:
+    def _update_var(self, var_name: str, value: t.Any, propagate=True, holder: _TaipyBase = None) -> None:
         if holder:
             var_name = holder.get_name()
         hash_expr = self._get_hash_from_expr(var_name)
@@ -263,7 +263,7 @@ class Gui:
                 if argcount > 2:
                     args[2] = (
                         value.get()
-                        if isinstance(value, TaipyBase)
+                        if isinstance(value, _TaipyBase)
                         else value._dict
                         if isinstance(value, _MapDict)
                         else value
@@ -349,28 +349,28 @@ class Gui:
         ws_dict = {}
         values = {v: getscopeattr_drill(self, v) for v in modified_vars}
         for v in values.values():
-            if isinstance(v, TaipyData) and v.get_name() in modified_vars:
+            if isinstance(v, _TaipyData) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
         for _var in modified_vars:
             newvalue = values.get(_var)
             # self._scopes.broadcast_data(_var, newvalue)
-            if isinstance(newvalue, TaipyData):
+            if isinstance(newvalue, _TaipyData):
                 ws_dict[newvalue.get_name() + ".refresh"] = True
             else:
-                if isinstance(newvalue, (TaipyContent, TaipyContentImage)):
+                if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
-                        front_var, newvalue.get(), isinstance(newvalue, TaipyContentImage)
+                        front_var, newvalue.get(), isinstance(newvalue, _TaipyContentImage)
                     )
                     if isinstance(ret_value, tuple):
                         newvalue = Gui.__CONTENT_ROOT + ret_value[0]
                     else:
                         newvalue = ret_value
-                elif isinstance(newvalue, TaipyLov):
+                elif isinstance(newvalue, _TaipyLov):
                     newvalue = [
                         self._run_adapter_for_var(newvalue.get_name(), elt, str(idx))
                         for idx, elt in enumerate(newvalue.get())
                     ]
-                elif isinstance(newvalue, TaipyLovValue):
+                elif isinstance(newvalue, _TaipyLovValue):
                     newvalue = self._run_adapter_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
@@ -381,7 +381,7 @@ class Gui:
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = getscopeattr_drill(self, var_name)
-        if isinstance(newvalue, TaipyData):
+        if isinstance(newvalue, _TaipyData):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload, newvalue.get_name() + ".refresh": False})
 
@@ -408,18 +408,18 @@ class Gui:
     def _send_ws_id(self, id: str) -> None:
         self.__send_ws(
             {
-                "type": WsType.CLIENT_ID.value,
+                "type": _WsType.CLIENT_ID.value,
                 "id": id,
             }
         )
 
     def _send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws({"type": WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "on_action": on_action})
+        self.__send_ws({"type": _WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "on_action": on_action})
 
     def __send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
         self.__send_ws(
             {
-                "type": WsType.ALERT.value,
+                "type": _WsType.ALERT.value,
                 "atype": type,
                 "message": message,
                 "browser": browser_notification,
@@ -436,7 +436,7 @@ class Gui:
     ):
         self.__send_ws(
             {
-                "type": WsType.BLOCK.value,
+                "type": _WsType.BLOCK.value,
                 "action": action,
                 "close": close,
                 "message": message,
@@ -450,7 +450,7 @@ class Gui:
     ):
         self.__send_ws(
             {
-                "type": WsType.NAVIGATE.value,
+                "type": _WsType.NAVIGATE.value,
                 "to": to,
             }
         )
@@ -460,7 +460,7 @@ class Gui:
             {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
             for k, v in modified_values.items()
         ]
-        self.__send_ws({"type": WsType.MULTIPLE_UPDATE.value, "payload": payload})
+        self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def __get_ws_receiver(self) -> t.Union[str, None]:
         if not hasattr(request, "sid") or self._bindings()._get_single_client():
@@ -488,14 +488,14 @@ class Gui:
     def __hold_messages(self):
         grouping_message = self.__get_message_grouping()
         if grouping_message is None:
-            self.bind_var_val(Gui.__MESSAGE_GROUPING_NAME, [])
+            self._bind_var_val(Gui.__MESSAGE_GROUPING_NAME, [])
 
     def __send_messages(self):
         grouping_message = self.__get_message_grouping()
         if grouping_message is not None:
             delscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
             if len(grouping_message):
-                self.__send_ws({"type": WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
+                self.__send_ws({"type": _WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
     def _get_user_function(self, func_name: str):
         func = getscopeattr(self, func_name, None)
@@ -555,7 +555,7 @@ class Gui:
     def _get_expr_from_hash(self, hash: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash)
 
-    def _evaluate_bind_holder(self, holder: t.Type[TaipyBase], expr: str) -> str:
+    def _evaluate_bind_holder(self, holder: t.Type[_TaipyBase], expr: str) -> str:
         return self.__evaluator.evaluate_bind_holder(self, holder, expr)
 
     def _evaluate_holders(self, expr: str) -> t.List[str]:
@@ -704,13 +704,13 @@ class Gui:
         return new_partial
 
     # Main binding method (bind in markdown declaration)
-    def bind_var(self, var_name: str) -> bool:
+    def _bind_var(self, var_name: str) -> bool:
         if not hasattr(self._bindings(), var_name) and var_name in self.__locals_bind.keys():
             self._bind(var_name, self.__locals_bind[var_name])
             return True
         return False
 
-    def bind_var_val(self, var_name: str, value: t.Any) -> bool:
+    def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
             return True
@@ -819,7 +819,7 @@ class Gui:
             return
         self.__send_ws_navigate(to)
 
-    def register_data_accessor(self, data_accessor_class: t.Type[DataAccessor]) -> None:
+    def register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
 
     def get_flask_app(self):
@@ -879,7 +879,7 @@ class Gui:
         self.__state = State(self, self.__locals_bind.keys())
 
         # base global ctx is TaipyHolder classes + script modules and callables
-        glob_ctx = {t.__name__: t for t in TaipyBase.__subclasses__()}
+        glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
         glob_ctx.update({k: v for k, v in self.__locals_bind.items() if inspect.ismodule(v) or callable(v)})
         self.__evaluator = _Evaluator(glob_ctx)
 
@@ -891,7 +891,7 @@ class Gui:
         if Gui.__root_page_name not in self._config.routes:
             new_page = _Page()
             new_page.route = Gui.__root_page_name
-            new_page.renderer = EmptyPage()
+            new_page.renderer = _EmptyPage()
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 
@@ -935,7 +935,7 @@ class Gui:
             self._server.get_flask().register_blueprint(bp)
 
         # Register data accessor communicaiton data format (JSON, Apache Arrow)
-        self._accessors._set_data_format(DataFormat.APACHE_ARROW if app_config["use_arrow"] else DataFormat.JSON)
+        self._accessors._set_data_format(_DataFormat.APACHE_ARROW if app_config["use_arrow"] else _DataFormat.JSON)
 
         # Use multi user or not
         self._bindings()._set_single_client(bool(app_config["single_client"]))

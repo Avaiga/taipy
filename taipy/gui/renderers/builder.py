@@ -7,7 +7,7 @@ import warnings
 import xml.etree.ElementTree as etree
 
 from ..partial import Partial
-from ..types import AttributeType, _get_taipy_type
+from ..types import _AttributeType, _get_taipy_type
 from ..utils import (
     _get_expr_var_name,
     _MapDict,
@@ -19,8 +19,8 @@ from ..utils import (
     is_boolean,
     is_boolean_true,
 )
-from ..utils.types import TaipyData
-from .jsonencoder import TaipyJsonEncoder
+from ..utils.types import _TaipyData
+from .jsonencoder import _TaipyJsonEncoder
 from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
 
 
@@ -59,7 +59,7 @@ class Builder:
         if "properties" in self.__attributes:
             (prop_dict, prop_hash) = self.__parse_attribute_value(self.__attributes["properties"])
             if prop_hash is None:
-                self.__gui.bind_var(prop_dict)
+                self.__gui._bind_var(prop_dict)
                 prop_dict = getscopeattr(self.__gui, prop_dict)
             if isinstance(prop_dict, _MapDict):
                 # Iterate through prop_dict and append to self.attributes
@@ -77,7 +77,7 @@ class Builder:
             if callable(v):
                 if v.__name__ == "<lambda>":
                     hashname = _get_expr_var_name(v.__code__)
-                    self.__gui.bind_var_val(hashname, v)
+                    self.__gui._bind_var_val(hashname, v)
                 else:
                     hashname = _get_expr_var_name(v.__name__)
             elif isinstance(v, str):
@@ -162,7 +162,7 @@ class Builder:
         return self
 
     def __set_json_attribute(self, name, value):
-        return self.set_attribute(name, json.dumps(value, cls=TaipyJsonEncoder))
+        return self.set_attribute(name, json.dumps(value, cls=_TaipyJsonEncoder))
 
     def __set_list_of_(self, name: str):
         lof = self.__get_list_of_(name)
@@ -322,7 +322,7 @@ class Builder:
     def get_dataframe_attributes(self, date_format="MM/dd/yyyy", number_format=None):  # noqa: C901
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
-        col_types = self.__gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
+        col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
         columns = _get_columns_dict(
             data,
             _add_to_dict_and_get(self.__attributes, "columns", {}),
@@ -450,7 +450,7 @@ class Builder:
         data = self.__attributes.get("data")
         data_hash = self.__hashes.get("data", "")
         columns = _get_columns_dict(
-            data, list(columns), self.__gui._accessors._get_col_types(data_hash, TaipyData(data, data_hash))
+            data, list(columns), self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
         )
         # set default columns if not defined
         cols = tuple(columns.keys())
@@ -536,7 +536,7 @@ class Builder:
             name_idx = f"{name}[{idx}]"
             sel = self.__attributes.get(name_idx)
 
-    def get_list_attribute(self, name: str, list_type: AttributeType):
+    def get_list_attribute(self, name: str, list_type: _AttributeType):
         varname = self.__hashes.get(name)
         if varname is None:
             list_val = self.__attributes.get(name)
@@ -544,7 +544,7 @@ class Builder:
                 list_val = [s for s in list_val.split(";")]
             if isinstance(list_val, list):
                 # TODO catch the cast exception
-                if list_type.value == AttributeType.number.value:
+                if list_type.value == _AttributeType.number.value:
                     list_val = [int(v) for v in list_val]
                 else:
                     list_val = [int(v) for v in list_val]
@@ -583,7 +583,7 @@ class Builder:
         if content is None and hash_name is None:
             return self
         if hash_name:
-            hash_name = self.__get_typed_hash_name(hash_name, AttributeType.image if image else AttributeType.content)
+            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.image if image else _AttributeType.content)
         value = self.__gui._get_content(hash_name or var_name, content, image)
         if hash_name:
             self.__set_react_attribute(
@@ -597,7 +597,7 @@ class Builder:
         self.__set_list_of_("default_" + property_name)
         hash_name = self.__hashes.get(var_name)
         if hash_name:
-            hash_name = self.__get_typed_hash_name(hash_name, AttributeType.lov)
+            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.lov)
             self.__update_vars.append(f"{property_name}={hash_name}")
             self.__set_react_attribute(property_name, hash_name)
         return self
@@ -632,7 +632,7 @@ class Builder:
         elif numVal is not None:
             warnings.warn(f"{self.__element_name} {var_name} value is not not valid {numVal}")
         if hash_name:
-            hash_name = self.__get_typed_hash_name(hash_name, AttributeType.number)
+            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.number)
             self.__update_vars.append(f"{var_name}={hash_name}")
             self.__set_react_attribute(var_name, hash_name)
         return self
@@ -662,11 +662,11 @@ class Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Optional[AttributeType] = None,
+        var_type: t.Optional[_AttributeType] = None,
         default_val: t.Any = None,
     ):
         var_name = self.__default_property_name if var_name is None else var_name
-        if var_type == AttributeType.dynamic_boolean:
+        if var_type == _AttributeType.dynamic_boolean:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
         hash_name = self.__hashes.get(var_name)
         if hash_name:
@@ -767,14 +767,14 @@ class Builder:
             self.set_attribute("kind", "theme")
         return self
 
-    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[AttributeType]) -> str:
+    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[_AttributeType]) -> str:
         taipy_type = _get_taipy_type(var_type)
         if taipy_type:
             expr = self.__gui._get_expr_from_hash(hash_name)
             hash_name = self.__gui._evaluate_bind_holder(taipy_type, expr)
         return hash_name
 
-    def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, var_type: AttributeType, update_main=True):
+    def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, var_type: _AttributeType, update_main=True):
         hash_name = self.__hashes.get(name)
         val = self.__get_boolean_attribute(name, def_val)
         default_name = "default_" + name if hash_name is not None else name
@@ -793,34 +793,34 @@ class Builder:
         for attr in attributes:
             if not isinstance(attr, tuple):
                 attr = (attr,)
-            var_type = _get_tuple_val(attr, 1, AttributeType.string)
-            if var_type == AttributeType.boolean:
+            var_type = _get_tuple_val(attr, 1, _AttributeType.string)
+            if var_type == _AttributeType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 val = self.__get_boolean_attribute(attr[0], def_val)
                 if val != def_val:
                     self.__set_boolean_attribute(attr[0], val)
-            elif var_type == AttributeType.dynamic_boolean:
+            elif var_type == _AttributeType.dynamic_boolean:
                 self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(
                     attr, 2, False), _get_tuple_val(attr, 3, False), var_type)
-            elif var_type == AttributeType.number:
+            elif var_type == _AttributeType.number:
                 self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == AttributeType.dynamic_number:
+            elif var_type == _AttributeType.dynamic_number:
                 self.__set_dynamic_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == AttributeType.string:
+            elif var_type == _AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
-            elif var_type == AttributeType.dynamic_string:
+            elif var_type == _AttributeType.dynamic_string:
                 self.__set_dynamic_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False))
-            elif var_type == AttributeType.function:
+            elif var_type == _AttributeType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
-            elif var_type == AttributeType.react:
+            elif var_type == _AttributeType.react:
                 self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
-            elif var_type == AttributeType.string_or_number:
+            elif var_type == _AttributeType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == AttributeType.dict:
+            elif var_type == _AttributeType.dict:
                 self.__set_dict_attribute(attr[0])
-            elif var_type == AttributeType.dynamic_list:
+            elif var_type == _AttributeType.dynamic_list:
                 self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == AttributeType.boolean_or_list:
+            elif var_type == _AttributeType.boolean_or_list:
                 if is_boolean(self.__attributes.get(attr[0])):
                     self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(
                         attr, 2, False), True, var_type, update_main=False)

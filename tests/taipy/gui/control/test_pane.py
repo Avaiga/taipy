@@ -2,7 +2,7 @@ from taipy.gui import Gui
 
 
 def test_pane_md(gui: Gui, helpers):
-    gui.bind_var_val("show_pane", False)
+    gui._bind_var_val("show_pane", False)
     md_string = """
 <|{show_pane}|pane|not persistent|
 # This is a Pane
@@ -11,8 +11,8 @@ def test_pane_md(gui: Gui, helpers):
     expected_list = [
         "<Pane",
         'anchor="left"',
-        'updateVarName="TaipyBool_show_pane"',
-        "open={TaipyBool_show_pane}",
+        'updateVarName="_TpB_show_pane"',
+        "open={_TpB_show_pane}",
         "<h1",
         "This is a Pane</h1></Pane>",
     ]
@@ -20,7 +20,7 @@ def test_pane_md(gui: Gui, helpers):
 
 
 def test_pane_persistent_md(gui: Gui, helpers):
-    gui.bind_var_val("show_pane", False)
+    gui._bind_var_val("show_pane", False)
     md_string = """
 <|{show_pane}|pane|persistent|
 # This is a Pane
@@ -30,8 +30,8 @@ def test_pane_persistent_md(gui: Gui, helpers):
         "<Pane",
         'anchor="left"',
         "persistent={true}",
-        'updateVarName="TaipyBool_show_pane"',
-        "open={TaipyBool_show_pane}",
+        'updateVarName="_TpB_show_pane"',
+        "open={_TpB_show_pane}",
         "<h1",
         "This is a Pane</h1></Pane>",
     ]
@@ -39,13 +39,13 @@ def test_pane_persistent_md(gui: Gui, helpers):
 
 
 def test_pane_html(gui: Gui, helpers):
-    gui.bind_var_val("show_pane", False)
+    gui._bind_var_val("show_pane", False)
     html_string = '<taipy:pane open="{show_pane}" persistent="false"><h1>This is a Pane</h1></taipy:pane>'
     expected_list = [
         "<Pane",
         'anchor="left"',
-        'updateVarName="TaipyBool_show_pane"',
-        "open={TaipyBool_show_pane}",
+        'updateVarName="_TpB_show_pane"',
+        "open={_TpB_show_pane}",
         "<h1",
         "This is a Pane</h1></Pane>",
     ]

@@ -2,7 +2,7 @@ import sys
 import threading
 
 
-class KillableThread(threading.Thread):
+class _KillableThread(threading.Thread):
     def __init__(self, *args, **keywords):
         threading.Thread.__init__(self, *args, **keywords)
         self.killed = False

@@ -88,7 +88,7 @@ def test_file_upload_multi_part(gui: Gui, helpers):
 
 def test_file_upload_multiple(gui: Gui, helpers):
     var_name = "varname"
-    gui.bind_var_val(var_name, None)
+    gui._bind_var_val(var_name, None)
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
     # Get the jsx once so that the page will be evaluated -> variable will be registered

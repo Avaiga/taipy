@@ -1,1 +1,1 @@
-from .data_accessor import DataAccessor
+from .data_accessor import _DataAccessor

@@ -10,7 +10,7 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 from . import (
-    TaipyBase,
+    _TaipyBase,
     _get_expr_var_name,
     get_client_var_name,
     getscopeattr,
@@ -45,7 +45,7 @@ class _Evaluator:
         # instead of binding everywhere the types
         self.__global_ctx = default_bindings
         # expr to holders
-        self.__expr_to_holders: t.Dict[str, t.Set[t.Type[TaipyBase]]] = {}
+        self.__expr_to_holders: t.Dict[str, t.Set[t.Type[_TaipyBase]]] = {}
 
     def get_hash_from_expr(self, expr: str) -> str:
         return self.__expr_to_hash.get(expr, expr)
@@ -77,7 +77,7 @@ class _Evaluator:
                     var_name = node.id.split(sep=".")[0]
                     if var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
-                            gui.bind_var(var_name)
+                            gui._bind_var(var_name)
                             var_val[var_name] = getscopeattr_drill(gui, var_name)
                             var_list.append(var_name)
                         except AttributeError as e:
@@ -96,11 +96,11 @@ class _Evaluator:
         if expr in self.__expr_to_hash:
             if expr_hash is None:
                 expr_hash = self.__expr_to_hash[expr]
-                gui.bind_var_val(expr_hash, expr_evaluated)
+                gui._bind_var_val(expr_hash, expr_evaluated)
             return expr_hash
         if expr_hash is None:
             expr_hash = self.__expr_to_hash[expr] = _get_expr_var_name(expr)
-            gui.bind_var_val(expr_hash, expr_evaluated)
+            gui._bind_var_val(expr_hash, expr_evaluated)
         else:
             self.__expr_to_hash[expr] = expr_hash
         self.__hash_to_expr[expr_hash] = expr
@@ -115,7 +115,7 @@ class _Evaluator:
             self.__expr_to_var_list[expr] = var_list
         return expr_hash
 
-    def evaluate_bind_holder(self, gui: Gui, holder: t.Type[TaipyBase], expr: str) -> str:
+    def evaluate_bind_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> str:
         expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
         hash_name = self.__get_holder_hash(holder, expr_hash)
         expr_lit = expr.replace("'", "\\'")
@@ -147,16 +147,16 @@ class _Evaluator:
         return lst
 
     @staticmethod
-    def __get_holder_hash(holder: t.Type[TaipyBase], expr_hash: str) -> str:
-        return f"{holder.__name__}_{get_client_var_name(expr_hash)}"
+    def __get_holder_hash(holder: t.Type[_TaipyBase], expr_hash: str) -> str:
+        return f"{holder.get_hash()}_{get_client_var_name(expr_hash)}"
 
-    def __evaluate_holder(self, gui: Gui, holder: t.Type[TaipyBase], expr: str) -> TaipyBase:
+    def __evaluate_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> _TaipyBase:
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)
             expr_value = getscopeattr_drill(gui, expr_hash)
             holder_value = getscopeattr(gui, holder_hash, None)
-            if not isinstance(holder_value, TaipyBase):
+            if not isinstance(holder_value, _TaipyBase):
                 holder_value = holder(expr_value, expr_hash)
                 setscopeattr(gui, holder_hash, holder_value)
             else:

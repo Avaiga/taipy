@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class DataFormat(Enum):
+class _DataFormat(Enum):
     JSON = "JSON"
     APACHE_ARROW = "ARROW"

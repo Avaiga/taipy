@@ -2,8 +2,8 @@ from taipy.gui import Gui
 
 
 def test_selector_md_1(gui: Gui, helpers):
-    gui.bind_var_val("selected_val", ["l1", "l2"])
-    gui.bind_var_val("selector_properties", {"lov": [("l1", "v1"), ("l2", "v2"), ("l3", "v3")], "filter": True})
+    gui._bind_var_val("selected_val", ["l1", "l2"])
+    gui._bind_var_val("selector_properties", {"lov": [("l1", "v1"), ("l2", "v2"), ("l3", "v3")], "filter": True})
     md_string = "<|{selected_val}|selector|properties=selector_properties|multiple|>"
     expected_list = [
         "<Selector",
@@ -11,49 +11,49 @@ def test_selector_md_1(gui: Gui, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'updateVarName="TaipyLovValue_selected_val"',
-        "value={TaipyLovValue_selected_val}",
+        'updateVarName="_TpLv_selected_val"',
+        "value={_TpLv_selected_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_selector_md_2(gui: Gui, helpers):
-    gui.bind_var_val("selected_val", "Item 2")
+    gui._bind_var_val("selected_val", "Item 2")
     md_string = "<|{selected_val}|selector|lov=Item 1;Item 2; This is a another value|>"
     expected_list = [
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'updateVarName="TaipyLovValue_selected_val"',
-        "value={TaipyLovValue_selected_val}",
+        'updateVarName="_TpLv_selected_val"',
+        "value={_TpLv_selected_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_selector_md_3(gui: Gui, helpers):
-    gui.bind_var_val("elt", None)
-    gui.bind_var_val(
+    gui._bind_var_val("elt", None)
+    gui._bind_var_val(
         "scenario_list",
         [{"id": "1", "name": "scenario 1"}, {"id": "3", "name": "scenario 3"}, {"id": "2", "name": "scenario 2"}],
     )
-    gui.bind_var_val("selected_obj", {"id": "1", "name": "scenario 1"})
+    gui._bind_var_val("selected_obj", {"id": "1", "name": "scenario 1"})
     md_string = '<|{selected_obj}|selector|lov={scenario_list}|type=Scenario|adapter={lambda elt: (elt["id"], elt["name"])}|not propagate|>'
     expected_list = [
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
         'defaultValue="[&quot;1&quot;]"',
-        "lov={TaipyLov_scenario_list}",
+        "lov={_TpL_scenario_list}",
         "propagate={false}",
-        'updateVars="lov=TaipyLov_scenario_list"',
-        'updateVarName="TaipyLovValue_selected_obj"',
-        "value={TaipyLovValue_selected_obj}",
+        'updateVars="lov=_TpL_scenario_list"',
+        'updateVarName="_TpLv_selected_obj"',
+        "value={_TpLv_selected_obj}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
 def test_selector_html_1_1(gui: Gui, helpers):
-    gui.bind_var_val("selected_val", ["l1", "l2"])
-    gui.bind_var_val("selector_properties", {"lov": [("l1", "v1"), ("l2", "v2"), ("l3", "v3")], "filter": True})
+    gui._bind_var_val("selected_val", ["l1", "l2"])
+    gui._bind_var_val("selector_properties", {"lov": [("l1", "v1"), ("l2", "v2"), ("l3", "v3")], "filter": True})
     html_string = '<taipy:selector value="{selected_val}" properties="selector_properties" multiple="True"/>'
     expected_list = [
         "<Selector",
@@ -61,15 +61,15 @@ def test_selector_html_1_1(gui: Gui, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'updateVarName="TaipyLovValue_selected_val"',
-        "value={TaipyLovValue_selected_val}",
+        'updateVarName="_TpLv_selected_val"',
+        "value={_TpLv_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_selector_html_1_2(gui: Gui, helpers):
-    gui.bind_var_val("selected_val", ["l1", "l2"])
-    gui.bind_var_val("selector_properties", {"lov": [("l1", "v1"), ("l2", "v2"), ("l3", "v3")], "filter": True})
+    gui._bind_var_val("selected_val", ["l1", "l2"])
+    gui._bind_var_val("selector_properties", {"lov": [("l1", "v1"), ("l2", "v2"), ("l3", "v3")], "filter": True})
     html_string = '<taipy:selector properties="selector_properties" multiple="True">{selected_val}</taipy:selector>'
     expected_list = [
         "<Selector",
@@ -77,33 +77,33 @@ def test_selector_html_1_2(gui: Gui, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'updateVarName="TaipyLovValue_selected_val"',
-        "value={TaipyLovValue_selected_val}",
+        'updateVarName="_TpLv_selected_val"',
+        "value={_TpLv_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_selector_html_2_1(gui: Gui, helpers):
-    gui.bind_var_val("selected_val", "Item 2")
+    gui._bind_var_val("selected_val", "Item 2")
     html_string = '<taipy:selector value="{selected_val}" lov="Item 1;Item 2; This is a another value" />'
     expected_list = [
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'updateVarName="TaipyLovValue_selected_val"',
-        "value={TaipyLovValue_selected_val}",
+        'updateVarName="_TpLv_selected_val"',
+        "value={_TpLv_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
 def test_selector_html_2_2(gui: Gui, helpers):
-    gui.bind_var_val("selected_val", "Item 2")
+    gui._bind_var_val("selected_val", "Item 2")
     html_string = '<taipy:selector lov="Item 1;Item 2; This is a another value">{selected_val}</taipy:selector>'
     expected_list = [
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'updateVarName="TaipyLovValue_selected_val"',
-        "value={TaipyLovValue_selected_val}",
+        'updateVarName="_TpLv_selected_val"',
+        "value={_TpLv_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
