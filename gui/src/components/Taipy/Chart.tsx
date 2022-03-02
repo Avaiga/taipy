@@ -20,6 +20,7 @@ import {
 } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { getArrayValue, getUpdateVar, TaipyActiveProps } from "./utils";
@@ -94,8 +95,8 @@ const Chart = (props: ChartProp) => {
         width = "100%",
         height = "100%",
         refresh = false,
-        tp_varname,
-        tp_updatevars,
+        updateVarName,
+        updateVars,
         id,
         data = {},
         tp_onRangeChange,
@@ -109,6 +110,7 @@ const Chart = (props: ChartProp) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     // get props.selected[i] values
     useEffect(() => {
@@ -175,7 +177,7 @@ const Chart = (props: ChartProp) => {
             dataKey.current = backCols.join("-");
             dispatch(
                 createRequestChartUpdateAction(
-                    tp_varname,
+                    updateVarName,
                     id,
                     dataKey.current,
                     backCols,
@@ -184,9 +186,9 @@ const Chart = (props: ChartProp) => {
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, tp_varname, id, limitRows]);
+    }, [refresh, dispatch, config.columns, updateVarName, id, limitRows]);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
     const layout = useMemo(() => {
         const playout = props.layout ? JSON.parse(props.layout) : {};
@@ -267,7 +269,7 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) =>
-        tp_onRangeChange && dispatch(createSendActionNameAction(id, { action: tp_onRangeChange, ...eventData })),
+            tp_onRangeChange && dispatch(createSendActionNameAction(id, { action: tp_onRangeChange, ...eventData })),
         [dispatch, tp_onRangeChange, id]
     );
 
@@ -283,38 +285,40 @@ const Chart = (props: ChartProp) => {
     const onSelect = useCallback(
         (evt?: PlotMouseEvent | PlotSelectionEvent) => {
             const points = evt?.points || [];
-            if (points.length && tp_updatevars) {
+            if (points.length && updateVars) {
                 const traces = points.reduce((tr, pt) => {
                     tr[pt.curveNumber] = tr[pt.curveNumber] || [];
                     tr[pt.curveNumber].push(getRealIndex(pt.pointIndex));
                     return tr;
                 }, [] as number[][]);
                 traces.forEach((tr, idx) => {
-                    const upvar = getUpdateVar(tp_updatevars, `selected${idx}`);
+                    const upvar = getUpdateVar(updateVars, `selected${idx}`);
                     if (upvar && tr && tr.length) {
                         dispatch(createSendUpdateAction(upvar, tr, propagate));
                     }
                 });
             }
         },
-        [getRealIndex, dispatch, tp_updatevars, propagate]
+        [getRealIndex, dispatch, updateVars, propagate]
     );
 
     return render ? (
         <Box id={id} key="div" data-testid={props.testId} className={className} ref={plotRef}>
-            <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
-                <Plot
-                    data={dataPl}
-                    layout={layout}
-                    style={style}
-                    onRelayout={onRelayout}
-                    onAfterPlot={onAfterPlot}
-                    onSelected={onSelect}
-                    onDeselect={onSelect}
-                    onClick={onSelect}
-                    config={plotConfig}
-                />
-            </Suspense>
+            <Tooltip title={hover || ""}>
+                <Suspense fallback={<Skeleton key="skeleton" sx={skelStyle} />}>
+                    <Plot
+                        data={dataPl}
+                        layout={layout}
+                        style={style}
+                        onRelayout={onRelayout}
+                        onAfterPlot={onAfterPlot}
+                        onSelected={onSelect}
+                        onDeselect={onSelect}
+                        onClick={onSelect}
+                        config={plotConfig}
+                    />
+                </Suspense>
+            </Tooltip>
         </Box>
     ) : null;
 };

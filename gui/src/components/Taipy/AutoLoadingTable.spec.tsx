@@ -147,7 +147,7 @@ describe("AutoLoadingTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <AutoLoadingTable id="table" data={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
+                <AutoLoadingTable id="table" data={undefined} columns={tableColumns} updateVars="varname=varname" />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -167,7 +167,7 @@ describe("AutoLoadingTable Component", () => {
                     columns={tableColumns}
                     defaultKey="Infinite--asc"
                     pageSize={2}
-                    tp_updatevars="varname=varname"
+                    updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
         );
@@ -180,7 +180,7 @@ describe("AutoLoadingTable Component", () => {
                     defaultKey="Infinite--asc"
                     columns={tableColumns}
                     pageSize={2}
-                    tp_updatevars="varname=varname"
+                    updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
         );

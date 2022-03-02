@@ -53,8 +53,10 @@ class Factory:
                 ("id",),
                 ("on_action", AttributeType.function, ""),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "chart": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -73,6 +75,7 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
                 ("limit_rows", AttributeType.boolean),
                 ("render", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
@@ -96,9 +99,11 @@ class Factory:
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("editable", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
-        .set_propagate(),
+        .set_propagate()
+        .set_refresh_on_update(),
         "dialog": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -119,9 +124,11 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width", AttributeType.string_or_number),
                 ("height", AttributeType.string_or_number),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
-        .set_propagate(),
+        .set_propagate()
+        .set_refresh_on_update(),
         "expandable": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Expandable", attributes=attrs, default_value=None
         )
@@ -130,8 +137,10 @@ class Factory:
             [
                 ("id",),
                 ("expanded", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "file_download": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -149,8 +158,10 @@ class Factory:
                 ("auto", AttributeType.boolean, False),
                 ("bypass_preview", AttributeType.boolean, True),
                 ("name",),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "file_selector": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -167,8 +178,10 @@ class Factory:
                 ("multiple", AttributeType.boolean, False),
                 ("extensions",),
                 ("drop_message",),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "image": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -184,8 +197,10 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width",),
                 ("height",),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "indicator": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -201,8 +216,10 @@ class Factory:
                 ("value", AttributeType.dynamic_number),
                 ("format",),
                 ("orientation"),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "input": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -216,8 +233,10 @@ class Factory:
             [
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "layout": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Layout", attributes=attrs, default_value=None
         )
@@ -246,6 +265,7 @@ class Factory:
                 ("width[mobile]",),
                 ("on_action", AttributeType.function, "on_menu_action"),
                 ("inactive_ids", AttributeType.dynamic_list),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update()
@@ -259,8 +279,10 @@ class Factory:
             [
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "number": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -275,8 +297,10 @@ class Factory:
             [
                 ("id",),
                 ("active", AttributeType.dynamic_boolean, True),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "pane": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Pane", attributes=attrs, default_value=None
         )
@@ -292,9 +316,11 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
                 ("width", AttributeType.string_or_number, "30vw"),
                 ("height", AttributeType.string_or_number, "30vh"),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
-        .set_propagate(),
+        .set_propagate()
+        .set_refresh_on_update(),
         "part": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=None
         )
@@ -318,6 +344,7 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
                 ("height", AttributeType.string_or_number),
                 ("width", AttributeType.string_or_number),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update()
@@ -339,13 +366,15 @@ class Factory:
                 ("width", AttributeType.string, "300px"),
                 ("height"),
                 ("orientation"),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_labels()
         .set_string_with_check("text_anchor", Factory.__TEXT_ANCHORS + [Factory.__TEXT_ANCHOR_NONE], "bottom")
-        .set_propagate(),
+        .set_propagate()
+        .set_refresh_on_update(),
         "status": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -354,8 +383,13 @@ class Factory:
         )
         .set_value_and_default(with_update=False)
         .set_attributes(
-            [("id",), ("without_close", AttributeType.boolean, False)]
-        ),
+            [
+                ("id",), 
+                ("without_close", AttributeType.boolean, False),
+                ("hover_text", AttributeType.dynamic_string),
+            ]
+        )
+        .set_refresh_on_update(),
         "table": lambda gui, control_type, attrs: Builder(
             gui=gui,
             control_type=control_type,
@@ -379,6 +413,7 @@ class Factory:
                 ("on_delete", AttributeType.function),
                 ("on_add", AttributeType.function),
                 ("nan_value",),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .set_refresh()
@@ -398,8 +433,10 @@ class Factory:
             [
                 ("format",),
                 ("id",),
+                ("hover_text", AttributeType.dynamic_string),
             ]
-        ),
+        )
+        .set_refresh_on_update(),
         "toggle": lambda gui, control_type, attrs: Builder(
             gui=gui, control_type=control_type, element_name="Toggle", attributes=attrs, default_value=None
         )
@@ -412,6 +449,7 @@ class Factory:
                 ("label",),
                 ("active", AttributeType.dynamic_boolean, True),
                 ("unselected_value", AttributeType.string, ""),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .set_kind()
@@ -435,6 +473,7 @@ class Factory:
                 ("active", AttributeType.dynamic_boolean, True),
                 ("height", AttributeType.string_or_number),
                 ("width", AttributeType.string_or_number),
+                ("hover_text", AttributeType.dynamic_string),
             ]
         )
         .set_refresh_on_update()

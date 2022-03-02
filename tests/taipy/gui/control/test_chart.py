@@ -16,8 +16,8 @@ def test_chart_md_1(gui: Gui, helpers, csvdata):
         'height="100%"',
         'layout="{&quot;grid&quot;: {&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;}}"',
         'tp_onRangeChange="range_change"',
-        'tp_updatevars="selected0=selected_indices;selected1=selected_indices"',
-        'tp_varname="TaipyData_csvdata"',
+        'updateVars="selected0=selected_indices;selected1=selected_indices"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
         'width="100%"',
     ]
@@ -39,8 +39,8 @@ def test_chart_html_1(gui: Gui, helpers, csvdata):
         'height="100%"',
         'layout="{&quot;grid&quot;: {&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;}}"',
         'tp_onRangeChange="range_change"',
-        'tp_updatevars="selected0=selected_indices;selected1=selected_indices"',
-        'tp_varname="TaipyData_csvdata"',
+        'updateVars="selected0=selected_indices;selected1=selected_indices"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
         'width="100%"',
     ]
@@ -62,8 +62,8 @@ def test_chart_html_2(gui: Gui, helpers, csvdata):
         'height="100%"',
         'layout="{&quot;grid&quot;: {&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;}}"',
         'tp_onRangeChange="range_change"',
-        'tp_updatevars="selected0=selected_indices;selected1=selected_indices"',
-        'tp_varname="TaipyData_csvdata"',
+        'updateVars="selected0=selected_indices;selected1=selected_indices"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
         'width="100%"',
     ]

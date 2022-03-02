@@ -11,7 +11,7 @@ def test_selector_md_1(gui: Gui, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'tp_varname="TaipyLovValue_selected_val"',
+        'updateVarName="TaipyLovValue_selected_val"',
         "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -24,7 +24,7 @@ def test_selector_md_2(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'tp_varname="TaipyLovValue_selected_val"',
+        'updateVarName="TaipyLovValue_selected_val"',
         "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -44,8 +44,8 @@ def test_selector_md_3(gui: Gui, helpers):
         'defaultValue="[&quot;1&quot;]"',
         "lov={TaipyLov_scenario_list}",
         "propagate={false}",
-        'tp_updatevars="lov=TaipyLov_scenario_list"',
-        'tp_varname="TaipyLovValue_selected_obj"',
+        'updateVars="lov=TaipyLov_scenario_list"',
+        'updateVarName="TaipyLovValue_selected_obj"',
         "value={TaipyLovValue_selected_obj}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -61,7 +61,7 @@ def test_selector_html_1_1(gui: Gui, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'tp_varname="TaipyLovValue_selected_val"',
+        'updateVarName="TaipyLovValue_selected_val"',
         "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -77,7 +77,7 @@ def test_selector_html_1_2(gui: Gui, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'tp_varname="TaipyLovValue_selected_val"',
+        'updateVarName="TaipyLovValue_selected_val"',
         "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -90,7 +90,7 @@ def test_selector_html_2_1(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'tp_varname="TaipyLovValue_selected_val"',
+        'updateVarName="TaipyLovValue_selected_val"',
         "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -103,7 +103,7 @@ def test_selector_html_2_2(gui: Gui, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'tp_varname="TaipyLovValue_selected_val"',
+        'updateVarName="TaipyLovValue_selected_val"',
         "value={TaipyLovValue_selected_val}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

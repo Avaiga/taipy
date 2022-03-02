@@ -89,7 +89,7 @@ class Builder:
             if hashname:
                 self.__hashes[k] = hashname
         # set classname
-        self.__set_classNames()
+        self.__set_class_names()
         # define a unique key
         self.set_attribute("key", Builder._get_key(self.__element_name))
 
@@ -195,6 +195,17 @@ class Builder:
                 warnings.warn(f"Property {name} is required for control {self.__control_type}")
             return self
         return self.set_attribute(_to_camel_case(name), str(strattr))
+
+    def __set_dynamic_string_attribute(self, name: str, default_value: t.Optional[str] = None, with_update: t.Optional[bool] = False):
+        hash_name = self.__hashes.get(name)
+        str_val = self.__attributes.get(name, default_value)
+        if str_val is not None:
+            self.set_attribute(_to_camel_case(f"default_{name}"), str(str_val))
+        if hash_name:
+            if with_update:
+                self.__update_vars.append(f"{name}={hash_name}")
+            self.__set_react_attribute(name, hash_name)
+        return self
 
     def __set_function_attribute(
         self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True
@@ -546,7 +557,7 @@ class Builder:
             self.__set_react_attribute(_to_camel_case(name), varname)
         return self
 
-    def __set_classNames(self):
+    def __set_class_names(self):
         classes = ["taipy-" + self.__control_type.replace("_", "-")]
         cl = self.__attributes.get("classname")
         if cl:
@@ -561,7 +572,7 @@ class Builder:
     def set_file_content(self, var_name: str = "content"):
         hash_name = self.__hashes.get(var_name)
         if hash_name:
-            self.__set_tp_varname(hash_name)
+            self.__set_update_var_name(hash_name)
         else:
             warnings.warn("{self.element_name} {var_name} should be binded")
         return self
@@ -630,7 +641,7 @@ class Builder:
         if value is None:
             value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case("default_" + var_name)
-        if isinstance(value, datetime.datetime):
+        if isinstance(value, (datetime.datetime, datetime.date, datetime.time)):
             self.set_attribute(default_var_name, date_to_ISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
@@ -642,8 +653,8 @@ class Builder:
             self.__set_json_attribute(default_var_name, value)
         return self
 
-    def __set_tp_varname(self, hash_name: str):
-        return self.set_attribute("tp_varname", hash_name)
+    def __set_update_var_name(self, hash_name: str):
+        return self.set_attribute("updateVarName", hash_name)
 
     def set_value_and_default(
         self,
@@ -665,7 +676,7 @@ class Builder:
                 get_client_var_name(hash_name),
             )
             if with_update:
-                self.__set_tp_varname(hash_name)
+                self.__set_update_var_name(hash_name)
             if with_default:
                 if native_type:
                     val = self.__attributes.get(var_name)
@@ -728,8 +739,8 @@ class Builder:
         )
 
     def set_refresh_on_update(self):
-        if len(self.__update_vars):
-            self.set_attribute("tp_updatevars", ";".join(self.__update_vars))
+        if self.__update_vars:
+            self.set_attribute("updateVars", ";".join(self.__update_vars))
         return self
 
     def set_table_pagesize_options(self, default_size=[50, 100, 500]):
@@ -774,7 +785,7 @@ class Builder:
             self.__set_react_attribute(_to_camel_case(name), get_client_var_name(hash_name))
             if with_update:
                 if update_main:
-                    self.__set_tp_varname(hash_name)
+                    self.__set_update_var_name(hash_name)
                 else:
                     self.__update_vars.append(f"{name}={hash_name}")
 
@@ -797,6 +808,8 @@ class Builder:
                 self.__set_dynamic_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
+            elif var_type == AttributeType.dynamic_string:
+                self.__set_dynamic_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False))
             elif var_type == AttributeType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == AttributeType.react:

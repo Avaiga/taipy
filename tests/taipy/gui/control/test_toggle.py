@@ -17,8 +17,8 @@ def test_toggle_md_2(gui: Gui, helpers):
         'defaultValue="l1"',
         'label="Label"',
         "lov={TaipyLov_lov}",
-        'tp_updatevars="lov=TaipyLov_lov"',
-        'tp_varname="TaipyLovValue_x"',
+        'updateVars="lov=TaipyLov_lov"',
+        'updateVarName="TaipyLovValue_x"',
         'unselectedValue=""',
         "value={TaipyLovValue_x}",
     ]
@@ -41,8 +41,8 @@ def test_toggle_html_2(gui: Gui, helpers):
         'defaultValue="l1"',
         'label="Label"',
         "lov={TaipyLov_lov}",
-        'tp_updatevars="lov=TaipyLov_lov"',
-        'tp_varname="TaipyLovValue_x"',
+        'updateVars="lov=TaipyLov_lov"',
+        'updateVarName="TaipyLovValue_x"',
         'unselectedValue=""',
         "value={TaipyLovValue_x}",
     ]

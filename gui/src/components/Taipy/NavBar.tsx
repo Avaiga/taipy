@@ -7,6 +7,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/icons-material/Menu";
 import { useLocation, useNavigate } from "react-router";
 
@@ -28,6 +29,7 @@ const NavBar = (props: LovProps) => {
     const isMobile = useIsMobile();
     const [opened, setOpened] = useState(false);
 
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     let lovList = useLovListMemo(lov, defaultLov);
     if (!lovList.length) {
         lovList = Object.keys(state.locations || {})
@@ -47,38 +49,43 @@ const NavBar = (props: LovProps) => {
         [navigate, state.locations]
     );
 
-    const selectedVal = !isMobile && (lovList.find(it => it.id === location.pathname)?.id || lovList[0].id);
+    const selectedVal = !isMobile && (lovList.find((it) => it.id === location.pathname)?.id || lovList[0].id);
 
-    return isMobile ? (<>
-        <Drawer open={opened} onClose={() => setOpened(false)}>
-            <List>
-                {lovList.map((val) => (
-                    <ListItem key={val.id} onClick={() => setOpened(false)} disabled={!active}>
-                        <ListItemText>
-                            <Link href={val.id}>
-                                {(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
-                            </Link>
-                        </ListItemText>
-                    </ListItem>
-                ))}
-            </List>
-        </Drawer>
-        <IconButton onClick={() => setOpened(o => !o)}>
-            <Menu />
-        </IconButton>
-        </>
+    return isMobile ? (
+        <Tooltip title={hover || ""}>
+            <>
+                <Drawer open={opened} onClose={() => setOpened(false)}>
+                    <List>
+                        {lovList.map((val) => (
+                            <ListItem key={val.id} onClick={() => setOpened(false)} disabled={!active}>
+                                <ListItemText>
+                                    <Link href={val.id}>
+                                        {(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
+                                    </Link>
+                                </ListItemText>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Drawer>
+                <IconButton onClick={() => setOpened((o) => !o)}>
+                    <Menu />
+                </IconButton>
+            </>
+        </Tooltip>
     ) : (
         <Box sx={boxSx} className={className}>
-            <Tabs value={selectedVal} id={id} onChange={linkChange}>
-                {lovList.map((val) => (
-                    <Tab
-                        key={val.id}
-                        value={val.id}
-                        disabled={!active}
-                        label={(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
-                    />
-                ))}
-            </Tabs>
+            <Tooltip title={hover || ""}>
+                <Tabs value={selectedVal} id={id} onChange={linkChange}>
+                    {lovList.map((val) => (
+                        <Tab
+                            key={val.id}
+                            value={val.id}
+                            disabled={!active}
+                            label={(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
+                        />
+                    ))}
+                </Tabs>
+            </Tooltip>
         </Box>
     );
 };

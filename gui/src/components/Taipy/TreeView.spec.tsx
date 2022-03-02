@@ -92,7 +92,7 @@ describe("TreeView Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <TreeView lov={lov} tp_varname="varname" />
+                <TreeView lov={lov} updateVarName="varname" />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
@@ -114,7 +114,7 @@ describe("TreeView Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <TreeView lov={lov} tp_varname="varname" multiple={true} />
+                <TreeView lov={lov} updateVarName="varname" multiple={true} />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
@@ -153,7 +153,7 @@ describe("TreeView Component", () => {
     it("does not dispatch update message when expanded is boolean", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={true} tp_updatevars="expanded=tree_expanded" /></TaipyContext.Provider>);
+        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={true} updateVars="expanded=tree_expanded" /></TaipyContext.Provider>);
         const elt = getByText("Item 1");
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledTimes(1);
@@ -162,7 +162,7 @@ describe("TreeView Component", () => {
     it("does dispatch update message when expanded is not boolean", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
-        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={[]} tp_updatevars="expanded=tree_expanded" /></TaipyContext.Provider>);
+        const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={[]} updateVars="expanded=tree_expanded" /></TaipyContext.Provider>);
         const elt = getByText("Item 1");
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledTimes(2);

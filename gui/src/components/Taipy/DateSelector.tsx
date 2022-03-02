@@ -3,6 +3,7 @@ import DatePicker from "@mui/lab/DatePicker";
 import DateTimePicker from "@mui/lab/DateTimePicker";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
+import Tooltip from "@mui/material/Tooltip";
 import { isValid } from "date-fns";
 
 import { TaipyContext } from "../../context/taipyContext";
@@ -24,7 +25,7 @@ interface DateSelectorProps extends TaipyActiveProps {
 const boxSx = {display: "inline-block"};
 
 const DateSelector = (props: DateSelectorProps) => {
-    const { className, tp_varname, withTime = false, id, propagate = true } = props;
+    const { className, updateVarName, withTime = false, id, propagate = true } = props;
     const { dispatch } = useContext(TaipyContext);
     const formatConfig = useFormatConfig();
     const tz = formatConfig.timeZone;
@@ -32,6 +33,7 @@ const DateSelector = (props: DateSelectorProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleChange = useCallback(
         (v) => {
@@ -52,10 +54,10 @@ const DateSelector = (props: DateSelectorProps) => {
                     newDate.setHours(hours);
                     newDate.setMinutes(minutes);
                 }
-                dispatch(createSendUpdateAction(tp_varname, newDate.toISOString(), propagate));
+                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), propagate));
             }
         },
-        [tp_varname, dispatch, withTime, propagate, tz]
+        [updateVarName, dispatch, withTime, propagate, tz]
     );
 
     const renderInput = useCallback(
@@ -72,6 +74,7 @@ const DateSelector = (props: DateSelectorProps) => {
 
     return (
         <Box id={id} className={className} sx={boxSx}>
+            <Tooltip title={hover || ""}>
             {editable ? (
                 withTime ? (
                     <DateTimePicker
@@ -100,6 +103,7 @@ const DateSelector = (props: DateSelectorProps) => {
                     className={getSuffixedClassNames(className, "-text")}
                 />
             )}
+            </Tooltip>
         </Box>
     );
 };

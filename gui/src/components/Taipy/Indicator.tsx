@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo } from "react";
 import Slider from "@mui/material/Slider";
+import Tooltip from "@mui/material/Tooltip";
 import { styled } from "@mui/material/styles";
 import { sprintf } from "sprintf-js";
 
-import { TaipyBaseProps } from "./utils";
+import { TaipyBaseProps, TaipyHoverProps } from "./utils";
+import { useDynamicProperty } from "../../utils/hooks";
 
-interface IndicatorProps extends TaipyBaseProps {
+interface IndicatorProps extends TaipyBaseProps, TaipyHoverProps {
     min?: number;
     max?: number;
     value?: number;
@@ -26,6 +28,7 @@ const Indicator = (props: IndicatorProps) => {
     const { min = 0, max = 100, display, defaultDisplay, format, value, defaultValue = 0 } = props;
 
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const getLabel = useCallback(() => {
         const dsp = display === undefined ? (defaultDisplay === undefined ? "" : defaultDisplay) : display;
@@ -60,30 +63,32 @@ const Indicator = (props: IndicatorProps) => {
                     backgroundColor: "transparent",
                 },
                 "& .MuiSlider-valueLabel": {
-                    top: "unset"
+                    top: "unset",
                 },
                 "& .MuiSlider-valueLabel.MuiSlider-valueLabelOpen": {
-                    transform: horizontalOrientation ? "": "translate(calc(50% + 10px))"
+                    transform: horizontalOrientation ? "" : "translate(calc(50% + 10px))",
                 },
                 "& .MuiSlider-valueLabel:before": {
                     left: horizontalOrientation ? "50%" : "0",
-                    bottom: horizontalOrientation ? "0": "50%",
-                }
+                    bottom: horizontalOrientation ? "0" : "50%",
+                },
             }),
         [horizontalOrientation]
     );
 
     return (
-        <TpSlider
-            min={0}
-            max={100}
-            value={getValue(value === undefined ? defaultValue : value, min, max)}
-            disabled={true}
-            valueLabelDisplay="on"
-            valueLabelFormat={getLabel}
-            marks={marks}
-            orientation={horizontalOrientation ? undefined : "vertical"}
-        ></TpSlider>
+        <Tooltip title={hover || ""}>
+            <TpSlider
+                min={0}
+                max={100}
+                value={getValue(value === undefined ? defaultValue : value, min, max)}
+                disabled={true}
+                valueLabelDisplay="on"
+                valueLabelFormat={getLabel}
+                marks={marks}
+                orientation={horizontalOrientation ? undefined : "vertical"}
+            ></TpSlider>
+        </Tooltip>
     );
 };
 

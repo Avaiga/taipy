@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useCallback, useContext, useEffect, useRef, useState } from "react";
 import Fab from "@mui/material/Fab";
 import LinearProgress from "@mui/material/LinearProgress";
+import Tooltip from "@mui/material/Tooltip";
 import UploadFile from "@mui/icons-material/UploadFile";
 
 import { TaipyContext } from "../../context/taipyContext";
@@ -32,7 +33,7 @@ const FileSelector = (props: FileSelectorProps) => {
         id,
         tp_onAction,
         defaultLabel = "",
-        tp_varname = "",
+        updateVarName = "",
         multiple = false,
         extensions = ".csv,.xlsx",
         dropMessage = "Drop here to Upload",
@@ -46,6 +47,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const fabRef = useRef<HTMLElement>(null);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleFiles = useCallback(
         (files: FileList | undefined | null, evt: Event | ChangeEvent) => {
@@ -53,7 +55,7 @@ const FileSelector = (props: FileSelectorProps) => {
             evt.preventDefault();
             if (files) {
                 setUpload(true);
-                uploadFile(tp_varname, files, setProgress, state.id).then(
+                uploadFile(updateVarName, files, setProgress, state.id).then(
                     (value) => {
                         setUpload(false);
                         tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
@@ -70,7 +72,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 );
             }
         },
-        [state.id, id, tp_onAction, tp_varname, dispatch]
+        [state.id, id, tp_onAction, updateVarName, dispatch]
     );
 
     const handleChange = useCallback(
@@ -133,19 +135,20 @@ const FileSelector = (props: FileSelectorProps) => {
                 multiple={multiple}
                 onChange={handleChange}
             />
-
-            <Fab
-                id={id}
-                size="small"
-                component="span"
-                aria-label="upload"
-                variant="extended"
-                disabled={!active || upload}
-                ref={fabRef}
-                sx={dropSx}
-            >
-                <UploadFile /> {dropLabel || label || defaultLabel}
-            </Fab>
+            <Tooltip title={hover || ""}>
+                <Fab
+                    id={id}
+                    size="small"
+                    component="span"
+                    aria-label="upload"
+                    variant="extended"
+                    disabled={!active || upload}
+                    ref={fabRef}
+                    sx={dropSx}
+                >
+                    <UploadFile /> {dropLabel || label || defaultLabel}
+                </Fab>
+            </Tooltip>
             {upload ? <LinearProgress value={progress} /> : null}
         </label>
     );

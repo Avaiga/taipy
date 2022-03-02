@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 
 import Fab from "@mui/material/Fab";
+import Tooltip from "@mui/material/Tooltip";
 import FileDownloadIco from "@mui/icons-material/FileDownload";
 
 import { useDynamicProperty } from "../../utils/hooks";
@@ -28,6 +29,7 @@ const FileDownload = (props: FileDownloadProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     useEffect(() => {
         if (auto && aRef.current && active && render) {
@@ -62,17 +64,19 @@ const FileDownload = (props: FileDownloadProps) => {
         <label htmlFor={id + "download-file"} className={className}>
             <a style={noDisplayStyle} id={id + "download-file"} download={download} href={url} {...aProps} ref={aRef} />
             {auto ? null : (
-                <Fab
-                    id={id}
-                    size="small"
-                    component="span"
-                    aria-label="download"
-                    variant="extended"
-                    disabled={!active}
-                    onClick={clickHandler}
-                >
-                    <FileDownloadIco /> {label || defaultLabel}
-                </Fab>
+                <Tooltip title={hover || ""}>
+                    <Fab
+                        id={id}
+                        size="small"
+                        component="span"
+                        aria-label="download"
+                        variant="extended"
+                        disabled={!active}
+                        onClick={clickHandler}
+                    >
+                        <FileDownloadIco /> {label || defaultLabel}
+                    </Fab>
+                </Tooltip>
             )}
         </label>
     ) : null;

@@ -13,7 +13,7 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'tp_varname="TaipyData_csvdata"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -52,7 +52,7 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'tp_varname="TaipyData_csvdata"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -70,7 +70,7 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'tp_varname="TaipyData_csvdata"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -109,7 +109,7 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
         "pageSize={100}",
         "refresh={csvdata__refresh}",
         "selected={[]}",
-        'tp_varname="TaipyData_csvdata"',
+        'updateVarName="TaipyData_csvdata"',
         "data={TaipyData_csvdata}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

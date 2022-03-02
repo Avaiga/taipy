@@ -79,7 +79,7 @@ describe("Selector Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Selector lov={lov} tp_varname="varname" tp_updatevars="lov=lov" />
+                <Selector lov={lov} updateVarName="varname" updateVars="lov=lov" />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
@@ -119,7 +119,7 @@ describe("Selector Component", () => {
             const state: TaipyState = INITIAL_STATE;
             const { getByText } = render(
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <Selector lov={lov} tp_varname="varname" multiple={true} />
+                    <Selector lov={lov} updateVarName="varname" multiple={true} />
                 </TaipyContext.Provider>
             );
             const elt = getByText("Item 1");

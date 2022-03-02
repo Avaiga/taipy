@@ -222,7 +222,8 @@ class Gui:
                 def mapping(v):
                     ret = v
                     for elt in lov_holder.get():
-                        if v == self._run_adapter_for_var(lov_holder.get_name(), elt, id_only=True):
+                        elt_v = self._run_adapter_for_var(lov_holder.get_name(), elt, id_only=True)
+                        if v == elt_v or (isinstance(v, str) and v == str(elt_v)):
                             ret = elt
                             break
                     return ret

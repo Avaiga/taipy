@@ -64,6 +64,8 @@ export const formatWSValue = (
     dataType = dataType || typeof value;
     switch (dataType) {
         case "datetime.datetime":
+        case "datetime.date":
+        case "datetime.time":
             try {
                 return getDateTimeString(value.toString(), dataFormat, formatConf);
             } catch (e) {
