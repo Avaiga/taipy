@@ -173,7 +173,9 @@ class TestDataNode:
 
     def test_is_in_cache_with_30_min_validity_period_cacheable_false(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id", validity_minutes=30)
+        dn = InMemoryDataNode(
+            "foo", Scope.PIPELINE, DataNodeId("id"), "name", "parent_id", validity_period=timedelta(minutes=30)
+        )
         assert dn.is_in_cache is False
 
         # Has been writen less than 30 minutes ago
@@ -187,7 +189,9 @@ class TestDataNode:
 
     def test_is_in_cache_with_30_min_validity_period_cacheable_true(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, properties={"cacheable": True}, validity_minutes=30)
+        dn = InMemoryDataNode(
+            "foo", Scope.PIPELINE, properties={"cacheable": True}, validity_period=timedelta(minutes=30)
+        )
         assert dn.is_in_cache is False
 
         # Has been writen less than 30 minutes ago
@@ -364,17 +368,13 @@ class TestDataNode:
         dn_bis = dm.get(dn)
 
         dn._name = "new_name"
-        dn._validity_days = 3
-        dn._validity_hours = 2
-        dn._validity_minutes = 1
+        dn._validity_period = timedelta(days=3, hours=2, minutes=1)
         dn.write("Any data")
 
         assert dn.last_edition_date is not None
         assert dn.last_edition_date == dn_bis.last_edition_date
         assert dn.name == dn_bis.name == "new_name"
-        assert dn._validity_days != dn_bis._validity_days
-        assert dn._validity_hours != dn_bis._validity_hours
-        assert dn._validity_minutes != dn_bis._validity_minutes
+        assert dn._validity_period != dn_bis._validity_period
         assert dn.write_has_been_called == 1
         assert dn.validity() == dn_bis.validity() == 3 * 24 * 60 + 2 * 60 + 1
         assert dn.expiration_date() == dn_bis.expiration_date()

@@ -1,7 +1,7 @@
 import os
 import pathlib
 import pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from taipy.core.common.alias import DataNodeId, JobId
@@ -26,7 +26,9 @@ class PickleDataNode(DataNode):
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
-        up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
+        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
+            timedelta object to represent the data node validity duration. If validity_period is set to None,
+            the data_node is always up to date.
         properties (dict): Dict of additional arguments. Note that at the creation of the data node, if the property
             "default_data" is present, the data node is automatically written with the corresponding default_data value.
             If the property "path" is present, data will be stored using the corresponding value as the name of the
@@ -47,9 +49,7 @@ class PickleDataNode(DataNode):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        validity_days: Optional[int] = None,
-        validity_hours: Optional[int] = None,
-        validity_minutes: Optional[int] = None,
+        validity_period: Optional[timedelta] = None,
         edition_in_progress: bool = False,
         properties=None,
     ):
@@ -64,9 +64,7 @@ class PickleDataNode(DataNode):
             parent_id,
             last_edition_date,
             job_ids,
-            validity_days,
-            validity_hours,
-            validity_minutes,
+            validity_period,
             edition_in_progress,
             **properties,
         )
