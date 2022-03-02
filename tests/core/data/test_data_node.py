@@ -390,9 +390,9 @@ class TestDataNode:
         assert dn.name == dn_bis.name == "new_name"
         assert dn._validity_period != dn_bis._validity_period
         assert dn.write_has_been_called == 1
-        assert dn.validity() == dn_bis.validity() == 3 * 24 * 60 + 2 * 60 + 1
-        assert dn.expiration_date() == dn_bis.expiration_date()
-        assert dn.expiration_date() > dn.last_edition_date
+        assert dn.validity_period == dn_bis.validity_period
+        assert dn.expiration_date == dn_bis.expiration_date
+        assert dn.expiration_date > dn.last_edition_date
 
         assert dn.job_ids == dn_bis.job_ids
 
@@ -413,9 +413,9 @@ class TestDataNode:
         dn = FakeDataNode("foo")
 
         with pytest.raises(NoData):
-            dn.expiration_date()
+            dn.expiration_date
 
     def test_validity_null_if_never_write(self):
         dn = FakeDataNode("foo")
 
-        assert dn.validity() == 0
+        assert dn.validity_period == timedelta()

@@ -82,19 +82,21 @@ class DataNode:
 
         self._properties = Properties(self, **kwargs)
 
+    @property  # type: ignore
     @self_reload("data")
-    def validity(self) -> float:
+    def validity_period(self) -> timedelta:
         """
         Number of minutes where the Data Node is up-to-date.
         """
-        return self._validity_period.total_seconds() / 60 if self._validity_period else 0
+        return self._validity_period if self._validity_period else timedelta(0)
 
+    @property  # type: ignore
     @self_reload("data")
     def expiration_date(self) -> datetime:
         if not self._last_edition_date:
             raise NoData
 
-        return self._last_edition_date + self._validity_period if self._validity_period else self._last_edition_date
+        return self._last_edition_date + self.validity_period
 
     @property  # type: ignore
     @self_reload("data")
@@ -299,7 +301,7 @@ class DataNode:
         if not self._validity_period:
             # No validity period and cacheable so it is up-to-date
             return True
-        if datetime.now() > self.expiration_date():
+        if datetime.now() > self.expiration_date:
             # expiration_date has been passed
             return False
         return True
