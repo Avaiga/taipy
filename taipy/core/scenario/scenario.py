@@ -47,7 +47,6 @@ class Scenario:
         subscribers: Set[Callable] = None,
         tags: Set[str] = None,
     ):
-        print("initializing")
         self.config_name = protect_name(config_name)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
         self.pipelines = {p.config_name: p for p in pipelines}
@@ -59,12 +58,6 @@ class Scenario:
         self._tags = tags or set()
 
         self._properties = Properties(self, **properties)
-
-    def __enter__(self):
-        print("entering")
-
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        print("exiting")
 
     def __getstate__(self):
         return self.id

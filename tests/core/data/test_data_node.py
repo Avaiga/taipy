@@ -418,4 +418,4 @@ class TestDataNode:
     def test_validity_null_if_never_write(self):
         dn = FakeDataNode("foo")
 
-        assert dn.validity_period == timedelta()
+        assert dn.validity_period is None

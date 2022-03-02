@@ -84,11 +84,11 @@ class DataNode:
 
     @property  # type: ignore
     @self_reload("data")
-    def validity_period(self) -> timedelta:
+    def validity_period(self) -> Optional[timedelta]:
         """
         Number of minutes where the Data Node is up-to-date.
         """
-        return self._validity_period if self._validity_period else timedelta(0)
+        return self._validity_period if self._validity_period else None
 
     @property  # type: ignore
     @self_reload("data")
@@ -96,7 +96,7 @@ class DataNode:
         if not self._last_edition_date:
             raise NoData
 
-        return self._last_edition_date + self.validity_period
+        return self._last_edition_date + self.validity_period if self.validity_period else self._last_edition_date
 
     @property  # type: ignore
     @self_reload("data")
