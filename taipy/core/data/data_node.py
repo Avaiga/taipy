@@ -42,15 +42,9 @@ class DataNode:
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
-        validity_days (Optional[int]): Number of days to be added to the data node validity duration. If
-            validity_days, validity_hours, and validity_minutes are all set to None, The data_node is always up to
-            date.
-        validity_hours (Optional[int]): Number of hours to be added to the data node validity duration. If
-            validity_days, validity_hours, and validity_minutes are all set to None, The data_node is always up to
-            date.
-        validity_minutes (Optional[int]): Number of minutes to be added to the data node validity duration. If
-            validity_days, validity_hours, and validity_minutes are all set to None, The data_node is always up to
-            date.
+        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
+            timedelta object to represent the data node validity duration. If validity_period is set to None,
+            the data_node is always up to date.
         edition_in_progress (bool) : True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
         properties (dict): Dict of additional arguments.
@@ -70,9 +64,7 @@ class DataNode:
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        validity_days: Optional[int] = None,
-        validity_hours: Optional[int] = None,
-        validity_minutes: Optional[int] = None,
+        validity_period: Optional[timedelta] = None,
         edition_in_progress: bool = False,
         **kwargs,
     ):
@@ -86,30 +78,25 @@ class DataNode:
         self._edition_in_progress = edition_in_progress
         self._job_ids = job_ids or []
 
-        self._validity_days = validity_days
-        self._validity_hours = validity_hours
-        self._validity_minutes = validity_minutes
+        self._validity_period = validity_period
 
         self._properties = Properties(self, **kwargs)
 
+    @property  # type: ignore
     @self_reload("data")
-    def validity(self) -> int:
+    def validity_period(self) -> Optional[timedelta]:
         """
         Number of minutes where the Data Node is up-to-date.
         """
-        minutes = self._validity_minutes or 0
-        hours = self._validity_hours or 0
-        days = self._validity_days or 0
-        return minutes + hours * 60 + days * 60 * 24
+        return self._validity_period if self._validity_period else None
 
+    @property  # type: ignore
     @self_reload("data")
     def expiration_date(self) -> datetime:
         if not self._last_edition_date:
             raise NoData
 
-        return self._last_edition_date + timedelta(
-            minutes=self._validity_minutes or 0, hours=self._validity_hours or 0, days=self._validity_days or 0
-        )  # type: ignore
+        return self._last_edition_date + self.validity_period if self.validity_period else self._last_edition_date
 
     @property  # type: ignore
     @self_reload("data")
@@ -311,10 +298,10 @@ class DataNode:
         if not self._last_edition_date:
             # Never been written so it is not up-to-date
             return False
-        if not self._validity_days and not self._validity_hours and not self._validity_minutes:
+        if not self._validity_period:
             # No validity period and cacheable so it is up-to-date
             return True
-        if datetime.now() > self.expiration_date():
+        if datetime.now() > self.expiration_date:
             # expiration_date has been passed
             return False
         return True

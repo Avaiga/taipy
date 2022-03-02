@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -33,7 +33,9 @@ class ExcelDataNode(DataNode):
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
-        up_to_date (bool): `True` if the data is considered as up to date. `False` otherwise.
+        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
+            timedelta object to represent the data node validity duration. If validity_period is set to None,
+            the data_node is always up to date.
         properties (dict): Dict of additional arguments. Note that the properties parameter should at least contain
             a value for "path" properties.
     """
@@ -56,9 +58,7 @@ class ExcelDataNode(DataNode):
         parent_id: Optional[str] = None,
         last_edition_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
-        validity_days: Optional[int] = None,
-        validity_hours: Optional[int] = None,
-        validity_minutes: Optional[int] = None,
+        validity_period: Optional[timedelta] = None,
         edition_in_progress: bool = False,
         properties: Dict = None,
     ):
@@ -83,9 +83,7 @@ class ExcelDataNode(DataNode):
             parent_id,
             last_edition_date,
             job_ids,
-            validity_days,
-            validity_hours,
-            validity_minutes,
+            validity_period,
             edition_in_progress,
             **properties,
         )
