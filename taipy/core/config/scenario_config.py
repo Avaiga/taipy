@@ -14,7 +14,7 @@ class ScenarioConfig:
     Holds all the configuration fields needed to create actual scenarios from the ScenarioConfig.
 
     Attributes:
-        name (str):  Unique name as an identifier of the scenario config.
+        id (str): Identifier of the scenario config.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
@@ -30,13 +30,13 @@ class ScenarioConfig:
 
     def __init__(
         self,
-        name: str,
+        id: str,
         pipelines: Union[PipelineConfig, List[PipelineConfig]] = None,
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ):
-        self.name = protect_name(name)
+        self.id = protect_name(id)
         self.properties = properties
         if pipelines:
             self.pipelines = [pipelines] if isinstance(pipelines, PipelineConfig) else copy(pipelines)
@@ -56,11 +56,11 @@ class ScenarioConfig:
 
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
-        return ScenarioConfig(self.name, copy(self.pipelines), self.frequency, copy(comp), **copy(self.properties))
+        return ScenarioConfig(self.id, copy(self.pipelines), self.frequency, copy(comp), **copy(self.properties))
 
     @classmethod
-    def default_config(cls, name):
-        return ScenarioConfig(name, [], None, dict())
+    def default_config(cls, id):
+        return ScenarioConfig(id, [], None, dict())
 
     @property
     def pipelines_configs(self) -> List[PipelineConfig]:
@@ -70,9 +70,9 @@ class ScenarioConfig:
         return {self.PIPELINE_KEY: self.pipelines, self.FREQUENCY_KEY: self.frequency, **self.properties}
 
     @classmethod
-    def from_dict(cls, name: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
-        config = ScenarioConfig(name)
-        config.name = protect_name(name)
+    def from_dict(cls, id: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
+        config = ScenarioConfig(id)
+        config.id = protect_name(id)
         if pipeline_ids := config_as_dict.pop(cls.PIPELINE_KEY, None):
             config.pipelines = [pipeline_configs[p_id] for p_id in pipeline_ids if p_id in pipeline_configs]
         config.frequency = config_as_dict.pop(cls.FREQUENCY_KEY, None)

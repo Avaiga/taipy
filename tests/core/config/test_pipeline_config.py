@@ -23,10 +23,10 @@ task2_config = Config.add_task("task2", print, [], [])
 def test_pipeline_config_creation():
     pipeline_config = Config.add_pipeline("pipelines1", [task1_config, task2_config])
 
-    assert list(Config.pipelines) == ["default", pipeline_config.name]
+    assert list(Config.pipelines) == ["default", pipeline_config.id]
 
     pipeline2_config = Config.add_pipeline("pipelines2", [task1_config, task2_config])
-    assert list(Config.pipelines) == ["default", pipeline_config.name, pipeline2_config.name]
+    assert list(Config.pipelines) == ["default", pipeline_config.id, pipeline2_config.id]
 
 
 def test_pipeline_count():
@@ -44,7 +44,7 @@ def test_pipeline_getitem():
     pipeline_config_id = "pipelines1"
     pipeline = Config.add_pipeline(pipeline_config_id, [task1_config, task2_config])
 
-    assert Config.pipelines[pipeline_config_id].name == pipeline.name
+    assert Config.pipelines[pipeline_config_id].id == pipeline.id
     assert Config.pipelines[pipeline_config_id].tasks == pipeline.tasks
     assert Config.pipelines[pipeline_config_id].properties == pipeline.properties
 

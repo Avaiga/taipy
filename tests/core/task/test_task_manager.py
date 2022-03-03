@@ -180,22 +180,22 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     task_config = Config.add_task("name_1", print, input, output)
     task = TaskManager.get_or_create(task_config)
 
-    assert [i.config_id for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
-    assert [o.config_id for o in task.output.values()] == [embedded_4.name, embedded_5.name]
+    assert [i.config_id for i in task.input.values()] == [embedded_1.id, embedded_2.id, embedded_3.id]
+    assert [o.config_id for o in task.output.values()] == [embedded_4.id, embedded_5.id]
 
     data_nodes = {
-        embedded_1: InMemoryDataNode(embedded_1.name, Scope.PIPELINE),
-        embedded_2: InMemoryDataNode(embedded_2.name, Scope.PIPELINE),
-        embedded_3: InMemoryDataNode(embedded_3.name, Scope.PIPELINE),
-        embedded_4: InMemoryDataNode(embedded_4.name, Scope.PIPELINE),
-        embedded_5: InMemoryDataNode(embedded_5.name, Scope.PIPELINE),
+        embedded_1: InMemoryDataNode(embedded_1.id, Scope.PIPELINE),
+        embedded_2: InMemoryDataNode(embedded_2.id, Scope.PIPELINE),
+        embedded_3: InMemoryDataNode(embedded_3.id, Scope.PIPELINE),
+        embedded_4: InMemoryDataNode(embedded_4.id, Scope.PIPELINE),
+        embedded_5: InMemoryDataNode(embedded_5.id, Scope.PIPELINE),
     }
 
     task_config = Config.add_task("name_2", print, input, output)
     task = TaskManager.get_or_create(task_config, data_nodes)
 
-    assert [i.config_id for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
-    assert [o.config_id for o in task.output.values()] == [embedded_4.name, embedded_5.name]
+    assert [i.config_id for i in task.input.values()] == [embedded_1.id, embedded_2.id, embedded_3.id]
+    assert [o.config_id for o in task.output.values()] == [embedded_4.id, embedded_5.id]
 
 
 def test_get_all_by_config_id():

@@ -218,11 +218,11 @@ def untag(scenario: Scenario, tag: str):
 
 def compare_scenarios(*scenarios: Scenario, data_node_config_id: str = None):
     """
-    Compares the data nodes of given scenarios with known datanode config name.
+    Compares the data nodes of given scenarios with known datanode config id.
 
     Parameters:
         scenarios (Scenario) : Scenario objects to compare
-        data_node_config_id (Optional[str]) : config name of the DataNode to compare scenarios, if no
+        data_node_config_id (Optional[str]) : config id of the DataNode to compare scenarios, if no
             datanode_config_id is provided, the scenarios will be compared based on all the previously defined
             comparators.
     Raises:
@@ -405,10 +405,10 @@ def configure_job_executions(mode: str = None, nb_of_workers: Union[int, str] = 
 
 
 def configure_data_node(
-    name: str, storage_type: str = "pickle", scope: Scope = DataNodeConfig.DEFAULT_SCOPE, **properties
+    id: str, storage_type: str = "pickle", scope: Scope = DataNodeConfig.DEFAULT_SCOPE, **properties
 ) -> DataNodeConfig:
     """Configures a new data node configuration."""
-    return Config.add_data_node(name, storage_type, scope, **properties)
+    return Config.add_data_node(id, storage_type, scope, **properties)
 
 
 def configure_default_data_node(storage_type: str, scope=DataNodeConfig.DEFAULT_SCOPE, **properties) -> DataNodeConfig:
@@ -416,15 +416,15 @@ def configure_default_data_node(storage_type: str, scope=DataNodeConfig.DEFAULT_
     return Config.add_default_data_node(storage_type, scope, **properties)
 
 
-def configure_csv_data_node(name: str, path: str, has_header=True, scope=Scope.PIPELINE, **properties):
+def configure_csv_data_node(id: str, path: str, has_header=True, scope=Scope.PIPELINE, **properties):
     """Configures a new data node configuration with CSV storage type."""
     return Config.add_data_node(
-        name, CSVDataNode.storage_type(), scope=scope, path=path, has_header=has_header, **properties
+        id, CSVDataNode.storage_type(), scope=scope, path=path, has_header=has_header, **properties
     )
 
 
 def configure_excel_data_node(
-    name: str,
+    id: str,
     path: str,
     has_header: bool = True,
     sheet_name: Union[List[str], str] = "Sheet1",
@@ -433,7 +433,7 @@ def configure_excel_data_node(
 ):
     """Configures a new data node configuration with Excel storage type."""
     return Config.add_data_node(
-        name,
+        id,
         ExcelDataNode.storage_type(),
         scope=scope,
         path=path,
@@ -444,34 +444,32 @@ def configure_excel_data_node(
 
 
 def configure_generic_data_node(
-    name: str, read_fct: Callable = None, write_fct: Callable = None, scope: Scope = Scope.PIPELINE, **properties
+    id: str, read_fct: Callable = None, write_fct: Callable = None, scope: Scope = Scope.PIPELINE, **properties
 ):
     """Configures a new data node configuration with Generic storage type."""
     return Config.add_data_node(
-        name, GenericDataNode.storage_type(), scope=scope, read_fct=read_fct, write_fct=write_fct, **properties
+        id, GenericDataNode.storage_type(), scope=scope, read_fct=read_fct, write_fct=write_fct, **properties
     )
 
 
 def configure_in_memory_data_node(
-    name: str, default_data: Optional[Any] = None, scope: Scope = Scope.PIPELINE, **properties
+    id: str, default_data: Optional[Any] = None, scope: Scope = Scope.PIPELINE, **properties
 ):
     """Configures a new data node configuration with In memory storage type."""
     return Config.add_data_node(
-        name, InMemoryDataNode.storage_type(), scope=scope, default_data=default_data, **properties
+        id, InMemoryDataNode.storage_type(), scope=scope, default_data=default_data, **properties
     )
 
 
 def configure_pickle_data_node(
-    name: str, default_data: Optional[Any] = None, scope: Scope = Scope.PIPELINE, **properties
+    id: str, default_data: Optional[Any] = None, scope: Scope = Scope.PIPELINE, **properties
 ):
     """Configures a new data node configuration with pickle storage type."""
-    return Config.add_data_node(
-        name, PickleDataNode.storage_type(), scope=scope, default_data=default_data, **properties
-    )
+    return Config.add_data_node(id, PickleDataNode.storage_type(), scope=scope, default_data=default_data, **properties)
 
 
 def configure_sql_data_node(
-    name: str,
+    id: str,
     db_username: str,
     db_password: str,
     db_name: str,
@@ -484,7 +482,7 @@ def configure_sql_data_node(
 ):
     """Configures a new data node configuration with SQL storage type."""
     return Config.add_data_node(
-        name,
+        id,
         SQLDataNode.storage_type(),
         scope=scope,
         db_username=db_username,
@@ -499,14 +497,14 @@ def configure_sql_data_node(
 
 
 def configure_task(
-    name: str,
+    id: str,
     function,
     input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
     output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
     **properties,
 ) -> TaskConfig:
     """Configures a new task configuration."""
-    return Config.add_task(name, function, input, output, **properties)
+    return Config.add_task(id, function, input, output, **properties)
 
 
 def configure_default_task(
@@ -519,9 +517,9 @@ def configure_default_task(
     return Config.add_default_task(function, input, output, **properties)
 
 
-def configure_pipeline(name: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> PipelineConfig:
+def configure_pipeline(id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> PipelineConfig:
     """Configures a new pipeline configuration."""
-    return Config.add_pipeline(name, task_configs, **properties)
+    return Config.add_pipeline(id, task_configs, **properties)
 
 
 def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]], **properties) -> PipelineConfig:
@@ -530,26 +528,26 @@ def configure_default_pipeline(task_configs: Union[TaskConfig, List[TaskConfig]]
 
 
 def configure_scenario(
-    name: str,
+    id: str,
     pipeline_configs: List[PipelineConfig],
     frequency: Optional[Frequency] = None,
     comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
     **properties,
 ) -> ScenarioConfig:
     """Configures a new scenario configuration."""
-    return Config.add_scenario(name, pipeline_configs, frequency, comparators, **properties)
+    return Config.add_scenario(id, pipeline_configs, frequency, comparators, **properties)
 
 
 def configure_scenario_from_tasks(
-    name: str,
+    id: str,
     task_configs: List[TaskConfig],
     frequency: Optional[Frequency] = None,
     comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-    pipeline_name: Optional[str] = None,
+    pipeline_id: Optional[str] = None,
     **properties,
 ) -> ScenarioConfig:
     """Configures a new scenario configuration from a list of tasks."""
-    return Config.add_scenario_from_tasks(name, task_configs, frequency, comparators, pipeline_name, **properties)
+    return Config.add_scenario_from_tasks(id, task_configs, frequency, comparators, pipeline_id, **properties)
 
 
 def configure_default_scenario(

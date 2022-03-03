@@ -23,8 +23,8 @@ class PipelineConfig:
 
     TASK_KEY = "tasks"
 
-    def __init__(self, name: str, tasks: Union[TaskConfig, List[TaskConfig]] = None, **properties):
-        self.name = protect_name(name)
+    def __init__(self, id: str, tasks: Union[TaskConfig, List[TaskConfig]] = None, **properties):
+        self.id = protect_name(id)
         self.properties = properties
         if tasks:
             self.tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
@@ -35,11 +35,11 @@ class PipelineConfig:
         return self.properties.get(item)
 
     def __copy__(self):
-        return PipelineConfig(self.name, copy(self.tasks), **copy(self.properties))
+        return PipelineConfig(self.id, copy(self.tasks), **copy(self.properties))
 
     @classmethod
-    def default_config(cls, name):
-        return PipelineConfig(name, [])
+    def default_config(cls, id):
+        return PipelineConfig(id, [])
 
     @property
     def tasks_configs(self) -> List[TaskConfig]:
@@ -49,9 +49,9 @@ class PipelineConfig:
         return {self.TASK_KEY: self.tasks, **self.properties}
 
     @classmethod
-    def from_dict(cls, name: str, config_as_dict: Dict[str, Any], task_configs: Dict[str, TaskConfig]):
-        config = PipelineConfig(name)
-        config.name = protect_name(name)
+    def from_dict(cls, id: str, config_as_dict: Dict[str, Any], task_configs: Dict[str, TaskConfig]):
+        config = PipelineConfig(id)
+        config.id = protect_name(id)
         if tasks := config_as_dict.pop(cls.TASK_KEY, None):
             config.tasks = [task_configs[task_id] for task_id in tasks if task_id in task_configs]
         config.properties = config_as_dict

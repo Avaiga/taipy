@@ -43,22 +43,22 @@ class Config:
 
     @classproperty
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
-        """Returns data node configs by config name."""
+        """Returns data node configs by config id."""
         return cls._applied_config.data_nodes
 
     @classproperty
     def tasks(cls) -> Dict[str, TaskConfig]:
-        """Returns task configs by config name."""
+        """Returns task configs by config id."""
         return cls._applied_config.tasks
 
     @classproperty
     def pipelines(cls) -> Dict[str, PipelineConfig]:
-        """Returns pipeline configs by config name."""
+        """Returns pipeline configs by config id."""
         return cls._applied_config.pipelines
 
     @classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
-        """Returns scenario configs by config name."""
+        """Returns scenario configs by config id."""
         return cls._applied_config.scenarios
 
     @classmethod
@@ -137,16 +137,16 @@ class Config:
     @classmethod
     def add_data_node(
         cls,
-        name: str,
+        id: str,
         storage_type: str = DataNodeConfig.DEFAULT_STORAGE_TYPE,
         scope: Scope = DataNodeConfig.DEFAULT_SCOPE,
         **properties,
     ):
         """Adds a new data node configuration."""
-        dn_config = DataNodeConfig(name, storage_type, scope, **properties)
-        cls._python_config.data_nodes[dn_config.name] = dn_config
+        dn_config = DataNodeConfig(id, storage_type, scope, **properties)
+        cls._python_config.data_nodes[dn_config.id] = dn_config
         cls.__compile_configs()
-        return cls._applied_config.data_nodes[dn_config.name]
+        return cls._applied_config.data_nodes[dn_config.id]
 
     @classmethod
     def add_default_data_node(cls, storage_type: str, scope=DataNodeConfig.DEFAULT_SCOPE, **properties):
@@ -159,17 +159,17 @@ class Config:
     @classmethod
     def add_task(
         cls,
-        name: str,
+        id: str,
         function,
         input: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         **properties,
     ):
         """Adds a new task configuration."""
-        task_config = TaskConfig(name, function, input, output, **properties)
-        cls._python_config.tasks[task_config.name] = task_config
+        task_config = TaskConfig(id, function, input, output, **properties)
+        cls._python_config.tasks[task_config.id] = task_config
         cls.__compile_configs()
-        return cls._applied_config.tasks[task_config.name]
+        return cls._applied_config.tasks[task_config.id]
 
     @classmethod
     def add_default_task(
@@ -181,17 +181,17 @@ class Config:
     ):
         """Configures the default task configuration."""
         task_config = TaskConfig(_Config.DEFAULT_KEY, function, input, output, **properties)
-        cls._python_config.tasks[task_config.name] = task_config
+        cls._python_config.tasks[task_config.id] = task_config
         cls.__compile_configs()
         return cls._applied_config.tasks[_Config.DEFAULT_KEY]
 
     @classmethod
-    def add_pipeline(cls, name: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
+    def add_pipeline(cls, id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
         """Adds a new pipeline configuration."""
-        pipeline_config = PipelineConfig(name, task_configs, **properties)
-        cls._python_config.pipelines[pipeline_config.name] = pipeline_config
+        pipeline_config = PipelineConfig(id, task_configs, **properties)
+        cls._python_config.pipelines[pipeline_config.id] = pipeline_config
         cls.__compile_configs()
-        return cls._applied_config.pipelines[pipeline_config.name]
+        return cls._applied_config.pipelines[pipeline_config.id]
 
     @classmethod
     def add_default_pipeline(cls, task_configs: Union[TaskConfig, List[TaskConfig]], **properties):
@@ -204,7 +204,7 @@ class Config:
     @classmethod
     def add_scenario(
         cls,
-        name: str,
+        id: str,
         pipeline_configs: List[PipelineConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
@@ -212,27 +212,27 @@ class Config:
     ):
         """Adds a new scenario configuration."""
         scenario_config = ScenarioConfig(
-            name, pipeline_configs, frequency=frequency, comparators=comparators, **properties
+            id, pipeline_configs, frequency=frequency, comparators=comparators, **properties
         )
-        cls._python_config.scenarios[scenario_config.name] = scenario_config
+        cls._python_config.scenarios[scenario_config.id] = scenario_config
         cls.__compile_configs()
-        return cls._applied_config.scenarios[scenario_config.name]
+        return cls._applied_config.scenarios[scenario_config.id]
 
     @classmethod
     def add_scenario_from_tasks(
         cls,
-        name: str,
+        id: str,
         task_configs: List[TaskConfig],
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
-        pipeline_name: Optional[str] = None,
+        pipeline_id: Optional[str] = None,
         **properties,
     ):
         """Adds a new scenario configuration with a pipeline built from the given task configs."""
-        if not pipeline_name:
-            pipeline_name = f"{name}_pipeline"
-        pipeline_config = cls.add_pipeline(pipeline_name, task_configs, **properties)
-        return cls.add_scenario(name, [pipeline_config], frequency=frequency, comparators=comparators, **properties)
+        if not pipeline_id:
+            pipeline_id = f"{id}_pipeline"
+        pipeline_config = cls.add_pipeline(pipeline_id, task_configs, **properties)
+        return cls.add_scenario(id, [pipeline_config], frequency=frequency, comparators=comparators, **properties)
 
     @classmethod
     def add_default_scenario(

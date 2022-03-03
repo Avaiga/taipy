@@ -15,13 +15,13 @@ class TestTaskConfigChecker:
         assert len(collector.warnings) == 0
 
         config.tasks["new"] = copy(config.tasks["default"])
-        config.tasks["new"].name = None
+        config.tasks["new"].id = None
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 2
         assert len(collector.warnings) == 2
 
-        config.tasks["new"].name = "new"
+        config.tasks["new"].id = "new"
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
@@ -35,7 +35,7 @@ class TestTaskConfigChecker:
         assert len(collector.warnings) == 0
 
         config.tasks["new"] = config.tasks["default"]
-        config.tasks["new"].name, config.tasks["new"].function = "new", print
+        config.tasks["new"].id, config.tasks["new"].function = "new", print
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
@@ -75,7 +75,7 @@ class TestTaskConfigChecker:
         assert len(collector.warnings) == 0
 
         config.tasks["new"] = config.tasks["default"]
-        config.tasks["new"].name, config.tasks["new"].function = "new", print
+        config.tasks["new"].id, config.tasks["new"].function = "new", print
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
@@ -111,7 +111,7 @@ class TestTaskConfigChecker:
         assert len(collector.warnings) == 0
 
         config.tasks["new"] = copy(config.tasks["default"])
-        config.tasks["new"].name = "new"
+        config.tasks["new"].id = "new"
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
         assert len(collector.errors) == 1

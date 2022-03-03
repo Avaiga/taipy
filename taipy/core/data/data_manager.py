@@ -52,7 +52,7 @@ class DataManager(Manager[DataNode]):
         """
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        dn_from_data_node_config = cls._get_all_by_config_id(data_node_config.name)
+        dn_from_data_node_config = cls._get_all_by_config_id(data_node_config.id)
         dn_from_parent = [dn for dn in dn_from_data_node_config if dn.parent_id == parent_id]
         if len(dn_from_parent) == 1:
             return dn_from_parent[0]
@@ -73,7 +73,7 @@ class DataManager(Manager[DataNode]):
             props = data_node_config.properties.copy()
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
-                config_id=data_node_config.name,
+                config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,
                 validity_period=validity_period,

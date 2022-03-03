@@ -396,9 +396,9 @@ class TestTaipy:
             mck.assert_called_once_with(pipeline_config)
 
     def test_clean_all_entities(self, cycle):
-        data_node_1_config = Config.add_data_node(name="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+        data_node_1_config = Config.add_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         data_node_2_config = Config.add_data_node(
-            name="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
+            id="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
         )
         task_config = Config.add_task("my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO)
         pipeline_config = Config.add_pipeline("my_pipeline", task_config)

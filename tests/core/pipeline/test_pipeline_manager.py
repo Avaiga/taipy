@@ -268,8 +268,8 @@ def test_get_or_create_data():
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 0
     assert pipeline.baz.read() == 0
-    assert pipeline.get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.name
-    assert pipeline.get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.name
+    assert pipeline.get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.id
+    assert pipeline.get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.id
 
     PipelineManager.submit(pipeline.id)
     assert pipeline.foo.read() == 1
@@ -421,7 +421,7 @@ def test_pipeline_notification_subscribe_all():
     )
 
     pipeline = PipelineManager.get_or_create(pipeline_config)
-    pipeline_config.name = "other pipeline"
+    pipeline_config.id = "other pipeline"
 
     other_pipeline = PipelineManager.get_or_create(pipeline_config)
 

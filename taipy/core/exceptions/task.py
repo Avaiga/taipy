@@ -12,8 +12,8 @@ class NonExistingTaskConfig(Exception):
     Raised when a requested task configuration is not known by the Task Manager.
     """
 
-    def __init__(self, name: str):
-        self.message = f"Task config: {name} does not exist."
+    def __init__(self, id: str):
+        self.message = f"Task config: {id} does not exist."
 
 
 class MultipleTaskFromSameConfigWithSameParent(Exception):
