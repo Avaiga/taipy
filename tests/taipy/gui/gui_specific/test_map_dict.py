@@ -102,7 +102,7 @@ def test_map_dict_set(gui: Gui, helpers):
     d = {"a": 1}  # noqa: F841
     gui.run(run_server=False)
     sid = helpers.create_scope_and_get_sid(gui)
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
+    with gui._get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
         assert isinstance(gui._Gui__state.d, _MapDict)
         gui._Gui__state.d = {"b": 2}
         assert isinstance(gui._Gui__state.d, _MapDict)
