@@ -7,11 +7,10 @@ on:
     branches: [ develop ]
 
 jobs:
-  backend-e2e:
+  backend:
     timeout-minutes: 20
     strategy:
       matrix:
-        node-version: [16.x]
         python-versions: ["3.8", "3.9", "3.10"]
         os: [ubuntu-18.04, windows-latest]
     runs-on: ${{ matrix.os }}
@@ -21,17 +20,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
-
-      - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        working-directory: ./gui
-        run: npm ci
-      - name: Run npm build
-        run: npm run build --if-present
-        working-directory: ./gui
 
       - name: test with tox
         env:
@@ -47,6 +35,37 @@ jobs:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           thresholdAll: 0.75
+
+  e2e:
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        node-version: [16.x]
+        python-versions: ["3.8", "3.9", "3.10"]
+        os: [ubuntu-18.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python, pipenv and Pipfile packages
+        uses: palewire/install-python-pipenv-pipfile@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        working-directory: ./gui
+        run: npm ci
+      - name: Run npm build
+        run: npm run build --if-present
+        working-directory: ./gui
+
+      - name: Run tests
+        run: |
+          pipenv install --dev
+          pipenv run pytest -v -m teste2e
 
   gui:
     timeout-minutes: 20

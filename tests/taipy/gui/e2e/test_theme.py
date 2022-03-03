@@ -1,8 +1,10 @@
+import pytest
 from playwright._impl._page import Page
 
 from taipy.gui import Gui
 
 
+@pytest.mark.teste2e
 def test_theme_light(page: Page, gui: Gui):
     page_md = """
 <|Just a page|id=text1|>
@@ -17,6 +19,7 @@ def test_theme_light(page: Page, gui: Gui):
     assert background_color == "rgb(255, 255, 255)"
 
 
+@pytest.mark.teste2e
 def test_theme_dark(page: Page, gui: Gui):
     page_md = """
 <|Just a page|id=text1|>

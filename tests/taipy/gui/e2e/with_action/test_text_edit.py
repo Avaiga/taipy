@@ -1,8 +1,10 @@
+import pytest
 from playwright._impl._page import Page
 
 from taipy.gui import Gui
 
 
+@pytest.mark.teste2e
 def test_text_edit(page: Page, gui: Gui):
     page_md = """
 <|{x}|text|id=text1|>
@@ -22,6 +24,7 @@ def test_text_edit(page: Page, gui: Gui):
     assert text1.inner_text() == "There"
 
 
+@pytest.mark.teste2e
 def test_number_edit(page: Page, gui: Gui):
     page_md = """
 <|{x}|text|id=text1|>

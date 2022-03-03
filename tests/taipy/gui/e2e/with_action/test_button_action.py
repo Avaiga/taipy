@@ -1,8 +1,10 @@
+import pytest
 from playwright._impl._page import Page
 
 from taipy.gui import Gui
 
 
+@pytest.mark.teste2e
 def test_button_action(page: Page, gui: Gui):
     page_md = """
 <|{x}|id=text1|>
