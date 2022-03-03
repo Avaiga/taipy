@@ -46,8 +46,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Install Python, pipenv and Pipfile packages
-        uses: palewire/install-python-pipenv-pipfile@v2
+      - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
 
@@ -64,6 +63,8 @@ jobs:
 
       - name: Run tests
         run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
           pipenv install --dev --skip-lock
           pipenv run pytest -v -m teste2e
 
