@@ -1,3 +1,4 @@
+import time
 from importlib import util
 
 import pytest
@@ -15,6 +16,8 @@ def test_redirect(page: "Page", gui: Gui):
 """
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
+    while not gui._server._thread.is_alive():
+        time.sleep(0.2)
     page.goto(url="/", wait_until="domcontentloaded", timeout=120000)
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")

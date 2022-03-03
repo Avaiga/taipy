@@ -1,3 +1,4 @@
+import time
 from importlib import util
 
 import pytest
@@ -18,6 +19,8 @@ def test_slider_action(page: "Page", gui: Gui):
     x = 10
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
+    while not gui._server._thread.is_alive():
+        time.sleep(0.2)
     page.goto(url="/test", wait_until="domcontentloaded", timeout=120000)
     page.expect_websocket()
     page.wait_for_selector("#text1")
