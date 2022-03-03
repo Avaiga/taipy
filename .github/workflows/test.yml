@@ -64,7 +64,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pipenv install --dev
+          pipenv install --dev --skip-lock
           pipenv run pytest -v -m teste2e
 
   gui:
