@@ -3,12 +3,14 @@ from datetime import datetime
 from typing import Any, Dict
 
 from taipy.core.common.alias import CycleId
+from taipy.core.common.entity import Entity
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.reload import self_reload, self_setter
 from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.common.wrapper import Properties
 
 
-class Cycle:
+class Cycle(Entity):
     """
     A Cycle object holds the frequency representing a work cycle.
 
@@ -24,6 +26,7 @@ class Cycle:
 
     ID_PREFIX = "CYCLE"
     __SEPARATOR = "_"
+    MANAGER_NAME = "cycle"
 
     def __init__(
         self,
@@ -35,20 +38,70 @@ class Cycle:
         name: str = None,
         id: CycleId = None,
     ):
-        self.frequency = frequency
-        self.creation_date = creation_date
-        self.start_date = start_date
-        self.end_date = end_date
-        self.name = self.new_name(name)
-        self.id = id or self.new_id(self.name)
+        self._frequency = frequency
+        self._creation_date = creation_date
+        self._start_date = start_date
+        self._end_date = end_date
+        self._name = self.new_name(name)
+        self.id = id or self.new_id(self._name)
         self.properties = Properties(self, **properties)
 
     def new_name(self, name: str = None) -> str:
         return (
             protect_name(name)
             if name
-            else Cycle.__SEPARATOR.join([str(self.frequency), self.creation_date.isoformat()])
+            else Cycle.__SEPARATOR.join([str(self._frequency), self._creation_date.isoformat()])
         )
+
+    @property  # type: ignore
+    @self_reload("cycle")
+    def frequency(self):
+        return self._frequency
+
+    @frequency.setter  # type: ignore
+    @self_setter("cycle")
+    def frequency(self, val):
+        self._frequency = val
+
+    @property  # type: ignore
+    @self_reload("cycle")
+    def creation_date(self):
+        return self._creation_date
+
+    @creation_date.setter  # type: ignore
+    @self_setter("cycle")
+    def creation_date(self, val):
+        self._creation_date = val
+
+    @property  # type: ignore
+    @self_reload("cycle")
+    def start_date(self):
+        return self._start_date
+
+    @start_date.setter  # type: ignore
+    @self_setter("cycle")
+    def start_date(self, val):
+        self._start_date = val
+
+    @property  # type: ignore
+    @self_reload("cycle")
+    def end_date(self):
+        return self._end_date
+
+    @end_date.setter  # type: ignore
+    @self_setter("cycle")
+    def end_date(self, val):
+        self._end_date = val
+
+    @property  # type: ignore
+    @self_reload("cycle")
+    def name(self):
+        return self._name
+
+    @name.setter  # type: ignore
+    @self_setter("cycle")
+    def name(self, val):
+        self._name = val
 
     @staticmethod
     def new_id(name: str) -> CycleId:

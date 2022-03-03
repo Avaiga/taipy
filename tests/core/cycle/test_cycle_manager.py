@@ -16,7 +16,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
 
     CycleManager.set(cycle)
 
-    cycle_1 = CycleManager.get(cycle.id)
+    cycle_1 = CycleManager.get(cycle)
 
     assert cycle_1.id == cycle.id
     assert cycle_1.name == cycle.name

@@ -1,6 +1,6 @@
 import calendar
 from datetime import datetime, time, timedelta
-from typing import Optional
+from typing import Optional, Union
 
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
@@ -55,7 +55,7 @@ class CycleManager:
         cls.repository.save(cycle)
 
     @classmethod
-    def get(cls, cycle_id: CycleId, default=None) -> Cycle:
+    def get(cls, cycle: Union[Cycle, CycleId], default=None) -> Cycle:
         """
         Gets the cycle corresponding to the identifier given as parameter.
 
@@ -63,6 +63,7 @@ class CycleManager:
             cycle_id (CycleId): The identifier of the cycle to retrieve.
             default: Default value to return if no cycle is found. None is returned if no default value is provided.
         """
+        cycle_id = cycle.id if isinstance(cycle, Cycle) else cycle
         try:
             return cls.repository.load(cycle_id)
         except ModelNotFound:

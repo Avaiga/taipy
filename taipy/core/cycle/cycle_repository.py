@@ -16,11 +16,11 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
     def to_model(self, cycle: Cycle) -> CycleModel:
         return CycleModel(
             id=cycle.id,
-            name=cycle.name,
-            frequency=cycle.frequency,
-            creation_date=cycle.creation_date.isoformat(),
-            start_date=cycle.start_date.isoformat(),
-            end_date=cycle.end_date.isoformat(),
+            name=cycle._name,
+            frequency=cycle._frequency,
+            creation_date=cycle._creation_date.isoformat(),
+            start_date=cycle._start_date.isoformat(),
+            end_date=cycle._end_date.isoformat(),
             properties=cycle.properties.data,
         )
 
