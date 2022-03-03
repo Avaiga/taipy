@@ -1,8 +1,7 @@
 import json
 import logging
+import socket
 import typing as t
-
-import pytest
 
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import Builder
@@ -71,3 +70,13 @@ class Helpers:
         sid = "test"
         gui._bindings()._get_or_create_scope(sid)
         return sid
+
+    @staticmethod
+    def port_check():
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        try:
+            s.connect(("127.0.0.1", 5000))
+            return True
+        except:
+            return False

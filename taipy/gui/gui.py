@@ -413,14 +413,7 @@ class Gui:
         )
 
     def _send_ws_download(self, content: str, name: str, on_action: str) -> None:
-        self.__send_ws(
-            {
-                "type": WsType.DOWNLOAD_FILE.value,
-                "content": content,
-                "name": name,
-                "on_action": on_action
-            }
-        )
+        self.__send_ws({"type": WsType.DOWNLOAD_FILE.value, "content": content, "name": name, "on_action": on_action})
 
     def __send_ws_alert(self, type: str, message: str, browser_notification: bool, duration: int) -> None:
         self.__send_ws(
@@ -831,7 +824,7 @@ class Gui:
     def get_flask_app(self):
         return self._server.get_flask()
 
-    def run(self, run_server: bool = True, **kwargs) -> None:
+    def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> None:
         """
         Starts the server that delivers pages to Web clients.
 
@@ -844,10 +837,9 @@ class Gui:
             run_server (bool): whether or not to run a Web server locally.
                 If set to `False`, a Web server is _not_ created and started.
         """
-        if _is_in_notebook():
-            if hasattr(self._server, "_thread"):
-                self._server._thread.kill()
-                self._server._thread.join()
+        if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
+            self._server._thread.kill()
+            self._server._thread.join()
             self._flask_blueprint = []
             self._server = Server(
                 self,
@@ -870,7 +862,7 @@ class Gui:
         self._config.build_app_config(self._root_dir, self.__env_filename, kwargs)
 
         # Special config for notebook runtime
-        if _is_in_notebook():
+        if _is_in_notebook() or run_in_thread:
             self._config.app_config["single_client"] = True
 
         if run_server and app_config["ngrok_token"]:
@@ -955,10 +947,11 @@ class Gui:
                 debug=app_config["debug"],
                 use_reloader=app_config["use_reloader"],
                 flask_log=app_config["flask_log"],
+                run_in_thread=run_in_thread,
             )
 
     def stop(self):
-        if _is_in_notebook() and hasattr(self._server, "_thread"):
+        if hasattr(self._server, "_thread"):
             self._server._thread.kill()
             self._server._thread.join()
             print("Gui server has been stopped")

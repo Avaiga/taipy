@@ -26,8 +26,9 @@ jobs:
         run: |
           pip install .
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package
+          pip install markupsafe==2.0.1
           pip install pytest pytest-mock
-          pytest
+          pytest -m "not teste2e"
 
   optionals-packages:
     timeout-minutes: 10
@@ -43,6 +44,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
+
       - name: Add optionals dependencies
         run: |
           # Extract optionals packages before installing them
@@ -51,8 +53,9 @@ jobs:
           python setup_packages.py | xargs -I% bash -c "pip install .[%]"
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
           # Run test with optionals packages installed
+          pip install markupsafe==2.0.1
           pip install pytest pytest-mock
-          pytest > pytest_res
+          pytest -m "not teste2e" > pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"
