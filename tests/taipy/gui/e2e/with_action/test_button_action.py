@@ -18,7 +18,7 @@ def test_button_action(page: Page, gui: Gui):
 
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    page.goto("/test")
+    page.goto("/test", waitUntil="domcontentloaded")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")

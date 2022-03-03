@@ -11,7 +11,7 @@ def test_redirect(page: Page, gui: Gui):
 """
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    page.goto("/")
+    page.goto("/", waitUntil="domcontentloaded")
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")
     assert text1.inner_text() == "Redirect Successfully"

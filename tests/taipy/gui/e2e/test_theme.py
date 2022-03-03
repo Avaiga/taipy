@@ -11,7 +11,7 @@ def test_theme_light(page: Page, gui: Gui):
 """
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True, dark_mode=False)
-    page.goto("/")
+    page.goto("/", waitUntil="domcontentloaded")
     page.wait_for_selector("#text1")
     background_color = page.evaluate(
         'window.getComputedStyle(document.querySelector("main"), null).getPropertyValue("background-color")'
@@ -26,7 +26,7 @@ def test_theme_dark(page: Page, gui: Gui):
 """
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True, dark_mode=True)
-    page.goto("/")
+    page.goto("/", waitUntil="domcontentloaded")
     page.wait_for_selector("#text1")
     background_color = page.evaluate(
         'window.getComputedStyle(document.querySelector("main"), null).getPropertyValue("background-color")'

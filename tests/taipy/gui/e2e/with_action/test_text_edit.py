@@ -14,7 +14,7 @@ def test_text_edit(page: Page, gui: Gui):
     x = "Hey"
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    page.goto("/test")
+    page.goto("/test", waitUntil="domcontentloaded")
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")
     assert text1.inner_text() == "Hey"
@@ -35,7 +35,7 @@ def test_number_edit(page: Page, gui: Gui):
     x = 10
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    page.goto("/test")
+    page.goto("/test", waitUntil="domcontentloaded")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")

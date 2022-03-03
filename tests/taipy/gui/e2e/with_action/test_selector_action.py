@@ -14,7 +14,7 @@ def test_slider_action(page: Page, gui: Gui):
     x = "Item 1"
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    page.goto("/test")
+    page.goto("/test", waitUntil="domcontentloaded")
     page.expect_websocket()
     page.wait_for_selector("#selector1")
     assert gui._bindings().x == "Item 1"

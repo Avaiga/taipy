@@ -37,7 +37,7 @@ def _timezone_test_template(page: Page, gui: Gui, time_zone, text):
     time = ISO_to_date("2022-03-03T00:00:00.000Z")
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True, time_zone=time_zone)
-    page.goto("/test")
+    page.goto("/test", waitUntil="domcontentloaded")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")
