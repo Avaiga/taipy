@@ -11,7 +11,7 @@ def test_pane_md(gui: Gui, helpers):
     expected_list = [
         "<Pane",
         'anchor="left"',
-        'tp_varname="TaipyBool_show_pane"',
+        'updateVarName="TaipyBool_show_pane"',
         "open={TaipyBool_show_pane}",
         "<h1",
         "This is a Pane</h1></Pane>",
@@ -30,7 +30,7 @@ def test_pane_persistent_md(gui: Gui, helpers):
         "<Pane",
         'anchor="left"',
         "persistent={true}",
-        'tp_varname="TaipyBool_show_pane"',
+        'updateVarName="TaipyBool_show_pane"',
         "open={TaipyBool_show_pane}",
         "<h1",
         "This is a Pane</h1></Pane>",
@@ -44,7 +44,7 @@ def test_pane_html(gui: Gui, helpers):
     expected_list = [
         "<Pane",
         'anchor="left"',
-        'tp_varname="TaipyBool_show_pane"',
+        'updateVarName="TaipyBool_show_pane"',
         "open={TaipyBool_show_pane}",
         "<h1",
         "This is a Pane</h1></Pane>",

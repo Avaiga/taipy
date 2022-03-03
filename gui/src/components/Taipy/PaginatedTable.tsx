@@ -21,6 +21,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 import { visuallyHidden } from "@mui/utils";
 import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
@@ -61,7 +62,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const {
         className,
         id,
-        tp_varname,
+        updateVarName,
         pageSize = 100,
         pageSizeOptions,
         allowAllRows = false,
@@ -69,7 +70,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         refresh = false,
         height,
         selected = [],
-        tp_updatevars,
+        updateVars,
         tp_onEdit = "",
         tp_onDelete = "",
         tp_onAdd = "",
@@ -89,6 +90,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const [colsOrder, columns, styles, handleNan] = useMemo(() => {
         let hNan = !!props.nanValue;
@@ -115,7 +117,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         return [[], {}, {}, hNan];
     }, [active, editable, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
     useEffect(() => {
         if (selected.length) {
@@ -157,7 +159,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 : undefined;
             dispatch(
                 createRequestTableUpdateAction(
-                    tp_varname,
+                    updateVarName,
                     id,
                     cols,
                     pageKey.current,
@@ -186,7 +188,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         rowsPerPage,
         order,
         orderBy,
-        tp_varname,
+        updateVarName,
         id,
         handleNan,
         dispatch,
@@ -238,36 +240,36 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const onAddRowClick = useCallback(
         () =>
             dispatch(
-                createSendActionNameAction(tp_varname, {
+                createSendActionNameAction(updateVarName, {
                     action: tp_onAdd,
                     index: startIndex,
                 })
             ),
-        [startIndex, dispatch, tp_varname, tp_onAdd]
+        [startIndex, dispatch, updateVarName, tp_onAdd]
     );
 
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string) =>
             dispatch(
-                createSendActionNameAction(tp_varname, {
+                createSendActionNameAction(updateVarName, {
                     action: tp_onEdit,
                     value: value,
                     index: rowIndex,
                     col: colName,
                 })
             ),
-        [dispatch, tp_varname, tp_onEdit]
+        [dispatch, updateVarName, tp_onEdit]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
-                createSendActionNameAction(tp_varname, {
+                createSendActionNameAction(updateVarName, {
                     action: tp_onDelete,
                     index: rowIndex,
                 })
             ),
-        [dispatch, tp_varname, tp_onDelete]
+        [dispatch, updateVarName, tp_onDelete]
     );
 
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
@@ -305,120 +307,131 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     return (
         <Box id={id} sx={boxSx}>
             <Paper sx={paperSx}>
-                <TableContainer sx={tableContainerSx}>
-                    <Table
-                        sx={tableSx}
-                        aria-labelledby="tableTitle"
-                        size={"medium"}
-                        className={className}
-                        stickyHeader={true}
-                    >
-                        <TableHead>
-                            <TableRow>
-                                {colsOrder.map((col, idx) => (
-                                    <TableCell
-                                        key={col + idx}
-                                        sortDirection={orderBy === columns[col].dfid && order}
-                                        width={columns[col].width}
-                                    >
-                                        {columns[col].dfid === EDIT_COL ? (
-                                            active && editable && tp_onAdd ? (
-                                                <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
-                                                    <AddIcon />
-                                                </IconButton>
-                                            ) : null
-                                        ) : (
-                                            <TableSortLabel
-                                                active={orderBy === columns[col].dfid}
-                                                direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                onClick={createSortHandler(columns[col].dfid)}
-                                                disabled={!active}
-                                            >
-                                                <Box sx={headBoxSx}>
-                                                    {columns[col].groupBy ? (
-                                                        <IconButton
-                                                            onClick={onAggregate}
-                                                            size="small"
-                                                            title="aggregate"
-                                                            sx={iconInRowSx}
-                                                            data-dfid={columns[col].dfid}
-                                                            disabled={!active}
-                                                        >
-                                                            {aggregates.includes(columns[col].dfid) ? (
-                                                                <DataSaverOff />
-                                                            ) : (
-                                                                <DataSaverOn />
-                                                            )}
-                                                        </IconButton>
-                                                    ) : null}
-                                                    {columns[col].title === undefined
-                                                        ? columns[col].dfid
-                                                        : columns[col].title}
-                                                </Box>
-                                                {orderBy === columns[col].dfid ? (
-                                                    <Box component="span" sx={visuallyHidden}>
-                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
+                <Tooltip title={hover || ""}>
+                    <TableContainer sx={tableContainerSx}>
+                        <Table
+                            sx={tableSx}
+                            aria-labelledby="tableTitle"
+                            size={"medium"}
+                            className={className}
+                            stickyHeader={true}
+                        >
+                            <TableHead>
+                                <TableRow>
+                                    {colsOrder.map((col, idx) => (
+                                        <TableCell
+                                            key={col + idx}
+                                            sortDirection={orderBy === columns[col].dfid && order}
+                                            width={columns[col].width}
+                                        >
+                                            {columns[col].dfid === EDIT_COL ? (
+                                                active && editable && tp_onAdd ? (
+                                                    <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
+                                                        <AddIcon />
+                                                    </IconButton>
+                                                ) : null
+                                            ) : (
+                                                <TableSortLabel
+                                                    active={orderBy === columns[col].dfid}
+                                                    direction={orderBy === columns[col].dfid ? order : "asc"}
+                                                    onClick={createSortHandler(columns[col].dfid)}
+                                                    disabled={!active}
+                                                >
+                                                    <Box sx={headBoxSx}>
+                                                        {columns[col].groupBy ? (
+                                                            <IconButton
+                                                                onClick={onAggregate}
+                                                                size="small"
+                                                                title="aggregate"
+                                                                sx={iconInRowSx}
+                                                                data-dfid={columns[col].dfid}
+                                                                disabled={!active}
+                                                            >
+                                                                {aggregates.includes(columns[col].dfid) ? (
+                                                                    <DataSaverOff />
+                                                                ) : (
+                                                                    <DataSaverOn />
+                                                                )}
+                                                            </IconButton>
+                                                        ) : null}
+                                                        {columns[col].title === undefined
+                                                            ? columns[col].dfid
+                                                            : columns[col].title}
                                                     </Box>
-                                                ) : null}
-                                            </TableSortLabel>
-                                        )}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {rows.map((row, index) => {
-                                const sel = selected.indexOf(index + startIndex);
-                                if (sel == 0) {
-                                    setTimeout(() => selectedRowRef.current?.scrollIntoView({ block: "center" }), 1);
-                                }
-                                return (
-                                    <TableRow
-                                        hover
-                                        tabIndex={-1}
-                                        key={"row" + index}
-                                        selected={sel > -1}
-                                        ref={sel == 0 ? selectedRowRef : undefined}
-                                        className={getClassName(rows[index], props.lineStyle)}
-                                    >
-                                        {colsOrder.map((col, cidx) => (
-                                            <TableCell
-                                                key={"val" + index + "-" + cidx}
-                                                {...getCellProps(columns[col])}
-                                                className={getClassName(rows[index], columns[col].style)}
-                                            >
-                                                <EditableCell
-                                                    colDesc={columns[col]}
-                                                    value={rows[index][col]}
-                                                    formatConfig={formatConfig}
-                                                    rowIndex={index}
-                                                    onValidation={
-                                                        active && editable && tp_onEdit ? onCellValidation : undefined
-                                                    }
-                                                    onDeletion={
-                                                        active && editable && tp_onDelete ? onRowDeletion : undefined
-                                                    }
-                                                    nanValue={columns[col].nanValue || props.nanValue}
-                                                />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                );
-                            })}
-                            {rows.length == 0 &&
-                                loading &&
-                                Array.from(Array(30).keys(), (v, idx) => (
-                                    <TableRow hover key={"rowskel" + idx}>
-                                        {colsOrder.map((col, cidx) => (
-                                            <TableCell key={"skel" + cidx}>
-                                                <Skeleton sx={skelSx} />
-                                            </TableCell>
-                                        ))}
-                                    </TableRow>
-                                ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                                    {orderBy === columns[col].dfid ? (
+                                                        <Box component="span" sx={visuallyHidden}>
+                                                            {order === "desc"
+                                                                ? "sorted descending"
+                                                                : "sorted ascending"}
+                                                        </Box>
+                                                    ) : null}
+                                                </TableSortLabel>
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {rows.map((row, index) => {
+                                    const sel = selected.indexOf(index + startIndex);
+                                    if (sel == 0) {
+                                        setTimeout(
+                                            () => selectedRowRef.current?.scrollIntoView({ block: "center" }),
+                                            1
+                                        );
+                                    }
+                                    return (
+                                        <TableRow
+                                            hover
+                                            tabIndex={-1}
+                                            key={"row" + index}
+                                            selected={sel > -1}
+                                            ref={sel == 0 ? selectedRowRef : undefined}
+                                            className={getClassName(rows[index], props.lineStyle)}
+                                        >
+                                            {colsOrder.map((col, cidx) => (
+                                                <TableCell
+                                                    key={"val" + index + "-" + cidx}
+                                                    {...getCellProps(columns[col])}
+                                                    className={getClassName(rows[index], columns[col].style)}
+                                                >
+                                                    <EditableCell
+                                                        colDesc={columns[col]}
+                                                        value={rows[index][col]}
+                                                        formatConfig={formatConfig}
+                                                        rowIndex={index}
+                                                        onValidation={
+                                                            active && editable && tp_onEdit
+                                                                ? onCellValidation
+                                                                : undefined
+                                                        }
+                                                        onDeletion={
+                                                            active && editable && tp_onDelete
+                                                                ? onRowDeletion
+                                                                : undefined
+                                                        }
+                                                        nanValue={columns[col].nanValue || props.nanValue}
+                                                    />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    );
+                                })}
+                                {rows.length == 0 &&
+                                    loading &&
+                                    Array.from(Array(30).keys(), (v, idx) => (
+                                        <TableRow hover key={"rowskel" + idx}>
+                                            {colsOrder.map((col, cidx) => (
+                                                <TableCell key={"skel" + cidx}>
+                                                    <Skeleton sx={skelSx} />
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Tooltip>
                 {!showAll &&
                     (loading ? (
                         <Skeleton sx={loadingStyle}>

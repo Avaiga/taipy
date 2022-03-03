@@ -80,7 +80,7 @@ describe("Chart Component", () => {
         const selProps = { selected0: JSON.stringify([2, 4, 6]) };
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Chart id="chart" data={undefined} config={chartConfig} tp_updatevars="varname=varname" {...selProps} />
+                <Chart id="chart" data={undefined} config={chartConfig} updateVars="varname=varname" {...selProps} />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -132,7 +132,7 @@ describe("Chart Component", () => {
                     id="table"
                     data={state.data.table as undefined}
                     config={chartConfig}
-                    tp_updatevars="varname=varname"
+                    updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
         );
@@ -143,7 +143,7 @@ describe("Chart Component", () => {
                     id="table"
                     data={newState.data.table as Record<string, TraceValueType>}
                     config={chartConfig}
-                    tp_updatevars="varname=varname"
+                    updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
         );
@@ -165,9 +165,9 @@ describe("Chart Component", () => {
     });
     xit("displays the received data", async () => {
         const { getAllByText, rerender } = render(
-            <Chart data={undefined} config={chartConfig} tp_updatevars="varname=varname" />
+            <Chart data={undefined} config={chartConfig} updateVars="varname=varname" />
         );
-        rerender(<Chart data={chartValue} config={chartConfig} tp_updatevars="varname=varname" />);
+        rerender(<Chart data={chartValue} config={chartConfig} updateVars="varname=varname" />);
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");

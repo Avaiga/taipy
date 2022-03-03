@@ -114,7 +114,7 @@ describe("PaginatedTable Component", () => {
         const state: TaipyState = INITIAL_STATE;
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <PaginatedTable id="table" data={undefined} columns={tableColumns} tp_updatevars="varname=varname" />
+                <PaginatedTable id="table" data={undefined} columns={tableColumns} updateVars="varname=varname" />
             </TaipyContext.Provider>
         );
         expect(dispatch).toHaveBeenCalledWith({
@@ -177,7 +177,7 @@ describe("PaginatedTable Component", () => {
                     id="table"
                     data={state.data.table as undefined}
                     columns={tableColumns}
-                    tp_updatevars="varname=varname"
+                    updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
         );
@@ -188,7 +188,7 @@ describe("PaginatedTable Component", () => {
                     id="table"
                     data={newState.data.table as TableValueType}
                     columns={tableColumns}
-                    tp_updatevars="varname=varname"
+                    updateVars="varname=varname"
                 />
             </TaipyContext.Provider>
         );

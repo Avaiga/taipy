@@ -16,6 +16,7 @@ import IconButton from "@mui/material/IconButton";
 import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import {
@@ -135,11 +136,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const {
         className,
         id,
-        tp_varname,
+        updateVarName,
         refresh = false,
         height = "60vh",
         width = "100vw",
-        tp_updatevars,
+        updateVars,
         selected = [],
         pageSize = 100,
         defaultKey = "",
@@ -161,6 +162,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     useEffect(() => {
         if (props.data && page.current.key && props.data[page.current.key] !== undefined) {
@@ -178,7 +180,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         }
     }, [props.data]);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
     const handleRequestSort = useCallback(
         (event: React.MouseEvent<unknown>, col: string) => {
@@ -289,7 +291,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     : undefined;
                 dispatch(
                     createRequestInfiniteTableUpdateAction(
-                        tp_varname,
+                        updateVarName,
                         id,
                         cols,
                         key,
@@ -305,18 +307,18 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 );
             });
         },
-        [aggregates, styles, tp_varname, orderBy, order, id, colsOrder, columns, handleNan, dispatch]
+        [aggregates, styles, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, dispatch]
     );
 
     const onAddRowClick = useCallback(
         () =>
             dispatch(
-                createSendActionNameAction(tp_varname, {
+                createSendActionNameAction(updateVarName, {
                     action: tp_onAdd,
                     index: visibleStartIndex,
                 })
             ),
-        [visibleStartIndex, dispatch, tp_varname, tp_onAdd]
+        [visibleStartIndex, dispatch, updateVarName, tp_onAdd]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -324,25 +326,25 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string) =>
             dispatch(
-                createSendActionNameAction(tp_varname, {
+                createSendActionNameAction(updateVarName, {
                     action: tp_onEdit,
                     value: value,
                     index: rowIndex,
                     col: colName,
                 })
             ),
-        [dispatch, tp_varname, tp_onEdit]
+        [dispatch, updateVarName, tp_onEdit]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
-                createSendActionNameAction(tp_varname, {
+                createSendActionNameAction(updateVarName, {
                     action: tp_onDelete,
                     index: rowIndex,
                 })
             ),
-        [dispatch, tp_varname, tp_onDelete]
+        [dispatch, updateVarName, tp_onDelete]
     );
 
     const onTaipyItemsRendered = useCallback(
@@ -395,96 +397,100 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     return (
         <Box sx={boxSx} id={id}>
             <Paper sx={paperSx}>
-                <TableContainer>
-                    <MuiTable
-                        sx={tableSx}
-                        aria-labelledby="tableTitle"
-                        size={"medium"}
-                        className={className}
-                        stickyHeader={true}
-                    >
-                        <TableHead>
-                            <TableRow ref={headerRow}>
-                                {colsOrder.map((col, idx) => (
-                                    <TableCell
-                                        key={col + idx}
-                                        sortDirection={orderBy === columns[col].dfid && order}
-                                        width={columns[col].width}
-                                    >
-                                        {columns[col].dfid === EDIT_COL ? (
-                                            active && editable && tp_onAdd ? (
-                                                <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
-                                                    <AddIcon />
-                                                </IconButton>
-                                            ) : null
-                                        ) : (
-                                            <TableSortLabel
-                                                active={orderBy === columns[col].dfid}
-                                                direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                onClick={createSortHandler(columns[col].dfid)}
-                                                disabled={!active}
-                                            >
-                                                <Box sx={headBoxSx}>
-                                                    {columns[col].groupBy ? (
-                                                        <IconButton
-                                                            onClick={onAggregate}
-                                                            size="small"
-                                                            title="aggregate"
-                                                            sx={iconInRowSx}
-                                                            data-dfid={columns[col].dfid}
-                                                            disabled={!active}
-                                                        >
-                                                            {aggregates.includes(columns[col].dfid) ? (
-                                                                <DataSaverOff />
-                                                            ) : (
-                                                                <DataSaverOn />
-                                                            )}
-                                                        </IconButton>
-                                                    ) : null}
-                                                    {columns[col].title === undefined
-                                                        ? columns[col].dfid
-                                                        : columns[col].title}
-                                                </Box>
-                                                {orderBy === columns[col].dfid ? (
-                                                    <Box component="span" sx={visuallyHidden}>
-                                                        {order === "desc" ? "sorted descending" : "sorted ascending"}
-                                                    </Box>
-                                                ) : null}
-                                            </TableSortLabel>
-                                        )}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                    </MuiTable>
-                    <Box sx={boxBodySx}>
-                        <AutoSizer>
-                            {({ height, width }) => (
-                                <InfiniteLoader
-                                    ref={infiniteLoaderRef}
-                                    isItemLoaded={isItemLoaded}
-                                    itemCount={rowCount}
-                                    loadMoreItems={loadMoreItems}
-                                    minimumBatchSize={pageSize}
-                                >
-                                    {({ onItemsRendered, ref }) => (
-                                        <List
-                                            height={height}
-                                            width={width}
-                                            itemCount={rowCount}
-                                            itemSize={ROW_HEIGHT}
-                                            onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
-                                            ref={ref}
-                                            itemData={rowData}
+                <Tooltip title={hover || ""}>
+                    <TableContainer>
+                        <MuiTable
+                            sx={tableSx}
+                            aria-labelledby="tableTitle"
+                            size={"medium"}
+                            className={className}
+                            stickyHeader={true}
+                        >
+                            <TableHead>
+                                <TableRow ref={headerRow}>
+                                    {colsOrder.map((col, idx) => (
+                                        <TableCell
+                                            key={col + idx}
+                                            sortDirection={orderBy === columns[col].dfid && order}
+                                            width={columns[col].width}
                                         >
-                                            {Row}
-                                        </List>
-                                    )}
-                                </InfiniteLoader>
-                            )}
-                        </AutoSizer>
-                    </Box>
-                </TableContainer>
+                                            {columns[col].dfid === EDIT_COL ? (
+                                                active && editable && tp_onAdd ? (
+                                                    <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
+                                                        <AddIcon />
+                                                    </IconButton>
+                                                ) : null
+                                            ) : (
+                                                <TableSortLabel
+                                                    active={orderBy === columns[col].dfid}
+                                                    direction={orderBy === columns[col].dfid ? order : "asc"}
+                                                    onClick={createSortHandler(columns[col].dfid)}
+                                                    disabled={!active}
+                                                >
+                                                    <Box sx={headBoxSx}>
+                                                        {columns[col].groupBy ? (
+                                                            <IconButton
+                                                                onClick={onAggregate}
+                                                                size="small"
+                                                                title="aggregate"
+                                                                sx={iconInRowSx}
+                                                                data-dfid={columns[col].dfid}
+                                                                disabled={!active}
+                                                            >
+                                                                {aggregates.includes(columns[col].dfid) ? (
+                                                                    <DataSaverOff />
+                                                                ) : (
+                                                                    <DataSaverOn />
+                                                                )}
+                                                            </IconButton>
+                                                        ) : null}
+                                                        {columns[col].title === undefined
+                                                            ? columns[col].dfid
+                                                            : columns[col].title}
+                                                    </Box>
+                                                    {orderBy === columns[col].dfid ? (
+                                                        <Box component="span" sx={visuallyHidden}>
+                                                            {order === "desc"
+                                                                ? "sorted descending"
+                                                                : "sorted ascending"}
+                                                        </Box>
+                                                    ) : null}
+                                                </TableSortLabel>
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                        </MuiTable>
+                        <Box sx={boxBodySx}>
+                            <AutoSizer>
+                                {({ height, width }) => (
+                                    <InfiniteLoader
+                                        ref={infiniteLoaderRef}
+                                        isItemLoaded={isItemLoaded}
+                                        itemCount={rowCount}
+                                        loadMoreItems={loadMoreItems}
+                                        minimumBatchSize={pageSize}
+                                    >
+                                        {({ onItemsRendered, ref }) => (
+                                            <List
+                                                height={height}
+                                                width={width}
+                                                itemCount={rowCount}
+                                                itemSize={ROW_HEIGHT}
+                                                onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
+                                                ref={ref}
+                                                itemData={rowData}
+                                            >
+                                                {Row}
+                                            </List>
+                                        )}
+                                    </InfiniteLoader>
+                                )}
+                            </AutoSizer>
+                        </Box>
+                    </TableContainer>
+                </Tooltip>
             </Paper>
         </Box>
     );

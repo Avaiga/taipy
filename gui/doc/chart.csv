@@ -5,6 +5,7 @@ width,str|int|float,100vw,"The width, in CSS units, of this element."
 height,str|int|float,100vw,"The height, in CSS units, of this element."
 selected,dynamic(list[int]|str),None,List of the selected point indices.
 layout,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/layout/"">layout object</a>."
+plot_config,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/configuration-options/""> configugration options object</a>."
 options,"indexed(dict[str, any])",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/"">data object where dynamic data will be overridden.</a>."
 render,bool,True,"If <i>True</i>, this chart is visible on the page.
 on_range_change,Callable?,None,"Callback function called when the visible part of the x axis changes.

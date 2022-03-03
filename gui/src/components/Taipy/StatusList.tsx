@@ -2,10 +2,12 @@ import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from "re
 import Stack from "@mui/material/Stack";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
+import Tooltip from "@mui/material/Tooltip";
 import Popover, { PopoverOrigin } from "@mui/material/Popover";
 
 import Status, { StatusType } from "./Status";
-import { TaipyBaseProps } from "./utils";
+import { TaipyBaseProps, TaipyHoverProps } from "./utils";
+import { useDynamicProperty } from "../../utils/hooks";
 
 const getStatusIntValue = (status: string) => {
     status = status.toLowerCase();
@@ -67,7 +69,7 @@ interface StatusDel extends StatusType {
     id?: string;
 }
 
-interface StatusListProps extends TaipyBaseProps {
+interface StatusListProps extends TaipyBaseProps, TaipyHoverProps {
     value: Array<[string, string] | StatusType> | [string, string] | StatusType;
     defaultValue?: string;
     withoutClose?: boolean;
@@ -79,6 +81,8 @@ const StatusList = (props: StatusListProps) => {
     const [opened, setOpened] = useState(false);
     const [multiple, setMultiple] = useState(false);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     useEffect(() => {
         let val;
@@ -138,27 +142,29 @@ const StatusList = (props: StatusListProps) => {
     );
 
     return (
-        <>
-            <Status id={props.id} value={getGlobalStatus(values)} className={className} {...globalProps} />
-            <Popover open={opened} anchorEl={anchorEl} onClose={onOpen} anchorOrigin={ORIGIN}>
-                <Stack direction="column" spacing={1}>
-                    {values
-                        .filter((val) => !val.hidden)
-                        .map((val, idx) => {
-                            const closeProp = withoutClose ? {} : { onClose: () => onClose(val) };
-                            return (
-                                <Status
-                                    key={getId(props.id, idx)}
-                                    id={getId(props.id, idx)}
-                                    value={val}
-                                    className={className}
-                                    {...closeProp}
-                                />
-                            );
-                        })}
-                </Stack>
-            </Popover>
-        </>
+        <Tooltip title={hover || ""}>
+            <>
+                <Status id={props.id} value={getGlobalStatus(values)} className={className} {...globalProps} />
+                <Popover open={opened} anchorEl={anchorEl} onClose={onOpen} anchorOrigin={ORIGIN}>
+                    <Stack direction="column" spacing={1}>
+                        {values
+                            .filter((val) => !val.hidden)
+                            .map((val, idx) => {
+                                const closeProp = withoutClose ? {} : { onClose: () => onClose(val) };
+                                return (
+                                    <Status
+                                        key={getId(props.id, idx)}
+                                        id={getId(props.id, idx)}
+                                        value={val}
+                                        className={className}
+                                        {...closeProp}
+                                    />
+                                );
+                            })}
+                    </Stack>
+                </Popover>
+            </>
+        </Tooltip>
     );
 };
 

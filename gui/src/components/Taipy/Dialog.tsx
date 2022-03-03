@@ -4,6 +4,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
+import Tooltip from "@mui/material/Tooltip";
 import { Theme } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
@@ -55,6 +56,7 @@ const Dialog = (props: DialogProps) => {
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleClose = useCallback(() => {
         dispatch(createSendActionNameAction(id, tp_onCancel || tp_onValidate));
@@ -87,17 +89,19 @@ const Dialog = (props: DialogProps) => {
             className={className}
             PaperProps={paperProps}
         >
-            <DialogTitle sx={titleSx}>
-                {title}
-                <IconButton
-                    aria-label="close"
-                    onClick={handleClose}
-                    sx={closeSx}
-                    title={tp_onCancel ? cancelLabel : validateLabel}
-                >
-                    <CloseIcon />
-                </IconButton>
-            </DialogTitle>
+            <Tooltip title={hover || ""}>
+                <DialogTitle sx={titleSx}>
+                    {title}
+                    <IconButton
+                        aria-label="close"
+                        onClick={handleClose}
+                        sx={closeSx}
+                        title={tp_onCancel ? cancelLabel : validateLabel}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+            </Tooltip>
 
             <DialogContent dividers>
                 {page ? <TaipyRendered path={"/" + page} /> : null}

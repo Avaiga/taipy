@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import MuiButton from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
@@ -19,6 +20,7 @@ const Button = (props: ButtonProps) => {
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleClick = useCallback(() => {
         dispatch(createSendActionNameAction(id, tp_onAction));
@@ -41,13 +43,15 @@ const Button = (props: ButtonProps) => {
     }, [props.label, defaultLabel]);
 
     return (
-        <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
-            {typeof value === "string" ? (
-                value
-            ) : (
-                <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
-            )}
-        </MuiButton>
+        <Tooltip title={hover || ""}>
+            <MuiButton id={id} variant="outlined" className={className} onClick={handleClick} disabled={!active}>
+                {typeof value === "string" ? (
+                    value
+                ) : (
+                    <IconAvatar img={value as Icon} className={getSuffixedClassNames(className, "-image")} />
+                )}
+            </MuiButton>
+        </Tooltip>
     );
 };
 

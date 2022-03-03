@@ -3,3 +3,4 @@ id,str,"""""",The identifier that will be assigned to the rendered HTML componen
 properties,"dict[str, any]",None,Bound to a dictionary that contains additonnal properties for this element.
 class_name,str,None,"CSS class name that will be associated with the generated HTML Element.
 This class names will be added to the default <code>taipy-&lt;element_type&gt;</code>."
+hover_text,dynamic(str),None,"Hover information provides tips on what a control does."

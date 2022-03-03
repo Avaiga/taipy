@@ -3,6 +3,7 @@ import { SxProps } from "@mui/material";
 import MuiSlider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -26,19 +27,20 @@ const Slider = (props: SliderProps) => {
     const {
         className,
         id,
-        tp_varname,
+        updateVarName,
         propagate = true,
         defaultValue,
         lov,
         defaultLov = "",
         textAnchor = "bottom",
         width = "300px",
-        tp_updatevars = "",
+        updateVars = "",
     } = props;
     const [value, setValue] = useState(0);
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const lovList = useLovListMemo(lov, defaultLov);
 
     const update = useMemo(
@@ -55,10 +57,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(tp_varname, value, propagate, getUpdateVar(tp_updatevars, "lov")));
+                dispatch(createSendUpdateAction(updateVarName, value, propagate, getUpdateVar(updateVars, "lov")));
             }
         },
-        [lovList, update, tp_varname, dispatch, propagate, tp_updatevars]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars]
     );
 
     const handleRangeCommitted = useCallback(
@@ -66,10 +68,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (!update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(tp_varname, value, propagate, getUpdateVar(tp_updatevars, "lov")));
+                dispatch(createSendUpdateAction(updateVarName, value, propagate, getUpdateVar(updateVars, "lov")));
             }
         },
-        [lovList, update, tp_varname, dispatch, propagate, tp_updatevars]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars]
     );
 
     const getLabel = useCallback(
@@ -194,20 +196,22 @@ const Slider = (props: SliderProps) => {
     return (
         <Box sx={textAnchorSx} className={className}>
             {getText(value, true)}
-            <MuiSlider
-                id={id}
-                value={value as number}
-                onChange={handleRange}
-                onChangeCommitted={handleRangeCommitted}
-                disabled={!active}
-                valueLabelDisplay="auto"
-                min={min}
-                max={max}
-                step={1}
-                marks={marks}
-                valueLabelFormat={getLabel}
-                orientation={horizontalOrientation ? undefined : "vertical"}
-            />
+            <Tooltip title={hover || ""}>
+                <MuiSlider
+                    id={id}
+                    value={value as number}
+                    onChange={handleRange}
+                    onChangeCommitted={handleRangeCommitted}
+                    disabled={!active}
+                    valueLabelDisplay="auto"
+                    min={min}
+                    max={max}
+                    step={1}
+                    marks={marks}
+                    valueLabelFormat={getLabel}
+                    orientation={horizontalOrientation ? undefined : "vertical"}
+                />
+            </Tooltip>
             {getText(value, false)}
         </Box>
     );

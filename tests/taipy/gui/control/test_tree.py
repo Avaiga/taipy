@@ -8,7 +8,7 @@ def test_tree_md(gui: Gui, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'tp_varname="value"',
+        'updateVarName="value"',
         "value={value}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -21,7 +21,7 @@ def test_tree_expended_md_1(gui: Gui, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'tp_varname="value"',
+        'updateVarName="value"',
         "value={value}",
         "expanded={false}",
     ]
@@ -36,11 +36,11 @@ def test_tree_expended_md_2(gui: Gui, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'tp_varname="value"',
+        'updateVarName="value"',
         "value={value}",
         'defaultExpanded="[&quot;Item1&quot;]"',
         "expanded={expa}",
-        'tp_updatevars="expanded=expa"',
+        'updateVars="expanded=expa"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -52,7 +52,7 @@ def test_tree_html_1(gui: Gui, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'tp_varname="value"',
+        'updateVarName="value"',
         "value={value}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
@@ -65,7 +65,7 @@ def test_tree_html_2(gui: Gui, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'tp_varname="value"',
+        'updateVarName="value"',
         "value={value}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

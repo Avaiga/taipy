@@ -6,10 +6,20 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TreeItem from "@mui/lab/TreeItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { boxSx, isLovParent, LovImage, paperBaseSx, SelTreeProps, showItem, treeSelBaseSx, useLovListMemo } from "./lovUtils";
+import {
+    boxSx,
+    isLovParent,
+    LovImage,
+    paperBaseSx,
+    SelTreeProps,
+    showItem,
+    treeSelBaseSx,
+    useLovListMemo,
+} from "./lovUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
@@ -43,14 +53,14 @@ const TreeView = (props: TreeViewProps) => {
         id,
         defaultValue = "",
         value,
-        tp_varname = "",
+        updateVarName = "",
         defaultLov = "",
         filter = false,
         multiple = false,
         className,
         propagate = true,
         lov,
-        tp_updatevars = "",
+        updateVars = "",
         width = 360,
         height,
     } = props;
@@ -62,8 +72,9 @@ const TreeView = (props: TreeViewProps) => {
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, tp_updatevars, tp_varname);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars, updateVarName);
 
     const lovList = useLovListMemo(lov, defaultLov, true);
     const treeSx = useMemo(() => ({ ...treeSelBaseSx, maxWidth: width }), [width]);
@@ -136,52 +147,44 @@ const TreeView = (props: TreeViewProps) => {
     const clickHandler = useCallback(
         (event: SyntheticEvent, nodeIds: string[] | string) => {
             setSelectedValue(nodeIds);
-            tp_varname && dispatch(
-                createSendUpdateAction(
-                    tp_varname,
-                    Array.isArray(nodeIds) ? nodeIds : [nodeIds],
-                    propagate,
-                    getUpdateVar(tp_updatevars, "lov")
-                )
-            );
+            updateVarName &&
+                dispatch(
+                    createSendUpdateAction(
+                        updateVarName,
+                        Array.isArray(nodeIds) ? nodeIds : [nodeIds],
+                        propagate,
+                        getUpdateVar(updateVars, "lov")
+                    )
+                );
         },
-        [tp_varname, dispatch, propagate, tp_updatevars]
+        [updateVarName, dispatch, propagate, updateVars]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
 
-    const handleNodeToggle = useCallback((event: React.SyntheticEvent, nodeIds: string[]) => {
-        const expVar = getUpdateVar(tp_updatevars, "expanded")
-        if (oneExpanded) {
-            setExpandedNodes(en => {
-                if (en.length < nodeIds.length) {
-                    // node opened: keep only parent nodes
-                    nodeIds = nodeIds.filter((n, i) => i == 0 || isLovParent(lovList, n, nodeIds[0]));
-                }
+    const handleNodeToggle = useCallback(
+        (event: React.SyntheticEvent, nodeIds: string[]) => {
+            const expVar = getUpdateVar(updateVars, "expanded");
+            if (oneExpanded) {
+                setExpandedNodes((en) => {
+                    if (en.length < nodeIds.length) {
+                        // node opened: keep only parent nodes
+                        nodeIds = nodeIds.filter((n, i) => i == 0 || isLovParent(lovList, n, nodeIds[0]));
+                    }
+                    if (refreshExpanded) {
+                        dispatch(createSendUpdateAction(expVar, nodeIds, propagate));
+                    }
+                    return nodeIds;
+                });
+            } else {
+                setExpandedNodes(nodeIds);
                 if (refreshExpanded) {
-                    dispatch(
-                        createSendUpdateAction(
-                            expVar,
-                            nodeIds,
-                            propagate,
-                        )
-                    );
+                    dispatch(createSendUpdateAction(expVar, nodeIds, propagate));
                 }
-                return nodeIds;
-            });
-        } else {
-            setExpandedNodes(nodeIds);
-            if (refreshExpanded) {
-                dispatch(
-                    createSendUpdateAction(
-                        expVar,
-                        nodeIds,
-                        propagate,
-                    )
-                );
             }
-        }
-    }, [oneExpanded, refreshExpanded, lovList, propagate, tp_updatevars, dispatch]);
+        },
+        [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch]
+    );
 
     const treeProps = useMemo(
         () =>
@@ -193,31 +196,33 @@ const TreeView = (props: TreeViewProps) => {
 
     return (
         <Box id={id} sx={boxSx} className={className}>
-            <Paper sx={paperSx}>
-                <Box>
-                    {filter && (
-                        <TextField
-                            margin="dense"
-                            placeholder="Search field"
-                            value={searchValue}
-                            onChange={handleInput}
-                            disabled={!active}
-                        />
-                    )}
-                </Box>
-                <MuiTreeView
-                    aria-label="tree"
-                    defaultCollapseIcon={<ExpandMoreIcon />}
-                    defaultExpandIcon={<ChevronRightIcon />}
-                    sx={treeSx}
-                    onNodeSelect={clickHandler}
-                    expanded={expandedNodes}
-                    onNodeToggle={handleNodeToggle}
-                    {...treeProps}
-                >
-                    {renderTree(lovList, !!active, searchValue)}
-                </MuiTreeView>
-            </Paper>
+            <Tooltip title={hover || ""}>
+                <Paper sx={paperSx}>
+                    <Box>
+                        {filter && (
+                            <TextField
+                                margin="dense"
+                                placeholder="Search field"
+                                value={searchValue}
+                                onChange={handleInput}
+                                disabled={!active}
+                            />
+                        )}
+                    </Box>
+                    <MuiTreeView
+                        aria-label="tree"
+                        defaultCollapseIcon={<ExpandMoreIcon />}
+                        defaultExpandIcon={<ChevronRightIcon />}
+                        sx={treeSx}
+                        onNodeSelect={clickHandler}
+                        expanded={expandedNodes}
+                        onNodeToggle={handleNodeToggle}
+                        {...treeProps}
+                    >
+                        {renderTree(lovList, !!active, searchValue)}
+                    </MuiTreeView>
+                </Paper>
+            </Tooltip>
         </Box>
     );
 };

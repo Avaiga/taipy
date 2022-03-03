@@ -30,7 +30,7 @@ const MenuCtl = (props: MenuCtlProps) => {
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
 
-    useDispatchRequestUpdateOnFirstRender(dispatch, id, props.tp_updatevars, props.tp_varname);
+    useDispatchRequestUpdateOnFirstRender(dispatch, id, props.updateVars, props.updateVarName);
 
     const lovList = useLovListMemo(props.lov, defaultLov, true);
 

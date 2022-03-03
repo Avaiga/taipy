@@ -1,14 +1,19 @@
 import { MouseEvent } from "react";
 
-export interface TaipyActiveProps extends TaipyDynamicProps {
+export interface TaipyActiveProps extends TaipyDynamicProps, TaipyHoverProps {
     defaultActive?: boolean;
     active?: boolean;
 }
 
-export interface TaipyDynamicProps extends TaipyBaseProps {
-    tp_varname?: string;
+export interface TaipyHoverProps {
+    hoverText?: string;
+    defaultHoverText?: string;
+}
+
+interface TaipyDynamicProps extends TaipyBaseProps {
+    updateVarName?: string;
     propagate?: boolean;
-    tp_updatevars?: string;
+    updateVars?: string;
 }
 
 export interface TaipyBaseProps {
@@ -20,7 +25,7 @@ export interface TaipyMultiSelectProps {
     selected?: number[];
 }
 
-export interface TaipyFieldProps extends TaipyBaseProps {
+export interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     dataType?: string;
     value: string | number;
     defaultValue?: string;

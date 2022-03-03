@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
@@ -57,7 +58,7 @@ const Pane = (props: PaneProps) => {
         defaultOpen,
         height = "30vh",
         width = "30vw",
-        tp_varname,
+        updateVarName,
         propagate = true,
         className,
     } = props;
@@ -65,6 +66,7 @@ const Pane = (props: PaneProps) => {
     const [open, setOpen] = useState(defaultOpen === "true" || defaultOpen === true);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const drawerSx = useMemo(
         () => getDrawerSx(anchor === "left" || anchor === "right", width, height),
@@ -76,13 +78,13 @@ const Pane = (props: PaneProps) => {
         if (active) {
             if (tp_onClose) {
                 dispatch(createSendActionNameAction(id, tp_onClose));
-            } else if (tp_varname) {
-                dispatch(createSendUpdateAction(tp_varname, false, propagate));
+            } else if (updateVarName) {
+                dispatch(createSendUpdateAction(updateVarName, false, propagate));
             } else {
                 setOpen(false);
             }
         }
-    }, [active, dispatch, id, tp_onClose, tp_varname, propagate]);
+    }, [active, dispatch, id, tp_onClose, updateVarName, propagate]);
 
     useEffect(() => {
         if (props.open !== undefined) {
@@ -109,8 +111,12 @@ const Pane = (props: PaneProps) => {
                     <Divider />
                 </>
             ) : null}
-            {page ? <TaipyRendered path={"/" + page} /> : null}
-            {props.children}
+            <Tooltip title={hover || ""}>
+                <>
+                    {page ? <TaipyRendered path={"/" + page} /> : null}
+                    {props.children}
+                </>
+            </Tooltip>
         </Drawer>
     ) : null;
 };

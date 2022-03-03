@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -25,47 +26,58 @@ const Toggle = (props: ToggleProps) => {
         style = {},
         kind,
         label,
-        tp_varname = "",
+        updateVarName = "",
         propagate = true,
         className,
         lov,
         defaultLov = "",
         unselectedValue = "",
-        tp_updatevars = "",
+        updateVars = "",
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const lovList = useLovListMemo(lov, defaultLov);
 
     const changeValue = useCallback(
-        (evt: MouseEvent, val: string) => dispatch(createSendUpdateAction(tp_varname, val === null ? unselectedValue : val, propagate, getUpdateVar(tp_updatevars, "lov"))),
-        [unselectedValue, tp_varname, propagate, dispatch, tp_updatevars]
+        (evt: MouseEvent, val: string) =>
+            dispatch(
+                createSendUpdateAction(
+                    updateVarName,
+                    val === null ? unselectedValue : val,
+                    propagate,
+                    getUpdateVar(updateVars, "lov")
+                )
+            ),
+        [unselectedValue, updateVarName, propagate, dispatch, updateVars]
     );
 
-    return kind === "theme"  ? (
+    return kind === "theme" ? (
         <ThemeToggle {...props} />
     ) : (
         <Box id={id} sx={style} className={className}>
             {label ? <Typography>{label}</Typography> : null}
-            <ToggleButtonGroup
-                value={props.value || props.defaultValue}
-                exclusive
-                onChange={changeValue}
-                disabled={!active}
-            >
-                {lovList &&
-                    lovList.map((v) => (
-                        <ToggleButton value={v.id} key={v.id}>
-                            {typeof v.item === "string" ? (
-                                <Typography>{v.item}</Typography>
-                            ) : (
-                                <IconAvatar id={v.id} img={v.item as Icon} />
-                            )}
-                        </ToggleButton>
-                    ))}
-            </ToggleButtonGroup>
+            <Tooltip title={hover || ""}>
+                <ToggleButtonGroup
+                    value={props.value || props.defaultValue}
+                    exclusive
+                    onChange={changeValue}
+                    disabled={!active}
+                >
+                    {lovList &&
+                        lovList.map((v) => (
+                            <ToggleButton value={v.id} key={v.id}>
+                                {typeof v.item === "string" ? (
+                                    <Typography>{v.item}</Typography>
+                                ) : (
+                                    <IconAvatar id={v.id} img={v.item as Icon} />
+                                )}
+                            </ToggleButton>
+                        ))}
+                </ToggleButtonGroup>
+            </Tooltip>
         </Box>
     );
 };

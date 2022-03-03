@@ -40,6 +40,7 @@ class AttributeType(Enum):
     dynamic_number = TaipyNumber
     dynamic_boolean = TaipyBool
     dynamic_list = "dynamiclist"
+    dynamic_string = "dynamicstring"
     function = "function"
     image = TaipyContentImage
     json = "json"

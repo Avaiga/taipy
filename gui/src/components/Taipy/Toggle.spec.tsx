@@ -89,7 +89,7 @@ describe("Toggle Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Toggle lov={lov} tp_varname="varname" />
+                <Toggle lov={lov} updateVarName="varname" />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
@@ -106,7 +106,7 @@ describe("Toggle Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Toggle lov={lov} tp_varname="varname" unselectedValue="uv" value="id2" />
+                <Toggle lov={lov} updateVarName="varname" unselectedValue="uv" value="id2" />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 2");

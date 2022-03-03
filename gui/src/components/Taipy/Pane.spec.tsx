@@ -150,7 +150,7 @@ describe("Pane Component", () => {
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane id="testId" page="page" open={true} persistent={true} tp_varname="varname" />
+                    <Pane id="testId" page="page" open={true} persistent={true} updateVarName="varname" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );

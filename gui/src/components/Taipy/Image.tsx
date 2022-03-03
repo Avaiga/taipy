@@ -2,6 +2,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 import { styled, SxProps, Theme } from "@mui/material/styles";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
@@ -89,6 +90,7 @@ const Image = (props: ImageProps) => {
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
+    const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleClick = useCallback(() => {
         if (tp_onAction) {
@@ -130,25 +132,27 @@ const Image = (props: ImageProps) => {
     );
 
     return (
-        <ImageButton
-            focusRipple
-            style={style}
-            onClick={handleClick}
-            disabled={!active}
-            className={className}
-            id={id}
-        >
-            <ImageSrc style={imgStyle} />
-            <ImageBackdrop className="MuiImageBackdrop-root" />
-            {label === undefined ? null : (
-                <ImageSpan>
-                    <Typography component="span" variant="subtitle1" color="inherit" sx={imgSx}>
-                        {label}
-                        <ImageMarked className="MuiImageMarked-root" />
-                    </Typography>
-                </ImageSpan>
-            )}
-        </ImageButton>
+        <Tooltip title={hover || ""}>
+            <ImageButton
+                focusRipple
+                style={style}
+                onClick={handleClick}
+                disabled={!active}
+                className={className}
+                id={id}
+            >
+                <ImageSrc style={imgStyle} />
+                <ImageBackdrop className="MuiImageBackdrop-root" />
+                {label === undefined ? null : (
+                    <ImageSpan>
+                        <Typography component="span" variant="subtitle1" color="inherit" sx={imgSx}>
+                            {label}
+                            <ImageMarked className="MuiImageMarked-root" />
+                        </Typography>
+                    </ImageSpan>
+                )}
+            </ImageButton>
+        </Tooltip>
     );
 };
 

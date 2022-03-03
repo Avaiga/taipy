@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date, time
 from json import JSONEncoder
 from pathlib import Path
 import warnings
@@ -15,7 +15,7 @@ class TaipyJsonEncoder(JSONEncoder):
             return o._dict
         elif isinstance(o, TaipyBase):
             return o.get()
-        elif isinstance(o, datetime):
+        elif isinstance(o, (date, datetime, time)):
             return date_to_ISO(o)
         elif isinstance(o, Path):
             return str(o)

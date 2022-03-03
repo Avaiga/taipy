@@ -193,7 +193,7 @@ describe("DateSelector with time Component", () => {
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <DateSelector date={curDateStr} withTime={true} tp_varname="varname" />
+                    <DateSelector date={curDateStr} withTime={true} updateVarName="varname" />
                 </LocalizationProvider>
             </TaipyContext.Provider>
         );
