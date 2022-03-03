@@ -8,7 +8,7 @@ from taipy.core.config.pipeline_config import PipelineConfig
 
 
 class TestScenarioConfigChecker:
-    def test_check_config_name(self):
+    def test_check_config_id(self):
         collector = IssueCollector()
         config = _Config.default_config()
         ScenarioConfigChecker(config, collector).check()

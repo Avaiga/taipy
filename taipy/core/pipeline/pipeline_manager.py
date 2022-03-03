@@ -2,7 +2,7 @@ from functools import partial
 from typing import Callable, List, Optional, Union
 
 from taipy.core.common.alias import PipelineId, ScenarioId
-from taipy.core.common.logger import TaipyLogger
+from taipy.core.common.manager import Manager
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
@@ -13,13 +13,13 @@ from taipy.core.pipeline.pipeline_repository import PipelineRepository
 from taipy.core.task.task_manager import TaskManager
 
 
-class PipelineManager:
+class PipelineManager(Manager[Pipeline]):
     """
     The Pipeline Manager is responsible for managing all pipeline-related capabilities.
     """
 
-    repository = PipelineRepository()
-    __logger = TaipyLogger.get_logger()
+    _repository = PipelineRepository()
+    ENTITY_NAME = Pipeline.__name__
 
     @classmethod
     def subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -66,24 +66,6 @@ class PipelineManager:
         cls.set(pipeline)
 
     @classmethod
-    def delete_all(cls):
-        """
-        Deletes all pipelines.
-        """
-        cls.repository.delete_all()
-
-    @classmethod
-    def delete(cls, pipeline_id: PipelineId):
-        """Deletes the pipeline provided as parameter.
-
-        Parameters:
-            pipeline_id (str): identifier of the pipeline to delete.
-        Raises:
-            ModelNotFound: No pipeline corresponds to pipeline_id.
-        """
-        cls.repository.delete(pipeline_id)
-
-    @classmethod
     def get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         """
         Returns a pipeline created from the pipeline configuration.
@@ -102,8 +84,8 @@ class PipelineManager:
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
-        pipelines_from_config_name = cls._get_all_by_config_name(pipeline_config.name)
-        pipelines_from_parent = [pipeline for pipeline in pipelines_from_config_name if pipeline.parent_id == parent_id]
+        pipelines_from_config_id = cls._get_all_by_config_id(pipeline_config.name)
+        pipelines_from_parent = [pipeline for pipeline in pipelines_from_config_id if pipeline.parent_id == parent_id]
         if len(pipelines_from_parent) == 1:
             return pipelines_from_parent[0]
         elif len(pipelines_from_parent) > 1:
@@ -112,42 +94,6 @@ class PipelineManager:
             pipeline = Pipeline(pipeline_config.name, dict(**pipeline_config.properties), tasks, pipeline_id, parent_id)
             cls.set(pipeline)
             return pipeline
-
-    @classmethod
-    def set(cls, pipeline: Pipeline):
-        """
-        Saves or updates a pipeline.
-
-        Parameters:
-            pipeline (Pipeline): the pipeline to save or update.
-        """
-        cls.repository.save(pipeline)
-
-    @classmethod
-    def get(cls, pipeline: Union[Pipeline, PipelineId], default=None) -> Pipeline:
-        """
-        Gets a pipeline.
-
-        Parameters:
-            pipeline (Union[Pipeline, PipelineId]): pipeline identifier or the pipeline to get.
-            default: default value to return if no pipeline is found. None is returned if no default value is provided.
-        """
-        try:
-            pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
-            return cls.repository.load(pipeline_id)
-        except ModelNotFound:
-            cls.__logger.warning(f"Pipeline entity: {pipeline_id} does not exist.")
-            return default
-
-    @classmethod
-    def get_all(cls) -> List[Pipeline]:
-        """
-        Returns all existing pipelines.
-
-        Returns:
-            List[Pipeline]: the list of all pipelines managed by this pipeline manager.
-        """
-        return cls.repository.load_all()
 
     @classmethod
     def submit(
@@ -178,19 +124,6 @@ class PipelineManager:
         return [partial(c, pipeline) for c in pipeline.subscribers]
 
     @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[Pipeline]:
-        """
-        Returns all the existing pipelines for a configuration.
-
-        Parameters:
-            config_name (str): The pipeline configuration name to be looked for.
-        Returns:
-            List[Pipeline]: the list of all pipelines, managed by this pipeline manager,
-                that use the indicated configuration name.
-        """
-        return cls.repository.search_all("config_name", config_name)
-
-    @classmethod
     def hard_delete(cls, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
         """
         Deletes the pipeline given as parameter and the nested tasks, data nodes, and jobs.
@@ -212,3 +145,7 @@ class PipelineManager:
             elif task.parent_id == pipeline.id:
                 TaskManager.hard_delete(task.id, None, pipeline_id)
         cls.delete(pipeline_id)
+
+    @classmethod
+    def _get_all_by_config_id(cls, config_id: str) -> List[Pipeline]:
+        return cls._repository.search_all("config_id", config_id)

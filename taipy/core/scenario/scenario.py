@@ -17,7 +17,7 @@ class Scenario:
     It holds a set of pipelines to submit for execution in order to solve the business case.
 
     Attributes:
-        config_name (str):  Name that identifies the scenario configuration.
+        config_id (str): Identifier of the scenario configuration.
             We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
             or underscore characters ('_').
             Other characters are replaced according the following rules:
@@ -37,7 +37,7 @@ class Scenario:
 
     def __init__(
         self,
-        config_name: str,
+        config_id: str,
         pipelines: List[Pipeline],
         properties: Dict[str, Any],
         scenario_id: ScenarioId = None,
@@ -47,9 +47,9 @@ class Scenario:
         subscribers: Set[Callable] = None,
         tags: Set[str] = None,
     ):
-        self.config_name = protect_name(config_name)
-        self.id: ScenarioId = scenario_id or self.new_id(self.config_name)
-        self.pipelines = {p.config_name: p for p in pipelines}
+        self.config_id = protect_name(config_id)
+        self.id: ScenarioId = scenario_id or self.new_id(self.config_id)
+        self.pipelines = {p.config_id: p for p in pipelines}
         self.creation_date = creation_date or datetime.now()
         self.cycle = cycle
 
@@ -92,9 +92,9 @@ class Scenario:
         return self.id == other.id
 
     @staticmethod
-    def new_id(config_name: str) -> ScenarioId:
+    def new_id(config_id: str) -> ScenarioId:
         """Generates a unique scenario identifier."""
-        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, protect_name(config_name), str(uuid.uuid4())]))
+        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, protect_name(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = protect_name(attribute_name)

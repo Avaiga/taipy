@@ -12,8 +12,8 @@ class NonExistingPipelineConfig(Exception):
     Raised if a requested Pipeline configuration is not known by the Pipeline Manager.
     """
 
-    def __init__(self, pipeline_config_name: str):
-        self.message = f"Pipeline config: {pipeline_config_name} does not exist."
+    def __init__(self, pipeline_config_id: str):
+        self.message = f"Pipeline config: {pipeline_config_id} does not exist."
 
 
 class MultiplePipelineFromSameConfigWithSameParent(Exception):

@@ -16,7 +16,7 @@ def test_create_pipeline():
     pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
     assert pipeline.id is not None
     assert pipeline.parent_id is None
-    assert pipeline.config_name == "name_1"
+    assert pipeline.config_id == "name_1"
     assert pipeline.description == "description"
     assert pipeline.foo == input
     assert pipeline.bar == output
@@ -31,7 +31,7 @@ def test_create_pipeline():
     pipeline_1 = Pipeline("nAmE 1 ", {"description": "description"}, [task_1], parent_id="parent_id")
     assert pipeline_1.id is not None
     assert pipeline_1.parent_id == "parent_id"
-    assert pipeline_1.config_name == "name_1"
+    assert pipeline_1.config_id == "name_1"
     assert pipeline_1.description == "description"
     assert pipeline_1.inx == input_1
     assert pipeline_1.outx == output_1
@@ -72,7 +72,7 @@ def test_check_consistency():
     assert not pipeline_4.is_consistent  # Not a Dag
 
     class FakeDataNode:
-        config_name = "config_name_of_a_fake_dn"
+        config_id = "config_id_of_a_fake_dn"
 
     input_5 = DataNode("foo", Scope.PIPELINE, "input_id_5")
     output_5 = DataNode("foo", Scope.PIPELINE, "output_id_5")

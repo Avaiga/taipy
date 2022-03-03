@@ -10,10 +10,10 @@ class SchedulerFactory:
     @classmethod
     def build_scheduler(cls) -> AbstractScheduler:
         if Config.job_config.mode == Config.job_config.MODE_VALUE_AIRFLOW:
-            if not util.find_spec("taipy_airflow"):
+            if not util.find_spec("taipy.airflow"):
                 raise DependencyNotInstalled("airflow")
 
-            from taipy_airflow.scheduler import Scheduler as AirflowScheduler
+            from taipy.airflow.scheduler import Scheduler as AirflowScheduler
 
             return AirflowScheduler()
         return Scheduler()

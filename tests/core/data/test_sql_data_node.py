@@ -40,7 +40,7 @@ class TestSQLDataNode:
         )
         assert isinstance(dn, SQLDataNode)
         assert dn.storage_type() == "sql"
-        assert dn.config_name == "foo_bar"
+        assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
         assert dn.parent_id is None

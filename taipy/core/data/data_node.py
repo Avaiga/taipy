@@ -30,7 +30,7 @@ class DataNode:
     only instantiate children classes of Data Node through a Data Manager.
 
     Attributes:
-        config_name (str):  Name that identifies the data node.
+        config_id (str):  Identifier of the data node configuration.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
@@ -57,7 +57,7 @@ class DataNode:
 
     def __init__(
         self,
-        config_name,
+        config_id,
         scope: Scope = Scope(Scope.PIPELINE),
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
@@ -68,8 +68,8 @@ class DataNode:
         edition_in_progress: bool = False,
         **kwargs,
     ):
-        self.config_name = protect_name(config_name)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.config_id = protect_name(config_id)
+        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.parent_id = parent_id
         self.scope = scope
 

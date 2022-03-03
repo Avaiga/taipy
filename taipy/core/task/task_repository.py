@@ -18,7 +18,7 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
         return TaskModel(
             id=task.id,
             parent_id=task.parent_id,
-            config_name=task.config_name,
+            config_id=task.config_id,
             input_ids=self.__to_ids(task.input.values()),
             function_name=task.function.__name__,
             function_module=task.function.__module__,
@@ -29,7 +29,7 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
         return Task(
             id=TaskId(model.id),
             parent_id=model.parent_id,
-            config_name=model.config_name,
+            config_id=model.config_id,
             function=load_fct(model.function_module, model.function_name),
             input=self.__to_data_nodes(model.input_ids),
             output=self.__to_data_nodes(model.output_ids),

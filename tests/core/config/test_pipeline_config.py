@@ -41,12 +41,12 @@ def test_pipeline_count():
 
 
 def test_pipeline_getitem():
-    pipeline_config_name = "pipelines1"
-    pipeline = Config.add_pipeline(pipeline_config_name, [task1_config, task2_config])
+    pipeline_config_id = "pipelines1"
+    pipeline = Config.add_pipeline(pipeline_config_id, [task1_config, task2_config])
 
-    assert Config.pipelines[pipeline_config_name].name == pipeline.name
-    assert Config.pipelines[pipeline_config_name].tasks == pipeline.tasks
-    assert Config.pipelines[pipeline_config_name].properties == pipeline.properties
+    assert Config.pipelines[pipeline_config_id].name == pipeline.name
+    assert Config.pipelines[pipeline_config_id].tasks == pipeline.tasks
+    assert Config.pipelines[pipeline_config_id].properties == pipeline.properties
 
 
 def test_pipeline_creation_no_duplication():

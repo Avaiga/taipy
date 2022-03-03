@@ -11,8 +11,8 @@ class FakeDataframeDataNode(DataNode):
     COLUMN_NAME_1 = "a"
     COLUMN_NAME_2 = "b"
 
-    def __init__(self, config_name, default_data_frame, **kwargs):
-        super().__init__(config_name, **kwargs)
+    def __init__(self, config_id, default_data_frame, **kwargs):
+        super().__init__(config_id, **kwargs)
         self.data = default_data_frame
 
     def _read(self):
@@ -26,8 +26,8 @@ class CustomClass:
 
 
 class FakeCustomDataNode(DataNode):
-    def __init__(self, config_name, **kwargs):
-        super().__init__(config_name, **kwargs)
+    def __init__(self, config_id, **kwargs):
+        super().__init__(config_id, **kwargs)
         self.data = [CustomClass(i, i * 2) for i in range(10)]
 
     def _read(self):
@@ -35,8 +35,8 @@ class FakeCustomDataNode(DataNode):
 
 
 class FakeMultiSheetExcelDataFrameDataNode(DataNode):
-    def __init__(self, config_name, default_data_frame, **kwargs):
-        super().__init__(config_name, **kwargs)
+    def __init__(self, config_id, default_data_frame, **kwargs):
+        super().__init__(config_id, **kwargs)
         self.data = {
             "Sheet1": default_data_frame,
             "Sheet2": default_data_frame,
@@ -47,8 +47,8 @@ class FakeMultiSheetExcelDataFrameDataNode(DataNode):
 
 
 class FakeMultiSheetExcelCustomDataNode(DataNode):
-    def __init__(self, config_name, **kwargs):
-        super().__init__(config_name, **kwargs)
+    def __init__(self, config_id, **kwargs):
+        super().__init__(config_id, **kwargs)
         self.data = {
             "Sheet1": [CustomClass(i, i * 2) for i in range(10)],
             "Sheet2": [CustomClass(i, i * 2) for i in range(10)],

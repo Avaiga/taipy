@@ -8,12 +8,12 @@ class TaskModel:
     """Hold the model of a Task.
 
     A model refers to the structure of a Task stored in a database.
-    The tuple `(config_name, parent_id)` forms a unique key.
+    The tuple `(config_id, parent_id)` forms a unique key.
 
     Attributes:
         id: Identifier of a Data Node.
         parent_id: Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        config_name: Name of the Data Node Config.
+        config_id: Name of the Data Node Config.
         input: Input data node of the Task, saved as its ID string representation.
         function_name: Name of the task function.
         function_module: Module name of the task function.
@@ -22,7 +22,7 @@ class TaskModel:
 
     id: str
     parent_id: Optional[str]
-    config_name: str
+    config_id: str
     input_ids: List[str]
     function_name: str
     function_module: str
@@ -36,7 +36,7 @@ class TaskModel:
         return TaskModel(
             id=data["id"],
             parent_id=data["parent_id"],
-            config_name=data["config_name"],
+            config_id=data["config_id"],
             input_ids=data["input_ids"],
             function_name=data["function_name"],
             function_module=data["function_module"],

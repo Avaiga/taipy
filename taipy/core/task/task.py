@@ -13,8 +13,8 @@ class Task:
     This element bring together the user code as function, parameters and outputs.
 
     Attributes:
-        config_name:
-            Name that identifies the task config. We strongly recommend to use lowercase alphanumeric characters,
+        config_id: Identifier of the task configuration.
+            We strongly recommend to use lowercase alphanumeric characters,
             dash character '-', or underscore character '_'.
             Note that other characters are replaced according the following rules :
             - Space character ' ' is replaced by '_'.
@@ -37,18 +37,18 @@ class Task:
 
     def __init__(
         self,
-        config_name: str,
+        config_id: str,
         function,
         input: Optional[Iterable[DataNode]] = None,
         output: Optional[Iterable[DataNode]] = None,
         id: TaskId = None,
         parent_id: Optional[str] = None,
     ):
-        self.config_name = protect_name(config_name)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_name, str(uuid.uuid4())]))
+        self.config_id = protect_name(config_id)
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.parent_id = parent_id
-        self.__input = {dn.config_name: dn for dn in input or []}
-        self.__output = {dn.config_name: dn for dn in output or []}
+        self.__input = {dn.config_id: dn for dn in input or []}
+        self.__output = {dn.config_id: dn for dn in output or []}
         self.function = function
 
     def __hash__(self):

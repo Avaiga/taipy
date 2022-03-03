@@ -92,11 +92,11 @@ class ScenarioConfig:
         for k, v in self.properties.items():
             self.properties[k] = tpl.replace_templates(v)
 
-    def add_comparator(self, dn_config_name: str, comparator: Callable):
-        self.comparators[dn_config_name].append(comparator)
+    def add_comparator(self, dn_config_id: str, comparator: Callable):
+        self.comparators[dn_config_id].append(comparator)
 
-    def delete_comparator(self, dn_config_name: str):
-        if dn_config_name in self.comparators:
-            del self.comparators[dn_config_name]
+    def delete_comparator(self, dn_config_id: str):
+        if dn_config_id in self.comparators:
+            del self.comparators[dn_config_id]
         else:
             raise NonExistingComparator

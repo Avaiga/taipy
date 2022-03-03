@@ -40,7 +40,7 @@ def test_can_execute_synchronous():
 
     task_id = TaskId("task_id1")
     task = Task(
-        config_name="name",
+        config_id="name",
         input=[],
         function=partial(execute, lock),
         output=[DataManager.get_or_create(Config.add_data_node("input1", default_data=21))],
@@ -66,7 +66,7 @@ def test_can_execute_parallel_multiple_submit():
     lock = m.Lock()
 
     task_id = TaskId("task_id1")
-    task = Task(config_name="name", input=[], function=partial(execute, lock), output=[], id=task_id)
+    task = Task(config_id="name", input=[], function=partial(execute, lock), output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task)
 
@@ -80,7 +80,7 @@ def test_can_execute_parallel_multiple_submit():
 
 def test_can_execute_synchronous_2():
     task_id = TaskId("task_id1")
-    task = Task(config_name="name", input=[], function=print, output=[], id=task_id)
+    task = Task(config_id="name", input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task)
 
@@ -94,7 +94,7 @@ def test_can_execute_synchronous_2():
 def test_handle_exception_in_user_function():
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
-    task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
+    task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task)
 
     executor = JobDispatcher(None)
@@ -108,10 +108,10 @@ def test_handle_exception_when_writing_datanode():
     job_id = JobId("id1")
     output = MagicMock()
     output.id = DataNodeId("output_id")
-    output.config_name = "my_raising_datanode"
+    output.config_id = "my_raising_datanode"
     output.is_in_cache = False
     output.write.side_effect = ValueError()
-    task = Task(config_name="name", input=[], function=print, output=[output], id=task_id)
+    task = Task(config_id="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task)
 
     dispatcher = JobDispatcher(None)

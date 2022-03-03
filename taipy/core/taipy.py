@@ -216,14 +216,14 @@ def untag(scenario: Scenario, tag: str):
     return ScenarioManager.untag(scenario, tag)
 
 
-def compare_scenarios(*scenarios: Scenario, data_node_config_name: str = None):
+def compare_scenarios(*scenarios: Scenario, data_node_config_id: str = None):
     """
     Compares the data nodes of given scenarios with known datanode config name.
 
     Parameters:
         scenarios (Scenario) : Scenario objects to compare
-        data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no
-            datanode_config_name is provided, the scenarios will be compared based on all the previously defined
+        data_node_config_id (Optional[str]) : config name of the DataNode to compare scenarios, if no
+            datanode_config_id is provided, the scenarios will be compared based on all the previously defined
             comparators.
     Raises:
         InsufficientScenarioToCompare: Provided only one or no scenario for comparison
@@ -231,7 +231,7 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_name: str = None):
         DifferentScenarioConfigs: The provided scenarios do not share the same scenario_config
         NonExistingScenarioConfig: Cannot find the shared scenario config of the provided scenarios
     """
-    return ScenarioManager.compare(*scenarios, data_node_config_name=data_node_config_name)
+    return ScenarioManager.compare(*scenarios, data_node_config_id=data_node_config_id)
 
 
 def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):

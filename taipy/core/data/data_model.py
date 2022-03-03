@@ -15,7 +15,7 @@ class DataNodeModel:
 
     Attributes:
         id (str): Identifier of a DataNode.
-        config_name (int): Name of the `DataNodeConfig`.
+        config_id (int): Identifier of the `DataNodeConfig`.
         scope (taipy.core.data.node.scope.Scope): Scope of the usage of a DataNode.
         type (str):  Name of the class that represents a DataNode.
         name (str): User-readable name of the data node.
@@ -36,11 +36,11 @@ class DataNodeModel:
         data_node_properties (Dict[str, Any]): Additional properties of the data node.
 
     Note:
-        The tuple `(config_name, parent_id)` forms a unique key.
+        The tuple `(config_id, parent_id)` forms a unique key.
     """
 
     id: str
-    config_name: str
+    config_id: str
     scope: Scope
     storage_type: str
     name: str
@@ -59,7 +59,7 @@ class DataNodeModel:
     def from_dict(data: Dict[str, Any]):
         return DataNodeModel(
             id=data["id"],
-            config_name=data["config_name"],
+            config_id=data["config_id"],
             scope=Scope.from_repr(data["scope"]),
             storage_type=data["storage_type"],
             name=data["name"],

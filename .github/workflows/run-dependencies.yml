@@ -6,7 +6,12 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
-      - name: Run Milestones demos
+      - name: Run tests on milestones
         run: gh workflow run run-all-demos.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/milestones
         env:
           GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
+
+      -   name: Run tests on taipy-airflow
+          run: gh workflow run test.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-airflow
+          env:
+              GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}

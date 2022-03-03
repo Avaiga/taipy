@@ -48,7 +48,7 @@ def test_submit_task():
     before_creation = datetime.now()
     sleep(0.1)
     task = _create_task(multiply)
-    output_dn_id = task.output[f"{task.config_name}-output0"].id
+    output_dn_id = task.output[f"{task.config_id}-output0"].id
 
     assert DataManager.get(output_dn_id).last_edition_date > before_creation
     assert DataManager.get(output_dn_id).job_ids == []
@@ -83,13 +83,13 @@ def test_submit_task_that_return_multiple_outputs():
     scheduler.submit_task(with_list)
 
     assert (
-        with_tuple.output[f"{with_tuple.config_name}-output0"].read()
-        == with_list.output[f"{with_list.config_name}-output0"].read()
+        with_tuple.output[f"{with_tuple.config_id}-output0"].read()
+        == with_list.output[f"{with_list.config_id}-output0"].read()
         == 42
     )
     assert (
-        with_tuple.output[f"{with_tuple.config_name}-output1"].read()
-        == with_list.output[f"{with_list.config_name}-output1"].read()
+        with_tuple.output[f"{with_tuple.config_id}-output1"].read()
+        == with_list.output[f"{with_list.config_id}-output1"].read()
         == 21
     )
 
@@ -106,9 +106,9 @@ def test_submit_task_returns_single_iterable_output():
     task_with_list = _create_task(return_list, 1)
 
     scheduler.submit_task(task_with_tuple)
-    assert task_with_tuple.output[f"{task_with_tuple.config_name}-output0"].read() == (42, 21)
+    assert task_with_tuple.output[f"{task_with_tuple.config_id}-output0"].read() == (42, 21)
     scheduler.submit_task(task_with_list)
-    assert task_with_list.output[f"{task_with_list.config_name}-output0"].read() == [42, 21]
+    assert task_with_list.output[f"{task_with_list.config_id}-output0"].read() == [42, 21]
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
@@ -119,7 +119,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
     task = _create_task(return_2tuple(), 3)
 
     job = scheduler.submit_task(task)
-    assert task.output[f"{task.config_name}-output0"].read() == 0
+    assert task.output[f"{task.config_id}-output0"].read() == 0
     assert job.is_failed()
 
 
@@ -132,7 +132,7 @@ def test_submit_task_in_parallel():
 
     with lock:
         job = scheduler.submit_task(task)
-        assert task.output[f"{task.config_name}-output0"].read() == 0
+        assert task.output[f"{task.config_id}-output0"].read() == 0
         assert job.is_running()
 
     assert_true_after_20_second_max(job.is_completed)
@@ -153,19 +153,19 @@ def test_submit_task_multithreading_multiple_task():
             job_1 = scheduler.submit_task(task_1)
             job_2 = scheduler.submit_task(task_2)
 
-            assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
-            assert task_2.output[f"{task_2.config_name}-output0"].read() == 0
+            assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
+            assert task_2.output[f"{task_2.config_id}-output0"].read() == 0
             assert job_1.is_running()
             assert job_2.is_running()
 
-        assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
-        assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
+        assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_id}-output0"].read() == 42)
+        assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
         assert_true_after_20_second_max(job_2.is_completed)
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
-    assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
+    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_id}-output0"].read() == 42)
+    assert task_2.output[f"{task_2.config_id}-output0"].read() == 42
     assert_true_after_20_second_max(job_1.is_completed)
     assert job_2.is_completed()
 
@@ -189,18 +189,18 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
                 job_1 = scheduler.submit_task(task_2)
                 job_2 = scheduler.submit_task(task_1)
 
-                assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
-                assert task_2.output[f"{task_2.config_name}-output0"].read() == 0
+                assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
+                assert task_2.output[f"{task_2.config_id}-output0"].read() == 0
                 assert job_1.is_running()
                 assert job_2.is_pending()
 
-            assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_name}-output0"].read() == 42)
-            assert task_1.output[f"{task_1.config_name}-output0"].read() == 0
+            assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_id}-output0"].read() == 42)
+            assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
             assert_true_after_20_second_max(job_1.is_completed)
             assert job_2.is_running()
 
-    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_name}-output0"].read() == 42)
-    assert task_2.output[f"{task_2.config_name}-output0"].read() == 42
+    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_id}-output0"].read() == 42)
+    assert task_2.output[f"{task_2.config_id}-output0"].read() == 42
     assert job_1.is_completed()
     assert_true_after_20_second_max(job_2.is_completed)
 
@@ -263,20 +263,20 @@ def test_task_scheduler_create_parallel_dispatcher():
 
 
 def _create_task(function, nb_outputs=1):
-    output_dn_config_name = str(uuid.uuid4())
+    output_dn_config_id = str(uuid.uuid4())
     input_dn = [
         DataManager.get_or_create(Config.add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
         DataManager.get_or_create(Config.add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
     ]
     output_dn = [
         DataManager.get_or_create(
-            Config.add_data_node(f"{output_dn_config_name}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+            Config.add_data_node(f"{output_dn_config_id}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]
 
     return Task(
-        output_dn_config_name,
+        output_dn_config_id,
         function=function,
         input=input_dn,
         output=output_dn,
