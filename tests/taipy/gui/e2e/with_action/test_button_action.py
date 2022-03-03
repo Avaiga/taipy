@@ -10,7 +10,7 @@ from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_button_action(page: "Page", gui: Gui):
+def test_button_action(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{x}|id=text1|>
 
@@ -23,9 +23,9 @@ def test_button_action(page: "Page", gui: Gui):
 
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    while not gui._server._thread.is_alive():
-        time.sleep(0.2)
-    page.goto(url="/test", wait_until="domcontentloaded", timeout=120000)
+    while not helpers.port_check():
+        time.sleep(0.5)
+    page.goto("/test")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")

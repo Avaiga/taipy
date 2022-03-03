@@ -10,16 +10,16 @@ from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_slider_action(page: "Page", gui: Gui):
+def test_slider_action(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{x}|selector|lov=Item 1;Item 2;Item 3|id=selector1|>
 """
     x = "Item 1"
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    while not gui._server._thread.is_alive():
-        time.sleep(0.2)
-    page.goto(url="/test", wait_until="domcontentloaded", timeout=120000)
+    while not helpers.port_check():
+        time.sleep(0.5)
+    page.goto("/test")
     page.expect_websocket()
     page.wait_for_selector("#selector1")
     assert gui._bindings().x == "Item 1"

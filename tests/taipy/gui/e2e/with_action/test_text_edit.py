@@ -10,7 +10,7 @@ from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_text_edit(page: "Page", gui: Gui):
+def test_text_edit(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{x}|text|id=text1|>
 
@@ -19,9 +19,9 @@ def test_text_edit(page: "Page", gui: Gui):
     x = "Hey"
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    while not gui._server._thread.is_alive():
-        time.sleep(0.2)
-    page.goto(url="/test", wait_until="domcontentloaded", timeout=120000)
+    while not helpers.port_check():
+        time.sleep(0.5)
+    page.goto("/test")
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")
     assert text1.inner_text() == "Hey"
@@ -32,7 +32,7 @@ def test_text_edit(page: "Page", gui: Gui):
 
 
 @pytest.mark.teste2e
-def test_number_edit(page: "Page", gui: Gui):
+def test_number_edit(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{x}|text|id=text1|>
 
@@ -42,9 +42,9 @@ def test_number_edit(page: "Page", gui: Gui):
     x = 10
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True)
-    while not gui._server._thread.is_alive():
-        time.sleep(0.2)
-    page.goto(url="/test", wait_until="domcontentloaded", timeout=120000)
+    while not helpers.port_check():
+        time.sleep(0.5)
+    page.goto("/test")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")
