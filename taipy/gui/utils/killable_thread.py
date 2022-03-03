@@ -18,14 +18,11 @@ class KillableThread(threading.Thread):
         self.run = self.__run_backup
 
     def globaltrace(self, frame, why, arg):
-        if why == "call":
-            return self.localtrace
-        else:
-            return None
+        return self.localtrace if why == "call" else None
 
     def localtrace(self, frame, why, arg):
         if self.killed and why == "line":
-            raise SystemExit()
+            raise SystemExit(0)
         return self.localtrace
 
     def kill(self):

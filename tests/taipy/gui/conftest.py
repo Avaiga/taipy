@@ -26,8 +26,10 @@ def small_dataframe():
 
 @pytest.fixture(scope="function")
 def gui(helpers):
-    yield Gui()
+    gui = Gui()
+    yield gui
     # Delete Gui instance and state of some classes after each test
+    gui.stop()
     helpers.test_cleanup()
 
 

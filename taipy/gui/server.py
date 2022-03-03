@@ -206,14 +206,14 @@ class Server:
     def _run_notebook(self):
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
-    def runWithWS(self, host=None, port=None, debug=None, use_reloader=None, flask_log=True):
+    def runWithWS(self, host=None, port=None, debug=None, use_reloader=None, flask_log=True, run_in_thread=False):
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
             self._flask.logger.disabled = True
             # os.environ['WERKZEUG_RUN_MAIN'] = 'true'
             print(f" * Server starting on http://{host}:{port}")
-        if _is_in_notebook():
+        if _is_in_notebook() or run_in_thread:
             self._host = host
             self._port = port
             self._thread = KillableThread(target=self._run_notebook)
