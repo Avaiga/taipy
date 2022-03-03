@@ -27,7 +27,7 @@ from .data.data_format import _DataFormat
 from .partial import Partial
 from .renderers import _EmptyPage, Page
 from .renderers._markdown import _TaipyMarkdownExtension
-from .server import Server
+from .server import _Server
 from .types import _WsType
 from .utils import (
     _TaipyBase,
@@ -39,18 +39,18 @@ from .utils import (
     _get_non_existent_file_path,
     _is_in_notebook,
     _MapDict,
-    delscopeattr,
-    get_client_var_name,
-    getscopeattr,
-    getscopeattr_drill,
-    hasscopeattr,
-    setscopeattr,
-    setscopeattr_drill,
+    _delscopeattr,
+    _get_client_var_name,
+    _getscopeattr,
+    _getscopeattr_drill,
+    _hasscopeattr,
+    _setscopeattr,
+    _setscopeattr_drill,
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils._state import State
+from .utils.state import State
 
 
 class Gui:
@@ -108,7 +108,7 @@ class Gui:
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
         """
-        self._server = Server(
+        self._server = _Server(
             self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
         )
         # Preserve server config for re-initialization on notebook
@@ -208,11 +208,11 @@ class Gui:
 
     def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
         # Check if Variable is a managed type
-        current_value = getscopeattr_drill(self, self._get_hash_from_expr(var_name))
+        current_value = _getscopeattr_drill(self, self._get_hash_from_expr(var_name))
         if isinstance(current_value, _TaipyData):
             return
         elif rel_var and isinstance(current_value, _TaipyLovValue):
-            lov_holder = getscopeattr_drill(self, self._get_hash_from_expr(rel_var))
+            lov_holder = _getscopeattr_drill(self, self._get_hash_from_expr(rel_var))
             if isinstance(lov_holder, _TaipyLov):
                 if isinstance(value, list):
                     val = value
@@ -245,7 +245,7 @@ class Gui:
         modified_vars = set([hash_expr])
         # Use custom attrsetter function to allow value binding for _MapDict
         if propagate:
-            setscopeattr_drill(self, hash_expr, value)
+            _setscopeattr_drill(self, hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
                 modified_vars.update(self._re_evaluate_expr(var_name))
@@ -333,7 +333,7 @@ class Gui:
                 # notify the file is uploaded
                 newvalue = str(file_path)
                 if multiple:
-                    value = getscopeattr(self, var_name)
+                    value = _getscopeattr(self, var_name)
                     if not isinstance(value, t.List):
                         value = [] if value is None else [value]
                     value.append(newvalue)
@@ -347,7 +347,7 @@ class Gui:
         front_var: t.Optional[str] = None,
     ):
         ws_dict = {}
-        values = {v: getscopeattr_drill(self, v) for v in modified_vars}
+        values = {v: _getscopeattr_drill(self, v) for v in modified_vars}
         for v in values.values():
             if isinstance(v, _TaipyData) and v.get_name() in modified_vars:
                 modified_vars.remove(v.get_name())
@@ -380,7 +380,7 @@ class Gui:
 
     def __request_data_update(self, var_name: str, payload: t.Any) -> None:
         # Use custom attrgetter function to allow value binding for _MapDict
-        newvalue = getscopeattr_drill(self, var_name)
+        newvalue = _getscopeattr_drill(self, var_name)
         if isinstance(newvalue, _TaipyData):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload, newvalue.get_name() + ".refresh": False})
@@ -457,7 +457,7 @@ class Gui:
 
     def __send_ws_update_with_dict(self, modified_values: dict) -> None:
         payload = [
-            {"name": get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
+            {"name": _get_client_var_name(k), "payload": (v if isinstance(v, dict) and "value" in v else {"value": v})}
             for k, v in modified_values.items()
         ]
         self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
@@ -468,9 +468,9 @@ class Gui:
         return request.sid  # type: ignore
 
     def __get_message_grouping(self):
-        if not hasscopeattr(self, Gui.__MESSAGE_GROUPING_NAME):
+        if not _hasscopeattr(self, Gui.__MESSAGE_GROUPING_NAME):
             return None
-        return getscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
+        return _getscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
 
     def __enter__(self):
         self.__hold_messages()
@@ -493,12 +493,12 @@ class Gui:
     def __send_messages(self):
         grouping_message = self.__get_message_grouping()
         if grouping_message is not None:
-            delscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
+            _delscopeattr(self, Gui.__MESSAGE_GROUPING_NAME)
             if len(grouping_message):
                 self.__send_ws({"type": _WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
     def _get_user_function(self, func_name: str):
-        func = getscopeattr(self, func_name, None)
+        func = _getscopeattr(self, func_name, None)
         if not callable(func):
             func = self.__locals_bind.get(func_name)
         if callable(func):
@@ -594,12 +594,12 @@ class Gui:
         return self.__adapter._get_valid_adapter_result(value, index, id_only)
 
     def _is_ui_blocked(self):
-        return getscopeattr(self, Gui.__UI_BLOCK_NAME, False)
+        return _getscopeattr(self, Gui.__UI_BLOCK_NAME, False)
 
     def __get_on_cancel_block_ui(self, callback: t.Optional[str]):
         def _taipy_on_cancel_block_ui(guiApp, id: t.Optional[str], payload: t.Any):
-            if hasscopeattr(self, Gui.__UI_BLOCK_NAME):
-                setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
+            if _hasscopeattr(self, Gui.__UI_BLOCK_NAME):
+                _setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
             self.__on_action(id, callback)
 
         return _taipy_on_cancel_block_ui
@@ -636,9 +636,9 @@ class Gui:
             raise Exception(f'"page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}')
         # Init a new page
         new_page = _Page()
-        new_page.route = name
-        new_page.renderer = page
-        new_page.style = style
+        new_page._route = name
+        new_page._renderer = page
+        new_page._style = style
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
@@ -689,18 +689,18 @@ class Gui:
         # Init a new partial
         new_partial = Partial()
         # Validate name
-        if new_partial.route in self._config.partial_routes or new_partial.route in self._config.routes:
-            warnings.warn(f'Partial name "{new_partial.route}" is already defined')
+        if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes:
+            warnings.warn(f'Partial name "{new_partial._route}" is already defined')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page)
         elif not isinstance(page, Page):
-            raise Exception(f'Partial name "{new_partial.route}" has invalid Page')
-        new_partial.renderer = page
+            raise Exception(f'Partial name "{new_partial._route}" has invalid Page')
+        new_partial._renderer = page
         # Append partial to _config
         self._config.partials.append(new_partial)
-        self._config.partial_routes.append(str(new_partial.route))
+        self._config.partial_routes.append(str(new_partial._route))
         return new_partial
 
     # Main binding method (bind in markdown declaration)
@@ -793,18 +793,18 @@ class Gui:
         action_name = callback.__name__ if callable(callback) else callback
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
-        setscopeattr(self, def_action_name, func)
+        _setscopeattr(self, def_action_name, func)
 
-        if hasscopeattr(self, Gui.__UI_BLOCK_NAME):
-            setscopeattr(self, Gui.__UI_BLOCK_NAME, True)
+        if _hasscopeattr(self, Gui.__UI_BLOCK_NAME):
+            _setscopeattr(self, Gui.__UI_BLOCK_NAME, True)
         else:
             self._bind(Gui.__UI_BLOCK_NAME, True)
         self.__send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
 
     def unblock_ui(self):
         """Unblocks the UI"""
-        if hasscopeattr(self, Gui.__UI_BLOCK_NAME):
-            setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
+        if _hasscopeattr(self, Gui.__UI_BLOCK_NAME):
+            _setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
 
     def navigate(self, to: t.Optional[str] = ""):
@@ -842,7 +842,7 @@ class Gui:
             self._server._thread.kill()
             self._server._thread.join()
             self._flask_blueprint = []
-            self._server = Server(
+            self._server = _Server(
                 self,
                 path_mapping=self._path_mapping,
                 flask=self._flask,
@@ -890,8 +890,8 @@ class Gui:
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:
             new_page = _Page()
-            new_page.route = Gui.__root_page_name
-            new_page.renderer = _EmptyPage()
+            new_page._route = Gui.__root_page_name
+            new_page._renderer = _EmptyPage()
             self._config.pages.append(new_page)
             self._config.routes.append(Gui.__root_page_name)
 

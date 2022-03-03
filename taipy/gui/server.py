@@ -17,7 +17,7 @@ if t.TYPE_CHECKING:
     from .gui import Gui
 
 
-class Server:
+class _Server:
 
     __RE_JSX_RENDER_ROUTE = re.compile(r"/taipy-jsx/(.*)/")
 
@@ -126,15 +126,15 @@ class Server:
 
     def _render_page(self) -> t.Any:
         page = None
-        render_path_name = Server.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)  # type: ignore
+        render_path_name = _Server.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)  # type: ignore
         # Get page instance
         for page_i in self._gui._config.pages:
-            if page_i.route == render_path_name:
+            if page_i._route == render_path_name:
                 page = page_i
         # try partials
         if page is None:
             for partial in self._gui._config.partials:
-                if partial.route == render_path_name:
+                if partial._route == render_path_name:
                     page = partial
         # Make sure that there is a page instance found
         if page is None:
@@ -142,13 +142,13 @@ class Server:
         page.render(self._gui)
         if (
             render_path_name == self._root_page_name
-            and page.rendered_jsx is not None
-            and "<PageContent" not in page.rendered_jsx
+            and page._rendered_jsx is not None
+            and "<PageContent" not in page._rendered_jsx
         ):
-            page.rendered_jsx += "<PageContent />"
+            page._rendered_jsx += "<PageContent />"
         # Return jsx page
-        if page.rendered_jsx is not None:
-            return self._render(page.rendered_jsx, page.style if hasattr(page, "style") else "", page.head)
+        if page._rendered_jsx is not None:
+            return self._render(page._rendered_jsx, page._style if hasattr(page, "style") else "", page._head)
         else:
             return ("No page template", 404)
 

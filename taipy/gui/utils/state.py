@@ -7,6 +7,13 @@ if t.TYPE_CHECKING:
 
 
 class State:
+    """This class allows access to the script variables in callbacks
+
+    Attributes:
+
+        assign (Callable): allows to set a variable inside a lambda function (state.assign("name", value) is equivalent to state.name = value).
+
+    """
     __attrs = ("_gui", "_user_var_list")
     __methods = ("assign")
 
@@ -36,6 +43,15 @@ class State:
             setattr(gui._bindings(), name, value)
 
     def assign(self, name: str, value: t.Any) -> t.Any:
+        """Allows to set a variable inside a lambda function.
+
+        Args:
+            name (string): The variable name.
+            value (Any): New variable value.
+        
+        Returns (Any):
+            Previous value.
+        """
         val = getattr(self, name)
         setattr(self, name, value)
         return val

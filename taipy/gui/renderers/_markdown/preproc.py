@@ -5,11 +5,11 @@ from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
-from ..builder import Builder
-from .factory import MarkdownFactory
+from ..builder import _Builder
+from .factory import _MarkdownFactory
 
 
-class Preprocessor(MdPreprocessor):
+class _Preprocessor(MdPreprocessor):
     # ----------------------------------------------------------------------
     # Finds, in the Markdown text, control declaration constructs:
     #     <|<some value>|>
@@ -48,7 +48,7 @@ class Preprocessor(MdPreprocessor):
 
     @staticmethod
     def extend(md, gui, priority):
-        instance = Preprocessor(md)
+        instance = _Preprocessor(md)
         md.preprocessors.register(instance, "taipy", priority)
         instance._gui = gui
 
@@ -63,31 +63,31 @@ class Preprocessor(MdPreprocessor):
             new_line = ""
             last_index = 0
             # Opening tags
-            m = Preprocessor.__OPENING_TAG_RE.search(line)
+            m = _Preprocessor.__OPENING_TAG_RE.search(line)
             if m is not None:
                 tag = "part"
                 properties: List[Tuple[str, str]] = []
                 if m.group(2):
                     tag, properties = self._process_control(m.group(2), line_count)
-                if tag in MarkdownFactory._TAIPY_BLOCK_TAGS:
+                if tag in _MarkdownFactory._TAIPY_BLOCK_TAGS:
                     tag_queue.append((tag, line_count, m.group(1) or None))
                     new_line_delimeter = "\n" if line.startswith("<|") else "\n\n"
-                    line = line[: m.start()] + new_line_delimeter + MarkdownFactory._TAIPY_START + tag + ".start"
+                    line = line[: m.start()] + new_line_delimeter + _MarkdownFactory._TAIPY_START + tag + ".start"
                     for property in properties:
                         prop_value = property[1].replace('"', '\\"')
                         line += f' {property[0]}="{prop_value}"'
-                    line += MarkdownFactory._TAIPY_END + new_line_delimeter
+                    line += _MarkdownFactory._TAIPY_END + new_line_delimeter
                 else:
                     warnings.warn(f"Invalid tag name '{tag}' in line {line_count}")
             # Other controls
-            for m in Preprocessor.__CONTROL_RE.finditer(line):
+            for m in _Preprocessor.__CONTROL_RE.finditer(line):
                 control_name, properties = self._process_control(m.group(1), line_count)
                 new_line += line[last_index : m.start()]
-                control_text = MarkdownFactory._TAIPY_START + control_name
+                control_text = _MarkdownFactory._TAIPY_START + control_name
                 for property in properties:
                     prop_value = property[1].replace('"', '\\"')
                     control_text += f' {property[0]}="{prop_value}"'
-                control_text += MarkdownFactory._TAIPY_END
+                control_text += _MarkdownFactory._TAIPY_END
                 new_line += control_text
                 last_index = m.end()
             new_line = line if last_index == 0 else new_line + line[last_index:]
@@ -95,13 +95,13 @@ class Preprocessor(MdPreprocessor):
             line = new_line
             new_line = ""
             last_index = 0
-            for m in Preprocessor.__LINK_RE.finditer(line):
+            for m in _Preprocessor.__LINK_RE.finditer(line):
                 new_line += line[last_index : m.end()]
-                new_line += "{: key=" + Builder._get_key("link") + "}"
+                new_line += "{: key=" + _Builder._get_key("link") + "}"
                 last_index = m.end()
             new_line = line if last_index == 0 else new_line + line[last_index:]
             # Look for a closing tag
-            m = Preprocessor.__CLOSING_TAG_RE.search(new_line)
+            m = _Preprocessor.__CLOSING_TAG_RE.search(new_line)
             if m is not None:
                 if len(tag_queue):
                     open_tag, open_tag_line_count, open_tag_identifier = tag_queue.pop()
@@ -114,10 +114,10 @@ class Preprocessor(MdPreprocessor):
                         warnings.warn(f"Unmatched '{open_tag}' tag identifier in line {open_tag_line_count} and line {line_count}")
                     new_line = (
                         new_line[: m.start()]
-                        + MarkdownFactory._TAIPY_START
+                        + _MarkdownFactory._TAIPY_START
                         + open_tag
                         + ".end"
-                        + MarkdownFactory._TAIPY_END
+                        + _MarkdownFactory._TAIPY_END
                         + new_line[m.end() :]
                     )
                 else:
@@ -135,22 +135,22 @@ class Preprocessor(MdPreprocessor):
             new_lines.insert(0, "")
         # Check for tags left unclosed (but close them anyway)
         for tag, line_no, _ in tag_queue:
-            new_lines.append(MarkdownFactory._TAIPY_START + tag + ".end" + MarkdownFactory._TAIPY_END)
+            new_lines.append(_MarkdownFactory._TAIPY_START + tag + ".end" + _MarkdownFactory._TAIPY_END)
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
 
     def _process_control(self, prop_string: str, line_count: int) -> Tuple[str, List[Tuple[str, str]]]:
-        fragments = [f for f in Preprocessor.__SPLIT_RE.split(prop_string) if f]
+        fragments = [f for f in _Preprocessor.__SPLIT_RE.split(prop_string) if f]
         control_name = None
         default_prop_name = None
         default_prop_value = None
         properties: List[Tuple[str, Any]] = []
         for fragment in fragments:
-            if control_name is None and MarkdownFactory.get_default_property_name(fragment):
+            if control_name is None and _MarkdownFactory.get_default_property_name(fragment):
                 control_name = fragment
             elif control_name is None and default_prop_value is None:
                 default_prop_value = fragment
-            elif prop_match := Preprocessor.__PROPERTY_RE.match(fragment):
+            elif prop_match := _Preprocessor.__PROPERTY_RE.match(fragment):
                 not_prefix = prop_match.group(1)
                 prop_name = prop_match.group(2)
                 val = prop_match.group(3)
@@ -166,9 +166,9 @@ class Preprocessor(MdPreprocessor):
                 warnings.warn(f"Bad Taipy property format at line {line_count}: '{fragment}'")
 
         if control_name is None:
-            control_name = MarkdownFactory.DEFAULT_CONTROL
+            control_name = _MarkdownFactory.DEFAULT_CONTROL
         if default_prop_value is not None:
-            default_prop_name = MarkdownFactory.get_default_property_name(control_name)
+            default_prop_name = _MarkdownFactory.get_default_property_name(control_name)
             # Set property only if it is not already defined
             if default_prop_name and default_prop_name not in [x[0] for x in properties]:
                 properties.insert(0, self._make_prop_pair(default_prop_name, default_prop_value))

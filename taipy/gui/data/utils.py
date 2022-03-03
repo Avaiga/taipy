@@ -17,7 +17,7 @@ if t.TYPE_CHECKING:
     import pandas as pd
 
 
-def df_data_filter(
+def _df_data_filter(
     dataframe: pd.DataFrame,
     x_column_name: t.Union[None, str],
     y_column_name: str,

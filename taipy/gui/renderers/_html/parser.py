@@ -3,10 +3,10 @@ import typing as t
 import warnings
 from html.parser import HTMLParser
 
-from .factory import HtmlFactory
+from .factory import _HtmlFactory
 
 
-class TaipyHTMLParser(HTMLParser):
+class _TaipyHTMLParser(HTMLParser):
 
     __TAIPY_NAMESPACE_RE = re.compile(r"taipy:([a-zA-Z\_]*)")
 
@@ -37,7 +37,7 @@ class TaipyHTMLParser(HTMLParser):
         elif tag == "body":
             self.is_body = True
         elif m := self.__TAIPY_NAMESPACE_RE.match(tag):
-            self.taipy_tag = TaipyTag(m.group(1), props)
+            self.taipy_tag = _TaipyTag(m.group(1), props)
         elif not self.is_body:
             head_props = {prop[0]: prop[1] for prop in props}
             self.head_tag = {"tag": tag, "props": head_props, "content": ""}
@@ -99,7 +99,7 @@ class TaipyHTMLParser(HTMLParser):
             warnings.warn(f"Opening tag '{opening_tag}' at line {opening_tag_line} has no matching closing tag")
 
 
-class TaipyTag(object):
+class _TaipyTag(object):
     def __init__(self, tag_name: str, properties: t.List[t.Tuple[str, str]]) -> None:
         self.control_type = tag_name
         self.properties = {prop[0]: prop[1] for prop in properties}
@@ -108,7 +108,7 @@ class TaipyTag(object):
     def set_value(self, value: str) -> bool:
         if self.has_set_value:
             return False
-        property_name = HtmlFactory.get_default_property_name(self.control_type)
+        property_name = _HtmlFactory.get_default_property_name(self.control_type)
         # Set property only if it is not already defined
         if property_name and property_name not in self.properties.keys():
             self.properties[property_name] = value
@@ -118,4 +118,4 @@ class TaipyTag(object):
     def parse(self, gui) -> t.Tuple[str, str]:
         for k, v in self.properties.items():
             self.properties[k] = v if v is not None else "true"
-        return HtmlFactory.create_element(gui, self.control_type, self.properties)
+        return _HtmlFactory.create_element(gui, self.control_type, self.properties)

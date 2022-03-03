@@ -12,11 +12,11 @@ if t.TYPE_CHECKING:
 from . import (
     _TaipyBase,
     _get_expr_var_name,
-    get_client_var_name,
-    getscopeattr,
-    getscopeattr_drill,
-    hasscopeattr,
-    setscopeattr,
+    _get_client_var_name,
+    _getscopeattr,
+    _getscopeattr_drill,
+    _hasscopeattr,
+    _setscopeattr,
 )
 
 
@@ -78,7 +78,7 @@ class _Evaluator:
                     if var_name not in args and var_name not in targets and var_name not in non_vars:
                         try:
                             gui._bind_var(var_name)
-                            var_val[var_name] = getscopeattr_drill(gui, var_name)
+                            var_val[var_name] = _getscopeattr_drill(gui, var_name)
                             var_list.append(var_name)
                         except AttributeError as e:
                             warnings.warn(f"Variable '{var_name}' is not defined (in expression '{expr}'): {e}")
@@ -148,17 +148,17 @@ class _Evaluator:
 
     @staticmethod
     def __get_holder_hash(holder: t.Type[_TaipyBase], expr_hash: str) -> str:
-        return f"{holder.get_hash()}_{get_client_var_name(expr_hash)}"
+        return f"{holder.get_hash()}_{_get_client_var_name(expr_hash)}"
 
     def __evaluate_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> _TaipyBase:
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)
-            expr_value = getscopeattr_drill(gui, expr_hash)
-            holder_value = getscopeattr(gui, holder_hash, None)
+            expr_value = _getscopeattr_drill(gui, expr_hash)
+            holder_value = _getscopeattr(gui, holder_hash, None)
             if not isinstance(holder_value, _TaipyBase):
                 holder_value = holder(expr_value, expr_hash)
-                setscopeattr(gui, holder_hash, holder_value)
+                _setscopeattr(gui, holder_hash, holder_value)
             else:
                 holder_value.set(expr_value)
             return holder_value
@@ -182,7 +182,7 @@ class _Evaluator:
             expr_hash = expr if _Evaluator.__EXPR_VALID_VAR_EDGE_CASE.match(expr) else None
             is_edge_case = True
         # validate whether expression has already been evaluated
-        if expr in self.__expr_to_hash and hasscopeattr(gui, self.__expr_to_hash[expr]):
+        if expr in self.__expr_to_hash and _hasscopeattr(gui, self.__expr_to_hash[expr]):
             return self.__expr_to_hash[expr]
         try:
             # evaluate expressions
@@ -214,7 +214,7 @@ class _Evaluator:
             if expr_var_list is None:
                 warnings.warn(f"Someting is amiss with expression list for {expr}")
                 continue
-            eval_dict = {v: getscopeattr_drill(gui, v) for v in expr_var_list}
+            eval_dict = {v: _getscopeattr_drill(gui, v) for v in expr_var_list}
 
             if self._is_expression(expr):
                 expr_string = 'f"' + expr.replace('"', '\\"') + '"'
@@ -226,7 +226,7 @@ class _Evaluator:
                 ctx.update(self.__global_ctx)
                 ctx.update(eval_dict)
                 expr_evaluated = eval(expr_string, ctx)
-                setscopeattr(gui, hash_expr, expr_evaluated)
+                _setscopeattr(gui, hash_expr, expr_evaluated)
             except Exception as e:
                 warnings.warn(f"Problem evaluating {expr_string}: {e}")
 
@@ -234,7 +234,7 @@ class _Evaluator:
             for h in self.__expr_to_holders.get(expr, []):
                 holder_hash = self.__get_holder_hash(h, self.get_hash_from_expr(expr))
                 if holder_hash not in modified_vars:
-                    setscopeattr(gui, holder_hash, self.__evaluate_holder(gui, h, expr))
+                    _setscopeattr(gui, holder_hash, self.__evaluate_holder(gui, h, expr))
                     modified_vars.add(holder_hash)
 
             modified_vars.add(hash_expr)

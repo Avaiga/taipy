@@ -3,7 +3,7 @@ from datetime import datetime
 import typing as t
 import warnings
 
-from . import date_to_ISO, ISO_to_date
+from . import _date_to_ISO, _ISO_to_date
 
 
 class _TaipyBase(ABC):
@@ -72,14 +72,14 @@ class _TaipyDate(_TaipyBase):
     def get(self):
         val = super().get()
         if isinstance(val, datetime):
-            val = date_to_ISO(val)
+            val = _date_to_ISO(val)
         elif val is not None:
             val = str(val)
         return val
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
-            return ISO_to_date(value)
+            return _ISO_to_date(value)
         return super().cast_value(value)
 
     @staticmethod
