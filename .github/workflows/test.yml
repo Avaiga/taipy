@@ -36,7 +36,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           thresholdAll: 0.75
 
-  e2e:
+  end-to-end:
     timeout-minutes: 20
     strategy:
       matrix:

@@ -74,7 +74,7 @@ class Helpers:
     @staticmethod
     def port_check():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(2)
+        s.settimeout(1)
         try:
             s.connect(("127.0.0.1", 5000))
             return True
