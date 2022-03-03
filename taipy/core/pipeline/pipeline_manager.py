@@ -84,8 +84,8 @@ class PipelineManager(Manager[Pipeline]):
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
-        pipelines_from_config_name = cls._get_all_by_config_name(pipeline_config.name)
-        pipelines_from_parent = [pipeline for pipeline in pipelines_from_config_name if pipeline.parent_id == parent_id]
+        pipelines_from_config_id = cls._get_all_by_config_id(pipeline_config.name)
+        pipelines_from_parent = [pipeline for pipeline in pipelines_from_config_id if pipeline.parent_id == parent_id]
         if len(pipelines_from_parent) == 1:
             return pipelines_from_parent[0]
         elif len(pipelines_from_parent) > 1:
@@ -147,5 +147,5 @@ class PipelineManager(Manager[Pipeline]):
         cls.delete(pipeline_id)
 
     @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[Pipeline]:
-        return cls._repository.search_all("config_name", config_name)
+    def _get_all_by_config_id(cls, config_id: str) -> List[Pipeline]:
+        return cls._repository.search_all("config_id", config_id)

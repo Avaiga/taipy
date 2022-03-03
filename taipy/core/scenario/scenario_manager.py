@@ -242,7 +242,7 @@ class ScenarioManager(Manager[Scenario]):
         """
         tags = scenario.properties.get(cls.AUTHORIZED_TAGS_KEY, set())
         if len(tags) > 0 and tag not in tags:
-            raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_name}`")
+            raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
         if scenario.cycle:
             old_tagged_scenario = cls.get_by_tag(scenario.cycle, tag)
             if old_tagged_scenario:
@@ -279,14 +279,14 @@ class ScenarioManager(Manager[Scenario]):
         super().delete(scenario_id)
 
     @classmethod
-    def compare(cls, *scenarios: Scenario, data_node_config_name: str = None):
+    def compare(cls, *scenarios: Scenario, data_node_config_id: str = None):
         """
         Compares the data nodes of given scenarios with known datanode config name.
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
-            data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no
-                dn_config_name is provided, the scenarios will be compared based on all the previously defined
+            data_node_config_id (Optional[str]) : config name of the DataNode to compare scenarios, if no
+                dn_config_id is provided, the scenarios will be compared based on all the previously defined
                 comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
@@ -297,33 +297,33 @@ class ScenarioManager(Manager[Scenario]):
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare
 
-        if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
+        if not all([scenarios[0].config_id == scenario.config_id for scenario in scenarios]):
             raise DifferentScenarioConfigs
 
         if scenario_config := ScenarioManager.__get_config(scenarios[0]):
             results = {}
-            if data_node_config_name:
-                if data_node_config_name in scenario_config.comparators.keys():
-                    dn_comparators = {data_node_config_name: scenario_config.comparators[data_node_config_name]}
+            if data_node_config_id:
+                if data_node_config_id in scenario_config.comparators.keys():
+                    dn_comparators = {data_node_config_id: scenario_config.comparators[data_node_config_id]}
                 else:
                     raise NonExistingComparator
             else:
                 dn_comparators = scenario_config.comparators
 
-            for data_node_config_name, comparators in dn_comparators.items():
-                data_nodes = [scenario.__getattr__(data_node_config_name).read() for scenario in scenarios]
-                results[data_node_config_name] = {
+            for data_node_config_id, comparators in dn_comparators.items():
+                data_nodes = [scenario.__getattr__(data_node_config_id).read() for scenario in scenarios]
+                results[data_node_config_id] = {
                     comparator.__name__: comparator(*data_nodes) for comparator in comparators
                 }
 
             return results
 
         else:
-            raise NonExistingScenarioConfig(scenarios[0].config_name)
+            raise NonExistingScenarioConfig(scenarios[0].config_id)
 
     @staticmethod
     def __get_config(scenario: Scenario):
-        return Config.scenarios.get(scenario.config_name, None)
+        return Config.scenarios.get(scenario.config_id, None)
 
     @classmethod
     def hard_delete(cls, scenario_id: ScenarioId):
@@ -349,5 +349,5 @@ class ScenarioManager(Manager[Scenario]):
             cls._repository.delete(scenario_id)
 
     @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[Scenario]:
-        return cls._repository.search_all("config_name", config_name)
+    def _get_all_by_config_id(cls, config_id: str) -> List[Scenario]:
+        return cls._repository.search_all("config_id", config_id)

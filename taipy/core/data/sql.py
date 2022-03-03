@@ -19,7 +19,7 @@ class SQLDataNode(DataNode):
     A Data Node stored as a SQL database.
 
     Attributes:
-        config_name (str):  Name that identifies the data node.
+        config_id (str):  Identifier of the data node configuration.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
@@ -47,7 +47,7 @@ class SQLDataNode(DataNode):
 
     def __init__(
         self,
-        config_name: str,
+        config_id: str,
         scope: Scope,
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
@@ -81,7 +81,7 @@ class SQLDataNode(DataNode):
         )
 
         super().__init__(
-            config_name,
+            config_id,
             scope,
             id,
             name,

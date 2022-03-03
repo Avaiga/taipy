@@ -7,7 +7,7 @@ from taipy.core.config.task_config import TaskConfig
 
 
 class TestPipelineConfigChecker:
-    def test_check_config_name(self):
+    def test_check_config_id(self):
         collector = IssueCollector()
         config = _Config.default_config()
         PipelineConfigChecker(config, collector).check()

@@ -38,7 +38,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
 
         return DataNodeModel(
             data_node.id,
-            data_node.config_name,
+            data_node.config_id,
             data_node.scope,
             data_node.storage_type(),
             data_node._name,
@@ -79,7 +79,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
 
         return self.class_map[model.storage_type](
-            config_name=model.config_name,
+            config_id=model.config_id,
             scope=model.scope,
             id=model.id,
             name=model.name,

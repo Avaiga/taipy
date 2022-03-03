@@ -16,23 +16,23 @@ def test_create_and_save():
     task_config = Config.add_task("foo", print, input_configs, output_configs)
     task = TaskManager.get_or_create(task_config)
     assert task.id is not None
-    assert task.config_name == "foo"
+    assert task.config_id == "foo"
     assert len(task.input) == 1
     assert len(DataManager.get_all()) == 2
     assert task.my_input.id is not None
-    assert task.my_input.config_name == "my_input"
+    assert task.my_input.config_id == "my_input"
     assert task.my_output.id is not None
-    assert task.my_output.config_name == "my_output"
+    assert task.my_output.config_id == "my_output"
     assert task.function == print
 
     task_retrieved_from_manager = TaskManager.get(task.id)
     assert task_retrieved_from_manager.id == task.id
-    assert task_retrieved_from_manager.config_name == task.config_name
+    assert task_retrieved_from_manager.config_id == task.config_id
     assert len(task_retrieved_from_manager.input) == len(task.input)
     assert task_retrieved_from_manager.my_input.id is not None
-    assert task_retrieved_from_manager.my_input.config_name == task.my_input.config_name
+    assert task_retrieved_from_manager.my_input.config_id == task.my_input.config_id
     assert task_retrieved_from_manager.my_output.id is not None
-    assert task_retrieved_from_manager.my_output.config_name == task.my_output.config_name
+    assert task_retrieved_from_manager.my_output.config_id == task.my_output.config_id
     assert task_retrieved_from_manager.function == task.function
 
 
@@ -160,9 +160,9 @@ def test_set_and_get_task():
     TaskManager.set(third_task_with_same_id_as_first_task)
     assert len(TaskManager.get_all()) == 2
     assert TaskManager.get(task_id_1).id == third_task_with_same_id_as_first_task.id
-    assert TaskManager.get(task_id_1).config_name != first_task.config_name
+    assert TaskManager.get(task_id_1).config_id != first_task.config_id
     assert TaskManager.get(first_task).id == third_task_with_same_id_as_first_task.id
-    assert TaskManager.get(first_task).config_name != first_task.config_name
+    assert TaskManager.get(first_task).config_id != first_task.config_id
     assert TaskManager.get(task_id_2).id == second_task.id
     assert TaskManager.get(second_task).id == second_task.id
 
@@ -180,8 +180,8 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     task_config = Config.add_task("name_1", print, input, output)
     task = TaskManager.get_or_create(task_config)
 
-    assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
-    assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
+    assert [i.config_id for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
+    assert [o.config_id for o in task.output.values()] == [embedded_4.name, embedded_5.name]
 
     data_nodes = {
         embedded_1: InMemoryDataNode(embedded_1.name, Scope.PIPELINE),
@@ -194,27 +194,27 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     task_config = Config.add_task("name_2", print, input, output)
     task = TaskManager.get_or_create(task_config, data_nodes)
 
-    assert [i.config_name for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
-    assert [o.config_name for o in task.output.values()] == [embedded_4.name, embedded_5.name]
+    assert [i.config_id for i in task.input.values()] == [embedded_1.name, embedded_2.name, embedded_3.name]
+    assert [o.config_id for o in task.output.values()] == [embedded_4.name, embedded_5.name]
 
 
-def test_get_all_by_config_name():
+def test_get_all_by_config_id():
     input_configs = [Config.add_data_node("my_input", "in_memory", scope=Scope.PIPELINE)]
-    assert len(TaskManager._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
+    assert len(TaskManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
     task_config_1 = Config.add_task("foo", print, input_configs, [])
-    assert len(TaskManager._get_all_by_config_name("foo")) == 0
+    assert len(TaskManager._get_all_by_config_id("foo")) == 0
 
     TaskManager.get_or_create(task_config_1)
-    assert len(TaskManager._get_all_by_config_name("foo")) == 1
+    assert len(TaskManager._get_all_by_config_id("foo")) == 1
 
     task_config_2 = Config.add_task("baz", print, input_configs, [])
     TaskManager.get_or_create(task_config_2)
-    assert len(TaskManager._get_all_by_config_name("foo")) == 1
-    assert len(TaskManager._get_all_by_config_name("baz")) == 1
+    assert len(TaskManager._get_all_by_config_id("foo")) == 1
+    assert len(TaskManager._get_all_by_config_id("baz")) == 1
 
     TaskManager.get_or_create(task_config_2, "other_scenario", "other_pipeline")
-    assert len(TaskManager._get_all_by_config_name("foo")) == 1
-    assert len(TaskManager._get_all_by_config_name("baz")) == 2
+    assert len(TaskManager._get_all_by_config_id("foo")) == 1
+    assert len(TaskManager._get_all_by_config_id("baz")) == 2
 
 
 def test_delete_raise_exception():

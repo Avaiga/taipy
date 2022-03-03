@@ -10,7 +10,7 @@ from taipy.core.task.task import Task
 def test_create_scenario(cycle, current_datetime):
     scenario_entity_1 = Scenario("fOo ", [], {"key": "value"}, is_master=True, cycle=cycle)
     assert scenario_entity_1.id is not None
-    assert scenario_entity_1.config_name == "foo"
+    assert scenario_entity_1.config_id == "foo"
     assert scenario_entity_1.pipelines == {}
     assert scenario_entity_1.properties == {"key": "value"}
     assert scenario_entity_1.key == "value"
@@ -21,7 +21,7 @@ def test_create_scenario(cycle, current_datetime):
 
     scenario_entity_2 = Scenario("   bar/ξéà   ", [], {}, ScenarioId("baz"), creation_date=current_datetime)
     assert scenario_entity_2.id == "baz"
-    assert scenario_entity_2.config_name == "bar-xea"
+    assert scenario_entity_2.config_id == "bar-xea"
     assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
     assert scenario_entity_2.creation_date == current_datetime
@@ -32,7 +32,7 @@ def test_create_scenario(cycle, current_datetime):
     pipeline_entity = Pipeline("qux", {}, [])
     scenario_entity_3 = Scenario("quux", [pipeline_entity], {})
     assert scenario_entity_3.id is not None
-    assert scenario_entity_3.config_name == "quux"
+    assert scenario_entity_3.config_id == "quux"
     assert len(scenario_entity_3.pipelines) == 1
     assert scenario_entity_3.qux == pipeline_entity
     assert scenario_entity_3.properties == {}
@@ -41,7 +41,7 @@ def test_create_scenario(cycle, current_datetime):
     pipeline_entity_1 = Pipeline("abcξyₓéà", {}, [])
     scenario_entity_4 = Scenario("abcx", [pipeline_entity_1], {})
     assert scenario_entity_4.id is not None
-    assert scenario_entity_4.config_name == "abcx"
+    assert scenario_entity_4.config_id == "abcx"
     assert len(scenario_entity_4.pipelines) == 1
     assert scenario_entity_4.abcxyxea == pipeline_entity_1
     assert scenario_entity_4.properties == {}

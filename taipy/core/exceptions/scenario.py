@@ -12,8 +12,8 @@ class NonExistingScenarioConfig(Exception):
     Raised when a requested scenario configuration is not known by the Scenario Manager.
     """
 
-    def __init__(self, scenario_config_name: str):
-        self.message = f"Scenario config: {scenario_config_name} does not exist."
+    def __init__(self, scenario_config_id: str):
+        self.message = f"Scenario config: {scenario_config_id} does not exist."
 
 
 class DoesNotBelongToACycle(Exception):

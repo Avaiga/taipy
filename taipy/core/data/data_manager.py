@@ -52,7 +52,7 @@ class DataManager(Manager[DataNode]):
         """
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        dn_from_data_node_config = cls._get_all_by_config_name(data_node_config.name)
+        dn_from_data_node_config = cls._get_all_by_config_id(data_node_config.name)
         dn_from_parent = [dn for dn in dn_from_data_node_config if dn.parent_id == parent_id]
         if len(dn_from_parent) == 1:
             return dn_from_parent[0]
@@ -73,7 +73,7 @@ class DataManager(Manager[DataNode]):
             props = data_node_config.properties.copy()
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
-                config_name=data_node_config.name,
+                config_id=data_node_config.name,
                 scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,
                 validity_period=validity_period,
@@ -83,5 +83,5 @@ class DataManager(Manager[DataNode]):
             raise InvalidDataNodeType(data_node_config.storage_type)
 
     @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[DataNode]:
-        return cls._repository.search_all("config_name", config_name)
+    def _get_all_by_config_id(cls, config_id: str) -> List[DataNode]:
+        return cls._repository.search_all("config_id", config_id)

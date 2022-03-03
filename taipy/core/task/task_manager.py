@@ -80,8 +80,8 @@ class TaskManager(Manager[Task]):
         }
         scope = min(dn.scope for dn in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        tasks_from_config_name = cls._get_all_by_config_name(task_config.name)
-        tasks_from_parent = [task for task in tasks_from_config_name if task.parent_id == parent_id]
+        tasks_from_config_id = cls._get_all_by_config_id(task_config.name)
+        tasks_from_parent = [task for task in tasks_from_config_id if task.parent_id == parent_id]
         if len(tasks_from_parent) == 1:
             return tasks_from_parent[0]
         elif len(tasks_from_parent) > 1:
@@ -140,5 +140,5 @@ class TaskManager(Manager[Task]):
                 DataManager.delete(data_node.id)
 
     @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[Task]:
-        return cls._repository.search_all("config_name", config_name)
+    def _get_all_by_config_id(cls, config_id: str) -> List[Task]:
+        return cls._repository.search_all("config_id", config_id)

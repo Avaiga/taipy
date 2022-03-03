@@ -7,7 +7,7 @@ from taipy.core.data.scope import Scope
 
 
 class TestDataNodeConfigChecker:
-    def test_check_config_name(self):
+    def test_check_config_id(self):
         collector = IssueCollector()
         config = _Config.default_config()
         DataNodeConfigChecker(config, collector).check()

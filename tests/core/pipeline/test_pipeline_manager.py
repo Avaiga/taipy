@@ -52,10 +52,10 @@ def test_set_and_get_pipeline():
     # Save one pipeline. We expect to have only one pipeline stored
     PipelineManager.set(pipeline_1)
     assert PipelineManager.get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert PipelineManager.get(pipeline_id_1).config_id == pipeline_1.config_id
     assert len(PipelineManager.get(pipeline_id_1).tasks) == 0
     assert PipelineManager.get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_1).config_name == pipeline_1.config_name
+    assert PipelineManager.get(pipeline_1).config_id == pipeline_1.config_id
     assert len(PipelineManager.get(pipeline_1).tasks) == 0
     assert PipelineManager.get(pipeline_id_2) is None
     assert PipelineManager.get(pipeline_2) is None
@@ -64,32 +64,32 @@ def test_set_and_get_pipeline():
     TaskManager.set(task_2)
     PipelineManager.set(pipeline_2)
     assert PipelineManager.get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert PipelineManager.get(pipeline_id_1).config_id == pipeline_1.config_id
     assert len(PipelineManager.get(pipeline_id_1).tasks) == 0
     assert PipelineManager.get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_1).config_name == pipeline_1.config_name
+    assert PipelineManager.get(pipeline_1).config_id == pipeline_1.config_id
     assert len(PipelineManager.get(pipeline_1).tasks) == 0
     assert PipelineManager.get(pipeline_id_2).id == pipeline_2.id
-    assert PipelineManager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert PipelineManager.get(pipeline_id_2).config_id == pipeline_2.config_id
     assert len(PipelineManager.get(pipeline_id_2).tasks) == 1
     assert PipelineManager.get(pipeline_2).id == pipeline_2.id
-    assert PipelineManager.get(pipeline_2).config_name == pipeline_2.config_name
+    assert PipelineManager.get(pipeline_2).config_id == pipeline_2.config_id
     assert len(PipelineManager.get(pipeline_2).tasks) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
     PipelineManager.set(pipeline_1)
     assert PipelineManager.get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_id_1).config_name == pipeline_1.config_name
+    assert PipelineManager.get(pipeline_id_1).config_id == pipeline_1.config_id
     assert len(PipelineManager.get(pipeline_id_1).tasks) == 0
     assert PipelineManager.get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_1).config_name == pipeline_1.config_name
+    assert PipelineManager.get(pipeline_1).config_id == pipeline_1.config_id
     assert len(PipelineManager.get(pipeline_1).tasks) == 0
     assert PipelineManager.get(pipeline_id_2).id == pipeline_2.id
-    assert PipelineManager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert PipelineManager.get(pipeline_id_2).config_id == pipeline_2.config_id
     assert len(PipelineManager.get(pipeline_id_2).tasks) == 1
     assert PipelineManager.get(pipeline_2).id == pipeline_2.id
-    assert PipelineManager.get(pipeline_2).config_name == pipeline_2.config_name
+    assert PipelineManager.get(pipeline_2).config_id == pipeline_2.config_id
     assert len(PipelineManager.get(pipeline_2).tasks) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
 
@@ -97,16 +97,16 @@ def test_set_and_get_pipeline():
     # We expect the first pipeline to be updated
     PipelineManager.set(pipeline_3_with_same_id)
     assert PipelineManager.get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_id_1).config_name == pipeline_3_with_same_id.config_name
+    assert PipelineManager.get(pipeline_id_1).config_id == pipeline_3_with_same_id.config_id
     assert len(PipelineManager.get(pipeline_id_1).tasks) == 0
     assert PipelineManager.get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager.get(pipeline_1).config_name == pipeline_3_with_same_id.config_name
+    assert PipelineManager.get(pipeline_1).config_id == pipeline_3_with_same_id.config_id
     assert len(PipelineManager.get(pipeline_1).tasks) == 0
     assert PipelineManager.get(pipeline_id_2).id == pipeline_2.id
-    assert PipelineManager.get(pipeline_id_2).config_name == pipeline_2.config_name
+    assert PipelineManager.get(pipeline_id_2).config_id == pipeline_2.config_id
     assert len(PipelineManager.get(pipeline_id_2).tasks) == 1
     assert PipelineManager.get(pipeline_2).id == pipeline_2.id
-    assert PipelineManager.get(pipeline_2).config_name == pipeline_2.config_name
+    assert PipelineManager.get(pipeline_2).config_id == pipeline_2.config_id
     assert len(PipelineManager.get(pipeline_2).tasks) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
 
@@ -268,8 +268,8 @@ def test_get_or_create_data():
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 0
     assert pipeline.baz.read() == 0
-    assert pipeline.get_sorted_tasks()[0][0].config_name == task_config_mult_by_2.name
-    assert pipeline.get_sorted_tasks()[1][0].config_name == task_config_mult_by_3.name
+    assert pipeline.get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.name
+    assert pipeline.get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.name
 
     PipelineManager.submit(pipeline.id)
     assert pipeline.foo.read() == 1
@@ -433,24 +433,24 @@ def test_pipeline_notification_subscribe_all():
     assert len(PipelineManager.get(other_pipeline.id).subscribers) == 1
 
 
-def test_get_all_by_config_name():
+def test_get_all_by_config_id():
     input_configs = [Config.add_data_node("my_input", "in_memory")]
     task_config_1 = Config.add_task("task_config_1", print, input_configs, [])
-    assert len(PipelineManager._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
+    assert len(PipelineManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
     pipeline_config_1 = Config.add_pipeline("foo", [task_config_1])
-    assert len(PipelineManager._get_all_by_config_name("foo")) == 0
+    assert len(PipelineManager._get_all_by_config_id("foo")) == 0
 
     PipelineManager.get_or_create(pipeline_config_1)
-    assert len(PipelineManager._get_all_by_config_name("foo")) == 1
+    assert len(PipelineManager._get_all_by_config_id("foo")) == 1
 
     pipeline_config_2 = Config.add_pipeline("baz", [task_config_1])
     PipelineManager.get_or_create(pipeline_config_2)
-    assert len(PipelineManager._get_all_by_config_name("foo")) == 1
-    assert len(PipelineManager._get_all_by_config_name("baz")) == 1
+    assert len(PipelineManager._get_all_by_config_id("foo")) == 1
+    assert len(PipelineManager._get_all_by_config_id("baz")) == 1
 
     PipelineManager.get_or_create(pipeline_config_2, "other_scenario")
-    assert len(PipelineManager._get_all_by_config_name("foo")) == 1
-    assert len(PipelineManager._get_all_by_config_name("baz")) == 2
+    assert len(PipelineManager._get_all_by_config_id("foo")) == 1
+    assert len(PipelineManager._get_all_by_config_id("baz")) == 2
 
 
 def test_do_not_recreate_existing_pipeline_except_same_config():

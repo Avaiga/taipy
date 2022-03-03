@@ -24,12 +24,12 @@ data_node = CSVDataNode(
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_name", print, [data_node], [], TaskId("id"), parent_id="parent_id")
+task = Task("config_id", print, [data_node], [], TaskId("id"), parent_id="parent_id")
 
 task_model = TaskModel(
     id="id",
     parent_id="parent_id",
-    config_name="config_name",
+    config_id="config_id",
     input_ids=["dn_id"],
     function_name=print.__name__,
     function_module=print.__module__,

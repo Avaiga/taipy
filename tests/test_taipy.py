@@ -275,8 +275,8 @@ class TestTaipy:
 
     def test_compare_scenarios(self, scenario):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.compare") as mck:
-            tp.compare_scenarios(scenario, scenario, data_node_config_name="dn")
-            mck.assert_called_once_with(scenario, scenario, data_node_config_name="dn")
+            tp.compare_scenarios(scenario, scenario, data_node_config_id="dn")
+            mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.subscribe") as mck:
@@ -447,9 +447,9 @@ class TestTaipy:
 
     def test_clean_all_entities_with_user_pickle_files(self, pickle_file_path):
         user_pickle = PickleDataNode(
-            config_name="d1", properties={"default_data": "foo", "path": pickle_file_path}, scope=Scope.SCENARIO
+            config_id="d1", properties={"default_data": "foo", "path": pickle_file_path}, scope=Scope.SCENARIO
         )
-        generated_pickle = PickleDataNode(config_name="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
+        generated_pickle = PickleDataNode(config_id="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
 
         # File already exists so it does not write any
         assert len(DataManager.get_all()) == 1

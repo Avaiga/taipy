@@ -102,13 +102,13 @@ def scenario(cycle):
 
 @pytest.fixture(scope="function")
 def data_node():
-    return InMemoryDataNode("data_node_config_name", Scope.PIPELINE)
+    return InMemoryDataNode("data_node_config_id", Scope.PIPELINE)
 
 
 @pytest.fixture(scope="function")
 def task(data_node):
-    dn = InMemoryDataNode("dn_config_name", Scope.PIPELINE)
-    return Task("task_config_name", print, [data_node], [dn])
+    dn = InMemoryDataNode("dn_config_id", Scope.PIPELINE)
+    return Task("task_config_id", print, [data_node], [dn])
 
 
 @pytest.fixture(scope="function")

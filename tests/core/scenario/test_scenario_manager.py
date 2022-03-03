@@ -61,10 +61,10 @@ def test_set_and_get_scenario(cycle):
     ScenarioManager.set(scenario_1)
     assert len(ScenarioManager.get_all()) == 1
     assert ScenarioManager.get(scenario_id_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_id_1).config_name == scenario_1.config_name
+    assert ScenarioManager.get(scenario_id_1).config_id == scenario_1.config_id
     assert len(ScenarioManager.get(scenario_id_1).pipelines) == 0
     assert ScenarioManager.get(scenario_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_1).config_name == scenario_1.config_name
+    assert ScenarioManager.get(scenario_1).config_id == scenario_1.config_id
     assert len(ScenarioManager.get(scenario_1).pipelines) == 0
     assert ScenarioManager.get(scenario_id_2) is None
     assert ScenarioManager.get(scenario_2) is None
@@ -76,16 +76,16 @@ def test_set_and_get_scenario(cycle):
     ScenarioManager.set(scenario_2)
     assert len(ScenarioManager.get_all()) == 2
     assert ScenarioManager.get(scenario_id_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_id_1).config_name == scenario_1.config_name
+    assert ScenarioManager.get(scenario_id_1).config_id == scenario_1.config_id
     assert len(ScenarioManager.get(scenario_id_1).pipelines) == 0
     assert ScenarioManager.get(scenario_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_1).config_name == scenario_1.config_name
+    assert ScenarioManager.get(scenario_1).config_id == scenario_1.config_id
     assert len(ScenarioManager.get(scenario_1).pipelines) == 0
     assert ScenarioManager.get(scenario_id_2).id == scenario_2.id
-    assert ScenarioManager.get(scenario_id_2).config_name == scenario_2.config_name
+    assert ScenarioManager.get(scenario_id_2).config_id == scenario_2.config_id
     assert len(ScenarioManager.get(scenario_id_2).pipelines) == 1
     assert ScenarioManager.get(scenario_2).id == scenario_2.id
-    assert ScenarioManager.get(scenario_2).config_name == scenario_2.config_name
+    assert ScenarioManager.get(scenario_2).config_id == scenario_2.config_id
     assert len(ScenarioManager.get(scenario_2).pipelines) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
     assert ScenarioManager.get(scenario_id_2).cycle == cycle
@@ -96,16 +96,16 @@ def test_set_and_get_scenario(cycle):
     ScenarioManager.set(scenario_1)
     assert len(ScenarioManager.get_all()) == 2
     assert ScenarioManager.get(scenario_id_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_id_1).config_name == scenario_1.config_name
+    assert ScenarioManager.get(scenario_id_1).config_id == scenario_1.config_id
     assert len(ScenarioManager.get(scenario_id_1).pipelines) == 0
     assert ScenarioManager.get(scenario_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_1).config_name == scenario_1.config_name
+    assert ScenarioManager.get(scenario_1).config_id == scenario_1.config_id
     assert len(ScenarioManager.get(scenario_1).pipelines) == 0
     assert ScenarioManager.get(scenario_id_2).id == scenario_2.id
-    assert ScenarioManager.get(scenario_id_2).config_name == scenario_2.config_name
+    assert ScenarioManager.get(scenario_id_2).config_id == scenario_2.config_id
     assert len(ScenarioManager.get(scenario_id_2).pipelines) == 1
     assert ScenarioManager.get(scenario_2).id == scenario_2.id
-    assert ScenarioManager.get(scenario_2).config_name == scenario_2.config_name
+    assert ScenarioManager.get(scenario_2).config_id == scenario_2.config_id
     assert len(ScenarioManager.get(scenario_2).pipelines) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
     assert CycleManager.get(cycle.id).id == cycle.id
@@ -117,18 +117,18 @@ def test_set_and_get_scenario(cycle):
     ScenarioManager.set(scenario_3_with_same_id)
     assert len(ScenarioManager.get_all()) == 2
     assert ScenarioManager.get(scenario_id_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_id_1).config_name == scenario_3_with_same_id.config_name
+    assert ScenarioManager.get(scenario_id_1).config_id == scenario_3_with_same_id.config_id
     assert len(ScenarioManager.get(scenario_id_1).pipelines) == 1
     assert ScenarioManager.get(scenario_id_1).cycle == cycle
     assert ScenarioManager.get(scenario_1).id == scenario_1.id
-    assert ScenarioManager.get(scenario_1).config_name == scenario_3_with_same_id.config_name
+    assert ScenarioManager.get(scenario_1).config_id == scenario_3_with_same_id.config_id
     assert len(ScenarioManager.get(scenario_1).pipelines) == 1
     assert ScenarioManager.get(scenario_1).cycle == cycle
     assert ScenarioManager.get(scenario_id_2).id == scenario_2.id
-    assert ScenarioManager.get(scenario_id_2).config_name == scenario_2.config_name
+    assert ScenarioManager.get(scenario_id_2).config_id == scenario_2.config_id
     assert len(ScenarioManager.get(scenario_id_2).pipelines) == 1
     assert ScenarioManager.get(scenario_2).id == scenario_2.id
-    assert ScenarioManager.get(scenario_2).config_name == scenario_2.config_name
+    assert ScenarioManager.get(scenario_2).config_id == scenario_2.config_id
     assert len(ScenarioManager.get(scenario_2).pipelines) == 1
     assert TaskManager.get(task_2.id).id == task_2.id
 
@@ -165,7 +165,7 @@ def test_create_and_delete_scenario():
     scenario_config = Config.add_scenario("sc", [], Frequency.DAILY)
 
     scenario_1 = ScenarioManager.create(scenario_config, creation_date=creation_date_1, display_name=display_name_1)
-    assert scenario_1.config_name == "sc"
+    assert scenario_1.config_id == "sc"
     assert scenario_1.pipelines == {}
     assert scenario_1.cycle.frequency == Frequency.DAILY
     assert scenario_1.is_master
@@ -181,7 +181,7 @@ def test_create_and_delete_scenario():
         ScenarioManager.delete(scenario_1.id)
 
     scenario_2 = ScenarioManager.create(scenario_config, creation_date=creation_date_2)
-    assert scenario_2.config_name == "sc"
+    assert scenario_2.config_id == "sc"
     assert scenario_2.pipelines == {}
     assert scenario_2.cycle.frequency == Frequency.DAILY
     assert not scenario_2.is_master
@@ -245,9 +245,9 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario.bar.read() == 0
     assert scenario.baz.read() == 0
     assert scenario.qux.read() == 0
-    assert scenario.by_6.get_sorted_tasks()[0][0].config_name == task_mult_by_2_config.name
-    assert scenario.by_6.get_sorted_tasks()[1][0].config_name == task_mult_by_3_config.name
-    assert scenario.by_4.get_sorted_tasks()[0][0].config_name == task_mult_by_4_config.name
+    assert scenario.by_6.get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.name
+    assert scenario.by_6.get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.name
+    assert scenario.by_4.get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.name
     assert scenario.cycle.frequency == Frequency.DAILY
 
 
@@ -658,19 +658,19 @@ def test_scenarios_comparison():
     scenario_2 = ScenarioManager.create(scenario_config)
 
     with pytest.raises(InsufficientScenarioToCompare):
-        ScenarioManager.compare(scenario_1, data_node_config_name="bar")
+        ScenarioManager.compare(scenario_1, data_node_config_id="bar")
 
     scenario_3 = Scenario("awesome_scenario_config", [], {})
     with pytest.raises(DifferentScenarioConfigs):
-        ScenarioManager.compare(scenario_1, scenario_3, data_node_config_name="bar")
+        ScenarioManager.compare(scenario_1, scenario_3, data_node_config_id="bar")
 
     ScenarioManager.submit(scenario_1.id)
     ScenarioManager.submit(scenario_2.id)
 
-    bar_comparison = ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="bar")["bar"]
+    bar_comparison = ScenarioManager.compare(scenario_1, scenario_2, data_node_config_id="bar")["bar"]
     assert bar_comparison["subtraction"] == 0
 
-    foo_comparison = ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="foo")["foo"]
+    foo_comparison = ScenarioManager.compare(scenario_1, scenario_2, data_node_config_id="foo")["foo"]
     assert len(foo_comparison.keys()) == 2
     assert foo_comparison["addition"] == 2
     assert foo_comparison["subtraction"] == 0
@@ -681,7 +681,7 @@ def test_scenarios_comparison():
         ScenarioManager.compare(scenario_3, scenario_3)
 
     with pytest.raises(NonExistingComparator):
-        ScenarioManager.compare(scenario_1, scenario_2, data_node_config_name="abc")
+        ScenarioManager.compare(scenario_1, scenario_2, data_node_config_id="abc")
 
 
 def test_automatic_reload():

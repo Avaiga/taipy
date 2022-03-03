@@ -42,8 +42,8 @@ class TestDataManager:
 
         assert DataManager.get(csv_dn.id) is not None
         assert DataManager.get(csv_dn.id).id == csv_dn.id
-        assert DataManager.get(csv_dn.id).config_name == "foo"
-        assert DataManager.get(csv_dn.id).config_name == csv_dn.config_name
+        assert DataManager.get(csv_dn.id).config_id == "foo"
+        assert DataManager.get(csv_dn.id).config_id == csv_dn.config_id
         assert DataManager.get(csv_dn.id).scope == Scope.SCENARIO
         assert DataManager.get(csv_dn.id).scope == csv_dn.scope
         assert DataManager.get(csv_dn.id).parent_id is None
@@ -62,8 +62,8 @@ class TestDataManager:
 
         assert DataManager.get(csv_dn) is not None
         assert DataManager.get(csv_dn).id == csv_dn.id
-        assert DataManager.get(csv_dn).config_name == "foo"
-        assert DataManager.get(csv_dn).config_name == csv_dn.config_name
+        assert DataManager.get(csv_dn).config_id == "foo"
+        assert DataManager.get(csv_dn).config_id == csv_dn.config_id
         assert DataManager.get(csv_dn).scope == Scope.SCENARIO
         assert DataManager.get(csv_dn).scope == csv_dn.scope
         assert DataManager.get(csv_dn).parent_id is None
@@ -101,8 +101,8 @@ class TestDataManager:
 
         assert DataManager.get(in_mem_dn.id) is not None
         assert DataManager.get(in_mem_dn.id).id == in_mem_dn.id
-        assert DataManager.get(in_mem_dn.id).config_name == "baz"
-        assert DataManager.get(in_mem_dn.id).config_name == in_mem_dn.config_name
+        assert DataManager.get(in_mem_dn.id).config_id == "baz"
+        assert DataManager.get(in_mem_dn.id).config_id == in_mem_dn.config_id
         assert DataManager.get(in_mem_dn.id).scope == Scope.SCENARIO
         assert DataManager.get(in_mem_dn.id).scope == in_mem_dn.scope
         assert DataManager.get(in_mem_dn.id).parent_id == "Scenario_id"
@@ -120,8 +120,8 @@ class TestDataManager:
 
         assert DataManager.get(in_mem_dn) is not None
         assert DataManager.get(in_mem_dn).id == in_mem_dn.id
-        assert DataManager.get(in_mem_dn).config_name == "baz"
-        assert DataManager.get(in_mem_dn).config_name == in_mem_dn.config_name
+        assert DataManager.get(in_mem_dn).config_id == "baz"
+        assert DataManager.get(in_mem_dn).config_id == in_mem_dn.config_id
         assert DataManager.get(in_mem_dn).scope == Scope.SCENARIO
         assert DataManager.get(in_mem_dn).scope == in_mem_dn.scope
         assert DataManager.get(in_mem_dn).parent_id == "Scenario_id"
@@ -151,8 +151,8 @@ class TestDataManager:
 
         assert DataManager.get(pickle_dn.id) is not None
         assert DataManager.get(pickle_dn.id).id == pickle_dn.id
-        assert DataManager.get(pickle_dn.id).config_name == "plop"
-        assert DataManager.get(pickle_dn.id).config_name == pickle_dn.config_name
+        assert DataManager.get(pickle_dn.id).config_id == "plop"
+        assert DataManager.get(pickle_dn.id).config_id == pickle_dn.config_id
         assert DataManager.get(pickle_dn.id).scope == Scope.CYCLE
         assert DataManager.get(pickle_dn.id).scope == pickle_dn.scope
         assert DataManager.get(pickle_dn.id).parent_id is None
@@ -169,8 +169,8 @@ class TestDataManager:
 
         assert DataManager.get(pickle_dn) is not None
         assert DataManager.get(pickle_dn).id == pickle_dn.id
-        assert DataManager.get(pickle_dn).config_name == "plop"
-        assert DataManager.get(pickle_dn).config_name == pickle_dn.config_name
+        assert DataManager.get(pickle_dn).config_id == "plop"
+        assert DataManager.get(pickle_dn).config_id == pickle_dn.config_id
         assert DataManager.get(pickle_dn).scope == Scope.CYCLE
         assert DataManager.get(pickle_dn).scope == pickle_dn.scope
         assert DataManager.get(pickle_dn).parent_id is None
@@ -201,14 +201,14 @@ class TestDataManager:
 
         csv_dn = Config.add_data_node(name="foo", storage_type="csv", path="bar", has_header=True)
         csv = DataManager._create_and_set(csv_dn, None)
-        assert csv.config_name == "foo"
+        assert csv.config_id == "foo"
         assert isinstance(csv, CSVDataNode)
         assert csv.path == "path_from_config_file"
         assert csv.has_header
 
         csv_dn = Config.add_data_node(name="baz", storage_type="csv", path="bar", has_header=True)
         csv = DataManager._create_and_set(csv_dn, None)
-        assert csv.config_name == "baz"
+        assert csv.config_id == "baz"
         assert isinstance(csv, CSVDataNode)
         assert csv.path == "bar"
         assert csv.has_header
@@ -226,26 +226,26 @@ class TestDataManager:
         DataManager._create_and_set(dn_config_2, None)
         DataManager._create_and_set(dn_config_2, None)
         assert len(DataManager.get_all()) == 3
-        assert len([dn for dn in DataManager.get_all() if dn.config_name == "foo"]) == 1
-        assert len([dn for dn in DataManager.get_all() if dn.config_name == "baz"]) == 2
+        assert len([dn for dn in DataManager.get_all() if dn.config_id == "foo"]) == 1
+        assert len([dn for dn in DataManager.get_all() if dn.config_id == "baz"]) == 2
 
-    def test_get_all_by_config_name(self):
-        assert len(DataManager._get_all_by_config_name("NOT_EXISTING_CONFIG_NAME")) == 0
+    def test_get_all_by_config_id(self):
+        assert len(DataManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
         dn_config_1 = Config.add_data_node(name="foo", storage_type="in_memory")
-        assert len(DataManager._get_all_by_config_name("foo")) == 0
+        assert len(DataManager._get_all_by_config_id("foo")) == 0
         DataManager._create_and_set(dn_config_1, None)
-        assert len(DataManager._get_all_by_config_name("foo")) == 1
+        assert len(DataManager._get_all_by_config_id("foo")) == 1
         dn_config_2 = Config.add_data_node(name="baz", storage_type="in_memory")
         DataManager._create_and_set(dn_config_2, None)
-        assert len(DataManager._get_all_by_config_name("foo")) == 1
-        assert len(DataManager._get_all_by_config_name("baz")) == 1
+        assert len(DataManager._get_all_by_config_id("foo")) == 1
+        assert len(DataManager._get_all_by_config_id("baz")) == 1
         DataManager._create_and_set(dn_config_2, None)
-        assert len(DataManager._get_all_by_config_name("foo")) == 1
-        assert len(DataManager._get_all_by_config_name("baz")) == 2
+        assert len(DataManager._get_all_by_config_id("foo")) == 1
+        assert len(DataManager._get_all_by_config_id("baz")) == 2
 
     def test_set(self):
         dn = InMemoryDataNode(
-            "config_name",
+            "config_id",
             Scope.PIPELINE,
             id=DataNodeId("id"),
             parent_id=None,
@@ -259,18 +259,18 @@ class TestDataManager:
         assert len(DataManager.get_all()) == 1
 
         # changing data node attribute
-        dn.config_name = "foo"
-        assert dn.config_name == "foo"
-        assert DataManager.get(dn.id).config_name == "config_name"
+        dn.config_id = "foo"
+        assert dn.config_id == "foo"
+        assert DataManager.get(dn.id).config_id == "config_id"
         DataManager.set(dn)
         assert len(DataManager.get_all()) == 1
-        assert dn.config_name == "foo"
-        assert DataManager.get(dn.id).config_name == "foo"
+        assert dn.config_id == "foo"
+        assert DataManager.get(dn.id).config_id == "foo"
 
     def test_delete(self):
-        dn_1 = InMemoryDataNode("config_name", Scope.PIPELINE, id="id_1")
-        dn_2 = InMemoryDataNode("config_name", Scope.PIPELINE, id="id_2")
-        dn_3 = InMemoryDataNode("config_name", Scope.PIPELINE, id="id_3")
+        dn_1 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_1")
+        dn_2 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_2")
+        dn_3 = InMemoryDataNode("config_id", Scope.PIPELINE, id="id_3")
         assert len(DataManager.get_all()) == 0
         DataManager.set(dn_1)
         DataManager.set(dn_2)

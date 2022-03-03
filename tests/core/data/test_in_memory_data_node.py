@@ -18,7 +18,7 @@ class TestInMemoryDataNodeEntity:
         )
         assert isinstance(dn, InMemoryDataNode)
         assert dn.storage_type() == "in_memory"
-        assert dn.config_name == "foobar_bazy"
+        assert dn.config_id == "foobar_bazy"
         assert dn.scope == Scope.SCENARIO
         assert dn.id == "id_uio"
         assert dn.name == "my name"

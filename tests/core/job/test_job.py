@@ -22,7 +22,7 @@ def task_id():
 
 @pytest.fixture
 def task(task_id):
-    return Task(config_name="name", function=print, input=[], output=[], id=task_id)
+    return Task(config_id="name", function=print, input=[], output=[], id=task_id)
 
 
 @pytest.fixture
@@ -110,7 +110,7 @@ def test_notification_job(job):
 
 
 def test_handle_exception_in_user_function(task_id, job_id):
-    task = Task(config_name="name", input=[], function=_error, output=[], id=task_id)
+    task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task)
 
     _dispatch(task, job)
@@ -124,7 +124,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 
 def test_handle_exception_in_input_data_node(task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
-    task = Task(config_name="name", input=[data_node], function=print, output=[], id=task_id)
+    task = Task(config_id="name", input=[data_node], function=print, output=[], id=task_id)
     job = Job(job_id, task)
 
     _dispatch(task, job)
@@ -137,7 +137,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 
 def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
-    task = Task(config_name="name", input=[], function=_foo, output=[data_node], id=task_id)
+    task = Task(config_id="name", input=[], function=_foo, output=[data_node], id=task_id)
     job = Job(job_id, task)
 
     _dispatch(task, job)

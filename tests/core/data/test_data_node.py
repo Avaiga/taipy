@@ -17,8 +17,8 @@ class FakeDataNode(InMemoryDataNode):
     read_has_been_called = 0
     write_has_been_called = 0
 
-    def __init__(self, config_name, **kwargs):
-        super().__init__(config_name, Scope.PIPELINE, **kwargs)
+    def __init__(self, config_id, **kwargs):
+        super().__init__(config_id, Scope.PIPELINE, **kwargs)
 
     def _read(self, query=None):
         self.read_has_been_called += 1
@@ -33,8 +33,8 @@ class FakeDataframeDataNode(DataNode):
     COLUMN_NAME_1 = "a"
     COLUMN_NAME_2 = "b"
 
-    def __init__(self, config_name, default_data_frame, **kwargs):
-        super().__init__(config_name, **kwargs)
+    def __init__(self, config_id, default_data_frame, **kwargs):
+        super().__init__(config_id, **kwargs)
         self.data = default_data_frame
 
     def _read(self):
@@ -46,8 +46,8 @@ class FakeListDataNode(DataNode):
         def __init__(self, value):
             self.value = value
 
-    def __init__(self, config_name, **kwargs):
-        super().__init__(config_name, **kwargs)
+    def __init__(self, config_id, **kwargs):
+        super().__init__(config_id, **kwargs)
         self.data = [self.Row(i) for i in range(10)]
 
     def _read(self):
@@ -57,7 +57,7 @@ class FakeListDataNode(DataNode):
 class TestDataNode:
     def test_create_with_default_values(self):
         dn = DataNode("fOo BAr")
-        assert dn.config_name == "foo_bar"
+        assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
         assert dn.name == dn.id
@@ -80,7 +80,7 @@ class TestDataNode:
             edition_in_progress=False,
             prop="erty",
         )
-        assert dn.config_name == "foo_bar_e-"
+        assert dn.config_id == "foo_bar_e-"
         assert dn.scope == Scope.SCENARIO
         assert dn.id == "an_id"
         assert dn.name == "a name"

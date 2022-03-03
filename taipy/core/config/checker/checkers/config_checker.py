@@ -23,12 +23,12 @@ class ConfigChecker:
     def _info(self, field: str, value: Any, message: str):
         self.collector.add_info(field, value, message, self.__class__.__name__)
 
-    def _check_children(self, parent_config_class, config_name: str, config_key: str, config_value, child_config_class):
+    def _check_children(self, parent_config_class, config_id: str, config_key: str, config_value, child_config_class):
         if not config_value:
             self._warning(
                 config_key,
                 config_value,
-                f"{config_key} field of {parent_config_class.__name__} {config_name} is empty.",
+                f"{config_key} field of {parent_config_class.__name__} {config_id} is empty.",
             )
         else:
             if not (
@@ -37,13 +37,13 @@ class ConfigChecker:
                 self._error(
                     config_key,
                     config_value,
-                    f"{config_key} field of {parent_config_class.__name__} {config_name} must be populated with a list of {child_config_class.__name__} objects.",
+                    f"{config_key} field of {parent_config_class.__name__} {config_id} must be populated with a list of {child_config_class.__name__} objects.",
                 )
 
-    def _check_existing_config_name(self, config):
+    def _check_existing_config_id(self, config):
         if not config.name:
             self._error(
-                "config_name",
+                "config_id",
                 config.name,
-                f"config_name of {config.__name__} {config.name} is empty.",
+                f"config_id of {config.__name__} {config.name} is empty.",
             )

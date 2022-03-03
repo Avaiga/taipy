@@ -27,7 +27,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
         return PipelineModel(
             pipeline.id,
             pipeline.parent_id,
-            pipeline.config_name,
+            pipeline.config_id,
             pipeline._properties.data,
             [task.id for task in pipeline.tasks.values()],
             utils.fcts_to_dict(pipeline._subscribers),

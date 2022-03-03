@@ -7,7 +7,7 @@ from taipy.core.config.data_node_config import DataNodeConfig
 
 
 class TestTaskConfigChecker:
-    def test_check_config_name(self):
+    def test_check_config_id(self):
         config = _Config.default_config()
         collector = IssueCollector()
         TaskConfigChecker(config, collector).check()
