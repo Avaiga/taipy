@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Union
 
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.logger import TaipyLogger
+from taipy.core.common.manager import Manager
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.scope import Scope
@@ -15,7 +16,7 @@ from taipy.core.task.task import Task
 from taipy.core.task.task_repository import TaskRepository
 
 
-class TaskManager:
+class TaskManager(Manager[Task]):
     """
     The Task Manager saves and retrieves Tasks.
 
@@ -26,8 +27,8 @@ class TaskManager:
         repository (TaskRepository): The repository where tasks are saved.
     """
 
-    repository: TaskRepository = TaskRepository()
-    __logger = TaipyLogger.get_logger()
+    _repository: TaskRepository = TaskRepository()
+    ENTITY_NAME = Task.__name__
     _scheduler = None
 
     @classmethod
@@ -35,34 +36,6 @@ class TaskManager:
         if not cls._scheduler:
             cls._scheduler = SchedulerFactory.build_scheduler()
         return cls._scheduler
-
-    @classmethod
-    def delete_all(cls):
-        """
-        Deletes all the persisted tasks.
-        """
-        cls.repository.delete_all()
-
-    @classmethod
-    def delete(cls, task_id: TaskId):
-        """Deletes the cycle provided as parameter.
-
-        Parameters:
-            task_id (str): identifier of the task to delete.
-        Raises:
-            ModelNotFound: No task corresponds to task_id.
-        """
-        cls.repository.delete(task_id)
-
-    @classmethod
-    def get_all(cls) -> List[Task]:
-        """
-        Returns the list of all existing tasks.
-
-        Returns:
-            List: The list of tasks handled by this Task Manager.
-        """
-        return cls.repository.load_all()
 
     @classmethod
     def set(cls, task: Task):
@@ -74,7 +47,7 @@ class TaskManager:
         """
         cls.__save_data_nodes(task.input.values())
         cls.__save_data_nodes(task.output.values())
-        cls.repository.save(task)
+        super().set(task)
 
     @classmethod
     def get_or_create(
@@ -121,38 +94,9 @@ class TaskManager:
             return task
 
     @classmethod
-    def get(cls, task: Union[Task, TaskId], default=None) -> Task:
-        """
-        Gets a task given the Task or the identifier.
-
-        Parameters:
-            task (Union[Task, TaskId]): The task identifier of the task to get.
-            default: The default value to return if no task is found. None is returned if no default value is provided.
-        """
-        try:
-            task_id = task.id if isinstance(task, Task) else task
-            return cls.repository.load(task_id)
-        except ModelNotFound:
-            cls.__logger.warning(f"Task: {task_id} does not exist.")
-            return default
-
-    @classmethod
     def __save_data_nodes(cls, data_nodes):
         for i in data_nodes:
             DataManager.set(i)
-
-    @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[Task]:
-        """
-        Returns the list of all existing tasks with the corresponding config name.
-
-        Args:
-             config_name (str) : task config's name.
-
-        Returns:
-            List of tasks of this config name
-        """
-        return cls.repository.search_all("config_name", config_name)
 
     @classmethod
     def hard_delete(
@@ -194,3 +138,7 @@ class TaskManager:
         for data_node in data_nodes:
             if data_node.parent_id == id_:
                 DataManager.delete(data_node.id)
+
+    @classmethod
+    def _get_all_by_config_name(cls, config_name: str) -> List[Task]:
+        return cls._repository.search_all("config_name", config_name)

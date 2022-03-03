@@ -39,7 +39,7 @@ task_model = TaskModel(
 
 class TestTaskRepository:
     def test_save_and_load(self, tmpdir):
-        repository = TaskManager.repository
+        repository = TaskManager._repository
         repository.base_path = tmpdir
         repository.save(task)
         with pytest.raises(NonExistingDataNode):
@@ -50,7 +50,7 @@ class TestTaskRepository:
         assert len(t.input) == 1
 
     def test_from_and_to_model(self):
-        repository = TaskManager.repository
+        repository = TaskManager._repository
         assert repository.to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):
             repository.from_model(task_model)
