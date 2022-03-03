@@ -27,6 +27,7 @@ jobs:
           pip install .
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package
           pip install pytest pytest-mock
+          pip install markupsafe==2.0.1
           pytest -m "not teste2e"
 
   optionals-packages:
@@ -53,6 +54,7 @@ jobs:
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
           # Run test with optionals packages installed
           pip install pytest pytest-mock
+          pip install markupsafe==2.0.1
           pytest -m "not teste2e" > pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"

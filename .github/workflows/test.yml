@@ -66,6 +66,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pipenv
           pipenv install --dev --skip-lock
+          pipenv install markupsafe==2.0.1
           pipenv run playwright install
           pipenv run pytest -m teste2e
 
