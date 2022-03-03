@@ -11,7 +11,6 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        node-version: [16.x]
         python-versions: ['3.8', '3.9', '3.10']
         os: [ubuntu-18.04, windows-latest]
 
@@ -22,31 +21,18 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
-
-      - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        working-directory: ./gui
-        run: npm ci
-      - name: Run npm build
-        run: npm run build --if-present
-        working-directory: ./gui
 
       - name: Install Taipy without dependencies
         run: |
           pip install .
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package
-          pip install pytest pytest-mock pytest-playwright
-          playwright install
-          pytest
+          pip install pytest pytest-mock
+          pytest -m "not teste2e"
 
   optionals-packages:
     timeout-minutes: 10
     strategy:
       matrix:
-        node-version: [16.x]
         python-versions: ['3.8', '3.9', '3.10']
         os: [ubuntu-18.04, windows-latest]
 
@@ -57,17 +43,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
-
-      - name: npm build and test ${{ matrix.node-version }} on ${{ matrix.os }}
-        uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        working-directory: ./gui
-        run: npm ci
-      - name: Run npm build
-        run: npm run build --if-present
-        working-directory: ./gui
 
       - name: Add optionals dependencies
         run: |
@@ -77,9 +52,8 @@ jobs:
           python setup_packages.py | xargs -I% bash -c "pip install .[%]"
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
           # Run test with optionals packages installed
-          pip install pytest pytest-mock pytest-playwright
-          playwright install
-          pytest > pytest_res
+          pip install pytest pytest-mock
+          pytest -m "not teste2e"> pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"

@@ -2,6 +2,8 @@ import json
 import logging
 import typing as t
 
+import pytest
+
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import Builder
 
