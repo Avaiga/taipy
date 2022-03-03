@@ -925,7 +925,7 @@ class Gui:
         # (save rendered html to page.rendered_jsx for optimization)
         for page in self._config.pages + self._config.partials:  # type: ignore
             # Server URL Rule for each page jsx
-            pages_bp.add_url_rule(f"/taipy-jsx/{page.route}/", view_func=self._server._render_page)
+            pages_bp.add_url_rule(f"/taipy-jsx/{page._route}/", view_func=self._server._render_page)
 
         # server URL Rule for flask rendered react-router
         pages_bp.add_url_rule("/taipy-init/", view_func=self._server._render_route)

@@ -7,7 +7,7 @@ if util.find_spec("playwright"):
     from playwright._impl._page import Page
 
 from taipy.gui import Gui
-from taipy.gui.utils.date import ISO_to_date
+from taipy.gui.utils.date import _ISO_to_date
 
 
 @pytest.mark.teste2e
@@ -39,7 +39,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, text):
     page_md = """
 <|{t}|id=text1|>
 """
-    t = ISO_to_date("2022-03-03T00:00:00.000Z")
+    t = _ISO_to_date("2022-03-03T00:00:00.000Z")
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True, time_zone=time_zone)
     while not helpers.port_check():
