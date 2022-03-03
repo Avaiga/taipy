@@ -6,18 +6,18 @@ import pandas as pd
 import pyarrow as pa
 
 from ..utils import _get_date_col_str_name
-from .data_accessor import DataAccessor
-from .data_format import DataFormat
+from .data_accessor import _DataAccessor
+from .data_format import _DataFormat
 from ..gui import Gui
 
 
-class PandasDataAccessor(DataAccessor):
+class _PandasDataAccessor(_DataAccessor):
 
     __types = (pd.DataFrame,)
 
     @staticmethod
     def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in PandasDataAccessor.__types]
+        return [t.__name__ for t in _PandasDataAccessor.__types]
 
     @staticmethod
     def __style_function(
@@ -74,7 +74,7 @@ class PandasDataAccessor(DataAccessor):
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
                 cols.append(newcol)
-                data[newcol] = data[col].dt.strftime(DataAccessor._WS_DATE_FORMAT).astype(str)
+                data[newcol] = data[col].dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
         data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]
@@ -86,7 +86,7 @@ class PandasDataAccessor(DataAccessor):
         arg_count = user_function.__code__.co_argcount
         if arg_count > 0:
             data[function_name] = data.apply(
-                PandasDataAccessor.__style_function,
+                _PandasDataAccessor.__style_function,
                 axis=1,
                 args=(column_name, user_function, arg_count, function_name),
             )
@@ -98,7 +98,7 @@ class PandasDataAccessor(DataAccessor):
     def __format_data(
         self,
         data: pd.DataFrame,
-        data_format: DataFormat,
+        data_format: _DataFormat,
         orient: str = None,
         start: t.Optional[int] = None,
         rowcount: t.Optional[int] = None,
@@ -114,7 +114,7 @@ class PandasDataAccessor(DataAccessor):
             ret["start"] = start
         if data_extraction is not None:
             ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
-        if data_format == DataFormat.APACHE_ARROW:
+        if data_format == _DataFormat.APACHE_ARROW:
             # Convert from pandas to Arrow
             table = pa.Table.from_pandas(data)
             # Create sink buffer stream
@@ -135,15 +135,15 @@ class PandasDataAccessor(DataAccessor):
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, PandasDataAccessor.__types):
+        if isinstance(value, _PandasDataAccessor.__types):
             return value.dtypes.apply(lambda x: x.name).to_dict()
         return None
 
     def get_data(  # noqa: C901
-        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: DataFormat
+        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
-        if isinstance(value, PandasDataAccessor.__types):
+        if isinstance(value, _PandasDataAccessor.__types):
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
             columns = payload.get("columns", [])

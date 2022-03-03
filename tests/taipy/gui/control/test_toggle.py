@@ -8,19 +8,19 @@ def test_toggle_md_1(gui: Gui, helpers):
 
 
 def test_toggle_md_2(gui: Gui, helpers):
-    gui.bind_var_val("x", "l1")
-    gui.bind_var_val("lov", [("l1", "v1"), ("l2", "v2")])
+    gui._bind_var_val("x", "l1")
+    gui._bind_var_val("lov", [("l1", "v1"), ("l2", "v2")])
     md_string = "<|{x}|toggle|lov={lov}|label=Label|>"
     expected_list = [
         "<Toggle",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;]]"',
         'defaultValue="l1"',
         'label="Label"',
-        "lov={TaipyLov_lov}",
-        'updateVars="lov=TaipyLov_lov"',
-        'updateVarName="TaipyLovValue_x"',
+        "lov={_TpL_lov}",
+        'updateVars="lov=_TpL_lov"',
+        'updateVarName="_TpLv_x"',
         'unselectedValue=""',
-        "value={TaipyLovValue_x}",
+        "value={_TpLv_x}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -32,18 +32,18 @@ def test_toggle_html_1(gui: Gui, helpers):
 
 
 def test_toggle_html_2(gui: Gui, helpers):
-    gui.bind_var_val("x", "l1")
-    gui.bind_var_val("lov", [("l1", "v1"), ("l2", "v2")])
+    gui._bind_var_val("x", "l1")
+    gui._bind_var_val("lov", [("l1", "v1"), ("l2", "v2")])
     html_string = '<taipy:toggle lov="{lov}" label="Label">{x}</taipy:toggle>'
     expected_list = [
         "<Toggle",
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;]]"',
         'defaultValue="l1"',
         'label="Label"',
-        "lov={TaipyLov_lov}",
-        'updateVars="lov=TaipyLov_lov"',
-        'updateVarName="TaipyLovValue_x"',
+        "lov={_TpL_lov}",
+        'updateVars="lov=_TpL_lov"',
+        'updateVarName="_TpLv_x"',
         'unselectedValue=""',
-        "value={TaipyLovValue_x}",
+        "value={_TpLv_x}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

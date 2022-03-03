@@ -4,13 +4,13 @@ import socket
 import typing as t
 
 from taipy.gui import Gui, Html, Markdown
-from taipy.gui.renderers.builder import Builder
+from taipy.gui.renderers.builder import _Builder
 
 
 class Helpers:
     @staticmethod
     def test_cleanup():
-        Builder._reset_key()
+        _Builder._reset_key()
 
     @staticmethod
     def test_control_md(gui: Gui, md_string: str, expected_values: t.Union[str, t.List]):

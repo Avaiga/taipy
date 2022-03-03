@@ -2,35 +2,35 @@ import re
 
 from markdown.blockprocessors import BlockProcessor
 
-from .factory import MarkdownFactory
+from .factory import _MarkdownFactory
 
 
-class StartBlockProcessor(BlockProcessor):
+class _StartBlockProcessor(BlockProcessor):
     __RE_FENCE_START = re.compile(
-        MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.start(.*?)" + MarkdownFactory._TAIPY_END
+        _MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.start(.*?)" + _MarkdownFactory._TAIPY_END
     )  # start line
     __RE_OTHER_FENCE = re.compile(
-        MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)" + MarkdownFactory._TAIPY_END
+        _MarkdownFactory._TAIPY_START + r"([a-zA-Z][\.a-zA-Z_$0-9]*)\.(start|end)(.*?)" + _MarkdownFactory._TAIPY_END
     )  # start or end tag
 
     @staticmethod
     def extend(md, gui, priority):
-        instance = StartBlockProcessor(md.parser)
+        instance = _StartBlockProcessor(md.parser)
         md.parser.blockprocessors.register(instance, "taipy", priority)
         instance._gui = gui
 
     def test(self, parent, block):
-        return re.match(StartBlockProcessor.__RE_FENCE_START, block)
+        return re.match(_StartBlockProcessor.__RE_FENCE_START, block)
 
     def run(self, parent, blocks):
         original_block = blocks[0]
-        original_match = re.search(StartBlockProcessor.__RE_FENCE_START, original_block)
-        blocks[0] = re.sub(StartBlockProcessor.__RE_FENCE_START, "", blocks[0], 1)
+        original_match = re.search(_StartBlockProcessor.__RE_FENCE_START, original_block)
+        blocks[0] = re.sub(_StartBlockProcessor.__RE_FENCE_START, "", blocks[0], 1)
         tag = original_match.group(1)
         queue = [tag]
         # Find block with ending fence
         for block_num, block in enumerate(blocks):
-            matches = re.findall(StartBlockProcessor.__RE_OTHER_FENCE, block)
+            matches = re.findall(_StartBlockProcessor.__RE_OTHER_FENCE, block)
             for match in matches:
                 if queue[-1] == match[0] and match[1] == "end":
                     queue.pop()
@@ -39,13 +39,13 @@ class StartBlockProcessor(BlockProcessor):
             if not queue:
                 # remove end fence
                 blocks[block_num] = re.sub(
-                    MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + MarkdownFactory._TAIPY_END,
+                    _MarkdownFactory._TAIPY_START + tag + r"\.end(.*?)" + _MarkdownFactory._TAIPY_END,
                     "",
                     block,
                     1,
                 )
                 # render fenced area inside a new div
-                e = MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))
+                e = _MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))
                 parent.append(e)
                 self.parser.parseBlocks(e, blocks[: block_num + 1])
                 # remove used blocks

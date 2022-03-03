@@ -1,1 +1,1 @@
-from .parser import TaipyHTMLParser
+from .parser import _TaipyHTMLParser

@@ -2,7 +2,7 @@ from taipy.gui import Gui
 
 
 def test_status_md(gui: Gui, helpers):
-    gui.bind_var_val("status", [{"status": "info", "message": "Info Message"}])
+    gui._bind_var_val("status", [{"status": "info", "message": "Info Message"}])
     md_string = "<|{status}|status|>"
     expected_list = [
         "<Status",
@@ -13,7 +13,7 @@ def test_status_md(gui: Gui, helpers):
 
 
 def test_status_html(gui: Gui, helpers):
-    gui.bind_var_val("status", [{"status": "info", "message": "Info Message"}])
+    gui._bind_var_val("status", [{"status": "info", "message": "Info Message"}])
     html_string = '<taipy:status value="{status}" />'
     expected_list = [
         "<Status",

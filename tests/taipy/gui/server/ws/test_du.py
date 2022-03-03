@@ -24,7 +24,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
         {
             "client_id": sid,
             "type": "DU",
-            "name": "TaipyData_csvdata",
+            "name": "_TpD_csvdata",
             "payload": {
                 "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
                 "pagekey": "0-100--asc",
@@ -41,7 +41,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     helpers.assert_outward_ws_message(
         received_messages[0],
         "MU",
-        "TaipyData_csvdata",
+        "_TpD_csvdata",
         {
             "data": [
                 {

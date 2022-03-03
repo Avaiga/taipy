@@ -2,13 +2,13 @@ from typing import Any
 
 from markdown.extensions import Extension
 
-from .blocproc import StartBlockProcessor
-from .control import ControlPattern
-from .postproc import Postprocessor
-from .preproc import Preprocessor
+from .blocproc import _StartBlockProcessor
+from .control import _ControlPattern
+from .postproc import _Postprocessor
+from .preproc import _Preprocessor
 
 
-class TaipyMarkdownExtension(Extension):
+class _TaipyMarkdownExtension(Extension):
 
     config = {"gui": ["", "Gui object for extension"]}
 
@@ -19,7 +19,7 @@ class TaipyMarkdownExtension(Extension):
         if not isinstance(gui, Gui):
             raise RuntimeError("Gui instance is not bound to Markdown Extension")
         md.registerExtension(self)
-        Preprocessor.extend(md, gui, 210)
-        ControlPattern.extend(md, gui, 205)
-        StartBlockProcessor.extend(md, gui, 175)
-        Postprocessor.extend(md, gui, 200)
+        _Preprocessor.extend(md, gui, 210)
+        _ControlPattern.extend(md, gui, 205)
+        _StartBlockProcessor.extend(md, gui, 175)
+        _Postprocessor.extend(md, gui, 200)

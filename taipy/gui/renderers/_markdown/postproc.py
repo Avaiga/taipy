@@ -1,12 +1,12 @@
 from markdown.treeprocessors import Treeprocessor
 
-from ..builder import Builder
+from ..builder import _Builder
 
 
-class Postprocessor(Treeprocessor):
+class _Postprocessor(Treeprocessor):
     @staticmethod
     def extend(md, gui, priority):
-        instance = Postprocessor(md)
+        instance = _Postprocessor(md)
         md.treeprocessors.register(instance, "taipy", priority)
         instance._gui = gui
 
@@ -19,5 +19,5 @@ class Postprocessor(Treeprocessor):
                 p.set("class", classes)
                 p.tag = "div"
             if p != root:
-                p.set("key", Builder._get_key(p.tag))
+                p.set("key", _Builder._get_key(p.tag))
         return root

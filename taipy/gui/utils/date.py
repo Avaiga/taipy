@@ -1,11 +1,11 @@
 from datetime import datetime, date, time
 import warnings
 import typing as t
-from pytz import utc
 from dateutil import parser
+from pytz import utc
 
 
-def date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
+def _date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
     if isinstance(date_val, datetime):
         # return date.isoformat() + 'Z', if possible
         try:
@@ -17,7 +17,7 @@ def date_to_ISO(date_val: t.Union[datetime, date, time]) -> str:
     return date_val.isoformat()
 
 
-def ISO_to_date(date_str: str) -> datetime:
+def _ISO_to_date(date_str: str) -> datetime:
     # return datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%S.%fZ')
     # return datetime.fromisoformat(date_str)
     return parser.parse(date_str)

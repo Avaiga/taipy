@@ -17,7 +17,7 @@ if util.find_spec("magic"):
     _has_magic_module = True
 
 
-class ContentAccessor:
+class _ContentAccessor:
     def __init__(self, data_url_max_size: int) -> None:
         self.__content_paths: t.Dict[str, pathlib.Path] = {}
         self.__url_is_image: t.Dict[str, bool] = {}

@@ -12,7 +12,7 @@ as Taipy controls that are typically linked to some
 value that is managed by the whole Taipy application.
 """
 
-from .data import DataAccessor
+from .data import _DataAccessor
 from .gui import Gui
 from .icon import Icon
 from .renderers import Html, Markdown

@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from os import path
 
 from ..utils import _varname_from_content
-from ._html import TaipyHTMLParser
+from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -58,7 +58,7 @@ class Page(ABC):
         pass
 
 
-class EmptyPage(Page):
+class _EmptyPage(Page):
     def __init__(self) -> None:
         super().__init__("<PageContent />")
 
@@ -104,7 +104,7 @@ class Html(Page):
 
     # Generate JSX from HTML
     def render(self, gui: Gui) -> str:
-        parser = TaipyHTMLParser(gui)
+        parser = _TaipyHTMLParser(gui)
         parser.feed_data(str(self._content))
         self.head = parser.head
         return parser.get_jsx()
