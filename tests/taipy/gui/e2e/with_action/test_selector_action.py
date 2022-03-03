@@ -10,7 +10,7 @@ from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_slider_action(page: "Page", gui: Gui, helpers):
+def test_selector_action(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{x}|selector|lov=Item 1;Item 2;Item 3|id=selector1|>
 """
