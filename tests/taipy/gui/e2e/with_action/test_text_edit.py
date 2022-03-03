@@ -1,11 +1,15 @@
+from importlib import util
+
 import pytest
-from playwright._impl._page import Page
+
+if util.find_spec("playwright"):
+    from playwright._impl._page import Page
 
 from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_text_edit(page: Page, gui: Gui):
+def test_text_edit(page: "Page", gui: Gui):
     page_md = """
 <|{x}|text|id=text1|>
 
@@ -25,7 +29,7 @@ def test_text_edit(page: Page, gui: Gui):
 
 
 @pytest.mark.teste2e
-def test_number_edit(page: Page, gui: Gui):
+def test_number_edit(page: "Page", gui: Gui):
     page_md = """
 <|{x}|text|id=text1|>
 

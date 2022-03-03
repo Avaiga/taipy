@@ -1,11 +1,15 @@
+from importlib import util
+
 import pytest
-from playwright._impl._page import Page
+
+if util.find_spec("playwright"):
+    from playwright._impl._page import Page
 
 from taipy.gui import Gui
 
 
 @pytest.mark.teste2e
-def test_redirect(page: Page, gui: Gui):
+def test_redirect(page: "Page", gui: Gui):
     page_md = """
 <|Redirect Successfully|id=text1|>
 """
