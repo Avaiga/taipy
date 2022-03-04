@@ -24,6 +24,7 @@ jobs:
 
       - name: Install Taipy without dependencies
         run: |
+          sed -i 's/ssh/https/g' setup.py
           sed -i 's/git@github/${{ secrets.PERSONAL_TOKEN }}@github/g' setup.py
           pip install .
           rm -r taipy
