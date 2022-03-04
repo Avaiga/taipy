@@ -41,9 +41,9 @@ class ConfigChecker:
                 )
 
     def _check_existing_config_id(self, config):
-        if not config.name:
+        if not config.id:
             self._error(
                 "config_id",
-                config.name,
-                f"config_id of {config.__name__} {config.name} is empty.",
+                config.id,
+                f"config_id of {config.__name__} {config.id} is empty.",
             )

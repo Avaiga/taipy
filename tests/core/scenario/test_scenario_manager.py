@@ -245,9 +245,9 @@ def test_scenario_manager_only_creates_data_node_once():
     assert scenario.bar.read() == 0
     assert scenario.baz.read() == 0
     assert scenario.qux.read() == 0
-    assert scenario.by_6.get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.name
-    assert scenario.by_6.get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.name
-    assert scenario.by_4.get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.name
+    assert scenario.by_6.get_sorted_tasks()[0][0].config_id == task_mult_by_2_config.id
+    assert scenario.by_6.get_sorted_tasks()[1][0].config_id == task_mult_by_3_config.id
+    assert scenario.by_4.get_sorted_tasks()[0][0].config_id == task_mult_by_4_config.id
     assert scenario.cycle.frequency == Frequency.DAILY
 
 
@@ -356,7 +356,7 @@ def test_scenario_notification_subscribe_all():
     )
 
     scenario = ScenarioManager.create(scenario_config)
-    scenario_config.name = "other scenario"
+    scenario_config.id = "other scenario"
 
     other_scenario = ScenarioManager.create(scenario_config)
 

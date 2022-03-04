@@ -80,7 +80,7 @@ class TaskManager(Manager[Task]):
         }
         scope = min(dn.scope for dn in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        tasks_from_config_id = cls._get_all_by_config_id(task_config.name)
+        tasks_from_config_id = cls._get_all_by_config_id(task_config.id)
         tasks_from_parent = [task for task in tasks_from_config_id if task.parent_id == parent_id]
         if len(tasks_from_parent) == 1:
             return tasks_from_parent[0]
@@ -89,7 +89,7 @@ class TaskManager(Manager[Task]):
         else:
             inputs = [data_nodes[input_config] for input_config in task_config.input]
             outputs = [data_nodes[output_config] for output_config in task_config.output]
-            task = Task(task_config.name, task_config.function, inputs, outputs, parent_id=parent_id)
+            task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
             cls.set(task)
             return task
 

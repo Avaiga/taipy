@@ -27,25 +27,25 @@ def test_override_default_configuration_with_code_configuration():
     assert Config.global_config.notification
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
-    assert foo_config.name in Config.data_nodes
-    assert Config.data_nodes[foo_config.name].storage_type == "in_memory"
+    assert foo_config.id in Config.data_nodes
+    assert Config.data_nodes[foo_config.id].storage_type == "in_memory"
     assert len(Config.tasks) == 2
     assert "default" in Config.tasks
-    assert bar_config.name in Config.tasks
-    assert len(Config.tasks[bar_config.name].inputs) == 1
-    assert Config.tasks[bar_config.name].inputs[0].name == foo_config.name
-    assert len(Config.tasks[bar_config.name].outputs) == 0
-    assert Config.tasks[bar_config.name].function == print
+    assert bar_config.id in Config.tasks
+    assert len(Config.tasks[bar_config.id].inputs) == 1
+    assert Config.tasks[bar_config.id].inputs[0].id == foo_config.id
+    assert len(Config.tasks[bar_config.id].outputs) == 0
+    assert Config.tasks[bar_config.id].function == print
     assert len(Config.pipelines) == 2
     assert "default" in Config.pipelines
-    assert baz_config.name in Config.pipelines
-    assert len(Config.pipelines[baz_config.name].tasks) == 1
-    assert Config.pipelines[baz_config.name].tasks[0].name == bar_config.name
+    assert baz_config.id in Config.pipelines
+    assert len(Config.pipelines[baz_config.id].tasks) == 1
+    assert Config.pipelines[baz_config.id].tasks[0].id == bar_config.id
     assert len(Config.scenarios) == 2
     assert "default" in Config.scenarios
-    assert qux_config.name in Config.scenarios
-    assert len(Config.scenarios[qux_config.name].pipelines) == 1
-    assert Config.scenarios[qux_config.name].pipelines[0].name == baz_config.name
+    assert qux_config.id in Config.scenarios
+    assert len(Config.scenarios[qux_config.id].pipelines) == 1
+    assert Config.scenarios[qux_config.id].pipelines[0].id == baz_config.id
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():

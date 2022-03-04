@@ -13,7 +13,7 @@ class TestJobConfigChecker:
         JobConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
 
-        dn_config_1 = Config.add_data_node(name="foo", storage_type="in_memory")
+        dn_config_1 = Config.add_data_node(id="foo", storage_type="in_memory")
         DataManager.get_or_create(dn_config_1)
         assert len(tp.get_data_nodes()) == 1
 

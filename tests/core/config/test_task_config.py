@@ -21,10 +21,10 @@ def test_task_config_creation():
     output_config = Config.add_data_node("output")
     task_config = Config.add_task("tasks1", print, input_config, output_config)
 
-    assert list(Config.tasks) == ["default", task_config.name]
+    assert list(Config.tasks) == ["default", task_config.id]
 
     task2 = Config.add_task("tasks2", print, input_config, output_config)
-    assert list(Config.tasks) == ["default", task_config.name, task2.name]
+    assert list(Config.tasks) == ["default", task_config.id, task2.id]
 
 
 def test_task_count():
@@ -43,14 +43,14 @@ def test_task_count():
 def test_task_getitem():
     input_config = Config.add_data_node("input")
     output_config = Config.add_data_node("output")
-    task_name = "tasks1"
-    task = Config.add_task(task_name, print, input_config, output_config)
+    task_id = "tasks1"
+    task = Config.add_task(task_id, print, input_config, output_config)
 
-    assert Config.tasks[task_name].name == task.name
-    assert Config.tasks[task_name].properties == task.properties
-    assert Config.tasks[task_name].function == task.function
-    assert Config.tasks[task_name].inputs == task.inputs
-    assert Config.tasks[task_name].outputs == task.outputs
+    assert Config.tasks[task_id].id == task.id
+    assert Config.tasks[task_id].properties == task.properties
+    assert Config.tasks[task_id].function == task.function
+    assert Config.tasks[task_id].inputs == task.inputs
+    assert Config.tasks[task_id].outputs == task.outputs
 
 
 def test_task_creation_no_duplication():

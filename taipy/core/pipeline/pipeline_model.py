@@ -13,15 +13,15 @@ class PipelineModel:
     A model refers to the structure of a Pipeline stored in a database.
 
     Attributes:
-        id (PipelineId): identifier of a Pipeline.
+        id (PipelineId): Identifier of a Pipeline.
+        config_id (str): Identifier of the pipeline configuration.
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        name (str): name of the pipeline.
         properties(dict): List of additional arguments.
     """
 
     id: PipelineId
     parent_id: Optional[str]
-    name: str
+    config_id: str
     properties: Dict[str, Any]
     tasks: List[TaskId]
     subscribers: List[Dict]
@@ -33,8 +33,8 @@ class PipelineModel:
     def from_dict(data: Dict[str, Any]):
         return PipelineModel(
             id=data["id"],
+            config_id=data["config_id"],
             parent_id=data["parent_id"],
-            name=data["name"],
             properties=data["properties"],
             tasks=data["tasks"],
             subscribers=data["subscribers"],

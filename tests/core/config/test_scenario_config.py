@@ -37,10 +37,10 @@ def test_scenario_creation():
         "scenarios1", [pipeline1_config, pipeline2_config], comparators={"dn_cfg": [my_func]}
     )
 
-    assert list(Config.scenarios) == ["default", scenario.name]
+    assert list(Config.scenarios) == ["default", scenario.id]
 
     scenario2 = Config.add_scenario("scenarios2", [pipeline1_config, pipeline2_config], Frequency.MONTHLY)
-    assert list(Config.scenarios) == ["default", scenario.name, scenario2.name]
+    assert list(Config.scenarios) == ["default", scenario.id, scenario2.id]
 
 
 def test_scenario_count():
@@ -55,12 +55,12 @@ def test_scenario_count():
 
 
 def test_scenario_getitem():
-    scenario_name = "scenarios1"
-    scenario = Config.add_scenario(scenario_name, [pipeline1_config, pipeline2_config])
+    scenario_id = "scenarios1"
+    scenario = Config.add_scenario(scenario_id, [pipeline1_config, pipeline2_config])
 
-    assert Config.scenarios[scenario_name].name == scenario.name
-    assert Config.scenarios[scenario_name].pipelines == scenario.pipelines
-    assert Config.scenarios[scenario_name].properties == scenario.properties
+    assert Config.scenarios[scenario_id].id == scenario.id
+    assert Config.scenarios[scenario_id].pipelines == scenario.pipelines
+    assert Config.scenarios[scenario_id].properties == scenario.properties
 
 
 def test_scenario_creation_no_duplication():
@@ -110,12 +110,12 @@ def test_scenario_config_with_env_variable_value():
 
 
 def test_scenario_create_from_tasks():
-    data_node_1_config = Config.add_data_node(name="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+    data_node_1_config = Config.add_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
     data_node_2_config = Config.add_data_node(
-        name="d2", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+        id="d2", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
     )
     data_node_3_config = Config.add_data_node(
-        name="d3", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+        id="d3", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
     )
     task_config_1 = Config.add_task("t1", print, data_node_1_config, data_node_2_config, scope=Scope.GLOBAL)
     task_config_2 = Config.add_task("t2", print, data_node_2_config, data_node_3_config, scope=Scope.GLOBAL)
@@ -126,14 +126,14 @@ def test_scenario_create_from_tasks():
     assert len(scenario_config_1.pipelines) == 1
     assert len(scenario_config_1.pipelines[0].tasks) == 2
     # Should create a default pipeline name
-    assert isinstance(scenario_config_1.pipelines[0].name, str)
-    assert scenario_config_1.pipelines[0].name == f"{scenario_config_1.name}_pipeline"
+    assert isinstance(scenario_config_1.pipelines[0].id, str)
+    assert scenario_config_1.pipelines[0].id == f"{scenario_config_1.id}_pipeline"
 
     pipeline_name = "p1"
     scenario_config_2 = Config.add_scenario_from_tasks(
-        "s2", task_configs=[task_config_1, task_config_2], pipeline_name=pipeline_name
+        "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
     )
     ScenarioManager.submit(ScenarioManager.create(scenario_config_2))
     assert len(ScenarioManager.get_all()) == 2
     assert len(PipelineManager.get_all()) == 2
-    assert scenario_config_2.pipelines[0].name == pipeline_name
+    assert scenario_config_2.pipelines[0].id == pipeline_name

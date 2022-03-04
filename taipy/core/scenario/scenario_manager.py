@@ -99,7 +99,7 @@ class ScenarioManager(Manager[Scenario]):
                 default value.
             display_name (Optional[str]) : Display name of the scenario.
         """
-        scenario_id = Scenario.new_id(config.name)
+        scenario_id = Scenario.new_id(config.id)
         pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
         cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
@@ -107,7 +107,7 @@ class ScenarioManager(Manager[Scenario]):
         if display_name:
             props["display_name"] = display_name
         scenario = Scenario(
-            config.name,
+            config.id,
             pipelines,
             props,
             scenario_id,
@@ -281,11 +281,11 @@ class ScenarioManager(Manager[Scenario]):
     @classmethod
     def compare(cls, *scenarios: Scenario, data_node_config_id: str = None):
         """
-        Compares the data nodes of given scenarios with known datanode config name.
+        Compares the data nodes of given scenarios with known datanode config id.
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
-            data_node_config_id (Optional[str]) : config name of the DataNode to compare scenarios, if no
+            data_node_config_id (Optional[str]) : config id of the DataNode to compare scenarios, if no
                 dn_config_id is provided, the scenarios will be compared based on all the previously defined
                 comparators.
         Raises:

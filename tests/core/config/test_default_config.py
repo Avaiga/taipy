@@ -29,8 +29,8 @@ def _test_default_job_config(job_config: JobConfig):
 
 def _test_default_data_node_config(dn_config: DataNodeConfig):
     assert dn_config is not None
-    assert dn_config.name is not None
-    assert dn_config.name == protect_name(dn_config.name)
+    assert dn_config.id is not None
+    assert dn_config.id == protect_name(dn_config.id)
     assert dn_config.storage_type == "pickle"
     assert dn_config.scope == Scope.SCENARIO
     assert not dn_config.cacheable
@@ -39,8 +39,8 @@ def _test_default_data_node_config(dn_config: DataNodeConfig):
 
 def _test_default_task_config(task_config: TaskConfig):
     assert task_config is not None
-    assert task_config.name is not None
-    assert task_config.name == protect_name(task_config.name)
+    assert task_config.id is not None
+    assert task_config.id == protect_name(task_config.id)
     assert task_config.inputs == []
     assert task_config.outputs == []
     assert task_config.function is None
@@ -49,16 +49,16 @@ def _test_default_task_config(task_config: TaskConfig):
 
 def _test_default_pipeline_config(pipeline_config: PipelineConfig):
     assert pipeline_config is not None
-    assert pipeline_config.name is not None
-    assert pipeline_config.name == protect_name(pipeline_config.name)
+    assert pipeline_config.id is not None
+    assert pipeline_config.id == protect_name(pipeline_config.id)
     assert pipeline_config.tasks == []
     assert len(pipeline_config.properties) == 0
 
 
 def _test_default_scenario_config(scenario_config: ScenarioConfig):
     assert scenario_config is not None
-    assert scenario_config.name is not None
-    assert scenario_config.name == protect_name(scenario_config.name)
+    assert scenario_config.id is not None
+    assert scenario_config.id == protect_name(scenario_config.id)
     assert scenario_config.pipelines == []
     assert len(scenario_config.properties) == 0
 

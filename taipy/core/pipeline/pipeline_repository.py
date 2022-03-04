@@ -37,7 +37,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
         try:
             tasks = self.__to_tasks(model.tasks)
             pipeline = Pipeline(
-                model.name,
+                model.config_id,
                 model.properties,
                 tasks,
                 model.id,

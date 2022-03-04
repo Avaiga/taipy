@@ -14,12 +14,12 @@ class TestDataNodeConfigChecker:
         assert len(collector.errors) == 0
 
         config.data_nodes["new"] = copy(config.data_nodes["default"])
-        config.data_nodes["new"].name = None
+        config.data_nodes["new"].id = None
         collector = IssueCollector()
         DataNodeConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
 
-        config.data_nodes["new"].name = "new"
+        config.data_nodes["new"].id = "new"
         collector = IssueCollector()
         DataNodeConfigChecker(config, collector).check()
         assert len(collector.errors) == 0
