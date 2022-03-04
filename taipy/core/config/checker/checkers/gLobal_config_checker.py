@@ -10,13 +10,13 @@ class GlobalConfigChecker(ConfigChecker):
 
     def check(self) -> IssueCollector:
         global_config = self.config.global_config
-        self._check_notification_field(global_config)
+        self._check_bolean_field(global_config)
         return self.collector
 
-    def _check_notification_field(self, global_config: GlobalAppConfig):
-        if not isinstance(global_config.notification, bool):
+    def _check_bolean_field(self, global_config: GlobalAppConfig):
+        if not isinstance(global_config.clean_entities_enabled, bool):
             self._error(
-                global_config.NOTIFICATION_KEY,
-                global_config.notification,
-                f"{global_config.NOTIFICATION_KEY} field must be populated with a boolean value.",
+                global_config.CLEAN_ENTITIES_ENABLED_KEY,
+                global_config.clean_entities_enabled,
+                f"{global_config.CLEAN_ENTITIES_ENABLED_KEY} field must be populated with a boolean value.",
             )

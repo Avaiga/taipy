@@ -41,8 +41,6 @@ nb_of_workers = 10
 def test_write_configuration_file():
     expected_config = """
 [TAIPY]
-notification = true
-broker_endpoint = "my_broker_end_point"
 root_folder = "./taipy/"
 storage_folder = ".data/"
 clean_entities_enabled = true
@@ -100,7 +98,7 @@ frequency = "QUARTERLY"
 owner = "Raymond Kopa"
     """.strip()
 
-    Config.set_global_config(True, "my_broker_end_point", clean_entities_enabled=True)
+    Config.set_global_config(clean_entities_enabled=True)
     Config.set_job_config(mode="standalone")
     Config.add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
     dn1_cfg_v2 = Config.add_data_node(
@@ -190,7 +188,7 @@ frequency = "QUARTERLY"
 owner = "Raymond Kopa"
     """.strip()
 
-    Config.set_global_config(True, "my_broker_end_point", clean_entities_enabled=True)
+    Config.set_global_config(clean_entities_enabled=True)
     Config.set_job_config(mode="airflow")
     Config.add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
     dn1_cfg_v2 = Config.add_data_node(

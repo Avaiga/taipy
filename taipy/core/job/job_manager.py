@@ -1,5 +1,5 @@
 import uuid
-from typing import Callable, Iterable, List
+from typing import Callable, Iterable, List, Optional
 
 from taipy.core.common.alias import JobId
 from taipy.core.common.manager import Manager
@@ -52,10 +52,16 @@ class JobManager(Manager[Job]):
             raise err
 
     @classmethod
-    def get_latest(cls, task: Task) -> Job:
+    def get_latest(cls, task: Task) -> Optional[Job]:
         """Allows to retrieve the latest computed job of a task.
 
         Returns:
             The latest computed job of the task.
         """
-        return max(filter(lambda job: task in job, cls.get_all()))
+        jobs_of_task = list(filter(lambda job: task in job, cls.get_all()))
+        if len(jobs_of_task) == 0:
+            return None
+        if len(jobs_of_task) == 1:
+            return jobs_of_task[0]
+        else:
+            return max(jobs_of_task)

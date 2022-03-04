@@ -15,13 +15,13 @@ class ConfigChecker:
         raise NotImplementedError
 
     def _error(self, field: str, value: Any, message: str):
-        self.collector.add_error(field, value, message, self.__class__.__name__)
+        self.collector._add_error(field, value, message, self.__class__.__name__)
 
     def _warning(self, field: str, value: Any, message: str):
-        self.collector.add_warning(field, value, message, self.__class__.__name__)
+        self.collector._add_warning(field, value, message, self.__class__.__name__)
 
     def _info(self, field: str, value: Any, message: str):
-        self.collector.add_info(field, value, message, self.__class__.__name__)
+        self.collector._add_info(field, value, message, self.__class__.__name__)
 
     def _check_children(self, parent_config_class, config_id: str, config_key: str, config_value, child_config_class):
         if not config_value:

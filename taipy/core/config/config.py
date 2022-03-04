@@ -103,8 +103,6 @@ class Config:
     @classmethod
     def set_global_config(
         cls,
-        notification: Union[bool, str] = None,
-        broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
         clean_entities_enabled: Union[bool, str] = None,
@@ -112,7 +110,7 @@ class Config:
     ) -> GlobalAppConfig:
         """Configures fields related to global application."""
         cls._python_config.global_config = GlobalAppConfig(
-            notification, broker_endpoint, root_folder, storage_folder, clean_entities_enabled, **properties
+            root_folder, storage_folder, clean_entities_enabled, **properties
         )
         cls.__compile_configs()
         return cls._applied_config.global_config
@@ -276,13 +274,13 @@ class Config:
 
     @classmethod
     def __log_message(cls, config):
-        for issue in config.collector.warnings:
+        for issue in config.collector._warnings:
             cls.__logger.warning(str(issue))
-        for issue in config.collector.infos:
+        for issue in config.collector._infos:
             cls.__logger.info(str(issue))
-        for issue in config.collector.errors:
+        for issue in config.collector._errors:
             cls.__logger.error(str(issue))
-        if len(config.collector.errors) != 0:
+        if len(config.collector._errors) != 0:
             raise ConfigurationIssueError
 
 

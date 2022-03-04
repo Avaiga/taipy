@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from taipy.core.common.alias import CycleId, Dag, PipelineId, ScenarioId
+from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
 from taipy.core.config.global_app_config import GlobalAppConfig

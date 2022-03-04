@@ -44,10 +44,10 @@ class TestTaipy:
             export.assert_called_once_with(file_name)
 
     def test_configure_global_app(self):
-        a, b, c, d, e, f = "foo", "bar", "baz", "qux", "quux", "grault"
+        a, b, c, d = "foo", "bar", "baz", "qux"
         with mock.patch("taipy.core.config.config.Config.set_global_config") as set_global:
-            tp.configure_global_app(a, b, c, d, e, property=f)
-            set_global.assert_called_once_with(a, b, c, d, e, property=f)
+            tp.configure_global_app(a, b, c, property=d)
+            set_global.assert_called_once_with(a, b, c, property=d)
 
     def test_configure_job_executions(self):
         a, b, my_property = "foo", "bar", "garphy"

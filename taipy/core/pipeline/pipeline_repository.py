@@ -2,7 +2,6 @@ import pathlib
 from collections import defaultdict
 
 from taipy.core.common import utils
-from taipy.core.common.alias import Dag
 from taipy.core.config.config import Config
 from taipy.core.exceptions.pipeline import NonExistingPipeline
 from taipy.core.exceptions.task import NonExistingTask

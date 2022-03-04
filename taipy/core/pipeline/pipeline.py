@@ -1,10 +1,9 @@
 import uuid
-from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
-from taipy.core.common.alias import Dag, PipelineId
+from taipy.core.common.alias import PipelineId
 from taipy.core.common.reload import reload, self_reload
 from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.common.utils import fcts_to_dict

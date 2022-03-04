@@ -56,17 +56,24 @@ def test_get_job():
 def test_get_latest_job():
     scheduler = Scheduler()
     task = _create_task(multiply)
+    task_2 = _create_task(multiply)
 
     job_1 = scheduler.submit_task(task)
     assert JobManager.get_latest(task) == job_1
+    assert JobManager.get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = scheduler.submit_task(task)
-    assert JobManager.get_latest(task).id == job_2.id
+    job_2 = scheduler.submit_task(task_2)
+    assert JobManager.get_latest(task).id == job_1.id
+    assert JobManager.get_latest(task_2).id == job_2.id
+
+    sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
+    job_1_bis = scheduler.submit_task(task)
+    assert JobManager.get_latest(task).id == job_1_bis.id
+    assert JobManager.get_latest(task_2).id == job_2.id
 
 
 def test_get_job_unknown():
-
     assert JobManager.get(JobId("Unknown")) is None
 
 

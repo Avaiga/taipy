@@ -5,36 +5,45 @@ from taipy.core.config.checker.issue import Issue
 
 class IssueCollector:
     """
-    Dataclass representing an issue detected in the compiled configuration.
+    A collection of `Issue`s.
 
-    attributes:
-        errors (List[Issue]): List of error issues collected.
-        warnings (List[Issue]): List warning issues collected.
-        infos (List[Issue]): List info issues collected.
-        all (List[Issue]): List of all issues collected ordered by decreasing level (Error, warning and info).
+    Attributes:
+        errors (List[`Issue`]): List of ERROR issues collected.
+        warnings (List[`Issue`]): List WARNING issues collected.
+        infos (List[`Issue`]): List INFO issues collected.
+        all (List[`Issue`]): List of all issues collected ordered by decreasing level (ERROR, WARNING and INFO).
     """
 
-    ERROR_LEVEL = "ERROR"
-    WARNING_LEVEL = "WARNING"
-    INFO_LEVEL = "INFO"
+    _ERROR_LEVEL = "ERROR"
+    _WARNING_LEVEL = "WARNING"
+    _INFO_LEVEL = "INFO"
 
     def __init__(self):
-        self.errors: List[Issue] = []
-        self.warnings: List[Issue] = []
-        self.infos: List[Issue] = []
+        self._errors: List[Issue] = []
+        self._warnings: List[Issue] = []
+        self._infos: List[Issue] = []
 
     @property
     def all(self) -> List[Issue]:
-        return self.errors + self.warnings + self.infos
+        return self._errors + self._warnings + self._infos
 
-    def add_error(self, field: str, value: Any, message: str, checker_name: str):
-        """Adds an issue with error level."""
-        self.errors.append(Issue(self.ERROR_LEVEL, field, value, message, checker_name))
+    @property
+    def infos(self) -> List[Issue]:
+        return self._infos
 
-    def add_warning(self, field: str, value: Any, message: str, checker_name: str):
-        """Adds an issue with warning level."""
-        self.warnings.append(Issue(self.WARNING_LEVEL, field, value, message, checker_name))
+    @property
+    def warnings(self) -> List[Issue]:
+        return self._warnings
 
-    def add_info(self, field: str, value: Any, message: str, checker_name: str):
-        """Adds an issue with info level."""
-        self.infos.append(Issue(self.INFO_LEVEL, field, value, message, checker_name))
+    @property
+    def errors(self) -> List[Issue]:
+        return self._errors
+
+    def _add_error(self, field: str, value: Any, message: str, checker_name: str):
+        self._errors.append(Issue(self._ERROR_LEVEL, field, value, message, checker_name))
+
+    def _add_warning(self, field: str, value: Any, message: str, checker_name: str):
+        self._warnings.append(Issue(self._WARNING_LEVEL, field, value, message, checker_name))
+
+    def _add_info(self, field: str, value: Any, message: str, checker_name: str):
+        self._infos.append(Issue(self._INFO_LEVEL, field, value, message, checker_name))
