@@ -2,13 +2,15 @@
 
 """The setup script."""
 
+import os
+from pathlib import Path
 from setuptools import find_packages, setup
+from setuptools.command.build_py import build_py
+
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open("docs/history.md") as history_file:
-    history = history_file.read()
 
 requirements = [
     "flask",
@@ -34,6 +36,19 @@ extras_require = {
     "rdp": ["rdp>=0.8"],
 }
 
+
+def _build_webapp():
+    already_exists = Path(f'./taipy/gui/webapp/index.html').exists()
+    if not already_exists:
+        os.system('cd gui && npm ci && npm run build')
+
+
+class NPMInstall(build_py):
+    def run(self):
+        _build_webapp()
+        build_py.run(self)
+
+
 setup(
     author="Avaiga",
     author_email="taipy.dev@avaiga.com",
@@ -50,7 +65,6 @@ setup(
     description="AI Platform for Business Applications.",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme + "\n\n" + history,
     include_package_data=True,
     keywords="taipy-gui",
     name="taipy-gui",
@@ -58,7 +72,8 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-gui",
-    version="0.1.2",
+    version="1.0.0.dev",
     zip_safe=False,
     extras_require=extras_require,
+    cmdclass={'build_py': NPMInstall},
 )

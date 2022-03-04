@@ -2,4 +2,4 @@
 
 __author__ = """Avaiga"""
 __email__ = "taipy.dev@avaiga.com"
-__version__ = "0.1.0"
+__version__ = "1.0.0.dev"
