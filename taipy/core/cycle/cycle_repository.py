@@ -21,7 +21,7 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             creation_date=cycle._creation_date.isoformat(),
             start_date=cycle._start_date.isoformat(),
             end_date=cycle._end_date.isoformat(),
-            properties=cycle.properties.data,
+            properties=cycle._properties.data,
         )
 
     def from_model(self, model: CycleModel) -> Cycle:

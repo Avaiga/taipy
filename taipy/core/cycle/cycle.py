@@ -5,7 +5,7 @@ from typing import Any, Dict
 from taipy.core.common.alias import CycleId
 from taipy.core.common.entity import Entity
 from taipy.core.common.frequency import Frequency
-from taipy.core.common.reload import self_reload, self_setter
+from taipy.core.common.reload import reload, self_reload, self_setter
 from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.common.wrapper import Properties
 
@@ -42,11 +42,11 @@ class Cycle(Entity):
         self._creation_date = creation_date
         self._start_date = start_date
         self._end_date = end_date
-        self._name = self.new_name(name)
+        self._name = self.__new_name(name)
         self.id = id or self.new_id(self._name)
-        self.properties = Properties(self, **properties)
+        self._properties = Properties(self, **properties)
 
-    def new_name(self, name: str = None) -> str:
+    def __new_name(self, name: str = None) -> str:
         return (
             protect_name(name)
             if name
@@ -54,54 +54,59 @@ class Cycle(Entity):
         )
 
     @property  # type: ignore
-    @self_reload("cycle")
+    @self_reload(MANAGER_NAME)
     def frequency(self):
         return self._frequency
 
     @frequency.setter  # type: ignore
-    @self_setter("cycle")
+    @self_setter(MANAGER_NAME)
     def frequency(self, val):
         self._frequency = val
 
     @property  # type: ignore
-    @self_reload("cycle")
+    @self_reload(MANAGER_NAME)
     def creation_date(self):
         return self._creation_date
 
     @creation_date.setter  # type: ignore
-    @self_setter("cycle")
+    @self_setter(MANAGER_NAME)
     def creation_date(self, val):
         self._creation_date = val
 
     @property  # type: ignore
-    @self_reload("cycle")
+    @self_reload(MANAGER_NAME)
     def start_date(self):
         return self._start_date
 
     @start_date.setter  # type: ignore
-    @self_setter("cycle")
+    @self_setter(MANAGER_NAME)
     def start_date(self, val):
         self._start_date = val
 
     @property  # type: ignore
-    @self_reload("cycle")
+    @self_reload(MANAGER_NAME)
     def end_date(self):
         return self._end_date
 
     @end_date.setter  # type: ignore
-    @self_setter("cycle")
+    @self_setter(MANAGER_NAME)
     def end_date(self, val):
         self._end_date = val
 
     @property  # type: ignore
-    @self_reload("cycle")
+    @self_reload(MANAGER_NAME)
     def name(self):
         return self._name
 
     @name.setter  # type: ignore
-    @self_setter("cycle")
+    @self_setter(MANAGER_NAME)
     def name(self, val):
         self._name = val
+
+    @property  # type: ignore
+    def properties(self):
+        self._properties = reload(self.MANAGER_NAME, self)._properties
+        return self._properties
 
     @staticmethod
     def new_id(name: str) -> CycleId:
@@ -109,8 +114,8 @@ class Cycle(Entity):
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = protect_name(attribute_name)
-        if protected_attribute_name in self.properties:
-            return self.properties[protected_attribute_name]
+        if protected_attribute_name in self._properties:
+            return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")
 
     def __eq__(self, other):

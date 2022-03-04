@@ -33,6 +33,7 @@ class Scenario:
     """
 
     ID_PREFIX = "SCENARIO"
+    MANAGER_NAME = "scenario"
     __SEPARATOR = "_"
 
     def __init__(

@@ -60,14 +60,14 @@ def test_add_property_to_scenario(current_datetime):
     assert cycle.key == "value"
     assert cycle.new_key == "new_value"
 
-    tp.set(cycle)
+    CycleManager.set(cycle)
+    same_cycle = CycleManager.get(cycle)
     cycle.properties["qux"] = 5
-    same_cycle = tp.get(cycle.id)
     assert cycle.properties["qux"] == 5
     assert same_cycle.properties["qux"] == 5
 
 
-def test_auto_set(current_datetime):
+def test_auto_set_and_reload(current_datetime):
     cycle_1 = Cycle(
         Frequency.WEEKLY,
         {"key": "value"},
@@ -123,7 +123,7 @@ def test_auto_set(current_datetime):
         assert cycle.start_date == new_datetime
         assert cycle.end_date == new_datetime
         assert cycle.name == "def"
-        assert cycle.is_in_context
+        assert cycle._is_in_context
 
         new_datetime_2 = new_datetime + timedelta(1)
         cycle.frequency = Frequency.YEARLY

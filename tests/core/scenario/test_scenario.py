@@ -98,3 +98,8 @@ def test_add_and_remove_tag():
 
     scenario.remove_tag("tag")
     assert len(scenario.tags) == 0
+
+
+def test_auto_set_and_reload():
+    # scenario = Scenario("foo", [], {})
+    pass
