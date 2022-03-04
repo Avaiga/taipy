@@ -781,7 +781,7 @@ class Gui:
         to = to or Gui.__root_page_name
         if to not in self._config.routes:
             warnings.warn(
-                f'cannot navigate to "{to if to != Gui.__root_page_name else "/"}" which is not a declared route.')
+                f'cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return
         self.__send_ws_navigate(to)
 

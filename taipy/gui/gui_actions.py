@@ -31,18 +31,18 @@ def notify(
 
     Args:
         state: the current user state as received in any callback.
-        notification_type (optional(string)): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
+        notification_type (optional(string)): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`. Default: `"info"`.
             To remove the last notification, set this parameter to the empty string.
         message (string): The text message to display.
         browser_notification (optional(bool)): If set to `True`, the browser will also show the notification.
-            If not specified or set to `None`, this parameter will user the value of
+            If not specified or set to `None`, this parameter will use the value of
             `app_config[browser_notification]`.
         duration (optional(int)): The time, in milliseconds, during which the notification is shown.
             If not specified or set to `None`, this parameter will use the value of
             `app_config[notification_duration]`.
 
-    Note that you can also call this function with _type_ set to the first letter or the alert type
-    (ie setting _type_ to `"i"` is equivalent to setting it to `"info"`).
+    Note that you can also call this function with _notification_type_ set to the first letter or the alert type
+    (ie setting _notification_type_ to `"i"` is equivalent to setting it to `"info"`).
     """
     if state and isinstance(state._gui, Gui):
         state._gui._notify(notification_type, message, browser_notification, duration)
@@ -50,7 +50,7 @@ def notify(
         warnings.warn("'notify' function should be called in the context of a callback")
 
 
-def hold_actions(
+def hold_control(
     state: State,
     callback: t.Optional[t.Union[str, t.Callable]] = None,
     message: t.Optional[str] = "Work in Progress...",
@@ -68,7 +68,7 @@ def hold_actions(
         warnings.warn("'hold_actions' function should be called in the context of a callback")
 
 
-def resume_actions(state: State):
+def resume_control(state: State):
     """Resume the UI actions (ie allows user interactions).
 
     Args:

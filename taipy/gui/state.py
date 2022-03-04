@@ -10,8 +10,6 @@ class State:
     Attributes:
 
         assign (Callable): allows to set a variable inside a lambda function (state.assign("name", value) is equivalent to state.name = value).
-        gui (Gui): easy access to gui methods.
-
     """
     __attrs = ("_gui", "_user_var_list")
     __methods = ("assign")
