@@ -22,14 +22,14 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
     def to_model(self, scenario: Scenario):
         return ScenarioModel(
             id=scenario.id,
-            name=scenario.config_id,
-            pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
+            name=scenario._config_id,
+            pipelines=self.__to_pipeline_ids(scenario._pipelines.values()),
             properties=scenario._properties.data,
-            creation_date=scenario.creation_date.isoformat(),
+            creation_date=scenario._creation_date.isoformat(),
             master_scenario=scenario._master_scenario,
             subscribers=utils.fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
-            cycle=self.__to_cycle_id(scenario.cycle),
+            cycle=self.__to_cycle_id(scenario._cycle),
         )
 
     def from_model(self, model: ScenarioModel) -> Scenario:

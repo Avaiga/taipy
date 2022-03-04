@@ -60,12 +60,6 @@ def test_add_property_to_scenario(current_datetime):
     assert cycle.key == "value"
     assert cycle.new_key == "new_value"
 
-    CycleManager.set(cycle)
-    same_cycle = CycleManager.get(cycle)
-    cycle.properties["qux"] = 5
-    assert cycle.properties["qux"] == 5
-    assert same_cycle.properties["qux"] == 5
-
 
 def test_auto_set_and_reload(current_datetime):
     cycle_1 = Cycle(
@@ -116,6 +110,11 @@ def test_auto_set_and_reload(current_datetime):
     cycle_1.name = "def"
     assert cycle_1.name == "def"
     assert cycle_2.name == "def"
+
+    assert cycle_1.properties == {"key": "value"}
+    cycle_1._properties["qux"] = 5
+    assert cycle_1.properties["qux"] == 5
+    assert cycle_2.properties["qux"] == 5
 
     with cycle_1 as cycle:
         assert cycle.frequency == Frequency.MONTHLY
