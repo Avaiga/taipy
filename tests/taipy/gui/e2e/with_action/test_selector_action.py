@@ -24,5 +24,7 @@ def test_selector_action(page: "Page", gui: Gui, helpers):
     page.wait_for_selector("#selector1")
     assert gui._bindings().x == "Item 1"
     page.click('#selector1 ul > div[data-id="Item 3"]')
-    time.sleep(1)
+    page.wait_for_function(
+        "document.querySelector('#selector1 ul > div[data-id=\"Item 3\"]').classList.contains('Mui-selected')"
+    )
     assert gui._bindings().x == "Item 3"

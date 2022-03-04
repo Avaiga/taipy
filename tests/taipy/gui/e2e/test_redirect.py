@@ -19,6 +19,7 @@ def test_redirect(page: "Page", gui: Gui, helpers):
     while not helpers.port_check():
         time.sleep(0.5)
     page.goto("/")
+    page.expect_websocket()
     page.wait_for_selector("#text1")
     text1 = page.query_selector("#text1")
     assert text1.inner_text() == "Redirect Successfully"

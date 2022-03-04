@@ -19,6 +19,7 @@ def test_theme_light(page: "Page", gui: Gui, helpers):
     while not helpers.port_check():
         time.sleep(0.5)
     page.goto("/")
+    page.expect_websocket()
     page.wait_for_selector("#text1")
     background_color = page.evaluate(
         'window.getComputedStyle(document.querySelector("main"), null).getPropertyValue("background-color")'
@@ -36,6 +37,7 @@ def test_theme_dark(page: "Page", gui: Gui, helpers):
     while not helpers.port_check():
         time.sleep(0.1)
     page.goto("/")
+    page.expect_websocket()
     page.wait_for_selector("#text1")
     background_color = page.evaluate(
         'window.getComputedStyle(document.querySelector("main"), null).getPropertyValue("background-color")'
