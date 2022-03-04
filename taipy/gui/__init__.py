@@ -16,3 +16,4 @@ from .gui import Gui
 from .state import State
 from .icon import Icon
 from .renderers import Html, Markdown
+from .gui_actions import download, hold_actions, navigate, notify, resume_actions

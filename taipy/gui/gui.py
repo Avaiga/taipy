@@ -736,42 +736,19 @@ class Gui:
             return
         self._config.load_config(app_config=app_config)
 
-    def download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
-        """Donwloads content to the client.
-
-        Args:
-            content (Any): file path or file content
-            name (optional(str)): file name for the content on the client browser (default to content name)
-            on_action (optional(str)): function called when the download starts
-        """
+    def _download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
         content_str = self._get_content("Gui.download", content, False)
         self._send_ws_download(content_str, name, on_action)
 
-    def notify(
+    def _notify(
         self,
-        type: str = "I",
+        notification_type: str = "I",
         message: str = "",
         browser_notification: t.Optional[bool] = None,
         duration: t.Optional[int] = None,
     ):
-        """Sends a notification to the user interface.
-
-        Args:
-            type (optional(string)): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`.
-                To remove the last notification, set this parameter to the empty string.
-            message (string): The text message to display.
-            browser_notification (optional(bool)): If set to `True`, the browser will also show the notification.
-                If not specified or set to `None`, this parameter will user the value of
-                `app_config[browser_notification]`.
-            duration (optional(int)): The time, in milliseconds, during which the notification is shown.
-                If not specified or set to `None`, this parameter will use the value of
-                `app_config[notification_duration]`.
-
-        Note that you can also call this function with _type_ set to the first letter or the alert type
-        (ie setting _type_ to `"i"` is equivalent to setting it to `"info"`).
-        """
         self.__send_ws_alert(
-            type,
+            notification_type,
             message,
             self._get_app_config("browser_notification", True)
             if browser_notification is None
@@ -779,17 +756,11 @@ class Gui:
             self._get_app_config("notification_duration", 3000) if duration is None else duration,
         )
 
-    def hold_actions(
+    def _hold_actions(
         self,
         callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
     ):
-        """Hold the UI actions (ie prevent user interactions).
-
-        Args:
-            action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action will be provided to the user.
-            message (string): The message to show. Default: Work in Progress...
-        """
         action_name = callback.__name__ if callable(callback) else callback
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
@@ -801,18 +772,12 @@ class Gui:
             self._bind(Gui.__UI_BLOCK_NAME, True)
         self.__send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
 
-    def resume_actions(self):
-        """Resume the UI actions (ie allows user interactions)."""
+    def _resume_actions(self):
         if _hasscopeattr(self, Gui.__UI_BLOCK_NAME):
             _setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
 
-    def navigate(self, to: t.Optional[str] = ""):
-        """Navigate to a page
-
-        Args:
-            to: page to navigate to. Should be a valid page identifier. If ommitted, navigates to the root page.
-        """
+    def _navigate(self, to: t.Optional[str] = ""):
         to = to or Gui.__root_page_name
         if to not in self._config.routes:
             warnings.warn(

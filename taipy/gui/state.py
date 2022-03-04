@@ -15,7 +15,7 @@ class State:
     """
     __attrs = ("_gui", "_user_var_list")
     __methods = ("assign")
-    __gui_attr = "gui"
+    __gui_attr = "_gui"
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
         super().__setattr__(State.__attrs[1], list(var_list))
@@ -37,7 +37,7 @@ class State:
         if name in State.__attrs:
             super().__setattr__(name, value)
         else:
-            if name == State.__gui_attr or name not in super().__getattribute__(State.__attrs[1]):
+            if name not in super().__getattribute__(State.__attrs[1]):
                 raise AttributeError(f"Variable '{name}' is not accessible.")
             gui = super().__getattribute__(State.__attrs[0])
             if not hasattr(gui._bindings(), name):
