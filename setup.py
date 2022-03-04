@@ -2,7 +2,7 @@
 
 """The setup script."""
 
-from setuptools import find_packages, setup, find_namespace_packages
+from setuptools import find_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -11,10 +11,6 @@ requirements = [
     "taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
 ]
-
-extras_require = {
-    "airflow": ["taipy-airflow@git+ssh://git@github.com/Avaiga/taipy-airflow.git@develop"],
-}
 
 setup(
     author="Avaiga",
@@ -34,13 +30,11 @@ setup(
     install_requires=requirements,
     license="MIT license",
     long_description=readme,
-    include_package_data=True,
     keywords="taipy",
     name="taipy",
     packages=find_packages(include=['taipy']),
     url="https://github.com/avaiga/taipy",
-    version="0.1.2",
+    version="1.0.0.dev",
     zip_safe=False,
-    extras_require=extras_require,
 )
 

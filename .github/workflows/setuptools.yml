@@ -1,0 +1,33 @@
+name: Setuptools
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  standard-packages:
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python-versions: [ '3.8', '3.9', '3.10' ]
+        os: [ubuntu-18.04, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Install Taipy without dependencies
+        run: |
+          sed -i 's/ssh/https/g' setup.py
+          sed -i 's/git@github/${{ secrets.PERSONAL_TOKEN }}@github/g' setup.py
+          pip install .
+          rm -r taipy
+
+          python -c "import taipy as tp; tp.Scenario"
+          python -c "import taipy as tp; tp.gui"
