@@ -43,7 +43,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, text):
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True, time_zone=time_zone)
     while not helpers.port_check():
-        time.sleep(0.5)
+        time.sleep(0.1)
     page.goto("/test")
     page.expect_websocket()
     page.wait_for_selector("#text1")

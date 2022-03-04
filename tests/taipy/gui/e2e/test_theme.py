@@ -17,7 +17,7 @@ def test_theme_light(page: "Page", gui: Gui, helpers):
     gui.add_page(name="test", page=page_md)
     gui.run(run_in_thread=True, single_client=True, dark_mode=False)
     while not helpers.port_check():
-        time.sleep(0.5)
+        time.sleep(0.1)
     page.goto("/")
     page.expect_websocket()
     page.wait_for_selector("#text1")
