@@ -86,9 +86,9 @@ def test_to_model():
     input = InMemoryDataNode("input", Scope.PIPELINE)
     output = InMemoryDataNode("output", Scope.PIPELINE)
     task = Task("task", print, [input], [output], TaskId("task_id"))
-    pipeline = Pipeline("name", {"foo": "bar"}, [task])
+    pipeline = Pipeline("id", {"foo": "bar"}, [task])
     model = pipeline.to_model()
-    assert model.name == "name"
+    assert model.config_id == "id"
     assert model.id == pipeline.id
     assert len(model.properties) == 1
     assert model.properties["foo"] == "bar"

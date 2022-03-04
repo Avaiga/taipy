@@ -11,7 +11,7 @@ class PipelineConfig:
     Holds all the configuration fields needed to create actual pipelines from the PipelineConfig.
 
     Attributes:
-        name (str):  Unique name as an identifier of the pipeline config.
+        id (str):  Unique identifier of the pipeline config.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
