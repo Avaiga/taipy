@@ -33,16 +33,16 @@ def test_create_task():
     name = "name_1"
     task = Task(name, print, [], [])
     assert f"TASK_{name}_" in task.id
-    assert task.config_name == "name_1"
+    assert task.config_id == "name_1"
 
     name_1 = "name_1//ξ"
     task_1 = Task(name_1, print, [], [])
-    assert task_1.config_name == "name_1-x"
+    assert task_1.config_id == "name_1-x"
 
     path = "my/csv/path"
     foo_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
     task = Task("namE 1", print, [foo_dn], [])
-    assert task.config_name == "name_1"
+    assert task.config_id == "name_1"
     assert task.id is not None
     assert task.parent_id is None
     assert task.foo == foo_dn
@@ -53,7 +53,7 @@ def test_create_task():
     path = "my/csv/path"
     abc_dn = InMemoryDataNode("abc_dsξyₓéà", Scope.SCENARIO, properties={"path": path})
     task = Task("namE 1éà", print, [abc_dn], [], parent_id="parent_id")
-    assert task.config_name == "name_1ea"
+    assert task.config_id == "name_1ea"
     assert task.id is not None
     assert task.parent_id == "parent_id"
     assert task.abc_dsxyxea == abc_dn

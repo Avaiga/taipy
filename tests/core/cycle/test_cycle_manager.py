@@ -10,7 +10,7 @@ from taipy.core.exceptions.cycle import NonExistingCycle
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
-    CycleManager.repository.base_path = tmpdir
+    CycleManager._repository.base_path = tmpdir
 
     assert len(CycleManager.get_all()) == 0
 
@@ -60,7 +60,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
 
 
 def test_create_and_delete_cycle_entity(tmpdir):
-    CycleManager.repository.base_path = tmpdir
+    CycleManager._repository.base_path = tmpdir
 
     assert len(CycleManager.get_all()) == 0
 

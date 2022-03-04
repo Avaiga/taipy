@@ -4,6 +4,7 @@ from typing import Callable, List, Optional, Union
 
 from taipy.core.common.alias import ScenarioId
 from taipy.core.common.logger import TaipyLogger
+from taipy.core.common.manager import Manager
 from taipy.core.config.config import Config
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle.cycle import Cycle
@@ -25,15 +26,15 @@ from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario.scenario_repository import ScenarioRepository
 
 
-class ScenarioManager:
+class ScenarioManager(Manager[Scenario]):
     """
     Scenario Manager is responsible for all managing scenario related capabilities. In particular, it is exposing
     methods for creating, storing, updating, retrieving, deleting, submitting scenarios.
     """
 
     AUTHORIZED_TAGS_KEY = "authorized_tags"
-    repository = ScenarioRepository()
-    __logger = TaipyLogger.get_logger()
+    _repository = ScenarioRepository()
+    ENTITY_NAME = Scenario.__name__
 
     @classmethod
     def subscribe(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -80,11 +81,6 @@ class ScenarioManager:
         cls.set(scenario)
 
     @classmethod
-    def delete_all(cls):
-        """Deletes all scenarios."""
-        cls.repository.delete_all()
-
-    @classmethod
     def create(
         cls,
         config: ScenarioConfig,
@@ -103,7 +99,7 @@ class ScenarioManager:
                 default value.
             display_name (Optional[str]) : Display name of the scenario.
         """
-        scenario_id = Scenario.new_id(config.name)
+        scenario_id = Scenario.new_id(config.id)
         pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
         cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
@@ -111,7 +107,7 @@ class ScenarioManager:
         if display_name:
             props["display_name"] = display_name
         scenario = Scenario(
-            config.name,
+            config.id,
             pipelines,
             props,
             scenario_id,
@@ -121,39 +117,6 @@ class ScenarioManager:
         )
         cls.set(scenario)
         return scenario
-
-    @classmethod
-    def set(cls, scenario: Scenario):
-        """
-        Saves or Updates the scenario given as parameter.
-
-        Parameters:
-            scenario (Scenario) : Scenario to save or update.
-        """
-        cls.repository.save(scenario)
-
-    @classmethod
-    def get(cls, scenario: Union[Scenario, ScenarioId], default=None) -> Scenario:
-        """
-        Returns the scenario corresponding to the scenario or the identifier given as parameter.
-
-        Parameters:
-            scenario (Union[Scenario, ScenarioId]) : scenario to get.
-            default: Default value to return if scenario is not found. None is returned if no default value is provided.
-        """
-        scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
-        try:
-            return cls.repository.load(scenario_id)
-        except ModelNotFound:
-            cls.__logger.warning(f"Scenario entity: {scenario_id} does not exist.")
-            return default
-
-    @classmethod
-    def get_all(cls) -> List[Scenario]:
-        """
-        Returns the list of all existing scenarios.
-        """
-        return cls.repository.load_all()
 
     @classmethod
     def submit(cls, scenario: Union[Scenario, ScenarioId], force: bool = False):
@@ -279,7 +242,7 @@ class ScenarioManager:
         """
         tags = scenario.properties.get(cls.AUTHORIZED_TAGS_KEY, set())
         if len(tags) > 0 and tag not in tags:
-            raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_name}`")
+            raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
         if scenario.cycle:
             old_tagged_scenario = cls.get_by_tag(scenario.cycle, tag)
             if old_tagged_scenario:
@@ -301,7 +264,7 @@ class ScenarioManager:
         cls.set(scenario)
 
     @classmethod
-    def delete(cls, scenario_id: ScenarioId):
+    def delete(cls, scenario_id: ScenarioId):  # type: ignore
         """
         Deletes the scenario given as parameter.
 
@@ -313,17 +276,17 @@ class ScenarioManager:
         """
         if cls.get(scenario_id).is_master:
             raise DeletingMasterScenario
-        cls.repository.delete(scenario_id)
+        super().delete(scenario_id)
 
     @classmethod
-    def compare(cls, *scenarios: Scenario, data_node_config_name: str = None):
+    def compare(cls, *scenarios: Scenario, data_node_config_id: str = None):
         """
-        Compares the data nodes of given scenarios with known datanode config name.
+        Compares the data nodes of given scenarios with known datanode config id.
 
         Parameters:
             scenarios (Scenario) : Scenario objects to compare
-            data_node_config_name (Optional[str]) : config name of the DataNode to compare scenarios, if no
-                dn_config_name is provided, the scenarios will be compared based on all the previously defined
+            data_node_config_id (Optional[str]) : config id of the DataNode to compare scenarios, if no
+                dn_config_id is provided, the scenarios will be compared based on all the previously defined
                 comparators.
         Raises:
             InsufficientScenarioToCompare: Provided only one or no scenario for comparison
@@ -334,33 +297,33 @@ class ScenarioManager:
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare
 
-        if not all([scenarios[0].config_name == scenario.config_name for scenario in scenarios]):
+        if not all([scenarios[0].config_id == scenario.config_id for scenario in scenarios]):
             raise DifferentScenarioConfigs
 
         if scenario_config := ScenarioManager.__get_config(scenarios[0]):
             results = {}
-            if data_node_config_name:
-                if data_node_config_name in scenario_config.comparators.keys():
-                    dn_comparators = {data_node_config_name: scenario_config.comparators[data_node_config_name]}
+            if data_node_config_id:
+                if data_node_config_id in scenario_config.comparators.keys():
+                    dn_comparators = {data_node_config_id: scenario_config.comparators[data_node_config_id]}
                 else:
                     raise NonExistingComparator
             else:
                 dn_comparators = scenario_config.comparators
 
-            for data_node_config_name, comparators in dn_comparators.items():
-                data_nodes = [scenario.__getattr__(data_node_config_name).read() for scenario in scenarios]
-                results[data_node_config_name] = {
+            for data_node_config_id, comparators in dn_comparators.items():
+                data_nodes = [scenario.__getattr__(data_node_config_id).read() for scenario in scenarios]
+                results[data_node_config_id] = {
                     comparator.__name__: comparator(*data_nodes) for comparator in comparators
                 }
 
             return results
 
         else:
-            raise NonExistingScenarioConfig(scenarios[0].config_name)
+            raise NonExistingScenarioConfig(scenarios[0].config_id)
 
     @staticmethod
     def __get_config(scenario: Scenario):
-        return Config.scenarios.get(scenario.config_name, None)
+        return Config.scenarios.get(scenario.config_id, None)
 
     @classmethod
     def hard_delete(cls, scenario_id: ScenarioId):
@@ -383,4 +346,8 @@ class ScenarioManager:
             for pipeline in scenario.pipelines.values():
                 if pipeline.parent_id == scenario.id or pipeline.parent_id == pipeline.id:
                     PipelineManager.hard_delete(pipeline.id, scenario.id)
-            cls.repository.delete(scenario_id)
+            cls._repository.delete(scenario_id)
+
+    @classmethod
+    def _get_all_by_config_id(cls, config_id: str) -> List[Scenario]:
+        return cls._repository.search_all("config_id", config_id)

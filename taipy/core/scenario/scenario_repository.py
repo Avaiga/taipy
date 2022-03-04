@@ -22,7 +22,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
     def to_model(self, scenario: Scenario):
         return ScenarioModel(
             id=scenario.id,
-            name=scenario.config_name,
+            name=scenario.config_id,
             pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
             properties=scenario._properties.data,
             creation_date=scenario.creation_date.isoformat(),
@@ -35,7 +35,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
     def from_model(self, model: ScenarioModel) -> Scenario:
         scenario = Scenario(
             scenario_id=model.id,
-            config_name=model.name,
+            config_id=model.name,
             pipelines=self.__to_pipelines(model.pipelines),
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),

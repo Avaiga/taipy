@@ -21,17 +21,17 @@ def reset_configuration_singleton():
 
 def test_data_node_config_check():
     data_node_config = Config.add_data_node("data_nodes1", "pickle")
-    assert list(Config.data_nodes) == ["default", data_node_config.name]
+    assert list(Config.data_nodes) == ["default", data_node_config.id]
 
     data_node2_config = Config.add_data_node("data_nodes2", "pickle")
-    assert list(Config.data_nodes) == ["default", data_node_config.name, data_node2_config.name]
+    assert list(Config.data_nodes) == ["default", data_node_config.id, data_node2_config.id]
 
     data_node3_config = Config.add_data_node("data_nodes3", "csv", has_header=True, path="")
     assert list(Config.data_nodes) == [
         "default",
-        data_node_config.name,
-        data_node2_config.name,
-        data_node3_config.name,
+        data_node_config.id,
+        data_node2_config.id,
+        data_node3_config.id,
     ]
 
     with pytest.raises(ConfigurationIssueError):
@@ -71,14 +71,14 @@ def test_data_node_count():
 
 
 def test_data_node_getitem():
-    data_node_name = "data_nodes1"
-    data_node_config = Config.add_data_node(data_node_name, "pickle")
+    data_node_id = "data_nodes1"
+    data_node_config = Config.add_data_node(data_node_id, "pickle")
 
-    assert Config.data_nodes[data_node_name].name == data_node_config.name
-    assert Config.data_nodes[data_node_name].storage_type == data_node_config.storage_type
-    assert Config.data_nodes[data_node_name].scope == data_node_config.scope
-    assert Config.data_nodes[data_node_name].properties == data_node_config.properties
-    assert Config.data_nodes[data_node_name].cacheable == data_node_config.cacheable
+    assert Config.data_nodes[data_node_id].id == data_node_config.id
+    assert Config.data_nodes[data_node_id].storage_type == data_node_config.storage_type
+    assert Config.data_nodes[data_node_id].scope == data_node_config.scope
+    assert Config.data_nodes[data_node_id].properties == data_node_config.properties
+    assert Config.data_nodes[data_node_id].cacheable == data_node_config.cacheable
 
 
 def test_data_node_creation_no_duplication():
@@ -92,7 +92,7 @@ def test_data_node_creation_no_duplication():
 
 def test_date_node_create_with_datetime():
     data_node_config = Config.add_data_node(
-        name="datetime_data",
+        id="datetime_data",
         my_property=datetime(1991, 1, 1),
         foo="hello",
         test=1,

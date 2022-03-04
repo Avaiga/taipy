@@ -20,7 +20,7 @@ class Pipeline:
     connected in series.
 
     Attributes:
-        config_name (str):  Name that identifies the pipeline configuration.
+        config_id (str): Identifier of the pipeline configuration.
             We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
             or underscore characters ('_').
             Other characters are replaced according the following rules:
@@ -38,16 +38,16 @@ class Pipeline:
 
     def __init__(
         self,
-        config_name: str,
+        config_id: str,
         properties: Dict[str, Any],
         tasks: List[Task],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,
         subscribers: Set[Callable] = None,
     ):
-        self.config_name = protect_name(config_name)
-        self.tasks = {task.config_name: task for task in tasks}
-        self.id: PipelineId = pipeline_id or self.new_id(self.config_name)
+        self.config_id = protect_name(config_id)
+        self.tasks = {task.config_id: task for task in tasks}
+        self.id: PipelineId = pipeline_id or self.new_id(self.config_id)
         self.parent_id = parent_id
         self.is_consistent = self.__is_consistent()
 
@@ -77,8 +77,8 @@ class Pipeline:
         return self.id == other.id
 
     @staticmethod
-    def new_id(config_name: str) -> PipelineId:
-        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, protect_name(config_name), str(uuid.uuid4())]))
+    def new_id(config_id: str) -> PipelineId:
+        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, protect_name(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = protect_name(attribute_name)
@@ -132,7 +132,7 @@ class Pipeline:
         return PipelineModel(
             self.id,
             self.parent_id,
-            self.config_name,
+            self.config_id,
             self._properties.data,
             [task.id for task in self.tasks.values()],
             fcts_to_dict(list(self._subscribers)),

@@ -27,7 +27,7 @@ data_node = CSVDataNode(
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_name", print, [data_node], [], TaskId("task_id"), parent_id="parent_id")
+task = Task("config_id", print, [data_node], [], TaskId("task_id"), parent_id="parent_id")
 
 job = Job(JobId("id"), task)
 
@@ -44,7 +44,7 @@ job_model = JobModel(
 
 class TestJobRepository:
     def test_save_and_load(self, tmpdir):
-        repository = JobManager.repository
+        repository = JobManager._repository
         repository.base_path = tmpdir
         repository.save(job)
         with pytest.raises(ModelNotFound):
@@ -55,7 +55,7 @@ class TestJobRepository:
         assert j.id == job.id
 
     def test_from_and_to_model(self):
-        repository = JobManager.repository
+        repository = JobManager._repository
         assert repository.to_model(job) == job_model
         with pytest.raises(ModelNotFound):
             repository.from_model(job_model)

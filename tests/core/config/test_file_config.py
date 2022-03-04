@@ -236,8 +236,8 @@ def test_all_entities_use_protected_name():
         """
     )
     Config.load(file_config.filename)
-    data_node_1_config = Config.add_data_node(name="my_datanode")
-    data_node_2_config = Config.add_data_node(name="my_datanode2")
+    data_node_1_config = Config.add_data_node(id="my_datanode")
+    data_node_2_config = Config.add_data_node(id="my_datanode2")
     task_config = Config.add_task("my_task", print, data_node_1_config, data_node_2_config)
     pipeline_config = Config.add_pipeline("my_pipeline", task_config)
     Config.add_scenario("my_scenario", pipeline_config)
@@ -245,17 +245,17 @@ def test_all_entities_use_protected_name():
     assert len(Config.data_nodes) == 3
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
     assert Config.data_nodes["my_datanode2"].path == "/data2/csv"
-    assert Config.data_nodes["my_datanode"].name == "my_datanode"
-    assert Config.data_nodes["my_datanode2"].name == "my_datanode2"
+    assert Config.data_nodes["my_datanode"].id == "my_datanode"
+    assert Config.data_nodes["my_datanode2"].id == "my_datanode2"
 
     assert len(Config.tasks) == 2
-    assert Config.tasks["my_task"].name == "my_task"
+    assert Config.tasks["my_task"].id == "my_task"
     assert Config.tasks["my_task"].description == "task description"
 
     assert len(Config.pipelines) == 2
-    assert Config.pipelines["my_pipeline"].name == "my_pipeline"
+    assert Config.pipelines["my_pipeline"].id == "my_pipeline"
     assert Config.pipelines["my_pipeline"].cron == "daily"
 
     assert len(Config.scenarios) == 2
-    assert Config.scenarios["my_scenario"].name == "my_scenario"
+    assert Config.scenarios["my_scenario"].id == "my_scenario"
     assert Config.scenarios["my_scenario"].owner == "John Doe"

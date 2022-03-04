@@ -19,7 +19,7 @@ class TestCSVDataNode:
         dn = CSVDataNode("fOo BAr", Scope.PIPELINE, name="super name", properties={"path": path, "has_header": False})
         assert isinstance(dn, CSVDataNode)
         assert dn.storage_type() == "csv"
-        assert dn.config_name == "foo_bar"
+        assert dn.config_id == "foo_bar"
         assert dn.name == "super name"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
@@ -31,12 +31,12 @@ class TestCSVDataNode:
         assert dn.has_header is False
 
     def test_new_csv_data_node_with_existing_file_is_ready_for_reading(self):
-        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_name", "csv", path="NOT_EXISTING.csv")
+        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_id", "csv", path="NOT_EXISTING.csv")
         not_ready_dn = DataManager.get_or_create(not_ready_dn_cfg)
         assert not not_ready_dn.is_ready_for_reading
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        ready_dn_cfg = Config.add_data_node("ready_data_node_config_name", "csv", path=path)
+        ready_dn_cfg = Config.add_data_node("ready_data_node_config_id", "csv", path=path)
         ready_dn = DataManager.get_or_create(ready_dn_cfg)
         assert ready_dn.is_ready_for_reading
 

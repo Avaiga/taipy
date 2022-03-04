@@ -275,8 +275,8 @@ class TestTaipy:
 
     def test_compare_scenarios(self, scenario):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.compare") as mck:
-            tp.compare_scenarios(scenario, scenario, data_node_config_name="dn")
-            mck.assert_called_once_with(scenario, scenario, data_node_config_name="dn")
+            tp.compare_scenarios(scenario, scenario, data_node_config_id="dn")
+            mck.assert_called_once_with(scenario, scenario, data_node_config_id="dn")
 
     def test_subscribe_scenario(self, scenario):
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.subscribe") as mck:
@@ -396,9 +396,9 @@ class TestTaipy:
             mck.assert_called_once_with(pipeline_config)
 
     def test_clean_all_entities(self, cycle):
-        data_node_1_config = Config.add_data_node(name="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+        data_node_1_config = Config.add_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         data_node_2_config = Config.add_data_node(
-            name="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
+            id="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
         )
         task_config = Config.add_task("my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO)
         pipeline_config = Config.add_pipeline("my_pipeline", task_config)
@@ -447,9 +447,9 @@ class TestTaipy:
 
     def test_clean_all_entities_with_user_pickle_files(self, pickle_file_path):
         user_pickle = PickleDataNode(
-            config_name="d1", properties={"default_data": "foo", "path": pickle_file_path}, scope=Scope.SCENARIO
+            config_id="d1", properties={"default_data": "foo", "path": pickle_file_path}, scope=Scope.SCENARIO
         )
-        generated_pickle = PickleDataNode(config_name="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
+        generated_pickle = PickleDataNode(config_id="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
 
         # File already exists so it does not write any
         assert len(DataManager.get_all()) == 1

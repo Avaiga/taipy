@@ -51,11 +51,11 @@ class TomlSerializer:
         if isinstance(config, Frequency):
             return config.name
         if isinstance(config, DataNodeConfig):
-            return config.name
+            return config.id
         if isinstance(config, TaskConfig):
-            return config.name
+            return config.id
         if isinstance(config, PipelineConfig):
-            return config.name
+            return config.id
         if isinstance(config, dict):
             return {str(key): cls.__stringify(val) for key, val in config.items()}
         if isinstance(config, list):

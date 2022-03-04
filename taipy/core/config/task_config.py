@@ -11,7 +11,7 @@ class TaskConfig:
     Holds all the configuration fields needed to create actual tasks from the TaskConfig.
 
     Attributes:
-        name (str):  Unique name as an identifier of the task config.
+        id (str): Identifier of the task config.
             We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
             '_'. Note that other characters are replaced according the following rules :
             - Space characters are replaced by underscore characters ('_').
@@ -31,13 +31,13 @@ class TaskConfig:
 
     def __init__(
         self,
-        name: str,
+        id: str,
         function,
         inputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
         outputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
         **properties,
     ):
-        self.name = protect_name(name)
+        self.id = protect_name(id)
         self.properties = properties
         if inputs:
             self.inputs = [inputs] if isinstance(inputs, DataNodeConfig) else copy(inputs)
@@ -53,11 +53,11 @@ class TaskConfig:
         return self.properties.get(item)
 
     def __copy__(self):
-        return TaskConfig(self.name, copy(self.inputs), self.function, copy(self.outputs), **copy(self.properties))
+        return TaskConfig(self.id, copy(self.inputs), self.function, copy(self.outputs), **copy(self.properties))
 
     @classmethod
-    def default_config(cls, name):
-        return TaskConfig(name, None, [], [])
+    def default_config(cls, id):
+        return TaskConfig(id, None, [], [])
 
     def to_dict(self):
         return {
@@ -68,10 +68,10 @@ class TaskConfig:
         }
 
     @classmethod
-    def from_dict(cls, name: str, config_as_dict: Dict[str, Any], dn_configs: Dict[str, DataNodeConfig]):
+    def from_dict(cls, id: str, config_as_dict: Dict[str, Any], dn_configs: Dict[str, DataNodeConfig]):
         funct = config_as_dict.pop(cls.FUNCTION, None)
-        config = TaskConfig(name, funct)
-        config.name = protect_name(name)
+        config = TaskConfig(id, funct)
+        config.id = protect_name(id)
         if inputs := config_as_dict.pop(cls.INPUT_KEY, None):
             config.inputs = [dn_configs[dn_id] for dn_id in inputs if dn_id in dn_configs]
         if outputs := config_as_dict.pop(cls.OUTPUT_KEY, None):

@@ -46,10 +46,10 @@ class _Config:
                 sub_configs[self.DEFAULT_KEY].update(other_sub_configs[self.DEFAULT_KEY].to_dict())
             else:
                 sub_configs[self.DEFAULT_KEY] = other_sub_configs[self.DEFAULT_KEY]
-        for name, dn_config in other_sub_configs.items():
-            if name != self.DEFAULT_KEY:
-                if name in sub_configs:
-                    sub_configs[name].update(dn_config.to_dict(), sub_configs.get(self.DEFAULT_KEY))
+        for cfg_id, dn_config in other_sub_configs.items():
+            if cfg_id != self.DEFAULT_KEY:
+                if cfg_id in sub_configs:
+                    sub_configs[cfg_id].update(dn_config.to_dict(), sub_configs.get(self.DEFAULT_KEY))
                 else:
-                    sub_configs[name] = copy(dn_config)
-                    sub_configs[name].update(dn_config.to_dict(), sub_configs.get(self.DEFAULT_KEY))
+                    sub_configs[cfg_id] = copy(dn_config)
+                    sub_configs[cfg_id].update(dn_config.to_dict(), sub_configs.get(self.DEFAULT_KEY))

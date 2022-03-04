@@ -5,20 +5,21 @@ from typing import Optional, Union
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.logger import TaipyLogger
+from taipy.core.common.manager import Manager
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_repository import CycleRepository
 from taipy.core.exceptions.repository import ModelNotFound
 
 
-class CycleManager:
+class CycleManager(Manager[Cycle]):
     """
     The Cycle Manager is responsible for managing all the cycle-related capabilities.
 
     This class provides methods for creating, storing, updating, retrieving and deleting cycles.
     """
 
-    repository = CycleRepository()
-    __logger = TaipyLogger.get_logger()
+    _repository = CycleRepository()
+    ENTITY_NAME = Cycle.__name__
 
     @classmethod
     def create(
@@ -45,32 +46,6 @@ class CycleManager:
         return cycle
 
     @classmethod
-    def set(cls, cycle: Cycle):
-        """
-        Saves or updates a cycle.
-
-        Parameters:
-            cycle (Cycle): The cycle to save.
-        """
-        cls.repository.save(cycle)
-
-    @classmethod
-    def get(cls, cycle: Union[Cycle, CycleId], default=None) -> Cycle:
-        """
-        Gets the cycle corresponding to the identifier given as parameter.
-
-        Parameters:
-            cycle_id (CycleId): The identifier of the cycle to retrieve.
-            default: Default value to return if no cycle is found. None is returned if no default value is provided.
-        """
-        cycle_id = cycle.id if isinstance(cycle, Cycle) else cycle
-        try:
-            return cls.repository.load(cycle_id)
-        except ModelNotFound:
-            cls.__logger.warning(f"Cycle entity: {cycle_id} does not exist.")
-            return default
-
-    @classmethod
     def get_or_create(
         cls, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
     ) -> Cycle:
@@ -89,7 +64,7 @@ class CycleManager:
         """
         creation_date = creation_date if creation_date else datetime.now()
         start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
-        cycles = cls.repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
+        cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:
@@ -122,29 +97,3 @@ class CycleManager:
         if frequency == Frequency.YEARLY:
             end_date = end_date.replace(month=12, day=31) + timedelta(days=1)
         return end_date - timedelta(microseconds=1)
-
-    @classmethod
-    def get_all(cls):
-        """
-        Returns all the existing cycles.
-        """
-        return cls.repository.load_all()
-
-    @classmethod
-    def delete_all(cls):
-        """
-        Deletes all cycles.
-        """
-        cls.repository.delete_all()
-
-    @classmethod
-    def delete(cls, cycle_id: CycleId):
-        """
-        Deletes a cycle.
-
-        Parameters:
-            cycle_id (str): The identifier of the cycle to be deleted.
-        Raises:
-            ModelNotFound: if no cycle corresponds to `cycle_id`.
-        """
-        cls.repository.delete(cycle_id)

@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 
 from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
 from taipy.core.common.logger import TaipyLogger
+from taipy.core.common.manager import Manager
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
@@ -16,7 +17,7 @@ from taipy.core.exceptions.data_node import InvalidDataNodeType, MultipleDataNod
 from taipy.core.exceptions.repository import ModelNotFound
 
 
-class DataManager:
+class DataManager(Manager[DataNode]):
     """
     A Data Manager is responsible for all managing data node related capabilities.
 
@@ -24,26 +25,8 @@ class DataManager:
     """
 
     __DATA_NODE_CLASS_MAP = {c.storage_type(): c for c in DataNode.__subclasses__()}  # type: ignore
-    repository = DataRepository(__DATA_NODE_CLASS_MAP)
-    __logger = TaipyLogger.get_logger()
-
-    @classmethod
-    def delete_all(cls):
-        """Deletes all data nodes."""
-        cls.repository.delete_all()
-
-    @classmethod
-    def delete(cls, data_node_id: str):
-        """
-        Deletes the data node provided as parameter.
-
-        Parameters:
-            data_node_id (str) : identifier of the data node to delete.
-
-        Raises:
-            ModelNotFound: Raised if no data node corresponds to data_node_id.
-        """
-        cls.repository.delete(data_node_id)
+    _repository = DataRepository(__DATA_NODE_CLASS_MAP)
+    ENTITY_NAME = DataNode.__name__
 
     @classmethod
     def get_or_create(
@@ -69,7 +52,7 @@ class DataManager:
         """
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        dn_from_data_node_config = cls._get_all_by_config_name(data_node_config.name)
+        dn_from_data_node_config = cls._get_all_by_config_id(data_node_config.id)
         dn_from_parent = [dn for dn in dn_from_data_node_config if dn.parent_id == parent_id]
         if len(dn_from_parent) == 1:
             return dn_from_parent[0]
@@ -77,41 +60,6 @@ class DataManager:
             raise MultipleDataNodeFromSameConfigWithSameParent
         else:
             return cls._create_and_set(data_node_config, parent_id)
-
-    @classmethod
-    def set(cls, data_node: DataNode):
-        """
-        Saves or Updates the data node given as parameter.
-
-        Parameters:
-            data_node (DataNode) : data node to save or update.
-        """
-        cls.repository.save(data_node)
-
-    @classmethod
-    def get(cls, data_node: Union[DataNode, DataNodeId], default=None) -> DataNode:
-        """
-        Gets the data node corresponding to the DataNode or the identifier given as parameter.
-
-        Parameters:
-            data_node (Union[DataNode, DataNodeId]) : data node to get.
-            default: default value to return if no data node is found. None is returned if no default value is provided.
-        """
-        try:
-            data_node_id = data_node.id if isinstance(data_node, DataNode) else data_node
-            return cls.repository.load(data_node_id)
-        except ModelNotFound:
-            cls.__logger.warning(f"DataNode: {data_node_id} does not exist.")
-            return default
-
-    @classmethod
-    def get_all(cls) -> List[DataNode]:
-        """Returns the list of all existing data nodes."""
-        return cls.repository.load_all()
-
-    @classmethod
-    def _get_all_by_config_name(cls, config_name: str) -> List[DataNode]:
-        return cls.repository.search_all("config_name", config_name)
 
     @classmethod
     def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
@@ -125,7 +73,7 @@ class DataManager:
             props = data_node_config.properties.copy()
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
-                config_name=data_node_config.name,
+                config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
                 parent_id=parent_id,
                 validity_period=validity_period,
@@ -133,3 +81,7 @@ class DataManager:
             )
         except KeyError:
             raise InvalidDataNodeType(data_node_config.storage_type)
+
+    @classmethod
+    def _get_all_by_config_id(cls, config_id: str) -> List[DataNode]:
+        return cls._repository.search_all("config_id", config_id)

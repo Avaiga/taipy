@@ -25,7 +25,7 @@ class TestPickleDataNodeEntity:
         assert os.path.isfile(Config.global_config.storage_folder + "pickles/" + dn.id + ".p")
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
-        assert dn.config_name == "foobar_bazxyxea"
+        assert dn.config_id == "foobar_bazxyxea"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
         assert dn.name == dn.id
@@ -38,12 +38,12 @@ class TestPickleDataNodeEntity:
         assert dn.job_ids == []
 
     def test_new_pickle_data_node_with_existing_file_is_ready_for_reading(self):
-        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_name", "pickle", path="NOT_EXISTING.p")
+        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_id", "pickle", path="NOT_EXISTING.p")
         not_ready_dn = DataManager.get_or_create(not_ready_dn_cfg)
         assert not not_ready_dn.is_ready_for_reading
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
-        ready_dn_cfg = Config.add_data_node("ready_data_node_config_name", "pickle", path=path)
+        ready_dn_cfg = Config.add_data_node("ready_data_node_config_id", "pickle", path=path)
         ready_dn = DataManager.get_or_create(ready_dn_cfg)
         assert ready_dn.is_ready_for_reading
 

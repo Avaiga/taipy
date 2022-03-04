@@ -8,7 +8,7 @@ from taipy.core.config.pipeline_config import PipelineConfig
 
 
 class TestScenarioConfigChecker:
-    def test_check_config_name(self):
+    def test_check_config_id(self):
         collector = IssueCollector()
         config = _Config.default_config()
         ScenarioConfigChecker(config, collector).check()
@@ -17,14 +17,14 @@ class TestScenarioConfigChecker:
         assert len(collector.infos) == 0
 
         config.scenarios["new"] = copy(config.scenarios["default"])
-        config.scenarios["new"].name = None
+        config.scenarios["new"].id = None
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 1
         assert len(collector.warnings) == 1
         assert len(collector.infos) == 1
 
-        config.scenarios["new"].name = "new"
+        config.scenarios["new"].id = "new"
         collector = IssueCollector()
         ScenarioConfigChecker(config, collector).check()
         assert len(collector.errors) == 0

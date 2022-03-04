@@ -11,13 +11,13 @@ class PipelineConfigChecker(ConfigChecker):
 
     def check(self) -> IssueCollector:
         pipeline_configs = self.config.pipelines
-        for pipeline_config_name, pipeline_config in pipeline_configs.items():
-            if pipeline_config_name != _Config.DEFAULT_KEY:
-                self._check_existing_config_name(pipeline_config)
-                self._check_tasks(pipeline_config_name, pipeline_config)
+        for pipeline_config_id, pipeline_config in pipeline_configs.items():
+            if pipeline_config_id != _Config.DEFAULT_KEY:
+                self._check_existing_config_id(pipeline_config)
+                self._check_tasks(pipeline_config_id, pipeline_config)
         return self.collector
 
-    def _check_tasks(self, pipeline_config_name: str, pipeline_config: PipelineConfig):
+    def _check_tasks(self, pipeline_config_id: str, pipeline_config: PipelineConfig):
         self._check_children(
-            PipelineConfig, pipeline_config_name, pipeline_config.TASK_KEY, pipeline_config.tasks, TaskConfig
+            PipelineConfig, pipeline_config_id, pipeline_config.TASK_KEY, pipeline_config.tasks, TaskConfig
         )
