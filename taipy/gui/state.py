@@ -1,9 +1,7 @@
 import typing as t
 
-from ._map_dict import _MapDict
-
 if t.TYPE_CHECKING:
-    from ..gui import Gui
+    from .gui import Gui
 
 
 class State:
@@ -12,10 +10,10 @@ class State:
     Attributes:
 
         assign (Callable): allows to set a variable inside a lambda function (state.assign("name", value) is equivalent to state.name = value).
-
     """
     __attrs = ("_gui", "_user_var_list")
     __methods = ("assign")
+    __gui_attr = "_gui"
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
         super().__setattr__(State.__attrs[1], list(var_list))
@@ -24,9 +22,11 @@ class State:
     def __getattribute__(self, name: str) -> t.Any:
         if name in State.__methods:
             return super().__getattribute__(name)
+        gui = super().__getattribute__(State.__attrs[0])
+        if name == State.__gui_attr:
+            return gui
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
-        gui = super().__getattribute__(State.__attrs[0])
         if not hasattr(gui._bindings(), name):
             gui._bind_var(name)
         return getattr(gui._bindings(), name)
@@ -36,7 +36,7 @@ class State:
             super().__setattr__(name, value)
         else:
             if name not in super().__getattribute__(State.__attrs[1]):
-                raise AttributeError(f"Variable '{name}' is not defined.")
+                raise AttributeError(f"Variable '{name}' is not accessible.")
             gui = super().__getattribute__(State.__attrs[0])
             if not hasattr(gui._bindings(), name):
                 gui._bind_var(name)
@@ -48,7 +48,7 @@ class State:
         Args:
             name (string): The variable name.
             value (Any): New variable value.
-        
+
         Returns (Any):
             Previous value.
         """

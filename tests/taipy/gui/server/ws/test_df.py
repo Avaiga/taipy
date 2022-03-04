@@ -1,12 +1,12 @@
 import pytest
-from taipy.gui import Gui, Markdown
+from taipy.gui import Gui, download
 import pathlib
 import logging
 
 
-def test_donwload_file(gui: Gui, helpers):
+def test_download_file(gui: Gui, helpers):
     def do_something(state, id):
-        gui.download((pathlib.Path(__file__).parent.parent.parent / "resources" / "taipan.jpg"))
+        download(state, (pathlib.Path(__file__).parent.parent.parent / "resources" / "taipan.jpg"))
 
     # Bind a page so that the function will be called
     # gui.add_page(

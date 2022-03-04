@@ -12,7 +12,8 @@ as Taipy controls that are typically linked to some
 value that is managed by the whole Taipy application.
 """
 
-from .data import _DataAccessor
 from .gui import Gui
+from .state import State
 from .icon import Icon
 from .renderers import Html, Markdown
+from .gui_actions import download, hold_control, navigate, notify, resume_control
