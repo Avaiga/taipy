@@ -6,7 +6,9 @@ from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.pipeline.pipeline_manager import PipelineManager
 from taipy.core.task.task import Task
+from taipy.core.task.task_manager import TaskManager
 
 
 def test_create_pipeline():
@@ -120,3 +122,74 @@ def test_get_sorted_tasks():
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
     assert pipeline.get_sorted_tasks() == [[task_1], [task_2, task_4], [task_3]]
+
+
+def test_auto_set_and_reload(task):
+    pipeline_1 = Pipeline("foo", {}, [], parent_id=None, subscribers=None)
+
+    TaskManager.set(task)
+    PipelineManager.set(pipeline_1)
+
+    pipeline_2 = PipelineManager.get(pipeline_1)
+
+    assert pipeline_1.config_id == "foo"
+    pipeline_1._config_id = "def"
+    assert pipeline_1.config_id == "foo"
+    pipeline_1.config_id = "def"
+    assert pipeline_1.config_id == "def"
+    assert pipeline_2.config_id == "def"
+
+    assert len(pipeline_1.tasks) == 0
+    pipeline_1._tasks = [task]
+    assert len(pipeline_1.tasks) == 0
+    pipeline_1.tasks = [task]
+    assert len(pipeline_1.tasks) == 1
+    assert pipeline_1.tasks[task.config_id].id == task.id
+    assert len(pipeline_2.tasks) == 1
+    assert pipeline_2.tasks[task.config_id].id == task.id
+
+    assert pipeline_1.parent_id is None
+    pipeline_1._parent_id = "parent_id"
+    assert pipeline_1.parent_id is None
+    pipeline_1.parent_id = "parent_id"
+    assert pipeline_1.parent_id == "parent_id"
+    assert pipeline_2.parent_id == "parent_id"
+
+    assert len(pipeline_1.subscribers) == 0
+    pipeline_1._subscribers = set([print])
+    assert len(pipeline_1.subscribers) == 0
+    pipeline_1.subscribers = set([print])
+    assert len(pipeline_1.subscribers) == 1
+    assert len(pipeline_2.subscribers) == 1
+
+    assert pipeline_1.properties == {}
+    pipeline_1.properties["qux"] = 5
+    assert pipeline_1.properties["qux"] == 5
+    assert pipeline_2.properties["qux"] == 5
+
+    with pipeline_1 as pipeline:
+        assert pipeline.config_id == "def"
+        assert len(pipeline.tasks) == 1
+        assert pipeline.tasks[task.config_id].id == task.id
+        assert pipeline.parent_id == "parent_id"
+        assert len(pipeline.subscribers) == 1
+        assert pipeline._is_in_context
+
+        pipeline.config_id = "abc"
+        pipeline.tasks = []
+        pipeline.parent_id = None
+        pipeline.subscribers = None
+
+        assert pipeline._config_id == "abc"
+        assert pipeline.config_id == "def"
+        assert len(pipeline.tasks) == 1
+        assert pipeline.tasks[task.config_id].id == task.id
+        assert pipeline.parent_id == "parent_id"
+        assert len(pipeline.subscribers) == 1
+        assert pipeline._is_in_context
+
+    assert pipeline_1.config_id == "abc"
+    assert len(pipeline_1.tasks) == 0
+    assert pipeline_1.parent_id is None
+    assert len(pipeline_1.subscribers) == 0
+    assert not pipeline_1._is_in_context

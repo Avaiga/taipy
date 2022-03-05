@@ -107,7 +107,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_1.config_id == "foo"
     scenario_1.config_id = "def"
     assert scenario_1.config_id == "def"
-    assert scenario_1.config_id == "def"
+    assert scenario_2.config_id == "def"
 
     assert len(scenario_1.pipelines) == 0
     scenario_1._pipelines = [pipeline]
