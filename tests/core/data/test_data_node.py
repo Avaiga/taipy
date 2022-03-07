@@ -184,7 +184,7 @@ class TestDataNode:
 
         # Has been writen more than 30 minutes ago
         dn._last_edition_date = datetime.now() + timedelta(days=-1)
-        DataManager.set(dn)
+        DataManager._set(dn)
         assert dn.is_in_cache is False
 
     def test_is_in_cache_with_30_min_validity_period_cacheable_true(self):
@@ -200,7 +200,7 @@ class TestDataNode:
 
         # Has been writen more than 30 minutes ago
         dn._last_edition_date = datetime.now() - timedelta(days=1)
-        DataManager().set(dn)
+        DataManager()._set(dn)
         assert dn.is_in_cache is False
 
     def test_is_in_cache_with_5_days_validity_period_cacheable_true(self):
@@ -214,7 +214,7 @@ class TestDataNode:
 
         # Has been writen more than 30 minutes ago
         dn._last_edition_date = datetime.now() - timedelta(days=6)
-        DataManager().set(dn)
+        DataManager()._set(dn)
         assert dn.is_in_cache is False
 
     def test_pandas_filter(self, default_data_frame):
@@ -367,19 +367,19 @@ class TestDataNode:
     def test_data_node_update_after_writing(self):
         dn = FakeDataNode("foo")
 
-        DataManager.set(dn)
-        assert not DataManager.get(dn.id).is_ready_for_reading
+        DataManager._set(dn)
+        assert not DataManager._get(dn.id).is_ready_for_reading
         dn.write("Any data")
 
         assert dn.is_ready_for_reading
-        assert DataManager.get(dn.id).is_ready_for_reading
+        assert DataManager._get(dn.id).is_ready_for_reading
 
     def test_auto_reload(self):
         dm = DataManager()
         dn = FakeDataNode("foo")
 
-        dm.set(dn)
-        dn_bis = dm.get(dn)
+        dm._set(dn)
+        dn_bis = dm._get(dn)
 
         dn._name = "new_name"
         dn._validity_period = timedelta(days=3, hours=2, minutes=1)
@@ -397,15 +397,15 @@ class TestDataNode:
         assert dn.job_ids == dn_bis.job_ids
 
         dn.lock_edition()
-        dm.set(dn)
+        dm._set(dn)
         assert dn.edition_in_progress == dn_bis.edition_in_progress is True
 
         dn.unlock_edition()
-        dm.set(dn)
+        dm._set(dn)
         assert dn.edition_in_progress == dn_bis.edition_in_progress is False
 
         dn.properties["qux"] = 5
-        same_dn = dm.get(dn.id)
+        same_dn = dm._get(dn.id)
         assert dn.properties["qux"] == 5
         assert same_dn.properties["qux"] == 5
 

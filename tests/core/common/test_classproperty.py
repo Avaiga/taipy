@@ -1,12 +1,12 @@
 import pytest
 
-from taipy.core.common.classproperty import classproperty
+from taipy.core.common._classproperty import _Classproperty
 
 
 class TestClassProperty:
     def test_class_property(self):
         class TestClass:
-            @classproperty
+            @_Classproperty
             def test_property(cls):
                 return "test_property"
 

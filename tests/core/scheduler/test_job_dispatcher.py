@@ -116,7 +116,7 @@ def test_handle_exception_when_writing_datanode():
 
     dispatcher = JobDispatcher(None)
 
-    with mock.patch("taipy.core.data.data_manager.DataManager.get") as get:
+    with mock.patch("taipy.core.data.data_manager.DataManager._get") as get:
         get.return_value = output
         dispatcher.dispatch(job)
         assert job.is_failed()
@@ -220,7 +220,7 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
 
     output = task.hello_world
     output._last_edition_date = datetime.now() - timedelta(days=1, minutes=30)
-    DataManager().set(output)
+    DataManager()._set(output)
     assert scheduler._dispatcher._needs_to_run(task)
 
 

@@ -99,7 +99,7 @@ def test_date_node_create_with_datetime():
         test_dict={"type": "Datetime", 2: "daw"},
     )
     dn = DataManager.get_or_create(data_node_config)
-    dn = DataManager.get(dn)
+    dn = DataManager._get(dn)
     assert dn.foo == "hello"
     assert dn.my_property == datetime(1991, 1, 1)
     assert dn.test == 1

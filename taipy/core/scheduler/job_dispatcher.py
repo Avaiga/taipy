@@ -4,8 +4,8 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 from typing import Any, List
 
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
-from taipy.core.common.logger import TaipyLogger
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.data_node import DataNode
 from taipy.core.exceptions.job import DataNodeWritingError
@@ -25,7 +25,7 @@ class JobDispatcher:
 
     def __init__(self, max_number_of_parallel_execution):
         self._executor, self._nb_worker_available = self.__create(max_number_of_parallel_execution or 1)
-        self.__logger = TaipyLogger.get_logger()
+        self.__logger = _TaipyLogger._get_logger()
 
     def can_execute(self) -> bool:
         """Returns True if a worker is available for a new run."""
@@ -41,14 +41,14 @@ class JobDispatcher:
             if job.force:
                 self.__logger.info(f"job {job.id} is forced to be executed.")
             job.running()
-            JobManager.set(job)
+            JobManager._set(job)
             self._nb_worker_available -= 1
             future = self._executor.submit(self._call_function, job.id, job.task)
             future.add_done_callback(self.__release_worker)
             future.add_done_callback(partial(self.__update_status, job))
         else:
             job.skipped()
-            JobManager.set(job)
+            JobManager._set(job)
             self.__logger.info(f"job {job.id} is skipped.")
 
     def __release_worker(self, _):
@@ -56,7 +56,7 @@ class JobDispatcher:
 
     def __update_status(self, job, ft):
         job.update_status(ft)
-        JobManager.set(job)
+        JobManager._set(job)
 
     @staticmethod
     def _needs_to_run(task: Task) -> bool:
@@ -70,13 +70,13 @@ class JobDispatcher:
         """
         if len(task.output) == 0:
             return True
-        are_outputs_in_cache = all(DataManager().get(dn.id).is_in_cache for dn in task.output.values())
+        are_outputs_in_cache = all(DataManager()._get(dn.id).is_in_cache for dn in task.output.values())
         if not are_outputs_in_cache:
             return True
         if len(task.input) == 0:
             return False
-        input_last_edition = max(DataManager().get(dn.id).last_edition_date for dn in task.input.values())
-        output_last_edition = min(DataManager().get(dn.id).last_edition_date for dn in task.output.values())
+        input_last_edition = max(DataManager()._get(dn.id).last_edition_date for dn in task.input.values())
+        output_last_edition = min(DataManager()._get(dn.id).last_edition_date for dn in task.output.values())
         return input_last_edition > output_last_edition
 
     @classmethod
@@ -92,7 +92,7 @@ class JobDispatcher:
 
     @classmethod
     def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
-        return [DataManager.get(dn.id).read_or_raise() for dn in inputs]
+        return [DataManager._get(dn.id).read_or_raise() for dn in inputs]
 
     @classmethod
     def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
@@ -102,9 +102,9 @@ class JobDispatcher:
                 exceptions = []
                 for res, dn in zip(_results, outputs):
                     try:
-                        data_node = DataManager.get(dn.id)
+                        data_node = DataManager._get(dn.id)
                         data_node.write(res, job_id=job_id)
-                        DataManager.set(data_node)
+                        DataManager._set(data_node)
                     except Exception as e:
                         exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
                 return exceptions

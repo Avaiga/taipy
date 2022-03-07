@@ -8,7 +8,7 @@ def reload(manager: str, obj):
 
     manager_cls = {"scenario": ScenarioManager, "pipeline": PipelineManager, "data": DataManager}[manager]
 
-    return manager_cls.get(obj, obj)  # type: ignore
+    return manager_cls._get(obj, obj)  # type: ignore
 
 
 def self_reload(manager):

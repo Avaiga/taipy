@@ -115,7 +115,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 
     _dispatch(task, job)
 
-    job = JobManager.get(job_id)
+    job = JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(RuntimeError):
         raise job.exceptions[0]
@@ -129,7 +129,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 
     _dispatch(task, job)
 
-    job = JobManager.get(job_id)
+    job = JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(NoData):
         raise job.exceptions[0]
@@ -142,7 +142,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
 
     _dispatch(task, job)
 
-    job = JobManager.get(job_id)
+    job = JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(DataNodeWritingError):
         raise job.exceptions[0]
@@ -154,8 +154,8 @@ def _error():
 
 
 def _dispatch(task: Task, job: Job):
-    TaskManager.set(task)
-    JobManager.set(job)
+    TaskManager._set(task)
+    JobManager._set(job)
     executor = JobDispatcher(None)
     executor.dispatch(job)
 

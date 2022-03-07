@@ -5,27 +5,16 @@ from taipy.core.config.config_template_handler import ConfigTemplateHandler as t
 
 class GlobalAppConfig:
     """
-    Holds configuration fields related to the global application.
+    Configuration fields related to the global application.
 
     Parameters:
-        notification (bool): Boolean field to activate/deactivate the notification. Default value : false.
-        broker_endpoint (str): broker endpoint used for notification. Must be populated if notification is true.
-            Default value is None.
-        root_folder (str): Path of the base folder for the taipy application. Default value is "./taipy/"
-        storage_folder (str): Folder name used to store Taipy data. Default value is ".data/". It is used in conjunction
-            with the root_folder field. That means the storage path is <root_folder><storage_folder> (Default
-            path : "./taipy/.data/")
+        root_folder (str): Path of the base folder for the taipy application. The default value is "./taipy/"
+        storage_folder (str): Folder name used to store Taipy data. The default value is ".data/". It is used in
+            conjunction with the _root_folder_ field. That means the storage path is
+            <root_folder><storage_folder> (The Default path : "./taipy/.data/")
         clean_entities_enabled (bool): Boolean field to activate/deactivate the clean entities feature. Default: false
         properties (dict): Dictionary of additional properties.
     """
-
-    NOTIFICATION_KEY = "notification"
-    NOTIFICATION_VALUE_TRUE = True
-    NOTIFICATION_VALUE_FALSE = False
-    NOTIFICATION_DEFAULT_VALUE = NOTIFICATION_VALUE_FALSE
-
-    BROKER_ENDPOINT_KEY = "broker_endpoint"
-    DEFAULT_BROKER_ENDPOINT = None
 
     ROOT_FOLDER_KEY = "root_folder"
     DEFAULT_ROOT_FOLDER = "./taipy/"
@@ -40,15 +29,11 @@ class GlobalAppConfig:
 
     def __init__(
         self,
-        notification: Union[bool, str] = None,
-        broker_endpoint: str = None,
         root_folder: str = None,
         storage_folder: str = None,
         clean_entities_enabled: Union[bool, str] = None,
         **properties
     ):
-        self.notification = notification
-        self.broker_endpoint = broker_endpoint
         self.root_folder = root_folder
         self.storage_folder = storage_folder
         self.clean_entities_enabled = clean_entities_enabled
@@ -60,8 +45,6 @@ class GlobalAppConfig:
     @classmethod
     def default_config(cls):
         config = GlobalAppConfig()
-        config.notification = cls.NOTIFICATION_DEFAULT_VALUE
-        config.broker_endpoint = cls.DEFAULT_BROKER_ENDPOINT
         config.root_folder = cls.DEFAULT_ROOT_FOLDER
         config.storage_folder = cls.DEFAULT_STORAGE_FOLDER
         config.clean_entities_enabled = cls.DEFAULT_CLEAN_ENTITIES_ENABLED
@@ -69,10 +52,6 @@ class GlobalAppConfig:
 
     def to_dict(self):
         as_dict = {}
-        if self.notification is not None:
-            as_dict[self.NOTIFICATION_KEY] = self.notification
-        if self.broker_endpoint:
-            as_dict[self.BROKER_ENDPOINT_KEY] = self.broker_endpoint
         if self.root_folder:
             as_dict[self.ROOT_FOLDER_KEY] = self.root_folder
         if self.storage_folder:
@@ -85,8 +64,6 @@ class GlobalAppConfig:
     @classmethod
     def from_dict(cls, config_as_dict: Dict[str, Any]):
         config = GlobalAppConfig()
-        config.notification = config_as_dict.pop(cls.NOTIFICATION_KEY, None)
-        config.broker_endpoint = config_as_dict.pop(cls.BROKER_ENDPOINT_KEY, None)
         config.root_folder = config_as_dict.pop(cls.ROOT_FOLDER_KEY, None)
         config.storage_folder = config_as_dict.pop(cls.STORAGE_FOLDER_KEY, None)
         config.clean_entities_enabled = config_as_dict.pop(cls.CLEAN_ENTITIES_ENABLED_KEY, None)
@@ -94,8 +71,6 @@ class GlobalAppConfig:
         return config
 
     def update(self, config_as_dict):
-        self.notification = tpl.replace_templates(config_as_dict.pop(self.NOTIFICATION_KEY, self.notification), bool)
-        self.broker_endpoint = tpl.replace_templates(config_as_dict.pop(self.BROKER_ENDPOINT_KEY, self.broker_endpoint))
         self.root_folder = tpl.replace_templates(config_as_dict.pop(self.ROOT_FOLDER_KEY, self.root_folder))
         self.storage_folder = tpl.replace_templates(config_as_dict.pop(self.STORAGE_FOLDER_KEY, self.storage_folder))
         self.clean_entities_enabled = tpl.replace_templates(

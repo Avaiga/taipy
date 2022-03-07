@@ -2,10 +2,10 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Set
 
+from taipy.core.common._properties import _Properties
+from taipy.core.common._reload import reload, self_reload
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.common.alias import ScenarioId
-from taipy.core.common.reload import reload, self_reload
-from taipy.core.common.unicode_to_python_variable_name import protect_name
-from taipy.core.common.wrapper import Properties
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.pipeline.pipeline import Pipeline
 
@@ -47,7 +47,7 @@ class Scenario:
         subscribers: Set[Callable] = None,
         tags: Set[str] = None,
     ):
-        self.config_id = protect_name(config_id)
+        self.config_id = _protect_name(config_id)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_id)
         self.pipelines = {p.config_id: p for p in pipelines}
         self.creation_date = creation_date or datetime.now()
@@ -57,7 +57,7 @@ class Scenario:
         self._master_scenario = is_master
         self._tags = tags or set()
 
-        self._properties = Properties(self, **properties)
+        self._properties = _Properties(self, **properties)
 
     def __getstate__(self):
         return self.id
@@ -65,7 +65,7 @@ class Scenario:
     def __setstate__(self, id):
         from taipy.core.scenario.scenario_manager import ScenarioManager
 
-        sc = ScenarioManager.get(id)
+        sc = ScenarioManager._get(id)
         self.__dict__ = sc.__dict__
 
     @property  # type: ignore
@@ -94,10 +94,10 @@ class Scenario:
     @staticmethod
     def new_id(config_id: str) -> ScenarioId:
         """Generates a unique scenario identifier."""
-        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, protect_name(config_id), str(uuid.uuid4())]))
+        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, _protect_name(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
+        protected_attribute_name = _protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.pipelines:

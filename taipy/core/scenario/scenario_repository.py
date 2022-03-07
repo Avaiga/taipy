@@ -2,7 +2,7 @@ import pathlib
 from datetime import datetime
 from typing import List, Optional
 
-from taipy.core.common import utils
+from taipy.core.common import _utils
 from taipy.core.common.alias import CycleId, PipelineId
 from taipy.core.config.config import Config
 from taipy.core.cycle.cycle import Cycle
@@ -27,7 +27,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             properties=scenario._properties.data,
             creation_date=scenario.creation_date.isoformat(),
             master_scenario=scenario._master_scenario,
-            subscribers=utils.fcts_to_dict(scenario._subscribers),
+            subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
             cycle=self.__to_cycle_id(scenario.cycle),
         )
@@ -42,7 +42,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             is_master=model.master_scenario,
             tags=set(model.tags),
             cycle=self.__to_cycle(model.cycle),
-            subscribers={utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},
+            subscribers={_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},
         )
         return scenario
 
@@ -58,7 +58,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
     def __to_pipelines(pipeline_ids) -> List[Pipeline]:
         pipelines = []
         for _id in pipeline_ids:
-            if pipeline := PipelineManager.get(_id):
+            if pipeline := PipelineManager._get(_id):
                 pipelines.append(pipeline)
             else:
                 raise NonExistingPipeline(_id)
@@ -66,7 +66,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
 
     @staticmethod
     def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
-        return CycleManager.get(cycle_id) if cycle_id else None
+        return CycleManager._get(cycle_id) if cycle_id else None
 
     @staticmethod
     def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:

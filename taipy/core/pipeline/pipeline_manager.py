@@ -1,8 +1,8 @@
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import PipelineId, ScenarioId
-from taipy.core.common.manager import Manager
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.pipeline import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
@@ -13,7 +13,7 @@ from taipy.core.pipeline.pipeline_repository import PipelineRepository
 from taipy.core.task.task_manager import TaskManager
 
 
-class PipelineManager(Manager[Pipeline]):
+class PipelineManager(_Manager[Pipeline]):
     """
     The Pipeline Manager is responsible for managing all pipeline-related capabilities.
     """
@@ -31,7 +31,7 @@ class PipelineManager(Manager[Pipeline]):
             Notification will be available only for jobs created after this subscription.
         """
         if pipeline is None:
-            pipelines = cls.get_all()
+            pipelines = cls._get_all()
             for pln in pipelines:
                 cls.__add_subscriber(callback, pln)
             return
@@ -48,7 +48,7 @@ class PipelineManager(Manager[Pipeline]):
             The function will continue to be called for ongoing jobs.
         """
         if pipeline is None:
-            pipelines = cls.get_all()
+            pipelines = cls._get_all()
             for pln in pipelines:
                 cls.__remove_subscriber(callback, pln)
             return
@@ -58,12 +58,12 @@ class PipelineManager(Manager[Pipeline]):
     @classmethod
     def __add_subscriber(cls, callback, pipeline):
         pipeline.add_subscriber(callback)
-        cls.set(pipeline)
+        cls._set(pipeline)
 
     @classmethod
     def __remove_subscriber(cls, callback, pipeline):
         pipeline.remove_subscriber(callback)
-        cls.set(pipeline)
+        cls._set(pipeline)
 
     @classmethod
     def get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
@@ -92,7 +92,7 @@ class PipelineManager(Manager[Pipeline]):
             raise MultiplePipelineFromSameConfigWithSameParent
         else:
             pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config.properties), tasks, pipeline_id, parent_id)
-            cls.set(pipeline)
+            cls._set(pipeline)
             return pipeline
 
     @classmethod
@@ -113,7 +113,7 @@ class PipelineManager(Manager[Pipeline]):
         """
         callbacks = callbacks or []
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
-        pipeline = cls.get(pipeline_id)
+        pipeline = cls._get(pipeline_id)
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
@@ -138,13 +138,13 @@ class PipelineManager(Manager[Pipeline]):
         Raises:
             ModelNotFound: No pipeline corresponds to pipeline_id.
         """
-        pipeline = cls.get(pipeline_id)
+        pipeline = cls._get(pipeline_id)
         for task in pipeline.tasks.values():
             if scenario_id and task.parent_id == scenario_id:
                 TaskManager.hard_delete(task.id, scenario_id)
             elif task.parent_id == pipeline.id:
                 TaskManager.hard_delete(task.id, None, pipeline_id)
-        cls.delete(pipeline_id)
+        cls._delete(pipeline_id)
 
     @classmethod
     def _get_all_by_config_id(cls, config_id: str) -> List[Pipeline]:

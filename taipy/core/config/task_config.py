@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
-from taipy.core.common.unicode_to_python_variable_name import protect_name
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.config.data_node_config import DataNodeConfig
 
@@ -37,7 +37,7 @@ class TaskConfig:
         outputs: Union[DataNodeConfig, List[DataNodeConfig]] = None,
         **properties,
     ):
-        self.id = protect_name(id)
+        self.id = _protect_name(id)
         self.properties = properties
         if inputs:
             self.inputs = [inputs] if isinstance(inputs, DataNodeConfig) else copy(inputs)
@@ -71,7 +71,7 @@ class TaskConfig:
     def from_dict(cls, id: str, config_as_dict: Dict[str, Any], dn_configs: Dict[str, DataNodeConfig]):
         funct = config_as_dict.pop(cls.FUNCTION, None)
         config = TaskConfig(id, funct)
-        config.id = protect_name(id)
+        config.id = _protect_name(id)
         if inputs := config_as_dict.pop(cls.INPUT_KEY, None):
             config.inputs = [dn_configs[dn_id] for dn_id in inputs if dn_id in dn_configs]
         if outputs := config_as_dict.pop(cls.OUTPUT_KEY, None):

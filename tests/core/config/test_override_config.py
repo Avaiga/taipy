@@ -10,21 +10,21 @@ from tests.core.config.named_temporary_file import NamedTemporaryFile
 
 def test_override_default_configuration_with_code_configuration():
     assert Config.job_config.nb_of_workers == 1
-    assert not Config.global_config.notification
+    assert not Config.global_config.root_folder == "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
     Config.set_job_config(nb_of_workers=-1)
-    Config.set_global_config(notification=True)
+    Config.set_global_config(root_folder="foo")
     foo_config = Config.add_data_node("foo", "in_memory")
     bar_config = Config.add_task("bar", print, [foo_config], [])
     baz_config = Config.add_pipeline("baz", [bar_config])
     qux_config = Config.add_scenario("qux", [baz_config])
 
     assert Config.job_config.nb_of_workers == -1
-    assert Config.global_config.notification
+    assert Config.global_config.root_folder == "foo"
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
     assert foo_config.id in Config.data_nodes
@@ -49,28 +49,28 @@ def test_override_default_configuration_with_code_configuration():
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
-    assert not Config.global_config.notification
-    Config.set_global_config(notification=True)
-    assert Config.global_config.notification
+    assert not Config.global_config.clean_entities_enabled
+    Config.set_global_config(clean_entities_enabled=True)
+    assert Config.global_config.clean_entities_enabled
 
     with mock.patch.dict(os.environ, {"ENV_VAR": "False"}):
-        Config.set_global_config(notification="ENV[ENV_VAR]")
-        assert not Config.global_config.notification
+        Config.set_global_config(clean_entities_enabled="ENV[ENV_VAR]")
+        assert not Config.global_config.clean_entities_enabled
 
     with mock.patch.dict(os.environ, {"ENV_VAR": "true"}):
-        Config.set_global_config(notification="ENV[ENV_VAR]")
-        assert Config.global_config.notification
+        Config.set_global_config(clean_entities_enabled="ENV[ENV_VAR]")
+        assert Config.global_config.clean_entities_enabled
 
     with mock.patch.dict(os.environ, {"ENV_VAR": "foo"}):
         with pytest.raises(InconsistentEnvVariableError):
-            Config.set_global_config(notification="ENV[ENV_VAR]")
+            Config.set_global_config(clean_entities_enabled="ENV[ENV_VAR]")
 
 
 def test_override_default_configuration_with_file_configuration():
     tf = NamedTemporaryFile(
         """
 [TAIPY]
-notification = true
+clean_entities_enabled = true
 
 [JOB]
 nb_of_workers = -1
@@ -86,7 +86,7 @@ nb_of_workers = -1
     )
 
     assert Config.job_config.nb_of_workers == 1
-    assert not Config.global_config.notification
+    assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
     assert len(Config.pipelines) == 1
@@ -95,7 +95,7 @@ nb_of_workers = -1
     Config.load(tf.filename)
 
     assert Config.job_config.nb_of_workers == -1
-    assert Config.global_config.notification
+    assert Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
     assert "foo" in Config.data_nodes
@@ -202,23 +202,23 @@ path = "/data/csv"
 nb_of_workers = 10
 
 [TAIPY]
-notification = false
+clean_entities_enabled = false
     """
     )
 
     # Default config is applied
     assert Config.job_config.nb_of_workers == 1
-    assert Config.global_config.notification is False
+    assert Config.global_config.clean_entities_enabled is False
 
     # Code config is applied
     Config.set_job_config(nb_of_workers=-1)
-    Config.set_global_config(notification=True)
-    assert Config.global_config.notification is True
+    Config.set_global_config(clean_entities_enabled=True)
+    assert Config.global_config.clean_entities_enabled is True
     assert Config.job_config.nb_of_workers == -1
 
     # File config is applied
     Config.load(file_config.filename)
-    assert Config.global_config.notification is False
+    assert Config.global_config.clean_entities_enabled is False
     assert Config.job_config.nb_of_workers == 10
     assert Config.data_nodes["my_datanode"].has_header
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
@@ -237,26 +237,26 @@ path = "ENV[FOO]"
 nb_of_workers = 10
 
 [TAIPY]
-notification = false
+clean_entities_enabled = false
     """
     )
 
-    with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/toto/data/csv"}):
+    with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
         assert Config.job_config.nb_of_workers == 1
-        assert Config.global_config.notification is False
+        assert Config.global_config.clean_entities_enabled is False
 
         # Code config is applied
         Config.set_job_config(nb_of_workers=-1)
-        Config.set_global_config(notification=True)
+        Config.set_global_config(clean_entities_enabled=True)
         Config.add_data_node("my_datanode", path="ENV[BAR]")
-        assert Config.global_config.notification is True
+        assert Config.global_config.clean_entities_enabled is True
         assert Config.job_config.nb_of_workers == -1
-        assert Config.data_nodes["my_datanode"].path == "/toto/data/csv"
+        assert Config.data_nodes["my_datanode"].path == "/baz/data/csv"
 
         # File config is applied
         Config.load(file_config.filename)
-        assert Config.global_config.notification is False
+        assert Config.global_config.clean_entities_enabled is False
         assert Config.job_config.nb_of_workers == 10
         assert Config.data_nodes["my_datanode"].has_header
         assert Config.data_nodes["my_datanode"].path == "/data/csv"

@@ -24,7 +24,7 @@ class CycleModel:
         return CycleModel(
             id=data["id"],
             name=data["name"],
-            frequency=Frequency.from_repr(data["frequency"]),
+            frequency=Frequency._from_repr(data["frequency"]),
             properties=data["properties"],
             creation_date=data["creation_date"],
             start_date=data["start_date"],

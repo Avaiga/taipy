@@ -2,8 +2,8 @@ from typing import Any, Dict, Optional
 
 import toml  # type: ignore
 
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.common.frequency import Frequency
-from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.config._config import _Config
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.config.global_app_config import GlobalAppConfig
@@ -74,7 +74,7 @@ class TomlSerializer:
     def extract_node(config_as_dict, cls_config, node, config: Optional[dict]):
         res = {}
         for key, value in config_as_dict.get(node, {}).items():
-            key = protect_name(key)
+            key = _protect_name(key)
             res[key] = cls_config.from_dict(key, value) if config is None else cls_config.from_dict(key, value, config)
         return res
 

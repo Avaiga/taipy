@@ -2,7 +2,7 @@ import pathlib
 from copy import copy
 from datetime import datetime, timedelta
 
-from taipy.core.common.utils import load_fct
+from taipy.core.common._utils import _load_fct
 from taipy.core.config.config import Config
 from taipy.core.data.data_model import DataNodeModel
 from taipy.core.data.data_node import DataNode
@@ -54,7 +54,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
     def from_model(self, model: DataNodeModel):
         if model.storage_type == GenericDataNode.storage_type():
             if model.data_node_properties[self.READ_FCT_MODULE_KEY]:
-                model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = load_fct(
+                model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = _load_fct(
                     model.data_node_properties[self.READ_FCT_MODULE_KEY],
                     model.data_node_properties[self.READ_FCT_NAME_KEY],
                 )
@@ -62,7 +62,7 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
                 model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = None
 
             if model.data_node_properties[self.WRITE_FCT_MODULE_KEY]:
-                model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = load_fct(
+                model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = _load_fct(
                     model.data_node_properties[self.WRITE_FCT_MODULE_KEY],
                     model.data_node_properties[self.WRITE_FCT_NAME_KEY],
                 )

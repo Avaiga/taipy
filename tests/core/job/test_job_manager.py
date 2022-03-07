@@ -45,29 +45,36 @@ def test_get_job():
     task = _create_task(multiply)
 
     job_1 = scheduler.submit_task(task)
-    assert JobManager.get(job_1.id) == job_1
+    assert JobManager._get(job_1.id) == job_1
 
     job_2 = scheduler.submit_task(task)
     assert job_1 != job_2
-    assert JobManager.get(job_1.id).id == job_1.id
-    assert JobManager.get(job_2.id).id == job_2.id
+    assert JobManager._get(job_1.id).id == job_1.id
+    assert JobManager._get(job_2.id).id == job_2.id
 
 
 def test_get_latest_job():
     scheduler = Scheduler()
     task = _create_task(multiply)
+    task_2 = _create_task(multiply)
 
     job_1 = scheduler.submit_task(task)
     assert JobManager.get_latest(task) == job_1
+    assert JobManager.get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = scheduler.submit_task(task)
-    assert JobManager.get_latest(task).id == job_2.id
+    job_2 = scheduler.submit_task(task_2)
+    assert JobManager.get_latest(task).id == job_1.id
+    assert JobManager.get_latest(task_2).id == job_2.id
+
+    sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
+    job_1_bis = scheduler.submit_task(task)
+    assert JobManager.get_latest(task).id == job_1_bis.id
+    assert JobManager.get_latest(task_2).id == job_2.id
 
 
 def test_get_job_unknown():
-
-    assert JobManager.get(JobId("Unknown")) is None
+    assert JobManager._get(JobId("Unknown")) is None
 
 
 def test_get_jobs():
@@ -78,7 +85,7 @@ def test_get_jobs():
     job_1 = scheduler.submit_task(task)
     job_2 = scheduler.submit_task(task)
 
-    assert {job.id for job in JobManager.get_all()} == {job_1.id, job_2.id}
+    assert {job.id for job in JobManager._get_all()} == {job_1.id, job_2.id}
 
 
 def test_delete_job():
@@ -88,10 +95,10 @@ def test_delete_job():
     job_1 = scheduler.submit_task(task)
     job_2 = scheduler.submit_task(task)
 
-    JobManager.delete(job_1)
+    JobManager._delete(job_1)
 
-    assert [job.id for job in JobManager.get_all()] == [job_2.id]
-    assert JobManager.get(job_1.id) is None
+    assert [job.id for job in JobManager._get_all()] == [job_2.id]
+    assert JobManager._get(job_1.id) is None
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
@@ -110,7 +117,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
         job = scheduler.submit_task(task)
 
         with pytest.raises(JobNotDeletedException):
-            JobManager.delete(job)
+            JobManager._delete(job)
 
 
 def _create_task(function, nb_outputs=1):

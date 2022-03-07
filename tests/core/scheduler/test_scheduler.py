@@ -50,20 +50,20 @@ def test_submit_task():
     task = _create_task(multiply)
     output_dn_id = task.output[f"{task.config_id}-output0"].id
 
-    assert DataManager.get(output_dn_id).last_edition_date > before_creation
-    assert DataManager.get(output_dn_id).job_ids == []
-    assert DataManager.get(output_dn_id).is_ready_for_reading
+    assert DataManager._get(output_dn_id).last_edition_date > before_creation
+    assert DataManager._get(output_dn_id).job_ids == []
+    assert DataManager._get(output_dn_id).is_ready_for_reading
 
     before_submission_creation = datetime.now()
     sleep(0.1)
     job = scheduler.submit_task(task)
     sleep(0.1)
     after_submission_creation = datetime.now()
-    assert DataManager.get(output_dn_id).read() == 42
-    assert DataManager.get(output_dn_id).last_edition_date > before_submission_creation
-    assert DataManager.get(output_dn_id).last_edition_date < after_submission_creation
-    assert DataManager.get(output_dn_id).job_ids == [job.id]
-    assert DataManager.get(output_dn_id).is_ready_for_reading
+    assert DataManager._get(output_dn_id).read() == 42
+    assert DataManager._get(output_dn_id).last_edition_date > before_submission_creation
+    assert DataManager._get(output_dn_id).last_edition_date < after_submission_creation
+    assert DataManager._get(output_dn_id).job_ids == [job.id]
+    assert DataManager._get(output_dn_id).is_ready_for_reading
     assert job.is_completed()
 
 
@@ -233,16 +233,16 @@ def test_blocked_task():
         with lock_1:
             job_1 = scheduler.submit_task(task_1)  # job 1 is submitted and locked
             assert job_1.is_running()  # so it is still running
-            assert not DataManager.get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
+            assert not DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
         assert_true_after_20_second_max(job_1.is_completed)  # job1 unlocked and can complete
-        assert DataManager.get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
-        assert DataManager.get(task_1.bar.id).read() == 2  # the data is computed and written
+        assert DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
+        assert DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert job_2.is_running()  # And job 2 can run
         assert len(scheduler.blocked_jobs) == 0
     assert_true_after_20_second_max(job_2.is_completed)  # job 2 unlocked so it can complete
-    assert DataManager.get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
-    assert DataManager.get(task_2.baz.id).read() == 6  # the data is computed and written
+    assert DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
+    assert DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
 
 
 class MyScheduler(Scheduler):

@@ -49,15 +49,15 @@ class Scheduler(AbstractScheduler):
     def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
         for dn in task.output.values():
             dn.lock_edition()
-            DataManager.set(dn)
+            DataManager._set(dn)
         job = JobManager.create(task, itertools.chain([self.on_status_change], callbacks or []))
         if self.is_blocked(job):
             job.blocked()
-            JobManager.set(job)
+            JobManager._set(job)
             self.blocked_jobs.append(job)
         else:
             job.pending()
-            JobManager.set(job)
+            JobManager._set(job)
             self.jobs_to_run.put(job)
             self.__run()
         return job
@@ -73,7 +73,7 @@ class Scheduler(AbstractScheduler):
              True if one of its input data nodes is blocked.
         """
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
-        return any(not DataManager.get(dn.id).is_ready_for_reading for dn in data_nodes)
+        return any(not DataManager._get(dn.id).is_ready_for_reading for dn in data_nodes)
 
     def __run(self):
         with self.lock:
@@ -99,7 +99,7 @@ class Scheduler(AbstractScheduler):
         jobs_to_unblock = [job for job in self.blocked_jobs if not self.is_blocked(job)]
         for job in jobs_to_unblock:
             job.pending()
-            JobManager.set(job)
+            JobManager._set(job)
             self.blocked_jobs.remove(job)
             self.jobs_to_run.put(job)
 
