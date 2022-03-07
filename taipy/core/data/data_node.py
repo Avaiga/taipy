@@ -7,11 +7,11 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
+from taipy.core.common._properties import _Properties
+from taipy.core.common._reload import reload, self_reload
+from taipy.core.common._taipy_logger import _TaipyLogger
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.common.alias import DataNodeId, JobId
-from taipy.core.common.logger import TaipyLogger
-from taipy.core.common.reload import reload, self_reload
-from taipy.core.common.unicode_to_python_variable_name import protect_name
-from taipy.core.common.wrapper import Properties
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.filter import FilterDataNode
 from taipy.core.data.operator import JoinOperator, Operator
@@ -52,7 +52,7 @@ class DataNode:
 
     ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
-    __logger = TaipyLogger.get_logger()
+    __logger = _TaipyLogger._get_logger()
     REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -68,7 +68,7 @@ class DataNode:
         edition_in_progress: bool = False,
         **kwargs,
     ):
-        self.config_id = protect_name(config_id)
+        self.config_id = _protect_name(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.parent_id = parent_id
         self.scope = scope
@@ -80,7 +80,7 @@ class DataNode:
 
         self._validity_period = validity_period
 
-        self._properties = Properties(self, **kwargs)
+        self._properties = _Properties(self, **kwargs)
 
     @property  # type: ignore
     @self_reload("data")
@@ -140,7 +140,7 @@ class DataNode:
         vars(self).update(state)
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
+        protected_attribute_name = _protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
@@ -167,7 +167,7 @@ class DataNode:
 
         self._write(data)
         self.unlock_edition(job_id=job_id)
-        DataManager.set(self)
+        DataManager._set(self)
 
     def lock_edition(self):
         self._edition_in_progress = True

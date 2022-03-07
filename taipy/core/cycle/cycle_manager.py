@@ -2,16 +2,16 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
+from taipy.core.common._manager import _Manager
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
-from taipy.core.common.logger import TaipyLogger
-from taipy.core.common.manager import Manager
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_repository import CycleRepository
 from taipy.core.exceptions.repository import ModelNotFound
 
 
-class CycleManager(Manager[Cycle]):
+class CycleManager(_Manager[Cycle]):
     """
     The Cycle Manager is responsible for managing all the cycle-related capabilities.
 
@@ -42,7 +42,7 @@ class CycleManager(Manager[Cycle]):
         cycle = Cycle(
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
         )
-        cls.set(cycle)
+        cls._set(cycle)
         return cycle
 
     @classmethod

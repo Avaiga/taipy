@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
-from taipy.core.common.unicode_to_python_variable_name import protect_name
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.config.task_config import TaskConfig
 
@@ -24,7 +24,7 @@ class PipelineConfig:
     TASK_KEY = "tasks"
 
     def __init__(self, id: str, tasks: Union[TaskConfig, List[TaskConfig]] = None, **properties):
-        self.id = protect_name(id)
+        self.id = _protect_name(id)
         self.properties = properties
         if tasks:
             self.tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
@@ -51,7 +51,7 @@ class PipelineConfig:
     @classmethod
     def from_dict(cls, id: str, config_as_dict: Dict[str, Any], task_configs: Dict[str, TaskConfig]):
         config = PipelineConfig(id)
-        config.id = protect_name(id)
+        config.id = _protect_name(id)
         if tasks := config_as_dict.pop(cls.TASK_KEY, None):
             config.tasks = [task_configs[task_id] for task_id in tasks if task_id in task_configs]
         config.properties = config_as_dict

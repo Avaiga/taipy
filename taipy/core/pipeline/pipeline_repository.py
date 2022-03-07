@@ -1,7 +1,7 @@
 import pathlib
 from collections import defaultdict
 
-from taipy.core.common import utils
+from taipy.core.common import _utils
 from taipy.core.config.config import Config
 from taipy.core.exceptions.pipeline import NonExistingPipeline
 from taipy.core.exceptions.task import NonExistingTask
@@ -29,7 +29,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
             pipeline.config_id,
             pipeline._properties.data,
             [task.id for task in pipeline.tasks.values()],
-            utils.fcts_to_dict(pipeline._subscribers),
+            _utils._fcts_to_dict(pipeline._subscribers),
         )
 
     def from_model(self, model: PipelineModel) -> Pipeline:
@@ -41,7 +41,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
                 tasks,
                 model.id,
                 model.parent_id,
-                {utils.load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},
+                {_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},
             )
             return pipeline
         except NonExistingTask as err:
@@ -58,7 +58,7 @@ class PipelineRepository(FileSystemRepository[PipelineModel, Pipeline]):
     def __to_tasks(task_ids):
         tasks = []
         for _id in task_ids:
-            if task := TaskManager.get(_id):
+            if task := TaskManager._get(_id):
                 tasks.append(task)
             else:
                 raise NonExistingTask(_id)

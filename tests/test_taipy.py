@@ -174,19 +174,19 @@ class TestTaipy:
             mck.assert_called_once_with()
 
     def test_set(self, scenario, cycle, pipeline, data_node, task):
-        with mock.patch("taipy.core.data.data_manager.DataManager.set") as mck:
+        with mock.patch("taipy.core.data.data_manager.DataManager._set") as mck:
             tp.set(data_node)
             mck.assert_called_once_with(data_node)
-        with mock.patch("taipy.core.task.task_manager.TaskManager.set") as mck:
+        with mock.patch("taipy.core.task.task_manager.TaskManager._set") as mck:
             tp.set(task)
             mck.assert_called_once_with(task)
-        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.set") as mck:
+        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager._set") as mck:
             tp.set(pipeline)
             mck.assert_called_once_with(pipeline)
-        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.set") as mck:
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager._set") as mck:
             tp.set(scenario)
             mck.assert_called_once_with(scenario)
-        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager.set") as mck:
+        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager._set") as mck:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
 
@@ -211,12 +211,12 @@ class TestTaipy:
             mck.assert_called_once_with(pipeline, force=True)
 
     def test_get_tasks(self):
-        with mock.patch("taipy.core.task.task_manager.TaskManager.get_all") as mck:
+        with mock.patch("taipy.core.task.task_manager.TaskManager._get_all") as mck:
             tp.get_tasks()
             mck.assert_called_once_with()
 
     def test_get_task(self, task):
-        with mock.patch("taipy.core.task.task_manager.TaskManager.get") as mck:
+        with mock.patch("taipy.core.task.task_manager.TaskManager._get") as mck:
             task_id = TaskId("TASK_id")
             tp.get(task_id)
             mck.assert_called_once_with(task_id)
@@ -228,13 +228,13 @@ class TestTaipy:
             mck.assert_called_once_with(scenario_id)
 
     def test_delete(self):
-        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager.delete") as mck:
+        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager._delete") as mck:
             cycle_id = CycleId("CYCLE_id")
             tp.delete(cycle_id)
             mck.assert_called_once_with(cycle_id)
 
     def test_get_scenarios(self, cycle):
-        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get_all") as mck:
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager._get_all") as mck:
             tp.get_scenarios()
             mck.assert_called_once_with()
         with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get_all_by_cycle") as mck:
@@ -245,7 +245,7 @@ class TestTaipy:
             mck.assert_called_once_with("tag")
 
     def test_get_scenario(self, scenario):
-        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.get") as mck:
+        with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager._get") as mck:
             scenario_id = ScenarioId("SCENARIO_id")
             tp.get(scenario_id)
             mck.assert_called_once_with(scenario_id)
@@ -317,43 +317,43 @@ class TestTaipy:
             mck.assert_called_once_with(pipeline_id)
 
     def test_get_pipeline(self, pipeline):
-        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.get") as mck:
+        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager._get") as mck:
             pipeline_id = PipelineId("PIPELINE_id")
             tp.get(pipeline_id)
             mck.assert_called_once_with(pipeline_id)
 
     def test_get_pipelines(self):
-        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.get_all") as mck:
+        with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager._get_all") as mck:
             tp.get_pipelines()
             mck.assert_called_once_with()
 
     def test_get_job(self):
-        with mock.patch("taipy.core.job.job_manager.JobManager.get") as mck:
+        with mock.patch("taipy.core.job.job_manager.JobManager._get") as mck:
             job_id = JobId("JOB_id")
             tp.get(job_id)
             mck.assert_called_once_with(job_id)
 
     def test_get_jobs(self):
-        with mock.patch("taipy.core.job.job_manager.JobManager.get_all") as mck:
+        with mock.patch("taipy.core.job.job_manager.JobManager._get_all") as mck:
             tp.get_jobs()
             mck.assert_called_once_with()
 
     def test_delete_job(self, task):
-        with mock.patch("taipy.core.job.job_manager.JobManager.delete") as mck:
+        with mock.patch("taipy.core.job.job_manager.JobManager._delete") as mck:
             job = Job(JobId("job_id"), task)
             tp.delete_job(job)
             mck.assert_called_once_with(job, False)
-        with mock.patch("taipy.core.job.job_manager.JobManager.delete") as mck:
+        with mock.patch("taipy.core.job.job_manager.JobManager._delete") as mck:
             job = Job(JobId("job_id"), task)
             tp.delete_job(job, False)
             mck.assert_called_once_with(job, False)
-        with mock.patch("taipy.core.job.job_manager.JobManager.delete") as mck:
+        with mock.patch("taipy.core.job.job_manager.JobManager._delete") as mck:
             job = Job(JobId("job_id"), task)
             tp.delete_job(job, True)
             mck.assert_called_once_with(job, True)
 
     def test_delete_jobs(self):
-        with mock.patch("taipy.core.job.job_manager.JobManager.delete_all") as mck:
+        with mock.patch("taipy.core.job.job_manager.JobManager._delete_all") as mck:
             tp.delete_jobs()
             mck.assert_called_once_with()
 
@@ -363,17 +363,17 @@ class TestTaipy:
             mck.assert_called_once_with(task)
 
     def test_get_data_node(self, data_node):
-        with mock.patch("taipy.core.data.data_manager.DataManager.get") as mck:
+        with mock.patch("taipy.core.data.data_manager.DataManager._get") as mck:
             tp.get(data_node.id)
             mck.assert_called_once_with(data_node.id)
 
     def test_get_data_nodes(self):
-        with mock.patch("taipy.core.data.data_manager.DataManager.get_all") as mck:
+        with mock.patch("taipy.core.data.data_manager.DataManager._get_all") as mck:
             tp.get_data_nodes()
             mck.assert_called_once_with()
 
     def test_get_cycles(self):
-        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager.get_all") as mck:
+        with mock.patch("taipy.core.cycle.cycle_manager.CycleManager._get_all") as mck:
             tp.get_cycles()
             mck.assert_called_once_with()
 
@@ -403,7 +403,7 @@ class TestTaipy:
         task_config = Config.add_task("my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO)
         pipeline_config = Config.add_pipeline("my_pipeline", task_config)
         scenario_config = Config.add_scenario("my_scenario", pipeline_config)
-        CycleManager.set(cycle)
+        CycleManager._set(cycle)
 
         scenario = ScenarioManager.create(scenario_config)
         ScenarioManager.submit(scenario)
@@ -412,24 +412,24 @@ class TestTaipy:
         # Initial assertion
         assert isinstance(pickle_data_node, PickleDataNode)
         assert_file_exists(pickle_data_node.path)
-        assert len(DataManager.get_all()) == 2
-        assert len(TaskManager.get_all()) == 1
-        assert len(PipelineManager.get_all()) == 1
-        assert len(ScenarioManager.get_all()) == 1
-        assert len(CycleManager.get_all()) == 1
-        assert len(JobManager.get_all()) == 1
+        assert len(DataManager._get_all()) == 2
+        assert len(TaskManager._get_all()) == 1
+        assert len(PipelineManager._get_all()) == 1
+        assert len(ScenarioManager._get_all()) == 1
+        assert len(CycleManager._get_all()) == 1
+        assert len(JobManager._get_all()) == 1
 
         # Test with clean entities disabled
         Config.set_global_config(clean_entities_enabled=False)
         success = tp.clean_all_entities()
         # Everything should be the same after clean_all_entities since clean_entities_enabled is False
         assert_file_exists(pickle_data_node.path)
-        assert len(DataManager.get_all()) == 2
-        assert len(TaskManager.get_all()) == 1
-        assert len(PipelineManager.get_all()) == 1
-        assert len(ScenarioManager.get_all()) == 1
-        assert len(CycleManager.get_all()) == 1
-        assert len(JobManager.get_all()) == 1
+        assert len(DataManager._get_all()) == 2
+        assert len(TaskManager._get_all()) == 1
+        assert len(PipelineManager._get_all()) == 1
+        assert len(ScenarioManager._get_all()) == 1
+        assert len(CycleManager._get_all()) == 1
+        assert len(JobManager._get_all()) == 1
         assert not success
 
         # Test with clean entities enabled
@@ -437,12 +437,12 @@ class TestTaipy:
         success = tp.clean_all_entities()
         # File should not exist after clean_all_entities since clean_entities_enabled is True
         assert_file_not_exists(pickle_data_node.path)
-        assert len(DataManager.get_all()) == 0
-        assert len(TaskManager.get_all()) == 0
-        assert len(PipelineManager.get_all()) == 0
-        assert len(ScenarioManager.get_all()) == 0
-        assert len(CycleManager.get_all()) == 0
-        assert len(JobManager.get_all()) == 0
+        assert len(DataManager._get_all()) == 0
+        assert len(TaskManager._get_all()) == 0
+        assert len(PipelineManager._get_all()) == 0
+        assert len(ScenarioManager._get_all()) == 0
+        assert len(CycleManager._get_all()) == 0
+        assert len(JobManager._get_all()) == 0
         assert success
 
     def test_clean_all_entities_with_user_pickle_files(self, pickle_file_path):
@@ -452,12 +452,12 @@ class TestTaipy:
         generated_pickle = PickleDataNode(config_id="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
 
         # File already exists so it does not write any
-        assert len(DataManager.get_all()) == 1
+        assert len(DataManager._get_all()) == 1
         assert file_exists(user_pickle.path)
         assert_file_exists(generated_pickle.path)
 
         Config.set_global_config(clean_entities_enabled=True)
         tp.clean_all_entities()
-        assert len(DataManager.get_all()) == 0
+        assert len(DataManager._get_all()) == 0
         assert_file_exists(user_pickle.path)
         assert_file_not_exists(generated_pickle.path)

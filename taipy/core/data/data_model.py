@@ -60,7 +60,7 @@ class DataNodeModel:
         return DataNodeModel(
             id=data["id"],
             config_id=data["config_id"],
-            scope=Scope.from_repr(data["scope"]),
+            scope=Scope._from_repr(data["scope"]),
             storage_type=data["storage_type"],
             name=data["name"],
             parent_id=data["parent_id"],

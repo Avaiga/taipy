@@ -3,11 +3,11 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
+from taipy.core.common._properties import _Properties
+from taipy.core.common._reload import reload, self_reload
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
+from taipy.core.common._utils import _fcts_to_dict
 from taipy.core.common.alias import PipelineId
-from taipy.core.common.reload import reload, self_reload
-from taipy.core.common.unicode_to_python_variable_name import protect_name
-from taipy.core.common.utils import fcts_to_dict
-from taipy.core.common.wrapper import Properties
 from taipy.core.data.data_node import DataNode
 from taipy.core.pipeline.pipeline_model import PipelineModel
 from taipy.core.task.task import Task
@@ -44,14 +44,14 @@ class Pipeline:
         parent_id: Optional[str] = None,
         subscribers: Set[Callable] = None,
     ):
-        self.config_id = protect_name(config_id)
+        self.config_id = _protect_name(config_id)
         self.tasks = {task.config_id: task for task in tasks}
         self.id: PipelineId = pipeline_id or self.new_id(self.config_id)
         self.parent_id = parent_id
         self.is_consistent = self.__is_consistent()
 
         self._subscribers = subscribers or set()
-        self._properties = Properties(self, **properties)
+        self._properties = _Properties(self, **properties)
 
     def __getstate__(self):
         return self.id
@@ -59,7 +59,7 @@ class Pipeline:
     def __setstate__(self, id):
         from taipy.core.pipeline.pipeline_manager import PipelineManager
 
-        p = PipelineManager.get(id)
+        p = PipelineManager._get(id)
         self.__dict__ = p.__dict__
 
     @property  # type: ignore
@@ -77,10 +77,10 @@ class Pipeline:
 
     @staticmethod
     def new_id(config_id: str) -> PipelineId:
-        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, protect_name(config_id), str(uuid.uuid4())]))
+        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, _protect_name(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
+        protected_attribute_name = _protect_name(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.tasks:
@@ -134,7 +134,7 @@ class Pipeline:
             self.config_id,
             self._properties.data,
             [task.id for task in self.tasks.values()],
-            fcts_to_dict(list(self._subscribers)),
+            _fcts_to_dict(list(self._subscribers)),
         )
 
     def get_sorted_tasks(self) -> List[List[Task]]:

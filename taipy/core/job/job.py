@@ -5,8 +5,8 @@ from concurrent.futures import Future
 from datetime import datetime
 from typing import Callable, List
 
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
-from taipy.core.common.logger import TaipyLogger
 from taipy.core.job.status import Status
 from taipy.core.task.task import Task
 
@@ -43,7 +43,7 @@ class Job:
         self.creation_date = datetime.now()
         self._subscribers: List[Callable] = []
         self._exceptions: List[Exception] = []
-        self.__logger = TaipyLogger.get_logger()
+        self.__logger = _TaipyLogger._get_logger()
 
     def __contains__(self, task: Task):
         """Returns True if the Job is based on this task."""

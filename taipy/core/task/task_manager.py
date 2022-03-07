@@ -1,9 +1,9 @@
 import itertools
 from typing import Dict, List, Optional, Union
 
+from taipy.core.common._manager import _Manager
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
-from taipy.core.common.logger import TaipyLogger
-from taipy.core.common.manager import Manager
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.scope import Scope
@@ -16,7 +16,7 @@ from taipy.core.task.task import Task
 from taipy.core.task.task_repository import TaskRepository
 
 
-class TaskManager(Manager[Task]):
+class TaskManager(_Manager[Task]):
     """
     The Task Manager saves and retrieves Tasks.
 
@@ -38,7 +38,7 @@ class TaskManager(Manager[Task]):
         return cls._scheduler
 
     @classmethod
-    def set(cls, task: Task):
+    def _set(cls, task: Task):
         """
         Saves or updates a task.
 
@@ -47,7 +47,7 @@ class TaskManager(Manager[Task]):
         """
         cls.__save_data_nodes(task.input.values())
         cls.__save_data_nodes(task.output.values())
-        super().set(task)
+        super()._set(task)
 
     @classmethod
     def get_or_create(
@@ -90,13 +90,13 @@ class TaskManager(Manager[Task]):
             inputs = [data_nodes[input_config] for input_config in task_config.input]
             outputs = [data_nodes[output_config] for output_config in task_config.output]
             task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
-            cls.set(task)
+            cls._set(task)
             return task
 
     @classmethod
     def __save_data_nodes(cls, data_nodes):
         for i in data_nodes:
-            DataManager.set(i)
+            DataManager._set(i)
 
     @classmethod
     def hard_delete(
@@ -117,12 +117,12 @@ class TaskManager(Manager[Task]):
         Raises:
             ModelNotFound: No task corresponds to task_id.
         """
-        task = cls.get(task_id)
+        task = cls._get(task_id)
 
-        jobs = JobManager.get_all()
+        jobs = JobManager._get_all()
         for job in jobs:
             if job.task.id == task.id:
-                JobManager.delete(job)
+                JobManager._delete(job)
 
         if scenario_id:
             cls._remove_if_parent_id_eq(task.input.values(), scenario_id)
@@ -131,13 +131,13 @@ class TaskManager(Manager[Task]):
             cls._remove_if_parent_id_eq(task.input.values(), pipeline_id)
             cls._remove_if_parent_id_eq(task.output.values(), pipeline_id)
 
-        cls.delete(task_id)
+        cls._delete(task_id)
 
     @classmethod
     def _remove_if_parent_id_eq(cls, data_nodes, id_):
         for data_node in data_nodes:
             if data_node.parent_id == id_:
-                DataManager.delete(data_node.id)
+                DataManager._delete(data_node.id)
 
     @classmethod
     def _get_all_by_config_id(cls, config_id: str) -> List[Task]:

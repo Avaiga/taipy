@@ -121,8 +121,8 @@ def test_scenario_create_from_tasks():
     task_config_2 = Config.add_task("t2", print, data_node_2_config, data_node_3_config, scope=Scope.GLOBAL)
     scenario_config_1 = Config.add_scenario_from_tasks("s1", task_configs=[task_config_1, task_config_2])
     ScenarioManager.submit(ScenarioManager.create(scenario_config_1))
-    assert len(ScenarioManager.get_all()) == 1
-    assert len(PipelineManager.get_all()) == 1
+    assert len(ScenarioManager._get_all()) == 1
+    assert len(PipelineManager._get_all()) == 1
     assert len(scenario_config_1.pipelines) == 1
     assert len(scenario_config_1.pipelines[0].tasks) == 2
     # Should create a default pipeline name
@@ -134,6 +134,6 @@ def test_scenario_create_from_tasks():
         "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
     )
     ScenarioManager.submit(ScenarioManager.create(scenario_config_2))
-    assert len(ScenarioManager.get_all()) == 2
-    assert len(PipelineManager.get_all()) == 2
+    assert len(ScenarioManager._get_all()) == 2
+    assert len(PipelineManager._get_all()) == 2
     assert scenario_config_2.pipelines[0].id == pipeline_name

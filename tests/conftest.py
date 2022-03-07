@@ -170,12 +170,12 @@ def setup():
 
 def delete_everything():
     TaskManager.scheduler = SchedulerFactory.build_scheduler
-    ScenarioManager.delete_all()
-    PipelineManager.delete_all()
-    DataManager.delete_all()
-    TaskManager.delete_all()
-    JobManager.delete_all()
-    CycleManager.delete_all()
+    ScenarioManager._delete_all()
+    PipelineManager._delete_all()
+    DataManager._delete_all()
+    TaskManager._delete_all()
+    JobManager._delete_all()
+    CycleManager._delete_all()
     Config._python_config.global_config = GlobalAppConfig()
     Config._python_config.job_config = JobConfig()
     Config._python_config.data_nodes.clear()

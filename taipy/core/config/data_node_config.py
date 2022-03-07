@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
-from taipy.core.common.unicode_to_python_variable_name import protect_name
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.data.scope import Scope
 
@@ -44,7 +44,7 @@ class DataNodeConfig:
     DEFAULT_IS_CACHEABLE_VALUE = False
 
     def __init__(self, id: str, storage_type: str = None, scope: Scope = None, **properties):
-        self.id = protect_name(id)
+        self.id = _protect_name(id)
         self.storage_type = storage_type
         self.scope = scope
         self.properties = properties
@@ -73,7 +73,7 @@ class DataNodeConfig:
     @classmethod
     def from_dict(cls, id: str, config_as_dict: Dict[str, Any]):
         config = DataNodeConfig(id)
-        config.id = protect_name(id)
+        config.id = _protect_name(id)
         config.storage_type = config_as_dict.pop(cls.STORAGE_TYPE_KEY, None)
         config.scope = config_as_dict.pop(cls.SCOPE_KEY, None)
         config.properties = config_as_dict

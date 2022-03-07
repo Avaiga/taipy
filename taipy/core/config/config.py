@@ -3,9 +3,9 @@ __all__ = ["Config"]
 import os
 from typing import Callable, Dict, List, Optional, Union
 
-from taipy.core.common.classproperty import classproperty
+from taipy.core.common._classproperty import _Classproperty
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.frequency import Frequency
-from taipy.core.common.logger import TaipyLogger
 from taipy.core.config._config import _Config
 from taipy.core.config.checker.checker import Checker
 from taipy.core.config.checker.issue_collector import IssueCollector
@@ -24,39 +24,39 @@ class Config:
     """Singleton entry point to configure Taipy application and retrieve the configuration values."""
 
     ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
-    __logger = TaipyLogger.get_logger()
+    __logger = _TaipyLogger._get_logger()
     _python_config = _Config()
     _file_config = None
     _env_file_config = None
     _applied_config = _Config.default_config()
     collector = IssueCollector()
 
-    @classproperty
+    @_Classproperty
     def job_config(cls) -> JobConfig:
         """Returns configuration values related to the job executions."""
         return cls._applied_config.job_config
 
-    @classproperty
+    @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
         """Returns configuration values related to the global application."""
         return cls._applied_config.global_config
 
-    @classproperty
+    @_Classproperty
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
         """Returns data node configs by config id."""
         return cls._applied_config.data_nodes
 
-    @classproperty
+    @_Classproperty
     def tasks(cls) -> Dict[str, TaskConfig]:
         """Returns task configs by config id."""
         return cls._applied_config.tasks
 
-    @classproperty
+    @_Classproperty
     def pipelines(cls) -> Dict[str, PipelineConfig]:
         """Returns pipeline configs by config id."""
         return cls._applied_config.pipelines
 
-    @classproperty
+    @_Classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
         """Returns scenario configs by config id."""
         return cls._applied_config.scenarios

@@ -1,8 +1,8 @@
 import uuid
 from typing import Dict, Iterable, Optional
 
+from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.common.alias import TaskId
-from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
 
@@ -44,7 +44,7 @@ class Task:
         id: TaskId = None,
         parent_id: Optional[str] = None,
     ):
-        self.config_id = protect_name(config_id)
+        self.config_id = _protect_name(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.parent_id = parent_id
         self.__input = {dn.config_id: dn for dn in input or []}
@@ -69,7 +69,7 @@ class Task:
         return self.__input
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
+        protected_attribute_name = _protect_name(attribute_name)
         if protected_attribute_name in self.input:
             return self.input[protected_attribute_name]
         if protected_attribute_name in self.output:

@@ -1,7 +1,7 @@
 from importlib import util
 from typing import Any, Dict, Optional, Union
 
-from taipy.core.common.utils import load_fct
+from taipy.core.common._utils import _load_fct
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.exceptions.scheduler import DependencyNotInstalled
 
@@ -107,4 +107,4 @@ class JobConfig:
         dep = f"taipy.{mode}"
         if not util.find_spec(dep):
             raise DependencyNotInstalled(mode)
-        return load_fct(dep + ".config", "Config")(**properties)
+        return _load_fct(dep + ".config", "Config")(**properties)

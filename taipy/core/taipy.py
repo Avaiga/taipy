@@ -3,9 +3,9 @@ import os
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.common.frequency import Frequency
-from taipy.core.common.logger import TaipyLogger
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.config import Config
 from taipy.core.config.data_node_config import DataNodeConfig
@@ -35,7 +35,7 @@ from taipy.core.scenario.scenario_manager import ScenarioManager
 from taipy.core.task.task import Task
 from taipy.core.task.task_manager import TaskManager
 
-__logger = TaipyLogger.get_logger()
+__logger = _TaipyLogger._get_logger()
 
 
 def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
@@ -47,15 +47,15 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
 
     """
     if isinstance(entity, Cycle):
-        return CycleManager.set(entity)
+        return CycleManager._set(entity)
     if isinstance(entity, Scenario):
-        return ScenarioManager.set(entity)
+        return ScenarioManager._set(entity)
     if isinstance(entity, Pipeline):
-        return PipelineManager.set(entity)
+        return PipelineManager._set(entity)
     if isinstance(entity, Task):
-        return TaskManager.set(entity)
+        return TaskManager._set(entity)
     if isinstance(entity, DataNode):
-        return DataManager.set(entity)
+        return DataManager._set(entity)
 
 
 def submit(entity: Union[Scenario, Pipeline], force: bool = False):
@@ -90,17 +90,17 @@ def get(
         `ModelNotFound`: If `entity_id` does not match a correct entity id pattern.
     """
     if entity_id.startswith(JobManager.ID_PREFIX):
-        return JobManager.get(JobId(entity_id))
+        return JobManager._get(JobId(entity_id))
     if entity_id.startswith(Cycle.ID_PREFIX):
-        return CycleManager.get(CycleId(entity_id))
+        return CycleManager._get(CycleId(entity_id))
     if entity_id.startswith(Scenario.ID_PREFIX):
-        return ScenarioManager.get(ScenarioId(entity_id))
+        return ScenarioManager._get(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline.ID_PREFIX):
-        return PipelineManager.get(PipelineId(entity_id))
+        return PipelineManager._get(PipelineId(entity_id))
     if entity_id.startswith(Task.ID_PREFIX):
-        return TaskManager.get(TaskId(entity_id))
+        return TaskManager._get(TaskId(entity_id))
     if entity_id.startswith(DataNode.ID_PREFIX):
-        return DataManager.get(DataNodeId(entity_id))
+        return DataManager._get(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -111,7 +111,7 @@ def get_tasks() -> List[Task]:
     Returns:
         List[`Task`]: The list of tasks.
     """
-    return TaskManager.get_all()
+    return TaskManager._get_all()
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
@@ -133,9 +133,9 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
         `ModelNotFound`: No entity corresponds to entity_id
     """
     if entity_id.startswith(JobManager.ID_PREFIX):
-        return JobManager.delete(JobManager.get(JobId(entity_id)))  # type: ignore
+        return JobManager._delete(JobManager._get(JobId(entity_id)))  # type: ignore
     if entity_id.startswith(Cycle.ID_PREFIX):
-        return CycleManager.delete(CycleId(entity_id))
+        return CycleManager._delete(CycleId(entity_id))
     if entity_id.startswith(Scenario.ID_PREFIX):
         return ScenarioManager.hard_delete(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline.ID_PREFIX):
@@ -143,7 +143,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     if entity_id.startswith(Task.ID_PREFIX):
         return TaskManager.hard_delete(TaskId(entity_id))
     if entity_id.startswith(DataNode.ID_PREFIX):
-        return DataManager.delete(DataNodeId(entity_id))
+        return DataManager._delete(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -158,7 +158,7 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
         List[`Scenario`]: The list of scenarios filtered by cycle or tag if given as parameter.
     """
     if not cycle and not tag:
-        return ScenarioManager.get_all()
+        return ScenarioManager._get_all()
     if cycle and not tag:
         return ScenarioManager.get_all_by_cycle(cycle)
     if not cycle and tag:
@@ -314,7 +314,7 @@ def get_pipelines() -> List[Pipeline]:
     Returns:
         List[`Pipeline`]: The list of all pipelines.
     """
-    return PipelineManager.get_all()
+    return PipelineManager._get_all()
 
 
 def get_jobs() -> List[Job]:
@@ -324,7 +324,7 @@ def get_jobs() -> List[Job]:
     Returns:
         List[`Job`]: The list of all jobs.
     """
-    return JobManager.get_all()
+    return JobManager._get_all()
 
 
 def delete_job(job: Job, force=False):
@@ -337,12 +337,12 @@ def delete_job(job: Job, force=False):
     Raises:
         `JobNotDeletedException`: If the job is not finished.
     """
-    return JobManager.delete(job, force)
+    return JobManager._delete(job, force)
 
 
 def delete_jobs():
     """Deletes all jobs."""
-    return JobManager.delete_all()
+    return JobManager._delete_all()
 
 
 def get_latest_job(task: Task) -> Optional[Job]:
@@ -364,7 +364,7 @@ def get_data_nodes() -> List[DataNode]:
     Returns:
         List[`DataNode`]: The list of all data nodes.
     """
-    return DataManager.get_all()
+    return DataManager._get_all()
 
 
 def get_cycles() -> List[Cycle]:
@@ -374,7 +374,7 @@ def get_cycles() -> List[Cycle]:
     Returns:
         List[`Cycle`]: The list of all cycles.
     """
-    return CycleManager.get_all()
+    return CycleManager._get_all()
 
 
 def create_scenario(
@@ -836,7 +836,7 @@ def clean_all_entities() -> bool:
         __logger.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
         return False
 
-    data_nodes = DataManager.get_all()
+    data_nodes = DataManager._get_all()
 
     # Clean all pickle files
     for data_node in data_nodes:
@@ -845,12 +845,12 @@ def clean_all_entities() -> bool:
                 os.remove(data_node.path)
 
     # Clean all entities
-    DataManager.delete_all()
-    TaskManager.delete_all()
-    PipelineManager.delete_all()
-    ScenarioManager.delete_all()
-    CycleManager.delete_all()
-    JobManager.delete_all()
+    DataManager._delete_all()
+    TaskManager._delete_all()
+    PipelineManager._delete_all()
+    ScenarioManager._delete_all()
+    CycleManager._delete_all()
+    JobManager._delete_all()
     return True
 
 

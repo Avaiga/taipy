@@ -49,8 +49,8 @@ class TestJobRepository:
         repository.save(job)
         with pytest.raises(ModelNotFound):
             repository.load("id")
-        DataManager.set(data_node)
-        TaskManager.set(task)
+        DataManager._set(data_node)
+        TaskManager._set(task)
         j = repository.load("id")
         assert j.id == job.id
 
@@ -59,6 +59,6 @@ class TestJobRepository:
         assert repository.to_model(job) == job_model
         with pytest.raises(ModelNotFound):
             repository.from_model(job_model)
-        DataManager.set(data_node)
-        TaskManager.set(task)
+        DataManager._set(data_node)
+        TaskManager._set(task)
         assert repository.from_model(job_model).id == job.id
