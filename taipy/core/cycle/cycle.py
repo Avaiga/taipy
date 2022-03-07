@@ -10,19 +10,19 @@ from taipy.core.common.frequency import Frequency
 
 class Cycle:
     """
-    A Cycle object holds the frequency representing a work cycle.
+    Represents an iteration of a recurrent work pattern.
 
     Attributes:
-        frequency (Frequency): The frequency of the cycle
-        properties (dict[str, str]): List of additional arguments.
-        name (str): Name that identifies the cycle.
-        creation_date (datetime): Date and time of the creation of the cycle
-        start_date (datetime): Date and time of the start of the cycle
-        end_date (datetime): Date and time of the end of the cycle
-        id (str): Unique identifier of the cycle
+        id (str): The Unique identifier of the cycle.
+        frequency (Frequency): The `Frequency^` of the cycle.
+        creation_date (datetime): The date and time of the creation of the cycle.
+        start_date (datetime): The date and time of the start of the cycle.
+        end_date (datetime): The date and time of the end of the cycle.
+        name (str): The name of the cycle.
+        properties (dict[str, str]): The list of additional arguments.
     """
 
-    ID_PREFIX = "CYCLE"
+    _ID_PREFIX = "CYCLE"
     __SEPARATOR = "_"
 
     def __init__(
@@ -39,16 +39,16 @@ class Cycle:
         self.creation_date = creation_date
         self.start_date = start_date
         self.end_date = end_date
-        self.name = self.new_name(name)
-        self.id = id or self.new_id(self.name)
+        self.name = self._new_name(name)
+        self.id = id or self._new_id(self.name)
         self.properties = _Properties(self, **properties)
 
-    def new_name(self, name: str = None) -> str:
+    def _new_name(self, name: str = None) -> str:
         return name if name else Cycle.__SEPARATOR.join([str(self.frequency), self.creation_date.isoformat()])
 
     @staticmethod
-    def new_id(name: str) -> CycleId:
-        return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle.ID_PREFIX, name, str(uuid.uuid4())])))
+    def _new_id(name: str) -> CycleId:
+        return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle._ID_PREFIX, name, str(uuid.uuid4())])))
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = attribute_name
