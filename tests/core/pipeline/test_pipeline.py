@@ -40,17 +40,6 @@ def test_create_pipeline():
     assert pipeline_1.task_x == task_1
 
 
-def test_add_property_to_pipeline():
-    pipeline = Pipeline("qux", {}, [])
-
-    tp.set(pipeline)
-    pipeline.properties["abc"] = 5
-    same_pipeline = tp.get(pipeline.id)
-
-    assert pipeline.properties["abc"] == 5
-    assert same_pipeline.properties["abc"] == 5
-
-
 def test_check_consistency():
     pipeline_1 = Pipeline("name_1", {}, [])
     assert pipeline_1.is_consistent
