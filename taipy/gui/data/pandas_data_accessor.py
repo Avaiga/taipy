@@ -144,7 +144,7 @@ class _PandasDataAccessor(_DataAccessor):
             return ret_dict
         return None
 
-    def __get_data(self, gui: Gui, var_name: str, value: pd.DataFrame, payload: t.Dict[str, t.Any], data_format: _DataFormat, col_prefix: t.Optional[str] = ""
+    def __get_data(self, gui: Gui, var_name: str, value: pd.DataFrame, payload: t.Dict[str, t.Any], data_format: _DataFormat, col_prefix: t.Optional[str] = ""   # noqa: C901
                    ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         columns = payload.get("columns", [])
@@ -221,9 +221,7 @@ class _PandasDataAccessor(_DataAccessor):
         ret_payload["value"] = dictret
         return ret_payload
 
-    def get_data(  # noqa: C901
-        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
-    ) -> t.Dict[str, t.Any]:
+    def get_data(self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat) -> t.Dict[str, t.Any]:
         if isinstance(value, list):
             is_chart = payload.get("alldata", False)
             if is_chart:
