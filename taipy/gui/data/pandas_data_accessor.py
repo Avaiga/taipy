@@ -144,8 +144,15 @@ class _PandasDataAccessor(_DataAccessor):
             return ret_dict
         return None
 
-    def __get_data(self, gui: Gui, var_name: str, value: pd.DataFrame, payload: t.Dict[str, t.Any], data_format: _DataFormat, col_prefix: t.Optional[str] = ""   # noqa: C901
-                   ) -> t.Dict[str, t.Any]:
+    def __get_data(  # noqa: C901
+            self,
+            gui: Gui,
+            var_name: str,
+            value: pd.DataFrame,
+            payload: t.Dict[str, t.Any],
+            data_format: _DataFormat,
+            col_prefix: t.Optional[str] = ""
+    ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         columns = payload.get("columns", [])
         if col_prefix:
