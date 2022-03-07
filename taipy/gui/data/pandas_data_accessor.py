@@ -137,16 +137,24 @@ class _PandasDataAccessor(_DataAccessor):
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
         if isinstance(value, _PandasDataAccessor.__types):
             return value.dtypes.apply(lambda x: x.name).to_dict()
+        elif isinstance(value, list):
+            ret_dict: t.Dict[str, str] = {}
+            for i, v in enumerate(value):
+                ret_dict.update({f"{i}/{k}": v for k, v in v.dtypes.apply(lambda x: x.name).items()})
+            return ret_dict
         return None
 
-    def get_data(  # noqa: C901
-        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
-    ) -> t.Dict[str, t.Any]:
+    def __get_data(self, gui: Gui, var_name: str, value: pd.DataFrame, payload: t.Dict[str, t.Any], data_format: _DataFormat, col_prefix: t.Optional[str] = ""
+                   ) -> t.Dict[str, t.Any]:
         ret_payload = {}
-        if isinstance(value, _PandasDataAccessor.__types):
+        columns = payload.get("columns", [])
+        if col_prefix:
+            columns = [c.removeprefix(col_prefix) for c in columns if c.startswith(col_prefix)]
+        ret_payload["pagekey"] = payload.get("pagekey", "unknown page")
+        paged = not payload.get("alldata", False)
+        if paged:
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
-            columns = payload.get("columns", [])
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
                 applies_with_fn = {}
                 for k, v in applies.items():
@@ -158,60 +166,80 @@ class _PandasDataAccessor(_DataAccessor):
                     value = value.groupby(aggregates).agg(applies_with_fn)
                 except Exception:
                     warnings.warn(f"Cannot aggregate {var_name} with groupby {aggregates} and aggregates {applies}")
-            ret_payload["pagekey"] = payload.get("pagekey", "unknown page")
-            paged = not payload.get("alldata", False)
-            if paged:
-                inf = payload.get("infinite")
-                if inf is not None:
-                    ret_payload["infinite"] = inf
-                # real number of rows is needed to calculate the number of pages
-                rowcount = len(value)
-                # here we'll deal with start and end values from payload if present
-                if isinstance(payload["start"], int):
-                    start = int(payload["start"])
-                else:
-                    try:
-                        start = int(str(payload["start"]), base=10)
-                    except Exception:
-                        warnings.warn(f'start should be an int value {payload["start"]}')
-                        start = 0
-                if isinstance(payload["end"], int):
-                    end = int(payload["end"])
-                else:
-                    try:
-                        end = int(str(payload["end"]), base=10)
-                    except Exception:
-                        end = -1
-                if start < 0 or start >= rowcount:
-                    start = 0
-                if end < 0 or end >= rowcount:
-                    end = rowcount - 1
-                # deal with sort
-                order_by = payload.get("orderby")
-                if isinstance(order_by, str) and len(order_by):
-                    new_indexes = value[order_by].values.argsort(axis=0)
-                    if payload.get("sort") == "desc":
-                        # reverse order
-                        new_indexes = new_indexes[::-1]
-                    new_indexes = new_indexes[slice(start, end + 1)]
-                else:
-                    new_indexes = slice(start, end + 1)
-                value = self.__build_transferred_cols(
-                    gui, columns, value.iloc[new_indexes], styles=payload.get("styles")
-                )
-                dictret = self.__format_data(
-                    value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
-                )
+            inf = payload.get("infinite")
+            if inf is not None:
+                ret_payload["infinite"] = inf
+            # real number of rows is needed to calculate the number of pages
+            rowcount = len(value)
+            # here we'll deal with start and end values from payload if present
+            if isinstance(payload["start"], int):
+                start = int(payload["start"])
             else:
-                ret_payload["alldata"] = True
-                nb_rows_max = payload.get("width")
-                # view with the requested columns
-                if nb_rows_max and nb_rows_max < len(value) / 2:
-                    value = value.copy()
-                    value["tp_index"] = value.index
-                    # we need to be more clever than this :-)
-                    value = value.iloc[:: (len(value) // nb_rows_max)]
-                value = self.__build_transferred_cols(gui, columns, value)
-                dictret = self.__format_data(value, data_format, "list", data_extraction=True)
-            ret_payload["value"] = dictret
+                try:
+                    start = int(str(payload["start"]), base=10)
+                except Exception:
+                    warnings.warn(f'start should be an int value {payload["start"]}')
+                    start = 0
+            if isinstance(payload["end"], int):
+                end = int(payload["end"])
+            else:
+                try:
+                    end = int(str(payload["end"]), base=10)
+                except Exception:
+                    end = -1
+            if start < 0 or start >= rowcount:
+                start = 0
+            if end < 0 or end >= rowcount:
+                end = rowcount - 1
+            # deal with sort
+            order_by = payload.get("orderby")
+            if isinstance(order_by, str) and len(order_by):
+                new_indexes = value[order_by].values.argsort(axis=0)
+                if payload.get("sort") == "desc":
+                    # reverse order
+                    new_indexes = new_indexes[::-1]
+                new_indexes = new_indexes[slice(start, end + 1)]
+            else:
+                new_indexes = slice(start, end + 1)
+            value = self.__build_transferred_cols(
+                gui, columns, value.iloc[new_indexes], styles=payload.get("styles")
+            )
+            dictret = self.__format_data(
+                value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
+            )
+        else:
+            ret_payload["alldata"] = True
+            nb_rows_max = payload.get("width")
+            # view with the requested columns
+            if nb_rows_max and nb_rows_max < len(value) / 2:
+                value = value.copy()
+                value["tp_index"] = value.index
+                # we need to be more clever than this :-)
+                value = value.iloc[:: (len(value) // nb_rows_max)]
+            value = self.__build_transferred_cols(gui, columns, value)
+            dictret = self.__format_data(value, data_format, "list", data_extraction=True)
+        ret_payload["value"] = dictret
         return ret_payload
+
+    def get_data(  # noqa: C901
+        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+    ) -> t.Dict[str, t.Any]:
+        if isinstance(value, list):
+            is_chart = payload.get("alldata", False)
+            if is_chart:
+                ret_payload = {"alldata": True, "value": {"multi": True},
+                               "pagekey": payload.get("pagekey", "unknown page")}
+                data = []
+                for i, v in enumerate(value):
+                    ret = self.__get_data(gui, var_name, v, payload, data_format,
+                                          f"{i}/") if isinstance(v, pd.DataFrame) else {}
+                    ret_val = ret.get("value", {})
+                    data.append(ret_val.pop("data", None))
+                    ret_payload.get("value", {}).update(ret_val)
+                ret_payload["value"]["data"] = data
+                return ret_payload
+            else:
+                value = value[0]
+        if isinstance(value, _PandasDataAccessor.__types):
+            return self.__get_data(gui, var_name, value, payload, data_format)
+        return {}

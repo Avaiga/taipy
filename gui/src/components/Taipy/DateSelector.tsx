@@ -22,7 +22,7 @@ interface DateSelectorProps extends TaipyActiveProps {
     editable?: boolean;
 }
 
-const boxSx = {display: "inline-block"};
+const boxSx = { display: "inline-block" };
 
 const DateSelector = (props: DateSelectorProps) => {
     const { className, updateVarName, withTime = false, id, propagate = true } = props;
@@ -73,38 +73,38 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [props.date, tz]);
 
     return (
-        <Box id={id} className={className} sx={boxSx}>
-            <Tooltip title={hover || ""}>
-            {editable ? (
-                withTime ? (
-                    <DateTimePicker
-                        value={value}
-                        onChange={handleChange}
-                        renderInput={renderInput}
-                        className={getSuffixedClassNames(className, "-picker")}
-                        disabled={!active}
-                    />
+        <Tooltip title={hover || ""}>
+            <Box id={id} className={className} sx={boxSx}>
+                {editable ? (
+                    withTime ? (
+                        <DateTimePicker
+                            value={value}
+                            onChange={handleChange}
+                            renderInput={renderInput}
+                            className={getSuffixedClassNames(className, "-picker")}
+                            disabled={!active}
+                        />
+                    ) : (
+                        <DatePicker
+                            value={value}
+                            onChange={handleChange}
+                            renderInput={renderInput}
+                            className={getSuffixedClassNames(className, "-picker")}
+                            disabled={!active}
+                        />
+                    )
                 ) : (
-                    <DatePicker
-                        value={value}
-                        onChange={handleChange}
-                        renderInput={renderInput}
-                        className={getSuffixedClassNames(className, "-picker")}
-                        disabled={!active}
+                    <Field
+                        dataType="datetime.datetime"
+                        defaultValue={props.defaultDate}
+                        value={props.date}
+                        format={props.format}
+                        id={id + "-field"}
+                        className={getSuffixedClassNames(className, "-text")}
                     />
-                )
-            ) : (
-                <Field
-                    dataType="datetime.datetime"
-                    defaultValue={props.defaultDate}
-                    value={props.date}
-                    format={props.format}
-                    id={id + "-field"}
-                    className={getSuffixedClassNames(className, "-text")}
-                />
-            )}
-            </Tooltip>
-        </Box>
+                )}
+            </Box>
+        </Tooltip>
     );
 };
 

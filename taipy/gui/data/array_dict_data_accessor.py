@@ -16,11 +16,18 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
         return [t.__name__ for t in _ArrayDictDataAccessor.__types]
 
     def __get_dataframe(self, value: t.Any) -> pd.DataFrame:
-        if isinstance(value, (list)):
+        if isinstance(value, list):
             if isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
-            elif isinstance(value[0], list):
-                return pd.DataFrame({str(i): v for i, v in enumerate(value)})
+            else:
+                types = set([type(x) for x in value])
+                if len(types) == 1 and types[0] == list:
+                    return pd.DataFrame({str(i): v for i, v in enumerate(value)})
+                elif pd.DataFrame in types:
+                    if len(types) == 1:
+                        return value
+                    elif len(types) == 2 and list in types:
+                        return [v if isinstance(v, pd.DataFrame) else pd.DataFrame({str(i): v}) for i, v in enumerate(value)]
         return pd.DataFrame(value)
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore

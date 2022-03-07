@@ -1,5 +1,7 @@
 import typing as t
 
+from .utils import _MapDict
+
 if t.TYPE_CHECKING:
     from .gui import Gui
 
@@ -29,7 +31,8 @@ class State:
             raise AttributeError(f"Variable '{name}' is not defined.")
         if not hasattr(gui._bindings(), name):
             gui._bind_var(name)
-        return getattr(gui._bindings(), name)
+        val = getattr(gui._bindings(), name)
+        return val._dict if isinstance(val, _MapDict) else val
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name in State.__attrs:

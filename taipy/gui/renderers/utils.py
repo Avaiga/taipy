@@ -1,5 +1,6 @@
 import typing as t
 import warnings
+import re
 
 from ..utils import _get_date_col_str_name, _MapDict
 from ..types import NumberTypes
@@ -62,6 +63,23 @@ def _get_columns_dict(
             elif number_format and type in NumberTypes:
                 _add_to_dict_and_get(columns[col], "format", number_format)
     return columns
+
+
+_indexed_data = re.compile(r"^(\d+)\/(.*)")
+
+
+def _get_col_from_indexed(col_name: str, idx: int) -> str:
+    re_res = _indexed_data.search(col_name)
+    if re_res:
+        return col_name if str(idx) == re_res.group(1) else None
+    return col_name
+
+
+def _get_idx_from_col(col_name) -> int:
+    re_res = _indexed_data.search(col_name)
+    if re_res:
+        return int(re_res.group(1))
+    return 0
 
 
 def _to_camel_case(value: str) -> str:
