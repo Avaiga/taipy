@@ -2,8 +2,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict
 
+from taipy.core.common._get_valid_filename import _get_valid_filename
 from taipy.core.common._properties import _Properties
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 
@@ -44,18 +44,14 @@ class Cycle:
         self.properties = _Properties(self, **properties)
 
     def new_name(self, name: str = None) -> str:
-        return (
-            _protect_name(name)
-            if name
-            else Cycle.__SEPARATOR.join([str(self.frequency), self.creation_date.isoformat()])
-        )
+        return name if name else Cycle.__SEPARATOR.join([str(self.frequency), self.creation_date.isoformat()])
 
     @staticmethod
     def new_id(name: str) -> CycleId:
-        return CycleId(Cycle.__SEPARATOR.join([Cycle.ID_PREFIX, _protect_name(name), str(uuid.uuid4())]))
+        return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle.ID_PREFIX, name, str(uuid.uuid4())])))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = _protect_name(attribute_name)
+        protected_attribute_name = attribute_name
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")

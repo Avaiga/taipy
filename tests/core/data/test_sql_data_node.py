@@ -34,7 +34,7 @@ class TestSQLDataNode:
     @pytest.mark.parametrize("properties", __properties)
     def test_create(self, properties):
         dn = SQLDataNode(
-            "fOo BAr",
+            "foo_bar",
             Scope.PIPELINE,
             properties=properties,
         )

@@ -6,6 +6,7 @@ from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.task.task import Task
 
 
@@ -35,13 +36,12 @@ def test_create_task():
     assert f"TASK_{name}_" in task.id
     assert task.config_id == "name_1"
 
-    name_1 = "name_1//ξ"
-    task_1 = Task(name_1, print, [], [])
-    assert task_1.config_id == "name_1-x"
+    with pytest.raises(InvalidConfigurationId):
+        Task("foo bar", print, [], [])
 
     path = "my/csv/path"
     foo_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
-    task = Task("namE 1", print, [foo_dn], [])
+    task = Task("name_1", print, [foo_dn], [])
     assert task.config_id == "name_1"
     assert task.id is not None
     assert task.parent_id is None
@@ -51,13 +51,13 @@ def test_create_task():
         task.bar
 
     path = "my/csv/path"
-    abc_dn = InMemoryDataNode("abc_dsξyₓéà", Scope.SCENARIO, properties={"path": path})
-    task = Task("namE 1éà", print, [abc_dn], [], parent_id="parent_id")
+    abc_dn = InMemoryDataNode("name_1ea", Scope.SCENARIO, properties={"path": path})
+    task = Task("name_1ea", print, [abc_dn], [], parent_id="parent_id")
     assert task.config_id == "name_1ea"
     assert task.id is not None
     assert task.parent_id == "parent_id"
-    assert task.abc_dsxyxea == abc_dn
-    assert task.abc_dsxyxea.path == path
+    assert task.name_1ea == abc_dn
+    assert task.name_1ea.path == path
     with pytest.raises(AttributeError):
         task.bar
 

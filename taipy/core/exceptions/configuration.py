@@ -20,3 +20,9 @@ class MissingEnvVariableError(Exception):
     """Environment variable referenced in configuration is missing."""
 
     pass
+
+
+class InvalidConfigurationId(Exception):
+    """Configuration id is not valid."""
+
+    pass

@@ -5,7 +5,7 @@ import pytest
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import LoadingError
+from taipy.core.exceptions.configuration import InvalidConfigurationId, LoadingError
 from tests.core.config.named_temporary_file import NamedTemporaryFile
 
 
@@ -206,30 +206,30 @@ owner = "Raymond Kopa"
     assert actual_config == expected_config
 
 
-def test_all_entities_use_protected_name():
+def test_all_entities_use_valid_id():
     file_config = NamedTemporaryFile(
         """
         [DATA_NODE.default]
         has_header = true
 
-        [DATA_NODE.my_dataNode]
+        [DATA_NODE.my_datanode]
         path = "/data/csv"
 
-        [DATA_NODE.my_dataNode2]
+        [DATA_NODE.my_datanode2]
         path = "/data2/csv"
 
-        [TASK.my_Task]
-        inputs = ["my_dataNode"]
+        [TASK.my_task]
+        inputs = ["my_datanode"]
         function = "<built-in function print>"
-        outputs = ["my_dataNode2"]
+        outputs = ["my_datanode2"]
         description = "task description"
 
-        [PIPELINE.my_Pipeline]
+        [PIPELINE.my_pipeline]
         tasks = [ "my_Task",]
         cron = "daily"
 
-        [SCENARIO.my_Scenario]
-        pipelines = [ "my_Pipeline",]
+        [SCENARIO.my_scenario]
+        pipelines = [ "my_pipeline",]
         owner = "John Doe"
         """
     )
@@ -257,3 +257,34 @@ def test_all_entities_use_protected_name():
     assert len(Config.scenarios) == 2
     assert Config.scenarios["my_scenario"].id == "my_scenario"
     assert Config.scenarios["my_scenario"].owner == "John Doe"
+
+
+def test_all_entities_use_invalid_id():
+    file_config = NamedTemporaryFile(
+        """
+        [DATA_NODE.default]
+        has_header = true
+
+        [DATA_NODE.1y_datanode]
+        path = "/data/csv"
+
+        [DATA_NODE.1y_datanode2]
+        path = "/data2/csv"
+
+        [TASK.my_task]
+        inputs = ["1y_datanode"]
+        function = "<built-in function print>"
+        outputs = ["1y_datanode2"]
+        description = "task description"
+
+        [PIPELINE.1y_pipeline]
+        tasks = [ "1y_Task",]
+        cron = "daily"
+
+        [SCENARIO.1y_scenario]
+        pipelines = [ "1y_pipeline",]
+        owner = "John Doe"
+        """
+    )
+    with pytest.raises(InvalidConfigurationId):
+        Config.load(file_config.filename)

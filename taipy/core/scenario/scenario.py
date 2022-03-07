@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List, Set
 
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.pipeline.pipeline import Pipeline
@@ -17,13 +17,7 @@ class Scenario:
     It holds a set of pipelines to submit for execution in order to solve the business case.
 
     Attributes:
-        config_id (str): Identifier of the scenario configuration.
-            We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
-            or underscore characters ('_').
-            Other characters are replaced according the following rules:
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        config_id (str): Identifier of the scenario configuration. Must be a valid Python variable name.
         pipelines (List[Pipeline]): List of pipelines.
         properties (dict): Dictionary of additional properties of the scenario.
         scenario_id (str): Unique identifier of this scenario. Will be generated if None value provided.
@@ -47,7 +41,7 @@ class Scenario:
         subscribers: Set[Callable] = None,
         tags: Set[str] = None,
     ):
-        self.config_id = _protect_name(config_id)
+        self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self.new_id(self.config_id)
         self.pipelines = {p.config_id: p for p in pipelines}
         self.creation_date = creation_date or datetime.now()
@@ -94,10 +88,10 @@ class Scenario:
     @staticmethod
     def new_id(config_id: str) -> ScenarioId:
         """Generates a unique scenario identifier."""
-        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, _protect_name(config_id), str(uuid.uuid4())]))
+        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = _protect_name(attribute_name)
+        protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.pipelines:

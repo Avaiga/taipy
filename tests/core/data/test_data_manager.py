@@ -346,8 +346,8 @@ class TestDataManager:
         dm = DataManager()
         dm._delete_all()
 
-        dn_config_1 = Config.add_data_node(id="data node 1", storage_type="in_memory", data="In memory pipeline 2")
-        dn_config_2 = Config.add_data_node(id="data node 2", storage_type="in_memory", data="In memory pipeline 2")
+        dn_config_1 = Config.add_data_node(id="data_node_1", storage_type="in_memory", data="In memory pipeline 2")
+        dn_config_2 = Config.add_data_node(id="data_node_2", storage_type="in_memory", data="In memory pipeline 2")
 
         # Create and save
         dm.get_or_create(dn_config_1)

@@ -1,6 +1,8 @@
 import glob
 import multiprocessing
 import os
+import random
+import string
 import uuid
 from time import sleep
 
@@ -121,13 +123,13 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 
 def _create_task(function, nb_outputs=1):
-    output_dn_config_id = str(uuid.uuid4())
+    output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     input1_dn_config = Config.add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)
     DataManager.get_or_create(input1_dn_config)
     input2_dn_config = Config.add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)
     DataManager.get_or_create(input2_dn_config)
     output_dn_configs = [
-        Config.add_data_node(f"{output_dn_config_id}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+        Config.add_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
         for i in range(nb_outputs)
     ]
     [DataManager.get_or_create(cfg) for cfg in output_dn_configs]

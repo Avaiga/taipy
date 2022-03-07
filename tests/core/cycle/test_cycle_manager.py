@@ -42,7 +42,7 @@ def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
         creation_date=current_datetime,
         start_date=current_datetime,
         end_date=current_datetime,
-        name="   bar/ξéà   ",
+        name="bar",
         id=cycle_1.id,
     )
     CycleManager._set(cycle_3)
@@ -64,7 +64,7 @@ def test_create_and_delete_cycle_entity(tmpdir):
 
     assert len(CycleManager._get_all()) == 0
 
-    cycle_1 = CycleManager.create(Frequency.DAILY, name="fOo   ", key="value", display_name="foo")
+    cycle_1 = CycleManager.create(Frequency.DAILY, name="foo", key="value", display_name="foo")
 
     assert cycle_1.id is not None
     assert cycle_1.name == "foo"
@@ -87,10 +87,10 @@ def test_create_and_delete_cycle_entity(tmpdir):
     cycle_2_id = CycleId("cycle_2")
     assert CycleManager._get(cycle_2_id) is None
 
-    cycle_3 = CycleManager.create(Frequency.MONTHLY, "   bar/ξéà   ")
+    cycle_3 = CycleManager.create(Frequency.MONTHLY, "bar")
 
     assert cycle_3.id is not None
-    assert cycle_3.name == "bar-xea"
+    assert cycle_3.name == "bar"
     assert cycle_3.properties["display_name"] == cycle_3.start_date.isoformat()
     assert isinstance(cycle_3.creation_date, datetime)
     assert cycle_3.frequency == Frequency.MONTHLY
@@ -98,9 +98,9 @@ def test_create_and_delete_cycle_entity(tmpdir):
     cycle_3_id = cycle_3.id
 
     assert len(CycleManager._get_all()) == 2
-    assert CycleManager._get(cycle_3_id).name == "bar-xea"
+    assert CycleManager._get(cycle_3_id).name == "bar"
 
-    cycle_4 = CycleManager.create(Frequency.YEARLY, "ξéà   ")
+    cycle_4 = CycleManager.create(Frequency.YEARLY, "baz")
     cycle_4_id = cycle_4.id
 
     assert len(CycleManager._get_all()) == 3

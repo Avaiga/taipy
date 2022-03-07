@@ -7,6 +7,7 @@ from taipy.core.config.config import Config
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.exceptions.data_node import NoData
 
 
@@ -21,7 +22,7 @@ class TestPickleDataNodeEntity:
             os.remove(f)
 
     def test_create(self):
-        dn = PickleDataNode("foobar BaZξyₓéà", Scope.PIPELINE, properties={"default_data": "Data"})
+        dn = PickleDataNode("foobar_bazxyxea", Scope.PIPELINE, properties={"default_data": "Data"})
         assert os.path.isfile(Config.global_config.storage_folder + "pickles/" + dn.id + ".p")
         assert isinstance(dn, PickleDataNode)
         assert dn.storage_type() == "pickle"
@@ -36,6 +37,9 @@ class TestPickleDataNodeEntity:
         assert dn.read() == "Data"
         assert dn.last_edition_date is not None
         assert dn.job_ids == []
+
+        with pytest.raises(InvalidConfigurationId):
+            PickleDataNode("foobar bazxyxea", Scope.PIPELINE, properties={"default_data": "Data"})
 
     def test_new_pickle_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_id", "pickle", path="NOT_EXISTING.p")

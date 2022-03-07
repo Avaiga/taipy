@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Any, Dict, Optional, Union
 
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.data.scope import Scope
 
@@ -14,12 +14,7 @@ class DataNodeConfig:
     needed to create an actual data node.
 
     Attributes:
-        id (str):  Unique identifier of the data node config.
-            We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
-            '_'. Note that other characters are replaced according the following rules :
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        id (str):  Unique identifier of the data node config. Must be a valid Python variable name.
         storage_type (str): Storage type of the data nodes created from the data node config. The possible values
             are : "csv", "excel", "pickle", "sql", "generic" and "In_memory". The default value is "pickle".
             Note that the "in_memory" value can only be used when JobConfig.mode is "standalone".
@@ -44,7 +39,7 @@ class DataNodeConfig:
     DEFAULT_IS_CACHEABLE_VALUE = False
 
     def __init__(self, id: str, storage_type: str = None, scope: Scope = None, **properties):
-        self.id = _protect_name(id)
+        self.id = _validate_id(id)
         self.storage_type = storage_type
         self.scope = scope
         self.properties = properties
@@ -73,7 +68,7 @@ class DataNodeConfig:
     @classmethod
     def from_dict(cls, id: str, config_as_dict: Dict[str, Any]):
         config = DataNodeConfig(id)
-        config.id = _protect_name(id)
+        config.id = _validate_id(id)
         config.storage_type = config_as_dict.pop(cls.STORAGE_TYPE_KEY, None)
         config.scope = config_as_dict.pop(cls.SCOPE_KEY, None)
         config.properties = config_as_dict

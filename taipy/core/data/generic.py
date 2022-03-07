@@ -12,12 +12,7 @@ class GenericDataNode(DataNode):
     A generic Data Node that accepts custom read function and custom write function.
 
     Attributes:
-        config_id (str):  Identifier of the data node configuration.
-            We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
-            '_'. Note that other characters are replaced according the following rules :
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        config_id (str):  Identifier of the data node configuration. Must be a valid Python variable name.
         scope (Scope):  The usage scope of this data node.
         id (str): Unique identifier of this data node.
         name (str): User-readable name of the data node.

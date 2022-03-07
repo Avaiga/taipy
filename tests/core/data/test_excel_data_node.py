@@ -34,7 +34,7 @@ class TestExcelDataNode:
         path = "data/node/path"
         sheet_names = ["sheet_name_1", "sheet_name_2"]
         dn = ExcelDataNode(
-            "fOo BAr",
+            "foo_bar",
             Scope.PIPELINE,
             name="super name",
             properties={"path": path, "has_header": False, "sheet_name": sheet_names},

@@ -2,7 +2,7 @@ from collections import defaultdict
 from copy import copy
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.config.pipeline_config import PipelineConfig
@@ -14,12 +14,7 @@ class ScenarioConfig:
     Holds all the configuration fields needed to create actual scenarios from the ScenarioConfig.
 
     Attributes:
-        id (str): Identifier of the scenario config.
-            We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
-            '_'. Note that other characters are replaced according the following rules :
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        id (str): Identifier of the scenario config. Must be a valid Python variable name.
         pipelines (list): List of pipeline configs. Default value: [].
         properties (dict): Dictionary of additional properties.
     """
@@ -36,7 +31,7 @@ class ScenarioConfig:
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ):
-        self.id = _protect_name(id)
+        self.id = _validate_id(id)
         self.properties = properties
         if pipelines:
             self.pipelines = [pipelines] if isinstance(pipelines, PipelineConfig) else copy(pipelines)
@@ -47,9 +42,9 @@ class ScenarioConfig:
         if comparators:
             for k, v in comparators.items():
                 if isinstance(v, list):
-                    self.comparators[_protect_name(k)].extend(v)
+                    self.comparators[_validate_id(k)].extend(v)
                 else:
-                    self.comparators[_protect_name(k)].append(v)
+                    self.comparators[_validate_id(k)].append(v)
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return self.properties.get(item)
@@ -72,7 +67,7 @@ class ScenarioConfig:
     @classmethod
     def from_dict(cls, id: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
         config = ScenarioConfig(id)
-        config.id = _protect_name(id)
+        config.id = _validate_id(id)
         if pipeline_ids := config_as_dict.pop(cls.PIPELINE_KEY, None):
             config.pipelines = [pipeline_configs[p_id] for p_id in pipeline_ids if p_id in pipeline_configs]
         config.frequency = config_as_dict.pop(cls.FREQUENCY_KEY, None)

@@ -252,10 +252,10 @@ def test_get_or_create_data():
     dn_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
     dn_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_config_mult_by_2 = Config.add_task("mult by 2", mult_by_2, [dn_config_1], dn_config_2)
-    task_config_mult_by_3 = Config.add_task("mult by 3", mult_by_3, [dn_config_2], dn_config_6)
-    pipeline_config = Config.add_pipeline("by 6", [task_config_mult_by_2, task_config_mult_by_3])
-    # dn_1 ---> mult by 2 ---> dn_2 ---> mult by 3 ---> dn_6
+    task_config_mult_by_2 = Config.add_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_config_mult_by_3 = Config.add_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
+    pipeline_config = Config.add_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3])
+    # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
 
     assert len(DataManager._get_all()) == 0
     assert len(TaskManager._get_all()) == 0
@@ -295,9 +295,9 @@ def test_create_pipeline_and_modify_properties_does_not_modify_config():
     dn_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
     dn_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_config_mult_by_2 = Config.add_task("mult by 2", mult_by_2, [dn_config_1], dn_config_2)
-    task_config_mult_by_3 = Config.add_task("mult by 3", mult_by_3, [dn_config_2], dn_config_6)
-    pipeline_config = Config.add_pipeline("by 6", [task_config_mult_by_2, task_config_mult_by_3], foo="bar")
+    task_config_mult_by_2 = Config.add_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_config_mult_by_3 = Config.add_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
+    pipeline_config = Config.add_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3], foo="bar")
 
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
@@ -329,10 +329,10 @@ def test_pipeline_notification_subscribe(mocker):
     mocker.patch("taipy.core.common._reload.reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.add_pipeline(
-        "by 6",
+        "by_6",
         [
             Config.add_task(
-                "mult by 2",
+                "mult_by_2",
                 mult_by_2,
                 [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
@@ -381,10 +381,10 @@ def test_pipeline_notification_unsubscribe(mocker):
     mocker.patch("taipy.core.common._reload.reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.add_pipeline(
-        "by 6",
+        "by_6",
         [
             Config.add_task(
-                "mult by 2",
+                "mult_by_2",
                 mult_by_2,
                 [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
@@ -409,10 +409,10 @@ def test_pipeline_notification_unsubscribe(mocker):
 
 def test_pipeline_notification_subscribe_all():
     pipeline_config = Config.add_pipeline(
-        "by 6",
+        "by_6",
         [
             Config.add_task(
-                "mult by 2",
+                "mult_by_2",
                 mult_by_2,
                 [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
@@ -421,7 +421,7 @@ def test_pipeline_notification_subscribe_all():
     )
 
     pipeline = PipelineManager.get_or_create(pipeline_config)
-    pipeline_config.id = "other pipeline"
+    pipeline_config.id = "other_pipeline"
 
     other_pipeline = PipelineManager.get_or_create(pipeline_config)
 

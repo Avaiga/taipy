@@ -5,6 +5,7 @@ from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task.task import Task
 
@@ -13,7 +14,7 @@ def test_create_pipeline():
     input = InMemoryDataNode("foo", Scope.PIPELINE)
     output = InMemoryDataNode("bar", Scope.PIPELINE)
     task = Task("baz", print, [input], [output], TaskId("task_id"))
-    pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
+    pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
     assert pipeline.parent_id is None
     assert pipeline.config_id == "name_1"
@@ -25,17 +26,21 @@ def test_create_pipeline():
     with pytest.raises(AttributeError):
         pipeline.qux
 
-    input_1 = InMemoryDataNode("inξ", Scope.SCENARIO)
-    output_1 = InMemoryDataNode("outξ", Scope.SCENARIO)
-    task_1 = Task("task_ξ", print, [input_1], [output_1], TaskId("task_id_1"))
-    pipeline_1 = Pipeline("nAmE 1 ", {"description": "description"}, [task_1], parent_id="parent_id")
+    input_1 = InMemoryDataNode("input", Scope.SCENARIO)
+    output_1 = InMemoryDataNode("output", Scope.SCENARIO)
+    task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
+    pipeline_1 = Pipeline("name_1", {"description": "description"}, [task_1], parent_id="parent_id")
     assert pipeline_1.id is not None
     assert pipeline_1.parent_id == "parent_id"
     assert pipeline_1.config_id == "name_1"
     assert pipeline_1.description == "description"
-    assert pipeline_1.inx == input_1
-    assert pipeline_1.outx == output_1
-    assert pipeline_1.task_x == task_1
+    assert pipeline_1.input == input_1
+    assert pipeline_1.output == output_1
+    assert pipeline_1.task_1 == task_1
+
+    assert pipeline_1.id is not None
+    with pytest.raises(InvalidConfigurationId):
+        Pipeline("name 1", {"description": "description"}, [task_1], parent_id="parent_id")
 
 
 def test_add_property_to_pipeline():

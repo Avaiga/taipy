@@ -10,7 +10,7 @@ import pandas as pd
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload
 from taipy.core.common._taipy_logger import _TaipyLogger
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.filter import FilterDataNode
@@ -30,12 +30,7 @@ class DataNode:
     only instantiate children classes of Data Node through a Data Manager.
 
     Attributes:
-        config_id (str):  Identifier of the data node configuration.
-            We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
-            '_'. Note that other characters are replaced according the following rules :
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        config_id (str):  Identifier of the data node configuration. Must be a valid Python variable name.
         scope (Scope):  The usage scope of this data node.
         id (str): Unique identifier of this data node.
         name (str): User-readable name of the data node.
@@ -68,7 +63,7 @@ class DataNode:
         edition_in_progress: bool = False,
         **kwargs,
     ):
-        self.config_id = _protect_name(config_id)
+        self.config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.parent_id = parent_id
         self.scope = scope
@@ -140,7 +135,7 @@ class DataNode:
         vars(self).update(state)
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = _protect_name(attribute_name)
+        protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")

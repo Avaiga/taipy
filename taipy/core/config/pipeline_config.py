@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
 from taipy.core.config.task_config import TaskConfig
 
@@ -11,12 +11,7 @@ class PipelineConfig:
     Holds all the configuration fields needed to create actual pipelines from the PipelineConfig.
 
     Attributes:
-        id (str):  Unique identifier of the pipeline config.
-            We strongly recommend to use lowercase alphanumeric characters, dash character '-', or underscore character
-            '_'. Note that other characters are replaced according the following rules :
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        id (str): Identifier of the pipeline configuration. Must be a valid Python variable name.
         tasks (list): List of task configs. Default value: [].
         properties (dict): Dictionary of additional properties.
     """
@@ -24,7 +19,7 @@ class PipelineConfig:
     TASK_KEY = "tasks"
 
     def __init__(self, id: str, tasks: Union[TaskConfig, List[TaskConfig]] = None, **properties):
-        self.id = _protect_name(id)
+        self.id = _validate_id(id)
         self.properties = properties
         if tasks:
             self.tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
@@ -51,7 +46,7 @@ class PipelineConfig:
     @classmethod
     def from_dict(cls, id: str, config_as_dict: Dict[str, Any], task_configs: Dict[str, TaskConfig]):
         config = PipelineConfig(id)
-        config.id = _protect_name(id)
+        config.id = _validate_id(id)
         if tasks := config_as_dict.pop(cls.TASK_KEY, None):
             config.tasks = [task_configs[task_id] for task_id in tasks if task_id in task_configs]
         config.properties = config_as_dict

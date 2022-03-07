@@ -173,7 +173,7 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     embedded_2 = Config.add_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
     embedded_3 = Config.add_data_node("a_dn_3", "in_memory", scope=Scope.PIPELINE)
     embedded_4 = Config.add_data_node("dn_4", "in_memory", scope=Scope.PIPELINE)
-    embedded_5 = Config.add_data_node("1_dn_4", "in_memory", scope=Scope.PIPELINE)
+    embedded_5 = Config.add_data_node("dn_5", "in_memory", scope=Scope.PIPELINE)
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
