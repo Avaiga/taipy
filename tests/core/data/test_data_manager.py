@@ -17,7 +17,7 @@ from taipy.core.exceptions.repository import ModelNotFound
 
 class TestDataManager:
     def test_create_data_node_and_modify_properties_does_not_modify_config(self):
-        dn_config = Config.add_data_node(id="name", foo="bar")
+        dn_config = Config._add_data_node(id="name", foo="bar")
         dn = DataManager._create_and_set(dn_config, None)
         assert dn_config.properties.get("foo") == "bar"
         assert dn_config.properties.get("baz") is None
@@ -34,7 +34,7 @@ class TestDataManager:
         # - a csv type
         # - a default scenario scope
         # - No parent_id
-        csv_dn_config = Config.add_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
+        csv_dn_config = Config._add_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
         csv_dn = DataManager._create_and_set(csv_dn_config, None)
 
         assert isinstance(csv_dn, CSVDataNode)
@@ -86,7 +86,7 @@ class TestDataManager:
         # - a scenario scope
         # - a parent id
         # - some default data
-        in_memory_dn_config = Config.add_data_node(
+        in_memory_dn_config = Config._add_data_node(
             id="baz",
             storage_type="in_memory",
             scope=Scope.SCENARIO,
@@ -143,7 +143,7 @@ class TestDataManager:
         # - a business cycle scope
         # - No parent id
         # - no default data
-        dn_config = Config.add_data_node(id="plop", storage_type="pickle", scope=Scope.CYCLE)
+        dn_config = Config._add_data_node(id="plop", storage_type="pickle", scope=Scope.CYCLE)
         pickle_dn = DataManager._create_and_set(dn_config, None)
 
         assert isinstance(pickle_dn, PickleDataNode)
@@ -186,27 +186,27 @@ class TestDataManager:
         assert DataManager._get(pickle_dn).properties == pickle_dn.properties
 
     def test_create_raises_exception_with_wrong_type(self):
-        wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig.DEFAULT_SCOPE)
+        wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig._DEFAULT_SCOPE)
         with pytest.raises(InvalidDataNodeType):
             DataManager._create_and_set(wrong_type_dn_config, None)
 
     def test_create_from_same_config_generates_new_data_node_and_new_id(self):
-        dn_config = Config.add_data_node(id="foo", storage_type="in_memory")
+        dn_config = Config._add_data_node(id="foo", storage_type="in_memory")
         dn = DataManager._create_and_set(dn_config, None)
         dn_2 = DataManager._create_and_set(dn_config, None)
         assert dn_2.id != dn.id
 
     def test_create_uses_overridden_attributes_in_config_file(self):
-        Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
+        Config._load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
-        csv_dn = Config.add_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
+        csv_dn = Config._add_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
         csv = DataManager._create_and_set(csv_dn, None)
         assert csv.config_id == "foo"
         assert isinstance(csv, CSVDataNode)
         assert csv.path == "path_from_config_file"
         assert csv.has_header
 
-        csv_dn = Config.add_data_node(id="baz", storage_type="csv", path="bar", has_header=True)
+        csv_dn = Config._add_data_node(id="baz", storage_type="csv", path="bar", has_header=True)
         csv = DataManager._create_and_set(csv_dn, None)
         assert csv.config_id == "baz"
         assert isinstance(csv, CSVDataNode)
@@ -219,10 +219,10 @@ class TestDataManager:
 
     def test_get_all(self):
         assert len(DataManager._get_all()) == 0
-        dn_config_1 = Config.add_data_node(id="foo", storage_type="in_memory")
+        dn_config_1 = Config._add_data_node(id="foo", storage_type="in_memory")
         DataManager._create_and_set(dn_config_1, None)
         assert len(DataManager._get_all()) == 1
-        dn_config_2 = Config.add_data_node(id="baz", storage_type="in_memory")
+        dn_config_2 = Config._add_data_node(id="baz", storage_type="in_memory")
         DataManager._create_and_set(dn_config_2, None)
         DataManager._create_and_set(dn_config_2, None)
         assert len(DataManager._get_all()) == 3
@@ -231,11 +231,11 @@ class TestDataManager:
 
     def test_get_all_by_config_id(self):
         assert len(DataManager._get_all_by_config_id("NOT_EXISTING_CONFIG_ID")) == 0
-        dn_config_1 = Config.add_data_node(id="foo", storage_type="in_memory")
+        dn_config_1 = Config._add_data_node(id="foo", storage_type="in_memory")
         assert len(DataManager._get_all_by_config_id("foo")) == 0
         DataManager._create_and_set(dn_config_1, None)
         assert len(DataManager._get_all_by_config_id("foo")) == 1
-        dn_config_2 = Config.add_data_node(id="baz", storage_type="in_memory")
+        dn_config_2 = Config._add_data_node(id="baz", storage_type="in_memory")
         DataManager._create_and_set(dn_config_2, None)
         assert len(DataManager._get_all_by_config_id("foo")) == 1
         assert len(DataManager._get_all_by_config_id("baz")) == 1
@@ -287,13 +287,13 @@ class TestDataManager:
     def test_get_or_create(self):
         DataManager._delete_all()
 
-        global_dn_config = Config.add_data_node(
+        global_dn_config = Config._add_data_node(
             id="test_data_node", storage_type="in_memory", scope=Scope.GLOBAL, data="In memory Data Node"
         )
-        scenario_dn_config = Config.add_data_node(
+        scenario_dn_config = Config._add_data_node(
             id="test_data_node2", storage_type="in_memory", scope=Scope.SCENARIO, data="In memory scenario"
         )
-        pipeline_dn_config = Config.add_data_node(
+        pipeline_dn_config = Config._add_data_node(
             id="test_data_node2", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
         )
 
@@ -346,8 +346,8 @@ class TestDataManager:
         dm = DataManager()
         dm._delete_all()
 
-        dn_config_1 = Config.add_data_node(id="data_node_1", storage_type="in_memory", data="In memory pipeline 2")
-        dn_config_2 = Config.add_data_node(id="data_node_2", storage_type="in_memory", data="In memory pipeline 2")
+        dn_config_1 = Config._add_data_node(id="data_node_1", storage_type="in_memory", data="In memory pipeline 2")
+        dn_config_2 = Config._add_data_node(id="data_node_2", storage_type="in_memory", data="In memory pipeline 2")
 
         # Create and save
         dm.get_or_create(dn_config_1)

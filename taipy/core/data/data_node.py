@@ -288,7 +288,7 @@ class DataNode:
     @property  # type: ignore
     @self_reload("data")
     def is_in_cache(self):
-        if not self._properties.get(DataNodeConfig.IS_CACHEABLE_KEY):
+        if not self._properties.get(DataNodeConfig._IS_CACHEABLE_KEY):
             return False
         if not self._last_edition_date:
             # Never been written so it is not up-to-date

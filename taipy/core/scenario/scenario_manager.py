@@ -99,7 +99,7 @@ class ScenarioManager(_Manager[Scenario]):
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.id)
-        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipeline_configs]
         cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config.properties.copy()

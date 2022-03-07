@@ -15,32 +15,32 @@ from taipy.core.data.scope import Scope
 from taipy.core.exceptions.configuration import LoadingError
 
 
-class TomlSerializer:
+class _TomlSerializer:
     """Convert configuration from TOML representation to Python Dict and reciprocally."""
 
-    GLOBAL_NODE_NAME = "TAIPY"
-    JOB_NODE_NAME = "JOB"
-    DATA_NODE_NAME = "DATA_NODE"
-    TASK_NODE_NAME = "TASK"
-    PIPELINE_NODE_NAME = "PIPELINE"
-    SCENARIO_NODE_NAME = "SCENARIO"
+    _GLOBAL_NODE_NAME = "TAIPY"
+    _JOB_NODE_NAME = "JOB"
+    _DATA_NODE_NAME = "DATA_NODE"
+    _TASK_NODE_NAME = "TASK"
+    _PIPELINE_NODE_NAME = "PIPELINE"
+    _SCENARIO_NODE_NAME = "SCENARIO"
 
     @classmethod
-    def write(cls, configuration: _Config, filename: str):
+    def _write(cls, configuration: _Config, filename: str):
         config = {
-            cls.GLOBAL_NODE_NAME: configuration.global_config.to_dict(),
-            cls.JOB_NODE_NAME: configuration.job_config.to_dict(),
-            cls.DATA_NODE_NAME: cls.__to_dict(configuration.data_nodes),
-            cls.TASK_NODE_NAME: cls.__to_dict(configuration.tasks),
-            cls.PIPELINE_NODE_NAME: cls.__to_dict(configuration.pipelines),
-            cls.SCENARIO_NODE_NAME: cls.__to_dict(configuration.scenarios),
+            cls._GLOBAL_NODE_NAME: configuration._global_config._to_dict(),
+            cls._JOB_NODE_NAME: configuration._job_config._to_dict(),
+            cls._DATA_NODE_NAME: cls.__to_dict(configuration._data_nodes),
+            cls._TASK_NODE_NAME: cls.__to_dict(configuration._tasks),
+            cls._PIPELINE_NODE_NAME: cls.__to_dict(configuration._pipelines),
+            cls._SCENARIO_NODE_NAME: cls.__to_dict(configuration._scenarios),
         }
         with open(filename, "w") as fd:
             toml.dump(cls.__stringify(config), fd)
 
     @classmethod
     def __to_dict(cls, dict_of_configs: Dict[str, Any]):
-        return {key: value.to_dict() for key, value in dict_of_configs.items()}
+        return {key: value._to_dict() for key, value in dict_of_configs.items()}
 
     @classmethod
     def __stringify(cls, config):
@@ -63,7 +63,7 @@ class TomlSerializer:
         return config
 
     @classmethod
-    def read(cls, filename: str) -> _Config:
+    def _read(cls, filename: str) -> _Config:
         try:
             return cls.__from_dict(dict(toml.load(filename)))
         except toml.TomlDecodeError as e:
@@ -71,20 +71,24 @@ class TomlSerializer:
             raise LoadingError(error_msg)
 
     @staticmethod
-    def extract_node(config_as_dict, cls_config, node, config: Optional[dict]):
+    def _extract_node(config_as_dict, cls_config, node, config: Optional[dict]):
         res = {}
         for key, value in config_as_dict.get(node, {}).items():
             key = _validate_id(key)
-            res[key] = cls_config.from_dict(key, value) if config is None else cls_config.from_dict(key, value, config)
+            res[key] = (
+                cls_config._from_dict(key, value) if config is None else cls_config._from_dict(key, value, config)
+            )
         return res
 
     @classmethod
     def __from_dict(cls, config_as_dict) -> _Config:
         config = _Config()
-        config.global_config = GlobalAppConfig.from_dict(config_as_dict.get(cls.GLOBAL_NODE_NAME, {}))
-        config.job_config = JobConfig.from_dict(config_as_dict.get(cls.JOB_NODE_NAME, {}))
-        config.data_nodes = cls.extract_node(config_as_dict, DataNodeConfig, cls.DATA_NODE_NAME, None)
-        config.tasks = cls.extract_node(config_as_dict, TaskConfig, cls.TASK_NODE_NAME, config.data_nodes)
-        config.pipelines = cls.extract_node(config_as_dict, PipelineConfig, cls.PIPELINE_NODE_NAME, config.tasks)
-        config.scenarios = cls.extract_node(config_as_dict, ScenarioConfig, cls.SCENARIO_NODE_NAME, config.pipelines)
+        config._global_config = GlobalAppConfig._from_dict(config_as_dict.get(cls._GLOBAL_NODE_NAME, {}))
+        config._job_config = JobConfig._from_dict(config_as_dict.get(cls._JOB_NODE_NAME, {}))
+        config._data_nodes = cls._extract_node(config_as_dict, DataNodeConfig, cls._DATA_NODE_NAME, None)
+        config._tasks = cls._extract_node(config_as_dict, TaskConfig, cls._TASK_NODE_NAME, config._data_nodes)
+        config._pipelines = cls._extract_node(config_as_dict, PipelineConfig, cls._PIPELINE_NODE_NAME, config._tasks)
+        config._scenarios = cls._extract_node(
+            config_as_dict, ScenarioConfig, cls._SCENARIO_NODE_NAME, config._pipelines
+        )
         return config

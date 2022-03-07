@@ -4,24 +4,24 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.frequency import Frequency
-from taipy.core.config.config_template_handler import ConfigTemplateHandler as tpl
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.exceptions.scenario import NonExistingComparator
 
 
 class ScenarioConfig:
     """
-    Holds all the configuration fields needed to create actual scenarios from the ScenarioConfig.
+    Holds all the configuration fields needed to instantiate actual scenarios from the `ScenarioConfig`.
 
     Attributes:
-        id (str): Identifier of the scenario config. Must be a valid Python variable name.
-        pipelines (list): List of pipeline configs. Default value: [].
+        id (str): Identifier of the scenario config. It must be a valid Python variable name.
+        pipeline_configs (list): List of pipeline configs. The default value is [].
         properties (dict): Dictionary of additional properties.
     """
 
-    PIPELINE_KEY = "pipelines"
-    FREQUENCY_KEY = "frequency"
-    COMPARATOR_KEY = "comparators"
+    _PIPELINE_KEY = "pipelines"
+    _FREQUENCY_KEY = "frequency"
+    _COMPARATOR_KEY = "comparators"
 
     def __init__(
         self,
@@ -34,9 +34,9 @@ class ScenarioConfig:
         self.id = _validate_id(id)
         self.properties = properties
         if pipelines:
-            self.pipelines = [pipelines] if isinstance(pipelines, PipelineConfig) else copy(pipelines)
+            self._pipelines = [pipelines] if isinstance(pipelines, PipelineConfig) else copy(pipelines)
         else:
-            self.pipelines = []
+            self._pipelines = []
         self.frequency = frequency
         self.comparators = defaultdict(list)
         if comparators:
@@ -51,41 +51,41 @@ class ScenarioConfig:
 
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
-        return ScenarioConfig(self.id, copy(self.pipelines), self.frequency, copy(comp), **copy(self.properties))
+        return ScenarioConfig(self.id, copy(self._pipelines), self.frequency, copy(comp), **copy(self.properties))
 
     @classmethod
     def default_config(cls, id):
         return ScenarioConfig(id, [], None, dict())
 
     @property
-    def pipelines_configs(self) -> List[PipelineConfig]:
-        return self.pipelines
+    def pipeline_configs(self) -> List[PipelineConfig]:
+        return self._pipelines
 
-    def to_dict(self):
-        return {self.PIPELINE_KEY: self.pipelines, self.FREQUENCY_KEY: self.frequency, **self.properties}
+    def _to_dict(self):
+        return {self._PIPELINE_KEY: self._pipelines, self._FREQUENCY_KEY: self.frequency, **self.properties}
 
     @classmethod
-    def from_dict(cls, id: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
+    def _from_dict(cls, id: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
         config = ScenarioConfig(id)
         config.id = _validate_id(id)
-        if pipeline_ids := config_as_dict.pop(cls.PIPELINE_KEY, None):
-            config.pipelines = [pipeline_configs[p_id] for p_id in pipeline_ids if p_id in pipeline_configs]
-        config.frequency = config_as_dict.pop(cls.FREQUENCY_KEY, None)
-        config.comparators = config_as_dict.pop(cls.COMPARATOR_KEY, dict())
+        if pipeline_ids := config_as_dict.pop(cls._PIPELINE_KEY, None):
+            config._pipelines = [pipeline_configs[p_id] for p_id in pipeline_ids if p_id in pipeline_configs]
+        config.frequency = config_as_dict.pop(cls._FREQUENCY_KEY, None)
+        config.comparators = config_as_dict.pop(cls._COMPARATOR_KEY, dict())
         config.properties = config_as_dict
         return config
 
-    def update(self, config_as_dict, default_scenario_cfg=None):
-        self.pipelines = config_as_dict.pop(self.PIPELINE_KEY, self.pipelines)
-        if self.pipelines is None and default_scenario_cfg:
-            self.pipelines = default_scenario_cfg.pipelines
-        self.frequency = config_as_dict.pop(self.FREQUENCY_KEY, self.frequency) or default_scenario_cfg.frequency
-        self.comparators = config_as_dict.pop(self.COMPARATOR_KEY, self.comparators)
+    def _update(self, config_as_dict, default_scenario_cfg=None):
+        self._pipelines = config_as_dict.pop(self._PIPELINE_KEY, self._pipelines)
+        if self._pipelines is None and default_scenario_cfg:
+            self._pipelines = default_scenario_cfg._pipelines
+        self.frequency = config_as_dict.pop(self._FREQUENCY_KEY, self.frequency) or default_scenario_cfg.frequency
+        self.comparators = config_as_dict.pop(self._COMPARATOR_KEY, self.comparators)
         if self.comparators is None and default_scenario_cfg:
             self.comparators = default_scenario_cfg.comparators
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():
-            self.properties[k] = tpl.replace_templates(v)
+            self.properties[k] = tpl._replace_templates(v)
 
     def add_comparator(self, dn_config_id: str, comparator: Callable):
         self.comparators[dn_config_id].append(comparator)

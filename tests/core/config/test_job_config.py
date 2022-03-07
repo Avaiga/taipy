@@ -14,7 +14,7 @@ def reset_configuration_singleton():
     Config._python_config = _Config()
     Config._file_config = _Config()
     Config._env_file_config = _Config()
-    Config._applied_config = _Config.default_config()
+    Config._applied_config = _Config._default_config()
 
 
 def test_job_config():
@@ -23,8 +23,8 @@ def test_job_config():
     assert Config.job_config.mode == "standalone"
     assert Config.job_config.nb_of_workers == 1
 
-    Config.set_job_config(
-        mode=Config.job_config.MODE_VALUE_AIRFLOW,
+    Config._set_job_config(
+        mode=Config.job_config._MODE_VALUE_AIRFLOW,
         hostname="http://localhost:8080",
         nb_of_workers=2,
         airflow_dags_folder=".testDags/",
@@ -45,8 +45,8 @@ def test_job_config():
     assert Config.job_config.airflow_password == "password"
 
     with mock.patch.dict(os.environ, {"FOO": "36", "BAR": "baz", "USER": "user", "PASS": "pass"}):
-        Config.set_job_config(
-            mode=Config.job_config.MODE_VALUE_AIRFLOW,
+        Config._set_job_config(
+            mode=Config.job_config._MODE_VALUE_AIRFLOW,
             hostname="http://localhost:8080",
             nb_of_workers="ENV[FOO]",
             airflow_dags_folder=".testDags/",

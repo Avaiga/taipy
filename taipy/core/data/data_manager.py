@@ -74,7 +74,7 @@ class DataManager(_Manager[DataNode]):
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
                 config_id=data_node_config.id,
-                scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
+                scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 parent_id=parent_id,
                 validity_period=validity_period,
                 properties=props,
