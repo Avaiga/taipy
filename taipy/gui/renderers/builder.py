@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date, time
 import json
 import numbers
 import re
@@ -650,7 +650,7 @@ class _Builder:
         if value is None:
             value = self.__attributes.get(var_name)
         default_var_name = _to_camel_case("default_" + var_name)
-        if isinstance(value, datetime.datetime):
+        if isinstance(value, (datetime, date, time)):
             self.set_attribute(default_var_name, _date_to_ISO(value))
         elif isinstance(value, str):
             self.set_attribute(default_var_name, value)
