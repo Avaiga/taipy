@@ -4,7 +4,7 @@ import { Column, Float32Vector, Int32Vector, Table } from "apache-arrow";
 import { DataFormat, parseData } from "./dataFormat";
 
 const straightData = { data: { key: "value" } };
-const extractData = { dataExtraction: true, data: { key: "value" } };
+const extractData = { dataExtraction: true, format: "", data: { key: "value" } };
 const i32s = Column.new("i32", Int32Vector.from([1, 2, 3]));
 const f32s = Column.new("f32", Float32Vector.from([0.1, 0.2, 0.3]));
 // Need to find how to make this data a UInt8Array ...

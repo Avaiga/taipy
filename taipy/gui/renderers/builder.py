@@ -21,7 +21,7 @@ from ..utils import (
 )
 from ..utils.types import _TaipyData
 from .jsonencoder import _TaipyJsonEncoder
-from .utils import _add_to_dict_and_get, _get_columns_dict, _get_tuple_val, _to_camel_case
+from .utils import _add_to_dict_and_get, _get_columns_dict, _get_col_from_indexed, _get_idx_from_col, _get_tuple_val, _to_camel_case
 
 
 class _Builder:
@@ -443,20 +443,29 @@ class _Builder:
         else:
             traces.append(trace)
 
+        # read column definitions
+        data = self.__attributes.get("data")
+        data_hash = self.__hashes.get("data", "")
+        col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
+
+        # add trace for non used indexed columns
+        max_idx = max([_get_idx_from_col(c) for c in col_types.keys()])
+        for idx in range(len(traces), max_idx + 1):
+            traces.append([x if i > 4 else None for i, x in enumerate(traces[0])])
+
         # configure columns
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[0:5] if t])
-        data = self.__attributes.get("data")
-        data_hash = self.__hashes.get("data", "")
-        columns = _get_columns_dict(
-            data, list(columns), self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
-        )
+        columns = _get_columns_dict(data, list(columns), col_types)
         # set default columns if not defined
-        cols = tuple(columns.keys())
+        icols = []
+        for i in range(len(traces)):
+            icols.append([c for c in [_get_col_from_indexed(c, i) for c in columns.keys()] if c])
         for i, tr in enumerate(traces):
             if not tr[0] or tr[6] in _Builder.__ONE_COLUMN_CHART or not tr[1]:
-                traces[i] = tuple(v or (cols[i] if i < 3 and i < len(cols) else v) for i, v in enumerate(tr))
+                traces[i] = tuple(v or (icols[i].pop(0) if j < 3 and j < len(icols[i]) else v)
+                                  for j, v in enumerate(tr))
 
         if columns is not None:
             self.__attributes["columns"] = columns
@@ -809,7 +818,8 @@ class _Builder:
             elif var_type == _AttributeType.string:
                 self.__set_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == _AttributeType.dynamic_string:
-                self.__set_dynamic_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False))
+                self.__set_dynamic_string_attribute(attr[0], _get_tuple_val(
+                    attr, 2, None), _get_tuple_val(attr, 3, False))
             elif var_type == _AttributeType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == _AttributeType.react:
