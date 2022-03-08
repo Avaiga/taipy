@@ -85,12 +85,6 @@ class TestCSVDataNode:
         assert np.array_equal(data_numpy, pd.read_csv(path).to_numpy())
 
         # Create the same CSVDataNode but with custom exposed_type
-        # class MyCustomObject:
-        #     def __init__(self, id, integer, text):
-        #         self.id = id
-        #         self.integer = integer
-        #         self.text = text
-
         csv_data_node_as_custom_object = CSVDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "exposed_type": MyCustomObject}
         )
@@ -128,12 +122,6 @@ class TestCSVDataNode:
         assert np.array_equal(data_numpy, pd.read_csv(path, header=None).to_numpy())
 
         # Create the same CSVDataNode but with custom exposed_type
-        # class MyCustomObject:
-        #     def __init__(self, id, integer, text):
-        #         self.id = id
-        #         self.integer = integer
-        #         self.text = text
-
         csv_data_node_as_custom_object = CSVDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False, "exposed_type": MyCustomObject}
         )
