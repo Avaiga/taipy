@@ -21,7 +21,7 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                 return pd.DataFrame({"0": value})
             else:
                 types = set([type(x) for x in value])
-                if len(types) == 1 and types.pop() == list:
+                if len(types) == 1 and next(iter(types), None) == list:
                     lengths = set([len(x) for x in value])
                     if len(lengths) == 1:
                         return pd.DataFrame({str(i): v for i, v in enumerate(value)})
