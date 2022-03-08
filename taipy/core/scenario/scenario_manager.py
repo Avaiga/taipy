@@ -247,7 +247,7 @@ class ScenarioManager(_Manager[Scenario]):
             if old_tagged_scenario:
                 old_tagged_scenario.remove_tag(tag)
                 cls._set(old_tagged_scenario)
-        scenario.add_tag(tag)
+        scenario._add_tag(tag)
         cls._set(scenario)
 
     @classmethod
@@ -259,7 +259,7 @@ class ScenarioManager(_Manager[Scenario]):
             scenario (Scenario) : scenario to untag.
             tag (str) : Tag to remove from scenario.
         """
-        scenario.remove_tag(tag)
+        scenario._remove_tag(tag)
         cls._set(scenario)
 
     @classmethod

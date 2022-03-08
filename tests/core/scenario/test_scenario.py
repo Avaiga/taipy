@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest import mock
 
 import pytest
 
@@ -206,3 +207,38 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.subscribers) == 0
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
+
+
+def test_submit_scenario():
+    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.submit") as mock_submit:
+        scenario = Scenario("foo", [], {})
+        scenario.submit(False)
+        mock_submit.assert_called_once_with(scenario, False)
+
+
+def test_subscribe_scenario():
+    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.subscribe") as mock_subscribe:
+        scenario = Scenario("foo", [], {})
+        scenario.subscribe(None)
+        mock_subscribe.assert_called_once_with(None, scenario)
+
+
+def test_unsubscribe_scenario():
+    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.unsubscribe") as mock_unsubscribe:
+        scenario = Scenario("foo", [], {})
+        scenario.unsubscribe(None)
+        mock_unsubscribe.assert_called_once_with(None, scenario)
+
+
+def test_add_tag_scenario():
+    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.tag") as mock_add_tag:
+        scenario = Scenario("foo", [], {})
+        scenario.add_tag("tag")
+        mock_add_tag.assert_called_once_with(scenario, "tag")
+
+
+def test_remove_tag_scenario():
+    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.untag") as mock_remove_tag:
+        scenario = Scenario("foo", [], {})
+        scenario.remove_tag("tag")
+        mock_remove_tag.assert_called_once_with(scenario, "tag")

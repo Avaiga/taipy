@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 import taipy.core.taipy as tp
@@ -187,3 +189,24 @@ def test_auto_set_and_reload(task):
     assert pipeline_1.parent_id is None
     assert len(pipeline_1.subscribers) == 0
     assert not pipeline_1._is_in_context
+
+
+def test_subscribe_pipeline():
+    with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.subscribe") as mck:
+        pipeline = Pipeline("id", {}, [])
+        pipeline.subscribe(None)
+        mck.assert_called_once_with(None, pipeline)
+
+
+def test_unsubscribe_pipeline():
+    with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.unsubscribe") as mck:
+        pipeline = Pipeline("id", {}, [])
+        pipeline.unsubscribe(None)
+        mck.assert_called_once_with(None, pipeline)
+
+
+def test_submit_pipeline():
+    with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.submit") as mck:
+        pipeline = Pipeline("id", {}, [])
+        pipeline.submit(None, False)
+        mck.assert_called_once_with(pipeline, None, False)
