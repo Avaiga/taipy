@@ -24,13 +24,6 @@ from taipy.core.task.task import Task
 from tests.core.utils.NotifyMock import NotifyMock
 
 
-@pytest.fixture()
-def airflow_config():
-    Config._set_job_config(mode=Config.job_config._MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
-    yield
-    Config._set_job_config(mode=Config.job_config._DEFAULT_MODE)
-
-
 def test_set_and_get_pipeline():
     pipeline_id_1 = PipelineId("id1")
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)

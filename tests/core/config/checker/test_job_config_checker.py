@@ -17,10 +17,10 @@ class TestJobConfigChecker:
         _DataManager._get_or_create(dn_config_1)
         assert len(tp.get_data_nodes()) == 1
 
-        tp.configure_job_executions(mode=JobConfig._MODE_VALUE_STANDALONE, nb_of_workers=1)
+        tp.configure_job_executions(mode=JobConfig._DEFAULT_MODE, nb_of_workers=1)
         _JobConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
 
-        tp.configure_job_executions(mode=JobConfig._MODE_VALUE_STANDALONE, nb_of_workers=2)
+        tp.configure_job_executions(mode=JobConfig._DEFAULT_MODE, nb_of_workers=2)
         _JobConfigChecker(config, collector)._check()
         assert len(collector.errors) == 1
