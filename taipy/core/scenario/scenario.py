@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline import Pipeline
 
 
@@ -111,7 +114,7 @@ class Scenario:
         self._subscribers = reload("scenario", self)._subscribers
         self._subscribers.add(callback)
 
-    def add_tag(self, tag: str):
+    def _add_tag(self, tag: str):
         """Adds tag to the set of tags."""
         self._tags = reload("scenario", self)._tags
         self._tags.add(tag)
@@ -124,8 +127,38 @@ class Scenario:
         self._subscribers = reload("scenario", self)._subscribers
         self._subscribers.remove(callback)
 
-    def remove_tag(self, tag: str):
+    def _remove_tag(self, tag: str):
         """Removes tag."""
         self._tags = reload("scenario", self)._tags
         if self.has_tag(tag):
             self._tags.remove(tag)
+
+    def subscribe(self, callback: Callable[[Scenario, Job], None]):
+        from taipy.core.scenario.scenario_manager import ScenarioManager
+
+        return ScenarioManager.subscribe(callback, self)
+
+    def unsubscribe(self, callback: Callable[[Scenario, Job], None]):
+        from taipy.core.scenario.scenario_manager import ScenarioManager
+
+        return ScenarioManager.unsubscribe(callback, self)
+
+    def submit(self, force: bool = False):
+        from taipy.core.scenario.scenario_manager import ScenarioManager
+
+        return ScenarioManager.submit(self, force)
+
+    def set_master(self):
+        from taipy.core.scenario.scenario_manager import ScenarioManager
+
+        return ScenarioManager.set_master(self)
+
+    def add_tag(self, tag: str):
+        from taipy.core.scenario.scenario_manager import ScenarioManager
+
+        return ScenarioManager.tag(self, tag)
+
+    def remove_tag(self, tag: str):
+        from taipy.core.scenario.scenario_manager import ScenarioManager
+
+        return ScenarioManager.untag(self, tag)
