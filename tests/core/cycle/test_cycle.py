@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 
 from taipy.core.common.frequency import Frequency
+from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.cycle.cycle_manager import CycleManager
 
 
 def test_create_cycle_entity(current_datetime):
@@ -69,8 +69,8 @@ def test_auto_set_and_reload(current_datetime):
         name="foo",
     )
 
-    CycleManager._set(cycle_1)
-    cycle_2 = CycleManager._get(cycle_1)
+    _CycleManager._set(cycle_1)
+    cycle_2 = _CycleManager._get(cycle_1)
 
     assert cycle_1.frequency == Frequency.WEEKLY
     cycle_1._frequency = Frequency.MONTHLY

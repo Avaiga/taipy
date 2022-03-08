@@ -7,7 +7,7 @@ from taipy.core.job.status import Status
 
 
 @dataclass
-class JobModel:
+class _JobModel:
     id: JobId
     task_id: str
     status: Status
@@ -21,7 +21,7 @@ class JobModel:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return JobModel(
+        return _JobModel(
             id=data["id"],
             task_id=data["task_id"],
             status=Status._from_repr(data["status"]),

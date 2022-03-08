@@ -11,22 +11,22 @@ from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
 from taipy.core.config.global_app_config import GlobalAppConfig
 from taipy.core.config.job_config import JobConfig
+from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.cycle._cycle_model import _CycleModel
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.cycle.cycle_manager import CycleManager
-from taipy.core.cycle.cycle_model import CycleModel
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.job.job_manager import JobManager
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
+from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.pipeline.pipeline_manager import PipelineManager
-from taipy.core.pipeline.pipeline_model import PipelineModel
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario._scenario_model import _ScenarioModel
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.scenario.scenario_manager import ScenarioManager
-from taipy.core.scenario.scenario_model import ScenarioModel
 from taipy.core.scheduler.scheduler_factory import SchedulerFactory
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
 
 current_time = datetime.now()
 
@@ -113,7 +113,7 @@ def task(data_node):
 
 @pytest.fixture(scope="function")
 def scenario_model(cycle):
-    return ScenarioModel(
+    return _ScenarioModel(
         ScenarioId("sc_id"),
         "sc",
         [],
@@ -147,7 +147,7 @@ def pipeline():
 
 @pytest.fixture(scope="function")
 def cycle_model():
-    return CycleModel(
+    return _CycleModel(
         CycleId("cc_id"),
         "cc",
         Frequency.DAILY,
@@ -160,7 +160,7 @@ def cycle_model():
 
 @pytest.fixture(scope="class")
 def pipeline_model():
-    return PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, [], [])
+    return _PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, [], [])
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -169,13 +169,13 @@ def setup():
 
 
 def delete_everything():
-    TaskManager.scheduler = SchedulerFactory.build_scheduler
-    ScenarioManager._delete_all()
-    PipelineManager._delete_all()
-    DataManager._delete_all()
-    TaskManager._delete_all()
-    JobManager._delete_all()
-    CycleManager._delete_all()
+    _TaskManager._scheduler = SchedulerFactory.build_scheduler
+    _ScenarioManager._delete_all()
+    _PipelineManager._delete_all()
+    _DataManager._delete_all()
+    _TaskManager._delete_all()
+    _JobManager._delete_all()
+    _CycleManager._delete_all()
     Config._python_config._global_config = GlobalAppConfig()
     Config._python_config._job_config = JobConfig()
     Config._python_config._data_nodes.clear()

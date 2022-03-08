@@ -13,7 +13,7 @@ Entity = TypeVar("Entity")
 Json = Union[dict, list, str, int, float, bool, None]
 
 
-class CustomEncoder(json.JSONEncoder):
+class _CustomEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Json:
         result: Json
         if isinstance(o, Enum):
@@ -25,7 +25,7 @@ class CustomEncoder(json.JSONEncoder):
         return result
 
 
-class CustomDecoder(json.JSONDecoder):
+class _CustomDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
 
@@ -36,7 +36,7 @@ class CustomDecoder(json.JSONDecoder):
             return source
 
 
-class FileSystemRepository(Generic[ModelType, Entity]):
+class _FileSystemRepository(Generic[ModelType, Entity]):
     """
     Holds common methods to be used and extended when the need for saving
     dataclasses as JSON files in local storage emerges.
@@ -50,7 +50,7 @@ class FileSystemRepository(Generic[ModelType, Entity]):
     """
 
     @abstractmethod
-    def to_model(self, obj):
+    def _to_model(self, obj):
         """
         Converts the object to be saved to its model.
         """
@@ -58,14 +58,14 @@ class FileSystemRepository(Generic[ModelType, Entity]):
 
     @property
     @abstractmethod
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         """
         Base folder used by repository to store data
         """
         ...
 
     @abstractmethod
-    def from_model(self, model):
+    def _from_model(self, model):
         """
         Converts a model to its functional object.
         """
@@ -76,8 +76,8 @@ class FileSystemRepository(Generic[ModelType, Entity]):
         self.dir_name = dir_name
 
     @property
-    def directory(self) -> pathlib.Path:
-        dir_path = self.storage_folder / self.dir_name
+    def _directory(self) -> pathlib.Path:
+        dir_path = self._storage_folder / self.dir_name
 
         if not dir_path.exists():
             dir_path.mkdir(parents=True, exist_ok=True)
@@ -87,43 +87,43 @@ class FileSystemRepository(Generic[ModelType, Entity]):
     def load(self, model_id: str) -> Entity:
         return self.__to_entity(self.__get_model(model_id))
 
-    def load_all(self) -> List[Entity]:
-        return [self.__to_entity(f) for f in self.directory.glob("*.json")]
+    def _load_all(self) -> List[Entity]:
+        return [self.__to_entity(f) for f in self._directory.glob("*.json")]
 
-    def save(self, model):
-        model = self.to_model(model)
+    def _save(self, model):
+        model = self._to_model(model)
         self.__get_model(model.id, False).write_text(
-            json.dumps(model.to_dict(), ensure_ascii=False, indent=4, cls=CustomEncoder)
+            json.dumps(model.to_dict(), ensure_ascii=False, indent=4, cls=_CustomEncoder)
         )
 
-    def delete_all(self):
-        shutil.rmtree(self.directory)
+    def _delete_all(self):
+        shutil.rmtree(self._directory)
 
-    def delete(self, model_id: str):
+    def _delete(self, model_id: str):
         self.__get_model(model_id).unlink()
 
-    def search(self, attribute: str, value: str) -> Optional[Entity]:
-        return next(self._search(attribute, value), None)
+    def _search(self, attribute: str, value: str) -> Optional[Entity]:
+        return next(self.__search(attribute, value), None)
 
-    def search_all(self, attribute: str, value: str) -> List[Entity]:
-        return list(self._search(attribute, value))
+    def _search_all(self, attribute: str, value: str) -> List[Entity]:
+        return list(self.__search(attribute, value))
 
     def _build_model(self, model_data: Dict) -> ModelType:
         return self.model.from_dict(model_data)  # type: ignore
 
-    def _search(self, attribute: str, value: str) -> Iterator[Entity]:
-        return filter(lambda e: hasattr(e, attribute) and getattr(e, attribute) == value, self.load_all())
+    def __search(self, attribute: str, value: str) -> Iterator[Entity]:
+        return filter(lambda e: hasattr(e, attribute) and getattr(e, attribute) == value, self._load_all())
 
     def __get_model(self, model_id, raise_if_not_exist=True) -> pathlib.Path:
-        filepath = self.directory / f"{model_id}.json"
+        filepath = self._directory / f"{model_id}.json"
 
         if not filepath.exists() and raise_if_not_exist:
-            raise ModelNotFound(str(self.directory), model_id)
+            raise ModelNotFound(str(self._directory), model_id)
 
         return filepath
 
     def __to_entity(self, filepath):
         with open(filepath, "r") as f:
-            data = json.load(f, cls=CustomDecoder)
+            data = json.load(f, cls=_CustomDecoder)
         model = self.model.from_dict(data)  # type: ignore
-        return self.from_model(model)
+        return self._from_model(model)

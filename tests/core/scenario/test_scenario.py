@@ -4,14 +4,13 @@ from unittest import mock
 import pytest
 
 from taipy.core.common.alias import ScenarioId
-from taipy.core.cycle.cycle_manager import CycleManager
-from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.pipeline.pipeline_manager import PipelineManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.scenario.scenario_manager import ScenarioManager
 
 
 def test_create_scenario(cycle, current_datetime):
@@ -73,7 +72,7 @@ def test_add_property_to_scenario():
 def test_add_cycle_to_scenario(cycle):
     scenario = Scenario("foo", [], {})
     assert scenario.cycle is None
-    CycleManager._set(cycle)
+    _CycleManager._set(cycle)
     scenario.cycle = cycle
 
     assert scenario.cycle == cycle
@@ -96,20 +95,20 @@ def test_add_and_remove_tag():
     scenario = Scenario("foo", [], {})
 
     assert len(scenario.tags) == 0
-    scenario.add_tag("tag")
+    scenario._add_tag("tag")
     assert len(scenario.tags) == 1
 
-    scenario.remove_tag("tag")
+    scenario._remove_tag("tag")
     assert len(scenario.tags) == 0
 
 
 def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     scenario_1 = Scenario("foo", [], {}, creation_date=current_datetime, is_master=False, cycle=None)
-    ScenarioManager._set(scenario_1)
-    PipelineManager._set(pipeline)
-    CycleManager._set(cycle)
+    _ScenarioManager._set(scenario_1)
+    _PipelineManager._set(pipeline)
+    _CycleManager._set(cycle)
 
-    scenario_2 = ScenarioManager._get(scenario_1)
+    scenario_2 = _ScenarioManager._get(scenario_1)
     assert scenario_1.config_id == "foo"
     scenario_1._config_id = "fgh"
     assert scenario_1.config_id == "foo"
@@ -210,35 +209,35 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
 
 
 def test_submit_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.submit") as mock_submit:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mock_submit:
         scenario = Scenario("foo", [], {})
         scenario.submit(False)
         mock_submit.assert_called_once_with(scenario, False)
 
 
 def test_subscribe_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.subscribe") as mock_subscribe:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mock_subscribe:
         scenario = Scenario("foo", [], {})
         scenario.subscribe(None)
         mock_subscribe.assert_called_once_with(None, scenario)
 
 
 def test_unsubscribe_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.unsubscribe") as mock_unsubscribe:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mock_unsubscribe:
         scenario = Scenario("foo", [], {})
         scenario.unsubscribe(None)
         mock_unsubscribe.assert_called_once_with(None, scenario)
 
 
 def test_add_tag_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.tag") as mock_add_tag:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._tag") as mock_add_tag:
         scenario = Scenario("foo", [], {})
         scenario.add_tag("tag")
         mock_add_tag.assert_called_once_with(scenario, "tag")
 
 
 def test_remove_tag_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.untag") as mock_remove_tag:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._untag") as mock_remove_tag:
         scenario = Scenario("foo", [], {})
         scenario.remove_tag("tag")
         mock_remove_tag.assert_called_once_with(scenario, "tag")

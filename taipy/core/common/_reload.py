@@ -2,20 +2,20 @@ import functools
 
 
 def get_manager(manager: str):
-    from taipy.core.cycle.cycle_manager import CycleManager
-    from taipy.core.data.data_manager import DataManager
-    from taipy.core.job.job_manager import JobManager
-    from taipy.core.pipeline.pipeline_manager import PipelineManager
-    from taipy.core.scenario.scenario_manager import ScenarioManager
-    from taipy.core.task.task_manager import TaskManager
+    from taipy.core.cycle._cycle_manager import _CycleManager
+    from taipy.core.data._data_manager import _DataManager
+    from taipy.core.job._job_manager import _JobManager
+    from taipy.core.pipeline._pipeline_manager import _PipelineManager
+    from taipy.core.scenario._scenario_manager import _ScenarioManager
+    from taipy.core.task._task_manager import _TaskManager
 
     return {
-        "scenario": ScenarioManager,
-        "pipeline": PipelineManager,
-        "data": DataManager,
-        "cycle": CycleManager,
-        "job": JobManager,
-        "task": TaskManager,
+        "scenario": _ScenarioManager,
+        "pipeline": _PipelineManager,
+        "data": _DataManager,
+        "cycle": _CycleManager,
+        "job": _JobManager,
+        "task": _TaskManager,
     }[manager]
 
 
@@ -24,7 +24,6 @@ def reload(manager: str, obj):
 
 
 def set_entity(manager: str, obj):
-    # TODO: tp.set(obj)
     get_manager(manager)._set(obj)
 
 

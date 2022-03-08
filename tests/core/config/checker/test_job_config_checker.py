@@ -3,7 +3,7 @@ from taipy.core.config.checker._checkers._job_config_checker import _JobConfigCh
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.config import Config
 from taipy.core.config.job_config import JobConfig
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 
 
 class TestJobConfigChecker:
@@ -14,7 +14,7 @@ class TestJobConfigChecker:
         assert len(collector.errors) == 0
 
         dn_config_1 = Config._add_data_node(id="foo", storage_type="in_memory")
-        DataManager.get_or_create(dn_config_1)
+        _DataManager._get_or_create(dn_config_1)
         assert len(tp.get_data_nodes()) == 1
 
         tp.configure_job_executions(mode=JobConfig._MODE_VALUE_STANDALONE, nb_of_workers=1)

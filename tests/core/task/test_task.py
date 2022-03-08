@@ -2,14 +2,14 @@ import pytest
 
 from taipy.core.config.config import Config
 from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.data_manager import DataManager
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
 
 
 @pytest.fixture
@@ -126,10 +126,10 @@ def mock_func():
 def test_auto_set_and_reload(data_node):
     task_1 = Task(config_id="foo", function=print, input=None, output=None, parent_id=None)
 
-    DataManager._set(data_node)
-    TaskManager._set(task_1)
+    _DataManager._set(data_node)
+    _TaskManager._set(task_1)
 
-    task_2 = TaskManager._get(task_1)
+    task_2 = _TaskManager._get(task_1)
 
     assert task_1.config_id == "foo"
     task_1._config_id = "fgh"

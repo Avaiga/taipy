@@ -6,18 +6,7 @@ from taipy.core.common.alias import PipelineId, TaskId
 
 
 @dataclass
-class PipelineModel:
-    """
-    Class to hold a model of a Pipeline.
-
-    A model refers to the structure of a Pipeline stored in a database.
-
-    Attributes:
-        id (PipelineId): Identifier of a Pipeline.
-        config_id (str): Identifier of the pipeline configuration.
-        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        properties(dict): List of additional arguments.
-    """
+class _PipelineModel:
 
     id: PipelineId
     parent_id: Optional[str]
@@ -31,7 +20,7 @@ class PipelineModel:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return PipelineModel(
+        return _PipelineModel(
             id=data["id"],
             config_id=data["config_id"],
             parent_id=data["parent_id"],

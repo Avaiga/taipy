@@ -4,21 +4,7 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
-class TaskModel:
-    """Hold the model of a Task.
-
-    A model refers to the structure of a Task stored in a database.
-    The tuple `(config_id, parent_id)` forms a unique key.
-
-    Attributes:
-        id: Identifier of a Data Node.
-        parent_id: Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        config_id: Name of the Data Node Config.
-        input: Input data node of the Task, saved as its ID string representation.
-        function_name: Name of the task function.
-        function_module: Module name of the task function.
-        output: Output data node of the Task, saved as its ID string representation.
-    """
+class _TaskModel:
 
     id: str
     parent_id: Optional[str]
@@ -33,7 +19,7 @@ class TaskModel:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return TaskModel(
+        return _TaskModel(
             id=data["id"],
             parent_id=data["parent_id"],
             config_id=data["config_id"],

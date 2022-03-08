@@ -13,12 +13,12 @@ import pytest
 
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
 from taipy.core.scheduler.executor.synchronous import Synchronous
 from taipy.core.scheduler.scheduler import Scheduler
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -52,20 +52,20 @@ def test_submit_task():
     task = _create_task(multiply)
     output_dn_id = task.output[f"{task.config_id}_output0"].id
 
-    assert DataManager._get(output_dn_id).last_edition_date > before_creation
-    assert DataManager._get(output_dn_id).job_ids == []
-    assert DataManager._get(output_dn_id).is_ready_for_reading
+    assert _DataManager._get(output_dn_id).last_edition_date > before_creation
+    assert _DataManager._get(output_dn_id).job_ids == []
+    assert _DataManager._get(output_dn_id).is_ready_for_reading
 
     before_submission_creation = datetime.now()
     sleep(0.1)
     job = scheduler.submit_task(task)
     sleep(0.1)
     after_submission_creation = datetime.now()
-    assert DataManager._get(output_dn_id).read() == 42
-    assert DataManager._get(output_dn_id).last_edition_date > before_submission_creation
-    assert DataManager._get(output_dn_id).last_edition_date < after_submission_creation
-    assert DataManager._get(output_dn_id).job_ids == [job.id]
-    assert DataManager._get(output_dn_id).is_ready_for_reading
+    assert _DataManager._get(output_dn_id).read() == 42
+    assert _DataManager._get(output_dn_id).last_edition_date > before_submission_creation
+    assert _DataManager._get(output_dn_id).last_edition_date < after_submission_creation
+    assert _DataManager._get(output_dn_id).job_ids == [job.id]
+    assert _DataManager._get(output_dn_id).is_ready_for_reading
     assert job.is_completed()
 
 
@@ -215,11 +215,11 @@ def test_blocked_task():
     lock_2 = m.Lock()
 
     foo_cfg = Config._add_data_node("foo", default_data=1)
-    foo = DataManager.get_or_create(foo_cfg)
+    foo = _DataManager._get_or_create(foo_cfg)
     bar_cfg = Config._add_data_node("bar")
-    bar = DataManager.get_or_create(bar_cfg)
+    bar = _DataManager._get_or_create(bar_cfg)
     baz_cfg = Config._add_data_node("baz")
-    baz = DataManager.get_or_create(baz_cfg)
+    baz = _DataManager._get_or_create(baz_cfg)
     task_1 = Task("by_2", partial(lock_multiply, lock_1, 2), [foo], [bar])
     task_2 = Task("by_3", partial(lock_multiply, lock_2, 3), [bar], [baz])
 
@@ -235,16 +235,16 @@ def test_blocked_task():
         with lock_1:
             job_1 = scheduler.submit_task(task_1)  # job 1 is submitted and locked
             assert job_1.is_running()  # so it is still running
-            assert not DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
+            assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
         assert_true_after_20_second_max(job_1.is_completed)  # job1 unlocked and can complete
-        assert DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
-        assert DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
+        assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
+        assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert job_2.is_running()  # And job 2 can run
         assert len(scheduler.blocked_jobs) == 0
     assert_true_after_20_second_max(job_2.is_completed)  # job 2 unlocked so it can complete
-    assert DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
-    assert DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
+    assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
+    assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
 
 
 class MyScheduler(Scheduler):
@@ -267,11 +267,11 @@ def test_task_scheduler_create_parallel_dispatcher():
 def _create_task(function, nb_outputs=1):
     output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     input_dn = [
-        DataManager.get_or_create(Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
-        DataManager.get_or_create(Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
+        _DataManager._get_or_create(Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
+        _DataManager._get_or_create(Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
     ]
     output_dn = [
-        DataManager.get_or_create(
+        _DataManager._get_or_create(
             Config._add_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
