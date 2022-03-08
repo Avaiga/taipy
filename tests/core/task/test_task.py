@@ -145,24 +145,6 @@ def test_auto_set_and_reload(data_node):
     assert task_1.function == mock_func
     assert task_2.function == mock_func
 
-    # assert len(task_1.input) == 0
-    # task_1._input = [data_node]
-    # assert len(task_1.input) == 0
-    # task_1.input = [data_node]
-    # assert len(task_1.input) == 1
-    # assert task_1.input[data_node.config_id].id == data_node.id
-    # assert len(task_2.input) == 1
-    # assert task_2.input[data_node.config_id].id == data_node.id
-
-    # assert len(task_1.output) == 0
-    # task_1._output = [data_node]
-    # assert len(task_1.output) == 0
-    # task_1.output = [data_node]
-    # assert len(task_1.output) == 1
-    # assert task_1.output[data_node.config_id].id == data_node.id
-    # assert len(task_2.output) == 1
-    # assert task_2.tasks[data_node.config_id].id == data_node.id
-
     assert task_1.parent_id is None
     task_1._parent_id = "parent_id"
     assert task_1.parent_id is None
@@ -172,33 +154,21 @@ def test_auto_set_and_reload(data_node):
 
     with task_1 as task:
         assert task.config_id == "fgh"
-        # assert len(task.input) == 1
-        # assert task.input[data_node.config_id].id == data_node.id
-        # assert len(task.output) == 1
-        # assert task.output[data_node.config_id].id == data_node.id
         assert task.parent_id == "parent_id"
         assert task.function == mock_func
         assert task._is_in_context
 
         task.config_id = "abc"
-        # task.input = []
-        # task.output = []
         task.parent_id = None
         task.function = print
 
         assert task._config_id == "abc"
         assert task.config_id == "fgh"
-        # assert len(task.input) == 1
-        # assert task.input[data_node.config_id].id == data_node.id
-        # assert len(task.output) == 1
-        # assert task.output[data_node.config_id].id == data_node.id
         assert task.parent_id == "parent_id"
         assert task.function == mock_func
         assert task._is_in_context
 
     assert task_1.config_id == "abc"
-    # assert len(task.input) == 0
-    # assert len(task.output) == 0
     assert task_1.parent_id is None
     assert task_1.function == print
     assert not task_1._is_in_context

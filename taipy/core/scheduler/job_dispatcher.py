@@ -74,7 +74,6 @@ class JobDispatcher:
         if not are_outputs_in_cache:
             return True
         if len(task.input) == 0:
-
             return False
         input_last_edition = max(DataManager()._get(dn.id).last_edition_date for dn in task.input.values())
         output_last_edition = min(DataManager()._get(dn.id).last_edition_date for dn in task.output.values())

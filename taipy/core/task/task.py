@@ -74,24 +74,12 @@ class Task(Entity):
         self._config_id = val
 
     @property  # type: ignore
-    # @self_reload(MANAGER_NAME)
     def input(self):
         return self.__input
 
-    # @input.setter  # type: ignore
-    # @self_setter(MANAGER_NAME)
-    # def input(self, val):
-    #     self._input = {dn.config_id: dn for dn in val}
-
     @property  # type: ignore
-    # @self_reload(MANAGER_NAME)
     def output(self):
         return self.__output
-
-    # @output.setter  # type: ignore
-    # @self_setter(MANAGER_NAME)
-    # def output(self, val):
-    #     self._output = {dn.config_id: dn for dn in val}
 
     @property  # type: ignore
     @self_reload(MANAGER_NAME)

@@ -8,10 +8,11 @@ import numpy as np
 import pandas as pd
 
 from taipy.core.common._properties import _Properties
-from taipy.core.common._reload import reload, self_reload
+from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.entity import Entity
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.filter import FilterDataNode
 from taipy.core.data.operator import JoinOperator, Operator
@@ -19,7 +20,7 @@ from taipy.core.data.scope import Scope
 from taipy.core.exceptions.data_node import NoData
 
 
-class DataNode:
+class DataNode(Entity):
     """
     Data Node represents a reference to a dataset but not the data itself.
 
@@ -49,6 +50,7 @@ class DataNode:
     __ID_SEPARATOR = "_"
     __logger = _TaipyLogger._get_logger()
     REQUIRED_PROPERTIES: List[str] = []
+    MANAGER_NAME = "data"
 
     def __init__(
         self,
@@ -63,11 +65,10 @@ class DataNode:
         edition_in_progress: bool = False,
         **kwargs,
     ):
-        self.config_id = _validate_id(config_id)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
-        self.parent_id = parent_id
-        self.scope = scope
-
+        self._config_id = _validate_id(config_id)
+        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self._config_id, str(uuid.uuid4())]))
+        self._parent_id = parent_id
+        self._scope = scope
         self._last_edition_date = last_edition_date
         self._name = name or self.id
         self._edition_in_progress = edition_in_progress
@@ -78,12 +79,57 @@ class DataNode:
         self._properties = _Properties(self, **kwargs)
 
     @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def config_id(self, val):
+        self._config_id = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def parent_id(self):
+        return self._parent_id
+
+    @parent_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def parent_id(self, val):
+        self._parent_id = val
+
+    @property  # type: ignore
+    @self_reload("data")
+    def last_edition_date(self):
+        return self._last_edition_date
+
+    @last_edition_date.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def last_edition_date(self, val):
+        self._last_edition_date = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def scope(self):
+        return self._scope
+
+    @scope.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def scope(self, val):
+        self._scope = val
+
+    @property  # type: ignore
     @self_reload("data")
     def validity_period(self) -> Optional[timedelta]:
         """
         Number of minutes where the Data Node is up-to-date.
         """
         return self._validity_period if self._validity_period else None
+
+    @validity_period.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def validity_period(self, val):
+        self._validity_period = val
 
     @property  # type: ignore
     @self_reload("data")
@@ -98,13 +144,22 @@ class DataNode:
     def name(self):
         return self._name
 
+    @name.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def name(self, val):
+        self._name = val
+
     @property  # type: ignore
     @self_reload("data")
     def edition_in_progress(self):
         return self._edition_in_progress
 
+    @edition_in_progress.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def edition_in_progress(self, val):
+        self._edition_in_progress = val
+
     @property  # type: ignore
-    @self_reload("data")
     def job_ids(self):
         return self._job_ids
 
@@ -113,11 +168,6 @@ class DataNode:
         r = reload("data", self)
         self._properties = r._properties
         return self._properties
-
-    @property  # type: ignore
-    @self_reload("data")
-    def last_edition_date(self):
-        return self._last_edition_date
 
     def __eq__(self, other):
         return self.id == other.id
@@ -165,11 +215,11 @@ class DataNode:
         DataManager._set(self)
 
     def lock_edition(self):
-        self._edition_in_progress = True
+        self.edition_in_progress = True
 
     def unlock_edition(self, at: datetime = None, job_id: JobId = None):
-        self._last_edition_date = at or datetime.now()
-        self._edition_in_progress = False
+        self.last_edition_date = at or datetime.now()  # type: ignore
+        self.edition_in_progress = False  # type: ignore
         if job_id:
             self._job_ids.append(job_id)
 

@@ -19,6 +19,27 @@ from taipy.core.exceptions.data_node import (
 )
 
 
+class MyCustomObject:
+    def __init__(self, id, integer, text):
+        self.id = id
+        self.integer = integer
+        self.text = text
+
+
+class MyCustomObject1:
+    def __init__(self, id, integer, text):
+        self.id = id
+        self.integer = integer
+        self.text = text
+
+
+class MyCustomObject2:
+    def __init__(self, id, integer, text):
+        self.id = id
+        self.integer = integer
+        self.text = text
+
+
 class TestExcelDataNode:
     def test_new_excel_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config._add_data_node("not_ready_data_node_config_id", "excel", path="NOT_EXISTING.csv")
@@ -94,12 +115,6 @@ class TestExcelDataNode:
         assert np.array_equal(data_numpy, pd.read_excel(path).to_numpy())
 
         # Create the same ExcelDataNode but with custom exposed_type
-        class MyCustomObject:
-            def __init__(self, id, integer, text):
-                self.id = id
-                self.integer = integer
-                self.text = text
-
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
@@ -152,12 +167,6 @@ class TestExcelDataNode:
         assert np.array_equal(data_numpy, pd.read_excel(path, header=None).to_numpy())
 
         # Create the same ExcelDataNode but with custom exposed_type
-        class MyCustomObject:
-            def __init__(self, id, integer, text):
-                self.id = id
-                self.integer = integer
-                self.text = text
-
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
@@ -259,18 +268,6 @@ class TestExcelDataNode:
             assert np.array_equal(data_pandas[sheet_name], pd.read_excel(path, sheet_name=sheet_name).to_numpy())
 
         # Create the same ExcelDataNode but with custom exposed_type
-        class MyCustomObject1:
-            def __init__(self, id, integer, text):
-                self.id = id
-                self.integer = integer
-                self.text = text
-
-        class MyCustomObject2:
-            def __init__(self, id, integer, text):
-                self.id = id
-                self.integer = integer
-                self.text = text
-
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
@@ -392,18 +389,6 @@ class TestExcelDataNode:
             )
 
         # Create the same ExcelDataNode but with custom exposed_type
-        class MyCustomObject1:
-            def __init__(self, id, integer, text):
-                self.id = id
-                self.integer = integer
-                self.text = text
-
-        class MyCustomObject2:
-            def __init__(self, id, integer, text):
-                self.id = id
-                self.integer = integer
-                self.text = text
-
         non_existing_sheet_name_custom = ExcelDataNode(
             "bar",
             Scope.PIPELINE,
