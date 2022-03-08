@@ -2,15 +2,15 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._get_valid_filename import _get_valid_filename
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common.alias import CycleId
-from taipy.core.common.entity import Entity
 from taipy.core.common.frequency import Frequency
 
 
-class Cycle(Entity):
+class Cycle(_Entity):
     """
     Represents an iteration of a recurrent work pattern.
 

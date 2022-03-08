@@ -3,18 +3,18 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common._utils import _fcts_to_dict
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId
-from taipy.core.common.entity import Entity
 from taipy.core.data.data_node import DataNode
 from taipy.core.pipeline.pipeline_model import PipelineModel
 from taipy.core.task.task import Task
 
 
-class Pipeline(Entity):
+class Pipeline(_Entity):
     """
     A Pipeline entity that holds a list of tasks and additional arguments representing a set of data processing elements
     connected in series.

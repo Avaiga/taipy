@@ -5,10 +5,10 @@ from concurrent.futures import Future
 from datetime import datetime
 from typing import Callable, List
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._reload import self_reload, self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
-from taipy.core.common.entity import Entity
 from taipy.core.job.status import Status
 from taipy.core.task.task import Task
 
@@ -22,7 +22,7 @@ def _run_callbacks(fn):
     return __run_callbacks
 
 
-class Job(Entity):
+class Job(_Entity):
     """Execution of a Task.
 
     A Job is the execution wrapper around a Task. It handles the status of the execution,

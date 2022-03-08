@@ -1,7 +1,7 @@
 from taipy.core.common._reload import set_entity
 
 
-class Entity:
+class _Entity:
     MANAGER_NAME: str
     _is_in_context = False
 

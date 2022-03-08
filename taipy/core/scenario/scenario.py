@@ -2,16 +2,16 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Set
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import ScenarioId
-from taipy.core.common.entity import Entity
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.pipeline.pipeline import Pipeline
 
 
-class Scenario(Entity):
+class Scenario(_Entity):
     """
     Represents an instance of the  business case to solve.
 

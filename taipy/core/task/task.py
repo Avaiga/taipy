@@ -1,15 +1,15 @@
 import uuid
 from typing import Dict, Iterable, Optional
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._reload import self_reload, self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import TaskId
-from taipy.core.common.entity import Entity
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
 
 
-class Task(Entity):
+class Task(_Entity):
     """Holds user function that will be executed, its parameters qs data nodes and outputs as data nodes.
 
     This element bring together the user code as function, parameters and outputs.

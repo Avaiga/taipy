@@ -7,12 +7,12 @@ from typing import List, Optional, Tuple, Union
 import numpy as np
 import pandas as pd
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import DataNodeId, JobId
-from taipy.core.common.entity import Entity
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.filter import FilterDataNode
 from taipy.core.data.operator import JoinOperator, Operator
@@ -20,7 +20,7 @@ from taipy.core.data.scope import Scope
 from taipy.core.exceptions.data_node import NoData
 
 
-class DataNode(Entity):
+class DataNode(_Entity):
     """
     Data Node represents a reference to a dataset but not the data itself.
 
