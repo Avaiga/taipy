@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 import taipy.core.taipy as tp
@@ -125,3 +127,24 @@ def test_get_sorted_tasks():
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
     assert pipeline.get_sorted_tasks() == [[task_1], [task_2, task_4], [task_3]]
+
+
+def test_subscribe_pipeline():
+    with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.subscribe") as mck:
+        pipeline = Pipeline("id", {}, [])
+        pipeline.subscribe(None)
+        mck.assert_called_once_with(None, pipeline)
+
+
+def test_unsubscribe_pipeline():
+    with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.unsubscribe") as mck:
+        pipeline = Pipeline("id", {}, [])
+        pipeline.unsubscribe(None)
+        mck.assert_called_once_with(None, pipeline)
+
+
+def test_submit_pipeline():
+    with mock.patch("taipy.core.pipeline.pipeline_manager.PipelineManager.submit") as mck:
+        pipeline = Pipeline("id", {}, [])
+        pipeline.submit(None, False)
+        mck.assert_called_once_with(pipeline, None, False)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Set
 
@@ -9,6 +11,7 @@ from taipy.core.common._utils import _fcts_to_dict
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId
 from taipy.core.data.data_node import DataNode
+from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline_model import PipelineModel
 from taipy.core.task.task import Task
 
@@ -134,3 +137,18 @@ class Pipeline:
     def get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
+
+    def subscribe(self, callback: Callable[[Pipeline, Job], None]):
+        from taipy.core.pipeline.pipeline_manager import PipelineManager
+
+        return PipelineManager.subscribe(callback, self)
+
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
+        from taipy.core.pipeline.pipeline_manager import PipelineManager
+
+        return PipelineManager.unsubscribe(callback, self)
+
+    def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
+        from taipy.core.pipeline.pipeline_manager import PipelineManager
+
+        return PipelineManager.submit(self, callbacks, force)
