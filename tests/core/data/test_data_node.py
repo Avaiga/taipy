@@ -10,6 +10,7 @@ from taipy.core.data.filter import FilterDataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.exceptions.data_node import NoData
 
 
@@ -56,7 +57,7 @@ class FakeListDataNode(DataNode):
 
 class TestDataNode:
     def test_create_with_default_values(self):
-        dn = DataNode("fOo BAr")
+        dn = DataNode("foo_bar")
         assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
@@ -70,7 +71,7 @@ class TestDataNode:
     def test_create(self):
         a_date = datetime.now()
         dn = DataNode(
-            "fOo BAr é@",
+            "foo_bar",
             Scope.SCENARIO,
             DataNodeId("an_id"),
             "a name",
@@ -80,7 +81,7 @@ class TestDataNode:
             edition_in_progress=False,
             prop="erty",
         )
-        assert dn.config_id == "foo_bar_e-"
+        assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.SCENARIO
         assert dn.id == "an_id"
         assert dn.name == "a name"
@@ -91,8 +92,11 @@ class TestDataNode:
         assert len(dn.properties) == 1
         assert dn.properties["prop"] == "erty"
 
+        with pytest.raises(InvalidConfigurationId):
+            DataNode("foo bar")
+
     def test_read_write(self):
-        dn = FakeDataNode("fOo BAr")
+        dn = FakeDataNode("foo_bar")
         with pytest.raises(NoData):
             assert dn.read() is None
             dn.read_or_raise()
@@ -128,7 +132,7 @@ class TestDataNode:
         assert dn.job_ids == [job_id]
 
     def test_ready_for_reading(self):
-        dn = DataNode("fOo BAr")
+        dn = DataNode("foo_bar")
         assert dn.last_edition_date is None
         assert not dn.is_ready_for_reading
         assert dn.job_ids == []
@@ -218,14 +222,14 @@ class TestDataNode:
         assert dn.is_in_cache is False
 
     def test_pandas_filter(self, default_data_frame):
-        df_dn = FakeDataframeDataNode("fake dataframe dn", default_data_frame)
+        df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
         COLUMN_NAME_1 = "a"
         COLUMN_NAME_2 = "b"
         assert isinstance(df_dn[COLUMN_NAME_1], FilterDataNode)
         assert isinstance(df_dn[[COLUMN_NAME_1, COLUMN_NAME_2]], FilterDataNode)
 
     def test_filter(self, default_data_frame):
-        dn = FakeDataNode("fake dn")
+        dn = FakeDataNode("fake_dn")
         dn.write("Any data")
 
         assert NotImplemented == dn.filter((("any", 0, Operator.EQUAL)), JoinOperator.OR)
@@ -235,7 +239,7 @@ class TestDataNode:
         assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_THAN)))
         assert NotImplemented == dn.filter((("any", 0, Operator.GREATER_OR_EQUAL)))
 
-        df_dn = FakeDataframeDataNode("fake dataframe dn", default_data_frame)
+        df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)
 
         COLUMN_NAME_1 = "a"
         COLUMN_NAME_2 = "b"
@@ -297,7 +301,7 @@ class TestDataNode:
         ) == len(
             default_data_frame[(default_data_frame[COLUMN_NAME_1] > 10) | (default_data_frame[COLUMN_NAME_1] < -10)]
         )
-        list_dn = FakeListDataNode("fake list dn")
+        list_dn = FakeListDataNode("fake_list_dn")
 
         KEY_NAME = "value"
 

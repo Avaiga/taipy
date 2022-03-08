@@ -1,6 +1,9 @@
+import pytest
+
 import taipy.core.taipy as tp
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 
 
 def test_create_cycle_entity(current_datetime):
@@ -11,10 +14,10 @@ def test_create_cycle_entity(current_datetime):
         creation_date=current_datetime,
         start_date=current_datetime,
         end_date=current_datetime,
-        name="   bAr/ξéà    ",
+        name="foo",
     )
     assert cycle_1.id is not None
-    assert cycle_1.name == "bar-xea"
+    assert cycle_1.name == "foo"
     assert cycle_1.properties == {"key": "value"}
     assert cycle_1.creation_date == current_datetime
     assert cycle_1.start_date == current_datetime

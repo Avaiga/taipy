@@ -5,23 +5,23 @@ from taipy.core.config._config import _Config
 from taipy.core.config.checker.issue_collector import IssueCollector
 
 
-class ConfigChecker:
+class _ConfigChecker:
     def __init__(self, config: _Config, collector):
-        self.collector = collector
-        self.config = config
+        self._collector = collector
+        self._config = config
 
     @abc.abstractmethod
-    def check(self) -> IssueCollector:
+    def _check(self) -> IssueCollector:
         raise NotImplementedError
 
     def _error(self, field: str, value: Any, message: str):
-        self.collector._add_error(field, value, message, self.__class__.__name__)
+        self._collector._add_error(field, value, message, self.__class__.__name__)
 
     def _warning(self, field: str, value: Any, message: str):
-        self.collector._add_warning(field, value, message, self.__class__.__name__)
+        self._collector._add_warning(field, value, message, self.__class__.__name__)
 
     def _info(self, field: str, value: Any, message: str):
-        self.collector._add_info(field, value, message, self.__class__.__name__)
+        self._collector._add_info(field, value, message, self.__class__.__name__)
 
     def _check_children(self, parent_config_class, config_id: str, config_key: str, config_value, child_config_class):
         if not config_value:

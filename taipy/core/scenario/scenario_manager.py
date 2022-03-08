@@ -9,7 +9,6 @@ from taipy.core.config.config import Config
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_manager import CycleManager
-from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.exceptions.scenario import (
     DeletingMasterScenario,
     DifferentScenarioConfigs,
@@ -100,7 +99,7 @@ class ScenarioManager(_Manager[Scenario]):
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.id)
-        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipeline_configs]
         cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config.properties.copy()

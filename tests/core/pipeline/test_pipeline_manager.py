@@ -26,9 +26,9 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 @pytest.fixture()
 def airflow_config():
-    Config.set_job_config(mode=Config.job_config.MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
+    Config._set_job_config(mode=Config.job_config._MODE_VALUE_AIRFLOW, hostname="http://localhost:8080")
     yield
-    Config.set_job_config(mode=Config.job_config.DEFAULT_MODE)
+    Config._set_job_config(mode=Config.job_config._DEFAULT_MODE)
 
 
 def test_set_and_get_pipeline():
@@ -248,14 +248,14 @@ def mult_by_3(nb: int):
 def test_get_or_create_data():
     # only create intermediate data node once
 
-    dn_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    dn_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
-    dn_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_1 = Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    dn_config_2 = Config._add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_6 = Config._add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_config_mult_by_2 = Config.add_task("mult by 2", mult_by_2, [dn_config_1], dn_config_2)
-    task_config_mult_by_3 = Config.add_task("mult by 3", mult_by_3, [dn_config_2], dn_config_6)
-    pipeline_config = Config.add_pipeline("by 6", [task_config_mult_by_2, task_config_mult_by_3])
-    # dn_1 ---> mult by 2 ---> dn_2 ---> mult by 3 ---> dn_6
+    task_config_mult_by_2 = Config._add_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_config_mult_by_3 = Config._add_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
+    pipeline_config = Config._add_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3])
+    # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
 
     assert len(DataManager._get_all()) == 0
     assert len(TaskManager._get_all()) == 0
@@ -291,13 +291,13 @@ def test_get_or_create_data():
 
 
 def test_create_pipeline_and_modify_properties_does_not_modify_config():
-    dn_config_1 = Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    dn_config_2 = Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
-    dn_config_6 = Config.add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_1 = Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    dn_config_2 = Config._add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_6 = Config._add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_config_mult_by_2 = Config.add_task("mult by 2", mult_by_2, [dn_config_1], dn_config_2)
-    task_config_mult_by_3 = Config.add_task("mult by 3", mult_by_3, [dn_config_2], dn_config_6)
-    pipeline_config = Config.add_pipeline("by 6", [task_config_mult_by_2, task_config_mult_by_3], foo="bar")
+    task_config_mult_by_2 = Config._add_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_config_mult_by_3 = Config._add_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
+    pipeline_config = Config._add_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3], foo="bar")
 
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
@@ -328,14 +328,14 @@ def notify2(*args, **kwargs):
 def test_pipeline_notification_subscribe(mocker):
     mocker.patch("taipy.core.common._reload.reload", side_effect=lambda m, o: o)
 
-    pipeline_config = Config.add_pipeline(
-        "by 6",
+    pipeline_config = Config._add_pipeline(
+        "by_6",
         [
-            Config.add_task(
-                "mult by 2",
+            Config._add_task(
+                "mult_by_2",
                 mult_by_2,
-                [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
+                [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                Config._add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )
@@ -380,14 +380,14 @@ def test_pipeline_notification_subscribe(mocker):
 def test_pipeline_notification_unsubscribe(mocker):
     mocker.patch("taipy.core.common._reload.reload", side_effect=lambda m, o: o)
 
-    pipeline_config = Config.add_pipeline(
-        "by 6",
+    pipeline_config = Config._add_pipeline(
+        "by_6",
         [
-            Config.add_task(
-                "mult by 2",
+            Config._add_task(
+                "mult_by_2",
                 mult_by_2,
-                [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
+                [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                Config._add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )
@@ -408,20 +408,20 @@ def test_pipeline_notification_unsubscribe(mocker):
 
 
 def test_pipeline_notification_subscribe_all():
-    pipeline_config = Config.add_pipeline(
-        "by 6",
+    pipeline_config = Config._add_pipeline(
+        "by_6",
         [
-            Config.add_task(
-                "mult by 2",
+            Config._add_task(
+                "mult_by_2",
                 mult_by_2,
-                [Config.add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                Config.add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
+                [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                Config._add_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
         ],
     )
 
     pipeline = PipelineManager.get_or_create(pipeline_config)
-    pipeline_config.id = "other pipeline"
+    pipeline_config.id = "other_pipeline"
 
     other_pipeline = PipelineManager.get_or_create(pipeline_config)
 
@@ -434,16 +434,16 @@ def test_pipeline_notification_subscribe_all():
 
 
 def test_get_all_by_config_id():
-    input_configs = [Config.add_data_node("my_input", "in_memory")]
-    task_config_1 = Config.add_task("task_config_1", print, input_configs, [])
+    input_configs = [Config._add_data_node("my_input", "in_memory")]
+    task_config_1 = Config._add_task("task_config_1", print, input_configs, [])
     assert len(PipelineManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
-    pipeline_config_1 = Config.add_pipeline("foo", [task_config_1])
+    pipeline_config_1 = Config._add_pipeline("foo", [task_config_1])
     assert len(PipelineManager._get_all_by_config_id("foo")) == 0
 
     PipelineManager.get_or_create(pipeline_config_1)
     assert len(PipelineManager._get_all_by_config_id("foo")) == 1
 
-    pipeline_config_2 = Config.add_pipeline("baz", [task_config_1])
+    pipeline_config_2 = Config._add_pipeline("baz", [task_config_1])
     PipelineManager.get_or_create(pipeline_config_2)
     assert len(PipelineManager._get_all_by_config_id("foo")) == 1
     assert len(PipelineManager._get_all_by_config_id("baz")) == 1
@@ -454,10 +454,12 @@ def test_get_all_by_config_id():
 
 
 def test_do_not_recreate_existing_pipeline_except_same_config():
-    dn_input_config_scope_scenario = Config.add_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
-    dn_output_config_scope_scenario = Config.add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
-    task_config = Config.add_task("task_config", print, dn_input_config_scope_scenario, dn_output_config_scope_scenario)
-    pipeline_config = Config.add_pipeline("pipeline_config_1", [task_config])
+    dn_input_config_scope_scenario = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
+    dn_output_config_scope_scenario = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config._add_task(
+        "task_config", print, dn_input_config_scope_scenario, dn_output_config_scope_scenario
+    )
+    pipeline_config = Config._add_pipeline("pipeline_config_1", [task_config])
 
     # Scope is scenario
     pipeline_1 = PipelineManager.get_or_create(pipeline_config)
@@ -474,12 +476,12 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert len(PipelineManager._get_all()) == 2
     assert pipeline_3.id == pipeline_4.id
 
-    dn_input_config_scope_scenario_2 = Config.add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO)
-    dn_output_config_scope_global_2 = Config.add_data_node("my_output_2", "in_memory", scope=Scope.GLOBAL)
-    task_config_2 = Config.add_task(
+    dn_input_config_scope_scenario_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO)
+    dn_output_config_scope_global_2 = Config._add_data_node("my_output_2", "in_memory", scope=Scope.GLOBAL)
+    task_config_2 = Config._add_task(
         "task_config_2", print, dn_input_config_scope_scenario_2, dn_output_config_scope_global_2
     )
-    pipeline_config_2 = Config.add_pipeline("pipeline_config_2", [task_config_2])
+    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_2])
 
     # Scope is scenario and global
     pipeline_5 = PipelineManager.get_or_create(pipeline_config_2)
@@ -495,12 +497,12 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert len(PipelineManager._get_all()) == 4
     assert pipeline_7.id == pipeline_8.id
 
-    dn_input_config_scope_global_3 = Config.add_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL)
-    dn_output_config_scope_global_3 = Config.add_data_node("my_output_3", "in_memory", scope=Scope.GLOBAL)
-    task_config_3 = Config.add_task(
+    dn_input_config_scope_global_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL)
+    dn_output_config_scope_global_3 = Config._add_data_node("my_output_3", "in_memory", scope=Scope.GLOBAL)
+    task_config_3 = Config._add_task(
         "task_config_3", print, dn_input_config_scope_global_3, dn_output_config_scope_global_3
     )
-    pipeline_config_3 = Config.add_pipeline("pipeline_config_3", [task_config_3])
+    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])
 
     # Scope is global
     pipeline_9 = PipelineManager.get_or_create(pipeline_config_3)
@@ -515,12 +517,12 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert pipeline_11.id == pipeline_10.id
     assert pipeline_11.id == pipeline_9.id
 
-    dn_input_config_scope_pipeline_4 = Config.add_data_node("my_input_4", "in_memory", scope=Scope.PIPELINE)
-    dn_output_config_scope_global_4 = Config.add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
-    task_config_4 = Config.add_task(
+    dn_input_config_scope_pipeline_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.PIPELINE)
+    dn_output_config_scope_global_4 = Config._add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
+    task_config_4 = Config._add_task(
         "task_config_4", print, dn_input_config_scope_pipeline_4, dn_output_config_scope_global_4
     )
-    pipeline_config_4 = Config.add_pipeline("pipeline_config_4", [task_config_4])
+    pipeline_config_4 = Config._add_pipeline("pipeline_config_4", [task_config_4])
 
     # Scope is global and pipeline
     pipeline_12 = PipelineManager.get_or_create(pipeline_config_4)
@@ -540,12 +542,12 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert pipeline_15.id != pipeline_13.id
     assert pipeline_15.id != pipeline_12.id
 
-    dn_input_config_scope_pipeline_5 = Config.add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE)
-    dn_output_config_scope_scenario_5 = Config.add_data_node("my_output_5", "in_memory", scope=Scope.SCENARIO)
-    task_config_5 = Config.add_task(
+    dn_input_config_scope_pipeline_5 = Config._add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE)
+    dn_output_config_scope_scenario_5 = Config._add_data_node("my_output_5", "in_memory", scope=Scope.SCENARIO)
+    task_config_5 = Config._add_task(
         "task_config_5", print, dn_input_config_scope_pipeline_5, dn_output_config_scope_scenario_5
     )
-    pipeline_config_5 = Config.add_pipeline("pipeline_config_5", [task_config_5])
+    pipeline_config_5 = Config._add_pipeline("pipeline_config_5", [task_config_5])
 
     # Scope is scenario and pipeline
     pipeline_16 = PipelineManager.get_or_create(pipeline_config_5)
@@ -561,12 +563,12 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert pipeline_18.id != pipeline_16.id
 
     # create a second pipeline from the same config
-    dn_input_config_scope_pipeline_6 = Config.add_data_node("my_input_6", "in_memory", scope=Scope.PIPELINE)
-    dn_output_config_scope_pipeline_6 = Config.add_data_node("my_output_6", "in_memory", scope=Scope.PIPELINE)
-    task_config_6 = Config.add_task(
+    dn_input_config_scope_pipeline_6 = Config._add_data_node("my_input_6", "in_memory", scope=Scope.PIPELINE)
+    dn_output_config_scope_pipeline_6 = Config._add_data_node("my_output_6", "in_memory", scope=Scope.PIPELINE)
+    task_config_6 = Config._add_task(
         "task_config_6", print, dn_input_config_scope_pipeline_6, dn_output_config_scope_pipeline_6
     )
-    pipeline_config_6 = Config.add_pipeline("pipeline_config_6", [task_config_6])
+    pipeline_config_6 = Config._add_pipeline("pipeline_config_6", [task_config_6])
 
     pipeline_19 = PipelineManager.get_or_create(pipeline_config_6)
     assert len(PipelineManager._get_all()) == 13
@@ -577,10 +579,10 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 
 def test_hard_delete():
     #  test hard delete with pipeline at pipeline level
-    dn_input_config_1 = Config.add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config_1 = Config.add_data_node("my_output_1", "in_memory", scope=Scope.PIPELINE, default_data="works !")
-    task_config_1 = Config.add_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    pipeline_config_1 = Config.add_pipeline("pipeline_config_1", [task_config_1])
+    dn_input_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config_1 = Config._add_data_node("my_output_1", "in_memory", scope=Scope.PIPELINE, default_data="works !")
+    task_config_1 = Config._add_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
+    pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1])
     pipeline_1 = PipelineManager.get_or_create(pipeline_config_1)
     PipelineManager.submit(pipeline_1.id)
 
@@ -595,10 +597,10 @@ def test_hard_delete():
     assert len(JobManager._get_all()) == 0
 
     #  test hard delete with pipeline at scenario level
-    dn_input_config_2 = Config.add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_output_config_2 = Config.add_data_node("my_output_2", "in_memory", scope=Scope.SCENARIO)
-    task_config_2 = Config.add_task("task_config_2", print, dn_input_config_2, dn_output_config_2)
-    pipeline_config_2 = Config.add_pipeline("pipeline_config_2", [task_config_2])
+    dn_input_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_output_config_2 = Config._add_data_node("my_output_2", "in_memory", scope=Scope.SCENARIO)
+    task_config_2 = Config._add_task("task_config_2", print, dn_input_config_2, dn_output_config_2)
+    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_2])
     pipeline_2 = PipelineManager.get_or_create(pipeline_config_2)
     PipelineManager.submit(pipeline_2.id)
 
@@ -619,10 +621,10 @@ def test_hard_delete():
     JobManager._delete_all()
 
     #  test hard delete with pipeline at business level
-    dn_input_config_3 = Config.add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
-    dn_output_config_3 = Config.add_data_node("my_output_3", "in_memory", scope=Scope.CYCLE)
-    task_config_3 = Config.add_task("task_config_3", print, dn_input_config_3, dn_output_config_3)
-    pipeline_config_3 = Config.add_pipeline("pipeline_config_3", [task_config_3])
+    dn_input_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    dn_output_config_3 = Config._add_data_node("my_output_3", "in_memory", scope=Scope.CYCLE)
+    task_config_3 = Config._add_task("task_config_3", print, dn_input_config_3, dn_output_config_3)
+    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])
     pipeline_3 = PipelineManager.get_or_create(pipeline_config_3)
     PipelineManager.submit(pipeline_3.id)
 
@@ -643,10 +645,10 @@ def test_hard_delete():
     JobManager._delete_all()
 
     #  test hard delete with pipeline at global level
-    dn_input_config_4 = Config.add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config_4 = Config.add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
-    task_config_4 = Config.add_task("task_config_4", print, dn_input_config_4, dn_output_config_4)
-    pipeline_config_4 = Config.add_pipeline("pipeline_config_4", [task_config_4])
+    dn_input_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_output_config_4 = Config._add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
+    task_config_4 = Config._add_task("task_config_4", print, dn_input_config_4, dn_output_config_4)
+    pipeline_config_4 = Config._add_pipeline("pipeline_config_4", [task_config_4])
     pipeline_4 = PipelineManager.get_or_create(pipeline_config_4)
     PipelineManager.submit(pipeline_4.id)
 
@@ -666,10 +668,10 @@ def test_hard_delete():
     TaskManager._delete_all()
     JobManager._delete_all()
 
-    dn_input_config_5 = Config.add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config_5 = Config.add_data_node("my_output_5", "in_memory", scope=Scope.GLOBAL)
-    task_config_5 = Config.add_task("task_config_5", print, dn_input_config_5, dn_output_config_5)
-    pipeline_config_5 = Config.add_pipeline("pipeline_config_5", [task_config_5])
+    dn_input_config_5 = Config._add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config_5 = Config._add_data_node("my_output_5", "in_memory", scope=Scope.GLOBAL)
+    task_config_5 = Config._add_task("task_config_5", print, dn_input_config_5, dn_output_config_5)
+    pipeline_config_5 = Config._add_pipeline("pipeline_config_5", [task_config_5])
     pipeline_5 = PipelineManager.get_or_create(pipeline_config_5)
     PipelineManager.submit(pipeline_5.id)
 
@@ -685,10 +687,10 @@ def test_hard_delete():
 
 
 def test_automatic_reload():
-    dn_input_config = Config.add_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
-    dn_output_config = Config.add_data_node("output", "pickle")
-    task_config = Config.add_task("task_config", mult_by_2, dn_input_config, dn_output_config)
-    pipeline_config = Config.add_pipeline("pipeline_config", [task_config])
+    dn_input_config = Config._add_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
+    dn_output_config = Config._add_data_node("output", "pickle")
+    task_config = Config._add_task("task_config", mult_by_2, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
     pipeline = PipelineManager.get_or_create(pipeline_config)
 
     p1 = Process(target=PipelineManager.submit, args=(pipeline,))

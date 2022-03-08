@@ -33,67 +33,67 @@ def assert_file_not_exists(file_path):
 class TestTaipy:
     def test_load_configuration(self):
         file_name = "my_file.toml"
-        with mock.patch("taipy.core.config.config.Config.load") as load:
+        with mock.patch("taipy.core.config.config.Config._load") as load:
             tp.load_configuration(file_name)
             load.assert_called_once_with(file_name)
 
     def test_export_configuration(self):
         file_name = "my_file.toml"
-        with mock.patch("taipy.core.config.config.Config.export") as export:
+        with mock.patch("taipy.core.config.config.Config._export") as export:
             tp.export_configuration(file_name)
             export.assert_called_once_with(file_name)
 
     def test_configure_global_app(self):
         a, b, c, d = "foo", "bar", "baz", "qux"
-        with mock.patch("taipy.core.config.config.Config.set_global_config") as set_global:
+        with mock.patch("taipy.core.config.config.Config._set_global_config") as set_global:
             tp.configure_global_app(a, b, c, property=d)
             set_global.assert_called_once_with(a, b, c, property=d)
 
     def test_configure_job_executions(self):
         a, b, my_property = "foo", "bar", "garphy"
-        with mock.patch("taipy.core.config.config.Config.set_job_config") as mck:
+        with mock.patch("taipy.core.config.config.Config._set_job_config") as mck:
             tp.configure_job_executions(a, b, my_property=my_property)
             mck.assert_called_once_with(a, b, my_property=my_property)
 
     def test_configure_data_node(self):
         a, b, c, d = "foo", "bar", Scope.PIPELINE, "qux"
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_data_node(a, b, c, property=d)
             mck.assert_called_once_with(a, b, c, property=d)
 
     def test_configure_default_data_node(self):
         a, b, c = "foo", Scope.PIPELINE, "qux"
-        with mock.patch("taipy.core.config.config.Config.add_default_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_default_data_node") as mck:
             tp.configure_default_data_node(a, b, property=c)
             mck.assert_called_once_with(a, b, property=c)
 
     def test_configure_csv_data_node(self):
         a, b, c, d, e = "foo", "path", True, Scope.PIPELINE, "numpy"
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_csv_data_node(a, b, c, d, exposed_type=e)
             mck.assert_called_once_with(a, "csv", scope=d, path=b, has_header=c, exposed_type=e)
 
     def test_configure_excel_data_node(self):
         a, b, c, d, e, f = "foo", "path", True, "Sheet1", Scope.PIPELINE, "numpy"
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_excel_data_node(a, b, c, d, e, exposed_type=f)
             mck.assert_called_once_with(a, "excel", scope=e, path=b, has_header=c, sheet_name=d, exposed_type=f)
 
     def test_configure_generic_data_node(self):
         a, b, c, d, e = "foo", print, print, Scope.PIPELINE, "qux"
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_generic_data_node(a, b, c, d, property=e)
             mck.assert_called_once_with(a, "generic", scope=d, read_fct=b, write_fct=c, property=e)
 
     def test_configure_in_memory_data_node(self):
         a, b, c, d = "foo", 0, Scope.PIPELINE, "qux"
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_in_memory_data_node(a, b, c, property=d)
             mck.assert_called_once_with(a, "in_memory", scope=c, default_data=b, property=d)
 
     def test_configure_pickle_data_node(self):
         a, b, c, d = "foo", 0, Scope.PIPELINE, "path"
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_pickle_data_node(a, b, c, path=d)
             mck.assert_called_once_with(a, "pickle", scope=c, default_data=b, path=d)
 
@@ -110,7 +110,7 @@ class TestTaipy:
             Scope.PIPELINE,
             "qux",
         )
-        with mock.patch("taipy.core.config.config.Config.add_data_node") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_sql_data_node(a, b, c, d, e, f, g, h, i, property=j)
             mck.assert_called_once_with(
                 a,
@@ -128,48 +128,48 @@ class TestTaipy:
 
     def test_configure_task(self):
         a, b, c, d, e, f, g, h = "foo", "bar", "baz", "qux", "quux", "quz", "corge", "grault"
-        with mock.patch("taipy.core.config.config.Config.add_task") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_task") as mck:
             tp.configure_task(a, b, [], [], properties={c: d, e: f, g: h})
             mck.assert_called_once_with(a, b, [], [], properties={c: d, e: f, g: h})
 
     def test_configure_default_task(self):
         c, e, f, g, h = "baz", "quux", "quz", "corge", "grault"
-        with mock.patch("taipy.core.config.config.Config.add_default_task") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_default_task") as mck:
             tp.configure_default_task(c, [], [], properties={e: f, g: h})
             mck.assert_called_once_with(c, [], [], properties={e: f, g: h})
 
     def test_configure_pipeline(self):
         a, b, c = "foo", "bar", "baz"
-        with mock.patch("taipy.core.config.config.Config.add_pipeline") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_pipeline") as mck:
             tp.configure_pipeline(a, b, my_property=c)
             mck.assert_called_once_with(a, b, my_property=c)
 
     def test_configure_default_pipeline(self):
         a, b = "foo", "bar"
-        with mock.patch("taipy.core.config.config.Config.add_default_pipeline") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_default_pipeline") as mck:
             tp.configure_default_pipeline(a, my_property=b)
             mck.assert_called_once_with(a, my_property=b)
 
     def test_configure_scenario(self):
         a, b, c, d, e = "foo", "bar", "baz", "qux", "quux"
-        with mock.patch("taipy.core.config.config.Config.add_scenario") as set_global:
+        with mock.patch("taipy.core.config.config.Config._add_scenario") as set_global:
             tp.configure_scenario(a, b, c, d, property=e)
             set_global.assert_called_once_with(a, b, c, d, property=e)
 
     def test_configure_scenario_from_tasks(self):
         a, b, c, d, e, f = "foo", "bar", "baz", "qux", "quux", "grault"
-        with mock.patch("taipy.core.config.config.Config.add_scenario_from_tasks") as set_global:
+        with mock.patch("taipy.core.config.config.Config._add_scenario_from_tasks") as set_global:
             tp.configure_scenario_from_tasks(a, b, c, d, e, property=f)
             set_global.assert_called_once_with(a, b, c, d, e, property=f)
 
     def test_configure_default_scenario(self):
         a, b, c, d = "foo", "bar", Scope.PIPELINE, "qux"
-        with mock.patch("taipy.core.config.config.Config.add_default_scenario") as mck:
+        with mock.patch("taipy.core.config.config.Config._add_default_scenario") as mck:
             tp.configure_default_scenario(a, b, c, property=d)
             mck.assert_called_once_with(a, b, c, property=d)
 
     def test_check_configuration(self):
-        with mock.patch("taipy.core.config.config.Config.check") as mck:
+        with mock.patch("taipy.core.config.config.Config._check") as mck:
             tp.check_configuration()
             mck.assert_called_once_with()
 
@@ -396,13 +396,13 @@ class TestTaipy:
             mck.assert_called_once_with(pipeline_config)
 
     def test_clean_all_entities(self, cycle):
-        data_node_1_config = Config.add_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
-        data_node_2_config = Config.add_data_node(
+        data_node_1_config = Config._add_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+        data_node_2_config = Config._add_data_node(
             id="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
         )
-        task_config = Config.add_task("my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO)
-        pipeline_config = Config.add_pipeline("my_pipeline", task_config)
-        scenario_config = Config.add_scenario("my_scenario", pipeline_config)
+        task_config = Config._add_task("my_task", print, data_node_1_config, data_node_2_config, scope=Scope.SCENARIO)
+        pipeline_config = Config._add_pipeline("my_pipeline", task_config)
+        scenario_config = Config._add_scenario("my_scenario", pipeline_config)
         CycleManager._set(cycle)
 
         scenario = ScenarioManager.create(scenario_config)
@@ -420,7 +420,7 @@ class TestTaipy:
         assert len(JobManager._get_all()) == 1
 
         # Test with clean entities disabled
-        Config.set_global_config(clean_entities_enabled=False)
+        Config._set_global_config(clean_entities_enabled=False)
         success = tp.clean_all_entities()
         # Everything should be the same after clean_all_entities since clean_entities_enabled is False
         assert_file_exists(pickle_data_node.path)
@@ -433,7 +433,7 @@ class TestTaipy:
         assert not success
 
         # Test with clean entities enabled
-        Config.set_global_config(clean_entities_enabled=True)
+        Config._set_global_config(clean_entities_enabled=True)
         success = tp.clean_all_entities()
         # File should not exist after clean_all_entities since clean_entities_enabled is True
         assert_file_not_exists(pickle_data_node.path)
@@ -456,7 +456,7 @@ class TestTaipy:
         assert file_exists(user_pickle.path)
         assert_file_exists(generated_pickle.path)
 
-        Config.set_global_config(clean_entities_enabled=True)
+        Config._set_global_config(clean_entities_enabled=True)
         tp.clean_all_entities()
         assert len(DataManager._get_all()) == 0
         assert_file_exists(user_pickle.path)

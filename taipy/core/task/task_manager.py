@@ -76,7 +76,7 @@ class TaskManager(_Manager[Task]):
         """
         data_nodes = {
             dn_config: DataManager.get_or_create(dn_config, scenario_id, pipeline_id)
-            for dn_config in set(itertools.chain(task_config.input, task_config.output))
+            for dn_config in set(itertools.chain(task_config.input_configs, task_config.output_configs))
         }
         scope = min(dn.scope for dn in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
@@ -87,8 +87,8 @@ class TaskManager(_Manager[Task]):
         elif len(tasks_from_parent) > 1:
             raise MultipleTaskFromSameConfigWithSameParent
         else:
-            inputs = [data_nodes[input_config] for input_config in task_config.input]
-            outputs = [data_nodes[output_config] for output_config in task_config.output]
+            inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
+            outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
             task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
             cls._set(task)
             return task

@@ -1,14 +1,17 @@
+import pytest
+
 import taipy.core.taipy as tp
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.task.task import Task
 
 
 def test_create_scenario(cycle, current_datetime):
-    scenario_entity_1 = Scenario("fOo ", [], {"key": "value"}, is_master=True, cycle=cycle)
+    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_master=True, cycle=cycle)
     assert scenario_entity_1.id is not None
     assert scenario_entity_1.config_id == "foo"
     assert scenario_entity_1.pipelines == {}
@@ -19,9 +22,9 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_1.cycle == cycle
     assert scenario_entity_1.tags == set()
 
-    scenario_entity_2 = Scenario("   bar/ξéà   ", [], {}, ScenarioId("baz"), creation_date=current_datetime)
+    scenario_entity_2 = Scenario("bar", [], {}, ScenarioId("baz"), creation_date=current_datetime)
     assert scenario_entity_2.id == "baz"
-    assert scenario_entity_2.config_id == "bar-xea"
+    assert scenario_entity_2.config_id == "bar"
     assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
     assert scenario_entity_2.creation_date == current_datetime
@@ -38,14 +41,17 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_3.properties == {}
     assert scenario_entity_3.tags == set()
 
-    pipeline_entity_1 = Pipeline("abcξyₓéà", {}, [])
-    scenario_entity_4 = Scenario("abcx", [pipeline_entity_1], {})
+    pipeline_entity_1 = Pipeline("abcx", {}, [])
+    scenario_entity_4 = Scenario("abcxy", [pipeline_entity_1], {})
     assert scenario_entity_4.id is not None
-    assert scenario_entity_4.config_id == "abcx"
+    assert scenario_entity_4.config_id == "abcxy"
     assert len(scenario_entity_4.pipelines) == 1
-    assert scenario_entity_4.abcxyxea == pipeline_entity_1
+    assert scenario_entity_4.abcx == pipeline_entity_1
     assert scenario_entity_4.properties == {}
     assert scenario_entity_4.tags == set()
+
+    with pytest.raises(InvalidConfigurationId):
+        Scenario("foo bar", [], {})
 
 
 def test_add_property_to_scenario():

@@ -176,12 +176,12 @@ def delete_everything():
     TaskManager._delete_all()
     JobManager._delete_all()
     CycleManager._delete_all()
-    Config._python_config.global_config = GlobalAppConfig()
-    Config._python_config.job_config = JobConfig()
-    Config._python_config.data_nodes.clear()
-    Config._python_config.tasks.clear()
-    Config._python_config.pipelines.clear()
-    Config._python_config.scenarios.clear()
+    Config._python_config._global_config = GlobalAppConfig()
+    Config._python_config._job_config = JobConfig()
+    Config._python_config._data_nodes.clear()
+    Config._python_config._tasks.clear()
+    Config._python_config._pipelines.clear()
+    Config._python_config._scenarios.clear()
 
 
 @pytest.fixture(scope="function", autouse=True)

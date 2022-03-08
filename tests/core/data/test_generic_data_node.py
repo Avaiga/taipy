@@ -3,6 +3,7 @@ import pytest
 from taipy.core.common.alias import DataNodeId
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.exceptions.data_node import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
 
 
@@ -29,7 +30,7 @@ class TestGenericDataNode:
     def test_create(self):
 
         dn = GenericDataNode(
-            "fOo BAr", Scope.PIPELINE, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
+            "foo_bar", Scope.PIPELINE, name="super name", properties={"read_fct": read_fct, "write_fct": write_fct}
         )
         assert isinstance(dn, GenericDataNode)
         assert dn.storage_type() == "generic"
@@ -44,7 +45,7 @@ class TestGenericDataNode:
         assert dn.properties["read_fct"] == read_fct
         assert dn.properties["write_fct"] == write_fct
 
-        dn_1 = GenericDataNode("fOo", Scope.PIPELINE, name="foo", properties={"read_fct": read_fct, "write_fct": None})
+        dn_1 = GenericDataNode("foo", Scope.PIPELINE, name="foo", properties={"read_fct": read_fct, "write_fct": None})
         assert isinstance(dn, GenericDataNode)
         assert dn_1.storage_type() == "generic"
         assert dn_1.config_id == "foo"
@@ -71,6 +72,9 @@ class TestGenericDataNode:
         assert dn_2.is_ready_for_reading
         assert dn_2.properties["read_fct"] is None
         assert dn_2.properties["write_fct"] == write_fct
+
+        with pytest.raises(InvalidConfigurationId):
+            GenericDataNode("foo bar", Scope.PIPELINE, properties={"read_fct": read_fct, "write_fct": write_fct})
 
     def test_create_with_missing_parameters(self):
         with pytest.raises(MissingRequiredProperty):

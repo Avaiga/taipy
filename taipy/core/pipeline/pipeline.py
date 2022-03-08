@@ -5,8 +5,8 @@ import networkx as nx
 
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import reload, self_reload
-from taipy.core.common._unicode_to_python_variable_name import _protect_name
 from taipy.core.common._utils import _fcts_to_dict
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId
 from taipy.core.data.data_node import DataNode
 from taipy.core.pipeline.pipeline_model import PipelineModel
@@ -19,13 +19,7 @@ class Pipeline:
     connected in series.
 
     Attributes:
-        config_id (str): Identifier of the pipeline configuration.
-            We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
-            or underscore characters ('_').
-            Other characters are replaced according the following rules:
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        config_id (str): Identifier of the pipeline configuration. Must be a valid Python variable name.
         properties (dict):  List of additional arguments.
         tasks (List[Task]): List of tasks.
         pipeline_id (str): Unique identifier of this pipeline.
@@ -44,7 +38,7 @@ class Pipeline:
         parent_id: Optional[str] = None,
         subscribers: Set[Callable] = None,
     ):
-        self.config_id = _protect_name(config_id)
+        self.config_id = _validate_id(config_id)
         self.tasks = {task.config_id: task for task in tasks}
         self.id: PipelineId = pipeline_id or self.new_id(self.config_id)
         self.parent_id = parent_id
@@ -77,10 +71,10 @@ class Pipeline:
 
     @staticmethod
     def new_id(config_id: str) -> PipelineId:
-        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, _protect_name(config_id), str(uuid.uuid4())]))
+        return PipelineId(Pipeline.__SEPARATOR.join([Pipeline.ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = _protect_name(attribute_name)
+        protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.tasks:

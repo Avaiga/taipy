@@ -6,6 +6,7 @@ from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.task.task import Task
 
 
@@ -35,13 +36,12 @@ def test_create_task():
     assert f"TASK_{name}_" in task.id
     assert task.config_id == "name_1"
 
-    name_1 = "name_1//ξ"
-    task_1 = Task(name_1, print, [], [])
-    assert task_1.config_id == "name_1-x"
+    with pytest.raises(InvalidConfigurationId):
+        Task("foo bar", print, [], [])
 
     path = "my/csv/path"
     foo_dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "has_header": True})
-    task = Task("namE 1", print, [foo_dn], [])
+    task = Task("name_1", print, [foo_dn], [])
     assert task.config_id == "name_1"
     assert task.id is not None
     assert task.parent_id is None
@@ -51,13 +51,13 @@ def test_create_task():
         task.bar
 
     path = "my/csv/path"
-    abc_dn = InMemoryDataNode("abc_dsξyₓéà", Scope.SCENARIO, properties={"path": path})
-    task = Task("namE 1éà", print, [abc_dn], [], parent_id="parent_id")
+    abc_dn = InMemoryDataNode("name_1ea", Scope.SCENARIO, properties={"path": path})
+    task = Task("name_1ea", print, [abc_dn], [], parent_id="parent_id")
     assert task.config_id == "name_1ea"
     assert task.id is not None
     assert task.parent_id == "parent_id"
-    assert task.abc_dsxyxea == abc_dn
-    assert task.abc_dsxyxea.path == path
+    assert task.name_1ea == abc_dn
+    assert task.name_1ea.path == path
     with pytest.raises(AttributeError):
         task.bar
 
@@ -85,33 +85,33 @@ def test_can_not_change_task_input(input):
 
 
 def test_can_not_change_task_config_output(output_config):
-    task_config = Config.add_task("name_1", print, [], output=output_config)
+    task_config = Config._add_task("name_1", print, [], output=output_config)
 
-    assert task_config.output == output_config
+    assert task_config.output_configs == output_config
     with pytest.raises(Exception):
-        task_config.output = []
+        task_config.output_configs = []
 
     output_config.append(output_config[0])
-    assert task_config.output != output_config
+    assert task_config._output != output_config
 
 
 def test_can_not_update_task_output_values(output_config):
-    data_node = DataNode("data_node")
-    task_config = Config.add_task("name_1", print, [], output=output_config)
+    data_node_cfg = Config._add_data_node("data_node_cfg")
+    task_config = Config._add_task("name_1", print, [], output=output_config)
 
-    task_config.output.append(data_node)
-    assert task_config.output == output_config
+    task_config.output_configs.append(data_node_cfg)
+    assert task_config.output_configs == output_config
 
-    task_config.output[0] = data_node
-    assert task_config.output[0] != data_node
+    task_config.output_configs[0] = data_node_cfg
+    assert task_config.output_configs[0] != data_node_cfg
 
 
 def test_can_not_update_task_input_values(input_config):
     data_node_config = DataNodeConfig("data_node")
-    task_config = Config.add_task("name_1", print, input_config, [])
+    task_config = Config._add_task("name_1", print, input_config, [])
 
-    task_config.input.append(data_node_config)
-    assert task_config.input == input_config
+    task_config.input_configs.append(data_node_config)
+    assert task_config.input_configs == input_config
 
-    task_config.input[0] = data_node_config
-    assert task_config.input[0] != data_node_config
+    task_config.input_configs[0] = data_node_config
+    assert task_config.input_configs[0] != data_node_config

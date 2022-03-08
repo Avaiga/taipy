@@ -1,6 +1,8 @@
 import glob
 import multiprocessing
 import os
+import random
+import string
 import uuid
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
@@ -25,7 +27,7 @@ def reset_configuration_singleton():
     Config._python_config = _Config()
     Config._file_config = None
     Config._env_file_config = None
-    Config._applied_config = _Config.default_config()
+    Config._applied_config = _Config._default_config()
 
     for f in glob.glob("*.p"):
         print(f"deleting file {f}")
@@ -48,7 +50,7 @@ def test_submit_task():
     before_creation = datetime.now()
     sleep(0.1)
     task = _create_task(multiply)
-    output_dn_id = task.output[f"{task.config_id}-output0"].id
+    output_dn_id = task.output[f"{task.config_id}_output0"].id
 
     assert DataManager._get(output_dn_id).last_edition_date > before_creation
     assert DataManager._get(output_dn_id).job_ids == []
@@ -83,13 +85,13 @@ def test_submit_task_that_return_multiple_outputs():
     scheduler.submit_task(with_list)
 
     assert (
-        with_tuple.output[f"{with_tuple.config_id}-output0"].read()
-        == with_list.output[f"{with_list.config_id}-output0"].read()
+        with_tuple.output[f"{with_tuple.config_id}_output0"].read()
+        == with_list.output[f"{with_list.config_id}_output0"].read()
         == 42
     )
     assert (
-        with_tuple.output[f"{with_tuple.config_id}-output1"].read()
-        == with_list.output[f"{with_list.config_id}-output1"].read()
+        with_tuple.output[f"{with_tuple.config_id}_output1"].read()
+        == with_list.output[f"{with_list.config_id}_output1"].read()
         == 21
     )
 
@@ -106,9 +108,9 @@ def test_submit_task_returns_single_iterable_output():
     task_with_list = _create_task(return_list, 1)
 
     scheduler.submit_task(task_with_tuple)
-    assert task_with_tuple.output[f"{task_with_tuple.config_id}-output0"].read() == (42, 21)
+    assert task_with_tuple.output[f"{task_with_tuple.config_id}_output0"].read() == (42, 21)
     scheduler.submit_task(task_with_list)
-    assert task_with_list.output[f"{task_with_list.config_id}-output0"].read() == [42, 21]
+    assert task_with_list.output[f"{task_with_list.config_id}_output0"].read() == [42, 21]
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
@@ -119,7 +121,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
     task = _create_task(return_2tuple(), 3)
 
     job = scheduler.submit_task(task)
-    assert task.output[f"{task.config_id}-output0"].read() == 0
+    assert task.output[f"{task.config_id}_output0"].read() == 0
     assert job.is_failed()
 
 
@@ -127,19 +129,19 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    scheduler = Scheduler(Config.set_job_config(nb_of_workers=2))
+    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
         job = scheduler.submit_task(task)
-        assert task.output[f"{task.config_id}-output0"].read() == 0
+        assert task.output[f"{task.config_id}_output0"].read() == 0
         assert job.is_running()
 
     assert_true_after_20_second_max(job.is_completed)
 
 
 def test_submit_task_multithreading_multiple_task():
-    scheduler = Scheduler(Config.set_job_config(nb_of_workers=2))
+    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -153,25 +155,25 @@ def test_submit_task_multithreading_multiple_task():
             job_1 = scheduler.submit_task(task_1)
             job_2 = scheduler.submit_task(task_2)
 
-            assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
-            assert task_2.output[f"{task_2.config_id}-output0"].read() == 0
+            assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
+            assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert job_1.is_running()
             assert job_2.is_running()
 
-        assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_id}-output0"].read() == 42)
-        assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
+        assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
+        assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
         assert_true_after_20_second_max(job_2.is_completed)
         assert job_1.is_running()
         assert job_2.is_completed()
 
-    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_id}-output0"].read() == 42)
-    assert task_2.output[f"{task_2.config_id}-output0"].read() == 42
+    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
+    assert task_2.output[f"{task_2.config_id}_output0"].read() == 42
     assert_true_after_20_second_max(job_1.is_completed)
     assert job_2.is_completed()
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    scheduler = Scheduler(Config.set_job_config(nb_of_workers=2))
+    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_0 = m.Lock()
@@ -189,34 +191,34 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
                 job_1 = scheduler.submit_task(task_2)
                 job_2 = scheduler.submit_task(task_1)
 
-                assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
-                assert task_2.output[f"{task_2.config_id}-output0"].read() == 0
+                assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
+                assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
                 assert job_1.is_running()
                 assert job_2.is_pending()
 
-            assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_id}-output0"].read() == 42)
-            assert task_1.output[f"{task_1.config_id}-output0"].read() == 0
+            assert_true_after_20_second_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
+            assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert_true_after_20_second_max(job_1.is_completed)
             assert job_2.is_running()
 
-    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_id}-output0"].read() == 42)
-    assert task_2.output[f"{task_2.config_id}-output0"].read() == 42
+    assert_true_after_20_second_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
+    assert task_2.output[f"{task_2.config_id}_output0"].read() == 42
     assert job_1.is_completed()
     assert_true_after_20_second_max(job_2.is_completed)
 
 
 def test_blocked_task():
-    scheduler = Scheduler(Config.set_job_config(nb_of_workers=2))
+    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    foo_cfg = Config.add_data_node("foo", default_data=1)
+    foo_cfg = Config._add_data_node("foo", default_data=1)
     foo = DataManager.get_or_create(foo_cfg)
-    bar_cfg = Config.add_data_node("bar")
+    bar_cfg = Config._add_data_node("bar")
     bar = DataManager.get_or_create(bar_cfg)
-    baz_cfg = Config.add_data_node("baz")
+    baz_cfg = Config._add_data_node("baz")
     baz = DataManager.get_or_create(baz_cfg)
     task_1 = Task("by_2", partial(lock_multiply, lock_1, 2), [foo], [bar])
     task_2 = Task("by_3", partial(lock_multiply, lock_2, 3), [bar], [baz])
@@ -251,26 +253,26 @@ class MyScheduler(Scheduler):
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
-    scheduler = MyScheduler(Config.set_job_config())
+    scheduler = MyScheduler(Config._set_job_config())
     assert isinstance(scheduler.getJobDispatcher()._executor, Synchronous)
     assert scheduler.getJobDispatcher()._nb_worker_available == 1
 
 
 def test_task_scheduler_create_parallel_dispatcher():
-    scheduler = MyScheduler(Config.set_job_config(nb_of_workers=42))
+    scheduler = MyScheduler(Config._set_job_config(nb_of_workers=42))
     assert isinstance(scheduler.getJobDispatcher()._executor, ProcessPoolExecutor)
     assert scheduler.getJobDispatcher()._nb_worker_available == 42
 
 
 def _create_task(function, nb_outputs=1):
-    output_dn_config_id = str(uuid.uuid4())
+    output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     input_dn = [
-        DataManager.get_or_create(Config.add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
-        DataManager.get_or_create(Config.add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
+        DataManager.get_or_create(Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
+        DataManager.get_or_create(Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
     ]
     output_dn = [
         DataManager.get_or_create(
-            Config.add_data_node(f"{output_dn_config_id}-output{i}", "pickle", Scope.PIPELINE, default_data=0)
+            Config._add_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]
