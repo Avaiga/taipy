@@ -1,11 +1,12 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
-__version__ = "0.1"
+__version__ = "1.0.0.dev"
 
 setup(
     name="taipy_rest",
     version=__version__,
-    packages=find_packages(exclude=["tests"]),
+    packages=["taipy.rest"],
+    package_dir={'taipy': 'src/taipy'},
     install_requires=[
         "flask",
         "flask-sqlalchemy",
@@ -18,5 +19,6 @@ setup(
         "passlib",
         "apispec[yaml]",
         "apispec-webframeworks",
+        "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop"
     ],
 )

@@ -1,19 +1,18 @@
+import importlib
+import os
 import uuid
 from typing import Optional
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.common.alias import JobId
+from taipy.core.common.alias import JobId
+from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core import Job
+from taipy.core.job._job_manager import _JobManager as JobManager
+from taipy.core.task._task_manager import _TaskManager as TaskManager
 
-from taipy.job.job_manager import JobManager
-from taipy.task.manager import TaskManager
-from taipy.exceptions.job import NonExistingJob
-from taipy.exceptions.repository import ModelNotFound
-
-from taipy_rest.api.schemas import JobSchema, JobResponseSchema
-from taipy.job.job import Job
-from taipy_rest.config import TAIPY_SETUP_FILE
-import importlib
+from ...config import TAIPY_SETUP_FILE
+from ..schemas import JobResponseSchema, JobSchema
 
 
 class JobResource(Resource):
@@ -65,18 +64,17 @@ class JobResource(Resource):
     """
 
     def get(self, job_id):
-        try:
-            schema = JobResponseSchema()
-            manager = JobManager()
-            job = manager.get(job_id)
-            return {"job": schema.dump(manager.repository.to_model(job))}
-        except NonExistingJob:
+        schema = JobResponseSchema()
+        manager = JobManager()
+        job = manager._get(job_id)
+        if not job:
             return make_response(jsonify({"message": f"Job {job_id} not found"}), 404)
+        return {"job": schema.dump(job)}
 
     def delete(self, job_id):
         try:
             manager = JobManager()
-            manager.delete(job_id)
+            manager._delete(job_id)
         except ModelNotFound:
             return make_response(
                 jsonify({"message": f"DataNode {job_id} not found"}), 404
@@ -130,19 +128,21 @@ class JobList(Resource):
     """
 
     def __init__(self):
-        spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-        self.module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.module)
+        if os.path.exists(TAIPY_SETUP_FILE):
+            spec = importlib.util.spec_from_file_location(
+                "taipy_setup", TAIPY_SETUP_FILE
+            )
+            self.module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(self.module)
 
-    def fetch_config(self, config_name):
-        return getattr(self.module, config_name)
+    def fetch_config(self, config_id):
+        return getattr(self.module, config_id)
 
     def get(self):
         schema = JobResponseSchema(many=True)
         manager = JobManager()
-        jobs = manager.get_all()
-        jobs_model = [manager.repository.to_model(t) for t in jobs]
-        return schema.dump(jobs_model)
+        jobs = manager._get_all()
+        return schema.dump(jobs)
 
     def post(self):
         schema = JobSchema()
@@ -155,17 +155,17 @@ class JobList(Resource):
         if not job:
             return {"msg": f"Task with name {job_data.get('task_name')} not found"}, 404
 
-        manager.set(job)
+        manager._set(job)
 
         return {
             "msg": "job created",
-            "job": response_schema.dump(manager.repository.to_model(job)),
+            "job": response_schema.dump(job),
         }, 201
 
     def __create_job_from_schema(self, job_schema: JobSchema) -> Optional[Job]:
         task_manager = TaskManager()
         try:
-            task = task_manager.get_or_create(
+            task = task_manager._get_or_create(
                 self.fetch_config(job_schema.get("task_name"))
             )
         except AttributeError:

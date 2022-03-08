@@ -3,7 +3,7 @@ from marshmallow import Schema, fields
 
 class TaskSchema(Schema):
 
-    config_name = fields.String()
+    config_id = fields.String()
     id = fields.String()
     parent_id = fields.String()
     input_ids = fields.List(fields.String)

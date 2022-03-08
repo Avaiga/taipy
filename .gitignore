@@ -138,6 +138,6 @@ Dockerfile.dev
 .databkp/
 
 *.db
-taipy_rest/setup/*
+src/taipy/rest/setup/*
 
 setup/

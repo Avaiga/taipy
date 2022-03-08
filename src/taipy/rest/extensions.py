@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from passlib.context import CryptContext
 
-from taipy_rest.commons.apispec import APISpecExt
+from .commons.apispec import APISpecExt
 
 db = SQLAlchemy()
 ma = Marshmallow()

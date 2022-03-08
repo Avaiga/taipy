@@ -21,3 +21,4 @@ exclude =
     .vscode,
     .github,
     tests
+    taipy_rest/setup

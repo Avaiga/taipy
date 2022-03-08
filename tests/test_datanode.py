@@ -9,7 +9,7 @@ def test_get_datanode(client, default_datanode):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.data.manager.data_manager.DataManager.get") as manager_mock:
+    with mock.patch("taipy.core.data._data_manager._DataManager._get") as manager_mock:
         manager_mock.return_value = default_datanode
         # test get_datanode
         rep = client.get(url_for("api.datanode_by_id", datanode_id="foo"))
@@ -22,7 +22,7 @@ def test_delete_datanode(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.data.manager.data_manager.DataManager.delete"):
+    with mock.patch("taipy.core.data._data_manager._DataManager._delete"):
         # test get_datanode
         rep = client.delete(url_for("api.datanode_by_id", datanode_id="foo"))
         assert rep.status_code == 200
@@ -35,15 +35,15 @@ def test_create_datanode(client, default_datanode_config):
     assert rep.status_code == 400
 
     # config does not exist
-    datanodes_url = url_for("api.datanodes", config_name="foo")
+    datanodes_url = url_for("api.datanodes", config_id="foo")
     rep = client.post(datanodes_url)
     assert rep.status_code == 404
 
     with mock.patch(
-        "taipy_rest.api.resources.datanode.DataNodeList.fetch_config"
+        "src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config"
     ) as config_mock:
         config_mock.return_value = default_datanode_config
-        datanodes_url = url_for("api.datanodes", config_name="bar")
+        datanodes_url = url_for("api.datanodes", config_id="bar")
         rep = client.post(datanodes_url)
         assert rep.status_code == 201
 
@@ -51,10 +51,10 @@ def test_create_datanode(client, default_datanode_config):
 def test_get_all_datanodes(client, default_datanode_config_list):
     for ds in range(10):
         with mock.patch(
-            "taipy_rest.api.resources.datanode.DataNodeList.fetch_config"
+            "src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config"
         ) as config_mock:
             config_mock.return_value = default_datanode_config_list[ds]
-            datanodes_url = url_for("api.datanodes", config_name=config_mock.name)
+            datanodes_url = url_for("api.datanodes", config_id=config_mock.name)
             client.post(datanodes_url)
 
     rep = client.get(datanodes_url)
@@ -65,7 +65,7 @@ def test_get_all_datanodes(client, default_datanode_config_list):
 
 
 def test_read_datanode(client, default_df_datanode):
-    with mock.patch("taipy.data.manager.data_manager.DataManager.get") as config_mock:
+    with mock.patch("taipy.core.data._data_manager._DataManager._get") as config_mock:
         config_mock.side_effect = [default_df_datanode]
         # without operators
         datanodes_url = url_for("api.datanode_reader", datanode_id="foo")
@@ -79,7 +79,7 @@ def test_read_datanode(client, default_df_datanode):
 
 
 def test_write_datanode(client, default_datanode):
-    with mock.patch("taipy.data.manager.data_manager.DataManager.get") as config_mock:
+    with mock.patch("taipy.core.data._data_manager._DataManager._get") as config_mock:
         config_mock.return_value = default_datanode
         # Get DataNode
         datanodes_read_url = url_for(

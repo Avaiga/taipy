@@ -9,9 +9,7 @@ def test_get_cycle(client, default_cycle):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch(
-        "taipy.cycle.manager.cycle_manager.CycleManager.get"
-    ) as manager_mock:
+    with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._get") as manager_mock:
         manager_mock.return_value = default_cycle
 
         # test get_cycle
@@ -25,7 +23,7 @@ def test_delete_cycle(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.cycle.manager.cycle_manager.CycleManager.delete"):
+    with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._delete"):
         # test get_cycle
         rep = client.delete(url_for("api.cycle_by_id", cycle_id="foo"))
         assert rep.status_code == 200

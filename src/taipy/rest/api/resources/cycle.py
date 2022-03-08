@@ -1,18 +1,16 @@
 import importlib
+import os.path
 from datetime import datetime
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.common.frequency import Frequency
+from taipy.core import Frequency
+from taipy.core import Cycle
+from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
+from taipy.core.exceptions.repository import ModelNotFound
 
-from taipy.cycle.manager import CycleManager
-from taipy.exceptions.cycle import NonExistingCycle
-from taipy.exceptions.repository import ModelNotFound
-
-from taipy_rest.api.schemas import CycleSchema, CycleResponseSchema
-from taipy.cycle.cycle import Cycle
-
-from taipy_rest.config import TAIPY_SETUP_FILE
+from ...config import TAIPY_SETUP_FILE
+from ..schemas import CycleResponseSchema, CycleSchema
 
 
 class CycleResource(Resource):
@@ -64,20 +62,19 @@ class CycleResource(Resource):
     """
 
     def get(self, cycle_id):
-        try:
-            schema = CycleResponseSchema()
-            manager = CycleManager()
-            cycle = manager.get(cycle_id)
-            return {"cycle": schema.dump(manager.repository.to_model(cycle))}
-        except NonExistingCycle:
+        schema = CycleResponseSchema()
+        manager = CycleManager()
+        cycle = manager._get(cycle_id)
+        if not cycle:
             return make_response(
                 jsonify({"message": f"Cycle {cycle_id} not found"}), 404
             )
+        return {"cycle": schema.dump(cycle)}
 
     def delete(self, cycle_id):
         try:
             manager = CycleManager()
-            manager.delete(cycle_id)
+            manager._delete(cycle_id)
         except ModelNotFound:
             return make_response(
                 jsonify({"message": f"DataNode {cycle_id} not found"}), 404
@@ -131,30 +128,32 @@ class CycleList(Resource):
     """
 
     def __init__(self):
-        spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-        self.module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(self.module)
+        if os.path.exists(TAIPY_SETUP_FILE):
+            spec = importlib.util.spec_from_file_location(
+                "taipy_setup", TAIPY_SETUP_FILE
+            )
+            self.module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(self.module)
 
-    def fetch_config(self, config_name):
-        return getattr(self.module, config_name)
+    def fetch_config(self, config_id):
+        return getattr(self.module, config_id)
 
     def get(self):
         schema = CycleSchema(many=True)
         manager = CycleManager()
-        cycles = manager.get_all()
-        cycles_model = [manager.repository.to_model(t) for t in cycles]
-        return schema.dump(cycles_model)
+        cycles = manager._get_all()
+        return schema.dump(cycles)
 
     def post(self):
         schema = CycleSchema()
         manager = CycleManager()
 
         cycle = self.__create_cycle_from_schema(schema.load(request.json))
-        manager.set(cycle)
+        manager._set(cycle)
 
         return {
             "msg": "cycle created",
-            "cycle": schema.dump(manager.repository.to_model(cycle)),
+            "cycle": schema.dump(cycle),
         }, 201
 
     def __create_cycle_from_schema(self, cycle_schema: CycleSchema):

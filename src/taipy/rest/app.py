@@ -1,25 +1,17 @@
-import importlib
-
-from flask import Flask
-
-from taipy_rest import api
-from taipy_rest.extensions import apispec, db, migrate
-from taipy.gui import Gui, Markdown
-from taipy_rest.config import TAIPY_SETUP_FILE
 import os
 
+from flask import Flask
+from taipy.gui import Gui, Markdown
 
-# def _routes(app):
-#     routes = []
-#     for route in app.url_map.iter_rules():
-#         routes.append('%s' % route)
-#     return routes
+from . import api
+from .config import TAIPY_SETUP_FILE
+from .extensions import apispec, db, migrate
 
 
 def create_app(testing=False):
     """Application factory, used to create application"""
-    app = Flask("taipy_rest")
-    app.config.from_object("taipy_rest.config")
+    app = Flask("src.taipy.rest")
+    app.config.from_object("src.taipy.rest.config")
 
     if testing is True:
         app.config["TESTING"] = True
@@ -27,9 +19,6 @@ def create_app(testing=False):
     configure_extensions(app)
     configure_apispec(app)
     register_blueprints(app)
-    # spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-    # module = importlib.util.module_from_spec(spec)
-    # spec.loader.exec_module(module)
 
     abs_folder, _ = TAIPY_SETUP_FILE.rsplit("/", 1)
     gui = Gui(flask=app, pages={"demo": Markdown(os.path.join(abs_folder, "demo.md"))})
