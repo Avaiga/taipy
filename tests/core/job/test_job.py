@@ -117,7 +117,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 
     _dispatch(task, job)
 
-    job = JobManager.get(job_id)
+    job = JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(RuntimeError):
         raise job.exceptions[0]
@@ -131,7 +131,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 
     _dispatch(task, job)
 
-    job = JobManager.get(job_id)
+    job = JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(NoData):
         raise job.exceptions[0]
@@ -144,7 +144,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
 
     _dispatch(task, job)
 
-    job = JobManager.get(job_id)
+    job = JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(DataNodeWritingError):
         raise job.exceptions[0]
@@ -156,11 +156,11 @@ def test_auto_set_and_reload(current_datetime, job_id):
     task_2 = Task(config_id="name_2", function=_foo, id=TaskId("task_2"))
     job_1 = Job(job_id, task_1)
 
-    TaskManager.set(task_1)
-    TaskManager.set(task_2)
-    JobManager.set(job_1)
+    TaskManager._set(task_1)
+    TaskManager._set(task_2)
+    JobManager._set(job_1)
 
-    job_2 = JobManager.get(job_1)
+    job_2 = JobManager._get(job_1)
 
     assert job_1.task.id == task_1.id
     job_1._task = task_2
@@ -228,8 +228,8 @@ def _error():
 
 
 def _dispatch(task: Task, job: Job):
-    TaskManager.set(task)
-    JobManager.set(job)
+    TaskManager._set(task)
+    JobManager._set(job)
     executor = JobDispatcher(None)
     executor.dispatch(job)
 

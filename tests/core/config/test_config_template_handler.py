@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from taipy.core.config.config_template_handler import ConfigTemplateHandler
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.configuration import InconsistentEnvVariableError
 
@@ -33,57 +33,57 @@ def test_replace_if_template():
 
 def assert_does_replace(template, env_variable_name):
     with mock.patch.dict(os.environ, {env_variable_name: "VALUE"}):
-        fact = ConfigTemplateHandler()
-        assert fact.replace_templates(template) == "VALUE"
+        fact = _ConfigTemplateHandler()
+        assert fact._replace_templates(template) == "VALUE"
 
 
 def assert_does_not_change(template):
-    fact = ConfigTemplateHandler()
-    assert fact.replace_templates(template) == template
+    fact = _ConfigTemplateHandler()
+    assert fact._replace_templates(template) == template
 
 
 def test_to_bool():
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_bool("okhds")
+        _ConfigTemplateHandler._to_bool("okhds")
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_bool("no")
+        _ConfigTemplateHandler._to_bool("no")
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_bool("tru")
+        _ConfigTemplateHandler._to_bool("tru")
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_bool("tru_e")
+        _ConfigTemplateHandler._to_bool("tru_e")
 
-    assert ConfigTemplateHandler.to_bool("true")
-    assert ConfigTemplateHandler.to_bool("True")
-    assert ConfigTemplateHandler.to_bool("TRUE")
-    assert ConfigTemplateHandler.to_bool("TruE")
-    assert ConfigTemplateHandler.to_bool("TrUE")
+    assert _ConfigTemplateHandler._to_bool("true")
+    assert _ConfigTemplateHandler._to_bool("True")
+    assert _ConfigTemplateHandler._to_bool("TRUE")
+    assert _ConfigTemplateHandler._to_bool("TruE")
+    assert _ConfigTemplateHandler._to_bool("TrUE")
 
-    assert not ConfigTemplateHandler.to_bool("false")
-    assert not ConfigTemplateHandler.to_bool("False")
-    assert not ConfigTemplateHandler.to_bool("FALSE")
-    assert not ConfigTemplateHandler.to_bool("FalSE")
-    assert not ConfigTemplateHandler.to_bool("FalSe")
+    assert not _ConfigTemplateHandler._to_bool("false")
+    assert not _ConfigTemplateHandler._to_bool("False")
+    assert not _ConfigTemplateHandler._to_bool("FALSE")
+    assert not _ConfigTemplateHandler._to_bool("FalSE")
+    assert not _ConfigTemplateHandler._to_bool("FalSe")
 
 
 def test_to_int():
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_int("okhds")
+        _ConfigTemplateHandler._to_int("okhds")
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_int("_45")
+        _ConfigTemplateHandler._to_int("_45")
 
-    assert 12 == ConfigTemplateHandler.to_int("12")
-    assert 0 == ConfigTemplateHandler.to_int("0")
-    assert -2 == ConfigTemplateHandler.to_int("-2")
-    assert 156165 == ConfigTemplateHandler.to_int("156165")
+    assert 12 == _ConfigTemplateHandler._to_int("12")
+    assert 0 == _ConfigTemplateHandler._to_int("0")
+    assert -2 == _ConfigTemplateHandler._to_int("-2")
+    assert 156165 == _ConfigTemplateHandler._to_int("156165")
 
 
 def test_to_scope():
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_scope("okhds")
+        _ConfigTemplateHandler._to_scope("okhds")
     with pytest.raises(InconsistentEnvVariableError):
-        ConfigTemplateHandler.to_scope("plop")
+        _ConfigTemplateHandler._to_scope("plop")
 
-    assert Scope.PIPELINE == ConfigTemplateHandler.to_scope("pipeline")
-    assert Scope.PIPELINE == ConfigTemplateHandler.to_scope("PIPELINE")
-    assert Scope.SCENARIO == ConfigTemplateHandler.to_scope("SCENARIO")
-    assert Scope.CYCLE == ConfigTemplateHandler.to_scope("cycle")
+    assert Scope.PIPELINE == _ConfigTemplateHandler._to_scope("pipeline")
+    assert Scope.PIPELINE == _ConfigTemplateHandler._to_scope("PIPELINE")
+    assert Scope.SCENARIO == _ConfigTemplateHandler._to_scope("SCENARIO")
+    assert Scope.CYCLE == _ConfigTemplateHandler._to_scope("cycle")

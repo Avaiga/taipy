@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Set
 
+from taipy.core.common._properties import _Properties
+from taipy.core.common._reload import reload, self_reload, self_setter
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import ScenarioId
 from taipy.core.common.entity import Entity
-from taipy.core.common.reload import reload, self_reload, self_setter
-from taipy.core.common.unicode_to_python_variable_name import protect_name
-from taipy.core.common.wrapper import Properties
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.pipeline.pipeline import Pipeline
 
@@ -18,13 +18,7 @@ class Scenario(Entity):
     It holds a set of pipelines to submit for execution in order to solve the business case.
 
     Attributes:
-        config_id (str): Identifier of the scenario configuration.
-            We strongly recommend to use lowercase alphanumeric characters, dash characters ('-'),
-            or underscore characters ('_').
-            Other characters are replaced according the following rules:
-            - Space characters are replaced by underscore characters ('_').
-            - Unicode characters are replaced by a corresponding alphanumeric character using the Unicode library.
-            - Other characters are replaced by dash characters ('-').
+        config_id (str): Identifier of the scenario configuration. Must be a valid Python variable name.
         pipelines (List[Pipeline]): List of pipelines.
         properties (dict): Dictionary of additional properties of the scenario.
         scenario_id (str): Unique identifier of this scenario. Will be generated if None value provided.
@@ -49,17 +43,16 @@ class Scenario(Entity):
         subscribers: Set[Callable] = None,
         tags: Set[str] = None,
     ):
-        self._config_id = protect_name(config_id)
+        self._config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self.new_id(self._config_id)
         self._pipelines = {p.config_id: p for p in pipelines}
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
-
         self._subscribers = subscribers or set()
         self._master_scenario = is_master
         self._tags = tags or set()
 
-        self._properties = Properties(self, **properties)
+        self._properties = _Properties(self, **properties)
 
     def __getstate__(self):
         return self.id
@@ -67,7 +60,7 @@ class Scenario(Entity):
     def __setstate__(self, id):
         from taipy.core.scenario.scenario_manager import ScenarioManager
 
-        sc = ScenarioManager.get(id)
+        sc = ScenarioManager._get(id)
         self.__dict__ = sc.__dict__
 
     @property  # type: ignore
@@ -151,10 +144,10 @@ class Scenario(Entity):
     @staticmethod
     def new_id(config_id: str) -> ScenarioId:
         """Generates a unique scenario identifier."""
-        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, protect_name(config_id), str(uuid.uuid4())]))
+        return ScenarioId(Scenario.__SEPARATOR.join([Scenario.ID_PREFIX, _validate_id(config_id), str(uuid.uuid4())]))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
+        protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
         if protected_attribute_name in self.pipelines:

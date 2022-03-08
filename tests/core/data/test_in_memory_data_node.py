@@ -3,13 +3,14 @@ import pytest
 from taipy.core.common.alias import DataNodeId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.exceptions.data_node import NoData
 
 
 class TestInMemoryDataNodeEntity:
     def test_create(self):
         dn = InMemoryDataNode(
-            "foobar BaZy",
+            "foobar_bazy",
             Scope.SCENARIO,
             DataNodeId("id_uio"),
             "my name",
@@ -31,6 +32,9 @@ class TestInMemoryDataNodeEntity:
         dn_2 = InMemoryDataNode("foo", Scope.PIPELINE)
         assert dn_2.last_edition_date is None
         assert not dn_2.is_ready_for_reading
+
+        with pytest.raises(InvalidConfigurationId):
+            InMemoryDataNode("foo bar", Scope.PIPELINE, DataNodeId("dn_id"))
 
     def test_read_and_write(self):
         no_data_dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"))

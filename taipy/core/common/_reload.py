@@ -20,12 +20,12 @@ def get_manager(manager: str):
 
 
 def reload(manager: str, obj):
-    return get_manager(manager).get(obj, obj)
+    return get_manager(manager)._get(obj, obj)
 
 
 def set_entity(manager: str, obj):
     # TODO: tp.set(obj)
-    get_manager(manager).set(obj)
+    get_manager(manager)._set(obj)
 
 
 def self_setter(manager):

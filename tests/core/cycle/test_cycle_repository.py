@@ -32,7 +32,7 @@ def test_get_masters(tmpdir, cycle, current_datetime):
 
     cycle_repository.save(cycle)
     cycle_1 = cycle_repository.load(cycle.id)
-    cycle_2 = Cycle(Frequency.MONTHLY, {}, current_datetime, current_datetime, current_datetime)
+    cycle_2 = Cycle(Frequency.MONTHLY, {}, current_datetime, current_datetime, current_datetime, name="foo")
     cycle_repository.save(cycle_2)
     cycle_2 = cycle_repository.load(cycle_2.id)
 

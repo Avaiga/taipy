@@ -1,8 +1,8 @@
 from typing import List, Optional, Union
 
+from taipy.core.common._manager import _Manager
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
-from taipy.core.common.logger import TaipyLogger
-from taipy.core.common.manager import Manager
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
@@ -17,7 +17,7 @@ from taipy.core.exceptions.data_node import InvalidDataNodeType, MultipleDataNod
 from taipy.core.exceptions.repository import ModelNotFound
 
 
-class DataManager(Manager[DataNode]):
+class DataManager(_Manager[DataNode]):
     """
     A Data Manager is responsible for all managing data node related capabilities.
 
@@ -64,7 +64,7 @@ class DataManager(Manager[DataNode]):
     @classmethod
     def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
         data_node = cls.__create(data_node_config, parent_id)
-        cls.set(data_node)
+        cls._set(data_node)
         return data_node
 
     @classmethod
@@ -74,7 +74,7 @@ class DataManager(Manager[DataNode]):
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
                 config_id=data_node_config.id,
-                scope=data_node_config.scope or DataNodeConfig.DEFAULT_SCOPE,
+                scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 parent_id=parent_id,
                 validity_period=validity_period,
                 properties=props,

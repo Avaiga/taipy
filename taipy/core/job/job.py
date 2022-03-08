@@ -5,10 +5,10 @@ from concurrent.futures import Future
 from datetime import datetime
 from typing import Callable, List
 
+from taipy.core.common._reload import self_reload, self_setter
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.common.entity import Entity
-from taipy.core.common.logger import TaipyLogger
-from taipy.core.common.reload import self_reload, self_setter
 from taipy.core.job.status import Status
 from taipy.core.task.task import Task
 
@@ -47,7 +47,7 @@ class Job(Entity):
         self._creation_date = datetime.now()
         self._subscribers: List[Callable] = []
         self._exceptions: List[Exception] = []
-        self.__logger = TaipyLogger.get_logger()
+        self.__logger = _TaipyLogger._get_logger()
 
     @property  # type: ignore
     @self_reload(MANAGER_NAME)

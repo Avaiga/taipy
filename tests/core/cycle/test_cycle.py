@@ -1,23 +1,21 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 
-import taipy.core.taipy as tp
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_manager import CycleManager
 
 
 def test_create_cycle_entity(current_datetime):
-
     cycle_1 = Cycle(
         Frequency.DAILY,
         {"key": "value"},
         creation_date=current_datetime,
         start_date=current_datetime,
         end_date=current_datetime,
-        name="   bAr/ξéà    ",
+        name="foo",
     )
     assert cycle_1.id is not None
-    assert cycle_1.name == "bar-xea"
+    assert cycle_1.name == "foo"
     assert cycle_1.properties == {"key": "value"}
     assert cycle_1.creation_date == current_datetime
     assert cycle_1.start_date == current_datetime
@@ -71,8 +69,8 @@ def test_auto_set_and_reload(current_datetime):
         name="foo",
     )
 
-    CycleManager.set(cycle_1)
-    cycle_2 = CycleManager.get(cycle_1)
+    CycleManager._set(cycle_1)
+    cycle_2 = CycleManager._get(cycle_1)
 
     assert cycle_1.frequency == Frequency.WEEKLY
     cycle_1._frequency = Frequency.MONTHLY

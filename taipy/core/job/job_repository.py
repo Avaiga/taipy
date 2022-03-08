@@ -1,7 +1,7 @@
 import pathlib
 from datetime import datetime
 
-from taipy.core.common.utils import fct_to_dict, load_fct
+from taipy.core.common._utils import _fct_to_dict, _load_fct
 from taipy.core.config.config import Config
 from taipy.core.job.job import Job
 from taipy.core.job.job_model import JobModel
@@ -35,7 +35,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
         #         job._subscribers.append(load_fct(it.get("fct_module"), it.get("fct_name")))
         #     except AttributeError:
         #         raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be load.")
-        job._exceptions = [load_fct(e["fct_module"], e["fct_name"])(*e["args"]) for e in model.exceptions]
+        job._exceptions = [_load_fct(e["fct_module"], e["fct_name"])(*e["args"]) for e in model.exceptions]
 
         return job
 
@@ -45,4 +45,4 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
 
     @staticmethod
     def __serialize_exceptions(exceptions):
-        return [{**fct_to_dict(type(e)), "args": e.args} for e in exceptions]
+        return [{**_fct_to_dict(type(e)), "args": e.args} for e in exceptions]

@@ -2,14 +2,13 @@ import datetime
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core.common._manager import _Manager
+from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import ScenarioId
-from taipy.core.common.logger import TaipyLogger
-from taipy.core.common.manager import Manager
 from taipy.core.config.config import Config
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.cycle.cycle_manager import CycleManager
-from taipy.core.exceptions.repository import ModelNotFound
 from taipy.core.exceptions.scenario import (
     DeletingMasterScenario,
     DifferentScenarioConfigs,
@@ -26,7 +25,7 @@ from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario.scenario_repository import ScenarioRepository
 
 
-class ScenarioManager(Manager[Scenario]):
+class ScenarioManager(_Manager[Scenario]):
     """
     Scenario Manager is responsible for all managing scenario related capabilities. In particular, it is exposing
     methods for creating, storing, updating, retrieving, deleting, submitting scenarios.
@@ -46,7 +45,7 @@ class ScenarioManager(Manager[Scenario]):
             Notification will be available only for jobs created after this subscription.
         """
         if scenario is None:
-            scenarios = cls.get_all()
+            scenarios = cls._get_all()
             for scn in scenarios:
                 cls.__add_subscriber(callback, scn)
             return
@@ -63,7 +62,7 @@ class ScenarioManager(Manager[Scenario]):
             The function will continue to be called for ongoing jobs.
         """
         if scenario is None:
-            scenarios = cls.get_all()
+            scenarios = cls._get_all()
             for scn in scenarios:
                 cls.__remove_subscriber(callback, scn)
             return
@@ -73,12 +72,12 @@ class ScenarioManager(Manager[Scenario]):
     @classmethod
     def __add_subscriber(cls, callback, scenario):
         scenario.add_subscriber(callback)
-        cls.set(scenario)
+        cls._set(scenario)
 
     @classmethod
     def __remove_subscriber(cls, callback, scenario):
         scenario.remove_subscriber(callback)
-        cls.set(scenario)
+        cls._set(scenario)
 
     @classmethod
     def create(
@@ -100,7 +99,7 @@ class ScenarioManager(Manager[Scenario]):
             display_name (Optional[str]) : Display name of the scenario.
         """
         scenario_id = Scenario.new_id(config.id)
-        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipelines_configs]
+        pipelines = [PipelineManager.get_or_create(p_config, scenario_id) for p_config in config.pipeline_configs]
         cycle = CycleManager.get_or_create(config.frequency, creation_date) if config.frequency else None
         is_master_scenario = len(cls.get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config.properties.copy()
@@ -115,7 +114,7 @@ class ScenarioManager(Manager[Scenario]):
             is_master=is_master_scenario,
             cycle=cycle,
         )
-        cls.set(scenario)
+        cls._set(scenario)
         return scenario
 
     @classmethod
@@ -133,7 +132,7 @@ class ScenarioManager(Manager[Scenario]):
             NonExistingScenario : No scenario is found with the given identifier.
         """
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
-        scenario = cls.get(scenario_id)
+        scenario = cls._get(scenario_id)
         if scenario is None:
             raise NonExistingScenario(scenario_id)
         callbacks = cls.__get_status_notifier_callbacks(scenario)
@@ -183,7 +182,7 @@ class ScenarioManager(Manager[Scenario]):
              tag (str) : Tag of the scenarios to return.
         """
         scenarios = []
-        for scenario in cls.get_all():
+        for scenario in cls._get_all():
             if scenario.has_tag(tag):
                 scenarios.append(scenario)
         return scenarios
@@ -197,7 +196,7 @@ class ScenarioManager(Manager[Scenario]):
              cycle (Cycle) : Cycle of the scenarios to return.
         """
         scenarios = []
-        for scenario in cls.get_all():
+        for scenario in cls._get_all():
             if scenario.cycle and scenario.cycle == cycle:
                 scenarios.append(scenario)
         return scenarios
@@ -206,7 +205,7 @@ class ScenarioManager(Manager[Scenario]):
     def get_all_masters(cls) -> List[Scenario]:
         """Returns the list of all master scenarios."""
         master_scenarios = []
-        for scenario in cls.get_all():
+        for scenario in cls._get_all():
             if scenario.is_master:
                 master_scenarios.append(scenario)
         return master_scenarios
@@ -224,9 +223,9 @@ class ScenarioManager(Manager[Scenario]):
             master_scenario = cls.get_master(scenario.cycle)
             if master_scenario:
                 master_scenario._master_scenario = False
-                cls.set(master_scenario)
+                cls._set(master_scenario)
             scenario._master_scenario = True
-            cls.set(scenario)
+            cls._set(scenario)
         else:
             raise DoesNotBelongToACycle
 
@@ -247,9 +246,9 @@ class ScenarioManager(Manager[Scenario]):
             old_tagged_scenario = cls.get_by_tag(scenario.cycle, tag)
             if old_tagged_scenario:
                 old_tagged_scenario.remove_tag(tag)
-                cls.set(old_tagged_scenario)
+                cls._set(old_tagged_scenario)
         scenario.add_tag(tag)
-        cls.set(scenario)
+        cls._set(scenario)
 
     @classmethod
     def untag(cls, scenario: Scenario, tag: str):
@@ -261,10 +260,10 @@ class ScenarioManager(Manager[Scenario]):
             tag (str) : Tag to remove from scenario.
         """
         scenario.remove_tag(tag)
-        cls.set(scenario)
+        cls._set(scenario)
 
     @classmethod
-    def delete(cls, scenario_id: ScenarioId):  # type: ignore
+    def _delete(cls, scenario_id: ScenarioId):  # type: ignore
         """
         Deletes the scenario given as parameter.
 
@@ -274,9 +273,9 @@ class ScenarioManager(Manager[Scenario]):
             DeletingMasterScenario : scenario_id corresponds to a master Scenario. It cannot be deleted.
             ModelNotFound : No scenario corresponds to scenario_id.
         """
-        if cls.get(scenario_id).is_master:
+        if cls._get(scenario_id).is_master:
             raise DeletingMasterScenario
-        super().delete(scenario_id)
+        super()._delete(scenario_id)
 
     @classmethod
     def compare(cls, *scenarios: Scenario, data_node_config_id: str = None):
@@ -339,7 +338,7 @@ class ScenarioManager(Manager[Scenario]):
         Raises:
             ModelNotFound: scenario_id does not correspond to any scenario
         """
-        scenario = cls.get(scenario_id)
+        scenario = cls._get(scenario_id)
         if scenario.is_master:
             raise DeletingMasterScenario
         else:

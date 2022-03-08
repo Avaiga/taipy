@@ -2,29 +2,29 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict
 
+from taipy.core.common._get_valid_filename import _get_valid_filename
+from taipy.core.common._properties import _Properties
+from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common.alias import CycleId
 from taipy.core.common.entity import Entity
 from taipy.core.common.frequency import Frequency
-from taipy.core.common.reload import reload, self_reload, self_setter
-from taipy.core.common.unicode_to_python_variable_name import protect_name
-from taipy.core.common.wrapper import Properties
 
 
 class Cycle(Entity):
     """
-    A Cycle object holds the frequency representing a work cycle.
+    Represents an iteration of a recurrent work pattern.
 
     Attributes:
-        frequency (Frequency): The frequency of the cycle
-        properties (dict[str, str]): List of additional arguments.
-        name (str): Name that identifies the cycle.
-        creation_date (datetime): Date and time of the creation of the cycle
-        start_date (datetime): Date and time of the start of the cycle
-        end_date (datetime): Date and time of the end of the cycle
-        id (str): Unique identifier of the cycle
+        id (str): The Unique identifier of the cycle.
+        frequency (Frequency): The `Frequency^` of the cycle.
+        creation_date (datetime): The date and time of the creation of the cycle.
+        start_date (datetime): The date and time of the start of the cycle.
+        end_date (datetime): The date and time of the end of the cycle.
+        name (str): The name of the cycle.
+        properties (dict[str, str]): The list of additional arguments.
     """
 
-    ID_PREFIX = "CYCLE"
+    _ID_PREFIX = "CYCLE"
     __SEPARATOR = "_"
     MANAGER_NAME = "cycle"
 
@@ -42,16 +42,12 @@ class Cycle(Entity):
         self._creation_date = creation_date
         self._start_date = start_date
         self._end_date = end_date
-        self._name = self.__new_name(name)
-        self.id = id or self.new_id(self._name)
-        self._properties = Properties(self, **properties)
+        self._name = self._new_name(name)
+        self.id = id or self._new_id(self._name)
+        self._properties = _Properties(self, **properties)
 
-    def __new_name(self, name: str = None) -> str:
-        return (
-            protect_name(name)
-            if name
-            else Cycle.__SEPARATOR.join([str(self._frequency), self._creation_date.isoformat()])
-        )
+    def _new_name(self, name: str = None) -> str:
+        return name if name else Cycle.__SEPARATOR.join([str(self._frequency), self._creation_date.isoformat()])
 
     @property  # type: ignore
     @self_reload(MANAGER_NAME)
@@ -109,11 +105,11 @@ class Cycle(Entity):
         return self._properties
 
     @staticmethod
-    def new_id(name: str) -> CycleId:
-        return CycleId(Cycle.__SEPARATOR.join([Cycle.ID_PREFIX, protect_name(name), str(uuid.uuid4())]))
+    def _new_id(name: str) -> CycleId:
+        return CycleId(_get_valid_filename(Cycle.__SEPARATOR.join([Cycle._ID_PREFIX, name, str(uuid.uuid4())])))
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
+        protected_attribute_name = attribute_name
         if protected_attribute_name in self._properties:
             return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of cycle {self.id}")

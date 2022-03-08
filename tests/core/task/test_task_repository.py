@@ -44,7 +44,7 @@ class TestTaskRepository:
         repository.save(task)
         with pytest.raises(NonExistingDataNode):
             repository.load("id")
-        DataManager.set(data_node)
+        DataManager._set(data_node)
         t = repository.load("id")
         assert t.id == task.id
         assert len(t.input) == 1
@@ -54,7 +54,7 @@ class TestTaskRepository:
         assert repository.to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):
             repository.from_model(task_model)
-        DataManager.set(data_node)
+        DataManager._set(data_node)
         t = repository.from_model(task_model)
         assert isinstance(t, Task)
         assert len(t.input) == 1

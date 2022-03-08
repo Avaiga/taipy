@@ -10,13 +10,14 @@ from taipy.core.config.config import Config
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_manager import DataManager
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.exceptions.data_node import MissingRequiredProperty, NoData
 
 
 class TestCSVDataNode:
     def test_create(self):
         path = "data/node/path"
-        dn = CSVDataNode("fOo BAr", Scope.PIPELINE, name="super name", properties={"path": path, "has_header": False})
+        dn = CSVDataNode("foo_bar", Scope.PIPELINE, name="super name", properties={"path": path, "has_header": False})
         assert isinstance(dn, CSVDataNode)
         assert dn.storage_type() == "csv"
         assert dn.config_id == "foo_bar"
@@ -30,13 +31,18 @@ class TestCSVDataNode:
         assert dn.path == path
         assert dn.has_header is False
 
+        with pytest.raises(InvalidConfigurationId):
+            dn = CSVDataNode(
+                "foo bar", Scope.PIPELINE, name="super name", properties={"path": path, "has_header": False}
+            )
+
     def test_new_csv_data_node_with_existing_file_is_ready_for_reading(self):
-        not_ready_dn_cfg = Config.add_data_node("not_ready_data_node_config_id", "csv", path="NOT_EXISTING.csv")
+        not_ready_dn_cfg = Config._add_data_node("not_ready_data_node_config_id", "csv", path="NOT_EXISTING.csv")
         not_ready_dn = DataManager.get_or_create(not_ready_dn_cfg)
         assert not not_ready_dn.is_ready_for_reading
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
-        ready_dn_cfg = Config.add_data_node("ready_data_node_config_id", "csv", path=path)
+        ready_dn_cfg = Config._add_data_node("ready_data_node_config_id", "csv", path=path)
         ready_dn = DataManager.get_or_create(ready_dn_cfg)
         assert ready_dn.is_ready_for_reading
 

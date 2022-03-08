@@ -1,9 +1,11 @@
-from taipy.core.common.repr_enum import ReprEnum
+from taipy.core.common._repr_enum import _ReprEnum
 
 
-class Frequency(ReprEnum):
-    """Enumeration representing the recurrence of a Scenario, and so the duration of its work cycle.
-    The possible values are DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY
+class Frequency(_ReprEnum):
+    """
+    The frequency of a cycle and the recurrence of Scenarios.
+
+    It is implemented as an enumeration. The possible values are DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY.
     """
 
     DAILY = 1

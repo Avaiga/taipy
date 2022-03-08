@@ -1,8 +1,12 @@
 from datetime import timedelta
 
-import taipy.core.taipy as tp
+import pytest
+
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle.cycle_manager import CycleManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.pipeline.pipeline_manager import PipelineManager
 from taipy.core.scenario.scenario import Scenario
@@ -10,7 +14,7 @@ from taipy.core.scenario.scenario_manager import ScenarioManager
 
 
 def test_create_scenario(cycle, current_datetime):
-    scenario_entity_1 = Scenario("fOo ", [], {"key": "value"}, is_master=True, cycle=cycle)
+    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_master=True, cycle=cycle)
     assert scenario_entity_1.id is not None
     assert scenario_entity_1.config_id == "foo"
     assert scenario_entity_1.pipelines == {}
@@ -21,9 +25,9 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_1.cycle == cycle
     assert scenario_entity_1.tags == set()
 
-    scenario_entity_2 = Scenario("   bar/ξéà   ", [], {}, ScenarioId("baz"), creation_date=current_datetime)
+    scenario_entity_2 = Scenario("bar", [], {}, ScenarioId("baz"), creation_date=current_datetime)
     assert scenario_entity_2.id == "baz"
-    assert scenario_entity_2.config_id == "bar-xea"
+    assert scenario_entity_2.config_id == "bar"
     assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
     assert scenario_entity_2.creation_date == current_datetime
@@ -40,14 +44,17 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_3.properties == {}
     assert scenario_entity_3.tags == set()
 
-    pipeline_entity_1 = Pipeline("abcξyₓéà", {}, [])
-    scenario_entity_4 = Scenario("abcx", [pipeline_entity_1], {})
+    pipeline_entity_1 = Pipeline("abcx", {}, [])
+    scenario_entity_4 = Scenario("abcxy", [pipeline_entity_1], {})
     assert scenario_entity_4.id is not None
-    assert scenario_entity_4.config_id == "abcx"
+    assert scenario_entity_4.config_id == "abcxy"
     assert len(scenario_entity_4.pipelines) == 1
-    assert scenario_entity_4.abcxyxea == pipeline_entity_1
+    assert scenario_entity_4.abcx == pipeline_entity_1
     assert scenario_entity_4.properties == {}
     assert scenario_entity_4.tags == set()
+
+    with pytest.raises(InvalidConfigurationId):
+        Scenario("foo bar", [], {})
 
 
 def test_add_property_to_scenario():
@@ -65,7 +72,7 @@ def test_add_property_to_scenario():
 def test_add_cycle_to_scenario(cycle):
     scenario = Scenario("foo", [], {})
     assert scenario.cycle is None
-    CycleManager.set(cycle)
+    CycleManager._set(cycle)
     scenario.cycle = cycle
 
     assert scenario.cycle == cycle
@@ -97,17 +104,17 @@ def test_add_and_remove_tag():
 
 def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     scenario_1 = Scenario("foo", [], {}, creation_date=current_datetime, is_master=False, cycle=None)
-    ScenarioManager.set(scenario_1)
-    PipelineManager.set(pipeline)
-    CycleManager.set(cycle)
+    ScenarioManager._set(scenario_1)
+    PipelineManager._set(pipeline)
+    CycleManager._set(cycle)
 
-    scenario_2 = ScenarioManager.get(scenario_1)
+    scenario_2 = ScenarioManager._get(scenario_1)
     assert scenario_1.config_id == "foo"
-    scenario_1._config_id = "def"
+    scenario_1._config_id = "fgh"
     assert scenario_1.config_id == "foo"
-    scenario_1.config_id = "def"
-    assert scenario_1.config_id == "def"
-    assert scenario_2.config_id == "def"
+    scenario_1.config_id = "fgh"
+    assert scenario_1.config_id == "fgh"
+    assert scenario_2.config_id == "fgh"
 
     assert len(scenario_1.pipelines) == 0
     scenario_1._pipelines = [pipeline]
@@ -161,7 +168,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_2.properties["qux"] == 5
 
     with scenario_1 as scenario:
-        assert scenario.config_id == "def"
+        assert scenario.config_id == "fgh"
         assert len(scenario.pipelines) == 1
         assert scenario.pipelines[pipeline.config_id] == pipeline
         assert scenario.creation_date == new_datetime
@@ -181,7 +188,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         scenario.tags = None
 
         assert scenario._config_id == "abc"
-        assert scenario.config_id == "def"
+        assert scenario.config_id == "fgh"
         assert len(scenario.pipelines) == 1
         assert scenario.pipelines[pipeline.config_id] == pipeline
         assert scenario.creation_date == new_datetime

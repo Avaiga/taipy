@@ -5,6 +5,7 @@ from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
+from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.pipeline.pipeline_manager import PipelineManager
 from taipy.core.task.task import Task
@@ -15,7 +16,7 @@ def test_create_pipeline():
     input = InMemoryDataNode("foo", Scope.PIPELINE)
     output = InMemoryDataNode("bar", Scope.PIPELINE)
     task = Task("baz", print, [input], [output], TaskId("task_id"))
-    pipeline = Pipeline("nAmE 1 ", {"description": "description"}, [task])
+    pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
     assert pipeline.parent_id is None
     assert pipeline.config_id == "name_1"
@@ -27,17 +28,21 @@ def test_create_pipeline():
     with pytest.raises(AttributeError):
         pipeline.qux
 
-    input_1 = InMemoryDataNode("inξ", Scope.SCENARIO)
-    output_1 = InMemoryDataNode("outξ", Scope.SCENARIO)
-    task_1 = Task("task_ξ", print, [input_1], [output_1], TaskId("task_id_1"))
-    pipeline_1 = Pipeline("nAmE 1 ", {"description": "description"}, [task_1], parent_id="parent_id")
+    input_1 = InMemoryDataNode("input", Scope.SCENARIO)
+    output_1 = InMemoryDataNode("output", Scope.SCENARIO)
+    task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
+    pipeline_1 = Pipeline("name_1", {"description": "description"}, [task_1], parent_id="parent_id")
     assert pipeline_1.id is not None
     assert pipeline_1.parent_id == "parent_id"
     assert pipeline_1.config_id == "name_1"
     assert pipeline_1.description == "description"
-    assert pipeline_1.inx == input_1
-    assert pipeline_1.outx == output_1
-    assert pipeline_1.task_x == task_1
+    assert pipeline_1.input == input_1
+    assert pipeline_1.output == output_1
+    assert pipeline_1.task_1 == task_1
+
+    assert pipeline_1.id is not None
+    with pytest.raises(InvalidConfigurationId):
+        Pipeline("name 1", {"description": "description"}, [task_1], parent_id="parent_id")
 
 
 def test_check_consistency():
@@ -77,9 +82,9 @@ def test_to_model():
     input = InMemoryDataNode("input", Scope.PIPELINE)
     output = InMemoryDataNode("output", Scope.PIPELINE)
     task = Task("task", print, [input], [output], TaskId("task_id"))
-    pipeline = Pipeline("name", {"foo": "bar"}, [task])
+    pipeline = Pipeline("id", {"foo": "bar"}, [task])
     model = pipeline.to_model()
-    assert model.name == "name"
+    assert model.config_id == "id"
     assert model.id == pipeline.id
     assert len(model.properties) == 1
     assert model.properties["foo"] == "bar"
@@ -116,17 +121,17 @@ def test_get_sorted_tasks():
 def test_auto_set_and_reload(task):
     pipeline_1 = Pipeline("foo", {}, [], parent_id=None, subscribers=None)
 
-    TaskManager.set(task)
-    PipelineManager.set(pipeline_1)
+    TaskManager._set(task)
+    PipelineManager._set(pipeline_1)
 
-    pipeline_2 = PipelineManager.get(pipeline_1)
+    pipeline_2 = PipelineManager._get(pipeline_1)
 
     assert pipeline_1.config_id == "foo"
-    pipeline_1._config_id = "def"
+    pipeline_1._config_id = "fgh"
     assert pipeline_1.config_id == "foo"
-    pipeline_1.config_id = "def"
-    assert pipeline_1.config_id == "def"
-    assert pipeline_2.config_id == "def"
+    pipeline_1.config_id = "fgh"
+    assert pipeline_1.config_id == "fgh"
+    assert pipeline_2.config_id == "fgh"
 
     assert len(pipeline_1.tasks) == 0
     pipeline_1._tasks = [task]
@@ -157,7 +162,7 @@ def test_auto_set_and_reload(task):
     assert pipeline_2.properties["qux"] == 5
 
     with pipeline_1 as pipeline:
-        assert pipeline.config_id == "def"
+        assert pipeline.config_id == "fgh"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
         assert pipeline.parent_id == "parent_id"
@@ -170,7 +175,7 @@ def test_auto_set_and_reload(task):
         pipeline.subscribers = None
 
         assert pipeline._config_id == "abc"
-        assert pipeline.config_id == "def"
+        assert pipeline.config_id == "fgh"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
         assert pipeline.parent_id == "parent_id"

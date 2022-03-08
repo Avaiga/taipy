@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from taipy.core.common.alias import CycleId, Dag, PipelineId, ScenarioId
+from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
 from taipy.core.config.global_app_config import GlobalAppConfig
@@ -170,18 +170,18 @@ def setup():
 
 def delete_everything():
     TaskManager.scheduler = SchedulerFactory.build_scheduler
-    ScenarioManager.delete_all()
-    PipelineManager.delete_all()
-    DataManager.delete_all()
-    TaskManager.delete_all()
-    JobManager.delete_all()
-    CycleManager.delete_all()
-    Config._python_config.global_config = GlobalAppConfig()
-    Config._python_config.job_config = JobConfig()
-    Config._python_config.data_nodes.clear()
-    Config._python_config.tasks.clear()
-    Config._python_config.pipelines.clear()
-    Config._python_config.scenarios.clear()
+    ScenarioManager._delete_all()
+    PipelineManager._delete_all()
+    DataManager._delete_all()
+    TaskManager._delete_all()
+    JobManager._delete_all()
+    CycleManager._delete_all()
+    Config._python_config._global_config = GlobalAppConfig()
+    Config._python_config._job_config = JobConfig()
+    Config._python_config._data_nodes.clear()
+    Config._python_config._tasks.clear()
+    Config._python_config._pipelines.clear()
+    Config._python_config._scenarios.clear()
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -1,10 +1,10 @@
 import uuid
 from typing import Dict, Iterable, Optional
 
+from taipy.core.common._reload import self_reload, self_setter
+from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import TaskId
 from taipy.core.common.entity import Entity
-from taipy.core.common.reload import self_reload, self_setter
-from taipy.core.common.unicode_to_python_variable_name import protect_name
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
 
@@ -47,7 +47,7 @@ class Task(Entity):
         id: TaskId = None,
         parent_id: Optional[str] = None,
     ):
-        self._config_id = protect_name(config_id)
+        self._config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self._config_id, str(uuid.uuid4())]))
         self._parent_id = parent_id
         self.__input = {dn.config_id: dn for dn in input or []}
@@ -114,11 +114,11 @@ class Task(Entity):
         self._function = val
 
     def __getattr__(self, attribute_name):
-        protected_attribute_name = protect_name(attribute_name)
-        if protected_attribute_name in self.__input:
-            return self.__input[protected_attribute_name]
-        if protected_attribute_name in self.__output:
-            return self.__output[protected_attribute_name]
+        protected_attribute_name = _validate_id(attribute_name)
+        if protected_attribute_name in self.input:
+            return self.input[protected_attribute_name]
+        if protected_attribute_name in self.output:
+            return self.output[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of task {self.id}")
 
     @property

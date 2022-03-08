@@ -24,7 +24,7 @@ class JobModel:
         return JobModel(
             id=data["id"],
             task_id=data["task_id"],
-            status=Status.from_repr(data["status"]),
+            status=Status._from_repr(data["status"]),
             force=data["force"],
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],

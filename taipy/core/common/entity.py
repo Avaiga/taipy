@@ -1,4 +1,4 @@
-from taipy.core.common.reload import set_entity
+from taipy.core.common._reload import set_entity
 
 
 class Entity:

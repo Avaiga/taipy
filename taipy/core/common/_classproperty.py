@@ -1,4 +1,4 @@
-class classproperty(object):
+class _Classproperty(object):
     def __init__(self, f):
         self.f = f
 

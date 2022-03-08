@@ -3,20 +3,20 @@ import os
 import sys
 
 
-class TaipyLogger:
+class _TaipyLogger:
 
-    ENVIRONMENT_VARIABLE_NAME_WITH_LOGGER_CONFIG_PATH = "TAIPY_LOGGER_CONFIG_PATH"
+    _ENVIRONMENT_VARIABLE_NAME_WITH_LOGGER_CONFIG_PATH = "TAIPY_LOGGER_CONFIG_PATH"
 
     __logger = None
 
     @classmethod
-    def get_logger(cls):
-        cls.ENVIRONMENT_VARIABLE_NAME_WITH_LOGGER_CONFIG_PATH = "TAIPY_LOGGER_CONFIG_PATH"
+    def _get_logger(cls):
+        cls._ENVIRONMENT_VARIABLE_NAME_WITH_LOGGER_CONFIG_PATH = "TAIPY_LOGGER_CONFIG_PATH"
 
         if cls.__logger:
             return cls.__logger
 
-        if config_filename := os.environ.get(cls.ENVIRONMENT_VARIABLE_NAME_WITH_LOGGER_CONFIG_PATH):
+        if config_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_LOGGER_CONFIG_PATH):
             logging.config.fileConfig(config_filename)
             cls.__logger = logging.getLogger("Taipy")
         else:
