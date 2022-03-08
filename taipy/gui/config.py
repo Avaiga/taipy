@@ -33,6 +33,7 @@ AppConfigOption = t.Literal[
     "upload_folder",
     "data_url_max_size",
     "flask_log",
+    "margin",
 ]
 
 AppConfig = t.TypedDict(
@@ -59,6 +60,7 @@ AppConfig = t.TypedDict(
         "upload_folder": t.Union[str, None],
         "data_url_max_size": t.Union[int, None],
         "flask_log": bool,
+        "margin": t.Union[str, None]
     },
     total=False,
 )
@@ -160,7 +162,8 @@ class GuiConfig(object):
                 key = key.lower()
                 if value is not None and key in app_config:
                     try:
-                        app_config[key] = value if app_config[key] is None else type(app_config[key])(value)  # type: ignore
+                        app_config[key] = value if app_config[key] is None else type(
+                            app_config[key])(value)  # type: ignore
                     except Exception as e:
                         warnings.warn(
                             f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
