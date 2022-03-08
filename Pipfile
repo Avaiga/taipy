@@ -10,7 +10,6 @@ openpyxl = ">=3.0"
 pandas = ">=1.3"
 sqlalchemy = ">=1.3"
 toml = ">=0.10"
-unidecode = ">=1.3"
 
 [dev-packages]
 black = "*"
