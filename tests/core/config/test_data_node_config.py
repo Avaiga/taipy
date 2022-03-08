@@ -6,7 +6,7 @@ import pytest
 
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.exceptions.configuration import ConfigurationIssueError
 
 
@@ -98,8 +98,8 @@ def test_date_node_create_with_datetime():
         test=1,
         test_dict={"type": "Datetime", 2: "daw"},
     )
-    dn = DataManager.get_or_create(data_node_config)
-    dn = DataManager._get(dn)
+    dn = _DataManager._get_or_create(data_node_config)
+    dn = _DataManager._get(dn)
     assert dn.foo == "hello"
     assert dn.my_property == datetime(1991, 1, 1)
     assert dn.test == 1

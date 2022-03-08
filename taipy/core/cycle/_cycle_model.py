@@ -7,7 +7,7 @@ from taipy.core.common.frequency import Frequency
 
 
 @dataclass
-class CycleModel:
+class _CycleModel:
     id: CycleId
     name: str
     frequency: Frequency
@@ -21,7 +21,7 @@ class CycleModel:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return CycleModel(
+        return _CycleModel(
             id=data["id"],
             name=data["name"],
             frequency=Frequency._from_repr(data["frequency"]),

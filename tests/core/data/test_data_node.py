@@ -4,7 +4,7 @@ from time import sleep
 import pytest
 
 from taipy.core.common.alias import DataNodeId, JobId
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.filter import FilterDataNode
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -188,7 +188,7 @@ class TestDataNode:
 
         # Has been writen more than 30 minutes ago
         dn._last_edition_date = datetime.now() + timedelta(days=-1)
-        DataManager._set(dn)
+        _DataManager._set(dn)
         assert dn.is_in_cache is False
 
     def test_is_in_cache_with_30_min_validity_period_cacheable_true(self):
@@ -204,7 +204,7 @@ class TestDataNode:
 
         # Has been writen more than 30 minutes ago
         dn._last_edition_date = datetime.now() - timedelta(days=1)
-        DataManager()._set(dn)
+        _DataManager()._set(dn)
         assert dn.is_in_cache is False
 
     def test_is_in_cache_with_5_days_validity_period_cacheable_true(self):
@@ -218,7 +218,7 @@ class TestDataNode:
 
         # Has been writen more than 30 minutes ago
         dn._last_edition_date = datetime.now() - timedelta(days=6)
-        DataManager()._set(dn)
+        _DataManager()._set(dn)
         assert dn.is_in_cache is False
 
     def test_pandas_filter(self, default_data_frame):
@@ -371,15 +371,15 @@ class TestDataNode:
     def test_data_node_update_after_writing(self):
         dn = FakeDataNode("foo")
 
-        DataManager._set(dn)
-        assert not DataManager._get(dn.id).is_ready_for_reading
+        _DataManager._set(dn)
+        assert not _DataManager._get(dn.id).is_ready_for_reading
         dn.write("Any data")
 
         assert dn.is_ready_for_reading
-        assert DataManager._get(dn.id).is_ready_for_reading
+        assert _DataManager._get(dn.id).is_ready_for_reading
 
     def test_auto_reload(self):
-        dm = DataManager()
+        dm = _DataManager()
         dn = FakeDataNode("foo")
 
         dm._set(dn)

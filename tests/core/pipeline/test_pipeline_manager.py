@@ -8,19 +8,19 @@ import pytest
 from taipy.core.common import _utils
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.config.config import Config
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.pipeline import NonExistingPipeline
 from taipy.core.exceptions.task import NonExistingTask
-from taipy.core.job.job_manager import JobManager
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.pipeline.pipeline_manager import PipelineManager
-from taipy.core.scenario.scenario_manager import ScenarioManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scheduler.scheduler import Scheduler
 from taipy.core.scheduler.scheduler_factory import SchedulerFactory
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
 from tests.core.utils.NotifyMock import NotifyMock
 
 
@@ -44,71 +44,71 @@ def test_set_and_get_pipeline():
     pipeline_3_with_same_id = Pipeline("name_3", {}, [], pipeline_id_1)
 
     # No existing Pipeline
-    assert PipelineManager._get(pipeline_id_1) is None
-    assert PipelineManager._get(pipeline_1) is None
-    assert PipelineManager._get(pipeline_id_2) is None
-    assert PipelineManager._get(pipeline_2) is None
+    assert _PipelineManager._get(pipeline_id_1) is None
+    assert _PipelineManager._get(pipeline_1) is None
+    assert _PipelineManager._get(pipeline_id_2) is None
+    assert _PipelineManager._get(pipeline_2) is None
 
     # Save one pipeline. We expect to have only one pipeline stored
-    PipelineManager._set(pipeline_1)
-    assert PipelineManager._get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_id_1).config_id == pipeline_1.config_id
-    assert len(PipelineManager._get(pipeline_id_1).tasks) == 0
-    assert PipelineManager._get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_1).config_id == pipeline_1.config_id
-    assert len(PipelineManager._get(pipeline_1).tasks) == 0
-    assert PipelineManager._get(pipeline_id_2) is None
-    assert PipelineManager._get(pipeline_2) is None
+    _PipelineManager._set(pipeline_1)
+    assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_id_1).config_id == pipeline_1.config_id
+    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_1).config_id == pipeline_1.config_id
+    assert len(_PipelineManager._get(pipeline_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_id_2) is None
+    assert _PipelineManager._get(pipeline_2) is None
 
     # Save a second pipeline. Now, we expect to have a total of two pipelines stored
-    TaskManager._set(task_2)
-    PipelineManager._set(pipeline_2)
-    assert PipelineManager._get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_id_1).config_id == pipeline_1.config_id
-    assert len(PipelineManager._get(pipeline_id_1).tasks) == 0
-    assert PipelineManager._get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_1).config_id == pipeline_1.config_id
-    assert len(PipelineManager._get(pipeline_1).tasks) == 0
-    assert PipelineManager._get(pipeline_id_2).id == pipeline_2.id
-    assert PipelineManager._get(pipeline_id_2).config_id == pipeline_2.config_id
-    assert len(PipelineManager._get(pipeline_id_2).tasks) == 1
-    assert PipelineManager._get(pipeline_2).id == pipeline_2.id
-    assert PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
-    assert len(PipelineManager._get(pipeline_2).tasks) == 1
-    assert TaskManager._get(task_2.id).id == task_2.id
+    _TaskManager._set(task_2)
+    _PipelineManager._set(pipeline_2)
+    assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_id_1).config_id == pipeline_1.config_id
+    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_1).config_id == pipeline_1.config_id
+    assert len(_PipelineManager._get(pipeline_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_id_2).id == pipeline_2.id
+    assert _PipelineManager._get(pipeline_id_2).config_id == pipeline_2.config_id
+    assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
+    assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
+    assert _PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
+    assert len(_PipelineManager._get(pipeline_2).tasks) == 1
+    assert _TaskManager._get(task_2.id).id == task_2.id
 
     # We save the first pipeline again. We expect nothing to change
-    PipelineManager._set(pipeline_1)
-    assert PipelineManager._get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_id_1).config_id == pipeline_1.config_id
-    assert len(PipelineManager._get(pipeline_id_1).tasks) == 0
-    assert PipelineManager._get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_1).config_id == pipeline_1.config_id
-    assert len(PipelineManager._get(pipeline_1).tasks) == 0
-    assert PipelineManager._get(pipeline_id_2).id == pipeline_2.id
-    assert PipelineManager._get(pipeline_id_2).config_id == pipeline_2.config_id
-    assert len(PipelineManager._get(pipeline_id_2).tasks) == 1
-    assert PipelineManager._get(pipeline_2).id == pipeline_2.id
-    assert PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
-    assert len(PipelineManager._get(pipeline_2).tasks) == 1
-    assert TaskManager._get(task_2.id).id == task_2.id
+    _PipelineManager._set(pipeline_1)
+    assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_id_1).config_id == pipeline_1.config_id
+    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_1).config_id == pipeline_1.config_id
+    assert len(_PipelineManager._get(pipeline_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_id_2).id == pipeline_2.id
+    assert _PipelineManager._get(pipeline_id_2).config_id == pipeline_2.config_id
+    assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
+    assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
+    assert _PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
+    assert len(_PipelineManager._get(pipeline_2).tasks) == 1
+    assert _TaskManager._get(task_2.id).id == task_2.id
 
     # We save a third pipeline with same id as the first one.
     # We expect the first pipeline to be updated
-    PipelineManager._set(pipeline_3_with_same_id)
-    assert PipelineManager._get(pipeline_id_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_id_1).config_id == pipeline_3_with_same_id.config_id
-    assert len(PipelineManager._get(pipeline_id_1).tasks) == 0
-    assert PipelineManager._get(pipeline_1).id == pipeline_1.id
-    assert PipelineManager._get(pipeline_1).config_id == pipeline_3_with_same_id.config_id
-    assert len(PipelineManager._get(pipeline_1).tasks) == 0
-    assert PipelineManager._get(pipeline_id_2).id == pipeline_2.id
-    assert PipelineManager._get(pipeline_id_2).config_id == pipeline_2.config_id
-    assert len(PipelineManager._get(pipeline_id_2).tasks) == 1
-    assert PipelineManager._get(pipeline_2).id == pipeline_2.id
-    assert PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
-    assert len(PipelineManager._get(pipeline_2).tasks) == 1
-    assert TaskManager._get(task_2.id).id == task_2.id
+    _PipelineManager._set(pipeline_3_with_same_id)
+    assert _PipelineManager._get(pipeline_id_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_id_1).config_id == pipeline_3_with_same_id.config_id
+    assert len(_PipelineManager._get(pipeline_id_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_1).id == pipeline_1.id
+    assert _PipelineManager._get(pipeline_1).config_id == pipeline_3_with_same_id.config_id
+    assert len(_PipelineManager._get(pipeline_1).tasks) == 0
+    assert _PipelineManager._get(pipeline_id_2).id == pipeline_2.id
+    assert _PipelineManager._get(pipeline_id_2).config_id == pipeline_2.config_id
+    assert len(_PipelineManager._get(pipeline_id_2).tasks) == 1
+    assert _PipelineManager._get(pipeline_2).id == pipeline_2.id
+    assert _PipelineManager._get(pipeline_2).config_id == pipeline_2.config_id
+    assert len(_PipelineManager._get(pipeline_2).tasks) == 1
+    assert _TaskManager._get(task_2.id).id == task_2.id
 
 
 def test_submit():
@@ -138,38 +138,38 @@ def test_submit():
             self.submit_calls.append(task)
             return None
 
-    TaskManager.scheduler = MockScheduler
+    _TaskManager._scheduler = MockScheduler
 
     # pipeline does not exists. We expect an exception to be raised
     with pytest.raises(NonExistingPipeline):
-        PipelineManager.submit(pipeline.id)
+        _PipelineManager._submit(pipeline.id)
     with pytest.raises(NonExistingPipeline):
-        PipelineManager.submit(pipeline)
+        _PipelineManager._submit(pipeline)
 
     # pipeline does exist, but tasks does not exist. We expect an exception to be raised
-    PipelineManager._set(pipeline)
+    _PipelineManager._set(pipeline)
     with pytest.raises(NonExistingTask):
-        PipelineManager.submit(pipeline.id)
+        _PipelineManager._submit(pipeline.id)
     with pytest.raises(NonExistingTask):
-        PipelineManager.submit(pipeline)
+        _PipelineManager._submit(pipeline)
 
     # pipeline, and tasks does exist. We expect the tasks to be submitted
     # in a specific order
-    TaskManager._set(task_1)
-    TaskManager._set(task_2)
-    TaskManager._set(task_3)
-    TaskManager._set(task_4)
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+    _TaskManager._set(task_3)
+    _TaskManager._set(task_4)
 
-    PipelineManager.submit(pipeline.id)
-    calls_ids = [t.id for t in TaskManager.scheduler().submit_calls]
+    _PipelineManager._submit(pipeline.id)
+    calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
     tasks_ids = [task_1.id, task_2.id, task_4.id, task_3.id]
     assert calls_ids == tasks_ids
 
-    PipelineManager.submit(pipeline)
-    calls_ids = [t.id for t in TaskManager.scheduler().submit_calls]
+    _PipelineManager._submit(pipeline)
+    calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
     tasks_ids = tasks_ids * 2
     assert set(calls_ids) == set(tasks_ids)
-    TaskManager.scheduler = SchedulerFactory.build_scheduler
+    _TaskManager._scheduler = SchedulerFactory.build_scheduler
 
 
 g = 0
@@ -195,11 +195,11 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     task_no_input_no_output = Task("task_no_input_no_output", mock_function_no_input_no_output)
     pipeline_1 = Pipeline("my_pipeline", {}, [task_no_input_no_output])
 
-    TaskManager._set(task_no_input_no_output)
-    PipelineManager._set(pipeline_1)
+    _TaskManager._set(task_no_input_no_output)
+    _PipelineManager._set(pipeline_1)
     assert len(pipeline_1.get_sorted_tasks()) == 1
 
-    PipelineManager.submit(pipeline_1)
+    _PipelineManager._submit(pipeline_1)
     assert g == 1
 
     # test one input and no output Task
@@ -209,14 +209,14 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     )
     pipeline_2 = Pipeline("my_pipeline_2", {}, [task_one_input_no_output])
 
-    DataManager._set(data_node_input)
+    _DataManager._set(data_node_input)
     data_node_input.unlock_edition()
 
-    TaskManager._set(task_one_input_no_output)
-    PipelineManager._set(pipeline_2)
+    _TaskManager._set(task_one_input_no_output)
+    _PipelineManager._set(pipeline_2)
     assert len(pipeline_2.get_sorted_tasks()) == 1
 
-    PipelineManager.submit(pipeline_2)
+    _PipelineManager._submit(pipeline_2)
     assert g == 3
 
     # test no input and one output Task
@@ -226,14 +226,14 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     )
     pipeline_3 = Pipeline("my_pipeline_3", {}, [task_no_input_one_output])
 
-    DataManager._set(data_node_output)
+    _DataManager._set(data_node_output)
     assert data_node_output.read() is None
 
-    TaskManager._set(task_no_input_one_output)
-    PipelineManager._set(pipeline_3)
+    _TaskManager._set(task_no_input_one_output)
+    _PipelineManager._set(pipeline_3)
     assert len(pipeline_2.get_sorted_tasks()) == 1
 
-    PipelineManager.submit(pipeline_3)
+    _PipelineManager._submit(pipeline_3)
     assert data_node_output.read() == 3
 
 
@@ -257,13 +257,13 @@ def test_get_or_create_data():
     pipeline_config = Config._add_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3])
     # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
 
-    assert len(DataManager._get_all()) == 0
-    assert len(TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
 
-    pipeline = PipelineManager.get_or_create(pipeline_config)
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
 
-    assert len(DataManager._get_all()) == 3
-    assert len(TaskManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 3
+    assert len(_TaskManager._get_all()) == 2
     assert len(pipeline.get_sorted_tasks()) == 2
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 0
@@ -271,7 +271,7 @@ def test_get_or_create_data():
     assert pipeline.get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.id
     assert pipeline.get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.id
 
-    PipelineManager.submit(pipeline.id)
+    _PipelineManager._submit(pipeline.id)
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 2
     assert pipeline.baz.read() == 6
@@ -302,14 +302,14 @@ def test_create_pipeline_and_modify_properties_does_not_modify_config():
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
 
-    pipeline = PipelineManager.get_or_create(pipeline_config, None)
+    pipeline = _PipelineManager._get_or_create(pipeline_config, None)
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
     assert len(pipeline.properties) == 1
     assert pipeline.properties.get("foo") == "bar"
 
     pipeline.properties["baz"] = "qux"
-    PipelineManager._set(pipeline)
+    _PipelineManager._set(pipeline)
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
     assert len(pipeline.properties) == 2
@@ -340,7 +340,7 @@ def test_pipeline_notification_subscribe(mocker):
         ],
     )
 
-    pipeline = PipelineManager.get_or_create(pipeline_config)
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
 
     notify_1 = NotifyMock(pipeline)
     notify_1.__name__ = "notify_1"
@@ -356,12 +356,12 @@ def test_pipeline_notification_subscribe(mocker):
     callback = mock.MagicMock()
     callback.__name__ = "callback"
     callback.__module__ = "callback"
-    PipelineManager.submit(pipeline.id, [callback])
+    _PipelineManager._submit(pipeline.id, [callback])
     callback.assert_called()
 
     # test pipeline subscribe notification
-    PipelineManager.subscribe(notify_1, pipeline)
-    PipelineManager.submit(pipeline.id)
+    _PipelineManager._subscribe(notify_1, pipeline)
+    _PipelineManager._submit(pipeline.id)
 
     notify_1.assert_called_3_times()
 
@@ -369,9 +369,9 @@ def test_pipeline_notification_subscribe(mocker):
 
     # test pipeline unsubscribe notification
     # test subscribe notification only on new job
-    PipelineManager.unsubscribe(notify_1, pipeline)
-    PipelineManager.subscribe(notify_2, pipeline)
-    PipelineManager.submit(pipeline.id)
+    _PipelineManager._unsubscribe(notify_1, pipeline)
+    _PipelineManager._subscribe(notify_2, pipeline)
+    _PipelineManager._submit(pipeline.id)
 
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()
@@ -392,19 +392,19 @@ def test_pipeline_notification_unsubscribe(mocker):
         ],
     )
 
-    pipeline = PipelineManager.get_or_create(pipeline_config)
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
 
     notify_1 = notify1
     notify_2 = notify2
 
-    PipelineManager.subscribe(notify_1, pipeline)
-    PipelineManager.unsubscribe(notify_1, pipeline)
-    PipelineManager.subscribe(notify_2, pipeline)
-    PipelineManager.submit(pipeline.id)
+    _PipelineManager._subscribe(notify_1, pipeline)
+    _PipelineManager._unsubscribe(notify_1, pipeline)
+    _PipelineManager._subscribe(notify_2, pipeline)
+    _PipelineManager._submit(pipeline.id)
 
     with pytest.raises(KeyError):
-        PipelineManager.unsubscribe(notify_1, pipeline)
-        PipelineManager.unsubscribe(notify_2, pipeline)
+        _PipelineManager._unsubscribe(notify_1, pipeline)
+        _PipelineManager._unsubscribe(notify_2, pipeline)
 
 
 def test_pipeline_notification_subscribe_all():
@@ -420,37 +420,37 @@ def test_pipeline_notification_subscribe_all():
         ],
     )
 
-    pipeline = PipelineManager.get_or_create(pipeline_config)
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
     pipeline_config.id = "other_pipeline"
 
-    other_pipeline = PipelineManager.get_or_create(pipeline_config)
+    other_pipeline = _PipelineManager._get_or_create(pipeline_config)
 
     notify_1 = NotifyMock(pipeline)
 
-    PipelineManager.subscribe(notify_1)
+    _PipelineManager._subscribe(notify_1)
 
-    assert len(PipelineManager._get(pipeline.id).subscribers) == 1
-    assert len(PipelineManager._get(other_pipeline.id).subscribers) == 1
+    assert len(_PipelineManager._get(pipeline.id).subscribers) == 1
+    assert len(_PipelineManager._get(other_pipeline.id).subscribers) == 1
 
 
 def test_get_all_by_config_id():
     input_configs = [Config._add_data_node("my_input", "in_memory")]
     task_config_1 = Config._add_task("task_config_1", print, input_configs, [])
-    assert len(PipelineManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
+    assert len(_PipelineManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
     pipeline_config_1 = Config._add_pipeline("foo", [task_config_1])
-    assert len(PipelineManager._get_all_by_config_id("foo")) == 0
+    assert len(_PipelineManager._get_all_by_config_id("foo")) == 0
 
-    PipelineManager.get_or_create(pipeline_config_1)
-    assert len(PipelineManager._get_all_by_config_id("foo")) == 1
+    _PipelineManager._get_or_create(pipeline_config_1)
+    assert len(_PipelineManager._get_all_by_config_id("foo")) == 1
 
     pipeline_config_2 = Config._add_pipeline("baz", [task_config_1])
-    PipelineManager.get_or_create(pipeline_config_2)
-    assert len(PipelineManager._get_all_by_config_id("foo")) == 1
-    assert len(PipelineManager._get_all_by_config_id("baz")) == 1
+    _PipelineManager._get_or_create(pipeline_config_2)
+    assert len(_PipelineManager._get_all_by_config_id("foo")) == 1
+    assert len(_PipelineManager._get_all_by_config_id("baz")) == 1
 
-    PipelineManager.get_or_create(pipeline_config_2, "other_scenario")
-    assert len(PipelineManager._get_all_by_config_id("foo")) == 1
-    assert len(PipelineManager._get_all_by_config_id("baz")) == 2
+    _PipelineManager._get_or_create(pipeline_config_2, "other_scenario")
+    assert len(_PipelineManager._get_all_by_config_id("foo")) == 1
+    assert len(_PipelineManager._get_all_by_config_id("baz")) == 2
 
 
 def test_do_not_recreate_existing_pipeline_except_same_config():
@@ -462,18 +462,20 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_config = Config._add_pipeline("pipeline_config_1", [task_config])
 
     # Scope is scenario
-    pipeline_1 = PipelineManager.get_or_create(pipeline_config)
-    assert len(PipelineManager._get_all()) == 1
-    pipeline_2 = PipelineManager.get_or_create(pipeline_config)
-    assert len(PipelineManager._get_all()) == 1
+    pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    assert len(_PipelineManager._get_all()) == 1
+    pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
+    assert len(_PipelineManager._get_all()) == 1
     assert pipeline_1.id == pipeline_2.id
-    pipeline_3 = PipelineManager.get_or_create(pipeline_config, "a_scenario")  # Create even if the config is the same
-    assert len(PipelineManager._get_all()) == 2
+    pipeline_3 = _PipelineManager._get_or_create(pipeline_config, "a_scenario")  # Create even if the config is the same
+    assert len(_PipelineManager._get_all()) == 2
     assert pipeline_1.id == pipeline_2.id
     assert pipeline_3.id != pipeline_1.id
     assert pipeline_3.id != pipeline_2.id
-    pipeline_4 = PipelineManager.get_or_create(pipeline_config, "a_scenario")  # Do not create because existed pipeline
-    assert len(PipelineManager._get_all()) == 2
+    pipeline_4 = _PipelineManager._get_or_create(
+        pipeline_config, "a_scenario"
+    )  # Do not create because existed pipeline
+    assert len(_PipelineManager._get_all()) == 2
     assert pipeline_3.id == pipeline_4.id
 
     dn_input_config_scope_scenario_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO)
@@ -484,17 +486,17 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_2])
 
     # Scope is scenario and global
-    pipeline_5 = PipelineManager.get_or_create(pipeline_config_2)
-    assert len(PipelineManager._get_all()) == 3
-    pipeline_6 = PipelineManager.get_or_create(pipeline_config_2)
-    assert len(PipelineManager._get_all()) == 3
+    pipeline_5 = _PipelineManager._get_or_create(pipeline_config_2)
+    assert len(_PipelineManager._get_all()) == 3
+    pipeline_6 = _PipelineManager._get_or_create(pipeline_config_2)
+    assert len(_PipelineManager._get_all()) == 3
     assert pipeline_5.id == pipeline_6.id
-    pipeline_7 = PipelineManager.get_or_create(pipeline_config_2, "another_scenario")
-    assert len(PipelineManager._get_all()) == 4
+    pipeline_7 = _PipelineManager._get_or_create(pipeline_config_2, "another_scenario")
+    assert len(_PipelineManager._get_all()) == 4
     assert pipeline_7.id != pipeline_6.id
     assert pipeline_7.id != pipeline_5.id
-    pipeline_8 = PipelineManager.get_or_create(pipeline_config_2, "another_scenario")
-    assert len(PipelineManager._get_all()) == 4
+    pipeline_8 = _PipelineManager._get_or_create(pipeline_config_2, "another_scenario")
+    assert len(_PipelineManager._get_all()) == 4
     assert pipeline_7.id == pipeline_8.id
 
     dn_input_config_scope_global_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL)
@@ -505,15 +507,15 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])
 
     # Scope is global
-    pipeline_9 = PipelineManager.get_or_create(pipeline_config_3)
-    assert len(PipelineManager._get_all()) == 5
-    pipeline_10 = PipelineManager.get_or_create(pipeline_config_3)
-    assert len(PipelineManager._get_all()) == 5
+    pipeline_9 = _PipelineManager._get_or_create(pipeline_config_3)
+    assert len(_PipelineManager._get_all()) == 5
+    pipeline_10 = _PipelineManager._get_or_create(pipeline_config_3)
+    assert len(_PipelineManager._get_all()) == 5
     assert pipeline_9.id == pipeline_10.id
-    pipeline_11 = PipelineManager.get_or_create(
+    pipeline_11 = _PipelineManager._get_or_create(
         pipeline_config_3, "another_new_scenario"
     )  # Do not create because scope is global
-    assert len(PipelineManager._get_all()) == 5
+    assert len(_PipelineManager._get_all()) == 5
     assert pipeline_11.id == pipeline_10.id
     assert pipeline_11.id == pipeline_9.id
 
@@ -525,19 +527,19 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_config_4 = Config._add_pipeline("pipeline_config_4", [task_config_4])
 
     # Scope is global and pipeline
-    pipeline_12 = PipelineManager.get_or_create(pipeline_config_4)
-    assert len(PipelineManager._get_all()) == 6
-    pipeline_13 = PipelineManager.get_or_create(pipeline_config_4)  # Create a new pipeline because new pipeline ID
-    assert len(PipelineManager._get_all()) == 7
+    pipeline_12 = _PipelineManager._get_or_create(pipeline_config_4)
+    assert len(_PipelineManager._get_all()) == 6
+    pipeline_13 = _PipelineManager._get_or_create(pipeline_config_4)  # Create a new pipeline because new pipeline ID
+    assert len(_PipelineManager._get_all()) == 7
     assert pipeline_12.id != pipeline_13.id
-    pipeline_14 = PipelineManager.get_or_create(pipeline_config_4, "another_new_scenario_2")
-    assert len(PipelineManager._get_all()) == 8
+    pipeline_14 = _PipelineManager._get_or_create(pipeline_config_4, "another_new_scenario_2")
+    assert len(_PipelineManager._get_all()) == 8
     assert pipeline_14.id != pipeline_12.id
     assert pipeline_14.id != pipeline_13.id
-    pipeline_15 = PipelineManager.get_or_create(
+    pipeline_15 = _PipelineManager._get_or_create(
         pipeline_config_4, "another_new_scenario_2"
     )  # Don't create because scope is pipeline
-    assert len(PipelineManager._get_all()) == 9
+    assert len(_PipelineManager._get_all()) == 9
     assert pipeline_15.id != pipeline_14.id
     assert pipeline_15.id != pipeline_13.id
     assert pipeline_15.id != pipeline_12.id
@@ -550,15 +552,15 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     pipeline_config_5 = Config._add_pipeline("pipeline_config_5", [task_config_5])
 
     # Scope is scenario and pipeline
-    pipeline_16 = PipelineManager.get_or_create(pipeline_config_5)
-    assert len(PipelineManager._get_all()) == 10
-    pipeline_17 = PipelineManager.get_or_create(pipeline_config_5)
-    assert len(PipelineManager._get_all()) == 11
+    pipeline_16 = _PipelineManager._get_or_create(pipeline_config_5)
+    assert len(_PipelineManager._get_all()) == 10
+    pipeline_17 = _PipelineManager._get_or_create(pipeline_config_5)
+    assert len(_PipelineManager._get_all()) == 11
     assert pipeline_16.id != pipeline_17.id
-    pipeline_18 = PipelineManager.get_or_create(
+    pipeline_18 = _PipelineManager._get_or_create(
         pipeline_config_5, "random_scenario"
     )  # Create because scope is pipeline
-    assert len(PipelineManager._get_all()) == 12
+    assert len(_PipelineManager._get_all()) == 12
     assert pipeline_18.id != pipeline_17.id
     assert pipeline_18.id != pipeline_16.id
 
@@ -570,10 +572,10 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     )
     pipeline_config_6 = Config._add_pipeline("pipeline_config_6", [task_config_6])
 
-    pipeline_19 = PipelineManager.get_or_create(pipeline_config_6)
-    assert len(PipelineManager._get_all()) == 13
-    pipeline_20 = PipelineManager.get_or_create(pipeline_config_6)
-    assert len(PipelineManager._get_all()) == 14
+    pipeline_19 = _PipelineManager._get_or_create(pipeline_config_6)
+    assert len(_PipelineManager._get_all()) == 13
+    pipeline_20 = _PipelineManager._get_or_create(pipeline_config_6)
+    assert len(_PipelineManager._get_all()) == 14
     assert pipeline_19.id != pipeline_20.id
 
 
@@ -583,107 +585,107 @@ def test_hard_delete():
     dn_output_config_1 = Config._add_data_node("my_output_1", "in_memory", scope=Scope.PIPELINE, default_data="works !")
     task_config_1 = Config._add_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
     pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1])
-    pipeline_1 = PipelineManager.get_or_create(pipeline_config_1)
-    PipelineManager.submit(pipeline_1.id)
+    pipeline_1 = _PipelineManager._get_or_create(pipeline_config_1)
+    _PipelineManager._submit(pipeline_1.id)
 
-    assert len(PipelineManager._get_all()) == 1
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
-    PipelineManager.hard_delete(pipeline_1.id)
-    assert len(PipelineManager._get_all()) == 0
-    assert len(TaskManager._get_all()) == 0
-    assert len(DataManager._get_all()) == 0
-    assert len(JobManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    _PipelineManager._hard_delete(pipeline_1.id)
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 0
+    assert len(_JobManager._get_all()) == 0
 
     #  test hard delete with pipeline at scenario level
     dn_input_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config_2 = Config._add_data_node("my_output_2", "in_memory", scope=Scope.SCENARIO)
     task_config_2 = Config._add_task("task_config_2", print, dn_input_config_2, dn_output_config_2)
     pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_2])
-    pipeline_2 = PipelineManager.get_or_create(pipeline_config_2)
-    PipelineManager.submit(pipeline_2.id)
+    pipeline_2 = _PipelineManager._get_or_create(pipeline_config_2)
+    _PipelineManager._submit(pipeline_2.id)
 
-    assert len(PipelineManager._get_all()) == 1
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
-    PipelineManager.hard_delete(pipeline_2.id)
-    assert len(PipelineManager._get_all()) == 0
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    _PipelineManager._hard_delete(pipeline_2.id)
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
 
-    ScenarioManager._delete_all()
-    PipelineManager._delete_all()
-    DataManager._delete_all()
-    TaskManager._delete_all()
-    JobManager._delete_all()
+    _ScenarioManager._delete_all()
+    _PipelineManager._delete_all()
+    _DataManager._delete_all()
+    _TaskManager._delete_all()
+    _JobManager._delete_all()
 
     #  test hard delete with pipeline at business level
     dn_input_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config_3 = Config._add_data_node("my_output_3", "in_memory", scope=Scope.CYCLE)
     task_config_3 = Config._add_task("task_config_3", print, dn_input_config_3, dn_output_config_3)
     pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])
-    pipeline_3 = PipelineManager.get_or_create(pipeline_config_3)
-    PipelineManager.submit(pipeline_3.id)
+    pipeline_3 = _PipelineManager._get_or_create(pipeline_config_3)
+    _PipelineManager._submit(pipeline_3.id)
 
-    assert len(PipelineManager._get_all()) == 1
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
-    PipelineManager.hard_delete(pipeline_3.id)
-    assert len(PipelineManager._get_all()) == 0
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    _PipelineManager._hard_delete(pipeline_3.id)
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
 
-    ScenarioManager._delete_all()
-    PipelineManager._delete_all()
-    DataManager._delete_all()
-    TaskManager._delete_all()
-    JobManager._delete_all()
+    _ScenarioManager._delete_all()
+    _PipelineManager._delete_all()
+    _DataManager._delete_all()
+    _TaskManager._delete_all()
+    _JobManager._delete_all()
 
     #  test hard delete with pipeline at global level
     dn_input_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     dn_output_config_4 = Config._add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
     task_config_4 = Config._add_task("task_config_4", print, dn_input_config_4, dn_output_config_4)
     pipeline_config_4 = Config._add_pipeline("pipeline_config_4", [task_config_4])
-    pipeline_4 = PipelineManager.get_or_create(pipeline_config_4)
-    PipelineManager.submit(pipeline_4.id)
+    pipeline_4 = _PipelineManager._get_or_create(pipeline_config_4)
+    _PipelineManager._submit(pipeline_4.id)
 
-    assert len(PipelineManager._get_all()) == 1
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
-    PipelineManager.hard_delete(pipeline_4.id)
-    assert len(PipelineManager._get_all()) == 0
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    _PipelineManager._hard_delete(pipeline_4.id)
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
 
-    ScenarioManager._delete_all()
-    PipelineManager._delete_all()
-    DataManager._delete_all()
-    TaskManager._delete_all()
-    JobManager._delete_all()
+    _ScenarioManager._delete_all()
+    _PipelineManager._delete_all()
+    _DataManager._delete_all()
+    _TaskManager._delete_all()
+    _JobManager._delete_all()
 
     dn_input_config_5 = Config._add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config_5 = Config._add_data_node("my_output_5", "in_memory", scope=Scope.GLOBAL)
     task_config_5 = Config._add_task("task_config_5", print, dn_input_config_5, dn_output_config_5)
     pipeline_config_5 = Config._add_pipeline("pipeline_config_5", [task_config_5])
-    pipeline_5 = PipelineManager.get_or_create(pipeline_config_5)
-    PipelineManager.submit(pipeline_5.id)
+    pipeline_5 = _PipelineManager._get_or_create(pipeline_config_5)
+    _PipelineManager._submit(pipeline_5.id)
 
-    assert len(PipelineManager._get_all()) == 1
-    assert len(TaskManager._get_all()) == 1
-    assert len(DataManager._get_all()) == 2
-    assert len(JobManager._get_all()) == 1
-    PipelineManager.hard_delete(pipeline_5.id)
-    assert len(PipelineManager._get_all()) == 0
-    assert len(TaskManager._get_all()) == 0
-    assert len(DataManager._get_all()) == 1
-    assert len(JobManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    _PipelineManager._hard_delete(pipeline_5.id)
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 0
 
 
 def test_automatic_reload():
@@ -691,9 +693,9 @@ def test_automatic_reload():
     dn_output_config = Config._add_data_node("output", "pickle")
     task_config = Config._add_task("task_config", mult_by_2, dn_input_config, dn_output_config)
     pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    pipeline = PipelineManager.get_or_create(pipeline_config)
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
 
-    p1 = Process(target=PipelineManager.submit, args=(pipeline,))
+    p1 = Process(target=_PipelineManager._submit, args=(pipeline,))
     p1.start()
     p1.join()
 

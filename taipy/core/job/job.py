@@ -28,11 +28,12 @@ class Job:
     finished.
 
     Attributes:
-        id: Id of the Job.
-        task: Task that is executed by the job.
-        force: Boolean to enforce the execution whatever the cache data nodes.
-        status: Current status of the job.
-        creation_date: Date of the object creation.
+        id (str): The identifier of the Job.
+        task (`Task^`): The task of the job.
+        force (bool): Enforce the job's execution whatever the output data nodes are in cache or not.
+        status (`Status^`): The current status of the job.
+        creation_date (datetime): The date of the job's creation.
+        exceptions (List[Exception]): The list of exceptions raised during the execution.
     """
 
     def __init__(self, id: JobId, task: Task, force=False):
@@ -46,7 +47,6 @@ class Job:
         self.__logger = _TaipyLogger._get_logger()
 
     def __contains__(self, task: Task):
-        """Returns True if the Job is based on this task."""
         return self.task.id == task.id
 
     def __lt__(self, other):
@@ -66,12 +66,6 @@ class Job:
 
     @property
     def exceptions(self) -> List[Exception]:
-        """The potential exceptions that were raised during the execution of this job.
-
-        Returns:
-            A list containing all the exceptions that were raised during the execution of this job.
-            If no exceptions were raised, then the list is empty.
-        """
         return self._exceptions
 
     @_run_callbacks

@@ -6,7 +6,7 @@ from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 
 
 @dataclass
-class ScenarioModel:
+class _ScenarioModel:
     id: ScenarioId
     config_id: str
     pipelines: List[PipelineId]
@@ -22,7 +22,7 @@ class ScenarioModel:
 
     @staticmethod
     def from_dict(data: Dict[str, Any]):
-        return ScenarioModel(
+        return _ScenarioModel(
             id=data["id"],
             config_id=data["config_id"],
             pipelines=data["pipelines"],

@@ -3,41 +3,23 @@ from datetime import datetime, time, timedelta
 from typing import Optional
 
 from taipy.core.common._manager import _Manager
-from taipy.core.common._taipy_logger import _TaipyLogger
-from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
+from taipy.core.cycle._cycle_repository import _CycleRepository
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.cycle.cycle_repository import CycleRepository
-from taipy.core.exceptions.repository import ModelNotFound
 
 
-class CycleManager(_Manager[Cycle]):
-    """
-    The Cycle Manager is responsible for managing all the cycle-related capabilities.
+class _CycleManager(_Manager[Cycle]):
 
-    This class provides methods for creating, storing, updating, retrieving and deleting cycles.
-    """
-
-    _repository = CycleRepository()
-    ENTITY_NAME = Cycle.__name__
+    _repository = _CycleRepository()
+    _ENTITY_NAME = Cycle.__name__
 
     @classmethod
-    def create(
+    def _create(
         cls, frequency: Frequency, name: str = None, creation_date: datetime = None, display_name=None, **properties
     ):
-        """
-        Creates a new cycle.
-
-        Parameters:
-            frequency (Frequency): The frequency of the new cycle.
-            name (str): The name of the new cycle. Default: `None`.
-            creation_date (datetime): The date and time when the cycle is created. Default: `None`.
-            display_name (Optional[str]): The display name of the cycle.
-            properties (dict[str, str]): other properties. Default: `None`.
-        """
         creation_date = creation_date if creation_date else datetime.now()
-        start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
-        end_date = CycleManager.get_end_date_of_cycle(frequency, start_date)
+        start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
+        end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date)
         properties["display_name"] = display_name if display_name else start_date.isoformat()
         cycle = Cycle(
             frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
@@ -46,32 +28,19 @@ class CycleManager(_Manager[Cycle]):
         return cycle
 
     @classmethod
-    def get_or_create(
+    def _get_or_create(
         cls, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
     ) -> Cycle:
-        """
-        Returns a cycle with the provided parameters.
-
-        If no cycle already exists with the provided parameter values, a new cycle is created
-        and returned.
-
-        Parameters:
-            frequency (Frequency): The frequency of the cycle.
-            creation_date (Optional[datetime]): The creation date of the cycle. Default value : `None`.
-            display_name (Optional[str]): The display name of the cycle.
-        Returns:
-            Cycle: a cycle that has the indicated parameters. A new cycle may be created.
-        """
         creation_date = creation_date if creation_date else datetime.now()
-        start_date = CycleManager.get_start_date_of_cycle(frequency, creation_date)
+        start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
         cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return cls.create(frequency=frequency, creation_date=creation_date, display_name=display_name)
+            return cls._create(frequency=frequency, creation_date=creation_date, display_name=display_name)
 
     @staticmethod
-    def get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):
+    def _get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):
         start_date = creation_date.date()
         start_time = time()
         if frequency == Frequency.DAILY:
@@ -85,7 +54,7 @@ class CycleManager(_Manager[Cycle]):
         return datetime.combine(start_date, start_time)
 
     @staticmethod
-    def get_end_date_of_cycle(frequency: Frequency, start_date: datetime):
+    def _get_end_date_of_cycle(frequency: Frequency, start_date: datetime):
         end_date = start_date
         if frequency == Frequency.DAILY:
             end_date = end_date + timedelta(days=1)

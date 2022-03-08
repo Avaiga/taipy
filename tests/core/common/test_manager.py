@@ -5,7 +5,7 @@ from typing import Any, Dict
 
 from taipy.core.common._manager import _Manager
 from taipy.core.config.config import Config
-from taipy.core.repository import FileSystemRepository
+from taipy.core.repository import _FileSystemRepository
 
 
 @dataclass
@@ -27,20 +27,20 @@ class MockEntity:
     name: str
 
 
-class MockRepository(FileSystemRepository):
-    def to_model(self, obj: MockEntity):
+class MockRepository(_FileSystemRepository):
+    def _to_model(self, obj: MockEntity):
         return MockModel(obj.id, obj.name)
 
-    def from_model(self, model: MockModel):
+    def _from_model(self, model: MockModel):
         return MockEntity(model.id, model.name)
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
 
 class MockManager(_Manager[MockEntity]):
-    ENTITY_NAME = MockEntity.__name__
+    _ENTITY_NAME = MockEntity.__name__
     _repository = MockRepository(model=MockModel, dir_name="foo")
 
 

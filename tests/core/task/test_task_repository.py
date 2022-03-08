@@ -3,13 +3,13 @@ import datetime
 import pytest
 
 from taipy.core.common.alias import DataNodeId, JobId, TaskId
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.data_manager import DataManager
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.data_node import NonExistingDataNode
+from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_model import _TaskModel
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
-from taipy.core.task.task_model import TaskModel
 
 data_node = CSVDataNode(
     "test_data_node",
@@ -26,7 +26,7 @@ data_node = CSVDataNode(
 
 task = Task("config_id", print, [data_node], [], TaskId("id"), parent_id="parent_id")
 
-task_model = TaskModel(
+task_model = _TaskModel(
     id="id",
     parent_id="parent_id",
     config_id="config_id",
@@ -39,22 +39,22 @@ task_model = TaskModel(
 
 class TestTaskRepository:
     def test_save_and_load(self, tmpdir):
-        repository = TaskManager._repository
+        repository = _TaskManager._repository
         repository.base_path = tmpdir
-        repository.save(task)
+        repository._save(task)
         with pytest.raises(NonExistingDataNode):
             repository.load("id")
-        DataManager._set(data_node)
+        _DataManager._set(data_node)
         t = repository.load("id")
         assert t.id == task.id
         assert len(t.input) == 1
 
     def test_from_and_to_model(self):
-        repository = TaskManager._repository
-        assert repository.to_model(task) == task_model
+        repository = _TaskManager._repository
+        assert repository._to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):
-            repository.from_model(task_model)
-        DataManager._set(data_node)
-        t = repository.from_model(task_model)
+            repository._from_model(task_model)
+        _DataManager._set(data_node)
+        t = repository._from_model(task_model)
         assert isinstance(t, Task)
         assert len(t.input) == 1

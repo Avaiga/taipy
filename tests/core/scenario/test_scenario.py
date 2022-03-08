@@ -101,43 +101,43 @@ def test_add_and_remove_tag():
     scenario = Scenario("foo", [], {})
 
     assert len(scenario.tags) == 0
-    scenario.add_tag("tag")
+    scenario._add_tag("tag")
     assert len(scenario.tags) == 1
 
-    scenario.remove_tag("tag")
+    scenario._remove_tag("tag")
     assert len(scenario.tags) == 0
 
 
 def test_submit_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.submit") as mock_submit:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mock_submit:
         scenario = Scenario("foo", [], {})
         scenario.submit(False)
         mock_submit.assert_called_once_with(scenario, False)
 
 
 def test_subscribe_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.subscribe") as mock_subscribe:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._subscribe") as mock_subscribe:
         scenario = Scenario("foo", [], {})
         scenario.subscribe(None)
         mock_subscribe.assert_called_once_with(None, scenario)
 
 
 def test_unsubscribe_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.unsubscribe") as mock_unsubscribe:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mock_unsubscribe:
         scenario = Scenario("foo", [], {})
         scenario.unsubscribe(None)
         mock_unsubscribe.assert_called_once_with(None, scenario)
 
 
 def test_add_tag_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.tag") as mock_add_tag:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._tag") as mock_add_tag:
         scenario = Scenario("foo", [], {})
         scenario.add_tag("tag")
         mock_add_tag.assert_called_once_with(scenario, "tag")
 
 
 def test_remove_tag_scenario():
-    with mock.patch("taipy.core.scenario.scenario_manager.ScenarioManager.untag") as mock_remove_tag:
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._untag") as mock_remove_tag:
         scenario = Scenario("foo", [], {})
         scenario.remove_tag("tag")
         mock_remove_tag.assert_called_once_with(scenario, "tag")

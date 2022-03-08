@@ -8,8 +8,8 @@ from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.scenario import NonExistingComparator
-from taipy.core.pipeline.pipeline_manager import PipelineManager
-from taipy.core.scenario.scenario_manager import ScenarioManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -120,9 +120,9 @@ def test_scenario_create_from_tasks():
     task_config_1 = Config._add_task("t1", print, data_node_1_config, data_node_2_config, scope=Scope.GLOBAL)
     task_config_2 = Config._add_task("t2", print, data_node_2_config, data_node_3_config, scope=Scope.GLOBAL)
     scenario_config_1 = Config._add_scenario_from_tasks("s1", task_configs=[task_config_1, task_config_2])
-    ScenarioManager.submit(ScenarioManager.create(scenario_config_1))
-    assert len(ScenarioManager._get_all()) == 1
-    assert len(PipelineManager._get_all()) == 1
+    _ScenarioManager._submit(_ScenarioManager._create(scenario_config_1))
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
     assert len(scenario_config_1.pipeline_configs) == 1
     assert len(scenario_config_1.pipeline_configs[0].task_configs) == 2
     # Should create a default pipeline name
@@ -133,7 +133,7 @@ def test_scenario_create_from_tasks():
     scenario_config_2 = Config._add_scenario_from_tasks(
         "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
     )
-    ScenarioManager.submit(ScenarioManager.create(scenario_config_2))
-    assert len(ScenarioManager._get_all()) == 2
-    assert len(PipelineManager._get_all()) == 2
+    _ScenarioManager._submit(_ScenarioManager._create(scenario_config_2))
+    assert len(_ScenarioManager._get_all()) == 2
+    assert len(_PipelineManager._get_all()) == 2
     assert scenario_config_2.pipeline_configs[0].id == pipeline_name

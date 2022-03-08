@@ -3,18 +3,18 @@ from datetime import datetime
 from typing import List
 
 from taipy.core.cycle.cycle import Cycle  # isort:skip
-from taipy.core.cycle.cycle_model import CycleModel  # isort:skip
+from taipy.core.cycle._cycle_model import _CycleModel  # isort:skip
 from taipy.core.common.frequency import Frequency  # isort:skip
-from taipy.core.repository import FileSystemRepository  # isort:skip
+from taipy.core.repository import _FileSystemRepository  # isort:skip
 from taipy.core.config.config import Config  # isort:skip
 
 
-class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
+class _CycleRepository(_FileSystemRepository[_CycleModel, Cycle]):
     def __init__(self):
-        super().__init__(model=CycleModel, dir_name="cycles")
+        super().__init__(model=_CycleModel, dir_name="cycles")
 
-    def to_model(self, cycle: Cycle) -> CycleModel:
-        return CycleModel(
+    def _to_model(self, cycle: Cycle) -> _CycleModel:
+        return _CycleModel(
             id=cycle.id,
             name=cycle.name,
             frequency=cycle.frequency,
@@ -24,7 +24,7 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
             properties=cycle.properties.data,
         )
 
-    def from_model(self, model: CycleModel) -> Cycle:
+    def _from_model(self, model: _CycleModel) -> Cycle:
         return Cycle(
             id=model.id,
             name=model.name,
@@ -36,7 +36,7 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
         )
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
@@ -51,21 +51,21 @@ class CycleRepository(FileSystemRepository[CycleModel, Cycle]):
 
     def __get_cycles_by_start_date(self, start_date: datetime) -> List[Cycle]:
         cycles_by_start_date = []
-        for cycle in self.load_all():
+        for cycle in self._load_all():
             if cycle.start_date == start_date:
                 cycles_by_start_date.append(cycle)
         return cycles_by_start_date
 
     def __get_cycles_by_frequency(self, frequency: Frequency) -> List[Cycle]:
         cycles_by_frequency = []
-        for cycle in self.load_all():
+        for cycle in self._load_all():
             if cycle.frequency == frequency:
                 cycles_by_frequency.append(cycle)
         return cycles_by_frequency
 
     def __get_cycles_with_overlapping_date(self, date=datetime) -> List[Cycle]:
         cycles_by_overlapping_date = []
-        for cycle in self.load_all():
+        for cycle in self._load_all():
             if cycle.start_date <= date <= cycle.end_date:
                 cycles_by_overlapping_date.append(cycle)
         return cycles_by_overlapping_date
