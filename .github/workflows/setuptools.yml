@@ -36,7 +36,7 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           cat ~/.ssh/id_ed25519 | base64
 
-          export GIT_SSH_COMMAND=ssh -v
+          export GIT_SSH_COMMAND="ssh -v"
           pip install .
           rm -r taipy
 
