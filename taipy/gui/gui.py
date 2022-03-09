@@ -211,7 +211,7 @@ class Gui:
         current_value = _getscopeattr_drill(self, self._get_hash_from_expr(var_name))
         if isinstance(current_value, _TaipyData):
             return
-        elif rel_var and isinstance(current_value, _TaipyLovValue):
+        elif rel_var and isinstance(current_value, _TaipyLovValue):  # pragma: no cover
             lov_holder = _getscopeattr_drill(self, self._get_hash_from_expr(rel_var))
             if isinstance(lov_holder, _TaipyLov):
                 if isinstance(value, list):
