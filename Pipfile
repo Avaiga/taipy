@@ -43,7 +43,6 @@ twine = "*"
 types-toml = "0.10.0"
 pytest-playwright = "*"
 markupsafe = "==2.0.1"
-pytest-ngrok = "*"
 
 [requires]
 python_version = "3"
