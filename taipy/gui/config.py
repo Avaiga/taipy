@@ -82,7 +82,7 @@ class GuiConfig(object):
         # verify user timezone config is valid
         self.get_time_zone()
 
-    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
+    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:  # pragma: no covers
         if name in self.app_config and self.app_config[name] is not None:
             if default_value is not None and not isinstance(self.app_config[name], type(default_value)):
                 try:
@@ -130,7 +130,7 @@ class GuiConfig(object):
         args, unknown_args = parser.parse_known_args()
         self._handle_argparse(args)
 
-    def _handle_argparse(self, args):
+    def _handle_argparse(self, args):  # pragma: no cover
         app_config = self.app_config
         if args.port:
             if not GuiConfig.__RE_PORT_NUMBER.match(args.port):
@@ -152,7 +152,7 @@ class GuiConfig(object):
         if args.ngrok_token:
             app_config["ngrok_token"] = args.ngrok_token
 
-    def build_app_config(self, root_dir, env_filename, kwargs):
+    def build_app_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         app_config = self.app_config
         env_file_abs_path = env_filename if os.path.isabs(env_filename) else os.path.join(root_dir, env_filename)
         if os.path.isfile(env_file_abs_path):
