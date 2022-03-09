@@ -17,7 +17,7 @@ no index) which is overridden by any specified indexed property.
 ### Simple example
 
 If you want to create a chart that represents a dataframe stored in the Python
-variable _data_ (first and second columns will be used for x and y values), you can use the following content:
+variable _data_ (first and second columns will be used for _x_ and _y_ values), you can use the following content:
 
 !!! example "Page content"
 

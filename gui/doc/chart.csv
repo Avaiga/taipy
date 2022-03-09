@@ -2,7 +2,7 @@
 *value,any,,The data object bound to this chart control.
 title,str,None,The title of this chart control.
 width,str|int|float,100%,"The width, in CSS units, of this element."
-height,str|int|float,100vh,"The height, in CSS units, of this element."
+height,str|int|float,None,"The height, in CSS units, of this element."
 selected,dynamic(list[int]|str),None,List of the selected point indices.
 layout,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/layout/"">layout object</a>."
 plot_config,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/configuration-options/""> configugration options object</a>."
