@@ -25,7 +25,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             config_id=scenario._config_id,
             pipelines=self.__to_pipeline_ids(scenario._pipelines.values()),
             properties=scenario._properties.data,
-            creation_date=scenario.creation_date.isoformat(),
+            creation_date=scenario._creation_date.isoformat(),
             official_scenario=scenario._official_scenario,
             subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
