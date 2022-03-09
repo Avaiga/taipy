@@ -22,4 +22,5 @@ app_config_default: AppConfig = {
     "ngrok_token": "",
     "upload_folder": None,
     "flask_log": False,
+    "margin": "1em",
 }

@@ -884,6 +884,7 @@ class Gui:
                 title=self._get_app_config("title", "Taipy App"),
                 favicon=self._get_app_config("favicon", "/favicon.png"),
                 themes=self._get_themes(),
+                root_margin=self._get_app_config("margin", None)
             )
         )
 
