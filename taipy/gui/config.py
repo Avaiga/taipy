@@ -60,7 +60,7 @@ AppConfig = t.TypedDict(
         "upload_folder": t.Union[str, None],
         "data_url_max_size": t.Union[int, None],
         "flask_log": bool,
-        "margin": t.Union[str, None]
+        "margin": t.Union[str, None],
     },
     total=False,
 )
@@ -84,7 +84,7 @@ class GuiConfig(object):
         # verify user timezone config is valid
         self.get_time_zone()
 
-    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:  # pragma: no covers
+    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:  # pragma: no cover
         if name in self.app_config and self.app_config[name] is not None:
             if default_value is not None and not isinstance(self.app_config[name], type(default_value)):
                 try:
@@ -162,8 +162,9 @@ class GuiConfig(object):
                 key = key.lower()
                 if value is not None and key in app_config:
                     try:
-                        app_config[key] = value if app_config[key] is None else type(
-                            app_config[key])(value)  # type: ignore
+                        app_config[key] = (
+                            value if app_config[key] is None else type(app_config[key])(value)
+                        )  # type: ignore
                     except Exception as e:
                         warnings.warn(
                             f"Invalid env value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"

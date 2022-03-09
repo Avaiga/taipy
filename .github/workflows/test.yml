@@ -46,7 +46,7 @@ jobs:
         with:
           coverageFile: coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          thresholdAll: 0.75
+          thresholdAll: 0.85
 
   gui:
     timeout-minutes: 20

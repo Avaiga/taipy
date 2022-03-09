@@ -1,13 +1,13 @@
-from datetime import datetime, date, time
+import warnings
+from datetime import date, datetime, time
 from json import JSONEncoder
 from pathlib import Path
-import warnings
 
 from ..icon import Icon
-from ..utils import _MapDict, _TaipyBase, _date_to_ISO
+from ..utils import _date_to_ISO, _MapDict, _TaipyBase
 
 
-class _TaipyJsonEncoder(JSONEncoder):
+class _TaipyJsonEncoder(JSONEncoder):  #  pragma: no cover
     def default(self, o):
         if isinstance(o, Icon):
             return o._to_dict()

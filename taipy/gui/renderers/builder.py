@@ -351,7 +351,7 @@ class _Builder:
                     else:
                         warnings.warn(f"{self.__element_name} group_by[{k}] is not in the list of displayed columns")
             apply = self.__get_name_indexed_property("apply")
-            for k, v in apply.items():
+            for k, v in apply.items():  # pragma: no cover
                 col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
                 if col_desc:
                     if callable(v):
@@ -366,7 +366,7 @@ class _Builder:
                 else:
                     warnings.warn(f"{self.__element_name} apply[{k}] is not in the list of displayed columns")
             line_style = self.__attributes.get("style")
-            if line_style:
+            if line_style:  # pragma: no cover
                 if callable(line_style):
                     value = self.__hashes.get("style")
                 elif isinstance(line_style, str):
@@ -378,7 +378,7 @@ class _Builder:
                 elif value:
                     self.set_attribute("lineStyle", value)
             styles = self.__get_name_indexed_property("style")
-            for k, v in styles.items():
+            for k, v in styles.items():  # pragma: no cover
                 col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
                 if col_desc:
                     if callable(v):

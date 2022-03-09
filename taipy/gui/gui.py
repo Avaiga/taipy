@@ -760,7 +760,7 @@ class Gui:
         self,
         callback: t.Optional[t.Union[str, t.Callable]] = None,
         message: t.Optional[str] = "Work in Progress...",
-    ):
+    ):  # pragma: no cover
         action_name = callback.__name__ if callable(callback) else callback
         func = self.__get_on_cancel_block_ui(action_name)
         def_action_name = func.__name__
@@ -772,7 +772,7 @@ class Gui:
             self._bind(Gui.__UI_BLOCK_NAME, True)
         self.__send_ws_block(action=def_action_name, message=message, cancel=bool(action_name))
 
-    def _resume_actions(self):
+    def _resume_actions(self):  # pragma: no cover
         if _hasscopeattr(self, Gui.__UI_BLOCK_NAME):
             _setscopeattr(self, Gui.__UI_BLOCK_NAME, False)
         self.__send_ws_block(close=True)
@@ -883,7 +883,7 @@ class Gui:
                 title=self._get_app_config("title", "Taipy App"),
                 favicon=self._get_app_config("favicon", "/favicon.png"),
                 themes=self._get_themes(),
-                root_margin=self._get_app_config("margin", None)
+                root_margin=self._get_app_config("margin", None),
             )
         )
 
