@@ -1,7 +1,7 @@
 from importlib import util
 
 
-def _is_in_notebook():
+def _is_in_notebook():  # pragma: no cover
     try:
         if not util.find_spec("IPython"):
             return False

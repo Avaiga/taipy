@@ -1,3 +1,5 @@
+import pytest
+
 from taipy.gui.gui import Gui
 from taipy.gui.utils import _MapDict
 
@@ -88,6 +90,7 @@ def test_map_dict_update_full_dictionary_2():
 
     def update(k, v):
         temp_values[k] = v
+
     values = {"a": 1, "b": 2}
     update_values = {"a": 3, "b": 5}
     md = _MapDict(values, update)
@@ -109,3 +112,22 @@ def test_map_dict_set(gui: Gui, helpers):
         assert len(gui._Gui__state.d) == 1
         assert gui._Gui__state.d.get("a", None) is None
         assert gui._Gui__state.d.get("b", None) == 2
+
+
+def test_map_dict_items():
+    def update(k, v):
+        pass
+
+    values = {"a": 1, "b": {"c": "list c"}}
+    md = _MapDict(values)
+    mdu = _MapDict(values, update)
+    assert md["a"] == 1
+    assert isinstance(md["b"], _MapDict)
+    assert isinstance(mdu["b"], _MapDict)
+    assert md["b"]["c"] == "list c"
+    assert mdu["b"]["c"] == "list c"
+    del md["a"]
+    with pytest.raises(KeyError):
+        md["e"]
+    setattr(md, "a", 1)
+    assert md["a"] == 1

@@ -6,17 +6,17 @@ import re
 import typing as t
 import warnings
 
-if t.TYPE_CHECKING:
+if t.TYPE_CHECKING:  # pragma: no cover
     from ..gui import Gui
 
 from . import (
-    _TaipyBase,
-    _get_expr_var_name,
     _get_client_var_name,
+    _get_expr_var_name,
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
     _setscopeattr,
+    _TaipyBase,
 )
 
 

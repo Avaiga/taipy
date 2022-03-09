@@ -5,7 +5,7 @@ import logging
 import typing as t
 import warnings
 
-if t.TYPE_CHECKING:
+if t.TYPE_CHECKING:  # pragma: no cover
     from .gui import Gui
     from .renderers import Page
 

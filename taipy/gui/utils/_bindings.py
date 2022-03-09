@@ -1,12 +1,12 @@
+import typing as t
 from datetime import datetime
 from random import random
-import typing as t
 
-from ._map_dict import _MapDict
 from ..data.data_scope import _DataScopes
+from ._map_dict import _MapDict
 
 if t.TYPE_CHECKING:
-    from ..gui import Gui
+    from ..gui import Gui  # pragma: no cover
 
 
 class _Bindings:
@@ -38,6 +38,7 @@ class _Bindings:
                 return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
             else:
                 return value
+
         return property(__getter, __setter)  # Getter, Setter
 
     def _set_single_client(self, value: bool) -> None:

@@ -15,12 +15,12 @@ class _KillableThread(threading.Thread):
     def __run(self):
         sys.settrace(self.globaltrace)
         self.__run_backup()
-        self.run = self.__run_backup
+        self.run = self.__run_backup  # pragma: no cover
 
     def globaltrace(self, frame, why, arg):
-        return self.localtrace if why == "call" else None
+        return self.localtrace if why == "call" else None  # pragma: no cover
 
-    def localtrace(self, frame, why, arg):
+    def localtrace(self, frame, why, arg):  # pragma: no cover
         if self.killed and why == "line":
             raise SystemExit(0)
         return self.localtrace
