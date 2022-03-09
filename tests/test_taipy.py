@@ -250,19 +250,19 @@ class TestTaipy:
             tp.get(scenario_id)
             mck.assert_called_once_with(scenario_id)
 
-    def test_get_master(self, cycle):
-        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_master") as mck:
-            tp.get_master(cycle)
+    def test_get_official(self, cycle):
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_official") as mck:
+            tp.get_official(cycle)
             mck.assert_called_once_with(cycle)
 
-    def test_get_all_masters(self):
-        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_all_masters") as mck:
-            tp.get_all_masters()
+    def test_get_official_scenarios(self):
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._get_official_scenarios") as mck:
+            tp.get_official_scenarios()
             mck.assert_called_once_with()
 
-    def test_set_master(self, scenario):
-        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._set_master") as mck:
-            tp.set_master(scenario)
+    def test_set_official(self, scenario):
+        with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._set_official") as mck:
+            tp.set_official(scenario)
             mck.assert_called_once_with(scenario)
 
     def test_tag_and_untag(self, scenario):

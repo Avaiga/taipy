@@ -12,7 +12,7 @@ class _ScenarioModel:
     pipelines: List[PipelineId]
     properties: Dict[str, Any]
     creation_date: str
-    master_scenario: bool
+    official_scenario: bool
     subscribers: List[Dict]
     tags: List[str]
     cycle: Optional[CycleId] = None
@@ -28,7 +28,7 @@ class _ScenarioModel:
             pipelines=data["pipelines"],
             properties=data["properties"],
             creation_date=data["creation_date"],
-            master_scenario=data["master_scenario"],
+            official_scenario=data["official_scenario"],
             subscribers=data["subscribers"],
             tags=data["tags"],
             cycle=CycleId(data["cycle"]) if "cycle" in data else None,

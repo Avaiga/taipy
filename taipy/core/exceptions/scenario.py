@@ -18,15 +18,15 @@ class NonExistingScenarioConfig(Exception):
 
 class DoesNotBelongToACycle(Exception):
     """
-    Raised when setting a scenario to be the master scenario but it doesn't belong to any cycle
+    Raised when setting a scenario to be the official scenario but it doesn't belong to any cycle
     """
 
     pass
 
 
-class DeletingMasterScenario(Exception):
+class DeletingOfficialScenario(Exception):
     """
-    Raised when trying to remove a master scenario
+    Raised when trying to remove an official scenario
     """
 
     pass
