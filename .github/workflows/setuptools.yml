@@ -30,17 +30,11 @@ jobs:
 
       - name: Install Taipy without dependencies
         run: |
-          # Allows to install taipy-core from taipy-rest.
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY_TAIPY_CORE }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KEY_TAIPY }}" > ~/.ssh/id_ed25519
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
 
-          # Limitation of ssh key with github.
-          # We should use PAT to install all package.
-          # This should disappear when Taipy is open-source.
-          sed -i 's/ssh/https/g' setup.py
-          sed -i 's/git@github/${{ secrets.PERSONAL_TOKEN }}@github/g' setup.py
           pip install .
           rm -r taipy
 
