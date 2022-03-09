@@ -1,9 +1,11 @@
-import tempfile
-import pytest
-from taipy.gui import Gui
-from taipy.gui.utils import _get_non_existent_file_path
 import io
 import pathlib
+import tempfile
+
+import pytest
+
+from taipy.gui import Gui
+from taipy.gui.utils import _get_non_existent_file_path
 
 
 def test_file_upload_no_varname(gui: Gui, helpers):

@@ -6,8 +6,7 @@ from ._page import _Page
 
 
 class Partial(_Page):
-    """The class that allows to define a part of a page that is re-usable in Dialog or Pane controls.
-    """
+    """The class that allows to define a part of a page that is re-usable in Dialog or Pane controls."""
 
     __partials: t.Dict[str, Partial] = {}
 

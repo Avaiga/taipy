@@ -1,7 +1,9 @@
-import pytest
-from taipy.gui import Gui, download
-import pathlib
 import logging
+import pathlib
+
+import pytest
+
+from taipy.gui import Gui, download
 
 
 def test_download_file(gui: Gui, helpers):

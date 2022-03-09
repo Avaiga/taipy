@@ -57,7 +57,9 @@ def test_dialog_html_2(gui: Gui, helpers, csvdata):
     partial = gui.add_partial(Markdown("# A partial"))
     gui._bind_var_val("dialog_open", False)
     gui._bind_var_val("partial", partial)
-    html_string = '<taipy:dialog title="Another Dialog" open="{dialog_open}" partial="{partial}" on_validate="validate_action" />'
+    html_string = (
+        '<taipy:dialog title="Another Dialog" open="{dialog_open}" partial="{partial}" on_validate="validate_action" />'
+    )
     expected_list = [
         "<Dialog",
         'cancelLabel="Cancel"',

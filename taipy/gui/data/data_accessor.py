@@ -49,9 +49,9 @@ class _DataAccessors(object):
 
         self.__data_format = _DataFormat.JSON
 
-        from .pandas_data_accessor import _PandasDataAccessor
         from .array_dict_data_accessor import _ArrayDictDataAccessor
         from .numpy_data_accessor import _NumpyDataAccessor
+        from .pandas_data_accessor import _PandasDataAccessor
 
         self._register(_PandasDataAccessor)
         self._register(_ArrayDictDataAccessor)

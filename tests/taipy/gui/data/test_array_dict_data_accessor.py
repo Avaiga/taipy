@@ -1,7 +1,8 @@
 import pytest
+
 from taipy.gui import Gui
-from taipy.gui.data.data_format import _DataFormat
 from taipy.gui.data.array_dict_data_accessor import _ArrayDictDataAccessor
+from taipy.gui.data.data_format import _DataFormat
 
 an_array = [1, 2, 3]
 

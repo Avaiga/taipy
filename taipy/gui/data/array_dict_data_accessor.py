@@ -2,9 +2,9 @@ import typing as t
 
 import pandas as pd
 
+from ..gui import Gui
 from .data_format import _DataFormat
 from .pandas_data_accessor import _PandasDataAccessor
-from ..gui import Gui
 
 
 class _ArrayDictDataAccessor(_PandasDataAccessor):
@@ -31,7 +31,9 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                     if len(types) == 1:
                         return value
                     elif len(types) == 2 and list in types:
-                        return [v if isinstance(v, pd.DataFrame) else pd.DataFrame({str(i): v}) for i, v in enumerate(value)]
+                        return [
+                            v if isinstance(v, pd.DataFrame) else pd.DataFrame({str(i): v}) for i, v in enumerate(value)
+                        ]
         return pd.DataFrame(value)
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore

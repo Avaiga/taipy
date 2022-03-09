@@ -1,5 +1,6 @@
-import pytest
 import pandas  # type: ignore
+import pytest
+
 from taipy.gui import Gui
 from taipy.gui.data.data_format import _DataFormat
 from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor

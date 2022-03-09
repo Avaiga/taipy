@@ -107,11 +107,17 @@ class _Preprocessor(MdPreprocessor):
                     open_tag, open_tag_line_count, open_tag_identifier = tag_queue.pop()
                     close_tag_identifier = m.group(1)
                     if close_tag_identifier and not open_tag_identifier:
-                        warnings.warn(f"Missing opening '{open_tag}' tag identifier '{close_tag_identifier}' in line {open_tag_line_count}")
+                        warnings.warn(
+                            f"Missing opening '{open_tag}' tag identifier '{close_tag_identifier}' in line {open_tag_line_count}"
+                        )
                     if open_tag_identifier and not close_tag_identifier:
-                        warnings.warn(f"Missing closing '{open_tag}' tag identifier '{open_tag_identifier}' in line {line_count}")
+                        warnings.warn(
+                            f"Missing closing '{open_tag}' tag identifier '{open_tag_identifier}' in line {line_count}"
+                        )
                     if close_tag_identifier and open_tag_identifier and close_tag_identifier != open_tag_identifier:
-                        warnings.warn(f"Unmatched '{open_tag}' tag identifier in line {open_tag_line_count} and line {line_count}")
+                        warnings.warn(
+                            f"Unmatched '{open_tag}' tag identifier in line {open_tag_line_count} and line {line_count}"
+                        )
                     new_line = (
                         new_line[: m.start()]
                         + _MarkdownFactory._TAIPY_START
