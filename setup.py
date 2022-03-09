@@ -34,15 +34,6 @@ setup(
     keywords="taipy",
     name="taipy",
     packages=find_packages(include=['taipy']),
-    package_data={
-        'taipy': [
-            'gui/webapp/*.html',
-            'gui/webapp/*.png',
-            'gui/webapp/*.ico',
-            'gui/webapp/*.js',
-            'gui/webapp/*.txt'
-        ]
-    },
     url="https://github.com/avaiga/taipy",
     version="1.0.0.dev",
     zip_safe=False,
