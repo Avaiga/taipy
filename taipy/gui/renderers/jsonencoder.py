@@ -7,7 +7,7 @@ from ..icon import Icon
 from ..utils import _date_to_ISO, _MapDict, _TaipyBase
 
 
-class _TaipyJsonEncoder(JSONEncoder):  #  pragma: no cover
+class _TaipyJsonEncoder(JSONEncoder):
     def default(self, o):
         if isinstance(o, Icon):
             return o._to_dict()
