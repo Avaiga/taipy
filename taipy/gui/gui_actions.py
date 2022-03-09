@@ -10,9 +10,9 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
 
     Args:
         state: the current user state as received in any callback.
-        content (Any): file path or file content
-        name (optional(str)): file name for the content on the client browser (default to content name)
-        on_action (optional(str)): function called when the download starts
+        content: file path or file content
+        name: file name for the content on the client browser (default to content name)
+        on_action: function called when the download starts
     """
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)
@@ -31,14 +31,14 @@ def notify(
 
     Args:
         state: the current user state as received in any callback.
-        notification_type (optional(string)): The notification type. This can be one of `"success"`, `"info"`, `"warning"` or `"error"`. Default: `"info"`.
+        notification_type: The notification type. This can be one of `"success"`, `"info"`, `"warning"`, or `"error"`.
             To remove the last notification, set this parameter to the empty string.
-        message (string): The text message to display.
-        browser_notification (optional(bool)): If set to `True`, the browser will also show the notification.
-            If not specified or set to `None`, this parameter will use the value of
+        message: The text message to display.
+        browser_notification: If set to True, the browser will also show the notification.
+            If not specified or set to None, this parameter will use the value of
             `app_config[browser_notification]`.
-        duration (optional(int)): The time, in milliseconds, during which the notification is shown.
-            If not specified or set to `None`, this parameter will use the value of
+        duration: The time, in milliseconds, during which the notification is shown.
+            If not specified or set to None, this parameter will use the value of
             `app_config[notification_duration]`.
 
     Note that you can also call this function with _notification_type_ set to the first letter or the alert type
@@ -59,8 +59,8 @@ def hold_control(
 
     Args:
         state: the current user state as received in any callback.
-        action (string | function): The action to be carried on cancel. If empty string or None, no Cancel action will be provided to the user.
-        message (string): The message to show. Default: Work in Progress...
+        callback: The function to be called on _cancel_. If empty or None, no cancel action is provided to the user.
+        message: The message to show.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._hold_actions(callback, message)
