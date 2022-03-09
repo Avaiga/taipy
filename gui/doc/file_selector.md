@@ -1,12 +1,12 @@
-A control that allows to upload files.
+Allows to upload a file content.
 
 The upload can be triggered by pressing a button, or drag-and-dropping a file on top of the control.
 
 ## Usage
 
-### default behavior
+### Default behavior
 
-The variable specified in _content_ is populated by a local filename when transfer is finished.
+The variable specified in _content_ is populated by a local filename when the transfer is finished.
 
 !!! example "Page content"
 
@@ -22,11 +22,11 @@ The variable specified in _content_ is populated by a local filename when transf
         <taipy:file_selector>{content}</taipy:file_selector>
         ```
 
-### standard configuration
+### Standard configuration
 
 A specific _label_ can be shown besides the standard icon. 
 The function name provided as _on_action_ is called when the transfer is finished.
-The _extensions_ property is a list of extensions that is used to filter the file selction box but won't be enforced ie the suer can select and upload any file.
+The _extensions_ property can be used as a list of file name extensions that is used to filter the file selection box. This filter is not enforced: the user can select and upload any file.
 Upon dragging a file over the button, the _drop_message_ content is displayed as a temporary label for the button.
 
 !!! example "Page content"
@@ -43,9 +43,9 @@ Upon dragging a file over the button, the _drop_message_ content is displayed as
         <taipy:file_selector on_action="function_name" extensions=".csv,.xlsx" drop_message="Drop Message">{content}</taipy:file_selector>
         ```
 
-### multiple files upload
+### Multiple files upload
 
-The user can transfer multiple files at once by specifying the _multiple_ property as True.
+The user can transfer multiple files at once by setting the _multiple_ property to True.
 
 !!! example "Page content"
 

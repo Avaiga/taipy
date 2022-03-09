@@ -5,7 +5,7 @@ The value will be maintained between min and max.
 
 ## Usage
 
-### default behavior
+### Minimal usage
 
 Shows a message at a specified position between min and max.
 
@@ -23,7 +23,7 @@ Shows a message at a specified position between min and max.
         <taipy:indicator value="{val}" min="0" max ="100">message</taipy:indicator>
         ```
 
-### formatting the message
+### Formatting the message
 
 A _format_ can be applied to the message. 
 
@@ -42,9 +42,9 @@ A _format_ can be applied to the message.
         ```
 
 
-### vertical orientation
+### Vertical indicators
 
-The _orientation_ of the indicator can be specified as vertical. 
+The _orientation_ can be specified to "vertical" (or "v") to create a vertical indicator.
 
 !!! example "Page content"
 

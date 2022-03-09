@@ -129,10 +129,10 @@ By specifying a function for _on_range_change_, you can be made aware of chart z
         <taipy:chart on_range_change="range_change_function_name" ...>{data}</taipy:chart>
         ```
 
-### sampling data
+### Sampling data
 
 By specifying _limit_rows_ as True, charts will adapt the number of points to the viewable area.
-Depending on the algorithm, Some specific points mightnot be shown on the chart.
+Depending on the algorithm, Some specific points might not be shown on the chart.
 
 !!! example "Page content"
 

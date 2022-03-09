@@ -1,10 +1,10 @@
-A control that allows to download a file.
+Allows to download a file content.
 
-The download can be triggered when clicking on a button, or can be performed automatically.
+The download can be triggered when clicking on a button, or can be performed automatically
 
 ## Usage
 
-### default behavior
+### Sefault behavior
 
 Allows to download _content_ when content is a file path or some content
 
@@ -22,10 +22,10 @@ Allows to download _content_ when content is a file path or some content
         <taipy:file_download>{content}</taipy:file_download>
         ```
 
-### standard configuration
+### Standard configuration
 
 A specific _label_ can be shown besides the standard icon. 
-The function name provided as _on_action_ is called when the user initiate the download.
+The function name provided as _on_action_ is called when the user initiates the download.
 The _name_ provided will be the default name proposed to the user when downloading (depending on browser validation and rules).
 
 !!! example "Page content"
@@ -42,9 +42,9 @@ The _name_ provided will be the default name proposed to the user when downloadi
         <taipy:file_download on_action="function_name"  name="filename">{content}</taipy:file_download>
         ```
 
-### file preview in the browser
+### Preview file in the browser
 
-File content can be visualized in the browser (if supported and in another tab) by specifying _bypass_preview_ as False.
+The file content can be visualized in the browser (if supported and in another tab) by specifying _bypass_preview_ as False.
 
 !!! example "Page content"
 
@@ -60,9 +60,9 @@ File content can be visualized in the browser (if supported and in another tab) 
         <taipy:file_download bypass_preview="False">{content}</taipy:file_download>
         ```
 
-### automatic download
+### Automatic download
 
-File content can be downloaded automatically (when the page shows or when the content is set).
+The file content can be downloaded automatically (when the page shows and when the content is set).
 
 !!! example "Page content"
 

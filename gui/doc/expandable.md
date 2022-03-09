@@ -1,11 +1,12 @@
 Displays its child elements in a collapsable area.
+
 Expandable is a block control.
 
 ## Usage
 
 ### Defining a title and managing expanded state
 
-The default property _title_ defines the title shown when closed.
+The default property _title_ defines the title shown when clthe visual element is collapsed.
 
 !!! example "Page content"
 
@@ -21,9 +22,9 @@ The default property _title_ defines the title shown when closed.
         <taipy:expandable expand="{expand}">Title</taipy:expandable>
         ```
 
-### Exapandable as block
+### Content as block
 
-Expandable content is specified inside the expandable block
+The content of `expandable` can be specified as the block content.
 
 !!! example "Page content"
 

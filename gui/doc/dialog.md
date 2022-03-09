@@ -1,6 +1,7 @@
 A modal dialog.
 
-Dialog allows to show some content over the current page. it is closed automatically on Cancel, Validation or click on the background.
+Dialog allows to show some content over the current page.
+The dialog is closed when the user presses the Cancel or Validate buttons, or clicks outside the area of the dialog (triggering a Cancel action).
 
 ## Usage
 
@@ -49,7 +50,7 @@ and what actions (callback functions) are triggered when buttons are pressed:
 
 ### Dialog as block
 
-Dialog content can be specified as inside the dialog block
+The content of the dialog can be specified directly inside the dialog block.
 
 !!! example "Page content"
 
@@ -58,7 +59,7 @@ Dialog content can be specified as inside the dialog block
         ```
         <|{show_dialog}|dialog|
             ...
-            Some text
+            Some content
             ...
             <|{some content}|>
             ...
@@ -79,7 +80,7 @@ Dialog content can be specified as inside the dialog block
 
 ### Dialog with page
 
-Dialog content can be specified as an existing page route through the _page_ property.
+The content of the dialog can be specified as an existing page name using the _page_ property.
 
 !!! example "Page content"
 
@@ -97,7 +98,7 @@ Dialog content can be specified as an existing page route through the _page_ pro
 
 ### Dialog with partial
 
-Dialog content can be specified as a _Partial_ instance through the _partial_ property.
+The content of the dialog can be specified as a _Partial_ instance using the _partial_ property.
 
 !!! example "Page content"
 
