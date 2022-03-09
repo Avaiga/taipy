@@ -1,8 +1,7 @@
 import warnings
 
 from taipy.gui import Gui
-from taipy.gui.utils._evaluator import _Evaluator
-from taipy.gui.utils.types import _TaipyBool, _TaipyNumber
+from taipy.gui.utils.types import _TaipyNumber
 
 
 def test_unbind_variable_in_expression(gui: Gui):

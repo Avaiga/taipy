@@ -1,8 +1,8 @@
-import pytest
+import pathlib
 import tempfile
+
 from taipy.gui import Gui
 from taipy.gui.utils import _get_non_existent_file_path
-import pathlib
 
 
 def test_empty_file_name(gui: Gui, helpers):
