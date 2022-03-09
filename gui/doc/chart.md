@@ -78,9 +78,11 @@ with columns _Col D_ and _Col F_: the columns names needs to be prefixed by the 
 
         ```
         <|{[data1, data2]}|chart|x[1]=0/Col A|y[1]=0/Col B|x[2]=1/Col D|y[2]=1/Col F|>
+
+        <|{[[26, 34, 46],[34,34],[16, 46, 20, 6]]}|chart|>
         ```
   
-        Note how we refer to the different y value sources, using indices.
+        In this second example, we draw 3 charts with _x_ the index of the _y_ value in each array.
 
     === "HTML"
 
