@@ -25,32 +25,32 @@ from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .partial import Partial
-from .renderers import _EmptyPage, Page
+from .renderers import Page, _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
 from .server import _Server
+from .state import State
 from .types import _WsType
 from .utils import (
+    _delscopeattr,
+    _get_client_var_name,
+    _get_non_existent_file_path,
+    _getscopeattr,
+    _getscopeattr_drill,
+    _hasscopeattr,
+    _is_in_notebook,
+    _MapDict,
+    _setscopeattr,
+    _setscopeattr_drill,
     _TaipyBase,
     _TaipyContent,
     _TaipyContentImage,
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
-    _get_non_existent_file_path,
-    _is_in_notebook,
-    _MapDict,
-    _delscopeattr,
-    _get_client_var_name,
-    _getscopeattr,
-    _getscopeattr_drill,
-    _hasscopeattr,
-    _setscopeattr,
-    _setscopeattr_drill,
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .state import State
 
 
 class Gui:
@@ -568,8 +568,8 @@ class Gui:
         return self.__evaluator._fetch_expression_list(expr)
 
     # Proxy methods for Adapter
-    def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
-        self.__adapter._add_list_for_variable(var_name, list_name)
+    # def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
+    #     self.__adapter._add_list_for_variable(var_name, list_name)
 
     def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter._add_adapter_for_type(type_name, adapter)
@@ -780,8 +780,7 @@ class Gui:
     def _navigate(self, to: t.Optional[str] = ""):
         to = to or Gui.__root_page_name
         if to not in self._config.routes:
-            warnings.warn(
-                f'cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
+            warnings.warn(f'cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return
         self.__send_ws_navigate(to)
 
@@ -832,7 +831,7 @@ class Gui:
         if _is_in_notebook() or run_in_thread:
             self._config.app_config["single_client"] = True
 
-        if run_server and app_config["ngrok_token"]:
+        if run_server and app_config["ngrok_token"] and util.find_spec("pyngrok"):  # pragma: no cover
             ngrok.set_auth_token(app_config["ngrok_token"])
             http_tunnel = ngrok.connect(app_config["port"], "http")
             app_config["client_url"] = http_tunnel.public_url

@@ -61,7 +61,7 @@ jobs:
           rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
           # Run test with optionals packages installed
           pip install markupsafe==2.0.1
-          pip install pytest pytest-mock
+          pip install pytest pytest-mock pytest-ngrok
           pytest -m "not teste2e" > pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
