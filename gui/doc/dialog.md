@@ -87,13 +87,13 @@ The content of the dialog can be specified as an existing page name using the _p
     === "Markdown"
 
         ```
-        <|{show_dialog}|dialog|page=route|>
+        <|{show_dialog}|dialog|page=page_name|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:dialog page="route">{show_dialog}</taipy:dialog>
+        <taipy:dialog page="page_name">{show_dialog}</taipy:dialog>
         ```
 
 ### Dialog with partial
