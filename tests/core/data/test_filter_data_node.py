@@ -123,7 +123,6 @@ class TestFilterDataNode:
         assert all([isinstance(x, Dict) for x in filtered_custom_dn.data])
         for i, row in bool_df.iterrows():
             for col in row.index:
-                print(i, col, row[col])
                 if row[col]:
                     assert filtered_custom_dn.data[i][col] == custom_dn[["a", "b"]].data[i][col]
                 else:

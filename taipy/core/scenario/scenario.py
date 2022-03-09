@@ -4,8 +4,9 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
-from taipy.core.common._reload import reload, self_reload
+from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle.cycle import Cycle
@@ -13,7 +14,7 @@ from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline import Pipeline
 
 
-class Scenario:
+class Scenario(_Entity):
     """
     Represents an instance of the  business case to solve.
 
@@ -30,6 +31,7 @@ class Scenario:
     """
 
     ID_PREFIX = "SCENARIO"
+    MANAGER_NAME = "scenario"
     __SEPARATOR = "_"
 
     def __init__(
@@ -44,12 +46,11 @@ class Scenario:
         subscribers: Set[Callable] = None,
         tags: Set[str] = None,
     ):
-        self.config_id = _validate_id(config_id)
-        self.id: ScenarioId = scenario_id or self.new_id(self.config_id)
-        self.pipelines = {p.config_id: p for p in pipelines}
-        self.creation_date = creation_date or datetime.now()
-        self.cycle = cycle
-
+        self._config_id = _validate_id(config_id)
+        self.id: ScenarioId = scenario_id or self.new_id(self._config_id)
+        self._pipelines = {p.config_id: p for p in pipelines}
+        self._creation_date = creation_date or datetime.now()
+        self._cycle = cycle
         self._subscribers = subscribers or set()
         self._master_scenario = is_master
         self._tags = tags or set()
@@ -66,19 +67,74 @@ class Scenario:
         self.__dict__ = sc.__dict__
 
     @property  # type: ignore
-    @self_reload("scenario")
+    @self_reload(MANAGER_NAME)
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def config_id(self, val):
+        self._config_id = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def pipelines(self):
+        return self._pipelines
+
+    @pipelines.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def pipelines(self, val: List[Pipeline]):
+        self._pipelines = {p.config_id: p for p in val}
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def creation_date(self):
+        return self._creation_date
+
+    @creation_date.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def creation_date(self, val):
+        self._creation_date = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def cycle(self):
+        return self._cycle
+
+    @cycle.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def cycle(self, val):
+        self._cycle = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
     def is_master(self):
         return self._master_scenario
 
+    @is_master.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def is_master(self, val):
+        self._master_scenario = val
+
     @property  # type: ignore
-    @self_reload("scenario")
+    @self_reload(MANAGER_NAME)
     def subscribers(self):
         return self._subscribers
 
+    @subscribers.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def subscribers(self, val):
+        self._subscribers = val or set()
+
     @property  # type: ignore
-    @self_reload("scenario")
+    @self_reload(MANAGER_NAME)
     def tags(self):
         return self._tags
+
+    @tags.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def tags(self, val):
+        self._tags = val or set()
 
     @property  # type: ignore
     def properties(self):

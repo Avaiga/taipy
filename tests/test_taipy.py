@@ -452,7 +452,7 @@ class TestTaipy:
         generated_pickle = PickleDataNode(config_id="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
 
         # File already exists so it does not write any
-        assert len(_DataManager._get_all()) == 1
+        assert len(_DataManager._get_all()) == 2
         assert file_exists(user_pickle.path)
         assert_file_exists(generated_pickle.path)
 

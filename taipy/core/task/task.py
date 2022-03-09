@@ -1,13 +1,15 @@
 import uuid
 from typing import Dict, Iterable, Optional
 
+from taipy.core.common._entity import _Entity
+from taipy.core.common._reload import self_reload, self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import TaskId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
 
 
-class Task:
+class Task(_Entity):
     """Holds user function that will be executed, its parameters qs data nodes and outputs as data nodes.
 
     This element bring together the user code as function, parameters and outputs.
@@ -28,6 +30,7 @@ class Task:
 
     ID_PREFIX = "TASK"
     __ID_SEPARATOR = "_"
+    MANAGER_NAME = "task"
 
     def __init__(
         self,
@@ -38,12 +41,12 @@ class Task:
         id: TaskId = None,
         parent_id: Optional[str] = None,
     ):
-        self.config_id = _validate_id(config_id)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self.config_id, str(uuid.uuid4())]))
-        self.parent_id = parent_id
+        self._config_id = _validate_id(config_id)
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self._config_id, str(uuid.uuid4())]))
+        self._parent_id = parent_id
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
-        self.function = function
+        self._function = function
 
     def __hash__(self):
         return hash(self.id)
@@ -54,13 +57,43 @@ class Task:
     def __setstate__(self, state):
         vars(self).update(state)
 
-    @property
-    def output(self) -> Dict[str, DataNode]:
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def config_id(self, val):
+        self._config_id = val
+
+    @property  # type: ignore
+    def input(self):
+        return self.__input
+
+    @property  # type: ignore
+    def output(self):
         return self.__output
 
-    @property
-    def input(self) -> Dict[str, DataNode]:
-        return self.__input
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def parent_id(self):
+        return self._parent_id
+
+    @parent_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def parent_id(self, val):
+        self._parent_id = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def function(self):
+        return self._function
+
+    @function.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def function(self, val):
+        self._function = val
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
@@ -77,6 +110,6 @@ class Task:
         Returns:
            Lowest `scope` present in input and output data node or GLOBAL if there are no neither input or output.
         """
-        data_nodes = list(self.input.values()) + list(self.output.values())
+        data_nodes = list(self.__input.values()) + list(self.__output.values())
         scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return Scope(scope)

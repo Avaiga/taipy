@@ -1,3 +1,4 @@
+from datetime import timedelta
 from time import sleep
 from unittest.mock import MagicMock
 
@@ -10,6 +11,7 @@ from taipy.core.exceptions.data_node import NoData
 from taipy.core.exceptions.job import DataNodeWritingError
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
+from taipy.core.job.status import Status
 from taipy.core.scheduler.job_dispatcher import JobDispatcher
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
@@ -147,6 +149,78 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
     with pytest.raises(DataNodeWritingError):
         raise job.exceptions[0]
     assert "Error writing in datanode" in str(job.exceptions[0])
+
+
+def test_auto_set_and_reload(current_datetime, job_id):
+    task_1 = Task(config_id="name_1", function=_foo, id=TaskId("task_1"))
+    task_2 = Task(config_id="name_2", function=_foo, id=TaskId("task_2"))
+    job_1 = Job(job_id, task_1)
+
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+    _JobManager._set(job_1)
+
+    job_2 = _JobManager._get(job_1)
+
+    assert job_1.task.id == task_1.id
+    job_1._task = task_2
+    assert job_1.task.id == task_1.id
+    job_1.task = task_2
+    assert job_1.task.id == task_2.id
+    assert job_1.task.id == task_2.id
+
+    assert not job_1.force
+    job_1._force = True
+    assert not job_1.force
+    job_1.force = True
+    assert job_1.force
+    assert job_2.force
+
+    assert job_1.status == Status.SUBMITTED
+    job_1._status = Status.BLOCKED
+    assert job_1.status == Status.SUBMITTED
+    job_1.status = Status.BLOCKED
+    assert job_1.status == Status.BLOCKED
+    assert job_2.status == Status.BLOCKED
+
+    new_datetime = current_datetime + timedelta(1)
+    job_1.creation_date = new_datetime
+    assert job_1.creation_date == new_datetime
+    assert job_2.creation_date == new_datetime
+
+    # assert len(job_1.subscribers) == 0
+    # job_1._subscribers = set([print])
+    # assert len(job_1.subscribers) == 0
+    # job_1.subscribers = set([print])
+    # assert len(job_1.subscribers) == 1
+    # assert len(job_2.subscribers) == 1
+
+    # TODO: add exceptions
+
+    with job_1 as job:
+        assert job.task.id == task_2.id
+        assert job.force
+        assert job.status == Status.BLOCKED
+        assert job.creation_date == new_datetime
+        assert job._is_in_context
+
+        new_datetime_2 = new_datetime + timedelta(1)
+        job.task = task_1
+        job.force = False
+        job.status = Status.COMPLETED
+        job.creation_date = new_datetime_2
+
+        assert job.task.id == task_2.id
+        assert job.force
+        assert job.status == Status.BLOCKED
+        assert job.creation_date == new_datetime
+        assert job._is_in_context
+
+    assert job_1.task.id == task_1.id
+    assert not job_1.force
+    assert job_1.status == Status.COMPLETED
+    assert job_1.creation_date == new_datetime_2
+    assert not job_1._is_in_context
 
 
 def _error():

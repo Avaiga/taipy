@@ -160,9 +160,8 @@ def test_set_and_get_task():
     _TaskManager._set(third_task_with_same_id_as_first_task)
     assert len(_TaskManager._get_all()) == 2
     assert _TaskManager._get(task_id_1).id == third_task_with_same_id_as_first_task.id
-    assert _TaskManager._get(task_id_1).config_id != first_task.config_id
+    assert _TaskManager._get(task_id_1).config_id == third_task_with_same_id_as_first_task.config_id
     assert _TaskManager._get(first_task).id == third_task_with_same_id_as_first_task.id
-    assert _TaskManager._get(first_task).config_id != first_task.config_id
     assert _TaskManager._get(task_id_2).id == second_task.id
     assert _TaskManager._get(second_task).id == second_task.id
 

@@ -103,15 +103,18 @@ def test_delete_job():
     assert _JobManager._get(job_1.id) is None
 
 
+m = multiprocessing.Manager()
+lock = m.Lock()
+
+
+def inner_lock_multiply(nb1: float, nb2: float):
+    with lock:
+        return multiply(nb1, nb2)
+
+
 def test_raise_when_trying_to_delete_unfinished_job():
-    m = multiprocessing.Manager()
-    lock = m.Lock()
 
     scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
-
-    def inner_lock_multiply(nb1: float, nb2: float):
-        with lock:
-            return multiply(nb1, nb2)
 
     task = _create_task(inner_lock_multiply)
 

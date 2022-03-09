@@ -1,6 +1,7 @@
 import pathlib
 from copy import copy
 from datetime import datetime, timedelta
+from typing import Dict
 
 from taipy.core.common._utils import _load_fct
 from taipy.core.config.config import Config
@@ -15,6 +16,7 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
     _READ_FCT_MODULE_KEY = "read_fct_module"
     _WRITE_FCT_NAME_KEY = "write_fct_name"
     _WRITE_FCT_MODULE_KEY = "write_fct_module"
+    _EXPOSED_TYPE_KEY = "exposed_type"
 
     def __init__(self, class_map):
         super().__init__(model=_DataNodeModel, dir_name="data_nodes")
@@ -36,13 +38,24 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
                 properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY],
             )
 
+        if self._EXPOSED_TYPE_KEY in properties.keys():
+            if not isinstance(properties[self._EXPOSED_TYPE_KEY], str):
+                if isinstance(properties[self._EXPOSED_TYPE_KEY], Dict):
+                    properties[self._EXPOSED_TYPE_KEY] = {
+                        k: f"{v.__module__}.{v.__qualname__}" for k, v in properties[self._EXPOSED_TYPE_KEY].items()
+                    }
+                else:
+                    properties[
+                        self._EXPOSED_TYPE_KEY
+                    ] = f"{properties[self._EXPOSED_TYPE_KEY].__module__}.{properties[self._EXPOSED_TYPE_KEY].__qualname__}"
+
         return _DataNodeModel(
             data_node.id,
-            data_node.config_id,
-            data_node.scope,
+            data_node._config_id,
+            data_node._scope,
             data_node.storage_type(),
             data_node._name,
-            data_node.parent_id,
+            data_node._parent_id,
             data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
             data_node._job_ids,
             data_node._validity_period.days if data_node._validity_period else None,
@@ -73,6 +86,19 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
             del model.data_node_properties[self._READ_FCT_MODULE_KEY]
             del model.data_node_properties[self._WRITE_FCT_NAME_KEY]
             del model.data_node_properties[self._WRITE_FCT_MODULE_KEY]
+
+        if self._EXPOSED_TYPE_KEY in model.data_node_properties.keys():
+            if model.data_node_properties[self._EXPOSED_TYPE_KEY] != "numpy":
+                from pydoc import locate
+
+                if isinstance(model.data_node_properties[self._EXPOSED_TYPE_KEY], str):
+                    model.data_node_properties[self._EXPOSED_TYPE_KEY] = locate(
+                        model.data_node_properties[self._EXPOSED_TYPE_KEY]
+                    )
+                if isinstance(model.data_node_properties[self._EXPOSED_TYPE_KEY], Dict):
+                    model.data_node_properties[self._EXPOSED_TYPE_KEY] = {
+                        k: locate(v) for k, v in model.data_node_properties[self._EXPOSED_TYPE_KEY].items()
+                    }
 
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:

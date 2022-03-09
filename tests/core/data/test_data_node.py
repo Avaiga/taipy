@@ -132,7 +132,7 @@ class TestDataNode:
         assert dn.job_ids == [job_id]
 
     def test_ready_for_reading(self):
-        dn = DataNode("foo_bar")
+        dn = InMemoryDataNode("foo_bar", Scope.CYCLE)
         assert dn.last_edition_date is None
         assert not dn.is_ready_for_reading
         assert dn.job_ids == []
@@ -378,41 +378,6 @@ class TestDataNode:
         assert dn.is_ready_for_reading
         assert _DataManager._get(dn.id).is_ready_for_reading
 
-    def test_auto_reload(self):
-        dm = _DataManager()
-        dn = FakeDataNode("foo")
-
-        dm._set(dn)
-        dn_bis = dm._get(dn)
-
-        dn._name = "new_name"
-        dn._validity_period = timedelta(days=3, hours=2, minutes=1)
-        dn.write("Any data")
-
-        assert dn.last_edition_date is not None
-        assert dn.last_edition_date == dn_bis.last_edition_date
-        assert dn.name == dn_bis.name == "new_name"
-        assert dn._validity_period != dn_bis._validity_period
-        assert dn.write_has_been_called == 1
-        assert dn.validity_period == dn_bis.validity_period
-        assert dn.expiration_date == dn_bis.expiration_date
-        assert dn.expiration_date > dn.last_edition_date
-
-        assert dn.job_ids == dn_bis.job_ids
-
-        dn.lock_edition()
-        dm._set(dn)
-        assert dn.edition_in_progress == dn_bis.edition_in_progress is True
-
-        dn.unlock_edition()
-        dm._set(dn)
-        assert dn.edition_in_progress == dn_bis.edition_in_progress is False
-
-        dn.properties["qux"] = 5
-        same_dn = dm._get(dn.id)
-        assert dn.properties["qux"] == 5
-        assert same_dn.properties["qux"] == 5
-
     def test_expiration_date_raise_if_never_write(self):
         dn = FakeDataNode("foo")
 
@@ -423,3 +388,125 @@ class TestDataNode:
         dn = FakeDataNode("foo")
 
         assert dn.validity_period is None
+
+    def test_auto_set_and_reload(self, current_datetime):
+        dn_1 = InMemoryDataNode(
+            "foo",
+            scope=Scope.SCENARIO,
+            id=DataNodeId("an_id"),
+            name="foo",
+            parent_id=None,
+            last_edition_date=current_datetime,
+            job_ids=[JobId("a_job_id")],
+            edition_in_progress=False,
+            validity_period=None,
+        )
+
+        dm = _DataManager()
+        dm._set(dn_1)
+
+        dn_2 = dm._get(dn_1)
+
+        assert dn_1.config_id == "foo"
+        dn_1._config_id = "fgh"
+        assert dn_1.config_id == "foo"
+        dn_1.config_id = "fgh"
+        assert dn_1.config_id == "fgh"
+        assert dn_2.config_id == "fgh"
+
+        assert dn_1.parent_id is None
+        dn_1._parent_id = "parent_id"
+        assert dn_1.parent_id is None
+        dn_1.parent_id = "parent_id"
+        assert dn_1.parent_id == "parent_id"
+        assert dn_2.parent_id == "parent_id"
+
+        assert dn_1.scope == Scope.SCENARIO
+        dn_1._scope = Scope.PIPELINE
+        assert dn_1.scope == Scope.SCENARIO
+        dn_1.scope = Scope.PIPELINE
+        assert dn_1.scope == Scope.PIPELINE
+        assert dn_2.scope == Scope.PIPELINE
+
+        new_datetime = current_datetime + timedelta(1)
+
+        assert dn_1.last_edition_date == current_datetime
+        dn_1._last_edition_date = new_datetime
+        assert dn_1.last_edition_date == current_datetime
+        dn_1.last_edition_date = new_datetime
+        assert dn_1.last_edition_date == new_datetime
+        assert dn_2.last_edition_date == new_datetime
+
+        assert dn_1.name == "foo"
+        dn_1._name = "def"
+        assert dn_1.name == "foo"
+        dn_1.name = "def"
+        assert dn_1.name == "def"
+        assert dn_2.name == "def"
+
+        assert not dn_1.edition_in_progress
+        dn_1._edition_in_progress = True
+        assert not dn_1.edition_in_progress
+        dn_1.edition_in_progress = True
+        assert dn_1.edition_in_progress
+        assert dn_2.edition_in_progress
+        dn_1.unlock_edition()
+        assert not dn_1.edition_in_progress
+        assert not dn_2.edition_in_progress
+        dn_1.lock_edition()
+        assert dn_1.edition_in_progress
+        assert dn_2.edition_in_progress
+
+        time_period = timedelta(1)
+
+        assert dn_1.validity_period is None
+        dn_1._validity_period = time_period
+        assert dn_1.validity_period is None
+        dn_1.validity_period = time_period
+        assert dn_1.validity_period == time_period
+        assert dn_2.validity_period == time_period
+
+        assert dn_1.properties == {}
+        dn_1.properties["qux"] = 5
+        assert dn_1.properties["qux"] == 5
+        assert dn_2.properties["qux"] == 5
+
+        dn_1.last_edition_date = new_datetime
+
+        with dn_1 as dn:
+            assert dn.config_id == "fgh"
+            assert dn.parent_id == "parent_id"
+            assert dn.scope == Scope.PIPELINE
+            assert dn.last_edition_date == new_datetime
+            assert dn.name == "def"
+            assert dn.edition_in_progress
+            assert dn.validity_period == time_period
+            assert dn._is_in_context
+
+            new_datetime_2 = new_datetime + timedelta(1)
+
+            dn.config_id = "abc"
+            dn.parent_id = "parent_id_2"
+            dn.scope = Scope.CYCLE
+            dn.last_edition_date = new_datetime_2
+            dn.name = "abc"
+            dn.edition_in_progress = False
+            dn.validity_period = None
+
+            assert dn._config_id == "abc"
+            assert dn.config_id == "fgh"
+            assert dn.parent_id == "parent_id"
+            assert dn.scope == Scope.PIPELINE
+            assert dn.last_edition_date == new_datetime
+            assert dn.name == "def"
+            assert dn.edition_in_progress
+            assert dn.validity_period == time_period
+
+        assert dn_1.config_id == "abc"
+        assert dn_1.parent_id == "parent_id_2"
+        assert dn_1.scope == Scope.CYCLE
+        assert dn_1.last_edition_date == new_datetime_2
+        assert dn_1.name == "abc"
+        assert not dn_1.edition_in_progress
+        assert dn_1.validity_period is None
+        assert not dn_1._is_in_context

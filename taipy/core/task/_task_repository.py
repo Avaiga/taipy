@@ -17,11 +17,11 @@ class _TaskRepository(_FileSystemRepository[_TaskModel, Task]):
     def _to_model(self, task: Task) -> _TaskModel:
         return _TaskModel(
             id=task.id,
-            parent_id=task.parent_id,
-            config_id=task.config_id,
+            parent_id=task._parent_id,
+            config_id=task._config_id,
             input_ids=self.__to_ids(task.input.values()),
-            function_name=task.function.__name__,
-            function_module=task.function.__module__,
+            function_name=task._function.__name__,
+            function_module=task._function.__module__,
             output_ids=self.__to_ids(task.output.values()),
         )
 
