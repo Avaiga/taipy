@@ -106,9 +106,9 @@ def test_map_dict_set(gui: Gui, helpers):
     gui.run(run_server=False)
     sid = helpers.create_scope_and_get_sid(gui)
     with gui._get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
-        assert isinstance(gui._Gui__state.d, _MapDict)
+        assert isinstance(gui._Gui__state.d, dict)
         gui._Gui__state.d = {"b": 2}
-        assert isinstance(gui._Gui__state.d, _MapDict)
+        assert isinstance(gui._Gui__state.d, dict)
         assert len(gui._Gui__state.d) == 1
         assert gui._Gui__state.d.get("a", None) is None
         assert gui._Gui__state.d.get("b", None) == 2

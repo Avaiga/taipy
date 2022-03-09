@@ -15,7 +15,7 @@ class _TaipyJsonEncoder(JSONEncoder):
             return o._dict
         elif isinstance(o, _TaipyBase):
             return o.get()
-        elif isinstance(o, datetime):
+        elif isinstance(o, (datetime, date, time)):
             return _date_to_ISO(o)
         elif isinstance(o, Path):
             return str(o)

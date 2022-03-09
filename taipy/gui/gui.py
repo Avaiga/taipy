@@ -230,9 +230,9 @@ class Gui:
 
                 ret_val = map(mapping, val)
                 if isinstance(value, list):
-                    value = _TaipyLovValue(list(ret_val), current_value.get_name())
+                    value = list(ret_val)
                 else:
-                    value = _TaipyLovValue(next(ret_val), current_value.get_name())
+                    value = next(ret_val)
 
         elif isinstance(current_value, _TaipyBase):
             value = current_value.cast_value(value)
