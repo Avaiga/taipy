@@ -111,7 +111,7 @@ const Chart = (props: ChartProp) => {
         title = "",
         className,
         width = "100%",
-        height = "100%",
+        height = "100vh",
         refresh = false,
         updateVarName,
         updateVars,

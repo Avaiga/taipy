@@ -17,20 +17,20 @@ no index) which is overridden by any specified indexed property.
 ### Simple example
 
 If you want to create a chart that represents a dataframe stored in the Python
-variable _data_, where column "Col1" you can use the following content:
+variable _data_ (first and second columns will be used for x and y values), you can use the following content:
 
 !!! example "Page content"
 
     === "Markdown"
 
         ```
-        <|{data}|chart|x=xValues|y=yValues|>
+        <|{data}|chart|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:chart x="xValues" y="yValues">{data}</taipy:chart>
+        <taipy:chart>{data}</taipy:chart>
         ```
 
 
@@ -66,6 +66,32 @@ Furthermore, we want the second dataset to be displayed in red.
          xaxis[2]="x2">{data}</taipy:chart>
         ```
 
+### Multiple charts with different lengths
+
+In the following example, the value holds an array of dataframe of different length _[data1, data2]_.
+We want to show a first chart with columns _Col A_ and _Col B_ from the first dataframe and a second chart
+with columns _Col D_ and _Col F_: the columns names needs to be prefixed by the index of tha dataframe in the array.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{[data1, data2]}|chart|x[1]=0/Col A|y[1]=0/Col B|x[2]=1/Col D|y[2]=1/Col F|>
+        ```
+  
+        Note how we refer to the different y value sources, using indices.
+
+    === "HTML"
+
+        ```html
+        <taipy:chart
+         x[1]="0/Col A" y[1]="0/Col B"
+         x[2]="1/Col D" y[2]="1/Col F"
+         >{[data1, data2]}</taipy:chart>
+        ```
+
+
 ### Tracking selection
 
 If points selection is enabled in the chart, you can keep track of which point indices
@@ -82,5 +108,43 @@ are selected in a variable.
     === "HTML"
 
         ```html
-        <taipy:chart selected="selected_indices" ...>{data}</taipy:chart>
+        <taipy:chart selected="{selected_indices}" ...>{data}</taipy:chart>
         ```
+
+### Tracking range
+
+By specifying a function for _on_range_change_, you can be made aware of chart zoom changes.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{data}|chart|on_range_change=range_change_function_name|...|>
+        ```
+
+    === "HTML"
+
+        ```html
+        <taipy:chart on_range_change="range_change_function_name" ...>{data}</taipy:chart>
+        ```
+
+### sampling data
+
+By specifying _limit_rows_ as True, charts will adapt the number of points to the viewable area.
+Depending on the algorithm, Some specific points mightnot be shown on the chart.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{data}|chart|limit_rows|...|>
+        ```
+
+    === "HTML"
+
+        ```html
+        <taipy:chart limit_rows="true" ...>{data}</taipy:chart>
+        ```
+
