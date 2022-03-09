@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         python-versions: [ '3.8', '3.9', '3.10' ]
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-18.04, macos-latest] #windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -34,7 +34,6 @@ jobs:
           echo "${{ secrets.SSH_KEY_TAIPY_CORE }}" > ~/.ssh/id_ed25519
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519
-          cat ~/.ssh/id_ed25519 | base64
 
           export GIT_SSH_COMMAND="ssh -v"
           pip install .
