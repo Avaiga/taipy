@@ -1,5 +1,3 @@
-from importlib import util
-
 import pytest
 
 from taipy.core.common.frequency import Frequency
@@ -100,96 +98,6 @@ owner = "Raymond Kopa"
 
     Config._set_global_config(clean_entities_enabled=True)
     Config._set_job_config(mode="standalone")
-    Config._add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
-    dn1_cfg_v2 = Config._add_data_node(
-        "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
-    )
-    dn2_cfg_v2 = Config._add_data_node("dn2", storage_type="in_memory", foo="bar", default_data="dn2")
-    t1_cfg_v2 = Config._add_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
-    p1_cfg_v2 = Config._add_pipeline("p1", t1_cfg_v2, cron="daily")
-    Config._add_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
-    Config._add_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
-    tf = NamedTemporaryFile()
-    Config._export(tf.filename)
-    actual_config = tf.read().strip()
-
-    assert actual_config == expected_config
-
-
-def test_write_configuration_file_with_airflow():
-    if not util.find_spec("taipy_airflow"):
-        pytest.skip("Airflow is not install")
-
-    expected_config = """
-[TAIPY]
-notification = true
-broker_endpoint = "my_broker_end_point"
-root_folder = "./taipy/"
-storage_folder = ".data/"
-clean_entities_enabled = true
-
-[JOB]
-mode = "airflow"
-nb_of_workers = 1
-hostname = "http://localhost:8080"
-airflow_dags_folder = ".dags/"
-airflow_folder = ".airflow/"
-start_airflow = false
-airflow_api_retry = 10
-airflow_user = "taipy"
-airflow_password = "taipy"
-
-[DATA_NODE.default]
-storage_type = "in_memory"
-scope = "SCENARIO"
-cacheable = false
-custom = "default_custom_prop"
-
-[DATA_NODE.dn1]
-storage_type = "pickle"
-scope = "PIPELINE"
-cacheable = false
-custom = "custom property"
-default_data = "dn1"
-
-[DATA_NODE.dn2]
-storage_type = "in_memory"
-scope = "SCENARIO"
-cacheable = false
-custom = "default_custom_prop"
-foo = "bar"
-default_data = "dn2"
-
-[TASK.default]
-inputs = []
-outputs = []
-
-[TASK.t1]
-inputs = [ "dn1",]
-function = "<built-in function print>"
-outputs = [ "dn2",]
-description = "t1 description"
-
-[PIPELINE.default]
-tasks = []
-
-[PIPELINE.p1]
-tasks = [ "t1",]
-cron = "daily"
-
-[SCENARIO.default]
-pipelines = []
-frequency = "QUARTERLY"
-owner = "Michel Platini"
-
-[SCENARIO.s1]
-pipelines = [ "p1",]
-frequency = "QUARTERLY"
-owner = "Raymond Kopa"
-    """.strip()
-
-    Config._set_global_config(clean_entities_enabled=True)
-    Config._set_job_config(mode="airflow")
     Config._add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
     dn1_cfg_v2 = Config._add_data_node(
         "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"

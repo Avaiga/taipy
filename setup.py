@@ -15,7 +15,6 @@ requirements = [
     "simple-websocket",
     "sqlalchemy",
     "toml",
-    "Unidecode",
 ]
 
 test_requirements = ["pytest>=3.8"]

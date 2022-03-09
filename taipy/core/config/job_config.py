@@ -11,18 +11,15 @@ class JobConfig:
     Holds configuration fields related to the job executions.
 
     Parameters:
-        mode (str): Field representing the Taipy operating mode. Possible values are "standalone", "airflow". The
-            default value is "standalone".
-        nb_of_workers (int): Maximum number of running workers to execute jobs. It must be a positive integer.
+                mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise, the "airflow" mode is available.
+        nb_of_workers (int): The maximum number of running workers to execute jobs. It must be a positive integer.
             The default value is 1.
         properties (dict): Dictionary of additional properties.
 
     """
 
     _MODE_KEY = "mode"
-    _MODE_VALUE_STANDALONE = "standalone"
-    _MODE_VALUE_AIRFLOW = "airflow"
-    _DEFAULT_MODE = _MODE_VALUE_STANDALONE
+    _DEFAULT_MODE = "standalone"
 
     _NB_OF_WORKERS_KEY = "nb_of_workers"
     _DEFAULT_NB_OF_WORKERS = 1
@@ -84,7 +81,7 @@ class JobConfig:
     @property
     def is_standalone(self) -> bool:
         """True if the config is set to standalone execution"""
-        return self.mode == self._MODE_VALUE_STANDALONE
+        return self.mode == self._DEFAULT_MODE
 
     @property
     def is_multiprocess(self) -> bool:
@@ -97,3 +94,6 @@ class JobConfig:
         if not util.find_spec(dep):
             raise DependencyNotInstalled(mode)
         return _load_fct(dep + ".config", "Config")(**properties)
+
+    def _is_default_mode(self) -> bool:
+        return self.mode == self._DEFAULT_MODE

@@ -14,10 +14,10 @@ from taipy.core.config.job_config import JobConfig
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.config.task_config import TaskConfig
+from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.cycle.cycle_manager import CycleManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.data_manager import DataManager
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.data.generic import GenericDataNode
@@ -26,14 +26,14 @@ from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
 from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
-from taipy.core.job.job_manager import JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.pipeline.pipeline_manager import PipelineManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.scenario.scenario_manager import ScenarioManager
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
 
 __logger = _TaipyLogger._get_logger()
 
@@ -47,15 +47,15 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
 
     """
     if isinstance(entity, Cycle):
-        return CycleManager._set(entity)
+        return _CycleManager._set(entity)
     if isinstance(entity, Scenario):
-        return ScenarioManager._set(entity)
+        return _ScenarioManager._set(entity)
     if isinstance(entity, Pipeline):
-        return PipelineManager._set(entity)
+        return _PipelineManager._set(entity)
     if isinstance(entity, Task):
-        return TaskManager._set(entity)
+        return _TaskManager._set(entity)
     if isinstance(entity, DataNode):
-        return DataManager._set(entity)
+        return _DataManager._set(entity)
 
 
 def submit(entity: Union[Scenario, Pipeline], force: bool = False):
@@ -69,9 +69,9 @@ def submit(entity: Union[Scenario, Pipeline], force: bool = False):
         force (bool): Force execution even if the data nodes are in cache.
     """
     if isinstance(entity, Scenario):
-        return ScenarioManager.submit(entity, force=force)
+        return _ScenarioManager._submit(entity, force=force)
     if isinstance(entity, Pipeline):
-        return PipelineManager.submit(entity, force=force)
+        return _PipelineManager._submit(entity, force=force)
 
 
 def get(
@@ -89,18 +89,18 @@ def get(
     Raises:
         `ModelNotFound`: If `entity_id` does not match a correct entity id pattern.
     """
-    if entity_id.startswith(JobManager.ID_PREFIX):
-        return JobManager._get(JobId(entity_id))
+    if entity_id.startswith(_JobManager._ID_PREFIX):
+        return _JobManager._get(JobId(entity_id))
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return CycleManager._get(CycleId(entity_id))
+        return _CycleManager._get(CycleId(entity_id))
     if entity_id.startswith(Scenario.ID_PREFIX):
-        return ScenarioManager._get(ScenarioId(entity_id))
+        return _ScenarioManager._get(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline.ID_PREFIX):
-        return PipelineManager._get(PipelineId(entity_id))
+        return _PipelineManager._get(PipelineId(entity_id))
     if entity_id.startswith(Task.ID_PREFIX):
-        return TaskManager._get(TaskId(entity_id))
+        return _TaskManager._get(TaskId(entity_id))
     if entity_id.startswith(DataNode.ID_PREFIX):
-        return DataManager._get(DataNodeId(entity_id))
+        return _DataManager._get(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -111,7 +111,7 @@ def get_tasks() -> List[Task]:
     Returns:
         List[`Task`]: The list of tasks.
     """
-    return TaskManager._get_all()
+    return _TaskManager._get_all()
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
@@ -132,18 +132,18 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     Raises:
         `ModelNotFound`: No entity corresponds to entity_id
     """
-    if entity_id.startswith(JobManager.ID_PREFIX):
-        return JobManager._delete(JobManager._get(JobId(entity_id)))  # type: ignore
+    if entity_id.startswith(_JobManager._ID_PREFIX):
+        return _JobManager._delete(_JobManager._get(JobId(entity_id)))  # type: ignore
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return CycleManager._delete(CycleId(entity_id))
+        return _CycleManager._delete(CycleId(entity_id))
     if entity_id.startswith(Scenario.ID_PREFIX):
-        return ScenarioManager.hard_delete(ScenarioId(entity_id))
+        return _ScenarioManager._hard_delete(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline.ID_PREFIX):
-        return PipelineManager.hard_delete(PipelineId(entity_id))
+        return _PipelineManager._hard_delete(PipelineId(entity_id))
     if entity_id.startswith(Task.ID_PREFIX):
-        return TaskManager.hard_delete(TaskId(entity_id))
+        return _TaskManager._hard_delete(TaskId(entity_id))
     if entity_id.startswith(DataNode.ID_PREFIX):
-        return DataManager._delete(DataNodeId(entity_id))
+        return _DataManager._delete(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -158,13 +158,13 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
         List[`Scenario`]: The list of scenarios filtered by cycle or tag if given as parameter.
     """
     if not cycle and not tag:
-        return ScenarioManager._get_all()
+        return _ScenarioManager._get_all()
     if cycle and not tag:
-        return ScenarioManager.get_all_by_cycle(cycle)
+        return _ScenarioManager._get_all_by_cycle(cycle)
     if not cycle and tag:
-        return ScenarioManager.get_all_by_tag(tag)
+        return _ScenarioManager._get_all_by_tag(tag)
     if cycle and tag:
-        cycles_scenarios = ScenarioManager.get_all_by_cycle(cycle)
+        cycles_scenarios = _ScenarioManager._get_all_by_cycle(cycle)
         return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
     return []
 
@@ -178,7 +178,7 @@ def get_master(cycle: Cycle) -> Optional[Scenario]:
     Returns:
         Optional[`Scenario`]: The master scenario of the cycle given as parameter. None if the cycle has no scenario.
     """
-    return ScenarioManager.get_master(cycle)
+    return _ScenarioManager._get_master(cycle)
 
 
 def get_all_masters() -> List[Scenario]:
@@ -188,7 +188,7 @@ def get_all_masters() -> List[Scenario]:
     Returns:
         List[Scenario]: The list of all master scenarios.
     """
-    return ScenarioManager.get_all_masters()
+    return _ScenarioManager._get_all_masters()
 
 
 def set_master(scenario: Scenario):
@@ -199,7 +199,7 @@ def set_master(scenario: Scenario):
     Parameters:
         scenario (`Scenario`): The scenario to promote as master.
     """
-    return ScenarioManager.set_master(scenario)
+    return _ScenarioManager._set_master(scenario)
 
 
 def tag(scenario: Scenario, tag: str):
@@ -211,7 +211,7 @@ def tag(scenario: Scenario, tag: str):
         scenario (`Scenario`): The scenario to tag.
         tag (str): The tag of the scenario to tag.
     """
-    return ScenarioManager.tag(scenario, tag)
+    return _ScenarioManager._tag(scenario, tag)
 
 
 def untag(scenario: Scenario, tag: str):
@@ -222,7 +222,7 @@ def untag(scenario: Scenario, tag: str):
         scenario (`Scenario`): The scenario to untag.
         tag (str): The tag to remove from scenario.
     """
-    return ScenarioManager.untag(scenario, tag)
+    return _ScenarioManager._untag(scenario, tag)
 
 
 def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] = None):
@@ -242,7 +242,7 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
         `DifferentScenarioConfigs`: The provided scenarios do not share the same scenario_config.
         `NonExistingScenarioConfig`: Cannot find the shared scenario config of the provided scenarios.
     """
-    return ScenarioManager.compare(*scenarios, data_node_config_id=data_node_config_id)
+    return _ScenarioManager._compare(*scenarios, data_node_config_id=data_node_config_id)
 
 
 def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -258,7 +258,7 @@ def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Opti
     Note:
         Notification will be available only for jobs created after this subscription.
     """
-    return ScenarioManager.subscribe(callback, scenario)
+    return _ScenarioManager._subscribe(callback, scenario)
 
 
 def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -273,7 +273,7 @@ def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Op
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return ScenarioManager.unsubscribe(callback, scenario)
+    return _ScenarioManager._unsubscribe(callback, scenario)
 
 
 def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -289,7 +289,7 @@ def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Opti
     Note:
         Notification will be available only for jobs created after this subscription.
     """
-    return PipelineManager.subscribe(callback, pipeline)
+    return _PipelineManager._subscribe(callback, pipeline)
 
 
 def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -304,7 +304,7 @@ def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Op
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return PipelineManager.unsubscribe(callback, pipeline)
+    return _PipelineManager._unsubscribe(callback, pipeline)
 
 
 def get_pipelines() -> List[Pipeline]:
@@ -314,7 +314,7 @@ def get_pipelines() -> List[Pipeline]:
     Returns:
         List[`Pipeline`]: The list of all pipelines.
     """
-    return PipelineManager._get_all()
+    return _PipelineManager._get_all()
 
 
 def get_jobs() -> List[Job]:
@@ -324,7 +324,7 @@ def get_jobs() -> List[Job]:
     Returns:
         List[`Job`]: The list of all jobs.
     """
-    return JobManager._get_all()
+    return _JobManager._get_all()
 
 
 def delete_job(job: Job, force=False):
@@ -337,12 +337,12 @@ def delete_job(job: Job, force=False):
     Raises:
         `JobNotDeletedException`: If the job is not finished.
     """
-    return JobManager._delete(job, force)
+    return _JobManager._delete(job, force)
 
 
 def delete_jobs():
     """Deletes all jobs."""
-    return JobManager._delete_all()
+    return _JobManager._delete_all()
 
 
 def get_latest_job(task: Task) -> Optional[Job]:
@@ -354,7 +354,7 @@ def get_latest_job(task: Task) -> Optional[Job]:
     Returns:
         Optional[`Job`]: The latest job created from task `task`. None if no job has been created from task `task`.
     """
-    return JobManager.get_latest(task)
+    return _JobManager._get_latest(task)
 
 
 def get_data_nodes() -> List[DataNode]:
@@ -364,7 +364,7 @@ def get_data_nodes() -> List[DataNode]:
     Returns:
         List[`DataNode`]: The list of all data nodes.
     """
-    return DataManager._get_all()
+    return _DataManager._get_all()
 
 
 def get_cycles() -> List[Cycle]:
@@ -374,7 +374,7 @@ def get_cycles() -> List[Cycle]:
     Returns:
         List[`Cycle`]: The list of all cycles.
     """
-    return CycleManager._get_all()
+    return _CycleManager._get_all()
 
 
 def create_scenario(
@@ -394,7 +394,7 @@ def create_scenario(
     Returns:
         `Scenario`: The new scenario created.
     """
-    return ScenarioManager.create(config, creation_date, name)
+    return _ScenarioManager._create(config, creation_date, name)
 
 
 def create_pipeline(config: PipelineConfig) -> Pipeline:
@@ -406,7 +406,7 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Returns:
         `Pipeline`: The new pipeline created.
     """
-    return PipelineManager.get_or_create(config)
+    return _PipelineManager._get_or_create(config)
 
 
 def load_configuration(filename):
@@ -838,7 +838,7 @@ def clean_all_entities() -> bool:
         __logger.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
         return False
 
-    data_nodes = DataManager._get_all()
+    data_nodes = _DataManager._get_all()
 
     # Clean all pickle files
     for data_node in data_nodes:
@@ -847,12 +847,12 @@ def clean_all_entities() -> bool:
                 os.remove(data_node.path)
 
     # Clean all entities
-    DataManager._delete_all()
-    TaskManager._delete_all()
-    PipelineManager._delete_all()
-    ScenarioManager._delete_all()
-    CycleManager._delete_all()
-    JobManager._delete_all()
+    _DataManager._delete_all()
+    _TaskManager._delete_all()
+    _PipelineManager._delete_all()
+    _ScenarioManager._delete_all()
+    _CycleManager._delete_all()
+    _JobManager._delete_all()
     return True
 
 

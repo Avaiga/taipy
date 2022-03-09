@@ -2,43 +2,43 @@ from typing import Any, Generic, List, TypeVar, Union
 
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.exceptions.repository import ModelNotFound
-from taipy.core.repository import FileSystemRepository
+from taipy.core.repository import _FileSystemRepository
 
 EntityType = TypeVar("EntityType")
 
 
 class _Manager(Generic[EntityType]):
-    _repository: FileSystemRepository
+    _repository: _FileSystemRepository
     _logger = _TaipyLogger._get_logger()
-    ENTITY_NAME: str = "Entity"
+    _ENTITY_NAME: str = "Entity"
 
     @classmethod
     def _delete_all(cls):
         """
         Deletes all entities.
         """
-        cls._repository.delete_all()
+        cls._repository._delete_all()
 
     @classmethod
     def _delete(cls, id: Any, *args: Any, **kwargs: Any):
         """
         Deletes an entity by id.
         """
-        cls._repository.delete(id)
+        cls._repository._delete(id)
 
     @classmethod
     def _set(cls, entity: EntityType):
         """
         Save or update an entity.
         """
-        cls._repository.save(entity)
+        cls._repository._save(entity)
 
     @classmethod
     def _get_all(cls) -> List[EntityType]:
         """
         Returns all entities.
         """
-        return cls._repository.load_all()
+        return cls._repository._load_all()
 
     @classmethod
     def _get(cls, entity: Union[str, EntityType], default=None, *args: Any, **kwargs: Any) -> EntityType:
@@ -49,5 +49,5 @@ class _Manager(Generic[EntityType]):
         try:
             return cls._repository.load(entity_id)
         except ModelNotFound:
-            cls._logger.error(f"{cls.ENTITY_NAME} not found: {entity_id}")
+            cls._logger.error(f"{cls._ENTITY_NAME} not found: {entity_id}")
             return default

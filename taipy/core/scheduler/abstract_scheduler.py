@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Callable, Iterable, List, Optional
 
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task
 

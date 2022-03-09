@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 from taipy.core.config.config import Config
-from taipy.core.repository import FileSystemRepository
+from taipy.core.repository import _FileSystemRepository
 
 
 @dataclass
@@ -26,15 +26,15 @@ class MockObj:
     name: str
 
 
-class MockRepository(FileSystemRepository):
-    def to_model(self, obj: MockObj):
+class MockRepository(_FileSystemRepository):
+    def _to_model(self, obj: MockObj):
         return MockModel(obj.id, obj.name)
 
-    def from_model(self, model: MockModel):
+    def _from_model(self, model: MockModel):
         return MockObj(model.id, model.name)
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
 
@@ -42,7 +42,7 @@ class TestFileSystemStorage:
     def test_save_and_fetch_model(self):
         r = MockRepository(model=MockModel, dir_name="foo")
         m = MockObj("uuid", "foo")
-        r.save(m)
+        r._save(m)
 
         fetched_model = r.load(m.id)
         assert m == fetched_model
@@ -53,8 +53,8 @@ class TestFileSystemStorage:
         for i in range(5):
             m = MockObj(f"uuid-{i}", f"Foo{i}")
             objs.append(m)
-            r.save(m)
-        _objs = r.load_all()
+            r._save(m)
+        _objs = r._load_all()
 
         assert len(_objs) == 5
 
@@ -67,23 +67,23 @@ class TestFileSystemStorage:
 
         for i in range(5):
             m = MockObj(f"uuid-{i}", f"Foo{i}")
-            r.save(m)
+            r._save(m)
 
-        _models = r.load_all()
+        _models = r._load_all()
         assert len(_models) == 5
 
-        r.delete_all()
-        _models = r.load_all()
+        r._delete_all()
+        _models = r._load_all()
         assert len(_models) == 0
 
     def test_search(self):
         r = MockRepository(model=MockModel, dir_name="foo")
 
         m = MockObj("uuid", "foo")
-        r.save(m)
+        r._save(m)
 
-        m1 = r.search("name", "bar")
-        m2 = r.search("name", "foo")
+        m1 = r._search("name", "bar")
+        m2 = r._search("name", "foo")
 
         assert m1 is None
         assert m == m2

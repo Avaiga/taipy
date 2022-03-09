@@ -7,9 +7,9 @@ from typing import Callable, Iterable, List, Optional, Union
 
 from taipy.core.config.config import Config
 from taipy.core.config.job_config import JobConfig
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
-from taipy.core.job.job_manager import JobManager
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.core.scheduler.job_dispatcher import JobDispatcher
@@ -49,15 +49,15 @@ class Scheduler(AbstractScheduler):
     def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
         for dn in task.output.values():
             dn.lock_edition()
-            DataManager._set(dn)
-        job = JobManager.create(task, itertools.chain([self.on_status_change], callbacks or []))
+            _DataManager._set(dn)
+        job = _JobManager._create(task, itertools.chain([self.on_status_change], callbacks or []))
         if self.is_blocked(job):
             job.blocked()
-            JobManager._set(job)
+            _JobManager._set(job)
             self.blocked_jobs.append(job)
         else:
             job.pending()
-            JobManager._set(job)
+            _JobManager._set(job)
             self.jobs_to_run.put(job)
             self.__run()
         return job
@@ -73,7 +73,7 @@ class Scheduler(AbstractScheduler):
              True if one of its input data nodes is blocked.
         """
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
-        return any(not DataManager._get(dn.id).is_ready_for_reading for dn in data_nodes)
+        return any(not _DataManager._get(dn.id).is_ready_for_reading for dn in data_nodes)
 
     def __run(self):
         with self.lock:
@@ -99,7 +99,7 @@ class Scheduler(AbstractScheduler):
         jobs_to_unblock = [job for job in self.blocked_jobs if not self.is_blocked(job)]
         for job in jobs_to_unblock:
             job.pending()
-            JobManager._set(job)
+            _JobManager._set(job)
             self.blocked_jobs.remove(job)
             self.jobs_to_run.put(job)
 

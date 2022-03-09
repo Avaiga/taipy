@@ -5,22 +5,22 @@ from typing import List, Optional
 from taipy.core.common import _utils
 from taipy.core.common.alias import CycleId, PipelineId
 from taipy.core.config.config import Config
+from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.cycle.cycle_manager import CycleManager
 from taipy.core.exceptions.pipeline import NonExistingPipeline
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.pipeline.pipeline_manager import PipelineManager
-from taipy.core.repository import FileSystemRepository
+from taipy.core.repository import _FileSystemRepository
+from taipy.core.scenario._scenario_model import _ScenarioModel
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.scenario.scenario_model import ScenarioModel
 
 
-class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
+class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
     def __init__(self):
-        super().__init__(model=ScenarioModel, dir_name="scenarios")
+        super().__init__(model=_ScenarioModel, dir_name="scenarios")
 
-    def to_model(self, scenario: Scenario):
-        return ScenarioModel(
+    def _to_model(self, scenario: Scenario):
+        return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
             pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
@@ -32,7 +32,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
             cycle=self.__to_cycle_id(scenario.cycle),
         )
 
-    def from_model(self, model: ScenarioModel) -> Scenario:
+    def _from_model(self, model: _ScenarioModel) -> Scenario:
         scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
@@ -47,7 +47,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
         return scenario
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
@@ -58,7 +58,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
     def __to_pipelines(pipeline_ids) -> List[Pipeline]:
         pipelines = []
         for _id in pipeline_ids:
-            if pipeline := PipelineManager._get(_id):
+            if pipeline := _PipelineManager._get(_id):
                 pipelines.append(pipeline)
             else:
                 raise NonExistingPipeline(_id)
@@ -66,7 +66,7 @@ class ScenarioRepository(FileSystemRepository[ScenarioModel, Scenario]):
 
     @staticmethod
     def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
-        return CycleManager._get(cycle_id) if cycle_id else None
+        return _CycleManager._get(cycle_id) if cycle_id else None
 
     @staticmethod
     def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:

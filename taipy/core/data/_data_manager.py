@@ -1,12 +1,11 @@
 from typing import List, Optional, Union
 
 from taipy.core.common._manager import _Manager
-from taipy.core.common._taipy_logger import _TaipyLogger
-from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
+from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.config.data_node_config import DataNodeConfig
+from taipy.core.data._data_repository import _DataRepository
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
-from taipy.core.data.data_repository import DataRepository
 from taipy.core.data.excel import ExcelDataNode
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -14,42 +13,21 @@ from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
 from taipy.core.exceptions.data_node import InvalidDataNodeType, MultipleDataNodeFromSameConfigWithSameParent
-from taipy.core.exceptions.repository import ModelNotFound
 
 
-class DataManager(_Manager[DataNode]):
-    """
-    A Data Manager is responsible for all managing data node related capabilities.
-
-    In particular, it is exposing methods for creating, storing, updating, retrieving, deleting data nodes.
-    """
+class _DataManager(_Manager[DataNode]):
 
     __DATA_NODE_CLASS_MAP = {c.storage_type(): c for c in DataNode.__subclasses__()}  # type: ignore
-    _repository = DataRepository(__DATA_NODE_CLASS_MAP)
-    ENTITY_NAME = DataNode.__name__
+    _repository = _DataRepository(__DATA_NODE_CLASS_MAP)
+    _ENTITY_NAME = DataNode.__name__
 
     @classmethod
-    def get_or_create(
+    def _get_or_create(
         cls,
         data_node_config: DataNodeConfig,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
     ) -> DataNode:
-        """Gets or creates a Data Node.
-
-        Returns the data node created from the data_node_config, by (pipeline_id and scenario_id) if it already
-        exists, or creates and returns a new data_node.
-
-        Parameters:
-            data_node_config (DataNodeConfig) : data node configuration object.
-            scenario_id (Optional[ScenarioId]) : id of the scenario creating the data node.
-            pipeline_id (Optional[PipelineId]) : id of the pipeline creating the data node.
-
-        Raises:
-            MultipleDataNodeFromSameConfigWithSameParent: Raised if more than 1 data node already exist with same
-                config, and the same parent id (scenario_id, or pipeline_id depending on the scope of the data node).
-            InvalidDataNodeType: Raised if the type of the data node config is invalid.
-        """
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
         dn_from_data_node_config = cls._get_all_by_config_id(data_node_config.id)
@@ -84,4 +62,4 @@ class DataManager(_Manager[DataNode]):
 
     @classmethod
     def _get_all_by_config_id(cls, config_id: str) -> List[DataNode]:
-        return cls._repository.search_all("config_id", config_id)
+        return cls._repository._search_all("config_id", config_id)

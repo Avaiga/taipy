@@ -3,18 +3,18 @@ from datetime import datetime
 
 from taipy.core.common._utils import _fct_to_dict, _load_fct
 from taipy.core.config.config import Config
+from taipy.core.job._job_model import _JobModel
 from taipy.core.job.job import Job
-from taipy.core.job.job_model import JobModel
-from taipy.core.repository import FileSystemRepository
-from taipy.core.task.task_repository import TaskRepository
+from taipy.core.repository import _FileSystemRepository
+from taipy.core.task._task_repository import _TaskRepository
 
 
-class JobRepository(FileSystemRepository[JobModel, Job]):
+class _JobRepository(_FileSystemRepository[_JobModel, Job]):
     def __init__(self):
-        super().__init__(model=JobModel, dir_name="jobs")
+        super().__init__(model=_JobModel, dir_name="jobs")
 
-    def to_model(self, job: Job):
-        return JobModel(
+    def _to_model(self, job: Job):
+        return _JobModel(
             job.id,
             job.task.id,
             job.status,
@@ -24,8 +24,8 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
             self.__serialize_exceptions(job.exceptions),
         )
 
-    def from_model(self, model: JobModel):
-        job = Job(id=model.id, task=TaskRepository().load(model.task_id))
+    def _from_model(self, model: _JobModel):
+        job = Job(id=model.id, task=_TaskRepository().load(model.task_id))
 
         job.status = model.status
         job.force = model.force
@@ -40,7 +40,7 @@ class JobRepository(FileSystemRepository[JobModel, Job]):
         return job
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod

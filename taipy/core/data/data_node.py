@@ -37,10 +37,9 @@ class DataNode:
         parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
         last_edition_date (datetime):  Date and time of the last edition.
         job_ids (List[str]): Ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
-            timedelta object to represent the data node validity duration. If validity_period is set to None,
-            the data_node is always up to date.
-        edition_in_progress (bool) : True if a task computing the data node has been submitted and not completed yet.
+        validity_period (Optional[timedelta]): The validity period of a cacheable datanode. Implemented as a
+            timedelta. If validity_period is set to None, the data_node is always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
         properties (dict): Dict of additional arguments.
     """
@@ -80,9 +79,6 @@ class DataNode:
     @property  # type: ignore
     @self_reload("data")
     def validity_period(self) -> Optional[timedelta]:
-        """
-        Number of minutes where the Data Node is up-to-date.
-        """
         return self._validity_period if self._validity_period else None
 
     @property  # type: ignore
@@ -158,11 +154,11 @@ class DataNode:
             return None
 
     def write(self, data, job_id: Optional[JobId] = None):
-        from taipy.core.data.data_manager import DataManager
+        from taipy.core.data._data_manager import _DataManager
 
         self._write(data)
         self.unlock_edition(job_id=job_id)
-        DataManager._set(self)
+        _DataManager._set(self)
 
     def lock_edition(self):
         self._edition_in_progress = True

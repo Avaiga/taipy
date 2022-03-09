@@ -13,13 +13,7 @@ class Task:
     This element bring together the user code as function, parameters and outputs.
 
     Attributes:
-        config_id: Identifier of the task configuration.
-            We strongly recommend to use lowercase alphanumeric characters,
-            dash character '-', or underscore character '_'.
-            Note that other characters are replaced according the following rules :
-            - Space character ' ' is replaced by '_'.
-            - Unicode characters are replaced by a corresponding alphanumeric character using unicode library.
-            - Other characters are replaced by dash character '-'.
+        config_id: Identifier of the task configuration. Must be a valid Python variable name.
         input:
             Data node input as list.
         function:

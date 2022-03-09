@@ -3,19 +3,19 @@ import pathlib
 from taipy.core.common._utils import _load_fct
 from taipy.core.common.alias import TaskId
 from taipy.core.config.config import Config
-from taipy.core.data.data_manager import DataManager
+from taipy.core.data._data_manager import _DataManager
 from taipy.core.exceptions.data_node import NonExistingDataNode
-from taipy.core.repository import FileSystemRepository
+from taipy.core.repository import _FileSystemRepository
+from taipy.core.task._task_model import _TaskModel
 from taipy.core.task.task import Task
-from taipy.core.task.task_model import TaskModel
 
 
-class TaskRepository(FileSystemRepository[TaskModel, Task]):
+class _TaskRepository(_FileSystemRepository[_TaskModel, Task]):
     def __init__(self):
-        super().__init__(model=TaskModel, dir_name="tasks")
+        super().__init__(model=_TaskModel, dir_name="tasks")
 
-    def to_model(self, task: Task) -> TaskModel:
-        return TaskModel(
+    def _to_model(self, task: Task) -> _TaskModel:
+        return _TaskModel(
             id=task.id,
             parent_id=task.parent_id,
             config_id=task.config_id,
@@ -25,7 +25,7 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
             output_ids=self.__to_ids(task.output.values()),
         )
 
-    def from_model(self, model: TaskModel) -> Task:
+    def _from_model(self, model: _TaskModel) -> Task:
         return Task(
             id=TaskId(model.id),
             parent_id=model.parent_id,
@@ -36,7 +36,7 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
         )
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
@@ -47,7 +47,7 @@ class TaskRepository(FileSystemRepository[TaskModel, Task]):
     def __to_data_nodes(data_nodes_ids):
         data_nodes = []
         for _id in data_nodes_ids:
-            if data_node := DataManager._get(_id):
+            if data_node := _DataManager._get(_id):
                 data_nodes.append(data_node)
             else:
                 raise NonExistingDataNode(_id)

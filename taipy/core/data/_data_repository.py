@@ -4,39 +4,39 @@ from datetime import datetime, timedelta
 
 from taipy.core.common._utils import _load_fct
 from taipy.core.config.config import Config
-from taipy.core.data.data_model import DataNodeModel
+from taipy.core.data._data_model import _DataNodeModel
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.generic import GenericDataNode
-from taipy.core.repository import FileSystemRepository
+from taipy.core.repository import _FileSystemRepository
 
 
-class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
-    READ_FCT_NAME_KEY = "read_fct_name"
-    READ_FCT_MODULE_KEY = "read_fct_module"
-    WRITE_FCT_NAME_KEY = "write_fct_name"
-    WRITE_FCT_MODULE_KEY = "write_fct_module"
+class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
+    _READ_FCT_NAME_KEY = "read_fct_name"
+    _READ_FCT_MODULE_KEY = "read_fct_module"
+    _WRITE_FCT_NAME_KEY = "write_fct_name"
+    _WRITE_FCT_MODULE_KEY = "write_fct_module"
 
     def __init__(self, class_map):
-        super().__init__(model=DataNodeModel, dir_name="data_nodes")
+        super().__init__(model=_DataNodeModel, dir_name="data_nodes")
         self.class_map = class_map
 
-    def to_model(self, data_node: DataNode):
+    def _to_model(self, data_node: DataNode):
         properties = data_node._properties.data.copy()
         if data_node.storage_type() == GenericDataNode.storage_type():
             read_fct = data_node._properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY]
-            properties[self.READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
-            properties[self.READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
+            properties[self._READ_FCT_NAME_KEY] = read_fct.__name__ if read_fct else None
+            properties[self._READ_FCT_MODULE_KEY] = read_fct.__module__ if read_fct else None
 
             write_fct = data_node._properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY]
-            properties[self.WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
-            properties[self.WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
+            properties[self._WRITE_FCT_NAME_KEY] = write_fct.__name__ if write_fct else None
+            properties[self._WRITE_FCT_MODULE_KEY] = write_fct.__module__ if write_fct else None
 
             del (
                 properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY],
                 properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY],
             )
 
-        return DataNodeModel(
+        return _DataNodeModel(
             data_node.id,
             data_node.config_id,
             data_node.scope,
@@ -51,28 +51,28 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
             properties,
         )
 
-    def from_model(self, model: DataNodeModel):
+    def _from_model(self, model: _DataNodeModel):
         if model.storage_type == GenericDataNode.storage_type():
-            if model.data_node_properties[self.READ_FCT_MODULE_KEY]:
+            if model.data_node_properties[self._READ_FCT_MODULE_KEY]:
                 model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = _load_fct(
-                    model.data_node_properties[self.READ_FCT_MODULE_KEY],
-                    model.data_node_properties[self.READ_FCT_NAME_KEY],
+                    model.data_node_properties[self._READ_FCT_MODULE_KEY],
+                    model.data_node_properties[self._READ_FCT_NAME_KEY],
                 )
             else:
                 model.data_node_properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY] = None
 
-            if model.data_node_properties[self.WRITE_FCT_MODULE_KEY]:
+            if model.data_node_properties[self._WRITE_FCT_MODULE_KEY]:
                 model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = _load_fct(
-                    model.data_node_properties[self.WRITE_FCT_MODULE_KEY],
-                    model.data_node_properties[self.WRITE_FCT_NAME_KEY],
+                    model.data_node_properties[self._WRITE_FCT_MODULE_KEY],
+                    model.data_node_properties[self._WRITE_FCT_NAME_KEY],
                 )
             else:
                 model.data_node_properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY] = None
 
-            del model.data_node_properties[self.READ_FCT_NAME_KEY]
-            del model.data_node_properties[self.READ_FCT_MODULE_KEY]
-            del model.data_node_properties[self.WRITE_FCT_NAME_KEY]
-            del model.data_node_properties[self.WRITE_FCT_MODULE_KEY]
+            del model.data_node_properties[self._READ_FCT_NAME_KEY]
+            del model.data_node_properties[self._READ_FCT_MODULE_KEY]
+            del model.data_node_properties[self._WRITE_FCT_NAME_KEY]
+            del model.data_node_properties[self._WRITE_FCT_MODULE_KEY]
 
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
@@ -92,5 +92,5 @@ class DataRepository(FileSystemRepository[DataNodeModel, DataNode]):
         )
 
     @property
-    def storage_folder(self) -> pathlib.Path:
+    def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore

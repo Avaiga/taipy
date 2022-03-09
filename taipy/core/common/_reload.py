@@ -2,11 +2,11 @@ import functools
 
 
 def reload(manager: str, obj):
-    from taipy.core.data.data_manager import DataManager
-    from taipy.core.pipeline.pipeline_manager import PipelineManager
-    from taipy.core.scenario.scenario_manager import ScenarioManager
+    from taipy.core.data._data_manager import _DataManager
+    from taipy.core.pipeline._pipeline_manager import _PipelineManager
+    from taipy.core.scenario._scenario_manager import _ScenarioManager
 
-    manager_cls = {"scenario": ScenarioManager, "pipeline": PipelineManager, "data": DataManager}[manager]
+    manager_cls = {"scenario": _ScenarioManager, "pipeline": _PipelineManager, "data": _DataManager}[manager]
 
     return manager_cls._get(obj, obj)  # type: ignore
 

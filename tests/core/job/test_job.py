@@ -8,11 +8,11 @@ from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.data_node import NoData
 from taipy.core.exceptions.job import DataNodeWritingError
+from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
-from taipy.core.job.job_manager import JobManager
 from taipy.core.scheduler.job_dispatcher import JobDispatcher
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
-from taipy.core.task.task_manager import TaskManager
 
 
 @pytest.fixture
@@ -115,7 +115,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 
     _dispatch(task, job)
 
-    job = JobManager._get(job_id)
+    job = _JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(RuntimeError):
         raise job.exceptions[0]
@@ -129,7 +129,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 
     _dispatch(task, job)
 
-    job = JobManager._get(job_id)
+    job = _JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(NoData):
         raise job.exceptions[0]
@@ -142,7 +142,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
 
     _dispatch(task, job)
 
-    job = JobManager._get(job_id)
+    job = _JobManager._get(job_id)
     assert job.is_failed()
     with pytest.raises(DataNodeWritingError):
         raise job.exceptions[0]
@@ -154,8 +154,8 @@ def _error():
 
 
 def _dispatch(task: Task, job: Job):
-    TaskManager._set(task)
-    JobManager._set(job)
+    _TaskManager._set(task)
+    _JobManager._set(job)
     executor = JobDispatcher(None)
     executor.dispatch(job)
 

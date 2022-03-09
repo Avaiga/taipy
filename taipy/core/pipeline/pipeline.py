@@ -12,7 +12,7 @@ from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId
 from taipy.core.data.data_node import DataNode
 from taipy.core.job.job import Job
-from taipy.core.pipeline.pipeline_model import PipelineModel
+from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.task.task import Task
 
 
@@ -54,9 +54,9 @@ class Pipeline:
         return self.id
 
     def __setstate__(self, id):
-        from taipy.core.pipeline.pipeline_manager import PipelineManager
+        from taipy.core.pipeline._pipeline_manager import _PipelineManager
 
-        p = PipelineManager._get(id)
+        p = _PipelineManager._get(id)
         self.__dict__ = p.__dict__
 
     @property  # type: ignore
@@ -124,8 +124,8 @@ class Pipeline:
         self._subscribers = reload("pipeline", self)._subscribers
         self._subscribers.remove(callback)
 
-    def to_model(self) -> PipelineModel:
-        return PipelineModel(
+    def to_model(self) -> _PipelineModel:
+        return _PipelineModel(
             self.id,
             self.parent_id,
             self.config_id,
@@ -139,16 +139,16 @@ class Pipeline:
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None]):
-        from taipy.core.pipeline.pipeline_manager import PipelineManager
+        from taipy.core.pipeline._pipeline_manager import _PipelineManager
 
-        return PipelineManager.subscribe(callback, self)
+        return _PipelineManager._subscribe(callback, self)
 
     def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
-        from taipy.core.pipeline.pipeline_manager import PipelineManager
+        from taipy.core.pipeline._pipeline_manager import _PipelineManager
 
-        return PipelineManager.unsubscribe(callback, self)
+        return _PipelineManager._unsubscribe(callback, self)
 
     def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
-        from taipy.core.pipeline.pipeline_manager import PipelineManager
+        from taipy.core.pipeline._pipeline_manager import _PipelineManager
 
-        return PipelineManager.submit(self, callbacks, force)
+        return _PipelineManager._submit(self, callbacks, force)
