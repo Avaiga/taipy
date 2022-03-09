@@ -5,6 +5,12 @@ on:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      user-to-notify:
+        description: "Github username to notify"
+        required: false
+        default: ""
 
 jobs:
   standard-packages:
@@ -32,3 +38,11 @@ jobs:
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
           python -c "import taipy.rest as rest"
+
+      - name: Notify user if failed
+        if: failure()
+        run: |
+          if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
+            curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
+          fi
+        shell: bash
