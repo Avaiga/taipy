@@ -261,7 +261,6 @@ class TestDataManager:
         # changing data node attribute
         dn.config_id = "foo"
         assert dn.config_id == "foo"
-        assert _DataManager._get(dn.id).config_id == "config_id"
         _DataManager._set(dn)
         assert len(_DataManager._get_all()) == 1
         assert dn.config_id == "foo"

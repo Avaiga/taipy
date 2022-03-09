@@ -22,14 +22,14 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
     def _to_model(self, scenario: Scenario):
         return _ScenarioModel(
             id=scenario.id,
-            config_id=scenario.config_id,
-            pipelines=self.__to_pipeline_ids(scenario.pipelines.values()),
+            config_id=scenario._config_id,
+            pipelines=self.__to_pipeline_ids(scenario._pipelines.values()),
             properties=scenario._properties.data,
             creation_date=scenario.creation_date.isoformat(),
-            master_scenario=scenario._master_scenario,
+            official_scenario=scenario._official_scenario,
             subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
-            cycle=self.__to_cycle_id(scenario.cycle),
+            cycle=self.__to_cycle_id(scenario._cycle),
         )
 
     def _from_model(self, model: _ScenarioModel) -> Scenario:
@@ -39,7 +39,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             pipelines=self.__to_pipelines(model.pipelines),
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
-            is_master=model.master_scenario,
+            is_official=model.official_scenario,
             tags=set(model.tags),
             cycle=self.__to_cycle(model.cycle),
             subscribers={_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},

@@ -169,37 +169,37 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
     return []
 
 
-def get_master(cycle: Cycle) -> Optional[Scenario]:
+def get_official(cycle: Cycle) -> Optional[Scenario]:
     """
-    Returns the master scenario of the cycle given as parameter. None if the cycle has no master scenario.
+    Returns the official scenario of the cycle given as parameter. None if the cycle has no official scenario.
 
     Parameters:
-         cycle (`Cycle`): The cycle of the master scenario to return.
+         cycle (`Cycle`): The cycle of the official scenario to return.
     Returns:
-        Optional[`Scenario`]: The master scenario of the cycle given as parameter. None if the cycle has no scenario.
+        Optional[`Scenario`]: The official scenario of the cycle given as parameter. None if the cycle has no scenario.
     """
-    return _ScenarioManager._get_master(cycle)
+    return _ScenarioManager._get_official(cycle)
 
 
-def get_all_masters() -> List[Scenario]:
+def get_official_scenarios() -> List[Scenario]:
     """
-    Returns the list of all master scenarios.
+    Returns the list of all official scenarios.
 
     Returns:
-        List[Scenario]: The list of all master scenarios.
+        List[Scenario]: The list of all official scenarios.
     """
-    return _ScenarioManager._get_all_masters()
+    return _ScenarioManager._get_official_scenarios()
 
 
-def set_master(scenario: Scenario):
+def set_official(scenario: Scenario):
     """
-    Promotes scenario `scenario` given as parameter as master scenario of its cycle. If the cycle already had a
-    master scenario, it will be demoted, and it will no longer be master for the cycle.
+    Promotes scenario `scenario` given as parameter as official scenario of its cycle. If the cycle already had a
+    official scenario, it will be demoted, and it will no longer be official for the cycle.
 
     Parameters:
-        scenario (`Scenario`): The scenario to promote as master.
+        scenario (`Scenario`): The scenario to promote as official.
     """
-    return _ScenarioManager._set_master(scenario)
+    return _ScenarioManager._set_official(scenario)
 
 
 def tag(scenario: Scenario, tag: str):

@@ -1,26 +1,27 @@
+from datetime import timedelta
 from unittest import mock
 
 import pytest
 
-import taipy.core.taipy as tp
-from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
-from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.common.alias import ScenarioId
+from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.task.task import Task
 
 
 def test_create_scenario(cycle, current_datetime):
-    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_master=True, cycle=cycle)
+    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_official=True, cycle=cycle)
     assert scenario_entity_1.id is not None
     assert scenario_entity_1.config_id == "foo"
     assert scenario_entity_1.pipelines == {}
     assert scenario_entity_1.properties == {"key": "value"}
     assert scenario_entity_1.key == "value"
     assert scenario_entity_1.creation_date is not None
-    assert scenario_entity_1.is_master
+    assert scenario_entity_1.is_official
     assert scenario_entity_1.cycle == cycle
     assert scenario_entity_1.tags == set()
 
@@ -30,7 +31,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
     assert scenario_entity_2.creation_date == current_datetime
-    assert not scenario_entity_2.is_master
+    assert not scenario_entity_2.is_official
     assert scenario_entity_2.cycle is None
     assert scenario_entity_2.tags == set()
 
@@ -67,18 +68,11 @@ def test_add_property_to_scenario():
     assert scenario.key == "value"
     assert scenario.new_key == "new_value"
 
-    # test scenario properties saved and reloaded
-    tp.set(scenario)
-    scenario.properties["qux"] = 5
-    same_scenario = tp.get(scenario.id)
-    assert scenario.properties["qux"] == 5
-    assert same_scenario.properties["qux"] == 5
-
 
 def test_add_cycle_to_scenario(cycle):
     scenario = Scenario("foo", [], {})
     assert scenario.cycle is None
-
+    _CycleManager._set(cycle)
     scenario.cycle = cycle
 
     assert scenario.cycle == cycle
@@ -106,6 +100,112 @@ def test_add_and_remove_tag():
 
     scenario._remove_tag("tag")
     assert len(scenario.tags) == 0
+
+
+def test_auto_set_and_reload(cycle, current_datetime, pipeline):
+    scenario_1 = Scenario("foo", [], {}, creation_date=current_datetime, is_official=False, cycle=None)
+    _ScenarioManager._set(scenario_1)
+    _PipelineManager._set(pipeline)
+    _CycleManager._set(cycle)
+
+    scenario_2 = _ScenarioManager._get(scenario_1)
+    assert scenario_1.config_id == "foo"
+    scenario_1._config_id = "fgh"
+    assert scenario_1.config_id == "foo"
+    scenario_1.config_id = "fgh"
+    assert scenario_1.config_id == "fgh"
+    assert scenario_2.config_id == "fgh"
+
+    assert len(scenario_1.pipelines) == 0
+    scenario_1._pipelines = [pipeline]
+    assert len(scenario_1.pipelines) == 0
+    scenario_1.pipelines = [pipeline]
+    assert len(scenario_1.pipelines) == 1
+    assert scenario_1.pipelines[pipeline.config_id] == pipeline
+    assert len(scenario_2.pipelines) == 1
+    assert scenario_2.pipelines[pipeline.config_id] == pipeline
+
+    new_datetime = current_datetime + timedelta(1)
+
+    assert scenario_1.creation_date == current_datetime
+    scenario_1._creation_date = new_datetime
+    assert scenario_1.creation_date == current_datetime
+    scenario_1.creation_date = new_datetime
+    assert scenario_1.creation_date == new_datetime
+    assert scenario_2.creation_date == new_datetime
+
+    assert scenario_1.cycle is None
+    scenario_1._cycle = cycle
+    assert scenario_1.cycle is None
+    scenario_1.cycle = cycle
+    assert scenario_1.cycle == cycle
+    assert scenario_2.cycle == cycle
+
+    assert not scenario_1.is_official
+    scenario_1._official_scenario = True
+    assert not scenario_1.is_official
+    scenario_1.is_official = True
+    assert scenario_1.is_official
+    assert scenario_2.is_official
+
+    assert len(scenario_1.subscribers) == 0
+    scenario_1._subscribers = set([print])
+    assert len(scenario_1.subscribers) == 0
+    scenario_1.subscribers = set([print])
+    assert len(scenario_1.subscribers) == 1
+    assert len(scenario_2.subscribers) == 1
+
+    assert len(scenario_1.tags) == 0
+    scenario_1._tags = set(["hi"])
+    assert len(scenario_1.tags) == 0
+    scenario_1.tags = set(["hi"])
+    assert len(scenario_1.tags) == 1
+    assert len(scenario_2.tags) == 1
+
+    assert scenario_1.properties == {}
+    scenario_1.properties["qux"] = 5
+    assert scenario_1.properties["qux"] == 5
+    assert scenario_2.properties["qux"] == 5
+
+    with scenario_1 as scenario:
+        assert scenario.config_id == "fgh"
+        assert len(scenario.pipelines) == 1
+        assert scenario.pipelines[pipeline.config_id] == pipeline
+        assert scenario.creation_date == new_datetime
+        assert scenario.cycle == cycle
+        assert scenario.is_official
+        assert len(scenario.subscribers) == 1
+        assert len(scenario.tags) == 1
+        assert scenario._is_in_context
+
+        new_datetime_2 = new_datetime + timedelta(1)
+        scenario.config_id = "abc"
+        scenario.pipelines = []
+        scenario.creation_date = new_datetime_2
+        scenario.cycle = None
+        scenario.is_official = False
+        scenario.subscribers = None
+        scenario.tags = None
+
+        assert scenario._config_id == "abc"
+        assert scenario.config_id == "fgh"
+        assert len(scenario.pipelines) == 1
+        assert scenario.pipelines[pipeline.config_id] == pipeline
+        assert scenario.creation_date == new_datetime
+        assert scenario.cycle == cycle
+        assert scenario.is_official
+        assert len(scenario.subscribers) == 1
+        assert len(scenario.tags) == 1
+        assert scenario._is_in_context
+
+    assert scenario_1.config_id == "abc"
+    assert len(scenario_1.pipelines) == 0
+    assert scenario_1.creation_date == new_datetime_2
+    assert scenario_1.cycle is None
+    assert not scenario_1.is_official
+    assert len(scenario_1.subscribers) == 0
+    assert len(scenario_1.tags) == 0
+    assert not scenario_1._is_in_context
 
 
 def test_submit_scenario():

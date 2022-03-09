@@ -9,7 +9,7 @@ from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.exceptions.scenario import (
-    DeletingMasterScenario,
+    DeletingOfficialScenario,
     DifferentScenarioConfigs,
     DoesNotBelongToACycle,
     InsufficientScenarioToCompare,
@@ -70,7 +70,7 @@ class _ScenarioManager(_Manager[Scenario]):
         scenario_id = Scenario.new_id(config.id)
         pipelines = [_PipelineManager._get_or_create(p_config, scenario_id) for p_config in config.pipeline_configs]
         cycle = _CycleManager._get_or_create(config.frequency, creation_date) if config.frequency else None
-        is_master_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
+        is_official_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config.properties.copy()
         if display_name:
             props["display_name"] = display_name
@@ -80,7 +80,7 @@ class _ScenarioManager(_Manager[Scenario]):
             props,
             scenario_id,
             creation_date,
-            is_master=is_master_scenario,
+            is_official=is_official_scenario,
             cycle=cycle,
         )
         cls._set(scenario)
@@ -101,10 +101,10 @@ class _ScenarioManager(_Manager[Scenario]):
         return [partial(c, scenario) for c in scenario.subscribers]
 
     @classmethod
-    def _get_master(cls, cycle: Cycle) -> Optional[Scenario]:
+    def _get_official(cls, cycle: Cycle) -> Optional[Scenario]:
         scenarios = cls._get_all_by_cycle(cycle)
         for scenario in scenarios:
-            if scenario.is_master:
+            if scenario.is_official:
                 return scenario
         return None
 
@@ -133,21 +133,21 @@ class _ScenarioManager(_Manager[Scenario]):
         return scenarios
 
     @classmethod
-    def _get_all_masters(cls) -> List[Scenario]:
-        master_scenarios = []
+    def _get_official_scenarios(cls) -> List[Scenario]:
+        official_scenarios = []
         for scenario in cls._get_all():
-            if scenario.is_master:
-                master_scenarios.append(scenario)
-        return master_scenarios
+            if scenario.is_official:
+                official_scenarios.append(scenario)
+        return official_scenarios
 
     @classmethod
-    def _set_master(cls, scenario: Scenario):
+    def _set_official(cls, scenario: Scenario):
         if scenario.cycle:
-            master_scenario = cls._get_master(scenario.cycle)
-            if master_scenario:
-                master_scenario._master_scenario = False
-                cls._set(master_scenario)
-            scenario._master_scenario = True
+            official_scenario = cls._get_official(scenario.cycle)
+            if official_scenario:
+                official_scenario._official_scenario = False
+                cls._set(official_scenario)
+            scenario._official_scenario = True
             cls._set(scenario)
         else:
             raise DoesNotBelongToACycle
@@ -172,8 +172,8 @@ class _ScenarioManager(_Manager[Scenario]):
 
     @classmethod
     def _delete(cls, scenario_id: ScenarioId, **kwargs):  # type: ignore
-        if cls._get(scenario_id).is_master:
-            raise DeletingMasterScenario
+        if cls._get(scenario_id).is_official:
+            raise DeletingOfficialScenario
         super()._delete(scenario_id)
 
     @classmethod
@@ -212,8 +212,8 @@ class _ScenarioManager(_Manager[Scenario]):
     @classmethod
     def _hard_delete(cls, scenario_id: ScenarioId):
         scenario = cls._get(scenario_id)
-        if scenario.is_master:
-            raise DeletingMasterScenario
+        if scenario.is_official:
+            raise DeletingOfficialScenario
         else:
             for pipeline in scenario.pipelines.values():
                 if pipeline.parent_id == scenario.id or pipeline.parent_id == pipeline.id:

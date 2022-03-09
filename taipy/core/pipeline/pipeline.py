@@ -5,8 +5,9 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 import networkx as nx
 
+from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
-from taipy.core.common._reload import reload, self_reload
+from taipy.core.common._reload import reload, self_reload, self_setter
 from taipy.core.common._utils import _fcts_to_dict
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId
@@ -16,7 +17,7 @@ from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.task.task import Task
 
 
-class Pipeline:
+class Pipeline(_Entity):
     """
     A Pipeline entity that holds a list of tasks and additional arguments representing a set of data processing elements
     connected in series.
@@ -31,6 +32,7 @@ class Pipeline:
 
     ID_PREFIX = "PIPELINE"
     __SEPARATOR = "_"
+    MANAGER_NAME = "pipeline"
 
     def __init__(
         self,
@@ -41,10 +43,10 @@ class Pipeline:
         parent_id: Optional[str] = None,
         subscribers: Set[Callable] = None,
     ):
-        self.config_id = _validate_id(config_id)
-        self.tasks = {task.config_id: task for task in tasks}
-        self.id: PipelineId = pipeline_id or self.new_id(self.config_id)
-        self.parent_id = parent_id
+        self._config_id = _validate_id(config_id)
+        self._tasks = {task.config_id: task for task in tasks}
+        self.id: PipelineId = pipeline_id or self.new_id(self._config_id)
+        self._parent_id = parent_id
         self.is_consistent = self.__is_consistent()
 
         self._subscribers = subscribers or set()
@@ -60,9 +62,44 @@ class Pipeline:
         self.__dict__ = p.__dict__
 
     @property  # type: ignore
-    @self_reload("pipeline")
+    @self_reload(MANAGER_NAME)
+    def config_id(self):
+        return self._config_id
+
+    @config_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def config_id(self, val):
+        self._config_id = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def tasks(self):
+        return self._tasks
+
+    @tasks.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def tasks(self, val):
+        self._tasks = {task.config_id: task for task in val}
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
+    def parent_id(self):
+        return self._parent_id
+
+    @parent_id.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def parent_id(self, val):
+        self._parent_id = val
+
+    @property  # type: ignore
+    @self_reload(MANAGER_NAME)
     def subscribers(self):
         return self._subscribers
+
+    @subscribers.setter  # type: ignore
+    @self_setter(MANAGER_NAME)
+    def subscribers(self, val):
+        self._subscribers = val or set()
 
     @property  # type: ignore
     def properties(self):
@@ -80,9 +117,9 @@ class Pipeline:
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self.properties:
             return self.properties[protected_attribute_name]
-        if protected_attribute_name in self.tasks:
-            return self.tasks[protected_attribute_name]
-        for task in self.tasks.values():
+        if protected_attribute_name in self._tasks:
+            return self._tasks[protected_attribute_name]
+        for task in self._tasks.values():
             if protected_attribute_name in task.input:
                 return task.input[protected_attribute_name]
             if protected_attribute_name in task.output:
@@ -105,7 +142,7 @@ class Pipeline:
 
     def __build_dag(self):
         graph = nx.DiGraph()
-        for task in self.tasks.values():
+        for task in self._tasks.values():
             if has_input := task.input:
                 for predecessor in task.input.values():
                     graph.add_edges_from([(predecessor, task)])
@@ -128,9 +165,9 @@ class Pipeline:
         return _PipelineModel(
             self.id,
             self.parent_id,
-            self.config_id,
+            self._config_id,
             self._properties.data,
-            [task.id for task in self.tasks.values()],
+            [task.id for task in self._tasks.values()],
             _fcts_to_dict(list(self._subscribers)),
         )
 

@@ -16,10 +16,10 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
     def _to_model(self, job: Job):
         return _JobModel(
             job.id,
-            job.task.id,
-            job.status,
-            job.force,
-            job.creation_date.isoformat(),
+            job._task.id,
+            job._status,
+            job._force,
+            job._creation_date.isoformat(),
             [],
             self.__serialize_exceptions(job.exceptions),
         )
@@ -27,9 +27,9 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
     def _from_model(self, model: _JobModel):
         job = Job(id=model.id, task=_TaskRepository().load(model.task_id))
 
-        job.status = model.status
-        job.force = model.force
-        job.creation_date = datetime.fromisoformat(model.creation_date)
+        job.status = model.status  # type: ignore
+        job.force = model.force  # type: ignore
+        job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
         # for it in model.subscribers:
         #     try:
         #         job._subscribers.append(load_fct(it.get("fct_module"), it.get("fct_name")))

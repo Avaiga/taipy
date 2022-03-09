@@ -1,3 +1,4 @@
+from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.data.data_node import DataNode
@@ -35,18 +36,18 @@ from taipy.core.taipy import (
     delete_jobs,
     export_configuration,
     get,
-    get_all_masters,
     get_cycles,
     get_data_nodes,
     get_jobs,
     get_latest_job,
-    get_master,
+    get_official,
+    get_official_scenarios,
     get_pipelines,
     get_scenarios,
     get_tasks,
     load_configuration,
     set,
-    set_master,
+    set_official,
     submit,
     subscribe_pipeline,
     subscribe_scenario,

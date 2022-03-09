@@ -36,7 +36,7 @@ job_model = _JobModel(
     task_id=task.id,
     status=Status(Status.SUBMITTED),
     force=False,
-    creation_date=job.creation_date.isoformat(),
+    creation_date=job._creation_date.isoformat(),
     subscribers=[],
     exceptions=[],
 )

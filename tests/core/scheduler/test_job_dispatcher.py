@@ -149,9 +149,11 @@ def test_need_to_run_output_not_cacheable():
     assert JobDispatcher(None)._needs_to_run(task)
 
 
+def nothing():
+    return True
+
+
 def test_need_to_run_output_cacheable_no_input():
-    def nothing():
-        return True
 
     hello_world_cfg = Config._add_data_node("hello_world", cacheable=True)
     task_cfg = Config._add_task("name", input=[], function=nothing, output=[hello_world_cfg])
@@ -165,8 +167,6 @@ def test_need_to_run_output_cacheable_no_input():
 
 
 def test_need_to_run_output_cacheable_no_validity_period():
-    def concat(a, b):
-        return a + b
 
     hello_cfg = Config._add_data_node("hello", default_data="Hello ")
     world_cfg = Config._add_data_node("world", default_data="world !")
@@ -181,10 +181,11 @@ def test_need_to_run_output_cacheable_no_validity_period():
     assert not scheduler._dispatcher._needs_to_run(task)
 
 
-def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
-    def concat(a, b):
-        return a + b
+def concat(a, b):
+    return a + b
 
+
+def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     hello_cfg = Config._add_data_node("hello", default_data="Hello ")
     world_cfg = Config._add_data_node("world", default_data="world !")
     hello_world_cfg = Config._add_data_node("hello_world", cacheable=True, validity_days=1)

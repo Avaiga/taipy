@@ -1,6 +1,6 @@
 import calendar
 from datetime import datetime, time, timedelta
-from typing import Optional
+from typing import Optional, Union
 
 from taipy.core.common._manager import _Manager
 from taipy.core.common.frequency import Frequency
