@@ -10,6 +10,7 @@ with open("README.md") as readme_file:
 requirements = [
     "taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
+    "taipy-rest@git+ssh://git@github.com/Avaiga/taipy-rest.git@develop",
 ]
 
 setup(
@@ -33,6 +34,15 @@ setup(
     keywords="taipy",
     name="taipy",
     packages=find_packages(include=['taipy']),
+    package_data={
+        'taipy': [
+            'gui/webapp/*.html',
+            'gui/webapp/*.png',
+            'gui/webapp/*.ico',
+            'gui/webapp/*.js',
+            'gui/webapp/*.txt'
+        ]
+    },
     url="https://github.com/avaiga/taipy",
     version="1.0.0.dev",
     zip_safe=False,
