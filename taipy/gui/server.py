@@ -13,7 +13,7 @@ from flask_socketio import SocketIO
 from .renderers.jsonencoder import _TaipyJsonEncoder
 from .utils import _is_in_notebook, _KillableThread
 
-if t.TYPE_CHECKING:  # pragma: no cover
+if t.TYPE_CHECKING:
     from .gui import Gui
 
 
@@ -53,7 +53,7 @@ class _Server:
         # Websocket (handle json message)
         @self._ws.on("message")
         def handle_message(message) -> None:
-            if "status" in message:  # pragma: no cover
+            if "status" in message:
                 print(message["status"])
             elif "type" in message.keys():
                 gui._manage_message(message["type"], message)

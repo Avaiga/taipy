@@ -6,7 +6,7 @@ from ..data.data_scope import _DataScopes
 from ._map_dict import _MapDict
 
 if t.TYPE_CHECKING:
-    from ..gui import Gui  # pragma: no cover
+    from ..gui import Gui
 
 
 class _Bindings:

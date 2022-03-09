@@ -6,7 +6,7 @@ import re
 import typing as t
 import warnings
 
-if t.TYPE_CHECKING:  # pragma: no cover
+if t.TYPE_CHECKING:
     from ..gui import Gui
 
 from . import (

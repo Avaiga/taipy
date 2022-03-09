@@ -20,7 +20,7 @@ class _MapDict(object):
         return self._dict.__len__()
 
     def __length_hint__(self):
-        return self._dict.__length_hint__()  # pragma: no cover
+        return self._dict.__length_hint__()
 
     def __getitem__(self, key):
         value = self._dict.__getitem__(key)
@@ -41,7 +41,7 @@ class _MapDict(object):
         self._dict.__delitem__(key)
 
     def __missing__(self, key):
-        return self._dict.__missing__(key)  # pragma: no cover
+        return self._dict.__missing__(key)
 
     def __iter__(self):
         return self._dict.__iter__()

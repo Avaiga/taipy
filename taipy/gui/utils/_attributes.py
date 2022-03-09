@@ -2,7 +2,7 @@ import typing as t
 from operator import attrgetter
 
 if t.TYPE_CHECKING:
-    from ..gui import Gui  # pragma: no cover
+    from ..gui import Gui
 
 
 def _getscopeattr(gui: "Gui", name: str, *more) -> t.Any:

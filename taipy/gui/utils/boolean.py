@@ -7,7 +7,7 @@ def _is_boolean_true(s: t.Union[bool, str]) -> bool:
 
 def _is_boolean(s: t.Any) -> bool:
     if isinstance(s, bool):
-        return True  # pragma: no cover
+        return True
     elif isinstance(s, str):
         return s.lower() in ["true", "1", "t", "y", "yes", "yeah", "sure", "false", "0", "f", "no"]
     else:
