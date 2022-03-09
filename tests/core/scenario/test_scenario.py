@@ -128,8 +128,6 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     new_datetime = current_datetime + timedelta(1)
 
     assert scenario_1.creation_date == current_datetime
-    scenario_1._creation_date = new_datetime
-    assert scenario_1.creation_date == current_datetime
     scenario_1.creation_date = new_datetime
     assert scenario_1.creation_date == new_datetime
     assert scenario_2.creation_date == new_datetime
