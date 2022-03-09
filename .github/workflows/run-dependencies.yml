@@ -4,6 +4,7 @@ on:
     branches: [ develop ]
 jobs:
   trigger:
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - name: Run tests on milestones
@@ -11,7 +12,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
 
-      -   name: Run tests on taipy-airflow
-          run: gh workflow run test.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-airflow
-          env:
-              GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
+      - name: Run tests on taipy-airflow
+        run: gh workflow run tests.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-airflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
+
+      - name: Run tests on taipy-rest
+        run: gh workflow run tests.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-rest
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
