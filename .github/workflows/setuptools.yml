@@ -31,3 +31,4 @@ jobs:
 
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
+          python -c "import taipy.rest as rest"
