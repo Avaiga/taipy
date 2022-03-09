@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_manager import _CycleManager

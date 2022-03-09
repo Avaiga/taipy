@@ -5,7 +5,6 @@ import pytest
 
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.configuration import InvalidConfigurationId
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
