@@ -111,7 +111,7 @@ const Chart = (props: ChartProp) => {
         title = "",
         className,
         width = "100%",
-        height = "100%",
+        height,
         refresh = false,
         updateVarName,
         updateVars,
@@ -241,7 +241,13 @@ const Chart = (props: ChartProp) => {
         } as Layout;
     }, [title, config.columns, config.traces, props.layout]);
 
-    const style = useMemo(() => ({ ...defaultStyle, width: width, height: height } as CSSProperties), [width, height]);
+    const style = useMemo(
+        () =>
+            height === undefined
+                ? ({ ...defaultStyle, width: width } as CSSProperties)
+                : ({ ...defaultStyle, width: width, height: height } as CSSProperties),
+        [width, height]
+    );
     const skelStyle = useMemo(() => ({ ...style, minHeight: "7em" }), [style]);
 
     const dataPl = useMemo(() => {
