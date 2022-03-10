@@ -1,9 +1,14 @@
 import typing as t
 import warnings
+from importlib import util
 
 import numpy as np
 import pandas as pd
-import pyarrow as pa
+
+_has_arrow_module = False
+if util.find_spec("pyarrow"):
+    _has_arrow_module = True
+    import pyarrow as pa
 
 from ..gui import Gui
 from ..utils import _get_date_col_str_name
@@ -114,7 +119,7 @@ class _PandasDataAccessor(_DataAccessor):
             ret["start"] = start
         if data_extraction is not None:
             ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
-        if data_format == _DataFormat.APACHE_ARROW:
+        if data_format == _DataFormat.APACHE_ARROW and _has_arrow_module:
             # Convert from pandas to Arrow
             table = pa.Table.from_pandas(data)
             # Create sink buffer stream

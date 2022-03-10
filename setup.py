@@ -19,7 +19,6 @@ requirements = [
     "markdown",
     "numpy",
     "pandas",
-    "pyarrow",
     "python-dotenv",
     "pytz",
     "simple-websocket",
@@ -34,6 +33,7 @@ extras_require = {
     "ngrok": ["pyngrok>=5"],
     "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
     "rdp": ["rdp>=0.8"],
+    "arrow": ["pyarrow>=7.0"],
 }
 
 
