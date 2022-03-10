@@ -117,7 +117,6 @@ class _Builder:
     def __get_list_of_(self, name: str):
         lof = self.__attributes.get(name)
         if isinstance(lof, str):
-            self.from_string = True
             lof = [s for s in lof.split(";")]
         return lof
 
@@ -247,11 +246,14 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
+    @staticmethod
+    def __default_str_adapter(x: t.Any):
+        return str(x)
+
     def get_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True):  # noqa: C901
         property_name = var_name if property_name is None else property_name
         lov = self.__get_list_of_(var_name)
         if isinstance(lov, list):
-            from_string = getattr(self, "from_string", False)
             adapter = self.__attributes.get("adapter")
             if adapter and not callable(adapter):
                 warnings.warn("'adapter' property value is invalid")
@@ -289,7 +291,7 @@ class _Builder:
                 self.__gui._add_adapter_for_type(var_type, adapter)
 
             if adapter is None:
-                adapter = (lambda x: (x, x)) if from_string else (lambda x: str(x))  # type: ignore
+                adapter = _Builder.__default_str_adapter
             ret_list = []
             if len(lov) > 0:
                 ret = self.__gui._get_valid_adapter_result(lov[0], index="0")

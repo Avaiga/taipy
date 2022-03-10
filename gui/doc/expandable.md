@@ -41,9 +41,9 @@ The content of `expandable` can be specified as the block content.
     === "HTML"
 
         ```html
-        <taipy:expandable.start>Title</taipy:expandable.start>
+        <taipy:expandable title="Title">
             ...
             <taipy:text>{some content}</taipy:text>
             ...
-        <taipy:expandable.end></taipy:expandable.end>
+        </taipy:expandable>
         ```
