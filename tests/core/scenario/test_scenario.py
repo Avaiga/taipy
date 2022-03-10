@@ -138,12 +138,12 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_2.is_official
 
     assert len(scenario_1.subscribers) == 0
-    scenario_1.subscribers = set([print])
+    scenario_1.subscribers = {print}
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
 
     assert len(scenario_1.tags) == 0
-    scenario_1.tags = set(["hi"])
+    scenario_1.tags = {"hi"}
     assert len(scenario_1.tags) == 1
     assert len(scenario_2.tags) == 1
 
