@@ -12,7 +12,7 @@ from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.data_node import InvalidDataNodeType, MultipleDataNodeFromSameConfigWithSameParent
+from taipy.core.exceptions.exceptions import InvalidDataNodeType, MultipleDataNodeFromSameConfigWithSameParent
 
 
 class _DataManager(_Manager[DataNode]):

@@ -3,10 +3,10 @@ from taipy.core.common._repr_enum import _ReprEnum
 
 class Status(_ReprEnum):
     """
-    The execution status of a Job.
+    The execution status of a `Job^`.
 
-    It is implemented as an enumeration. The possible values are SUBMITTED, BLOCKED, PENDING, RUNNING, CANCELLED,
-    FAILED, COMPLETED, SKIPPED.
+    It is implemented as an enumeration. The possible values are `SUBMITTED`, `BLOCKED`, `PENDING`, `RUNNING`,
+    `CANCELLED`, `FAILED`, `COMPLETED`, `SKIPPED`.
     """
 
     SUBMITTED = 1

@@ -3,9 +3,9 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
+from taipy.core._repository import _FileSystemRepository
 from taipy.core.common._manager import _Manager
 from taipy.core.config.config import Config
-from taipy.core.repository import _FileSystemRepository
 
 
 @dataclass

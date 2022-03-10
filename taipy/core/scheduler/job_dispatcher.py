@@ -8,7 +8,7 @@ from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.data_node import DataNode
-from taipy.core.exceptions.job import DataNodeWritingError
+from taipy.core.exceptions.exceptions import DataNodeWritingError
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.scheduler.executor.synchronous import Synchronous
@@ -19,7 +19,7 @@ class JobDispatcher:
     """Wrapper around executor that will run jobs.
 
     Job can be executed on different contexts (locally, etc.). This wrapper
-    instantiate the executor based on its args then deal with its low level interface to provide
+    instantiates the executor based on its args then deal with its low level interface to provide
     a homogeneous way to execute jobs.
     """
 
@@ -70,7 +70,7 @@ class JobDispatcher:
         """
         if len(task.output) == 0:
             return True
-        are_outputs_in_cache = all(_DataManager()._get(dn.id).is_in_cache for dn in task.output.values())
+        are_outputs_in_cache = all(_DataManager()._get(dn.id)._is_in_cache for dn in task.output.values())
         if not are_outputs_in_cache:
             return True
         if len(task.input) == 0:

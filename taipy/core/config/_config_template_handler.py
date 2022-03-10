@@ -3,7 +3,7 @@ import re
 
 from taipy.core.common.frequency import Frequency
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InconsistentEnvVariableError, MissingEnvVariableError
+from taipy.core.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
 
 
 class _ConfigTemplateHandler:

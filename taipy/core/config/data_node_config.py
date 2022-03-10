@@ -1,8 +1,8 @@
 from copy import copy
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 from taipy.core.common._validate_id import _validate_id
-from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.data.scope import Scope
 
 
@@ -20,7 +20,7 @@ class DataNodeConfig:
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
         scope (Scope):  The usage scope of the data nodes created from the data node config. The default value is
             SCENARIO.
-        properties (dict): Dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _STORAGE_TYPE_KEY = "storage_type"
@@ -76,13 +76,13 @@ class DataNodeConfig:
 
     def _update(self, config_as_dict, default_dn_cfg=None):
         self.storage_type = config_as_dict.pop(self._STORAGE_TYPE_KEY, self.storage_type) or default_dn_cfg.storage_type
-        self.storage_type = tpl._replace_templates(self.storage_type)
+        self.storage_type = _tpl._replace_templates(self.storage_type)
         self.scope = config_as_dict.pop(self._SCOPE_KEY, self.scope) or default_dn_cfg.scope
-        self.scope = tpl._replace_templates(
+        self.scope = _tpl._replace_templates(
             config_as_dict.pop(self._SCOPE_KEY, self.scope) or default_dn_cfg.scope, Scope
         )
         self.properties.update(config_as_dict)
         if default_dn_cfg:
             self.properties = {**default_dn_cfg.properties, **self.properties}
         for k, v in self.properties.items():
-            self.properties[k] = tpl._replace_templates(v)
+            self.properties[k] = _tpl._replace_templates(v)

@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Callable, List
 
 from taipy.core.common._entity import _Entity
-from taipy.core.common._reload import self_reload, self_setter
+from taipy.core.common._reload import _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.job.status import Status
@@ -23,22 +23,22 @@ def _run_callbacks(fn):
 
 
 class Job(_Entity):
-    """Execution of a Task.
+    """
+    Unique execution of a `Task^`.
 
-    A Job is the execution wrapper around a Task. It handles the status of the execution,
-    contains raising exceptions during the execution and notifies subscriber when the job is
-    finished.
+    A `Job` handles the status of the execution, contains raising exceptions during the execution, and notifies
+    subscriber when on status change.
 
     Attributes:
         id (str): The identifier of the Job.
-        task (`Task^`): The task of the job.
+        task (`Task^`): The `Task^` of the job.
         force (bool): Enforce the job's execution whatever the output data nodes are in cache or not.
-        status (`Status^`): The current status of the job.
+        status (`Status^`): The current `Status^` of the job.
         creation_date (datetime): The date of the job's creation.
         exceptions (List[Exception]): The list of exceptions raised during the execution.
     """
 
-    MANAGER_NAME = "job"
+    _MANAGER_NAME = "job"
 
     def __init__(self, id: JobId, task: Task, force=False):
         self.id = id
@@ -51,42 +51,42 @@ class Job(_Entity):
         self.__logger = _TaipyLogger._get_logger()
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def task(self):
         return self._task
 
     @task.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def task(self, val):
         self._task = val
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def force(self):
         return self._force
 
     @force.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def force(self, val):
         self._force = val
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def status(self):
         return self._status
 
     @status.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def status(self, val):
         self._status = val
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def creation_date(self):
         return self._creation_date
 
     @creation_date.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def creation_date(self, val):
         self._creation_date = val
 

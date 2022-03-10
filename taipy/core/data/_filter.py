@@ -5,7 +5,7 @@ import pandas as pd
 from pandas.core.common import is_bool_indexer
 
 
-class FilterDataNode:
+class _FilterDataNode:
     __DATAFRAME_DATA_TYPE = "dataframe"
     __MULTI_SHEET_EXCEL_DATA_TYPE = "multi_sheet_excel"
     __CUSTOM_DATA_TYPE = "custom"
@@ -14,14 +14,14 @@ class FilterDataNode:
         self.data_node_id = data_node_id
         self.data = data
         self.data_type = None
-        if self.is_pandas_object():
+        if self._is_pandas_object():
             self.data_type = self.__DATAFRAME_DATA_TYPE
         elif self.is_multi_sheet_excel():
             self.data_type = self.__MULTI_SHEET_EXCEL_DATA_TYPE
         else:
             self.data_type = self.__CUSTOM_DATA_TYPE
 
-    def is_pandas_object(self) -> bool:
+    def _is_pandas_object(self) -> bool:
         return isinstance(self.data, pd.DataFrame) or isinstance(self.data, pd.Series)
 
     def is_multi_sheet_excel(self) -> bool:
@@ -38,7 +38,7 @@ class FilterDataNode:
         return self.data_type == self.__MULTI_SHEET_EXCEL_DATA_TYPE
 
     def __getitem__(self, key):
-        if isinstance(key, FilterDataNode):
+        if isinstance(key, _FilterDataNode):
             key = key.data
         if isinstance(key, Hashable):
             filtered_data = self.__getitem_hashable(key)
@@ -52,7 +52,7 @@ class FilterDataNode:
             filtered_data = self.__getitem_iterable(key)
         else:
             filtered_data = None
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __getitem_hashable(self, key):
         if self.data_is_dataframe() or self.data_is_multi_sheet_excel():
@@ -96,42 +96,42 @@ class FilterDataNode:
             filtered_data = self.data == value
         else:
             filtered_data = [e == value for e in self.data]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __lt__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data < value
         else:
             filtered_data = [e < value for e in self.data]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __le__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data <= value
         else:
             filtered_data = [e <= value for e in self.data]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __gt__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data > value
         else:
             filtered_data = [e > value for e in self.data]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __ge__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data >= value
         else:
             filtered_data = [e >= value for e in self.data]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __ne__(self, value):
         if self.data_is_dataframe():
             filtered_data = self.data != value
         else:
             filtered_data = [e != value for e in self.data]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __and__(self, other):
         if self.data_is_dataframe():
@@ -144,7 +144,7 @@ class FilterDataNode:
                 return NotImplemented
             else:
                 filtered_data = [s and o for s, o in zip(self.data, other.data)]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __or__(self, other):
         if self.data_is_dataframe():
@@ -157,7 +157,7 @@ class FilterDataNode:
                 return NotImplemented
             else:
                 filtered_data = [s or o for s, o in zip(self.data, other.data)]
-        return FilterDataNode(self.data_node_id, filtered_data)
+        return _FilterDataNode(self.data_node_id, filtered_data)
 
     def __str__(self) -> str:
         if self.data_is_dataframe():

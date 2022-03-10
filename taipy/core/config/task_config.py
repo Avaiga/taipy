@@ -2,7 +2,7 @@ from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
 from taipy.core.common._validate_id import _validate_id
-from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.config.data_node_config import DataNodeConfig
 
 
@@ -17,7 +17,7 @@ class TaskConfig:
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
             (exposed_type field) of the input data nodes and returning results compatible with the exposed types
             (exposed_type field) of the outputs list. The default value is None.
-        properties (dict): Dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _INPUT_KEY = "inputs"
@@ -91,4 +91,4 @@ class TaskConfig:
         if default_task_cfg:
             self.properties = {**default_task_cfg.properties, **self.properties}
         for k, v in self.properties.items():
-            self.properties[k] = tpl._replace_templates(v)
+            self.properties[k] = _tpl._replace_templates(v)

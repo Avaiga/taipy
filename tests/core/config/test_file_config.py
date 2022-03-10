@@ -3,7 +3,7 @@ import pytest
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InvalidConfigurationId, LoadingError
+from taipy.core.exceptions.exceptions import InvalidConfigurationId, LoadingError
 from tests.core.config.named_temporary_file import NamedTemporaryFile
 
 

@@ -1,6 +1,6 @@
 import keyword
 
-from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.exceptions.exceptions import InvalidConfigurationId
 
 
 def _validate_id(name: str):

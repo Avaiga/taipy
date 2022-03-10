@@ -3,7 +3,7 @@ from taipy.core.config._config_template_handler import _ConfigTemplateHandler as
 from taipy.core.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.global_app_config import GlobalAppConfig
-from taipy.core.exceptions.configuration import InconsistentEnvVariableError
+from taipy.core.exceptions.exceptions import InconsistentEnvVariableError
 
 
 class _GlobalConfigChecker(_ConfigChecker):

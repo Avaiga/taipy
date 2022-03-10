@@ -7,8 +7,7 @@ from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InvalidConfigurationId
-from taipy.core.exceptions.data_node import NoData
+from taipy.core.exceptions.exceptions import InvalidConfigurationId, NoData
 
 
 class TestPickleDataNodeEntity:

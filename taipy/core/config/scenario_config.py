@@ -4,9 +4,9 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.frequency import Frequency
-from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.config.pipeline_config import PipelineConfig
-from taipy.core.exceptions.scenario import NonExistingComparator
+from taipy.core.exceptions.exceptions import NonExistingComparator
 
 
 class ScenarioConfig:
@@ -16,7 +16,7 @@ class ScenarioConfig:
     Attributes:
         id (str): Identifier of the scenario config. It must be a valid Python variable name.
         pipeline_configs (list): List of pipeline configs. The default value is [].
-        properties (dict): Dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _PIPELINE_KEY = "pipelines"
@@ -85,7 +85,7 @@ class ScenarioConfig:
             self.comparators = default_scenario_cfg.comparators
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():
-            self.properties[k] = tpl._replace_templates(v)
+            self.properties[k] = _tpl._replace_templates(v)
 
     def add_comparator(self, dn_config_id: str, comparator: Callable):
         self.comparators[dn_config_id].append(comparator)

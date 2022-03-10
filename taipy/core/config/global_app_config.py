@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Union
 
-from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
-from taipy.core.exceptions.configuration import MissingEnvVariableError
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 
 
 class GlobalAppConfig:
@@ -16,7 +15,7 @@ class GlobalAppConfig:
             conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
             (The Default path is "./taipy/.data/").
         clean_entities_enabled (bool): Boolean field to activate/deactivate the clean entities feature. Default: false
-        properties (dict): Dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _ROOT_FOLDER_KEY = "root_folder"
@@ -74,9 +73,9 @@ class GlobalAppConfig:
         return config
 
     def _update(self, config_as_dict):
-        self.root_folder = tpl._replace_templates(config_as_dict.pop(self._ROOT_FOLDER_KEY, self.root_folder))
-        self.storage_folder = tpl._replace_templates(config_as_dict.pop(self._STORAGE_FOLDER_KEY, self.storage_folder))
-        self.clean_entities_enabled = tpl._replace_templates(
+        self.root_folder = _tpl._replace_templates(config_as_dict.pop(self._ROOT_FOLDER_KEY, self.root_folder))
+        self.storage_folder = _tpl._replace_templates(config_as_dict.pop(self._STORAGE_FOLDER_KEY, self.storage_folder))
+        self.clean_entities_enabled = _tpl._replace_templates(
             config_as_dict.pop(self._CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled),
             type=bool,
             required=False,
@@ -84,4 +83,4 @@ class GlobalAppConfig:
         )
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():
-            self.properties[k] = tpl._replace_templates(v)
+            self.properties[k] = _tpl._replace_templates(v)

@@ -7,7 +7,7 @@ import pytest
 from taipy.core.common.alias import DataNodeId
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.data_node import MissingRequiredProperty
+from taipy.core.exceptions.exceptions import MissingRequiredProperty
 
 if not util.find_spec("pyodbc"):
     pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)

@@ -2,7 +2,7 @@ import uuid
 from typing import Dict, Iterable, Optional
 
 from taipy.core.common._entity import _Entity
-from taipy.core.common._reload import self_reload, self_setter
+from taipy.core.common._reload import _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import TaskId
 from taipy.core.data.data_node import DataNode
@@ -10,27 +10,24 @@ from taipy.core.data.scope import Scope
 
 
 class Task(_Entity):
-    """Holds user function that will be executed, its parameters qs data nodes and outputs as data nodes.
+    """
+    Holds user function that will be executed, its inputs as data nodes and outputs as data nodes.
 
-    This element bring together the user code as function, parameters and outputs.
+    The `Task` brings together the user code as function, the parameters and the results.
 
     Attributes:
-        config_id: Identifier of the task configuration. Must be a valid Python variable name.
-        input:
-            Data node input as list.
-        function:
-            Taking data from input data node and return data that should go inside of the output data node.
-        output:
-            Data node output result of the function as optional list.
-        id:
-            Unique identifier of this task. Generated if `None`.
-        parent_id:
-            Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        config_id (str): The identifier of the `TaskConfig^`.
+        function (callable): The python function to execute. The _function_ must take as parameter the
+            data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
+        input (List[`DataNode^`]): The list of `DataNode^` inputs.
+        output (List[`DataNode^`]): The list of `DataNode^` outputs.
+        id (str): The unique identifier of the task.
+        parent_id (str):  The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
     """
 
-    ID_PREFIX = "TASK"
+    _ID_PREFIX = "TASK"
     __ID_SEPARATOR = "_"
-    MANAGER_NAME = "task"
+    _MANAGER_NAME = "task"
 
     def __init__(
         self,
@@ -42,7 +39,7 @@ class Task(_Entity):
         parent_id: Optional[str] = None,
     ):
         self._config_id = _validate_id(config_id)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self._config_id, str(uuid.uuid4())]))
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self._config_id, str(uuid.uuid4())]))
         self._parent_id = parent_id
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
@@ -58,12 +55,12 @@ class Task(_Entity):
         vars(self).update(state)
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def config_id(self):
         return self._config_id
 
     @config_id.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def config_id(self, val):
         self._config_id = val
 
@@ -76,22 +73,22 @@ class Task(_Entity):
         return self.__output
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def parent_id(self):
         return self._parent_id
 
     @parent_id.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def parent_id(self, val):
         self._parent_id = val
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def function(self):
         return self._function
 
     @function.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def function(self, val):
         self._function = val
 
@@ -105,10 +102,10 @@ class Task(_Entity):
 
     @property
     def scope(self) -> Scope:
-        """Retrieve the lowest scope of the task based on its data node.
+        """Retrieve the lowest scope of the task based on its data nodes.
 
         Returns:
-           Lowest `scope` present in input and output data node or GLOBAL if there are no neither input or output.
+           Lowest `Scope^` present in input and output data nodes or GLOBAL if there are either no input or no output.
         """
         data_nodes = list(self.__input.values()) + list(self.__output.values())
         scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL

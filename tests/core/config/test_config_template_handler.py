@@ -5,7 +5,7 @@ import pytest
 
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InconsistentEnvVariableError
+from taipy.core.exceptions.exceptions import InconsistentEnvVariableError
 
 
 def test_replace_if_template():

@@ -2,8 +2,8 @@ from importlib import util
 from typing import Any, Dict, Optional, Union
 
 from taipy.core.common._utils import _load_fct
-from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
-from taipy.core.exceptions.scheduler import DependencyNotInstalled
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
+from taipy.core.exceptions.exceptions import DependencyNotInstalled
 
 
 class JobConfig:
@@ -11,11 +11,11 @@ class JobConfig:
     Holds configuration fields related to the job executions.
 
     Parameters:
-                mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise, the "airflow" mode is available.
+        mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise,
+            the "airflow" mode is available.
         nb_of_workers (int): The maximum number of running workers to execute jobs. It must be a positive integer.
             The default value is 1.
-        properties (dict): Dictionary of additional properties.
-
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _MODE_KEY = "mode"
@@ -64,8 +64,8 @@ class JobConfig:
         return config
 
     def _update(self, cfg_as_dict):
-        mode = tpl._replace_templates(cfg_as_dict.pop(self._MODE_KEY, self.mode))
-        self.nb_of_workers = tpl._replace_templates(cfg_as_dict.pop(self._NB_OF_WORKERS_KEY, self.nb_of_workers), int)
+        mode = _tpl._replace_templates(cfg_as_dict.pop(self._MODE_KEY, self.mode))
+        self.nb_of_workers = _tpl._replace_templates(cfg_as_dict.pop(self._NB_OF_WORKERS_KEY, self.nb_of_workers), int)
 
         if self.mode != mode:
             self.mode = mode
@@ -76,7 +76,7 @@ class JobConfig:
 
         self.properties.update(cfg_as_dict)
         for k, v in self.properties.items():
-            self.properties[k] = tpl._replace_templates(v)
+            self.properties[k] = _tpl._replace_templates(v)
 
     @property
     def is_standalone(self) -> bool:

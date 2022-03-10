@@ -1,13 +1,12 @@
 import pathlib
 from collections import defaultdict
 
+from taipy.core._repository import _FileSystemRepository
 from taipy.core.common import _utils
 from taipy.core.config.config import Config
-from taipy.core.exceptions.pipeline import NonExistingPipeline
-from taipy.core.exceptions.task import NonExistingTask
+from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
 from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.repository import _FileSystemRepository
 from taipy.core.task._task_manager import _TaskManager
 
 

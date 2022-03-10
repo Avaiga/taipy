@@ -9,47 +9,47 @@ import pandas as pd
 
 from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
-from taipy.core.common._reload import reload, self_reload, self_setter
+from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.data.filter import FilterDataNode
+from taipy.core.data._filter import _FilterDataNode
 from taipy.core.data.operator import JoinOperator, Operator
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.data_node import NoData
+from taipy.core.exceptions.exceptions import NoData
 
 
 class DataNode(_Entity):
     """
-    Data Node represents a reference to a dataset but not the data itself.
+    Represents a reference to a dataset.
 
-    A Data Node holds meta data related to the dataset it refers. In particular, a data node holds the name, the
-    scope, the parent_id, the last edition date and additional properties of the data. A data Node is also made to
-    contain information and methods needed to access the dataset. This information depends on the type of storage and it
-    is hold by children classes (such as SQL Data Node, CSV Data Node, ...). It is strongly recommended to
+    A Data Node holds metadata related to the dataset it refers. In particular, a data node holds the name, the
+    scope, the parent_id, the last edition date and some additional properties of the data. A data Node is also made to
+    contain information and methods needed to access the dataset. This information depends on the type of storage, and
+    it is hold by children classes (such as SQL Data Node, CSV Data Node, ...). It is strongly recommended to
     only instantiate children classes of Data Node through a Data Manager.
 
     Attributes:
-        config_id (str):  Identifier of the data node configuration. Must be a valid Python variable name.
-        scope (Scope):  The usage scope of this data node.
-        id (str): Unique identifier of this data node.
-        name (str): User-readable name of the data node.
-        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        last_edition_date (datetime):  Date and time of the last edition.
-        job_ids (List[str]): Ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): The validity period of a cacheable datanode. Implemented as a
-            timedelta. If validity_period is set to None, the data_node is always up-to-date.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
+        scope (`Scope^`): The `Scope^` of the data node.
+        id (str): The unique identifier of the data node.
+        name (str): A user-readable name of the data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        last_edition_date (datetime): The date and time of the last edition.
+        job_ids (List[str]): The ordered list of jobs that have written this data node.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
+            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
         edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
-        properties (dict): Dict of additional arguments.
+        properties (dict[str, Any]): A dictionary of additional properties.
     """
 
-    ID_PREFIX = "DATANODE"
+    _ID_PREFIX = "DATANODE"
     __ID_SEPARATOR = "_"
     __logger = _TaipyLogger._get_logger()
-    REQUIRED_PROPERTIES: List[str] = []
-    MANAGER_NAME = "data"
+    _REQUIRED_PROPERTIES: List[str] = []
+    _MANAGER_NAME = "data"
 
     def __init__(
         self,
@@ -65,7 +65,7 @@ class DataNode(_Entity):
         **kwargs,
     ):
         self._config_id = _validate_id(config_id)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self.ID_PREFIX, self._config_id, str(uuid.uuid4())]))
+        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self._config_id, str(uuid.uuid4())]))
         self._parent_id = parent_id
         self._scope = scope
         self._last_edition_date = last_edition_date
@@ -78,57 +78,57 @@ class DataNode(_Entity):
         self._properties = _Properties(self, **kwargs)
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def config_id(self):
         return self._config_id
 
     @config_id.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def config_id(self, val):
         self._config_id = val
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def parent_id(self):
         return self._parent_id
 
     @parent_id.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def parent_id(self, val):
         self._parent_id = val
 
     @property  # type: ignore
-    @self_reload("data")
+    @_self_reload("data")
     def last_edition_date(self):
         return self._last_edition_date
 
     @last_edition_date.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def last_edition_date(self, val):
         self._last_edition_date = val
 
     @property  # type: ignore
-    @self_reload(MANAGER_NAME)
+    @_self_reload(_MANAGER_NAME)
     def scope(self):
         return self._scope
 
     @scope.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def scope(self, val):
         self._scope = val
 
     @property  # type: ignore
-    @self_reload("data")
+    @_self_reload("data")
     def validity_period(self) -> Optional[timedelta]:
         return self._validity_period if self._validity_period else None
 
     @validity_period.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def validity_period(self, val):
         self._validity_period = val
 
     @property  # type: ignore
-    @self_reload("data")
+    @_self_reload("data")
     def expiration_date(self) -> datetime:
         if not self._last_edition_date:
             raise NoData
@@ -136,22 +136,22 @@ class DataNode(_Entity):
         return self._last_edition_date + self.validity_period if self.validity_period else self._last_edition_date
 
     @property  # type: ignore
-    @self_reload("data")
+    @_self_reload("data")
     def name(self):
         return self._name
 
     @name.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def name(self, val):
         self._name = val
 
     @property  # type: ignore
-    @self_reload("data")
+    @_self_reload("data")
     def edition_in_progress(self):
         return self._edition_in_progress
 
     @edition_in_progress.setter  # type: ignore
-    @self_setter(MANAGER_NAME)
+    @_self_setter(_MANAGER_NAME)
     def edition_in_progress(self, val):
         self._edition_in_progress = val
 
@@ -161,7 +161,7 @@ class DataNode(_Entity):
 
     @property  # type: ignore
     def properties(self):
-        r = reload("data", self)
+        r = _reload("data", self)
         self._properties = r._properties
         return self._properties
 
@@ -192,11 +192,25 @@ class DataNode(_Entity):
         return NotImplemented
 
     def read_or_raise(self):
+        """
+        Read the data referenced by the data node.
+
+        Returns:
+            Any: The data referenced by the data node.
+        Raises:
+            `NoData^`: If the data has not been written yet.
+        """
         if not self.last_edition_date:
             raise NoData
         return self._read()
 
     def read(self):
+        """
+        Read the data referenced by the data node.
+
+        Returns:
+            Any: The data referenced by the data node. None if the data has not been written yet.
+        """
         try:
             return self.read_or_raise()
         except NoData:
@@ -204,6 +218,13 @@ class DataNode(_Entity):
             return None
 
     def write(self, data, job_id: Optional[JobId] = None):
+        """
+        Write the _data_ given as parameter.
+
+        Parameters:
+            data (Any): The data to write.
+            job_id (JobId): An optional identifier of the writer.
+        """
         from taipy.core.data._data_manager import _DataManager
 
         self._write(data)
@@ -211,9 +232,25 @@ class DataNode(_Entity):
         _DataManager._set(self)
 
     def lock_edition(self):
+        """
+        Locks the edition of the data node.
+
+        Note:
+            It can be unlocked with the method `unlock_edition()^`
+        """
         self.edition_in_progress = True
 
     def unlock_edition(self, at: datetime = None, job_id: JobId = None):
+        """
+        Unlocks the edition of the data node and update its _last_edition_date_.
+
+        Parameters:
+            at (datetime): The optional datetime of the last edition. If no _at_ datetime is provided, the
+                current datetime is used.
+            job_id (JobId): An optional identifier of the writer.
+        Note:
+            It can be unlocked with the method `unlock_edition()^`
+        """
         self.last_edition_date = at or datetime.now()  # type: ignore
         self.edition_in_progress = False  # type: ignore
         if job_id:
@@ -221,26 +258,32 @@ class DataNode(_Entity):
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """
-        Filter data based on the provided list of tuples (key, value, operator)
-        If mulitple filter operators, filtered data will be joined based on the join operator (AND or OR)
+        Reads the data referenced by the data node filtered by the provided list of 3-tuples (key, value, `Operator^`).
+
+        If multiple filter operators are provided, filtered data will be joined based on the join operator (_AND_ or
+        _OR_).
+
+        Parameters:
+            operators (Union[List[Tuple], Tuple]): TODO
+            join_operator (`JoinOperator^`): The `JoinOperator^` used to join the multiple filter 3-tuples.
         """
         data = self._read()
         if len(operators) == 0:
             return data
         if not ((type(operators[0]) == list) or (type(operators[0]) == tuple)):
             if isinstance(data, pd.DataFrame):
-                return DataNode.filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
+                return DataNode.__filter_dataframe_per_key_value(data, operators[0], operators[1], operators[2])
             if isinstance(data, List):
-                return DataNode.filter_list_per_key_value(data, operators[0], operators[1], operators[2])
+                return DataNode.__filter_list_per_key_value(data, operators[0], operators[1], operators[2])
         else:
             if isinstance(data, pd.DataFrame):
-                return DataNode.filter_dataframe(data, operators, join_operator=join_operator)
+                return DataNode.__filter_dataframe(data, operators, join_operator=join_operator)
             if isinstance(data, List):
-                return DataNode.filter_list(data, operators, join_operator=join_operator)
+                return DataNode.__filter_list(data, operators, join_operator=join_operator)
         return NotImplemented
 
     @staticmethod
-    def filter_dataframe(df_data: pd.DataFrame, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+    def __filter_dataframe(df_data: pd.DataFrame, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         filtered_df_data = []
         if join_operator == JoinOperator.AND:
             how = "inner"
@@ -249,11 +292,11 @@ class DataNode(_Entity):
         else:
             return NotImplemented
         for key, value, operator in operators:
-            filtered_df_data.append(DataNode.filter_dataframe_per_key_value(df_data, key, value, operator))
-        return DataNode.dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
+            filtered_df_data.append(DataNode.__filter_dataframe_per_key_value(df_data, key, value, operator))
+        return DataNode.__dataframe_merge(filtered_df_data, how) if filtered_df_data else pd.DataFrame()
 
     @staticmethod
-    def filter_dataframe_per_key_value(df_data: pd.DataFrame, key: str, value, operator: Operator):
+    def __filter_dataframe_per_key_value(df_data: pd.DataFrame, key: str, value, operator: Operator):
         df_by_col = df_data[key]
         if operator == Operator.EQUAL:
             df_by_col = df_by_col == value
@@ -270,25 +313,25 @@ class DataNode(_Entity):
         return df_data[df_by_col]
 
     @staticmethod
-    def dataframe_merge(df_list: List, how="inner"):
+    def __dataframe_merge(df_list: List, how="inner"):
         return reduce(lambda df1, df2: pd.merge(df1, df2, how=how), df_list)
 
     @staticmethod
-    def filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
+    def __filter_list(list_data: List, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         filtered_list_data = []
         for key, value, operator in operators:
-            filtered_list_data.append(DataNode.filter_list_per_key_value(list_data, key, value, operator))
+            filtered_list_data.append(DataNode.__filter_list_per_key_value(list_data, key, value, operator))
         if len(filtered_list_data) == 0:
             return filtered_list_data
         if join_operator == JoinOperator.AND:
-            return DataNode.list_intersect(filtered_list_data)
+            return DataNode.__list_intersect(filtered_list_data)
         elif join_operator == JoinOperator.OR:
             return list(set(np.concatenate(filtered_list_data)))
         else:
             return NotImplemented
 
     @staticmethod
-    def filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
+    def __filter_list_per_key_value(list_data: List, key: str, value, operator: Operator):
         filtered_list = []
         for row in list_data:
             row_value = getattr(row, key)
@@ -307,7 +350,7 @@ class DataNode(_Entity):
         return filtered_list
 
     @staticmethod
-    def list_intersect(list_data):
+    def __list_intersect(list_data):
         return list(set(list_data.pop()).intersection(*map(set, list_data)))
 
     @abstractmethod
@@ -319,11 +362,14 @@ class DataNode(_Entity):
         return NotImplemented
 
     def __getitem__(self, items):
-        return FilterDataNode(self.id, self._read())[items]
+        return _FilterDataNode(self.id, self._read())[items]
 
     @property  # type: ignore
-    @self_reload("data")
+    @_self_reload("data")
     def is_ready_for_reading(self):
+        """
+        Returns `False` if the data is locked for edition or if the data has never been written. `True` otherwise.
+        """
         if self._edition_in_progress:
             return False
         if not self._last_edition_date:
@@ -332,8 +378,8 @@ class DataNode(_Entity):
         return True
 
     @property  # type: ignore
-    @self_reload("data")
-    def is_in_cache(self):
+    @_self_reload("data")
+    def _is_in_cache(self):
         if not self._properties.get(DataNodeConfig._IS_CACHEABLE_KEY):
             return False
         if not self._last_edition_date:

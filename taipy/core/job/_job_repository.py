@@ -1,11 +1,11 @@
 import pathlib
 from datetime import datetime
 
+from taipy.core._repository import _FileSystemRepository
 from taipy.core.common._utils import _fct_to_dict, _load_fct
 from taipy.core.config.config import Config
 from taipy.core.job._job_model import _JobModel
 from taipy.core.job.job import Job
-from taipy.core.repository import _FileSystemRepository
 from taipy.core.task._task_repository import _TaskRepository
 
 

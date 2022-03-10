@@ -3,8 +3,12 @@ import pytest
 from taipy.core.common.alias import DataNodeId
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InvalidConfigurationId
-from taipy.core.exceptions.data_node import MissingReadFunction, MissingRequiredProperty, MissingWriteFunction
+from taipy.core.exceptions.exceptions import (
+    InvalidConfigurationId,
+    MissingReadFunction,
+    MissingRequiredProperty,
+    MissingWriteFunction,
+)
 
 
 def read_fct():

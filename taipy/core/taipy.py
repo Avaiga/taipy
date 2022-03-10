@@ -25,7 +25,7 @@ from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
@@ -93,13 +93,13 @@ def get(
         return _JobManager._get(JobId(entity_id))
     if entity_id.startswith(Cycle._ID_PREFIX):
         return _CycleManager._get(CycleId(entity_id))
-    if entity_id.startswith(Scenario.ID_PREFIX):
+    if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManager._get(ScenarioId(entity_id))
-    if entity_id.startswith(Pipeline.ID_PREFIX):
+    if entity_id.startswith(Pipeline._ID_PREFIX):
         return _PipelineManager._get(PipelineId(entity_id))
-    if entity_id.startswith(Task.ID_PREFIX):
+    if entity_id.startswith(Task._ID_PREFIX):
         return _TaskManager._get(TaskId(entity_id))
-    if entity_id.startswith(DataNode.ID_PREFIX):
+    if entity_id.startswith(DataNode._ID_PREFIX):
         return _DataManager._get(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
@@ -136,13 +136,13 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
         return _JobManager._delete(_JobManager._get(JobId(entity_id)))  # type: ignore
     if entity_id.startswith(Cycle._ID_PREFIX):
         return _CycleManager._delete(CycleId(entity_id))
-    if entity_id.startswith(Scenario.ID_PREFIX):
+    if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManager._hard_delete(ScenarioId(entity_id))
-    if entity_id.startswith(Pipeline.ID_PREFIX):
+    if entity_id.startswith(Pipeline._ID_PREFIX):
         return _PipelineManager._hard_delete(PipelineId(entity_id))
-    if entity_id.startswith(Task.ID_PREFIX):
+    if entity_id.startswith(Task._ID_PREFIX):
         return _TaskManager._hard_delete(TaskId(entity_id))
-    if entity_id.startswith(DataNode.ID_PREFIX):
+    if entity_id.startswith(DataNode._ID_PREFIX):
         return _DataManager._delete(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
@@ -193,7 +193,7 @@ def get_official_scenarios() -> List[Scenario]:
 
 def set_official(scenario: Scenario):
     """
-    Promotes scenario `scenario` given as parameter as official scenario of its cycle. If the cycle already had a
+    Promotes scenario `scenario` given as parameter as official scenario of its cycle. If the cycle already had an
     official scenario, it will be demoted, and it will no longer be official for the cycle.
 
     Parameters:
@@ -264,7 +264,7 @@ def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Opti
 def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
     """
     Unsubscribes a function that is called when the status of a Job changes.
-    If scenario is not passed, the subscription is removed for all scenarios.
+    If scenario is not provided, the subscription is removed for all scenarios.
 
     Parameters:
         callback (Callable[[`Scenario`, `Job`], None]): The callable function to unsubscribe.

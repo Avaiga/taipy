@@ -12,28 +12,30 @@ class InMemoryDataNode(DataNode):
     """
     A Data Node stored in memory.
 
-    This Data Node implementation is not compatible with a parallel execution of taipy tasks, but only with a
-    Synchronous task executor. The purpose of InMemoryDataNode is to be used for development or debug.
+    Warning:
+        This Data Node implementation is not compatible with a parallel execution of taipy tasks, but only with a
+        Synchronous task executor. The purpose of InMemoryDataNode is to be used for development or debug.
 
     Attributes:
-        config_id (str):  Identifier of the data node configuration. Must be a valid Python variable name.
-        scope (Scope):  The usage scope of this data node.
-        id (str): Unique identifier of this data node.
-        name (str): User-readable name of the data node.
-        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        last_edition_date (datetime):  Date and time of the last edition.
-        job_ids (List[str]): Ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
-            timedelta object to represent the data node validity duration. If validity_period is set to None,
-            the data_node is always up to date.
-        properties (dict): Dict of additional arguments. Note that at the creation of the In Memory data node, if the
-            property default_data is present, the data node is automatically written with the corresponding
-            default_data value.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
+        scope (`Scope^`): The `Scope^` of the data node.
+        id (str): The unique identifier of the data node.
+        name (str): A user-readable name of the data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        last_edition_date (datetime): The date and time of the last edition.
+        job_ids (List[str]): The ordered list of jobs that have written this data node.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
+            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
+            False otherwise.
+        properties (dict[str, Any]): A dictionary of additional properties. At creation of an _InMemory_ data node, if the
+            _properties_ dictionary contains a "default_data" entry, the data node is automatically written with
+            the corresponding "default_data" value.
     """
 
     __STORAGE_TYPE = "in_memory"
     __DEFAULT_DATA_VALUE = "default_data"
-    REQUIRED_PROPERTIES: List[str] = []
+    _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
         self,

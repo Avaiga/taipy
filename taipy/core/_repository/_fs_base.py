@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
 
-from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.exceptions.exceptions import ModelNotFound
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
@@ -60,7 +60,7 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
     @abstractmethod
     def _storage_folder(self) -> pathlib.Path:
         """
-        Base folder used by repository to store data
+        Base folder used by _repository to store data
         """
         ...
 

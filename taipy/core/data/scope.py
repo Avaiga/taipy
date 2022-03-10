@@ -1,7 +1,7 @@
 from taipy.core.common._repr_enum import _ReprEnum
 
 
-class OrderedEnum(_ReprEnum):
+class _OrderedEnum(_ReprEnum):
     def __ge__(self, other):
         if self.__class__ is other.__class__:
             return self.value >= other.value
@@ -23,9 +23,10 @@ class OrderedEnum(_ReprEnum):
         return NotImplemented
 
 
-class Scope(OrderedEnum):
+class Scope(_OrderedEnum):
     """
-    The scope of a Data Node among the following values : GLOBAL, CYCLE, SCENARIO, PIPELINE.
+    Enumeration representing the scope of a Data Node among the following values : `GLOBAL`, `CYCLE`, `SCENARIO`,
+    `PIPELINE`.
     """
 
     GLOBAL = 4

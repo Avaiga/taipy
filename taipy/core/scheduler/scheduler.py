@@ -40,7 +40,7 @@ class Scheduler(AbstractScheduler):
             The created Jobs.
         """
         res = []
-        tasks = pipeline.get_sorted_tasks()
+        tasks = pipeline._get_sorted_tasks()
         for ts in tasks:
             for task in ts:
                 res.append(self.submit_task(task, callbacks, force))

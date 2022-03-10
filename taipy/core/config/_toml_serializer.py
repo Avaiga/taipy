@@ -12,7 +12,7 @@ from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import LoadingError
+from taipy.core.exceptions.exceptions import LoadingError
 
 
 class _TomlSerializer:

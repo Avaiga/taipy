@@ -10,8 +10,7 @@ from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.pipeline import NonExistingPipeline
-from taipy.core.exceptions.task import NonExistingTask
+from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
@@ -189,7 +188,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
 
     _TaskManager._set(task_no_input_no_output)
     _PipelineManager._set(pipeline_1)
-    assert len(pipeline_1.get_sorted_tasks()) == 1
+    assert len(pipeline_1._get_sorted_tasks()) == 1
 
     _PipelineManager._submit(pipeline_1)
     assert g == 1
@@ -206,7 +205,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
 
     _TaskManager._set(task_one_input_no_output)
     _PipelineManager._set(pipeline_2)
-    assert len(pipeline_2.get_sorted_tasks()) == 1
+    assert len(pipeline_2._get_sorted_tasks()) == 1
 
     _PipelineManager._submit(pipeline_2)
     assert g == 3
@@ -223,7 +222,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
 
     _TaskManager._set(task_no_input_one_output)
     _PipelineManager._set(pipeline_3)
-    assert len(pipeline_2.get_sorted_tasks()) == 1
+    assert len(pipeline_2._get_sorted_tasks()) == 1
 
     _PipelineManager._submit(pipeline_3)
     assert data_node_output.read() == 3
@@ -256,12 +255,12 @@ def test_get_or_create_data():
 
     assert len(_DataManager._get_all()) == 3
     assert len(_TaskManager._get_all()) == 2
-    assert len(pipeline.get_sorted_tasks()) == 2
+    assert len(pipeline._get_sorted_tasks()) == 2
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 0
     assert pipeline.baz.read() == 0
-    assert pipeline.get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.id
-    assert pipeline.get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.id
+    assert pipeline._get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.id
+    assert pipeline._get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.id
 
     _PipelineManager._submit(pipeline.id)
     assert pipeline.foo.read() == 1
@@ -318,7 +317,7 @@ def notify2(*args, **kwargs):
 
 
 def test_pipeline_notification_subscribe(mocker):
-    mocker.patch("taipy.core.common._reload.reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config._add_pipeline(
         "by_6",
@@ -370,7 +369,7 @@ def test_pipeline_notification_subscribe(mocker):
 
 
 def test_pipeline_notification_unsubscribe(mocker):
-    mocker.patch("taipy.core.common._reload.reload", side_effect=lambda m, o: o)
+    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config._add_pipeline(
         "by_6",

@@ -109,7 +109,7 @@ def test_handle_exception_when_writing_datanode():
     output = MagicMock()
     output.id = DataNodeId("output_id")
     output.config_id = "my_raising_datanode"
-    output.is_in_cache = False
+    output._is_in_cache = False
     output.write.side_effect = ValueError()
     task = Task(config_id="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task)

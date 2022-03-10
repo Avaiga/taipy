@@ -2,18 +2,20 @@ from taipy.core.config._config import _Config
 from taipy.core.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.data.data_node import DataNode
-from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
 
 
 class _DataNodeConfigChecker(_ConfigChecker):
     def __init__(self, config: _Config, collector: IssueCollector):
         super().__init__(config, collector)
-        self._required_properties = {c.storage_type(): c.REQUIRED_PROPERTIES for c in DataNode.__subclasses__()}
+        from taipy.core.data.data_node import DataNode
+
+        self._required_properties = {c.storage_type(): c._REQUIRED_PROPERTIES for c in DataNode.__subclasses__()}
         self._storage_types = [c.storage_type() for c in DataNode.__subclasses__()]
 
     def _check(self) -> IssueCollector:
+        from taipy.core.data.generic import GenericDataNode
+
         data_node_configs = self._config._data_nodes
         for data_node_config_id, data_node_config in data_node_configs.items():
             self._check_existing_config_id(data_node_config)
@@ -43,6 +45,8 @@ class _DataNodeConfigChecker(_ConfigChecker):
             )
 
     def _check_read_write_fct(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+        from taipy.core.data.generic import GenericDataNode
+
         key_names = [
             GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY,
             GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY,

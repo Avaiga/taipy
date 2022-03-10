@@ -1,8 +1,8 @@
-from taipy.core.common._reload import set_entity
+from taipy.core.common._reload import _set_entity
 
 
 class _Entity:
-    MANAGER_NAME: str
+    _MANAGER_NAME: str
     _is_in_context = False
 
     def __enter__(self):
@@ -11,4 +11,4 @@ class _Entity:
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self._is_in_context = False
-        set_entity(self.MANAGER_NAME, self)
+        _set_entity(self._MANAGER_NAME, self)

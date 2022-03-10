@@ -7,7 +7,7 @@ from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 

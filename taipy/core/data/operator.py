@@ -3,7 +3,8 @@ from enum import Enum
 
 class Operator(Enum):
     """
-    The operator of filtering of a Data Node.
+    Enumeration of operators for Data Node filtering. The possible values are `EQUAL`, `NOT_EQUAL`, `LESS_THAN`,
+    `LESS_OR_EQUAL`, `GREATER_THAN`, `GREATER_OR_EQUAL`.
     """
 
     EQUAL = 1
@@ -15,5 +16,9 @@ class Operator(Enum):
 
 
 class JoinOperator(Enum):
+    """
+    Enumeration of join operators for Data Node filtering. The possible values are `AND` and `OR`.
+    """
+
     AND = 1
     OR = 2

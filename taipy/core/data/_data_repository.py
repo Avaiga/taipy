@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 from pydoc import locate
 from typing import Dict
 
+from taipy.core._repository import _FileSystemRepository
 from taipy.core.common._utils import _load_fct
 from taipy.core.config.config import Config
 from taipy.core.data._data_model import _DataNodeModel
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.generic import GenericDataNode
-from taipy.core.repository import _FileSystemRepository
 
 
 class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):

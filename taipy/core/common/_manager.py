@@ -1,8 +1,8 @@
 from typing import Any, Generic, List, TypeVar, Union
 
+from taipy.core._repository import _FileSystemRepository
 from taipy.core.common._taipy_logger import _TaipyLogger
-from taipy.core.exceptions.repository import ModelNotFound
-from taipy.core.repository import _FileSystemRepository
+from taipy.core.exceptions.exceptions import ModelNotFound
 
 EntityType = TypeVar("EntityType")
 

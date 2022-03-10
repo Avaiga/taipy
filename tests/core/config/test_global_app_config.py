@@ -5,7 +5,7 @@ import pytest
 
 from taipy.core.config.config import Config
 from taipy.core.config.global_app_config import GlobalAppConfig
-from taipy.core.exceptions.configuration import InconsistentEnvVariableError
+from taipy.core.exceptions.exceptions import InconsistentEnvVariableError
 
 
 def test_clean_entities_enabled_default():

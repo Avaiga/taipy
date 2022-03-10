@@ -1,5 +1,3 @@
-__all__ = ["Config"]
-
 import os
 from typing import Callable, Dict, List, Optional, Union
 
@@ -17,7 +15,7 @@ from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import ConfigurationIssueError
+from taipy.core.exceptions.exceptions import ConfigurationIssueError
 
 
 class Config:
@@ -63,7 +61,6 @@ class Config:
 
     @classmethod
     def _load(cls, filename):
-
         cls._file_config = _TomlSerializer()._read(filename)
         cls.__compile_configs()
 
@@ -73,14 +70,6 @@ class Config:
 
     @classmethod
     def _export_code_config(cls, filename):
-        """
-        Exports the python code configuration as a toml file.
-
-        Parameters:
-            filename (str): File to export.
-        Note:
-            Overwrite the file if it already exists.
-        """
         _TomlSerializer()._write(cls._python_config, filename)
 
     @classmethod

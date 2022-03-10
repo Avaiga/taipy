@@ -5,7 +5,7 @@ import pytest
 
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager import _ScenarioManager
@@ -83,10 +83,10 @@ def test_add_and_remove_subscriber():
 
     scenario = Scenario("foo", [], {})
 
-    scenario.add_subscriber(mock_function)
+    scenario._add_subscriber(mock_function)
     assert len(scenario.subscribers) == 1
 
-    scenario.remove_subscriber(mock_function)
+    scenario._remove_subscriber(mock_function)
     assert len(scenario.subscribers) == 0
 
 

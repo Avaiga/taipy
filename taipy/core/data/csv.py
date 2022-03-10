@@ -8,7 +8,7 @@ import pandas as pd
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.data_node import MissingRequiredProperty
+from taipy.core.exceptions.exceptions import MissingRequiredProperty
 
 
 class CSVDataNode(DataNode):
@@ -16,18 +16,19 @@ class CSVDataNode(DataNode):
     A Data Node stored as a CSV file.
 
     Attributes:
-        config_id (str): Identifier of the data node configuration. Must be a valid Python variable name.
-        scope (Scope):  The usage scope of this data node.
-        id (str): Unique identifier of this data node.
-        name (str): User-readable name of the data node.
-        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        last_edition_date (datetime):  Date and time of the last edition.
-        job_ids (List[str]): Ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
-            timedelta object to represent the data node validity duration. If validity_period is set to None,
-            the data_node is always up to date.
-        properties (dict): Dict of additional arguments. Note that the properties parameter should at least contain
-            a value for "path" properties.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
+        scope (`Scope^`): The `Scope^` of the data node.
+        id (str): The unique identifier of the data node.
+        name (str): A user-readable name of the data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        last_edition_date (datetime): The date and time of the last edition.
+        job_ids (List[str]): The ordered list of jobs that have written this data node.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
+            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
+            False otherwise.
+        properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
+            at least contain a "path" entry representing the path of the CSV file.
     """
 
     __STORAGE_TYPE = "csv"
@@ -35,7 +36,7 @@ class CSVDataNode(DataNode):
     __EXPOSED_TYPE_NUMPY = "numpy"
     __REQUIRED_PATH_PROPERTY = "path"
     __HAS_HEADER_PROPERTY = "has_header"
-    REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
+    _REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
 
     def __init__(
         self,
@@ -52,7 +53,7 @@ class CSVDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
-        if missing := set(self.REQUIRED_PROPERTIES) - set(properties.keys()):
+        if missing := set(self._REQUIRED_PROPERTIES) - set(properties.keys()):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
@@ -120,6 +121,14 @@ class CSVDataNode(DataNode):
         pd.DataFrame(data).to_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
+        """
+        Write only the columns provided in _columns_ parameter.
+
+        Parameters:
+            data (Any): The data to write.
+            columns (List[str]): The list of columns to write.
+            job_id (JobId): An optional identifier of the writer.
+        """
         if not columns:
             df = pd.DataFrame(data)
         else:

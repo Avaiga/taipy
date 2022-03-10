@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytest
 
-from taipy.core.repository._fs_base import _CustomDecoder, _CustomEncoder
+from taipy.core._repository._fs_base import _CustomDecoder, _CustomEncoder
 
 
 @pytest.fixture(scope="function", autouse=True)

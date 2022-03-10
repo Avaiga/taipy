@@ -7,7 +7,7 @@ from taipy.core.common.frequency import Frequency
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.scenario import NonExistingComparator
+from taipy.core.exceptions.exceptions import NonExistingComparator
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 

@@ -5,7 +5,7 @@ from typing import List
 from taipy.core.cycle.cycle import Cycle  # isort:skip
 from taipy.core.cycle._cycle_model import _CycleModel  # isort:skip
 from taipy.core.common.frequency import Frequency  # isort:skip
-from taipy.core.repository import _FileSystemRepository  # isort:skip
+from taipy.core._repository import _FileSystemRepository  # isort:skip
 from taipy.core.config.config import Config  # isort:skip
 
 

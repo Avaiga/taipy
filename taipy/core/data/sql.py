@@ -11,34 +11,41 @@ from sqlalchemy import create_engine, table, text
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.data_node import MissingRequiredProperty, UnknownDatabaseEngine
+from taipy.core.exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 
 
 class SQLDataNode(DataNode):
     """
-    A Data Node stored as a SQL database.
+    A Data Node stored as an SQL database.
 
     Attributes:
-        config_id (str):  Identifier of the data node configuration. Must be a valid Python variable name.
-        scope (Scope):  The usage scope of this data node.
-        id (str): Unique identifier of this data node.
-        name (str): User-readable name of the data node.
-        parent_id (str): Identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
-        last_edition_date (datetime):  Date and time of the last edition.
-        job_ids (List[str]): Ordered list of jobs that have written this data node.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
+        scope (`Scope^`): The `Scope^` of the data node.
+        id (str): The unique identifier of the data node.
+        name (str): A user-readable name of the data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        last_edition_date (datetime): The date and time of the last edition.
+        job_ids (List[str]): The ordered list of jobs that have written this data node.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
+            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
         edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
-        validity_period (Optional[timedelta]): Number of weeks, days, hours, minutes, and seconds as a
-            timedelta object to represent the data node validity duration. If validity_period is set to None,
-            the data_node is always up to date.
-        properties (dict): Dict of additional arguments. Note that properties should at least contain
-            values for "db_username", "db_password", "db_name", "db_engine" and "query" properties.
+        properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
+            at least contain an entry for "db_username", "db_password", "db_name", "db_engine", "read_query", and
+            "write_table".
     """
 
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    REQUIRED_PROPERTIES: List[str] = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
+    _REQUIRED_PROPERTIES: List[str] = [
+        "db_username",
+        "db_password",
+        "db_name",
+        "db_engine",
+        "read_query",
+        "write_table",
+    ]
 
     def __init__(
         self,
@@ -56,7 +63,7 @@ class SQLDataNode(DataNode):
         if properties is None:
             properties = {}
         required = (
-            self.REQUIRED_PROPERTIES
+            self._REQUIRED_PROPERTIES
             if properties.get("db_engine") != "sqlite"
             else ["db_name", "read_query", "write_table"]
         )
@@ -92,7 +99,7 @@ class SQLDataNode(DataNode):
 
     @staticmethod
     def __build_conn_string(engine, username, host, password, database, port, path) -> str:
-        # TODO: Add support to other SQL engines
+        # TODO: Add support to other SQL engines, the engine value should be checked.
         if engine == "mssql":
             return "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(
                 f"DRIVER=FreeTDS;SERVER={host};PORT={port};DATABASE={database};UID={username};PWD={password};TDS_Version=8.0;"

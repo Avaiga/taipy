@@ -1,7 +1,7 @@
 import pytest
 
 from taipy.core.common._validate_id import _validate_id
-from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.exceptions.exceptions import InvalidConfigurationId
 
 
 class TestId:

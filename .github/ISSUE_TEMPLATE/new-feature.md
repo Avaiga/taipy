@@ -9,7 +9,7 @@ assignees: ''
 
 **What would that feature address**
 Description of the lacking functionality that this issue would address.
-Ex: It is no possible to do this or that...
+Ex: It is not possible to do this or that...
 
 ***Description of the ideal solution***
 What would be the best way to provide that functionality

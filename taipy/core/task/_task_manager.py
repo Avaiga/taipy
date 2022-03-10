@@ -6,7 +6,7 @@ from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.task import MultipleTaskFromSameConfigWithSameParent
+from taipy.core.exceptions.exceptions import MultipleTaskFromSameConfigWithSameParent
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scheduler.abstract_scheduler import AbstractScheduler
 from taipy.core.scheduler.scheduler_factory import SchedulerFactory

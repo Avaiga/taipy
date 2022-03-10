@@ -3,7 +3,7 @@ from typing import Callable, Iterable, Optional
 
 from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import JobId
-from taipy.core.exceptions.job import JobNotDeletedException
+from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_repository import _JobRepository
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task

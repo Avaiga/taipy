@@ -13,7 +13,7 @@ from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.job import JobNotDeletedException
+from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.scheduler.scheduler import Scheduler
 from taipy.core.task._task_manager import _TaskManager

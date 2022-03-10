@@ -2,7 +2,7 @@ from copy import copy
 from typing import Any, Dict, List, Optional, Union
 
 from taipy.core.common._validate_id import _validate_id
-from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.config.task_config import TaskConfig
 
 
@@ -13,7 +13,7 @@ class PipelineConfig:
     Attributes:
         id (str): Identifier of the pipeline configuration. It must be a valid Python variable name.
         task_configs (list): List of task configs. The default value is [].
-        properties (dict): Dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _TASK_KEY = "tasks"
@@ -58,4 +58,4 @@ class PipelineConfig:
             self._tasks = default_pipeline_cfg._tasks
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():
-            self.properties[k] = tpl._replace_templates(v)
+            self.properties[k] = _tpl._replace_templates(v)

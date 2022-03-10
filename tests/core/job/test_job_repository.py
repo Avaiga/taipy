@@ -6,7 +6,7 @@ from taipy.core.common.alias import DataNodeId, JobId, TaskId
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job._job_model import _JobModel
 from taipy.core.job.job import Job

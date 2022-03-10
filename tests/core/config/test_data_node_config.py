@@ -7,7 +7,7 @@ import pytest
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.exceptions.configuration import ConfigurationIssueError
+from taipy.core.exceptions.exceptions import ConfigurationIssueError
 
 
 @pytest.fixture(scope="function", autouse=True)

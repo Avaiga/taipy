@@ -6,7 +6,7 @@ from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InvalidConfigurationId
+from taipy.core.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task._task_manager import _TaskManager
@@ -79,19 +79,6 @@ def test_check_consistency():
     assert not pipeline_2.is_consistent
 
 
-def test_to_model():
-    input = InMemoryDataNode("input", Scope.PIPELINE)
-    output = InMemoryDataNode("output", Scope.PIPELINE)
-    task = Task("task", print, [input], [output], TaskId("task_id"))
-    pipeline = Pipeline("id", {"foo": "bar"}, [task])
-    model = pipeline.to_model()
-    assert model.config_id == "id"
-    assert model.id == pipeline.id
-    assert len(model.properties) == 1
-    assert model.properties["foo"] == "bar"
-    assert model.tasks == [task.id]
-
-
 def test_get_sorted_tasks():
     data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = DataNode("bar", Scope.PIPELINE, "s2")
@@ -116,7 +103,7 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -------------------------> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    assert pipeline.get_sorted_tasks() == [[task_1], [task_2, task_4], [task_3]]
+    assert pipeline._get_sorted_tasks() == [[task_1], [task_2, task_4], [task_3]]
 
 
 def test_auto_set_and_reload(task):

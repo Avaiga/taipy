@@ -10,8 +10,7 @@ from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.configuration import InvalidConfigurationId
-from taipy.core.exceptions.data_node import MissingRequiredProperty, NoData
+from taipy.core.exceptions.exceptions import InvalidConfigurationId, MissingRequiredProperty, NoData
 
 
 class MyCustomObject:
