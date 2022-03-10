@@ -12,13 +12,15 @@ class _ConfigTemplateHandler:
     _PATTERN = r"^ENV\[([a-zA-Z_]\w*)\]$"
 
     @classmethod
-    def _replace_templates(cls, template, type=str):
+    def _replace_templates(cls, template, type=str, required=True, default=None):
         match = re.fullmatch(cls._PATTERN, str(template))
         if match:
             var = match.group(1)
             val = os.environ.get(var)
             if val is None:
-                raise MissingEnvVariableError()
+                if required:
+                    raise MissingEnvVariableError()
+                return default
             if type == bool:
                 return cls._to_bool(val)
             elif type == int:

@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional, Union
 
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
+from taipy.core.exceptions.configuration import MissingEnvVariableError
 
 
 class GlobalAppConfig:
@@ -23,16 +26,16 @@ class GlobalAppConfig:
     _DEFAULT_STORAGE_FOLDER = ".data/"
 
     _CLEAN_ENTITIES_ENABLED_KEY = "clean_entities_enabled"
-    _CLEAN_ENTITIES_ENABLED_VALUE_TRUE = True
-    _CLEAN_ENTITIES_ENABLED_VALUE_FALSE = False
-    _DEFAULT_CLEAN_ENTITIES_ENABLED = _CLEAN_ENTITIES_ENABLED_VALUE_FALSE
+    _DEFAULT_CLEAN_ENTITIES_ENABLED = False
+    _CLEAN_ENTITIES_ENABLED_ENV_VAR = "TAIPY_CLEAN_ENTITIES_ENABLED"
+    _CLEAN_ENTITIES_ENABLED_TEMPLATE = f"ENV[{_CLEAN_ENTITIES_ENABLED_ENV_VAR}]"
 
     def __init__(
         self,
         root_folder: str = None,
         storage_folder: str = None,
         clean_entities_enabled: Union[bool, str] = None,
-        **properties
+        **properties,
     ):
         self.root_folder = root_folder
         self.storage_folder = storage_folder
@@ -43,11 +46,11 @@ class GlobalAppConfig:
         return self.properties.get(item)
 
     @classmethod
-    def default_config(cls):
+    def default_config(cls) -> GlobalAppConfig:
         config = GlobalAppConfig()
         config.root_folder = cls._DEFAULT_ROOT_FOLDER
         config.storage_folder = cls._DEFAULT_STORAGE_FOLDER
-        config.clean_entities_enabled = cls._DEFAULT_CLEAN_ENTITIES_ENABLED
+        config.clean_entities_enabled = cls._CLEAN_ENTITIES_ENABLED_TEMPLATE
         return config
 
     def _to_dict(self):
@@ -74,7 +77,10 @@ class GlobalAppConfig:
         self.root_folder = tpl._replace_templates(config_as_dict.pop(self._ROOT_FOLDER_KEY, self.root_folder))
         self.storage_folder = tpl._replace_templates(config_as_dict.pop(self._STORAGE_FOLDER_KEY, self.storage_folder))
         self.clean_entities_enabled = tpl._replace_templates(
-            config_as_dict.pop(self._CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled), bool
+            config_as_dict.pop(self._CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled),
+            type=bool,
+            required=False,
+            default=self._DEFAULT_CLEAN_ENTITIES_ENABLED,
         )
         self.properties.update(config_as_dict)
         for k, v in self.properties.items():

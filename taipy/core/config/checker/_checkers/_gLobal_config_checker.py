@@ -1,7 +1,9 @@
 from taipy.core.config._config import _Config
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler as tpl
 from taipy.core.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.global_app_config import GlobalAppConfig
+from taipy.core.exceptions.configuration import InconsistentEnvVariableError
 
 
 class _GlobalConfigChecker(_ConfigChecker):
@@ -10,13 +12,26 @@ class _GlobalConfigChecker(_ConfigChecker):
 
     def _check(self) -> IssueCollector:
         global_config = self._config._global_config
-        self._check_bolean_field(global_config)
+        self._check_clean_entities_enabled_type(global_config)
         return self._collector
 
-    def _check_bolean_field(self, global_config: GlobalAppConfig):
-        if not isinstance(global_config.clean_entities_enabled, bool):
-            self._error(
-                global_config._CLEAN_ENTITIES_ENABLED_KEY,
-                global_config.clean_entities_enabled,
-                f"{global_config._CLEAN_ENTITIES_ENABLED_KEY} field must be populated with a boolean value.",
-            )
+    def _check_clean_entities_enabled_type(self, global_config: GlobalAppConfig):
+        value = global_config.clean_entities_enabled
+
+        if isinstance(global_config.clean_entities_enabled, str):
+            try:
+                value = tpl._replace_templates(
+                    global_config.clean_entities_enabled,
+                    type=bool,
+                    required=False,
+                    default=GlobalAppConfig._DEFAULT_CLEAN_ENTITIES_ENABLED,
+                )
+            except InconsistentEnvVariableError:
+                pass
+        if isinstance(value, bool):
+            return
+        self._error(
+            global_config._CLEAN_ENTITIES_ENABLED_KEY,
+            value,
+            f"{global_config._CLEAN_ENTITIES_ENABLED_KEY} field must be populated with a boolean value.",
+        )

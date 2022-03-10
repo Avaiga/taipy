@@ -49,6 +49,7 @@ def test_override_default_configuration_with_code_configuration():
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
+    Config._set_global_config()
     assert not Config.global_config.clean_entities_enabled
     Config._set_global_config(clean_entities_enabled=True)
     assert Config.global_config.clean_entities_enabled
@@ -84,7 +85,7 @@ nb_of_workers = -1
 [SCENARIO.qux]
 """
     )
-
+    Config._set_global_config()
     assert Config.job_config.nb_of_workers == 1
     assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
@@ -206,6 +207,7 @@ clean_entities_enabled = false
     """
     )
 
+    Config._set_global_config()
     # Default config is applied
     assert Config.job_config.nb_of_workers == 1
     assert Config.global_config.clean_entities_enabled is False
@@ -241,6 +243,7 @@ clean_entities_enabled = false
     """
     )
 
+    Config._set_global_config()
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
         assert Config.job_config.nb_of_workers == 1
