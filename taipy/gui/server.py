@@ -58,14 +58,6 @@ class _Server:
             elif "type" in message.keys():
                 gui._manage_message(message["type"], message)
 
-        # @self._ws.on("connect")
-        # def ws_connect():
-        #     pass
-
-        # @self._ws.on("disconnect")
-        # def ws_disconnect():
-        #     pass
-
     def _get_default_blueprint(
         self,
         static_folder: t.Optional[str] = "",

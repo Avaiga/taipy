@@ -12,11 +12,6 @@ class _Adapter:
         self.__adapter_for_type: t.Dict[str, t.Callable] = {}
         self.__type_for_variable: t.Dict[str, str] = {}
 
-    #     self.__list_for_variable: t.Dict[str, str] = {}
-
-    # def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
-    #     self.__list_for_variable[var_name] = list_name
-
     def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter_for_type[type_name] = adapter
 

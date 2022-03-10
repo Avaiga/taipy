@@ -568,9 +568,6 @@ class Gui:
         return self.__evaluator._fetch_expression_list(expr)
 
     # Proxy methods for Adapter
-    # def _add_list_for_variable(self, var_name: str, list_name: str) -> None:
-    #     self.__adapter._add_list_for_variable(var_name, list_name)
-
     def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter._add_adapter_for_type(type_name, adapter)
 
@@ -831,12 +828,15 @@ class Gui:
         if _is_in_notebook() or run_in_thread:
             self._config.app_config["single_client"] = True
 
-        if run_server and app_config["ngrok_token"] and util.find_spec("pyngrok"):  # pragma: no cover
-            ngrok.set_auth_token(app_config["ngrok_token"])
-            http_tunnel = ngrok.connect(app_config["port"], "http")
-            app_config["client_url"] = http_tunnel.public_url
-            app_config["use_reloader"] = False
-            print(f" * NGROK Public Url: {http_tunnel.public_url}")
+        if run_server and app_config["ngrok_token"]:  # pragma: no cover
+            if not util.find_spec("pyngrok"):
+                warnings.warn("Cannot use ngrok as pyngrok package is not installed")
+            else:
+                ngrok.set_auth_token(app_config["ngrok_token"])
+                http_tunnel = ngrok.connect(app_config["port"], "http")
+                app_config["client_url"] = http_tunnel.public_url
+                app_config["use_reloader"] = False
+                print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
         self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals

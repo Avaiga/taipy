@@ -15,7 +15,7 @@ class State:
     """
 
     __attrs = ("_gui", "_user_var_list")
-    __methods = "assign"
+    __methods = ("assign",)
     __gui_attr = "_gui"
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
