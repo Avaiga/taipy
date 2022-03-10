@@ -5,15 +5,15 @@ from importlib import util
 import numpy as np
 import pandas as pd
 
-_has_arrow_module = False
-if util.find_spec("pyarrow"):
-    _has_arrow_module = True
-    import pyarrow as pa
-
 from ..gui import Gui
 from ..utils import _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
+
+_has_arrow_module = False
+if util.find_spec("pyarrow"):
+    _has_arrow_module = True
+    import pyarrow as pa
 
 
 class _PandasDataAccessor(_DataAccessor):
