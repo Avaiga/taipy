@@ -27,7 +27,7 @@ The default layout contains 2 columns in desktop mode and 1 column in mobile mod
         ```html
         <taipy:layout>
 
-            <taipy:text>{some content}</taipy:text>>
+            <taipy:text>{some content}</taipy:text>
 
         </taipy:layout>
         ```
