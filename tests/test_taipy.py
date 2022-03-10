@@ -80,10 +80,19 @@ class TestTaipy:
             mck.assert_called_once_with(a, "excel", scope=e, path=b, has_header=c, sheet_name=d, exposed_type=f)
 
     def test_configure_generic_data_node(self):
-        a, b, c, d, e = "foo", print, print, Scope.PIPELINE, "qux"
+        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, {}, {}, "qux"
         with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
-            tp.configure_generic_data_node(a, b, c, d, property=e)
-            mck.assert_called_once_with(a, "generic", scope=d, read_fct=b, write_fct=c, property=e)
+            tp.configure_generic_data_node(a, b, c, e, f, d, property=g)
+            mck.assert_called_once_with(
+                a, "generic", scope=d, read_fct=b, write_fct=c, read_fct_params=e, write_fct_params=f, property=g
+            )
+
+        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, [], [], "qux"
+        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
+            tp.configure_generic_data_node(a, b, c, e, f, d, property=g)
+            mck.assert_called_once_with(
+                a, "generic", scope=d, read_fct=b, write_fct=c, read_fct_params=e, write_fct_params=f, property=g
+            )
 
     def test_configure_in_memory_data_node(self):
         a, b, c, d = "foo", 0, Scope.PIPELINE, "qux"

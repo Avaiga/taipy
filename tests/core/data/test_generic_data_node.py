@@ -11,7 +11,11 @@ def read_fct():
     return TestGenericDataNode.data
 
 
-def read_fct_with_params(inp):
+def read_fct_with_dict_params(inp):
+    return [i + inp for i in TestGenericDataNode.data]
+
+
+def read_fct_with_list_params(inp):
     return [i + inp for i in TestGenericDataNode.data]
 
 
@@ -19,7 +23,12 @@ def write_fct(data):
     data.append(data[-1] + 1)
 
 
-def write_fct_with_params(data, inp):
+def write_fct_with_dict_params(data, inp):
+    for i in range(inp):
+        data.append(data[-1] + 1)
+
+
+def write_fct_with_list_params(data, inp):
     for i in range(inp):
         data.append(data[-1] + 1)
 
@@ -120,13 +129,13 @@ class TestGenericDataNode:
         with pytest.raises(MissingWriteFunction):
             generic_dn_3.write(self.data)
 
-    def test_read_write_generic_datanode_with_parameters(self):
+    def test_read_write_generic_datanode_with_parameters_as_dict(self):
         generic_dn = GenericDataNode(
             "foo",
             Scope.PIPELINE,
             properties={
-                "read_fct": read_fct_with_params,
-                "write_fct": write_fct_with_params,
+                "read_fct": read_fct_with_dict_params,
+                "write_fct": write_fct_with_dict_params,
                 "read_fct_params": {"inp": 1},
                 "write_fct_params": {"inp": 2},
             },
@@ -137,3 +146,21 @@ class TestGenericDataNode:
 
         generic_dn.write(self.data)
         assert len(generic_dn.read()) == 14
+
+    def test_read_write_generic_datanode_with_parameters_as_list(self):
+        generic_dn = GenericDataNode(
+            "foo",
+            Scope.PIPELINE,
+            properties={
+                "read_fct": read_fct_with_list_params,
+                "write_fct": write_fct_with_list_params,
+                "read_fct_params": [1],
+                "write_fct_params": [2],
+            },
+        )
+
+        assert all([a + 1 == b for a, b in zip(self.data, generic_dn.read())])
+        assert len(generic_dn.read()) == 14
+
+        generic_dn.write(self.data)
+        assert len(generic_dn.read()) == 16
