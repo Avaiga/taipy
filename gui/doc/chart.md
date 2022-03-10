@@ -70,7 +70,7 @@ Furthermore, we want the second dataset to be displayed in red.
 
 In the following example, the value holds an array of dataframe of different length _[data1, data2]_.
 We want to show a first chart with columns _Col A_ and _Col B_ from the first dataframe and a second chart
-with columns _Col D_ and _Col F_: the columns names needs to be prefixed by the index of tha dataframe in the array.
+with columns _Col D_ and _Col F_: the columns names needs to be prefixed by the index of the dataframe in the array.
 
 !!! example "Page content"
 
@@ -82,7 +82,7 @@ with columns _Col D_ and _Col F_: the columns names needs to be prefixed by the 
         <|{[[26, 34, 46],[34,34],[16, 46, 20, 6]]}|chart|>
         ```
   
-        In this second example, we draw 3 charts with _x_ the index of the _y_ value in each array.
+        In this second example, we draw 3 charts with _x_ the index of the _y_ value from each array.
 
     === "HTML"
 
