@@ -87,16 +87,16 @@ The _columns_ property follows the [https://developer.mozilla.org/en-US/docs/Web
         ```html
         <taipy:layout columns="50px 1fr 50px">
             <taipy:part>
-                <taipy.text>{1st column content}</taipy.text>
+                <taipy:text>{1st column content}</taipy:text>
             </taipy:part>
             <div>
-                <taipy.text>{2nd column content}</taipy.text>
+                <taipy:text>{2nd column content}</taipy:text>
             </div>
             <taipy:part>
-                <taipy.text>{3rd column content}</taipy.text>
+                <taipy:text>{3rd column content}</taipy:text>
             </taipy:part>
             <taipy:part>
-                <taipy.text>{1st column and second row content}</taipy.text>
+                <taipy:text>{1st column and second row content}</taipy:text>
             </taipy:part>
             ...
         </taipy:layout>
@@ -130,16 +130,16 @@ The _columns[mobile]_ property allows to specify a different layout when a mobil
         ```html
         <taipy:layout columns="50px 1fr 50px" columns[mobile]="1 1">
             <taipy:part>
-                <taipy.text>{1st column content}</taipy.text>
+                <taipy:text>{1st column content}</taipy:text>
             </taipy:part>
             <div>
-                <taipy.text>{2nd column content}</taipy.text>
+                <taipy:text>{2nd column content}</taipy:text>
             </div>
             <taipy:part>
-                <taipy.text>{3rd column content or 2nd row 1st column on mobile}</taipy.text>
+                <taipy:text>{3rd column content or 2nd row 1st column on mobile}</taipy:text>
             </taipy:part>
             <taipy:part>
-                <taipy.text>{1st column and second row content or 2nd row 2nd column on mobile}</taipy.text>
+                <taipy:text>{1st column and second row content or 2nd row 2nd column on mobile}</taipy:text>
             </taipy:part>
             ...
         </taipy:layout>
