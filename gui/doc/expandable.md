@@ -1,13 +1,49 @@
 Displays its child elements in a collapsable area.
 
+Expandable is a block control.
+
 ## Usage
 
-### Simple
-<code><|title|expandable|<br>...<br>|></code>
+### Defining a title and managing expanded state
 
-### Advanced
-<code><|{value}|expandable|expanded={False}|<br>...<br>|></code>
-<br>or with properties<br>
-<code><|expandable|properties={properties}|<br>...<br>|></code>
-<br>or with closing tag<br>
-<code><|expandable.start|...|><br>...<br><|expandable.end|></code>
+The default property _title_ defines the title shown when clthe visual element is collapsed.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|Title|expandable|expand={expand}|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:expandable expand="{expand}">Title</taipy:expandable>
+        ```
+
+### Content as block
+
+The content of `expandable` can be specified as the block content.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|Title|expandable|
+            ...
+            <|{some content}|>
+            ...
+        |>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:expandable.start>Title</taipy:expandable.start>
+            ...
+            <taipy:text>{some content}</taipy:text>
+            ...
+        <taipy:expandable.end></taipy:expandable.end>
+        ```

@@ -67,8 +67,8 @@ class _Factory:
             [
                 ("id",),
                 ("title",),
-                ("width", _AttributeType.string_or_number, "100vw"),
-                ("height", _AttributeType.string_or_number, "100vh"),
+                ("width", _AttributeType.string_or_number),
+                ("height", _AttributeType.string_or_number),
                 ("layout", _AttributeType.dict),
                 ("plot_config", _AttributeType.dict),
                 ("on_range_change", _AttributeType.function),
