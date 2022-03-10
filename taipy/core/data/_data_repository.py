@@ -1,6 +1,7 @@
 import pathlib
 from copy import copy
 from datetime import datetime, timedelta
+from pydoc import locate
 from typing import Dict
 
 from taipy.core.common._utils import _load_fct
@@ -89,8 +90,6 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
 
         if self._EXPOSED_TYPE_KEY in model.data_node_properties.keys():
             if model.data_node_properties[self._EXPOSED_TYPE_KEY] != "numpy":
-                from pydoc import locate
-
                 if isinstance(model.data_node_properties[self._EXPOSED_TYPE_KEY], str):
                     model.data_node_properties[self._EXPOSED_TYPE_KEY] = locate(
                         model.data_node_properties[self._EXPOSED_TYPE_KEY]

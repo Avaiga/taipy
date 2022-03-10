@@ -408,21 +408,15 @@ class TestDataNode:
         dn_2 = dm._get(dn_1)
 
         assert dn_1.config_id == "foo"
-        dn_1._config_id = "fgh"
-        assert dn_1.config_id == "foo"
         dn_1.config_id = "fgh"
         assert dn_1.config_id == "fgh"
         assert dn_2.config_id == "fgh"
 
         assert dn_1.parent_id is None
-        dn_1._parent_id = "parent_id"
-        assert dn_1.parent_id is None
         dn_1.parent_id = "parent_id"
         assert dn_1.parent_id == "parent_id"
         assert dn_2.parent_id == "parent_id"
 
-        assert dn_1.scope == Scope.SCENARIO
-        dn_1._scope = Scope.PIPELINE
         assert dn_1.scope == Scope.SCENARIO
         dn_1.scope = Scope.PIPELINE
         assert dn_1.scope == Scope.PIPELINE
@@ -431,21 +425,15 @@ class TestDataNode:
         new_datetime = current_datetime + timedelta(1)
 
         assert dn_1.last_edition_date == current_datetime
-        dn_1._last_edition_date = new_datetime
-        assert dn_1.last_edition_date == current_datetime
         dn_1.last_edition_date = new_datetime
         assert dn_1.last_edition_date == new_datetime
         assert dn_2.last_edition_date == new_datetime
 
         assert dn_1.name == "foo"
-        dn_1._name = "def"
-        assert dn_1.name == "foo"
         dn_1.name = "def"
         assert dn_1.name == "def"
         assert dn_2.name == "def"
 
-        assert not dn_1.edition_in_progress
-        dn_1._edition_in_progress = True
         assert not dn_1.edition_in_progress
         dn_1.edition_in_progress = True
         assert dn_1.edition_in_progress
@@ -459,8 +447,6 @@ class TestDataNode:
 
         time_period = timedelta(1)
 
-        assert dn_1.validity_period is None
-        dn_1._validity_period = time_period
         assert dn_1.validity_period is None
         dn_1.validity_period = time_period
         assert dn_1.validity_period == time_period

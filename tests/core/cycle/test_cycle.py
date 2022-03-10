@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_manager import _CycleManager
@@ -73,8 +73,6 @@ def test_auto_set_and_reload(current_datetime):
     cycle_2 = _CycleManager._get(cycle_1)
 
     assert cycle_1.frequency == Frequency.WEEKLY
-    cycle_1._frequency = Frequency.MONTHLY
-    assert cycle_1.frequency == Frequency.WEEKLY
     cycle_1.frequency = Frequency.MONTHLY
     assert cycle_1.frequency == Frequency.MONTHLY
     assert cycle_2.frequency == Frequency.MONTHLY
@@ -82,28 +80,20 @@ def test_auto_set_and_reload(current_datetime):
     new_datetime = current_datetime + timedelta(1)
 
     assert cycle_1.creation_date == current_datetime
-    cycle_1._creation_date = new_datetime
-    assert cycle_1.creation_date == current_datetime
     cycle_1.creation_date = new_datetime
     assert cycle_1.creation_date == new_datetime
     assert cycle_2.creation_date == new_datetime
 
-    assert cycle_1.start_date == current_datetime
-    cycle_1._start_date = new_datetime
     assert cycle_1.start_date == current_datetime
     cycle_1.start_date = new_datetime
     assert cycle_1.start_date == new_datetime
     assert cycle_2.start_date == new_datetime
 
     assert cycle_1.end_date == current_datetime
-    cycle_1._end_date = new_datetime
-    assert cycle_1.end_date == current_datetime
     cycle_1.end_date = new_datetime
     assert cycle_1.end_date == new_datetime
     assert cycle_2.end_date == new_datetime
 
-    assert cycle_1.name == "foo"
-    cycle_1._name = "def"
     assert cycle_1.name == "foo"
     cycle_1.name = "def"
     assert cycle_1.name == "def"

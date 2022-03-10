@@ -2,7 +2,6 @@ from unittest import mock
 
 import pytest
 
-import taipy.core.taipy as tp
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -129,14 +128,10 @@ def test_auto_set_and_reload(task):
     pipeline_2 = _PipelineManager._get(pipeline_1)
 
     assert pipeline_1.config_id == "foo"
-    pipeline_1._config_id = "fgh"
-    assert pipeline_1.config_id == "foo"
     pipeline_1.config_id = "fgh"
     assert pipeline_1.config_id == "fgh"
     assert pipeline_2.config_id == "fgh"
 
-    assert len(pipeline_1.tasks) == 0
-    pipeline_1._tasks = [task]
     assert len(pipeline_1.tasks) == 0
     pipeline_1.tasks = [task]
     assert len(pipeline_1.tasks) == 1
@@ -145,14 +140,10 @@ def test_auto_set_and_reload(task):
     assert pipeline_2.tasks[task.config_id].id == task.id
 
     assert pipeline_1.parent_id is None
-    pipeline_1._parent_id = "parent_id"
-    assert pipeline_1.parent_id is None
     pipeline_1.parent_id = "parent_id"
     assert pipeline_1.parent_id == "parent_id"
     assert pipeline_2.parent_id == "parent_id"
 
-    assert len(pipeline_1.subscribers) == 0
-    pipeline_1._subscribers = set([print])
     assert len(pipeline_1.subscribers) == 0
     pipeline_1.subscribers = set([print])
     assert len(pipeline_1.subscribers) == 1

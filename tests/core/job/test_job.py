@@ -163,21 +163,15 @@ def test_auto_set_and_reload(current_datetime, job_id):
     job_2 = _JobManager._get(job_1)
 
     assert job_1.task.id == task_1.id
-    job_1._task = task_2
-    assert job_1.task.id == task_1.id
     job_1.task = task_2
     assert job_1.task.id == task_2.id
     assert job_1.task.id == task_2.id
 
     assert not job_1.force
-    job_1._force = True
-    assert not job_1.force
     job_1.force = True
     assert job_1.force
     assert job_2.force
 
-    assert job_1.status == Status.SUBMITTED
-    job_1._status = Status.BLOCKED
     assert job_1.status == Status.SUBMITTED
     job_1.status = Status.BLOCKED
     assert job_1.status == Status.BLOCKED
@@ -187,15 +181,6 @@ def test_auto_set_and_reload(current_datetime, job_id):
     job_1.creation_date = new_datetime
     assert job_1.creation_date == new_datetime
     assert job_2.creation_date == new_datetime
-
-    # assert len(job_1.subscribers) == 0
-    # job_1._subscribers = set([print])
-    # assert len(job_1.subscribers) == 0
-    # job_1.subscribers = set([print])
-    # assert len(job_1.subscribers) == 1
-    # assert len(job_2.subscribers) == 1
-
-    # TODO: add exceptions
 
     with job_1 as job:
         assert job.task.id == task_2.id

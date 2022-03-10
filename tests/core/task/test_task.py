@@ -132,21 +132,15 @@ def test_auto_set_and_reload(data_node):
     task_2 = _TaskManager._get(task_1)
 
     assert task_1.config_id == "foo"
-    task_1._config_id = "fgh"
-    assert task_1.config_id == "foo"
     task_1.config_id = "fgh"
     assert task_1.config_id == "fgh"
     assert task_2.config_id == "fgh"
 
     assert task_1.function == print
-    task_1._function = mock_func
-    assert task_1.function == print
     task_1.function = mock_func
     assert task_1.function == mock_func
     assert task_2.function == mock_func
 
-    assert task_1.parent_id is None
-    task_1._parent_id = "parent_id"
     assert task_1.parent_id is None
     task_1.parent_id = "parent_id"
     assert task_1.parent_id == "parent_id"
