@@ -7,7 +7,7 @@ from flask_restful import Resource
 from taipy.core import Frequency
 from taipy.core import Cycle
 from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
-from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.exceptions.exceptions import ModelNotFound
 
 from ...config import TAIPY_SETUP_FILE
 from ..schemas import CycleResponseSchema, CycleSchema

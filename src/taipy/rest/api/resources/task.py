@@ -5,7 +5,7 @@ from flask import jsonify, make_response, request
 from flask_restful import Resource
 from taipy.core.common._utils import _load_fct
 from taipy.core.data._data_manager import _DataManager as DataManager
-from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.scheduler.scheduler import Scheduler
 from taipy.core.task.task import Task
 from taipy.core.task._task_manager import _TaskManager as TaskManager

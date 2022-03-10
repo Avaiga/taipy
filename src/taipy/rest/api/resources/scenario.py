@@ -3,8 +3,8 @@ import os
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.core.exceptions.repository import ModelNotFound
-from taipy.core.exceptions.scenario import NonExistingScenario
+from taipy.core.exceptions.exceptions import ModelNotFound
+from taipy.core.exceptions.exceptions import NonExistingScenario
 from taipy.core.pipeline._pipeline_manager import _PipelineManager as PipelineManager
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario._scenario_manager import _ScenarioManager as ScenarioManager

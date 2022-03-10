@@ -3,8 +3,8 @@ import os
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.core.exceptions.pipeline import NonExistingPipeline
-from taipy.core.exceptions.repository import ModelNotFound
+from taipy.core.exceptions.exceptions import NonExistingPipeline
+from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.pipeline._pipeline_manager import _PipelineManager as PipelineManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
