@@ -1,5 +1,5 @@
-from operator import attrgetter
 import typing as t
+from operator import attrgetter
 
 if t.TYPE_CHECKING:
     from ..gui import Gui

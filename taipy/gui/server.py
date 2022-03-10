@@ -11,7 +11,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from .renderers.jsonencoder import _TaipyJsonEncoder
-from .utils import _KillableThread, _is_in_notebook
+from .utils import _is_in_notebook, _KillableThread
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -58,14 +58,6 @@ class _Server:
             elif "type" in message.keys():
                 gui._manage_message(message["type"], message)
 
-        @self._ws.on("connect")
-        def ws_connect():
-            pass
-
-        @self._ws.on("disconnect")
-        def ws_disconnect():
-            pass
-
     def _get_default_blueprint(
         self,
         static_folder: t.Optional[str] = "",
@@ -90,14 +82,14 @@ class _Server:
                     title=title,
                     favicon=favicon,
                     themes=themes,
-                    root_margin=root_margin
+                    root_margin=root_margin,
                 )
             if os.path.isfile(static_folder + os.path.sep + path):
                 return send_from_directory(static_folder + os.path.sep, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
-                if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
-                    return send_from_directory(v + os.path.sep, path[len(k) + 1:])
+                if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
             if hasattr(__main__, "__file__") and os.path.isfile(
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):

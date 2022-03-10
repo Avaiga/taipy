@@ -30,3 +30,32 @@ def test_slider_action(page: "Page", gui: Gui, helpers):
     page.fill("#slider1 input", "20")
     page.wait_for_function("document.querySelector('#text1').innerText !== '" + "10" + "'")
     assert text1.inner_text() == "20"
+
+
+@pytest.mark.teste2e
+def test_slider_action_on_change(page: "Page", gui: Gui, helpers):
+    d = {"v1": 10, "v2": 10}
+
+    def on_change(state, var, val):
+        if var == "d.v2":
+            d = {"v1": 2 * val, "v2": val}
+            state.d.update(d)
+
+    page_md = """
+Value: <|{d.v1}|id=text1|>
+
+Slider: <|{d.v2}|slider|id=slider1|>
+"""
+    gui.add_page(name="test", page=page_md)
+    gui.run(run_in_thread=True, single_client=True)
+    while not helpers.port_check():
+        time.sleep(0.1)
+    page.goto("/test")
+    page.expect_websocket()
+    page.wait_for_selector("#text1")
+    text1 = page.query_selector("#text1")
+    assert text1.inner_text() == "10"
+    page.wait_for_selector("#slider1")
+    page.fill("#slider1 input", "20")
+    page.wait_for_function("document.querySelector('#text1').innerText !== '" + "10" + "'")
+    assert text1.inner_text() == "40"

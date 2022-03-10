@@ -14,8 +14,9 @@ class State:
 
         assign (Callable): allows to set a variable inside a lambda function (state.assign("name", value) is equivalent to state.name = value).
     """
+
     __attrs = ("_gui", "_user_var_list")
-    __methods = ("assign")
+    __methods = ("assign",)
     __gui_attr = "_gui"
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:

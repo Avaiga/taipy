@@ -11,39 +11,11 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        python-versions: ["3.8", "3.9", "3.10"]
-        os: [ubuntu-18.04, windows-latest]
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-versions }}
-
-      - name: test with tox
-        env:
-          TOX_PARALLEL_NO_SPINNER: 1
-        run: |
-          pip install tox
-          tox -p all
-
-      - name: Code coverage
-        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
-        uses: orgoro/coverage@v2
-        with:
-          coverageFile: coverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          thresholdAll: 0.75
-
-  end-to-end:
-    timeout-minutes: 20
-    strategy:
-      matrix:
         node-version: [16.x]
         python-versions: ["3.8", "3.9", "3.10"]
         os: [ubuntu-18.04, windows-latest]
     runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -61,14 +33,20 @@ jobs:
         run: npm run build --if-present
         working-directory: ./gui
 
-      - name: Run tests
+      - name: test with tox
+        env:
+          TOX_PARALLEL_NO_SPINNER: 1
         run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-          pipenv install markupsafe==2.0.1
-          pipenv install --dev --skip-lock
-          pipenv run playwright install
-          pipenv run pytest -m teste2e
+          pip install tox
+          tox -p all
+
+      - name: Code coverage
+        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
+        uses: orgoro/coverage@v2
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.85
 
   gui:
     timeout-minutes: 20

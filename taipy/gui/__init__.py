@@ -13,7 +13,7 @@ value that is managed by the whole Taipy application.
 """
 
 from .gui import Gui
-from .state import State
+from .gui_actions import download, hold_control, navigate, notify, resume_control
 from .icon import Icon
 from .renderers import Html, Markdown
-from .gui_actions import download, hold_control, navigate, notify, resume_control
+from .state import State

@@ -10,13 +10,13 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 from . import (
-    _TaipyBase,
-    _get_expr_var_name,
     _get_client_var_name,
+    _get_expr_var_name,
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
     _setscopeattr,
+    _TaipyBase,
 )
 
 

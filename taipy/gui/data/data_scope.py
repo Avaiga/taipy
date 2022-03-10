@@ -60,7 +60,7 @@ class _DataScopes:
         if id not in self.__scopes:
             self.__scopes[id] = SimpleNamespace()
 
-    def delete_scope(self, id: str) -> None:
+    def delete_scope(self, id: str) -> None:  # pragma: no cover
         if self.__single_client:
             return
         if id is None:

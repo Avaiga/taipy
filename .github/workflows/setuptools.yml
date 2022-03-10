@@ -8,7 +8,7 @@ on:
 
 jobs:
   standard-packages:
-    timeout-minutes: 10
+    timeout-minutes: 20
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
@@ -33,11 +33,12 @@ jobs:
           python -c "import taipy.gui as gui;from pathlib import Path; assert Path(f'{gui.__path__[0]}/webapp/index.html').exists()"
 
           # Run tests
-          pip install pytest pytest-mock
-          pytest -m "not teste2e"
+          pip install pytest pytest-mock pytest-playwright
+          playwright install
+          pytest
 
 
-  optionals-packages:
+  optional-packages:
     timeout-minutes: 20
     strategy:
       matrix:
@@ -58,11 +59,18 @@ jobs:
           grep -n 'setup(' setup.py | cut -d ":" -f 1 | xargs -I% bash -c "expr % - 1" | xargs -I% bash -c 'head -n% setup.py' > setup_packages.py
           echo "[print(k) for k in extras_require.keys()]" >> setup_packages.py
           python setup_packages.py | xargs -I% bash -c "pip install .[%]"
-          rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
+
+          # Ensure `webapp` folder is present in lib package
+          python -c "import taipy.gui as gui;from pathlib import Path; assert Path(f'{gui.__path__[0]}/webapp/index.html').exists()"
+
+          # Removal of Taipy code to ensure the use of the installed package.
+          rm -r taipy
+
           # Run test with optionals packages installed
           pip install markupsafe==2.0.1
-          pip install pytest pytest-mock
-          pytest -m "not teste2e" > pytest_res
+          pip install pytest pytest-mock pytest-playwright
+          playwright install
+          pytest > pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"

@@ -92,7 +92,7 @@ def test_lambda_expression_selector(gui: Gui, helpers):
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
         'defaultValue="[&quot;1&quot;]"',
         'updateVars="lov=_TpL_lov"',
-        'lov={_TpL_lov}',
+        "lov={_TpL_lov}",
         'updateVarName="_TpLv_sel"',
         "value={_TpLv_sel}",
     ]

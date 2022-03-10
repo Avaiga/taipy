@@ -1,5 +1,7 @@
-import pytest
+from importlib import util
+
 import pandas  # type: ignore
+
 from taipy.gui import Gui
 from taipy.gui.data.data_format import _DataFormat
 from taipy.gui.data.pandas_data_accessor import _PandasDataAccessor
@@ -18,15 +20,16 @@ def test_simple_data(gui: Gui, helpers, small_dataframe):
 
 
 def test_simple_data_with_arrow(gui: Gui, helpers, small_dataframe):
-    accessor = _PandasDataAccessor()
-    pd = pandas.DataFrame(data=small_dataframe)
-    ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1}, _DataFormat.APACHE_ARROW)
-    assert ret_data
-    value = ret_data["value"]
-    assert value
-    assert value["rowcount"] == 3
-    data = value["data"]
-    assert isinstance(data, bytes)
+    if util.find_spec("pyarrow"):
+        accessor = _PandasDataAccessor()
+        pd = pandas.DataFrame(data=small_dataframe)
+        ret_data = accessor.get_data(gui, "x", pd, {"start": 0, "end": -1}, _DataFormat.APACHE_ARROW)
+        assert ret_data
+        value = ret_data["value"]
+        assert value
+        assert value["rowcount"] == 3
+        data = value["data"]
+        assert isinstance(data, bytes)
 
 
 def test_slice(gui: Gui, helpers, small_dataframe):

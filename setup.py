@@ -4,9 +4,9 @@
 
 import os
 from pathlib import Path
+
 from setuptools import find_packages, setup
 from setuptools.command.build_py import build_py
-
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -19,7 +19,6 @@ requirements = [
     "markdown",
     "numpy",
     "pandas",
-    "pyarrow",
     "python-dotenv",
     "pytz",
     "simple-websocket",
@@ -34,13 +33,14 @@ extras_require = {
     "ngrok": ["pyngrok>=5"],
     "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
     "rdp": ["rdp>=0.8"],
+    "arrow": ["pyarrow>=7.0"],
 }
 
 
 def _build_webapp():
-    already_exists = Path(f'./taipy/gui/webapp/index.html').exists()
+    already_exists = Path(f"./taipy/gui/webapp/index.html").exists()
     if not already_exists:
-        os.system('cd gui && npm ci && npm run build')
+        os.system("cd gui && npm ci && npm run build")
 
 
 class NPMInstall(build_py):
@@ -75,5 +75,5 @@ setup(
     version="1.0.0.dev",
     zip_safe=False,
     extras_require=extras_require,
-    cmdclass={'build_py': NPMInstall},
+    cmdclass={"build_py": NPMInstall},
 )

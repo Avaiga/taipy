@@ -2,7 +2,7 @@ import sys
 import threading
 
 
-class _KillableThread(threading.Thread):
+class _KillableThread(threading.Thread):  # pragma: no cover
     def __init__(self, *args, **keywords):
         threading.Thread.__init__(self, *args, **keywords)
         self.killed = False

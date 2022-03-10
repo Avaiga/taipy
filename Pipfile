@@ -42,7 +42,7 @@ tox = "==3.24.3"
 twine = "*"
 types-toml = "0.10.0"
 pytest-playwright = "*"
-markupsafe = "<=2.0.1"
+markupsafe = "==2.0.1"
 
 [requires]
 python_version = "3"

@@ -1,7 +1,8 @@
-import pytest
+from importlib import util
+
 from taipy.gui import Gui
-from taipy.gui.data.data_format import _DataFormat
 from taipy.gui.data.array_dict_data_accessor import _ArrayDictDataAccessor
+from taipy.gui.data.data_format import _DataFormat
 
 an_array = [1, 2, 3]
 
@@ -18,14 +19,15 @@ def test_simple_data(gui: Gui, helpers):
 
 
 def test_simple_data_with_arrow(gui: Gui, helpers):
-    accessor = _ArrayDictDataAccessor()
-    ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.APACHE_ARROW)
-    assert ret_data
-    value = ret_data["value"]
-    assert value
-    assert value["rowcount"] == 3
-    data = value["data"]
-    assert isinstance(data, bytes)
+    if util.find_spec("pyarrow"):
+        accessor = _ArrayDictDataAccessor()
+        ret_data = accessor.get_data(gui, "x", an_array, {"start": 0, "end": -1}, _DataFormat.APACHE_ARROW)
+        assert ret_data
+        value = ret_data["value"]
+        assert value
+        assert value["rowcount"] == 3
+        data = value["data"]
+        assert isinstance(data, bytes)
 
 
 def test_slice(gui: Gui, helpers):

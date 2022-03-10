@@ -1,14 +1,19 @@
 import typing as t
 import warnings
+from importlib import util
+
 import numpy as np
-
 import pandas as pd
-import pyarrow as pa
 
+from ..gui import Gui
 from ..utils import _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
-from ..gui import Gui
+
+_has_arrow_module = False
+if util.find_spec("pyarrow"):
+    _has_arrow_module = True
+    import pyarrow as pa
 
 
 class _PandasDataAccessor(_DataAccessor):
@@ -22,7 +27,7 @@ class _PandasDataAccessor(_DataAccessor):
     @staticmethod
     def __style_function(
         row: pd.Series, column_name: t.Optional[str], user_function: t.Callable, arg_count: int, function_name: str
-    ) -> str:
+    ) -> str:  # pragma: no cover
         if arg_count > 0:
             args_idx = 0
             args = []
@@ -114,7 +119,7 @@ class _PandasDataAccessor(_DataAccessor):
             ret["start"] = start
         if data_extraction is not None:
             ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
-        if data_format == _DataFormat.APACHE_ARROW:
+        if data_format == _DataFormat.APACHE_ARROW and _has_arrow_module:
             # Convert from pandas to Arrow
             table = pa.Table.from_pandas(data)
             # Create sink buffer stream
@@ -130,6 +135,8 @@ class _PandasDataAccessor(_DataAccessor):
             ret["data"] = buf.to_pybytes()
             ret["orient"] = orient
         else:
+            if data_format == _DataFormat.APACHE_ARROW:
+                raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
             # workaround for python built in json encoder that does not yet support ignore_nan
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)
         return ret
@@ -145,13 +152,13 @@ class _PandasDataAccessor(_DataAccessor):
         return None
 
     def __get_data(  # noqa: C901
-            self,
-            gui: Gui,
-            var_name: str,
-            value: pd.DataFrame,
-            payload: t.Dict[str, t.Any],
-            data_format: _DataFormat,
-            col_prefix: t.Optional[str] = ""
+        self,
+        gui: Gui,
+        var_name: str,
+        value: pd.DataFrame,
+        payload: t.Dict[str, t.Any],
+        data_format: _DataFormat,
+        col_prefix: t.Optional[str] = "",
     ) -> t.Dict[str, t.Any]:
         ret_payload = {}
         columns = payload.get("columns", [])
@@ -208,9 +215,7 @@ class _PandasDataAccessor(_DataAccessor):
                 new_indexes = new_indexes[slice(start, end + 1)]
             else:
                 new_indexes = slice(start, end + 1)
-            value = self.__build_transferred_cols(
-                gui, columns, value.iloc[new_indexes], styles=payload.get("styles")
-            )
+            value = self.__build_transferred_cols(gui, columns, value.iloc[new_indexes], styles=payload.get("styles"))
             dictret = self.__format_data(
                 value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)
             )
@@ -228,16 +233,24 @@ class _PandasDataAccessor(_DataAccessor):
         ret_payload["value"] = dictret
         return ret_payload
 
-    def get_data(self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat) -> t.Dict[str, t.Any]:
+    def get_data(
+        self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
+    ) -> t.Dict[str, t.Any]:
         if isinstance(value, list):
             is_chart = payload.get("alldata", False)
             if is_chart:
-                ret_payload = {"alldata": True, "value": {"multi": True},
-                               "pagekey": payload.get("pagekey", "unknown page")}
+                ret_payload = {
+                    "alldata": True,
+                    "value": {"multi": True},
+                    "pagekey": payload.get("pagekey", "unknown page"),
+                }
                 data = []
                 for i, v in enumerate(value):
-                    ret = self.__get_data(gui, var_name, v, payload, data_format,
-                                          f"{i}/") if isinstance(v, pd.DataFrame) else {}
+                    ret = (
+                        self.__get_data(gui, var_name, v, payload, data_format, f"{i}/")
+                        if isinstance(v, pd.DataFrame)
+                        else {}
+                    )
                     ret_val = ret.get("value", {})
                     data.append(ret_val.pop("data", None))
                     ret_payload.get("value", {}).update(ret_val)

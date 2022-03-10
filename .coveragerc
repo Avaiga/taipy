@@ -4,6 +4,7 @@
 [report]
 exclude_lines =
     pragma: no cover
+    if t.TYPE_CHECKING:
     def __repr__
     if self.debug:
     if settings.DEBUG

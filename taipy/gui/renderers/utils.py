@@ -1,9 +1,9 @@
+import re
 import typing as t
 import warnings
-import re
 
-from ..utils import _get_date_col_str_name, _MapDict
 from ..types import NumberTypes
+from ..utils import _get_date_col_str_name, _MapDict
 
 
 def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:
@@ -34,7 +34,8 @@ def _get_columns_dict(
         for col in columns:
             if col not in col_types_keys:
                 warnings.warn(
-                    f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"')
+                    f'Error column "{col}" is not present in the dataframe "{value.head(0) if hasattr(value, "head") else value}"'
+                )
             else:
                 coldict[col] = {"index": idx}
                 idx += 1
