@@ -32,15 +32,16 @@ def test_evaluate_expressions_same_variable(gui: Gui):
 def test_evaluate_holder(gui: Gui):
     x = 10
     gui.run(run_server=False)
-    gui._evaluate_expr("{x + 10}")
-    hash = gui._evaluate_bind_holder(_TaipyNumber, "x + 10")
-    assert "_TpN_tp_x_10_" in hash
-    lst = gui._evaluate_holders("x + 10")
-    assert len(lst) == 1
-    assert "_TpN_tp_x_10_" in lst[0]
-    # test re-evaluate holders
-    gui._bindings().x = 20
-    gui._re_evaluate_expr(lst[0])
+    with warnings.catch_warnings(record=True) as w:
+        gui._evaluate_expr("{x + 10}")
+        hash = gui._evaluate_bind_holder(_TaipyNumber, "x + 10")
+        assert "_TpN_tp_x_10_" in hash
+        lst = gui._evaluate_holders("x + 10")
+        assert len(lst) == 1
+        assert "_TpN_tp_x_10_" in lst[0]
+        # test re-evaluate holders
+        gui._bindings().x = 20
+        gui._re_evaluate_expr(lst[0])
 
 
 def test_evaluate_not_expression_type(gui: Gui):
