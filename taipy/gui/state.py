@@ -1,6 +1,7 @@
+from operator import attrgetter
 import typing as t
 
-from .utils import _MapDict
+from .utils._attributes import _attrsetter
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -32,7 +33,7 @@ class State:
         if not hasattr(gui._bindings(), name):
             gui._bind_var(name)
         val = getattr(gui._bindings(), name)
-        return val._dict if isinstance(val, _MapDict) else val
+        return val
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name in State.__attrs:
@@ -55,8 +56,8 @@ class State:
         Returns (Any):
             Previous value.
         """
-        val = getattr(self, name)
-        setattr(self, name, value)
+        val = attrgetter(name)(self)
+        _attrsetter(self, name, value)
         return val
 
     def __enter__(self):
