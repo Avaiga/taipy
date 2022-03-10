@@ -830,7 +830,7 @@ class Gui:
 
         if run_server and app_config["ngrok_token"]:  # pragma: no cover
             if not util.find_spec("pyngrok"):
-                warnings.warn("Cannot use ngrok as pyngrok package is not installed")
+                raise RuntimeError("Cannot use ngrok as pyngrok package is not installed")
             else:
                 ngrok.set_auth_token(app_config["ngrok_token"])
                 http_tunnel = ngrok.connect(app_config["port"], "http")

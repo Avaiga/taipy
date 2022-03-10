@@ -136,7 +136,7 @@ class _PandasDataAccessor(_DataAccessor):
             ret["orient"] = orient
         else:
             if data_format == _DataFormat.APACHE_ARROW:
-                warnings.warn("Cannot use Arrow as pyarrow package is not installed")
+                raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
             # workaround for python built in json encoder that does not yet support ignore_nan
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)
         return ret
