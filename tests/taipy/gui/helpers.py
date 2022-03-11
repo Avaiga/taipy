@@ -1,7 +1,11 @@
+import inspect
 import json
 import logging
 import socket
+import time
 import typing as t
+import warnings
+from types import FrameType
 
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import _Builder
@@ -80,3 +84,13 @@ class Helpers:
             return True
         except:
             return False
+
+    @staticmethod
+    def run_e2e(gui, **kwargs):
+        kwargs["run_in_thread"] = True
+        kwargs["single_client"] = True
+        kwargs["locals_bind"] = t.cast(FrameType, inspect.currentframe().f_back).f_locals
+        with warnings.catch_warnings(record=True):
+            gui.run(**kwargs)
+        while not Helpers.port_check():
+            time.sleep(0.1)

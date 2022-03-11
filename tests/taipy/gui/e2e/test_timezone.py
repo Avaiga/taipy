@@ -1,4 +1,3 @@
-import time
 from importlib import util
 
 import pytest
@@ -41,9 +40,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, text):
 """
     t = _ISO_to_date("2022-03-03T00:00:00.000Z")
     gui.add_page(name="test", page=page_md)
-    gui.run(run_in_thread=True, single_client=True, time_zone=time_zone)
-    while not helpers.port_check():
-        time.sleep(0.1)
+    helpers.run_e2e(gui, time_zone=time_zone)
     page.goto("/test")
     page.expect_websocket()
     page.wait_for_selector("#text1")

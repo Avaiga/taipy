@@ -1,5 +1,5 @@
-from operator import attrgetter
 import typing as t
+from operator import attrgetter
 
 from .utils._attributes import _attrsetter
 
@@ -33,8 +33,7 @@ class State:
             raise AttributeError(f"Variable '{name}' is not defined.")
         if not hasattr(gui._bindings(), name):
             gui._bind_var(name)
-        val = getattr(gui._bindings(), name)
-        return val
+        return getattr(gui._bindings(), name)
 
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name in State.__attrs:
