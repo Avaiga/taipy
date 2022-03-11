@@ -17,7 +17,7 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
     def _to_model(self, pipeline: Pipeline) -> _PipelineModel:
         datanode_task_edges = defaultdict(list)
         task_datanode_edges = defaultdict(list)
-        for task in pipeline.tasks.values():
+        for task in pipeline._tasks.values():
             for predecessor in task.input.values():
                 datanode_task_edges[str(predecessor.id)].append(str(task.id))
             for successor in task.output.values():

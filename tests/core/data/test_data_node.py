@@ -3,6 +3,7 @@ from time import sleep
 
 import pytest
 
+import taipy.core as tp
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._filter import _FilterDataNode
@@ -52,6 +53,21 @@ class FakeListDataNode(DataNode):
 
     def _read(self):
         return self.data
+
+
+def funct_a_b(input: str):
+    print("task_a_b")
+    return "B"
+
+
+def funct_b_c(input: str):
+    print("task_b_c")
+    return "C"
+
+
+def funct_b_d(input: str):
+    print("task_b_d")
+    return "D"
 
 
 class TestDataNode:
@@ -219,6 +235,33 @@ class TestDataNode:
         dn._last_edition_date = datetime.now() - timedelta(days=6)
         _DataManager()._set(dn)
         assert dn._is_in_cache is False
+
+    def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
+        a = tp.configure_pickle_data_node("A", default_data="A")
+        b = tp.configure_pickle_data_node("B", cacheable=True)
+        c = tp.configure_pickle_data_node("C")
+        d = tp.configure_pickle_data_node("D")
+
+        task_a_b = tp.configure_task("task_a_b", funct_a_b, input=a, output=b)
+        task_b_c = tp.configure_task("task_b_c", funct_b_c, input=b, output=c)
+        task_b_d = tp.configure_task("task_b_d", funct_b_d, input=b, output=d)
+        pipeline_c = tp.configure_pipeline("pipeline_c", [task_a_b, task_b_c])
+        pipeline_d = tp.configure_pipeline("pipeline_d", [task_a_b, task_b_d])
+        scenario_cfg = tp.configure_scenario("scenario", [pipeline_c, pipeline_d])
+
+        scenario = tp.create_scenario(scenario_cfg)
+        scenario.submit()
+        assert scenario.A.read() == "A"
+        assert scenario.B.read() == "B"
+        assert scenario.C.read() == "C"
+        assert scenario.D.read() == "D"
+
+        assert len(tp.get_jobs()) == 4
+        jobs_and_status = [(job.task.config_id, job.status) for job in tp.get_jobs()]
+        assert ("task_a_b", tp.Status.COMPLETED) in jobs_and_status
+        assert ("task_a_b", tp.Status.SKIPPED) in jobs_and_status
+        assert ("task_b_c", tp.Status.COMPLETED) in jobs_and_status
+        assert ("task_b_d", tp.Status.COMPLETED) in jobs_and_status
 
     def test_pandas_filter(self, default_data_frame):
         df_dn = FakeDataframeDataNode("fake_dataframe_dn", default_data_frame)

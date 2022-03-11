@@ -42,6 +42,7 @@ class _JobDispatcher:
         else:
             job.skipped()
             _JobManager._set(job)
+            self.__unlock_edition_on_outputs(job)
             self.__logger.info(f"job {job.id} is skipped.")
 
     @staticmethod
@@ -130,3 +131,8 @@ class _JobDispatcher:
             return executor, (executor._max_workers)
         else:
             return _Synchronous(), 1
+
+    @staticmethod
+    def __unlock_edition_on_outputs(job):
+        for dn in job.task.output.values():
+            dn.unlock_edition(job_id=job.id)
