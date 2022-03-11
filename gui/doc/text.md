@@ -12,7 +12,7 @@ If the value is a `date` or a `datetime`, then _format_ can be set to a date/tim
 
 ## Usage
 
-### Simple
+### Display value
 
 You can represent a variable value as a simple, static text:
 

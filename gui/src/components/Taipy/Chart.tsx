@@ -269,6 +269,9 @@ const Chart = (props: ChartProp) => {
                 }
             } else {
                 ret.marker = getArrayValue(config.markers, idx, {});
+                if ((ret.marker as PlotMarker).opacity !== undefined && ret.type === "bar") {
+                    ret.opacity = (ret.marker as PlotMarker).opacity;
+                }
                 const xs = getValue(datum, trace, 0);
                 const ys = getValue(datum, trace, 1);
                 if (ys.length) {

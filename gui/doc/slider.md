@@ -6,7 +6,7 @@ If the _lov_ property is used, then the slider can be used to select a value amo
 
 ## Usage
 
-### Simple
+### Selecting a value between 0 and 100
 
 A numeric value can easily be represented and interacted with using the
 following content:
@@ -34,11 +34,28 @@ You can specify what bounds the value should be restrained to:
     === "Markdown"
 
         ```
-        <|{value}|slider|min=1|max=100|propagate|>
+        <|{value}|slider|min=1|max=100|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:slider min="1" max="100" propagate="true">{value}</taipy:slider>
+        <taipy:slider min="1" max="100">{value}</taipy:slider>
+        ```
+
+### Changing orientation
+
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|slider|orientation=vert|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:slider orientation="vertical">{value}</taipy:slider>
         ```
