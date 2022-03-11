@@ -69,13 +69,13 @@ The content of the dialog can be specified directly inside the dialog block.
     === "HTML"
 
         ```html
-        <taipy:dialog.start>{show_dialog}</taipy:dialog.start>
+        <taipy:dialog open={show_dialog}>
             ...
             Some text
             ...
             <taipy:text>{some content}</taipy:text>
             ...
-        <taipy:dialog.end></taipy:dialog.end>
+        </taipy:dialog>
         ```
 
 ### Dialog with page
