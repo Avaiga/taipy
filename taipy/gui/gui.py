@@ -675,7 +675,10 @@ class Gui:
                     assets_dir_name = f"{folder_name}/{file_name}"
                     self._flask_blueprint.append(
                         Blueprint(
-                            assets_dir_name, __name__, static_folder=assets_folder, url_prefix=f"/{assets_dir_name}"
+                            assets_dir_name,
+                            __name__,
+                            static_folder=assets_folder,
+                            static_url_path=f"/{assets_dir_name}",
                         )
                     )
 
