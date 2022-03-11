@@ -159,7 +159,7 @@ class TestGenericDataNode:
             },
         )
 
-        assert all([a + 1 == b for a, b in zip(self.data, generic_dn.read())])
+        assert all(a + 1 == b for a, b in zip(self.data, generic_dn.read()))
         assert len(generic_dn.read()) == 14
 
         generic_dn.write(self.data)
