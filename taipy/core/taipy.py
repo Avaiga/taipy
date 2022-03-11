@@ -565,6 +565,8 @@ def configure_generic_data_node(
     id: str,
     read_fct: Callable = None,
     write_fct: Callable = None,
+    read_fct_params: Union[Dict, List] = None,
+    write_fct_params: Union[Dict, List] = None,
     scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
     **properties,
 ):
@@ -574,14 +576,24 @@ def configure_generic_data_node(
     Parameters:
         id (str): The unique identifier of the data node configuration.
         read_fct (Callable): The python function called by Taipy to read the data.
-        write_fct (Callable): The python function called by Taipy to write the data.
+        write_fct (Callable): The python function called by Taipy to write the data. The provided function must have at least
+            1 parameter to receive the date to be written.
+        read_fct_params (Union[Dict, List]): The parameters that will be passed to read_fct to read the data.
+        write_fct_params (Union[Dict, List]): The parameters that will be passed to write_fct to write the data.
         scope (`Scope`): The scope of the Generic data node configuration. The default value is Scope.SCENARIO.
         **properties (Dict[str, Any]): The variable length keyword arguments.
     Returns:
         `DataNodeConfig`: The new Generic data node configuration.
     """
     return Config._add_data_node(
-        id, GenericDataNode.storage_type(), scope=scope, read_fct=read_fct, write_fct=write_fct, **properties
+        id,
+        GenericDataNode.storage_type(),
+        scope=scope,
+        read_fct=read_fct,
+        write_fct=write_fct,
+        read_fct_params=read_fct_params,
+        write_fct_params=write_fct_params,
+        **properties,
     )
 
 
