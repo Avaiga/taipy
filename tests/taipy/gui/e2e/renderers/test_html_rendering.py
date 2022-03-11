@@ -1,4 +1,5 @@
 import os
+import time
 from importlib import util
 from pathlib import Path
 
@@ -47,6 +48,14 @@ def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
     page.goto("/page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")
+    retry = 0
+    while (
+        retry < 10
+        and page.evaluate('window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color")')
+        != "rgb(0, 128, 0)"
+    ):
+        retry += 1
+        time.sleep(0.1)
     assert (
         page.evaluate('window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color")')
         == "rgb(0, 128, 0)"

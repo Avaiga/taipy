@@ -142,7 +142,7 @@ class _Server:
             page._rendered_jsx += "<PageContent />"
         # Return jsx page
         if page._rendered_jsx is not None:
-            return self._render(page._rendered_jsx, page._style if hasattr(page, "style") else "", page._head)
+            return self._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
         else:
             return ("No page template", 404)
 
