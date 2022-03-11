@@ -10,6 +10,7 @@ with open("README.md") as readme_file:
 requirements = [
     "taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
+    "taipy-rest@git+ssh://git@github.com/Avaiga/taipy-rest.git@develop",
 ]
 
 setup(
@@ -37,4 +38,3 @@ setup(
     version="1.0.0.dev",
     zip_safe=False,
 )
-

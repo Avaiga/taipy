@@ -5,6 +5,12 @@ on:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
+  workflow_dispatch:
+    inputs:
+      user-to-notify:
+        description: "Github username to notify"
+        required: false
+        default: ""
 
 jobs:
   standard-packages:
@@ -12,7 +18,7 @@ jobs:
     strategy:
       matrix:
         python-versions: [ '3.8', '3.9', '3.10' ]
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-18.04, macos-latest] #, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -24,10 +30,22 @@ jobs:
 
       - name: Install Taipy without dependencies
         run: |
-          sed -i 's/ssh/https/g' setup.py
-          sed -i 's/git@github/${{ secrets.PERSONAL_TOKEN }}@github/g' setup.py
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY_TAIPY_CORE }}" > ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+
           pip install .
           rm -r taipy
 
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
+          python -c "import taipy.rest as rest"
+
+      - name: Notify user if failed
+        if: failure()
+        run: |
+          if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
+            curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
+          fi
+        shell: bash
