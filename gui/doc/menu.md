@@ -6,9 +6,6 @@ This control is represented by a unique left-anchor and foldable vertical menu.
 
 ### Defining a simple static menu
 
-The property _on_action_ default value is "on_menu_action"; a function with that name will be called if present.
-The parameter payload["args"] holds a list that contains the id of the selected menu.
-
 !!! example "Page content"
 
     === "Markdown"
@@ -22,6 +19,33 @@ The parameter payload["args"] holds a list that contains the id of the selected 
         ```html
         <taipy:menu lov="menu 1;menu 2"></taipy:menu>
         ```
+
+### Calling a user-defined function
+
+To have the selection of a menu item call a user-defined function, you must set the on_action
+property to a function that you define:
+
+You page can define a menu control like:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|menu|lov=menu 1;menu 2|on_action=my_menu_action>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:menu lov="menu 1;menu 2" on_action="my_menu_action"></taipy:menu>
+        ```
+
+Your Python script must define the my_menu_action function:
+
+```def my_menu_action(state, ...):
+  ...
+```
 
 ### Disabling menu options
 
