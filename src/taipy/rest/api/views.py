@@ -30,6 +30,10 @@ from .schemas import (
     ScenarioSchema,
     TaskSchema,
 )
+from taipy.core.common._taipy_logger import _TaipyLogger
+
+_logger = _TaipyLogger._get_logger()
+
 
 blueprint = Blueprint("api", __name__, url_prefix="/api/v1")
 
@@ -39,67 +43,106 @@ api.add_resource(
     DataNodeResource,
     "/datanodes/<string:datanode_id>",
     endpoint="datanode_by_id",
+    resource_class_kwargs={"logger": _logger},
 )
 
 api.add_resource(
     DataNodeReader,
     "/datanodes/<string:datanode_id>/read",
     endpoint="datanode_reader",
+    resource_class_kwargs={"logger": _logger},
 )
 
 api.add_resource(
     DataNodeWriter,
     "/datanodes/<string:datanode_id>/write",
     endpoint="datanode_writer",
+    resource_class_kwargs={"logger": _logger},
 )
 
-api.add_resource(DataNodeList, "/datanodes", endpoint="datanodes")
+api.add_resource(
+    DataNodeList,
+    "/datanodes",
+    endpoint="datanodes",
+    resource_class_kwargs={"logger": _logger},
+)
 
 api.add_resource(
     TaskResource,
     "/tasks/<string:task_id>",
     endpoint="task_by_id",
+    resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(TaskList, "/tasks", endpoint="tasks")
-api.add_resource(TaskExecutor, "/tasks/submit/<string:task_id>", endpoint="task_submit")
+api.add_resource(
+    TaskList, "/tasks", endpoint="tasks", resource_class_kwargs={"logger": _logger}
+)
+api.add_resource(
+    TaskExecutor,
+    "/tasks/submit/<string:task_id>",
+    endpoint="task_submit",
+    resource_class_kwargs={"logger": _logger},
+)
 
 api.add_resource(
     PipelineResource,
     "/pipelines/<string:pipeline_id>",
     endpoint="pipeline_by_id",
+    resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(PipelineList, "/pipelines", endpoint="pipelines")
+api.add_resource(
+    PipelineList,
+    "/pipelines",
+    endpoint="pipelines",
+    resource_class_kwargs={"logger": _logger},
+)
 api.add_resource(
     PipelineExecutor,
     "/pipelines/submit/<string:pipeline_id>",
     endpoint="pipeline_submit",
+    resource_class_kwargs={"logger": _logger},
 )
 
 api.add_resource(
     ScenarioResource,
     "/scenarios/<string:scenario_id>",
     endpoint="scenario_by_id",
+    resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(ScenarioList, "/scenarios", endpoint="scenarios")
+api.add_resource(
+    ScenarioList,
+    "/scenarios",
+    endpoint="scenarios",
+    resource_class_kwargs={"logger": _logger},
+)
 api.add_resource(
     ScenarioExecutor,
     "/scenarios/submit/<string:scenario_id>",
     endpoint="scenario_submit",
+    resource_class_kwargs={"logger": _logger},
 )
 
 api.add_resource(
     CycleResource,
     "/cycles/<string:cycle_id>",
     endpoint="cycle_by_id",
+    resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(CycleList, "/cycles", endpoint="cycles")
+api.add_resource(
+    CycleList,
+    "/cycles",
+    endpoint="cycles",
+    resource_class_kwargs={"logger": _logger},
+)
 
 api.add_resource(
     JobResource,
     "/jobs/<string:job_id>",
     endpoint="job_by_id",
+    resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(JobList, "/jobs", endpoint="jobs")
+api.add_resource(
+    JobList, "/jobs", endpoint="jobs", resource_class_kwargs={"logger": _logger}
+)
 
 
 @blueprint.before_app_first_request

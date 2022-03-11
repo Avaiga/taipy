@@ -76,7 +76,8 @@ class DataNodeResource(Resource):
           description: datanode does not exist
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE
@@ -149,7 +150,8 @@ class DataNodeList(Resource):
                   datanode: DataNodeConfigSchema
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE
@@ -213,7 +215,8 @@ class DataNodeReader(Resource):
           description: datanode does not exist
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE
@@ -276,6 +279,9 @@ class DataNodeWriter(Resource):
         404:
           description: datanode does not exist
     """
+
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
 
     def put(self, datanode_id):
         try:

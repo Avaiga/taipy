@@ -61,6 +61,9 @@ class PipelineResource(Resource):
           description: pipeline does not exist
     """
 
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
+
     def get(self, pipeline_id):
         schema = PipelineResponseSchema()
         manager = PipelineManager()
@@ -127,7 +130,8 @@ class PipelineList(Resource):
                   pipeline: PipelineSchema
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE
@@ -202,6 +206,9 @@ class PipelineExecutor(Resource):
       404:
           description: pipeline does not exist
     """
+
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
 
     def post(self, pipeline_id):
         try:

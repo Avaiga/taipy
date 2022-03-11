@@ -61,6 +61,9 @@ class ScenarioResource(Resource):
           description: scenario does not exist
     """
 
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
+
     def get(self, scenario_id):
         schema = ScenarioResponseSchema()
         manager = ScenarioManager()
@@ -127,7 +130,8 @@ class ScenarioList(Resource):
                   scenario: ScenarioSchema
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE
@@ -207,6 +211,9 @@ class ScenarioExecutor(Resource):
       404:
           description: scenario does not exist
     """
+
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
 
     def post(self, scenario_id):
         try:

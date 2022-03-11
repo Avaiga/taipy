@@ -61,6 +61,9 @@ class CycleResource(Resource):
           description: cycle does not exist
     """
 
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
+
     def get(self, cycle_id):
         schema = CycleResponseSchema()
         manager = CycleManager()
@@ -127,7 +130,8 @@ class CycleList(Resource):
                   cycle: CycleSchema
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE

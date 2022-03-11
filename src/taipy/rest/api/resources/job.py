@@ -63,6 +63,9 @@ class JobResource(Resource):
           description: job does not exist
     """
 
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
+
     def get(self, job_id):
         schema = JobResponseSchema()
         manager = JobManager()
@@ -127,7 +130,8 @@ class JobList(Resource):
                   job: JobSchema
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
             spec = importlib.util.spec_from_file_location(
                 "taipy_setup", TAIPY_SETUP_FILE
