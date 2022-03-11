@@ -3,6 +3,8 @@ from multiprocessing import Process
 
 import pytest
 
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.frequency import Frequency
@@ -27,8 +29,6 @@ from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.scheduler.scheduler import Scheduler
-from taipy.core.scheduler.scheduler_factory import SchedulerFactory
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core.utils.NotifyMock import NotifyMock
@@ -568,7 +568,7 @@ def test_submit():
         ScenarioId("sce_id"),
     )
 
-    class MockScheduler(Scheduler):
+    class MockScheduler(_Scheduler):
         submit_calls = []
 
         def submit_task(self, task: Task, callbacks=None, force=False):
@@ -625,7 +625,7 @@ def test_submit():
     assert submit_calls.index(task_1.id) < submit_calls.index(task_2.id)
     assert submit_calls.index(task_1.id) < submit_calls.index(task_4.id)
 
-    _TaskManager._scheduler = SchedulerFactory.build_scheduler
+    _TaskManager._scheduler = _SchedulerFactory._build_scheduler
 
 
 def test_scenarios_comparison():

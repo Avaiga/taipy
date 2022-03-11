@@ -4,6 +4,8 @@ from unittest import mock
 
 import pytest
 
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.config.config import Config
@@ -15,8 +17,6 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.core.scheduler.scheduler import Scheduler
-from taipy.core.scheduler.scheduler_factory import SchedulerFactory
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core.utils.NotifyMock import NotifyMock
@@ -122,7 +122,7 @@ def test_submit():
     task_4 = Task("fred", print, [data_node_4], [data_node_7], TaskId("t4"))
     pipeline = Pipeline("plugh", {}, [task_4, task_2, task_1, task_3], PipelineId("p1"))
 
-    class MockScheduler(Scheduler):
+    class MockScheduler(_Scheduler):
         submit_calls = []
 
         def submit_task(self, task: Task, callbacks=None, force=False):
@@ -160,7 +160,7 @@ def test_submit():
     calls_ids = [t.id for t in _TaskManager._scheduler().submit_calls]
     tasks_ids = tasks_ids * 2
     assert set(calls_ids) == set(tasks_ids)
-    _TaskManager._scheduler = SchedulerFactory.build_scheduler
+    _TaskManager._scheduler = _SchedulerFactory._build_scheduler
 
 
 g = 0

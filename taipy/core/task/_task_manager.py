@@ -1,6 +1,8 @@
 import itertools
 from typing import List, Optional
 
+from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
+from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.config.task_config import TaskConfig
@@ -8,8 +10,6 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import MultipleTaskFromSameConfigWithSameParent
 from taipy.core.job._job_manager import _JobManager
-from taipy.core.scheduler.abstract_scheduler import AbstractScheduler
-from taipy.core.scheduler.scheduler_factory import SchedulerFactory
 from taipy.core.task._task_repository import _TaskRepository
 from taipy.core.task.task import Task
 
@@ -21,9 +21,9 @@ class _TaskManager(_Manager[Task]):
     __scheduler = None
 
     @classmethod
-    def _scheduler(cls) -> AbstractScheduler:
+    def _scheduler(cls) -> _AbstractScheduler:
         if not cls.__scheduler:
-            cls.__scheduler = SchedulerFactory.build_scheduler()
+            cls.__scheduler = _SchedulerFactory._build_scheduler()
         return cls.__scheduler
 
     @classmethod

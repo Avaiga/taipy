@@ -1,40 +1,46 @@
-__all__ = ["Scheduler"]
-
 import itertools
 from multiprocessing import Lock
 from queue import Queue
 from typing import Callable, Iterable, List, Optional, Union
 
+from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
+from taipy.core._scheduler._job_dispatcher import _JobDispatcher
 from taipy.core.config.config import Config
 from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scheduler.abstract_scheduler import AbstractScheduler
-from taipy.core.scheduler.job_dispatcher import JobDispatcher
 from taipy.core.task.task import Task
 
 
-class Scheduler(AbstractScheduler):
+class _Scheduler(_AbstractScheduler):
+    """
+    Handles the functional scheduling executors and dispatch jobs on it.
+
+    Attributes:
+
+    """
+
     def __init__(self, job_config: JobConfig = None):
         super().__init__()
         if not job_config:
             job_config = Config.job_config
         self.jobs_to_run: Queue[Job] = Queue()
         self.blocked_jobs: List[Job] = []
-        self._dispatcher = JobDispatcher(job_config.nb_of_workers)  # type: ignore
+        self._dispatcher = _JobDispatcher(job_config.nb_of_workers)  # type: ignore
         self.lock = Lock()
 
     def submit(
         self, pipeline: Pipeline, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
     ) -> List[Job]:
-        """Submit pipeline for execution.
+        """Submit the given `Pipeline^` for an execution.
 
-        Args:
-             pipeline: Pipeline to be transformed into Job(s) for execution.
-             callbacks: Optional list of functions that should be executed once the job is done.
-             force: Boolean to enforce re execution of the tasks whatever the cache data nodes.
+        Parameters:
+             pipeline (`Pipeline^`): The pipeline to submit for execution.
+             callbacks: The optional list of functions that should be executed on jobs status change.
+             force (bool) : The boolean parameter to enforce execution of the pipeline's tasks even if their output
+             data nodes are cached.
 
         Returns:
             The created Jobs.
@@ -47,10 +53,21 @@ class Scheduler(AbstractScheduler):
         return res
 
     def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
+        """Submit the given `Task^` for an execution.
+
+        Parameters:
+             task (`Task^`): The task to submit for execution.
+             callbacks: The optional list of functions that should be executed on job status change.
+             force (bool) : The boolean parameter to enforce execution of the task even if its output data nodes are
+             cached.
+
+        Returns:
+            The created `Job^`.
+        """
         for dn in task.output.values():
             dn.lock_edition()
             _DataManager._set(dn)
-        job = _JobManager._create(task, itertools.chain([self.on_status_change], callbacks or []))
+        job = _JobManager._create(task, itertools.chain([self._on_status_change], callbacks or []))
         if self.is_blocked(job):
             job.blocked()
             _JobManager._set(job)
@@ -80,11 +97,11 @@ class Scheduler(AbstractScheduler):
             self.__execute_jobs()
 
     def __execute_jobs(self):
-        while not self.jobs_to_run.empty() and self._dispatcher.can_execute():
+        while not self.jobs_to_run.empty() and self._dispatcher._can_execute():
             job_to_run = self.jobs_to_run.get()
-            self._dispatcher.dispatch(job_to_run)
+            self._dispatcher._dispatch(job_to_run)
 
-    def on_status_change(self, job: Job):
+    def _on_status_change(self, job: Job):
         if job.is_finished():
             if self.lock.acquire(block=False):
                 try:
@@ -104,10 +121,11 @@ class Scheduler(AbstractScheduler):
             self.jobs_to_run.put(job)
 
     def is_running(self) -> bool:
-        pass
+        """Returns False since the default scheduler is not runnable."""
+        return False
 
     def start(self):
-        pass
+        RuntimeError("The default scheduler cannot be started.")
 
     def stop(self):
-        pass
+        RuntimeError("The default scheduler cannot be started nor stopped.")

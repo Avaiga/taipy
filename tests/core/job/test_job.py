@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from taipy.core._scheduler._job_dispatcher import _JobDispatcher
 from taipy.core.common.alias import JobId, TaskId
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
@@ -11,7 +12,6 @@ from taipy.core.exceptions.exceptions import DataNodeWritingError, NoData
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.job.status import Status
-from taipy.core.scheduler.job_dispatcher import JobDispatcher
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
@@ -214,8 +214,8 @@ def _error():
 def _dispatch(task: Task, job: Job):
     _TaskManager._set(task)
     _JobManager._set(job)
-    executor = JobDispatcher(None)
-    executor.dispatch(job)
+    executor = _JobDispatcher(None)
+    executor._dispatch(job)
 
 
 def _foo():

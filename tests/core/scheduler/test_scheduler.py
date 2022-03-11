@@ -11,12 +11,12 @@ from time import sleep
 
 import pytest
 
+from taipy.core._scheduler._executor._synchronous import _Synchronous
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
-from taipy.core.scheduler.executor.synchronous import Synchronous
-from taipy.core.scheduler.scheduler import Scheduler
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
@@ -45,7 +45,7 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 
 def test_submit_task():
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
 
     before_creation = datetime.now()
     sleep(0.1)
@@ -76,7 +76,7 @@ def test_submit_task_that_return_multiple_outputs():
     def return_list(nb1, nb2):
         return [multiply(nb1, nb2), multiply(nb1, nb2) / 2]
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
 
     with_tuple = _create_task(return_2tuple, 2)
     with_list = _create_task(return_list, 2)
@@ -103,7 +103,7 @@ def test_submit_task_returns_single_iterable_output():
     def return_list(nb1, nb2):
         return [multiply(nb1, nb2), multiply(nb1, nb2) / 2]
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     task_with_tuple = _create_task(return_2tuple, 1)
     task_with_list = _create_task(return_list, 1)
 
@@ -117,7 +117,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
     def return_2tuple():
         return lambda nb1, nb2: (multiply(nb1, nb2), multiply(nb1, nb2) / 2)
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     task = _create_task(return_2tuple(), 3)
 
     job = scheduler.submit_task(task)
@@ -129,7 +129,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
@@ -141,7 +141,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_task_multithreading_multiple_task():
-    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -173,7 +173,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_0 = m.Lock()
@@ -208,7 +208,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 
 def test_blocked_task():
-    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -247,21 +247,21 @@ def test_blocked_task():
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
 
 
-class MyScheduler(Scheduler):
+class MyScheduler(_Scheduler):
     def getJobDispatcher(self):
         return self._dispatcher
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
     scheduler = MyScheduler(Config._set_job_config())
-    assert isinstance(scheduler.getJobDispatcher()._executor, Synchronous)
-    assert scheduler.getJobDispatcher()._nb_worker_available == 1
+    assert isinstance(scheduler.getJobDispatcher()._executor, _Synchronous)
+    assert scheduler.getJobDispatcher()._nb_available_workers == 1
 
 
 def test_task_scheduler_create_parallel_dispatcher():
     scheduler = MyScheduler(Config._set_job_config(nb_of_workers=42))
     assert isinstance(scheduler.getJobDispatcher()._executor, ProcessPoolExecutor)
-    assert scheduler.getJobDispatcher()._nb_worker_available == 42
+    assert scheduler.getJobDispatcher()._nb_available_workers == 42
 
 
 def _create_task(function, nb_outputs=1):

@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
+from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
@@ -24,7 +25,6 @@ from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario._scenario_model import _ScenarioModel
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.scheduler.scheduler_factory import SchedulerFactory
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
@@ -169,7 +169,7 @@ def setup():
 
 
 def delete_everything():
-    _TaskManager._scheduler = SchedulerFactory.build_scheduler
+    _TaskManager._scheduler = _SchedulerFactory._build_scheduler
     _ScenarioManager._delete_all()
     _PipelineManager._delete_all()
     _DataManager._delete_all()

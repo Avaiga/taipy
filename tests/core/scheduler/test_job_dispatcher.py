@@ -9,12 +9,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from taipy.core._scheduler._job_dispatcher import _JobDispatcher
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import DataNodeId, JobId, TaskId
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job.job import Job
-from taipy.core.scheduler.job_dispatcher import JobDispatcher
-from taipy.core.scheduler.scheduler import Scheduler
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
@@ -49,16 +49,16 @@ def test_can_execute_synchronous():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(2)
+    executor = _JobDispatcher(2)
 
     with lock:
-        assert executor.can_execute()
-        executor.dispatch(job)
-        assert executor.can_execute()
-        executor.dispatch(job)
-        assert not executor.can_execute()
+        assert executor._can_execute()
+        executor._dispatch(job)
+        assert executor._can_execute()
+        executor._dispatch(job)
+        assert not executor._can_execute()
 
-    assert_true_after_10_second_max(lambda: executor.can_execute())
+    assert_true_after_10_second_max(lambda: executor._can_execute())
 
 
 def test_can_execute_parallel_multiple_submit():
@@ -70,12 +70,12 @@ def test_can_execute_parallel_multiple_submit():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(2)
+    executor = _JobDispatcher(2)
 
     with lock:
-        assert executor.can_execute()
-        executor.dispatch(job)
-        assert executor.can_execute()
+        assert executor._can_execute()
+        executor._dispatch(job)
+        assert executor._can_execute()
 
 
 def test_can_execute_synchronous_2():
@@ -84,11 +84,11 @@ def test_can_execute_synchronous_2():
     job_id = JobId("id1")
     job = Job(job_id, task)
 
-    executor = JobDispatcher(None)
+    executor = _JobDispatcher(None)
 
-    assert executor.can_execute()
-    executor.dispatch(job)
-    assert executor.can_execute()
+    assert executor._can_execute()
+    executor._dispatch(job)
+    assert executor._can_execute()
 
 
 def test_handle_exception_in_user_function():
@@ -97,8 +97,8 @@ def test_handle_exception_in_user_function():
     task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task)
 
-    executor = JobDispatcher(None)
-    executor.dispatch(job)
+    executor = _JobDispatcher(None)
+    executor._dispatch(job)
     assert job.is_failed()
     assert "Something bad has happened" == str(job.exceptions[0])
 
@@ -114,11 +114,11 @@ def test_handle_exception_when_writing_datanode():
     task = Task(config_id="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task)
 
-    dispatcher = JobDispatcher(None)
+    dispatcher = _JobDispatcher(None)
 
     with mock.patch("taipy.core.data._data_manager._DataManager._get") as get:
         get.return_value = output
-        dispatcher.dispatch(job)
+        dispatcher._dispatch(job)
         assert job.is_failed()
         stack_trace = str(job.exceptions[0])
         assert "node" in stack_trace
@@ -133,7 +133,7 @@ def test_need_to_run_no_output():
     task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    assert JobDispatcher(None)._needs_to_run(task)
+    assert _JobDispatcher(None)._needs_to_run(task)
 
 
 def test_need_to_run_output_not_cacheable():
@@ -146,7 +146,7 @@ def test_need_to_run_output_not_cacheable():
     task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    assert JobDispatcher(None)._needs_to_run(task)
+    assert _JobDispatcher(None)._needs_to_run(task)
 
 
 def nothing():
@@ -159,7 +159,7 @@ def test_need_to_run_output_cacheable_no_input():
     task_cfg = Config._add_task("name", input=[], function=nothing, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     assert scheduler._dispatcher._needs_to_run(task)
     scheduler.submit_task(task)
 
@@ -174,7 +174,7 @@ def test_need_to_run_output_cacheable_no_validity_period():
     task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     assert scheduler._dispatcher._needs_to_run(task)
     scheduler.submit_task(task)
 
@@ -192,7 +192,7 @@ def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     assert scheduler._dispatcher._needs_to_run(task)
     job = scheduler.submit_task(task)
 
@@ -215,7 +215,7 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     assert scheduler._dispatcher._needs_to_run(task)
     scheduler.submit_task(task)
 

@@ -8,6 +8,7 @@ from time import sleep
 
 import pytest
 
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import JobId
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
@@ -15,7 +16,6 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_manager import _JobManager
-from taipy.core.scheduler.scheduler import Scheduler
 from taipy.core.task._task_manager import _TaskManager
 
 
@@ -43,7 +43,7 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 
 def test_get_job():
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     task = _create_task(multiply)
 
     job_1 = scheduler.submit_task(task)
@@ -56,7 +56,7 @@ def test_get_job():
 
 
 def test_get_latest_job():
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     task = _create_task(multiply)
     task_2 = _create_task(multiply)
 
@@ -80,7 +80,7 @@ def test_get_job_unknown():
 
 
 def test_get_jobs():
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
 
     task = _create_task(multiply)
 
@@ -91,7 +91,7 @@ def test_get_jobs():
 
 
 def test_delete_job():
-    scheduler = Scheduler()
+    scheduler = _Scheduler()
     task = _create_task(multiply)
 
     job_1 = scheduler.submit_task(task)
@@ -114,7 +114,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 def test_raise_when_trying_to_delete_unfinished_job():
 
-    scheduler = Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
 
     task = _create_task(inner_lock_multiply)
 

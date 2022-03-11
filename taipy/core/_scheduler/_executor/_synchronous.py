@@ -1,11 +1,10 @@
-__all__ = ["Synchronous"]
-
 from concurrent.futures import Executor, Future
 
 
-class Synchronous(Executor):
-    """Equivalent to the Python standard Thread/Process Pool Executor but
-    the function is executed directly.
+class _Synchronous(Executor):
+    """
+    Similar to the Python standard Thread/Process Pool Executor but the function is executed directly in a
+    synchronous mode.
     """
 
     @staticmethod
