@@ -62,20 +62,20 @@ The properties _width_ and _width[mobile]_ specify the requested width of the me
 
 ### Menu icons
 
-As for every control that deals with lov, the menu can display Icon with label for each option.
+As for every control that deals with lov, each menu option can display an image (see Icon^) and/or some text.
 
 !!! example "Page content"
 
     === "Markdown"
 
         ```
-        <|menu|lov={[("id1", Icon("/images/fred.png", "Menu option 1")), ("id2", "Menu option 2")]}|>
+        <|menu|lov={[("id1", Icon("/images/icon.png", "Menu option 1")), ("id2", "Menu option 2")]}|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:menu>{[("id1", Icon("/images/fred.png", "Menu option 1")), ("id2", "Menu option 2")]}</taipy:menu>
+        <taipy:menu>{[("id1", Icon("/images/icon.png", "Menu option 1")), ("id2", "Menu option 2")]}</taipy:menu>
         ```
 
 

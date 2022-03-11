@@ -15,7 +15,7 @@ The default layout contains 2 columns in desktop mode and 1 column in mobile mod
     === "Markdown"
 
         ```
-        <||layout|
+        <|layout|
 
             <|{some content}|>
 
@@ -42,7 +42,7 @@ The _gap_ between adjacent cells is set by default to 0.5rem and can be specifie
     === "Markdown"
 
         ```
-        <||layout|gap=20px|
+        <|layout|gap=20px|
             ...
             <|{some content}|>
             ...
@@ -61,14 +61,14 @@ The _gap_ between adjacent cells is set by default to 0.5rem and can be specifie
 
 ### Layout with a central "greedy" column
 
-The _columns_ property follows the [https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-columns](css standard).
+You can use the fr CSS unit so that the middle column use all the available space.
 
 !!! example "Page content"
 
     === "Markdown"
 
         ```
-        <||layout|columns=50px 1fr 50px|
+        <|layout|columns=50px 1fr 50px|
 
             <|{1st column content}|>
 
@@ -102,16 +102,16 @@ The _columns_ property follows the [https://developer.mozilla.org/en-US/docs/Web
         </taipy:layout>
         ```
 
-### Different layout for desktop and mobile view
+### Different layout for desktop and mobile devices
 
-The _columns[mobile]_ property allows to specify a different layout when a mobile device is detected.
+The _columns[mobile]_ property allows to specify a different layout when running on a mobile device.
 
 !!! example "Page content"
 
     === "Markdown"
 
         ```
-        <||layout|columns=50px 1fr 50px|columns[mobile]=1 1|
+        <|layout|columns=50px 1fr 50px|columns[mobile]=1 1|
 
             <|{1st column content}|>
 

@@ -2,7 +2,7 @@ A control that displays some text that can potentially be edited.
 
 ## Usage
 
-### Allows user input
+### Get user input
 
 You can create an input field bound to a variable with the following content:
 
