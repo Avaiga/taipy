@@ -1,6 +1,6 @@
 A side pane.
 
-Pane allows to show some content over the current page.
+Pane allows to show some content on top of the current page.
 The pane is closed when the user clicks outside the area of the pane (triggering a _on_close_ action).
 
 ## Usage
@@ -59,7 +59,7 @@ The pane is shown beside the page content instead of over it if the _persistent_
         <taipy:pane persistent="True">{show}</taipy:pane>
         ```
 
-### Pane as block
+### Pane as block element
 
 The content of the pane can be specified directly inside the pane block.
 
@@ -105,7 +105,7 @@ The content of the pane can be specified as an existing page name using the _pag
 
 ### Pane with partial
 
-The content of the pane can be specified as a Partial^ instance using the _partial_ property.
+The content of the pane can be specified as a `Partial^` instance using the _partial_ property.
 
 !!! example "Page content"
 

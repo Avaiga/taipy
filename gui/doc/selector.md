@@ -47,6 +47,8 @@ You can create a selector on a series of strings:
 
 ### Display with filter and multiple selection
 
+You can add a filter input field that lets you display only strings that match the filter value.
+
 !!! example "Page content"
 
     === "Markdown"
@@ -77,7 +79,7 @@ A selector control that returns an id while selecting a label or Icon^.
     === "HTML"
 
         ```html
-        <taipy:selector lov="{[('id1', 'Label 1'), ('id2', Icon('/images/icon.png', 'Label 2'),('id3', 'Label 3')]}">{sel}</taipy:selector>
+        <taipy:selector value="{sel}" lov="{[('id1', 'Label 1'), ('id2', Icon('/images/icon.png', 'Label 2'),('id3', 'Label 3')]}" />
         ```
 
 ### Display a list of objects

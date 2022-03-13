@@ -6,7 +6,7 @@ This control is implemented as a list of links.
 
 ### Defining a default navbar
 
-The list of pages is used to build the navbar.
+The list of all pages registered in the Gui instance is used to build the navbar.
 
 !!! example "Page content"
 
@@ -25,7 +25,7 @@ The list of pages is used to build the navbar.
 
 ### Defining a custom navbar
 
-The _lov_ property is used to define the list of element visible in the navbar.
+The _lov_ property is used to define the list of elements that are displayed.
 If an lov element id starts whith http, the page is opened in another tab.
 
 !!! example "Page content"

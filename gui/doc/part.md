@@ -1,8 +1,12 @@
 Displays its children in a block.
 
-The Part control is used to group controls. 
-This allows to show or hide them in one action and to display them in one Layout^ cell.
-Part controls can be simplified by not specifying the part keyword.
+The `part` control is used to group controls in a single element. 
+This allows to show or hide them in one action and be placed as a unique element in a `Layout^` cell.
+
+There is a simplified Markdown syntax to create a `part`, where the element name is optional:
+
+`<|` just before the end of the line indicates the beginning of a `part` element;
+`|>` at the beginning of a line indicated the end of the `part` definition.
 
 ## Usage
 
@@ -30,7 +34,7 @@ Part controls can be simplified by not specifying the part keyword.
         </taipy:part>
         ```
 
-### Showing/Hiding controls
+### Showing and hiding controls
 
 !!! example "Page content"
 
@@ -53,3 +57,5 @@ Part controls can be simplified by not specifying the part keyword.
             ...
         </taipy:part>
         ```
+
+If the _render_ property is bound to a Boolean value, the `part` will show or hide its elements according to the value of the bound variable.

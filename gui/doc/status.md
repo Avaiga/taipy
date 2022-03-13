@@ -28,6 +28,8 @@ or a list of dictionaries that contains the keys:
 
 ### Prevent status dismiss
 
+If you don't want the user to be allowed to dismiss the displayed statuses, you can use the _without_close_ property.
+
 !!! example "Page content"
 
     === "Markdown"
