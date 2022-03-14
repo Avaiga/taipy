@@ -727,7 +727,7 @@ class Gui:
             Calling `gui.add_pages('reports')` is equivalent to calling:
             ```py
             gui.add_pages({
-                            "reports/home", Htlm("reports/home.html"),
+                            "reports/home", Html("reports/home.html"),
                             "reports/budget/expenses/marketing", Markdown("reports/budget/expenses/marketing.md"),
                             "reports/budget/expenses/production", Markdown("reports/budget/expenses/production.md"),
                             "reports/budget/revenue/EMAE", Markdown("reports/budget/revenue/EMAE.md"),
