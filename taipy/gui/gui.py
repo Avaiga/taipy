@@ -842,9 +842,9 @@ class Gui:
                 print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
-        if "locals_bind" in kwargs and isinstance(kwargs["locals_bind"], dict):
-            self.__locals_bind = kwargs["locals_bind"]
-            warnings.warn("Gui is using custom locals_bind. Make sure that you know what you are doing")
+        if isinstance(kwargs.get("locals_bind"), dict):
+            self.__locals_bind = kwargs.get("locals_bind")
+            warnings.warn("Caution: the Gui instance is using a custom 'locals_bind' setting.")
         else:
             self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
 
