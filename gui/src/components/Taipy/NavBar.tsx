@@ -11,12 +11,11 @@ import Tooltip from "@mui/material/Tooltip";
 import Menu from "@mui/icons-material/Menu";
 import { useLocation, useNavigate } from "react-router";
 
-import { LovProps, useLovListMemo } from "./lovUtils";
+import Link from "./Link";
+import { LovProps, useLovListMemo, LovImage } from "./lovUtils";
 import { useDynamicProperty, useIsMobile } from "../../utils/hooks";
 import { TaipyContext } from "../../context/taipyContext";
-import Link from "./Link";
 import { LovItem } from "../../utils/lov";
-import { Icon } from "../../utils/icon";
 
 const boxSx = { borderBottom: 1, borderColor: "divider", width: "fit-content" };
 
@@ -49,7 +48,9 @@ const NavBar = (props: LovProps) => {
         [navigate, state.locations]
     );
 
-    const selectedVal = !isMobile && (lovList.find((it) => it.id === location.pathname)?.id || lovList[0].id);
+    const selectedVal =
+        !isMobile &&
+        (lovList.find((it) => it.id === location.pathname)?.id || (lovList.length ? lovList[0].id : false));
 
     return isMobile ? (
         <Tooltip title={hover || ""}>
@@ -60,7 +61,7 @@ const NavBar = (props: LovProps) => {
                             <ListItem key={val.id} onClick={() => setOpened(false)} disabled={!active}>
                                 <ListItemText>
                                     <Link href={val.id}>
-                                        {(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
+                                        {typeof val.item === "string" ? val.item : <LovImage item={val.item} />}
                                     </Link>
                                 </ListItemText>
                             </ListItem>
@@ -81,7 +82,7 @@ const NavBar = (props: LovProps) => {
                             key={val.id}
                             value={val.id}
                             disabled={!active}
-                            label={(typeof val.item === "string" ? val.item : (val.item as Icon).text) || val.id}
+                            label={typeof val.item === "string" ? val.item : <LovImage item={val.item} />}
                         />
                     ))}
                 </Tabs>
