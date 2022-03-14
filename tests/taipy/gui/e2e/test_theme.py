@@ -1,4 +1,3 @@
-import time
 from importlib import util
 
 import pytest
@@ -15,9 +14,7 @@ def test_theme_light(page: "Page", gui: Gui, helpers):
 <|Just a page|id=text1|>
 """
     gui.add_page(name="test", page=page_md)
-    gui.run(run_in_thread=True, single_client=True, dark_mode=False)
-    while not helpers.port_check():
-        time.sleep(0.1)
+    helpers.run_e2e(gui, dark_mode=False)
     page.goto("/")
     page.expect_websocket()
     page.wait_for_selector("#text1")
@@ -33,9 +30,7 @@ def test_theme_dark(page: "Page", gui: Gui, helpers):
 <|Just a page|id=text1|>
 """
     gui.add_page(name="test", page=page_md)
-    gui.run(run_in_thread=True, single_client=True, dark_mode=True)
-    while not helpers.port_check():
-        time.sleep(0.1)
+    helpers.run_e2e(gui, dark_mode=True)
     page.goto("/")
     page.expect_websocket()
     page.wait_for_selector("#text1")

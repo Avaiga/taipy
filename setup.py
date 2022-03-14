@@ -22,7 +22,6 @@ requirements = [
     "python-dotenv",
     "pytz",
     "simple-websocket",
-    "toml",
     "tzlocal",
     "backports.zoneinfo;python_version<'3.9'",
 ]

@@ -16,7 +16,7 @@ class _Page(object):
         self._renderer: t.Optional[Page] = None
         self._style: t.Optional[str] = None
         self._route: t.Optional[str] = None
-        self._head: t.Optional[str] = None
+        self._head: t.Optional[list] = None
 
     def render(self, gui: Gui):
         if self._renderer is None:
@@ -35,4 +35,4 @@ class _Page(object):
                 s += "\033[0m\n"
                 logging.warn(s)
         if hasattr(self._renderer, "head"):
-            self._head = str(self._renderer.head)  # type: ignore
+            self._head = list(self._renderer.head)  # type: ignore

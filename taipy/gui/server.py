@@ -78,7 +78,7 @@ class _Server:
                 return render_template(
                     "index.html",
                     flask_url=client_url,
-                    app_css="/" + self.css_file + ".css",
+                    app_css=f"/{self.css_file}.css",
                     title=title,
                     favicon=favicon,
                     themes=themes,
@@ -88,7 +88,7 @@ class _Server:
                 return send_from_directory(static_folder + os.path.sep, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
-                if path.startswith(k + "/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
+                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
                     return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
             if hasattr(__main__, "__file__") and os.path.isfile(
                 os.path.dirname(__main__.__file__) + os.path.sep + path
@@ -111,7 +111,7 @@ class _Server:
             {
                 "jsx": template_str,
                 "style": (style + os.linesep) if style else "",
-                "head": head or "",
+                "head": head or [],
             }
         )
 
@@ -142,14 +142,11 @@ class _Server:
             page._rendered_jsx += "<PageContent />"
         # Return jsx page
         if page._rendered_jsx is not None:
-            return self._render(page._rendered_jsx, page._style if hasattr(page, "style") else "", page._head)
+            return self._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
         else:
             return ("No page template", 404)
 
     def _render_route(self) -> t.Any:
-        # Generate router
-        routes = self._gui._config.routes
-        locations = {}
         router = '<Routes key="routes">'
         router += (
             '<Route path="/" key="'
@@ -160,10 +157,11 @@ class _Server:
             + self._root_page_name
             + '"'
         )
+        routes = self._gui._config.routes
         route = next((r for r in routes if r != self._root_page_name), None)
         router += (' route="/' + route + '"') if route else ""
         router += " />} >"
-        locations["/"] = "/" + self._root_page_name
+        locations = {"/": f"/{self._root_page_name}"}
         for route in routes:
             if route != self._root_page_name:
                 router += (
@@ -175,7 +173,7 @@ class _Server:
                     + route
                     + '"/>} />'
                 )
-                locations["/" + route] = "/" + route
+                locations[f"/{route}"] = f"/{route}"
         router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
         router += "</Route>"
         router += "</Routes>"

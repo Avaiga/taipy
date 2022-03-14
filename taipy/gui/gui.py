@@ -675,7 +675,10 @@ class Gui:
                     assets_dir_name = f"{folder_name}/{file_name}"
                     self._flask_blueprint.append(
                         Blueprint(
-                            assets_dir_name, __name__, static_folder=assets_folder, url_prefix=f"/{assets_dir_name}"
+                            assets_dir_name,
+                            __name__,
+                            static_folder=assets_folder,
+                            static_url_path=f"/{assets_dir_name}",
                         )
                     )
 
@@ -839,7 +842,11 @@ class Gui:
                 print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
-        self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
+        if isinstance(kwargs.get("locals_bind"), dict):
+            self.__locals_bind = kwargs.get("locals_bind")
+            warnings.warn("Caution: the Gui instance is using a custom 'locals_bind' setting.")
+        else:
+            self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
 
         self.__state = State(self, self.__locals_bind.keys())
 

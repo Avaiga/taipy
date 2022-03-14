@@ -1,4 +1,3 @@
-import time
 from importlib import util
 
 import pytest
@@ -16,9 +15,7 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
         name="test",
         page="<|{table_data}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
     )
-    gui.run(run_in_thread=True, single_client=True, use_arrow=False)
-    while not helpers.port_check():
-        time.sleep(0.1)
+    helpers.run_e2e(gui, use_arrow=False)
     page.goto("/test")
     page.expect_websocket()
     page.wait_for_selector("#table1")
@@ -33,9 +30,7 @@ def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
             name="test",
             page="<|{table_data}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
         )
-        gui.run(run_in_thread=True, single_client=True, use_arrow=True)
-        while not helpers.port_check():
-            time.sleep(0.1)
+        helpers.run_e2e(gui, use_arrow=True)
         page.goto("/test")
         page.expect_websocket()
         page.wait_for_selector("#table1")

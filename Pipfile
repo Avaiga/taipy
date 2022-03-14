@@ -17,7 +17,6 @@ python-magic-bin = {version = ">=0.4", sys_platform = "== 'win32'"}
 pytz = ">=2021.1"
 rdp = ">=0.8"
 simple-websocket = ">=0.3"
-toml = ">=0.10"
 tzlocal = ">=3.0"
 "backports.zoneinfo" = {version=">=0.2.0", markers="python_version < '3.9'", extras=["tzdata"]}
 
@@ -40,7 +39,6 @@ pytest-cov = "*"
 pytest-mock = "3.6.1"
 tox = "==3.24.3"
 twine = "*"
-types-toml = "0.10.0"
 pytest-playwright = "*"
 markupsafe = "==2.0.1"
 

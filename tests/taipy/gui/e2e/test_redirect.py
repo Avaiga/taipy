@@ -1,4 +1,3 @@
-import time
 from importlib import util
 
 import pytest
@@ -15,9 +14,7 @@ def test_redirect(page: "Page", gui: Gui, helpers):
 <|Redirect Successfully|id=text1|>
 """
     gui.add_page(name="test", page=page_md)
-    gui.run(run_in_thread=True, single_client=True)
-    while not helpers.port_check():
-        time.sleep(0.1)
+    helpers.run_e2e(gui)
     page.goto("/")
     page.expect_websocket()
     page.wait_for_selector("#text1")

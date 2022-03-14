@@ -9,7 +9,7 @@ declare global {
     }
 }
 
-// set global style the traditonal way
+// set global style the traditional way
 export const setStyle = (styleString: string): void => {
     const style = document.createElement("style");
     style.textContent = styleString;
