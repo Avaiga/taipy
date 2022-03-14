@@ -3,18 +3,43 @@ Displays a status or a list of statuses.
 
 ## Usage
 
-`value` can be a list of ?? or a dictionary that must contain the keys
+_value_ can be a list of tuples:
+   - first element: status
+   - second element: message
+or a list of dictionaries that contains the keys:
    - status
    - message
 
-### Simple
+### Show the current status
 
-<code><|{value}|status|></code>
+!!! example "Page content"
 
-### Advanced
+    === "Markdown"
 
-<code><|{value}|status|></code>
+        ```
+        <|{value}|status|>
+        ```
+  
+    === "HTML"
 
-or with properties
+        ```html
+        <taipy:status>{value}</taipy:status>
+        ```
 
-<code><|{value}|status|properties={properties}|></code>
+### Prevent status dismiss
+
+If you don't want the user to be allowed to dismiss the displayed statuses, you can use the _without_close_ property.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{value}|status|without_close|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:status without_close="True">{value}</taipy:status>
+        ```
