@@ -18,14 +18,15 @@ from werkzeug.utils import secure_filename
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
-from ._default_config import app_config_default
+from ._default_config import default_config
 from ._page import _Page
-from .config import AppConfig, AppConfigOption, GuiConfig
+from .page import Page
+from .config import Config, ConfigParameter, _Config
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .partial import Partial
-from .renderers import Page, _EmptyPage
+from .renderers import _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
 from .server import _Server
 from .state import State
@@ -54,14 +55,20 @@ from .utils._evaluator import _Evaluator
 
 
 class Gui:
-    """The class that handles the Graphical User Interface.
+    """Entry point for the Graphical User Interface generation.
 
     Attributes:
 
-        on_action (Callable): The default function that is called when a control
-            triggers an action, as the result of an interaction with the end-user.
+        on_action (Callable): The function that is called when a control
+            triggers an action, as the result of an interaction with the end-user.<br/>
+            It defaults to the _on_action_ global function defined in the Python
+            application. If there is no such function, actions will not trigger anything.
         on_change (Callable): The function that is called when a control
-            modifies the variable it is bound to, as the result of an interaction with the end-user.
+            modifies variables it is bound to, as the result of an interaction with the
+            end-user.<br/>
+            It defaults to the _on_change_ global function defined in the Python
+            application. If there is no such function, user interactions will not trigger
+            anything.
     """
 
     __root_page_name = "TaiPy_root_page"
@@ -80,33 +87,40 @@ class Gui:
 
     def __init__(
         self,
+        page: t.Optional[t.Union[str, Page]] = None,
+        pages: t.Optional[dict] = None,
         css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
         if hasattr(__main__, "__file__")
         else "Taipy",
-        page: t.Optional[t.Union[str, Page]] = None,
-        pages: t.Optional[dict] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
         flask: t.Optional[Flask] = None,
     ):
-        """Initializes a new Gui instance.
+        """Initialize a new Gui instance.
 
-        Parameters:
-
-            page (t.Union[str, Page], optional): An optional `Page` instance
-                that is used when there is a single page in this interface, referenced as the
-                root page (located at `/`).
-
-                If `page` is a raw string, a `Markdown` Page is built from that string.
-
-                Note that if `pages` is provided, those pages are added as well.
-
-            css_file (string):  An optional pathname to a CSS file that gets used as a style sheet in
-                all the pages.
-
+        Arguments:
+            page: An optional `Page^` instance that is used when there is a single page
+                in this interface, referenced as the _root_ page (located at `/`).<br/>
+                If _page_ is a raw string and if it holds a path to a readable file then
+                a `Markdown^` page is built from the content of that file.<br/>
+                If _page_ is a string that does not indicate a path to readable file then
+                a `Markdown^` page is built from that string.<br/>
+                Note that if _pages_ is provided, those pages are added as well.
+            pages: Used if you want to initialize this instance with a set of pages.
+                The method `(Gui.)add_pages()^` is called if _pages_ is not None, and
+                you can find details on the possible values of this argument in the
+                documentation for this method.
+            css_file:  An optional pathname to a CSS file that gets used as a style sheet in
+                all the pages.<br/>
                 The default value is a file that has the same base name as the Python
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
+            path_mapping: TODO explain what this does.
+            env_filename: An optional file from which to load application configuration
+                variables (see the [Configuration](../gui/configuration.md) section for
+                details.)</br>
+                The default value is "taipy.gui.env"
+            flask: TODO explain what this does.
         """
         self._server = _Server(
             self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
@@ -116,7 +130,7 @@ class Gui:
         self._flask = flask
         self._css_file = css_file
 
-        self._config = GuiConfig()
+        self._config = _Config()
         self.__content_accessor = None
         self._accessors = _DataAccessors()
         self.__state: State = None
@@ -129,12 +143,12 @@ class Gui:
 
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
-        self._config.load_config(app_config_default)
+        self._config._load(default_config)
 
         # Load Markdown extension
         # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
         # There's a section that explicitly lists these extensions in
-        #      docs/gui/user_pages.md#markdown-specifics
+        #      docs/gui/pages.md#markdown-specifics
         self._markdown = md_lib.Markdown(
             extensions=[
                 "fenced_code",
@@ -157,19 +171,19 @@ class Gui:
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
-            self.__content_accessor = _ContentAccessor(self._get_app_config("data_url_max_size", 50 * 1024))
+            self.__content_accessor = _ContentAccessor(self._get_config("data_url_max_size", 50 * 1024))
         return self.__content_accessor
 
     def _bindings(self):
         return self.__bindings
 
-    def _get_app_config(self, name: AppConfigOption, default_value: t.Any) -> t.Any:
-        return self._config._get_app_config(name, default_value)
+    def _get_config(self, name: ConfigParameter, default_value: t.Any) -> t.Any:
+        return self._config._get_config(name, default_value)
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
-        theme = self._get_app_config("theme", None)
-        dark_theme = self._get_app_config("theme[dark]", None)
-        light_theme = self._get_app_config("theme[light]", None)
+        theme = self._get_config("theme", None)
+        dark_theme = self._get_config("theme[dark]", None)
+        light_theme = self._get_config("theme[light]", None)
         res = {}
         if theme:
             res["base"] = theme
@@ -317,7 +331,7 @@ class Gui:
                 suffix = f".part.{part}"
                 complete = part == total - 1
         if file:  # and allowed_file(file.filename)
-            upload_path = pathlib.Path(self._get_app_config("upload_folder", tempfile.gettempdir())).resolve()
+            upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
             file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
             file.save(str(upload_path / (file_path.name + suffix)))
             if complete:
@@ -614,6 +628,23 @@ class Gui:
         page: t.Union[str, Page],
         style: t.Optional[str] = "",
     ) -> None:
+        """Add a page to the graphical User Interface.
+
+        Arguments:
+            name: The name of the page.
+            page (Union[str, Page]): The content of the page.<br/>
+                It can be an instance of `Markdown^` or `Html^`.<br/>
+                If _page_ is a string, then:
+
+                - If _page_ is set to the pathname of a readable file, the page
+                  content is read as Markdown input text.
+                - If it is not, the page content is read from this string as
+                  Markdown text.
+            style (Optional[str]): Additional CSS style to apply to this page.
+
+        Note that page names cannot start with the slash ('/') character and that each
+        page must have a unique name.
+        """
         # Validate name
         if name is None:
             raise Exception("name is required for add_page function!")
@@ -641,6 +672,73 @@ class Gui:
         self._config.routes.append(name)
 
     def add_pages(self, pages: t.Union[dict[str, t.Union[str, Page]], str] = None) -> None:
+        """Add several pages to the graphical User Interface.
+
+        Arguments:
+            pages (Union[dict[str, Union[str, Page]], str]): The pages to add.<br/>
+                If _pages_ is a dictionnary, a page is added to this `Gui` instance:
+
+                - The entry key is used as the page name.
+                - The entry value is used as the page content:
+                    - The value can can be an instance of `Markdown^` or `Html^`, then
+                      it is used as the page definition.
+                    - If entry value is a string, then:
+                        - If it is set to the pathname of a readable file, the page
+                          content is read as Markdown input text.
+                        - If it is not, the page content is read from this string as
+                          Markdown text.
+
+                If _pages_ is a string that contains the path to a directory, then
+                this directory is read to create pages. See below for details.
+
+        !!! note "Reading pages from a directory"
+            If _pages_ is a string that holds the path to a readable directory, then
+            this directory is traversed, recursively, to find files that Taipy can build
+            pages from.
+
+            For every new directory that is traversed, a new hierarchical level
+            for pages is created.
+
+            For every file that is found:
+
+                - If the filename extention is _.md_, it is read as Markdown content and
+                  a new page is created with the base name of this filename.
+                - If the filename extention is _.html_, it is read as HTML content and
+                  a new page is created with the base name of this filename.
+
+            For example, say you have the following directory structure:
+            ```
+            reports
+            ├── home.html
+            ├── budget/
+            │   ├── expenses/
+            │   │   ├── marketing.md
+            │   │   └── production.md
+            │   └── revenue/
+            │       ├── EMAE.md
+            │       ├── USA.md
+            │       └── ASIA.md
+            └── cashflow/
+                ├── weekly.md
+                ├── monthly.md
+                └── yearly.md
+            ```
+
+            Calling `gui.add_pages('reports')` is equivalent to calling:
+            ```py
+            gui.add_pages({
+                            "reports/home", Htlm("reports/home.html"),
+                            "reports/budget/expenses/marketing", Markdown("reports/budget/expenses/marketing.md"),
+                            "reports/budget/expenses/production", Markdown("reports/budget/expenses/production.md"),
+                            "reports/budget/revenue/EMAE", Markdown("reports/budget/revenue/EMAE.md"),
+                            "reports/budget/revenue/USA", Markdown("reports/budget/revenue/USA.md"),
+                            "reports/budget/revenue/ASIA", Markdown("reports/budget/revenue/ASIA.md"),
+                            "reports/cashflow/weekly", Markdown("reports/cashflow/weekly.md"),
+                            "reports/cashflow/monthly", Markdown("reports/cashflow/monthly.md"),
+                            "reports/cashflow/yearly", Markdown("reports/cashflow/yearly.md")
+            })
+            ```
+        """
         if isinstance(pages, dict):
             for k, v in pages.items():
                 if k == "/":
@@ -686,7 +784,21 @@ class Gui:
         self,
         page: t.Union[str, Page],
     ) -> Partial:
-        # Init a new partial
+        """Create a new `Partial^`.
+
+        The [User Manual section on Partials](../../gui/pages/#partials) gives details on
+        when and how to use this class.
+
+        Arguments:
+            page (Union[str, Page]): The page to create a new Partial from.<br/>
+                It can be an instance of `Markdown^` or `Html^`.<br/>
+                If _page_ is a string, then:
+
+                - If _page_ is set to the pathname of a readable file, the content of
+                  the new `Partial` is read as Markdown input text.
+                - If it is not, the content of the new `Partial` is read from this string
+                  as Markdown text.
+        """
         new_partial = Partial()
         # Validate name
         if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes:
@@ -731,10 +843,8 @@ class Gui:
             else:
                 warnings.warn(f"{name}: {func} should be a function")
 
-    def load_config(self, app_config: t.Optional[AppConfig] = None) -> None:
-        if app_config is None:
-            return
-        self._config.load_config(app_config=app_config)
+    def load_config(self, config: Config) -> None:
+        self._config._load(config)
 
     def _download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
         content_str = self._get_content("Gui.download", content, False)
@@ -750,10 +860,10 @@ class Gui:
         self.__send_ws_alert(
             notification_type,
             message,
-            self._get_app_config("browser_notification", True)
+            self._get_config("browser_notification", True)
             if browser_notification is None
             else browser_notification,
-            self._get_app_config("notification_duration", 3000) if duration is None else duration,
+            self._get_config("notification_duration", 3000) if duration is None else duration,
         )
 
     def _hold_actions(
@@ -796,12 +906,15 @@ class Gui:
 
         Once you enter `run`, users can run Web browsers and point to the Web server
         URL that `Gui` serves. The default is to listen to the _localhost_ address
-        (127.0.0.1) on the port number 5000. However, the configuration of the `Gui`
-        object may impact that (see TODO-Configuration-TODO).
+        (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
+        object may impact that (see the [Configuration](../gui/configuration.md)
+        section for details).
 
-        Args:
+        Arguments:
             run_server (bool): whether or not to run a Web server locally.
-                If set to `False`, a Web server is _not_ created and started.
+                If set to _False_, a Web server is _not_ created and started.
+            run_in_thread: TODO
+            kwargs: TODO
         """
         if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
             self._server._thread.kill()
@@ -816,7 +929,7 @@ class Gui:
             )
             self._bindings()._new_scopes()
 
-        app_config = self._config.app_config
+        app_config = self._config.config
 
         # Register _root_dir for abs path
         if not hasattr(self, "_root_dir"):
@@ -825,11 +938,11 @@ class Gui:
             )
 
         # Load application config from multiple sources (env files, kwargs, command line)
-        self._config.build_app_config(self._root_dir, self.__env_filename, kwargs)
+        self._config._build_config(self._root_dir, self.__env_filename, kwargs)
 
         # Special config for notebook runtime
         if _is_in_notebook() or run_in_thread:
-            self._config.app_config["single_client"] = True
+            self._config.config["single_client"] = True
 
         if run_server and app_config["ngrok_token"]:  # pragma: no cover
             if not util.find_spec("pyngrok"):
@@ -887,10 +1000,10 @@ class Gui:
                 static_folder=f"{_absolute_path}{os.path.sep}webapp",
                 template_folder=f"{_absolute_path}{os.path.sep}webapp",
                 client_url=app_config["client_url"],
-                title=self._get_app_config("title", "Taipy App"),
-                favicon=self._get_app_config("favicon", "/favicon.png"),
+                title=self._get_config("title", "Taipy App"),
+                favicon=self._get_config("favicon", "/favicon.png"),
                 themes=self._get_themes(),
-                root_margin=self._get_app_config("margin", None),
+                root_margin=self._get_config("margin", None),
             )
         )
 

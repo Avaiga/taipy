@@ -6,9 +6,9 @@ from .state import State
 
 
 def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
-    """Donwloads content to the client.
+    """Donwload content to the client.
 
-    Args:
+    Arguments:
         state: the current user state as received in any callback.
         content: file path or file content
         name: file name for the content on the client browser (default to content name)
@@ -17,7 +17,7 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)
     else:
-        warnings.warn("'download' function should be called in the context of a callback")
+        warnings.warn("'download()' must be called in the context of a callback")
 
 
 def notify(
@@ -27,22 +27,23 @@ def notify(
     browser_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
 ):
-    """Sends a notification to the user interface.
+    """Send a notification to the user interface.
 
-    Args:
+    Arguments:
         state: the current user state as received in any callback.
-        notification_type: The notification type. This can be one of `"success"`, `"info"`, `"warning"`, or `"error"`.
+        notification_type: the notification type. This can be one of `"success"`, `"info"`, `"warning"`, or `"error"`.
             To remove the last notification, set this parameter to the empty string.
-        message: The text message to display.
-        browser_notification: If set to True, the browser will also show the notification.
+        message: the text message to display.
+        browser_notification: if True, the browser will also show the notification.
             If not specified or set to None, this parameter will use the value of
-            `app_config[browser_notification]`.
-        duration: The time, in milliseconds, during which the notification is shown.
+            `configuration[browser_notification]`.
+        duration: the time, in milliseconds, during which the notification is shown.
             If not specified or set to None, this parameter will use the value of
-            `app_config[notification_duration]`.
+            `configuration[notification_duration]`.
 
-    Note that you can also call this function with _notification_type_ set to the first letter or the alert type
-    (ie setting _notification_type_ to `"i"` is equivalent to setting it to `"info"`).
+    Note that you can also call this function with _notification_type_ set to the first letter
+    or the alert type (ie setting _notification_type_ to "i" is equivalent to setting it to
+    "info").
     """
     if state and isinstance(state._gui, Gui):
         state._gui._notify(notification_type, message, browser_notification, duration)
@@ -55,39 +56,48 @@ def hold_control(
     callback: t.Optional[t.Union[str, t.Callable]] = None,
     message: t.Optional[str] = "Work in Progress...",
 ):
-    """Hold the UI actions (ie prevent user interactions).
+    """Hold the User Interface actions.
 
-    Args:
+    When the User Interface is held, users cannot interact with visual elements.<br/>
+    The application must call `resume_control()^` so that users can interact again
+    with the visual elements.
+
+    Arguments:
         state: the current user state as received in any callback.
-        callback: The function to be called on _cancel_. If empty or None, no cancel action is provided to the user.
-        message: The message to show.
+        callback: the function to be called on _callback_. If empty or None, no cancel action
+            is provided to the user.
+        message: the message to show.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._hold_actions(callback, message)
     else:
-        warnings.warn("'hold_actions' function should be called in the context of a callback")
+        warnings.warn("'hold_actions()' must be called in the context of a callback")
 
 
 def resume_control(state: State):
-    """Resume the UI actions (ie allows user interactions).
+    """Resume the User Interface actions.
 
-    Args:
+    This function must be called after `hold_control()^` was invoked, when interaction
+    must be allowed again for the user.
+
+    Arguments:
         state: the current user state as received in any callback.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._resume_actions()
     else:
-        warnings.warn("'resume_actions' function should be called in the context of a callback")
+        warnings.warn("'resume_actions()' must be called in the context of a callback")
 
 
 def navigate(state: State, to: t.Optional[str] = ""):
-    """Navigate to a page
+    """Navigate to a page.
 
-    Args:
+    Arguments:
         state: the current user state as received in any callback.
-        to: page to navigate to. Should be a valid page identifier. If ommitted, navigates to the root page.
+        to: the name of the page to navigate to. This must be a valid page identifier.
+            If ommitted, the application navigates to the root page.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._navigate(to)
     else:
-        warnings.warn("'navigate' function should be called in the context of a callback")
+        warnings.warn("'navigate()' must be called in the context of a callback")

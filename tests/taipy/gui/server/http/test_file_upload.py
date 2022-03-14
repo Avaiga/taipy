@@ -46,7 +46,7 @@ def test_file_upload_simple(gui: Gui, helpers):
     sid = helpers.create_scope_and_get_sid(gui)
     file_name = "test.jpg"
     file = (io.BytesIO(b"abcdef"), file_name)
-    upload_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir()))
+    upload_path = pathlib.Path(gui._get_config("upload_folder", tempfile.gettempdir()))
     file_name = _get_non_existent_file_path(upload_path, file_name).name
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}",
@@ -66,7 +66,7 @@ def test_file_upload_multi_part(gui: Gui, helpers):
     file_name = "test2.jpg"
     file0 = (io.BytesIO(b"abcdef"), file_name)
     file1 = (io.BytesIO(b"abcdef"), file_name)
-    upload_path = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir()))
+    upload_path = pathlib.Path(gui._get_config("upload_folder", tempfile.gettempdir()))
     file_name = _get_non_existent_file_path(upload_path, file_name).name
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}",
@@ -100,7 +100,7 @@ def test_file_upload_multiple(gui: Gui, helpers):
         f"/taipy-uploads?client_id={sid}", data={"var_name": var_name, "blob": file}, content_type="multipart/form-data"
     )
     assert ret.status_code == 200
-    created_file = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test.jpg"
+    created_file = pathlib.Path(gui._get_config("upload_folder", tempfile.gettempdir())) / "test.jpg"
     assert created_file.exists()
     file2 = (io.BytesIO(b"abcdef"), "test2.jpg")
     ret = flask_client.post(
@@ -109,7 +109,7 @@ def test_file_upload_multiple(gui: Gui, helpers):
         content_type="multipart/form-data",
     )
     assert ret.status_code == 200
-    created_file = pathlib.Path(gui._get_app_config("upload_folder", tempfile.gettempdir())) / "test2.jpg"
+    created_file = pathlib.Path(gui._get_config("upload_folder", tempfile.gettempdir())) / "test2.jpg"
     assert created_file.exists()
     value = getattr(gui._bindings()._get_all_scopes()[sid], var_name)
     assert len(value) == 2

@@ -4,8 +4,8 @@ from taipy.gui.gui import Gui
 
 
 def test_multiple_instance():
-    gui1 = Gui(page="<|gui1|>")
-    gui2 = Gui(page="<|gui2|>")
+    gui1 = Gui("<|gui1|>")
+    gui2 = Gui("<|gui2|>")
     gui1.run(run_server=False)
     gui2.run(run_server=False)
     client1 = gui1._server.test_client()

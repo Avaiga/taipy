@@ -1,7 +1,7 @@
 Displays a value as a static text.
 
 Note that if order to create a `text` control, you don't need to specify the control name
-in the text template. See the documentation for [Controls](../user_controls.md) for more details.
+in the text template. See the documentation for [Controls](../controls.md) for more details.
 
 ## Details
 

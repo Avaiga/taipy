@@ -1,7 +1,7 @@
-from .config import AppConfig
+from .config import Config
 
 # Default config loaded by app.py
-app_config_default: AppConfig = {
+default_config: Config = {
     "port": 5000,
     "dark_mode": True,
     "debug": True,
