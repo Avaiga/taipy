@@ -139,7 +139,7 @@ class Gui:
         self.__bindings = _Bindings(self)
         self.__locals_bind: t.Dict[str, t.Any] = {}
 
-        self.__evaluator: _Evaluator = None # type: ignore
+        self.__evaluator: _Evaluator = None  # type: ignore
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
 
@@ -957,7 +957,7 @@ class Gui:
 
         # Save all local variables of the parent frame (usually __main__)
         if isinstance(kwargs.get("locals_bind"), dict):
-            self.__locals_bind = kwargs.get("locals_bind") # type: ignore
+            self.__locals_bind = kwargs.get("locals_bind")  # type: ignore
             warnings.warn("Caution: the Gui instance is using a custom 'locals_bind' setting.")
         else:
             self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals

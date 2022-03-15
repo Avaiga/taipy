@@ -247,10 +247,6 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    @staticmethod
-    def __default_str_adapter(x: t.Any):
-        return str(x)
-
     def get_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True):  # noqa: C901
         property_name = var_name if property_name is None else property_name
         lov = self.__get_list_of_(var_name)
