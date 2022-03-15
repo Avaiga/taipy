@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import json
 import os
 import pathlib
 import re
@@ -27,6 +28,7 @@ from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .partial import Partial
 from .renderers import _EmptyPage
+from .renderers.jsonencoder import _TaipyJsonEncoder
 from .renderers._markdown import _TaipyMarkdownExtension
 from .server import _Server
 from .state import State
@@ -133,13 +135,17 @@ class Gui:
         self._config = _Config()
         self.__content_accessor = None
         self._accessors = _DataAccessors()
-        self.__state: State = None
+        self.__state: t.Optional[State] = None
         self.__bindings = _Bindings(self)
         self.__locals_bind: t.Dict[str, t.Any] = {}
 
-        self.__evaluator: _Evaluator = None
+        self.__evaluator: _Evaluator = None # type: ignore
         self.__adapter = _Adapter()
         self.__directory_name_of_pages: t.List[str] = []
+
+        # default actions
+        self.on_change: t.Optional[t.Callable] = None
+        self.on_action: t.Optional[t.Callable] = None
 
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
@@ -204,7 +210,7 @@ class Gui:
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
-                    message.get("name"),
+                    str(message.get("name")),
                     payload.get("value"),
                     message.get("propagate", True),
                     payload.get("relvar"),
@@ -212,7 +218,7 @@ class Gui:
             elif msg_type == _WsType.ACTION.value:
                 self.__on_action(message.get("name"), message.get("payload"))
             elif msg_type == _WsType.DATA_UPDATE.value:
-                self.__request_data_update(message.get("name"), message.get("payload"))
+                self.__request_data_update(str(message.get("name")), message.get("payload"))
             elif msg_type == _WsType.REQUEST_UPDATE.value:
                 self.__request_var_update(message.get("payload"))
             elif msg_type == _WsType.CLIENT_ID.value:
@@ -222,31 +228,23 @@ class Gui:
 
     def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
         # Check if Variable is a managed type
-        current_value = _getscopeattr_drill(self, self._get_hash_from_expr(var_name))
+        current_value = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(var_name))
         if isinstance(current_value, _TaipyData):
             return
         elif rel_var and isinstance(current_value, _TaipyLovValue):  # pragma: no cover
-            lov_holder = _getscopeattr_drill(self, self._get_hash_from_expr(rel_var))
+            lov_holder = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(rel_var))
             if isinstance(lov_holder, _TaipyLov):
                 if isinstance(value, list):
                     val = value
                 else:
                     val = [value]
-
-                def mapping(v):
-                    ret = v
-                    for elt in lov_holder.get():
-                        elt_v = self._run_adapter_for_var(lov_holder.get_name(), elt, id_only=True)
-                        if v == elt_v or (isinstance(v, str) and v == str(elt_v)):
-                            ret = elt
-                            break
-                    return ret
-
-                ret_val = map(mapping, val)
-                if isinstance(value, list):
-                    value = list(ret_val)
+                elt_4_ids = self.__adapter._get_elt_per_ids(lov_holder.get_name(), lov_holder.get())
+                ret_val = [elt_4_ids.get(x, x) for x in val]
+                if not isinstance(value, list):
+                    if ret_val:
+                        value = ret_val[0]
                 else:
-                    value = next(ret_val)
+                    value = ret_val
 
         elif isinstance(current_value, _TaipyBase):
             value = current_value.cast_value(value)
@@ -255,7 +253,7 @@ class Gui:
     def _update_var(self, var_name: str, value: t.Any, propagate=True, holder: _TaipyBase = None) -> None:
         if holder:
             var_name = holder.get_name()
-        hash_expr = self._get_hash_from_expr(var_name)
+        hash_expr = self.__evaluator.get_hash_from_expr(var_name)
         modified_vars = set([hash_expr])
         # Use custom attrsetter function to allow value binding for _MapDict
         if propagate:
@@ -269,7 +267,7 @@ class Gui:
         if hasattr(self, "on_change") and callable(self.on_change):
             try:
                 argcount = self.on_change.__code__.co_argcount
-                args = [None for _ in range(argcount)]
+                args: t.List[t.Any] = [None for _ in range(argcount)]
                 if argcount > 0:
                     args[0] = self.__state
                 if argcount > 1:
@@ -381,13 +379,25 @@ class Gui:
                         newvalue = ret_value
                 elif isinstance(newvalue, _TaipyLov):
                     newvalue = [
-                        self._run_adapter_for_var(newvalue.get_name(), elt, str(idx))
-                        for idx, elt in enumerate(newvalue.get())
+                        self.__adapter._run_for_var(newvalue.get_name(), elt)
+                        for elt in newvalue.get()
                     ]
                 elif isinstance(newvalue, _TaipyLovValue):
-                    newvalue = self._run_adapter_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
+                    if isinstance(newvalue.get(), list):
+                        newvalue = [
+                            self.__adapter._run_for_var(newvalue.get_name(), elt, id_only=True)
+                            for elt in newvalue.get()
+                        ]
+                    else:
+                        newvalue = self.__adapter._run_for_var(newvalue.get_name(), newvalue.get(), id_only=True)
                 if isinstance(newvalue, (dict, _MapDict)):
                     continue  # this var has no transformer
+                with warnings.catch_warnings(record=True) as w:
+                    warnings.resetwarnings()
+                    json.dumps(newvalue, cls=_TaipyJsonEncoder)
+                    if len(w):
+                        # do not send data that is not serializable
+                        continue
                 ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
@@ -563,9 +573,6 @@ class Gui:
     def _re_evaluate_expr(self, var_name: str) -> t.Set[str]:
         return self.__evaluator.re_evaluate_expr(self, var_name)
 
-    def _get_hash_from_expr(self, expr: str) -> str:
-        return self.__evaluator.get_hash_from_expr(expr)
-
     def _get_expr_from_hash(self, hash: str) -> str:
         return self.__evaluator.get_expr_from_hash(hash)
 
@@ -578,31 +585,25 @@ class Gui:
     def _is_expression(self, expr: str) -> bool:
         return self.__evaluator._is_expression(expr)
 
-    def _fetch_expression_list(self, expr: str) -> t.List:
-        return self.__evaluator._fetch_expression_list(expr)
-
     # Proxy methods for Adapter
     def _add_adapter_for_type(self, type_name: str, adapter: t.Callable) -> None:
-        self.__adapter._add_adapter_for_type(type_name, adapter)
+        self.__adapter._add_for_type(type_name, adapter)
 
     def _add_type_for_var(self, var_name: str, type_name: str) -> None:
         self.__adapter._add_type_for_var(var_name, type_name)
 
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[t.Callable]:
-        return self.__adapter._get_adapter_for_type(type_name)
-
-    def _run_adapter_for_var(self, var_name: str, value: t.Any, index: t.Optional[str] = None, id_only=False) -> t.Any:
-        return self.__adapter._run_adapter_for_var(var_name, value, index, id_only)
+        return self.__adapter._get_for_type(type_name)
 
     def _run_adapter(
-        self, adapter: t.Callable, value: t.Any, var_name: str, index: t.Optional[str], id_only=False
+        self, adapter: t.Callable, value: t.Any, var_name: str, id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
-        return self.__adapter._run_adapter(adapter, value, var_name, index, id_only)
+        return self.__adapter._run(adapter, value, var_name, id_only)
 
     def _get_valid_adapter_result(
-        self, value: t.Any, index: t.Optional[str], id_only=False
+        self, value: t.Any, id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
-        return self.__adapter._get_valid_adapter_result(value, index, id_only)
+        return self.__adapter._get_valid_result(value, id_only)
 
     def _is_ui_blocked(self):
         return _getscopeattr(self, Gui.__UI_BLOCK_NAME, False)
@@ -848,7 +849,7 @@ class Gui:
 
     def _download(self, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
         content_str = self._get_content("Gui.download", content, False)
-        self._send_ws_download(content_str, name, on_action)
+        self._send_ws_download(content_str, str(name), str(on_action))
 
     def _notify(
         self,
@@ -956,7 +957,7 @@ class Gui:
 
         # Save all local variables of the parent frame (usually __main__)
         if isinstance(kwargs.get("locals_bind"), dict):
-            self.__locals_bind = kwargs.get("locals_bind")
+            self.__locals_bind = kwargs.get("locals_bind") # type: ignore
             warnings.warn("Caution: the Gui instance is using a custom 'locals_bind' setting.")
         else:
             self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals

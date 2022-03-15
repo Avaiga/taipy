@@ -108,13 +108,13 @@ can use the following fragment.
     === "Markdown"
 
         ```
-        <|{user_sel}|selector|lov={users}|type=User|adapter=lambda u: (u.id, u.name)|>
+        <|{user_sel}|selector|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:selector lov="{users}" type="User" adapter="lambda u: (u.id, u.name)">{user_sel}</taipy:selector>
+        <taipy:selector lov="{users}" type="User" adapter="{lambda u: (u.id, u.name)}">{user_sel}</taipy:selector>
         ```
 
 In this example, we are using the Python list _users_ as the selector's _list of values_.
