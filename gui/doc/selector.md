@@ -66,7 +66,7 @@ You can add a filter input field that lets you display only strings that match t
 
 ### Display a list of tuples
 
-A selector control that returns an id while selecting a label or Icon^.
+A selector control that returns an id while selecting a label or `Icon^`.
 
 !!! example "Page content"
 

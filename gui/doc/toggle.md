@@ -1,4 +1,4 @@
-A serie of toggle buttons that the user can select.
+A series of toggle buttons that the user can select.
 
 ## Details
 
@@ -28,7 +28,7 @@ You can create a list of toggle buttons from a series of strings:
 
 ### Unselect value
 
-In a serie of toggle buttons, the user can unselect a button (no value is selected.
+In a toggle control, all buttons might be unselected. Therefore there is no value selected.
 In that case, the value of the property _unselected_value_ is assigned if specified.
 
 !!! example "Page content"
@@ -47,7 +47,7 @@ In that case, the value of the property _unselected_value_ is assigned if specif
 
 ### Display a list of tuples
 
-A toggle control that returns an id while selecting a label or Icon^.
+A toggle control that returns an id while selecting a label or `Icon^`.
 
 !!! example "Page content"
 
@@ -89,7 +89,7 @@ can use the following fragment.
     === "Markdown"
 
         ```
-        <|{user_sel}|toggle|lov={users}|type=User|adapter=lambda u: (u.id, u.name)|>
+        <|{user_sel}|toggle|lov={users}|type=User|adapter={lambda u: (u.id, u.name)}|>
         ```
   
     === "HTML"

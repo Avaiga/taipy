@@ -49,7 +49,7 @@ You can add a filter input field that lets you display only strings that match t
 
 ### Display a list of tuples
 
-A tree control that returns an id while selecting a label or Icon^.
+A tree control that returns an id while selecting a label or `Icon^`.
 
 !!! example "Page content"
 
@@ -86,12 +86,12 @@ You can add a filter input field that lets you display only strings that match t
 
 ### Manage expanded nodes
 
-The property _expanded_ helps to manage the state of the nodes.
+The property _expanded_ must be used to control the expanded/collapse state of the nodes.
 By default, the user can expand or collapse nodes.
-If _expanded_ is set to False, there can be only one expanded node at any given level of the tree.
-ie if a node is expanded at a certain level and the user click on another node at the same level, the first node will be automatically collapsed.
+If _expanded_ is set to False, there can be only one expanded node at any given level of the tree: 
+if a node is expanded at a certain level and the user click on another node at the same level, the first node will be automatically collapsed.
 
-The _expanded_ property can also hold a list of ids that will be automatically expanded.
+The _expanded_ property can also hold a list of ids that are expanded.
 
 !!! example "Page content"
 
@@ -192,9 +192,9 @@ can use the following fragment.
         <taipy:tree lov="{users}" value="{user_sel}" />
         ```
 
-### Display a list of dict with buil-in adapter
+### Display a list of dictionary with built-in adapter
 
-Dictionnaries with keys _id_, _label_ and _children_ (as a list) can de dealt directly by the built-in _lov_ adapter.
+Dictionaries with keys _id_, _label_ and _children_ (as a list) can de dealt directly by the built-in _lov_ adapter.
 
 Assuming your Python code has created a list of object:
 ```py3
