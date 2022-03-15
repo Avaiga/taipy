@@ -153,3 +153,73 @@ _User_) into a string that can be displayed, we are using an _adapter_: a functi
 an object, whose type must be provided to the _type_ property, to a tuple. The first element
 of the tuple is used to reference the selection (therefore those elements should be unique
 among all the items) and the second element is the string that turns out to be displayed.
+
+
+### Display a list of objects with buil-in adapter
+
+Objects with attributes _id_, _label_ and _children_ (as a list) can de dealt directly by the built-in _lov_ adapter.
+
+Assuming your Python code has created a list of object:
+```py3
+class User:
+    def __init__(self, id, label, birth_year, children):
+        self.id, self.label, self.birth_year, self.children = (id, label, birth_year, children)
+
+users = [
+    User(231, "Johanna", 1987, [User(231.1, "Johanna's son", 2006, [])]),
+    User(125, "John", 1979, []),
+    User(4,   "Peter", 1968, []),
+    User(31,  "Mary", 1974, [])
+    ]
+
+user_sel = users[2]
+```
+
+If you want to create a tree control that lets you pick a specific user, you
+can use the following fragment.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{user_sel}|tree|lov={users}|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:tree lov="{users}" value="{user_sel}" />
+        ```
+
+### Display a list of dict with buil-in adapter
+
+Dictionnaries with keys _id_, _label_ and _children_ (as a list) can de dealt directly by the built-in _lov_ adapter.
+
+Assuming your Python code has created a list of object:
+```py3
+users = [
+    {"id": "231", "label": "Johanna", "year": 1987, "children": [{"id": "231.1", "label": "Johanna's son", "year": 2006)]},
+    {"id": "125", "label": "John", "year": 1979, "children": []},
+    {"id": "4", "label": "Peter", "year": 1968, "children": []},
+    {"id": "31", "label": "Mary", "year": 1974, "children": []}
+    ]
+
+user_sel = users[2]
+```
+Displaying the data would be as simple as:
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{user_sel}|tree|lov={users}|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:tree lov="{users}" value="{user_sel}" />
+        ```
+
