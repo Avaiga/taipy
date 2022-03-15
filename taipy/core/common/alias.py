@@ -1,14 +1,14 @@
 from typing import NewType
 
 PipelineId = NewType("PipelineId", str)
-""" Type representing a pipeline identifier."""
+PipelineId.__doc__ = """Type that holds a `Pipeline^` identifier."""
 ScenarioId = NewType("ScenarioId", str)
-""" Type representing a scenario identifier."""
+ScenarioId.__doc__ = """Type that holds a `Scenario^` identifier."""
 TaskId = NewType("TaskId", str)
-""" Type representing a task identifier."""
+TaskId.__doc__ = """Type that holds a `Task^` identifier."""
 JobId = NewType("JobId", str)
-""" Type representing a job identifier."""
+JobId.__doc__ = """Type that holds a `Job^` identifier."""
 CycleId = NewType("CycleId", str)
-""" Type representing a cycle identifier."""
+CycleId.__doc__ = """Type that holds a `Cycle^` identifier."""
 DataNodeId = NewType("DataNodeId", str)
-""" Type representing a data node identifier."""
+DataNodeId.__doc__ = """Type that holds a `DataNode^` identifier."""
