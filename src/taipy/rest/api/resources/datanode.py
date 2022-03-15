@@ -10,6 +10,7 @@ from taipy.core.data._data_manager import _DataManager as DataManager
 from taipy.core.data.operator import Operator
 from taipy.core.exceptions.exceptions import NonExistingDataNode
 
+from ...commons.to_from_model import to_model
 from ...config import TAIPY_SETUP_FILE
 from ..schemas import (
     CSVDataNodeConfigSchema,
@@ -26,6 +27,8 @@ ds_schema_map = {
     "in_memory": InMemoryDataNodeConfigSchema,
     "sql": SQLDataNodeConfigSchema,
 }
+
+REPOSITORY = "data"
 
 
 class DataNodeResource(Resource):
@@ -79,9 +82,7 @@ class DataNodeResource(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
+            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
             self.module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(self.module)
 
@@ -90,19 +91,15 @@ class DataNodeResource(Resource):
         manager = DataManager()
         datanode = manager._get(datanode_id)
         if not datanode:
-            return make_response(
-                jsonify({"message": f"DataNode {datanode_id} not found"}), 404
-            )
-        return {"datanode": schema.dump(datanode)}
+            return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
+        return {"datanode": schema.dump(to_model(REPOSITORY, datanode, class_map=datanode.storage_type()))}
 
     def delete(self, datanode_id):
         try:
             manager = DataManager()
             manager._delete(datanode_id)
         except NonExistingDataNode:
-            return make_response(
-                jsonify({"message": f"DataNode {datanode_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
         return {"msg": f"datanode {datanode_id} deleted"}
 
 
@@ -153,9 +150,7 @@ class DataNodeList(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
+            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
             self.module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(self.module)
 
@@ -165,7 +160,9 @@ class DataNodeList(Resource):
     def get(self):
         schema = DataNodeSchema(many=True)
         manager = DataManager()
-        datanodes = manager._get_all()
+        datanodes = [
+            to_model(REPOSITORY, datanode, class_map=datanode.storage_type()) for datanode in manager._get_all()
+        ]
         return schema.dump(datanodes)
 
     def post(self):
@@ -218,9 +215,7 @@ class DataNodeReader(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
+            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
             self.module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(self.module)
 
@@ -249,9 +244,7 @@ class DataNodeReader(Resource):
                 data = list(data)
             return {"data": data}
         except NonExistingDataNode:
-            return make_response(
-                jsonify({"message": f"DataNode {datanode_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
 
 
 class DataNodeWriter(Resource):
@@ -291,6 +284,4 @@ class DataNodeWriter(Resource):
             datanode.write(data)
             return {"message": "DataNode data successfully updated"}
         except NonExistingDataNode:
-            return make_response(
-                jsonify({"message": f"DataNode {datanode_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)

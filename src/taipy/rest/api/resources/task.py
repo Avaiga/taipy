@@ -8,8 +8,12 @@ from taipy.core.data._data_manager import _DataManager as DataManager
 from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.task.task import Task
 from taipy.core.task._task_manager import _TaskManager as TaskManager
+
+from ...commons.to_from_model import to_model
 from ...config import TAIPY_SETUP_FILE
 from ..schemas import TaskSchema
+
+REPOSITORY = "task"
 
 
 class TaskResource(Resource):
@@ -69,16 +73,14 @@ class TaskResource(Resource):
         task = manager._get(task_id)
         if not task:
             return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
-        return {"task": schema.dump(task)}
+        return {"task": schema.dump(to_model(REPOSITORY, task))}
 
     def delete(self, task_id):
         try:
             manager = TaskManager()
             manager._delete(task_id)
         except ModelNotFound:
-            return make_response(
-                jsonify({"message": f"DataNode {task_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {task_id} not found"}), 404)
 
         return {"msg": f"task {task_id} deleted"}
 
@@ -130,9 +132,7 @@ class TaskList(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
+            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
             self.module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(self.module)
 
@@ -142,7 +142,7 @@ class TaskList(Resource):
     def get(self):
         schema = TaskSchema(many=True)
         manager = TaskManager()
-        tasks = manager._get_all()
+        tasks = [to_model(REPOSITORY, task) for task in manager._get_all()]
         return schema.dump(tasks)
 
     def post(self):
@@ -160,7 +160,7 @@ class TaskList(Resource):
 
             return {
                 "msg": "task created",
-                "task": schema.dump(task),
+                "task": schema.dump(to_model(REPOSITORY, task)),
             }, 201
         except AttributeError:
             return {"msg": f"Config id {config_id} not found"}, 404
@@ -169,9 +169,7 @@ class TaskList(Resource):
         data_manager = DataManager()
         return Task(
             task_schema.get("config_id"),
-            _load_fct(
-                task_schema.get("function_module"), task_schema.get("function_name")
-            ),
+            _load_fct(task_schema.get("function_module"), task_schema.get("function_name")),
             [data_manager._get(ds) for ds in task_schema.get("input_ids")],
             [data_manager._get(ds) for ds in task_schema.get("output_ids")],
             task_schema.get("parent_id"),
