@@ -34,13 +34,13 @@ You can specify what bounds the value should be restrained to:
     === "Markdown"
 
         ```
-        <|{value}|slider|min=1|max=100|>
+        <|{value}|slider|min=1|max=10|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:slider min="1" max="100">{value}</taipy:slider>
+        <taipy:slider min="1" max="10">{value}</taipy:slider>
         ```
 
 ### Changing orientation

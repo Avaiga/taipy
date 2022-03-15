@@ -448,7 +448,7 @@ class _Factory:
             element_name="TreeView",
             attributes=attrs,
         )
-        .set_value_and_default(with_default=False)
+        .set_value_and_default(with_default=False, var_type=_AttributeType.lov_value)
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_attributes(

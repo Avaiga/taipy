@@ -1,3 +1,4 @@
+from inspect import isclass
 import json
 import numbers
 import re
@@ -129,7 +130,7 @@ class _Builder:
                 ret[m.group(1)] = self.__attributes.get(key)
         return ret
 
-    def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[str]:
+    def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[t.Optional[str]]:
         names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
         return [self.__attributes.get(name) for name in names]
 
@@ -246,20 +247,18 @@ class _Builder:
     def __set_react_attribute(self, name: str, value: t.Any):
         return self.set_attribute(name, "{!" + (str(value).lower() if isinstance(value, bool) else str(value)) + "!}")
 
-    @staticmethod
-    def __default_str_adapter(x: t.Any):
-        return str(x)
-
     def get_adapter(self, var_name: str, property_name: t.Optional[str] = None, multi_selection=True):  # noqa: C901
         property_name = var_name if property_name is None else property_name
         lov = self.__get_list_of_(var_name)
         if isinstance(lov, list):
             adapter = self.__attributes.get("adapter")
+            if adapter and isinstance(adapter, str):
+                adapter = self.__gui._get_user_function(adapter)
             if adapter and not callable(adapter):
                 warnings.warn("'adapter' property value is invalid")
                 adapter = None
             var_type = self.__attributes.get("type")
-            if isinstance(var_type, t.Type):  # type: ignore
+            if isclass(var_type):
                 var_type = var_type.__name__
             if not isinstance(var_type, str):
                 elt = None
@@ -272,7 +271,7 @@ class _Builder:
                         elt = value
                 else:
                     elt = lov[0]
-                var_type = type(elt).__name__ if elt is not None else None
+                var_type = type(elt).__name__
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
             lov_name = self.__hashes.get(var_name)
@@ -290,25 +289,19 @@ class _Builder:
             if adapter is not None:
                 self.__gui._add_adapter_for_type(var_type, adapter)
 
-            if adapter is None:
-                adapter = _Builder.__default_str_adapter
             ret_list = []
             if len(lov) > 0:
-                ret = self.__gui._get_valid_adapter_result(lov[0], index="0")
-                if ret is None:  # lov list is not a list of tuple(id, label)
-                    for idx, elt in enumerate(lov):
-                        ret = self.__gui._run_adapter(adapter, elt, adapter.__name__, str(idx))
-                        if ret is not None:
-                            ret_list.append(ret)
-                else:
-                    ret_list = lov
+                for elt in lov:
+                    ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")
+                    if ret is not None:
+                        ret_list.append(ret)
             self.__attributes["default_" + property_name] = ret_list
 
             ret_list = []
             value = self.__attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self.__gui._run_adapter(adapter, val, adapter.__name__, "-1", id_only=True)
+                ret = self.__gui._run_adapter(adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
@@ -316,7 +309,7 @@ class _Builder:
             else:
                 ret_val = ret_list[0] if len(ret_list) else ""
                 if ret_val == "-1" and self.__attributes.get("unselected_value") is not None:
-                    ret_val = self.__attributes.get("unselected_value")
+                    ret_val = str(self.__attributes.get("unselected_value", ""))
                 self.__set_default_value("value", ret_val)
         return self
 

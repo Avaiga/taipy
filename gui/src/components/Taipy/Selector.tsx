@@ -179,105 +179,101 @@ const Selector = (props: SelTreeProps) => {
     const dropdownValue = (dropdown &&
         (multiple ? selectedValue : selectedValue.length > 0 ? selectedValue[0] : "")) as string[];
 
-    return (
+    return dropdown ? (
+        <FormControl sx={controlSx} className={className}>
+            <Tooltip title={hover || ""}>
+                <Select
+                    multiple={multiple}
+                    value={dropdownValue}
+                    onChange={handleChange}
+                    input={<OutlinedInput />}
+                    renderValue={(selected) => (
+                        <Box sx={renderBoxSx}>
+                            {lovList
+                                .filter((it) =>
+                                    Array.isArray(selected) ? selected.includes(it.id) : selected === it.id
+                                )
+                                .map((item, idx) => {
+                                    if (multiple) {
+                                        const chipProps = {} as Record<string, unknown>;
+                                        if (typeof item.item === "string") {
+                                            chipProps.label = item.item;
+                                        } else {
+                                            chipProps.label = item.item.text || "";
+                                            chipProps.avatar = <Avatar src={item.item.path} />;
+                                        }
+                                        return (
+                                            <Chip
+                                                key={item.id}
+                                                {...chipProps}
+                                                onDelete={handleDelete}
+                                                data-id={item.id}
+                                                onMouseDown={doNotPropagateEvent}
+                                            />
+                                        );
+                                    } else if (idx === 0) {
+                                        return typeof item.item === "string" ? (
+                                            item.item
+                                        ) : (
+                                            <LovImage item={item.item} />
+                                        );
+                                    } else {
+                                        return null;
+                                    }
+                                })}
+                        </Box>
+                    )}
+                    MenuProps={getMenuProps(width, height)}
+                >
+                    {lovList.map((item) => (
+                        <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
+                            {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </Tooltip>
+        </FormControl>
+    ) : (
         <Box id={id} sx={boxSx} className={className}>
             <Tooltip title={hover || ""}>
-                {dropdown ? (
-                    <FormControl sx={controlSx}>
-                        <Select
-                            multiple={multiple}
-                            value={dropdownValue}
-                            onChange={handleChange}
-                            input={<OutlinedInput />}
-                            renderValue={(selected) => (
-                                <Box sx={renderBoxSx}>
-                                    {lovList
-                                        .filter((it) =>
-                                            Array.isArray(selected) ? selected.includes(it.id) : selected === it.id
-                                        )
-                                        .map((item, idx) => {
-                                            if (multiple) {
-                                                const chipProps = {} as Record<string, unknown>;
-                                                if (typeof item.item === "string") {
-                                                    chipProps.label = item.item;
-                                                } else {
-                                                    chipProps.label = item.item.text || "";
-                                                    chipProps.avatar = <Avatar src={item.item.path} />;
-                                                }
-                                                return (
-                                                    <Chip
-                                                        key={item.id}
-                                                        {...chipProps}
-                                                        onDelete={handleDelete}
-                                                        data-id={item.id}
-                                                        onMouseDown={doNotPropagateEvent}
-                                                    />
-                                                );
-                                            } else if (idx === 0) {
-                                                return typeof item.item === "string" ? (
-                                                    item.item
-                                                ) : (
-                                                    <LovImage item={item.item} />
-                                                );
-                                            } else {
-                                                return null;
-                                            }
-                                        })}
-                                </Box>
+                <Paper sx={paperSx}>
+                    <Box>
+                        {filter && (
+                            <TextField
+                                margin="dense"
+                                placeholder="Search field"
+                                value={searchValue}
+                                onChange={handleInput}
+                                disabled={!active}
+                            />
+                        )}
+                    </Box>
+                    <List sx={listSx}>
+                        {lovList
+                            .filter((elt) => showItem(elt, searchValue))
+                            .map((elt) =>
+                                multiple ? (
+                                    <MultipleItem
+                                        key={elt.id}
+                                        value={elt.id}
+                                        item={elt.item}
+                                        selectedValue={selectedValue}
+                                        clickHandler={clickHandler}
+                                        disabled={!active}
+                                    />
+                                ) : (
+                                    <SingleItem
+                                        key={elt.id}
+                                        value={elt.id}
+                                        item={elt.item}
+                                        selectedValue={selectedValue}
+                                        clickHandler={clickHandler}
+                                        disabled={!active}
+                                    />
+                                )
                             )}
-                            MenuProps={getMenuProps(width, height)}
-                        >
-                            {lovList.map((item) => (
-                                <MenuItem
-                                    key={item.id}
-                                    value={item.id}
-                                    style={getStyles(item.id, selectedValue, theme)}
-                                >
-                                    {typeof item.item === "string" ? item.item : <LovImage item={item.item as Icon} />}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                ) : (
-                    <Paper sx={paperSx}>
-                        <Box>
-                            {filter && (
-                                <TextField
-                                    margin="dense"
-                                    placeholder="Search field"
-                                    value={searchValue}
-                                    onChange={handleInput}
-                                    disabled={!active}
-                                />
-                            )}
-                        </Box>
-                        <List sx={listSx}>
-                            {lovList
-                                .filter((elt) => showItem(elt, searchValue))
-                                .map((elt) =>
-                                    multiple ? (
-                                        <MultipleItem
-                                            key={elt.id}
-                                            value={elt.id}
-                                            item={elt.item}
-                                            selectedValue={selectedValue}
-                                            clickHandler={clickHandler}
-                                            disabled={!active}
-                                        />
-                                    ) : (
-                                        <SingleItem
-                                            key={elt.id}
-                                            value={elt.id}
-                                            item={elt.item}
-                                            selectedValue={selectedValue}
-                                            clickHandler={clickHandler}
-                                            disabled={!active}
-                                        />
-                                    )
-                                )}
-                        </List>
-                    </Paper>
-                )}
+                    </List>
+                </Paper>
             </Tooltip>
         </Box>
     );
