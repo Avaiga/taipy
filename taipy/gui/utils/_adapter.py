@@ -22,11 +22,9 @@ class _Adapter:
         return self.__adapter_for_type.get(type_name)
 
     def _run_for_var(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
-        adapter = self.__get_for_var(var_name, value)
-        if adapter:
-            ret = self._run(adapter, value, var_name, id_only)
-            if ret is not None:
-                return ret
+        ret = self._run(self.__get_for_var(var_name, value), value, var_name, id_only)
+        if ret is not None:
+            return ret
         return value
 
     def __get_for_var(self, var_name: str, value: t.Any) -> t.Optional[t.Callable]:
@@ -56,12 +54,16 @@ class _Adapter:
         return dict_res
 
     def _run(
-        self, adapter: t.Callable, value: t.Any, var_name: str, id_only=False
+        self, adapter: t.Optional[t.Callable], value: t.Any, var_name: str, id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
         if value is None:
             return None
         try:
-            result = adapter(value if not isinstance(value, _MapDict) else value._dict)
+            result = value if not isinstance(value, _MapDict) else value._dict
+            if adapter:
+                result = adapter(result)
+            elif isinstance(result, str):
+                return result
             result = self._get_valid_result(result, id_only)
             if result is None:
                 warnings.warn(
@@ -75,10 +77,10 @@ class _Adapter:
             warnings.warn(f"Can't run adapter for {var_name}: {e}")
         return None
 
-    def __on_tree(self, adapter: t.Callable, tree: t.List[t.Any]):
+    def __on_tree(self, adapter: t.Optional[t.Callable], tree: t.List[t.Any]):
         ret_list = []
-        for idx, elt in enumerate(tree):
-            ret = self._run(adapter, elt, adapter.__name__)
+        for elt in tree:
+            ret = self._run(adapter, elt, adapter.__name__ if adapter else "adapter")
             if ret is not None:
                 ret_list.append(ret)
         return ret_list

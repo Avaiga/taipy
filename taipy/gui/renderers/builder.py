@@ -293,25 +293,19 @@ class _Builder:
             if adapter is not None:
                 self.__gui._add_adapter_for_type(var_type, adapter)
 
-            if adapter is None:
-                adapter = _Builder.__default_str_adapter
             ret_list = []
             if len(lov) > 0:
-                ret = self.__gui._get_valid_adapter_result(lov[0])
-                if ret is None:  # lov list is not a list of tuple(id, label)
-                    for elt in lov:
-                        ret = self.__gui._run_adapter(adapter, elt, adapter.__name__)
-                        if ret is not None:
-                            ret_list.append(ret)
-                else:
-                    ret_list = lov
+                for elt in lov:
+                    ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")
+                    if ret is not None:
+                        ret_list.append(ret)
             self.__attributes["default_" + property_name] = ret_list
 
             ret_list = []
             value = self.__attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self.__gui._run_adapter(adapter, val, adapter.__name__, id_only=True)
+                ret = self.__gui._run_adapter(adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:

@@ -596,7 +596,7 @@ class Gui:
         return self.__adapter._get_for_type(type_name)
 
     def _run_adapter(
-        self, adapter: t.Callable, value: t.Any, var_name: str, id_only=False
+        self, adapter: t.Optional[t.Callable], value: t.Any, var_name: str, id_only=False
     ) -> t.Union[t.Tuple[str, ...], str, None]:
         return self.__adapter._run(adapter, value, var_name, id_only)
 
