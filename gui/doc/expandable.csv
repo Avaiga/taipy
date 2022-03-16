@@ -2,4 +2,5 @@
 *value,str,None,Title of this block element.
 expanded,bool,TRUE,"If <i>True</i>, the block is expanded, and the content is displayed.
 If <i>False</i>, the block is collapsed and its content is hidden."
+>partial,,,
 >shared,,,

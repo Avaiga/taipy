@@ -59,3 +59,39 @@ There is a simplified Markdown syntax to create a `part`, where the element name
         ```
 
 If the _render_ property is bound to a Boolean value, the `part` will show or hide its elements according to the value of the bound variable.
+
+### Part with page
+
+The content of the part can be specified as an existing page name using the _page_ property.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|part|page=page_name|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:part page="page_name"/>
+        ```
+
+### Part with partial
+
+The content of the part can be specified as a `Partial^` instance using the _partial_ property.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|part|partial={partial}|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:part partial="{partial}" />
+        ```
