@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
@@ -565,8 +565,8 @@ def configure_generic_data_node(
     id: str,
     read_fct: Callable = None,
     write_fct: Callable = None,
-    read_fct_params: Union[Dict, List] = None,
-    write_fct_params: Union[Dict, List] = None,
+    read_fct_params: Tuple = None,
+    write_fct_params: Tuple = None,
     scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
     **properties,
 ):
