@@ -15,7 +15,7 @@ class GlobalAppConfig:
             conjunction with the `root_folder` field. That means the storage path is <root_folder><storage_folder>
             (The Default path is "./taipy/.data/").
         clean_entities_enabled (bool): Boolean field to activate/deactivate the clean entities feature. Default: false
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        **properties: A dictionary of additional properties.
     """
 
     _ROOT_FOLDER_KEY = "root_folder"

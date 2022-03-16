@@ -42,7 +42,7 @@ class DataNode(_Entity):
             timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
         edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
-        properties (dict[str, Any]): A dictionary of additional properties.
+        kwargs: A dictionary of additional properties.
     """
 
     _ID_PREFIX = "DATANODE"

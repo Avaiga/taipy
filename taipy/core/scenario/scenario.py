@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Set
 
 from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
@@ -18,7 +18,8 @@ class Scenario(_Entity):
     """
     Represents an instance of the business case to solve.
 
-    It holds a list of `Pipeline^`s to submit for execution in order to solve the business case.
+    It holds a list of pipelines (instances of `Pipeline^` class) to submit for execution in order to solve the
+    business case.
 
     Attributes:
         config_id (str): The identifier of the `ScenarioConfig^`.

@@ -1,5 +1,4 @@
 import pathlib
-from copy import copy
 from datetime import datetime, timedelta
 from pydoc import locate
 from typing import Dict

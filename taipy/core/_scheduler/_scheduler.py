@@ -40,7 +40,7 @@ class _Scheduler(_AbstractScheduler):
              pipeline (`Pipeline^`): The pipeline to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : The boolean parameter to enforce execution of the pipeline's tasks even if their output
-             data nodes are cached.
+                data nodes are cached.
 
         Returns:
             The created Jobs.
@@ -58,8 +58,8 @@ class _Scheduler(_AbstractScheduler):
         Parameters:
              task (`Task^`): The task to submit for execution.
              callbacks: The optional list of functions that should be executed on job status change.
-             force (bool) : The boolean parameter to enforce execution of the task even if its output data nodes are
-             cached.
+             force (bool): The boolean parameter to enforce execution of the task even if its output data nodes are
+                cached.
 
         Returns:
             The created `Job^`.
@@ -81,10 +81,10 @@ class _Scheduler(_AbstractScheduler):
 
     @staticmethod
     def is_blocked(obj: Union[Task, Job]) -> bool:
-        """Returns True if the execution of the job or the task is blocked by the execution of another job.
+        """Returns True if the execution of the `Job^` or the `Task^` is blocked by the execution of another `Job^`.
 
-        Args:
-             obj: Task or Job.
+        Parameters:
+             obj (`Task^` or `Job^`): The job or task entity to run.
 
         Returns:
              True if one of its input data nodes is blocked.

@@ -25,6 +25,8 @@ class GenericDataNode(DataNode):
             False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
             at least contain an entry for "read_fct" or "write_fct" representing the read and write functions.
+            Entries for "read_fct_params" and "write_fct_params" respectively represent the eventual parameters of
+            the "read_fct" or "write_fct" functions.
     """
 
     __STORAGE_TYPE = "generic"

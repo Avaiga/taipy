@@ -17,8 +17,8 @@ from taipy.core.task.task import Task
 
 class Pipeline(_Entity):
     """
-    Holds a list of `Task^`s and additional arguments representing a set of data processing elements
-    connected in series.
+    Holds a list of `Task^`s and additional attributes representing a set of data processing elements
+    connected as a direct acyclic graph.
 
     Attributes:
         config_id (str): The identifier of the `PipelineConfig^`.

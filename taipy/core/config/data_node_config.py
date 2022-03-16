@@ -8,7 +8,7 @@ from taipy.core.data.scope import Scope
 
 class DataNodeConfig:
     """
-    Holds all the configuration fields needed to instantiate actual data nodes from the `DataNodeConfig`.
+    Configuration fields needed to instantiate an actual `DataNode^` from the DataNodeConfig.
 
     A Data Node config is made to be used as a generator for actual data nodes. It holds configuration information
     needed to create an actual data node.
@@ -18,9 +18,9 @@ class DataNodeConfig:
         storage_type (str): Storage type of the data nodes created from the data node config. The possible values
             are : "csv", "excel", "pickle", "sql", "generic" and "In_memory". The default value is "pickle".
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
-        scope (Scope):  The usage scope of the data nodes created from the data node config. The default value is
+        scope (`Scope^`):  The `Scope^` of the data nodes instantiated from the data node config. The default value is
             SCENARIO.
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        **properties: A dictionary of additional properties.
     """
 
     _STORAGE_TYPE_KEY = "storage_type"

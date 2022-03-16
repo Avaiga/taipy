@@ -8,12 +8,12 @@ from taipy.core.config.task_config import TaskConfig
 
 class PipelineConfig:
     """
-    Holds all the configuration fields needed to instantiate actual pipelines from the `PipelineConfig`.
+    Configuration fields needed to instantiate an actual `Pipeline^` from the PipelineConfig.
 
     Attributes:
         id (str): Identifier of the pipeline configuration. It must be a valid Python variable name.
-        task_configs (list): List of task configs. The default value is [].
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        task_configs (`TaskConfig^` or List[`TaskConfig^`]): List of task configs. The default value is [].
+        **properties: A dictionary of additional properties.
     """
 
     _TASK_KEY = "tasks"

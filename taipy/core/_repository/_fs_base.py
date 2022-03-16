@@ -90,8 +90,8 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
     def _load_all(self) -> List[Entity]:
         return [self.__to_entity(f) for f in self._directory.glob("*.json")]
 
-    def _save(self, model):
-        model = self._to_model(model)
+    def _save(self, entity):
+        model = self._to_model(entity)
         self.__get_model(model.id, False).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=4, cls=_CustomEncoder)
         )

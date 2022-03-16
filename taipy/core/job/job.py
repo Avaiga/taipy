@@ -24,13 +24,13 @@ def _run_callbacks(fn):
 
 class Job(_Entity):
     """
-    Unique execution of a `Task^`.
+    An execution of a `Task^`.
 
-    A `Job` handles the status of the execution, contains raising exceptions during the execution, and notifies
+    A job handles the status of the execution, contains raising exceptions during the execution, and notifies
     subscriber when on status change.
 
     Attributes:
-        id (str): The identifier of the Job.
+        id (str): The identifier of the job.
         task (`Task^`): The `Task^` of the job.
         force (bool): Enforce the job's execution whatever the output data nodes are in cache or not.
         status (`Status^`): The current `Status^` of the job.
@@ -148,7 +148,8 @@ class Job(_Entity):
         self.status = Status.SKIPPED
 
     def is_failed(self) -> bool:
-        """Returns true if the job failed.
+        """
+        Returns true if the job failed.
 
         Returns:
             True if the job has failed.
@@ -156,7 +157,8 @@ class Job(_Entity):
         return self.status == Status.FAILED
 
     def is_blocked(self) -> bool:
-        """Returns true if the job is blocked.
+        """
+        Returns true if the job is blocked.
 
         Returns:
             True if the job is blocked.
@@ -164,7 +166,8 @@ class Job(_Entity):
         return self.status == Status.BLOCKED
 
     def is_cancelled(self) -> bool:
-        """Returns true if the job is cancelled.
+        """
+        Returns true if the job is cancelled.
 
         Returns:
             True if the job is cancelled.
@@ -172,7 +175,8 @@ class Job(_Entity):
         return self.status == Status.CANCELLED
 
     def is_submitted(self) -> bool:
-        """Returns true if the job is submitted.
+        """
+        Returns true if the job is submitted.
 
         Returns:
             True if the job is submitted.
@@ -180,7 +184,8 @@ class Job(_Entity):
         return self.status == Status.SUBMITTED
 
     def is_completed(self) -> bool:
-        """Returns true if the job is completed.
+        """
+        Returns true if the job is completed.
 
         Returns:
             True if the job is completed.
@@ -188,7 +193,8 @@ class Job(_Entity):
         return self.status == Status.COMPLETED
 
     def is_skipped(self) -> bool:
-        """Returns true if the job is skipped.
+        """
+        Returns true if the job is skipped.
 
         Returns:
             True if the job is skipped.
@@ -196,7 +202,8 @@ class Job(_Entity):
         return self.status == Status.SKIPPED
 
     def is_running(self) -> bool:
-        """Returns true if the job is running.
+        """
+        Returns true if the job is running.
 
         Returns:
             True if the job is running.
@@ -204,7 +211,8 @@ class Job(_Entity):
         return self.status == Status.RUNNING
 
     def is_pending(self) -> bool:
-        """Returns true if the job is pending.
+        """
+        Returns true if the job is pending.
 
         Returns:
             True if the job is pending.
@@ -212,7 +220,8 @@ class Job(_Entity):
         return self.status == Status.PENDING
 
     def is_finished(self) -> bool:
-        """Returns true if the job is finished.
+        """
+        Returns true if the job is finished.
 
         Returns:
             True if the job is finished.
@@ -220,12 +229,13 @@ class Job(_Entity):
         return self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped()
 
     def on_status_change(self, *functions):
-        """Allows to be notified when the status of the job changes.
+        """
+        Allows to be notified when the status of the job changes.
 
         Job passing through multiple statuses (Submitted, pending, etc.) before being finished.
         You can be triggered on each change through this function unless for the `Submitted` status.
 
-        Args:
+        Parameters:
             functions: Callables that will be called on each status change.
         """
         functions = list(functions)

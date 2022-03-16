@@ -1,4 +1,3 @@
-"""Main module."""
 import os
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -43,7 +42,7 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
     Saves or updates the data node, task, job, pipeline, scenario or cycle given as parameter.
 
     Parameters:
-        entity (Union[`DataNode`, `Task`, `Pipeline`, `Scenario`, `Cycle`]): The entity to save.
+        entity (Union[`DataNode^`, `Task^`, `Job^`, `Pipeline^`, `Scenario^`, `Cycle^`]): The entity to save.
 
     """
     if isinstance(entity, Cycle):
@@ -65,7 +64,7 @@ def submit(entity: Union[Scenario, Pipeline], force: bool = False):
     All the tasks of the entity pipeline/scenario will be submitted for execution.
 
     Parameters:
-        entity (Union[`Scenario`, `Pipeline`]): The entity to submit.
+        entity (Union[`Scenario^`, `Pipeline^`]): The entity to submit.
         force (bool): Force execution even if the data nodes are in cache.
     """
     if isinstance(entity, Scenario):
@@ -81,13 +80,14 @@ def get(
     Gets an entity given the identifier as parameter.
 
     Parameters:
-        entity_id (Union[`TaskId`, `DataNodeId`, `PipelineId`, `ScenarioId`]): The identifier of the entity to get.
-            It must match the identifier pattern of one of the entities (task, data node, pipeline, scenario).
+        entity_id (Union[`TaskId^`, `DataNodeId^`, `PipelineId^`, `ScenarioId^`]): The identifier of the entity to get.
+            It must match the identifier pattern of one of the entities (`Task^`, `DataNode^`, `Pipeline^`,
+            `Scenario^`).
     Returns:
-        Union[`Task`, `DataNode`, `Pipeline`, `Scenario`, `Job`, `Cycle`]: The entity matching  the corresponding id.
-        None if no entity is found.
+        Union[`Task^`, `DataNode^`, `Pipeline^`, `Scenario^`, `Job^`, `Cycle^`]: The entity matching  the corresponding
+        id.None if no entity is found.
     Raises:
-        `ModelNotFound`: If `entity_id` does not match a correct entity id pattern.
+        `ModelNotFound^`: If _entity_id_ does not match a correct entity pattern.
     """
     if entity_id.startswith(_JobManager._ID_PREFIX):
         return _JobManager._get(JobId(entity_id))
@@ -109,7 +109,7 @@ def get_tasks() -> List[Task]:
     Returns the list of all existing tasks.
 
     Returns:
-        List[`Task`]: The list of tasks.
+        List[`Task^`]: The list of tasks.
     """
     return _TaskManager._get_all()
 
@@ -121,16 +121,16 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     Deletes the entity given as parameter and propagate the deletion. The deletion is propagated to a
     nested entity if the nested entity is not shared by another entity.
 
-    - If a `CycleId` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
-    - If a `ScenarioId` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
-    - If a `PipelineId` is provided, the nested tasks, data nodes, and jobs are deleted.
-    - If a `TaskId` is provided, the nested data nodes, and jobs are deleted.
+    - If a `CycleId^` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
+    - If a `ScenarioId^` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
+    - If a `PipelineId^` is provided, the nested tasks, data nodes, and jobs are deleted.
+    - If a `TaskId^` is provided, the nested data nodes, and jobs are deleted.
 
     Parameters:
-        entity_id (Union[`TaskId`, `DataNodeId`, `PipelineId`, `ScenarioId`, `JobId`, `CycleId`]): The id of the entity
-            to delete.
+        entity_id (Union[`TaskId^`, `DataNodeId^`, `PipelineId^`, `ScenarioId^`, `JobId^`, `CycleId^`]): The id of the
+        entity to delete.
     Raises:
-        `ModelNotFound`: No entity corresponds to entity_id
+        `ModelNotFound^`: No entity corresponds to entity_id
     """
     if entity_id.startswith(_JobManager._ID_PREFIX):
         return _JobManager._delete(_JobManager._get(JobId(entity_id)))  # type: ignore

@@ -11,16 +11,17 @@ from taipy.core.data.scope import Scope
 
 class Task(_Entity):
     """
-    Holds user function that will be executed, its inputs as data nodes and outputs as data nodes.
+    Holds a user function that will be executed, its parameters and the results.
 
-    The `Task` brings together the user code as function, the parameters and the results.
+    The `Task^` brings together the user code as function, the inputs and the outputs as data nodes (instances
+    of `DataNode^` class).
 
     Attributes:
         config_id (str): The identifier of the `TaskConfig^`.
         function (callable): The python function to execute. The _function_ must take as parameter the
             data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
-        input (List[`DataNode^`]): The list of `DataNode^` inputs.
-        output (List[`DataNode^`]): The list of `DataNode^` outputs.
+        input (`DataNode^` or List[`DataNode^`]): The list of `DataNode^` inputs.
+        output (`DataNode^` or List[`DataNode^`]): The list of `DataNode^` outputs.
         id (str): The unique identifier of the task.
         parent_id (str):  The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
     """

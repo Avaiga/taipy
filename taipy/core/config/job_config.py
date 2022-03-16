@@ -8,14 +8,14 @@ from taipy.core.exceptions.exceptions import DependencyNotInstalled
 
 class JobConfig:
     """
-    Holds configuration fields related to the job executions.
+    Configuration fields related to the jobs' executions.
 
     Parameters:
         mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise,
             the "airflow" mode is available.
         nb_of_workers (int): The maximum number of running workers to execute jobs. It must be a positive integer.
             The default value is 1.
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        **properties: A dictionary of additional properties.
     """
 
     _MODE_KEY = "mode"
