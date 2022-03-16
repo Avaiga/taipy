@@ -131,9 +131,11 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="Expandable", attributes=attrs, default_value=None
         )
         .set_value_and_default()
+        .set_partial()  # partial should be set before page
         .set_attributes(
             [
                 ("id",),
+                ("page",),
                 ("expanded", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
             ]
@@ -314,7 +316,13 @@ class _Factory:
             gui=gui, control_type=control_type, element_name="Part", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_update=False, var_type=_AttributeType.dynamic_boolean, default_val=True)
-        .set_attributes([("id",)]),
+        .set_partial()  # partial should be set before page
+        .set_attributes(
+            [
+                ("id",),
+                ("page",),
+            ]
+        ),
         "selector": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,

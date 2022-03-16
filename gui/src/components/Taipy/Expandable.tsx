@@ -7,6 +7,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useDynamicProperty } from "../../utils/hooks";
 import { TaipyActiveProps } from "./utils";
+import TaipyRendered from "../pages/TaipyRendered";
 
 interface ExpandableProps extends TaipyActiveProps {
     expanded?: boolean;
@@ -14,10 +15,11 @@ interface ExpandableProps extends TaipyActiveProps {
     children?: ReactNode;
     title?: string;
     defaultTitle?: string;
+    page?: string;
 }
 
 const Expandable = (props: ExpandableProps) => {
-    const { id, expanded = true, defaultExpanded, title, defaultTitle, className } = props;
+    const { id, expanded = true, defaultExpanded, title, defaultTitle, className, page } = props;
     const [opened, setOpened] = useState(defaultExpanded === undefined ? expanded : defaultExpanded);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -35,7 +37,10 @@ const Expandable = (props: ExpandableProps) => {
                 {title || defaultTitle ? (
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>{title || defaultTitle}</AccordionSummary>
                 ) : null}
-                <AccordionDetails>{props.children}</AccordionDetails>
+                <AccordionDetails>
+                    {page ? <TaipyRendered path={"/" + page} /> : null}
+                    {props.children}
+                </AccordionDetails>
             </Accordion>
         </Tooltip>
     );
