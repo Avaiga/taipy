@@ -2,6 +2,7 @@ import datetime
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import ScenarioId
 from taipy.core.config.config import Config
@@ -18,6 +19,7 @@ from taipy.core.exceptions.exceptions import (
     NonExistingScenarioConfig,
     UnauthorizedTagError,
 )
+from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.scenario._scenario_repository import _ScenarioRepository
@@ -214,11 +216,30 @@ class _ScenarioManager(_Manager[Scenario]):
         scenario = cls._get(scenario_id)
         if scenario.is_official:
             raise DeletingOfficialScenario
-        else:
-            for pipeline in scenario.pipelines.values():
-                if pipeline.parent_id == scenario.id or pipeline.parent_id == pipeline.id:
-                    _PipelineManager._hard_delete(pipeline.id, scenario.id)
-            cls._repository._delete(scenario_id)
+        entity_ids_to_delete = cls._get_owned_entity_ids(scenario)
+        entity_ids_to_delete.scenario_ids.add(scenario.id)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+
+    @classmethod
+    def _get_owned_entity_ids(cls, scenario: Scenario) -> _EntityIds:
+        entity_ids = _EntityIds()
+
+        for pipeline in scenario._pipelines.values():
+            if pipeline.parent_id == pipeline.id or pipeline.parent_id == scenario.id:
+                entity_ids.pipeline_ids.add(pipeline.id)
+            for task in pipeline.tasks.values():
+                if task.parent_id == pipeline.id or task.parent_id == scenario.id:
+                    entity_ids.task_ids.add(task.id)
+                for data_node in task.data_nodes.values():
+                    if data_node.parent_id == pipeline.id or data_node.parent_id == scenario.id:
+                        entity_ids.data_node_ids.add(data_node.id)
+
+        jobs = _JobManager._get_all()
+        for job in jobs:
+            if job.task.id in entity_ids.task_ids:
+                entity_ids.job_ids.add(job.id)
+
+        return entity_ids
 
     @classmethod
     def _get_all_by_config_id(cls, config_id: str) -> List[Scenario]:

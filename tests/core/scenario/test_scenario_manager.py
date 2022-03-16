@@ -3,6 +3,7 @@ from multiprocessing import Process
 
 import pytest
 
+import taipy.core
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
@@ -407,7 +408,7 @@ def test_get_set_official_scenario():
     assert _ScenarioManager._get_official(cycle_1) == scenario_2
 
 
-def test_hard_delete():
+def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
     dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
@@ -416,10 +417,9 @@ def test_hard_delete():
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario.id)
 
-    # test delete relevant entities with scenario scope
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
     _ScenarioManager._hard_delete(scenario.id)
@@ -429,113 +429,201 @@ def test_hard_delete():
     assert len(_DataManager._get_all()) == 0
     assert len(_JobManager._get_all()) == 0
 
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
 
-    dn_input_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config_1 = Config._add_data_node("my_output_1", "in_memory", scope=Scope.PIPELINE)
-    task_config_1 = Config._add_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    pipeline_config_1 = Config._add_pipeline("pipeline_config_2", [task_config_1])
-    scenario_config_1 = Config._add_scenario("scenario_config_2", [pipeline_config_1])
-    scenario_1 = _ScenarioManager._create(scenario_config_1)
-    _ScenarioManager._submit(scenario_1.id)
+def test_hard_delete_one_single_scenario_with_pipeline_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario.id)
 
-    # test delete relevant entities with pipeline scope
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
     assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
-    _ScenarioManager._hard_delete(scenario_1.id)
+    _ScenarioManager._hard_delete(scenario.id)
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
     assert len(_DataManager._get_all()) == 0
     assert len(_JobManager._get_all()) == 0
 
-    dn_input_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config_2 = Config._add_data_node("my_output_2", "in_memory", scope=Scope.SCENARIO)
-    task_config_2 = Config._add_task("task_config_2", print, dn_input_config_2, dn_output_config_2)
-    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_2])
-    scenario_config_2 = Config._add_scenario("scenario_config_2", [pipeline_config_2])
-    scenario_2 = _ScenarioManager._create(scenario_config_2)
-    _ScenarioManager._submit(scenario_2.id)
 
-    # test delete relevant entities with pipeline scope
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
+def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_scenario_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario.id)
+
     assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
-    _ScenarioManager._hard_delete(scenario_2.id)  # Do not delete because of pipeline scope
+    _ScenarioManager._hard_delete(scenario.id)
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 0
+    assert len(_JobManager._get_all()) == 0
+
+
+def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario.id)
+
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    _ScenarioManager._hard_delete(scenario.id)
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
     assert len(_DataManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 0
 
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
+    scenario_2 = _ScenarioManager._create(scenario_config)
+    scenario_2.submit()
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
 
-    dn_input_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
-    dn_output_config_3 = Config._add_data_node("my_output_3", "in_memory", scope=Scope.CYCLE)
-    task_config_3 = Config._add_task("task_config", print, dn_input_config_3, dn_output_config_3)
-    pipeline_config_3 = Config._add_pipeline("pipeline_config", [task_config_3])
-    scenario_config_3 = Config._add_scenario("scenario_config_3", [pipeline_config_3])
-    scenario_3 = _ScenarioManager._create(scenario_config_3)
-    scenario_4 = _ScenarioManager._create(scenario_config_3)
-    _ScenarioManager._submit(scenario_3.id)
-    _ScenarioManager._submit(scenario_4.id)
+    _ScenarioManager._hard_delete(scenario_2.id)
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 0
 
-    # test delete relevant entities with cycle scope
+    input_data_node = _DataManager._get_all_by_config_id("my_input")
+    _DataManager._delete(input_data_node[0].id)
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 0
+    assert len(_TaskManager._get_all()) == 0
+    assert len(_DataManager._get_all()) == 0
+    assert len(_JobManager._get_all()) == 0
+
+
+def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    scenario_1 = _ScenarioManager._create(scenario_config)
+    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario_1.id)
+    _ScenarioManager._submit(scenario_2.id)
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert len(_PipelineManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 3
+    assert len(_JobManager._get_all()) == 2
+    _ScenarioManager._hard_delete(scenario_1.id)
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    assert _ScenarioManager._get(scenario_2.id) is not None
+
+
+def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    scenario_1 = _ScenarioManager._create(scenario_config)
+    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario_1.id)
+    _ScenarioManager._submit(scenario_2.id)
+
+    assert len(_ScenarioManager._get_all()) == 2
+    assert len(_PipelineManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 4
+    assert len(_JobManager._get_all()) == 2
+    _ScenarioManager._hard_delete(scenario_1.id)
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+    assert _ScenarioManager._get(scenario_2.id) is not None
+
+
+def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.CYCLE)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    scenario_1 = _ScenarioManager._create(scenario_config)
+    scenario_2 = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._submit(scenario_1.id)
+    _ScenarioManager._submit(scenario_2.id)
+
     assert len(_ScenarioManager._get_all()) == 2
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 2
-    _ScenarioManager._hard_delete(scenario_3.id)  # Only delete scenario 3
+    _ScenarioManager._hard_delete(scenario_1.id)
     assert len(_ScenarioManager._get_all()) == 1
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 2
-    assert _ScenarioManager._get(scenario_4.id) is not None
+    assert _ScenarioManager._get(scenario_2.id) is not None
 
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
 
-    dn_input_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config_4 = Config._add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
-    task_config_4 = Config._add_task("task_config_4", print, dn_input_config_4, dn_output_config_4)
-    pipeline_config_4 = Config._add_pipeline("pipeline_config", [task_config_4])
-    scenario_config_4 = Config._add_scenario("scenario_config_4", [pipeline_config_4])
-    scenario_5 = _ScenarioManager._create(scenario_config_4)
-    scenario_6 = _ScenarioManager._create(scenario_config_4)
-    _ScenarioManager._submit(scenario_5.id)
-    _ScenarioManager._submit(scenario_6.id)
+def test_hard_delete_shared_entities():
+    dn_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    task_config_1 = Config._add_task("task_config_1", print, dn_config_1, dn_config_2)
+    task_config_2 = Config._add_task("task_config_2", print, dn_config_2, dn_config_3)
+    task_config_3 = Config._add_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
+    pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1, task_config_2])
+    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_1, task_config_2])
+    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])  # scope = global
+    scenario_config_1 = Config._add_scenario(
+        "scenario_config_1", [pipeline_config_1, pipeline_config_2, pipeline_config_3]
+    )
+    scenario_1 = _ScenarioManager._create(scenario_config_1)
+    scenario_2 = _ScenarioManager._create(scenario_config_1)
+    scenario_1.submit()
+    scenario_2.submit()
 
-    # test delete relevant entities with global scope
     assert len(_ScenarioManager._get_all()) == 2
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 2
-    _ScenarioManager._hard_delete(scenario_5.id)  # Only delete scenario 5
+    assert len(_PipelineManager._get_all()) == 5
+    assert len(_TaskManager._get_all()) == 7
+    assert len(_DataManager._get_all()) == 8
+    assert len(_JobManager._get_all()) == 10
+    _ScenarioManager._hard_delete(scenario_1.id)
     assert len(_ScenarioManager._get_all()) == 1
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 2
-    assert _ScenarioManager._get(scenario_6.id) is not None
+    assert len(_PipelineManager._get_all()) == 3
+    assert len(_TaskManager._get_all()) == 4
+    assert len(_DataManager._get_all()) == 5
+    assert len(_JobManager._get_all()) == 6
 
 
 def test_submit():

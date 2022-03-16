@@ -81,3 +81,12 @@ class TestManager:
             MockManager._set(m)
         MockManager._delete_all()
         assert MockManager._get_all() == []
+
+    def test_delete_many(self):
+        objs = []
+        for i in range(5):
+            m = MockEntity(f"uuid-{i}", f"Foo{i}")
+            objs.append(m)
+            MockManager._set(m)
+        MockManager._delete_many(["uuid-0", "uuid-1"])
+        assert len(MockManager._get_all()) == 3

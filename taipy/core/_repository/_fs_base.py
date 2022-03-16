@@ -4,7 +4,7 @@ import shutil
 from abc import abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Iterable, Iterator, List, Optional, Type, TypeVar, Union
 
 from taipy.core.exceptions.exceptions import ModelNotFound
 
@@ -101,6 +101,10 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
     def _delete(self, model_id: str):
         self.__get_model(model_id).unlink()
+
+    def _delete_many(self, model_ids: Iterable[str]):
+        for model_id in model_ids:
+            self._delete(model_id)
 
     def _search(self, attribute: str, value: str) -> Optional[Entity]:
         return next(self.__search(attribute, value), None)
