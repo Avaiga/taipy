@@ -47,3 +47,39 @@ The content of `expandable` can be specified as the block content.
             ...
         </taipy:expandable>
         ```
+
+### Expandable with page
+
+The content of the expandable can be specified as an existing page name using the _page_ property.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|Title|expandable|page=page_name|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:expandable page="page_name">Title</taipy:expandable>
+        ```
+
+### Expandable with partial
+
+The content of the expandable can be specified as a `Partial^` instance using the _partial_ property.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|Title|expandable|partial={partial}|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:expandable partial="{partial}">Title</taipy:dialog>
+        ```

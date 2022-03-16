@@ -22,7 +22,7 @@ interface DialogProps extends TaipyActiveProps {
     tp_onValidate?: string;
     cancelLabel?: string;
     validateLabel?: string;
-    page: string;
+    page?: string;
     open?: boolean;
     defaultOpen?: string | boolean;
     children?: ReactNode;
