@@ -9,8 +9,11 @@ from taipy.core.pipeline._pipeline_manager import _PipelineManager as PipelineMa
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.scenario._scenario_manager import _ScenarioManager as ScenarioManager
 
+from ...commons.to_from_model import to_model
 from ...config import TAIPY_SETUP_FILE
 from ..schemas import ScenarioResponseSchema, ScenarioSchema
+
+REPOSITORY = "scenario"
 
 
 class ScenarioResource(Resource):
@@ -69,19 +72,15 @@ class ScenarioResource(Resource):
         manager = ScenarioManager()
         scenario = manager._get(scenario_id)
         if not scenario:
-            return make_response(
-                jsonify({"message": f"Scenario {scenario_id} not found"}), 404
-            )
-        return {"scenario": schema.dump(scenario)}
+            return make_response(jsonify({"message": f"Scenario {scenario_id} not found"}), 404)
+        return {"scenario": schema.dump(to_model(REPOSITORY, scenario))}
 
     def delete(self, scenario_id):
         try:
             manager = ScenarioManager()
             manager._delete(scenario_id)
         except ModelNotFound:
-            return make_response(
-                jsonify({"message": f"DataNode {scenario_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {scenario_id} not found"}), 404)
 
         return {"msg": f"scenario {scenario_id} deleted"}
 
@@ -133,9 +132,7 @@ class ScenarioList(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
+            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
             self.module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(self.module)
 
@@ -145,7 +142,7 @@ class ScenarioList(Resource):
     def get(self):
         schema = ScenarioResponseSchema(many=True)
         manager = ScenarioManager()
-        scenarios = manager._get_all()
+        scenarios = [to_model(REPOSITORY, scenario) for scenario in manager._get_all()]
         return schema.dump(scenarios)
 
     def post(self):
@@ -164,7 +161,7 @@ class ScenarioList(Resource):
 
             return {
                 "msg": "scenario created",
-                "scenario": response_schema.dump(scenario),
+                "scenario": response_schema.dump(to_model(REPOSITORY, scenario)),
             }, 201
         except AttributeError:
             return {"msg": f"Config id {config_id} not found"}, 404
@@ -174,9 +171,7 @@ class ScenarioList(Resource):
         return Scenario(
             config_id=scenario_schema.get("name"),
             properties=scenario_schema.get("properties", {}),
-            pipelines=[
-                pipeline_manager._get(pl) for pl in scenario_schema.get("pipeline_ids")
-            ],
+            pipelines=[pipeline_manager._get(pl) for pl in scenario_schema.get("pipeline_ids")],
             scenario_id=scenario_schema.get("id"),
             is_master=scenario_schema.get("master_scenario"),
             cycle=scenario_schema.get("cycle"),
@@ -221,6 +216,4 @@ class ScenarioExecutor(Resource):
             manager._submit(scenario_id)
             return {"message": f"Executed scenario {scenario_id}"}
         except NonExistingScenario:
-            return make_response(
-                jsonify({"message": f"Scenario {scenario_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"Scenario {scenario_id} not found"}), 404)

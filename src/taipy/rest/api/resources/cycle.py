@@ -9,8 +9,11 @@ from taipy.core import Cycle
 from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
 from taipy.core.exceptions.exceptions import ModelNotFound
 
+from ...commons.to_from_model import to_model
 from ...config import TAIPY_SETUP_FILE
 from ..schemas import CycleResponseSchema, CycleSchema
+
+REPOSITORY = "cycle"
 
 
 class CycleResource(Resource):
@@ -69,19 +72,15 @@ class CycleResource(Resource):
         manager = CycleManager()
         cycle = manager._get(cycle_id)
         if not cycle:
-            return make_response(
-                jsonify({"message": f"Cycle {cycle_id} not found"}), 404
-            )
-        return {"cycle": schema.dump(cycle)}
+            return make_response(jsonify({"message": f"Cycle {cycle_id} not found"}), 404)
+        return {"cycle": schema.dump(to_model(REPOSITORY, cycle))}
 
     def delete(self, cycle_id):
         try:
             manager = CycleManager()
             manager._delete(cycle_id)
         except ModelNotFound:
-            return make_response(
-                jsonify({"message": f"DataNode {cycle_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {cycle_id} not found"}), 404)
 
         return {"msg": f"cycle {cycle_id} deleted"}
 
@@ -133,9 +132,7 @@ class CycleList(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
         if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
+            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
             self.module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(self.module)
 
@@ -143,13 +140,13 @@ class CycleList(Resource):
         return getattr(self.module, config_id)
 
     def get(self):
-        schema = CycleSchema(many=True)
+        schema = CycleResponseSchema(many=True)
         manager = CycleManager()
-        cycles = manager._get_all()
+        cycles = [to_model(REPOSITORY, cycle) for cycle in manager._get_all()]
         return schema.dump(cycles)
 
     def post(self):
-        schema = CycleSchema()
+        schema = CycleResponseSchema()
         manager = CycleManager()
 
         cycle = self.__create_cycle_from_schema(schema.load(request.json))
@@ -157,15 +154,13 @@ class CycleList(Resource):
 
         return {
             "msg": "cycle created",
-            "cycle": schema.dump(cycle),
+            "cycle": schema.dump(to_model(REPOSITORY, cycle)),
         }, 201
 
     def __create_cycle_from_schema(self, cycle_schema: CycleSchema):
         return Cycle(
             id=cycle_schema.get("id"),
-            frequency=Frequency(
-                getattr(Frequency, cycle_schema.get("frequency", "").upper())
-            ),
+            frequency=Frequency(getattr(Frequency, cycle_schema.get("frequency", "").upper())),
             properties=cycle_schema.get("properties", {}),
             creation_date=datetime.fromisoformat(cycle_schema.get("creation_date")),
             start_date=datetime.fromisoformat(cycle_schema.get("start_date")),

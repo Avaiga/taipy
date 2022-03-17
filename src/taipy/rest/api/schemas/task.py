@@ -9,5 +9,4 @@ class TaskSchema(Schema):
     input_ids = fields.List(fields.String)
     function_name = fields.String()
     function_module = fields.String()
-    validity_minutes = fields.Integer()
     output_ids = fields.List(fields.String)
