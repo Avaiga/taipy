@@ -95,7 +95,6 @@ class _Server:
             ):
                 return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
             if os.path.isfile(self._gui._root_dir + os.path.sep + path):
-                print("here")
                 return send_from_directory(self._gui._root_dir + os.path.sep, path)
             return ("", 404)
 
