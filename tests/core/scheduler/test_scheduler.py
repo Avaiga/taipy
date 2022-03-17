@@ -3,7 +3,6 @@ import multiprocessing
 import os
 import random
 import string
-import uuid
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from functools import partial
@@ -17,7 +16,6 @@ from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
-from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
 
