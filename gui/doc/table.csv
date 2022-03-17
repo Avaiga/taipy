@@ -1,5 +1,5 @@
 ﻿Name,Type,Default,Doc
-*value,any,None,The data to be represented in this table.
+*data,any,None,The data to be represented in this table.
 page_size,int,100,
 allow_all_rows,bool,FALSE,
 show_all,bool,FALSE,
