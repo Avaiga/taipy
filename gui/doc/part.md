@@ -1,7 +1,7 @@
 Displays its children in a block.
 
 The `part` control is used to group controls in a single element. 
-This allows to show or hide them in one action and be placed as a unique element in a `Layout^` cell.
+This allows to show or hide them in one action and be placed as a unique element in a [`Layout`](layout.md) cell.
 
 There is a simplified Markdown syntax to create a `part`, where the element name is optional:
 

@@ -12,6 +12,12 @@ specify which trace you target.
 Indexed properties can have a default value (using the *property_name* syntax with
 no index) which is overridden by any specified indexed property.
 
+The _data_ property supported types are:
+- pandas Dataframe
+- array of arrays
+- numpy series
+- array of pandas dataframe
+
 ## Usage
 
 ### Simple example

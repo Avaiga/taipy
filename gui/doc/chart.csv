@@ -1,5 +1,5 @@
 ﻿Name,Type,Default,Doc
-*value,any,,The data object bound to this chart control.
+*data,any,,The data object bound to this chart control.
 title,str,None,The title of this chart control.
 width,str|int|float,100%,"The width, in CSS units, of this element."
 height,str|int|float,None,"The height, in CSS units, of this element."
