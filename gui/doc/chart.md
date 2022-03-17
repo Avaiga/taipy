@@ -14,9 +14,9 @@ no index) which is overridden by any specified indexed property.
 
 The _data_ property supported types are:
 - pandas Dataframe
-- array of arrays
+- list of lists
 - numpy series
-- array of pandas dataframe
+- list of pandas dataframes
 
 ## Usage
 

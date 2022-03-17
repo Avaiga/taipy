@@ -9,6 +9,7 @@ The _data_ property supported types are:
 - pandas Dataframe
 - array of arrays
 - numpy series
+Data columns are accessed by their name or index (temporary dataframes are built from these different sources).
 
 ## Usage
 
