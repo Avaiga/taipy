@@ -47,8 +47,8 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
 def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
     gui.add_pages(pages=f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets")
     helpers.run_e2e(gui)
-    assert ".taipy-text" in urlopen("http://127.0.0.1:5000/test-assets/style/style.css/").read().decode("utf-8")
-    page.goto("/page1")
+    assert ".taipy-text" in urlopen("http://127.0.0.1:5000/test-assets/style/style.css").read().decode("utf-8")
+    page.goto("/test-assets/page1")
     page.expect_websocket()
     page.wait_for_selector("#text1")
     retry = 0
