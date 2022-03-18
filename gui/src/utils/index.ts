@@ -4,7 +4,6 @@ import { FormatConfig } from "../context/taipyReducers";
 
 declare global {
     interface Window {
-        taipyUrl: string;
         taipyUserThemes: Record<string, Record<string, unknown>>;
     }
 }
@@ -99,9 +98,6 @@ export const getInitials = (value: string, max = 2): string =>
         .join("")
         .toUpperCase();
 
-export const ENDPOINT =
-    !process.env.NODE_ENV || process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test"
-        ? (process.env.REACT_APP_BACKEND_FLASK_URL as string)
-        : window.taipyUrl;
+export const ENDPOINT = window.location.origin;
 
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;

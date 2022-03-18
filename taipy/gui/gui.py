@@ -942,7 +942,6 @@ class Gui:
             else:
                 ngrok.set_auth_token(app_config["ngrok_token"])
                 http_tunnel = ngrok.connect(app_config["port"], "http")
-                app_config["client_url"] = http_tunnel.public_url
                 app_config["use_reloader"] = False
                 print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
@@ -991,7 +990,6 @@ class Gui:
             self._server._get_default_blueprint(
                 static_folder=f"{_absolute_path}{os.path.sep}webapp",
                 template_folder=f"{_absolute_path}{os.path.sep}webapp",
-                client_url=app_config["client_url"],
                 title=self._get_config("title", "Taipy App"),
                 favicon=self._get_config("favicon", "/favicon.png"),
                 themes=self._get_themes(),

@@ -19,7 +19,6 @@ ConfigParameter = t.Literal[
     "use_reloader",
     "time_zone",
     "propagate",
-    "client_url",
     "favicon",
     "title",
     "theme",
@@ -37,7 +36,7 @@ ConfigParameter = t.Literal[
 ]
 
 Config = t.TypedDict(
-    "AppConfig",
+    "Config",
     {
         "port": int,
         "dark_mode": bool,
@@ -46,7 +45,6 @@ Config = t.TypedDict(
         "use_reloader": bool,
         "time_zone": str,
         "propagate": bool,
-        "client_url": str,
         "favicon": t.Union[str, None],
         "title": t.Union[str, None],
         "theme": t.Union[t.Dict[str, t.Any], None],
@@ -141,8 +139,6 @@ class _Config(object):
                 config["port"] = int(args.port)
         if args.host:
             config["host"] = args.host
-        if args.client_url:
-            config["client_url"] = args.client_url
         if args.debug:
             config["debug"] = True
         if args.no_debug:
@@ -162,7 +158,7 @@ class _Config(object):
                 key = key.lower()
                 if value is not None and key in config:
                     try:
-                        config[key] = (value if config[key] is None else type(config[key])(value))  # type: ignore
+                        config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
                     except Exception as e:
                         warnings.warn(
                             f"Invalid env value in Gui.run: {key} - {value}. Unable to parse value to the correct type.\n{e}"

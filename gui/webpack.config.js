@@ -3,13 +3,10 @@ const path = require("path");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const Dotenv = require("dotenv-webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
-const fs = require("fs");
 
 module.exports = (env, options) => {
-    const envFile = fs.existsSync("./.env." + options.mode + ".local") ? "./.env." + options.mode + ".local" : "./.env." + options.mode;
     return {
         mode: options.mode, //'development', //'production',
         entry: ["./src/index.tsx"],
@@ -57,9 +54,6 @@ module.exports = (env, options) => {
             new HtmlWebpackPlugin({
                 template: "public/index.html",
                 hash: true,
-            }),
-            new Dotenv({
-                path: envFile,
             }),
             new MiniCssExtractPlugin(),
             new ESLintPlugin({
