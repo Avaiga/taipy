@@ -367,7 +367,7 @@ export const createSendUpdateAction = (name = "", value: unknown, propagate = tr
     type: Types.SendUpdate,
     name: name,
     propagate: propagate,
-    payload: { value: value, relvar: rel_name },
+    payload: rel_name ? { value: value, relvar: rel_name } : { value: value },
 });
 
 export const createSendActionNameAction = (

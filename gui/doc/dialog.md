@@ -33,7 +33,7 @@ and what actions (callback functions) are triggered when buttons are pressed:
     === "Markdown"
 
         ```
-        <|dialog|title=Dialog Title|open={show_dialog}|page_id=page1|on_validate=validate_action|on_cancel=cancel_action|validate_action_text=Validate|cancel_action_text=Cancel|>
+        <|dialog|title=Dialog Title|open={show_dialog}|page_id=page1|on_validate=validate_action|on_cancel={lambda s: s.assign("show_dialog", False)}|validate_label=Validate|cancel_label=Cancel|>
         ```
   
     === "HTML"
@@ -45,8 +45,17 @@ and what actions (callback functions) are triggered when buttons are pressed:
          validate_label="Validate"
          on_validate="validate_action"
          cancel_label="Cancel"
-         on_cancel="cancel_action">{show_dialog}</taipy:dialog>
+         on_cancel="{lambda s: s.assign('show_dialog', False)}">{show_dialog}</taipy:dialog>
         ```
+
+The implementation of the validation callback could be:
+
+```py3
+def validate_action(state, id, action, payload):
+    with state as st:
+        ...
+        st.show_dialog = False
+```
 
 ### Dialog as block element
 

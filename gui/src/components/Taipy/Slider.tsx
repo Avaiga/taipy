@@ -35,6 +35,7 @@ const Slider = (props: SliderProps) => {
         textAnchor = "bottom",
         width = "300px",
         updateVars = "",
+        valueById,
     } = props;
     const [value, setValue] = useState(0);
     const { dispatch } = useContext(TaipyContext);
@@ -57,10 +58,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(updateVarName, value, propagate, getUpdateVar(updateVars, "lov")));
+                dispatch(createSendUpdateAction(updateVarName, value, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById]
     );
 
     const handleRangeCommitted = useCallback(
@@ -68,10 +69,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (!update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(updateVarName, value, propagate, getUpdateVar(updateVars, "lov")));
+                dispatch(createSendUpdateAction(updateVarName, value, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById]
     );
 
     const getLabel = useCallback(

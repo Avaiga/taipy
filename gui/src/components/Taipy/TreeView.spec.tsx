@@ -99,7 +99,7 @@ describe("TreeView Component", () => {
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
-            payload: { value: ["id1"], relvar: "" },
+            payload: { value: ["id1"] },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -126,7 +126,7 @@ describe("TreeView Component", () => {
         userEvent.click(elt2, { ctrlKey: true });
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: ["id3", "id1"], relvar: "" },
+            payload: { value: ["id3", "id1"] },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -167,6 +167,6 @@ describe("TreeView Component", () => {
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledTimes(2);
         expect(dispatch).toHaveBeenCalledWith({name: "", payload: {id: undefined, names:["tree_expanded"]}, type: "REQUEST_UPDATE"});
-        expect(dispatch).toHaveBeenCalledWith({name:"tree_expanded", payload: {relvar: "", value: ["id1"]}, type: "SEND_UPDATE_ACTION", propagate: true});
+        expect(dispatch).toHaveBeenCalledWith({name:"tree_expanded", payload: {value: ["id1"]}, type: "SEND_UPDATE_ACTION", propagate: true});
     });
 });
