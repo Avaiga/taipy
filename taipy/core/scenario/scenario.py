@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 from taipy.core.common._entity import _Entity
 from taipy.core.common._properties import _Properties
@@ -143,6 +143,16 @@ class Scenario(_Entity):
     def properties(self):
         self._properties = _reload("scenario", self)._properties
         return self._properties
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def name(self) -> Optional[str]:
+        return self._properties.get("name")
+
+    @name.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def name(self, val):
+        self._properties["name"] = val
 
     def __eq__(self, other):
         return self.id == other.id

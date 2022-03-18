@@ -67,15 +67,15 @@ class _ScenarioManager(_Manager[Scenario]):
         cls,
         config: ScenarioConfig,
         creation_date: datetime.datetime = None,
-        display_name: str = None,
+        name: str = None,
     ) -> Scenario:
         scenario_id = Scenario._new_id(config.id)
         pipelines = [_PipelineManager._get_or_create(p_config, scenario_id) for p_config in config.pipeline_configs]
         cycle = _CycleManager._get_or_create(config.frequency, creation_date) if config.frequency else None
         is_official_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
         props = config.properties.copy()
-        if display_name:
-            props["display_name"] = display_name
+        if name:
+            props["name"] = name
         scenario = Scenario(
             config.id,
             pipelines,
