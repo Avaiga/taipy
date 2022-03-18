@@ -65,12 +65,14 @@ class _Manager(Generic[EntityType]):
         """
         Deletes entities of multiple types.
         """
+        from taipy.core.cycle._cycle_manager import _CycleManager
         from taipy.core.data._data_manager import _DataManager
         from taipy.core.job._job_manager import _JobManager
         from taipy.core.pipeline._pipeline_manager import _PipelineManager
         from taipy.core.scenario._scenario_manager import _ScenarioManager
         from taipy.core.task._task_manager import _TaskManager
 
+        _CycleManager._delete_many(_entity_ids.cycle_ids)
         _ScenarioManager._delete_many(_entity_ids.scenario_ids)
         _PipelineManager._delete_many(_entity_ids.pipeline_ids)
         _TaskManager._delete_many(_entity_ids.task_ids)

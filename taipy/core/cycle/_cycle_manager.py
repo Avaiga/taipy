@@ -2,10 +2,13 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
+from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common._manager import _Manager
+from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.job._job_manager import _JobManager
 
 
 class _CycleManager(_Manager[Cycle]):
@@ -66,3 +69,37 @@ class _CycleManager(_Manager[Cycle]):
         if frequency == Frequency.YEARLY:
             end_date = end_date.replace(month=12, day=31) + timedelta(days=1)
         return end_date - timedelta(microseconds=1)
+
+    @classmethod
+    def _hard_delete(cls, cycle_id: CycleId):
+        cycle = cls._get(cycle_id)
+        entity_ids_to_delete = cls._get_owned_entities(cycle)
+        entity_ids_to_delete.cycle_ids.add(cycle.id)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+
+    @classmethod
+    def _get_owned_entities(cls, cycle: Cycle) -> _EntityIds:
+        from taipy.core.scenario._scenario_manager import _ScenarioManager
+
+        entity_ids = _EntityIds()
+
+        scenarios = _ScenarioManager._get_all_by_cycle(cycle)
+
+        for scenario in scenarios:
+            entity_ids.scenario_ids.add(scenario.id)
+            for pipeline in scenario._pipelines.values():
+                if pipeline.parent_id in (pipeline.id, scenario.id, cycle.id):
+                    entity_ids.pipeline_ids.add(pipeline.id)
+                for task in pipeline._tasks.values():
+                    if task.parent_id in (pipeline.id, scenario.id, cycle.id):
+                        entity_ids.task_ids.add(task.id)
+                    for data_node in task.data_nodes.values():
+                        if data_node.parent_id in (pipeline.id, scenario.id, cycle.id):
+                            entity_ids.data_node_ids.add(data_node.id)
+
+        jobs = _JobManager._get_all()
+        for job in jobs:
+            if job.task.id in entity_ids.task_ids:
+                entity_ids.job_ids.add(job.id)
+
+        return entity_ids

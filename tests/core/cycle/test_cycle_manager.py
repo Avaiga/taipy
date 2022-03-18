@@ -2,8 +2,15 @@ from datetime import datetime
 
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
+from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.scope import Scope
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.task._task_manager import _TaskManager
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
@@ -159,3 +166,44 @@ def test_get_cycle_start_date_and_end_date():
     assert yearly_end_date_2.year == creation_date_2.year
     assert yearly_end_date_2.date() == datetime(creation_date_2.year, 12, 31).date()
     assert yearly_start_date_2 < creation_date_2 < yearly_end_date_2
+
+
+def test_hard_delete_shared_entities():
+    dn_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    dn_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    task_config_1 = Config._add_task("task_config_1", print, dn_config_1, dn_config_2)
+    task_config_2 = Config._add_task("task_config_2", print, dn_config_2, dn_config_3)
+    task_config_3 = Config._add_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
+    pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1, task_config_2])
+    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_1, task_config_2])
+    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])  # scope = global
+    creation_date = datetime.now()
+    scenario_config_1 = Config._add_scenario(
+        "scenario_config_1",
+        [pipeline_config_1, pipeline_config_2, pipeline_config_3],
+        creation_date=creation_date,
+        frequency=Frequency.DAILY,
+    )
+    scenario_config_2 = Config._add_scenario("scenario_config_2", [pipeline_config_3])  # No Frequency so cycle attached to scenarios
+    scenario_1 = _ScenarioManager._create(scenario_config_1)
+    scenario_2 = _ScenarioManager._create(scenario_config_1)
+    scenario_3 = _ScenarioManager._create(scenario_config_2)
+    scenario_1.submit()
+    scenario_2.submit()
+    scenario_3.submit()
+
+    assert len(_ScenarioManager._get_all()) == 3
+    assert len(_PipelineManager._get_all()) == 5
+    assert len(_TaskManager._get_all()) == 7
+    assert len(_DataManager._get_all()) == 8
+    assert len(_JobManager._get_all()) == 11
+    assert len(_CycleManager._get_all()) == 1
+    _CycleManager._hard_delete(scenario_1.cycle.id)
+    assert len(_CycleManager._get_all()) == 0
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_JobManager._get_all()) == 3
+    assert len(_DataManager._get_all()) == 2
