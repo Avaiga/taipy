@@ -63,6 +63,7 @@ const TreeView = (props: TreeViewProps) => {
         updateVars = "",
         width = 360,
         height,
+        valueById,
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[] | string>(multiple ? [] : "");
@@ -153,11 +154,11 @@ const TreeView = (props: TreeViewProps) => {
                         updateVarName,
                         Array.isArray(nodeIds) ? nodeIds : [nodeIds],
                         propagate,
-                        getUpdateVar(updateVars, "lov")
+                        valueById ? undefined : getUpdateVar(updateVars, "lov")
                     )
                 );
         },
-        [updateVarName, dispatch, propagate, updateVars]
+        [updateVarName, dispatch, propagate, updateVars, valueById]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);

@@ -131,7 +131,7 @@ describe("Selector Component", () => {
             userEvent.click(elt2);
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "varname",
-                payload: { value: ["id1", "id3"], relvar: "" },
+                payload: { value: ["id1", "id3"] },
                 propagate: true,
                 type: "SEND_UPDATE_ACTION",
             });

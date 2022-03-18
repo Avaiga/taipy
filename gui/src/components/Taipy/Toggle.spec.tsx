@@ -96,7 +96,7 @@ describe("Toggle Component", () => {
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
-            payload: { value: "id1", relvar: "" },
+            payload: { value: "id1" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -113,7 +113,7 @@ describe("Toggle Component", () => {
         userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
-            payload: { value: "uv", relvar: "" },
+            payload: { value: "uv" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });

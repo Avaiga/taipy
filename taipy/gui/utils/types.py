@@ -61,7 +61,7 @@ class _TaipyNumber(_TaipyBase):
                 warnings.warn(f"{self.get_name()}: Parsing {value} as float:\n{e}")
                 return 0.0
         else:
-            super().cast_value(value)
+            return super().cast_value(value)
 
     @staticmethod
     def get_hash():

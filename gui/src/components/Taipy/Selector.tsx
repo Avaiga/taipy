@@ -88,6 +88,7 @@ const Selector = (props: SelTreeProps) => {
         updateVars = "",
         width = 360,
         height,
+        valueById,
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[]>([]);
@@ -135,19 +136,19 @@ const Selector = (props: SelTreeProps) => {
                             newKeys.splice(p, 1);
                         }
                         dispatch(
-                            createSendUpdateAction(updateVarName, newKeys, propagate, getUpdateVar(updateVars, "lov"))
+                            createSendUpdateAction(updateVarName, newKeys, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
                         );
                         return newKeys;
                     } else {
                         dispatch(
-                            createSendUpdateAction(updateVarName, key, propagate, getUpdateVar(updateVars, "lov"))
+                            createSendUpdateAction(updateVarName, key, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
                         );
                         return [key];
                     }
                 });
             }
         },
-        [active, updateVarName, dispatch, multiple, propagate, updateVars]
+        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById]
     );
 
     const handleChange = useCallback(
@@ -156,9 +157,9 @@ const Selector = (props: SelTreeProps) => {
                 target: { value },
             } = event;
             setSelectedValue(Array.isArray(value) ? value : [value]);
-            dispatch(createSendUpdateAction(updateVarName, value, propagate, getUpdateVar(updateVars, "lov")));
+            dispatch(createSendUpdateAction(updateVarName, value, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
         },
-        [dispatch, updateVarName, propagate, updateVars]
+        [dispatch, updateVarName, propagate, updateVars, valueById]
     );
 
     const handleDelete = useCallback(
@@ -167,11 +168,11 @@ const Selector = (props: SelTreeProps) => {
             id &&
                 setSelectedValue((vals) => {
                     const keys = vals.filter((valId) => valId !== id);
-                    dispatch(createSendUpdateAction(updateVarName, keys, propagate, getUpdateVar(updateVars, "lov")));
+                    dispatch(createSendUpdateAction(updateVarName, keys, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, updateVars]
+        [updateVarName, propagate, dispatch, updateVars, valueById]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);

@@ -51,10 +51,11 @@ class _AttributeType(Enum):
     string = "string"
     string_or_number = "string|number"
     boolean_or_list = "boolean|list"
+    number_or_lov_value = "number|lovValue"
 
 
 def _get_taipy_type(a_type: t.Optional[_AttributeType]) -> t.Optional[t.Type[_TaipyBase]]:
-    if isinstance(a_type, _AttributeType) and isinstance(a_type.value, _TaipyBase.__class__):
+    if isinstance(a_type, _AttributeType) and not isinstance(a_type.value, str):
         return a_type.value
     if a_type == _AttributeType.boolean:
         return _TaipyBool

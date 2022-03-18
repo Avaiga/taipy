@@ -25,6 +25,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
     value?: T;
     defaultValue?: U;
     height?: string | number;
+    valueById?: boolean;
 }
 
 type LoVElt = [string, stringIcon, LoVElt[]?];

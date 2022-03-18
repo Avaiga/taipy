@@ -334,14 +334,15 @@ class _Factory:
         .set_lov()
         .set_attributes(
             [
-                ("filter", _AttributeType.boolean),
-                ("multiple", _AttributeType.boolean),
-                ("dropdown", _AttributeType.boolean, False),
-                ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
+                ("dropdown", _AttributeType.boolean, False),
+                ("filter", _AttributeType.boolean),
                 ("height", _AttributeType.string_or_number),
-                ("width", _AttributeType.string_or_number),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("id",),
+                ("value_by_id", _AttributeType.boolean),
+                ("multiple", _AttributeType.boolean),
+                ("width", _AttributeType.string_or_number),
             ]
         )
         .set_refresh_on_update()
@@ -353,23 +354,25 @@ class _Factory:
             attributes=attrs,
             default_value=0,
         )
-        .set_value_and_default(native_type=True)
+        .set_value_and_default(native_type=True, var_type=_AttributeType.number_or_lov_value)
         .set_attributes(
             [
-                ("min", _AttributeType.number, 0),
-                ("max", _AttributeType.number, 100),
-                ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
-                ("width", _AttributeType.string, "300px"),
                 ("height"),
-                ("orientation"),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("id",),
+                ("value_by_id", _AttributeType.boolean),
+                ("max", _AttributeType.number, 100),
+                ("min", _AttributeType.number, 0),
+                ("orientation"),
+                ("width", _AttributeType.string, "300px"),
             ]
         )
         .get_adapter("lov")  # need to be called before set_lov
         .set_lov()
         .set_labels()
         .set_string_with_check("text_anchor", _Factory.__TEXT_ANCHORS + [_Factory.__TEXT_ANCHOR_NONE], "bottom")
+        .set_refresh_on_update()
         .set_propagate(),
         "status": lambda gui, control_type, attrs: _Builder(
             gui=gui,
@@ -440,11 +443,12 @@ class _Factory:
         .set_lov()
         .set_attributes(
             [
+                ("active", _AttributeType.dynamic_boolean, True),
+                ("hover_text", _AttributeType.dynamic_string),
                 ("id",),
                 ("label",),
-                ("active", _AttributeType.dynamic_boolean, True),
+                ("value_by_id", _AttributeType.boolean),
                 ("unselected_value", _AttributeType.string, ""),
-                ("hover_text", _AttributeType.dynamic_string),
             ]
         )
         .set_kind()
@@ -461,14 +465,15 @@ class _Factory:
         .set_lov()
         .set_attributes(
             [
-                ("filter", _AttributeType.boolean),
-                ("multiple", _AttributeType.boolean),
-                ("expanded", _AttributeType.boolean_or_list, True),
-                ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
-                ("height", _AttributeType.string_or_number),
-                ("width", _AttributeType.string_or_number),
+                ("expanded", _AttributeType.boolean_or_list, True),
+                ("filter", _AttributeType.boolean),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("height", _AttributeType.string_or_number),
+                ("id",),
+                ("value_by_id", _AttributeType.boolean),
+                ("multiple", _AttributeType.boolean),
+                ("width", _AttributeType.string_or_number),
             ]
         )
         .set_refresh_on_update()
