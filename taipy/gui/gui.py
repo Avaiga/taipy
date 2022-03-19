@@ -790,6 +790,9 @@ class Gui:
                   the new `Partial` is read as Markdown input text.
                 - If it is not, the content of the new `Partial` is read from this string
                   as Markdown text.
+
+        Returns:
+            Partial: the new Partial object defined by _page_.
         """
         new_partial = Partial()
         # Validate name

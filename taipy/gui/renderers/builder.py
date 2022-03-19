@@ -679,6 +679,9 @@ class _Builder:
         default_val: t.Any = None,
     ):
         var_name = self.__default_property_name if var_name is None else var_name
+        if var_type == _AttributeType.number_or_lov_value:
+            var_type = _AttributeType.lov_value if self.__attributes.get("lov") else _AttributeType.dynamic_number
+            native_type = native_type if var_type == _AttributeType.dynamic_number else False
         if var_type == _AttributeType.dynamic_boolean:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
         hash_name = self.__hashes.get(var_name)

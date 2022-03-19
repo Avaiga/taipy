@@ -33,6 +33,7 @@ const Toggle = (props: ToggleProps) => {
         defaultLov = "",
         unselectedValue = "",
         updateVars = "",
+        valueById,
     } = props;
     const { dispatch } = useContext(TaipyContext);
 
@@ -48,10 +49,10 @@ const Toggle = (props: ToggleProps) => {
                     updateVarName,
                     val === null ? unselectedValue : val,
                     propagate,
-                    getUpdateVar(updateVars, "lov")
+                    valueById ? undefined : getUpdateVar(updateVars, "lov")
                 )
             ),
-        [unselectedValue, updateVarName, propagate, dispatch, updateVars]
+        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById]
     );
 
     return kind === "theme" ? (

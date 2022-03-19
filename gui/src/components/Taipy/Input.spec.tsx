@@ -53,7 +53,7 @@ describe("Input Component", () => {
         userEvent.clear(elt);
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: "", relvar: "" },
+            payload: { value: "" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
@@ -107,7 +107,7 @@ describe("Number Component", () => {
         userEvent.type(elt, "666");
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
-            payload: { value: "666", relvar: "" },
+            payload: { value: "666" },
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
