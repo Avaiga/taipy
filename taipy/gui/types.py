@@ -54,8 +54,8 @@ class _AttributeType(Enum):
 
 
 def _get_taipy_type(a_type: t.Optional[_AttributeType]) -> t.Optional[t.Type[_TaipyBase]]:
-    if isinstance(a_type, _AttributeType) and isinstance(a_type.value, _TaipyBase.__class__):
-        return a_type.value
+    if isinstance(a_type, _AttributeType) and isinstance(a_type.value, _TaipyBase.__class__):  # type: ignore
+        return a_type.value  # type: ignore
     if a_type == _AttributeType.boolean:
         return _TaipyBool
     elif a_type == _AttributeType.number:

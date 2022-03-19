@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
 import typing as t
-from .utils import _varname_from_content
+from abc import ABC, abstractmethod
 from os import path
+
+from .utils import _varname_from_content
 
 
 class Page(ABC):
@@ -23,8 +24,8 @@ class Page(ABC):
 
         If _content_ is a path to a readable file, the file is read entirely as the text template.
         """
-        self._content: t.Optional[str] = None
-        self._filepath: t.Optional[str] = None
+        self._content = ""
+        self._filepath = ""
         self.__process_content(content)
 
     def __process_content(self, content: str) -> None:
