@@ -98,6 +98,4 @@ export const getInitials = (value: string, max = 2): string =>
         .join("")
         .toUpperCase();
 
-export const ENDPOINT = window.location.origin;
-
 export const TIMEZONE_CLIENT = Intl.DateTimeFormat().resolvedOptions().timeZone;

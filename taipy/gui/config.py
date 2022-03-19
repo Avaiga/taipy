@@ -113,9 +113,6 @@ class _Config(object):
         parser = argparse.ArgumentParser()
         parser.add_argument("-P", "--port", nargs="?", default="", const="", help="Specify server port")
         parser.add_argument("-H", "--host", nargs="?", default="", const="", help="Specify server host")
-        parser.add_argument(
-            "-C", "--client-url", nargs="?", default="", const="", help="Specify backend endpoint on client side"
-        )
 
         parser.add_argument("--ngrok-token", nargs="?", default="", const="", help="Specify NGROK Authtoken")
 

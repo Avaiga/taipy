@@ -11,7 +11,6 @@ import Box from "@mui/material/Box";
 import { SnackbarProvider } from "notistack";
 import { BrowserRouter } from "react-router-dom";
 
-import { ENDPOINT } from "../utils";
 import { TaipyContext } from "../context/taipyContext";
 import {
     createBlockAction,
@@ -59,7 +58,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get<AxiosRouter>(`${ENDPOINT}/taipy-init/?client_id=${state.id || ""}`)
+            .get<AxiosRouter>(`/taipy-init/?client_id=${state.id || ""}`)
             .then((result) => {
                 setJSX(result.data.router);
                 dispatch(createThemeAction(result.data.darkMode, true));
