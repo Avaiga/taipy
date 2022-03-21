@@ -119,8 +119,8 @@ class Gui:
                 with the `.css` extension.
             path_mapping: TODO explain what this does.
             env_filename: An optional file from which to load application configuration
-                variables (see the [Configuration](../gui/configuration.md) section for
-                details.)</br>
+                variables (see the [Configuration](../gui/configuration.md#configuring-the-gui-instance)
+                section for details.)</br>
                 The default value is "taipy.gui.env"
             flask: TODO explain what this does.
         """
@@ -900,7 +900,7 @@ class Gui:
         Once you enter `run`, users can run Web browsers and point to the Web server
         URL that `Gui` serves. The default is to listen to the _localhost_ address
         (127.0.0.1) on the port number 5000. However, the configuration of this `Gui`
-        object may impact that (see the [Configuration](../gui/configuration.md)
+        object may impact that (see the [Configuration](../gui/configuration.md#configuring-the-gui-instance)
         section for details).
 
         Arguments:
