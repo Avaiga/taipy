@@ -103,7 +103,14 @@ def navigate(state: State, to: t.Optional[str] = ""):
     else:
         warnings.warn("'navigate()' must be called in the context of a callback")
 
-def refresh_partial(state: State, partial: Partial, content: str):
+def change_partial(state: State, partial: Partial, content: str):
+    """Change partial content.
+
+    Arguments:
+        state: the current user state as received in any callback.
+        partial: A `Partial^` content that was previously added via `Gui.app_partial^`.
+        content: the new content to show.
+    """
     if state and isinstance(state._gui, Gui):
         state._gui._refresh_partial(partial, content)
     else:
