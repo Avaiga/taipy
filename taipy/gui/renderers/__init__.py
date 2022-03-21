@@ -1,7 +1,6 @@
-from ..page import Page
-
 import typing as t
 
+from ..page import Page
 from ._html import _TaipyHTMLParser
 
 if t.TYPE_CHECKING:
@@ -13,7 +12,7 @@ class _EmptyPage(Page):
         super().__init__("<PageContent />")
 
     def render(self, gui) -> str:
-        return str(self._content)
+        return self._content
 
 
 class Markdown(Page):
@@ -34,7 +33,7 @@ class Markdown(Page):
 
     # Generate JSX from Markdown
     def render(self, gui) -> str:
-        return gui._markdown.convert(str(self._content))
+        return gui._markdown.convert(self._content)
 
 
 class Html(Page):
@@ -56,11 +55,11 @@ class Html(Page):
 
     # Modify path routes
     def modify_taipy_base_url(self, base_url):
-        self._content = str(self._content).replace("{{taipy_base_url}}", f"/{base_url}")
+        self._content = self._content.replace("{{taipy_base_url}}", f"/{base_url}")
 
     # Generate JSX from HTML
     def render(self, gui) -> str:
         parser = _TaipyHTMLParser(gui)
-        parser.feed_data(str(self._content))
+        parser.feed_data(self._content)
         self.head = parser.head
         return parser.get_jsx()

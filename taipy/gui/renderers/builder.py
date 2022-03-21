@@ -1,4 +1,3 @@
-from inspect import isclass
 import json
 import numbers
 import re
@@ -6,6 +5,7 @@ import typing as t
 import warnings
 import xml.etree.ElementTree as etree
 from datetime import date, datetime, time
+from inspect import isclass
 
 from ..partial import Partial
 from ..types import _AttributeType, _get_taipy_type
@@ -24,8 +24,8 @@ from ..utils.types import _TaipyData
 from .jsonencoder import _TaipyJsonEncoder
 from .utils import (
     _add_to_dict_and_get,
-    _get_columns_dict,
     _get_col_from_indexed,
+    _get_columns_dict,
     _get_idx_from_col,
     _get_tuple_val,
     _to_camel_case,
@@ -136,7 +136,9 @@ class _Builder:
                 ret[m.group(1)] = self.__attributes.get(key)
         return ret
 
-    def __get_multiple_indexed_attributes(self, names: t.Tuple[str], index: t.Optional[int] = None) -> t.List[t.Optional[str]]:
+    def __get_multiple_indexed_attributes(
+        self, names: t.Tuple[str], index: t.Optional[int] = None
+    ) -> t.List[t.Optional[str]]:
         names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
         return [self.__attributes.get(name) for name in names]
 
@@ -265,7 +267,7 @@ class _Builder:
                 adapter = None
             var_type = self.__attributes.get("type")
             if isclass(var_type):
-                var_type = var_type.__name__
+                var_type = var_type.__name__  # type: ignore
             if not isinstance(var_type, str):
                 elt = None
                 if len(lov) == 0:

@@ -70,7 +70,7 @@ class _Evaluator:
             st = ast.parse(e if not _Evaluator.__EXPR_EDGE_CASE_F_STRING.match(e) else 'f"{' + e + '}"')
             args = [arg.arg for node in ast.walk(st) if isinstance(node, ast.arguments) for arg in node.args]
             targets = [
-                compr.target.id for node in ast.walk(st) if isinstance(node, ast.ListComp) for compr in node.generators
+                compr.target.id for node in ast.walk(st) if isinstance(node, ast.ListComp) for compr in node.generators  # type: ignore
             ]
             for node in ast.walk(st):
                 if isinstance(node, ast.Name):
@@ -141,7 +141,7 @@ class _Evaluator:
     def evaluate_holders(self, gui: Gui, expr: str) -> t.List[str]:
         lst = []
         for hld in self.__expr_to_holders.get(expr, []):
-            hash = self.__get_holder_hash(hld, self.__expr_to_hash.get(expr))
+            hash = self.__get_holder_hash(hld, self.__expr_to_hash.get(expr, ""))
             self.__evaluate_holder(gui, hld, expr)
             lst.append(hash)
         return lst
@@ -150,7 +150,7 @@ class _Evaluator:
     def __get_holder_hash(holder: t.Type[_TaipyBase], expr_hash: str) -> str:
         return f"{holder.get_hash()}_{_get_client_var_name(expr_hash)}"
 
-    def __evaluate_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> _TaipyBase:
+    def __evaluate_holder(self, gui: Gui, holder: t.Type[_TaipyBase], expr: str) -> t.Optional[_TaipyBase]:
         try:
             expr_hash = self.__expr_to_hash.get(expr, "unknownExpr")
             holder_hash = self.__get_holder_hash(holder, expr_hash)

@@ -4,7 +4,7 @@ import { createTheme, Theme } from "@mui/material/styles";
 import { io, Socket } from "socket.io-client";
 import merge from "lodash/merge";
 
-import { ENDPOINT, TIMEZONE_CLIENT } from "../utils";
+import { TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
 
@@ -157,7 +157,7 @@ export const INITIAL_STATE: TaipyState = {
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
     ...initialState,
     isSocketConnected: false,
-    socket: io(ENDPOINT),
+    socket: io("/"),
 });
 
 const storeClientId = (id: string) => localStorage && localStorage.setItem("TaipyClientId", id);

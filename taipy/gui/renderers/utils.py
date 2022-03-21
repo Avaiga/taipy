@@ -69,7 +69,7 @@ def _get_columns_dict(
 _indexed_data = re.compile(r"^(\d+)\/(.*)")
 
 
-def _get_col_from_indexed(col_name: str, idx: int) -> str:
+def _get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
     re_res = _indexed_data.search(col_name)
     if re_res:
         return col_name if str(idx) == re_res.group(1) else None

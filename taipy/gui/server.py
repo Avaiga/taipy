@@ -62,7 +62,6 @@ class _Server:
         self,
         static_folder: t.Optional[str] = "",
         template_folder: str = "",
-        client_url: str = "",
         title: str = "",
         favicon: str = "",
         themes: t.Optional[t.Dict[str, t.Any]] = None,
@@ -77,7 +76,6 @@ class _Server:
             if path == "" or "." not in path:
                 return render_template(
                     "index.html",
-                    flask_url=client_url,
                     app_css=f"/{self.css_file}.css",
                     title=title,
                     favicon=favicon,

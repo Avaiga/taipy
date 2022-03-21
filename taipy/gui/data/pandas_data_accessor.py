@@ -104,7 +104,7 @@ class _PandasDataAccessor(_DataAccessor):
         self,
         data: pd.DataFrame,
         data_format: _DataFormat,
-        orient: str = None,
+        orient: str,
         start: t.Optional[int] = None,
         rowcount: t.Optional[int] = None,
         data_extraction: t.Optional[bool] = None,
@@ -138,7 +138,7 @@ class _PandasDataAccessor(_DataAccessor):
             if data_format == _DataFormat.APACHE_ARROW:
                 raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
             # workaround for python built in json encoder that does not yet support ignore_nan
-            ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)
+            ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)  # type: ignore
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
@@ -214,7 +214,7 @@ class _PandasDataAccessor(_DataAccessor):
                     new_indexes = new_indexes[::-1]
                 new_indexes = new_indexes[slice(start, end + 1)]
             else:
-                new_indexes = slice(start, end + 1)
+                new_indexes = slice(start, end + 1)  # type: ignore
             value = self.__build_transferred_cols(gui, columns, value.iloc[new_indexes], styles=payload.get("styles"))
             dictret = self.__format_data(
                 value, data_format, "records", start, rowcount, handle_nan=payload.get("handlenan", False)

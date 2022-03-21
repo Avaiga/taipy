@@ -13,9 +13,9 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
 
     @staticmethod
     def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in _ArrayDictDataAccessor.__types]
+        return [t.__name__ for t in _ArrayDictDataAccessor.__types]  # type: ignore
 
-    def __get_dataframe(self, value: t.Any) -> pd.DataFrame:
+    def __get_dataframe(self, value: t.Any) -> t.Union[t.List[pd.DataFrame], pd.DataFrame]:
         if isinstance(value, list):
             if isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
@@ -37,13 +37,13 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
         return pd.DataFrame(value)
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, _ArrayDictDataAccessor.__types):
+        if isinstance(value, _ArrayDictDataAccessor.__types):  # type: ignore
             return super().get_col_types(var_name, self.__get_dataframe(value))
         return None
 
     def get_data(  # noqa: C901
         self, guiApp: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
-        if isinstance(value, _ArrayDictDataAccessor.__types):
+        if isinstance(value, _ArrayDictDataAccessor.__types):  # type: ignore
             return super().get_data(guiApp, var_name, self.__get_dataframe(value), payload, data_format)
         return {}
