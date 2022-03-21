@@ -67,15 +67,21 @@ class _Builder:
         if "properties" in self.__attributes:
             (prop_dict, prop_hash) = self.__parse_attribute_value(self.__attributes["properties"])
             if prop_hash is None:
-                self.__gui._bind_var(prop_dict)
-                prop_dict = _getscopeattr(self.__gui, prop_dict)
+                prop_hash = prop_dict
+                self.__gui._bind_var(prop_hash)
+                if hasattr(self.__gui._bindings(), prop_hash):
+                    prop_dict = _getscopeattr(self.__gui, prop_hash)
             if isinstance(prop_dict, _MapDict):
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
-                    self.__attributes[k] = v
+                    (val, key_hash) = self.__parse_attribute_value(v)
+                    if key_hash is None:
+                        self.__attributes[k] = f"{{{prop_hash}.{k}}}"
+                    else:
+                        self.__attributes[k] = v
             else:
                 warnings.warn(
-                    f"{self.__control_type}.properties ({self.__attributes['properties'] if prop_hash is None else prop_hash}) should be a dict."
+                    f"{self.__control_type}.properties ({prop_hash}) must be a dict."
                 )
 
         # Bind potential function and expressions in self.attributes
