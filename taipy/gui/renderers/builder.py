@@ -81,7 +81,7 @@ class _Builder:
                         self.__attributes[k] = v
             else:
                 warnings.warn(
-                    f"{self.__control_type}.properties ({prop_hash}) should be a dict."
+                    f"{self.__control_type}.properties ({prop_hash}) must be a dict."
                 )
 
         # Bind potential function and expressions in self.attributes
