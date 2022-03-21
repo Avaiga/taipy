@@ -9,6 +9,7 @@ from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job._job_model import _JobModel
+from taipy.core.job._job_repository import _JobRepository
 from taipy.core.job.job import Job
 from taipy.core.job.status import Status
 from taipy.core.task._task_manager import _TaskManager
@@ -29,7 +30,31 @@ data_node = CSVDataNode(
 
 task = Task("config_id", print, [data_node], [], TaskId("task_id"), parent_id="parent_id")
 
+
+def f():
+    pass
+
+
+class A:
+    class B:
+        def f(self):
+            pass
+
+    def f(self):
+        pass
+
+    @classmethod
+    def g(cls):
+        pass
+
+    @staticmethod
+    def h():
+        pass
+
+
 job = Job(JobId("id"), task)
+job._subscribers = [f, A.f, A.g, A.h, A.B.f]
+job._exceptions = [Exception()]
 
 job_model = _JobModel(
     id=JobId("id"),
@@ -37,8 +62,8 @@ job_model = _JobModel(
     status=Status(Status.SUBMITTED),
     force=False,
     creation_date=job._creation_date.isoformat(),
-    subscribers=[],
-    exceptions=[],
+    subscribers=_JobRepository._serialize_subscribers(job._subscribers),
+    exceptions=_JobRepository._serialize_exceptions(job._exceptions),
 )
 
 
