@@ -8,9 +8,11 @@ import { setStyle } from "../../utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
+import { createPartialAction } from "../../context/taipyReducers";
 
 interface TaipyRenderedProps {
     path?: string;
+    partial?: boolean;
 }
 
 interface HeadProps {
@@ -29,13 +31,16 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     const location = useLocation();
     const [JSX, setJSX] = useState("");
     const [head, setHead] = useState<HeadProps[]>([]);
-    const { state } = useContext(TaipyContext);
+    const { state, dispatch } = useContext(TaipyContext);
 
     const path = props.path || (state.locations && state.locations[location.pathname]) || location.pathname;
 
     useEffect(() => {
         // Fetch JSX Flask Backend Render
-        axios
+        if (props.partial) {
+            dispatch(createPartialAction(path.slice(1), false));
+        } else {
+            axios
             .get<AxiosRenderer>(`/taipy-jsx${path}?client_id=${state.id || ""}`)
             .then((result) => {
                 // set rendered JSX and CSS style from fetch result
@@ -44,7 +49,8 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 result.data.head && setHead(result.data.head);
             })
             .catch((error) => setJSX(`<h1>No data fetched from backend from ${path}</h1><br></br>${error}`));
-    }, [path, state.id]);
+        }
+    }, [path, state.id, dispatch, props.partial]);
 
     return (
         <>

@@ -1,4 +1,4 @@
-import React, { CSSProperties, MouseEvent, useCallback, useContext } from "react";
+import React, { CSSProperties, MouseEvent, useCallback, useContext, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -13,7 +13,7 @@ import { useDynamicProperty } from "../../utils/hooks";
 import { getUpdateVar } from "./utils";
 import { Icon, IconAvatar } from "../../utils/icon";
 
-interface ToggleProps extends LovProps {
+interface ToggleProps extends LovProps<string> {
     style?: CSSProperties;
     label?: string;
     kind?: string;
@@ -36,7 +36,7 @@ const Toggle = (props: ToggleProps) => {
         valueById,
     } = props;
     const { dispatch } = useContext(TaipyContext);
-
+    const [value, setValue] = useState(props.defaultValue)
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
@@ -55,6 +55,8 @@ const Toggle = (props: ToggleProps) => {
         [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById]
     );
 
+    useEffect(() => {props.value !== undefined && setValue(props.value)}, [props.value]);
+
     return kind === "theme" ? (
         <ThemeToggle {...props} />
     ) : (
@@ -62,7 +64,7 @@ const Toggle = (props: ToggleProps) => {
             {label ? <Typography>{label}</Typography> : null}
             <Tooltip title={hover || ""}>
                 <ToggleButtonGroup
-                    value={props.value || props.defaultValue}
+                    value={value}
                     exclusive
                     onChange={changeValue}
                     disabled={!active}

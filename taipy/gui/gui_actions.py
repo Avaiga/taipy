@@ -3,6 +3,7 @@ import warnings
 
 from .gui import Gui
 from .state import State
+from .partial import Partial
 
 
 def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
@@ -101,3 +102,9 @@ def navigate(state: State, to: t.Optional[str] = ""):
         state._gui._navigate(to)
     else:
         warnings.warn("'navigate()' must be called in the context of a callback")
+
+def refresh_partial(state: State, partial: Partial, content: str):
+    if state and isinstance(state._gui, Gui):
+        state._gui._refresh_partial(partial, content)
+    else:
+        warnings.warn("'refresh_partial()' must be called in the context of a callback")

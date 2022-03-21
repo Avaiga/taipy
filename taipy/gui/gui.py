@@ -227,6 +227,8 @@ class Gui:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
     def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
+        if var_name == "":
+            return
         # Check if Variable is a managed type
         current_value = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(var_name))
         if isinstance(current_value, _TaipyData):
@@ -445,6 +447,17 @@ class Gui:
                 "message": message,
                 "browser": browser_notification,
                 "duration": duration,
+            }
+        )
+
+    def __send_ws_partial(
+        self,
+        partial: str
+    ):
+        self.__send_ws(
+            {
+                "type": _WsType.PARTIAL.value,
+                "name": partial,
             }
         )
 
@@ -858,6 +871,10 @@ class Gui:
             self._get_config("browser_notification", True) if browser_notification is None else browser_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
         )
+
+    def _refresh_partial(self, partial: Partial, content: str):
+        partial._renderer.set_content(content)
+        self.__send_ws_partial(partial._route)
 
     def _hold_actions(
         self,

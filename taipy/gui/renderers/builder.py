@@ -38,6 +38,8 @@ class _Builder:
 
     __ONE_COLUMN_CHART = ["pie"]
 
+    __BLOCK_CONTROLS = ["dialog", "expandable", "pane", "part"]
+
     def __init__(
         self,
         gui,
@@ -735,15 +737,16 @@ class _Builder:
         return self
 
     def set_partial(self):
-        if self.__element_name != "Dialog" and self.__element_name != "Pane":
+        if self.__control_type not in _Builder.__BLOCK_CONTROLS:
             return self
         partial = self.__attributes.get("partial")
         if partial:
             page = self.__attributes.get("page")
             if page:
-                warnings.warn("Dialog control: page and partial should not be defined at the same time.")
+                warnings.warn(f"{self.__element_name} control: page and partial should not be defined at the same time.")
             if isinstance(partial, Partial):
                 self.__attributes["page"] = partial._route
+                self.__set_react_attribute("partial", partial._route)
         return self
 
     def set_propagate(self):
@@ -796,7 +799,7 @@ class _Builder:
         return hash_name
 
     def __set_dynamic_bool_attribute(
-        self, name: str, def_val: t.Any, with_update: bool, var_type: _AttributeType, update_main=True
+        self, name: str, def_val: t.Any, with_update: bool, update_main=True
     ):
         hash_name = self.__hashes.get(name)
         val = self.__get_boolean_attribute(name, def_val)
@@ -804,7 +807,7 @@ class _Builder:
         if val != def_val:
             self.__set_boolean_attribute(default_name, val)
         if hash_name is not None:
-            hash_name = self.__get_typed_hash_name(hash_name, var_type)
+            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.dynamic_boolean)
             self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash_name))
             if with_update:
                 if update_main:
@@ -824,7 +827,7 @@ class _Builder:
                     self.__set_boolean_attribute(attr[0], val)
             elif var_type == _AttributeType.dynamic_boolean:
                 self.__set_dynamic_bool_attribute(
-                    attr[0], _get_tuple_val(attr, 2, False), _get_tuple_val(attr, 3, False), var_type
+                    attr[0], _get_tuple_val(attr, 2, False), _get_tuple_val(attr, 3, False)
                 )
             elif var_type == _AttributeType.number:
                 self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
@@ -849,7 +852,7 @@ class _Builder:
             elif var_type == _AttributeType.boolean_or_list:
                 if _is_boolean(self.__attributes.get(attr[0])):
                     self.__set_dynamic_bool_attribute(
-                        attr[0], _get_tuple_val(attr, 2, False), True, var_type, update_main=False
+                        attr[0], _get_tuple_val(attr, 2, False), True, update_main=False
                     )
                 else:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
