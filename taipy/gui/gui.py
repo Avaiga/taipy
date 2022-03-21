@@ -785,6 +785,8 @@ class Gui:
             self.__directory_name_of_pages.append(folder_name)
             self.__add_pages_in_folder(folder_name, folder_path)
 
+    # partials
+
     def add_partial(
         self,
         page: t.Union[str, Page],
@@ -822,6 +824,19 @@ class Gui:
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial._route))
         return new_partial
+
+    def _update_partial(self, partial: Partial):
+        partials = _getscopeattr(self, Partial._PARTIALS, {})
+        partials[partial._route] = partial
+        _setscopeattr(self, Partial._PARTIALS, partials)
+        self.__send_ws_partial(partial._route)
+
+    def _get_partial(self, route: str) -> t.Optional[Partial]:
+        partials = _getscopeattr(self, Partial._PARTIALS, {})
+        partial = partials.get(route)
+        if partial is None:
+            partial = next((p for p in self._config.partials if p._route == route), None)
+        return partial
 
     # Main binding method (bind in markdown declaration)
     def _bind_var(self, var_name: str) -> bool:
@@ -871,10 +886,6 @@ class Gui:
             self._get_config("browser_notification", True) if browser_notification is None else browser_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
         )
-
-    def _refresh_partial(self, partial: Partial, content: str):
-        partial._renderer.set_content(content)
-        self.__send_ws_partial(partial._route)
 
     def _hold_actions(
         self,
