@@ -2,8 +2,10 @@ import pathlib
 from datetime import datetime
 
 from taipy.core._repository import _FileSystemRepository
-from taipy.core.common._utils import _fct_to_dict, _load_fct
+from taipy.core.common._listattributes import _ListAttributes
+from taipy.core.common._utils import _fct_to_dict, _fcts_to_dict, _load_fct
 from taipy.core.config.config import Config
+from taipy.core.exceptions.exceptions import InvalidSubscriber
 from taipy.core.job._job_model import _JobModel
 from taipy.core.job.job import Job
 from taipy.core.task._task_repository import _TaskRepository
@@ -14,29 +16,31 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
         super().__init__(model=_JobModel, dir_name="jobs")
 
     def _to_model(self, job: Job):
+        print(_fcts_to_dict(job._subscribers))
         return _JobModel(
             job.id,
             job._task.id,
             job._status,
             job._force,
             job._creation_date.isoformat(),
-            [],
-            self.__serialize_exceptions(job.exceptions),
+            _fcts_to_dict(job._subscribers),
+            self.__serialize_exceptions(job._exceptions),
         )
 
     def _from_model(self, model: _JobModel):
         job = Job(id=model.id, task=_TaskRepository().load(model.task_id))
 
-        job.status = model.status  # type: ignore
-        job.force = model.force  # type: ignore
-        job.creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
-        # for it in model.subscribers:
-        #     try:
-        #         job._subscribers.append(load_fct(it.get("fct_module"), it.get("fct_name")))
-        #     except AttributeError:
-        #         raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be load.")
-        job._exceptions = [_load_fct(e["fct_module"], e["fct_name"])(*e["args"]) for e in model.exceptions]
-
+        job._status = model.status  # type: ignore
+        job._force = model.force  # type: ignore
+        job._creation_date = datetime.fromisoformat(model.creation_date)  # type: ignore
+        for sub in model.subscribers:
+            try:
+                job._subscribers.append(_load_fct(sub.get("fct_module"), sub.get("fct_name")))  # type: ignore
+            except AttributeError:
+                raise InvalidSubscriber(f"The subscriber function {sub.get('fct_name')} cannot be load.")
+        job._exceptions = _ListAttributes(
+            job, [_load_fct(e["fct_module"], e["fct_name"])(*e["args"]) for e in model.exceptions]
+        )
         return job
 
     @property

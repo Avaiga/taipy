@@ -6,7 +6,8 @@ from datetime import datetime
 from typing import Callable, List
 
 from taipy.core.common._entity import _Entity
-from taipy.core.common._reload import _self_reload, _self_setter
+from taipy.core.common._listattributes import _ListAttributes
+from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.job.status import Status
@@ -46,8 +47,8 @@ class Job(_Entity):
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
-        self._subscribers: List[Callable] = []
-        self._exceptions: List[Exception] = []
+        self._subscribers = _ListAttributes(self, list())
+        self._exceptions = _ListAttributes(self, list())
         self.__logger = _TaipyLogger._get_logger()
 
     @property  # type: ignore
@@ -108,9 +109,25 @@ class Job(_Entity):
     def __eq__(self, other):
         return self.id == other.id
 
-    @property
-    def exceptions(self) -> List[Exception]:
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def exceptions(self):
         return self._exceptions
+
+    @exceptions.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def exceptions(self, val):
+        self._exceptions = _ListAttributes(self, val)
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def subscribers(self):
+        return self._subscribers
+
+    @subscribers.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def subscribers(self, val):
+        self._subscribers = _ListAttributes(self, val)
 
     @_run_callbacks
     def blocked(self):
@@ -230,8 +247,9 @@ class Job(_Entity):
         """
         functions = list(functions)
         function = functions.pop()
+        print(function)
         self._subscribers.append(function)
-
+        print(self.subscribers)
         if self.status != Status.SUBMITTED:
             function(self)
 
@@ -240,10 +258,10 @@ class Job(_Entity):
 
     def update_status(self, ft: Future):
         """Update the Job status based on its execution."""
-        self._exceptions = ft.result()
-        if self._exceptions:
+        self.exceptions = ft.result()  # type: ignore
+        if self.exceptions:
             self.failed()
-            self.__logger.error(f" {len(self._exceptions)} errors occurred during execution of job {self.id}")
+            self.__logger.error(f" {len(self.exceptions)} errors occurred during execution of job {self.id}")
             for e in self.exceptions:
                 self.__logger.error("".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__)))
         else:

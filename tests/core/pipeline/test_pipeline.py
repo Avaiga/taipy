@@ -131,41 +131,45 @@ def test_auto_set_and_reload(task):
     assert pipeline_1.parent_id == "parent_id"
     assert pipeline_2.parent_id == "parent_id"
 
-    assert len(pipeline_1.subscribers) == 0
-    pipeline_1.subscribers = set([print])
-    assert len(pipeline_1.subscribers) == 1
-    assert len(pipeline_2.subscribers) == 1
-
     assert pipeline_1.properties == {}
     pipeline_1.properties["qux"] = 5
     assert pipeline_1.properties["qux"] == 5
     assert pipeline_2.properties["qux"] == 5
+
+    assert len(pipeline_1.subscribers) == 0
+    pipeline_1.subscribers.append(print)
+    assert len(pipeline_1.subscribers) == 1
+    assert len(pipeline_2.subscribers) == 1
+
+    pipeline_1.subscribers = []
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
 
     with pipeline_1 as pipeline:
         assert pipeline.config_id == "fgh"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
         assert pipeline.parent_id == "parent_id"
-        assert len(pipeline.subscribers) == 1
+        assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
 
         pipeline.config_id = "abc"
         pipeline.tasks = []
         pipeline.parent_id = None
-        pipeline.subscribers = None
+        pipeline.subscribers = [print]
 
         assert pipeline._config_id == "abc"
         assert pipeline.config_id == "fgh"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
         assert pipeline.parent_id == "parent_id"
-        assert len(pipeline.subscribers) == 1
+        assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
 
     assert pipeline_1.config_id == "abc"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.parent_id is None
-    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline.subscribers) == 1
     assert not pipeline_1._is_in_context
 
 

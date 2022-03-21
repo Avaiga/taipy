@@ -54,6 +54,8 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
         return _PipelineManager._set(entity)
     if isinstance(entity, Task):
         return _TaskManager._set(entity)
+    if isinstance(entity, Job):
+        return _JobManager._set(entity)
     if isinstance(entity, DataNode):
         return _DataManager._set(entity)
 

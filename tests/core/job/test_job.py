@@ -144,6 +144,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
     _dispatch(task, job)
 
     job = _JobManager._get(job_id)
+
     assert job.is_failed()
     with pytest.raises(DataNodeWritingError):
         raise job.exceptions[0]
@@ -180,6 +181,24 @@ def test_auto_set_and_reload(current_datetime, job_id):
     job_1.creation_date = new_datetime
     assert job_1.creation_date == new_datetime
     assert job_2.creation_date == new_datetime
+
+    assert len(job_1.exceptions) == 0
+    job_1.exceptions.append(NoData("no data"))
+    assert len(job_1.exceptions) == 1
+    assert len(job_2.exceptions) == 1
+
+    job_1.exceptions = []
+    assert len(job_1.exceptions) == 0
+    assert len(job_2.exceptions) == 0
+
+    assert len(job_1.subscribers) == 0
+    job_1.subscribers.append(print)
+    assert len(job_1.subscribers) == 1
+    assert len(job_2.subscribers) == 1
+
+    job_1.subscribers = []
+    assert len(job_1.subscribers) == 0
+    assert len(job_2.subscribers) == 0
 
     with job_1 as job:
         assert job.task.id == task_2.id

@@ -58,7 +58,7 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
             data_node._name,
             data_node._parent_id,
             data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
-            data_node._job_ids,
+            data_node._job_ids.data,
             data_node._validity_period.days if data_node._validity_period else None,
             data_node._validity_period.seconds if data_node._validity_period else None,
             data_node._edition_in_progress,
