@@ -131,13 +131,10 @@ class ScenarioList(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def fetch_config(self, config_id):
-        return getattr(self.module, config_id)
+        from taipy.core.config.config import Config
+        return Config.scenarios[config_id]
 
     def get(self):
         schema = ScenarioResponseSchema(many=True)
