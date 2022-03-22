@@ -46,13 +46,13 @@ const Alert = (props: AlertProps) => {
                 action: notifAction,
                 autoHideDuration: alert.duration,
             });
-            alert.browser && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
+            alert.system && new Notification(document.title || "Taipy", { body: alert.message, icon: faviconUrl });
         }
     }, [alert, enqueueSnackbar, notifAction, faviconUrl]);
 
     useEffect(() => {
-        alert?.browser && window.Notification && Notification.requestPermission();
-    }, [alert?.browser]);
+        alert?.system && window.Notification && Notification.requestPermission();
+    }, [alert?.system]);
 
     return null;
 };

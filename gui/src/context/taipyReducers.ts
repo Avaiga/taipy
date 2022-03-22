@@ -58,7 +58,7 @@ interface NamePayload {
 export interface AlertMessage {
     atype: string;
     message: string;
-    browser: boolean;
+    system: boolean;
     duration: number;
 }
 
@@ -270,7 +270,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                     alert: {
                         atype: alertAction.atype,
                         message: alertAction.message,
-                        browser: alertAction.browser,
+                        system: alertAction.system,
                         duration: alertAction.duration,
                     },
                 };
@@ -528,7 +528,7 @@ export const createAlertAction = (alert?: AlertMessage): TaipyAlertAction => ({
     type: Types.SetAlert,
     atype: alert ? getAlertType(alert.atype) : "",
     message: alert ? alert.message : "",
-    browser: alert ? alert.browser : true,
+    system: alert ? alert.system : false,
     duration: alert ? alert.duration : 3000,
 });
 

@@ -6,7 +6,7 @@ from .state import State
 
 
 def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
-    """Donwload content to the client.
+    """Download content to the client.
 
     Arguments:
         state: the current user state as received in any callback.
@@ -24,7 +24,7 @@ def notify(
     state: State,
     notification_type: str = "I",
     message: str = "",
-    browser_notification: t.Optional[bool] = None,
+    system_notification: t.Optional[bool] = None,
     duration: t.Optional[int] = None,
 ):
     """Send a notification to the user interface.
@@ -34,9 +34,9 @@ def notify(
         notification_type: the notification type. This can be one of `"success"`, `"info"`, `"warning"`, or `"error"`.
             To remove the last notification, set this parameter to the empty string.
         message: the text message to display.
-        browser_notification: if True, the browser will also show the notification.
+        system_notification: if True, the system will also show the notification.
             If not specified or set to None, this parameter will use the value of
-            `configuration[browser_notification]`.
+            `configuration[system_notification]`.
         duration: the time, in milliseconds, during which the notification is shown.
             If not specified or set to None, this parameter will use the value of
             `configuration[notification_duration]`.
@@ -44,9 +44,17 @@ def notify(
     Note that you can also call this function with _notification_type_ set to the first letter
     or the alert type (ie setting _notification_type_ to "i" is equivalent to setting it to
     "info").
+
+    If _system_notification_ is set to True, then the browser requests the system
+    to display a notification as well. They usually appear in small windows that
+    fly out of the system tray.<br/>
+    The first time your browser is requested to show such a system notification for
+    Taipy applications, you may be prompted to authorize the browser to do so. Please
+    refer to your browser documentation for details on how to allow or prevent this
+    feature.
     """
     if state and isinstance(state._gui, Gui):
-        state._gui._notify(notification_type, message, browser_notification, duration)
+        state._gui._notify(notification_type, message, system_notification, duration)
     else:
         warnings.warn("'notify' function should be called in the context of a callback")
 
@@ -101,4 +109,3 @@ def navigate(state: State, to: t.Optional[str] = ""):
         state._gui._navigate(to)
     else:
         warnings.warn("'navigate()' must be called in the context of a callback")
-

@@ -7,7 +7,7 @@ import Alert from "./Alert";
 import { AlertMessage } from "../../context/taipyReducers";
 
 const defaultMessage = "message";
-const defaultAlert: AlertMessage = { atype: "success", message: defaultMessage, browser: true, duration: 3000 };
+const defaultAlert: AlertMessage = { atype: "success", message: defaultMessage, system: true, duration: 3000 };
 
 class myNotification {
     static requestPermission = jest.fn();

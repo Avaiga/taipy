@@ -41,7 +41,9 @@ class Page(ABC):
         """Set a new page content.
 
         Reads the new page content and reinitializes the page to reflect the change.
-        This function can only be used inside iPython (Jupyter) Notebook environment.
+        
+        !!! important
+            This function can only be used inside iPython (Jupyter) Notebook environment.
 
         Arguments:
             content: the text content or the path to the file holding the text to be transformed.

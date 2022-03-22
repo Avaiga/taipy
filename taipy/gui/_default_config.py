@@ -15,7 +15,7 @@ default_config: Config = {
     "theme[light]": None,
     "theme[dark]": None,
     "use_arrow": False,
-    "browser_notification": True,
+    "system_notification": False,
     "notification_duration": 3000,
     "single_client": False,
     "ngrok_token": "",
