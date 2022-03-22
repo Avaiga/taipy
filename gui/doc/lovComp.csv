@@ -4,4 +4,4 @@ lov,"dict[str, any]",None,The list of values. See [GLOBAL-LOV] for details.
 adapter,Callable,`lambda x: str(x)`,"The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
 type,str,Type(lov-element)??,"Must be specified if <i>lov</i> contains a non-specific type of data (ex: dict).
 <i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
-value_by_id,bool,False,If False, the selection value (in value) is the selected element in lov. If set to True, then value is set to the id of the selected element in lov.
+value_by_id,bool,False,"If False, the selection value (in <i>value</i>) is the selected element in <i>lov</i>. If set to True, then <i>value</i> is set to the id of the selected element in <i>lov</i>."

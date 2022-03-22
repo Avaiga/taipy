@@ -33,6 +33,7 @@ ConfigParameter = t.Literal[
     "data_url_max_size",
     "flask_log",
     "margin",
+    "run_browser",
 ]
 
 Config = t.TypedDict(
@@ -59,6 +60,7 @@ Config = t.TypedDict(
         "data_url_max_size": t.Union[int, None],
         "flask_log": bool,
         "margin": t.Union[str, None],
+        "run_browser": bool,
     },
     total=False,
 )

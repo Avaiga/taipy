@@ -4,7 +4,7 @@ A series of toggle buttons that the user can select.
 
 Each button is represented by a string, an image or both.
 
-You can use an arbitrary type for all the items (see the [example](#binding-to-a-list-of-objects)).
+You can use an arbitrary type for all the items (see the [example](#use-arbitrary-objects)).
 
 ## Usage
 
@@ -63,9 +63,9 @@ A toggle control that returns an id while selecting a label or `Icon^`.
         <taipy:toggle value="{sel}" lov="{[('id1', 'Label 1'), ('id2', Icon('/images/icon.png', 'Label 2'),('id3', 'Label 3')]}" />
         ```
 
-### Display a list of objects
+### Use arbitrary objects
 
-Assuming your Python code has created a list of object:
+Assuming your Python code has created a list of objects:
 ```py3
 class User:
     def __init__(self, id, name, birth_year):
@@ -82,7 +82,7 @@ user_sel = users[2]
 ```
 
 If you want to create a toggle control that lets you pick a specific user, you
-can use the following fragment.
+can use the following fragment:
 
 !!! example "Page content"
 

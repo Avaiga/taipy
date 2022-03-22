@@ -23,6 +23,7 @@ interface PaneProps extends TaipyActiveProps {
     persistent?: boolean;
     tp_onClose?: string;
     page?: string;
+    partial?: boolean;
     height?: string | number;
     width?: string | number;
 }
@@ -55,6 +56,7 @@ const Pane = (props: PaneProps) => {
         persistent = false,
         tp_onClose,
         page,
+        partial,
         defaultOpen,
         height = "30vh",
         width = "30vw",
@@ -113,7 +115,7 @@ const Pane = (props: PaneProps) => {
             ) : null}
             <Tooltip title={hover || ""}>
                 <>
-                    {page ? <TaipyRendered path={"/" + page} /> : null}
+                    {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
                     {props.children}
                 </>
             </Tooltip>

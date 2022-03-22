@@ -2,7 +2,7 @@ import typing as t
 from abc import ABC, abstractmethod
 from os import path
 
-from .utils import _varname_from_content
+from .utils import _is_in_notebook, _varname_from_content
 
 
 class Page(ABC):
@@ -41,12 +41,15 @@ class Page(ABC):
         """Set a new page content.
 
         Reads the new page content and reinitializes the page to reflect the change.
+        This function can only be used inside iPython (Jupyter) Notebook environment.
 
         Arguments:
             content: the text content or the path to the file holding the text to be transformed.
 
         If _content_ is a path to a readable file, the file is read entirely as the text template.
         """
+        if not _is_in_notebook():
+            raise RuntimeError("set_content function must only be used inside iPython Notebook")
         self.__process_content(content)
 
     def _get_content_detail(self, gui) -> str:
