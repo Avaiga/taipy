@@ -2,6 +2,10 @@ from setuptools import setup
 
 __version__ = "1.0.0.dev"
 
+extras = {
+    "gui": ["taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop"],
+}
+
 setup(
     name="taipy_rest",
     version=__version__,
@@ -21,4 +25,5 @@ setup(
         "apispec-webframeworks",
         "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop"
     ],
+    extras_require=extras,
 )
