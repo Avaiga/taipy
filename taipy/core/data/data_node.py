@@ -147,7 +147,7 @@ class DataNode(_Entity):
         self._name = val
 
     @property  # type: ignore
-    @_self_reload("data")
+    @_self_reload(_MANAGER_NAME)
     def edition_in_progress(self):
         return self._edition_in_progress
 
@@ -261,7 +261,7 @@ class DataNode(_Entity):
         self.last_edition_date = at or datetime.now()  # type: ignore
         self.edition_in_progress = False  # type: ignore
         if job_id:
-            self.job_ids.append(job_id)
+            self._job_ids.append(job_id)
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
         """

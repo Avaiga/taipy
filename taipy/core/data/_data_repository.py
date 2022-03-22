@@ -101,7 +101,6 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
-
         return self.class_map[model.storage_type](
             config_id=model.config_id,
             scope=model.scope,

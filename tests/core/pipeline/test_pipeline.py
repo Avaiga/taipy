@@ -169,7 +169,7 @@ def test_auto_set_and_reload(task):
     assert pipeline_1.config_id == "abc"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.parent_id is None
-    assert len(pipeline.subscribers) == 1
+    assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
 
 
