@@ -3,7 +3,6 @@ import warnings
 
 from .gui import Gui
 from .state import State
-from .partial import Partial
 
 
 def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action: t.Optional[str] = ""):
