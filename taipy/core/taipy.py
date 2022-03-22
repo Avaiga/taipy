@@ -644,8 +644,10 @@ def configure_sql_data_node(
     db_name: str,
     db_engine: str,
     read_query: str,
-    write_table: str,
-    db_port: int = 143,
+    write_table: str = None,
+    db_port: int = 1433,
+    db_host: str = "localhost",
+    db_driver: str = "ODBC Driver 17 for SQL Server",
     scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
     **properties,
 ):
@@ -660,7 +662,9 @@ def configure_sql_data_node(
         db_engine (str): The database engine. Possible values are 'sqlite' or 'mssql'.
         read_query (str): The SQL query called by Taipy to read the data from the database.
         write_table (str): The name of the table in the database to write the data to.
-        db_port (int): The database port. The default value is 143.
+        db_port (int): The database port. The default value is 1433.
+        db_host (str): The database host. The default value is 'localhost'.
+        db_driver (str): The database driver. The default value is 'ODBC Driver 17 for SQL Server'.
         scope (`Scope`): The scope of the SQL data node configuration. The default value is Scope.SCENARIO.
         **properties (Dict[str, Any]): The variable length keyword arguments.
     Returns:
@@ -673,7 +677,9 @@ def configure_sql_data_node(
         db_username=db_username,
         db_password=db_password,
         db_name=db_name,
+        db_host=db_host,
         db_engine=db_engine,
+        db_driver=db_driver,
         read_query=read_query,
         write_table=write_table,
         db_port=db_port,

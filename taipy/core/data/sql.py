@@ -1,4 +1,5 @@
 import os
+import re
 import urllib.parse
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
@@ -79,6 +80,7 @@ class SQLDataNode(DataNode):
             properties.get("db_password"),
             properties.get("db_name"),
             properties.get("db_port", 1433),
+            properties.get("db_driver", "ODBC Driver 17 for SQL Server"),
             properties.get("path", ""),
         )
 
@@ -98,18 +100,17 @@ class SQLDataNode(DataNode):
             self.unlock_edition()
 
     @staticmethod
-    def __build_conn_string(engine, username, host, password, database, port, path) -> str:
+    def __build_conn_string(engine, username, host, password, database, port, driver, path) -> str:
         # TODO: Add support to other SQL engines, the engine value should be checked.
         if engine == "mssql":
-            return "mssql+pyodbc:///?odbc_connect=" + urllib.parse.quote_plus(
-                f"DRIVER=FreeTDS;SERVER={host};PORT={port};DATABASE={database};UID={username};PWD={password};TDS_Version=8.0;"
-            )
+            driver = re.sub(r"\s+", "+", driver)
+            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?driver={driver}"
         elif engine == "sqlite":
             return os.path.join("sqlite:///", path, f"{database}.sqlite3")
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
-    def __create_engine(self, engine, username, host, password, database, port=1433, path=""):
-        conn_str = self.__build_conn_string(engine, username, host, password, database, port, path)
+    def __create_engine(self, engine, username, host, password, database, port, driver, path):
+        conn_str = self.__build_conn_string(engine, username, host, password, database, port, driver, path)
         return create_engine(conn_str)
 
     @classmethod
