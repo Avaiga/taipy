@@ -92,7 +92,6 @@ class _ScenarioManager(_Manager[Scenario]):
     def _submit(cls, scenario: Union[Scenario, ScenarioId], force: bool = False):
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         scenario = cls._get(scenario_id)
-
         if scenario is None:
             raise NonExistingScenario(scenario_id)
         callbacks = cls.__get_status_notifier_callbacks(scenario)

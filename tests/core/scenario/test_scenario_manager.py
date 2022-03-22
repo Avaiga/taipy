@@ -287,7 +287,8 @@ def test_notification_subscribe(mocker):
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2])
+    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_2])
+
     # test subscribing notification
     _ScenarioManager._subscribe(notify_1, scenario)
     _ScenarioManager._submit(scenario)
@@ -297,25 +298,10 @@ def test_notification_subscribe(mocker):
 
     # test unsubscribing notification
     # test notis subscribe only on new jobs
+    # _ScenarioManager._get(scenario)
     _ScenarioManager._unsubscribe(notify_1, scenario)
     _ScenarioManager._subscribe(notify_2, scenario)
-
-    print("notify1: ", notify_1, "\nnotify2: ", notify_2)
-    print(f"Im right: {scenario.subscribers}")
-    print(f"Im right: {scenario._subscribers}")
-
-    # print(_ScenarioManager._get(scenario.id))
-    print("get", _ScenarioManager._get(scenario).subscribers)
     _ScenarioManager._submit(scenario)
-    from taipy.core.common._utils import _fct_to_dict
-
-    print("noti1 dict: -- ", _fct_to_dict(notify_1))
-    print("noti2 dict: -- ", _fct_to_dict(notify_2))
-
-    print(f"Maybe Im right: {scenario.subscribers}")
-    print(f"Maybe Im right: {scenario._subscribers}")
-    print("noti1: ", notify_1.nb_called)
-    print("noti2: ", notify_2.nb_called)
 
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()
