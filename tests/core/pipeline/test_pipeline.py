@@ -141,6 +141,22 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_1.subscribers) == 1
     assert len(pipeline_2.subscribers) == 1
 
+    pipeline_1.subscribers.clear()
+    assert len(pipeline_1.subscribers) == 0
+    assert len(pipeline_2.subscribers) == 0
+
+    pipeline_1.subscribers.extend([print, map])
+    assert len(pipeline_1.subscribers) == 2
+    assert len(pipeline_2.subscribers) == 2
+
+    pipeline_1.subscribers.remove(print)
+    assert len(pipeline_1.subscribers) == 1
+    assert len(pipeline_2.subscribers) == 1
+
+    pipeline_1.subscribers + print + len
+    assert len(pipeline_1.subscribers) == 3
+    assert len(pipeline_2.subscribers) == 3
+
     pipeline_1.subscribers = []
     assert len(pipeline_1.subscribers) == 0
     assert len(pipeline_2.subscribers) == 0

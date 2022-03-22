@@ -144,6 +144,22 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
 
+    scenario_1.subscribers.clear()
+    assert len(scenario_1.subscribers) == 0
+    assert len(scenario_2.subscribers) == 0
+
+    scenario_1.subscribers.extend([print, map])
+    assert len(scenario_1.subscribers) == 2
+    assert len(scenario_2.subscribers) == 2
+
+    scenario_1.subscribers.remove(print)
+    assert len(scenario_1.subscribers) == 1
+    assert len(scenario_2.subscribers) == 1
+
+    scenario_1.subscribers + print + len
+    assert len(scenario_1.subscribers) == 3
+    assert len(scenario_2.subscribers) == 3
+
     scenario_1.subscribers = []
     assert len(scenario_1.subscribers) == 0
     assert len(scenario_2.subscribers) == 0
