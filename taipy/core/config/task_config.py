@@ -86,8 +86,16 @@ class TaskConfig:
         return list(self._outputs)
 
     def _update(self, config_as_dict, default_task_cfg=None):
-        self._inputs = config_as_dict.pop(self._INPUT_KEY, self._inputs) or default_task_cfg._inputs
-        self._outputs = config_as_dict.pop(self._OUTPUT_KEY, self._outputs) or default_task_cfg._outputs
+        self._inputs = (
+            config_as_dict.pop(self._INPUT_KEY, self._inputs)
+            if config_as_dict.get(self._INPUT_KEY, self._inputs) is not None
+            else default_task_cfg._inputs
+        )
+        self._outputs = (
+            config_as_dict.pop(self._OUTPUT_KEY, self._outputs)
+            if config_as_dict.get(self._OUTPUT_KEY, self._outputs) is not None
+            else default_task_cfg._outputs
+        )
         self.function = config_as_dict.pop(self._FUNCTION, self.function)
         self.properties.update(config_as_dict)
         if default_task_cfg:

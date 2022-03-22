@@ -53,7 +53,11 @@ class PipelineConfig:
         return config
 
     def _update(self, config_as_dict, default_pipeline_cfg=None):
-        self._tasks = config_as_dict.pop(self._TASK_KEY, self._tasks) or default_pipeline_cfg.task_configs
+        self._tasks = (
+            config_as_dict.pop(self._TASK_KEY, self._tasks)
+            if config_as_dict.get(self._TASK_KEY, self._tasks) is not None
+            else default_pipeline_cfg.task_configs
+        )
         if self._tasks is None and default_pipeline_cfg:
             self._tasks = default_pipeline_cfg._tasks
         self.properties.update(config_as_dict)

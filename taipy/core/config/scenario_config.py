@@ -77,7 +77,11 @@ class ScenarioConfig:
         return config
 
     def _update(self, config_as_dict, default_scenario_cfg=None):
-        self._pipelines = config_as_dict.pop(self._PIPELINE_KEY, self._pipelines)
+        self._pipelines = (
+            config_as_dict.pop(self._PIPELINE_KEY, self._pipelines)
+            if config_as_dict.pop(self._PIPELINE_KEY, self._pipelines) is not None
+            else default_scenario_cfg._pipelines
+        )
         if self._pipelines is None and default_scenario_cfg:
             self._pipelines = default_scenario_cfg._pipelines
         self.frequency = config_as_dict.pop(self._FREQUENCY_KEY, self.frequency) or default_scenario_cfg.frequency

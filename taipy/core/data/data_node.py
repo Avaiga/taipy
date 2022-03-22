@@ -236,7 +236,7 @@ class DataNode(_Entity):
         Locks the edition of the data node.
 
         Note:
-            It can be unlocked with the method `unlock_edition()^`
+            It can be unlocked with the method `(DataNode.)unlock_edition()^`
         """
         self.edition_in_progress = True
 
@@ -249,7 +249,8 @@ class DataNode(_Entity):
                 current datetime is used.
             job_id (JobId): An optional identifier of the writer.
         Note:
-            It can be unlocked with the method `unlock_edition()^`
+            It can be locked with the method `(DataNode.)lock_edition()^`
+``` @
         """
         self.last_edition_date = at or datetime.now()  # type: ignore
         self.edition_in_progress = False  # type: ignore

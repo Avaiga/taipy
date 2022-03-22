@@ -1,3 +1,4 @@
+import re
 from typing import Any, Dict, Optional
 
 import toml  # type: ignore
@@ -5,6 +6,7 @@ import toml  # type: ignore
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.frequency import Frequency
 from taipy.core.config._config import _Config
+from taipy.core.config._config_template_handler import _ConfigTemplateHandler
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.config.global_app_config import GlobalAppConfig
 from taipy.core.config.job_config import JobConfig
@@ -56,16 +58,25 @@ class _TomlSerializer:
             return config.id
         if isinstance(config, PipelineConfig):
             return config.id
+        if isinstance(config, bool):
+            return str(config) + ":bool"
+        if isinstance(config, int):
+            return str(config) + ":int"
+        if isinstance(config, float):
+            return str(config) + ":float"
         if isinstance(config, dict):
             return {str(key): cls.__stringify(val) for key, val in config.items()}
         if isinstance(config, list):
+            return [cls.__stringify(val) for val in config]
+        if isinstance(config, tuple):
             return [cls.__stringify(val) for val in config]
         return config
 
     @classmethod
     def _read(cls, filename: str) -> _Config:
         try:
-            return cls.__from_dict(dict(toml.load(filename)))
+            config_as_dict = cls._pythonify(dict(toml.load(filename)))
+            return cls.__from_dict(config_as_dict)
         except toml.TomlDecodeError as e:
             error_msg = f"Can not load configuration {e}"
             raise LoadingError(error_msg)
@@ -92,3 +103,30 @@ class _TomlSerializer:
             config_as_dict, ScenarioConfig, cls._SCENARIO_NODE_NAME, config._pipelines
         )
         return config
+
+    @classmethod
+    def _pythonify(cls, val):
+        match = re.fullmatch(_ConfigTemplateHandler._PATTERN, str(val))
+        if not match:
+            if isinstance(val, str):
+                TYPE_PATTERN = r"^(.+):(\bbool\b|\bstr\b|\bfloat\b|\bint\b)?$"
+                match = re.fullmatch(TYPE_PATTERN, str(val))
+                if match:
+                    actual_val = match.group(1)
+                    dynamic_type = match.group(2)
+                    if dynamic_type == "bool":
+                        return _ConfigTemplateHandler._to_bool(actual_val)
+                    elif dynamic_type == "int":
+                        return _ConfigTemplateHandler._to_int(actual_val)
+                    elif dynamic_type == "float":
+                        return _ConfigTemplateHandler._to_float(actual_val)
+                    elif dynamic_type == "str":
+                        return actual_val
+                    else:
+                        error_msg = f"Error loading toml configuration at {val}. {dynamic_type} type is not supported."
+                        raise LoadingError(error_msg)
+            if isinstance(val, dict):
+                return {str(k): cls._pythonify(v) for k, v in val.items()}
+            if isinstance(val, list):
+                return [cls._pythonify(v) for v in val]
+        return val

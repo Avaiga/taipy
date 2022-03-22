@@ -128,7 +128,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
 
     Parameters:
         entity_id (Union[`TaskId^`, `DataNodeId^`, `PipelineId^`, `ScenarioId^`, `JobId^`, `CycleId^`]): The id of the
-        entity to delete.
+            entity to delete.
     Raises:
         `ModelNotFound^`: No entity corresponds to entity_id
     """

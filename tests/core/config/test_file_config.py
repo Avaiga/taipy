@@ -1,5 +1,9 @@
+import os
+from unittest import mock
+
 import pytest
 
+import taipy.core.taipy
 from taipy.core.common.frequency import Frequency
 from taipy.core.config.config import Config
 from taipy.core.data.scope import Scope
@@ -41,32 +45,35 @@ def test_write_configuration_file():
 [TAIPY]
 root_folder = "./taipy/"
 storage_folder = ".data/"
-clean_entities_enabled = true
+clean_entities_enabled = "True:bool"
 
 [JOB]
 mode = "standalone"
-nb_of_workers = 1
+nb_of_workers = "1:int"
 
 [DATA_NODE.default]
 storage_type = "in_memory"
 scope = "SCENARIO"
-cacheable = false
+cacheable = "False:bool"
 custom = "default_custom_prop"
 
 [DATA_NODE.dn1]
 storage_type = "pickle"
 scope = "PIPELINE"
-cacheable = false
+cacheable = "False:bool"
 custom = "custom property"
 default_data = "dn1"
 
 [DATA_NODE.dn2]
 storage_type = "in_memory"
 scope = "SCENARIO"
-cacheable = false
+cacheable = "False:bool"
 custom = "default_custom_prop"
 foo = "bar"
 default_data = "dn2"
+baz = "qux"
+quux = "True:bool"
+corge = [ "grault", "garply", "17:int", "3.0:float",]
 
 [TASK.default]
 inputs = []
@@ -95,23 +102,36 @@ pipelines = [ "p1",]
 frequency = "QUARTERLY"
 owner = "Raymond Kopa"
     """.strip()
-
-    Config._set_global_config(clean_entities_enabled=True)
-    Config._set_job_config(mode="standalone")
-    Config._add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
-    dn1_cfg_v2 = Config._add_data_node(
-        "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
-    )
-    dn2_cfg_v2 = Config._add_data_node("dn2", storage_type="in_memory", foo="bar", default_data="dn2")
-    t1_cfg_v2 = Config._add_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
-    p1_cfg_v2 = Config._add_pipeline("p1", t1_cfg_v2, cron="daily")
-    Config._add_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
-    Config._add_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
     tf = NamedTemporaryFile()
-    Config._export(tf.filename)
-    actual_config = tf.read().strip()
+    with mock.patch.dict(os.environ, {"QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}):
+        Config._set_global_config(clean_entities_enabled=True)
+        Config._set_job_config(mode="standalone")
+        Config._add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
+        dn1_cfg_v2 = Config._add_data_node(
+            "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
+        )
+        dn2_cfg_v2 = Config._add_data_node(
+            "dn2",
+            storage_type="in_memory",
+            foo="bar",
+            default_data="dn2",
+            baz="ENV[QUX]",
+            quux="ENV[QUUZ]:bool",
+            corge=("grault", "ENV[GARPLY]", "ENV[WALDO]:int", 3.0),
+        )
+        t1_cfg_v2 = Config._add_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
+        p1_cfg_v2 = Config._add_pipeline("p1", t1_cfg_v2, cron="daily")
+        Config._add_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
+        Config._add_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
+        Config._export(tf.filename)
+        actual_config = tf.read().strip()
 
-    assert actual_config == expected_config
+        assert actual_config == expected_config
+        taipy.core.taipy.load_configuration(tf.filename)
+        tf2 = NamedTemporaryFile()
+        Config._export(tf2.filename)
+        actual_config_2 = tf2.read().strip()
+        assert actual_config_2 == expected_config
 
 
 def test_all_entities_use_valid_id():
