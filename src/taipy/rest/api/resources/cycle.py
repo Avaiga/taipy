@@ -1,16 +1,13 @@
-import importlib
-import os.path
 from datetime import datetime
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.core import Frequency
-from taipy.core import Cycle
+from taipy.core import Cycle, Frequency
+from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
 from taipy.core.exceptions.exceptions import ModelNotFound
 
 from ...commons.to_from_model import to_model
-from ...config import TAIPY_SETUP_FILE
 from ..schemas import CycleResponseSchema, CycleSchema
 
 REPOSITORY = "cycle"
@@ -131,13 +128,9 @@ class CycleList(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def fetch_config(self, config_id):
-        return getattr(self.module, config_id)
+        return Config.cycles[config_id]
 
     def get(self):
         schema = CycleResponseSchema(many=True)

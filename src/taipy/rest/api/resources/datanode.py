@@ -1,4 +1,3 @@
-import importlib
 import os
 from typing import List
 
@@ -6,12 +5,12 @@ import numpy as np
 import pandas as pd
 from flask import jsonify, make_response, request
 from flask_restful import Resource
+from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager as DataManager
 from taipy.core.data.operator import Operator
 from taipy.core.exceptions.exceptions import NonExistingDataNode
 
 from ...commons.to_from_model import to_model
-from ...config import TAIPY_SETUP_FILE
 from ..schemas import (
     CSVDataNodeConfigSchema,
     DataNodeFilterSchema,
@@ -81,10 +80,6 @@ class DataNodeResource(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def get(self, datanode_id):
         schema = DataNodeSchema()
@@ -149,13 +144,9 @@ class DataNodeList(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def fetch_config(self, config_id):
-        return getattr(self.module, config_id)
+        return Config.data_nodes[config_id]
 
     def get(self):
         schema = DataNodeSchema(many=True)
@@ -182,7 +173,7 @@ class DataNodeList(Resource):
                 "msg": "datanode created",
                 "datanode": schema.dump(config),
             }, 201
-        except AttributeError:
+        except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404
 
 
@@ -214,10 +205,6 @@ class DataNodeReader(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def __make_operators(self, schema: DataNodeFilterSchema) -> List:
         return [

@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, jsonify
 from flask_restful import Api
 from marshmallow import ValidationError
+from taipy.core.common._taipy_logger import _TaipyLogger
 
 from ..extensions import apispec
 from .resources import (
@@ -22,15 +23,7 @@ from .resources import (
     TaskList,
     TaskResource,
 )
-from .schemas import (
-    CycleSchema,
-    DataNodeSchema,
-    JobSchema,
-    PipelineSchema,
-    ScenarioSchema,
-    TaskSchema,
-)
-from taipy.core.common._taipy_logger import _TaipyLogger
+from .schemas import CycleSchema, DataNodeSchema, JobSchema, PipelineSchema, ScenarioSchema, TaskSchema
 
 _logger = _TaipyLogger._get_logger()
 
@@ -73,9 +66,7 @@ api.add_resource(
     endpoint="task_by_id",
     resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(
-    TaskList, "/tasks", endpoint="tasks", resource_class_kwargs={"logger": _logger}
-)
+api.add_resource(TaskList, "/tasks", endpoint="tasks", resource_class_kwargs={"logger": _logger})
 api.add_resource(
     TaskExecutor,
     "/tasks/submit/<string:task_id>",
@@ -140,9 +131,7 @@ api.add_resource(
     endpoint="job_by_id",
     resource_class_kwargs={"logger": _logger},
 )
-api.add_resource(
-    JobList, "/jobs", endpoint="jobs", resource_class_kwargs={"logger": _logger}
-)
+api.add_resource(JobList, "/jobs", endpoint="jobs", resource_class_kwargs={"logger": _logger})
 
 
 @blueprint.before_app_first_request

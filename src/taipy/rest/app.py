@@ -3,9 +3,7 @@ import os
 from flask import Flask
 
 from . import api
-from .config import TAIPY_SETUP_FILE
 from .extensions import apispec, db, migrate
-from importlib.util import find_spec
 
 
 def create_app(testing=False):
@@ -20,18 +18,7 @@ def create_app(testing=False):
     configure_apispec(app)
     register_blueprints(app)
 
-    if gui_installed():
-        from taipy.gui import Gui, Markdown
-        abs_folder, _ = TAIPY_SETUP_FILE.rsplit("/", 1)
-        gui = Gui(flask=app, pages={"demo": Markdown(os.path.join(abs_folder, "demo.md"))})
-        gui.run(run_server=False)
-
     return app
-
-
-def gui_installed() -> bool:
-    """Check if taipy.gui is installed"""
-    return find_spec("taipy.gui") is not None
 
 
 def configure_extensions(app):

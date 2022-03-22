@@ -1,8 +1,8 @@
-from taipy.core.scenario._scenario_repository import _ScenarioRepository
-from taipy.core.pipeline._pipeline_repository import _PipelineRepository
-from taipy.core.task._task_repository import _TaskRepository
-from taipy.core.data._data_repository import _DataRepository
 from taipy.core.cycle._cycle_repository import _CycleRepository
+from taipy.core.data._data_repository import _DataRepository
+from taipy.core.pipeline._pipeline_repository import _PipelineRepository
+from taipy.core.scenario._scenario_repository import _ScenarioRepository
+from taipy.core.task._task_repository import _TaskRepository
 
 repositories = {
     "scenario": _ScenarioRepository,
