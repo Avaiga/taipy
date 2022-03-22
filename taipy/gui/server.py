@@ -210,7 +210,6 @@ class _Server:
         if _is_in_notebook() or run_in_thread:
             self._host = host
             self._port = port
-            self._host_value = host_value
             self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
