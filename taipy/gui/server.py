@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import typing as t
+import webbrowser
 
 import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, render_template_string, request, send_from_directory
@@ -197,16 +198,19 @@ class _Server:
     def _run_notebook(self):
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
-    def runWithWS(self, host=None, port=None, debug=None, use_reloader=None, flask_log=True, run_in_thread=False):
+    def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread):
+        host_value = host if host != "0.0.0.0" else "localhost"
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
             self._flask.logger.disabled = True
-            # os.environ['WERKZEUG_RUN_MAIN'] = 'true'
-            print(f" * Server starting on http://{host}:{port}")
+            print(f" * Server starting on http://{host_value}:{port}")
+        if self._gui._get_config("run_browser", False) and self._gui._get_config("debug", False):
+            webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
         if _is_in_notebook() or run_in_thread:
             self._host = host
             self._port = port
+            self._host_value = host_value
             self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
