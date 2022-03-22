@@ -305,6 +305,7 @@ def test_notification_subscribe(mocker):
     print(f"Im right: {scenario._subscribers}")
 
     # print(_ScenarioManager._get(scenario.id))
+    print("get", _ScenarioManager._get(scenario).subscribers)
     _ScenarioManager._submit(scenario)
     from taipy.core.common._utils import _fct_to_dict
 

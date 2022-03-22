@@ -360,6 +360,7 @@ def test_pipeline_notification_subscribe(mocker):
 
     # test pipeline unsubscribe notification
     # test subscribe notification only on new job
+    _PipelineManager._get(pipeline)
     _PipelineManager._unsubscribe(notify_1, pipeline)
     _PipelineManager._subscribe(notify_2, pipeline)
     _PipelineManager._submit(pipeline.id)
