@@ -22,4 +22,5 @@ default_config: Config = {
     "upload_folder": None,
     "flask_log": False,
     "margin": "1em",
+    "run_browser": True,
 }
