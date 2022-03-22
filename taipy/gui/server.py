@@ -127,9 +127,7 @@ class _Server:
                 page = page_i
         # try partials
         if page is None:
-            for partial in self._gui._config.partials:
-                if partial._route == render_path_name:
-                    page = partial
+            page = self._gui._get_partial(render_path_name)
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})

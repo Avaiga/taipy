@@ -1,8 +1,9 @@
 from __future__ import annotations
-
 import typing as t
+import warnings
 
 from ._page import _Page
+from .state import State
 
 
 class Partial(_Page):
@@ -19,9 +20,31 @@ class Partial(_Page):
     Partial, you must call the `Gui.add_partial()^` function.
     """
 
+    _PARTIALS = "__partials"
+
     __partials: t.Dict[str, Partial] = {}
 
-    def __init__(self):
+    def __init__(self, route: t.Optional[str] = None):
         super().__init__()
-        self._route = f"TaiPy_partials_{len(Partial.__partials)}"
-        Partial.__partials[self._route] = self
+        if route is None:
+            self._route = f"TaiPy_partials_{len(Partial.__partials)}"
+            Partial.__partials[self._route] = self
+        else:
+            self._route = route
+
+    def update_content(self, state: State, content: str):
+        """Update partial content.
+
+        Arguments:
+            state: the current user state as received in any callback.
+            content: the new content to show.
+        """
+        if state and state._gui and callable(state._gui._update_partial):
+            state._gui._update_partial(self.__copy(content))
+        else:
+            warnings.warn("'Partial.update_content()' must be called in the context of a callback")
+
+    def __copy(self, content:str)-> Partial:
+        new_partial = Partial(self._route)
+        new_partial._renderer = type(self._renderer)(content)
+        return new_partial

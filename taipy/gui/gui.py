@@ -227,6 +227,8 @@ class Gui:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
     def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
+        if var_name == "":
+            return
         # Check if Variable is a managed type
         current_value = _getscopeattr_drill(self, self.__evaluator.get_hash_from_expr(var_name))
         if isinstance(current_value, _TaipyData):
@@ -445,6 +447,17 @@ class Gui:
                 "message": message,
                 "browser": browser_notification,
                 "duration": duration,
+            }
+        )
+
+    def __send_ws_partial(
+        self,
+        partial: str
+    ):
+        self.__send_ws(
+            {
+                "type": _WsType.PARTIAL.value,
+                "name": partial,
             }
         )
 
@@ -772,6 +785,8 @@ class Gui:
             self.__directory_name_of_pages.append(folder_name)
             self.__add_pages_in_folder(folder_name, folder_path)
 
+    # partials
+
     def add_partial(
         self,
         page: t.Union[str, Page],
@@ -809,6 +824,19 @@ class Gui:
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial._route))
         return new_partial
+
+    def _update_partial(self, partial: Partial):
+        partials = _getscopeattr(self, Partial._PARTIALS, {})
+        partials[partial._route] = partial
+        _setscopeattr(self, Partial._PARTIALS, partials)
+        self.__send_ws_partial(partial._route)
+
+    def _get_partial(self, route: str) -> t.Optional[Partial]:
+        partials = _getscopeattr(self, Partial._PARTIALS, {})
+        partial = partials.get(route)
+        if partial is None:
+            partial = next((p for p in self._config.partials if p._route == route), None)
+        return partial
 
     # Main binding method (bind in markdown declaration)
     def _bind_var(self, var_name: str) -> bool:

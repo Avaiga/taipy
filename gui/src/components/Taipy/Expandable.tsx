@@ -16,10 +16,11 @@ interface ExpandableProps extends TaipyActiveProps {
     title?: string;
     defaultTitle?: string;
     page?: string;
+    partial?: boolean;
 }
 
 const Expandable = (props: ExpandableProps) => {
-    const { id, expanded = true, defaultExpanded, title, defaultTitle, className, page } = props;
+    const { id, expanded = true, defaultExpanded, title, defaultTitle, className, page, partial } = props;
     const [opened, setOpened] = useState(defaultExpanded === undefined ? expanded : defaultExpanded);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -38,7 +39,7 @@ const Expandable = (props: ExpandableProps) => {
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>{title || defaultTitle}</AccordionSummary>
                 ) : null}
                 <AccordionDetails>
-                    {page ? <TaipyRendered path={"/" + page} /> : null}
+                    {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
                     {props.children}
                 </AccordionDetails>
             </Accordion>

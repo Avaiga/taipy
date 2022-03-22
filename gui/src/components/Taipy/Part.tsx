@@ -11,14 +11,15 @@ interface PartProps {
     defaultRender?: boolean;
     page?: string;
     children?: ReactNode;
+    partial?: boolean;
 }
 
 const Part = (props: PartProps) => {
-    const {id, className, children, page} = props;
+    const {id, className, children, page, partial} = props;
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     return render ? (
         <Box id={id} className={className}>
-            {page ? <TaipyRendered path={"/" + page} /> : null}
+            {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
             {children}
         </Box>
     ) : null;

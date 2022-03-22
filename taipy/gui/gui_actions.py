@@ -101,3 +101,4 @@ def navigate(state: State, to: t.Optional[str] = ""):
         state._gui._navigate(to)
     else:
         warnings.warn("'navigate()' must be called in the context of a callback")
+

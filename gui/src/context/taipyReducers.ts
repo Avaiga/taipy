@@ -26,6 +26,7 @@ enum Types {
     MultipleMessages = "MULTIPLE_MESSAGES",
     SetMenu = "SET_MENU",
     DownloadFile = "DOWNLOAD_FILE",
+    Partial = "PARTIAL",
 }
 
 export interface TaipyState {
@@ -110,6 +111,11 @@ interface TaipySetMenuAction extends TaipyBaseAction {
     menu: MenuProps;
 }
 
+interface TaipyPartialAction extends TaipyBaseAction {
+    name: string;
+    create: boolean;
+}
+
 export interface FormatConfig {
     timeZone: string;
     dateTime: string;
@@ -178,8 +184,10 @@ const messageToAction = (message: WsMessage) => {
             return createIdAction((message as unknown as IdMessage).id);
         } else if (message.type === "DF") {
             return createDownloadAction(message as unknown as FileDownloadProps);
+        } else if (message.type === "PR") {
+            return createPartialAction((message as unknown as Record<string, string>).name, true);
         }
-    }
+}
     return {} as TaipyBaseAction;
 };
 
@@ -335,6 +343,16 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
                 return { ...state };
             }
             return { ...state, download: { content: dAction.content, name: dAction.name, onAction: dAction.onAction } };
+        }
+        case Types.Partial: {
+            const pAction = baseAction as TaipyPartialAction;
+            const data = {...state.data}
+            if (pAction.create) {
+                data[pAction.name] = true;
+            } else {
+                data[pAction.name] !== undefined && delete data[pAction.name];
+            }
+            return { ...state, data: data };
         }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
@@ -544,12 +562,18 @@ export const createSetMenuAction = (menu: MenuProps): TaipySetMenuAction => ({
     menu: menu,
 });
 
-export const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
+export const createPartialAction = (name: string, create: boolean): TaipyPartialAction => ({
+    type: Types.Partial,
+    name: name,
+    create: create,
+});
+
+const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
     type: Types.MultipleMessages,
     actions: messages.map(messageToAction),
 });
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF";
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR";
 
 interface WsMessage {
     type: WsMessageType;
