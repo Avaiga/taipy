@@ -1,11 +1,13 @@
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import MultiplePipelineFromSameConfigWithSameParent, NonExistingPipeline
+from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_repository import _PipelineRepository
 from taipy.core.pipeline.pipeline import Pipeline
@@ -83,14 +85,26 @@ class _PipelineManager(_Manager[Pipeline]):
         return [partial(c, pipeline) for c in pipeline.subscribers]
 
     @classmethod
-    def _hard_delete(cls, pipeline_id: PipelineId, scenario_id: Optional[ScenarioId] = None):
+    def _hard_delete(cls, pipeline_id: PipelineId):
         pipeline = cls._get(pipeline_id)
-        for task in pipeline.tasks.values():
-            if scenario_id and task.parent_id == scenario_id:
-                _TaskManager._hard_delete(task.id, scenario_id)
-            elif task.parent_id == pipeline.id:
-                _TaskManager._hard_delete(task.id, None, pipeline_id)
-        cls._delete(pipeline_id)
+        entity_ids_to_delete = cls._get_owned_entity_ids(pipeline)
+        entity_ids_to_delete.pipeline_ids.add(pipeline.id)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+
+    @classmethod
+    def _get_owned_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:
+        entity_ids = _EntityIds()
+        for task in pipeline._tasks.values():
+            if task.parent_id == pipeline.id:
+                entity_ids.task_ids.add(task.id)
+            for data_node in task.data_nodes.values():
+                if data_node.parent_id == pipeline.id:
+                    entity_ids.data_node_ids.add(data_node.id)
+        jobs = _JobManager._get_all()
+        for job in jobs:
+            if job.task.id in entity_ids.task_ids:
+                entity_ids.job_ids.add(job.id)
+        return entity_ids
 
     @classmethod
     def _get_all_by_config_id(cls, config_id: str) -> List[Pipeline]:

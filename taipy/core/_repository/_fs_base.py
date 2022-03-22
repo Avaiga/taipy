@@ -4,7 +4,7 @@ import shutil
 from abc import abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, Iterable, Iterator, List, Optional, Type, TypeVar, Union
 
 from taipy.core.exceptions.exceptions import ModelNotFound
 
@@ -85,14 +85,14 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
         return dir_path
 
     def load(self, model_id: str) -> Entity:
-        return self.__to_entity(self.__get_model(model_id))
+        return self.__to_entity(self.__get_model_filepath(model_id))
 
     def _load_all(self) -> List[Entity]:
         return [self.__to_entity(f) for f in self._directory.glob("*.json")]
 
-    def _save(self, model):
-        model = self._to_model(model)
-        self.__get_model(model.id, False).write_text(
+    def _save(self, entity):
+        model = self._to_model(entity)
+        self.__get_model_filepath(model.id, False).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=4, cls=_CustomEncoder)
         )
 
@@ -100,7 +100,11 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
         shutil.rmtree(self._directory)
 
     def _delete(self, model_id: str):
-        self.__get_model(model_id).unlink()
+        self.__get_model_filepath(model_id).unlink()
+
+    def _delete_many(self, model_ids: Iterable[str]):
+        for model_id in model_ids:
+            self._delete(model_id)
 
     def _search(self, attribute: str, value: str) -> Optional[Entity]:
         return next(self.__search(attribute, value), None)
@@ -114,7 +118,7 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
     def __search(self, attribute: str, value: str) -> Iterator[Entity]:
         return filter(lambda e: hasattr(e, attribute) and getattr(e, attribute) == value, self._load_all())
 
-    def __get_model(self, model_id, raise_if_not_exist=True) -> pathlib.Path:
+    def __get_model_filepath(self, model_id, raise_if_not_exist=True) -> pathlib.Path:
         filepath = self._directory / f"{model_id}.json"
 
         if not filepath.exists() and raise_if_not_exist:

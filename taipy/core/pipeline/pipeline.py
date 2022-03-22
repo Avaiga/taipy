@@ -18,8 +18,8 @@ from taipy.core.task.task import Task
 
 class Pipeline(_Entity):
     """
-    Holds a list of `Task^`s and additional arguments representing a set of data processing elements
-    connected in series.
+    Holds a list of `Task^`s and additional attributes representing a set of data processing elements
+    connected as a direct acyclic graph.
 
     Attributes:
         config_id (str): The identifier of the `PipelineConfig^`.
@@ -151,6 +151,12 @@ class Pipeline(_Entity):
     @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
         self._subscribers = _ListAttributes(self, val)
+
+    def _add_subscriber(self, callback: Callable):
+        self._subscribers.append(callback)
+
+    def _remove_subscriber(self, callback: Callable):
+        self._subscribers.remove(callback)
 
     def _get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()

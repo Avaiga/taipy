@@ -19,7 +19,8 @@ class Scenario(_Entity):
     """
     Represents an instance of the business case to solve.
 
-    It holds a list of `Pipeline^`s to submit for execution in order to solve the business case.
+    It holds a list of pipelines (instances of `Pipeline^` class) to submit for execution in order to solve the
+    business case.
 
     Attributes:
         config_id (str): The identifier of the `ScenarioConfig^`.
@@ -144,6 +145,16 @@ class Scenario(_Entity):
         self._properties = _reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def name(self) -> Optional[str]:
+        return self._properties.get("name")
+
+    @name.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def name(self, val):
+        self._properties["name"] = val
+
     def __eq__(self, other):
         return self.id == other.id
 
@@ -168,6 +179,9 @@ class Scenario(_Entity):
                     return task.output[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
 
+    def _add_subscriber(self, callback: Callable):
+        self._subscribers.append(callback)
+
     def _add_tag(self, tag: str):
         self._tags = _reload("scenario", self)._tags
         self._tags.add(tag)
@@ -182,6 +196,9 @@ class Scenario(_Entity):
             bool: True if the scenario has the tag given as parameter. False otherwise.
         """
         return tag in self.tags
+
+    def _remove_subscriber(self, callback: Callable):
+        self._subscribers.remove(callback)
 
     def _remove_tag(self, tag: str):
         self._tags = _reload("scenario", self)._tags

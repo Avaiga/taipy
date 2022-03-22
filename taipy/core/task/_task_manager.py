@@ -3,6 +3,7 @@ from typing import List, Optional
 
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.config.task_config import TaskConfig
@@ -64,27 +65,20 @@ class _TaskManager(_Manager[Task]):
             _DataManager._set(i)
 
     @classmethod
-    def _hard_delete(
-        cls, task_id: TaskId, scenario_id: Optional[ScenarioId] = None, pipeline_id: Optional[PipelineId] = None
-    ):
+    def _hard_delete(cls, task_id: TaskId):
         task = cls._get(task_id)
+        entity_ids_to_delete = cls._get_owned_entity_ids(task)
+        entity_ids_to_delete.task_ids.add(task.id)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+
+    @classmethod
+    def _get_owned_entity_ids(cls, task: Task):
+        entity_ids = _EntityIds()
         jobs = _JobManager._get_all()
         for job in jobs:
             if job.task.id == task.id:
-                _JobManager._delete(job)
-        if scenario_id:
-            cls._remove_if_parent_id_eq(task.input.values(), scenario_id)
-            cls._remove_if_parent_id_eq(task.output.values(), scenario_id)
-        if pipeline_id:
-            cls._remove_if_parent_id_eq(task.input.values(), pipeline_id)
-            cls._remove_if_parent_id_eq(task.output.values(), pipeline_id)
-        cls._delete(task_id)
-
-    @classmethod
-    def _remove_if_parent_id_eq(cls, data_nodes, id_):
-        for data_node in data_nodes:
-            if data_node.parent_id == id_:
-                _DataManager._delete(data_node.id)
+                entity_ids.job_ids.add(job.id)
+        return entity_ids
 
     @classmethod
     def _get_all_by_config_id(cls, config_id: str) -> List[Task]:

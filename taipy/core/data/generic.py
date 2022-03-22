@@ -25,13 +25,15 @@ class GenericDataNode(DataNode):
             False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
             at least contain an entry for "read_fct" or "write_fct" representing the read and write functions.
+            Entries for "read_fct_params" and "write_fct_params" respectively represent the eventual parameters of
+            the "read_fct" or "write_fct" functions.
     """
 
     __STORAGE_TYPE = "generic"
     _REQUIRED_READ_FUNCTION_PROPERTY = "read_fct"
-    __READ_FUNCTION_PARAMS_PROPERTY = "read_fct_params"
+    _READ_FUNCTION_PARAMS_PROPERTY = "read_fct_params"
     _REQUIRED_WRITE_FUNCTION_PROPERTY = "write_fct"
-    __WRITE_FUNCTION_PARAMS_PROPERTY = "write_fct_params"
+    _WRITE_FUNCTION_PARAMS_PROPERTY = "write_fct_params"
     _REQUIRED_PROPERTIES: List[str] = [_REQUIRED_READ_FUNCTION_PROPERTY, _REQUIRED_WRITE_FUNCTION_PROPERTY]
 
     def __init__(
@@ -75,20 +77,14 @@ class GenericDataNode(DataNode):
 
     def _read(self):
         if read_fct := self.properties[self._REQUIRED_READ_FUNCTION_PROPERTY]:
-            if self.__READ_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
-                if isinstance(self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY], Dict):
-                    return read_fct(**self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY])
-                if isinstance(self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY], List):
-                    return read_fct(*self.properties[self.__READ_FUNCTION_PARAMS_PROPERTY])
+            if self._READ_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
+                return read_fct(*self.properties[self._READ_FUNCTION_PARAMS_PROPERTY])
             return read_fct()
         raise MissingReadFunction
 
     def _write(self, data: Any):
         if write_fct := self.properties[self._REQUIRED_WRITE_FUNCTION_PROPERTY]:
-            if self.__WRITE_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
-                if isinstance(self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY], Dict):
-                    return write_fct(data, **self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY])
-                if isinstance(self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY], List):
-                    return write_fct(data, *self.properties[self.__WRITE_FUNCTION_PARAMS_PROPERTY])
+            if self._WRITE_FUNCTION_PARAMS_PROPERTY in self.properties.keys():
+                return write_fct(data, *self.properties[self._WRITE_FUNCTION_PARAMS_PROPERTY])
             return write_fct(data)
         raise MissingWriteFunction

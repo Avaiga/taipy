@@ -6,8 +6,7 @@ from datetime import datetime
 from typing import Callable, List
 
 from taipy.core.common._entity import _Entity
-from taipy.core.common._listattributes import _ListAttributes
-from taipy.core.common._reload import _reload, _self_reload, _self_setter
+from taipy.core.common._reload import _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.job.status import Status
@@ -25,13 +24,11 @@ def _run_callbacks(fn):
 
 class Job(_Entity):
     """
-    Unique execution of a `Task^`.
-
-    A `Job` handles the status of the execution, contains raising exceptions during the execution, and notifies
+    An execution of a `Task^`.
+    A job handles the status of the execution, contains raising exceptions during the execution, and notifies
     subscriber when on status change.
-
     Attributes:
-        id (str): The identifier of the Job.
+        id (str): The identifier of the job.
         task (`Task^`): The `Task^` of the job.
         force (bool): Enforce the job's execution whatever the output data nodes are in cache or not.
         status (`Status^`): The current `Status^` of the job.
@@ -47,8 +44,8 @@ class Job(_Entity):
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
-        self._subscribers = _ListAttributes(self, list())
-        self._exceptions = _ListAttributes(self, list())
+        self._subscribers: List[Callable] = []
+        self._exceptions: List[Exception] = []
         self.__logger = _TaipyLogger._get_logger()
 
     @property  # type: ignore
@@ -109,25 +106,9 @@ class Job(_Entity):
     def __eq__(self, other):
         return self.id == other.id
 
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def exceptions(self):
+    @property
+    def exceptions(self) -> List[Exception]:
         return self._exceptions
-
-    @exceptions.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def exceptions(self, val):
-        self._exceptions = _ListAttributes(self, val)
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def subscribers(self):
-        return self._subscribers
-
-    @subscribers.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def subscribers(self, val):
-        self._subscribers = _ListAttributes(self, val)
 
     @_run_callbacks
     def blocked(self):
@@ -165,91 +146,89 @@ class Job(_Entity):
         self.status = Status.SKIPPED
 
     def is_failed(self) -> bool:
-        """Returns true if the job failed.
-
+        """
+        Returns true if the job failed.
         Returns:
             True if the job has failed.
         """
         return self.status == Status.FAILED
 
     def is_blocked(self) -> bool:
-        """Returns true if the job is blocked.
-
+        """
+        Returns true if the job is blocked.
         Returns:
             True if the job is blocked.
         """
         return self.status == Status.BLOCKED
 
     def is_cancelled(self) -> bool:
-        """Returns true if the job is cancelled.
-
+        """
+        Returns true if the job is cancelled.
         Returns:
             True if the job is cancelled.
         """
         return self.status == Status.CANCELLED
 
     def is_submitted(self) -> bool:
-        """Returns true if the job is submitted.
-
+        """
+        Returns true if the job is submitted.
         Returns:
             True if the job is submitted.
         """
         return self.status == Status.SUBMITTED
 
     def is_completed(self) -> bool:
-        """Returns true if the job is completed.
-
+        """
+        Returns true if the job is completed.
         Returns:
             True if the job is completed.
         """
         return self.status == Status.COMPLETED
 
     def is_skipped(self) -> bool:
-        """Returns true if the job is skipped.
-
+        """
+        Returns true if the job is skipped.
         Returns:
             True if the job is skipped.
         """
         return self.status == Status.SKIPPED
 
     def is_running(self) -> bool:
-        """Returns true if the job is running.
-
+        """
+        Returns true if the job is running.
         Returns:
             True if the job is running.
         """
         return self.status == Status.RUNNING
 
     def is_pending(self) -> bool:
-        """Returns true if the job is pending.
-
+        """
+        Returns true if the job is pending.
         Returns:
             True if the job is pending.
         """
         return self.status == Status.PENDING
 
     def is_finished(self) -> bool:
-        """Returns true if the job is finished.
-
+        """
+        Returns true if the job is finished.
         Returns:
             True if the job is finished.
         """
         return self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped()
 
     def on_status_change(self, *functions):
-        """Allows to be notified when the status of the job changes.
-
+        """
+        Allows to be notified when the status of the job changes.
         Job passing through multiple statuses (Submitted, pending, etc.) before being finished.
         You can be triggered on each change through this function unless for the `Submitted` status.
-
-        Args:
+        Parameters:
             functions: Callables that will be called on each status change.
         """
         functions = list(functions)
         function = functions.pop()
-        print(function)
         self._subscribers.append(function)
-        print(self.subscribers)
+
         if self.status != Status.SUBMITTED:
             function(self)
 
@@ -258,10 +237,10 @@ class Job(_Entity):
 
     def update_status(self, ft: Future):
         """Update the Job status based on its execution."""
-        self.exceptions = ft.result()  # type: ignore
-        if self.exceptions:
+        self._exceptions = ft.result()
+        if self._exceptions:
             self.failed()
-            self.__logger.error(f" {len(self.exceptions)} errors occurred during execution of job {self.id}")
+            self.__logger.error(f" {len(self._exceptions)} errors occurred during execution of job {self.id}")
             for e in self.exceptions:
                 self.__logger.error("".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__)))
         else:

@@ -32,7 +32,7 @@ class SQLDataNode(DataNode):
             False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
             at least contain an entry for "db_username", "db_password", "db_name", "db_engine", "read_query", and
-            "write_table".
+            "write_table". For now, the accepted values for the "db_engine" property are "mssql" and "sqlite".
     """
 
     __STORAGE_TYPE = "sql"

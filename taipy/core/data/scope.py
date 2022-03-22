@@ -25,7 +25,7 @@ class _OrderedEnum(_ReprEnum):
 
 class Scope(_OrderedEnum):
     """
-    Enumeration representing the scope of a Data Node among the following values : `GLOBAL`, `CYCLE`, `SCENARIO`,
+    Enumeration representing the scope of a `DataNode^` among the following values : `GLOBAL`, `CYCLE`, `SCENARIO`,
     `PIPELINE`.
     """
 

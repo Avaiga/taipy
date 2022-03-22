@@ -6,7 +6,7 @@ from taipy.core.task.task import Task
 
 
 class _AbstractScheduler:
-    """Creates, Enqueues and schedules Jobs."""
+    """Creates, Enqueues and schedules jobs as instances of `Job^` class."""
 
     @abstractmethod
     def submit(self, pipeline, callbacks: Optional[Iterable[Callable]], force: bool = False) -> List[Job]:

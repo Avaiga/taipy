@@ -78,15 +78,12 @@ def test_add_cycle_to_scenario(cycle):
 
 
 def test_add_and_remove_subscriber():
-    def mock_function():
-        pass
-
     scenario = Scenario("foo", [], {})
 
-    scenario._add_subscriber(mock_function)
+    scenario._add_subscriber(print)
     assert len(scenario.subscribers) == 1
 
-    scenario._remove_subscriber(mock_function)
+    scenario._remove_subscriber(print)
     assert len(scenario.subscribers) == 0
 
 
@@ -102,7 +99,7 @@ def test_add_and_remove_tag():
 
 
 def test_auto_set_and_reload(cycle, current_datetime, pipeline):
-    scenario_1 = Scenario("foo", [], {}, creation_date=current_datetime, is_official=False, cycle=None)
+    scenario_1 = Scenario("foo", [], {"name": "bar"}, creation_date=current_datetime, is_official=False, cycle=None)
     _ScenarioManager._set(scenario_1)
     _PipelineManager._set(pipeline)
     _CycleManager._set(cycle)
@@ -112,6 +109,11 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     scenario_1.config_id = "fgh"
     assert scenario_1.config_id == "fgh"
     assert scenario_2.config_id == "fgh"
+
+    assert scenario_1.name == "bar"
+    scenario_1.name = "baz"
+    assert scenario_1.name == "baz"
+    assert scenario_2.name == "baz"
 
     assert len(scenario_1.pipelines) == 0
     scenario_1.pipelines = [pipeline]
@@ -151,7 +153,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.tags) == 1
     assert len(scenario_2.tags) == 1
 
-    assert scenario_1.properties == {}
+    assert scenario_1.properties == {"name": "baz"}
     scenario_1.properties["qux"] = 5
     assert scenario_1.properties["qux"] == 5
     assert scenario_2.properties["qux"] == 5
@@ -166,6 +168,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert len(scenario.subscribers) == 0
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
+        assert scenario.name == "baz"
 
         new_datetime_2 = new_datetime + timedelta(1)
         scenario.config_id = "abc"
@@ -175,6 +178,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         scenario.is_official = False
         scenario.subscribers = [print]
         scenario.tags = None
+        scenario.name = "qux"
 
         assert scenario._config_id == "abc"
         assert scenario.config_id == "fgh"
@@ -186,6 +190,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert len(scenario.subscribers) == 0
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
+        assert scenario.name == "qux"  # should be baz here
 
     assert scenario_1.config_id == "abc"
     assert len(scenario_1.pipelines) == 0
@@ -195,6 +200,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context
+    assert scenario_1.name == "qux"
 
 
 def test_submit_scenario():

@@ -11,12 +11,13 @@ from taipy.core.exceptions.exceptions import NonExistingComparator
 
 class ScenarioConfig:
     """
-    Holds all the configuration fields needed to instantiate actual scenarios from the `ScenarioConfig`.
+    Holds all the configuration fields needed to instantiate an actual `Scenario^` from the `ScenarioConfig`.
 
     Attributes:
         id (str): Identifier of the scenario config. It must be a valid Python variable name.
-        pipeline_configs (list): List of pipeline configs. The default value is [].
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        pipeline_configs (`PipelineConfig^` or List[`PipelineConfig^`]): List of pipeline configs. The default value
+            is [].
+        **properties: A dictionary of additional properties.
     """
 
     _PIPELINE_KEY = "pipelines"

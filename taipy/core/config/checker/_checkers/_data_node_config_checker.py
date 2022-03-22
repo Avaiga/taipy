@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from taipy.core.config._config import _Config
 from taipy.core.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
@@ -24,6 +26,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_required_properties(data_node_config_id, data_node_config)
             if data_node_config.storage_type == GenericDataNode.storage_type():
                 self._check_read_write_fct(data_node_config_id, data_node_config)
+                self._check_read_write_fct_params(data_node_config_id, data_node_config)
         return self._collector
 
     def _check_storage_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -44,7 +47,24 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 f"value.",
             )
 
+    def _check_read_write_fct_params(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+
+        from taipy.core.data.generic import GenericDataNode
+
+        key_names = [
+            GenericDataNode._READ_FUNCTION_PARAMS_PROPERTY,
+            GenericDataNode._WRITE_FUNCTION_PARAMS_PROPERTY,
+        ]
+        for key_name in key_names:
+            if key_name in data_node_config.properties.keys() and not isinstance(data_node_config.properties[key_name], Tuple):  # type: ignore
+                self._error(
+                    key_name,
+                    data_node_config.properties[key_name],
+                    f"{key_name} field of DataNode {data_node_config_id} must be populated with a Set." f"value.",
+                )
+
     def _check_read_write_fct(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+
         from taipy.core.data.generic import GenericDataNode
 
         key_names = [

@@ -76,6 +76,17 @@ class TestFileSystemStorage:
         _models = r._load_all()
         assert len(_models) == 0
 
+    def test_delete_many(self):
+        r = MockRepository(model=MockModel, dir_name="foo")
+        for i in range(5):
+            m = MockObj(f"uuid-{i}", f"Foo{i}")
+            r._save(m)
+        _models = r._load_all()
+        assert len(_models) == 5
+        r._delete_many(["uuid-0", "uuid-1"])
+        _models = r._load_all()
+        assert len(_models) == 3
+
     def test_search(self):
         r = MockRepository(model=MockModel, dir_name="foo")
 

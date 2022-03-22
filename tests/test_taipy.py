@@ -80,14 +80,7 @@ class TestTaipy:
             mck.assert_called_once_with(a, "excel", scope=e, path=b, has_header=c, sheet_name=d, exposed_type=f)
 
     def test_configure_generic_data_node(self):
-        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, {}, {}, "qux"
-        with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
-            tp.configure_generic_data_node(a, b, c, e, f, d, property=g)
-            mck.assert_called_once_with(
-                a, "generic", scope=d, read_fct=b, write_fct=c, read_fct_params=e, write_fct_params=f, property=g
-            )
-
-        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, [], [], "qux"
+        a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, tuple([]), tuple([]), "qux"
         with mock.patch("taipy.core.config.config.Config._add_data_node") as mck:
             tp.configure_generic_data_node(a, b, c, e, f, d, property=g)
             mck.assert_called_once_with(

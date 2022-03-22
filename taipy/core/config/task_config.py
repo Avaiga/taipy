@@ -8,16 +8,18 @@ from taipy.core.config.data_node_config import DataNodeConfig
 
 class TaskConfig:
     """
-    Holds all the configuration fields needed to create actual tasks from the `TaskConfig`.
+    Holds all the configuration fields needed to create an actual `Task^` from the `TaskConfig`.
 
     Attributes:
         id (str): Identifier of the task config. Must be a valid Python variable name.
-        inputs (list): List of `DataNodeConfig^` inputs. The default value is [].
-        outputs (list): List of `DataNodeConfig^` outputs. The default value is [].
+        inputs (DataNodeConfig or List[DataNodeConfig]): The optional list of `DataNodeConfig^` inputs. The default
+            value is [].
+        outputs (DataNodeConfig or List[DataNodeConfig]): The optional list of `DataNodeConfig^` outputs. The default
+            value is [].
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
             (exposed_type field) of the input data nodes and returning results compatible with the exposed types
             (exposed_type field) of the outputs list. The default value is None.
-        **properties (dict[str, Any]): A dictionary of additional properties.
+        **properties: A dictionary of additional properties.
     """
 
     _INPUT_KEY = "inputs"

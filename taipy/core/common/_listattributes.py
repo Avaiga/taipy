@@ -26,3 +26,11 @@ class _ListAttributes(UserList):
 
         if hasattr(self, "parent"):
             tp.set(self.parent)
+
+    def remove(self, value):
+        super(_ListAttributes, self).remove(value)
+
+        import taipy.core as tp
+
+        if hasattr(self, "parent"):
+            tp.set(self.parent)

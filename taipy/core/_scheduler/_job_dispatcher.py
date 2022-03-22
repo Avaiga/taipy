@@ -14,7 +14,7 @@ from taipy.core.task.task import Task
 
 
 class _JobDispatcher:
-    """Manages executors and dispatch jobs on it."""
+    """Manages executors and dispatch jobs (instances of `Job^` class) on it."""
 
     def __init__(self, max_number_of_parallel_execution):
         self._executor, self._nb_available_workers = self.__create(max_number_of_parallel_execution or 1)

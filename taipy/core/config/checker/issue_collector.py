@@ -5,13 +5,13 @@ from taipy.core.config.checker.issue import Issue
 
 class IssueCollector:
     """
-    A collection of `Issue`s.
+    A collection of issues (instances of class `Issue^`).
 
     Attributes:
-        errors (List[`Issue`]): List of ERROR issues collected.
-        warnings (List[`Issue`]): List WARNING issues collected.
-        infos (List[`Issue`]): List INFO issues collected.
-        all (List[`Issue`]): List of all issues collected ordered by decreasing level (ERROR, WARNING and INFO).
+        errors (List[`Issue^`]): List of ERROR issues collected.
+        warnings (List[`Issue^`]): List WARNING issues collected.
+        infos (List[`Issue^`]): List INFO issues collected.
+        all (List[`Issue^`]): List of all issues collected ordered by decreasing level (ERROR, WARNING and INFO).
     """
 
     _ERROR_LEVEL = "ERROR"

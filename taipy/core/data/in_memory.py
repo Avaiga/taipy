@@ -28,8 +28,8 @@ class InMemoryDataNode(DataNode):
             timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
         edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
             False otherwise.
-        properties (dict[str, Any]): A dictionary of additional properties. At creation of an _InMemory_ data node, if the
-            _properties_ dictionary contains a "default_data" entry, the data node is automatically written with
+        properties (dict[str, Any]): A dictionary of additional properties. At creation of an _InMemory_ data node, if
+            the _properties_ dictionary contains a "default_data" entry, the data node is automatically written with
             the corresponding "default_data" value.
     """
 

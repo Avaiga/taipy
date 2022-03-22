@@ -393,7 +393,7 @@ def test_pipeline_notification_unsubscribe(mocker):
     _PipelineManager._subscribe(notify_2, pipeline)
     _PipelineManager._submit(pipeline.id)
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         _PipelineManager._unsubscribe(notify_1, pipeline)
         _PipelineManager._unsubscribe(notify_2, pipeline)
 
@@ -570,113 +570,136 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert pipeline_19.id != pipeline_20.id
 
 
-def test_hard_delete():
-    #  test hard delete with pipeline at pipeline level
-    dn_input_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config_1 = Config._add_data_node("my_output_1", "in_memory", scope=Scope.PIPELINE, default_data="works !")
-    task_config_1 = Config._add_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1])
-    pipeline_1 = _PipelineManager._get_or_create(pipeline_config_1)
-    _PipelineManager._submit(pipeline_1.id)
+def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE, default_data="works !")
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    _PipelineManager._submit(pipeline.id)
 
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
-    _PipelineManager._hard_delete(pipeline_1.id)
+    _PipelineManager._hard_delete(pipeline.id)
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
     assert len(_DataManager._get_all()) == 0
     assert len(_JobManager._get_all()) == 0
 
-    #  test hard delete with pipeline at scenario level
-    dn_input_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_output_config_2 = Config._add_data_node("my_output_2", "in_memory", scope=Scope.SCENARIO)
-    task_config_2 = Config._add_task("task_config_2", print, dn_input_config_2, dn_output_config_2)
-    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_2])
-    pipeline_2 = _PipelineManager._get_or_create(pipeline_config_2)
-    _PipelineManager._submit(pipeline_2.id)
 
+def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    _PipelineManager._submit(pipeline.id)
+
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
-    _PipelineManager._hard_delete(pipeline_2.id)
+    _PipelineManager._hard_delete(pipeline.id)
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
 
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
 
-    #  test hard delete with pipeline at business level
-    dn_input_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
-    dn_output_config_3 = Config._add_data_node("my_output_3", "in_memory", scope=Scope.CYCLE)
-    task_config_3 = Config._add_task("task_config_3", print, dn_input_config_3, dn_output_config_3)
-    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])
-    pipeline_3 = _PipelineManager._get_or_create(pipeline_config_3)
-    _PipelineManager._submit(pipeline_3.id)
+def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.CYCLE)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    _PipelineManager._submit(pipeline.id)
 
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
-    _PipelineManager._hard_delete(pipeline_3.id)
+    _PipelineManager._hard_delete(pipeline.id)
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
 
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
 
-    #  test hard delete with pipeline at global level
-    dn_input_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config_4 = Config._add_data_node("my_output_4", "in_memory", scope=Scope.GLOBAL)
-    task_config_4 = Config._add_task("task_config_4", print, dn_input_config_4, dn_output_config_4)
-    pipeline_config_4 = Config._add_pipeline("pipeline_config_4", [task_config_4])
-    pipeline_4 = _PipelineManager._get_or_create(pipeline_config_4)
-    _PipelineManager._submit(pipeline_4.id)
+def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    _PipelineManager._submit(pipeline.id)
 
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
     assert len(_JobManager._get_all()) == 1
-    _PipelineManager._hard_delete(pipeline_4.id)
-    assert len(_PipelineManager._get_all()) == 0
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-
-    _ScenarioManager._delete_all()
-    _PipelineManager._delete_all()
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _JobManager._delete_all()
-
-    dn_input_config_5 = Config._add_data_node("my_input_5", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config_5 = Config._add_data_node("my_output_5", "in_memory", scope=Scope.GLOBAL)
-    task_config_5 = Config._add_task("task_config_5", print, dn_input_config_5, dn_output_config_5)
-    pipeline_config_5 = Config._add_pipeline("pipeline_config_5", [task_config_5])
-    pipeline_5 = _PipelineManager._get_or_create(pipeline_config_5)
-    _PipelineManager._submit(pipeline_5.id)
-
-    assert len(_PipelineManager._get_all()) == 1
-    assert len(_TaskManager._get_all()) == 1
-    assert len(_DataManager._get_all()) == 2
-    assert len(_JobManager._get_all()) == 1
-    _PipelineManager._hard_delete(pipeline_5.id)
+    _PipelineManager._hard_delete(pipeline.id)
+    assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
     assert len(_DataManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 0
+
+
+def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
+    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
+    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
+    pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
+    _PipelineManager._submit(pipeline_1.id)
+    _PipelineManager._submit(pipeline_2.id)
+
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 3
+    assert len(_JobManager._get_all()) == 2
+    _PipelineManager._hard_delete(pipeline_1.id)
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 1
+    assert len(_DataManager._get_all()) == 2
+    assert len(_JobManager._get_all()) == 1
+
+
+def test_hard_delete_shared_entities():
+    input_dn = Config._add_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    intermediate_dn = Config._add_data_node("my_inter", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    output_dn = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    task_1 = Config._add_task("task_1", print, input_dn, intermediate_dn)
+    task_2 = Config._add_task("task_2", print, intermediate_dn, output_dn)
+    pipeline_config = Config._add_pipeline("pipeline_config", [task_1, task_2])
+    pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
+    _PipelineManager._submit(pipeline_1.id)
+    _PipelineManager._submit(pipeline_2.id)
+
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 2
+    assert len(_TaskManager._get_all()) == 3
+    assert len(_DataManager._get_all()) == 4
+    assert len(_JobManager._get_all()) == 4
+    _PipelineManager._hard_delete(pipeline_1.id)
+    assert len(_ScenarioManager._get_all()) == 0
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(_TaskManager._get_all()) == 2
+    assert len(_DataManager._get_all()) == 3
+    assert len(_JobManager._get_all()) == 3
 
 
 def test_automatic_reload():
