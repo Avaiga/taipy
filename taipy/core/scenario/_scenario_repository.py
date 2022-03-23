@@ -26,7 +26,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             pipelines=self.__to_pipeline_ids(scenario._pipelines.values()),
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
-            official_scenario=scenario._official_scenario,
+            primary_scenario=scenario._primary_scenario,
             subscribers=_utils._fcts_to_dict(scenario._subscribers),
             tags=list(scenario._tags),
             cycle=self.__to_cycle_id(scenario._cycle),
@@ -39,10 +39,12 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             pipelines=self.__to_pipelines(model.pipelines),
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
-            is_official=model.official_scenario,
+            is_primary=model.primary_scenario,
             tags=set(model.tags),
             cycle=self.__to_cycle(model.cycle),
-            subscribers={_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},  # type: ignore
+            subscribers={
+                _utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers
+            },  # type: ignore
         )
         return scenario
 

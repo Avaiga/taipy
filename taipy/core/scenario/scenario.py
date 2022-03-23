@@ -28,7 +28,7 @@ class Scenario(_Entity):
         properties (dict[str, Any]): A dictionary of additional properties.
         scenario_id (str): The Unique identifier of the scenario.
         creation_date (datetime): The date and time of the scenario's creation.
-        is_official (bool): True if the scenario is the official of its cycle. False otherwise.
+        is_primary (bool): True if the scenario is the primary of its cycle. False otherwise.
         cycle (Cycle^): The cycle of the scenario.
         subscribers (Set[Callable]): The set of callbacks to be called on `Job^`'s status change.
         tags (Set[str]): The list of scenario's tags.
@@ -45,7 +45,7 @@ class Scenario(_Entity):
         properties: Dict[str, Any],
         scenario_id: ScenarioId = None,
         creation_date=None,
-        is_official: bool = False,
+        is_primary: bool = False,
         cycle: Cycle = None,
         subscribers: List[Callable] = None,
         tags: Set[str] = None,
@@ -56,7 +56,7 @@ class Scenario(_Entity):
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
         self._subscribers = _ListAttributes(self, subscribers or list())
-        self._official_scenario = is_official
+        self._primary_scenario = is_primary
         self._tags = tags or set()
 
         self._properties = _Properties(self, **properties)
@@ -112,13 +112,13 @@ class Scenario(_Entity):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def is_official(self):
-        return self._official_scenario
+    def is_primary(self):
+        return self._primary_scenario
 
-    @is_official.setter  # type: ignore
+    @is_primary.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def is_official(self, val):
-        self._official_scenario = val
+    def is_primary(self, val):
+        self._primary_scenario = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -245,14 +245,14 @@ class Scenario(_Entity):
 
         return _ScenarioManager._submit(self, force)
 
-    def set_official(self):
+    def set_primary(self):
         """
-        Promotes the scenario as the official scenario of its cycle. If the cycle already
-        had an official scenario, it will be demoted, and it will no longer be official for the cycle.
+        Promotes the scenario as the primary scenario of its cycle. If the cycle already
+        had a primary scenario, it will be demoted, and it will no longer be primary for the cycle.
         """
         from taipy.core.scenario._scenario_manager import _ScenarioManager
 
-        return _ScenarioManager._set_official(self)
+        return _ScenarioManager._set_primary(self)
 
     def add_tag(self, tag: str):
         """

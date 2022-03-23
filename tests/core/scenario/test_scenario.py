@@ -13,14 +13,14 @@ from taipy.core.scenario.scenario import Scenario
 
 
 def test_create_scenario(cycle, current_datetime):
-    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_official=True, cycle=cycle)
+    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_primary=True, cycle=cycle)
     assert scenario_entity_1.id is not None
     assert scenario_entity_1.config_id == "foo"
     assert scenario_entity_1.pipelines == {}
     assert scenario_entity_1.properties == {"key": "value"}
     assert scenario_entity_1.key == "value"
     assert scenario_entity_1.creation_date is not None
-    assert scenario_entity_1.is_official
+    assert scenario_entity_1.is_primary
     assert scenario_entity_1.cycle == cycle
     assert scenario_entity_1.tags == set()
 
@@ -30,7 +30,7 @@ def test_create_scenario(cycle, current_datetime):
     assert scenario_entity_2.pipelines == {}
     assert scenario_entity_2.properties == {}
     assert scenario_entity_2.creation_date == current_datetime
-    assert not scenario_entity_2.is_official
+    assert not scenario_entity_2.is_primary
     assert scenario_entity_2.cycle is None
     assert scenario_entity_2.tags == set()
 
@@ -99,7 +99,7 @@ def test_add_and_remove_tag():
 
 
 def test_auto_set_and_reload(cycle, current_datetime, pipeline):
-    scenario_1 = Scenario("foo", [], {"name": "bar"}, creation_date=current_datetime, is_official=False, cycle=None)
+    scenario_1 = Scenario("foo", [], {"name": "bar"}, creation_date=current_datetime, is_primary=False, cycle=None)
     _ScenarioManager._set(scenario_1)
     _PipelineManager._set(pipeline)
     _CycleManager._set(cycle)
@@ -134,10 +134,10 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_1.cycle == cycle
     assert scenario_2.cycle == cycle
 
-    assert not scenario_1.is_official
-    scenario_1.is_official = True
-    assert scenario_1.is_official
-    assert scenario_2.is_official
+    assert not scenario_1.is_primary
+    scenario_1.is_primary = True
+    assert scenario_1.is_primary
+    assert scenario_2.is_primary
 
     assert len(scenario_1.subscribers) == 0
     scenario_1.subscribers.append(print)
@@ -180,7 +180,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert scenario.pipelines[pipeline.config_id] == pipeline
         assert scenario.creation_date == new_datetime
         assert scenario.cycle == cycle
-        assert scenario.is_official
+        assert scenario.is_primary
         assert len(scenario.subscribers) == 0
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
@@ -191,7 +191,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         scenario.pipelines = []
         scenario.creation_date = new_datetime_2
         scenario.cycle = None
-        scenario.is_official = False
+        scenario.is_primary = False
         scenario.subscribers = [print]
         scenario.tags = None
         scenario.name = "qux"
@@ -202,7 +202,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
         assert scenario.pipelines[pipeline.config_id] == pipeline
         assert scenario.creation_date == new_datetime
         assert scenario.cycle == cycle
-        assert scenario.is_official
+        assert scenario.is_primary
         assert len(scenario.subscribers) == 0
         assert len(scenario.tags) == 1
         assert scenario._is_in_context
@@ -212,7 +212,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.pipelines) == 0
     assert scenario_1.creation_date == new_datetime_2
     assert scenario_1.cycle is None
-    assert not scenario_1.is_official
+    assert not scenario_1.is_primary
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_1.tags) == 0
     assert not scenario_1._is_in_context

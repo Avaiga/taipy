@@ -136,11 +136,11 @@ class NonExistingScenarioConfig(Exception):
 
 
 class DoesNotBelongToACycle(Exception):
-    """Raised if a scenario without any cycle is promoted as official scenario."""
+    """Raised if a scenario without any cycle is promoted as primary scenario."""
 
 
-class DeletingOfficialScenario(Exception):
-    """Raised if an official scenario is deleted."""
+class DeletingPrimaryScenario(Exception):
+    """Raised if a primary scenario is deleted."""
 
 
 class DifferentScenarioConfigs(Exception):

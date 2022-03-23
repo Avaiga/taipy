@@ -23,7 +23,7 @@ def test_from_and_to_model(cycle, cycle_model):
     assert repository._from_model(cycle_model) == cycle
 
 
-def test_get_official(tmpdir, cycle, current_datetime):
+def test_get_primary(tmpdir, cycle, current_datetime):
 
     cycle_repository = _CycleRepository()
     cycle_repository.base_path = tmpdir

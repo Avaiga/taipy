@@ -15,7 +15,7 @@ from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import (
-    DeletingOfficialScenario,
+    DeletingPrimaryScenario,
     DifferentScenarioConfigs,
     InsufficientScenarioToCompare,
     NonExistingComparator,
@@ -174,7 +174,7 @@ def test_create_and_delete_scenario():
     assert scenario_1.config_id == "sc"
     assert scenario_1.pipelines == {}
     assert scenario_1.cycle.frequency == Frequency.DAILY
-    assert scenario_1.is_official
+    assert scenario_1.is_primary
     assert scenario_1.cycle.creation_date == creation_date_1
     assert scenario_1.cycle.start_date.date() == creation_date_1.date()
     assert scenario_1.cycle.end_date.date() == creation_date_1.date()
@@ -183,7 +183,7 @@ def test_create_and_delete_scenario():
     assert scenario_1.properties["name"] == name_1
     assert scenario_1.tags == set()
 
-    with pytest.raises(DeletingOfficialScenario):
+    with pytest.raises(DeletingPrimaryScenario):
         _ScenarioManager._delete(
             scenario_1.id,
         )
@@ -192,7 +192,7 @@ def test_create_and_delete_scenario():
     assert scenario_2.config_id == "sc"
     assert scenario_2.pipelines == {}
     assert scenario_2.cycle.frequency == Frequency.DAILY
-    assert not scenario_2.is_official
+    assert not scenario_2.is_primary
     assert scenario_2.cycle.creation_date == creation_date_1
     assert scenario_2.cycle.start_date.date() == creation_date_2.date()
     assert scenario_2.cycle.end_date.date() == creation_date_2.date()
@@ -207,7 +207,7 @@ def test_create_and_delete_scenario():
         scenario_2.id,
     )
     assert len(_ScenarioManager._get_all()) == 1
-    with pytest.raises(DeletingOfficialScenario):
+    with pytest.raises(DeletingPrimaryScenario):
         _ScenarioManager._delete(
             scenario_1.id,
         )
@@ -382,11 +382,11 @@ def test_scenario_notification_subscribe_all():
     assert len(_ScenarioManager._get(other_scenario.id).subscribers) == 1
 
 
-def test_get_set_official_scenario():
+def test_get_set_primary_scenario():
     cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo")
 
-    scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), is_official=False, cycle=cycle_1)
-    scenario_2 = Scenario("sc_2", [], {}, ScenarioId("sc_2"), is_official=False, cycle=cycle_1)
+    scenario_1 = Scenario("sc_1", [], {}, ScenarioId("sc_1"), is_primary=False, cycle=cycle_1)
+    scenario_2 = Scenario("sc_2", [], {}, ScenarioId("sc_2"), is_primary=False, cycle=cycle_1)
 
     _ScenarioManager._delete_all()
     _CycleManager._delete_all()
@@ -399,20 +399,20 @@ def test_get_set_official_scenario():
     _ScenarioManager._set(scenario_1)
     _ScenarioManager._set(scenario_2)
 
-    assert len(_ScenarioManager._get_official_scenarios()) == 0
+    assert len(_ScenarioManager._get_primary_scenarios()) == 0
     assert len(_ScenarioManager._get_all_by_cycle(cycle_1)) == 2
 
-    _ScenarioManager._set_official(scenario_1)
+    _ScenarioManager._set_primary(scenario_1)
 
-    assert len(_ScenarioManager._get_official_scenarios()) == 1
+    assert len(_ScenarioManager._get_primary_scenarios()) == 1
     assert len(_ScenarioManager._get_all_by_cycle(cycle_1)) == 2
-    assert _ScenarioManager._get_official(cycle_1) == scenario_1
+    assert _ScenarioManager._get_primary(cycle_1) == scenario_1
 
-    _ScenarioManager._set_official(scenario_2)
+    _ScenarioManager._set_primary(scenario_2)
 
-    assert len(_ScenarioManager._get_official_scenarios()) == 1
+    assert len(_ScenarioManager._get_primary_scenarios()) == 1
     assert len(_ScenarioManager._get_all_by_cycle(cycle_1)) == 2
-    assert _ScenarioManager._get_official(cycle_1) == scenario_2
+    assert _ScenarioManager._get_primary(cycle_1) == scenario_2
 
 
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():

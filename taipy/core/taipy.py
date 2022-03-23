@@ -169,37 +169,37 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
     return []
 
 
-def get_official(cycle: Cycle) -> Optional[Scenario]:
+def get_primary(cycle: Cycle) -> Optional[Scenario]:
     """
-    Returns the official scenario of the cycle given as parameter. None if the cycle has no official scenario.
+    Returns the primary scenario of the cycle given as parameter. None if the cycle has no primary scenario.
 
     Parameters:
-         cycle (`Cycle`): The cycle of the official scenario to return.
+         cycle (`Cycle`): The cycle of the primary scenario to return.
     Returns:
-        Optional[`Scenario`]: The official scenario of the cycle given as parameter. None if the cycle has no scenario.
+        Optional[`Scenario`]: The primary scenario of the cycle given as parameter. None if the cycle has no scenario.
     """
-    return _ScenarioManager._get_official(cycle)
+    return _ScenarioManager._get_primary(cycle)
 
 
-def get_official_scenarios() -> List[Scenario]:
+def get_primary_scenarios() -> List[Scenario]:
     """
-    Returns the list of all official scenarios.
+    Returns the list of all primary scenarios.
 
     Returns:
-        List[Scenario]: The list of all official scenarios.
+        List[Scenario]: The list of all primary scenarios.
     """
-    return _ScenarioManager._get_official_scenarios()
+    return _ScenarioManager._get_primary_scenarios()
 
 
-def set_official(scenario: Scenario):
+def set_primary(scenario: Scenario):
     """
-    Promotes scenario `scenario` given as parameter as official scenario of its cycle. If the cycle already had an
-    official scenario, it will be demoted, and it will no longer be official for the cycle.
+    Promotes scenario `scenario` given as parameter as primary scenario of its cycle. If the cycle already had an
+    primary scenario, it will be demoted, and it will no longer be primary for the cycle.
 
     Parameters:
-        scenario (`Scenario`): The scenario to promote as official.
+        scenario (`Scenario`): The scenario to promote as primary.
     """
-    return _ScenarioManager._set_official(scenario)
+    return _ScenarioManager._set_primary(scenario)
 
 
 def tag(scenario: Scenario, tag: str):
