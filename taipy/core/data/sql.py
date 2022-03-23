@@ -126,7 +126,7 @@ class SQLDataNode(DataNode):
 
     def _read_as(self, query, custom_class):
         with self.__engine.connect() as connection:
-            query_result = connection.dispatch(text(query))
+            query_result = connection.execute(text(query))
         return list(map(lambda row: custom_class(**row), query_result))
 
     def _read_as_numpy(self):
@@ -179,7 +179,7 @@ class SQLDataNode(DataNode):
                 markers = markers
                 ins = "INSERT INTO {tablename} VALUES {markers}"
                 ins = ins.format(tablename=write_table.name, markers=markers)
-                connection.dispatch(ins, list(data))
+                connection.execute(ins, list(data))
             except:
                 transaction.rollback()
                 raise
@@ -204,7 +204,7 @@ class SQLDataNode(DataNode):
                 ins = "INSERT INTO {tablename} VALUES ({markers})"
                 ins = ins.format(tablename=write_table.name, markers=markers)
 
-                connection.dispatch(ins, data)
+                connection.execute(ins, data)
             except:
                 transaction.rollback()
                 raise
@@ -223,7 +223,7 @@ class SQLDataNode(DataNode):
         """
         with connection.begin() as transaction:
             try:
-                connection.dispatch(write_table.insert(), data)
+                connection.execute(write_table.insert(), data)
             except:
                 transaction.rollback()
                 raise
