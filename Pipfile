@@ -17,7 +17,6 @@ Flask-SQLAlchemy = ">=2"
 Flask-JWT-Extended = ">=4"
 markupsafe = "==2.0.1"
 taipy-core = {git = "ssh://git@github.com/avaiga/taipy-core.git"}
-taipy-gui = {git = "ssh://git@github.com/avaiga/taipy-gui.git"}
 
 [dev-packages]
 tox = "3.24.5"
