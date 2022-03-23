@@ -728,7 +728,7 @@ class Gui:
                 If _pages_ is a string that contains the path to a directory, then
                 this directory is traversed, looking for filenames that have the
                 _.md_ extention, 
-    
+
 
         !!! note "Reading pages from a directory"
             If _pages_ is a string that holds the path to a readable directory, then
@@ -1007,6 +1007,10 @@ class Gui:
             self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
 
         self.__state = State(self, self.__locals_bind.keys())
+
+        if _is_in_notebook():
+            # to allow gui.state.x in notebook mode
+            self.state = self.__state
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
