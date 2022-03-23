@@ -60,13 +60,13 @@ const FileSelector = (props: FileSelectorProps) => {
                         setUpload(false);
                         tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
                         dispatch(
-                            createAlertAction({ atype: "success", message: value, browser: false, duration: 3000 })
+                            createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
                         );
                     },
                     (reason) => {
                         setUpload(false);
                         dispatch(
-                            createAlertAction({ atype: "error", message: reason, browser: false, duration: 3000 })
+                            createAlertAction({ atype: "error", message: reason, system: false, duration: 3000 })
                         );
                     }
                 );
