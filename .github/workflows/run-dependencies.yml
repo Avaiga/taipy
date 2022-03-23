@@ -21,3 +21,8 @@ jobs:
         run: gh workflow run tests.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-rest
         env:
           GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
+
+      - name: Trigger taipy-doc build on develop branch push
+        run: gh workflow run doc.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-doc
+        env:
+          GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
