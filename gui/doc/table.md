@@ -92,11 +92,13 @@ specific cells.
 The signature of this function depends on which `style` property you use:
 
    - `style`: this applies to entire rows.
-     The given function expects two parameters:
+     The given function expects three parameters:
+     - _state_: the current state
      - _index_: the index of the row in this table
      - _row_ (optional): all the values for this row
    - `style[_column_name_]`: this applies to a specific cell.
      The given function expects four parameters:
+     - _state_: the current state
      - _value_: the value of the cell
      - _index_ (optional): the index of the row of this cell
      - _column_name_ (optional): the name of the column for this cell
@@ -111,13 +113,13 @@ You can then add the definition of this class in your CSS file.
     === "Markdown"
 
         ```
-        <{data}|table|style={lambda idx, row: "red-row" if idx % 2 == 0 else "blue-row"}|>
+        <{data}|table|style={lambda state, idx, row: "red-row" if idx % 2 == 0 else "blue-row"}|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:table data="{data}" style="{lambda idx, row: 'red-row' if idx % 2 == 0 else 'blue-row'}" />
+        <taipy:table data="{data}" style="{lambda state, idx, row: 'red-row' if idx % 2 == 0 else 'blue-row'}" />
         ```
 
 Css definition
