@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set
 
 from taipy.core.common._entity import _Entity
+from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
@@ -46,7 +47,7 @@ class Scenario(_Entity):
         creation_date=None,
         is_official: bool = False,
         cycle: Cycle = None,
-        subscribers: Set[Callable] = None,
+        subscribers: List[Callable] = None,
         tags: Set[str] = None,
     ):
         self._config_id = _validate_id(config_id)
@@ -54,7 +55,7 @@ class Scenario(_Entity):
         self._pipelines = {p.config_id: p for p in pipelines}
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
-        self._subscribers = subscribers or set()
+        self._subscribers = _ListAttributes(self, subscribers or list())
         self._official_scenario = is_official
         self._tags = tags or set()
 
@@ -127,7 +128,7 @@ class Scenario(_Entity):
     @subscribers.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
     def subscribers(self, val):
-        self._subscribers = val or set()
+        self._subscribers = _ListAttributes(self, val)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -141,7 +142,7 @@ class Scenario(_Entity):
 
     @property  # type: ignore
     def properties(self):
-        self._properties = _reload("scenario", self)._properties
+        self._properties = _reload(self._MANAGER_NAME, self)._properties
         return self._properties
 
     @property  # type: ignore
@@ -179,8 +180,7 @@ class Scenario(_Entity):
         raise AttributeError(f"{attribute_name} is not an attribute of scenario {self.id}")
 
     def _add_subscriber(self, callback: Callable):
-        self._subscribers = _reload("scenario", self)._subscribers
-        self._subscribers.add(callback)
+        self._subscribers.append(callback)
 
     def _add_tag(self, tag: str):
         self._tags = _reload("scenario", self)._tags
@@ -198,7 +198,6 @@ class Scenario(_Entity):
         return tag in self.tags
 
     def _remove_subscriber(self, callback: Callable):
-        self._subscribers = _reload("scenario", self)._subscribers
         self._subscribers.remove(callback)
 
     def _remove_tag(self, tag: str):

@@ -144,6 +144,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
     _dispatch(task, job)
 
     job = _JobManager._get(job_id)
+
     assert job.is_failed()
     with pytest.raises(DataNodeWritingError):
         raise job.exceptions[0]

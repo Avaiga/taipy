@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from taipy.core.common._entity import _Entity
+from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
@@ -71,7 +72,7 @@ class DataNode(_Entity):
         self._last_edition_date = last_edition_date
         self._name = name or self.id
         self._edition_in_progress = edition_in_progress
-        self._job_ids = job_ids or []
+        self._job_ids = _ListAttributes(self, job_ids or list())
 
         self._validity_period = validity_period
 
@@ -146,7 +147,7 @@ class DataNode(_Entity):
         self._name = val
 
     @property  # type: ignore
-    @_self_reload("data")
+    @_self_reload(_MANAGER_NAME)
     def edition_in_progress(self):
         return self._edition_in_progress
 
@@ -156,8 +157,14 @@ class DataNode(_Entity):
         self._edition_in_progress = val
 
     @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
     def job_ids(self):
         return self._job_ids
+
+    @job_ids.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def job_ids(self, val):
+        self._job_ids = _ListAttributes(self, val)
 
     @property  # type: ignore
     def properties(self):

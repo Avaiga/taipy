@@ -42,7 +42,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             is_official=model.official_scenario,
             tags=set(model.tags),
             cycle=self.__to_cycle(model.cycle),
-            subscribers={_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},
+            subscribers={_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},  # type: ignore
         )
         return scenario
 

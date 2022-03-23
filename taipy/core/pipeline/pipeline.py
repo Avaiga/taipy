@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 import networkx as nx
 
 from taipy.core.common._entity import _Entity
+from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
@@ -39,7 +40,7 @@ class Pipeline(_Entity):
         tasks: List[Task],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,
-        subscribers: Set[Callable] = None,
+        subscribers: List[Callable] = None,
     ):
         self._config_id = _validate_id(config_id)
         self._tasks = {task.config_id: task for task in tasks}
@@ -47,7 +48,7 @@ class Pipeline(_Entity):
         self._parent_id = parent_id
         self.is_consistent = self.__is_consistent()
 
-        self._subscribers = subscribers or set()
+        self._subscribers = _ListAttributes(self, subscribers or list())
         self._properties = _Properties(self, **properties)
 
     def __getstate__(self):
@@ -88,16 +89,6 @@ class Pipeline(_Entity):
     @_self_setter(_MANAGER_NAME)
     def parent_id(self, val):
         self._parent_id = val
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def subscribers(self):
-        return self._subscribers
-
-    @subscribers.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def subscribers(self, val):
-        self._subscribers = val or set()
 
     @property  # type: ignore
     def properties(self):
@@ -151,12 +142,20 @@ class Pipeline(_Entity):
                 graph.add_node(task)
         return graph
 
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def subscribers(self):
+        return self._subscribers
+
+    @subscribers.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def subscribers(self, val):
+        self._subscribers = _ListAttributes(self, val)
+
     def _add_subscriber(self, callback: Callable):
-        self._subscribers = _reload("pipeline", self)._subscribers
-        self._subscribers.add(callback)
+        self._subscribers.append(callback)
 
     def _remove_subscriber(self, callback: Callable):
-        self._subscribers = _reload("pipeline", self)._subscribers
         self._subscribers.remove(callback)
 
     def _get_sorted_tasks(self) -> List[List[Task]]:

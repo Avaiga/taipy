@@ -287,19 +287,21 @@ def test_notification_subscribe(mocker):
 
     notify_1 = NotifyMock(scenario)
     notify_2 = NotifyMock(scenario)
-    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_1, notify_2])
+    mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_2])
+
     # test subscribing notification
     _ScenarioManager._subscribe(notify_1, scenario)
-    _ScenarioManager._submit(scenario.id)
+    _ScenarioManager._submit(scenario)
     notify_1.assert_called_3_times()
 
     notify_1.reset()
 
     # test unsubscribing notification
     # test notis subscribe only on new jobs
+    # _ScenarioManager._get(scenario)
     _ScenarioManager._unsubscribe(notify_1, scenario)
     _ScenarioManager._subscribe(notify_2, scenario)
-    _ScenarioManager._submit(scenario.id)
+    _ScenarioManager._submit(scenario)
 
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()
@@ -344,7 +346,7 @@ def test_notification_unsubscribe(mocker):
     _ScenarioManager._subscribe(notify_2, scenario)
     _ScenarioManager._submit(scenario.id)
 
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         _ScenarioManager._unsubscribe(notify_1, scenario)
     _ScenarioManager._unsubscribe(notify_2, scenario)
 

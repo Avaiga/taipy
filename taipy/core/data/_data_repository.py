@@ -57,7 +57,7 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
             data_node._name,
             data_node._parent_id,
             data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
-            data_node._job_ids,
+            data_node._job_ids.data,
             data_node._validity_period.days if data_node._validity_period else None,
             data_node._validity_period.seconds if data_node._validity_period else None,
             data_node._edition_in_progress,
@@ -101,7 +101,6 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
             validity_period = timedelta(days=model.validity_days, seconds=model.validity_seconds)
-
         return self.class_map[model.storage_type](
             config_id=model.config_id,
             scope=model.scope,

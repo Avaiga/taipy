@@ -501,6 +501,15 @@ class TestDataNode:
 
         dn_1.last_edition_date = new_datetime
 
+        assert len(dn_1.job_ids) == 1
+        dn_1.job_ids.append("a_job_id_2")
+        assert len(dn_1.job_ids) == 2
+        assert len(dn_2.job_ids) == 2
+
+        dn_1.job_ids = []
+        assert len(dn_1.job_ids) == 0
+        assert len(dn_2.job_ids) == 0
+
         with dn_1 as dn:
             assert dn.config_id == "fgh"
             assert dn.parent_id == "parent_id"
@@ -509,6 +518,7 @@ class TestDataNode:
             assert dn.name == "def"
             assert dn.edition_in_progress
             assert dn.validity_period == time_period
+            assert len(dn.job_ids) == 0
             assert dn._is_in_context
 
             new_datetime_2 = new_datetime + timedelta(1)
@@ -520,6 +530,7 @@ class TestDataNode:
             dn.name = "abc"
             dn.edition_in_progress = False
             dn.validity_period = None
+            dn.job_ids = ["a_job_id"]
 
             assert dn._config_id == "abc"
             assert dn.config_id == "fgh"
@@ -529,6 +540,7 @@ class TestDataNode:
             assert dn.name == "def"
             assert dn.edition_in_progress
             assert dn.validity_period == time_period
+            assert len(dn.job_ids) == 0
 
         assert dn_1.config_id == "abc"
         assert dn_1.parent_id == "parent_id_2"
@@ -538,3 +550,4 @@ class TestDataNode:
         assert not dn_1.edition_in_progress
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
+        assert len(dn_1.job_ids) == 1
