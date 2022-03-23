@@ -577,8 +577,16 @@ class Gui:
                 return True
             except Exception as e:
                 warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
-
         return False
+
+    def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
+        args.insert(0, self.__state)
+        arg_count = user_function.__code__.co_argcount
+        if arg_count > len(args):
+            args += (arg_count - len(args)) * [None]
+        else:
+            args = args[:arg_count]
+        return user_function(*args)
 
     # Proxy methods for Evaluator
     def _evaluate_expr(self, expr: str) -> t.Any:

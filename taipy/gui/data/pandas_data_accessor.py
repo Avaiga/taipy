@@ -26,25 +26,17 @@ class _PandasDataAccessor(_DataAccessor):
 
     @staticmethod
     def __style_function(
-        row: pd.Series, column_name: t.Optional[str], user_function: t.Callable, arg_count: int, function_name: str
+        row: pd.Series, gui: Gui, column_name: t.Optional[str], user_function: t.Callable, function_name: str
     ) -> str:  # pragma: no cover
-        if arg_count > 0:
-            args_idx = 0
-            args = []
-            if column_name:
-                args.append(row[column_name])
-                args_idx += 1
-            if arg_count > args_idx:
-                args.append(row.name)
-                if arg_count > args_idx + 1:
-                    args.append(row)
-                    if arg_count > args_idx + 2:
-                        if column_name:
-                            args.append(column_name)
-                            args_idx += 1
-                        args += (arg_count - (args_idx + 2)) * [None]
+        args = []
+        if column_name:
+            args.append(row[column_name])
+        args.append(row.name)
+        args.append(row)
+        if column_name:
+            args.append(column_name)
         try:
-            return str(user_function(*args))
+            return str(gui._call_function_with_state(user_function, args))
         except Exception as e:
             warnings.warn(f"Exception raised when calling user style function {function_name}\n{e}")
         return ""
@@ -66,7 +58,7 @@ class _PandasDataAccessor(_DataAccessor):
                 applied = False
                 func = gui._get_user_function(v)
                 if callable(func):
-                    applied = self.__apply_user_function(func, k if k in cols else None, v, data)
+                    applied = self.__apply_user_function(gui, func, k if k in cols else None, v, data)
                 if not applied:
                     data[v] = v
                 cols.append(v)
@@ -86,18 +78,18 @@ class _PandasDataAccessor(_DataAccessor):
         return data
 
     def __apply_user_function(
-        self, user_function: t.Callable, column_name: t.Optional[str], function_name: str, data: pd.DataFrame
+        self, gui: Gui, user_function: t.Callable, column_name: t.Optional[str], function_name: str, data: pd.DataFrame
     ):
         arg_count = user_function.__code__.co_argcount
-        if arg_count > 0:
+        if arg_count > 1:
             data[function_name] = data.apply(
                 _PandasDataAccessor.__style_function,
                 axis=1,
-                args=(column_name, user_function, arg_count, function_name),
+                args=(gui, column_name, user_function, function_name),
             )
             return True
         else:
-            warnings.warn(f"Style function {function_name} should take at least a value as first argument")
+            warnings.warn(f"Style function {function_name} should take at least a value as second argument")
         return False
 
     def __format_data(
