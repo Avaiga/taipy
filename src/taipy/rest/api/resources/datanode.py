@@ -128,7 +128,7 @@ class DataNodeList(Resource):
         content:
           application/json:
             schema:
-              DataNodeConfigSchema
+              DataNodeSchema
       responses:
         201:
           content:
@@ -139,7 +139,7 @@ class DataNodeList(Resource):
                   msg:
                     type: string
                     example: datanode created
-                  datanode: DataNodeConfigSchema
+                  datanode: DataNodeSchema
     """
 
     def __init__(self, **kwargs):

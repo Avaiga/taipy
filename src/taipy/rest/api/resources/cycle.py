@@ -34,7 +34,7 @@ class CycleResource(Resource):
               schema:
                 type: object
                 properties:
-                  cycle: CycleResponseSchema
+                  cycle: CycleSchema
         404:
           description: cycle does not exist
     delete:
