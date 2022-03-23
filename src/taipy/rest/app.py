@@ -3,7 +3,7 @@ import os
 from flask import Flask
 
 from . import api
-from .extensions import apispec, db, migrate
+from .extensions import apispec, migrate
 
 
 def create_app(testing=False):
@@ -14,17 +14,10 @@ def create_app(testing=False):
     if testing is True:
         app.config["TESTING"] = True
 
-    configure_extensions(app)
     configure_apispec(app)
     register_blueprints(app)
 
     return app
-
-
-def configure_extensions(app):
-    """Configure flask extensions"""
-    db.init_app(app)
-    migrate.init_app(app, db)
 
 
 def configure_apispec(app):
