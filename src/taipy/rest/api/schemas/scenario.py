@@ -4,7 +4,7 @@ from marshmallow import Schema, fields
 class ScenarioSchema(Schema):
     pipelines = fields.List(fields.String)
     properties = fields.Dict()
-    official_scenario = fields.Boolean(default=False)
+    primary_scenario = fields.Boolean(default=False)
     tags = fields.List(fields.String)
 
 
