@@ -1,9 +1,7 @@
-import os
-
 from flask import Flask
 
 from . import api
-from .extensions import apispec, migrate
+from .extensions import apispec
 
 
 def create_app(testing=False):
