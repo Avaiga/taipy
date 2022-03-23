@@ -3,7 +3,7 @@ import multiprocessing
 import os
 import random
 import string
-import uuid
+from datetime import datetime
 from time import sleep
 
 import pytest
@@ -113,30 +113,39 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-
     scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
-
     task = _create_task(inner_lock_multiply)
-
     with lock:
         job = scheduler.submit_task(task)
-
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
+    assert_true_after_1_minute_max(job.is_completed)
+    _JobManager._delete(job)
+
+
+def assert_true_after_1_minute_max(assertion):
+    start = datetime.now()
+    while (datetime.now() - start).seconds < 60:
+        sleep(0.1)  # Limit CPU usage
+        try:
+            if assertion():
+                return
+        except Exception as e:
+            print("Raise (test_scheduler):", e)
+    assert assertion()
 
 
 def _create_task(function, nb_outputs=1):
-    output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
-    input1_dn_config = Config._add_data_node("input1", "in_memory", Scope.PIPELINE, default_data=21)
-    _DataManager._get_or_create(input1_dn_config)
-    input2_dn_config = Config._add_data_node("input2", "in_memory", Scope.PIPELINE, default_data=2)
-    _DataManager._get_or_create(input2_dn_config)
+    input1_dn_config = Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
+    input2_dn_config = Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)
     output_dn_configs = [
-        Config._add_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
-        for i in range(nb_outputs)
+        Config._add_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
     [_DataManager._get_or_create(cfg) for cfg in output_dn_configs]
     task_config = Config._add_task(
-        output_dn_config_id, function, [input1_dn_config, input2_dn_config], output_dn_configs
+        "".join(random.choice(string.ascii_lowercase) for _ in range(10)),
+        function,
+        [input1_dn_config, input2_dn_config],
+        output_dn_configs,
     )
     return _TaskManager._get_or_create(task_config)
