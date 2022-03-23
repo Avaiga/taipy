@@ -25,6 +25,7 @@ pytest-flask = "*"
 pre-commit = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+python-dotenv = "*"
 
 [requires]
 python_version = "3.9"
