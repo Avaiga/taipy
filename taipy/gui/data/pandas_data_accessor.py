@@ -155,7 +155,7 @@ class _PandasDataAccessor(_DataAccessor):
         ret_payload = {}
         columns = payload.get("columns", [])
         if col_prefix:
-            columns = [c.removeprefix(col_prefix) for c in columns if c.startswith(col_prefix)]
+            columns = [c.removeprefix(col_prefix) for c in columns]
         ret_payload["pagekey"] = payload.get("pagekey", "unknown page")
         paged = not payload.get("alldata", False)
         if paged:
