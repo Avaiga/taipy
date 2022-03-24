@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
@@ -565,8 +565,8 @@ def configure_generic_data_node(
     id: str,
     read_fct: Callable = None,
     write_fct: Callable = None,
-    read_fct_params: Tuple = None,
-    write_fct_params: Tuple = None,
+    read_fct_params: List = None,
+    write_fct_params: List = None,
     scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
     **properties,
 ):
@@ -578,8 +578,8 @@ def configure_generic_data_node(
         read_fct (Callable): The python function called by Taipy to read the data.
         write_fct (Callable): The python function called by Taipy to write the data. The provided function must have at least
             1 parameter to receive the date to be written.
-        read_fct_params (Union[Dict, List]): The parameters that will be passed to read_fct to read the data.
-        write_fct_params (Union[Dict, List]): The parameters that will be passed to write_fct to write the data.
+        read_fct_params (List): The parameters that will be passed to read_fct to read the data.
+        write_fct_params (List): The parameters that will be passed to write_fct to write the data.
         scope (`Scope`): The scope of the Generic data node configuration. The default value is Scope.SCENARIO.
         **properties (Dict[str, Any]): The variable length keyword arguments.
     Returns:
