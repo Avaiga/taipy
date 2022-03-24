@@ -228,20 +228,6 @@ class TestDataManager:
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "foo"]) == 1
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
 
-    def test_get_all_by_config_id(self):
-        assert len(_DataManager._get_all_by_config_id("NOT_EXISTING_CONFIG_ID")) == 0
-        dn_config_1 = Config._add_data_node(id="foo", storage_type="in_memory")
-        assert len(_DataManager._get_all_by_config_id("foo")) == 0
-        _DataManager._create_and_set(dn_config_1, None)
-        assert len(_DataManager._get_all_by_config_id("foo")) == 1
-        dn_config_2 = Config._add_data_node(id="baz", storage_type="in_memory")
-        _DataManager._create_and_set(dn_config_2, None)
-        assert len(_DataManager._get_all_by_config_id("foo")) == 1
-        assert len(_DataManager._get_all_by_config_id("baz")) == 1
-        _DataManager._create_and_set(dn_config_2, None)
-        assert len(_DataManager._get_all_by_config_id("foo")) == 1
-        assert len(_DataManager._get_all_by_config_id("baz")) == 2
-
     def test_set(self):
         dn = InMemoryDataNode(
             "config_id",

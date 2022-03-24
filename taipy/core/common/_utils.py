@@ -1,13 +1,16 @@
+import functools
 from importlib import import_module
 from operator import attrgetter
 from typing import Callable, Optional
 
 
+@functools.lru_cache
 def _load_fct(module_name: str, fct_name: str) -> Callable:
     module = import_module(module_name)
     return attrgetter(fct_name)(module)
 
 
+@functools.lru_cache
 def _get_fct_name(f) -> Optional[str]:
     # Mock function does not have __qualname__ attribute -> return __name__
     # Partial or anonymous function does not have __name__ or __qualname__ attribute -> return None

@@ -424,26 +424,6 @@ def test_pipeline_notification_subscribe_all():
     assert len(_PipelineManager._get(other_pipeline.id).subscribers) == 1
 
 
-def test_get_all_by_config_id():
-    input_configs = [Config._add_data_node("my_input", "in_memory")]
-    task_config_1 = Config._add_task("task_config_1", print, input_configs, [])
-    assert len(_PipelineManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
-    pipeline_config_1 = Config._add_pipeline("foo", [task_config_1])
-    assert len(_PipelineManager._get_all_by_config_id("foo")) == 0
-
-    _PipelineManager._get_or_create(pipeline_config_1)
-    assert len(_PipelineManager._get_all_by_config_id("foo")) == 1
-
-    pipeline_config_2 = Config._add_pipeline("baz", [task_config_1])
-    _PipelineManager._get_or_create(pipeline_config_2)
-    assert len(_PipelineManager._get_all_by_config_id("foo")) == 1
-    assert len(_PipelineManager._get_all_by_config_id("baz")) == 1
-
-    _PipelineManager._get_or_create(pipeline_config_2, "other_scenario")
-    assert len(_PipelineManager._get_all_by_config_id("foo")) == 1
-    assert len(_PipelineManager._get_all_by_config_id("baz")) == 2
-
-
 def test_do_not_recreate_existing_pipeline_except_same_config():
     dn_input_config_scope_scenario = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
     dn_output_config_scope_scenario = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)

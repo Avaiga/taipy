@@ -46,18 +46,15 @@ class _TaskManager(_Manager[Task]):
         }
         scope = min(dn.scope for dn in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        tasks_from_config_id = cls._get_all_by_config_id(task_config.id)
-        tasks_from_parent = [task for task in tasks_from_config_id if task.parent_id == parent_id]
-        if len(tasks_from_parent) == 1:
-            return tasks_from_parent[0]
-        elif len(tasks_from_parent) > 1:
-            raise MultipleTaskFromSameConfigWithSameParent
-        else:
-            inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
-            outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
-            task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
-            cls._set(task)
-            return task
+
+        if tasks_from_parent := cls._repository._get_by_config_and_parent_ids(task_config.id, parent_id):
+            return tasks_from_parent
+
+        inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
+        outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
+        task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
+        cls._set(task)
+        return task
 
     @classmethod
     def __save_data_nodes(cls, data_nodes):
@@ -79,7 +76,3 @@ class _TaskManager(_Manager[Task]):
             if job.task.id == task.id:
                 entity_ids.job_ids.add(job.id)
         return entity_ids
-
-    @classmethod
-    def _get_all_by_config_id(cls, config_id: str) -> List[Task]:
-        return cls._repository._search_all("config_id", config_id)

@@ -18,14 +18,15 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
         datanode_task_edges = defaultdict(list)
         task_datanode_edges = defaultdict(list)
         for task in pipeline._tasks.values():
+            task_id = str(task.id)
             for predecessor in task.input.values():
-                datanode_task_edges[str(predecessor.id)].append(str(task.id))
+                datanode_task_edges[str(predecessor.id)].append(task_id)
             for successor in task.output.values():
-                task_datanode_edges[str(task.id)].append(str(successor.id))
+                task_datanode_edges[task_id].append(str(successor.id))
         return _PipelineModel(
             pipeline.id,
-            pipeline._parent_id,
-            pipeline._config_id,
+            pipeline.parent_id,
+            pipeline.config_id,
             pipeline._properties.data,
             [task.id for task in pipeline._tasks.values()],
             _utils._fcts_to_dict(pipeline._subscribers),

@@ -51,11 +51,11 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
 
         return _DataNodeModel(
             data_node.id,
-            data_node._config_id,
+            data_node.config_id,
             data_node._scope,
             data_node.storage_type(),
             data_node._name,
-            data_node._parent_id,
+            data_node.parent_id,
             data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
             data_node._job_ids.data,
             data_node._validity_period.days if data_node._validity_period else None,

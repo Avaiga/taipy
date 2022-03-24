@@ -65,9 +65,9 @@ class DataNode(_Entity):
         edition_in_progress: bool = False,
         **kwargs,
     ):
-        self._config_id = _validate_id(config_id)
-        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self._config_id, str(uuid.uuid4())]))
-        self._parent_id = parent_id
+        self.config_id = _validate_id(config_id)
+        self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
+        self.parent_id = parent_id
         self._scope = scope
         self._last_edition_date = last_edition_date
         self._name = name or self.id
@@ -77,26 +77,6 @@ class DataNode(_Entity):
         self._validity_period = validity_period
 
         self._properties = _Properties(self, **kwargs)
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def config_id(self):
-        return self._config_id
-
-    @config_id.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def config_id(self, val):
-        self._config_id = val
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def parent_id(self):
-        return self._parent_id
-
-    @parent_id.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def parent_id(self, val):
-        self._parent_id = val
 
     @property  # type: ignore
     @_self_reload("data")
@@ -252,12 +232,11 @@ class DataNode(_Entity):
         Unlocks the edition of the data node and update its _last_edition_date_.
 
         Parameters:
-            at (datetime): The optional datetime of the last edition. If no _at_ datetime is provided, the
-                current datetime is used.
+            at (datetime): The optional datetime of the last edition.
+                If no _at_ datetime is provided, the current datetime is used.
             job_id (JobId): An optional identifier of the writer.
         Note:
             It can be locked with the method `(DataNode.)lock_edition()^`
-``` @
         """
         self.last_edition_date = at or datetime.now()  # type: ignore
         self.edition_in_progress = False  # type: ignore

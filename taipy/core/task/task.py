@@ -39,9 +39,9 @@ class Task(_Entity):
         id: TaskId = None,
         parent_id: Optional[str] = None,
     ):
-        self._config_id = _validate_id(config_id)
-        self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self._config_id, str(uuid.uuid4())]))
-        self._parent_id = parent_id
+        self.config_id = _validate_id(config_id)
+        self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
+        self.parent_id = parent_id
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
         self._function = function
@@ -56,16 +56,6 @@ class Task(_Entity):
         vars(self).update(state)
 
     @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def config_id(self):
-        return self._config_id
-
-    @config_id.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def config_id(self, val):
-        self._config_id = val
-
-    @property  # type: ignore
     def input(self) -> Dict[str, DataNode]:
         return self.__input
 
@@ -76,16 +66,6 @@ class Task(_Entity):
     @property  # type: ignore
     def data_nodes(self) -> Dict[str, DataNode]:
         return {**self.input, **self.output}
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def parent_id(self):
-        return self._parent_id
-
-    @parent_id.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def parent_id(self, val):
-        self._parent_id = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

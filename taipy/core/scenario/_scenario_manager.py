@@ -240,7 +240,3 @@ class _ScenarioManager(_Manager[Scenario]):
                 entity_ids.job_ids.add(job.id)
 
         return entity_ids
-
-    @classmethod
-    def _get_all_by_config_id(cls, config_id: str) -> List[Scenario]:
-        return cls._repository._search_all("config_id", config_id)

@@ -88,13 +88,14 @@ class _CycleManager(_Manager[Cycle]):
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
             for pipeline in scenario._pipelines.values():
-                if pipeline.parent_id in (pipeline.id, scenario.id, cycle.id):
+                parent_ids = {pipeline.id, scenario.id, cycle.id}
+                if pipeline.parent_id in parent_ids:
                     entity_ids.pipeline_ids.add(pipeline.id)
                 for task in pipeline._tasks.values():
-                    if task.parent_id in (pipeline.id, scenario.id, cycle.id):
+                    if task.parent_id in parent_ids:
                         entity_ids.task_ids.add(task.id)
                     for data_node in task.data_nodes.values():
-                        if data_node.parent_id in (pipeline.id, scenario.id, cycle.id):
+                        if data_node.parent_id in parent_ids:
                             entity_ids.data_node_ids.add(data_node.id)
 
         jobs = _JobManager._get_all()

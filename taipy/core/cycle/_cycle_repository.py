@@ -1,6 +1,6 @@
 import pathlib
 from datetime import datetime
-from typing import List
+from typing import Callable, List
 
 from taipy.core._repository import _FileSystemRepository
 from taipy.core.common.frequency import Frequency
@@ -40,32 +40,12 @@ class _CycleRepository(_FileSystemRepository[_CycleModel, Cycle]):
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
-        cycles_by_frequency = self.__get_cycles_by_frequency(frequency)
-        cycles_by_start_date = self.__get_cycles_by_start_date(start_date)
-        return list(set(cycles_by_frequency) & set(cycles_by_start_date))
+        return self.__get_cycles_cdt(lambda cycle: cycle.frequency == frequency and cycle.start_date == start_date)
 
-    def get_cycles_by_frequency_and_overlapping_date(self, frequency: Frequency, date=datetime) -> List[Cycle]:
-        cycles_by_frequency = self.__get_cycles_by_frequency(frequency)
-        cycles_by_overlapping_date = self.__get_cycles_with_overlapping_date(date)
-        return list(set(cycles_by_frequency) & set(cycles_by_overlapping_date))
+    def get_cycles_by_frequency_and_overlapping_date(self, frequency: Frequency, date: datetime) -> List[Cycle]:
+        return self.__get_cycles_cdt(
+            lambda cycle: cycle.frequency == frequency and cycle.start_date <= date <= cycle.end_date
+        )
 
-    def __get_cycles_by_start_date(self, start_date: datetime) -> List[Cycle]:
-        cycles_by_start_date = []
-        for cycle in self._load_all():
-            if cycle.start_date == start_date:
-                cycles_by_start_date.append(cycle)
-        return cycles_by_start_date
-
-    def __get_cycles_by_frequency(self, frequency: Frequency) -> List[Cycle]:
-        cycles_by_frequency = []
-        for cycle in self._load_all():
-            if cycle.frequency == frequency:
-                cycles_by_frequency.append(cycle)
-        return cycles_by_frequency
-
-    def __get_cycles_with_overlapping_date(self, date=datetime) -> List[Cycle]:
-        cycles_by_overlapping_date = []
-        for cycle in self._load_all():
-            if cycle.start_date <= date <= cycle.end_date:
-                cycles_by_overlapping_date.append(cycle)
-        return cycles_by_overlapping_date
+    def __get_cycles_cdt(self, cdt: Callable[[Cycle], bool]) -> List[Cycle]:
+        return [cycle for cycle in self._load_all() if cdt(cycle)]

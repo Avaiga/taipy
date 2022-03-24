@@ -449,16 +449,6 @@ class TestDataNode:
 
         dn_2 = dm._get(dn_1)
 
-        assert dn_1.config_id == "foo"
-        dn_1.config_id = "fgh"
-        assert dn_1.config_id == "fgh"
-        assert dn_2.config_id == "fgh"
-
-        assert dn_1.parent_id is None
-        dn_1.parent_id = "parent_id"
-        assert dn_1.parent_id == "parent_id"
-        assert dn_2.parent_id == "parent_id"
-
         assert dn_1.scope == Scope.SCENARIO
         dn_1.scope = Scope.PIPELINE
         assert dn_1.scope == Scope.PIPELINE
@@ -511,8 +501,8 @@ class TestDataNode:
         assert len(dn_2.job_ids) == 0
 
         with dn_1 as dn:
-            assert dn.config_id == "fgh"
-            assert dn.parent_id == "parent_id"
+            assert dn.config_id == "foo"
+            assert dn.parent_id is None
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
@@ -523,8 +513,6 @@ class TestDataNode:
 
             new_datetime_2 = new_datetime + timedelta(1)
 
-            dn.config_id = "abc"
-            dn.parent_id = "parent_id_2"
             dn.scope = Scope.CYCLE
             dn.last_edition_date = new_datetime_2
             dn.name = "abc"
@@ -532,9 +520,8 @@ class TestDataNode:
             dn.validity_period = None
             dn.job_ids = ["a_job_id"]
 
-            assert dn._config_id == "abc"
-            assert dn.config_id == "fgh"
-            assert dn.parent_id == "parent_id"
+            assert dn.config_id == "foo"
+            assert dn.parent_id is None
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
@@ -542,8 +529,8 @@ class TestDataNode:
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 0
 
-        assert dn_1.config_id == "abc"
-        assert dn_1.parent_id == "parent_id_2"
+        assert dn_1.config_id == "foo"
+        assert dn_1.parent_id is None
         assert dn_1.scope == Scope.CYCLE
         assert dn_1.last_edition_date == new_datetime_2
         assert dn_1.name == "abc"

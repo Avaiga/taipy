@@ -115,9 +115,7 @@ def test_auto_set_and_reload(task):
     pipeline_2 = _PipelineManager._get(pipeline_1)
 
     assert pipeline_1.config_id == "foo"
-    pipeline_1.config_id = "fgh"
-    assert pipeline_1.config_id == "fgh"
-    assert pipeline_2.config_id == "fgh"
+    assert pipeline_2.config_id == "foo"
 
     assert len(pipeline_1.tasks) == 0
     pipeline_1.tasks = [task]
@@ -127,9 +125,7 @@ def test_auto_set_and_reload(task):
     assert pipeline_2.tasks[task.config_id].id == task.id
 
     assert pipeline_1.parent_id is None
-    pipeline_1.parent_id = "parent_id"
-    assert pipeline_1.parent_id == "parent_id"
-    assert pipeline_2.parent_id == "parent_id"
+    assert pipeline_2.parent_id is None
 
     assert pipeline_1.properties == {}
     pipeline_1.properties["qux"] = 5
@@ -162,27 +158,25 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_2.subscribers) == 0
 
     with pipeline_1 as pipeline:
-        assert pipeline.config_id == "fgh"
+        assert pipeline.config_id == "foo"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
-        assert pipeline.parent_id == "parent_id"
+        assert pipeline.parent_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
 
-        pipeline.config_id = "abc"
         pipeline.tasks = []
         pipeline.parent_id = None
         pipeline.subscribers = [print]
 
-        assert pipeline._config_id == "abc"
-        assert pipeline.config_id == "fgh"
+        assert pipeline.config_id == "foo"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
-        assert pipeline.parent_id == "parent_id"
+        assert pipeline.parent_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
 
-    assert pipeline_1.config_id == "abc"
+    assert pipeline_1.config_id == "foo"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.parent_id is None
     assert len(pipeline_1.subscribers) == 1

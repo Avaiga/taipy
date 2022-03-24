@@ -50,8 +50,8 @@ class Scenario(_Entity):
         subscribers: List[Callable] = None,
         tags: Set[str] = None,
     ):
-        self._config_id = _validate_id(config_id)
-        self.id: ScenarioId = scenario_id or self._new_id(self._config_id)
+        self.config_id = _validate_id(config_id)
+        self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
         self._pipelines = {p.config_id: p for p in pipelines}
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
@@ -69,16 +69,6 @@ class Scenario(_Entity):
 
         sc = _ScenarioManager._get(id)
         self.__dict__ = sc.__dict__
-
-    @property  # type: ignore
-    @_self_reload(_MANAGER_NAME)
-    def config_id(self):
-        return self._config_id
-
-    @config_id.setter  # type: ignore
-    @_self_setter(_MANAGER_NAME)
-    def config_id(self, val):
-        self._config_id = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

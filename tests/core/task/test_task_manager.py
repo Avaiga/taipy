@@ -197,25 +197,6 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
     assert [o.config_id for o in task.output.values()] == [embedded_4.id, embedded_5.id]
 
 
-def test_get_all_by_config_id():
-    input_configs = [Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE)]
-    assert len(_TaskManager._get_all_by_config_id("NOT_EXISTING_CONFIG_NAME")) == 0
-    task_config_1 = Config._add_task("foo", print, input_configs, [])
-    assert len(_TaskManager._get_all_by_config_id("foo")) == 0
-
-    _TaskManager._get_or_create(task_config_1)
-    assert len(_TaskManager._get_all_by_config_id("foo")) == 1
-
-    task_config_2 = Config._add_task("baz", print, input_configs, [])
-    _TaskManager._get_or_create(task_config_2)
-    assert len(_TaskManager._get_all_by_config_id("foo")) == 1
-    assert len(_TaskManager._get_all_by_config_id("baz")) == 1
-
-    _TaskManager._get_or_create(task_config_2, "other_scenario", "other_pipeline")
-    assert len(_TaskManager._get_all_by_config_id("foo")) == 1
-    assert len(_TaskManager._get_all_by_config_id("baz")) == 2
-
-
 def test_delete_raise_exception():
     dn_input_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config_1 = Config._add_data_node("my_output_1", "in_memory")

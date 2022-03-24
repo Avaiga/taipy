@@ -131,38 +131,25 @@ def test_auto_set_and_reload(data_node):
 
     task_2 = _TaskManager._get(task_1)
 
-    assert task_1.config_id == "foo"
-    task_1.config_id = "fgh"
-    assert task_1.config_id == "fgh"
-    assert task_2.config_id == "fgh"
-
     assert task_1.function == print
     task_1.function = mock_func
     assert task_1.function == mock_func
     assert task_2.function == mock_func
 
-    assert task_1.parent_id is None
-    task_1.parent_id = "parent_id"
-    assert task_1.parent_id == "parent_id"
-    assert task_2.parent_id == "parent_id"
-
     with task_1 as task:
-        assert task.config_id == "fgh"
-        assert task.parent_id == "parent_id"
+        assert task.config_id == "foo"
+        assert task.parent_id is None
         assert task.function == mock_func
         assert task._is_in_context
 
-        task.config_id = "abc"
-        task.parent_id = None
         task.function = print
 
-        assert task._config_id == "abc"
-        assert task.config_id == "fgh"
-        assert task.parent_id == "parent_id"
+        assert task.config_id == "foo"
+        assert task.parent_id is None
         assert task.function == mock_func
         assert task._is_in_context
 
-    assert task_1.config_id == "abc"
+    assert task_1.config_id == "foo"
     assert task_1.parent_id is None
     assert task_1.function == print
     assert not task_1._is_in_context

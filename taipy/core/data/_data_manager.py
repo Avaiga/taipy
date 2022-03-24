@@ -24,14 +24,11 @@ class _DataManager(_Manager[DataNode]):
     ) -> DataNode:
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-        dn_from_data_node_config = cls._get_all_by_config_id(data_node_config.id)
-        dn_from_parent = [dn for dn in dn_from_data_node_config if dn.parent_id == parent_id]
-        if len(dn_from_parent) == 1:
-            return dn_from_parent[0]
-        elif len(dn_from_parent) > 1:
-            raise MultipleDataNodeFromSameConfigWithSameParent
-        else:
-            return cls._create_and_set(data_node_config, parent_id)
+
+        if dn_from_parent := cls._repository._get_by_config_and_parent_ids(data_node_config.id, parent_id):
+            return dn_from_parent
+
+        return cls._create_and_set(data_node_config, parent_id)
 
     @classmethod
     def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
@@ -53,7 +50,3 @@ class _DataManager(_Manager[DataNode]):
             )
         except KeyError:
             raise InvalidDataNodeType(data_node_config.storage_type)
-
-    @classmethod
-    def _get_all_by_config_id(cls, config_id: str) -> List[DataNode]:
-        return cls._repository._search_all("config_id", config_id)

@@ -517,14 +517,6 @@ def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_n
     assert len(_DataManager._get_all()) == 1
     assert len(_JobManager._get_all()) == 0
 
-    input_data_node = _DataManager._get_all_by_config_id("my_input")
-    _DataManager._delete(input_data_node[0].id)
-    assert len(_ScenarioManager._get_all()) == 0
-    assert len(_PipelineManager._get_all()) == 0
-    assert len(_TaskManager._get_all()) == 0
-    assert len(_DataManager._get_all()) == 0
-    assert len(_JobManager._get_all()) == 0
-
 
 def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_data_nodes():
     dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
