@@ -86,6 +86,9 @@ def default_multi_sheet_data_frame():
 
 @pytest.fixture(autouse=True)
 def cleanup_files():
+    from time import sleep
+
+    sleep(0.1)
     if os.path.exists(".data"):
         shutil.rmtree(".data")
 
