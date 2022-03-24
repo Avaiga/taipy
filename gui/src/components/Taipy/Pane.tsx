@@ -11,11 +11,11 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction, createSendUpdateAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
 import TaipyRendered from "../pages/TaipyRendered";
-import { TaipyActiveProps } from "./utils";
+import { TaipyActiveProps, TaipyChangeProps } from "./utils";
 
 type AnchorType = "left" | "bottom" | "right" | "top" | undefined;
 
-interface PaneProps extends TaipyActiveProps {
+interface PaneProps extends TaipyActiveProps, TaipyChangeProps {
     children?: ReactNode;
     open?: boolean;
     defaultOpen?: string | boolean;
@@ -81,12 +81,12 @@ const Pane = (props: PaneProps) => {
             if (tp_onClose) {
                 dispatch(createSendActionNameAction(id, tp_onClose));
             } else if (updateVarName) {
-                dispatch(createSendUpdateAction(updateVarName, false, propagate));
+                dispatch(createSendUpdateAction(updateVarName, false, props.tp_onChange, propagate));
             } else {
                 setOpen(false);
             }
         }
-    }, [active, dispatch, id, tp_onClose, updateVarName, propagate]);
+    }, [active, dispatch, id, tp_onClose, updateVarName, propagate, props.tp_onChange]);
 
     useEffect(() => {
         if (props.open !== undefined) {

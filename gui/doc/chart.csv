@@ -47,4 +47,5 @@ line,"indexed(str|dict[str, any])",None?,"The configuration of the line used for
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-line"">line</a> for details. if str then dash??"
 selected_marker,"indexed(dict[str, any])",None?,"The type of markers used for selected points in the indicated trace.
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-selected-marker"">selected marker for details."
+>on_change,,,
 >shared,,,

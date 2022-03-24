@@ -1,3 +1,4 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(any),None,The value represented by this control.
+>on_change,,,
 >propagate,,,

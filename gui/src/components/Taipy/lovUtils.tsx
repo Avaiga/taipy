@@ -7,7 +7,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Tooltip from "@mui/material/Tooltip";
 import {TypographyProps} from "@mui/material";
 
-import { TaipyActiveProps } from "./utils";
+import { TaipyActiveProps, TaipyChangeProps } from "./utils";
 import { getInitials } from "../../utils";
 import { LovItem } from "../../utils/lov";
 import { stringIcon, Icon } from "../../utils/icon";
@@ -19,7 +19,7 @@ export interface SelTreeProps extends LovProps {
     dropdown?: boolean;
 }
 
-export interface LovProps<T = string | string[], U = string> extends TaipyActiveProps {
+export interface LovProps<T = string | string[], U = string> extends TaipyActiveProps, TaipyChangeProps {
     defaultLov?: string;
     lov?: LoV;
     value?: T;

@@ -5,3 +5,4 @@ with_time,bool,False,Whether or not to show the time part of the date.
 format,str,None,"The format to apply to the value.
 See below."
 editable,dynamic(bool),True,show the date as a formatted string if not editable
+>on_change,,,

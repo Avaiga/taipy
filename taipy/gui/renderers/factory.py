@@ -76,6 +76,7 @@ class _Factory:
                 ("limit_rows", _AttributeType.boolean),
                 ("render", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("on_change", ),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
@@ -100,6 +101,7 @@ class _Factory:
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("editable", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("on_change", ),
             ]
         )
         .set_propagate(),
@@ -229,6 +231,7 @@ class _Factory:
                 ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("on_change", ),
             ]
         ),
         "layout": lambda gui, control_type, attrs: _Builder(
@@ -291,6 +294,7 @@ class _Factory:
                 ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("on_change", ),
             ]
         ),
         "pane": lambda gui, control_type, attrs: _Builder(
@@ -309,6 +313,7 @@ class _Factory:
                 ("width", _AttributeType.string_or_number, "30vw"),
                 ("height", _AttributeType.string_or_number, "30vh"),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("on_change", ),
             ]
         )
         .set_propagate(),
@@ -343,6 +348,7 @@ class _Factory:
                 ("value_by_id", _AttributeType.boolean),
                 ("multiple", _AttributeType.boolean),
                 ("width", _AttributeType.string_or_number),
+                ("on_change", ),
             ]
         )
         .set_refresh_on_update()
@@ -366,6 +372,7 @@ class _Factory:
                 ("min", _AttributeType.number, 0),
                 ("orientation"),
                 ("width", _AttributeType.string, "300px"),
+                ("on_change", ),
             ]
         )
         .get_adapter("lov")  # need to be called before set_lov
@@ -449,6 +456,7 @@ class _Factory:
                 ("label",),
                 ("value_by_id", _AttributeType.boolean),
                 ("unselected_value", _AttributeType.string, ""),
+                ("on_change", ),
             ]
         )
         .set_kind()
@@ -474,6 +482,7 @@ class _Factory:
                 ("value_by_id", _AttributeType.boolean),
                 ("multiple", _AttributeType.boolean),
                 ("width", _AttributeType.string_or_number),
+                ("on_change", ),
             ]
         )
         .set_refresh_on_update()

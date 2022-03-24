@@ -18,4 +18,5 @@ height,str,"""30vh""","Height, in CSS units, of this pane.
 This is used only if <i>anchor</i> is ""top"" or ""bottom""."
 persistent,bool,FALSE,"If <i>True</i>, the pane appears next to the page.
 If <i>False</i>, the pane covers the page where it appeared."
+>on_change,,,
 >shared,,,

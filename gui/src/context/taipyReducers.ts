@@ -381,12 +381,23 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
-export const createSendUpdateAction = (name = "", value: unknown, propagate = true, rel_name = ""): TaipyAction => ({
+export const createSendUpdateAction = (name = "", value: unknown, onChange?: string, propagate = true, relName?: string): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
     propagate: propagate,
-    payload: rel_name ? { value: value, relvar: rel_name } : { value: value },
+    payload: getPayload(value, onChange, relName),
 });
+
+const getPayload = (value: unknown, onChange?: string, relName?: string) => {
+    const ret: Record<string, unknown> = {value: value};
+    if (relName) {
+        ret.relvar = relName;
+    }
+    if (onChange) {
+        ret.on_change = onChange;
+    }
+    return ret;
+}
 
 export const createSendActionNameAction = (
     name: string | undefined,

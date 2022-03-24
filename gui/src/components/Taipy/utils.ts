@@ -25,6 +25,10 @@ export interface TaipyMultiSelectProps {
     selected?: number[];
 }
 
+export interface TaipyChangeProps {
+    tp_onChange?: string;
+}
+
 export interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     dataType?: string;
     value: string | number;
@@ -32,7 +36,7 @@ export interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     format?: string;
 }
 
-export interface TaipyInputProps extends TaipyActiveProps {
+export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps {
     type: string;
     value: string;
     defaultValue?: string;
