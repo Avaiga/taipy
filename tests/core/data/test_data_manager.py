@@ -14,6 +14,10 @@ from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
 
 
+def file_exists(file_path: str) -> bool:
+    return os.path.exists(file_path)
+
+
 class TestDataManager:
     def test_create_data_node_and_modify_properties_does_not_modify_config(self):
         dn_config = Config._add_data_node(id="name", foo="bar")
@@ -345,3 +349,45 @@ class TestDataManager:
         assert len(dm._get_all()) == 2
 
         dm._delete_all()
+
+    def test_clean_generated_pickle_files(self, pickle_file_path):
+        user_pickle_dn_config = Config._add_data_node(
+            id="d1", storage_type="pickle", path=pickle_file_path, default_data="d"
+        )
+        generated_pickle_dn_config_1 = Config._add_data_node(id="d2", storage_type="pickle", default_data="d")
+        generated_pickle_dn_config_2 = Config._add_data_node(id="d3", storage_type="pickle", default_data="d")
+
+
+        user_pickle_dn = _DataManager._get_or_create(user_pickle_dn_config)
+        generated_pickle_dn_1 = _DataManager._get_or_create(generated_pickle_dn_config_1)
+        generated_pickle_dn_2 = _DataManager._get_or_create(generated_pickle_dn_config_2)
+
+        _DataManager._clean_pickle_file(user_pickle_dn.id)
+        assert file_exists(user_pickle_dn.path)
+
+        _DataManager._clean_pickle_files([generated_pickle_dn_1.id, generated_pickle_dn_2])
+        assert not file_exists(generated_pickle_dn_1.path)
+        assert not file_exists(generated_pickle_dn_2.path)
+
+    def test_delete_does_clean_generated_pickle_files(self, pickle_file_path):
+        user_pickle_dn_config = Config._add_data_node(
+            id="d1", storage_type="pickle", path=pickle_file_path, default_data="d"
+        )
+        generated_pickle_dn_config_1 = Config._add_data_node(id="d2", storage_type="pickle", default_data="d")
+        generated_pickle_dn_config_2 = Config._add_data_node(id="d3", storage_type="pickle", default_data="d")
+        generated_pickle_dn_config_3 = Config._add_data_node(id="d4", storage_type="pickle", default_data="d")
+
+        user_pickle_dn = _DataManager._get_or_create(user_pickle_dn_config)
+        generated_pickle_dn_1 = _DataManager._get_or_create(generated_pickle_dn_config_1)
+        generated_pickle_dn_2 = _DataManager._get_or_create(generated_pickle_dn_config_2)
+        generated_pickle_dn_3 = _DataManager._get_or_create(generated_pickle_dn_config_3)
+
+        _DataManager._delete(user_pickle_dn.id)
+        assert file_exists(user_pickle_dn.path)
+
+        _DataManager._delete_many([generated_pickle_dn_1.id, generated_pickle_dn_2.id])
+        assert not file_exists(generated_pickle_dn_1.path)
+        assert not file_exists(generated_pickle_dn_2.path)
+
+        _DataManager._delete_all()
+        assert not file_exists(generated_pickle_dn_3.path)

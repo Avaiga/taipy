@@ -80,7 +80,7 @@ class PickleDataNode(DataNode):
         return self.__pickle_file_path
 
     @property
-    def is_generated_file(self) -> bool:
+    def is_file_generated(self) -> bool:
         return self.__PICKLE_FILE_NAME not in self.properties
 
     def _read(self):

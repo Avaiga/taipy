@@ -18,18 +18,6 @@ from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.task._task_manager import _TaskManager
 
 
-def file_exists(file_path):
-    return os.path.exists(file_path)
-
-
-def assert_file_exists(file_path):
-    assert file_exists(file_path), f"File {file_path} does not exist"
-
-
-def assert_file_not_exists(file_path):
-    assert not file_exists(file_path), f"File {file_path} exists"
-
-
 class TestTaipy:
     def test_load_configuration(self):
         file_name = "my_file.toml"
@@ -414,10 +402,7 @@ class TestTaipy:
         scenario = _ScenarioManager._create(scenario_config)
         _ScenarioManager._submit(scenario)
 
-        pickle_data_node = scenario.d2
         # Initial assertion
-        assert isinstance(pickle_data_node, PickleDataNode)
-        assert_file_exists(pickle_data_node.path)
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
         assert len(_PipelineManager._get_all()) == 1
@@ -429,7 +414,6 @@ class TestTaipy:
         Config._set_global_config(clean_entities_enabled=False)
         success = tp.clean_all_entities()
         # Everything should be the same after clean_all_entities since clean_entities_enabled is False
-        assert_file_exists(pickle_data_node.path)
         assert len(_DataManager._get_all()) == 2
         assert len(_TaskManager._get_all()) == 1
         assert len(_PipelineManager._get_all()) == 1
@@ -442,7 +426,6 @@ class TestTaipy:
         Config._set_global_config(clean_entities_enabled=True)
         success = tp.clean_all_entities()
         # File should not exist after clean_all_entities since clean_entities_enabled is True
-        assert_file_not_exists(pickle_data_node.path)
         assert len(_DataManager._get_all()) == 0
         assert len(_TaskManager._get_all()) == 0
         assert len(_PipelineManager._get_all()) == 0
@@ -450,20 +433,3 @@ class TestTaipy:
         assert len(_CycleManager._get_all()) == 0
         assert len(_JobManager._get_all()) == 0
         assert success
-
-    def test_clean_all_entities_with_user_pickle_files(self, pickle_file_path):
-        user_pickle = PickleDataNode(
-            config_id="d1", properties={"default_data": "foo", "path": pickle_file_path}, scope=Scope.SCENARIO
-        )
-        generated_pickle = PickleDataNode(config_id="d2", properties={"default_data": "foo"}, scope=Scope.SCENARIO)
-
-        # File already exists so it does not write any
-        assert len(_DataManager._get_all()) == 2
-        assert file_exists(user_pickle.path)
-        assert_file_exists(generated_pickle.path)
-
-        Config._set_global_config(clean_entities_enabled=True)
-        tp.clean_all_entities()
-        assert len(_DataManager._get_all()) == 0
-        assert_file_exists(user_pickle.path)
-        assert_file_not_exists(generated_pickle.path)

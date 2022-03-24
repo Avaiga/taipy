@@ -853,18 +853,9 @@ def clean_all_entities() -> bool:
         bool: True if the operation succeeded, False otherwise.
     """
     if not Config.global_config.clean_entities_enabled:
-        __logger.warning("Please set clean_entities_enabled to True in global app config to clean all entities.")
+        __logger.warning("Please set clean_entities_enabled to True to clean all entities.")
         return False
 
-    data_nodes = _DataManager._get_all()
-
-    # Clean all pickle files
-    for data_node in data_nodes:
-        if isinstance(data_node, PickleDataNode):
-            if os.path.exists(data_node.path) and data_node.is_generated_file:
-                os.remove(data_node.path)
-
-    # Clean all entities
     _DataManager._delete_all()
     _TaskManager._delete_all()
     _PipelineManager._delete_all()

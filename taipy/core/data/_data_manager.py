@@ -1,10 +1,12 @@
-from typing import List, Optional
+import os
+from typing import Iterable, List, Optional, Union
 
 from taipy.core.common._manager import _Manager
-from taipy.core.common.alias import PipelineId, ScenarioId
+from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_repository import _DataRepository
 from taipy.core.data.data_node import DataNode
+from taipy.core.data.pickle import PickleDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InvalidDataNodeType, MultipleDataNodeFromSameConfigWithSameParent
 
@@ -50,3 +52,31 @@ class _DataManager(_Manager[DataNode]):
             )
         except KeyError:
             raise InvalidDataNodeType(data_node_config.storage_type)
+
+    @classmethod
+    def _clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
+        data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
+        if not isinstance(data_node, PickleDataNode):
+            return
+        if data_node.is_file_generated and os.path.exists(data_node.path):
+            os.remove(data_node.path)
+
+    @classmethod
+    def _clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]]):
+        for data_node in data_nodes:
+            cls._clean_pickle_file(data_node)
+
+    @classmethod
+    def _delete(cls, data_node_id: DataNodeId):  # type:ignore
+        cls._clean_pickle_file(data_node_id)
+        super()._delete(data_node_id)
+
+    @classmethod
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):  # type:ignore
+        cls._clean_pickle_files(data_node_ids)
+        super()._delete_many(data_node_ids)
+
+    @classmethod
+    def _delete_all(cls):
+        cls._clean_pickle_files(cls._get_all())
+        super()._delete_all()
