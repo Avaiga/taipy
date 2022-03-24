@@ -5,19 +5,14 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 import pytest
+import taipy.core as tp
 from dotenv import load_dotenv
+from taipy.core import Cycle, Frequency, Job, Pipeline, Scenario, Task
 from taipy.core.common.alias import DataNodeId, JobId
-from taipy.core import Frequency
-from taipy.core import Cycle
 from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode, Scope
 from taipy.core.job._job_manager import _JobManager as JobManager
-from taipy.core import Job
-from taipy.core import Pipeline
-from taipy.core import Scenario
-from taipy.core import Task
 from taipy.core.task._task_manager import _TaskManager as TaskManager
-import taipy.core as tp
 
 from src.taipy.rest.app import create_app
 
@@ -87,11 +82,7 @@ def default_df_datanode():
         DataNodeId("id_uio2"),
         "my name",
         "parent_id",
-        properties={
-            "default_data": pd.DataFrame(
-                [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}]
-            )
-        },
+        properties={"default_data": pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}])},
     )
 
 
@@ -104,11 +95,7 @@ def default_datanode_config():
 def default_datanode_config_list():
     configs = []
     for i in range(10):
-        configs.append(
-            tp.configure_data_node(
-                id=f"ds_{i}", storage_type="in_memory", scope=Scope.PIPELINE
-            )
-        )
+        configs.append(tp.configure_data_node(id=f"ds_{i}", storage_type="in_memory", scope=Scope.PIPELINE))
     return configs
 
 
@@ -183,9 +170,7 @@ def default_pipeline_config():
 def default_pipeline_config_list():
     configs = []
     for i in range(10):
-        configs.append(
-            tp.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())
-        )
+        configs.append(tp.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config()))
     return configs
 
 

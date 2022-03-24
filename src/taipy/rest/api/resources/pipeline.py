@@ -1,16 +1,12 @@
-import importlib
-import os
-
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.core.exceptions.exceptions import NonExistingPipeline
-from taipy.core.exceptions.exceptions import ModelNotFound
-from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.config.config import Config
+from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingPipeline
 from taipy.core.pipeline._pipeline_manager import _PipelineManager as PipelineManager
+from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task._task_manager import _TaskManager as TaskManager
 
 from ...commons.to_from_model import to_model
-from ...config import TAIPY_SETUP_FILE
 from ..schemas import PipelineResponseSchema, PipelineSchema
 
 REPOSITORY = "pipeline"
@@ -131,13 +127,9 @@ class PipelineList(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location("taipy_setup", TAIPY_SETUP_FILE)
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def fetch_config(self, config_id):
-        return getattr(self.module, config_id)
+        return Config.pipelines[config_id]
 
     def get(self):
         schema = PipelineResponseSchema(many=True)
@@ -162,7 +154,7 @@ class PipelineList(Resource):
                 "msg": "pipeline created",
                 "pipeline": response_schema.dump(to_model(REPOSITORY, pipeline)),
             }, 201
-        except AttributeError:
+        except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404
 
     def __create_pipeline_from_schema(self, pipeline_schema: PipelineSchema):

@@ -1,17 +1,15 @@
-import importlib
-import os
 import uuid
 from typing import Optional
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
-from taipy.core.common.alias import JobId
-from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core import Job
+from taipy.core.common.alias import JobId
+from taipy.core.config.config import Config
+from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager import _JobManager as JobManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
 
-from ...config import TAIPY_SETUP_FILE
 from ..schemas import JobResponseSchema, JobSchema
 
 
@@ -79,9 +77,7 @@ class JobResource(Resource):
             manager = JobManager()
             manager._delete(job_id)
         except ModelNotFound:
-            return make_response(
-                jsonify({"message": f"DataNode {job_id} not found"}), 404
-            )
+            return make_response(jsonify({"message": f"DataNode {job_id} not found"}), 404)
 
         return {"msg": f"job {job_id} deleted"}
 
@@ -132,15 +128,9 @@ class JobList(Resource):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
-        if os.path.exists(TAIPY_SETUP_FILE):
-            spec = importlib.util.spec_from_file_location(
-                "taipy_setup", TAIPY_SETUP_FILE
-            )
-            self.module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(self.module)
 
     def fetch_config(self, config_id):
-        return getattr(self.module, config_id)
+        return Config.tasks[config_id]
 
     def get(self):
         schema = JobResponseSchema(many=True)
@@ -169,10 +159,8 @@ class JobList(Resource):
     def __create_job_from_schema(self, job_schema: JobSchema) -> Optional[Job]:
         task_manager = TaskManager()
         try:
-            task = task_manager._get_or_create(
-                self.fetch_config(job_schema.get("task_name"))
-            )
-        except AttributeError:
+            task = task_manager._get_or_create(self.fetch_config(job_schema.get("task_name")))
+        except KeyError:
             return None
 
         return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
