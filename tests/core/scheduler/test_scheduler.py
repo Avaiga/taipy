@@ -17,6 +17,7 @@ from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
 from taipy.core.task.task import Task
+from tests.core.utils import assert_true_after_1_minute_max
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -281,15 +282,3 @@ def _create_task(function, nb_outputs=1):
         input=input_dn,
         output=output_dn,
     )
-
-
-def assert_true_after_1_minute_max(assertion):
-    start = datetime.now()
-    while (datetime.now() - start).seconds < 60:
-        sleep(0.1)  # Limit CPU usage
-        try:
-            if assertion():
-                return
-        except Exception as e:
-            print("Raise (test_scheduler):", e)
-    assert assertion()

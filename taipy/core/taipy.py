@@ -135,7 +135,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     if entity_id.startswith(_JobManager._ID_PREFIX):
         return _JobManager._delete(_JobManager._get(JobId(entity_id)))  # type: ignore
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return _CycleManager._delete(CycleId(entity_id))
+        return _CycleManager._hard_delete(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManager._hard_delete(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline._ID_PREFIX):

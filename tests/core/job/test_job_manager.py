@@ -3,7 +3,6 @@ import multiprocessing
 import os
 import random
 import string
-from datetime import datetime
 from time import sleep
 
 import pytest
@@ -17,6 +16,7 @@ from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
+from tests.core import utils
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -119,20 +119,8 @@ def test_raise_when_trying_to_delete_unfinished_job():
         job = scheduler.submit_task(task)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
-    assert_true_after_1_minute_max(job.is_completed)
+    utils.assert_true_after_1_minute_max(job.is_completed)
     _JobManager._delete(job)
-
-
-def assert_true_after_1_minute_max(assertion):
-    start = datetime.now()
-    while (datetime.now() - start).seconds < 60:
-        sleep(0.1)  # Limit CPU usage
-        try:
-            if assertion():
-                return
-        except Exception as e:
-            print("Raise (test_scheduler):", e)
-    assert assertion()
 
 
 def _create_task(function, nb_outputs=1):

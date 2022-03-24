@@ -234,7 +234,7 @@ class TestTaipy:
             mck.assert_called_once_with(scenario_id)
 
     def test_delete(self):
-        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._delete") as mck:
+        with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._hard_delete") as mck:
             cycle_id = CycleId("CYCLE_id")
             tp.delete(cycle_id)
             mck.assert_called_once_with(cycle_id)
