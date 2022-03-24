@@ -239,7 +239,7 @@ def test_blocked_task():
         assert_true_after_1_minute_max(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
-        assert job_2.is_running()  # And job 2 can run
+        assert_true_after_1_minute_max(job_2.is_running)  # And job 2 can start running
         assert len(scheduler.blocked_jobs) == 0
     assert_true_after_1_minute_max(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
