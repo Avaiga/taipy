@@ -294,7 +294,7 @@ class Gui:
                     args[2] = value
                 on_change_fn(*args)
             except Exception as e:
-                warnings.warn(f"{on_change or 'on_change'}: function invocation exception: {e}")
+                warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception: {e}")
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
         ret_value = self.__get_content_accessor().get_info(var_name, value, image)

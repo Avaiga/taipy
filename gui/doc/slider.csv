@@ -23,3 +23,4 @@ It defaults to the <i>width</i> value when using the vertical orientation."
 orientation,str,"""horizontal""","The orientation of this slider.
 Valid values are ""horizontal"" or ""vertical""."
 >lovComp,,,
+>on_change,,,
