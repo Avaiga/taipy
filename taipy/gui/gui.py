@@ -724,7 +724,7 @@ class Gui:
 
                 If _pages_ is a string that contains the path to a directory, then
                 this directory is traversed, looking for filenames that have the
-                _.md_ extention,
+                _.md_ extention, TODO
 
 
         !!! note "Reading pages from a directory"
