@@ -152,16 +152,6 @@ class _Config(object):
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config
         env_file_abs_path = env_filename if os.path.isabs(env_filename) else os.path.join(root_dir, env_filename)
-        if os.path.isfile(env_file_abs_path):
-            for key, value in dotenv_values(env_file_abs_path).items():
-                key = key.lower()
-                if value is not None and key in config:
-                    try:
-                        config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
-                    except Exception as e:
-                        warnings.warn(
-                            f"Invalid env value in Gui.run: {key} - {value}. Unable to parse value to the correct type.\n{e}"
-                        )
         # Load keyword arguments
         for key, value in kwargs.items():
             key = key.lower()
@@ -172,5 +162,16 @@ class _Config(object):
                     warnings.warn(
                         f"Invalid keyword arguments value in Gui.run {key} - {value}. Unable to parse value to the correct type.\n{e}"
                     )
+        # Load config from env file
+        if os.path.isfile(env_file_abs_path):
+            for key, value in dotenv_values(env_file_abs_path).items():
+                key = key.lower()
+                if value is not None and key in config:
+                    try:
+                        config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore
+                    except Exception as e:
+                        warnings.warn(
+                            f"Invalid env value in Gui.run: {key} - {value}. Unable to parse value to the correct type.\n{e}"
+                        )
         # Load from system arguments
         self._init_argparse()
