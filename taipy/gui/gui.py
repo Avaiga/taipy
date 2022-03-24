@@ -454,10 +454,7 @@ class Gui:
             }
         )
 
-    def __send_ws_partial(
-        self,
-        partial: str
-    ):
+    def __send_ws_partial(self, partial: str):
         self.__send_ws(
             {
                 "type": _WsType.PARTIAL.value,
@@ -727,7 +724,7 @@ class Gui:
 
                 If _pages_ is a string that contains the path to a directory, then
                 this directory is traversed, looking for filenames that have the
-                _.md_ extention, 
+                _.md_ extention,
 
 
         !!! note "Reading pages from a directory"
@@ -843,7 +840,7 @@ class Gui:
         partials = _getscopeattr(self, Partial._PARTIALS, {})
         partials[partial._route] = partial
         _setscopeattr(self, Partial._PARTIALS, partials)
-        self.__send_ws_partial(partial._route)
+        self.__send_ws_partial(str(partial._route))
 
     def _get_partial(self, route: str) -> t.Optional[Partial]:
         partials = _getscopeattr(self, Partial._PARTIALS, {})
@@ -897,9 +894,7 @@ class Gui:
         self.__send_ws_alert(
             notification_type,
             message,
-            self._get_config("system_notification", False)
-            if system_notification is None
-            else system_notification,
+            self._get_config("system_notification", False) if system_notification is None else system_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
         )
 

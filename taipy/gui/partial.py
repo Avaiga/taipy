@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import typing as t
 import warnings
 
@@ -50,7 +51,7 @@ class Partial(_Page):
         else:
             warnings.warn("'Partial.update_content()' must be called in the context of a callback")
 
-    def __copy(self, content:str)-> Partial:
+    def __copy(self, content: str) -> Partial:
         new_partial = Partial(self._route)
-        new_partial._renderer = type(self._renderer)(content)
+        new_partial._renderer = type(self._renderer)(content) if self._renderer is not None else None
         return new_partial

@@ -10,6 +10,7 @@ import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from werkzeug.serving import is_running_from_reloader
 
 from .renderers.jsonencoder import _TaipyJsonEncoder
 from .utils import _is_in_notebook, _KillableThread
@@ -203,7 +204,11 @@ class _Server:
             log.disabled = True
             self._flask.logger.disabled = True
             print(f" * Server starting on http://{host_value}:{port}")
-        if self._gui._get_config("run_browser", False) and self._gui._get_config("debug", False):
+        if (
+            not is_running_from_reloader()
+            and self._gui._get_config("run_browser", False)
+            and self._gui._get_config("debug", False)
+        ):
             webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
         if _is_in_notebook() or run_in_thread:
             self._host = host
