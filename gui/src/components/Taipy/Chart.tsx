@@ -102,8 +102,6 @@ const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number)
 
 const selectedPropRe = /selected(\d+)/;
 
-const defaultChartConfig = { responsive: true };
-
 const ONE_COLUMN_CHART = ["pie"];
 
 const Chart = (props: ChartProp) => {
@@ -307,11 +305,15 @@ const Chart = (props: ChartProp) => {
             } catch (e) {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
+            if (typeof plconf !== 'object' || plconf === null || Array.isArray(plconf)) {
+                console.info("Error Chart.plot_config is not a dictionnary");
+                plconf = {}
+            }
         }
         if (active) {
-            return { ...defaultChartConfig, ...plconf };
+            return plconf;
         } else {
-            return { ...defaultChartConfig, ...plconf, staticPlot: true };
+            return { ...plconf, staticPlot: true };
         }
     }, [active, props.plotConfig]);
 
