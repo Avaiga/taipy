@@ -6,7 +6,7 @@ __author__ = """Avaiga"""
 __email__ = "taipy.dev@avaiga.com"
 
 
-def run(gui=None, **kwargs):
+def run(gui_app: gui.Gui = None, **kwargs):
     """
     Run the REST API with the GUI if passed in parameters.
 
@@ -14,9 +14,9 @@ def run(gui=None, **kwargs):
         gui (Optional[`Gui^`]): Gui application to run. Only REST API will be running if it is not provided.
         **kwargs: Other parameters to provide to the Flask server.
     """
-    if isinstance(gui, gui.Gui):
+    if isinstance(gui_app, gui.Gui):
         from taipy.rest.run import app
-        gui.bind_flask(app)
-        gui.run(**kwargs)
+        gui_app.bind_flask(app)
+        gui_app.run(**kwargs)
     else:
         rest.run(**kwargs)
