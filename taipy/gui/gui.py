@@ -502,10 +502,10 @@ class Gui:
         ]
         self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
-    def __get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or self._bindings()._get_single_client():
-            return None
-        return request.sid  # type: ignore
+    def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
+        if not self._bindings()._get_single_client() and hasattr(request, "sid") :
+            return request.sid
+        return None
 
     def __get_message_grouping(self):
         if not _hasscopeattr(self, Gui.__MESSAGE_GROUPING_NAME):
