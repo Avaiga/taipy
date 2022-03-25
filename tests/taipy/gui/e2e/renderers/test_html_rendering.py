@@ -73,7 +73,6 @@ def test_html_render_path_mapping(page: "Page", gui: Gui, helpers):
     gui._server = _Server(
         gui,
         path_mapping={"style": f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets{os.path.sep}style"},
-        root_page_name=gui._get_root_page_name(),
     )
     gui.add_page("page1", Html(f"{Path(Path(__file__).parent.resolve())}{os.path.sep}page1.html"))
     helpers.run_e2e(gui)

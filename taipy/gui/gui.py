@@ -961,7 +961,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                root_page_name=Gui.__root_page_name,
             )
         if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
             self._server._thread.kill()
@@ -972,7 +971,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                root_page_name=Gui.__root_page_name,
             )
             self._bindings()._new_scopes()
 
