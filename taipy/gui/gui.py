@@ -128,10 +128,7 @@ class Gui:
                 server. If omitted or set to None, this `Gui` will create its own Flask
                 application instance and use it to serve the pages.
         """
-        self._server = _Server(
-            self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
-        )
-        # Preserve server config for re-initialization on notebook
+        # Preserve server config for server initialization
         self._path_mapping = path_mapping
         self._flask = flask
         self._css_file = css_file
@@ -660,6 +657,9 @@ class Gui:
     def _get_root_page_name(self):
         return self.__root_page_name
 
+    def _set_flask(self, flask: Flask):
+        self._flask = flask
+
     # Public methods
     def add_page(
         self,
@@ -960,6 +960,13 @@ class Gui:
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
                 section in the User Manual for more information.
         """
+        if not hasattr(self, "_server"):
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+            )
         if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
             self._server._thread.kill()
             self._server._thread.join()
@@ -969,7 +976,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                root_page_name=Gui.__root_page_name,
             )
             self._bindings()._new_scopes()
 
@@ -993,11 +999,10 @@ class Gui:
         if run_server and app_config["ngrok_token"]:  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed")
-            else:
-                ngrok.set_auth_token(app_config["ngrok_token"])
-                http_tunnel = ngrok.connect(app_config["port"], "http")
-                app_config["use_reloader"] = False
-                print(f" * NGROK Public Url: {http_tunnel.public_url}")
+            ngrok.set_auth_token(app_config["ngrok_token"])
+            http_tunnel = ngrok.connect(app_config["port"], "http")
+            app_config["use_reloader"] = False
+            print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
         if isinstance(kwargs.get("locals_bind"), dict):
@@ -1093,7 +1098,7 @@ class Gui:
         it was run in a separated thread: the _run_in_thread_ parameter to the
         `(Gui.)run^` method was set to True, or you are running in a Notebook context.
         """
-        if hasattr(self._server, "_thread"):
+        if hasattr(self, "_server") and hasattr(self._server, "_thread"):
             self._server._thread.kill()
             self._server._thread.join()
             print("Gui server has been stopped")

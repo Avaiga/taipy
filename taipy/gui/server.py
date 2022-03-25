@@ -29,10 +29,9 @@ class _Server:
         flask: t.Optional[Flask] = None,
         css_file: str = "",
         path_mapping: t.Optional[dict] = {},
-        root_page_name: str = "",
     ):
         self._gui = gui
-        self._root_page_name = root_page_name
+        self._root_page_name = gui._get_root_page_name()
         self._flask = Flask("Taipy") if flask is None else flask
         self.css_file = css_file
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
