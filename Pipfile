@@ -19,6 +19,7 @@ rdp = ">=0.8"
 simple-websocket = ">=0.3"
 tzlocal = ">=3.0"
 "backports.zoneinfo" = {version=">=0.2.0", markers="python_version < '3.9'", extras=["tzdata"]}
+pyngrok = ">=5.1"
 
 [dev-packages]
 black = "*"

@@ -82,9 +82,7 @@ class _Builder:
                     else:
                         self.__attributes[k] = v
             else:
-                warnings.warn(
-                    f"{self.__control_type}.properties ({prop_hash}) must be a dict."
-                )
+                warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
         # Bind potential function and expressions in self.attributes
         for k, v in self.__attributes.items():
@@ -297,12 +295,12 @@ class _Builder:
                 else:
                     self.__gui._add_type_for_var(value_name, var_type)
             if adapter is not None:
-                self.__gui._add_adapter_for_type(var_type, adapter)
+                self.__gui._add_adapter_for_type(var_type, adapter)  # type: ignore
 
             ret_list = []
             if len(lov) > 0:
                 for elt in lov:
-                    ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")
+                    ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")  # type: ignore
                     if ret is not None:
                         ret_list.append(ret)
             self.__attributes["default_" + property_name] = ret_list
@@ -311,7 +309,7 @@ class _Builder:
             value = self.__attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self.__gui._run_adapter(adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)
+                ret = self.__gui._run_adapter(adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
@@ -743,7 +741,9 @@ class _Builder:
         if partial:
             page = self.__attributes.get("page")
             if page:
-                warnings.warn(f"{self.__element_name} control: page and partial should not be defined at the same time.")
+                warnings.warn(
+                    f"{self.__element_name} control: page and partial should not be defined at the same time."
+                )
             if isinstance(partial, Partial):
                 self.__attributes["page"] = partial._route
                 self.__set_react_attribute("partial", partial._route)
@@ -798,9 +798,7 @@ class _Builder:
             hash_name = self.__gui._evaluate_bind_holder(taipy_type, expr)
         return hash_name
 
-    def __set_dynamic_bool_attribute(
-        self, name: str, def_val: t.Any, with_update: bool, update_main=True
-    ):
+    def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, update_main=True):
         hash_name = self.__hashes.get(name)
         val = self.__get_boolean_attribute(name, def_val)
         default_name = "default_" + name if hash_name is not None else name
@@ -851,9 +849,7 @@ class _Builder:
                 self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == _AttributeType.boolean_or_list:
                 if _is_boolean(self.__attributes.get(attr[0])):
-                    self.__set_dynamic_bool_attribute(
-                        attr[0], _get_tuple_val(attr, 2, False), True, update_main=False
-                    )
+                    self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(attr, 2, False), True, update_main=False)
                 else:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
         return self

@@ -1,11 +1,10 @@
 name: Setuptools
 
 on:
-  workflow_dispatch:
-#  push:
-#    branches: []  # develop ]
-#  pull_request:
-#    branches: [] # develop ]
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   standard-packages:
@@ -13,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-18.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -44,7 +43,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-18.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -53,6 +52,10 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-versions }}
+
+      - name: install libmagic on macos
+        if: matrix.os == 'macos-latest'
+        run: brew install libmagic
 
       - name: Add optionals dependencies
         run: |

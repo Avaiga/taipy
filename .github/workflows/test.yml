@@ -1,11 +1,10 @@
 name: Tests & Coverage
 
 on:
-  workflow_dispatch:  
-#  push:
-#    branches: [ develop ]
-#  pull_request:
-#    branches: [ develop ]
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
 
 jobs:
   backend:
@@ -13,8 +12,8 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-        python-versions: ["3.8", "3.9", "3.10"]
-        os: [ubuntu-18.04, windows-latest]
+        python-versions: ['3.8', '3.9', '3.10']
+        os: [ubuntu-18.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -33,6 +32,10 @@ jobs:
       - name: Run npm build
         run: npm run build --if-present
         working-directory: ./gui
+
+      - name: install libmagic on macos
+        if: matrix.os == 'macos-latest'
+        run: brew install libmagic
 
       - name: test with tox
         env:
@@ -54,7 +57,7 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-        os: [ubuntu-18.04, windows-latest]
+        os: [ubuntu-18.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     defaults:
