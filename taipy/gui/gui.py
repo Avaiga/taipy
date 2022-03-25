@@ -724,7 +724,7 @@ class Gui:
 
                 If _pages_ is a string that contains the path to a directory, then
                 this directory is traversed, looking for filenames that have the
-                _.md_ extention,
+                _.md_ extention, TODO
 
 
         !!! note "Reading pages from a directory"
@@ -840,7 +840,7 @@ class Gui:
         partials = _getscopeattr(self, Partial._PARTIALS, {})
         partials[partial._route] = partial
         _setscopeattr(self, Partial._PARTIALS, partials)
-        self.__send_ws_partial(partial._route)
+        self.__send_ws_partial(str(partial._route))
 
     def _get_partial(self, route: str) -> t.Optional[Partial]:
         partials = _getscopeattr(self, Partial._PARTIALS, {})
@@ -996,11 +996,10 @@ class Gui:
         if run_server and app_config["ngrok_token"]:  # pragma: no cover
             if not util.find_spec("pyngrok"):
                 raise RuntimeError("Cannot use ngrok as pyngrok package is not installed")
-            else:
-                ngrok.set_auth_token(app_config["ngrok_token"])
-                http_tunnel = ngrok.connect(app_config["port"], "http")
-                app_config["use_reloader"] = False
-                print(f" * NGROK Public Url: {http_tunnel.public_url}")
+            ngrok.set_auth_token(app_config["ngrok_token"])
+            http_tunnel = ngrok.connect(app_config["port"], "http")
+            app_config["use_reloader"] = False
+            print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
         # Save all local variables of the parent frame (usually __main__)
         if isinstance(kwargs.get("locals_bind"), dict):
