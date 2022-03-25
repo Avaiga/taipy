@@ -156,3 +156,25 @@ Depending on the algorithm, Some specific points might not be shown on the chart
         <taipy:chart limit_rows="true" ...>{data}</taipy:chart>
         ```
 
+### Responsive chart
+
+By specifying _plot_config_ responsive key, chart will be responsive ie chart will resize automatically to adapt to its container width.
+
+```py3
+pconf = {"responsive": True}
+```
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|{data}|chart|plot_config={pconf}|...|>
+        ```
+
+    === "HTML"
+
+        ```html
+        <taipy:chart plot_config="{pconf}" ...>{data}</taipy:chart>
+        ```
+
