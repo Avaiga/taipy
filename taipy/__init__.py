@@ -9,4 +9,4 @@ __email__ = "taipy.dev@avaiga.com"
 def run(page):
     from taipy.rest.run import app
 
-    gui.Gui(flask=app).run()
+    gui.Gui(flask=app, page=page).run()
