@@ -128,10 +128,7 @@ class Gui:
                 server. If omitted or set to None, this `Gui` will create its own Flask
                 application instance and use it to serve the pages.
         """
-        self._server = _Server(
-            self, path_mapping=path_mapping, flask=flask, css_file=css_file, root_page_name=Gui.__root_page_name
-        )
-        # Preserve server config for re-initialization on notebook
+        # Preserve server config for server initialization
         self._path_mapping = path_mapping
         self._flask = flask
         self._css_file = css_file
@@ -454,10 +451,7 @@ class Gui:
             }
         )
 
-    def __send_ws_partial(
-        self,
-        partial: str
-    ):
+    def __send_ws_partial(self, partial: str):
         self.__send_ws(
             {
                 "type": _WsType.PARTIAL.value,
@@ -658,6 +652,9 @@ class Gui:
     def _get_root_page_name(self):
         return self.__root_page_name
 
+    def _set_flask(self, flask: Flask):
+        self._flask = flask
+
     # Public methods
     def add_page(
         self,
@@ -727,7 +724,7 @@ class Gui:
 
                 If _pages_ is a string that contains the path to a directory, then
                 this directory is traversed, looking for filenames that have the
-                _.md_ extention, 
+                _.md_ extention,
 
 
         !!! note "Reading pages from a directory"
@@ -897,9 +894,7 @@ class Gui:
         self.__send_ws_alert(
             notification_type,
             message,
-            self._get_config("system_notification", False)
-            if system_notification is None
-            else system_notification,
+            self._get_config("system_notification", False) if system_notification is None else system_notification,
             self._get_config("notification_duration", 3000) if duration is None else duration,
         )
 
@@ -960,6 +955,14 @@ class Gui:
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
                 section in the User Manual for more information.
         """
+        if not hasattr(self, "_server"):
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                root_page_name=Gui.__root_page_name,
+            )
         if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
             self._server._thread.kill()
             self._server._thread.join()
@@ -1093,7 +1096,7 @@ class Gui:
         it was run in a separated thread: the _run_in_thread_ parameter to the
         `(Gui.)run^` method was set to True, or you are running in a Notebook context.
         """
-        if hasattr(self._server, "_thread"):
+        if hasattr(self, "_server") and hasattr(self._server, "_thread"):
             self._server._thread.kill()
             self._server._thread.join()
             print("Gui server has been stopped")
