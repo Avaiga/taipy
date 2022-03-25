@@ -8,12 +8,12 @@ import { isValid } from "date-fns";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
-import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
+import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./utils";
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
 import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import Field from "./Field";
 
-interface DateSelectorProps extends TaipyActiveProps {
+interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
     format?: string;
     date: string;
@@ -54,10 +54,10 @@ const DateSelector = (props: DateSelectorProps) => {
                     newDate.setHours(hours);
                     newDate.setMinutes(minutes);
                 }
-                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), propagate));
+                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), props.tp_onChange, propagate));
             }
         },
-        [updateVarName, dispatch, withTime, propagate, tz]
+        [updateVarName, dispatch, withTime, propagate, tz, props.tp_onChange]
     );
 
     const renderInput = useCallback(

@@ -18,9 +18,9 @@ const Input = (props: TaipyInputProps) => {
     const handleInput = useCallback(
         (e) => {
             setValue(e.target.value);
-            dispatch(createSendUpdateAction(updateVarName, e.target.value, propagate));
+            dispatch(createSendUpdateAction(updateVarName, e.target.value, props.tp_onChange, propagate));
         },
-        [updateVarName, dispatch, propagate]
+        [updateVarName, dispatch, propagate, props.tp_onChange]
     );
 
     useEffect(() => {

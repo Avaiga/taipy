@@ -1,0 +1,8 @@
+﻿Name,Type,Default,Doc
+on_change,str,,"The name of a function that is triggered when the value is updated.
+The parameters of that function are all optional:
+<ul>
+<li>state instance</li>
+<li>var_name</li>
+<li>value</li>
+</ul>"

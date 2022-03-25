@@ -58,10 +58,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(updateVarName, value, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                dispatch(createSendUpdateAction(updateVarName, value, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
     );
 
     const handleRangeCommitted = useCallback(
@@ -69,10 +69,10 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (!update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(updateVarName, value, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                dispatch(createSendUpdateAction(updateVarName, value, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
     );
 
     const getLabel = useCallback(

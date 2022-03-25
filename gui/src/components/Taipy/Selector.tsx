@@ -136,19 +136,19 @@ const Selector = (props: SelTreeProps) => {
                             newKeys.splice(p, 1);
                         }
                         dispatch(
-                            createSendUpdateAction(updateVarName, newKeys, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
+                            createSendUpdateAction(updateVarName, newKeys, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
                         );
                         return newKeys;
                     } else {
                         dispatch(
-                            createSendUpdateAction(updateVarName, key, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
+                            createSendUpdateAction(updateVarName, key, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
                         );
                         return [key];
                     }
                 });
             }
         },
-        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById]
+        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.tp_onChange]
     );
 
     const handleChange = useCallback(
@@ -157,9 +157,9 @@ const Selector = (props: SelTreeProps) => {
                 target: { value },
             } = event;
             setSelectedValue(Array.isArray(value) ? value : [value]);
-            dispatch(createSendUpdateAction(updateVarName, value, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+            dispatch(createSendUpdateAction(updateVarName, value, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById]
+        [dispatch, updateVarName, propagate, updateVars, valueById, props.tp_onChange]
     );
 
     const handleDelete = useCallback(
@@ -168,11 +168,11 @@ const Selector = (props: SelTreeProps) => {
             id &&
                 setSelectedValue((vals) => {
                     const keys = vals.filter((valId) => valId !== id);
-                    dispatch(createSendUpdateAction(updateVarName, keys, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                    dispatch(createSendUpdateAction(updateVarName, keys, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, updateVars, valueById]
+        [updateVarName, propagate, dispatch, updateVars, valueById, props.tp_onChange]
     );
 
     const handleInput = useCallback((e) => setSearchValue(e.target.value), []);

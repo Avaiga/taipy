@@ -218,6 +218,7 @@ class Gui:
                     payload.get("value"),
                     message.get("propagate", True),
                     payload.get("relvar"),
+                    payload.get("on_change"),
                 )
             elif msg_type == _WsType.ACTION.value:
                 self.__on_action(message.get("name"), message.get("payload"))
@@ -230,7 +231,7 @@ class Gui:
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
-    def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None) -> None:
+    def __front_end_update(self, var_name: str, value: t.Any, propagate=True, rel_var: t.Optional[str] = None, on_change: t.Optional[str] = None) -> None:
         if var_name == "":
             return
         # Check if Variable is a managed type
@@ -254,9 +255,10 @@ class Gui:
 
         elif isinstance(current_value, _TaipyBase):
             value = current_value.cast_value(value)
-        self._update_var(var_name, value, propagate, current_value if isinstance(current_value, _TaipyBase) else None)
+        self._update_var(var_name, value, propagate, current_value if isinstance(
+            current_value, _TaipyBase) else None, on_change)
 
-    def _update_var(self, var_name: str, value: t.Any, propagate=True, holder: _TaipyBase = None) -> None:
+    def _update_var(self, var_name: str, value: t.Any, propagate=True, holder: t.Optional[_TaipyBase] = None, on_change: t.Optional[str] = None) -> None:
         if holder:
             var_name = holder.get_name()
         hash_expr = self.__evaluator.get_hash_from_expr(var_name)
@@ -269,27 +271,30 @@ class Gui:
                 modified_vars.update(self._re_evaluate_expr(var_name))
         elif holder:
             modified_vars.update(self._evaluate_holders(hash_expr))
+        self.__call_on_change(var_name, value.get() if isinstance(value, _TaipyBase)
+                              else value._dict if isinstance(value, _MapDict) else value, on_change)
+        self.__send_var_list_update(list(modified_vars), var_name)
+
+    def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        if hasattr(self, "on_change") and callable(self.on_change):
+        on_change_fn = None
+        if on_change:
+            on_change_fn = self._get_user_function(on_change)
+        if not callable(on_change_fn) and hasattr(self, "on_change") and callable(self.on_change):
+            on_change_fn = self.on_change
+        if callable(on_change_fn):
             try:
-                argcount = self.on_change.__code__.co_argcount
+                argcount = on_change_fn.__code__.co_argcount
                 args: t.List[t.Any] = [None for _ in range(argcount)]
                 if argcount > 0:
                     args[0] = self.__state
                 if argcount > 1:
                     args[1] = var_name
                 if argcount > 2:
-                    args[2] = (
-                        value.get()
-                        if isinstance(value, _TaipyBase)
-                        else value._dict
-                        if isinstance(value, _MapDict)
-                        else value
-                    )
-                self.on_change(*args)
+                    args[2] = value
+                on_change_fn(*args)
             except Exception as e:
-                warnings.warn(f"on_change: function invocation exception: {e}")
-        self.__send_var_list_update(list(modified_vars), var_name)
+                warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception: {e}")
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
         ret_value = self.__get_content_accessor().get_info(var_name, value, image)
@@ -497,10 +502,10 @@ class Gui:
         ]
         self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
-    def __get_ws_receiver(self) -> t.Union[str, None]:
-        if not hasattr(request, "sid") or self._bindings()._get_single_client():
-            return None
-        return request.sid  # type: ignore
+    def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
+        if not self._bindings()._get_single_client():
+            return getattr(request, "sid", None)
+        return None
 
     def __get_message_grouping(self):
         if not _hasscopeattr(self, Gui.__MESSAGE_GROUPING_NAME):
@@ -532,7 +537,7 @@ class Gui:
             if len(grouping_message):
                 self.__send_ws({"type": _WsType.MULTIPLE_MESSAGE.value, "payload": grouping_message})
 
-    def _get_user_function(self, func_name: str):
+    def _get_user_function(self, func_name: str) -> t.Union[t.Callable, str]:
         func = _getscopeattr(self, func_name, None)
         if not callable(func):
             func = self.__locals_bind.get(func_name)
