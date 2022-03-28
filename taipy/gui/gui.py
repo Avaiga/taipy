@@ -429,7 +429,7 @@ class Gui:
                 )
             except Exception as e:
                 warnings.warn(
-                    f"Web Socket communication error in {t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_code.co_name}\n{e}"
+                    f"Web Socket communication error in {self.__get_frame().f_code.co_name}\n{e}"
                 )
         else:
             grouping_message.append(payload)
@@ -787,9 +787,7 @@ class Gui:
                 self.add_page(name=k, page=v)
         elif isinstance(folder_name := pages, str):
             if not hasattr(self, "_root_dir"):
-                self._root_dir = os.path.dirname(
-                    inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
-                )
+                self._root_dir = os.path.dirname(inspect.getabsfile(self.__get_frame()))
             folder_path = os.path.join(self._root_dir, folder_name) if not os.path.isabs(folder_name) else folder_name
             folder_name = os.path.basename(folder_path)
             if not os.path.isdir(folder_path):
@@ -937,6 +935,16 @@ class Gui:
     def _get_flask_app(self):
         return self._server.get_flask()
 
+    def _set_frame(self, frame: FrameType):
+        if not isinstance(frame, FrameType):
+            raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
+        self._frame = frame
+
+    def __get_frame(self) -> FrameType:
+        if not getattr(self, "_frame", None):
+            self._frame = t.cast(FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back)
+        return self._frame
+
     def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> None:
         """
         Starts the server that delivers pages to Web clients.
@@ -981,9 +989,7 @@ class Gui:
 
         app_config = self._config.config
 
-        run_root_dir = os.path.dirname(
-            inspect.getabsfile(t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back))
-        )
+        run_root_dir = os.path.dirname(inspect.getabsfile(self.__get_frame()))
 
         # Register _root_dir for abs path
         if not hasattr(self, "_root_dir"):
@@ -1009,7 +1015,7 @@ class Gui:
             self.__locals_bind = kwargs.get("locals_bind")  # type: ignore
             warnings.warn("Caution: the Gui instance is using a custom 'locals_bind' setting.")
         else:
-            self.__locals_bind = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_locals
+            self.__locals_bind = self.__get_frame().f_locals
 
         self.__state = State(self, self.__locals_bind.keys())
 
