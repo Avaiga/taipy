@@ -44,7 +44,7 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_get_job():
     scheduler = _Scheduler()
-    task = _create_task(multiply)
+    task = _create_task(multiply, name="get_job")
 
     job_1 = scheduler.submit_task(task)
     assert _JobManager._get(job_1.id) == job_1
@@ -57,8 +57,8 @@ def test_get_job():
 
 def test_get_latest_job():
     scheduler = _Scheduler()
-    task = _create_task(multiply)
-    task_2 = _create_task(multiply)
+    task = _create_task(multiply, name="get_latest_job")
+    task_2 = _create_task(multiply, name="get_latest_job_2")
 
     job_1 = scheduler.submit_task(task)
     assert _JobManager._get_latest(task) == job_1
@@ -82,7 +82,7 @@ def test_get_job_unknown():
 def test_get_jobs():
     scheduler = _Scheduler()
 
-    task = _create_task(multiply)
+    task = _create_task(multiply, name="get_all_jobs")
 
     job_1 = scheduler.submit_task(task)
     job_2 = scheduler.submit_task(task)
@@ -92,7 +92,7 @@ def test_get_jobs():
 
 def test_delete_job():
     scheduler = _Scheduler()
-    task = _create_task(multiply)
+    task = _create_task(multiply, name="delete_job")
 
     job_1 = scheduler.submit_task(task)
     job_2 = scheduler.submit_task(task)
@@ -114,7 +114,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 def test_raise_when_trying_to_delete_unfinished_job():
     scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
-    task = _create_task(inner_lock_multiply)
+    task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = scheduler.submit_task(task)
         with pytest.raises(JobNotDeletedException):
@@ -123,15 +123,16 @@ def test_raise_when_trying_to_delete_unfinished_job():
     _JobManager._delete(job)
 
 
-def _create_task(function, nb_outputs=1):
+def _create_task(function, nb_outputs=1, name=None):
     input1_dn_config = Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
     input2_dn_config = Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)
     output_dn_configs = [
         Config._add_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
     [_DataManager._get_or_create(cfg) for cfg in output_dn_configs]
+    name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config._add_task(
-        "".join(random.choice(string.ascii_lowercase) for _ in range(10)),
+        name,
         function,
         [input1_dn_config, input2_dn_config],
         output_dn_configs,
