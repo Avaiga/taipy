@@ -942,7 +942,7 @@ class Gui:
 
     def __get_frame(self) -> FrameType:
         if not getattr(self, "__frame", None):
-            self.__frame = inspect.currentframe().f_back.f_back
+            self.__frame = t.cast(FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back)
         return self.__frame
 
     def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> None:
