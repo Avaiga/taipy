@@ -139,5 +139,3 @@ Dockerfile.dev
 
 *.db
 src/taipy/rest/setup/*
-
-setup/
