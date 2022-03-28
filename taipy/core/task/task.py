@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Iterable, Optional
+from typing import Callable, Dict, Iterable, List, Optional
 
 from taipy.core.common._entity import _Entity
 from taipy.core.common._reload import _self_reload, _self_setter
@@ -95,3 +95,15 @@ class Task(_Entity):
         data_nodes = list(self.__input.values()) + list(self.__output.values())
         scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return Scope(scope)
+
+    def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
+        """
+        Submits the task for execution.
+
+        Parameters:
+            callbacks (List[Callable]): The list of callable functions to be called on status change.
+            force (bool): Force execution even if the data nodes are in cache.
+        """
+        from taipy.core.task._task_manager import _TaskManager
+
+        _TaskManager._submit(self, callbacks, force)

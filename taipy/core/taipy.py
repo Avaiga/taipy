@@ -57,20 +57,22 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
         return _DataManager._set(entity)
 
 
-def submit(entity: Union[Scenario, Pipeline], force: bool = False):
+def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
     """
     Submits the entity given as parameter for execution.
 
     All the tasks of the entity pipeline/scenario will be submitted for execution.
 
     Parameters:
-        entity (Union[`Scenario^`, `Pipeline^`]): The entity to submit.
+        entity (Union[`Scenario^`, `Pipeline^`, `Task^`]): The entity to submit.
         force (bool): Force execution even if the data nodes are in cache.
     """
     if isinstance(entity, Scenario):
         return _ScenarioManager._submit(entity, force=force)
     if isinstance(entity, Pipeline):
         return _PipelineManager._submit(entity, force=force)
+    if isinstance(entity, Task):
+        return _TaskManager._submit(entity, force=force)
 
 
 def get(

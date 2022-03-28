@@ -1,11 +1,12 @@
 import pytest
 
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import TaskId
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.exceptions import ModelNotFound
+from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
@@ -219,3 +220,35 @@ def test_hard_delete():
     _TaskManager._hard_delete(task_1.id)
     assert len(_TaskManager._get_all()) == 0
     assert len(_DataManager._get_all()) == 2
+
+
+def test_submit_task():
+    data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
+    data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
+    task_1 = Task(
+        "grault",
+        print,
+        [data_node_1],
+        [data_node_2],
+        TaskId("t1"),
+    )
+
+    class MockScheduler(_Scheduler):
+        submit_calls = []
+
+        def submit_task(self, task: Task, callbacks=None, force=False):
+            self.submit_calls.append(task)
+            return None
+
+    _TaskManager._scheduler = MockScheduler
+
+    # Task does not exist, we expect an exception
+    with pytest.raises(NonExistingTask):
+        _TaskManager._submit(task_1)
+    with pytest.raises(NonExistingTask):
+        _TaskManager._submit(task_1.id)
+
+    _TaskManager._set(task_1)
+    _TaskManager._submit(task_1)
+    call_ids = [call.id for call in MockScheduler.submit_calls]
+    assert call_ids == [task_1.id]

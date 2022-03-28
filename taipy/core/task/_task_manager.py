@@ -1,5 +1,5 @@
 import itertools
-from typing import List, Optional
+from typing import Callable, List, Optional, Union
 
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
@@ -9,7 +9,7 @@ from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.scope import Scope
-from taipy.core.exceptions.exceptions import MultipleTaskFromSameConfigWithSameParent
+from taipy.core.exceptions.exceptions import MultipleTaskFromSameConfigWithSameParent, NonExistingTask
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_repository import _TaskRepository
 from taipy.core.task.task import Task
@@ -76,3 +76,11 @@ class _TaskManager(_Manager[Task]):
             if job.task.id == task.id:
                 entity_ids.job_ids.add(job.id)
         return entity_ids
+
+    @classmethod
+    def _submit(cls, task: Union[TaskId, Task], callbacks: Optional[List[Callable]] = None, force: bool = False):
+        task_id = task.id if isinstance(task, Task) else task
+        task = cls._get(task_id)
+        if task is None:
+            raise NonExistingTask(task_id)
+        cls._scheduler().submit_task(task, callbacks, force)

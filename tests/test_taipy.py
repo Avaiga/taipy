@@ -184,25 +184,34 @@ class TestTaipy:
             tp.set(cycle)
             mck.assert_called_once_with(cycle)
 
-    def test_submit(self, scenario, pipeline):
+    def test_submit(self, scenario, pipeline, task):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario)
             mck.assert_called_once_with(scenario, force=False)
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
             tp.submit(pipeline)
             mck.assert_called_once_with(pipeline, force=False)
+        with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mck:
+            tp.submit(task)
+            mck.assert_called_once_with(task, force=False)
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario, False)
             mck.assert_called_once_with(scenario, force=False)
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
             tp.submit(pipeline, False)
             mck.assert_called_once_with(pipeline, force=False)
+        with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mck:
+            tp.submit(task, False)
+            mck.assert_called_once_with(task, force=False)
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._submit") as mck:
             tp.submit(scenario, True)
             mck.assert_called_once_with(scenario, force=True)
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
             tp.submit(pipeline, True)
             mck.assert_called_once_with(pipeline, force=True)
+        with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mck:
+            tp.submit(task, True)
+            mck.assert_called_once_with(task, force=True)
 
     def test_get_tasks(self):
         with mock.patch("taipy.core.task._task_manager._TaskManager._get_all") as mck:

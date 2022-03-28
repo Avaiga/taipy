@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from taipy.core.config.config import Config
@@ -153,3 +155,9 @@ def test_auto_set_and_reload(data_node):
     assert task_1.parent_id is None
     assert task_1.function == print
     assert not task_1._is_in_context
+
+
+def test_submit_task(task: Task):
+    with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mock_submit:
+        task.submit([], True)
+        mock_submit.assert_called_once_with(task, [], True)
