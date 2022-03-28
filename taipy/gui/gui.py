@@ -938,12 +938,12 @@ class Gui:
     def _set_frame(self, frame: FrameType):
         if not isinstance(frame, FrameType):
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
-        self.__frame = frame
+        self._frame = frame
 
     def __get_frame(self) -> FrameType:
-        if not getattr(self, "__frame", None):
-            self.__frame = t.cast(FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back)
-        return self.__frame
+        if not getattr(self, "_frame", None):
+            self._frame = t.cast(FrameType, t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back).f_back)
+        return self._frame
 
     def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> None:
         """
