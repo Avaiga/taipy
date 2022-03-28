@@ -90,7 +90,7 @@ def cleanup_files():
 
     sleep(0.1)
     if os.path.exists(".data"):
-        shutil.rmtree(".data")
+        shutil.rmtree(".data", ignore_errors=True)
 
 
 @pytest.fixture(scope="function")
