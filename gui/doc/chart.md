@@ -159,7 +159,7 @@ Depending on the algorithm, Some specific points might not be shown on the chart
 ### Responsive chart
 
 By specifying _plot_config_ responsive key, chart will be responsive ie chart will resize automatically to adapt to its container width (especially usefull on mobile devices).
-[Plotly.js responsive](https://plotly.com/javascript/responsive-fluid-layout/)
+Get more information at [Plotly.js responsive](https://plotly.com/javascript/responsive-fluid-layout/)
 
 ```py3
 pconf = {"responsive": True}
