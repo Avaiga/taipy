@@ -208,8 +208,26 @@ def test_auto_set_and_reload(current_datetime, job_id):
     assert not job_1._is_in_context
 
 
+def test_serialize_exception(task_id, job_id):
+    breakpoint()
+    task = Task(config_id="name", input=[], function=_error_multi_param, output=[], id=task_id)
+    job = Job(job_id, task)
+
+    _dispatch(task, job)
+
+    job = _JobManager._get(job_id)
+    assert job.is_failed()
+    with pytest.raises(RuntimeError):
+        raise job.exceptions[0]
+    assert "Something bad has happened" == str(job.exceptions[0])
+
+
 def _error():
     raise RuntimeError("Something bad has happened")
+
+
+def _error_multi_param():
+    raise TestError("Something bad has happened", "with this param")
 
 
 def _dispatch(task: Task, job: Job):
@@ -221,3 +239,9 @@ def _dispatch(task: Task, job: Job):
 
 def _foo():
     return 42
+
+
+class TestError(Exception):
+    def __init__(self, message, args):
+        self.message = f"{message} {args}"
+        self.args = args
