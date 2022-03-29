@@ -1,34 +1,33 @@
 import inspect
+import typing as t
 from types import FrameType
-from typing import Union, List
 
-import typing
-from taipy.gui import Gui
-from taipy.rest import Rest
+from .gui import Gui
+from .rest import Rest
 
 
 class NoApplicationToStart(Exception):
     ...
 
 
-def _run(*apps: List[Union[Gui, Rest]], **kwargs):
+def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs):
     """
-    Run a single or multiple Taipy services at the same time.
+    Run one or multiple Taipy services.
 
-    An Taipy service is an instance of an object that can expose an web application.
+    An Taipy service is an instance of an object that exposes a Web application.
 
     Parameters:
-        *args (List[Union[`Gui^`, `Rest^`]]): Services to run.
+        *args (List[Union[`Gui^`, `Rest^`]]): Services to run. If several services are provided, all the services run simultaneously.
         **kwargs: Other parameters to provide to the services.
     """
     gui = __typing_get(apps, Gui)
     rest = __typing_get(apps, Rest)
 
     if not rest and not gui:
-        raise NoApplicationToStart("You should provide a application to run.")
+        raise NoApplicationToStart("Empty list of services to run.")
 
     if gui:
-        gui._set_frame(typing.cast(FrameType, inspect.currentframe()).f_back)
+        gui._set_frame(t.cast(FrameType, inspect.currentframe()).f_back)
 
     if gui and rest:
         gui._set_flask(rest._app)
