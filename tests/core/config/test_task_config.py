@@ -17,34 +17,34 @@ def reset_configuration_singleton():
 
 
 def test_task_config_creation():
-    input_config = Config._add_data_node("input")
-    output_config = Config._add_data_node("output")
-    task_config = Config._add_task("tasks1", print, input_config, output_config)
+    input_config = Config.configure_data_node("input")
+    output_config = Config.configure_data_node("output")
+    task_config = Config.configure_task("tasks1", print, input_config, output_config)
 
     assert list(Config.tasks) == ["default", task_config.id]
 
-    task2 = Config._add_task("tasks2", print, input_config, output_config)
+    task2 = Config.configure_task("tasks2", print, input_config, output_config)
     assert list(Config.tasks) == ["default", task_config.id, task2.id]
 
 
 def test_task_count():
-    input_config = Config._add_data_node("input")
-    output_config = Config._add_data_node("output")
-    Config._add_task("tasks1", print, input_config, output_config)
+    input_config = Config.configure_data_node("input")
+    output_config = Config.configure_data_node("output")
+    Config.configure_task("tasks1", print, input_config, output_config)
     assert len(Config.tasks) == 2
 
-    Config._add_task("tasks2", print, input_config, output_config)
+    Config.configure_task("tasks2", print, input_config, output_config)
     assert len(Config.tasks) == 3
 
-    Config._add_task("tasks3", print, input_config, output_config)
+    Config.configure_task("tasks3", print, input_config, output_config)
     assert len(Config.tasks) == 4
 
 
 def test_task_getitem():
-    input_config = Config._add_data_node("input")
-    output_config = Config._add_data_node("output")
+    input_config = Config.configure_data_node("input")
+    output_config = Config.configure_data_node("output")
     task_id = "tasks1"
-    task_cfg = Config._add_task(task_id, print, input_config, output_config)
+    task_cfg = Config.configure_task(task_id, print, input_config, output_config)
 
     assert Config.tasks[task_id].id == task_cfg.id
     assert Config.tasks[task_id].properties == task_cfg.properties
@@ -54,20 +54,20 @@ def test_task_getitem():
 
 
 def test_task_creation_no_duplication():
-    input_config = Config._add_data_node("input")
-    output_config = Config._add_data_node("output")
-    Config._add_task("tasks1", print, input_config, output_config)
+    input_config = Config.configure_data_node("input")
+    output_config = Config.configure_data_node("output")
+    Config.configure_task("tasks1", print, input_config, output_config)
 
     assert len(Config.tasks) == 2
 
-    Config._add_task("tasks1", print, input_config, output_config)
+    Config.configure_task("tasks1", print, input_config, output_config)
     assert len(Config.tasks) == 2
 
 
 def test_task_config_with_env_variable_value():
-    input_config = Config._add_data_node("input")
-    output_config = Config._add_data_node("output")
+    input_config = Config.configure_data_node("input")
+    output_config = Config.configure_data_node("output")
 
     with mock.patch.dict(os.environ, {"FOO": "plop", "BAR": "baz"}):
-        Config._add_task("task_name", print, input_config, output_config, prop="ENV[BAR]")
+        Config.configure_task("task_name", print, input_config, output_config, prop="ENV[BAR]")
         assert Config.tasks["task_name"].prop == "baz"

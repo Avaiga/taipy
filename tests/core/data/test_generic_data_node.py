@@ -1,9 +1,9 @@
 import pytest
 
 from taipy.core.common.alias import DataNodeId
+from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.generic import GenericDataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import (
     InvalidConfigurationId,
     MissingReadFunction,

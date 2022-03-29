@@ -1,8 +1,8 @@
 import pytest
 
 from taipy.core.common.alias import DataNodeId
+from taipy.core.common.scope import Scope
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InvalidConfigurationId, NoData
 
 

@@ -3,10 +3,9 @@ from unittest import mock
 
 import pytest
 
-import taipy.core.taipy
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InvalidConfigurationId, LoadingError
 from tests.core.config.named_temporary_file import NamedTemporaryFile
 
@@ -24,7 +23,7 @@ nb_of_workers = 10
     )
 
     with pytest.raises(LoadingError, match="Can not load configuration"):
-        Config._load(config.filename)
+        Config.load(config.filename)
 
 
 def test_read_skip_configuration_outside_nodes():
@@ -34,7 +33,7 @@ nb_of_workers = 10
     """
     )
 
-    Config._load(config.filename)
+    Config.load(config.filename)
 
     assert not Config.job_config.parallel_execution
     assert Config.job_config.nb_of_workers == 1
@@ -104,13 +103,13 @@ owner = "Raymond Kopa"
     """.strip()
     tf = NamedTemporaryFile()
     with mock.patch.dict(os.environ, {"QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}):
-        Config._set_global_config(clean_entities_enabled=True)
-        Config._set_job_config(mode="standalone")
-        Config._add_default_data_node(storage_type="in_memory", custom="default_custom_prop")
-        dn1_cfg_v2 = Config._add_data_node(
+        Config.configure_global_app(clean_entities_enabled=True)
+        Config.configure_job_executions(mode="standalone")
+        Config.configure_default_data_node(storage_type="in_memory", custom="default_custom_prop")
+        dn1_cfg_v2 = Config.configure_data_node(
             "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
         )
-        dn2_cfg_v2 = Config._add_data_node(
+        dn2_cfg_v2 = Config.configure_data_node(
             "dn2",
             storage_type="in_memory",
             foo="bar",
@@ -119,17 +118,17 @@ owner = "Raymond Kopa"
             quux="ENV[QUUZ]:bool",
             corge=("grault", "ENV[GARPLY]", "ENV[WALDO]:int", 3.0),
         )
-        t1_cfg_v2 = Config._add_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
-        p1_cfg_v2 = Config._add_pipeline("p1", t1_cfg_v2, cron="daily")
-        Config._add_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
-        Config._add_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
-        Config._export(tf.filename)
+        t1_cfg_v2 = Config.configure_task("t1", print, dn1_cfg_v2, dn2_cfg_v2, description="t1 description")
+        p1_cfg_v2 = Config.configure_pipeline("p1", t1_cfg_v2, cron="daily")
+        Config.configure_default_scenario([], Frequency.QUARTERLY, owner="Michel Platini")
+        Config.configure_scenario("s1", p1_cfg_v2, frequency=Frequency.QUARTERLY, owner="Raymond Kopa")
+        Config.export(tf.filename)
         actual_config = tf.read().strip()
 
         assert actual_config == expected_config
-        taipy.core.taipy.load_configuration(tf.filename)
+        Config.load(tf.filename)
         tf2 = NamedTemporaryFile()
-        Config._export(tf2.filename)
+        Config.export(tf2.filename)
         actual_config_2 = tf2.read().strip()
         assert actual_config_2 == expected_config
 
@@ -161,12 +160,12 @@ def test_all_entities_use_valid_id():
         owner = "John Doe"
         """
     )
-    Config._load(file_config.filename)
-    data_node_1_config = Config._add_data_node(id="my_datanode")
-    data_node_2_config = Config._add_data_node(id="my_datanode2")
-    task_config = Config._add_task("my_task", print, data_node_1_config, data_node_2_config)
-    pipeline_config = Config._add_pipeline("my_pipeline", task_config)
-    Config._add_scenario("my_scenario", pipeline_config)
+    Config.load(file_config.filename)
+    data_node_1_config = Config.configure_data_node(id="my_datanode")
+    data_node_2_config = Config.configure_data_node(id="my_datanode2")
+    task_config = Config.configure_task("my_task", print, data_node_1_config, data_node_2_config)
+    pipeline_config = Config.configure_pipeline("my_pipeline", task_config)
+    Config.configure_scenario("my_scenario", [pipeline_config])
 
     assert len(Config.data_nodes) == 3
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
@@ -215,4 +214,4 @@ def test_all_entities_use_invalid_id():
         """
     )
     with pytest.raises(InvalidConfigurationId):
-        Config._load(file_config.filename)
+        Config.load(file_config.filename)

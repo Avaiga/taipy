@@ -1,14 +1,14 @@
 import os
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, Optional, Union
 
 from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
+from taipy.core.common.scope import Scope
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_repository import _DataRepository
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.pickle import PickleDataNode
-from taipy.core.data.scope import Scope
-from taipy.core.exceptions.exceptions import InvalidDataNodeType, MultipleDataNodeFromSameConfigWithSameParent
+from taipy.core.exceptions.exceptions import InvalidDataNodeType
 
 
 class _DataManager(_Manager[DataNode]):

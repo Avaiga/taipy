@@ -5,8 +5,8 @@ from taipy.core.common._entity import _Entity
 from taipy.core.common._reload import _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import TaskId
+from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
-from taipy.core.data.scope import Scope
 
 
 class Task(_Entity):

@@ -43,7 +43,7 @@ def test_can_execute_synchronous():
         config_id="name",
         input=[],
         function=partial(execute, lock),
-        output=[_DataManager._get_or_create(Config._add_data_node("input1", default_data=21))],
+        output=[_DataManager._get_or_create(Config.configure_data_node("input1", default_data=21))],
         id=task_id,
     )
     job_id = JobId("id1")
@@ -128,9 +128,9 @@ def test_need_to_run_no_output():
     def concat(a, b):
         return a + b
 
-    hello_cfg = Config._add_data_node("hello", default_data="Hello ")
-    world_cfg = Config._add_data_node("world", default_data="world !")
-    task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
+    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
+    world_cfg = Config.configure_data_node("world", default_data="world !")
+    task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
     task = _TaskManager()._get_or_create(task_cfg)
 
     assert _JobDispatcher(None)._needs_to_run(task)
@@ -140,10 +140,10 @@ def test_need_to_run_output_not_cacheable():
     def concat(a, b):
         return a + b
 
-    hello_cfg = Config._add_data_node("hello", default_data="Hello ")
-    world_cfg = Config._add_data_node("world", default_data="world !")
-    hello_world_cfg = Config._add_data_node("hello_world", cacheable=False)
-    task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
+    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
+    world_cfg = Config.configure_data_node("world", default_data="world !")
+    hello_world_cfg = Config.configure_data_node("hello_world", cacheable=False)
+    task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
     assert _JobDispatcher(None)._needs_to_run(task)
@@ -155,8 +155,8 @@ def nothing():
 
 def test_need_to_run_output_cacheable_no_input():
 
-    hello_world_cfg = Config._add_data_node("hello_world", cacheable=True)
-    task_cfg = Config._add_task("name", input=[], function=nothing, output=[hello_world_cfg])
+    hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
+    task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
     scheduler = _Scheduler()
@@ -168,10 +168,10 @@ def test_need_to_run_output_cacheable_no_input():
 
 def test_need_to_run_output_cacheable_no_validity_period():
 
-    hello_cfg = Config._add_data_node("hello", default_data="Hello ")
-    world_cfg = Config._add_data_node("world", default_data="world !")
-    hello_world_cfg = Config._add_data_node("hello_world", cacheable=True)
-    task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
+    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
+    world_cfg = Config.configure_data_node("world", default_data="world !")
+    hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
+    task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
     scheduler = _Scheduler()
@@ -186,10 +186,10 @@ def concat(a, b):
 
 
 def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
-    hello_cfg = Config._add_data_node("hello", default_data="Hello ")
-    world_cfg = Config._add_data_node("world", default_data="world !")
-    hello_world_cfg = Config._add_data_node("hello_world", cacheable=True, validity_days=1)
-    task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
+    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
+    world_cfg = Config.configure_data_node("world", default_data="world !")
+    hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True, validity_days=1)
+    task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
     scheduler = _Scheduler()
@@ -209,10 +209,10 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     def concat(a, b):
         return a + b
 
-    hello_cfg = Config._add_data_node("hello", default_data="Hello ")
-    world_cfg = Config._add_data_node("world", default_data="world !")
-    hello_world_cfg = Config._add_data_node("hello_world", cacheable=True, validity_days=1)
-    task_cfg = Config._add_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
+    hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
+    world_cfg = Config.configure_data_node("world", default_data="world !")
+    hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True, validity_days=1)
+    task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
     scheduler = _Scheduler()

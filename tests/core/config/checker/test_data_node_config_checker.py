@@ -1,9 +1,9 @@
 from copy import copy
 
+from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config.checker._checkers._data_node_config_checker import _DataNodeConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
-from taipy.core.data.scope import Scope
 
 
 class TestDataNodeConfigChecker:

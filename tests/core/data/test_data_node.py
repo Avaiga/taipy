@@ -4,13 +4,14 @@ from time import sleep
 import pytest
 
 import taipy.core as tp
+from taipy.core import Config
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.scope import Scope
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._filter import _FilterDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.data.operator import JoinOperator, Operator
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InvalidConfigurationId, NoData
 
 
@@ -237,17 +238,17 @@ class TestDataNode:
         assert dn._is_in_cache is False
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
-        a = tp.configure_pickle_data_node("A", default_data="A")
-        b = tp.configure_pickle_data_node("B", cacheable=True)
-        c = tp.configure_pickle_data_node("C")
-        d = tp.configure_pickle_data_node("D")
+        a = Config.configure_data_node("A", "pickle", default_data="A")
+        b = Config.configure_data_node("B", "pickle", cacheable=True)
+        c = Config.configure_data_node("C", "pickle")
+        d = Config.configure_data_node("D", "pickle")
 
-        task_a_b = tp.configure_task("task_a_b", funct_a_b, input=a, output=b)
-        task_b_c = tp.configure_task("task_b_c", funct_b_c, input=b, output=c)
-        task_b_d = tp.configure_task("task_b_d", funct_b_d, input=b, output=d)
-        pipeline_c = tp.configure_pipeline("pipeline_c", [task_a_b, task_b_c])
-        pipeline_d = tp.configure_pipeline("pipeline_d", [task_a_b, task_b_d])
-        scenario_cfg = tp.configure_scenario("scenario", [pipeline_c, pipeline_d])
+        task_a_b = Config.configure_task("task_a_b", funct_a_b, input=a, output=b)
+        task_b_c = Config.configure_task("task_b_c", funct_b_c, input=b, output=c)
+        task_b_d = Config.configure_task("task_b_d", funct_b_d, input=b, output=d)
+        pipeline_c = Config.configure_pipeline("pipeline_c", [task_a_b, task_b_c])
+        pipeline_d = Config.configure_pipeline("pipeline_d", [task_a_b, task_b_d])
+        scenario_cfg = Config.configure_scenario("scenario", [pipeline_c, pipeline_d])
 
         scenario = tp.create_scenario(scenario_cfg)
         scenario.submit()

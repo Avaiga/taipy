@@ -7,8 +7,8 @@ import pandas as pd
 from openpyxl import load_workbook
 
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import (
     MissingRequiredProperty,
     NonExistingExcelSheet,

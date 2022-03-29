@@ -6,8 +6,8 @@ import pytest
 
 from taipy.core._scheduler._job_dispatcher import _JobDispatcher
 from taipy.core.common.alias import JobId, TaskId
+from taipy.core.common.scope import Scope
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import DataNodeWritingError, NoData
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job

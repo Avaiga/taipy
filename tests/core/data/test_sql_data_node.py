@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from taipy.core.common.alias import DataNodeId
-from taipy.core.data.scope import Scope
+from taipy.core.common.scope import Scope
 from taipy.core.data.sql import SQLDataNode
 from taipy.core.exceptions.exceptions import MissingRequiredProperty
 

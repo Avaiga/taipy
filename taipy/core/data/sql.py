@@ -1,6 +1,5 @@
 import os
 import re
-import urllib.parse
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
 
@@ -10,8 +9,8 @@ import pandas as pd
 from sqlalchemy import create_engine, table, text
 
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
 
 

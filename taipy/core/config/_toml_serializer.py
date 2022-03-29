@@ -5,6 +5,7 @@ import toml  # type: ignore
 
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler
 from taipy.core.config.data_node_config import DataNodeConfig
@@ -13,7 +14,6 @@ from taipy.core.config.job_config import JobConfig
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.config.task_config import TaskConfig
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import LoadingError
 
 

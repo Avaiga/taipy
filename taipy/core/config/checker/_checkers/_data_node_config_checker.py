@@ -1,10 +1,10 @@
 from typing import Tuple
 
+from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config.checker._checkers._config_checker import _ConfigChecker
 from taipy.core.config.checker.issue_collector import IssueCollector
 from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.data.scope import Scope
 
 
 class _DataNodeConfigChecker(_ConfigChecker):

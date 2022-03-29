@@ -20,13 +20,13 @@ def reset_configuration_singleton():
 
 
 def test_data_node_config_check():
-    data_node_config = Config._add_data_node("data_nodes1", "pickle")
+    data_node_config = Config.configure_data_node("data_nodes1", "pickle")
     assert list(Config.data_nodes) == ["default", data_node_config.id]
 
-    data_node2_config = Config._add_data_node("data_nodes2", "pickle")
+    data_node2_config = Config.configure_data_node("data_nodes2", "pickle")
     assert list(Config.data_nodes) == ["default", data_node_config.id, data_node2_config.id]
 
-    data_node3_config = Config._add_data_node("data_nodes3", "csv", has_header=True, path="")
+    data_node3_config = Config.configure_data_node("data_nodes3", "csv", has_header=True, path="")
     assert list(Config.data_nodes) == [
         "default",
         data_node_config.id,
@@ -35,44 +35,44 @@ def test_data_node_config_check():
     ]
 
     with pytest.raises(ConfigurationIssueError):
-        Config._add_data_node("data_nodes", storage_type="bar")
-        Config._check()
+        Config.configure_data_node("data_nodes", storage_type="bar")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
-        Config._add_data_node("data_nodes", scope="bar")
-        Config._check()
+        Config.configure_data_node("data_nodes", scope="bar")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
-        Config._add_data_node("data_nodes", storage_type="csv")
-        Config._check()
+        Config.configure_data_node("data_nodes", storage_type="csv")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
-        Config._add_data_node("data_nodes", storage_type="sql")
-        Config._check()
+        Config.configure_data_node("data_nodes", storage_type="sql")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
-        Config._add_data_node("data_nodes", storage_type="excel")
-        Config._check()
+        Config.configure_data_node("data_nodes", storage_type="excel")
+        Config.check()
 
     with pytest.raises(ConfigurationIssueError):
-        Config._add_data_node("data_nodes", storage_type="generic")
-        Config._check()
+        Config.configure_data_node("data_nodes", storage_type="generic")
+        Config.check()
 
 
 def test_data_node_count():
-    Config._add_data_node("data_nodes1", "pickle")
+    Config.configure_data_node("data_nodes1", "pickle")
     assert len(Config.data_nodes) == 2
 
-    Config._add_data_node("data_nodes2", "pickle")
+    Config.configure_data_node("data_nodes2", "pickle")
     assert len(Config.data_nodes) == 3
 
-    Config._add_data_node("data_nodes3", "pickle")
+    Config.configure_data_node("data_nodes3", "pickle")
     assert len(Config.data_nodes) == 4
 
 
 def test_data_node_getitem():
     data_node_id = "data_nodes1"
-    data_node_config = Config._add_data_node(data_node_id, "pickle")
+    data_node_config = Config.configure_data_node(data_node_id, "pickle")
 
     assert Config.data_nodes[data_node_id].id == data_node_config.id
     assert Config.data_nodes[data_node_id].storage_type == data_node_config.storage_type
@@ -82,16 +82,16 @@ def test_data_node_getitem():
 
 
 def test_data_node_creation_no_duplication():
-    Config._add_data_node("data_nodes1", "pickle")
+    Config.configure_data_node("data_nodes1", "pickle")
 
     assert len(Config.data_nodes) == 2
 
-    Config._add_data_node("data_nodes1", "pickle")
+    Config.configure_data_node("data_nodes1", "pickle")
     assert len(Config.data_nodes) == 2
 
 
 def test_date_node_create_with_datetime():
-    data_node_config = Config._add_data_node(
+    data_node_config = Config.configure_data_node(
         id="datetime_data",
         my_property=datetime(1991, 1, 1),
         foo="hello",
@@ -108,13 +108,13 @@ def test_date_node_create_with_datetime():
 
 def test_data_node_with_env_variable_value():
     with mock.patch.dict(os.environ, {"BAR": "baz"}):
-        Config._add_data_node("data_node", prop="ENV[BAR]")
+        Config.configure_data_node("data_node", prop="ENV[BAR]")
         assert Config.data_nodes["data_node"].prop == "baz"
 
 
 def test_data_node_with_env_variable_in_write_fct_params():
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
-        Config._add_data_node(
+        Config.configure_data_node(
             "data_node", storage_type="generic", write_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"]
         )
         assert Config.data_nodes["data_node"].write_fct_params == ["bar", "my_param", "qux"]
@@ -122,5 +122,7 @@ def test_data_node_with_env_variable_in_write_fct_params():
 
 def test_data_node_with_env_variable_in_read_fct_params():
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
-        Config._add_data_node("data_node", storage_type="generic", read_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"])
+        Config.configure_data_node(
+            "data_node", storage_type="generic", read_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"]
+        )
         assert Config.data_nodes["data_node"].read_fct_params == ["bar", "my_param", "qux"]

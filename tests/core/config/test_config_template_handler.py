@@ -5,8 +5,8 @@ from unittest import mock
 import pytest
 
 from taipy.core import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InconsistentEnvVariableError
 
 

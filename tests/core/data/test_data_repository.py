@@ -1,11 +1,11 @@
 import datetime
 
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.scope import Scope
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._data_model import _DataNodeModel
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
-from taipy.core.data.scope import Scope
 
 data_node = CSVDataNode(
     "test_data_node",

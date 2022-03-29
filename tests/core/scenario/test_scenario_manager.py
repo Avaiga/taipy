@@ -3,17 +3,16 @@ from multiprocessing import Process
 
 import pytest
 
-import taipy.core
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import (
     DeletingPrimaryScenario,
     DifferentScenarioConfigs,
@@ -137,7 +136,7 @@ def test_set_and_get_scenario(cycle):
 def test_create_scenario_does_not_modify_config():
     creation_date_1 = datetime.now()
     name_1 = "name_1"
-    scenario_config = Config._add_scenario("sc", [], Frequency.DAILY)
+    scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
     assert scenario_config.properties.get("name") is None
     assert len(scenario_config.properties) == 0
 
@@ -168,7 +167,7 @@ def test_create_and_delete_scenario():
     _ScenarioManager._delete_all()
     assert len(_ScenarioManager._get_all()) == 0
 
-    scenario_config = Config._add_scenario("sc", [], Frequency.DAILY)
+    scenario_config = Config.configure_scenario("sc", [], Frequency.DAILY)
 
     scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
     assert scenario_1.config_id == "sc"
@@ -227,19 +226,21 @@ def mult_by_4(nb: int):
 
 
 def test_scenario_manager_only_creates_data_node_once():
-    dn_config_1 = Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
-    dn_config_2 = Config._add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
-    dn_config_6 = Config._add_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
-    dn_config_4 = Config._add_data_node("qux", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
+    dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
+    dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
+    dn_config_4 = Config.configure_data_node("qux", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_mult_by_2_config = Config._add_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
-    task_mult_by_3_config = Config._add_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
-    task_mult_by_4_config = Config._add_task("mult_by_4", mult_by_4, [dn_config_1], dn_config_4)
-    pipeline_config_1 = Config._add_pipeline("by_6", [task_mult_by_2_config, task_mult_by_3_config])
+    task_mult_by_2_config = Config.configure_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_mult_by_3_config = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
+    task_mult_by_4_config = Config.configure_task("mult_by_4", mult_by_4, [dn_config_1], dn_config_4)
+    pipeline_config_1 = Config.configure_pipeline("by_6", [task_mult_by_2_config, task_mult_by_3_config])
     # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
-    pipeline_config_2 = Config._add_pipeline("by_4", [task_mult_by_4_config])
+    pipeline_config_2 = Config.configure_pipeline("by_4", [task_mult_by_4_config])
     # dn_1 ---> mult_by_4 ---> dn_4
-    scenario_config = Config._add_scenario("awesome_scenario", [pipeline_config_1, pipeline_config_2], Frequency.DAILY)
+    scenario_config = Config.configure_scenario(
+        "awesome_scenario", [pipeline_config_1, pipeline_config_2], Frequency.DAILY
+    )
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -266,17 +267,17 @@ def test_scenario_manager_only_creates_data_node_once():
 def test_notification_subscribe(mocker):
     mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
-    scenario_config = Config._add_scenario(
+    scenario_config = Config.configure_scenario(
         "awesome_scenario",
         [
-            Config._add_pipeline(
+            Config.configure_pipeline(
                 "by_6",
                 [
-                    Config._add_task(
+                    Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                        Config._add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
@@ -318,17 +319,17 @@ def notify2(*args, **kwargs):
 def test_notification_unsubscribe(mocker):
     mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
-    scenario_config = Config._add_scenario(
+    scenario_config = Config.configure_scenario(
         "awesome_scenario",
         [
-            Config._add_pipeline(
+            Config.configure_pipeline(
                 "by_6",
                 [
-                    Config._add_task(
+                    Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                        Config._add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
@@ -352,17 +353,17 @@ def test_notification_unsubscribe(mocker):
 
 
 def test_scenario_notification_subscribe_all():
-    scenario_config = Config._add_scenario(
+    scenario_config = Config.configure_scenario(
         "awesome_scenario",
         [
-            Config._add_pipeline(
+            Config.configure_pipeline(
                 "by_6",
                 [
-                    Config._add_task(
+                    Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                        Config._add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
@@ -416,11 +417,11 @@ def test_get_set_primary_scenario():
 
 
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario.id)
 
@@ -438,11 +439,11 @@ def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_single_scenario_with_pipeline_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario.id)
 
@@ -460,11 +461,11 @@ def test_hard_delete_one_single_scenario_with_pipeline_data_nodes():
 
 
 def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_scenario_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario.id)
 
@@ -482,11 +483,11 @@ def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_scenario_data
 
 
 def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario.id)
 
@@ -519,11 +520,11 @@ def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_n
 
 
 def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario_1 = _ScenarioManager._create(scenario_config)
     scenario_2 = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario_1.id)
@@ -544,11 +545,11 @@ def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_dat
 
 
 def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario_1 = _ScenarioManager._create(scenario_config)
     scenario_2 = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario_1.id)
@@ -569,11 +570,11 @@ def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
-    dn_input_config = Config._add_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
-    dn_output_config = Config._add_data_node("my_output", "in_memory", scope=Scope.CYCLE)
-    task_config = Config._add_task("task_config", print, dn_input_config, dn_output_config)
-    pipeline_config = Config._add_pipeline("pipeline_config", [task_config])
-    scenario_config = Config._add_scenario("scenario_config", [pipeline_config])
+    dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
+    task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
+    scenario_config = Config.configure_scenario("scenario_config", [pipeline_config])
     scenario_1 = _ScenarioManager._create(scenario_config)
     scenario_2 = _ScenarioManager._create(scenario_config)
     _ScenarioManager._submit(scenario_1.id)
@@ -594,17 +595,17 @@ def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
 
 
 def test_hard_delete_shared_entities():
-    dn_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    dn_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    task_config_1 = Config._add_task("task_config_1", print, dn_config_1, dn_config_2)
-    task_config_2 = Config._add_task("task_config_2", print, dn_config_2, dn_config_3)
-    task_config_3 = Config._add_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
-    pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1, task_config_2])
-    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_1, task_config_2])
-    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])  # scope = global
-    scenario_config_1 = Config._add_scenario(
+    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    dn_config_4 = Config.configure_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    task_config_1 = Config.configure_task("task_config_1", print, dn_config_1, dn_config_2)
+    task_config_2 = Config.configure_task("task_config_2", print, dn_config_2, dn_config_3)
+    task_config_3 = Config.configure_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
+    pipeline_config_1 = Config.configure_pipeline("pipeline_config_1", [task_config_1, task_config_2])
+    pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_1, task_config_2])
+    pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])  # scope = global
+    scenario_config_1 = Config.configure_scenario(
         "scenario_config_1", [pipeline_config_1, pipeline_config_2, pipeline_config_3]
     )
     scenario_1 = _ScenarioManager._create(scenario_config_1)
@@ -727,17 +728,17 @@ def test_scenarios_comparison():
     _DataManager._delete_all()
     _TaskManager._delete_all()
 
-    scenario_config = Config._add_scenario(
+    scenario_config = Config.configure_scenario(
         "Awesome_scenario",
         [
-            Config._add_pipeline(
+            Config.configure_pipeline(
                 "by_6",
                 [
-                    Config._add_task(
+                    Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config._add_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
-                        Config._add_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
                     )
                 ],
             )
@@ -778,17 +779,17 @@ def test_scenarios_comparison():
 
 
 def test_automatic_reload():
-    scenario_config = Config._add_scenario(
+    scenario_config = Config.configure_scenario(
         "awesome_scenario",
         [
-            Config._add_pipeline(
+            Config.configure_pipeline(
                 "by_6",
                 [
-                    Config._add_task(
+                    Config.configure_task(
                         "mult_by_2",
                         mult_by_2,
-                        [Config._add_data_node("foo", "pickle", Scope.PIPELINE, default_data=1)],
-                        Config._add_data_node("bar", "pickle", Scope.SCENARIO),
+                        [Config.configure_data_node("foo", "pickle", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "pickle", Scope.SCENARIO),
                     )
                 ],
             )
@@ -921,7 +922,7 @@ def test_tags():
 
 def test_authorized_tags():
     scenario = Scenario("SCENARIO_1", [], {"authorized_tags": ["foo", "bar"]}, ScenarioId("SCENARIO_1"))
-    scenario_2_cfg = Config._add_scenario("SCENARIO_2", [], Frequency.DAILY, authorized_tags=["foo", "bar"])
+    scenario_2_cfg = Config.configure_scenario("SCENARIO_2", [], Frequency.DAILY, authorized_tags=["foo", "bar"])
     scenario_2 = _ScenarioManager._create(scenario_2_cfg)
     _ScenarioManager._set(scenario)
 

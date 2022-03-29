@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
-from taipy.core.data.scope import Scope
 
 
 class PickleDataNode(DataNode):

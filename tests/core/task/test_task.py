@@ -2,13 +2,13 @@ from unittest import mock
 
 import pytest
 
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import InvalidConfigurationId
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
@@ -89,7 +89,7 @@ def test_can_not_change_task_input(input):
 
 
 def test_can_not_change_task_config_output(output_config):
-    task_config = Config._add_task("name_1", print, [], output=output_config)
+    task_config = Config.configure_task("name_1", print, [], output=output_config)
 
     assert task_config.output_configs == output_config
     with pytest.raises(Exception):
@@ -100,8 +100,8 @@ def test_can_not_change_task_config_output(output_config):
 
 
 def test_can_not_update_task_output_values(output_config):
-    data_node_cfg = Config._add_data_node("data_node_cfg")
-    task_config = Config._add_task("name_1", print, [], output=output_config)
+    data_node_cfg = Config.configure_data_node("data_node_cfg")
+    task_config = Config.configure_task("name_1", print, [], output=output_config)
 
     task_config.output_configs.append(data_node_cfg)
     assert task_config.output_configs == output_config
@@ -112,7 +112,7 @@ def test_can_not_update_task_output_values(output_config):
 
 def test_can_not_update_task_input_values(input_config):
     data_node_config = DataNodeConfig("data_node")
-    task_config = Config._add_task("name_1", print, input=input_config, output=[])
+    task_config = Config.configure_task("name_1", print, input=input_config, output=[])
 
     task_config.input_configs.append(data_node_config)
     assert task_config.input_configs == input_config

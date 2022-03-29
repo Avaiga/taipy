@@ -14,10 +14,10 @@ from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.common.scope import Scope
 from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._filter import _FilterDataNode
 from taipy.core.data.operator import JoinOperator, Operator
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import NoData
 
 

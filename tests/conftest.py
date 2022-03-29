@@ -9,6 +9,7 @@ import pytest
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
 from taipy.core.config.global_app_config import GlobalAppConfig
 from taipy.core.config.job_config import JobConfig
@@ -17,7 +18,6 @@ from taipy.core.cycle._cycle_model import _CycleModel
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.data.scope import Scope
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline._pipeline_model import _PipelineModel

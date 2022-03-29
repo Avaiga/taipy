@@ -2,8 +2,8 @@ from copy import copy
 from typing import Any, Dict, Optional
 
 from taipy.core.common._validate_id import _validate_id
+from taipy.core.common.scope import Scope
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
-from taipy.core.data.scope import Scope
 
 
 class DataNodeConfig:

@@ -16,12 +16,12 @@ def test_override_default_configuration_with_code_configuration():
     assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
-    Config._set_job_config(nb_of_workers=-1)
-    Config._set_global_config(root_folder="foo")
-    foo_config = Config._add_data_node("foo", "in_memory")
-    bar_config = Config._add_task("bar", print, [foo_config], [])
-    baz_config = Config._add_pipeline("baz", [bar_config])
-    qux_config = Config._add_scenario("qux", [baz_config])
+    Config.configure_job_executions(nb_of_workers=-1)
+    Config.configure_global_app(root_folder="foo")
+    foo_config = Config.configure_data_node("foo", "in_memory")
+    bar_config = Config.configure_task("bar", print, [foo_config], [])
+    baz_config = Config.configure_pipeline("baz", [bar_config])
+    qux_config = Config.configure_scenario("qux", [baz_config])
 
     assert Config.job_config.nb_of_workers == -1
     assert Config.global_config.root_folder == "foo"
@@ -49,22 +49,22 @@ def test_override_default_configuration_with_code_configuration():
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
-    Config._set_global_config()
+    Config.configure_global_app()
     assert not Config.global_config.clean_entities_enabled
-    Config._set_global_config(clean_entities_enabled=True)
+    Config.configure_global_app(clean_entities_enabled=True)
     assert Config.global_config.clean_entities_enabled
 
     with mock.patch.dict(os.environ, {"ENV_VAR": "False"}):
-        Config._set_global_config(clean_entities_enabled="ENV[ENV_VAR]")
+        Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
         assert not Config.global_config.clean_entities_enabled
 
     with mock.patch.dict(os.environ, {"ENV_VAR": "true"}):
-        Config._set_global_config(clean_entities_enabled="ENV[ENV_VAR]")
+        Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
         assert Config.global_config.clean_entities_enabled
 
     with mock.patch.dict(os.environ, {"ENV_VAR": "foo"}):
         with pytest.raises(InconsistentEnvVariableError):
-            Config._set_global_config(clean_entities_enabled="ENV[ENV_VAR]")
+            Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
 
 
 def test_override_default_configuration_with_file_configuration():
@@ -85,7 +85,7 @@ nb_of_workers = -1
 [SCENARIO.qux]
 """
     )
-    Config._set_global_config()
+    Config.configure_global_app()
     assert Config.job_config.nb_of_workers == 1
     assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
@@ -93,7 +93,7 @@ nb_of_workers = -1
     assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
-    Config._load(tf.filename)
+    Config.load(tf.filename)
 
     assert Config.job_config.nb_of_workers == -1
     assert Config.global_config.clean_entities_enabled
@@ -123,17 +123,17 @@ start_airflow = "ENV[BAR]"
     assert not Config.job_config.start_airflow
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
-        Config._load(tf.filename)
+        Config.load(tf.filename)
         assert Config.job_config.nb_of_workers == 6
         assert Config.job_config.start_airflow
 
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
         with pytest.raises(InconsistentEnvVariableError):
-            Config._load(tf.filename)
+            Config.load(tf.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "5"}):
         with pytest.raises(MissingEnvVariableError):
-            Config._load(tf.filename)
+            Config.load(tf.filename)
 
 
 def test_code_configuration_do_not_override_file_configuration():
@@ -143,9 +143,9 @@ def test_code_configuration_do_not_override_file_configuration():
 nb_of_workers = 2
     """
     )
-    Config._load(config_from_filename.filename)
+    Config.load(config_from_filename.filename)
 
-    Config._set_job_config(nb_of_workers=21)
+    Config.configure_job_executions(nb_of_workers=21)
 
     assert Config.job_config.nb_of_workers == 2  # From file config
 
@@ -157,10 +157,10 @@ def test_code_configuration_do_not_override_file_configuration_including_env_var
 nb_of_workers = 2
     """
     )
-    Config._load(config_from_filename.filename)
+    Config.load(config_from_filename.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "21"}):
-        Config._set_job_config(nb_of_workers="ENV[FOO]")
+        Config.configure_job_executions(nb_of_workers="ENV[FOO]")
         assert Config.job_config.nb_of_workers == 2  # From file config
 
 
@@ -171,8 +171,8 @@ def test_file_configuration_override_code_configuration():
 nb_of_workers = 2
     """
     )
-    Config._set_job_config(nb_of_workers=21)
-    Config._load(config_from_filename.filename)
+    Config.configure_job_executions(nb_of_workers=21)
+    Config.load(config_from_filename.filename)
 
     assert Config.job_config.nb_of_workers == 2  # From file config
 
@@ -184,10 +184,10 @@ def test_file_configuration_override_code_configuration_including_env_variable_v
 nb_of_workers = "ENV[FOO]"
     """
     )
-    Config._set_job_config(nb_of_workers=21)
+    Config.configure_job_executions(nb_of_workers=21)
 
     with mock.patch.dict(os.environ, {"FOO": "2"}):
-        Config._load(config_from_filename.filename)
+        Config.load(config_from_filename.filename)
         assert Config.job_config.nb_of_workers == 2  # From file config
 
 
@@ -207,19 +207,19 @@ clean_entities_enabled = false
     """
     )
 
-    Config._set_global_config()
+    Config.configure_global_app()
     # Default config is applied
     assert Config.job_config.nb_of_workers == 1
     assert Config.global_config.clean_entities_enabled is False
 
     # Code config is applied
-    Config._set_job_config(nb_of_workers=-1)
-    Config._set_global_config(clean_entities_enabled=True)
+    Config.configure_job_executions(nb_of_workers=-1)
+    Config.configure_global_app(clean_entities_enabled=True)
     assert Config.global_config.clean_entities_enabled is True
     assert Config.job_config.nb_of_workers == -1
 
     # File config is applied
-    Config._load(file_config.filename)
+    Config.load(file_config.filename)
     assert Config.global_config.clean_entities_enabled is False
     assert Config.job_config.nb_of_workers == 10
     assert Config.data_nodes["my_datanode"].has_header
@@ -243,22 +243,22 @@ clean_entities_enabled = false
     """
     )
 
-    Config._set_global_config()
+    Config.configure_global_app()
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
         assert Config.job_config.nb_of_workers == 1
         assert Config.global_config.clean_entities_enabled is False
 
         # Code config is applied
-        Config._set_job_config(nb_of_workers=-1)
-        Config._set_global_config(clean_entities_enabled=True)
-        Config._add_data_node("my_datanode", path="ENV[BAR]")
+        Config.configure_job_executions(nb_of_workers=-1)
+        Config.configure_global_app(clean_entities_enabled=True)
+        Config.configure_data_node("my_datanode", path="ENV[BAR]")
         assert Config.global_config.clean_entities_enabled is True
         assert Config.job_config.nb_of_workers == -1
         assert Config.data_nodes["my_datanode"].path == "/baz/data/csv"
 
         # File config is applied
-        Config._load(file_config.filename)
+        Config.load(file_config.filename)
         assert Config.global_config.clean_entities_enabled is False
         assert Config.job_config.nb_of_workers == 10
         assert Config.data_nodes["my_datanode"].has_header

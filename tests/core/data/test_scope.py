@@ -1,14 +1,14 @@
 import pytest
 
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
-from taipy.core.data.scope import Scope
 
 
 def test_scope():
-    data_node_config_1 = Config._add_data_node("data_node_config_1", "in_memory", Scope.PIPELINE)
-    data_node_config_2 = Config._add_data_node("data_node_config_2", "in_memory", Scope.SCENARIO)
-    data_node_config_3 = Config._add_data_node("data_node_config_3", "in_memory", Scope.GLOBAL)
-    data_node_config_4 = Config._add_data_node("data_node_config_4", "in_memory", Scope.PIPELINE)
+    data_node_config_1 = Config.configure_data_node("data_node_config_1", "in_memory", Scope.PIPELINE)
+    data_node_config_2 = Config.configure_data_node("data_node_config_2", "in_memory", Scope.SCENARIO)
+    data_node_config_3 = Config.configure_data_node("data_node_config_3", "in_memory", Scope.GLOBAL)
+    data_node_config_4 = Config.configure_data_node("data_node_config_4", "in_memory", Scope.PIPELINE)
 
     # Test __ge__ method
     assert data_node_config_2.scope >= data_node_config_1.scope

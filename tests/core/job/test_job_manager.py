@@ -9,10 +9,10 @@ import pytest
 
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import JobId
+from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
@@ -113,7 +113,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config.configure_job_executions(nb_of_workers=2))
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = scheduler.submit_task(task)
@@ -124,14 +124,14 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 
 def _create_task(function, nb_outputs=1, name=None):
-    input1_dn_config = Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
-    input2_dn_config = Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)
+    input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
+    input2_dn_config = Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)
     output_dn_configs = [
-        Config._add_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
+        Config.configure_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
     [_DataManager._get_or_create(cfg) for cfg in output_dn_configs]
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
-    task_config = Config._add_task(
+    task_config = Config.configure_task(
         name,
         function,
         [input1_dn_config, input2_dn_config],

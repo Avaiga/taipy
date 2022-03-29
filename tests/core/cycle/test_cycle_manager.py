@@ -2,11 +2,11 @@ from datetime import datetime
 
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.scope import Scope
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
@@ -169,24 +169,26 @@ def test_get_cycle_start_date_and_end_date():
 
 
 def test_hard_delete_shared_entities():
-    dn_config_1 = Config._add_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
-    dn_config_2 = Config._add_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
-    dn_config_3 = Config._add_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
-    dn_config_4 = Config._add_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
-    task_config_1 = Config._add_task("task_config_1", print, dn_config_1, dn_config_2)
-    task_config_2 = Config._add_task("task_config_2", print, dn_config_2, dn_config_3)
-    task_config_3 = Config._add_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
-    pipeline_config_1 = Config._add_pipeline("pipeline_config_1", [task_config_1, task_config_2])
-    pipeline_config_2 = Config._add_pipeline("pipeline_config_2", [task_config_1, task_config_2])
-    pipeline_config_3 = Config._add_pipeline("pipeline_config_3", [task_config_3])  # scope = global
+    dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
+    dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
+    dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")
+    dn_config_4 = Config.configure_data_node("my_input_4", "in_memory", scope=Scope.GLOBAL, default_data="testing")
+    task_config_1 = Config.configure_task("task_config_1", print, dn_config_1, dn_config_2)
+    task_config_2 = Config.configure_task("task_config_2", print, dn_config_2, dn_config_3)
+    task_config_3 = Config.configure_task("task_config_3", print, dn_config_3, dn_config_4)  # scope = global
+    pipeline_config_1 = Config.configure_pipeline("pipeline_config_1", [task_config_1, task_config_2])
+    pipeline_config_2 = Config.configure_pipeline("pipeline_config_2", [task_config_1, task_config_2])
+    pipeline_config_3 = Config.configure_pipeline("pipeline_config_3", [task_config_3])  # scope = global
     creation_date = datetime.now()
-    scenario_config_1 = Config._add_scenario(
+    scenario_config_1 = Config.configure_scenario(
         "scenario_config_1",
         [pipeline_config_1, pipeline_config_2, pipeline_config_3],
         creation_date=creation_date,
         frequency=Frequency.DAILY,
     )
-    scenario_config_2 = Config._add_scenario("scenario_config_2", [pipeline_config_3])  # No Frequency so cycle attached to scenarios
+    scenario_config_2 = Config.configure_scenario(
+        "scenario_config_2", [pipeline_config_3]
+    )  # No Frequency so cycle attached to scenarios
     scenario_1 = _ScenarioManager._create(scenario_config_1)
     scenario_2 = _ScenarioManager._create(scenario_config_1)
     scenario_3 = _ScenarioManager._create(scenario_config_2)

@@ -20,7 +20,7 @@ nb_of_workers = 21
     )
 
     os.environ[Config._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH] = config_from_environment.filename
-    Config._load(config_from_filename.filename)
+    Config.load(config_from_filename.filename)
 
     assert Config.job_config.parallel_execution is True
     assert Config.job_config.nb_of_workers == 21

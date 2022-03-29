@@ -2,7 +2,7 @@ import os
 import re
 
 from taipy.core.common.frequency import Frequency
-from taipy.core.data.scope import Scope
+from taipy.core.common.scope import Scope
 from taipy.core.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
 
 

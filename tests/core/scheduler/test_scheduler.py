@@ -12,10 +12,10 @@ import pytest
 
 from taipy.core._scheduler._executor._synchronous import _Synchronous
 from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.scope import Scope
 from taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_1_minute_max
 
@@ -128,7 +128,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config.configure_job_executions(nb_of_workers=2))
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
@@ -140,7 +140,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_task_multithreading_multiple_task():
-    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config.configure_job_executions(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -172,7 +172,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config.configure_job_executions(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_0 = m.Lock()
@@ -207,17 +207,17 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 
 def test_blocked_task():
-    scheduler = _Scheduler(Config._set_job_config(nb_of_workers=2))
+    scheduler = _Scheduler(Config.configure_job_executions(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
     lock_2 = m.Lock()
 
-    foo_cfg = Config._add_data_node("foo", default_data=1)
+    foo_cfg = Config.configure_data_node("foo", default_data=1)
     foo = _DataManager._get_or_create(foo_cfg)
-    bar_cfg = Config._add_data_node("bar")
+    bar_cfg = Config.configure_data_node("bar")
     bar = _DataManager._get_or_create(bar_cfg)
-    baz_cfg = Config._add_data_node("baz")
+    baz_cfg = Config.configure_data_node("baz")
     baz = _DataManager._get_or_create(baz_cfg)
     task_1 = Task("by_2", partial(lock_multiply, lock_1, 2), [foo], [bar])
     task_2 = Task("by_3", partial(lock_multiply, lock_2, 3), [bar], [baz])
@@ -252,13 +252,13 @@ class MyScheduler(_Scheduler):
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
-    scheduler = MyScheduler(Config._set_job_config())
+    scheduler = MyScheduler(Config.configure_job_executions())
     assert isinstance(scheduler.getJobDispatcher()._executor, _Synchronous)
     assert scheduler.getJobDispatcher()._nb_available_workers == 1
 
 
 def test_task_scheduler_create_parallel_dispatcher():
-    scheduler = MyScheduler(Config._set_job_config(nb_of_workers=42))
+    scheduler = MyScheduler(Config.configure_job_executions(nb_of_workers=42))
     assert isinstance(scheduler.getJobDispatcher()._executor, ProcessPoolExecutor)
     assert scheduler.getJobDispatcher()._nb_available_workers == 42
 
@@ -266,12 +266,12 @@ def test_task_scheduler_create_parallel_dispatcher():
 def _create_task(function, nb_outputs=1):
     output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     input_dn = [
-        _DataManager._get_or_create(Config._add_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
-        _DataManager._get_or_create(Config._add_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
+        _DataManager._get_or_create(Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
+        _DataManager._get_or_create(Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
     ]
     output_dn = [
         _DataManager._get_or_create(
-            Config._add_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
+            Config.configure_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
         )
         for i in range(nb_outputs)
     ]
