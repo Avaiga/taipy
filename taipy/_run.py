@@ -1,13 +1,7 @@
-import inspect
 import typing as t
-from types import FrameType
 
 from .gui import Gui
 from .rest import Rest
-
-
-class NoApplicationToStart(Exception):
-    ...
 
 
 def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs):
@@ -17,17 +11,14 @@ def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs):
     An Taipy service is an instance of an object that exposes a Web application.
 
     Parameters:
-        *args (List[Union[`Gui^`, `Rest^`]]): Services to run. If several services are provided, all the services run simultaneously.
+        *args (List[Union[`Gui^`, `Rest^`]]): Services to run. If several services are provided, all the services run simultaneously. If this is empty or set to None, this method does nothing.
         **kwargs: Other parameters to provide to the services.
     """
     gui = __typing_get(apps, Gui)
     rest = __typing_get(apps, Rest)
 
     if not rest and not gui:
-        raise NoApplicationToStart("Empty list of services to run.")
-
-    if gui:
-        gui._set_frame(t.cast(FrameType, inspect.currentframe()).f_back)
+        return
 
     if gui and rest:
         gui._set_flask(rest._app)
