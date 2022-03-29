@@ -1,6 +1,7 @@
 import pytest
 
 from taipy.core.common.alias import DataNodeId
+from taipy.core.data.data_node import DataNode
 from taipy.core.data.generic import GenericDataNode
 from taipy.core.data.scope import Scope
 from taipy.core.exceptions.exceptions import (
@@ -26,6 +27,15 @@ def write_fct(data):
 def write_fct_with_params(data, inp):
     for i in range(inp):
         data.append(data[-1] + 1)
+
+
+def read_fct_modify_data_node_name(data_node_id: DataNodeId, name: str):
+    import taipy.core as tp
+
+    data_node = tp.get(data_node_id)
+    assert isinstance(data_node, DataNode)
+    data_node.name = name  # type:ignore
+    return data_node
 
 
 class TestGenericDataNode:
@@ -141,3 +151,11 @@ class TestGenericDataNode:
 
         generic_dn.write(self.data)
         assert len(generic_dn.read()) == 14
+
+    def test_save_data_node_when_read(self):
+        generic_dn = GenericDataNode(
+            "foo", Scope.PIPELINE, properties={"read_fct": read_fct_modify_data_node_name, "write_fct": write_fct}
+        )
+        generic_dn._properties["read_fct_params"] = (generic_dn.id, "bar")
+        generic_dn.read()
+        assert generic_dn.name == "bar"
