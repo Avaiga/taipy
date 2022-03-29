@@ -1,9 +1,14 @@
+import inspect
 from taipy.gui import Gui, Markdown
 
 
 def test_sending_messages_in_group(gui: Gui, helpers):
     name = "World!"  # noqa: F841
     btn_id = "button1"  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
