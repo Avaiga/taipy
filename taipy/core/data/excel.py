@@ -42,7 +42,6 @@ class ExcelDataNode(DataNode):
     __REQUIRED_PATH_PROPERTY = "path"
     __HAS_HEADER_PROPERTY = "has_header"
     __SHEET_NAME_PROPERTY = "sheet_name"
-    __DEFAULT_SHEET_NAME = "Sheet1"
     _REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
 
     def __init__(
@@ -65,9 +64,11 @@ class ExcelDataNode(DataNode):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
         if self.__SHEET_NAME_PROPERTY not in properties.keys():
-            properties[self.__SHEET_NAME_PROPERTY] = self.__DEFAULT_SHEET_NAME
+            properties[self.__SHEET_NAME_PROPERTY] = None
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
-            properties[self.__HAS_HEADER_PROPERTY] = True
+            properties[self.__HAS_HEADER_PROPERTY] = (
+                True if self.__HAS_HEADER_PROPERTY not in properties.keys() else properties[self.__HAS_HEADER_PROPERTY]
+            )
         if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties)
 
@@ -91,7 +92,7 @@ class ExcelDataNode(DataNode):
             return properties[self.__EXPOSED_TYPE_PROPERTY]
         if isinstance(properties[self.__EXPOSED_TYPE_PROPERTY], Dict):
             return properties[self.__EXPOSED_TYPE_PROPERTY]
-        sheet_names = self.__sheet_name_to_list(properties[self.__SHEET_NAME_PROPERTY])
+        sheet_names = self.__sheet_name_to_list(properties)
         if isinstance(properties[self.__EXPOSED_TYPE_PROPERTY], List):
             if len(sheet_names) == len(properties[self.__EXPOSED_TYPE_PROPERTY]):
                 return {
@@ -112,8 +113,13 @@ class ExcelDataNode(DataNode):
             return self._read_as()
         return self._read_as_pandas_dataframe()
 
-    def __sheet_name_to_list(self, sheet_names=None):
-        sheet_names = sheet_names if sheet_names else self.properties[self.__SHEET_NAME_PROPERTY]
+    def __sheet_name_to_list(self, properties):
+        if properties[self.__SHEET_NAME_PROPERTY]:
+            sheet_names = properties[self.__SHEET_NAME_PROPERTY]
+        else:
+            excel_file = load_workbook(properties[self.__REQUIRED_PATH_PROPERTY])
+            sheet_names = excel_file.sheetnames
+            excel_file.close()
         return sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
 
     def _read_as(self):
@@ -138,13 +144,15 @@ class ExcelDataNode(DataNode):
                     res[i] = custom_class(*row)
             work_books[sheet_name] = res
 
+        excel_file.close()
+
         if len(custom_class_dict) == 1:
             return work_books[list(custom_class_dict.keys())[0]]
 
         return work_books
 
     def _read_as_numpy(self):
-        sheet_names = self.__sheet_name_to_list()
+        sheet_names = self.__sheet_name_to_list(self.properties)
         if len(sheet_names) > 1:
             return {sheet_name: df.to_numpy() for sheet_name, df in self._read_as_pandas_dataframe().items()}
         return self._read_as_pandas_dataframe().to_numpy()
