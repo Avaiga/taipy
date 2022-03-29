@@ -2,11 +2,8 @@ import inspect
 import json
 import warnings
 
-import pytest
-
 from taipy.gui import Gui
 
-@pytest.mark.skip(reason="test not passing on github")
 def test_render_route(gui: Gui):
     gui.add_page("page1", "# first page")
     gui.add_page("page2", "# second page")
