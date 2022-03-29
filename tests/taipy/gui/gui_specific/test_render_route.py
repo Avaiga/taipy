@@ -2,6 +2,8 @@ import inspect
 import json
 import warnings
 
+import pytest
+
 from taipy.gui import Gui
 
 @pytest.mark.skip(reason="test not passing on github")
