@@ -7,7 +7,6 @@ import pytest
 from taipy.gui import Gui
 
 
-@pytest.mark.skip(reason="test not passing on github")
 def test_run_thread(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", "# first page")
