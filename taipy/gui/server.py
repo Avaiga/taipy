@@ -99,7 +99,7 @@ class _Server:
 
         @taipy_bp.errorhandler(404)
         def page_not_found(e):
-            return "{}, {}".format(e.message, e.description)
+            return f"{e.message}, {e.description}"
 
         return taipy_bp
 

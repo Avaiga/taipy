@@ -42,9 +42,9 @@ class _Adapter:
     def _get_elt_per_ids(self, var_name: str, lov: t.List[t.Any]) -> t.Dict[str, t.Any]:
         dict_res = {}
         adapter = self.__get_for_var(var_name, lov[0] if lov else None)
-        for idx, value in enumerate(lov):
+        for value in lov:
             try:
-                result = adapter(value if not isinstance(value, _MapDict) else value._dict) if adapter else value
+                result = adapter(value._dict if isinstance(value, _MapDict) else value) if adapter else value
                 dict_res[self.__get_id(result)] = value
                 children = self.__get_children(result)
                 if children is not None:
@@ -59,7 +59,7 @@ class _Adapter:
         if value is None:
             return None
         try:
-            result = value if not isinstance(value, _MapDict) else value._dict
+            result = value._dict if isinstance(value, _MapDict) else value
             if adapter:
                 result = adapter(result)
             elif isinstance(result, str):
@@ -85,9 +85,7 @@ class _Adapter:
                 ret_list.append(ret)
         return ret_list
 
-    def _get_valid_result(
-        self, value: t.Any, id_only=False
-    ) -> t.Union[t.Tuple[str, ...], str, None]:
+    def _get_valid_result(self, value: t.Any, id_only=False) -> t.Union[t.Tuple[str, ...], str, None]:
         id = self.__get_id(value)
         if id_only:
             return id

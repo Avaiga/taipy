@@ -70,15 +70,13 @@ _indexed_data = re.compile(r"^(\d+)\/(.*)")
 
 
 def _get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
-    re_res = _indexed_data.search(col_name)
-    if re_res:
+    if re_res := _indexed_data.search(col_name):
         return col_name if str(idx) == re_res.group(1) else None
     return col_name
 
 
 def _get_idx_from_col(col_name) -> int:
-    re_res = _indexed_data.search(col_name)
-    if re_res:
+    if re_res := _indexed_data.search(col_name):
         return int(re_res.group(1))
     return 0
 

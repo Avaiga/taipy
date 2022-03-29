@@ -15,7 +15,7 @@ class _Postprocessor(Treeprocessor):
         for p in root.iter():
             if p.tag == "p":
                 classes = p.get("class")
-                classes = MD_PARA_CLASSNAME + " " + classes if classes else MD_PARA_CLASSNAME
+                classes = f"{MD_PARA_CLASSNAME} {classes}" if classes else MD_PARA_CLASSNAME
                 p.set("class", classes)
                 p.tag = "div"
             if p != root:

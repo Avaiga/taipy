@@ -29,7 +29,7 @@ class _WsType(Enum):
     PARTIAL = "PR"
 
 
-NumberTypes = set(["int", "int64", "float", "float64"])
+NumberTypes = {"int", "int64", "float", "float64"}
 
 
 class _AttributeType(Enum):
