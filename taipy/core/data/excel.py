@@ -66,9 +66,7 @@ class ExcelDataNode(DataNode):
         if self.__SHEET_NAME_PROPERTY not in properties.keys():
             properties[self.__SHEET_NAME_PROPERTY] = None
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
-            properties[self.__HAS_HEADER_PROPERTY] = (
-                True if self.__HAS_HEADER_PROPERTY not in properties.keys() else properties[self.__HAS_HEADER_PROPERTY]
-            )
+            properties[self.__HAS_HEADER_PROPERTY] = True
         if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties)
 
