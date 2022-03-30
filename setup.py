@@ -10,7 +10,7 @@ with open("README.md") as readme_file:
 requirements = [
     "taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
-    "taipy-rest@file:///home/vuille_f/Documents/avaiga/taipy-rest",
+    "taipy-rest@git+ssh://git@github.com/Avaiga/taipy-rest.git@develop",
 ]
 
 extras_require = {
