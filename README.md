@@ -1,7 +1,8 @@
 # Taipy Rest
 Taipy Rest is a set of APIs built on top of the [taipy](https://github.com/Avaiga/taipy) library developed by Avaiga.
 
-This project is meant to be used as a complement for **taipy** and its goal is to enable automation through rest APIs of processes built on taipy.
+This project is meant to be used as a complement for **taipy** and its goal is to enable automation through rest APIs 
+of processes built on taipy.
 
 The project comes with rest APIs that provide interaction with all of taipy modules:
  - DataNodes
@@ -54,7 +55,7 @@ application.
 
 ### Running
 -----------
-To run the application you can either run localy with:
+To run the application you can either run locally with:
 ```
 $ flask run
 ```
@@ -93,7 +94,7 @@ And that's it ! Uwsgi is running on port 5000
 If you chose uwsgi as your wsgi server, the proper commands should be in your docker-compose file.
 
 #### Deploying on Heroku
-Make sure you have a working Docker installation (eg. docker ps) and that you’re logged in to Heroku (heroku login).
+Make sure you have a working Docker installation (e.g. docker ps) and that you’re logged in to Heroku (heroku login).
 
 Log in to Container Registry:
 
@@ -123,6 +124,6 @@ You can now access **taipy rest** on the URL that was returned on the `heroku cr
 ### Documentation
 -----------------
 
-All of the API Documentation can be found, after running the application in the following URL:
+All the API Documentation can be found, after running the application in the following URL:
  - ```/redoc-ui``` ReDoc UI configured to hit OpenAPI yaml file
  - ```/openapi.yml``` return OpenAPI specification file in yaml format

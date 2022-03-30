@@ -7,10 +7,10 @@ import pandas as pd
 import pytest
 import taipy.core as tp
 from dotenv import load_dotenv
-from taipy.core import Cycle, Frequency, Job, Pipeline, Scenario, Task
+from taipy.core import Config, Cycle, Frequency, Job, Pipeline, Scenario, Task, Scope
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
-from taipy.core.data.in_memory import InMemoryDataNode, Scope
+from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager as JobManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
 
@@ -88,14 +88,14 @@ def default_df_datanode():
 
 @pytest.fixture
 def default_datanode_config():
-    return tp.configure_data_node(f"taipy_{uuid.uuid4().hex}", "in_memory", Scope.PIPELINE)
+    return Config.configure_data_node(f"taipy_{uuid.uuid4().hex}", "in_memory", Scope.PIPELINE)
 
 
 @pytest.fixture
 def default_datanode_config_list():
     configs = []
     for i in range(10):
-        configs.append(tp.configure_data_node(id=f"ds_{i}", storage_type="in_memory", scope=Scope.PIPELINE))
+        configs.append(Config.configure_data_node(id=f"ds_{i}", storage_type="in_memory", scope=Scope.PIPELINE))
     return configs
 
 
@@ -133,14 +133,14 @@ def default_task():
 
 @pytest.fixture
 def default_task_config():
-    return tp.configure_task("task1", print, [], [])
+    return Config.configure_task("task1", print, [], [])
 
 
 @pytest.fixture
 def default_task_config_list():
     configs = []
     for i in range(10):
-        configs.append(tp.configure_task(f"task_{i}", print, [], []))
+        configs.append(Config.configure_task(f"task_{i}", print, [], []))
     return configs
 
 
@@ -153,7 +153,7 @@ def __default_pipeline():
 
 
 def __task_config():
-    return tp.configure_task("task1", print, [], [])
+    return Config.configure_task("task1", print, [], [])
 
 
 @pytest.fixture
@@ -163,22 +163,22 @@ def default_pipeline():
 
 @pytest.fixture
 def default_pipeline_config():
-    return tp.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())
+    return Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())
 
 
 @pytest.fixture
 def default_pipeline_config_list():
     configs = []
     for i in range(10):
-        configs.append(tp.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config()))
+        configs.append(Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config()))
     return configs
 
 
 @pytest.fixture
 def default_scenario_config():
-    return tp.configure_scenario(
+    return Config.configure_scenario(
         f"taipy_{uuid.uuid4().hex}",
-        [tp.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())],
+        [Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())],
     )
 
 
@@ -187,9 +187,9 @@ def default_scenario_config_list():
     configs = []
     for i in range(10):
         configs.append(
-            tp.configure_scenario(
+            Config.configure_scenario(
                 f"taipy_{uuid.uuid4().hex}",
-                [tp.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())],
+                [Config.configure_pipeline(f"taipy_{uuid.uuid4().hex}", __task_config())],
             )
         )
     return configs
