@@ -1,3 +1,4 @@
+import inspect
 import os
 from pathlib import Path
 
@@ -6,6 +7,7 @@ from taipy.gui import Gui
 
 def test_folder_pages_binding(gui: Gui):
     folder_path = f"{Path(Path(__file__).parent.resolve())}{os.path.sep}sample_assets"
+    gui._set_frame(inspect.currentframe())
     gui.add_pages(folder_path)
     gui.run(run_server=False)
     assert len(gui._config.routes) == 3  # 2 files -> 2 routes + 1 default route

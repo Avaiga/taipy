@@ -1,3 +1,4 @@
+import inspect
 import pytest
 
 from taipy.gui import Gui, Markdown
@@ -10,6 +11,10 @@ def test_default_on_change(gui: Gui, helpers):
         st["d"] = True
 
     x = 10  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     gui.add_page(
         "test", Markdown("<|{x}|input|>")
     )
@@ -35,6 +40,10 @@ def test_specific_on_change(gui: Gui, helpers):
         st["s"] = True
 
     x = 10  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     gui.add_page(
         "test", Markdown("<|{x}|input|on_change=on_input_change|>")
     )

@@ -1,3 +1,4 @@
+import inspect
 import time
 from importlib import util
 
@@ -15,6 +16,7 @@ def test_selector_action(page: "Page", gui: Gui, helpers):
 <|{x}|selector|lov=Item 1;Item 2;Item 3|id=selector1|>
 """
     x = "Item 1"
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("/test")
