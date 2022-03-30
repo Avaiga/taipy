@@ -1,4 +1,5 @@
 from importlib import util
+import inspect
 
 if util.find_spec("playwright"):
     from playwright._impl._page import Page
@@ -19,6 +20,7 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     color: blue;
 }
 """
+    gui._set_frame(inspect.currentframe())
     gui.add_page("page1", markdown_content, style=style)
     helpers.run_e2e(gui)
     page.goto("/page1")

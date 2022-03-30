@@ -1,3 +1,4 @@
+import inspect
 import pytest
 
 from taipy.gui import Gui, Markdown
@@ -6,6 +7,10 @@ from taipy.gui import Gui, Markdown
 def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     # Bind test variables
     csvdata = csvdata
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page(
         "test",

@@ -1,3 +1,4 @@
+import inspect
 import pytest
 
 from taipy.gui import Gui, Markdown
@@ -6,6 +7,10 @@ from taipy.gui import Gui, Markdown
 def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_update, payload):
     # Bind test variable
     var = value_before_update  # noqa: F841
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page("test", Markdown("<|{var}|>"))
     gui.run(run_server=False)
@@ -28,6 +33,10 @@ def test_ws_u_string(gui: Gui, helpers):
     value_before_update = "a random string"
     value_after_update = "a random string is added"
     payload = {"value": value_after_update}
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)
 
 
@@ -35,4 +44,8 @@ def test_ws_u_number(gui: Gui, helpers):
     value_before_update = 10
     value_after_update = "11"
     payload = {"value": value_after_update}
+
+    # set gui frame
+    gui._set_frame(inspect.currentframe())
+
     ws_u_assert_template(gui, helpers, value_before_update, value_after_update, payload)

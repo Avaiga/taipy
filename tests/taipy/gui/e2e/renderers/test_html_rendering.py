@@ -1,3 +1,4 @@
+import inspect
 import os
 import time
 from importlib import util
@@ -29,6 +30,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
     <taipy:text id="text2" class="custom-text">There</taipy:text>
 </body>
 </html>"""
+    gui._set_frame(inspect.currentframe())
     gui.add_page("page1", Html(html_content))
     helpers.run_e2e(gui)
     page.goto("/page1")
@@ -45,6 +47,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
 
 
 def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
+    gui._set_frame(inspect.currentframe())
     gui.add_pages(pages=f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets")
     helpers.run_e2e(gui)
     assert ".taipy-text" in urlopen("http://127.0.0.1:5000/test-assets/style/style.css").read().decode("utf-8")

@@ -1,3 +1,4 @@
+import inspect
 import warnings
 
 from taipy.gui import Gui
@@ -15,6 +16,7 @@ def test_unbind_variable_in_expression(gui: Gui):
 
 def test_evaluate_same_expression_multiple_times(gui: Gui):
     x = 10
+    gui._set_frame(inspect.currentframe())
     gui.run(run_server=False)
     s1 = gui._evaluate_expr("x + 10 = {x + 10}")
     s2 = gui._evaluate_expr("x + 10 = {x + 10}")
@@ -23,6 +25,7 @@ def test_evaluate_same_expression_multiple_times(gui: Gui):
 
 def test_evaluate_expressions_same_variable(gui: Gui):
     x = 10
+    gui._set_frame(inspect.currentframe())
     gui.run(run_server=False)
     s1 = gui._evaluate_expr("x + 10 = {x + 10}")
     s2 = gui._evaluate_expr("x = {x}")
@@ -31,6 +34,7 @@ def test_evaluate_expressions_same_variable(gui: Gui):
 
 def test_evaluate_holder(gui: Gui):
     x = 10
+    gui._set_frame(inspect.currentframe())
     gui.run(run_server=False)
     with warnings.catch_warnings(record=True) as w:
         gui._evaluate_expr("{x + 10}")
