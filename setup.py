@@ -10,8 +10,16 @@ with open("README.md") as readme_file:
 requirements = [
     "taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
-    "taipy-rest@git+ssh://git@github.com/Avaiga/taipy-rest.git@develop",
+    "taipy-rest@file:///home/vuille_f/Documents/avaiga/taipy-rest",
 ]
+
+extras_require = {
+    "ngrok": ["pyngrok>=5"],
+    "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
+    "rdp": ["rdp>=0.8"],
+    "arrow": ["pyarrow>=7.0"],
+    "mssql": ["pyodbc>=4"],
+}
 
 setup(
     author="Avaiga",
@@ -37,4 +45,5 @@ setup(
     url="https://github.com/avaiga/taipy",
     version="1.0.0.dev",
     zip_safe=False,
+    extras_require=extras_require,
 )
