@@ -31,8 +31,7 @@ class _PandasDataAccessor(_DataAccessor):
         args = []
         if column_name:
             args.append(row[column_name])
-        args.append(row.name)
-        args.append(row)
+        args.extend((row.name, row))
         if column_name:
             args.append(column_name)
         try:
@@ -126,9 +125,9 @@ class _PandasDataAccessor(_DataAccessor):
             # convert buffer to python bytes and return
             ret["data"] = buf.to_pybytes()
             ret["orient"] = orient
+        elif data_format == _DataFormat.APACHE_ARROW:
+            raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
         else:
-            if data_format == _DataFormat.APACHE_ARROW:
-                raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
             # workaround for python built in json encoder that does not yet support ignore_nan
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)  # type: ignore
         return ret
@@ -152,19 +151,19 @@ class _PandasDataAccessor(_DataAccessor):
         data_format: _DataFormat,
         col_prefix: t.Optional[str] = "",
     ) -> t.Dict[str, t.Any]:
-        ret_payload = {}
         columns = payload.get("columns", [])
         if col_prefix:
             columns = [c.removeprefix(col_prefix) for c in columns]
-        ret_payload["pagekey"] = payload.get("pagekey", "unknown page")
+        ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
         if paged:
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
             if isinstance(aggregates, list) and len(aggregates) and isinstance(applies, dict):
-                applies_with_fn = {}
-                for k, v in applies.items():
-                    applies_with_fn[k] = v if v in gui._aggregate_functions else gui._get_user_function(v)
+                applies_with_fn = {
+                    k: v if v in gui._aggregate_functions else gui._get_user_function(v) for k, v in applies.items()
+                }
+
                 for col in columns:
                     if col not in applies_with_fn.keys():
                         applies_with_fn[col] = "first"

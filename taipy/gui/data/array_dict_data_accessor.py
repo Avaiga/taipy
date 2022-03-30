@@ -19,21 +19,22 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
         if isinstance(value, list):
             if isinstance(value[0], (str, int, float, bool)):
                 return pd.DataFrame({"0": value})
-            else:
-                types = set([type(x) for x in value])
-                if len(types) == 1 and next(iter(types), None) == list:
-                    lengths = set([len(x) for x in value])
-                    if len(lengths) == 1:
-                        return pd.DataFrame({str(i): v for i, v in enumerate(value)})
-                    else:
-                        return [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
-                elif pd.DataFrame in types:
-                    if len(types) == 1:
-                        return value
-                    elif len(types) == 2 and list in types:
-                        return [
-                            v if isinstance(v, pd.DataFrame) else pd.DataFrame({str(i): v}) for i, v in enumerate(value)
-                        ]
+            types = {type(x) for x in value}
+            if len(types) == 1 and next(iter(types), None) == list:
+                lengths = {len(x) for x in value}
+                return (
+                    pd.DataFrame({str(i): v for i, v in enumerate(value)})
+                    if len(lengths) == 1
+                    else [pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)]
+                )
+
+            elif pd.DataFrame in types:
+                if len(types) == 1:
+                    return value
+                elif len(types) == 2 and list in types:
+                    return [
+                        v if isinstance(v, pd.DataFrame) else pd.DataFrame({str(i): v}) for i, v in enumerate(value)
+                    ]
         return pd.DataFrame(value)
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore

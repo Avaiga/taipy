@@ -1,3 +1,4 @@
+import contextlib
 import json
 import numbers
 import re
@@ -77,10 +78,7 @@ class _Builder:
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
                     (val, key_hash) = self.__parse_attribute_value(v)
-                    if key_hash is None:
-                        self.__attributes[k] = f"{{{prop_hash}.{k}}}"
-                    else:
-                        self.__attributes[k] = v
+                    self.__attributes[k] = f"{{{prop_hash}.{k}}}" if key_hash is None else v
             else:
                 warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
@@ -131,8 +129,7 @@ class _Builder:
         ret = {}
         index_re = re.compile(name + r"\[(.*)\]$")
         for key in self.__attributes.keys():
-            m = index_re.match(key)
-            if m:
+            if m := index_re.match(key):
                 ret[m.group(1)] = self.__attributes.get(key)
         return ret
 
@@ -282,14 +279,12 @@ class _Builder:
                 var_type = type(elt).__name__
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
-            lov_name = self.__hashes.get(var_name)
-            if lov_name:
+            if lov_name := self.__hashes.get(var_name):
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(lov_name)
                 else:
                     self.__gui._add_type_for_var(lov_name, var_type)
-            value_name = self.__hashes.get("value")
-            if value_name:
+            if value_name := self.__hashes.get("value"):
                 if adapter is None:
                     adapter = self.__gui._get_adapter_for_type(value_name)
                 else:
@@ -303,7 +298,7 @@ class _Builder:
                     ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")  # type: ignore
                     if ret is not None:
                         ret_list.append(ret)
-            self.__attributes["default_" + property_name] = ret_list
+            self.__attributes[f"default_{property_name}"] = ret_list
 
             ret_list = []
             value = self.__attributes.get("value")
@@ -324,8 +319,7 @@ class _Builder:
     def __update_col_desc_from_indexed(self, columns: t.Dict[str, t.Any], name: str):
         col_value = self.__get_name_indexed_property(name)
         for k, v in col_value.items():
-            col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
-            if col_desc:
+            if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
                 if col_desc.get(_to_camel_case(name)) is None:
                     col_desc[_to_camel_case(name)] = str(v)
             else:
@@ -348,15 +342,13 @@ class _Builder:
             group_by = self.__get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if _is_boolean_true(v):
-                    col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
-                    if col_desc:
+                    if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
                         col_desc["groupBy"] = True
                     else:
                         warnings.warn(f"{self.__element_name} group_by[{k}] is not in the list of displayed columns")
             apply = self.__get_name_indexed_property("apply")
             for k, v in apply.items():  # pragma: no cover
-                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
-                if col_desc:
+                if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
                     if callable(v):
                         value = self.__hashes.get(f"apply[{k}]")
                     elif isinstance(v, str):
@@ -368,8 +360,7 @@ class _Builder:
                         col_desc["apply"] = value
                 else:
                     warnings.warn(f"{self.__element_name} apply[{k}] is not in the list of displayed columns")
-            line_style = self.__attributes.get("style")
-            if line_style:  # pragma: no cover
+            if line_style := self.__attributes.get("style"):
                 if callable(line_style):
                     value = self.__hashes.get("style")
                 elif isinstance(line_style, str):
@@ -382,8 +373,7 @@ class _Builder:
                     self.set_attribute("lineStyle", value)
             styles = self.__get_name_indexed_property("style")
             for k, v in styles.items():  # pragma: no cover
-                col_desc = next((x for x in columns.values() if x["dfid"] == k), None)
-                if col_desc:
+                if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
                     if callable(v):
                         value = self.__hashes.get(f"style[{k}]")
                     elif isinstance(v, str):
@@ -431,11 +421,7 @@ class _Builder:
         if not trace[5]:
             # mode
             trace[5] = default_mode
-        if not trace[6]:
-            # type
-            trace[6] = default_type
-        else:
-            trace[6] = str(trace[6]).strip().lower()
+        trace[6] = str(trace[6]).strip().lower() if trace[6] else default_type
         if not trace[8]:
             # xaxis
             trace[8] = "x"
@@ -461,19 +447,17 @@ class _Builder:
         col_types = self.__gui._accessors._get_col_types(data_hash, _TaipyData(data, data_hash))
 
         # add trace for non used indexed columns
-        max_idx = max([_get_idx_from_col(c) for c in col_types.keys()])
-        for idx in range(len(traces), max_idx + 1):
-            traces.append([x if i > 4 else None for i, x in enumerate(traces[0])])
+        max_idx = max(_get_idx_from_col(c) for c in col_types.keys())
+        traces.extend([x if i > 4 else None for i, x in enumerate(traces[0])] for _ in range(len(traces), max_idx + 1))
 
         # configure columns
         columns = set()
         for trace in traces:
-            columns.update([t for t in trace[0:5] if t])
+            columns.update([t for t in trace[:5] if t])
         columns = _get_columns_dict(data, list(columns), col_types)
         # set default columns if not defined
-        icols = []
-        for i in range(len(traces)):
-            icols.append([c for c in [_get_col_from_indexed(c, i) for c in columns.keys()] if c])
+        icols = [[c for c in [_get_col_from_indexed(c, i) for c in columns.keys()] if c] for i in range(len(traces))]
+
         for i, tr in enumerate(traces):
             if not tr[0] or tr[6] in _Builder.__ONE_COLUMN_CHART or not tr[1]:
                 traces[i] = tuple(
@@ -507,8 +491,7 @@ class _Builder:
         return self
 
     def set_chart_layout(self):
-        layout = self.__attributes.get("layout")
-        if layout:
+        if layout := self.__attributes.get("layout"):
             if isinstance(layout, (dict, _MapDict)):
                 self.__set_json_attribute("layout", layout)
             else:
@@ -610,7 +593,7 @@ class _Builder:
                 var_name,
                 _get_client_var_name(hash_name),
             )
-        return self.set_attribute(_to_camel_case("default_" + var_name), value)
+        return self.set_attribute(_to_camel_case(f"default_{var_name}"), value)
 
     def set_lov(self, var_name="lov", property_name: t.Optional[str] = None):
         property_name = var_name if property_name is None else property_name
@@ -629,7 +612,7 @@ class _Builder:
         if isinstance(loi, str):
             loi = [s.strip() for s in loi.split(";") if s.strip()]
         if isinstance(loi, list):
-            self.__set_json_attribute(_to_camel_case("default_" + var_name), loi)
+            self.__set_json_attribute(_to_camel_case(f"default_{var_name}"), loi)
         if hash_name:
             self.__update_vars.append(f"{var_name}={hash_name}")
             self.__set_react_attribute(var_name, hash_name)
@@ -647,7 +630,7 @@ class _Builder:
                 warnings.warn(f"{self.__element_name} {var_name} cannot be transformed into a number\n{e}")
                 numVal = 0
         if isinstance(numVal, numbers.Number):
-            self.__set_react_attribute(_to_camel_case("default_" + var_name), numVal)
+            self.__set_react_attribute(_to_camel_case(f"default_{var_name}"), numVal)
         elif numVal is not None:
             warnings.warn(f"{self.__element_name} {var_name} value is not not valid {numVal}")
         if hash_name:
@@ -659,7 +642,7 @@ class _Builder:
     def __set_default_value(self, var_name: str, value: t.Optional[t.Any] = None, native_type: bool = False):
         if value is None:
             value = self.__attributes.get(var_name)
-        default_var_name = _to_camel_case("default_" + var_name)
+        default_var_name = _to_camel_case(f"default_{var_name}")
         if isinstance(value, (datetime, date, time)):
             self.set_attribute(default_var_name, _date_to_ISO(value))
         elif isinstance(value, str):
@@ -690,8 +673,7 @@ class _Builder:
             native_type = native_type if var_type == _AttributeType.dynamic_number else False
         if var_type == _AttributeType.dynamic_boolean:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
-        hash_name = self.__hashes.get(var_name)
-        if hash_name:
+        if hash_name := self.__hashes.get(var_name):
             hash_name = self.__get_typed_hash_name(hash_name, var_type)
             self.__set_react_attribute(
                 var_name,
@@ -703,11 +685,8 @@ class _Builder:
                 if native_type:
                     val = self.__attributes.get(var_name)
                     if native_type and isinstance(val, str):
-                        try:
+                        with contextlib.suppress(Exception):
                             val = float(val)
-                        except Exception:
-                            # keep as str
-                            pass
                     self.__set_default_value(var_name, val, native_type=native_type)
                 else:
                     self.__set_default_value(var_name)
@@ -716,19 +695,15 @@ class _Builder:
             if value is not None:
                 if native_type:
                     if isinstance(value, str):
-                        try:
+                        with contextlib.suppress(Exception):
                             value = float(value)
-                        except Exception:
-                            # keep as str
-                            pass
                     if isinstance(value, (int, float)):
                         return self.__set_react_attribute(var_name, value)
                 self.set_attribute(var_name, value)
         return self
 
     def set_labels(self, var_name: str = "labels"):
-        value = self.__attributes.get(var_name)
-        if value:
+        if value := self.__attributes.get(var_name):
             if _is_boolean_true(value):
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
             return self.__set_dict_attribute(var_name)
@@ -737,8 +712,7 @@ class _Builder:
     def set_partial(self):
         if self.__control_type not in _Builder.__BLOCK_CONTROLS:
             return self
-        partial = self.__attributes.get("partial")
-        if partial:
+        if partial := self.__attributes.get("partial"):
             page = self.__attributes.get("page")
             if page:
                 warnings.warn(
@@ -801,7 +775,7 @@ class _Builder:
     def __set_dynamic_bool_attribute(self, name: str, def_val: t.Any, with_update: bool, update_main=True):
         hash_name = self.__hashes.get(name)
         val = self.__get_boolean_attribute(name, def_val)
-        default_name = "default_" + name if hash_name is not None else name
+        default_name = f"default_{name}" if hash_name is not None else name
         if val != def_val:
             self.__set_boolean_attribute(default_name, val)
         if hash_name is not None:
@@ -856,7 +830,7 @@ class _Builder:
 
     def set_attribute(self, name, value):
         if name.startswith("on"):
-            name = "tp_" + name
+            name = f"tp_{name}"
         self.el.set(name, value)
         return self
 

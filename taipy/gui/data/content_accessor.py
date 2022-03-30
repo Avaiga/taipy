@@ -71,39 +71,33 @@ class _ContentAccessor:
                 warnings.warn(f"{var_name} ({type(value)}) cannot be written to file {file_path}.\n{e}")
             newvalue = file_path
         if isinstance(newvalue, (str, pathlib.Path)):
-            if isinstance(newvalue, str):
-                path = pathlib.Path(newvalue)
-            else:
-                path = newvalue
-            if path.is_file():
-                if image:
-                    if not mime:
-                        mime = self.__get_mime_from_file(path)
-                    if mime and not mime.startswith("image"):
-                        warnings.warn(f"{var_name} ({path}) is not an image: {mime}")
-                        return f"Invalid content: {mime}"
-                dir_path = path.resolve().parent
-                url_path = self.get_path(dir_path)
-                self.__content_paths[url_path] = dir_path
-                file_url = f"{url_path}/{path.name}"
-                self.__url_is_image[file_url] = image
-                return (file_url,)
-            else:
+            path = pathlib.Path(newvalue) if isinstance(newvalue, str) else newvalue
+            if not path.is_file():
                 return str(value)
+            if image:
+                if not mime:
+                    mime = self.__get_mime_from_file(path)
+                if mime and not mime.startswith("image"):
+                    warnings.warn(f"{var_name} ({path}) is not an image: {mime}")
+                    return f"Invalid content: {mime}"
+            dir_path = path.resolve().parent
+            url_path = self.get_path(dir_path)
+            self.__content_paths[url_path] = dir_path
+            file_url = f"{url_path}/{path.name}"
+            self.__url_is_image[file_url] = image
+            return (file_url,)
+        elif _has_magic_module:
+            try:
+                mime = magic.from_buffer(value, mime=True)
+                if not image or mime.startswith("image"):
+                    return f"data:{mime};base64," + str(base64.b64encode(value), "utf-8")
+                warnings.warn(f"{var_name} ({type(value)}) is not an image: {mime}")
+                return f"Invalid content: {mime}"
+            except Exception as e:
+                warnings.warn(f"{var_name} ({type(value)}) cannot be base64 encoded.\n{e}")
+                return "Cannot be base64 encoded"
         else:
-            if _has_magic_module:
-                try:
-                    mime = magic.from_buffer(value, mime=True)
-                    if not image or mime.startswith("image"):
-                        return f"data:{mime};base64," + str(base64.b64encode(value), "utf-8")
-                    else:
-                        warnings.warn(f"{var_name} ({type(value)}) is not an image: {mime}")
-                        return f"Invalid content: {mime}"
-                except Exception as e:
-                    warnings.warn(f"{var_name} ({type(value)}) cannot be base64 encoded.\n{e}")
-                    return "Cannot be base64 encoded"
-            else:
-                warnings.warn(
-                    "python-magic (and python-magic-bin for win) packages need to be installed if you want to process content as array of bytes."
-                )
-                return "Cannot guess content type"
+            warnings.warn(
+                "python-magic (and python-magic-bin for win) packages need to be installed if you want to process content as array of bytes."
+            )
+            return "Cannot guess content type"
