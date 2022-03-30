@@ -5,9 +5,9 @@ import warnings
 from taipy.gui import Gui
 
 def test_render_route(gui: Gui):
+    gui._set_frame(inspect.currentframe())
     gui.add_page("page1", "# first page")
     gui.add_page("page2", "# second page")
-    gui._set_frame(inspect.currentframe())
     gui.run(run_server=False)
     with warnings.catch_warnings(record=True) as w:
         client = gui._server.test_client()

@@ -30,6 +30,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
     <taipy:text id="text2" class="custom-text">There</taipy:text>
 </body>
 </html>"""
+    gui._set_frame(inspect.currentframe())
     gui.add_page("page1", Html(html_content))
     helpers.run_e2e(gui)
     page.goto("/page1")

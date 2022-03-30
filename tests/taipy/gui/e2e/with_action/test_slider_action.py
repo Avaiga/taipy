@@ -1,4 +1,5 @@
 from importlib import util
+import inspect
 
 import pytest
 
@@ -16,6 +17,7 @@ def test_slider_action(page: "Page", gui: Gui, helpers):
 <|{x}|slider|id=slider1|>
 """
     x = 10
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("/test")
@@ -43,6 +45,7 @@ Value: <|{d.v1}|id=text1|>
 
 Slider: <|{d.v2}|slider|id=slider1|>
 """
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("/test")

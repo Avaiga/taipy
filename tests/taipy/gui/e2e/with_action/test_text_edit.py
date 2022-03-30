@@ -1,4 +1,5 @@
 from importlib import util
+import inspect
 
 import pytest
 
@@ -16,6 +17,7 @@ def test_text_edit(page: "Page", gui: Gui, helpers):
 <|{x}|input|id=input1|>
 """
     x = "Hey"
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("/test")
@@ -38,6 +40,7 @@ def test_number_edit(page: "Page", gui: Gui, helpers):
 
 """
     x = 10
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("/test")

@@ -1,4 +1,5 @@
 from importlib import util
+import inspect
 
 import pytest
 
@@ -13,6 +14,7 @@ def test_redirect(page: "Page", gui: Gui, helpers):
     page_md = """
 <|Redirect Successfully|id=text1|>
 """
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
     page.goto("/")

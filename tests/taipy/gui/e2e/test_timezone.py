@@ -1,4 +1,5 @@
 from importlib import util
+import inspect
 
 import pytest
 
@@ -39,6 +40,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, text):
 <|{t}|id=text1|>
 """
     t = _ISO_to_date("2022-03-03T00:00:00.000Z")
+    gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, time_zone=time_zone)
     page.goto("/test")

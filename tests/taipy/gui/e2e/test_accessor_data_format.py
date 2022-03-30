@@ -1,4 +1,5 @@
 from importlib import util
+import inspect
 
 import pytest
 
@@ -11,6 +12,7 @@ from taipy.gui import Gui
 @pytest.mark.teste2e
 def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
     table_data = csvdata
+    gui._set_frame(inspect.currentframe())
     gui.add_page(
         name="test",
         page="<|{table_data}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
@@ -26,6 +28,7 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
 def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
     if util.find_spec("pyarrow"):
         table_data = csvdata
+        gui._set_frame(inspect.currentframe())
         gui.add_page(
             name="test",
             page="<|{table_data}|table|page_size=10|page_size_options=10;30;100|columns=Day;Entity;Code;Daily hospital occupancy|date_format=eee dd MMM yyyy|id=table1|>",
