@@ -18,6 +18,13 @@ class _EmptyPage(Page):
 class Markdown(Page):
     """
     Page generator for _Markdown_ text.
+
+    Taipy can use Markdown text to create pages that are the base of
+    user interfaces.
+
+    You can find details on the Taipy Markdown-specific syntax and how to add
+    Taipy Visual Elements in the [section on HTML](../../gui/pages/#using-markdown)
+    of the User Manual.
     """
 
     def __init__(self, content: str) -> None:
@@ -39,6 +46,13 @@ class Markdown(Page):
 class Html(Page):
     """
     Page generator for _HTML_ text.
+
+    Taipy can use HTML code to create pages that are the base of
+    user interfaces.
+
+    You can find details on HTML-specific constructs and how to add
+    Taipy Visual Elements in the [section on HTML](../../gui/pages/#using-html)
+    of the User Manual.
     """
 
     def __init__(self, content: str) -> None:

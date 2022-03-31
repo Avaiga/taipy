@@ -67,7 +67,7 @@ setup(
     include_package_data=True,
     keywords="taipy-gui",
     name="taipy-gui",
-    packages=find_packages(include=["taipy.gui", "taipy.gui.*"]),
+    packages=find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-gui",

@@ -19,7 +19,7 @@ class Partial(_Page):
     [`pane`](../gui/viselements/pane.md)] can use Partials.
 
     Note that `Partial` has no constructor (no `__init__()` method): to create a
-    Partial, you must call the `Gui.add_partial()^` function.
+    `Partial`, you must call the `Gui.add_partial()^` function.
 
     Partials can be really handy if you want to modify a section of a page:
     the `update_content()` method dynamically update pages that make use
@@ -43,8 +43,8 @@ class Partial(_Page):
         """Update partial content.
 
         Arguments:
-            state: the current user state as received in any callback.
-            content: the new content to show.
+            state (`State^`): The current user state as received in any callback.
+            content (str): The new content to use and display.
         """
         if state and state._gui and callable(state._gui._update_partial):
             state._gui._update_partial(self.__copy(content))
