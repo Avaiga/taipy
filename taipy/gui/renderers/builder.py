@@ -78,7 +78,7 @@ class _Builder:
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
                     (val, key_hash) = self.__parse_attribute_value(v)
-                    self.__attributes[k] = f"{{{prop_hash}.{k}}}" if key_hash is None else v
+                    self.__attributes[k] = f"{{{prop_hash}['{k}']}}" if key_hash is None else v
             else:
                 warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
@@ -296,7 +296,7 @@ class _Builder:
             if len(lov) > 0:
                 for elt in lov:
                     ret = self.__gui._run_adapter(
-                        t.cast(t.Callable, adapter), elt, adapter.__name__ if adapter else "adapter")  # type: ignore
+                        t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter")  # type: ignore
                     if ret is not None:
                         ret_list.append(ret)
             self.__attributes[f"default_{property_name}"] = ret_list
@@ -306,7 +306,7 @@ class _Builder:
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self.__gui._run_adapter(
-                    t.cast(t.Callable, adapter), val, adapter.__name__ if adapter else "adapter", id_only=True)  # type: ignore
+                    t.cast(t.Callable, adapter), val, adapter.__name__ if callable(adapter) else "adapter", id_only=True)  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
