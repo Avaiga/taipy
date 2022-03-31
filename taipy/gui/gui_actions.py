@@ -9,10 +9,10 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
     """Download content to the client.
 
     Arguments:
-        state: the current user state as received in any callback.
-        content: file path or file content
-        name: file name for the content on the client browser (default to content name)
-        on_action: function called when the download starts
+        state (`State^`): The current user state as received in any callback.
+        content: File path or file content.
+        name: File name for the content on the client browser (default to content name).
+        on_action: Function called when the download starts.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._download(content, name, on_action)
@@ -30,16 +30,17 @@ def notify(
     """Send a notification to the user interface.
 
     Arguments:
-        state: the current user state as received in any callback.
-        notification_type: the notification type. This can be one of `"success"`, `"info"`, `"warning"`, or `"error"`.
+        state (`State^`): The current user state as received in any callback.
+        notification_type: The notification type. This can be one of _"success"_, _"info"_,
+            _"warning"_, or _"error"_.<br/>
             To remove the last notification, set this parameter to the empty string.
-        message: the text message to display.
-        system_notification: if True, the system will also show the notification.
+        message: The text message to display.
+        system_notification: If True, the system will also show the notification.
             If not specified or set to None, this parameter will use the value of
-            `configuration[system_notification]`.
-        duration: the time, in milliseconds, during which the notification is shown.
+            _configuration[system_notification]_.
+        duration: The time, in milliseconds, during which the notification is shown.
             If not specified or set to None, this parameter will use the value of
-            `configuration[notification_duration]`.
+            _configuration[notification_duration]_.
 
     Note that you can also call this function with _notification_type_ set to the first letter
     or the alert type (ie setting _notification_type_ to "i" is equivalent to setting it to
@@ -56,7 +57,7 @@ def notify(
     if state and isinstance(state._gui, Gui):
         state._gui._notify(notification_type, message, system_notification, duration)
     else:
-        warnings.warn("'notify' function should be called in the context of a callback")
+        warnings.warn("'notify()' must be called in the context of a callback")
 
 
 def hold_control(
@@ -71,9 +72,10 @@ def hold_control(
     with the visual elements.
 
     Arguments:
-        state: the current user state as received in any callback.
-        callback: the function to be called on _callback_. If empty or None, no cancel action
-            is provided to the user.
+        state (`State^`): The current user state as received in any callback.
+        callback (Optional[Union[str, Callable]]): the function to be called if the user
+            chooses to cancel.<br/>
+            If empty or None, no cancel action is provided to the user.
         message: the message to show.
     """
     if state and isinstance(state._gui, Gui):
@@ -89,7 +91,7 @@ def resume_control(state: State):
     must be allowed again for the user.
 
     Arguments:
-        state: the current user state as received in any callback.
+        state (`State^`): The current user state as received in any callback.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._resume_actions()
@@ -101,8 +103,8 @@ def navigate(state: State, to: t.Optional[str] = ""):
     """Navigate to a page.
 
     Arguments:
-        state: the current user state as received in any callback.
-        to: the name of the page to navigate to. This must be a valid page identifier.
+        state (`State^`): The current user state as received in any callback.
+        to: The name of the page to navigate to. This must be a valid page identifier.
             If ommitted, the application navigates to the root page.
     """
     if state and isinstance(state._gui, Gui):

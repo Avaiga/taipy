@@ -7,13 +7,15 @@ from .utils import _is_in_notebook, _varname_from_content
 
 class Page(ABC):
     """
-    The base class that transforms template text to actual pages that can be
-    displayed on a Web browser.
+    Generic page generator.
+    
+    The `Page` class transforms template text into actual pages that can be displayed
+    on a Web browser.
 
-    When a page is requested to be displayed, it is transformed into HTML
+    When a page is requested to be displayed, it is converted into HTML
     code that can be sent to the client. All control placeholders are
-    replaced by the appropriate graphical component so you can display
-    your application variables, and interact with them.
+    replaced by their respective graphical component so you can show
+    your application variables and interact with them.
     """
 
     def __init__(self, content: str) -> None:
@@ -41,17 +43,20 @@ class Page(ABC):
         """Set a new page content.
 
         Reads the new page content and reinitializes the page to reflect the change.
-        
+
         !!! important
-            This function can only be used inside iPython (Jupyter) Notebook environment.
+            This function can only be used an IPython notebook context.
 
         Arguments:
-            content: the text content or the path to the file holding the text to be transformed.
+            content: The text content or the path to the file holding the text to be transformed.
+                If _content_ is a path to a readable file, the file is read entirely as the text
+                template.
 
-        If _content_ is a path to a readable file, the file is read entirely as the text template.
+        Exceptions:
+            RuntimeError: If this method is called outside an IPython notebook context.
         """
         if not _is_in_notebook():
-            raise RuntimeError("set_content function must only be used inside iPython Notebook")
+            raise RuntimeError("'set_content()' must be used in an IPython notebook context")
         self.__process_content(content)
 
     def _get_content_detail(self, gui) -> str:

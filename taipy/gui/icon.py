@@ -8,8 +8,8 @@ class Icon:
     or items in a [menu](../gui/viselements/menu.md).
 
     Attributes:
-        path (str): the path to the image file.
-        text (Optional[str]): the text associated to the image or None if there is none.
+        path (str): The path to the image file.
+        text (Optional[str]): The text associated to the image or None if there is none.
 
     If a text is associated to an icon, it is rendered by the visual elements that
     uses this Icon.
@@ -23,8 +23,8 @@ class Icon:
         """Initialize a new Icon.
 
         Arguments:
-            path: the path to an image file.
-            text: the text associated to the image. If _text_ is None, there is no text
+            path: The path to an image file.
+            text: The text associated to the image. If _text_ is None, there is no text
                 associated to this image.
         """
         self.path = path

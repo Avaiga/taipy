@@ -36,6 +36,7 @@ jobs:
           pip install pytest pytest-mock pytest-playwright
           playwright install
           pytest
+          python -c "import taipy as tp; tp.Gui"
 
 
   optional-packages:
