@@ -295,7 +295,8 @@ class _Builder:
             ret_list = []
             if len(lov) > 0:
                 for elt in lov:
-                    ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")  # type: ignore
+                    ret = self.__gui._run_adapter(
+                        adapter, elt, adapter.__name__ if adapter else "adapter")  # type: ignore
                     if ret is not None:
                         ret_list.append(ret)
             self.__attributes[f"default_{property_name}"] = ret_list
@@ -304,7 +305,8 @@ class _Builder:
             value = self.__attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self.__gui._run_adapter(adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)  # type: ignore
+                ret = self.__gui._run_adapter(
+                    adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
@@ -812,7 +814,8 @@ class _Builder:
                     attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False)
                 )
             elif var_type == _AttributeType.string_list:
-                self.__set_list_attribute(attr[0], self.__hashes.get(attr[0]), self.__attributes.get(attr[0]), str, False)
+                self.__set_list_attribute(attr[0], self.__hashes.get(
+                    attr[0]), self.__attributes.get(attr[0]), str, False)
             elif var_type == _AttributeType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == _AttributeType.react:
