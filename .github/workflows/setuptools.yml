@@ -24,18 +24,24 @@ jobs:
 
       - name: Install Taipy without dependencies
         run: |
+          # Install package
+          echo "Install package"
           pip install .
-
-          pip install markupsafe==2.0.1
           rm -r taipy
 
           # Ensure `webapp` folder is present in lib package
+          echo "Ensure webapp folder is present in lib package"
           python -c "import taipy.gui as gui;from pathlib import Path; assert Path(f'{gui.__path__[0]}/webapp/index.html').exists()"
 
           # Run tests
+          echo "installing playwright"
           pip install pytest pytest-mock pytest-playwright
           playwright install
-          pytest
+
+          echo "running pytest"
+          pytest -s
+
+          echo "running test import tp"
           python -c "import taipy as tp; tp.Gui"
 
 
@@ -72,10 +78,12 @@ jobs:
           rm -r taipy
 
           # Run test with optionals packages installed
-          pip install markupsafe==2.0.1
+          echo "installing playwright"
           pip install pytest pytest-mock pytest-playwright
           playwright install
-          pytest > pytest_res
+
+          echo "running pytest"
+          pytest -s | tee pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"
