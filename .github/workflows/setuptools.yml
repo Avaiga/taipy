@@ -39,7 +39,7 @@ jobs:
           playwright install
 
           echo "running pytest"
-          pytest - s
+          pytest -s
 
           echo "running test import tp"
           python -c "import taipy as tp; tp.Gui"
