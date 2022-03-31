@@ -24,12 +24,11 @@ __logger = _TaipyLogger._get_logger()
 
 
 def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
-    """
-    Saves or updates the data node, task, job, pipeline, scenario or cycle given as parameter.
+    """Save or update an entity.
 
     Parameters:
-        entity (Union[`DataNode^`, `Task^`, `Job^`, `Pipeline^`, `Scenario^`, `Cycle^`]): The entity to save.
-
+        entity (Union[DataNode^, Task^, Job^, Pipeline^, Scenario^, Cycle^]): The
+            entity to save.
     """
     if isinstance(entity, Cycle):
         return _CycleManager._set(entity)
@@ -44,14 +43,14 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
 
 
 def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
-    """
-    Submits the entity given as parameter for execution.
+    """Submit an entity for execution.
 
-    All the tasks of the entity pipeline/scenario will be submitted for execution.
+    If the entity is a pipeline or a scenario, all the tasks of the entity are
+    submitted for execution.
 
     Parameters:
-        entity (Union[`Scenario^`, `Pipeline^`, `Task^`]): The entity to submit.
-        force (bool): Force execution even if the data nodes are in cache.
+        entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
+        force (bool): If True, the execution is forced even if the data nodes are in cache.
     """
     if isinstance(entity, Scenario):
         return _ScenarioManager._submit(entity, force=force)
@@ -64,18 +63,18 @@ def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
 def get(
     entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]
 ) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
-    """
-    Gets an entity given the identifier as parameter.
+    """Get an entity from its identifier.
 
     Parameters:
-        entity_id (Union[`TaskId^`, `DataNodeId^`, `PipelineId^`, `ScenarioId^`]): The identifier of the entity to get.
-            It must match the identifier pattern of one of the entities (`Task^`, `DataNode^`, `Pipeline^`,
-            `Scenario^`).
+        entity_id (Union[TaskId^, DataNodeId^, PipelineId^, ScenarioId^]): The identifier
+            of the entity to get.<br/>
+            It must match the identifier pattern of one of the entities (`Task^`, `DataNode^`,
+            `Pipeline^` or `Scenario^`).
     Returns:
-        Union[`Task^`, `DataNode^`, `Pipeline^`, `Scenario^`, `Job^`, `Cycle^`]: The entity matching  the corresponding
-        id.None if no entity is found.
+        Union[Task^, DataNode^, Pipeline^, Scenario^, Job^, Cycle^]: The entity
+        matching the corresponding identifier. None if no entity is found.
     Raises:
-        `ModelNotFound^`: If _entity_id_ does not match a correct entity pattern.
+        ModelNotFound^: If _entity_id_ does not match a correct entity pattern.
     """
     if entity_id.startswith(_JobManager._ID_PREFIX):
         return _JobManager._get(JobId(entity_id))
@@ -93,21 +92,19 @@ def get(
 
 
 def get_tasks() -> List[Task]:
-    """
-    Returns the list of all existing tasks.
+    """Return the list of all existing tasks.
 
     Returns:
-        List[`Task^`]: The list of tasks.
+        List[Task^]: The list of tasks.
     """
     return _TaskManager._get_all()
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
-    """
-    Deletes the entity given as parameter and the nested entities
+    """Delete an entity and its nested entities.
 
-    Deletes the entity given as parameter and propagate the deletion. The deletion is propagated to a
-    nested entity if the nested entity is not shared by another entity.
+    The given entity is deleted. The deletion is propagated to all nested entities that are
+    not shared by another entity.
 
     - If a `CycleId^` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
     - If a `ScenarioId^` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
@@ -115,10 +112,10 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     - If a `TaskId^` is provided, the nested data nodes, and jobs are deleted.
 
     Parameters:
-        entity_id (Union[`TaskId^`, `DataNodeId^`, `PipelineId^`, `ScenarioId^`, `JobId^`, `CycleId^`]): The id of the
-            entity to delete.
+        entity_id (Union[TaskId^, DataNodeId^, PipelineId^, ScenarioId^, JobId^, CycleId^]): The
+            identifier of the entity to delete.
     Raises:
-        `ModelNotFound^`: No entity corresponds to entity_id
+        ModelNotFound^: No entity corresponds to _entity_id_.
     """
     if entity_id.startswith(_JobManager._ID_PREFIX):
         return _JobManager._delete(_JobManager._get(JobId(entity_id)))  # type: ignore
@@ -136,14 +133,16 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
 
 
 def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> List[Scenario]:
-    """
-    Returns the list of all existing scenarios filtered by cycle and/or tag if given as parameter.
+    """Return the list of all existing scenarios filtered by a cycle or a tag.
+
+    If both _cycle_ and _tag_ are provided, the returned list contains scenarios
+    that belong to _cycle_ **and** that hold the tag _tag_.
 
     Parameters:
-         cycle (Optional[`Cycle`]): Cycle of the scenarios to return.
+         cycle (Optional[Cycle^]): Cycle of the scenarios to return.
          tag (Optional[str]): Tag of the scenarios to return.
     Returns:
-        List[`Scenario`]: The list of scenarios filtered by cycle or tag if given as parameter.
+        List[Scenario^]: The list of scenarios filtered by cycle or tag.
     """
     if not cycle and not tag:
         return _ScenarioManager._get_all()
@@ -158,106 +157,112 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
 
 
 def get_primary(cycle: Cycle) -> Optional[Scenario]:
-    """
-    Returns the primary scenario of the cycle given as parameter. None if the cycle has no primary scenario.
+    """Return the primary scenario of a cycle.
 
     Parameters:
-         cycle (`Cycle`): The cycle of the primary scenario to return.
+         cycle (Cycle^): The cycle of the primary scenario to return.
     Returns:
-        Optional[`Scenario`]: The primary scenario of the cycle given as parameter. None if the cycle has no scenario.
+        Optional[Scenario^]: The primary scenario of the cycle _cycle_.
+            If the cycle has no primary scenario, this method returns None.
     """
     return _ScenarioManager._get_primary(cycle)
 
 
 def get_primary_scenarios() -> List[Scenario]:
-    """
-    Returns the list of all primary scenarios.
+    """Return the list of all primary scenarios.
 
     Returns:
-        List[Scenario]: The list of all primary scenarios.
+        List[Scenario^]: The list of all primary scenarios.
     """
     return _ScenarioManager._get_primary_scenarios()
 
 
 def set_primary(scenario: Scenario):
-    """
-    Promotes scenario `scenario` given as parameter as primary scenario of its cycle. If the cycle already had an
-    primary scenario, it will be demoted, and it will no longer be primary for the cycle.
+    """Promote a scenario as the primary scenario of its cycle.
+    
+    If the cycle of _scenario_ already has a primary scenario, it is demoted and
+    is no longer the primary scenario for its cycle.
 
     Parameters:
-        scenario (`Scenario`): The scenario to promote as primary.
+        scenario (Scenario^): The scenario to promote as _primary_.
     """
     return _ScenarioManager._set_primary(scenario)
 
 
 def tag(scenario: Scenario, tag: str):
-    """
-    Adds the tag `tag` to the scenario `scenario` given as parameter. If the scenario's cycle already have
-    another scenario tagged by `tag` the other scenario will be untagged.
+    """Add a tag to a scenario.
+    
+    If the _scenario_'s cycle already has another scenario tagged with _tag_, then this other
+    scenario is untagged.
 
     Parameters:
-        scenario (`Scenario`): The scenario to tag.
-        tag (str): The tag of the scenario to tag.
+        scenario (Scenario^): The scenario to tag.
+        tag (str): The tag to apply to the scenario.
     """
     return _ScenarioManager._tag(scenario, tag)
 
 
 def untag(scenario: Scenario, tag: str):
-    """
-    Removes tag `tag` given as parameter from the tag list of scenario `scenario` given as parameter.
+    """Remove a tag from a scenario.
 
     Parameters:
-        scenario (`Scenario`): The scenario to untag.
-        tag (str): The tag to remove from scenario.
+        scenario (Scenario^): The scenario to remove the tag from.
+        tag (str): The _tag_ to remove from _scenario_.
     """
     return _ScenarioManager._untag(scenario, tag)
 
 
 def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] = None):
-    """
-    Compares the data nodes of given scenarios 'scenarios' with known datanode config id.
+    """Compare the data nodes of several scenarios.
+    
+    You can specify which data node config identifier should the comparison be performed
+    on.
 
     Parameters:
-        scenarios (*`Scenario`): A variable length argument list. List of scenarios to compare.
-        data_node_config_id (Optional[str]): Config id of the DataNode to compare scenarios, if no
-            datanode_config_id is provided, the scenarios will be compared based on all the defined
+        scenarios (*Scenario^): The list of the scenarios to compare.
+        data_node_config_id (Optional[str]): Config identifier of the DataNode to compare
+            scenarios.<br/>
+            if _datanode_config_id_ is None, the scenarios are compared based on all the defined
             comparators.
     Returns:
-        Dict[str, Any]: The dictionary of comparison results. The key corresponds to the data node config id compared.
+        Dict[str, Any]: The comparison results. The key is the data node config identifier
+            that is compared.
     Raises:
-        `InsufficientScenarioToCompare`: Provided only one or no scenario for comparison.
-        `NonExistingComparator`: The scenario comparator does not exist.
-        `DifferentScenarioConfigs`: The provided scenarios do not share the same scenario_config.
-        `NonExistingScenarioConfig`: Cannot find the shared scenario config of the provided scenarios.
+        InsufficientScenarioToCompare^: Only one or no scenario for comparison is provided.
+        NonExistingComparator^: The scenario comparator does not exist.
+        DifferentScenarioConfigs^: _scenarios_ do not share the same scenario config.
+        NonExistingScenarioConfig^: The scenario config of the provided scenarios could not
+            be found.
     """
     return _ScenarioManager._compare(*scenarios, data_node_config_id=data_node_config_id)
 
 
 def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
-    """
-    Subscribes a function to be called on job status change. The subscription is applied to all jobs
-    created from the execution `scenario`. If no scenario is provided, the subscription concerns
-    all scenarios.
+    """Subscribe a function to be called on job status change.
+    
+    The subscription is applied to all jobs created for the execution of _scenario_.
+    If no scenario is provided, the subscription applies to all scenarios.
 
     Parameters:
-        callback (Callable[[`Scenario`, `Job`], None]): The callable function to be called on status change.
-        scenario (Optional[`Scenario`]): The scenario to subscribe on. If None, the subscription is active for all
-            scenarios.
+        callback (Callable[[Scenario^, Job^], None]): The function to be called on
+            status change.
+        scenario (Optional[Scenario^]): The scenario that subscribes to _callback_.
+            If None, the subscription is registered for all scenarios.
     Note:
-        Notification will be available only for jobs created after this subscription.
+        Notifications are applied only for jobs created **after** this subscription.
     """
     return _ScenarioManager._subscribe(callback, scenario)
 
 
 def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
-    """
-    Unsubscribes a function that is called when the status of a Job changes.
-    If scenario is not provided, the subscription is removed for all scenarios.
+    """Unsubscribe a function that is called when the status of a `Job^` changes.
+
+    If _scenario_ is not provided, the subscription is removed for all scenarios.
 
     Parameters:
-        callback (Callable[[`Scenario`, `Job`], None]): The callable function to unsubscribe.
-        scenario (Optional[`Scenario`]): The scenario to unsubscribe on. If None, the un-subscription is applied to all
-            scenarios.
+        callback (Callable[[Scenario^, Job^], None]): The function to unsubscribe to.
+        scenario (Optional[Scenario^]): The scenario to unsubscribe to. If None, all scenarios
+            unsubscribe to _callback_.
     Note:
         The function will continue to be called for ongoing jobs.
     """
@@ -265,30 +270,29 @@ def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Op
 
 
 def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
-    """
-    Subscribes a function to be called on job status change. The subscription is applied to all jobs
-    created from the execution of `pipeline`. If no pipeline is provided, the subscription concerns
-    all pipelines. If pipeline is not passed, the subscription concerns all pipelines.
+    """Subscribe a function to be called on job status change.
+    
+    The subscription is applied to all jobs created for the execution of _pipeline_.
 
     Parameters:
-        callback (Callable[[`Pipeline`, `Job`], None]): The callable function to be called on status change.
-        pipeline (Optional[`Pipeline`]): The pipeline to subscribe on. If None, the subscription is active for all
-            pipelines.
+        callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
+            status change.
+        pipeline (Optional[Pipeline^]): The pipeline to subscribe on. If None, the subscription
+            is actived for all pipelines.
     Note:
-        Notification will be available only for jobs created after this subscription.
+        Notifications are applied only for jobs created **after** this subscription.
     """
     return _PipelineManager._subscribe(callback, pipeline)
 
 
 def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
-    """
-    Unsubscribes a function that is called when the status of a Job changes.
-    If pipeline is not passed, the subscription is removed to all pipelines.
+    """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:
-        callback (Callable[[`Pipeline`, `Job`], None]): The callable function to be called on status change.
-        pipeline (Optional[`Pipeline`]): The pipeline to unsubscribe on. If None, the un-subscription is applied to all
-            pipelines.
+        callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
+            status change.
+        pipeline (Optional[Pipeline^]): The pipeline to unsubscribe to. If None, all pipelines
+            unsubscribe to _callback_.
     Note:
         The function will continue to be called for ongoing jobs.
     """
@@ -296,71 +300,67 @@ def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Op
 
 
 def get_pipelines() -> List[Pipeline]:
-    """
-    Returns all existing pipelines.
+    """Return all existing pipelines.
 
     Returns:
-        List[`Pipeline`]: The list of all pipelines.
+        List[Pipeline^]: The list of all pipelines.
     """
     return _PipelineManager._get_all()
 
 
 def get_jobs() -> List[Job]:
-    """
-    Returns all the existing jobs.
+    """Return all the existing jobs.
 
     Returns:
-        List[`Job`]: The list of all jobs.
+        List[Job^]: The list of all jobs.
     """
     return _JobManager._get_all()
 
 
 def delete_job(job: Job, force=False):
-    """
-    Deletes the job `job` given as parameter.
+    """Delete a job.
 
     Parameters:
-        job (`Job`): The job to delete.
-        force (bool): If `True`, forces the deletion of job `job`, even if it is not completed yet.
+        job (Job^): The job to delete.
+        force (Optional[bool]): If True, forces the deletion of _job_, even if it is not
+            completed yet.
     Raises:
-        `JobNotDeletedException`: If the job is not finished.
+        JobNotDeletedException^: If the job is not finished.
     """
     return _JobManager._delete(job, force)
 
 
 def delete_jobs():
-    """Deletes all jobs."""
+    """Delete all jobs."""
     return _JobManager._delete_all()
 
 
 def get_latest_job(task: Task) -> Optional[Job]:
-    """
-    Returns the latest job of the task `task`.
+    """Return the latest job of a task.
 
     Parameters:
-        task (`Task`): The task to retrieve the latest job.
+        task (Task^): The task to retrieve the latest job from.
     Returns:
-        Optional[`Job`]: The latest job created from task `task`. None if no job has been created from task `task`.
+        Optional[Job^]: The latest job created from _task_. This is None if no job has been
+            created from _task_.
     """
     return _JobManager._get_latest(task)
 
 
 def get_data_nodes() -> List[DataNode]:
-    """
-    Returns all the existing data nodes.
+    """Return all the existing data nodes.
 
     Returns:
-        List[`DataNode`]: The list of all data nodes.
+        List[DataNode^]: The list of all data nodes.
     """
     return _DataManager._get_all()
 
 
 def get_cycles() -> List[Cycle]:
-    """
-    Returns the list of all existing cycles.
+    """Return the list of all existing cycles.
 
     Returns:
-        List[`Cycle`]: The list of all cycles.
+        List[Cycle^]: The list of all cycles.
     """
     return _CycleManager._get_all()
 
@@ -368,44 +368,44 @@ def get_cycles() -> List[Cycle]:
 def create_scenario(
     config: ScenarioConfig, creation_date: Optional[datetime] = None, name: Optional[str] = None
 ) -> Scenario:
-    """
-    Creates and returns a new scenario from the scenario configuration `config` provided as parameter.
+    """Create and return a new scenario from a scenario configuration.
 
-    If the scenario belongs to a work cycle, the cycle (corresponding to the creation_date and the configuration
-    frequency attribute) is created if it does not exist yet.
+    If the scenario belongs to a work cycle, a cycle (corresponding to the _creation_date_
+    and the configuration frequency attribute) is created if it does not exist yet.
 
     Parameters:
-        config (`ScenarioConfig`): Scenario configuration object.
+        config (ScenarioConfig^): The scenario configuration.
         creation_date (Optional[datetime.datetime]): The creation date of the scenario.
-            Current date time used as default value.
+            If None, the current date time is used.
         name (Optional[str]): The displayable name of the scenario.
     Returns:
-        `Scenario`: The new scenario created.
+        Scenario^: The new scenario.
     """
     return _ScenarioManager._create(config, creation_date, name)
 
 
 def create_pipeline(config: PipelineConfig) -> Pipeline:
-    """
-    Creates and Returns a new pipeline from the pipeline configuration given as parameter.
+    """Create and return a new pipeline from a pipeline configuration.
 
     Parameters:
-        config (`PipelineConfig`): The pipeline configuration.
+        config (PipelineConfig^): The pipeline configuration.
     Returns:
-        `Pipeline`: The new pipeline created.
+        Pipeline^: The new pipeline.
     """
     return _PipelineManager._get_or_create(config)
 
 
 def clean_all_entities() -> bool:
-    """
-    Deletes all entities from the taipy data folder. Recommended only for development purpose.
+    """Delete all entities from the Taipy data folder.
+    
+    !!! important
+        Invoking this function is only recommended for development purposes.
 
     Returns:
         bool: True if the operation succeeded, False otherwise.
     """
     if not Config.global_config.clean_entities_enabled:
-        __logger.warning("Please set clean_entities_enabled to True to clean all entities.")
+        __logger.warning("Please set 'clean_entities_enabled' to True to clean all entities.")
         return False
 
     _DataManager._delete_all()

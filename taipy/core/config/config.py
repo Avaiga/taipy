@@ -31,41 +31,40 @@ class Config:
 
     @_Classproperty
     def job_config(cls) -> JobConfig:
-        """Returns configuration values related to the job executions as a `JobConfig^`."""
+        """Return configuration values related to the job executions as a `JobConfig^`."""
         return cls._applied_config._job_config
 
     @_Classproperty
     def global_config(cls) -> GlobalAppConfig:
-        """Returns configuration values related to the global application as a `GlobalAppConfig^`."""
+        """Return configuration values related to the global application as a `GlobalAppConfig^`."""
         return cls._applied_config._global_config
 
     @_Classproperty
     def data_nodes(cls) -> Dict[str, DataNodeConfig]:
-        """Returns data node configs by config id."""
+        """Return data node configs by config id."""
         return cls._applied_config._data_nodes
 
     @_Classproperty
     def tasks(cls) -> Dict[str, TaskConfig]:
-        """Returns task configs by config id."""
+        """Return task configs by config id."""
         return cls._applied_config._tasks
 
     @_Classproperty
     def pipelines(cls) -> Dict[str, PipelineConfig]:
-        """Returns pipeline configs by config id."""
+        """Return pipeline configs by config id."""
         return cls._applied_config._pipelines
 
     @_Classproperty
     def scenarios(cls) -> Dict[str, ScenarioConfig]:
-        """Returns scenario configs by config id."""
+        """Return scenario configs by config id."""
         return cls._applied_config._scenarios
 
     @classmethod
     def load(cls, filename):
-        """
-        Loads a toml file configuration located at the `filename` path given as parameter.
+        """Load a configuration file.
 
         Parameters:
-            filename (str or Path): The path of the toml configuration file to load.
+            filename (Union[str, Path]): The path of the toml configuration file to load.
         """
         cls.__logger.info(f"Loading configuration. Filename: '{filename}'")
         cls._file_config = _TomlSerializer()._read(filename)
@@ -74,17 +73,18 @@ class Config:
 
     @classmethod
     def export(cls, filename):
-        """
-        Exports the configuration to a toml file.
+        """Export a configuration.
 
-        The configuration exported is a compilation from the three possible methods to configure the application:
-        The python code configuration, the file configuration and the environment
+        The export is done in a toml file.
+
+        The exported configuration is a compilation from the three possible methods to configure
+        the application: the python code configuration, the file configuration and the environment
         configuration.
 
         Parameters:
-            filename (str or Path): The path of the file to export.
+            filename (Union[str, Path]): The path of the file to export.
         Note:
-            It overwrites the file if it already exists.
+            If _filename_ already exists, it is overwritten.
         """
         _TomlSerializer()._write(cls._applied_config, filename)
 
@@ -100,18 +100,17 @@ class Config:
         clean_entities_enabled: Union[bool, str] = None,
         **properties,
     ) -> GlobalAppConfig:
-        """
-        Configures global application.
+        """Configure the global application.
 
         Parameters:
-            root_folder (Optional[str]): The path of the base folder for the taipy application.
+            root_folder (Optional[str]): The path of the base folder for the Taipy application.
             storage_folder (Optional[str]): The folder name used to store Taipy data.
-                It is used in conjunction with the root_folder field. That means the storage path is
+                It is used in conjunction with the root_folder field: the storage path is
                 "<root_folder><storage_folder>".
-            clean_entities_enabled (Optional[str]): The field to activate/deactivate the clean entities feature.
-                The default value is false.
+            clean_entities_enabled (Optional[str]): The field to activate or deactivate the
+                'clean entities' feature. The default value is False.
         Returns:
-            `GlobalAppConfig`: The global application configuration.
+            GlobalAppConfig^: The global application configuration.
         """
         cls._python_config._global_config = GlobalAppConfig(
             root_folder, storage_folder, clean_entities_enabled, **properties
@@ -126,17 +125,19 @@ class Config:
         nb_of_workers: Union[int, str] = None,
         **properties,
     ) -> JobConfig:
-        """
-        Configures job execution.
+        """Configure job execution.
 
         Parameters:
             mode (Optional[str]): The job execution mode.
-                Possible values are: `standalone` (default value), or `airflow` (Enterprise version only).
-            nb_of_workers (Optional[int, str]): The maximum number of jobs able to run in parallel. Default value: 1.
-                A string can be provided as parameter to dynamically set the value using an environment variable.
-                The string must follow the pattern: `ENV[<env_var>]` where `<env_var>` is an environment variable name.
+                Possible values are: _"standalone"_ (the default value) or
+                _"airflow"_ (Enterprise version only).
+            nb_of_workers (Optional[int, str]): The maximum number of jobs able to run in
+                parallel. The default value is 1.<br/>
+                A string can be provided to dynamically set the value using an environment
+                variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
+                `&lt;env_var&gt;` is the name of environment variable.
         Returns:
-            `JobConfig`: The job execution configuration.
+            JobConfig^: The job execution configuration.
         """
         job_config = JobConfig(
             mode,
@@ -155,17 +156,21 @@ class Config:
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
     ) -> DataNodeConfig:
-        """
-        Configures a new data node configuration.
+        """Configure a new data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
-            storage_type (str): The data node configuration storage type. The possible values are "pickle"
-                (default value), "csv", "excel", "sql". "in_memory", "generic".
-            scope (`Scope`): The scope of the data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            id (str): The unique identifier of the new data node configuration.
+            storage_type (str): The data node configuration storage type. The possible values
+                are _"pickle"_ (which the default value, unless it has been overloaded by the
+                _storage_type_ value set in the default data node configuration
+                (see `configure_default_data_node()^`)), _"csv"_, _"excel"_, _"sql"_,
+                _"in_memory"_, or _"generic"_.
+            scope (Scope^): The scope of the data node configuration. The default value is
+                `Scope.SCENARIO` (or the one specified in `configure_default_data_node()^`).
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new data node configuration.
+            DataNodeConfig^: The new data node configuration.
         """
         dn_config = DataNodeConfig(id, storage_type, scope, **properties)
         cls._python_config._data_nodes[dn_config.id] = dn_config
@@ -176,16 +181,22 @@ class Config:
     def configure_default_data_node(
         cls, storage_type: str, scope=DataNodeConfig._DEFAULT_SCOPE, **properties
     ) -> DataNodeConfig:
-        """
-        Configures the default values of the data node configurations.
+        """Configure the default values for data node configurations.
+
+        This function creates the _default data node configuration_ object,
+        where all data node configuration objects will find their default
+        values when needed.
 
         Parameters:
-            storage_type (str): The default storage type of the data node configurations. The possible values are "pickle"
-                (default value), "csv", "excel", "sql". "in_memory", "generic".
-            scope (`Scope`): The default scope of the data node configurations. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            storage_type (str): The default storage type for all data node configurations.
+                The possible values are _"pickle"_ (the default value), _"csv"_, _"excel"_,
+                _"sql"_, _"in_memory"_, or _"generic"_.
+            scope (Scope^): The default scope fot all data node configurations.
+                The default value is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The default data node configuration.
+            DataNodeConfig^: The default data node configuration.
         """
         data_node_config = DataNodeConfig(_Config.DEFAULT_KEY, storage_type, scope, **properties)
         cls._python_config._data_nodes[_Config.DEFAULT_KEY] = data_node_config
@@ -201,19 +212,21 @@ class Config:
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         **properties,
     ) -> TaskConfig:
-        """
-        Configures a new task configuration.
+        """Configure a new task configuration.
 
         Parameters:
-            id (str): The unique identifier of the task configuration.
+            id (str): The unique identifier of this task configuration.
             function (Callable): The python function called by Taipy to run the task.
-            input (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): The list of the function inputs as data node
-                configurations.
-            output (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): The list of the function outputs as data node
-                configurations.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+                function input data node configurations. This can be a unique data node
+                configuration if there is a single input data node, or None if there are none.
+            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+                function output data node configurations. This can be a unique data node
+                configuration if there is a single output data node, or None if there are none.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `TaskConfig`: The new task configuration.
+            TaskConfig^: The new task configuration.
         """
         task_config = TaskConfig(id, function, input, output, **properties)
         cls._python_config._tasks[task_config.id] = task_config
@@ -228,18 +241,24 @@ class Config:
         output: Optional[Union[DataNodeConfig, List[DataNodeConfig]]] = None,
         **properties,
     ) -> TaskConfig:
-        """
-        Configures the default values of the task configurations.
+        """Configure the default values for task configurations.
+
+        This function creates the _default task configuration_ object,
+        where all task configuration objects will find their default
+        values when needed.
 
         Parameters:
             function (Callable): The python function called by Taipy to run the task.
-            input (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): The list of the function inputs as data node
-                configurations.
-            output (Optional[Union[DataNodeConfig, List[DataNodeConfig]]]): The list of the function outputs as data node
-                configurations.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            input (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+                input data node configurations. This can be a unique data node
+                configuration if there is a single input data node, or None if there are none.
+            output (Optional[Union[DataNodeConfig^, List[DataNodeConfig^]]]): The list of the
+                output data node configurations. This can be a unique data node
+                configuration if there is a single output data node, or None if there are none.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `TaskConfig`: The default task configuration.
+            TaskConfig^: The default task configuration.
         """
         task_config = TaskConfig(_Config.DEFAULT_KEY, function, input, output, **properties)
         cls._python_config._tasks[task_config.id] = task_config
@@ -250,15 +269,17 @@ class Config:
     def configure_pipeline(
         cls, id: str, task_configs: Union[TaskConfig, List[TaskConfig]], **properties
     ) -> PipelineConfig:
-        """
-        Configures a new pipeline configuration.
+        """Configure a new pipeline configuration.
 
         Parameters:
-            id (str): The unique identifier of the pipeline configuration.
-            task_configs (Callable): The list of the task configurations.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            id (str): The unique identifier of the new pipeline configuration.
+            task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
+                configurations that make this new pipeline. This can be a single task
+                configuration object is this pipeline holds a single task.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `PipelineConfig`: The new pipeline configuration.
+            PipelineConfig^: The new pipeline configuration.
         """
         pipeline_config = PipelineConfig(id, task_configs, **properties)
         cls._python_config._pipelines[pipeline_config.id] = pipeline_config
@@ -269,14 +290,20 @@ class Config:
     def configure_default_pipeline(
         cls, task_configs: Union[TaskConfig, List[TaskConfig]], **properties
     ) -> PipelineConfig:
-        """
-        Configures the default values of the pipeline configurations.
+        """Configure the default values for pipeline configurations.
+
+        This function creates the _default pipeline configuration_ object,
+        where all pipeline configuration objects will find their default
+        values when needed.
 
         Parameters:
-            task_configs (Callable): The list of the task configurations.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            task_configs (Union[TaskConfig^, List[TaskConfig^]]): The list of the task
+                configurations that make the default pipeline configuration. This can be
+                a single task configuration object is this pipeline holds a single task.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `PipelineConfig`: The default pipeline configuration.
+            PipelineConfig^: The default pipeline configuration.
         """
         pipeline_config = PipelineConfig(_Config.DEFAULT_KEY, task_configs, **properties)
         cls._python_config._pipelines[_Config.DEFAULT_KEY] = pipeline_config
@@ -292,23 +319,27 @@ class Config:
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ) -> ScenarioConfig:
-        """
-        Configures a new scenario configuration.
+        """Configure a new scenario configuration.
 
         Parameters:
-            id (str): The unique identifier of the scenario configuration.
-            pipeline_configs (Callable): The list of the pipeline configurations.
-            frequency (Optional[`Frequency`]): The scenario frequency.
-                It corresponds to the recurrence of the scenarios instantiated from this configuration. Based on this
-                frequency each scenario will be attached to the right cycle.
-            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of functions used to compare
-                scenarios. A comparator function is attached to a scenario's data node configuration. The key of
-                the dictionary parameter corresponds to the data node configuration id. During the scenarios' comparison,
-                each comparator is applied to all the data nodes instantiated from the data node configuration attached
-                to the comparator.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            id (str): The unique identifier of the new scenario configuration.
+            pipeline_configs (List[PipelineConfig^]): The list of pipeline configurations used
+                by this new scenario configuration.
+            frequency (Optional[Frequency^]): The scenario frequency.
+                It corresponds to the recurrence of the scenarios instantiated from this
+                configuration. Based on this frequency each scenario will be attached to the
+                relevant cycle.
+            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
+                functions used to compare scenarios. A comparator function is attached to a
+                scenario's data node configuration. The key of the dictionary parameter
+                corresponds to the data node configuration id. During the scenarios'
+                comparison, each comparator is applied to all the data nodes instantiated from
+                the data node configuration attached to the comparator. See
+                `(taipy.)compare_scenarios()^` more more details.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `ScenarioConfig`: The new scenario configuration.
+            ScenarioConfig^: The new scenario configuration.
         """
         scenario_config = ScenarioConfig(
             id, pipeline_configs, frequency=frequency, comparators=comparators, **properties
@@ -327,25 +358,33 @@ class Config:
         pipeline_id: Optional[str] = None,
         **properties,
     ) -> ScenarioConfig:
-        """
-        Configures a new scenario configuration made of a single new pipeline configuration. A new pipeline configuration is
-        created as well. If no pipeline_id is provided, it will be the scenario configuration id post-fixed by '_pipeline'.
+        """Configure a new scenario configuration made of a single new pipeline configuration.
+        
+        A new pipeline configuration is created as well. If _pipeline_id_ is not provided,
+        the new pipeline configuration identifier is set to the scenario configuration identifier
+        post-fixed by '_pipeline'.
 
         Parameters:
             id (str): The unique identifier of the scenario configuration.
-            task_configs (Callable): The list of the task configurations.
-            frequency (Optional[`Frequency`]): The scenario frequency.
-                It corresponds to the recurrence of the scenarios instantiated from this configuration. Based on this
-                frequency each scenario will be attached to the right cycle.
-            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of functions used to compare
-                scenarios. A comparator function is attached to a scenario's data node configuration. The key of
-                the dictionary parameter corresponds to the data node configuration id. During the scenarios' comparison,
-                each comparator is applied to all the data nodes instantiated from the data node configuration attached
-                to the comparator.
-            pipeline_id (str): The id of the pipeline configuration to be configured.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            task_configs (List[TaskConfig^]): The list of task configurations used by the
+                new pipeline configuration that is created.
+            frequency (Optional[Frequency^]): The scenario frequency.
+                It corresponds to the recurrence of the scenarios instantiated from this
+                configuration. Based on this frequency each scenario will be attached to the
+                relevant cycle.
+            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
+                functions used to compare scenarios. A comparator function is attached to a
+                scenario's data node configuration. The key of the dictionary parameter
+                corresponds to the data node configuration id. During the scenarios'
+                comparison, each comparator is applied to all the data nodes instantiated from
+                the data node configuration attached to the comparator. See
+                `(taipy.)compare_scenarios()` more more details.
+            pipeline_id (str): The identifier of the new pipeline configuration to be
+                configured.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `ScenarioConfig`: The new scenario configuration.
+            ScenarioConfig^: The new scenario configuration.
         """
         if not pipeline_id:
             pipeline_id = f"{id}_pipeline"
@@ -360,22 +399,30 @@ class Config:
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
     ):
-        """
-        Configures the default values of the scenario configurations.
+        """Configure the default values for scenario configurations.
+
+        This function creates the _default scenario configuration_ object,
+        where all scenario configuration objects will find their default
+        values when needed.
 
         Parameters:
-            pipeline_configs (Callable): The list of the pipeline configurations.
-            frequency (Optional[`Frequency`]): The scenario frequency.
-                It corresponds to the recurrence of the scenarios instantiated from this configuration. Based on this
-                frequency each scenario will be attached to the right cycle.
-            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of functions used to compare
-                scenarios. A comparator function is attached to a scenario's data node configuration. The key of
-                the dictionary parameter corresponds to the data node configuration id. During the scenarios' comparison,
-                each comparator is applied to all the data nodes instantiated from the data node configuration attached
-                to the comparator.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            pipeline_configs (List[PipelineConfig^]): The list of pipeline configurations used
+                by this scenario configuration.
+            frequency (Optional[Frequency^]): The scenario frequency.
+                It corresponds to the recurrence of the scenarios instantiated from this
+                configuration. Based on this frequency each scenario will be attached to
+                the relevant cycle.
+            comparators (Optional[Dict[str, Union[List[Callable], Callable]]]): The list of
+                functions used to compare scenarios. A comparator function is attached to a
+                scenario's data node configuration. The key of the dictionary parameter
+                corresponds to the data node configuration id. During the scenarios'
+                comparison, each comparator is applied to all the data nodes instantiated from
+                the data node configuration attached to the comparator. See
+                `taipy.compare_scenarios()^` more more details.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `ScenarioConfig`: The default scenario configuration.
+            ScenarioConfig^: The default scenario configuration.
         """
         scenario_config = ScenarioConfig(
             _Config.DEFAULT_KEY, pipeline_configs, frequency=frequency, comparators=comparators, **properties
@@ -404,11 +451,12 @@ class Config:
 
     @classmethod
     def check(cls) -> IssueCollector:
-        """
-        Checks configuration, logs issue messages and returns an issue collector.
+        """Check configuration.
+        
+        This method logs issue messages and returns an issue collector.
 
         Returns:
-            `IssueCollector`: Collector containing the info, the warning and the error issues.
+            IssueCollector^: Collector containing the info, warning and error issues.
         """
         cls._collector = _Checker()._check(cls._applied_config)
         cls.__log_message(cls)
@@ -427,19 +475,25 @@ class Config:
 
     @classmethod
     def configure_csv_data_node(
-        cls, id: str, path: str, has_header=True, scope=DataNodeConfig._DEFAULT_SCOPE, **properties
+        cls,
+        id: str,
+        path: str,
+        has_header: bool = True,
+        scope=DataNodeConfig._DEFAULT_SCOPE,
+        **properties
     ):
-        """
-        Configures a new CSV data node configuration.
+        """Configure a new CSV data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
+            id (str): The unique identifier of the new CSV data node configuration.
             path (str): The path of the CSV file.
-            has_header (bool): The parameter to define if the CSV file has a header or not.
-            scope (`Scope`): The scope of the CSV data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            has_header (bool): If True, indicates that the CSV file has a header.
+            scope (Scope^): The scope of the CSV data node configuration. The default value
+                is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new CSV data node configuration.
+            DataNodeConfig^: The new CSV data node configuration.
         """
         from taipy.core.data import CSVDataNode
 
@@ -457,18 +511,20 @@ class Config:
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
     ):
-        """
-        Configures a new Excel data node configuration.
+        """Configure a new Excel data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
+            id (str): The unique identifier of the new Excel data node configuration.
             path (str): The path of the Excel file.
-            has_header (bool): The parameter to define if the Excel file has a header or not.
-            sheet_name (str): The sheet names.
-            scope (`Scope`): The scope of the Excel data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            has_header (bool): If True, indicates that the Excel file has a header.
+            sheet_name (Union[List[str], str]): The list of sheet names to be used. This
+                can be a unique name.
+            scope (Scope^): The scope of the Excel data node configuration. The default
+                value is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new CSV data node configuration.
+            DataNodeConfig^: The new CSV data node configuration.
         """
         from taipy.core.data import ExcelDataNode
 
@@ -493,20 +549,24 @@ class Config:
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
     ):
-        """
-        Configures a new Generic data node configuration.
+        """Configure a new generic data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
-            read_fct (Callable): The python function called by Taipy to read the data.
-            write_fct (Callable): The python function called by Taipy to write the data. The provided function must have at least
-                1 parameter to receive the date to be written.
-            read_fct_params (List): The parameters that will be passed to read_fct to read the data.
-            write_fct_params (List): The parameters that will be passed to write_fct to write the data.
-            scope (`Scope`): The scope of the Generic data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            id (str): The unique identifier of the new generic data node configuration.
+            read_fct (Optional[Callable]): The Python function called to read the data.
+            write_fct (Optional[Callable]): The Python function called to write the data.
+                The provided function must have at least one parameter that receives the data
+                to be written.
+            read_fct_params (Optional[List]): The parameters that are passed to _read_fct_
+                to read the data.
+            write_fct_params (Optional[List]): The parameters that are passed to _write_fct_
+                to write the data.
+            scope (Optional[Scope^]): The scope of the Generic data node configuration.
+                The default value is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new Generic data node configuration.
+            DataNodeConfig^: The new Generic data node configuration.
         """
         from taipy.core.data import GenericDataNode
 
@@ -525,17 +585,18 @@ class Config:
     def configure_in_memory_data_node(
         cls, id: str, default_data: Optional[Any] = None, scope: Scope = DataNodeConfig._DEFAULT_SCOPE, **properties
     ):
-        """
-        Configures a new in_memory data node configuration.
+        """Configure a new _in_memory_ data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
-            default_data (Optional[Any]): The default data of the data nodes instantiated from the in_memory data node
-                configuration.
-            scope (`Scope`): The scope of the in_memory data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            id (str): The unique identifier of the new in_memory data node configuration.
+            default_data (Optional[Any]): The default data of the data nodes instantiated from
+                this in_memory data node configuration.
+            scope (Scope^): The scope of the in_memory data node configuration. The default
+                value is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new in_memory data node configuration.
+            DataNodeConfig^: The new _in_memory_ data node configuration.
         """
         from taipy.core.data import InMemoryDataNode
 
@@ -547,17 +608,18 @@ class Config:
     def configure_pickle_data_node(
         cls, id: str, default_data: Optional[Any] = None, scope: Scope = DataNodeConfig._DEFAULT_SCOPE, **properties
     ):
-        """
-        Configures a new pickle data node configuration.
+        """Configure a new pickle data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
-            default_data (Optional[Any]): The default data of the data nodes instantiated from the pickle data node
-                configuration.
-            scope (`Scope`): The scope of the pickle data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            id (str): The unique identifier of the new pickle data node configuration.
+            default_data (Optional[Any]): The default data of the data nodes instantiated from
+                this pickle data node configuration.
+            scope (Scope^): The scope of the pickle data node configuration. The default value
+                is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new pickle data node configuration.
+            DataNodeConfig^: The new pickle data node configuration.
         """
         from taipy.core.data import PickleDataNode
 
@@ -581,24 +643,26 @@ class Config:
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
     ):
-        """
-        Configures a new SQL data node configuration.
+        """Configure a new SQL data node configuration.
 
         Parameters:
-            id (str): The unique identifier of the data node configuration.
+            id (str): The unique identifier of the new SQL data node configuration.
             db_username (str): The database username.
             db_password (str): The database password.
             db_name (str): The database name.
-            db_engine (str): The database engine. Possible values are 'sqlite' or 'mssql'.
-            read_query (str): The SQL query called by Taipy to read the data from the database.
+            db_engine (str): The database engine. Possible values are _"sqlite"_ or _"mssql"_.
+            read_query (str): The SQL query string used to read the data from the database.
             write_table (str): The name of the table in the database to write the data to.
             db_port (int): The database port. The default value is 1433.
-            db_host (str): The database host. The default value is 'localhost'.
-            db_driver (str): The database driver. The default value is 'ODBC Driver 17 for SQL Server'.
-            scope (`Scope`): The scope of the SQL data node configuration. The default value is Scope.SCENARIO.
-            **properties (Dict[str, Any]): The variable length keyword arguments.
+            db_host (str): The database host. The default value is _"localhost"_.
+            db_driver (str): The database driver. The default value is
+                _"ODBC Driver 17 for SQL Server"_.
+            scope (Scope^): The scope of the SQL data node configuration. The default value is
+                `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
         Returns:
-            `DataNodeConfig`: The new SQL data node configuration.
+            DataNodeConfig^: The new SQL data node configuration.
         """
         from taipy.core.data import SQLDataNode
 
