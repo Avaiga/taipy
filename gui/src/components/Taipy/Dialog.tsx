@@ -70,7 +70,7 @@ const Dialog = (props: DialogProps) => {
             try {
                 return JSON.parse(props.labels) as string[];
             } catch (e) {
-                console.info(`Error while parsing dialog.labels\n${(e as Error).message || e}`);
+                console.info(`Error parsing dialog.labels\n${(e as Error).message || e}`);
             }
         }
         return [];
