@@ -14,14 +14,22 @@ The default property, _open_, indicates whether the dialog is visible or not:
     === "Markdown"
 
         ```
-        <|{show_dialog}|dialog|>
+        <|{show_dialog}|dialog|on_action={lambda s: s.assign("show_dialog", False)}|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:dialog>{show_dialog}</taipy:dialog>
+        <taipy:dialog on_action="on_action={lambda s: s.assign('show_dialog', False)}">{show_dialog}</taipy:dialog>
         ```
+
+With another action that would have previsouly shown the dialog with:
+
+```py3
+def button_action(state, id, action):
+    state.show_dialog = True
+```
+
 
 ### Specifying labels and actions
 
