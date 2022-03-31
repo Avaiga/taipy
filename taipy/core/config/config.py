@@ -507,7 +507,7 @@ class Config:
         id: str,
         path: str,
         has_header: bool = True,
-        sheet_name: Union[List[str], str] = "Sheet1",
+        sheet_name: Union[List[str], str] = None,
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
     ):
