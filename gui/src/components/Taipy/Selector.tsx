@@ -57,11 +57,10 @@ const MultipleItem = ({ value, clickHandler, selectedValue, item, disabled }: It
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
-const getMenuProps = (width: string | number, height?: string | number) => ({
+const getMenuProps = (height?: string | number) => ({
     PaperProps: {
         style: {
             maxHeight: height || ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-            width: width,
         },
     },
 });
@@ -109,7 +108,7 @@ const Selector = (props: SelTreeProps) => {
     const controlSx = useMemo(() => ({ m: 1, width: width }), [width]);
 
     useEffect(() => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
             setSelectedValue(Array.isArray(value) ? value.map((v) => "" + v) : ["" + value]);
         } else if (defaultValue) {
             let parsedValue;
@@ -224,7 +223,7 @@ const Selector = (props: SelTreeProps) => {
                                 })}
                         </Box>
                     )}
-                    MenuProps={getMenuProps(width, height)}
+                    MenuProps={getMenuProps(height)}
                 >
                     {lovList.map((item) => (
                         <MenuItem key={item.id} value={item.id} style={getStyles(item.id, selectedValue, theme)}>
