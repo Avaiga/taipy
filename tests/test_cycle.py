@@ -5,8 +5,8 @@ from flask import url_for
 
 def test_get_cycle(client, default_cycle):
     # test 404
-    user_url = url_for("api.cycle_by_id", cycle_id="foo")
-    rep = client.get(user_url)
+    cycle_url = url_for("api.cycle_by_id", cycle_id="foo")
+    rep = client.get(cycle_url)
     assert rep.status_code == 404
 
     with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._get") as manager_mock:
@@ -19,8 +19,8 @@ def test_get_cycle(client, default_cycle):
 
 def test_delete_cycle(client):
     # test 404
-    user_url = url_for("api.cycle_by_id", cycle_id="foo")
-    rep = client.get(user_url)
+    cycle_url = url_for("api.cycle_by_id", cycle_id="foo")
+    rep = client.get(cycle_url)
     assert rep.status_code == 404
 
     with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._delete"):

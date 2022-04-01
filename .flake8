@@ -20,5 +20,5 @@ exclude =
     .pytest_cache,
     .vscode,
     .github,
-    tests
-    taipy_rest/setup
+    tests,
+    tests/setup

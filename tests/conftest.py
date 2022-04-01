@@ -1,9 +1,7 @@
 import os
 import shutil
 import uuid
-from datetime import datetime, timedelta
 
-import pandas as pd
 import pytest
 import taipy.core as tp
 from dotenv import load_dotenv
@@ -13,8 +11,36 @@ from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager as JobManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
+import pandas as pd
 
 from src.taipy.rest.app import create_app
+from .setup.shared.algorithms import *
+
+
+@pytest.fixture
+def setup_end_to_end():
+    model_cfg = tp.configure_data_node("model", path="setup/my_model.p", storage_type="pickle")
+
+    day_cfg = tp.configure_data_node(id="day")
+    forecasts_cfg = tp.configure_data_node(id="forecasts")
+    forecast_task_cfg = tp.configure_task(
+        id="forecast_task", input=[model_cfg, day_cfg], function=forecast, output=forecasts_cfg
+    )
+
+    historical_temperature_cfg = tp.configure_data_node(
+        "historical_temperature", storage_type="csv", path="setup/historical_temperature.csv", has_header=True
+    )
+    evaluation_cfg = tp.configure_data_node("evaluation")
+    evaluate_task_cfg = tp.configure_task(
+        "evaluate_task",
+        input=[historical_temperature_cfg, forecasts_cfg, day_cfg],
+        function=evaluate,
+        output=evaluation_cfg,
+    )
+
+    pipeline_cfg = tp.configure_pipeline("pipeline", [forecast_task_cfg, evaluate_task_cfg])
+
+    scenario_cfg = tp.configure_scenario("scenario", [pipeline_cfg], frequency=Frequency.DAILY)
 
 
 @pytest.fixture(scope="session")
