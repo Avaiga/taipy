@@ -376,7 +376,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     const sel = selected.indexOf(index + startIndex);
                                     if (sel == 0) {
                                         setTimeout(
-                                            () => selectedRowRef.current?.scrollIntoView({ block: "center" }),
+                                            () => selectedRowRef.current?.scrollIntoView && selectedRowRef.current.scrollIntoView({ block: "center" }),
                                             1
                                         );
                                     }
