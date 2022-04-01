@@ -10,7 +10,6 @@ from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager as JobManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
-import pandas as pd
 
 from src.taipy.rest.app import create_app
 from .setup.shared.algorithms import *
