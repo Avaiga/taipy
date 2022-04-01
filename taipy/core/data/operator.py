@@ -2,9 +2,16 @@ from enum import Enum
 
 
 class Operator(Enum):
-    """
-    Enumeration of operators for Data Node filtering. The possible values are `EQUAL`, `NOT_EQUAL`, `LESS_THAN`,
-    `LESS_OR_EQUAL`, `GREATER_THAN`, `GREATER_OR_EQUAL`.
+    """Enumeration of operators for Data Node filtering.
+    
+    The possible values are:
+    
+    - `EQUAL`
+    - `NOT_EQUAL`
+    - `LESS_THAN`
+    - `LESS_OR_EQUAL`
+    - `GREATER_THAN`
+    - `GREATER_OR_EQUAL`
     """
 
     EQUAL = 1

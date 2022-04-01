@@ -96,7 +96,7 @@ def test_status_job(job):
 
 def test_notification_job(job):
     subscribe = MagicMock()
-    job.on_status_change(subscribe)
+    job._on_status_change(subscribe)
 
     job.running()
     subscribe.assert_called_once_with(job)

@@ -15,24 +15,28 @@ from taipy.core.exceptions.exceptions import MissingRequiredProperty, UnknownDat
 
 
 class SQLDataNode(DataNode):
-    """
-    A Data Node stored as an SQL database.
+    """Data Node stored in a SQL database.
 
     Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
-        scope (`Scope^`): The `Scope^` of the data node.
-        id (str): The unique identifier of the data node.
-        name (str): A user-readable name of the data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python
+            identifier.
+        scope (`Scope^`): The scope of this data node.
+        id (str): The unique identifier of this data node.
+        name (str): A user-readable name of this data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+            `None`.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
-            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
-        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
-            False otherwise.
-        properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
-            at least contain an entry for "db_username", "db_password", "db_name", "db_engine", "read_query", and
-            "write_table". For now, the accepted values for the "db_engine" property are "mssql" and "sqlite".
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+            Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
+            always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted
+            and not completed yet. False otherwise.
+        properties (dict[str, Any]): A dictionary of additional properties. Note that the
+            _properties_ parameter must at least contain an entry for _"db_username"_,
+            _"db_password"_, _"db_name"_, _"db_engine"_, _"read_query"_, and _"write_table"_.
+            For now, the accepted values for the _"db_engine"_ property are _"mssql"_ and
+            _"sqlite"_.
     """
 
     __STORAGE_TYPE = "sql"
@@ -137,8 +141,7 @@ class SQLDataNode(DataNode):
         return pd.read_sql_query(self.read_query, con=self.__engine)
 
     def _write(self, data) -> None:
-        """
-        Check data against a collection of types to handle insertion on the database.
+        """Check data against a collection of types to handle insertion on the database.
         """
         with self.__engine.connect() as connection:
             write_table = table(self.write_table)

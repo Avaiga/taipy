@@ -163,10 +163,11 @@ class Config:
             storage_type (str): The data node configuration storage type. The possible values
                 are _"pickle"_ (which the default value, unless it has been overloaded by the
                 _storage_type_ value set in the default data node configuration
-                (see `configure_default_data_node()^`)), _"csv"_, _"excel"_, _"sql"_,
+                (see `(Config.)configure_default_data_node()^`)), _"csv"_, _"excel"_, _"sql"_,
                 _"in_memory"_, or _"generic"_.
             scope (Scope^): The scope of the data node configuration. The default value is
-                `Scope.SCENARIO` (or the one specified in `configure_default_data_node()^`).
+                `Scope.SCENARIO` (or the one specified in
+                `(Config.)configure_default_data_node()^`).
             **properties (Dict[str, Any]): A keyworded variable length list of additional
                 arguments.
         Returns:

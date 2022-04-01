@@ -9,28 +9,32 @@ in_memory_storage: Dict[str, Any] = {}
 
 
 class InMemoryDataNode(DataNode):
-    """
-    A Data Node stored in memory.
+    """Data Node stored in memory.
 
     Warning:
-        This Data Node implementation is not compatible with a parallel execution of taipy tasks, but only with a
-        Synchronous task executor. The purpose of InMemoryDataNode is to be used for development or debug.
+        This Data Node implementation is not compatible with a parallel execution of taipy tasks,
+        but only with a Synchronous task executor. The purpose of `InMemoryDataNode` is to be used
+        for development or debugging.
 
     Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
-        scope (`Scope^`): The `Scope^` of the data node.
-        id (str): The unique identifier of the data node.
-        name (str): A user-readable name of the data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python
+            identifier.
+        scope (Scope^): The scope of this data node.
+        id (str): The unique identifier of this data node.
+        name (str): A user-readable name of this data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+            `None`.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
-            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
-        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
-            False otherwise.
-        properties (dict[str, Any]): A dictionary of additional properties. At creation of an _InMemory_ data node, if
-            the _properties_ dictionary contains a "default_data" entry, the data node is automatically written with
-            the corresponding "default_data" value.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+            Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
+            always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted
+            and not completed yet. False otherwise.
+        properties (dict[str, Any]): A dictionary of additional properties. When creating an
+            _In Memory_ data node, if the _properties_ dictionary contains a _"default_data"_
+            entry, the data node is automatically written with the corresponding _"default_data"_
+            value.
     """
 
     __STORAGE_TYPE = "in_memory"

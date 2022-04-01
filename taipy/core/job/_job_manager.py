@@ -19,7 +19,7 @@ class _JobManager(_Manager[Job]):
     def _create(cls, task: Task, callbacks: Iterable[Callable], force=False) -> Job:
         job = Job(id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"), task=task, force=force)
         cls._set(job)
-        job.on_status_change(*callbacks)
+        job._on_status_change(*callbacks)
         return job
 
     @classmethod

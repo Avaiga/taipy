@@ -8,25 +8,30 @@ from taipy.core.exceptions.exceptions import MissingReadFunction, MissingRequire
 
 
 class GenericDataNode(DataNode):
-    """
-    A generic Data Node that accepts custom read python function and custom write python function.
+    """Generic Data Node that uses custom read and write functions.
+
+    The read and write function for this data node type can be implemented is Python.
 
     Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
-        scope (`Scope^`): The `Scope^` of the data node.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python
+            identifier.
+        scope (Scope^): The scope of this data node.
         id (str): The unique identifier of the data node.
         name (str): A user-readable name of the data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+            `None`.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
-            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
-        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
-            False otherwise.
-        properties (dict[str, Any]): A dictionary of additional properties. Note that the _properties_ parameter must
-            at least contain an entry for "read_fct" or "write_fct" representing the read and write functions.
-            Entries for "read_fct_params" and "write_fct_params" respectively represent the eventual parameters of
-            the "read_fct" or "write_fct" functions.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+            Implemented as a timedelta. If _validity_period_ is set to None, the data node is
+            always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted
+            and not completed yet. False otherwise.
+        properties (dict[str, Any]): A dictionary of additional properties. Note that the
+            _properties_ parameter must at least contain an entry for _"read_fct"_ or
+            _"write_fct"_ representing the read and write functions.
+            Entries for _"read_fct_params"_ and _"write_fct_params"_ respectively represent
+            potential parameters for the _"read_fct"_ and _"write_fct"_ functions.
     """
 
     __STORAGE_TYPE = "generic"

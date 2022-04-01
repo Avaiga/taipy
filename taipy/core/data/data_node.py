@@ -22,27 +22,33 @@ from taipy.core.exceptions.exceptions import NoData
 
 
 class DataNode(_Entity):
-    """
-    Represents a reference to a dataset.
+    """Reference to a dataset.
 
-    A Data Node holds metadata related to the dataset it refers. In particular, a data node holds the name, the
-    scope, the parent_id, the last edition date and some additional properties of the data. A data Node is also made to
-    contain information and methods needed to access the dataset. This information depends on the type of storage, and
-    it is hold by children classes (such as SQL Data Node, CSV Data Node, ...). It is strongly recommended to
-    only instantiate children classes of Data Node through a Data Manager.
+    A Data Node holds metadata related to the dataset it refers to. In particular, a data node
+    holds the name, the scope, the parent identifier, the last edition date, and some additional
+    properties of the data.<br/>
+    A Data Node also contains information and methods needed to access the dataset. This
+    information depends on the type of storage, and it is held by subclasses (such as
+    SQL Data Node, CSV Data Node, ...).
+    
+    !!! note
+        It is recommended not to instantiate subclasses of DataNode directly.
 
     Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
-        scope (`Scope^`): The `Scope^` of the data node.
-        id (str): The unique identifier of the data node.
-        name (str): A user-readable name of the data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python
+            identifier.
+        scope (Scope^): The scope of this data node.
+        id (str): The unique identifier of this data node.
+        name (str): A user-readable name of this data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+            `None`.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
-            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
-        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
-            False otherwise.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+            Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
+            always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted
+            and not completed yet. False otherwise.
         kwargs: A dictionary of additional properties.
     """
 
@@ -179,24 +185,22 @@ class DataNode(_Entity):
         return NotImplemented
 
     def read_or_raise(self):
-        """
-        Read the data referenced by the data node.
+        """Read the data referenced by this data node.
 
         Returns:
-            Any: The data referenced by the data node.
+            Any: The data referenced by this data node.
         Raises:
-            `NoData^`: If the data has not been written yet.
+            NoData^: If the data has not been written yet.
         """
         if not self.last_edition_date:
             raise NoData
         return self._read()
 
     def read(self):
-        """
-        Read the data referenced by the data node.
+        """Read the data referenced by this data node.
 
         Returns:
-            Any: The data referenced by the data node. None if the data has not been written yet.
+            Any: The data referenced by this data node. None if the data has not been written yet.
         """
         try:
             return self.read_or_raise()
@@ -205,11 +209,10 @@ class DataNode(_Entity):
             return None
 
     def write(self, data, job_id: Optional[JobId] = None):
-        """
-        Write the _data_ given as parameter.
+        """Write some data to this data node.
 
         Parameters:
-            data (Any): The data to write.
+            data (Any): The data to write to this data node.
             job_id (JobId): An optional identifier of the writer.
         """
         from taipy.core.data._data_manager import _DataManager
@@ -219,24 +222,24 @@ class DataNode(_Entity):
         _DataManager._set(self)
 
     def lock_edition(self):
-        """
-        Locks the edition of the data node.
+        """Lock the edition of this data node.
 
         Note:
-            It can be unlocked with the method `(DataNode.)unlock_edition()^`
+            The data node can be unlocked with the method `(DataNode.)unlock_edition()^`.
         """
         self.edition_in_progress = True
 
     def unlock_edition(self, at: datetime = None, job_id: JobId = None):
-        """
-        Unlocks the edition of the data node and update its _last_edition_date_.
+        """Unlocks the edition of the data node.
+        
+        The _last_edition_date_ is updated.
 
         Parameters:
             at (datetime): The optional datetime of the last edition.
                 If no _at_ datetime is provided, the current datetime is used.
             job_id (JobId): An optional identifier of the writer.
         Note:
-            It can be locked with the method `(DataNode.)lock_edition()^`
+            The data node  can be locked with the method `(DataNode.)lock_edition()^`.
         """
         self.last_edition_date = at or datetime.now()  # type: ignore
         self.edition_in_progress = False  # type: ignore
@@ -244,15 +247,17 @@ class DataNode(_Entity):
             self._job_ids.append(job_id)
 
     def filter(self, operators: Union[List, Tuple], join_operator=JoinOperator.AND):
-        """
-        Reads the data referenced by the data node filtered by the provided list of 3-tuples (key, value, `Operator^`).
+        """Read the data referenced by the data node, appying a filter.
+        
+        The data is filtered by the provided list of 3-tuples (key, value, `Operator^`).
 
-        If multiple filter operators are provided, filtered data will be joined based on the join operator (_AND_ or
-        _OR_).
+        If multiple filter operators are provided, filtered data will be joined based on the
+        join operator (_AND_ or _OR_).
 
         Parameters:
             operators (Union[List[Tuple], Tuple]): TODO
-            join_operator (`JoinOperator^`): The `JoinOperator^` used to join the multiple filter 3-tuples.
+            join_operator (JoinOperator^): The `JoinOperator^` used to join the multiple filter
+                3-tuples.
         """
         data = self._read()
         if len(operators) == 0:
@@ -354,8 +359,11 @@ class DataNode(_Entity):
     @property  # type: ignore
     @_self_reload("data")
     def is_ready_for_reading(self):
-        """
-        Returns `False` if the data is locked for edition or if the data has never been written. `True` otherwise.
+        """Indicate if this data node is ready for reading.
+        
+        Returns:
+            bool: False if the data is locked for edition or if the data has never been written.
+                True otherwise.
         """
         if self._edition_in_progress:
             return False

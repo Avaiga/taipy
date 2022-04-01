@@ -11,17 +11,16 @@ from taipy.core.common.frequency import Frequency
 
 
 class Cycle(_Entity):
-    """
-    Represents an iteration of a recurrent work pattern.
+    """An iteration of a recurrent work pattern.
 
     Attributes:
-        id (str): The Unique identifier of the cycle.
-        frequency (`Frequency^`): The `Frequency^` of the cycle.
-        creation_date (datetime): The date and time of the creation of the cycle.
-        start_date (datetime): The date and time of the start of the cycle.
-        end_date (datetime): The date and time of the end of the cycle.
-        name (str): The name of the cycle.
-        properties: A dictionary of additional properties.
+        id (str): The unique identifier of the cycle.
+        frequency (Frequency^): The frequency of this cycle.
+        creation_date (datetime): The date and time of the creation of this cycle.
+        start_date (datetime): The date and time of the start of this cycle.
+        end_date (datetime): The date and time of the end of this cycle.
+        name (str): The name of this cycle.
+        properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     _ID_PREFIX = "CYCLE"

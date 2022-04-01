@@ -10,26 +10,29 @@ from taipy.core.data.data_node import DataNode
 
 
 class PickleDataNode(DataNode):
-    """
-    A Data Node stored as a pickle file.
+    """Data Node stored as a pickle file.
 
     Attributes:
-        config_id (str): Identifier of the data node configuration. It must be a valid Python variable name.
-        scope (`Scope^`): The `Scope^` of the data node.
-        id (str): The unique identifier of the data node.
-        name (str): A user-readable name of the data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        config_id (str): Identifier of the data node configuration. It must be a valid Python
+            identifer.
+        scope (Scope^): The scope of this data node.
+        id (str): The unique identifier of this data node.
+        name (str): A user-readable name of this data node.
+        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+            `None`.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
-        validity_period (Optional[timedelta]): The validity period of a cacheable data node. Implemented as a
-            timedelta. If _validity_period_ is set to None, the data_node is always up-to-date.
-        edition_in_progress (bool): True if a task computing the data node has been submitted and not completed yet.
-            False otherwise.
+        validity_period (Optional[timedelta]): The validity period of a cacheable data node.
+            Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
+            always up-to-date.
+        edition_in_progress (bool): True if a task computing the data node has been submitted
+            and not completed yet. False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties.
-            At creation of an _InMemory_ data node, if the _properties_ dictionary contains a "default_data" entry,
-            the data node is automatically written with the corresponding "default_data" value.
-            If the _properties_ dictionary contains a "path" entry, the data will be stored using the corresponding
-            value as the name of the pickle file.
+            When creating a pickle data node, if the _properties_ dictionary contains a
+            _"default_data"_ entry, the data node is automatically written with the corresponding
+            _"default_data"_ value.
+            If the _properties_ dictionary contains a _"path"_ entry, the data will be stored
+            using the corresponding value as the name of the pickle file.
     """
 
     __STORAGE_TYPE = "pickle"
