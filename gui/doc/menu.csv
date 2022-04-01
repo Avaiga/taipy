@@ -12,8 +12,8 @@ An inactive component allows no user interaction."
 on_action,str,"""on_menu_action""","The name of the function that will is triggered when a menu option is selected.
 All the parameters of that function are optional:
 <ul>
-<li>gui instance</li>
+<li>state instance</li>
 <li>id</li>
 <li>action</li>
-<li>payload with selected id</li>
+<li>payload with selected id in args</li>
 </ul>"

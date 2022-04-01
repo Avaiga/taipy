@@ -53,6 +53,7 @@ class _AttributeType(Enum):
     string_or_number = "string|number"
     boolean_or_list = "boolean|list"
     number_or_lov_value = "number|lovValue"
+    string_list = "stringlist"
 
 
 def _get_taipy_type(a_type: t.Optional[_AttributeType]) -> t.Optional[t.Type[_TaipyBase]]:

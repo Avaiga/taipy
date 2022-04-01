@@ -70,7 +70,7 @@ describe("Dialog Component", () => {
         );
         getByText("Dialog-Test-Title");
     });
-    it("doesn't show the cancel button by default", async () => {
+    it("doesn't show a button by default", async () => {
         const { getAllByRole } = render(
             <HelmetProvider>
                 <Dialog
@@ -78,12 +78,26 @@ describe("Dialog Component", () => {
                     page="page"
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
+                />
+            </HelmetProvider>
+        );
+        expect(getAllByRole("button")).toHaveLength(1);
+    });
+    it("shows one button when a label set", async () => {
+        const { getAllByRole } = render(
+            <HelmetProvider>
+                <Dialog
+                    title="Dialog-Test-Title"
+                    page="page"
+                    defaultOpen="true"
+                    open={undefined as unknown as boolean}
+                    labels={JSON.stringify(["toto"])}
                 />
             </HelmetProvider>
         );
         expect(getAllByRole("button")).toHaveLength(2);
     });
-    it("shows the cancel button when cancel action is set", async () => {
+    it("shows 3 buttons when 3 labels set", async () => {
         const { getAllByRole } = render(
             <HelmetProvider>
                 <Dialog
@@ -91,11 +105,11 @@ describe("Dialog Component", () => {
                     page="page"
                     defaultOpen="true"
                     open={undefined as unknown as boolean}
-                    tp_onCancel={"testCancelAction"}
+                    labels={JSON.stringify(["toto", "titi", "toto"])}
                 />
             </HelmetProvider>
         );
-        expect(getAllByRole("button")).toHaveLength(3);
+        expect(getAllByRole("button")).toHaveLength(4);
     });
     it("is disabled", async () => {
         const { getByText } = render(
@@ -105,9 +119,7 @@ describe("Dialog Component", () => {
                     page="page"
                     open={true}
                     active={false}
-                    validateLabel="testValidate"
-                    tp_onCancel="testCancelAction"
-                    cancelLabel="testCancel"
+                    labels={JSON.stringify(["testValidate", "testCancel"])}
                 />
             </HelmetProvider>
         );
@@ -121,9 +133,7 @@ describe("Dialog Component", () => {
                     title="Dialog-Test-Title"
                     page="page"
                     open={true}
-                    validateLabel="testValidate"
-                    tp_onCancel="testCancelAction"
-                    cancelLabel="testCancel"
+                    labels={JSON.stringify(["testValidate", "testCancel"])}
                 />
             </HelmetProvider>
         );
@@ -138,16 +148,38 @@ describe("Dialog Component", () => {
                     page="page"
                     open={true}
                     active={true}
-                    validateLabel="testValidate"
-                    tp_onCancel="testCancelAction"
-                    cancelLabel="testCancel"
+                    labels={JSON.stringify(["testValidate", "testCancel"])}
                 />
             </HelmetProvider>
         );
         expect(getByText("testValidate")).not.toBeDisabled();
         expect(getByText("testCancel")).not.toBeDisabled();
     });
-    it("dispatch a well formed message on validate", async () => {
+    it("dispatch a well formed message on close icon press", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByTitle } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <HelmetProvider>
+                    <Dialog
+                        id="testId"
+                        title="Dialog-Test-Title"
+                        page="page"
+                        open={true}
+                        active={true}
+                        tp_onAction="testValidateAction"
+                    />
+                </HelmetProvider>
+            </TaipyContext.Provider>
+        );
+        userEvent.click(getByTitle("Close"));
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "testId",
+            payload: { action: "testValidateAction", args: [-1] },
+            type: "SEND_ACTION_ACTION",
+        });
+    });
+    it("dispatch a well formed message on first button press", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
@@ -159,8 +191,8 @@ describe("Dialog Component", () => {
                         page="page"
                         open={true}
                         active={true}
-                        validateLabel="testValidate"
-                        tp_onValidate="testValidateAction"
+                        labels={JSON.stringify(["testValidate", "testCancel"])}
+                        tp_onAction="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
@@ -168,11 +200,11 @@ describe("Dialog Component", () => {
         userEvent.click(getByText("testValidate"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { action: "testValidateAction", args: [] },
+            payload: { action: "testValidateAction", args: [0] },
             type: "SEND_ACTION_ACTION",
         });
     });
-    it("dispatch a well formed message on cancel", async () => {
+    it("dispatch a well formed message on third button press", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
@@ -184,65 +216,16 @@ describe("Dialog Component", () => {
                         page="page"
                         open={true}
                         active={true}
-                        cancelLabel="testCancel"
-                        tp_onCancel="testCancelAction"
+                        labels={JSON.stringify(["testValidate", "testCancel", "Another One"])}
+                        tp_onAction="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
-        userEvent.click(getByText("testCancel"));
+        userEvent.click(getByText("Another One"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
-            payload: { action: "testCancelAction", args: [] },
-            type: "SEND_ACTION_ACTION",
-        });
-    });
-    it("dispatch a well formed message on close with no cancel", async () => {
-        const dispatch = jest.fn();
-        const state: TaipyState = INITIAL_STATE;
-        const { getByTestId } = render(
-            <TaipyContext.Provider value={{ state, dispatch }}>
-                <HelmetProvider>
-                    <Dialog
-                        id="testId"
-                        title="Dialog-Test-Title"
-                        page="page"
-                        open={true}
-                        active={true}
-                        tp_onValidate="testValidateAction"
-                    />
-                </HelmetProvider>
-            </TaipyContext.Provider>
-        );
-        userEvent.click(getByTestId("CloseIcon"));
-        expect(dispatch).toHaveBeenLastCalledWith({
-            name: "testId",
-            payload: { action: "testValidateAction", args: [] },
-            type: "SEND_ACTION_ACTION",
-        });
-    });
-    it("dispatch a well formed message on close with cancel defined", async () => {
-        const dispatch = jest.fn();
-        const state: TaipyState = INITIAL_STATE;
-        const { getByTestId } = render(
-            <TaipyContext.Provider value={{ state, dispatch }}>
-                <HelmetProvider>
-                    <Dialog
-                        id="testId"
-                        title="Dialog-Test-Title"
-                        page="page"
-                        open={true}
-                        active={true}
-                        cancelLabel="testCancel"
-                        tp_onCancel="testCancelAction"
-                    />
-                </HelmetProvider>
-            </TaipyContext.Provider>
-        );
-        userEvent.click(getByTestId("CloseIcon"));
-        expect(dispatch).toHaveBeenLastCalledWith({
-            name: "testId",
-            payload: { action: "testCancelAction", args: [] },
+            payload: { action: "testValidateAction", args: [2] },
             type: "SEND_ACTION_ACTION",
         });
     });

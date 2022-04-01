@@ -4,7 +4,7 @@ label,dynamic(str),None,The label for this image.
 on_action,str,"""""","The name of a function that is triggered when the user clicks on the image.
 All the parameters of that function are optional:
 <ul>
-<li>gui instance</li>
+<li>state instance</li>
 <li>id</li>
 <li>action</li>
 </ul>"

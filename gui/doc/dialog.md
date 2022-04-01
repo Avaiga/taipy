@@ -14,26 +14,34 @@ The default property, _open_, indicates whether the dialog is visible or not:
     === "Markdown"
 
         ```
-        <|{show_dialog}|dialog|>
+        <|{show_dialog}|dialog|on_action={lambda s: s.assign("show_dialog", False)}|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:dialog>{show_dialog}</taipy:dialog>
+        <taipy:dialog on_action="on_action={lambda s: s.assign('show_dialog', False)}">{show_dialog}</taipy:dialog>
         ```
+
+With another action that would have previsouly shown the dialog with:
+
+```py3
+def button_action(state, id, action):
+    state.show_dialog = True
+```
+
 
 ### Specifying labels and actions
 
-Several properties let you specify which label should be used for which button,
-and what actions (callback functions) are triggered when buttons are pressed:
+Several properties let you specify the buttons to show,
+and the action (callback functions) triggered when buttons are pressed:
 
 !!! example "Page content"
 
     === "Markdown"
 
         ```
-        <|dialog|title=Dialog Title|open={show_dialog}|page_id=page1|on_validate=validate_action|on_cancel={lambda s: s.assign("show_dialog", False)}|validate_label=Validate|cancel_label=Cancel|>
+        <|dialog|title=Dialog Title|open={show_dialog}|page_id=page1|on_action=dialog_action|labels=Validate;Cancel|>
         ```
   
     === "HTML"
@@ -42,17 +50,17 @@ and what actions (callback functions) are triggered when buttons are pressed:
         <taipy:dialog
          title="Dialog Title"
          page_id="page1"
-         validate_label="Validate"
-         on_validate="validate_action"
-         cancel_label="Cancel"
-         on_cancel="{lambda s: s.assign('show_dialog', False)}">{show_dialog}</taipy:dialog>
+         labels="Validate;Cancel"
+         on_action="dialog_action">{show_dialog}</taipy:dialog>
         ```
 
-The implementation of the validation callback could be:
+The implementation of the dialog callback could be:
 
 ```py3
-def validate_action(state, id, action, payload):
+def dialog_action(state, id, action, payload):
     with state as st:
+        ...
+        # depending on payload["args"][0]: -1 for close icon, 0 for Validate, 1 for Cancel
         ...
         st.show_dialog = False
 ```

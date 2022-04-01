@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useContext, useMemo } from "react";
+import React, { MouseEvent, ReactNode, useCallback, useContext, useMemo } from "react";
 import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import MuiDialog from "@mui/material/Dialog";
@@ -18,10 +18,9 @@ import { useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
-    tp_onCancel?: string;
-    tp_onValidate?: string;
-    cancelLabel?: string;
-    validateLabel?: string;
+    tp_onAction?: string;
+    closeLabel?: string;
+    labels?: string;
     page?: string;
     partial?: boolean;
     open?: boolean;
@@ -32,12 +31,12 @@ interface DialogProps extends TaipyActiveProps {
 }
 
 const closeSx: SxProps<Theme> = {
-    position: "absolute",
-    right: 8,
-    top: 8,
     color: (theme: Theme) => theme.palette.grey[500],
+    marginTop: "-0.6em",
+    marginLeft: "auto",
+    alignSelf: "start",
 };
-const titleSx = { m: 0, p: 2 };
+const titleSx = { m: 0, p: 2, display: "flex", paddingRight: "0.1em" };
 
 const Dialog = (props: DialogProps) => {
     const {
@@ -45,12 +44,10 @@ const Dialog = (props: DialogProps) => {
         title,
         defaultOpen,
         open,
-        tp_onCancel,
-        tp_onValidate = "ValidateAction",
+        tp_onAction = "dialog_action",
+        closeLabel = "Close",
         page,
         partial,
-        cancelLabel = "Cancel",
-        validateLabel = "Validate",
         className,
         width,
         height,
@@ -60,13 +57,24 @@ const Dialog = (props: DialogProps) => {
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    const handleClose = useCallback(() => {
-        dispatch(createSendActionNameAction(id, tp_onCancel || tp_onValidate));
-    }, [dispatch, id, tp_onCancel, tp_onValidate]);
+    const handleAction = useCallback(
+        (evt: MouseEvent<HTMLElement>) => {
+            const { idx = "-1" } = evt.currentTarget.dataset;
+            dispatch(createSendActionNameAction(id, tp_onAction, parseInt(idx, 10)));
+        },
+        [dispatch, id, tp_onAction]
+    );
 
-    const handleValidate = useCallback(() => {
-        dispatch(createSendActionNameAction(id, tp_onValidate));
-    }, [dispatch, id, tp_onValidate]);
+    const labels = useMemo(() => {
+        if (props.labels) {
+            try {
+                return JSON.parse(props.labels) as string[];
+            } catch (e) {
+                console.info(`Error parsing dialog.labels\n${(e as Error).message || e}`);
+            }
+        }
+        return [];
+    }, [props.labels]);
 
     const paperProps = useMemo(() => {
         if (width !== undefined || height !== undefined) {
@@ -86,7 +94,7 @@ const Dialog = (props: DialogProps) => {
     return (
         <MuiDialog
             id={id}
-            onClose={handleClose}
+            onClose={handleAction}
             open={open === undefined ? defaultOpen === "true" || defaultOpen === true : !!open}
             className={className}
             PaperProps={paperProps}
@@ -94,12 +102,7 @@ const Dialog = (props: DialogProps) => {
             <Tooltip title={hover || ""}>
                 <DialogTitle sx={titleSx}>
                     {title}
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleClose}
-                        sx={closeSx}
-                        title={tp_onCancel ? cancelLabel : validateLabel}
-                    >
+                    <IconButton aria-label="close" onClick={handleAction} sx={closeSx} title={closeLabel} data-idx="-1">
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
@@ -109,16 +112,15 @@ const Dialog = (props: DialogProps) => {
                 {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
                 {props.children}
             </DialogContent>
-            <DialogActions>
-                {tp_onCancel && (
-                    <Button onClick={handleClose} disabled={!active}>
-                        {cancelLabel}
-                    </Button>
-                )}
-                <Button onClick={handleValidate} autoFocus disabled={!active}>
-                    {validateLabel}
-                </Button>
-            </DialogActions>
+            {labels.length ? (
+                <DialogActions>
+                    {labels.map((l, i) => (
+                        <Button onClick={handleAction} disabled={!active} key={"label" + i} data-idx={i}>
+                            {l}
+                        </Button>
+                    ))}
+                </DialogActions>
+            ) : null}
         </MuiDialog>
     );
 };

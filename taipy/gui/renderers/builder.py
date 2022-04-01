@@ -78,7 +78,7 @@ class _Builder:
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
                     (val, key_hash) = self.__parse_attribute_value(v)
-                    self.__attributes[k] = f"{{{prop_hash}.{k}}}" if key_hash is None else v
+                    self.__attributes[k] = f"{{{prop_hash}['{k}']}}" if key_hash is None else v
             else:
                 warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
@@ -295,7 +295,8 @@ class _Builder:
             ret_list = []
             if len(lov) > 0:
                 for elt in lov:
-                    ret = self.__gui._run_adapter(adapter, elt, adapter.__name__ if adapter else "adapter")  # type: ignore
+                    ret = self.__gui._run_adapter(
+                        t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter")  # type: ignore
                     if ret is not None:
                         ret_list.append(ret)
             self.__attributes[f"default_{property_name}"] = ret_list
@@ -304,7 +305,8 @@ class _Builder:
             value = self.__attributes.get("value")
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
-                ret = self.__gui._run_adapter(adapter, val, adapter.__name__ if adapter else "adapter", id_only=True)  # type: ignore
+                ret = self.__gui._run_adapter(
+                    t.cast(t.Callable, adapter), val, adapter.__name__ if callable(adapter) else "adapter", id_only=True)  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
@@ -508,16 +510,16 @@ class _Builder:
                 self.__set_string_attribute(var_name, default_value)
         return self
 
-    def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type) -> t.List[str]:
+    def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type, dynamic=True) -> t.List[str]:
         if not hash_name and isinstance(val, str):
             val = [elt_type(t.strip()) for t in val.split(";")]
         if isinstance(val, list):
-            if hash_name:
+            if hash_name and dynamic:
                 self.__set_react_attribute(name, hash_name)
                 return [f"{name}={hash_name}"]
             else:
                 self.__set_json_attribute(name, val)
-        else:
+        elif val is not None:
             warnings.warn(f"{self.__element_name} {name} should be a list of {elt_type}")
         return []
 
@@ -811,6 +813,9 @@ class _Builder:
                 self.__set_dynamic_string_attribute(
                     attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False)
                 )
+            elif var_type == _AttributeType.string_list:
+                self.__set_list_attribute(attr[0], self.__hashes.get(
+                    attr[0]), self.__attributes.get(attr[0]), str, False)
             elif var_type == _AttributeType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == _AttributeType.react:
