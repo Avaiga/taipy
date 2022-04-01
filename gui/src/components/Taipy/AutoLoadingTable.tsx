@@ -275,12 +275,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                           return pv;
                       }, "-agg")
                     : "";
-                const key = `Infinite-${orderBy}-${order}${agg}`;
+                const cols = colsOrder.map((col) => columns[col].dfid);
+                const key = `Infinite-${cols.join()}-${orderBy}-${order}${agg}`;
                 page.current = {
                     key: key,
                     promises: { ...page.current.promises, [startIndex]: { resolve: resolve, reject: reject } },
                 };
-                const cols = colsOrder.map((col) => columns[col].dfid);
                 const applies = aggregates.length
                     ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                           if (columns[col].apply) {

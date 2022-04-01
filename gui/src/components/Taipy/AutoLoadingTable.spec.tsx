@@ -15,8 +15,9 @@ jest.mock(
             children({ height: 600, width: 600 })
 );
 
+const valueKey = "Infinite-Entity--asc";
 const tableValue = {
-    "Infinite--asc": {
+    [valueKey]: {
         data: [
             {
                 Entity: "Austria",
@@ -131,7 +132,7 @@ describe("AutoLoadingTable Component", () => {
                 id: undefined,
                 infinite: true,
                 orderby: "",
-                pagekey: "Infinite--asc",
+                pagekey: valueKey,
                 handlenan: false,
                 sort: "asc",
                 start: 0,
@@ -165,7 +166,7 @@ describe("AutoLoadingTable Component", () => {
                     id="table"
                     data={state.data.table as undefined}
                     columns={tableColumns}
-                    defaultKey="Infinite--asc"
+                    defaultKey={valueKey}
                     pageSize={2}
                     updateVars="varname=varname"
                 />
@@ -177,7 +178,7 @@ describe("AutoLoadingTable Component", () => {
                 <AutoLoadingTable
                     id="table"
                     data={newState.data.table as TableValueType}
-                    defaultKey="Infinite--asc"
+                    defaultKey={valueKey}
                     columns={tableColumns}
                     pageSize={2}
                     updateVars="varname=varname"
@@ -202,7 +203,7 @@ describe("AutoLoadingTable Component", () => {
                 <AutoLoadingTable
                     selected={selected}
                     data={tableValue as TableValueType}
-                    defaultKey="Infinite--asc"
+                    defaultKey={valueKey}
                     columns={tableColumns}
                     pageSize={2}
                 />

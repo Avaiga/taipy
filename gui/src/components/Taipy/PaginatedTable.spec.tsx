@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -8,8 +8,9 @@ import { TaipyContext } from "../../context/taipyContext";
 import { TaipyState, INITIAL_STATE } from "../../context/taipyReducers";
 import { TableValueType } from "./tableUtils";
 
+const valueKey = "0-100-Entity,Daily hospital occupancy--asc";
 const tableValue = {
-    "0-100--asc": {
+    [valueKey]: {
         data: [
             {
                 Day_str: "2020-04-01T00:00:00.000000Z",
@@ -129,7 +130,7 @@ describe("PaginatedTable Component", () => {
                 end: 100,
                 id: "table",
                 orderby: "",
-                pagekey: "0-100--asc",
+                pagekey: valueKey,
                 handlenan: false,
                 sort: "asc",
                 start: 0,
@@ -157,7 +158,7 @@ describe("PaginatedTable Component", () => {
                 end: 100,
                 id: undefined,
                 orderby: "Entity",
-                pagekey: "0-100-Entity-asc",
+                pagekey: "0-100-Entity,Daily hospital occupancy-Entity-asc",
                 handlenan: false,
                 sort: "asc",
                 start: 0,
@@ -201,7 +202,7 @@ describe("PaginatedTable Component", () => {
                 end: 200,
                 id: "table",
                 orderby: "",
-                pagekey: "100-200--asc",
+                pagekey: "100-200-Entity,Daily hospital occupancy--asc",
                 handlenan: false,
                 sort: "asc",
                 start: 100,
@@ -234,17 +235,17 @@ describe("PaginatedTable Component", () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const selected = [2, 4, 6];
-        const { getAllByText, rerender } = render(
+        const { findAllByText, rerender } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <PaginatedTable data={undefined} columns={tableColumns} />
             </TaipyContext.Provider>
         );
         rerender(
-            <TaipyContext.Provider value={{ state, dispatch }}>
+            <TaipyContext.Provider value={{ state: {...state}, dispatch }}>
                 <PaginatedTable selected={selected} data={tableValue as TableValueType} columns={tableColumns} />
             </TaipyContext.Provider>
         );
-        const elts = getAllByText("Austria");
+        const elts = await waitFor(() => findAllByText("Austria"));
         elts.forEach((elt: HTMLElement, idx: number) =>
             selected.indexOf(idx) == -1
                 ? expect(elt.parentElement).not.toHaveClass("Mui-selected")
