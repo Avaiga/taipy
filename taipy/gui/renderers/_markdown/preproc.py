@@ -124,6 +124,7 @@ class _Preprocessor(MdPreprocessor):
                         + open_tag
                         + ".end"
                         + _MarkdownFactory._TAIPY_END
+                        + "\n"
                         + new_line[m.end() :]
                     )
                 else:
