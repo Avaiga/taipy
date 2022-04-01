@@ -41,7 +41,7 @@ class DataNode(_Entity):
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
         parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
-            `None`.
+            None.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
@@ -213,7 +213,7 @@ class DataNode(_Entity):
 
         Parameters:
             data (Any): The data to write to this data node.
-            job_id (JobId): An optional identifier of the writer.
+            job_id (JobId^): An optional identifier of the writer.
         """
         from taipy.core.data._data_manager import _DataManager
 
@@ -237,7 +237,7 @@ class DataNode(_Entity):
         Parameters:
             at (datetime): The optional datetime of the last edition.
                 If no _at_ datetime is provided, the current datetime is used.
-            job_id (JobId): An optional identifier of the writer.
+            job_id (JobId^): An optional identifier of the writer.
         Note:
             The data node  can be locked with the method `(DataNode.)lock_edition()^`.
         """
@@ -256,7 +256,7 @@ class DataNode(_Entity):
 
         Parameters:
             operators (Union[List[Tuple], Tuple]): TODO
-            join_operator (JoinOperator^): The `JoinOperator^` used to join the multiple filter
+            join_operator (JoinOperator^): The operator used to join the multiple filter
                 3-tuples.
         """
         data = self._read()

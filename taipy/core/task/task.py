@@ -10,20 +10,19 @@ from taipy.core.data.data_node import DataNode
 
 
 class Task(_Entity):
-    """
-    Holds a user function that will be executed, its parameters and the results.
+    """Hold a user function that will be executed, its parameters and the results.
 
-    The `Task^` brings together the user code as function, the inputs and the outputs as data nodes (instances
-    of `DataNode^` class).
+    A `Task` brings together the user code as function, the inputs and the outputs as data nodes
+    (instances of the `DataNode^` class).
 
     Attributes:
         config_id (str): The identifier of the `TaskConfig^`.
         function (callable): The python function to execute. The _function_ must take as parameter the
             data referenced by inputs data nodes, and must return the data referenced by outputs data nodes.
-        input (`DataNode^` or List[`DataNode^`]): The list of `DataNode^` inputs.
-        output (`DataNode^` or List[`DataNode^`]): The list of `DataNode^` outputs.
+        input (Union[DataNode^, List[DataNode^]]): The list of inputs.
+        output (Union[DataNode^, List[DataNode^]]): The list of outputs.
         id (str): The unique identifier of the task.
-        parent_id (str):  The identifier of the parent (pipeline_id, scenario_id, cycle_id) or `None`.
+        parent_id (str):  The identifier of the parent (pipeline_id, scenario_id, cycle_id) or None.
     """
 
     _ID_PREFIX = "TASK"
@@ -90,18 +89,19 @@ class Task(_Entity):
         """Retrieve the lowest scope of the task based on its data nodes.
 
         Returns:
-           Lowest `Scope^` present in input and output data nodes or GLOBAL if there are either no input or no output.
+            Scope^: Lowest scope present in input and output data nodes or GLOBAL if there are
+                either no input or no output.
         """
         data_nodes = list(self.__input.values()) + list(self.__output.values())
         scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return Scope(scope)
 
     def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
-        """
-        Submits the task for execution.
+        """Submit the task for execution.
 
         Parameters:
-            callbacks (List[Callable]): The list of callable functions to be called on status change.
+            callbacks (List[Callable]): The list of callable functions to be called on status
+                change.
             force (bool): Force execution even if the data nodes are in cache.
         """
         from taipy.core.task._task_manager import _TaskManager
