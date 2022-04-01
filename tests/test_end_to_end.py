@@ -10,7 +10,7 @@ def create_and_submit_scenario(config_id: str, client) -> Dict:
     assert response.status_code == 201
 
     scenario = response.json.get("scenario")
-    assert (set(scenario) - set(json.load(open("json/expected/scenario.json")))) == set()
+    assert (set(scenario) - set(json.load(open("tests/json/expected/scenario.json")))) == set()
 
     response = client.post(url_for("api.scenario_submit", scenario_id=scenario.get("id")))
     assert response.status_code == 200
@@ -22,12 +22,12 @@ def get(url, name, client) -> Dict:
     response = client.get(url)
     returned_data = response.json.get(name)
 
-    assert (set(returned_data) - set(json.load(open(f"json/expected/{name}.json")))) == set()
+    assert (set(returned_data) - set(json.load(open(f"tests/json/expected/{name}.json")))) == set()
 
     return returned_data
 
 
-def get_all(url, expected_quantity, client) -> List:
+def get_all(url, expected_quantity, client):
     response = client.get(url)
 
     assert len(response.json) == expected_quantity
