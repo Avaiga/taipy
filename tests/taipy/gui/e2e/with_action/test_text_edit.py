@@ -28,16 +28,15 @@ def test_text_edit(page: "Page", gui: Gui, helpers):
     assert text1.inner_text() == "Hey"
     page.wait_for_selector("#input1")
     page.fill("#input1", "There")
-    function_evaluated = False
+    function_evaluated = True
     try:
         page.wait_for_function("document.querySelector('#text1').innerText !== 'Hey'")
-        function_evaluated = True
-    except:
-        pass
+    except Exception as e:
+        function_evaluated = False
+        logging.getLogger().debug(f"Function evaluation timeout.\n{e}")
     if function_evaluated:
-        assert text1.inner_text() == "There"
-    else:
-        logging.getLogger().debug("Function evaluation timeout.")
+        text1_2 = page.query_selector("#text1")
+        assert text1_2.inner_text() == "There"
 
 
 @pytest.mark.teste2e
