@@ -45,6 +45,7 @@ const Router = () => {
     const [state, dispatch] = useReducer(taipyReducer, INITIAL_STATE, taipyInitialize);
     const [JSX, setJSX] = useState("");
     const refresh = !!JSX;
+    const themeClass = "taipy-" + state.theme.palette.mode;
 
     useEffect(() => {
         if (refresh) {
@@ -84,7 +85,7 @@ const Router = () => {
                     <SnackbarProvider maxSnack={5}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <BrowserRouter>
-                                <Box style={containerSx}>
+                                <Box style={containerSx} className={themeClass}>
                                     <CssBaseline />
                                     <Menu {...state.menu} />
                                     <Box component="main" sx={mainSx}>
