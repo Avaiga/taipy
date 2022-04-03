@@ -145,10 +145,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                   return pv;
               }, "-agg")
             : "";
-        pageKey.current = `${startIndex}-${endIndex}-${orderBy}-${order}${agg}`;
+        const cols = colsOrder.map((col) => columns[col].dfid);
+        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}`;
         if (!props.data || props.data[pageKey.current] === undefined || !!refresh) {
             setLoading(true);
-            const cols = colsOrder.map((col) => columns[col].dfid);
             const applies = aggregates.length
                 ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                       if (columns[col].apply) {
@@ -376,7 +376,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     const sel = selected.indexOf(index + startIndex);
                                     if (sel == 0) {
                                         setTimeout(
-                                            () => selectedRowRef.current?.scrollIntoView({ block: "center" }),
+                                            () => selectedRowRef.current?.scrollIntoView && selectedRowRef.current.scrollIntoView({ block: "center" }),
                                             1
                                         );
                                     }
