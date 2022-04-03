@@ -217,7 +217,7 @@ def test_serialize_exception_with_multiple_params(task_id, job_id):
 
     job = _JobManager._get(job_id)
     assert job.is_failed()
-    with pytest.raises(TestError):
+    with pytest.raises(ExceptionTest):
         raise job.exceptions[0]
     assert "Something bad has happened a b 3" == str(job.exceptions[0].message)
 
@@ -227,7 +227,7 @@ def _error():
 
 
 def _error_multi_param():
-    raise TestError("Something bad has happened", "a", "b", 3)
+    raise ExceptionTest("Something bad has happened", "a", "b", 3)
 
 
 def _dispatch(task: Task, job: Job):
@@ -241,6 +241,6 @@ def _foo():
     return 42
 
 
-class TestError(Exception):
+class ExceptionTest(Exception):
     def __init__(self, message, arg1, arg2, arg3):
         self.message = f"{message} {arg1} {arg2} {arg3}"
