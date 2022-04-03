@@ -1,4 +1,20 @@
-# Taipy Rest
+# Overview
+
+## What is Taipy
+
+Taipy is a Python framework for creating Business Applications.
+More information on our website: `https://www.taipy.io`.
+
+## What is Taipy Core
+
+Taipy is split into multiple repositories to let users install the minimum they need.
+
+_taipy-core_ mostly includes business-oriented features. It helps users
+create and manage business applications and improve analyses capability through time,
+conditions and hypothesis.
+
+
+## What is Taipy Rest
 Taipy Rest is a set of APIs built on top of the [taipy](https://github.com/Avaiga/taipy) library developed by Avaiga.
 
 This project is meant to be used as a complement for **taipy** and its goal is to enable automation through rest APIs 
@@ -14,20 +30,19 @@ The project comes with rest APIs that provide interaction with all of taipy modu
 
 A more in depth documentation of taipy can be found [here](http://insert-link-for-taipy-docs).
 
-## Usage
---------
-
-- [Taipy Rest](#taipy-rest)
-  - [Usage](#-usage)
-  - [Installation](#-installation)
-  - [Configuration](#-configuration)
-  - [Running](#-running)
+### Usage
+- [Taipy](#What-is-Taipy)
+- [Taipy Core](#What-is-Taipy-Core)
+- [Taipy Rest](#What-is-Taipy-Rest)
+  - [Usage](#usage)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Running](#running)
       - [Running with Gunicorn](#running-with-gunicorn)
       - [Running with uwsgi](#running-with-uwsgi)
-  - [Documentation](#-documentation)
+  - [Documentation](#documentation)
 
 ### Installation
-----------------
 1. Clone the taipy rest repository
 ```
 $ git clone https://github.com/Avaiga/taipy-rest
@@ -44,7 +59,6 @@ $ pip install pipenv && pipenv install
 ```
 
 ### Configuration
------------------
 Before running, we need to define some variables. Taipy rest APIs depend on pre-configuration of taipy config objects, 
 i.e, is mandatory to define all configuration of DataNodes, Tasks, Pipelines, etc. The file containing this 
 configuration needs to be passed to the application at runtime. The following variable needs to be defined:
@@ -54,7 +68,6 @@ If using Docker, the folder containing the file needs to be mapped as a volume f
 application.
 
 ### Running
------------
 To run the application you can either run locally with:
 ```
 $ flask run
@@ -122,7 +135,6 @@ You can now access **taipy rest** on the URL that was returned on the `heroku cr
 
 
 ### Documentation
------------------
 
 All the API Documentation can be found, after running the application in the following URL:
  - ```/redoc-ui``` ReDoc UI configured to hit OpenAPI yaml file
