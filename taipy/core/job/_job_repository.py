@@ -1,4 +1,5 @@
 import pathlib
+import traceback
 from datetime import datetime
 from typing import List
 
@@ -27,6 +28,7 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
             job._creation_date.isoformat(),
             self._serialize_subscribers(job._subscribers),
             self._serialize_exceptions(job._exceptions),
+            self._get_exceptions_stacktrace(job._exceptions),
         )
 
     def _from_model(self, model: _JobModel):
@@ -41,6 +43,7 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
             except AttributeError:
                 raise InvalidSubscriber(f"The subscriber function {it.get('fct_name')} cannot be loaded.")
         job._exceptions = []
+        job._stacktrace = model.stacktrace
         for e in model.exceptions:
             try:
                 job._exceptions.append(_load_fct(e["fct_module"], e["fct_name"])(*e["args"]))  # type:ignore
@@ -56,6 +59,10 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
     @staticmethod
     def _serialize_exceptions(exceptions: List) -> List:
         return [{**_fct_to_dict(type(e)), "args": e.args} for e in exceptions]
+
+    @staticmethod
+    def _get_exceptions_stacktrace(exceptions: List) -> List:
+        return ["".join(traceback.TracebackException.from_exception(e).format()) for e in exceptions]
 
     @staticmethod
     def _serialize_subscribers(subscribers: List) -> List:

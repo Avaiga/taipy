@@ -64,6 +64,7 @@ job_model = _JobModel(
     creation_date=job._creation_date.isoformat(),
     subscribers=_JobRepository._serialize_subscribers(job._subscribers),
     exceptions=_JobRepository._serialize_exceptions(job._exceptions),
+    stacktrace=_JobRepository._get_exceptions_stacktrace(job._exceptions),
 )
 
 

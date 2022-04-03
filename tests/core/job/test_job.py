@@ -121,6 +121,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
     with pytest.raises(RuntimeError):
         raise job.exceptions[0]
     assert "Something bad has happened" == str(job.exceptions[0])
+    assert 'raise RuntimeError("Something bad has happened")' in str(job.stacktrace[0])
 
 
 def test_handle_exception_in_input_data_node(task_id, job_id):
@@ -208,8 +209,7 @@ def test_auto_set_and_reload(current_datetime, job_id):
     assert not job_1._is_in_context
 
 
-def test_serialize_exception(task_id, job_id):
-    breakpoint()
+def test_serialize_exception_with_multiple_params(task_id, job_id):
     task = Task(config_id="name", input=[], function=_error_multi_param, output=[], id=task_id)
     job = Job(job_id, task)
 
@@ -217,9 +217,9 @@ def test_serialize_exception(task_id, job_id):
 
     job = _JobManager._get(job_id)
     assert job.is_failed()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(TestError):
         raise job.exceptions[0]
-    assert "Something bad has happened" == str(job.exceptions[0])
+    assert "Something bad has happened a b 3" == str(job.exceptions[0].message)
 
 
 def _error():
@@ -227,7 +227,7 @@ def _error():
 
 
 def _error_multi_param():
-    raise TestError("Something bad has happened", "with this param")
+    raise TestError("Something bad has happened", "a", "b", 3)
 
 
 def _dispatch(task: Task, job: Job):
@@ -242,6 +242,5 @@ def _foo():
 
 
 class TestError(Exception):
-    def __init__(self, message, args):
-        self.message = f"{message} {args}"
-        self.args = args
+    def __init__(self, message, arg1, arg2, arg3):
+        self.message = f"{message} {arg1} {arg2} {arg3}"

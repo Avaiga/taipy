@@ -48,6 +48,7 @@ class Job(_Entity):
         self._creation_date = datetime.now()
         self._subscribers: List[Callable] = []
         self._exceptions: List[Exception] = []
+        self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
 
     @property  # type: ignore
@@ -111,6 +112,10 @@ class Job(_Entity):
     @property
     def exceptions(self) -> List[Exception]:
         return self._exceptions
+
+    @property
+    def stacktrace(self) -> List[str]:
+        return self._stacktrace
 
     @_run_callbacks
     def blocked(self):

@@ -15,6 +15,7 @@ class _JobModel:
     creation_date: str
     subscribers: List[Dict]
     exceptions: List[Dict]
+    stacktrace: List[str]
 
     def to_dict(self) -> Dict[str, Any]:
         return {**dataclasses.asdict(self), "status": repr(self.status)}
@@ -29,4 +30,5 @@ class _JobModel:
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             exceptions=data["exceptions"],
+            stacktrace=data["stacktrace"],
         )
