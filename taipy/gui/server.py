@@ -91,8 +91,8 @@ class _Server:
                 return send_from_directory(static_folder + os.path.sep, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
-                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
-                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
+                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1:])
             if hasattr(__main__, "__file__") and os.path.isfile(
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):
