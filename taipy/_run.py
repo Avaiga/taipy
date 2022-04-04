@@ -5,10 +5,9 @@ from .rest import Rest
 
 
 def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs):
-    """
-    Run one or multiple Taipy services.
+    """Run one or multiple Taipy services.
 
-    An Taipy service is an instance of an object that exposes a Web application.
+    A Taipy service is an instance of a class that runs code as a Web application.
 
     Parameters:
         *args (List[Union[`Gui^`, `Rest^`]]): Services to run. If several services are provided, all the services run simultaneously. If this is empty or set to None, this method does nothing.
