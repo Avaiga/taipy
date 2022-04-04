@@ -10,6 +10,7 @@ import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, render_template_string, request, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
+from flask_talisman import Talisman
 from werkzeug.serving import is_running_from_reloader
 
 from .renderers.jsonencoder import _TaipyJsonEncoder
@@ -29,6 +30,9 @@ class _Server:
         flask: t.Optional[Flask] = None,
         css_file: str = "",
         path_mapping: t.Optional[dict] = {},
+        cors_resources: dict[str, dict[str, t.Any]] | list[str] | str | None = None,
+        content_security_policy: t.Optional[dict] = None,
+        force_https: bool = False,
     ):
         self._gui = gui
         self._root_page_name = gui._get_root_page_name()
@@ -47,7 +51,13 @@ class _Server:
             ping_interval=5,
             json=json,
         )
-        CORS(self._flask)
+        # this is necessary since CORS resources can't been None eventhough python stub allows for None
+        if cors_resources:
+            CORS(self._flask, resources=cors_resources)
+        else:
+            CORS(self._flask)
+
+        Talisman(self._flask, content_security_policy=content_security_policy, force_https=force_https)
 
         self.__path_mapping = path_mapping
 

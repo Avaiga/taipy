@@ -24,6 +24,7 @@ requirements = [
     "simple-websocket",
     "tzlocal",
     "backports.zoneinfo;python_version<'3.9'",
+    "flask-talisman",
 ]
 
 test_requirements = ["pytest>=3.8"]

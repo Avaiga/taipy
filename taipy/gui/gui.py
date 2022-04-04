@@ -108,6 +108,9 @@ class Gui:
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
         flask: t.Optional[Flask] = None,
+        cors_resources: dict[str, dict[str, t.Any]] | list[str] | str | None = None,
+        content_security_policy: t.Optional[dict] = None,
+        force_https: bool = False,
     ):
         """Initialize a new Gui instance.
 
@@ -154,6 +157,9 @@ class Gui:
         self._path_mapping = path_mapping
         self._flask = flask
         self._css_file = css_file
+        self._cors_resources = cors_resources
+        self._content_security_policy = content_security_policy
+        self._force_https = force_https
 
         self._config = _Config()
         self.__content_accessor = None
@@ -960,7 +966,7 @@ class Gui:
     def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
 
-    def _get_flask_app(self):
+    def get_flask_app(self):
         return self._server.get_flask()
 
     def _set_frame(self, frame: FrameType):
@@ -997,6 +1003,9 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
+                cors_resources=self._cors_resources,
+                content_security_policy=self._content_security_policy,
+                force_https=self._force_https,
             )
         if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
             self._server._thread.kill()
@@ -1007,6 +1016,9 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
+                cors_resources=self._cors_resources,
+                content_security_policy=self._content_security_policy,
+                force_https=self._force_https,
             )
             self._bindings()._new_scopes()
 
@@ -1109,15 +1121,17 @@ class Gui:
         self._bindings()._set_single_client(bool(app_config["single_client"]))
 
         # Start Flask Server
-        if run_server:
-            self._server.runWithWS(
-                host=app_config["host"],
-                port=app_config["port"],
-                debug=app_config["debug"],
-                use_reloader=app_config["use_reloader"],
-                flask_log=app_config["flask_log"],
-                run_in_thread=run_in_thread,
-            )
+        if not run_server:
+            return self.get_flask_app()
+
+        self._server.runWithWS(
+            host=app_config["host"],
+            port=app_config["port"],
+            debug=app_config["debug"],
+            use_reloader=app_config["use_reloader"],
+            flask_log=app_config["flask_log"],
+            run_in_thread=run_in_thread,
+        )
 
     def stop(self):
         """
