@@ -13,6 +13,14 @@ requirements = [
     "taipy-rest@git+ssh://git@github.com/Avaiga/taipy-rest.git@develop",
 ]
 
+extras_require = {
+    "ngrok": ["pyngrok>=5"],
+    "image": ["python-magic;platform_system!='Windows'", "python-magic-bin;platform_system=='Windows'"],
+    "rdp": ["rdp>=0.8"],
+    "arrow": ["pyarrow>=7.0"],
+    "mssql": ["pyodbc>=4"],
+}
+
 setup(
     author="Avaiga",
     author_email="taipy.dev@avaiga.com",
@@ -37,4 +45,5 @@ setup(
     url="https://github.com/avaiga/taipy",
     version="1.0.0.dev",
     zip_safe=False,
+    extras_require=extras_require,
 )
