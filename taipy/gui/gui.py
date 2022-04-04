@@ -974,7 +974,7 @@ class Gui:
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
 
-    def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> None:
+    def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> t.Optional[Flask]:
         """
         Starts the server that delivers pages to Web clients.
 
@@ -1124,7 +1124,7 @@ class Gui:
         if not run_server:
             return self.get_flask_app()
 
-        self._server.runWithWS(
+        return self._server.runWithWS(
             host=app_config["host"],
             port=app_config["port"],
             debug=app_config["debug"],
