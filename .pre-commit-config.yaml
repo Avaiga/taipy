@@ -10,12 +10,16 @@ repos:
                 'types-tzlocal',
         ]
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.10
+    rev: v1.1.13
     hooks:
     -   id: forbid-crlf
     -   id: remove-crlf
     -   id: forbid-tabs
     -   id: remove-tabs
+    -   id: insert-license
+        args:
+        - --license-filepath
+        - .license_header
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
