@@ -100,7 +100,7 @@ def test_handle_exception_in_user_function():
     executor = _JobDispatcher(None)
     executor._dispatch(job)
     assert job.is_failed()
-    assert "Something bad has happened" == str(job.exceptions[0])
+    assert 'RuntimeError("Something bad has happened")' in str(job.stacktrace[0])
 
 
 def test_handle_exception_when_writing_datanode():
@@ -120,8 +120,7 @@ def test_handle_exception_when_writing_datanode():
         get.return_value = output
         dispatcher._dispatch(job)
         assert job.is_failed()
-        stack_trace = str(job.exceptions[0])
-        assert "node" in stack_trace
+        assert "node" in job.stacktrace[0]
 
 
 def test_need_to_run_no_output():

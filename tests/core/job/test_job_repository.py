@@ -1,4 +1,5 @@
 import datetime
+import traceback
 
 import pytest
 
@@ -54,7 +55,7 @@ class A:
 
 job = Job(JobId("id"), task)
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
-job._exceptions = [Exception()]
+job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
 job_model = _JobModel(
     id=JobId("id"),
@@ -63,7 +64,7 @@ job_model = _JobModel(
     force=False,
     creation_date=job._creation_date.isoformat(),
     subscribers=_JobRepository._serialize_subscribers(job._subscribers),
-    exceptions=_JobRepository._serialize_exceptions(job._exceptions),
+    stacktrace=job._stacktrace,
 )
 
 

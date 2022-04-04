@@ -118,9 +118,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 
     job = _JobManager._get(job_id)
     assert job.is_failed()
-    with pytest.raises(RuntimeError):
-        raise job.exceptions[0]
-    assert "Something bad has happened" == str(job.exceptions[0])
+    assert 'raise RuntimeError("Something bad has happened")' in str(job.stacktrace[0])
 
 
 def test_handle_exception_in_input_data_node(task_id, job_id):
@@ -132,8 +130,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 
     job = _JobManager._get(job_id)
     assert job.is_failed()
-    with pytest.raises(NoData):
-        raise job.exceptions[0]
+    assert 'taipy.core.exceptions.exceptions.NoData' in str(job.stacktrace[0])
 
 
 def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_id, job_id):
@@ -146,9 +143,7 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
     job = _JobManager._get(job_id)
 
     assert job.is_failed()
-    with pytest.raises(DataNodeWritingError):
-        raise job.exceptions[0]
-    assert "Error writing in datanode" in str(job.exceptions[0])
+    assert "taipy.core.exceptions.exceptions.DataNodeWritingError" in str(job.stacktrace[0])
 
 
 def test_auto_set_and_reload(current_datetime, job_id):
