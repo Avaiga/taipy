@@ -406,7 +406,7 @@ class Gui:
             newvalue = values.get(_var)
             # self._scopes.broadcast_data(_var, newvalue)
             if isinstance(newvalue, _TaipyData):
-                ws_dict[newvalue.get_name() + ".refresh"] = True
+                newvalue = None
             else:
                 if isinstance(newvalue, (_TaipyContent, _TaipyContentImage)):
                     ret_value = self.__get_content_accessor().get_info(
@@ -434,7 +434,7 @@ class Gui:
                     if len(w):
                         # do not send data that is not serializable
                         continue
-                ws_dict[_var] = newvalue
+            ws_dict[_var] = newvalue
         # TODO: What if value == newvalue?
         self.__send_ws_update_with_dict(ws_dict)
 
@@ -443,7 +443,7 @@ class Gui:
         newvalue = _getscopeattr_drill(self, var_name)
         if isinstance(newvalue, _TaipyData):
             ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
-            self.__send_ws_update_with_dict({var_name: ret_payload, newvalue.get_name() + ".refresh": False})
+            self.__send_ws_update_with_dict({var_name: ret_payload})
 
     def __request_var_update(self, payload: t.Any):
         if isinstance(payload, dict) and isinstance(payload.get("names"), list):

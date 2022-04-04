@@ -731,14 +731,6 @@ class _Builder:
             return self.__set_boolean_attribute("propagate", False)
         return self
 
-    def set_refresh(self):
-        return self.__set_react_attribute(
-            "refresh",
-            _get_client_var_name(
-                self.__hashes.get(self.__default_property_name, self.__default_property_name) + ".refresh"
-            ),
-        )
-
     def set_refresh_on_update(self):
         if self.__update_vars:
             self.set_attribute("updateVars", ";".join(self.__update_vars))

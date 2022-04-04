@@ -153,7 +153,7 @@ class _PandasDataAccessor(_DataAccessor):
     ) -> t.Dict[str, t.Any]:
         columns = payload.get("columns", [])
         if col_prefix:
-            columns = [c.removeprefix(col_prefix) for c in columns]
+            columns = [c[len(col_prefix):] for c in columns if c.startswith(col_prefix)]
         ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
         if paged:
