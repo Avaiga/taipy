@@ -14,7 +14,6 @@ class _JobModel:
     force: bool
     creation_date: str
     subscribers: List[Dict]
-    exceptions: List[Dict]
     stacktrace: List[str]
 
     def to_dict(self) -> Dict[str, Any]:
@@ -29,6 +28,5 @@ class _JobModel:
             force=data["force"],
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
-            exceptions=data["exceptions"],
             stacktrace=data["stacktrace"],
         )

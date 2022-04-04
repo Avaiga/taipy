@@ -25,8 +25,8 @@ def _run_callbacks(fn):
 class Job(_Entity):
     """Execution of a `Task^`.
 
-    A job handles the status of the execution, contains raising exceptions during the execution,
-    and notifies subscribers on status change.
+    A job handles the status of the execution, contains the stacktrace of exceptions that were
+    raised during the execution, and notifies subscribers on status change.
 
     Attributes:
         id (str): The identifier of this job.
@@ -35,7 +35,7 @@ class Job(_Entity):
             not.
         status (Status^): The current status of this job.
         creation_date (datetime): The date of this job's creation.
-        exceptions (List[Exception]): The list of exceptions raised during the execution.
+        stacktrace (List[str]): The list of stacktraces of the exceptions raised during the execution.
     """
 
     _MANAGER_NAME = "job"
@@ -47,7 +47,6 @@ class Job(_Entity):
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
         self._subscribers: List[Callable] = []
-        self._exceptions: List[Exception] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
 
@@ -110,10 +109,6 @@ class Job(_Entity):
         return self.id == other.id
 
     @property
-    def exceptions(self) -> List[Exception]:
-        return self._exceptions
-
-    @property
     def stacktrace(self) -> List[str]:
         return self._stacktrace
 
@@ -149,7 +144,7 @@ class Job(_Entity):
 
     @_run_callbacks
     def skipped(self):
-        """Set_ the status to _skipped_ and notify subscribers."""
+        """Set the status to _skipped_ and notify subscribers."""
         self.status = Status.SKIPPED
 
     def is_failed(self) -> bool:
@@ -247,12 +242,14 @@ class Job(_Entity):
     def update_status(self, ft: Future):
         """Update the job status based on the success or the failure of its execution.
         """
-        self._exceptions = ft.result()
-        if self._exceptions:
+        exceptions = ft.result()
+        if exceptions:
             self.failed()
-            self.__logger.error(f" {len(self._exceptions)} errors occurred during execution of job {self.id}")
-            for e in self.exceptions:
-                self.__logger.error("".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__)))
+            self.__logger.error(f" {len(exceptions)} errors occurred during execution of job {self.id}")
+            for e in exceptions:
+                st = "".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__))
+                self._stacktrace.append(st)
+                self.__logger.error(st)
         else:
             self.completed()
             self.__logger.info(f"job {self.id} is completed.")
