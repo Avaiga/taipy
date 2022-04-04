@@ -28,7 +28,7 @@ class _JobDispatcher:
         """Dispatches the given `Job^` on an available worker for execution.
 
         Parameters:
-            job (`Job^`): The job to submit on an executor with an available worker.
+            job (Job^): The job to submit on an executor with an available worker.
         """
         if job.force or self._needs_to_run(job.task):
             if job.force:
@@ -52,7 +52,7 @@ class _JobDispatcher:
         edition date.
 
         Parameters:
-             task (`Task^`): The task to run.
+             task (Task^): The task to run.
         Returns:
              True if the task needs to run. False otherwise.
         """
@@ -73,8 +73,8 @@ class _JobDispatcher:
         Reads inputs, execute function, and write outputs.
 
         Parameters:
-             job_id (`JobId^`): The id of the job.
-             task (`Task^`): The task to be executed.
+             job_id (JobId^): The id of the job.
+             task (Task^): The task to be executed.
         Returns:
              True if the task needs to run. False otherwise.
         """

@@ -20,11 +20,11 @@ class SQLDataNode(DataNode):
     Attributes:
         config_id (str): Identifier of the data node configuration. It must be a valid Python
             identifier.
-        scope (`Scope^`): The scope of this data node.
+        scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
         parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
-            `None`.
+            None.
         last_edition_date (datetime): The date and time of the last edition.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
@@ -141,8 +141,7 @@ class SQLDataNode(DataNode):
         return pd.read_sql_query(self.read_query, con=self.__engine)
 
     def _write(self, data) -> None:
-        """Check data against a collection of types to handle insertion on the database.
-        """
+        """Check data against a collection of types to handle insertion on the database."""
         with self.__engine.connect() as connection:
             write_table = table(self.write_table)
             if isinstance(data, pd.DataFrame):
