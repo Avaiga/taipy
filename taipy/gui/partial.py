@@ -43,7 +43,7 @@ class Partial(_Page):
         """Update partial content.
 
         Arguments:
-            state (`State^`): The current user state as received in any callback.
+            state (State^): The current user state as received in any callback.
             content (str): The new content to use and display.
         """
         if state and state._gui and callable(state._gui._update_partial):

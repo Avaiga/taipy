@@ -31,7 +31,7 @@ class Markdown(Page):
         """Initialize a new `Markdown` page.
 
         Arguments:
-            content: The text content or the path to the file holding the Markdown text
+            content (str): The text content or the path to the file holding the Markdown text
                 to be transformed.<br/>
                 If _content_ is a path to a readable file, the file is read as the Markdown
                 template content.
@@ -59,7 +59,7 @@ class Html(Page):
         """Initialize a new `Html` page.
 
         Arguments:
-            content: The text content or the path to the file holding the HTML text to
+            content (str): The text content or the path to the file holding the HTML text to
                 be transformed.<br/>
                 If _content_ is a path to a readable file, the file is read as the HTML
                 template content.
