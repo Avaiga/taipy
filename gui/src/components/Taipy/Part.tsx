@@ -19,7 +19,7 @@ const Part = (props: PartProps) => {
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     return render ? (
         <Box id={id} className={className}>
-            {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
+            {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
             {children}
         </Box>
     ) : null;

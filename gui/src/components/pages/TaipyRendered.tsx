@@ -4,7 +4,6 @@ import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
-import { setStyle } from "../../utils";
 import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
@@ -13,6 +12,7 @@ import { createPartialAction } from "../../context/taipyReducers";
 interface TaipyRenderedProps {
     path?: string;
     partial?: boolean;
+    fromBlock?: boolean;
 }
 
 interface HeadProps {
@@ -27,7 +27,26 @@ interface AxiosRenderer {
     head: HeadProps[];
 }
 
+// set global style the traditional way
+const setStyle = (id: string, styleString: string): void => {
+    let style = document.getElementById(id);
+    if (style && style.tagName !== "STYLE") {
+        style = null;
+        id = "TaiPy_" + id;
+    }
+    if (!style && styleString) {
+        style = document.createElement("style");
+        style.id = id;
+        document.head.append(style);
+    }
+    if (style) {
+        style.textContent = styleString;
+    }
+};
+
+
 const TaipyRendered = (props: TaipyRenderedProps) => {
+    const {partial, fromBlock} = props;
     const location = useLocation();
     const [JSX, setJSX] = useState("");
     const [head, setHead] = useState<HeadProps[]>([]);
@@ -37,7 +56,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
 
     useEffect(() => {
         // Fetch JSX Flask Backend Render
-        if (props.partial) {
+        if (partial) {
             dispatch(createPartialAction(path.slice(1), false));
         } else {
             axios
@@ -45,16 +64,18 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
             .then((result) => {
                 // set rendered JSX and CSS style from fetch result
                 result.data.jsx && setJSX(result.data.jsx);
-                result.data.style && setStyle(result.data.style);
-                result.data.head && setHead(result.data.head);
+                if (!fromBlock) {
+                    setStyle("Taipy_style", result.data.style || "");
+                    result.data.head && setHead(result.data.head);
+                }
             })
             .catch((error) => setJSX(`<h1>No data fetched from backend from ${path}</h1><br></br>${error}`));
         }
-    }, [path, state.id, dispatch, props.partial]);
+    }, [path, state.id, dispatch, partial, fromBlock]);
 
     return (
         <>
-            {head ? <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet> : null}
+            {head.length ? <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet> : null}
             <JsxParser
                 disableKeyGeneration={true}
                 bindings={state.data}
