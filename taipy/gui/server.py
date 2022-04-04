@@ -22,6 +22,10 @@ if t.TYPE_CHECKING:
 class _Server:
 
     __RE_JSX_RENDER_ROUTE = re.compile(r"/taipy-jsx/(.*)/")
+    __RE_OPENING_CURLY = re.compile(r"([^\"])(\{)")
+    __RE_CLOSING_CURLY = re.compile(r"(\})([^\"])")
+    __OPENING_CURLY = r"\1&#x7B;"
+    __CLOSING_CURLY = r"&#x7D;\2"
 
     def __init__(
         self,
@@ -105,7 +109,8 @@ class _Server:
 
     # Update to render as JSX
     def _render(self, html_fragment, style, head):
-        template_str = render_template_string(html_fragment)
+        template_str = _Server.__RE_OPENING_CURLY.sub(_Server.__OPENING_CURLY, html_fragment)
+        template_str = _Server.__RE_CLOSING_CURLY.sub(_Server.__CLOSING_CURLY, template_str)
         template_str = template_str.replace('"{!', "{")
         template_str = template_str.replace('!}"', "}")
         return self._direct_render_json(
