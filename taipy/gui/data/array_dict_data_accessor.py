@@ -33,7 +33,7 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                     return value
                 elif len(types) == 2 and list in types:
                     return [
-                        v if isinstance(v, pd.DataFrame) else pd.DataFrame({str(i): v}) for i, v in enumerate(value)
+                        v if isinstance(v, pd.DataFrame) else pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)
                     ]
         return pd.DataFrame(value)
 
