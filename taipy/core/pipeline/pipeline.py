@@ -155,7 +155,6 @@ class Pipeline(_Entity):
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None]):
         """Subscribe a function to be called on `Job^` status change.
-
         The subscription is applied to all jobs created from the pipeline's execution.
 
         Parameters:
