@@ -1,3 +1,14 @@
+# Copyright 2022 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 from unittest import mock
 
 from flask import url_for
@@ -39,9 +50,7 @@ def test_create_datanode(client, default_datanode_config):
     rep = client.post(datanodes_url)
     assert rep.status_code == 404
 
-    with mock.patch(
-        "src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config"
-    ) as config_mock:
+    with mock.patch("src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config") as config_mock:
         config_mock.return_value = default_datanode_config
         datanodes_url = url_for("api.datanodes", config_id="bar")
         rep = client.post(datanodes_url)
@@ -50,9 +59,7 @@ def test_create_datanode(client, default_datanode_config):
 
 def test_get_all_datanodes(client, default_datanode_config_list):
     for ds in range(10):
-        with mock.patch(
-            "src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config"
-        ) as config_mock:
+        with mock.patch("src.taipy.rest.api.resources.datanode.DataNodeList.fetch_config") as config_mock:
             config_mock.return_value = default_datanode_config_list[ds]
             datanodes_url = url_for("api.datanodes", config_id=config_mock.name)
             client.post(datanodes_url)
@@ -82,16 +89,12 @@ def test_write_datanode(client, default_datanode):
     with mock.patch("taipy.core.data._data_manager._DataManager._get") as config_mock:
         config_mock.return_value = default_datanode
         # Get DataNode
-        datanodes_read_url = url_for(
-            "api.datanode_reader", datanode_id=default_datanode.id
-        )
+        datanodes_read_url = url_for("api.datanode_reader", datanode_id=default_datanode.id)
         rep = client.get(datanodes_read_url)
         assert rep.status_code == 200
         assert rep.json == {"data": [1, 2, 3, 4, 5, 6]}
 
-        datanodes_write_url = url_for(
-            "api.datanode_writer", datanode_id=default_datanode.id
-        )
+        datanodes_write_url = url_for("api.datanode_writer", datanode_id=default_datanode.id)
         rep = client.put(datanodes_write_url, json=[1, 2, 3])
         assert rep.status_code == 200
 
