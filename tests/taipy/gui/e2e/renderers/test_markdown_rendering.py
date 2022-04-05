@@ -28,6 +28,8 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     page.expect_websocket()
     page.wait_for_selector("#text1")
     page.wait_for_selector("#Taipy_style", state="attached")
+    html_style = page.query_selector("#Taipy_style")
+    assert html_style.inner_text()
     function_evaluated = True
     try:
         page.wait_for_function('window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"')
