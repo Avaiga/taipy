@@ -160,11 +160,12 @@ class Pipeline(_Entity):
 
     def _get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
+        remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
+        dag.remove_nodes_from(remove)
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
     def subscribe(self, callback: Callable[[Pipeline, Job], None]):
         """Subscribe a function to be called on `Job^` status change.
-        
         The subscription is applied to all jobs created from the pipeline's execution.
 
         Parameters:
