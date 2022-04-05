@@ -30,7 +30,6 @@ class _Server:
         flask: t.Optional[Flask] = None,
         css_file: str = "",
         path_mapping: t.Optional[dict] = {},
-        cors_resources: dict[str, dict[str, t.Any]] | list[str] | str | None = None,
         content_security_policy: t.Optional[dict] = None,
         force_https: bool = False,
     ):
@@ -52,10 +51,7 @@ class _Server:
             json=json,
         )
         # this is necessary since CORS resources can't been None eventhough python stub allows for None
-        if cors_resources:
-            CORS(self._flask, resources=cors_resources)
-        else:
-            CORS(self._flask)
+        CORS(self._flask)
 
         Talisman(self._flask, content_security_policy=content_security_policy, force_https=force_https)
 

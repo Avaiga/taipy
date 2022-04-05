@@ -108,9 +108,6 @@ class Gui:
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
         flask: t.Optional[Flask] = None,
-        cors_resources: dict[str, dict[str, t.Any]] | list[str] | str | None = None,
-        content_security_policy: t.Optional[dict] = None,
-        force_https: bool = False,
     ):
         """Initialize a new Gui instance.
 
@@ -157,9 +154,6 @@ class Gui:
         self._path_mapping = path_mapping
         self._flask = flask
         self._css_file = css_file
-        self._cors_resources = cors_resources
-        self._content_security_policy = content_security_policy
-        self._force_https = force_https
 
         self._config = _Config()
         self.__content_accessor = None
@@ -966,7 +960,8 @@ class Gui:
     def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
 
-    def get_flask_app(self):
+    def get_flask_app(self) -> Flask:
+        """Get the internal Flask application"""
         return self._server.get_flask()
 
     def _set_frame(self, frame: FrameType):
@@ -997,30 +992,6 @@ class Gui:
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
                 section in the User Manual for more information.
         """
-        if not hasattr(self, "_server"):
-            self._server = _Server(
-                self,
-                path_mapping=self._path_mapping,
-                flask=self._flask,
-                css_file=self._css_file,
-                cors_resources=self._cors_resources,
-                content_security_policy=self._content_security_policy,
-                force_https=self._force_https,
-            )
-        if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
-            self._server._thread.kill()
-            self._server._thread.join()
-            self._flask_blueprint = []
-            self._server = _Server(
-                self,
-                path_mapping=self._path_mapping,
-                flask=self._flask,
-                css_file=self._css_file,
-                cors_resources=self._cors_resources,
-                content_security_policy=self._content_security_policy,
-                force_https=self._force_https,
-            )
-            self._bindings()._new_scopes()
 
         app_config = self._config.config
 
@@ -1032,6 +1003,32 @@ class Gui:
 
         # Load application config from multiple sources (env files, kwargs, command line)
         self._config._build_config(run_root_dir, self.__env_filename, kwargs)
+
+        # Init server if there is no server
+        if not hasattr(self, "_server"):
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                content_security_policy=self._get_config("content_security_policy", None),
+                force_https=self._get_config("force_https", False),
+            )
+
+        # Stop and reinitialize the server if it is still running as a thread
+        if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
+            self._server._thread.kill()
+            self._server._thread.join()
+            self._flask_blueprint = []
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                content_security_policy=self._get_config("content_security_policy", None),
+                force_https=self._get_config("force_https", False),
+            )
+            self._bindings()._new_scopes()
 
         # Special config for notebook runtime
         if _is_in_notebook() or run_in_thread:

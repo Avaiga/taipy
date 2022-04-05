@@ -23,4 +23,6 @@ default_config: Config = {
     "flask_log": False,
     "margin": "1em",
     "run_browser": True,
+    "content_security_policy": None,
+    "force_https": False,
 }
