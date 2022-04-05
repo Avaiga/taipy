@@ -103,7 +103,6 @@ def test_get_sorted_tasks():
     #       |---> t1 ---|      -------------------------> t3 ---> s6
     #       |           |      |
     # s2 ---             ---> s4 ---> t4 ---> s7
-    print([[node.id for node in nodes] for nodes in pipeline._get_sorted_tasks()])
     assert pipeline._get_sorted_tasks() == [[task_1], [task_2, task_4], [task_3]]
 
     data_node_1 = DataNode("foo", Scope.PIPELINE, "s1")
