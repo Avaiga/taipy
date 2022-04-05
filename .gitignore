@@ -93,8 +93,3 @@ tasks
 pickles
 
 *.sqlite3
-
-res.csv
-res.xlsx
-sum.csv
-sum.xlsx

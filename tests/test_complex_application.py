@@ -36,6 +36,20 @@ def return_a_number():
 
 
 def test_complex():
+    # d1 --- t1
+    # |
+    # | --- t2 --- d5 --- |                   t10 --- d12
+    #        |            |                   |
+    #        |            |                   |
+    #        d2           | --- t5 --- d7 --- t7 --- d9 --- t8 --- d10 --- t9 --- d11
+    #                     |                   |             |
+    # d3 --- |            |                   |             |
+    # |      |            |     t6 --- d8 -------------------
+    # |      t3 --- d6 ---|
+    # |      |
+    # |      |
+    # t4     d4
+
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
@@ -112,16 +126,5 @@ def test_complex():
     assert average(csv_sum_res["number"] - excel_sum_res["number"]) == csv_out.to_numpy()[0]
     assert average((csv_sum_res["number"] - excel_sum_res["number"]) * 10) == excel_out.to_numpy()[0]
 
-    # d1 --- t1
-    # |
-    # | --- t2 --- d5 --- |                   t10 --- d12
-    #        |            |                   |
-    #        |            |                   |
-    #        d2           | --- t5 --- d7 --- t7 --- d9 --- t8 --- d10 --- t9 --- d11
-    #                     |                   |             |
-    # d3 --- |            |                   |             |
-    # |      |            |     t6 --- d8 -------------------
-    # |      t3 --- d6 ---|
-    # |      |
-    # |      |
-    # t4     d4
+    for path in [csv_path_sum, excel_path_sum, csv_path_out, excel_path_out]:
+        os.remove(path)
