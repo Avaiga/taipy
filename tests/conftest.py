@@ -1,3 +1,14 @@
+# Copyright 2022 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 import os
 import shutil
 import uuid
@@ -10,9 +21,12 @@ from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
 from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager as JobManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
+import pandas as pd
+from datetime import datetime, timedelta
+
 
 from src.taipy.rest.app import create_app
-from .setup.shared.algorithms import *
+from .setup.shared.algorithms import forecast, evaluate
 
 
 @pytest.fixture
@@ -38,7 +52,7 @@ def setup_end_to_end():
 
     pipeline_cfg = Config.configure_pipeline("pipeline", [forecast_task_cfg, evaluate_task_cfg])
 
-    scenario_cfg = Config.configure_scenario("scenario", [pipeline_cfg], frequency=Frequency.DAILY)
+    Config.configure_scenario("scenario", [pipeline_cfg], frequency=Frequency.DAILY)
 
 
 @pytest.fixture(scope="session")
