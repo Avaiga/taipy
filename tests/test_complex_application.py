@@ -47,11 +47,9 @@ def test_complex():
 
     inp_csv_dn_1 = Config.configure_csv_data_node("dn_csv_in_1", path=csv_path_inp)
     inp_csv_dn_2 = Config.configure_csv_data_node("dn_csv_in_2", path=csv_path_inp)
-    inp_csv_dn_3 = Config.configure_csv_data_node("dn_csv_in_3", path=csv_path_inp)
 
     inp_excel_dn_1 = Config.configure_excel_data_node("dn_excel_in_1", path=excel_path_inp, sheet_name="Sheet1")
     inp_excel_dn_2 = Config.configure_excel_data_node("dn_excel_in_2", path=excel_path_inp, sheet_name="Sheet1")
-    inp_excel_dn_3 = Config.configure_excel_data_node("dn_excel_in_3", path=excel_path_inp, sheet_name="Sheet1")
 
     placeholder = Config.configure_in_memory_data_node("dn_placeholder", 10)
 
@@ -67,9 +65,9 @@ def test_complex():
 
     task_print_csv = Config.configure_task("task_print_csv", print, input=inp_csv_dn_1)
     task_print_excel = Config.configure_task("task_print_excel", print, input=inp_excel_dn_1)
-    task_sum_csv = Config.configure_task("task_sum_csv", sum, input=[inp_csv_dn_2, inp_csv_dn_3], output=dn_csv_sum)
+    task_sum_csv = Config.configure_task("task_sum_csv", sum, input=[inp_csv_dn_2, inp_csv_dn_1], output=dn_csv_sum)
     task_sum_excel = Config.configure_task(
-        "task_sum_excel", sum, input=[inp_excel_dn_2, inp_excel_dn_3], output=dn_excel_sum
+        "task_sum_excel", sum, input=[inp_excel_dn_2, inp_excel_dn_1], output=dn_excel_sum
     )
 
     task_subtract_csv_excel = Config.configure_task(
@@ -113,3 +111,17 @@ def test_complex():
     assert excel_sum_res.to_numpy().flatten().tolist() == [i * 2 for i in range(1, 11)]
     assert average(csv_sum_res["number"] - excel_sum_res["number"]) == csv_out.to_numpy()[0]
     assert average((csv_sum_res["number"] - excel_sum_res["number"]) * 10) == excel_out.to_numpy()[0]
+
+    # d1 --- t1
+    # |
+    # | --- t2 --- d5 --- |                   t10 --- d12
+    #        |            |                   |
+    #        |            |                   |
+    #        d2           | --- t5 --- d7 --- t7 --- d9 --- t8 --- d10 --- t9 --- d11
+    #                     |                   |             |
+    # d3 --- |            |                   |             |
+    # |      |            |     t6 --- d8 -------------------
+    # |      t3 --- d6 ---|
+    # |      |
+    # |      |
+    # t4     d4

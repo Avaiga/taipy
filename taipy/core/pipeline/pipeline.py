@@ -149,7 +149,7 @@ class Pipeline(_Entity):
 
     def _get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
-        remove = [node for node, degree in dict(dag.degree()).items() if degree == 1 and isinstance(node, DataNode)]
+        remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
         dag.remove_nodes_from(remove)
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
