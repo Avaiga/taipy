@@ -10,7 +10,6 @@ def test_chart_md_1(gui: Gui, helpers, csvdata):
     md_string = "<|{csvdata}|chart|x=Day|selected_color=green|y[1]=Daily hospital occupancy|label[1]=Entity|y[2]=Daily hospital occupancy|label[2]=Code|mode[2]=markers|color[2]=red|type[2]=scatter|xaxis[2]=x2|layout={subplot_layout}|on_range_change=range_change|width=100%|height=100%|selected={selected_indices}|>"
     expected_list = [
         "<Chart",
-        "refresh={csvdata__refresh}",
         "selected0={selected_indices}",
         "selected1={selected_indices}",
         'height="100%"',
@@ -33,7 +32,6 @@ def test_chart_html_1(gui: Gui, helpers, csvdata):
     html_string = '<taipy:chart data="{csvdata}" x="Day" selected_color="green" y[1]="Daily hospital occupancy" label[1]="Entity" y[2]="Daily hospital occupancy" label[2]="Code" mode[2]="markers" color[2]="red" type[2]="scatter" xaxis[2]="x2" layout="{subplot_layout}" on_range_change="range_change" width="100%" height="100%" selected="{selected_indices}"  />'
     expected_list = [
         "<Chart",
-        "refresh={csvdata__refresh}",
         "selected0={selected_indices}",
         "selected1={selected_indices}",
         'height="100%"',
@@ -56,7 +54,6 @@ def test_chart_html_2(gui: Gui, helpers, csvdata):
     html_string = '<taipy:chart x="Day" selected_color="green" y[1]="Daily hospital occupancy" label[1]="Entity" y[2]="Daily hospital occupancy" label[2]="Code" mode[2]="markers" color[2]="red" type[2]="scatter" xaxis[2]="x2" layout="{subplot_layout}" on_range_change="range_change" width="100%" height="100%" selected="{selected_indices}" >{csvdata}</taipy:chart>'
     expected_list = [
         "<Chart",
-        "refresh={csvdata__refresh}",
         "selected0={selected_indices}",
         "selected1={selected_indices}",
         'height="100%"',

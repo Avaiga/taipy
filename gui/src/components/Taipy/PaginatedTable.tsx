@@ -67,7 +67,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         pageSizeOptions,
         allowAllRows = false,
         showAll = false,
-        refresh = false,
         height,
         selected = [],
         updateVars,
@@ -147,7 +146,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             : "";
         const cols = colsOrder.map((col) => columns[col].dfid);
         pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}`;
-        if (!props.data || props.data[pageKey.current] === undefined || !!refresh) {
+        if (!props.data || props.data[pageKey.current] === undefined) {
             setLoading(true);
             const applies = aggregates.length
                 ? colsOrder.reduce<Record<string, unknown>>((pv, col) => {
@@ -180,7 +179,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         startIndex,
-        refresh,
         aggregates,
         colsOrder,
         columns,
