@@ -1,3 +1,4 @@
+exclude: 'tools/'
 repos:
 -   repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v0.910'  # Use the sha / tag you want to point at
@@ -10,12 +11,24 @@ repos:
                 'types-tzlocal',
         ]
 -   repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.10
+    rev: v1.1.13
     hooks:
     -   id: forbid-crlf
     -   id: remove-crlf
     -   id: forbid-tabs
     -   id: remove-tabs
+    -   id: insert-license
+        files: \.py$
+        args:
+        - --license-filepath
+        - .license-header
+    -   id: insert-license
+        files: \.(js|css)$
+        args:
+        - --license-filepath
+        - .license-header
+        - --comment-style
+        - /*| *| */
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
