@@ -23,4 +23,5 @@ default_config: Config = {
     "flask_log": False,
     "margin": "1em",
     "run_browser": True,
+    "watermark": "Taipy inside",
 }

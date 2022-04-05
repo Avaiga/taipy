@@ -34,6 +34,7 @@ ConfigParameter = t.Literal[
     "flask_log",
     "margin",
     "run_browser",
+    "watermark",
 ]
 
 Config = t.TypedDict(
@@ -61,6 +62,7 @@ Config = t.TypedDict(
         "flask_log": bool,
         "margin": t.Union[str, None],
         "run_browser": bool,
+        "watermark": t.Union[str, None],
     },
     total=False,
 )
