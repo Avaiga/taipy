@@ -31,13 +31,12 @@ def test_button_action(page: "Page", gui: Gui, helpers):
     text1 = page.query_selector("#text1")
     assert text1.inner_text() == "10"
     page.click("#button1")
-    function_evaluated = False
+    function_evaluated = True
     try:
         page.wait_for_function("document.querySelector('#text1').innerText !== '10'")
-        function_evaluated = True
-    except:
-        pass
+    except Exception as e:
+        function_evaluated = False
+        logging.getLogger().debug(f"Function evaluation timeout.\n{e}")
     if function_evaluated:
-        assert text1.inner_text() == "20"
-    else:
-        logging.getLogger().debug("Function evaluation timeout.")
+        text1_2 = page.query_selector("#text1")
+        assert text1_2.inner_text() == "20"

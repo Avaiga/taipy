@@ -71,7 +71,7 @@ class Gui:
             It defaults to the _on_change_ global function defined in the Python
             application. If there is no such function, user interactions will not trigger
             anything.
-        state (`State^`): **Only defined when running in an IPython notebook context.**<br/>
+        state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
 
@@ -112,7 +112,7 @@ class Gui:
         """Initialize a new Gui instance.
 
         Arguments:
-            page (Optional[Union[str, Page]]): An optional `Page^` instance that is used
+            page (Optional[Union[str, Page^]]): An optional `Page^` instance that is used
                 when there is a single page in this interface, referenced as the _root_
                 page (located at `/`).<br/>
                 If _page_ is a raw string and if it holds a path to a readable file then
@@ -122,10 +122,10 @@ class Gui:
                 Note that if _pages_ is provided, those pages are added as well.
             pages (Optional[dict]): Used if you want to initialize this instance with a set
                 of pages.<br/>
-                The method `(Gui.)add_pages()^` is called if _pages_ is not None, and
-                you can find details on the possible values of this argument in the
+                The method `(Gui.)add_pages(pages)^` is called if _pages_ is not None.
+                You can find details on the possible values of this argument in the
                 documentation for this method.
-            css_file: An optional pathname to a CSS file that gets used as a style sheet in
+            css_file (str): An optional pathname to a CSS file that gets used as a style sheet in
                 all the pages.<br/>
                 The default value is a file that has the same base name as the Python
                 file defining the `main` function, sitting next to this Python file,
@@ -698,7 +698,7 @@ class Gui:
 
         Arguments:
             name: The name of the page.
-            page (Union[str, Page]): The content of the page.<br/>
+            page (Union[str, Page^]): The content of the page.<br/>
                 It can be an instance of `Markdown^` or `Html^`.<br/>
                 If _page_ is a string, then:
 
@@ -741,7 +741,7 @@ class Gui:
         """Add several pages to the graphical User Interface.
 
         Arguments:
-            pages (Union[dict[str, Union[str, Page]], str]): The pages to add.<br/>
+            pages (Union[dict[str, Union[str, Page^]], str]): The pages to add.<br/>
                 If _pages_ is a dictionnary, a page is added to this `Gui` instance
                 for each of the entries in _pages_:
 
@@ -839,7 +839,7 @@ class Gui:
         when and how to use this class.
 
         Arguments:
-            page (Union[str, `Page^`]): The page to create a new Partial from.<br/>
+            page (Union[str, Page^]): The page to create a new Partial from.<br/>
                 It can be an instance of `Markdown^` or `Html^`.<br/>
                 If _page_ is a string, then:
 
@@ -980,9 +980,9 @@ class Gui:
         section of the User Manual for details).
 
         Arguments:
-            run_server: Whether or not to run a Web server locally.
+            run_server (bool): Whether or not to run a Web server locally.
                 If set to _False_, a Web server is _not_ created and started.
-            run_in_thread: Whether or not to run a Web server in a separated thread.
+            run_in_thread (bool): Whether or not to run a Web server in a separated thread.
                 If set to _True_, the Web server is run is a separated thread.
                 Note that if you are running in an IPython notebook context, the Web
                 server is always run in a separate thread.

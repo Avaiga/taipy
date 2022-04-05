@@ -23,9 +23,9 @@ class Icon:
         """Initialize a new Icon.
 
         Arguments:
-            path: The path to an image file.
-            text: The text associated to the image. If _text_ is None, there is no text
-                associated to this image.
+            path (str): The path to an image file.
+            text (Optional[str]): The text associated to the image. If _text_ is None,
+                there is no text associated to this image.
         """
         self.path = path
         self.text = text

@@ -93,11 +93,11 @@ class State:
         as a callback in a visual element.
 
         Args:
-            name: The variable name to assign to.
-            value: The new variable value.
+            name (str): The variable name to assign to.
+            value (Any): The new variable value.
 
         Returns:
-            The previous value of the variable.
+            Any: The previous value of the variable.
         """
         val = attrgetter(name)(self)
         _attrsetter(self, name, value)

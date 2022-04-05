@@ -6,8 +6,7 @@ from .utils import _is_in_notebook, _varname_from_content
 
 
 class Page(ABC):
-    """
-    Generic page generator.
+    """Generic page generator.
     
     The `Page` class transforms template text into actual pages that can be displayed
     on a Web browser.
@@ -22,7 +21,7 @@ class Page(ABC):
         """Initialize a new Page with the indicated content.
 
         Arguments:
-            content: The text content or the path to the file holding the text to be transformed.
+            content (str): The text content or the path to the file holding the text to be transformed.
 
         If _content_ is a path to a readable file, the file is read entirely as the text template.
         """
@@ -48,7 +47,7 @@ class Page(ABC):
             This function can only be used an IPython notebook context.
 
         Arguments:
-            content: The text content or the path to the file holding the text to be transformed.
+            content (str): The text content or the path to the file holding the text to be transformed.
                 If _content_ is a path to a readable file, the file is read entirely as the text
                 template.
 
