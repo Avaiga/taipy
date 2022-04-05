@@ -81,8 +81,7 @@ class _Factory:
         )
         .get_chart_config("scatter", "lines+markers")
         .set_propagate()
-        .set_refresh_on_update()
-        .set_refresh(),
+        .set_refresh_on_update(),
         "content": lambda gui, control_type, attrs: _Builder(
             gui=gui, control_type=control_type, element_name="PageContent", attributes=attrs
         ),
@@ -421,7 +420,6 @@ class _Factory:
                 ("hover_text", _AttributeType.dynamic_string),
             ]
         )
-        .set_refresh()
         .set_propagate()
         .get_list_attribute("selected", _AttributeType.number)
         .set_refresh_on_update()

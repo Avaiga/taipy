@@ -137,7 +137,6 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         className,
         id,
         updateVarName,
-        refresh = false,
         height = "60vh",
         width = "100vw",
         updateVars,
@@ -194,9 +193,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     useEffect(() => {
-        setRows([]);
-        setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
-    }, [refresh]);
+        if (props.data === null) {
+            setRows([]);
+            setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+        }
+    }, [props.data]);
 
     const createSortHandler = useCallback(
         (col: string) => (event: MouseEvent<unknown>) => {

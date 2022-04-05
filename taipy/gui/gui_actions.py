@@ -9,7 +9,7 @@ def download(state: State, content: t.Any, name: t.Optional[str] = "", on_action
     """Download content to the client.
 
     Arguments:
-        state (`State^`): The current user state as received in any callback.
+        state (State^): The current user state as received in any callback.
         content: File path or file content.
         name: File name for the content on the client browser (default to content name).
         on_action: Function called when the download starts.
@@ -30,7 +30,7 @@ def notify(
     """Send a notification to the user interface.
 
     Arguments:
-        state (`State^`): The current user state as received in any callback.
+        state (State^): The current user state as received in any callback.
         notification_type: The notification type. This can be one of _"success"_, _"info"_,
             _"warning"_, or _"error"_.<br/>
             To remove the last notification, set this parameter to the empty string.
@@ -72,7 +72,7 @@ def hold_control(
     with the visual elements.
 
     Arguments:
-        state (`State^`): The current user state as received in any callback.
+        state (State^): The current user state as received in any callback.
         callback (Optional[Union[str, Callable]]): the function to be called if the user
             chooses to cancel.<br/>
             If empty or None, no cancel action is provided to the user.
@@ -91,7 +91,7 @@ def resume_control(state: State):
     must be allowed again for the user.
 
     Arguments:
-        state (`State^`): The current user state as received in any callback.
+        state (State^): The current user state as received in any callback.
     """
     if state and isinstance(state._gui, Gui):
         state._gui._resume_actions()
@@ -103,7 +103,7 @@ def navigate(state: State, to: t.Optional[str] = ""):
     """Navigate to a page.
 
     Arguments:
-        state (`State^`): The current user state as received in any callback.
+        state (State^): The current user state as received in any callback.
         to: The name of the page to navigate to. This must be a valid page identifier.
             If ommitted, the application navigates to the root page.
     """

@@ -68,7 +68,6 @@ def test_expression_table_control(gui: Gui, helpers):
     expected_list = [
         "<Table",
         'columns="{&quot;Letters&quot;: {&quot;index&quot;: 0, &quot;type&quot;: &quot;object&quot;, &quot;dfid&quot;: &quot;Letters&quot;}, &quot;Numbers&quot;: {&quot;index&quot;: 1, &quot;type&quot;: &quot;int64&quot;, &quot;dfid&quot;: &quot;Numbers&quot;}}"',
-        "refresh={tp_pd_concat_series_1_series_2_axis_1__0__refresh}",
         'updateVarName="_TpD_tp_pd_concat_series_1_series_2_axis_1__0"',
         "data={_TpD_tp_pd_concat_series_1_series_2_axis_1__0}",
     ]
