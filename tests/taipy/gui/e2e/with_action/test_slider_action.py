@@ -35,7 +35,8 @@ def test_slider_action(page: "Page", gui: Gui, helpers):
         function_evaluated = False
         logging.getLogger().debug(f"Function evaluation timeout.\n{e}")
     if function_evaluated:
-        assert text1.inner_text() == "20"
+        text1_2 = page.query_selector("#text1")
+        assert text1_2.inner_text() == "20"
 
 
 @pytest.mark.teste2e
@@ -69,4 +70,5 @@ Slider: <|{d.v2}|slider|id=slider1|>
         function_evaluated = False
         logging.getLogger().debug(f"Function evaluation timeout.\n{e}")
     if function_evaluated:
-        assert text1.inner_text() == "40"
+        text1_2 = page.query_selector("#text1")
+        assert text1_2.inner_text() == "40"

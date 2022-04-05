@@ -109,7 +109,7 @@ const Dialog = (props: DialogProps) => {
             </Tooltip>
 
             <DialogContent dividers>
-                {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
+                {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
                 {props.children}
             </DialogContent>
             {labels.length ? (

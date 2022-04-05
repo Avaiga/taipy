@@ -8,13 +8,6 @@ declare global {
     }
 }
 
-// set global style the traditional way
-export const setStyle = (styleString: string): void => {
-    const style = document.createElement("style");
-    style.textContent = styleString;
-    document.head.append(style);
-};
-
 // return client server timeZone offset in minutes
 export const getClientServerTimeZoneOffset = (tz: string): number =>
     (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;

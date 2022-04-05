@@ -115,7 +115,7 @@ const Pane = (props: PaneProps) => {
             ) : null}
             <Tooltip title={hover || ""}>
                 <>
-                    {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
+                    {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
                     {props.children}
                 </>
             </Tooltip>
