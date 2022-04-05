@@ -94,7 +94,7 @@ pickles
 
 *.sqlite3
 
-res.csv
-res.xlsx
-sum.csv
-sum.xlsx
+# res.csv
+# res.xlsx
+# sum.csv
+# sum.xlsx
