@@ -22,8 +22,8 @@ ConfigParameter = t.Literal[
     "favicon",
     "title",
     "theme",
-    "theme[light]",
-    "theme[dark]",
+    "light_theme",
+    "dark_theme",
     "use_arrow",
     "system_notification",
     "notification_duration",
@@ -34,6 +34,7 @@ ConfigParameter = t.Literal[
     "flask_log",
     "margin",
     "run_browser",
+    "watermark",
 ]
 
 Config = t.TypedDict(
@@ -49,8 +50,8 @@ Config = t.TypedDict(
         "favicon": t.Union[str, None],
         "title": t.Union[str, None],
         "theme": t.Union[t.Dict[str, t.Any], None],
-        "theme[light]": t.Union[t.Dict[str, t.Any], None],
-        "theme[dark]": t.Union[t.Dict[str, t.Any], None],
+        "light_theme": t.Union[t.Dict[str, t.Any], None],
+        "dark_theme": t.Union[t.Dict[str, t.Any], None],
         "use_arrow": bool,
         "system_notification": bool,
         "notification_duration": int,
@@ -61,6 +62,7 @@ Config = t.TypedDict(
         "flask_log": bool,
         "margin": t.Union[str, None],
         "run_browser": bool,
+        "watermark": t.Union[str, None],
     },
     total=False,
 )

@@ -12,8 +12,8 @@ default_config: Config = {
     "favicon": None,
     "title": None,
     "theme": None,
-    "theme[light]": None,
-    "theme[dark]": None,
+    "light_theme": None,
+    "dark_theme": None,
     "use_arrow": False,
     "system_notification": False,
     "notification_duration": 3000,
@@ -23,4 +23,5 @@ default_config: Config = {
     "flask_log": False,
     "margin": "1em",
     "run_browser": True,
+    "watermark": "Taipy inside",
 }
