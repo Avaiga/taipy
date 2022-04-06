@@ -16,7 +16,7 @@ specific language governing permissions and limitations under the License.
 ## What is Taipy
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-core_ so that a minimal
+[website](https://www.taipy.io). Taipy is split into multiple repositories so that a minimal
 installation can be performed.
 
 
