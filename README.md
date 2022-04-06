@@ -41,4 +41,11 @@ Want to be part of the _Taipy_ community? Check out our [`CODE_OF_CONDUCT.md`](C
 
 ## Directory Structure
 
-TODO
+- `taipy`:
+    - `_run.py`: The python module exposing the method `run` to use to start a Taipy application.
+- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-core_.
+- `CONTRIBUTING.md`: Instructions to contribute to _taipy-core_.
+- `INSTALLATION.md`: Instructions to install _taipy-core_.
+- `LICENSE`: The Apache 2.0 License.
+- `README.md`: Current file.
+- `setup.py`: The setup script managing building, distributing, and installing _taipy-core_.
