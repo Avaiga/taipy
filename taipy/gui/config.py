@@ -22,8 +22,8 @@ ConfigParameter = t.Literal[
     "favicon",
     "title",
     "theme",
-    "theme[light]",
-    "theme[dark]",
+    "light_theme",
+    "dark_theme",
     "use_arrow",
     "system_notification",
     "notification_duration",
@@ -36,6 +36,7 @@ ConfigParameter = t.Literal[
     "run_browser",
     "content_security_policy",
     "force_https",
+    "watermark",
 ]
 
 Config = t.TypedDict(
@@ -51,8 +52,8 @@ Config = t.TypedDict(
         "favicon": t.Union[str, None],
         "title": t.Union[str, None],
         "theme": t.Union[t.Dict[str, t.Any], None],
-        "theme[light]": t.Union[t.Dict[str, t.Any], None],
-        "theme[dark]": t.Union[t.Dict[str, t.Any], None],
+        "light_theme": t.Union[t.Dict[str, t.Any], None],
+        "dark_theme": t.Union[t.Dict[str, t.Any], None],
         "use_arrow": bool,
         "system_notification": bool,
         "notification_duration": int,
@@ -65,6 +66,7 @@ Config = t.TypedDict(
         "run_browser": bool,
         "content_security_policy": t.Optional[dict],
         "force_https": bool,
+        "watermark": t.Union[str, None],
     },
     total=False,
 )

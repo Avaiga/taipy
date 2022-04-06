@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" href="/favicon.png" />
     <title>{{title}}</title>
     {%- if themes -%}
-    window.taipyUserThemes={{themes|tojson|safe}};{% endif %}</script>
+    <script>window.taipyUserThemes={{themes|tojson|safe}};</script>{% endif %}
   </head>
   <body >
     <link
@@ -18,5 +18,6 @@
     <link rel="stylesheet" href="{{app_css}}" />
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"{%- if root_margin -%} style="margin:{{root_margin}};"{% endif %}></div>
+    {%- if watermark -%}<span class="taipy-watermark" style="position:fixed;bottom:1em;opacity:0.4;color:gray;left:50%;transform:translateX(-50%);font-size:0.7em;">{{watermark}}</span>{% endif %}
   </body>
 </html>

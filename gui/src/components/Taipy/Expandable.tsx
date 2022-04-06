@@ -39,7 +39,7 @@ const Expandable = (props: ExpandableProps) => {
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>{title || defaultTitle}</AccordionSummary>
                 ) : null}
                 <AccordionDetails>
-                    {page ? <TaipyRendered path={"/" + page} partial={partial} /> : null}
+                    {page ? <TaipyRendered path={"/" + page} partial={partial} fromBlock={true} /> : null}
                     {props.children}
                 </AccordionDetails>
             </Accordion>

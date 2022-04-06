@@ -12,8 +12,8 @@ default_config: Config = {
     "favicon": None,
     "title": None,
     "theme": None,
-    "theme[light]": None,
-    "theme[dark]": None,
+    "light_theme": None,
+    "dark_theme": None,
     "use_arrow": False,
     "system_notification": False,
     "notification_duration": 3000,
@@ -25,4 +25,5 @@ default_config: Config = {
     "run_browser": True,
     "content_security_policy": None,
     "force_https": False,
+    "watermark": "Taipy inside",
 }

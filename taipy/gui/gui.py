@@ -211,8 +211,8 @@ class Gui:
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
         theme = self._get_config("theme", None)
-        dark_theme = self._get_config("theme[dark]", None)
-        light_theme = self._get_config("theme[light]", None)
+        dark_theme = self._get_config("dark_theme", None)
+        light_theme = self._get_config("light_theme", None)
         res = {}
         if theme:
             res["base"] = theme
@@ -707,6 +707,9 @@ class Gui:
                 - If it is not, the page content is read from this string as
                   Markdown text.
             style (Optional[str]): Additional CSS style to apply to this page.
+                - if there is style associated with a page, it is used at a global level
+                - if there is no style associated with the page, the style is cleared at a global level
+                - if the page is embedded in a block control, the style is ignored
 
         Note that page names cannot start with the slash ('/') character and that each
         page must have a unique name.
