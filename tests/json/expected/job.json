@@ -10,5 +10,5 @@
             "fct_module": "taipy.core._scheduler._scheduler"
         }
     ],
-    "exceptions": []
+    "stacktrace": []
 }

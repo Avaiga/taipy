@@ -21,7 +21,7 @@ from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager import _JobManager as JobManager
 from taipy.core.task._task_manager import _TaskManager as TaskManager
 
-from ..schemas import JobResponseSchema, JobSchema
+from ..schemas import JobSchema
 
 
 class JobResource(Resource):
@@ -76,7 +76,7 @@ class JobResource(Resource):
         self.logger = kwargs.get("logger")
 
     def get(self, job_id):
-        schema = JobResponseSchema()
+        schema = JobSchema()
         manager = JobManager()
         job = manager._get(job_id)
         if not job:
@@ -144,7 +144,7 @@ class JobList(Resource):
         return Config.tasks[config_id]
 
     def get(self):
-        schema = JobResponseSchema(many=True)
+        schema = JobSchema(many=True)
         manager = JobManager()
         jobs = manager._get_all()
         return schema.dump(jobs)
@@ -153,7 +153,7 @@ class JobList(Resource):
         schema = JobSchema()
 
         manager = JobManager()
-        response_schema = JobResponseSchema()
+        response_schema = JobSchema()
         job_data = schema.load(request.json)
         job = self.__create_job_from_schema(job_data)
 

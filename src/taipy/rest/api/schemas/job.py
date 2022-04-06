@@ -13,14 +13,15 @@ from marshmallow import Schema, fields
 
 
 class CallableSchema(Schema):
-    name = fields.String()
-    module = fields.String()
+    fct_name = fields.String()
+    fct_module = fields.String()
 
 
 class JobSchema(Schema):
-    task_name = fields.String()
-    callables = fields.Nested(CallableSchema)
-
-
-class JobResponseSchema(JobSchema):
     id = fields.String()
+    task_id = fields.String()
+    status = fields.String()
+    force = fields.Boolean()
+    creation_date = fields.String()
+    subscribers = fields.Nested(CallableSchema)
+    stacktrace = fields.List(fields.String)
