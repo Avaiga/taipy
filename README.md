@@ -13,6 +13,15 @@ Unless required by applicable law or agreed to in writing, software distributed 
 an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
+## Usage
+- [License](#license)
+- [Usage](#usage)
+- [Taipy](#what-is-taipy)
+- [Installation](#installation)
+- [Contributing](#contributing)
+- [Code of conduct](#code-of-conduct)
+- [Directory Structure](#directory-structure)
+- 
 ## What is Taipy
 
 Taipy is a Python library for creating Business Applications. More information on our
