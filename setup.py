@@ -54,7 +54,7 @@ setup(
     long_description=readme,
     keywords="taipy-core",
     name="taipy-core",
-    packages=find_packages(include=["taipy.core", "taipy.core.*"]),
+    packages=find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
