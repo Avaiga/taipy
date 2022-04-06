@@ -40,7 +40,7 @@ jobs:
 
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
-          python -c "import taipy.rest as rest"
+          python -c "import taipy as tp; tp.rest"
 
       - name: Notify user if failed
         if: failure()
