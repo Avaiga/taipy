@@ -222,8 +222,8 @@ class Gui:
 
     def _get_themes(self) -> t.Optional[t.Dict[str, t.Any]]:
         theme = self._get_config("theme", None)
-        dark_theme = self._get_config("theme[dark]", None)
-        light_theme = self._get_config("theme[light]", None)
+        dark_theme = self._get_config("dark_theme", None)
+        light_theme = self._get_config("light_theme", None)
         res = {}
         if theme:
             res["base"] = theme

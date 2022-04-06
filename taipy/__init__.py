@@ -9,4 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from .gui import Gui
+from importlib.util import find_spec
+
+if find_spec('taipy.core'):
+    from taipy.core import *
+
+if find_spec('taipy.gui'):
+    from taipy.gui import Gui
+
+if find_spec('taipy.rest'):
+    from taipy.rest import Rest
+
+if find_spec('taipy._run'):
+    from taipy._run import _run as run

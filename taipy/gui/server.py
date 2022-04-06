@@ -97,6 +97,7 @@ class _Server:
                     favicon=favicon,
                     themes=themes,
                     root_margin=root_margin,
+                    watermark=self._gui._get_config("watermark", None)
                 )
             if os.path.isfile(static_folder + os.path.sep + path):
                 return send_from_directory(static_folder + os.path.sep, path)
