@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+
 from flask import Flask
 
 from . import api

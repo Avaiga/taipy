@@ -150,27 +150,30 @@ class JobList(Resource):
         return schema.dump(jobs)
 
     def post(self):
-        schema = JobSchema()
+        args = request.args
+        task_name = args.get("task_name")
+
+        if not task_name:
+            return {"msg": "Config id is mandatory"}, 400
 
         manager = JobManager()
-        response_schema = JobSchema()
-        job_data = schema.load(request.json)
-        job = self.__create_job_from_schema(job_data)
+        schema = JobSchema()
+        job = self.__create_job_from_schema(task_name)
 
         if not job:
-            return {"msg": f"Task with name {job_data.get('task_name')} not found"}, 404
+            return {"msg": f"Task with name {task_name} not found"}, 404
 
         manager._set(job)
 
         return {
             "msg": "job created",
-            "job": response_schema.dump(job),
+            "job": schema.dump(job),
         }, 201
 
-    def __create_job_from_schema(self, job_schema: JobSchema) -> Optional[Job]:
+    def __create_job_from_schema(self, task_name: str) -> Optional[Job]:
         task_manager = TaskManager()
         try:
-            task = task_manager._get_or_create(self.fetch_config(job_schema.get("task_name")))
+            task = task_manager._get_or_create(self.fetch_config(task_name))
         except KeyError:
             return None
 
