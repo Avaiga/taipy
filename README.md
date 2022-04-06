@@ -1,0 +1,6 @@
+-> badges
+-> license
+-> What is Taipy
+-> install
+-> contributing
+-> code_of conduct
