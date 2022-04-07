@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 import pytest
 
 from taipy.gui.gui import Gui
@@ -121,7 +122,7 @@ def test_map_dict_set(gui: Gui, helpers):
 
     gui.run(run_server=False)
     sid = helpers.create_scope_and_get_sid(gui)
-    with gui._get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
         assert isinstance(gui._Gui__state.d, _MapDict)
         gui._Gui__state.d = {"b": 2}
         assert isinstance(gui._Gui__state.d, _MapDict)
