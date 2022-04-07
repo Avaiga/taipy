@@ -11,4 +11,5 @@ All the parameters of that function are optional:
 multiple,bool,FALSE,"If set to <i>True</i>, multiple files can be uploaded."
 extensions,str,""".csv,.xlsx""??",The list of file extensions that can be uploaded.
 drop_message,str,"""Drop here to Upload""??",The message that is displayed when the user drags a file above the button.
+>active,,,
 >shared,,,

@@ -1,0 +1,3 @@
+Name,Type,Default,Doc
+active,dynamic(bool),None,"Indicates if this component is active.
+An inactive component allows no user interaction."
