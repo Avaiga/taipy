@@ -19,9 +19,8 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "taipy-gui@git+ssh://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
-    "taipy-rest@git+ssh://git@github.com/Avaiga/taipy-rest.git@develop",
+    "taipy-gui>=1.0,<1.1",
+    "taipy-rest>=1.0,<1.1",
 ]
 
 extras_require = {
@@ -34,22 +33,22 @@ extras_require = {
 
 setup(
     author="Avaiga",
-    author_email="taipy.dev@avaiga.com",
+    author_email="dev@taipy.io",
     python_requires=">=3.8",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
-    description="AI Platform for Business Applications.",
+    description="A 360° open-source platform from Python pilots to production-ready web apps.",
     install_requires=requirements,
-    license="MIT license",
+    license="Apache License 2.0",
     long_description=readme,
+    long_description_content_type="text/markdown",
     keywords="taipy",
     name="taipy",
     packages=find_packages(include=['taipy']),
