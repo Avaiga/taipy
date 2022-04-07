@@ -58,5 +58,5 @@ Want to be part of the _Taipy GUI_ community? Check out our [`CODE_OF_CONDUCT.md
 - `pyproject.toml`: Python build configuration file use for linters here;
 - `pytest.ini`: [pytest](https://pytest.org/) configuration file;
 - `README.md`: Current file;
-- `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_;
+- `setup.py`: The setup script managing building, distributing, and installing _taipy-gui_;
 - `tox.ini`: Contains test scenarios to be run.
