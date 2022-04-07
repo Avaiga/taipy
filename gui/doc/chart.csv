@@ -48,5 +48,4 @@ yaxis,indexed(str),None?,The <i>y</i> axis identifier for the indicated trace.
 width,str|int|float,100%,"The width, in CSS units, of this element."
 height,str|int|float,None,"The height, in CSS units, of this element."
 >on_change,,,
->active,,,
->shared,,,
+>propagate,,,
