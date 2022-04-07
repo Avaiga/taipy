@@ -13,6 +13,7 @@ on:
 
 jobs:
   test-package:
+    timeout-minutes: 20
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -33,8 +34,10 @@ jobs:
           pip install pytest pytest-mock
           pytest
 
+
   publish-to-pypi:
     needs: [test-package]
+    timeout-minutes: 20
     environment: production
     runs-on: ubuntu-18.04
     steps:
@@ -57,12 +60,14 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+
   test-published-package:
     needs: [publish-to-pypi]
+    timeout-minutes: 30
     strategy:
       matrix:
-        python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        python-versions: ['3.8','3.9','3.10']
+        os: [ubuntu-18.04,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -70,19 +75,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Prepare tests on unix
-        if: matrix.os != 'windows-latest'
-        run: |
-          rm -rf src
-          pip install pytest pytest-mock
-
-      - name: Prepare tests on windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          rmdir -Recurse -Force src
-          pip install pytest pytest-mock
-
-      - name: Install and test package
+      - name: Install the package
         run: |
           pip install ${{ github.event.repository.name }}
-          pytest

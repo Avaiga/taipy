@@ -3,8 +3,8 @@
 Thanks for your interest in helping improve Taipy! Contributions are welcome, and they are greatly appreciated!
 Every little help and credit will always be given.
 
-There are multiple ways to contribute to Taipy, code, but also reporting bugs, creating feature requests, helping
-other users in our forums, Stack Overflow, etc.
+There are multiple ways to contribute to Taipy: code, but also reporting bugs, creating feature requests, helping
+other users in our forums, [stack**overflow**](https://stackoverflow.com/), etc.
 
 Today the only way to communicate with the Taipy team is by GitHub issues.
 
@@ -17,7 +17,7 @@ Have a look on this [GitHub documentation](https://docs.github.com/en/get-starte
 Reporting bugs is through [GitHub issues](https://github.com/Avaiga/taipy/issues).
 
 Please report relevant information and preferably code that exhibits the problem. We provide templates to help you
-to present the issue in a comprehensive way.
+describe the issue.
 
 The Taipy team will analyse and try to reproduce the bug to provide feedback. If confirmed, we will add a priority
 to the issue and add it in our backlog. Feel free to propose a pull request to fix it.
@@ -32,7 +32,7 @@ The Taipy team will analyse your issue and return to you as soon as possible.
 ## Improve Documentation
 
 Do not hesitate to create an issue or pull request directly on the
-[taipy-doc repository](https://github.com/Avaiga/taipy-doc/issues).
+[taipy-doc repository](https://github.com/Avaiga/taipy-doc).
 
 ## Implement Features
 
@@ -55,10 +55,9 @@ Taipy is organised in four main repositories:
 Taipy's repositories follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) and
 [PEP 484](https://www.python.org/dev/peps/pep-0484/) coding convention.
 
-## Javascript
+## TypeScript
 
-Taipy's repositories follow the [W3Schools](https://www.w3schools.com/js/js_conventions.asp) and
-[Google](https://google.github.io/styleguide/tsguide.html) coding convention.
+Taipy's repositories use the [ESLint](https://eslint.org/) and [TypeScript ESLint](https://github.com/typescript-eslint/typescript-eslint) plugin to ensure a common set of rules.
 
 ### Git branches
 
@@ -69,7 +68,7 @@ Where:
 
 - `<type>` would be one of:
     - feature: new feature implementation, or improvement of a feature.
-    - fix: bug fix.
+    - bug: bug fix.
     - review: change provoked by review comment not immediately taken care of.
     - refactor: refactor of a piece of code.
     - doc: doc changes (complement or typo fixes…).
@@ -97,7 +96,7 @@ working on it.
    code format or Python typing.
    You can install and setup it up by doing:
    ```
-     pipenv install pre-commit --skip-lock
+     pipenv install pre-commit
      pipenv run python -m pre-commit install
    ```
 
@@ -125,6 +124,6 @@ installation. This is not the behaviour for the front-end that installs all opti
 If you are a contributor on Taipy, be careful with dependencies, do not forget to install or uninstall depending on
 your issue.
 
-If you need to add to Taipy a new dependency, do not forget to add it in the `Pipfile` and the `setup.py`.
+If you need to add a new dependency to Taipy, do not forget to add it in the `Pipfile` and the `setup.py`.
 Keep in mind that dependency is a vector of attack. The Taipy team limits the usage of external dependencies at the
 minimum.

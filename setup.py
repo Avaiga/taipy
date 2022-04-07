@@ -11,14 +11,31 @@
 
 from setuptools import setup, find_namespace_packages, find_packages
 
-__version__ = "1.0.0.dev"
+
+with open("README.md") as readme_file:
+    readme = readme_file.read()
 
 
 setup(
-    name="taipy_rest",
-    version=__version__,
-    packages=find_namespace_packages(where="src") + find_packages(include=["taipy.rest"]),
+    author="Avaiga",
+    name="taipy-rest",
+    keywords="taipy-rest",
+    version="1.0.0.dev",
+    author_email="dev@taipy.io",
+    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.rest"]),
     package_dir={"": "src"},
+    long_description=readme,
+    long_description_content_type="text/markdown",
+    license="Apache License 2.0",
+    classifiers=[
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+    ],
     install_requires=[
         "flask",
         "flask-sqlalchemy",
@@ -31,6 +48,6 @@ setup(
         "passlib",
         "apispec[yaml]",
         "apispec-webframeworks",
-        "taipy-core@git+ssh://git@github.com/Avaiga/taipy-core.git@develop",
+        "taipy-core>=1.0,<1.1",
     ],
 )
