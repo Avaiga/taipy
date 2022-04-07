@@ -26,9 +26,9 @@ Taipy is a Python library for creating Business Applications. More information o
 [website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-gui_ to let users
 install the minimum they need.
 
-[Taipy GUI](https://github.com/Avaiga/taipy-gui) TODO
+[Taipy GUI](https://github.com/Avaiga/taipy-gui) provides Python classes that make it easy to create powerful Web apps in minutes.
 
-A more in depth documentation of taipy can be found [here](http://insert-link-for-taipy-docs).
+A more in depth documentation of taipy can be found [here](https://docs.taipy.io/).
 
 ## Installation
 
@@ -44,21 +44,19 @@ Want to be part of the _Taipy GUI_ community? Check out our [`CODE_OF_CONDUCT.md
 
 ## Directory Structure
 
-- `demos`: TODO or to remove.
-- `gui`: Graphical user interface related files
-- `taipy/gui`: Python source files
-- `tests/taipy/gui`: Unit tests.
-- `tools`: Files that consumed by tools used to build, test or document _taipy-gui_.
-- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-gui_.
-- `CONTRIBUTING.md`: Instructions to contribute to _taipy-gui_.
-- `INSTALLATION.md`: Instructions to install _taipy-gui_.
-- `LICENSE`: The Apache 2.0 License.
-- `MANIFEST.in`: TODO or to remove.
-- `mkdocs.yml`: TODO or to remove.
-- `mypy.ini`: TODO or to remove.
-- `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies.
-- `Pyproject.toml`: TODO or to remove.
-- `Pytest.ini`: TODO or to remove.
-- `README.md`: Current file.
-- `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_.
+- `gui`: Graphical user interface related files;
+- `taipy/gui`: Python source files;
+- `tests/taipy/gui`: Unit tests;
+- `tools`: Files used to document _taipy-gui_;
+- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-gui_;
+- `CONTRIBUTING.md`: Instructions to contribute to _taipy-gui_;
+- `INSTALLATION.md`: Instructions to install _taipy-gui_;
+- `LICENSE`: The Apache 2.0 License;
+- `MANIFEST.in`: Build configuration file;
+- `mypy.ini`: [mypy](http://mypy-lang.org/) linter configuration file;
+- `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies;
+- `pyproject.toml`: Python build configuration file use for linters here;
+- `pytest.ini`: [pytest](https://pytest.org/) configuration file;
+- `README.md`: Current file;
+- `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_;
 - `tox.ini`: Contains test scenarios to be run.
