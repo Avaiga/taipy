@@ -39,7 +39,7 @@ jobs:
           playwright install chromium
 
           echo "running pytest"
-          pytest -s -m "not teste2e"
+          pytest -s
 
           echo "running test import tp"
           python -c "import taipy as tp; tp.Gui"
@@ -83,7 +83,7 @@ jobs:
           playwright install chromium
 
           echo "running pytest"
-          pytest -s -m "not teste2e" | tee pytest_res
+          pytest -s | tee pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"
