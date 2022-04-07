@@ -61,7 +61,6 @@ jobs:
 
   test-published-package:
     needs: [publish-to-pypi]
-    environment: production
     strategy:
       matrix:
         python-versions: ['3.8','3.9','3.10']
@@ -73,9 +72,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Prepare tests
+      - name: Prepare tests on unix
+        if: matrix.os != 'windows-latest'
         run: |
-          rm -rf src taipy
+          rm -rf taipy
+          pip install pytest pytest-mock
+
+      - name: Prepare tests on windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          rmdir -Recurse -Force taipy
           pip install pytest pytest-mock
 
       - name: Install and test package

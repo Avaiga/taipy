@@ -50,6 +50,7 @@ setup(
     ],
     description="AI Platform for Business Applications.",
     install_requires=requirements,
+    long_description="",
     license="MIT license",
     keywords="taipy-core",
     name="taipy-core",
@@ -57,7 +58,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
-    version="1.0.0.dev",
+    version="1.0.0.dev2",
     zip_safe=False,
     extras_require=extras_require,
 )
