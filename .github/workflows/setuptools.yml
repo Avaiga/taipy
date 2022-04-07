@@ -35,11 +35,10 @@ jobs:
 
           # Run tests
           echo "installing playwright"
-          pip install pytest pytest-mock pytest-playwright
-          playwright install chromium
+          pip install pytest pytest-mock
 
           echo "running pytest"
-          pytest -s
+          pytest -s -m "not teste2e"
 
           echo "running test import tp"
           python -c "import taipy as tp; tp.Gui"
@@ -79,11 +78,10 @@ jobs:
 
           # Run test with optionals packages installed
           echo "installing playwright"
-          pip install pytest pytest-mock pytest-playwright
-          playwright install chromium
+          pip install pytest pytest-mock
 
           echo "running pytest"
-          pytest -s | tee pytest_res
+          pytest -s -m "not teste2e" | tee pytest_res
           cat pytest_res
           echo "Ensure that no tests are skipped"
           tail -n1 pytest_res | grep --invert-match "skipped"
