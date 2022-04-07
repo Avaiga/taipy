@@ -6,3 +6,4 @@ format,str,None,"The format to apply to the value.
 See below."
 editable,dynamic(bool),True,show the date as a formatted string if not editable
 >on_change,,,
+>propagate,,,
