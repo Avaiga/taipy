@@ -6,3 +6,4 @@ height,str|int,None,"The height, in CSS units, of this element."
 dropdown,bool,FALSE,"If <i>True</i>, the list of items is shown in a dropdown menu.
 You cannot use the filter in that situation."
 >lovComp,,,
+>propagate,,,

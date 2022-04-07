@@ -1,12 +1,15 @@
 ﻿Name,Type,Default,Doc
 *data,any,,The data object bound to this chart control.
+type,indexed(str),scatter,"Chart type.
+See the Plotly <a href=""https://plotly.com/javascript/reference/"">chart type</a> documentation for details."
+mode,indexed(str),lines+markers,"Chart mode.
+See the Plotly <a href=""https://plotly.com/javascript/reference/scatter/#scatter-mode"">chart mode</a> documentation for details."
+x,indexed(str),None,Column name for the <i>x</i> axis.
+y,indexed(str),None,Column name for the <i>y</i> axis.
+z,indexed(str),None,Column name for the <i>z</i> axis.
+text,indexed(str),None,"Column name for the text associated to the point for the indicated trace.
+This is meaningful only when _mode_ has the <i>text</i> option."
 title,str,None,The title of this chart control.
-width,str|int|float,100%,"The width, in CSS units, of this element."
-height,str|int|float,None,"The height, in CSS units, of this element."
-selected,dynamic(list[int]|str),None,List of the selected point indices.
-layout,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/layout/"">layout object</a>."
-plot_config,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/configuration-options/""> configugration options object</a>."
-options,"indexed(dict[str, any])",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/"">data object where dynamic data will be overridden.</a>."
 render,bool,True,"If True, this chart is visible on the page."
 on_range_change,Callable?,None,"Callback function called when the visible part of the x axis changes.
 The function receives three parameters:
@@ -25,21 +28,8 @@ If not, the list order defines the index</li>
 label,indexed(str),None,"The label for the indicated trace.
 This is used when the mouse hovers over a trace."
 name,indexed(str),None,The name of the indicated trace.
-orientation,indexed(str),None?,The orientation of the indicated trace.
-x,indexed(str),None,Column name for the <i>x</i> axis.
-y,indexed(str),None,Column name for the <i>y</i> axis.
-z,indexed(str),None,Column name for the <i>z</i> axis.
-text,indexed(str),None,"Column name for the text associated to the point for the indicated trace.
-This is meaningful only when _mode_ has the <i>text</i> option."
-text_anchor,indexed(str),None,"Position of the text relative to the point.
-Valid values are: <i>top</i>, <i>bottom</i>, <i>left</i> and <i>right</i>."
-mode,indexed(str),lines+markers,"Chart mode.
-See the Plotly <a href=""https://plotly.com/javascript/reference/scatter/#scatter-mode"">chart mode</a> documentation for details."
-type,indexed(str),?,"Chart type.
-See the Plotly <a href=""https://plotly.com/javascript/reference/"">chart type</a> documentation for details."
+selected,dynamic(list[int]|str),None,List of the selected point indices.
 color,indexed(str),None?,The color of the indicated trace.
-xaxis,indexed(str),None?,The <i>x</i> axis identifier for the indicated trace.
-yaxis,indexed(str),None?,The <i>y</i> axis identifier for the indicated trace.
 selected_color,indexed(str),None?,The color of the selected points for the indicated trace.
 marker,"indexed(dict[str, any])",None?,"The type of markers used for the indicated trace.
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-marker"">marker</a> for details."
@@ -47,5 +37,16 @@ line,"indexed(str|dict[str, any])",None?,"The configuration of the line used for
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-line"">line</a> for details. if str then dash??"
 selected_marker,"indexed(dict[str, any])",None?,"The type of markers used for selected points in the indicated trace.
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-selected-marker"">selected marker for details."
+layout,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/layout/"">layout object</a>."
+plot_config,"dict[str, any]",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/configuration-options/""> configugration options object</a>."
+options,"indexed(dict[str, any])",None,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/"">data object where dynamic data will be overridden.</a>."
+orientation,indexed(str),None?,The orientation of the indicated trace.
+text_anchor,indexed(str),None,"Position of the text relative to the point.
+Valid values are: <i>top</i>, <i>bottom</i>, <i>left</i> and <i>right</i>."
+xaxis,indexed(str),None?,The <i>x</i> axis identifier for the indicated trace.
+yaxis,indexed(str),None?,The <i>y</i> axis identifier for the indicated trace.
+width,str|int|float,100%,"The width, in CSS units, of this element."
+height,str|int|float,None,"The height, in CSS units, of this element."
 >on_change,,,
+>active,,,
 >shared,,,
