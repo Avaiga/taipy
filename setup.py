@@ -51,7 +51,6 @@ setup(
     description="AI Platform for Business Applications.",
     install_requires=requirements,
     license="MIT license",
-    long_description=readme,
     keywords="taipy-core",
     name="taipy-core",
     packages=find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
