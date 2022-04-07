@@ -1,24 +1,39 @@
-# Overview
+# Taipy-REST
 
-## What is Taipy
+## License
+Copyright 2022 Avaiga Private Limited
 
-Taipy is a Python framework for creating Business Applications.
-More information on our website: `https://www.taipy.io`.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+the License. You may obtain a copy of the License at
+[http://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0.txt)
 
-## What is Taipy Core
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
 
-Taipy is split into multiple repositories to let users install the minimum they need.
+## Usage
+- [Taipy-REST](#taipy-rest)
+  - [License](#license)
+  - [Usage](#usage)
+  - [What is Taipy REST](#what-is-taipy-rest)
+  - [Installation](#installation)
+  - [Contributing](#contributing)
+  - [Code of conduct](#code-of-conduct)
+  - [Directory Structure](#directory-structure)
 
-_taipy-core_ mostly includes business-oriented features. It helps users
-create and manage business applications and improve analyses capability through time,
-conditions and hypothesis.
 
+## What is Taipy REST
 
-## What is Taipy Rest
-Taipy Rest is a set of APIs built on top of the [taipy](https://github.com/Avaiga/taipy) library developed by Avaiga.
+Taipy is a Python library for creating Business Applications. More information on our
+[website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-core_ and _taipy-rest_
+to let users install the minimum they need.
 
-This project is meant to be used as a complement for **taipy** and its goal is to enable automation through rest APIs 
-of processes built on taipy.
+[Taipy Core](https://github.com/Avaiga/taipy-core) mostly includes business-oriented features. It helps users
+create and manage business applications and improve analyses capability through time, conditions and hypothesis.
+
+[Taipy REST](https://github.com/Avaiga/taipy-rest) is a set of APIs built on top of the _taipy-core_ library
+developed by Avaiga. This project is meant to be used as a complement for **taipy** and its goal is to enable
+automation through rest APIs of processes built on taipy.
 
 The project comes with rest APIs that provide interaction with all of taipy modules:
  - DataNodes
@@ -30,112 +45,36 @@ The project comes with rest APIs that provide interaction with all of taipy modu
 
 A more in depth documentation of taipy can be found [here](http://insert-link-for-taipy-docs).
 
-### Usage
-- [Taipy](#What-is-Taipy)
-- [Taipy Core](#What-is-Taipy-Core)
-- [Taipy Rest](#What-is-Taipy-Rest)
-  - [Usage](#usage)
-  - [Installation](#installation)
-  - [Configuration](#configuration)
-  - [Running](#running)
-      - [Running with Gunicorn](#running-with-gunicorn)
-      - [Running with uwsgi](#running-with-uwsgi)
-  - [Documentation](#documentation)
+## Installation
 
-### Installation
-1. Clone the taipy rest repository
-```
-$ git clone https://github.com/Avaiga/taipy-rest
-```
-2. Enter taipy rest directory
+Want to install and try _Taipy REST_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
 
-```
-$ cd taipy-rest
-```
+## Contributing
 
-3. Install dependencies
-```
-$ pip install pipenv && pipenv install
-```
+Want to help build _Taipy REST_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 
-### Configuration
-Before running, we need to define some variables. Taipy rest APIs depend on pre-configuration of taipy config objects, 
-i.e, is mandatory to define all configuration of DataNodes, Tasks, Pipelines, etc. The file containing this 
-configuration needs to be passed to the application at runtime. The following variable needs to be defined:
- - TAIPY_SETUP_FILE: the path to the file containing all of taipy object configuration
+## Code of conduct
 
-If using Docker, the folder containing the file needs to be mapped as a volume for it to be accessible to the 
-application.
+Want to be part of the _Taipy REST_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
 
-### Running
-To run the application you can either run locally with:
-```
-$ flask run
-```
+## Directory Structure
 
-or it can be run inside Docker with:
-```
-$ docker-compose up
-```
-
-You can also run with a Gunicorn or wsgi server.
-
-#### Running with Gunicorn
-This project provide a simple wsgi entry point to run gunicorn or uwsgi for example.
-
-For gunicorn you only need to run the following commands
-
-```
-$ pip install gunicorn
-
-$ gunicorn myapi.wsgi:app
-```
-And that's it ! Gunicorn is running on port 8000
-
-If you chose gunicorn as your wsgi server, the proper commands should be in your docker-compose file.
-
-#### Running with uwsgi
-Pretty much the same as gunicorn here
-
-```
-$ pip install uwsgi
-$ uwsgi --http 127.0.0.1:5000 --module myapi.wsgi:app
-```
-
-And that's it ! Uwsgi is running on port 5000
-
-If you chose uwsgi as your wsgi server, the proper commands should be in your docker-compose file.
-
-#### Deploying on Heroku
-Make sure you have a working Docker installation (e.g. docker ps) and that you’re logged in to Heroku (heroku login).
-
-Log in to Container Registry:
-
-```
-$ heroku container:login
-```
-
-Create a heroku app
-```
-$ heroku create
-```
-
-Build the image and push to Container Registry:
-```
-$ heroku container:push web
-```
-
-Then release the image:
-```
-$ heroku container:release web
-```
-
-You can now access **taipy rest** on the URL that was returned on the `heroku create` command.
-
-
-
-### Documentation
-
-All the API Documentation can be found, after running the application in the following URL:
- - ```/redoc-ui``` ReDoc UI configured to hit OpenAPI yaml file
- - ```/openapi.yml``` return OpenAPI specification file in yaml format
+- `src/taipy/rest`: Main source code folder.
+    - `api`: Endpoints and schema definitions.
+      - `resources`: Implementation of all endpoints related to taipy.
+      - `schemas`: Schemas related to taipy objects. Used for marshalling and unmarshalling data.
+      - `views`: Mapping of resources to urls
+    - `commons`: Common files shared throughout the application
+      - `templates`: Swagger and redoc templates for generating the documentation
+    - `app.py`: Flask app configuration and creation
+    - `extensions.py`: Singletons used on the application factory
+    - `rest.py`: Main python entrypoint for running _taipy-rest_ application.
+- `tests`: Unit tests.
+- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-rest_.
+- `CONTRIBUTING.md`: Instructions to contribute to _taipy-rest_.
+- `INSTALLATION.md`: Instructions to install _taipy-rest_.
+- `LICENSE`: The Apache 2.0 License.
+- `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies.
+- `README.md`: Current file.
+- `setup.py`: The setup script managing building, distributing, and installing _taipy-rest_.
+- `tox.ini`: Contains test scenarios to be run.
