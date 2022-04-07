@@ -8,6 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger taipy-doc build on develop branch push
-        run: gh workflow run doc.yml -f user-to-notify=$GITHUB_ACTOR -R Avaiga/taipy-doc
+        run: gh workflow run doc.yml -R Avaiga/taipy-doc
         env:
           GITHUB_TOKEN: ${{ secrets.TRIGGER_OTHER_ACTION }}
