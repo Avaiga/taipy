@@ -16,6 +16,8 @@ from importlib import util
 from pathlib import Path
 from urllib.request import urlopen
 
+import pytest
+
 if util.find_spec("playwright"):
     from playwright._impl._page import Page
 
@@ -23,6 +25,7 @@ from taipy.gui import Gui, Html
 from taipy.gui.server import _Server
 
 
+@pytest.mark.teste2e
 def test_html_render_with_style(page: "Page", gui: Gui, helpers):
     html_content = """<!DOCTYPE html>
 <html lang="en">
@@ -57,6 +60,7 @@ def test_html_render_with_style(page: "Page", gui: Gui, helpers):
     )
 
 
+@pytest.mark.teste2e
 def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     gui.add_pages(pages=f"{Path(Path(__file__).parent.resolve())}{os.path.sep}test-assets")
@@ -83,6 +87,7 @@ def test_html_render_bind_assets(page: "Page", gui: Gui, helpers):
     )
 
 
+@pytest.mark.teste2e
 def test_html_render_path_mapping(page: "Page", gui: Gui, helpers):
     gui._server = _Server(
         gui,
