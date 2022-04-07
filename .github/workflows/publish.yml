@@ -13,6 +13,7 @@ on:
 
 jobs:
   test-package:
+    timeout-minutes: 20
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -36,6 +37,7 @@ jobs:
 
   publish-to-pypi:
     needs: [test-package]
+    timeout-minutes: 20
     environment: production
     runs-on: ubuntu-18.04
     steps:
@@ -61,6 +63,7 @@ jobs:
 
   test-published-package:
     needs: [publish-to-pypi]
+    timeout-minutes: 30
     strategy:
       matrix:
         python-versions: ['3.8','3.9','3.10']
