@@ -19,7 +19,7 @@ from .datanode import (
     PickleDataNodeConfigSchema,
     SQLDataNodeConfigSchema,
 )
-from .job import JobResponseSchema, JobSchema
+from .job import JobSchema
 from .pipeline import PipelineResponseSchema, PipelineSchema
 from .scenario import ScenarioResponseSchema, ScenarioSchema
 from .task import TaskSchema
@@ -35,5 +35,4 @@ __all__ = [
     "CycleSchema",
     "CycleResponseSchema",
     "JobSchema",
-    "JobResponseSchema",
 ]

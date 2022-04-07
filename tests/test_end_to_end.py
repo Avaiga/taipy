@@ -56,9 +56,17 @@ def test_end_to_end(client, setup_end_to_end):
 
     # Get other models and verify if they return the necessary fields
     cycle = get(url_for("api.cycle_by_id", cycle_id=scenario.get("cycle")), "cycle", client)
-    pipeline = get(url_for("api.pipeline_by_id", pipeline_id=scenario.get("pipelines")[0]), "pipeline", client)
+    pipeline = get(
+        url_for("api.pipeline_by_id", pipeline_id=scenario.get("pipelines")[0]),
+        "pipeline",
+        client,
+    )
     task = get(url_for("api.task_by_id", task_id=pipeline.get("tasks")[0]), "task", client)
-    datanode = get(url_for("api.datanode_by_id", datanode_id=task.get("input_ids")[0]), "datanode", client)
+    datanode = get(
+        url_for("api.datanode_by_id", datanode_id=task.get("input_ids")[0]),
+        "datanode",
+        client,
+    )
 
     # Get All
     get_all(url_for("api.scenarios"), 1, client)

@@ -36,11 +36,17 @@ def setup_end_to_end():
     day_cfg = Config.configure_data_node(id="day")
     forecasts_cfg = Config.configure_data_node(id="forecasts")
     forecast_task_cfg = Config.configure_task(
-        id="forecast_task", input=[model_cfg, day_cfg], function=forecast, output=forecasts_cfg
+        id="forecast_task",
+        input=[model_cfg, day_cfg],
+        function=forecast,
+        output=forecasts_cfg,
     )
 
     historical_temperature_cfg = Config.configure_data_node(
-        "historical_temperature", storage_type="csv", path="setup/historical_temperature.csv", has_header=True
+        "historical_temperature",
+        storage_type="csv",
+        path="setup/historical_temperature.csv",
+        has_header=True,
     )
     evaluation_cfg = Config.configure_data_node("evaluation")
     evaluate_task_cfg = Config.configure_task(

@@ -34,7 +34,14 @@ from .resources import (
     TaskList,
     TaskResource,
 )
-from .schemas import CycleSchema, DataNodeSchema, JobSchema, PipelineSchema, ScenarioSchema, TaskSchema
+from .schemas import (
+    CycleSchema,
+    DataNodeSchema,
+    JobSchema,
+    PipelineSchema,
+    ScenarioSchema,
+    TaskSchema,
+)
 
 _logger = _TaipyLogger._get_logger()
 
