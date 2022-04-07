@@ -19,4 +19,5 @@ width,str|int|float,None,"The width, in CSS units, of this dialog.
 (CSS property)"
 height,str|int|float,None,"The height, in CSS units, of this dialog.
 (CSS property)"
+>active,,,
 >shared,,,

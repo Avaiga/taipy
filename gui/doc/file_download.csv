@@ -14,4 +14,5 @@ If <i>False</i>, the control is not displayed."
 bypass_preview,bool,TRUE,"If <i>False</i>, allows the browser to try to show the content in a different tab.
 The file download is always performed."
 name,str,None,"A name proposition for the file to save, that the user can change."
+>active,,,
 >shared,,,

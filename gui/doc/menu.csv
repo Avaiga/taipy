@@ -7,8 +7,7 @@ label,str,None,The title of the menu.
 width,str,"""15vw""","The width, in CSS units, of the menu when unfolded.
 Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
 width[mobile],str,"""85vw""","The width, in CSS units, of the menu when unfolded, on a mobile device."
-active,dynamic(bool),TRUE,"Indicates, when <i>True</i>, that this component is active.
-An inactive component allows no user interaction."
+>active,,,
 on_action,str,"""on_menu_action""","The name of the function that will is triggered when a menu option is selected.
 All the parameters of that function are optional:
 <ul>

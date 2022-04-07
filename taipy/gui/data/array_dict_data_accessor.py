@@ -17,10 +17,12 @@ from ..gui import Gui
 from .data_format import _DataFormat
 from .pandas_data_accessor import _PandasDataAccessor
 
+from ..utils import _MapDict
+
 
 class _ArrayDictDataAccessor(_PandasDataAccessor):
 
-    __types = (dict, list, tuple)
+    __types = (dict, list, tuple, _MapDict)
 
     @staticmethod
     def get_supported_classes() -> t.List[str]:
@@ -46,6 +48,8 @@ class _ArrayDictDataAccessor(_PandasDataAccessor):
                     return [
                         v if isinstance(v, pd.DataFrame) else pd.DataFrame({f"{i}/0": v}) for i, v in enumerate(value)
                     ]
+        elif isinstance(value, _MapDict):
+            return pd.DataFrame(value._dict)
         return pd.DataFrame(value)
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
