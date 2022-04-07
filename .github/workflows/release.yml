@@ -1,0 +1,39 @@
+name: release workflow
+
+on:
+  push:
+    branches:
+      - 'release/**'
+
+jobs:
+  release:
+    name: Release taipy-core Package
+
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Extract branch tag
+        shell: bash
+        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/release/})"
+        id: extract_branch
+
+      - name: Extract commit hash
+        shell: bash
+        run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
+        id: extract_hash
+
+      - name: Create/update release and tag
+        run: |
+            gh release view ${{ steps.extract_branch.outputs.tag }} &&
+            gh release delete ${{ steps.extract_branch.outputs.tag }} &&
+            git tag -f ${{ steps.extract_branch.outputs.tag }} &&
+            git push -f origin ${{ steps.extract_branch.outputs.tag }};
+            gh release create ${{ steps.extract_branch.outputs.tag }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
