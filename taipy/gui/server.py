@@ -68,7 +68,8 @@ class _Server:
         # this is necessary since CORS resources can't been None eventhough python stub allows for None
         CORS(self._flask)
 
-        Talisman(self._flask, content_security_policy=content_security_policy, force_https=force_https)
+        if force_https or content_security_policy:
+            Talisman(self._flask, content_security_policy=content_security_policy, force_https=force_https)
 
         self.__path_mapping = path_mapping
 
@@ -103,14 +104,14 @@ class _Server:
                     favicon=favicon,
                     themes=themes,
                     root_margin=root_margin,
-                    watermark=self._gui._get_config("watermark", None)
+                    watermark=self._gui._get_config("watermark", None),
                 )
             if os.path.isfile(static_folder + os.path.sep + path):
                 return send_from_directory(static_folder + os.path.sep, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
-                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
-                    return send_from_directory(v + os.path.sep, path[len(k) + 1:])
+                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
             if hasattr(__main__, "__file__") and os.path.isfile(
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):

@@ -35,7 +35,8 @@ jobs:
 
           # Run tests
           echo "installing playwright"
-          pip install pytest pytest-mock
+          pip install pytest pytest-mock pytest-playwright
+          playwright install chromium
 
           echo "running pytest"
           pytest -s -m "not teste2e"
@@ -78,7 +79,8 @@ jobs:
 
           # Run test with optionals packages installed
           echo "installing playwright"
-          pip install pytest pytest-mock
+          pip install pytest pytest-mock pytest-playwright
+          playwright install chromium
 
           echo "running pytest"
           pytest -s -m "not teste2e" | tee pytest_res
