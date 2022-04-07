@@ -9,9 +9,11 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from importlib import util
 import inspect
 import logging
+from importlib import util
+
+import pytest
 
 if util.find_spec("playwright"):
     from playwright._impl._page import Page
@@ -19,6 +21,7 @@ if util.find_spec("playwright"):
 from taipy.gui import Gui
 
 
+@pytest.mark.teste2e
 def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     markdown_content = """
 <|Hey|id=text1|>
@@ -41,7 +44,9 @@ def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     page.wait_for_selector("#Taipy_style", state="attached")
     function_evaluated = True
     try:
-        page.wait_for_function('window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"')
+        page.wait_for_function(
+            'window.getComputedStyle(document.querySelector("#text1"), null).getPropertyValue("color") !== "rgb(255, 255, 255)"'
+        )
     except Exception as e:
         function_evaluated = False
         logging.getLogger().debug(f"Function evaluation timeout.\n{e}")

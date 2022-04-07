@@ -974,7 +974,8 @@ class Gui:
     def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
 
-    def _get_flask_app(self):
+    def get_flask_app(self) -> Flask:
+        """Get the internal Flask application"""
         return self._server.get_flask()
 
     def _set_frame(self, frame: FrameType):
@@ -982,7 +983,7 @@ class Gui:
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
 
-    def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> None:
+    def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> t.Optional[Flask]:
         """
         Starts the server that delivers pages to Web clients.
 
@@ -1005,24 +1006,6 @@ class Gui:
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
                 section in the User Manual for more information.
         """
-        if not hasattr(self, "_server"):
-            self._server = _Server(
-                self,
-                path_mapping=self._path_mapping,
-                flask=self._flask,
-                css_file=self._css_file,
-            )
-        if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
-            self._server._thread.kill()
-            self._server._thread.join()
-            self._flask_blueprint = []
-            self._server = _Server(
-                self,
-                path_mapping=self._path_mapping,
-                flask=self._flask,
-                css_file=self._css_file,
-            )
-            self._bindings()._new_scopes()
 
         app_config = self._config.config
 
@@ -1034,6 +1017,32 @@ class Gui:
 
         # Load application config from multiple sources (env files, kwargs, command line)
         self._config._build_config(run_root_dir, self.__env_filename, kwargs)
+
+        # Init server if there is no server
+        if not hasattr(self, "_server"):
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                content_security_policy=self._get_config("content_security_policy", None),
+                force_https=self._get_config("force_https", False),
+            )
+
+        # Stop and reinitialize the server if it is still running as a thread
+        if (_is_in_notebook() or run_in_thread) and hasattr(self._server, "_thread"):
+            self._server._thread.kill()
+            self._server._thread.join()
+            self._flask_blueprint = []
+            self._server = _Server(
+                self,
+                path_mapping=self._path_mapping,
+                flask=self._flask,
+                css_file=self._css_file,
+                content_security_policy=self._get_config("content_security_policy", None),
+                force_https=self._get_config("force_https", False),
+            )
+            self._bindings()._new_scopes()
 
         # Special config for notebook runtime
         if _is_in_notebook() or run_in_thread:
@@ -1123,15 +1132,17 @@ class Gui:
         self._bindings()._set_single_client(bool(app_config["single_client"]))
 
         # Start Flask Server
-        if run_server:
-            self._server.runWithWS(
-                host=app_config["host"],
-                port=app_config["port"],
-                debug=app_config["debug"],
-                use_reloader=app_config["use_reloader"],
-                flask_log=app_config["flask_log"],
-                run_in_thread=run_in_thread,
-            )
+        if not run_server:
+            return self.get_flask_app()
+
+        return self._server.runWithWS(
+            host=app_config["host"],
+            port=app_config["port"],
+            debug=app_config["debug"],
+            use_reloader=app_config["use_reloader"],
+            flask_log=app_config["flask_log"],
+            run_in_thread=run_in_thread,
+        )
 
     def stop(self):
         """

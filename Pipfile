@@ -20,6 +20,7 @@ simple-websocket = ">=0.3"
 tzlocal = ">=3.0"
 "backports.zoneinfo" = {version=">=0.2.0", markers="python_version < '3.9'", extras=["tzdata"]}
 pyngrok = ">=5.1"
+flask-talisman = ">=1.0"
 
 [dev-packages]
 black = "*"
