@@ -1,1 +1,0 @@
-Single-database configuration for Flask.

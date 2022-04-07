@@ -1,9 +1,0 @@
-default_context:
-    project_name: "Taipy Rest"
-    app_name: "taipy_rest"
-    python_version: "3.8"
-    admin_user_username: "taipy.dev"
-    admin_user_email: "taipy.dev@avaiga.com"
-    admin_user_password: "taipy"
-    use_celery: "no"
-    wsgi_server: "none"
