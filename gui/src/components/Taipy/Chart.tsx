@@ -40,7 +40,6 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     height?: string | number;
     config: string;
     data?: Record<string, TraceValueType>;
-    refresh?: boolean;
     layout?: string;
     plotConfig?: string;
     tp_onRangeChange?: string;
@@ -110,7 +109,6 @@ const Chart = (props: ChartProp) => {
         className,
         width = "100%",
         height,
-        refresh = false,
         updateVarName,
         updateVars,
         id,
@@ -124,6 +122,7 @@ const Chart = (props: ChartProp) => {
     const plotRef = useRef<HTMLDivElement>(null);
     const dataKey = useRef("default");
 
+    const refresh = data === null;
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const render = useDynamicProperty(props.render, props.defaultRender, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
@@ -191,7 +190,7 @@ const Chart = (props: ChartProp) => {
     }, [props.config]);
 
     useEffect(() => {
-        if (!data[dataKey.current] || !!refresh) {
+        if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
             dataKey.current = backCols.join("-");
             dispatch(
