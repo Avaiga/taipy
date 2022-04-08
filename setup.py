@@ -85,7 +85,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-gui",
-    version="1.0.0.dev0",
+    version="1.0.0",
     zip_safe=False,
     extras_require=extras_require,
     cmdclass={"build_py": NPMInstall},
