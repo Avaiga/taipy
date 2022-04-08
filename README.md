@@ -43,7 +43,7 @@ The project comes with rest APIs that provide interaction with all of taipy modu
  - Scenarios
  - Cycles
 
-A more in depth documentation of taipy can be found [here](http://insert-link-for-taipy-docs).
+A more in depth documentation of taipy can be found [here](https://docs.taipy.io).
 
 ## Installation
 
