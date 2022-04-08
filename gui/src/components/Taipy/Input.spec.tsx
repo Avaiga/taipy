@@ -1,5 +1,5 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -51,6 +51,7 @@ describe("Input Component", () => {
         );
         const elt = getByDisplayValue("Val");
         userEvent.clear(elt);
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
             payload: { value: "" },
@@ -105,6 +106,7 @@ describe("Number Component", () => {
         const elt = getByDisplayValue("33");
         userEvent.clear(elt);
         userEvent.type(elt, "666");
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
             payload: { value: "666" },
