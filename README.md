@@ -29,7 +29,7 @@ install the minimum they need.
 [Taipy Core](https://github.com/Avaiga/taipy-core) mostly includes business-oriented features. It helps users
 create and manage business applications and improve analyses capability through time, conditions and hypothesis.
 
-A more in depth documentation of taipy can be found [here](http://insert-link-for-taipy-docs).
+A more in depth documentation of taipy can be found [here](https://docs.taipy.io).
 
 ## Installation
 
