@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useState, useEffect, useCallback, useContext, useRef } from "react";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
 
@@ -11,23 +11,31 @@ const Input = (props: TaipyInputProps) => {
     const { className, type, id, updateVarName, propagate = true, defaultValue = "" } = props;
     const [value, setValue] = useState(defaultValue);
     const { dispatch } = useContext(TaipyContext);
+    const delayCall = useRef(-1);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleInput = useCallback(
         (e) => {
-            setValue(e.target.value);
-            dispatch(createSendUpdateAction(updateVarName, e.target.value, props.tp_onChange, propagate));
+            if (delayCall.current > 0) {
+                clearTimeout(delayCall.current);
+            }
+            const val = e.target.value;
+            setValue(val);
+            delayCall.current = window.setTimeout(() => {
+                dispatch(createSendUpdateAction(updateVarName, val, props.tp_onChange, propagate));
+                delayCall.current = -1;
+            }, 300);
         },
         [updateVarName, dispatch, propagate, props.tp_onChange]
     );
 
     useEffect(() => {
-        if (props.value !== undefined && value !== props.value) {
+        if (props.value !== undefined) {
             setValue(props.value);
         }
-    }, [props.value, value]);
+    }, [props.value]);
 
     return (
         <Tooltip title={hover || ""}>
