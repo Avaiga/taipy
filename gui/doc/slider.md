@@ -1,8 +1,8 @@
 Displays and allows the user to set a value within a range.
 
-The range is set by the values `min` and `max` that must be integer values.
+The range is set by the values `min` and `max` which must be integer values.
 
-If the _lov_ property is used, then the slider can be used to select a value amoung the different choices.
+If the _lov_ property is used, then the slider can be used to select a value among the different choices.
 
 ## Usage
 

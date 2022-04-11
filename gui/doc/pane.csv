@@ -1,17 +1,17 @@
 ﻿Name,Type,Default,Doc
 *open,bool,FALSE,"If <i>True</i>, this pane is visible on the page.
 If <i>False</i>, the pane is hidden."
-on_close,str,None,"The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).
+on_close,Callback,,"The name of a function that is be triggered when this pane is closed (if the user clicks outside of it or presses the Esc key).
 All parameters of that function are optional:
 <ul>
-<li>state instance</li>
-<li>id</li>
-<li>action</li>
+<li>state (State^): state instance.</li>
+<li>id (optional[str]): the identifier of the button.</li>
+<li>action (optional[str]): the name of the action that provoked the change.</li>
 </ul>
-If this property is set to None, no function is called when this pane is closed."
+If this property is not set, no function is called when this pane is closed."
 >partial,,,
 anchor,str,"""left""","Anchor side of the pane.
-Valid values are ""left"", ""right"", ""top"" or ""bottom""."
+Valid values are ""left"", ""right"", ""top"", or ""bottom""."
 width,str,"""30vw""","Width, in CSS units, of this pane.
 This is used only if <i>anchor</i> is ""left"" or ""right""."
 height,str,"""30vh""","Height, in CSS units, of this pane.

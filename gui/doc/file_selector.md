@@ -1,4 +1,4 @@
-Allows to upload a file content.
+Allows uploading a file content.
 
 The upload can be triggered by pressing a button, or drag-and-dropping a file on top of the control.
 
@@ -6,7 +6,7 @@ The upload can be triggered by pressing a button, or drag-and-dropping a file on
 
 ### Default behavior
 
-The variable specified in _content_ is populated by a local filename when the transfer is finished.
+The variable specified in _content_ is populated by a local filename when the transfer is completed.
 
 !!! example "Page content"
 
@@ -25,7 +25,7 @@ The variable specified in _content_ is populated by a local filename when the tr
 ### Standard configuration
 
 A specific _label_ can be shown besides the standard icon. 
-The function name provided as _on_action_ is called when the transfer is finished.
+The function name provided as _on_action_ is called when the transfer is completed.
 The _extensions_ property can be used as a list of file name extensions that is used to filter the file selection box. This filter is not enforced: the user can select and upload any file.
 Upon dragging a file over the button, the _drop_message_ content is displayed as a temporary label for the button.
 

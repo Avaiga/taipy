@@ -1,6 +1,6 @@
 A side pane.
 
-Pane allows to show some content on top of the current page.
+Pane allows showing some content on top of the current page.
 The pane is closed when the user clicks outside the area of the pane (triggering a _on_close_ action).
 
 ## Usage

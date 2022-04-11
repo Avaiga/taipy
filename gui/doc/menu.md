@@ -1,4 +1,4 @@
-Shows a left side menu.
+Shows a left-side menu.
 
 This control is represented by a unique left-anchor and foldable vertical menu.
 

@@ -4,11 +4,13 @@ Displays a status or a list of statuses.
 ## Usage
 
 _value_ can be a list of tuples:
+
    - first element: status
    - second element: message
-or a list of dictionaries that contains the keys:
-   - status
-   - message
+or a list of dictionaries that contain the keys:
+
+       - status
+       - message
 
 ### Show the current status
 

@@ -1,77 +1,77 @@
 ﻿Name,Type,Default,Doc
-*data,any,None,The data to be represented in this table.
-page_size,int,100,
-allow_all_rows,bool,FALSE,
-show_all,bool,FALSE,
-auto_loading,bool,FALSE,data will be loaded on demand
-width[<i>col_name</i>],str,None,"The width, in CSS units, of the indicated column."
-selected,list[int]|str,None,The list of the selected indices. ??
+*data,any,,The data to be represented in this table.
+page_size,int,100,For paginated table, the number of rows displayed.
+allow_all_rows,bool,FALSE,For paginated table, adds an option to show all rows.
+show_all,bool,FALSE,For paginated table, show all rows.
+auto_loading,bool,FALSE,data will be loaded on demand.
+width[<i>col_name</i>],str,,"The width, in CSS units, of the indicated column."
+selected,list[int]|str,,The list of the indices of the rows to show as selected.
 page_size_options,List[int]|str,"[50, 100, 500]",The list of available page sizes that users can choose.
-columns,"str|List[str]|Dict[str, Dict[str, str|int]]","""All columns""??","The list of the column names.
+columns,"str|List[str]|Dict[str, Dict[str, str|int]]",<i>shows all columns when empty</i>,"The list of the column names.
 <ul>
-<li>str: separated list of column names.</li>
+<li>str: ;-separated list of column names.</li>
 <li>List[str]</li>
 <li>dict:
-<pre>{""col name"": {format: ""format"", index: 1}}</pre>
+{""col name"": {format: ""format"", index: 1}}
 if index is specified, it represents the display order of the columns.
-If <i>index</i> is not specified, the list order defines the index</li>
+If <i>index</i> is not specified, the list order defines the index.if format is specified, it is used for numbers or dates.</li>
 </ul>"
-date_format,str,"""MM/dd/yyyy""",The date format that is used for all date columns when format is not defined.??
-number_format,str,None,
+date_format,str,"""MM/dd/yyyy""",The date format that is used for all date columns when format is not specifically defined.
+number_format,str,,The number format that is used for all number columns when format is not specifically defined.
 group_by[<i>col_name</i>],bool,FALSE,"Indicates, if <i>True</i>, that the given column can be aggregated.
 See [below](#aggregation) for details."
 apply[<i>col_name</i>],str,"""first""","The name of the aggregation function to use.
 This is used only if <i>group_by[column_name]</i> is set to <i>True</i>.
 See [below](#aggregation) for details.
 "
-style,str,None,"Allows the styling of table lines.
+style,str,,"Allows the styling of table lines.
 See [below](#styling) for details."
-style[<i>col_name</i>],str,None,"Allows the styling of table cells.
+style[<i>col_name</i>],str,,"Allows the styling of table cells.
 See [below](#styling) for details."
-width,str|int|float,100vw,"The width, in CSS units, of this table control."
-height,str|int|float,100vw,"The height, in CSS units, of this table control."
+width,str|int|float,"""100vw""","The width, in CSS units, of this table control."
+height,str|int|float,"""80vh""","The height, in CSS units, of this table control."
 nan_value,str,"""""",The replacement text for NaN (not-a-number) values.
 nan_value[<i>col_name</i>],str,"""""",The replacement text for NaN (not-a-number) values for the indicated column.
-on_edit,str,None,"The name of a function that is be triggered when a cell edition is validated.
+on_edit,Callback,,"The name of a function that is to be triggered when a cell edition is validated.
 All parameters of that function are optional:
 <ul>
-<li>gui state</li>
-<li>var_name</li>
-<li>action</li>
+<li>state (State^): state instance.</li>
+<li>var_name (str): the name of the tabular data variable.</li>
+<li>action (str): the name of the action that provoked the change.</li>
 <li>payload
 <ul>
-<li>index</li>
-<li>col</li>
-<li>value</li>
+<li>index (int): row Index.</li>
+<li>col (str): column name.</li>
+<li>value (any): the new value.</li>
 </ul>
 </li>
 </ul>
-If this property is set to None, the user cannot edit cells."
-on_delete,str,None,"The name of a function that is be triggered when a row is deleted.
+If this property is not set, the user cannot edit cells."
+on_delete,str,,"The name of a function that is to be triggered when a row is deleted.
 All parameters of that function are optional:
 <ul>
-<li>gui state</li>
-<li>var_name</li>
-<li>action</li>
+<li>state (State^): state instance.</li>
+<li>var_name (str): the name of the tabular data variable.</li>
+<li>action (str): the name of the action that provoked the change.</li>
 <li>payload
 <ul>
-<li>index</li>
+<li>index (int): row Index.</li>
 </ul>
 </li>
 </ul>
-If this property is set to None, the user cannot delete rows."
-on_add,str,None,"The name of a function that is be triggered when the user request a row to be added.
+If this property is not set, the user cannot delete rows."
+on_add,str,,"The name of a function that is to be triggered when the user requests a row to be added.
 All parameters of that function are optional:
 <ul>
-<li>gui state</li>
-<li>var_name</li>
-<li>action</li>
+<li>state (State^): state instance.</li>
+<li>var_name (str): the name of the tabular data variable.</li>
+<li>action (str): the name of the action that provoked the change.</li>
 <li>payload
 <ul>
-<li>index</li>
+<li>index (int): row Index.</li>
 </ul>
 </li>
 </ul>
-If this property is set to None, the user cannot add rows."
+If this property is not set, the user cannot add rows."
 >active,,,
 >shared,,,

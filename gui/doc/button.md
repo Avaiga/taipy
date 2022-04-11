@@ -23,7 +23,7 @@ text.
 
 ### Specific action callback
 
-Button can specified a callback function to be invoked when the button is pressed.
+Button can specify a callback function to be invoked when the button is pressed.
 
 !!! example "Page content"
 

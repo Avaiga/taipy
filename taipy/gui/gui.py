@@ -718,6 +718,7 @@ class Gui:
                 - If it is not, the page content is read from this string as
                   Markdown text.
             style (Optional[str]): Additional CSS style to apply to this page.
+
                 - if there is style associated with a page, it is used at a global level
                 - if there is no style associated with the page, the style is cleared at a global level
                 - if the page is embedded in a block control, the style is ignored
@@ -784,10 +785,10 @@ class Gui:
 
             For every file that is found:
 
-                - If the filename extention is _.md_, it is read as Markdown content and
-                  a new page is created with the base name of this filename.
-                - If the filename extention is _.html_, it is read as HTML content and
-                  a new page is created with the base name of this filename.
+            - If the filename extention is _.md_, it is read as Markdown content and
+             a new page is created with the base name of this filename.
+            - If the filename extention is _.html_, it is read as HTML content and
+             a new page is created with the base name of this filename.
 
             For example, say you have the following directory structure:
             ```
@@ -975,7 +976,11 @@ class Gui:
         self._accessors._register(data_accessor_class)
 
     def get_flask_app(self) -> Flask:
-        """Get the internal Flask application"""
+        """Get the internal Flask application
+
+        Returns:
+            the Flask instance used.
+        """
         return self._server.get_flask()
 
     def _set_frame(self, frame: FrameType):
@@ -1005,6 +1010,9 @@ class Gui:
                 Please refer to the
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
                 section in the User Manual for more information.
+
+        Returns:
+            The Flask instance if _run_server_ is _False_ else _None_
         """
 
         app_config = self._config.config

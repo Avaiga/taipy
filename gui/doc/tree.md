@@ -155,7 +155,7 @@ of the tuple is used to reference the selection (therefore those elements should
 among all the items) and the second element is the string that turns out to be displayed.
 
 
-### Display a list of objects with buil-in adapter
+### Display a list of objects with built-in adapter
 
 Objects with attributes _id_, _label_ and _children_ (as a list) can de dealt directly by the built-in _lov_ adapter.
 

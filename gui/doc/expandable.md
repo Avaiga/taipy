@@ -6,7 +6,7 @@ Expandable is a block control.
 
 ### Defining a title and managing expanded state
 
-The default property _title_ defines the title shown when clthe visual element is collapsed.
+The default property _title_ defines the title shown when the visual element is collapsed.
 
 !!! example "Page content"
 

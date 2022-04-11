@@ -1,14 +1,14 @@
 ﻿Name,Type,Default,Doc
-*content,dynamic(url | path | file),None,The image source.
-label,dynamic(str),None,The label for this image.
-on_action,str,"""""","The name of a function that is triggered when the user clicks on the image.
+*content,dynamic(url | path | file),,The image source.
+label,dynamic(str),,The label for this image.
+on_action,str,,"The name of a function that is triggered when the user clicks on the image.
 All the parameters of that function are optional:
 <ul>
-<li>state instance</li>
-<li>id</li>
-<li>action</li>
+<li>state (State^): state instance.</li>
+<li>id (optional[str]): the identifier of the button.</li>
+<li>action (optional[str]): the name of the action that provoked the change.</li>
 </ul>"
 width,str|int|float,"""300px""","The width, in CSS units, of this element."
-height,str|int|float,None,"The height, in CSS units, of this element."
+height,str|int|float,,"The height, in CSS units, of this element."
 >active,,,
 >shared,,,
