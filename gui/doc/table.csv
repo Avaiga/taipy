@@ -1,8 +1,8 @@
 ﻿Name,Type,Default,Doc
 *data,any,,The data to be represented in this table.
-page_size,int,100,For paginated table, the number of rows displayed.
-allow_all_rows,bool,FALSE,For paginated table, adds an option to show all rows.
-show_all,bool,FALSE,For paginated table, show all rows.
+page_size,int,100,"For paginated table, the number of rows displayed."
+allow_all_rows,bool,FALSE,"For paginated table, adds an option to show all rows."
+show_all,bool,FALSE,"For paginated table, show all rows."
 auto_loading,bool,FALSE,data will be loaded on demand.
 width[<i>col_name</i>],str,,"The width, in CSS units, of the indicated column."
 selected,list[int]|str,,The list of the indices of the rows to show as selected.
