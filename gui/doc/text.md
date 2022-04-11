@@ -1,6 +1,6 @@
 Displays a value as a static text.
 
-Note that if order to create a `text` control, you don't need to specify the control name
+Note that in order to create a `text` control, you don't need to specify the control name
 in the text template. See the documentation for [Controls](../controls.md) for more details.
 
 ## Details
@@ -35,7 +35,7 @@ You can represent a variable value as a simple, static text:
 If your value is a floating point value, you can use the _format_ property
 to indicate what the output format should be used.
 
-To display a floating point value with two decimal place:
+To display a floating point value with two decimal places:
 
 !!! example "Page content"
 

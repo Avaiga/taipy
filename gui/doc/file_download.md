@@ -1,12 +1,12 @@
-Allows to download a file content.
+Allows downloading of a file content.
 
 The download can be triggered when clicking on a button, or can be performed automatically
 
 ## Usage
 
-### Sefault behavior
+### Default behavior
 
-Allows to download _content_ when content is a file path or some content
+Allows downloading _content_ when content is a file path or some content
 
 !!! example "Page content"
 
@@ -24,7 +24,7 @@ Allows to download _content_ when content is a file path or some content
 
 ### Standard configuration
 
-A specific _label_ can be shown besides the standard icon. 
+A specific _label_ can be shown beside the standard icon. 
 The function name provided as _on_action_ is called when the user initiates the download.
 The _name_ provided will be the default name proposed to the user when downloading (depending on browser validation and rules).
 

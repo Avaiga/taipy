@@ -1,6 +1,6 @@
 A modal dialog.
 
-Dialog allows to show some content over the current page.
+Dialog allows showing some content over the current page.
 The dialog is closed when the user presses the Cancel or Validate buttons, or clicks outside the area of the dialog (triggering a Cancel action).
 
 ## Usage
@@ -23,7 +23,7 @@ The default property, _open_, indicates whether the dialog is visible or not:
         <taipy:dialog on_action="on_action={lambda s: s.assign('show_dialog', False)}">{show_dialog}</taipy:dialog>
         ```
 
-With another action that would have previsouly shown the dialog with:
+With another action that would have previously shown the dialog with:
 
 ```py3
 def button_action(state, id, action):

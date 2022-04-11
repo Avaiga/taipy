@@ -1,14 +1,17 @@
 Displays a data set as tabular data.
 
 The table component supports 3 display modes:
+
    - _paginated_: you can choose the page size and page size options (`allow_all_rows` adds an option to show a page with all rows).
    - _unpaginated_:  all rows and no page are shown (`show_all = True`).
    - _auto_loading_: the pages are loaded on demand depending on the visible area.
 
 The _data_ property supported types are:
+
 - pandas Dataframe
 - array of arrays
 - numpy series
+
 Data columns are accessed by their name or index (temporary dataframes are built from these different sources).
 
 ## Usage
@@ -62,7 +65,7 @@ The function provided in the _apply[column_name]_ property indicates how to perf
 The value of this property, which is a string, can be:
 
    - A built-in function. Available predefined functions are the following: `count`, `sum`, `mean`, `median`,
-     `min`, `max`, `std`, `first` (the default value) and `last`.
+     `min`, `max`, `std`, `first` (the default value), and `last`.
    - The name of a user-defined function, or a lambda function.<br/>
      This function receives a single parameter which is the series to aggregate, and it must return a scalar value which would
      be the result of the aggregation.
@@ -104,7 +107,7 @@ The signature of this function depends on which `style` property you use:
      - _column_name_ (optional): the name of the column for this cell
 
 Based on these parameters, the function must return a string that defines a CSS class name that will
-be added to the CSS classes for this table row, or this specific cell.
+be added to the CSS classes for this table row or this specific cell.
 
 You can then add the definition of this class in your CSS file.
 

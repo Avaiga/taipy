@@ -1,11 +1,11 @@
 ﻿Name,Type,Default,Doc
-*value,dynamic(int | float | str),None,"The value that is set for this slider.
+*value,dynamic(int | float | str),,"The value that is set for this slider.
 It would be a <i>lov</i> label if it is used."
-min,int|float,1??,"The minimum value.
+min,int|float,0,"The minimum value.
 This is ignored when <i>lov</i> is defined."
 max,int|float,100,"The maximum value.
 This is ignored when <i>lov</i> is defined."
-text_anchor??,str,"""bottom""","When the <i>lov</i> property is used, this property indicates the location of the label.
+text_anchor,str,"""bottom""","When the <i>lov</i> property is used, this property indicates the location of the label.
 Possible values are:
 <ul>
 <li>bottom</li>
@@ -14,11 +14,11 @@ Possible values are:
 <li>right</li>
 <li>none (no label is displayed)</li>
 </ul>"
-labels,bool|dict,None,"The labels for specific points of the slider.
+labels,bool|dict,,"The labels for specific points of the slider.
 If set to <i>True</i>, this slider uses the labels of the <i>lov</i> if there are any.
 If set to a dictionary, the slider uses the dictionary keys as a <i>lov</i> key or index, and the associated value as the label."
 width,str,"""300px""","The width, in CSS units, of this element."
-height,str,None,"The height, in CSS units, of this element.
+height,str,,"The height, in CSS units, of this element.
 It defaults to the <i>width</i> value when using the vertical orientation."
 orientation,str,"""horizontal""","The orientation of this slider.
 Valid values are ""horizontal"" or ""vertical""."

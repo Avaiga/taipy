@@ -4,7 +4,7 @@ A kind of [`input`](input.md) that handles numbers.
 
 ### Simple
 
-You can create an number field bound to a numerical variable with the following content:
+You can create a <i>number</i> field bound to a numerical variable with the following content:
 
 !!! example "Page content"
 

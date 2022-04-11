@@ -27,7 +27,7 @@ class Partial(_Page):
 
     Visual elements such as [`part`](../gui/viselements/part.md),
     [`dialog`](../gui/viselements/dialog.md) or
-    [`pane`](../gui/viselements/pane.md)] can use Partials.
+    [`pane`](../gui/viselements/pane.md) can use Partials.
 
     Note that `Partial` has no constructor (no `__init__()` method): to create a
     `Partial`, you must call the `Gui.add_partial()^` function.

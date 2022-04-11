@@ -26,7 +26,7 @@ The list of all pages registered in the Gui instance is used to build the navbar
 ### Defining a custom navbar
 
 The _lov_ property is used to define the list of elements that are displayed.
-If an lov element id starts whith http, the page is opened in another tab.
+If a lov element id starts whith http, the page is opened in another tab.
 
 !!! example "Page content"
 
