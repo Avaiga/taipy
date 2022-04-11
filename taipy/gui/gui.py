@@ -976,7 +976,7 @@ class Gui:
         self._accessors._register(data_accessor_class)
 
     def get_flask_app(self) -> Flask:
-        """Get the internal Flask application
+        """Get the internal Flask application.
 
         Returns:
             the Flask instance used.
@@ -1012,7 +1012,7 @@ class Gui:
                 section in the User Manual for more information.
 
         Returns:
-            The Flask instance if _run_server_ is _False_ else _None_
+            The Flask instance if _run_server_ is _False_ else _None_.
         """
 
         app_config = self._config.config
