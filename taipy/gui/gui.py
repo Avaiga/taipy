@@ -653,6 +653,9 @@ class Gui:
 
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[t.Callable]:
         return self.__adapter._get_for_type(type_name)
+    
+    def _get_unique_type_adapter(self, type_name: str) -> str:
+        return self.__adapter._get_unique_type(type_name)
 
     def _run_adapter(
         self, adapter: t.Optional[t.Callable], value: t.Any, var_name: str, id_only=False

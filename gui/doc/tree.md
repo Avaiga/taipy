@@ -199,7 +199,7 @@ Dictionaries with keys _id_, _label_ and _children_ (as a list) can de dealt dir
 Assuming your Python code has created a list of object:
 ```py3
 users = [
-    {"id": "231", "label": "Johanna", "year": 1987, "children": [{"id": "231.1", "label": "Johanna's son", "year": 2006)]},
+    {"id": "231", "label": "Johanna", "year": 1987, "children": [{"id": "231.1", "label": "Johanna's son", "year": 2006}]},
     {"id": "125", "label": "John", "year": 1979, "children": []},
     {"id": "4", "label": "Peter", "year": 1968, "children": []},
     {"id": "31", "label": "Mary", "year": 1974, "children": []}
