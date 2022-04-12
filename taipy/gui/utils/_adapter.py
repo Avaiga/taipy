@@ -32,6 +32,13 @@ class _Adapter:
     def _get_for_type(self, type_name: str) -> t.Optional[t.Callable]:
         return self.__adapter_for_type.get(type_name)
 
+    def _get_unique_type(self, type_name: str) -> str:
+        index = 0
+        while type_name in self.__adapter_for_type:
+            type_name = f"{type_name}{index}"
+            index += 1
+        return type_name
+
     def _run_for_var(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
         ret = self._run(self.__get_for_var(var_name, value), value, var_name, id_only)
         if ret is not None:

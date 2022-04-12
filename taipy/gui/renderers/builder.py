@@ -287,7 +287,7 @@ class _Builder:
                         elt = value
                 else:
                     elt = lov[0]
-                var_type = type(elt).__name__
+                var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
             if lov_name := self.__hashes.get(var_name):
