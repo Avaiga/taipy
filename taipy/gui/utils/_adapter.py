@@ -22,6 +22,7 @@ class _Adapter:
     def __init__(self):
         self.__adapter_for_type: t.Dict[str, t.Callable] = {}
         self.__type_for_variable: t.Dict[str, str] = {}
+        self.__warning_by_type: t.Set[str] = set()
 
     def _add_for_type(self, type_name: str, adapter: t.Callable) -> None:
         self.__adapter_for_type[type_name] = adapter
@@ -113,27 +114,31 @@ class _Adapter:
         children = self.__get_children(value)
         return (id, label) if children is None else (id, label, children)  # type: ignore
 
-    def __get_id(self, value: t.Any, allow_list = True) -> str:
+    def __get_id(self, value: t.Any, dig = True) -> str:
         if isinstance(value, str):
             return value
-        elif allow_list and isinstance(value, (list, tuple)) and len(value):
-            return self.__get_id(value[0], False)
-        elif hasattr(value, "id"):
-            return str(value.id)
-        elif hasattr(value, "__getitem__") and "id" in value:
-            return str(value.get("id"))
-        else:
-            return str(value)
+        elif dig:
+            if isinstance(value, (list, tuple)) and len(value):
+                return self.__get_id(value[0], False)
+            elif hasattr(value, "id"):
+                return self.__get_id(value.id, False)
+            elif hasattr(value, "__getitem__") and "id" in value:
+                return self.__get_id(value.get("id"), False)
+        if type(value).__name__ not in self.__warning_by_type:
+            warnings.warn(f"LoV id must be a string, using a string representation of {type(value)}")
+            self.__warning_by_type.add(type(value).__name__)
+        return str(value)
 
-    def __get_label(self, value: t.Any, allow_list = True) -> t.Union[str, t.Dict, None]:
+    def __get_label(self, value: t.Any, dig = True) -> t.Union[str, t.Dict, None]:
         if isinstance(value, (str, Icon)):
             return Icon.get_dict_or(value)
-        elif allow_list and isinstance(value, (list, tuple)) and len(value) > 1:
-            return self.__get_label(value[1], False)
-        elif hasattr(value, "label"):
-            return Icon.get_dict_or(value.label)
-        elif hasattr(value, "__getitem__") and "label" in value:
-            return Icon.get_dict_or(value["label"])
+        elif dig:
+            if isinstance(value, (list, tuple)) and len(value) > 1:
+                return self.__get_label(value[1], False)
+            elif hasattr(value, "label"):
+                return self.__get_label(value.label, False)
+            elif hasattr(value, "__getitem__") and "label" in value:
+                return self.__get_label(value["label"], False)
         return None
 
     def __get_children(self, value: t.Any) -> t.Union[t.List[t.Any], None]:
