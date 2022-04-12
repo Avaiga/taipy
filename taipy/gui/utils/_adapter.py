@@ -113,11 +113,11 @@ class _Adapter:
         children = self.__get_children(value)
         return (id, label) if children is None else (id, label, children)  # type: ignore
 
-    def __get_id(self, value: t.Any) -> str:
+    def __get_id(self, value: t.Any, allow_list = True) -> str:
         if isinstance(value, str):
             return value
-        elif isinstance(value, (list, tuple)) and len(value):
-            return self.__get_id(value[0])
+        elif allow_list and isinstance(value, (list, tuple)) and len(value):
+            return self.__get_id(value[0], False)
         elif hasattr(value, "id"):
             return str(value.id)
         elif hasattr(value, "__getitem__") and "id" in value:
@@ -125,11 +125,11 @@ class _Adapter:
         else:
             return str(value)
 
-    def __get_label(self, value: t.Any) -> t.Union[str, t.Dict, None]:
+    def __get_label(self, value: t.Any, allow_list = True) -> t.Union[str, t.Dict, None]:
         if isinstance(value, (str, Icon)):
             return Icon.get_dict_or(value)
-        elif isinstance(value, (list, tuple)) and len(value) > 1:
-            return self.__get_label(value[1])
+        elif allow_list and isinstance(value, (list, tuple)) and len(value) > 1:
+            return self.__get_label(value[1], False)
         elif hasattr(value, "label"):
             return Icon.get_dict_or(value.label)
         elif hasattr(value, "__getitem__") and "label" in value:
