@@ -15,9 +15,9 @@ Possible values are:
 <li>none (no label is displayed)</li>
 </ul>"
 labels,bool|dict,,"The labels for specific points of the slider.
-If set to <i>True</i>, this slider uses the labels of the <i>lov</i> if there are any.
+If set to True, this slider uses the labels of the <i>lov</i> if there are any.
 If set to a dictionary, the slider uses the dictionary keys as a <i>lov</i> key or index, and the associated value as the label."
-continuous,bool,True,"If set to False, the control emits an on_change notification only when the cursor is released, 
+continuous,bool,True,"If set to False, the control emits an on_change notification only when the mouse button is released, 
 otherwise notifications are emitted during the cursor movements. 
 If <i>lov</i> is defined, the default value is False."
 change_delay,int,<i>App config</i>,"Minimum time between triggering two <i>on_change</i> calls.
