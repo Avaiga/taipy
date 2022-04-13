@@ -1118,7 +1118,6 @@ class Gui:
                 template_folder=f"{_absolute_path}{os.path.sep}webapp",
                 title=self._get_config("title", "Taipy App"),
                 favicon=self._get_config("favicon", "/favicon.png"),
-                themes=self._get_themes(),
                 root_margin=self._get_config("margin", None),
             )
         )
