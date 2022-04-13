@@ -12,10 +12,9 @@
 import os
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Iterable
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 from sqlalchemy import create_engine, table, text
 
@@ -175,7 +174,7 @@ class SQLDataNode(DataNode):
                 self.__insert_tuples([(data,)], write_table, connection)
 
     @staticmethod
-    def __insert_list(data: Union[List[Any], npt.NDArray[Any]], write_table: Any, connection: Any) -> None:
+    def __insert_list(data: Iterable[Any], write_table: Any, connection: Any) -> None:
         """
         :param data: a list of values
         :param write_table: a SQLAlchemy object that represents a table
@@ -199,7 +198,7 @@ class SQLDataNode(DataNode):
                 transaction.commit()
 
     @staticmethod
-    def __insert_tuples(data: Union[List[Any], npt.NDArray[Any]], write_table: Any, connection: Any) -> None:
+    def __insert_tuples(data: Iterable[Any], write_table: Any, connection: Any) -> None:
         """
         :param data: a list of tuples
         :param write_table: a SQLAlchemy object that represents a table
@@ -224,7 +223,7 @@ class SQLDataNode(DataNode):
                 transaction.commit()
 
     @staticmethod
-    def __insert_dicts(data: Union[List[Any], npt.NDArray[Any]], write_table: Any, connection: Any) -> None:
+    def __insert_dicts(data: Iterable[Any], write_table: Any, connection: Any) -> None:
         """
         :param data: a list of tuples
         :param write_table: a SQLAlchemy object that represents a table
