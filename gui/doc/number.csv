@@ -1,4 +1,6 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(any),,The numerical value represented by this control.
+change_delay,int,<i>App config</i>,"minimum time between triggering two <i>on_change</i> callback.
+The default value is defined at the application configuration level by change_delay. if None or 0, the delay is set to 300ms."
 >on_change,,,
 >propagate,,,

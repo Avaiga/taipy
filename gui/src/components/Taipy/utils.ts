@@ -40,6 +40,7 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps {
     type: string;
     value: string;
     defaultValue?: string;
+    changeDelay?: number;
 }
 
 export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined =>

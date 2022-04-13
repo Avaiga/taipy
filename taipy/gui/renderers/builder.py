@@ -671,6 +671,9 @@ class _Builder:
     def __set_update_var_name(self, hash_name: str):
         return self.set_attribute("updateVarName", hash_name)
 
+    def set_change_delay(self):
+        return self.__set_number_attribute("change_delay", self.__gui._get_config("change_delay", None))
+
     def set_value_and_default(
         self,
         var_name: t.Optional[str] = None,
