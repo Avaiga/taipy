@@ -1,4 +1,4 @@
-import React, { CSSProperties, MouseEvent, useCallback, useContext, useMemo } from "react";
+import React, { CSSProperties, MouseEvent, useCallback, useContext, useEffect, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { PaletteMode } from "@mui/material";
@@ -9,7 +9,7 @@ import Brightness3 from "@mui/icons-material/Brightness3";
 
 import { TaipyActiveProps } from "./utils";
 import { TaipyContext } from "../../context/taipyContext";
-import { createThemeAction } from "../../context/taipyReducers";
+import { createThemeAction, getLocalStorageValue } from "../../context/taipyReducers";
 
 interface ThemeToggleProps extends TaipyActiveProps {
     style?: CSSProperties;
@@ -31,10 +31,18 @@ const boxSx = {
 const ThemeToggle = (props: ThemeToggleProps) => {
     const { id, label = "Mode", style = {}, className, active = true } = props;
     const { state, dispatch } = useContext(TaipyContext);
+
     const changeMode = useCallback(
         (evt: MouseEvent, mode: PaletteMode) => dispatch(createThemeAction(mode === "dark")),
         [dispatch]
     );
+
+    useEffect(() => {
+        const localMode = getLocalStorageValue("theme", state.theme.palette.mode, ["light", "dark"]);
+        if (state.theme.palette.mode !== localMode) {
+            dispatch(createThemeAction(localMode === "dark"));
+        }
+    }, [state.theme.palette.mode, dispatch]);
 
     const mainSx = useMemo(() => ({ ...boxSx, ...style }), [style]);
     return (
