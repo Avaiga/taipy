@@ -234,6 +234,7 @@ class _Factory:
         )
         .set_type("text")
         .set_value_and_default()
+        .set_change_delay()
         .set_propagate()
         .set_attributes(
             [
@@ -297,6 +298,7 @@ class _Factory:
         )
         .set_type("number")
         .set_value_and_default()
+        .set_change_delay()
         .set_propagate()
         .set_attributes(
             [
@@ -370,6 +372,7 @@ class _Factory:
             default_value=0,
         )
         .set_value_and_default(native_type=True, var_type=_AttributeType.number_or_lov_value)
+        .set_change_delay()
         .set_attributes(
             [
                 ("active", _AttributeType.dynamic_boolean, True),
@@ -382,6 +385,7 @@ class _Factory:
                 ("orientation"),
                 ("width", _AttributeType.string, "300px"),
                 ("on_change", ),
+                ("continuous", _AttributeType.boolean, True),
             ]
         )
         .get_adapter("lov")  # need to be called before set_lov

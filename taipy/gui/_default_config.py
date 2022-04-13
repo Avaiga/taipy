@@ -37,4 +37,5 @@ default_config: Config = {
     "content_security_policy": None,
     "force_https": False,
     "watermark": "Taipy inside",
+    "change_delay": None
 }

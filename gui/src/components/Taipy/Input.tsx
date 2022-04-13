@@ -13,6 +13,7 @@ const Input = (props: TaipyInputProps) => {
     const { dispatch } = useContext(TaipyContext);
     const delayCall = useRef(-1);
 
+    const changeDelay = (typeof props.changeDelay === "number" && props.changeDelay > 0) ? props.changeDelay : 300;
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
@@ -26,9 +27,9 @@ const Input = (props: TaipyInputProps) => {
             delayCall.current = window.setTimeout(() => {
                 dispatch(createSendUpdateAction(updateVarName, val, props.tp_onChange, propagate));
                 delayCall.current = -1;
-            }, 300);
+            }, changeDelay);
         },
-        [updateVarName, dispatch, propagate, props.tp_onChange]
+        [updateVarName, dispatch, propagate, props.tp_onChange, changeDelay]
     );
 
     useEffect(() => {
