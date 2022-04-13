@@ -81,13 +81,23 @@ class _Server:
             elif "type" in message.keys():
                 gui._manage_message(message["type"], message)
 
+    def __get_client_config(self) -> t.Dict[str, t.Any]:
+        config = {
+            "timeZone": self._gui._config.get_time_zone(),
+            "darkMode": self._gui._get_config("dark_mode", True),
+            }
+        themes=self._gui._get_themes()
+        if themes:
+            config["themes"] = themes
+        return config
+        
+
     def _get_default_blueprint(
         self,
         static_folder: t.Optional[str] = "",
         template_folder: str = "",
         title: str = "",
         favicon: str = "",
-        themes: t.Optional[t.Dict[str, t.Any]] = None,
         root_margin: t.Optional[str] = None,
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
@@ -102,9 +112,10 @@ class _Server:
                     app_css=f"/{self.css_file}.css",
                     title=title,
                     favicon=favicon,
-                    themes=themes,
                     root_margin=root_margin,
                     watermark=self._gui._get_config("watermark", None),
+                    config=self.__get_client_config()
+
                 )
             if os.path.isfile(static_folder + os.path.sep + path):
                 return send_from_directory(static_folder + os.path.sep, path)

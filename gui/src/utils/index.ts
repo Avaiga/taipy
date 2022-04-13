@@ -4,7 +4,11 @@ import { FormatConfig } from "../context/taipyReducers";
 
 declare global {
     interface Window {
-        taipyUserThemes: Record<string, Record<string, unknown>>;
+        taipyConfig: {
+            darkMode: boolean,
+            themes: Record<string, Record<string, unknown>>,
+            timeZone: string,
+        }
     }
 }
 

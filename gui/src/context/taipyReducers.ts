@@ -123,8 +123,8 @@ export interface FormatConfig {
 }
 
 const getUserTheme = (mode: PaletteMode) => {
-    const userTheme = window.taipyUserThemes?.base || {};
-    const modeTheme = (window.taipyUserThemes && window.taipyUserThemes[mode]) || {};
+    const userTheme = window.taipyConfig?.themes?.base || {};
+    const modeTheme = (window.taipyConfig?.themes && window.taipyConfig.themes[mode]) || {};
     return createTheme(
         merge(userTheme, modeTheme, {
             palette: {
@@ -146,16 +146,16 @@ const themes = {
     dark: getUserTheme("dark"),
 };
 
-const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
+export const getLocalStorageValue = <T = string>(key: string, defaultValue: T, values?: T[]) => {
     const val = localStorage && (localStorage.getItem(key) as unknown as T);
     return !val ? defaultValue : !values ? val : values.indexOf(val) == -1 ? defaultValue : val;
 };
 
 export const INITIAL_STATE: TaipyState = {
     data: {},
-    theme: themes.light,
+    theme: window.taipyConfig?.darkMode ? themes.dark : themes.light,
     locations: {},
-    timeZone: TIMEZONE_CLIENT,
+    timeZone: (!window.taipyConfig?.timeZone || window.taipyConfig.timeZone === "client") ? TIMEZONE_CLIENT : window.taipyConfig.timeZone,
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
 };
