@@ -10,6 +10,7 @@ from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
+from taipy.core.job.status import Status
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task.task import Task
 
@@ -30,6 +31,43 @@ class _Scheduler(_AbstractScheduler):
         self.blocked_jobs: List[Job] = []
         self._dispatcher = _JobDispatcher(job_config.nb_of_workers)  # type: ignore
         self.lock = Lock()
+        # self.__recover_jobs()
+
+    def __recover_jobs(self):
+        jobs = _JobManager._get_all()
+
+        # if job is running -> put to a list
+        # if job is pending -> put to a list
+        # else
+        # sort by creation date -> put to a list
+        blocked_or_submitted_jobs = list()
+
+        for job in jobs:
+            if job.status == Status.RUNNING or job.status == Status.PENDING:
+                self.__set_pending_job(job)
+                self.__run()
+            elif job.status == Status.BLOCKED or job.status:
+                blocked_or_submitted_jobs.append(job)
+
+        blocked_or_submitted_jobs.sort(key=lambda x: x.creation_date)
+
+        for job in blocked_or_submitted_jobs:
+            if self.is_blocked(job):
+                self.__set_block_job(job)
+            else:
+                self.__set_pending_job(job)
+                self.__run()
+            return job
+
+    def __set_block_job(self, job):
+        job.blocked()
+        _JobManager._set(job)
+        self.blocked_jobs.append(job)
+
+    def __set_pending_job(self, job):
+        job.pending()
+        _JobManager._set(job)
+        self.jobs_to_run.put(job)
 
     def submit(
         self, pipeline: Pipeline, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
