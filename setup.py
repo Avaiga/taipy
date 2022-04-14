@@ -19,13 +19,11 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "networkx",
-    "numpy",
-    "openpyxl",
-    "pandas",
-    "simple-websocket",
-    "sqlalchemy",
-    "toml",
+    "networkx>=2.6",
+    "openpyxl>=3.0.3",
+    "pandas>=1.4",
+    "sqlalchemy>=1.4",
+    "toml>=0.10",
 ]
 
 test_requirements = ["pytest>=3.8"]
