@@ -48,6 +48,7 @@ ConfigParameter = t.Literal[
     "content_security_policy",
     "force_https",
     "watermark",
+    "change_delay",
 ]
 
 Config = t.TypedDict(
@@ -78,6 +79,7 @@ Config = t.TypedDict(
         "content_security_policy": t.Optional[dict],
         "force_https": bool,
         "watermark": t.Union[str, None],
+        "change_delay": t.Union[int, None],
     },
     total=False,
 )

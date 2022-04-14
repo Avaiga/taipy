@@ -15,8 +15,6 @@ import { TaipyContext } from "../context/taipyContext";
 import {
     createBlockAction,
     createSetLocationsAction,
-    createThemeAction,
-    createTimeZoneAction,
     initializeWebSocket,
     INITIAL_STATE,
     retreiveBlockUi,
@@ -32,8 +30,6 @@ import GuiDownload from "./Taipy/GuiDownload";
 
 interface AxiosRouter {
     router: string;
-    darkMode: boolean;
-    timeZone: string;
     locations: Record<string, string>;
     blockUI: boolean;
 }
@@ -62,8 +58,6 @@ const Router = () => {
             .get<AxiosRouter>(`/taipy-init/?client_id=${state.id || ""}`)
             .then((result) => {
                 setJSX(result.data.router);
-                dispatch(createThemeAction(result.data.darkMode, true));
-                dispatch(createTimeZoneAction(result.data.timeZone, true));
                 dispatch(createSetLocationsAction(result.data.locations));
                 result.data.blockUI && dispatch(createBlockAction(retreiveBlockUi()));
             })

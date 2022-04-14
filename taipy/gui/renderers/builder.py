@@ -287,7 +287,7 @@ class _Builder:
                         elt = value
                 else:
                     elt = lov[0]
-                var_type = type(elt).__name__
+                var_type = self.__gui._get_unique_type_adapter(type(elt).__name__)
             if adapter is None:
                 adapter = self.__gui._get_adapter_for_type(var_type)
             if lov_name := self.__hashes.get(var_name):
@@ -670,6 +670,9 @@ class _Builder:
 
     def __set_update_var_name(self, hash_name: str):
         return self.set_attribute("updateVarName", hash_name)
+
+    def set_change_delay(self):
+        return self.__set_number_attribute("change_delay", self.__gui._get_config("change_delay", None))
 
     def set_value_and_default(
         self,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useContext, useMemo, useRef } from "react";
 import { SxProps } from "@mui/material";
 import MuiSlider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
@@ -18,9 +18,10 @@ interface SliderProps extends LovProps<number | string, number | string> {
     min?: number;
     max?: number;
     textAnchor?: string;
-    alwaysUpdate?: boolean;
+    continuous?: boolean;
     labels?: string | boolean;
     orientation?: string;
+    changeDelay?: number;
 }
 
 const Slider = (props: SliderProps) => {
@@ -39,15 +40,15 @@ const Slider = (props: SliderProps) => {
     } = props;
     const [value, setValue] = useState(0);
     const { dispatch } = useContext(TaipyContext);
+    const delayCall = useRef(-1);
+    const lastVal = useRef<string|number>(0)
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
     const lovList = useLovListMemo(lov, defaultLov);
 
-    const update = useMemo(
-        () => (props.alwaysUpdate === undefined ? lovList.length === 0 : props.alwaysUpdate),
-        [lovList, props.alwaysUpdate]
-    );
+    const update = props.continuous === undefined ? lovList.length === 0 : props.continuous;
+    const changeDelay = (typeof props.changeDelay === "number" && props.changeDelay > 0) ? props.changeDelay : 0;
 
     const min = lovList.length ? 0 : props.min;
     const max = lovList.length ? lovList.length - 1 : props.max;
@@ -57,11 +58,21 @@ const Slider = (props: SliderProps) => {
         (e, val: number | number[]) => {
             setValue(val as number);
             if (update) {
-                const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(updateVarName, value, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                lastVal.current = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val as number;
+                if (changeDelay) {
+                    if (delayCall.current < 0) {
+                        delayCall.current = window.setTimeout(() => {
+                            dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                            delayCall.current = -1;
+                        }, changeDelay);
+                    }
+                } else {
+                    dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                }
+                delayCall.current = 0;
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange, changeDelay]
     );
 
     const handleRangeCommitted = useCallback(
@@ -69,7 +80,15 @@ const Slider = (props: SliderProps) => {
             setValue(val as number);
             if (!update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
-                dispatch(createSendUpdateAction(updateVarName, value, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                dispatch(
+                    createSendUpdateAction(
+                        updateVarName,
+                        value,
+                        props.tp_onChange,
+                        propagate,
+                        valueById ? undefined : getUpdateVar(updateVars, "lov")
+                    )
+                );
             }
         },
         [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
