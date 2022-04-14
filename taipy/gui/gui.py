@@ -984,7 +984,10 @@ class Gui:
         if hasattr(self, "on_init") and callable(self.on_init):
             if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
                 _setscopeattr(self, Gui.__ON_INIT_NAME, True)
-                self._call_function_with_state(self.on_init, [])
+                try:
+                    self._call_function_with_state(self.on_init, [])
+                except Exception as e:
+                    warnings.warn(f"Exception on on_init execution \n{e}")
         return self._server._render_route()
 
     def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
