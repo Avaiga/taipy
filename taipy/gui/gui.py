@@ -82,6 +82,9 @@ class Gui:
             It defaults to the _on_change_ global function defined in the Python
             application. If there is no such function, user interactions will not trigger
             anything.
+        on_init (Callable): The function that is called on the first connection of a new user.<br/>
+            It defaults to the _on_init_ global function defined in the Python
+            application.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
@@ -99,6 +102,7 @@ class Gui:
     __env_filename = "taipy.gui.env"
     __UI_BLOCK_NAME = "TaipyUiBlockVar"
     __MESSAGE_GROUPING_NAME = "TaipyMessageGrouping"
+    __ON_INIT_NAME = "TaipyOnInit"
     __CONTENT_ROOT = "/taipy-content/"
     __UPLOAD_URL = "/taipy-uploads"
 
@@ -178,8 +182,9 @@ class Gui:
         self.__directory_name_of_pages: t.List[str] = []
 
         # default actions
-        self.on_change: t.Optional[t.Callable] = None
         self.on_action: t.Optional[t.Callable] = None
+        self.on_change: t.Optional[t.Callable] = None
+        self.on_init: t.Optional[t.Callable] = None
 
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
@@ -653,7 +658,7 @@ class Gui:
 
     def _get_adapter_for_type(self, type_name: str) -> t.Optional[t.Callable]:
         return self.__adapter._get_for_type(type_name)
-    
+
     def _get_unique_type_adapter(self, type_name: str) -> str:
         return self.__adapter._get_unique_type(type_name)
 
@@ -975,6 +980,13 @@ class Gui:
             return
         self.__send_ws_navigate(to)
 
+    def __init_route(self):
+        if hasattr(self, "on_init") and callable(self.on_init):
+            if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
+                _setscopeattr(self, Gui.__ON_INIT_NAME, True)
+                self._call_function_with_state(self.on_init, [])
+        return self._server._render_route()
+
     def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
 
@@ -1086,6 +1098,7 @@ class Gui:
         self.__evaluator = _Evaluator(glob_ctx)
 
         # bind on_change and on_action function if available
+        self.__bind_local_func("on_init")
         self.__bind_local_func("on_change")
         self.__bind_local_func("on_action")
 
@@ -1129,7 +1142,7 @@ class Gui:
             pages_bp.add_url_rule(f"/taipy-jsx/{page._route}/", view_func=self._server._render_page)
 
         # server URL Rule for flask rendered react-router
-        pages_bp.add_url_rule("/taipy-init/", view_func=self._server._render_route)
+        pages_bp.add_url_rule("/taipy-init/", view_func=self.__init_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
