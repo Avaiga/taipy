@@ -85,12 +85,11 @@ class _Server:
         config = {
             "timeZone": self._gui._config.get_time_zone(),
             "darkMode": self._gui._get_config("dark_mode", True),
-            }
-        themes=self._gui._get_themes()
+        }
+        themes = self._gui._get_themes()
         if themes:
             config["themes"] = themes
         return config
-        
 
     def _get_default_blueprint(
         self,
@@ -216,8 +215,6 @@ class _Server:
             {
                 "router": router,
                 "locations": locations,
-                "timeZone": self._gui._config.get_time_zone(),
-                "darkMode": self._gui._get_config("dark_mode", True),
                 "blockUI": self._gui._is_ui_blocked(),
             }
         )
