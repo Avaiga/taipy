@@ -1,3 +1,14 @@
+# Copyright 2022 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 import itertools
 from multiprocessing import Lock
 from queue import Queue
@@ -75,10 +86,10 @@ class _Scheduler(_AbstractScheduler):
         """Submit the given `Pipeline^` for an execution.
 
         Parameters:
-             pipeline (`Pipeline^`): The pipeline to submit for execution.
+             pipeline (Pipeline^): The pipeline to submit for execution.
              callbacks: The optional list of functions that should be executed on jobs status change.
-             force (bool) : The boolean parameter to enforce execution of the pipeline's tasks even if their output
-                data nodes are cached.
+             force (bool) : Enforce execution of the pipeline's tasks even if their output data
+                nodes are cached.
 
         Returns:
             The created Jobs.
@@ -94,10 +105,9 @@ class _Scheduler(_AbstractScheduler):
         """Submit the given `Task^` for an execution.
 
         Parameters:
-             task (`Task^`): The task to submit for execution.
+             task (Task^): The task to submit for execution.
              callbacks: The optional list of functions that should be executed on job status change.
-             force (bool): The boolean parameter to enforce execution of the task even if its output data nodes are
-                cached.
+             force (bool): Enforce execution of the task even if its output data nodes are cached.
 
         Returns:
             The created `Job^`.
@@ -122,7 +132,7 @@ class _Scheduler(_AbstractScheduler):
         """Returns True if the execution of the `Job^` or the `Task^` is blocked by the execution of another `Job^`.
 
         Parameters:
-             obj (`Task^` or `Job^`): The job or task entity to run.
+             obj (Union[Task^, Job^]): The job or task entity to run.
 
         Returns:
              True if one of its input data nodes is blocked.

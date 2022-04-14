@@ -1,4 +1,16 @@
+# Copyright 2022 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 import datetime
+import traceback
 
 import pytest
 
@@ -54,7 +66,7 @@ class A:
 
 job = Job(JobId("id"), task)
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
-job._exceptions = [Exception()]
+job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
 job_model = _JobModel(
     id=JobId("id"),
@@ -63,7 +75,7 @@ job_model = _JobModel(
     force=False,
     creation_date=job._creation_date.isoformat(),
     subscribers=_JobRepository._serialize_subscribers(job._subscribers),
-    exceptions=_JobRepository._serialize_exceptions(job._exceptions),
+    stacktrace=job._stacktrace,
 )
 
 

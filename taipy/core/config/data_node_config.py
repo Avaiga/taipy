@@ -1,3 +1,14 @@
+# Copyright 2022 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 from copy import copy
 from typing import Any, Dict, Optional
 
@@ -18,7 +29,7 @@ class DataNodeConfig:
         storage_type (str): Storage type of the data nodes created from the data node config. The possible values
             are : "csv", "excel", "pickle", "sql", "generic" and "In_memory". The default value is "pickle".
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
-        scope (`Scope^`):  The `Scope^` of the data nodes instantiated from the data node config. The default value is
+        scope (Scope^):  The `Scope^` of the data nodes instantiated from the data node config. The default value is
             SCENARIO.
         **properties: A dictionary of additional properties.
     """
