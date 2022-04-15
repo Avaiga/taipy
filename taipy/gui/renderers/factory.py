@@ -62,7 +62,7 @@ class _Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", _AttributeType.function, ""),
+                ("on_action", _AttributeType.function),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
             ]
@@ -87,7 +87,7 @@ class _Factory:
                 ("limit_rows", _AttributeType.boolean),
                 ("render", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
             ]
         )
         .get_chart_config("scatter", "lines+markers")
@@ -111,7 +111,7 @@ class _Factory:
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("editable", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
             ]
         )
         .set_propagate(),
@@ -201,7 +201,7 @@ class _Factory:
         .set_attributes(
             [
                 ("id",),
-                ("on_action", _AttributeType.function, ""),
+                ("on_action", _AttributeType.function),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("width",),
                 ("height",),
@@ -241,7 +241,9 @@ class _Factory:
                 ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
+                ("on_action", _AttributeType.function),
+                ("action_keys", ),
             ]
         ),
         "layout": lambda gui, control_type, attrs: _Builder(
@@ -270,7 +272,7 @@ class _Factory:
                 ("label"),
                 ("width"),
                 ("width[mobile]",),
-                ("on_action", _AttributeType.function, "on_menu_action"),
+                ("on_action", _AttributeType.function),
                 ("inactive_ids", _AttributeType.dynamic_list),
                 ("hover_text", _AttributeType.dynamic_string),
             ]
@@ -305,7 +307,8 @@ class _Factory:
                 ("id",),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
+                ("on_action", _AttributeType.function),
             ]
         ),
         "pane": lambda gui, control_type, attrs: _Builder(
@@ -324,7 +327,7 @@ class _Factory:
                 ("width", _AttributeType.string_or_number, "30vw"),
                 ("height", _AttributeType.string_or_number, "30vh"),
                 ("hover_text", _AttributeType.dynamic_string),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
             ]
         )
         .set_propagate(),
@@ -359,7 +362,7 @@ class _Factory:
                 ("value_by_id", _AttributeType.boolean),
                 ("multiple", _AttributeType.boolean),
                 ("width", _AttributeType.string_or_number),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
             ]
         )
         .set_refresh_on_update()
@@ -384,7 +387,7 @@ class _Factory:
                 ("min", _AttributeType.number, 0),
                 ("orientation"),
                 ("width", _AttributeType.string, "300px"),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
                 ("continuous", _AttributeType.boolean, True),
             ]
         )
@@ -468,7 +471,7 @@ class _Factory:
                 ("label",),
                 ("value_by_id", _AttributeType.boolean),
                 ("unselected_value", _AttributeType.string, ""),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
             ]
         )
         .set_kind()
@@ -494,7 +497,7 @@ class _Factory:
                 ("value_by_id", _AttributeType.boolean),
                 ("multiple", _AttributeType.boolean),
                 ("width", _AttributeType.string_or_number),
-                ("on_change", ),
+                ("on_change", _AttributeType.function),
             ]
         )
         .set_refresh_on_update()
