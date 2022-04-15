@@ -28,7 +28,7 @@ class _JobDispatcher:
     """Manages executors and dispatch jobs (instances of `Job^` class) on it."""
 
     def __init__(self, max_number_of_parallel_execution):
-        self._executor, self._nb_available_workers = self.__create(max_number_of_parallel_execution or 1)
+        self._set_executer_and_nb_available_workers(max_number_of_parallel_execution)
         self.__logger = _TaipyLogger._get_logger()
 
     def _can_execute(self) -> bool:
@@ -142,6 +142,9 @@ class _JobDispatcher:
             return executor, (executor._max_workers)
         else:
             return _Synchronous(), 1
+
+    def _set_executer_and_nb_available_workers(self, max_number_of_parallel_execution):
+        self._executor, self._nb_available_workers = self.__create(max_number_of_parallel_execution or 1)
 
     @staticmethod
     def __unlock_edition_on_outputs(job):

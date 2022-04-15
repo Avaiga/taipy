@@ -17,9 +17,10 @@ from taipy.core.config.config import Config
 
 class _SchedulerFactory:
     @classmethod
-    def _build_scheduler(cls) -> _AbstractScheduler:
+    def _build_scheduler(cls):
         if Config.job_config._is_default_mode():
-            return _Scheduler()
+            _Scheduler._recover_jobs()
+            return _Scheduler
 
         package = f"taipy.{Config.job_config.mode}.scheduler"
         return _load_fct(package, "Scheduler")()

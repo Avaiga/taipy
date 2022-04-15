@@ -34,54 +34,64 @@ class _Scheduler(_AbstractScheduler):
 
     """
 
-    def __init__(self, job_config: JobConfig = None):
-        super().__init__()
+    jobs_to_run: Queue = Queue()
+    blocked_jobs: List = list()
+    _dispatcher = _JobDispatcher(Config.job_config.nb_of_workers)  # type: ignore
+    lock = Lock()
+
+    @classmethod
+    def _set_nb_of_workers(cls, job_config: JobConfig = None):
         if not job_config:
             job_config = Config.job_config
-        self.jobs_to_run: Queue[Job] = Queue()
-        self.blocked_jobs: List[Job] = []
-        self._dispatcher = _JobDispatcher(job_config.nb_of_workers)  # type: ignore
-        self.lock = Lock()
-        # self.__recover_jobs()
 
-    def __recover_jobs(self):
+        cls._dispatcher._set_executer_and_nb_available_workers(job_config.nb_of_workers)  # type: ignore
+
+    @classmethod
+    def _recover_jobs(cls):
+        res = list()
+        blocked_or_submitted_jobs = list()
         jobs = _JobManager._get_all()
 
-        # if job is running -> put to a list
-        # if job is pending -> put to a list
-        # else
-        # sort by creation date -> put to a list
-        blocked_or_submitted_jobs = list()
-
+        # alrogithm explanation:
+        #   - if job is running -> put to a list
+        #   - if job is pending -> put to a list
+        #   - else sort by creation date -> put to a list
         for job in jobs:
             if job.status == Status.RUNNING or job.status == Status.PENDING:
-                self.__set_pending_job(job)
-                self.__run()
-            elif job.status == Status.BLOCKED or job.status:
+                cls.__set_pending_job(job)
+                cls.__run()
+                res.append(job)
+            elif job.status == Status.BLOCKED or job.status == Status.SUBMITTED:
                 blocked_or_submitted_jobs.append(job)
+            else:
+                continue
 
         blocked_or_submitted_jobs.sort(key=lambda x: x.creation_date)
-
         for job in blocked_or_submitted_jobs:
-            if self.is_blocked(job):
-                self.__set_block_job(job)
+            if cls.is_blocked(job):
+                cls.__set_block_job(job)
             else:
-                self.__set_pending_job(job)
-                self.__run()
-            return job
+                cls.__set_pending_job(job)
+            cls.__run()
+            res.append(job)
 
-    def __set_block_job(self, job):
+        return res
+
+    @classmethod
+    def __set_block_job(cls, job):
         job.blocked()
         _JobManager._set(job)
-        self.blocked_jobs.append(job)
+        cls.blocked_jobs.append(job)
 
-    def __set_pending_job(self, job):
+    @classmethod
+    def __set_pending_job(cls, job):
         job.pending()
         _JobManager._set(job)
-        self.jobs_to_run.put(job)
+        cls.jobs_to_run.put(job)
 
+    @classmethod
     def submit(
-        self, pipeline: Pipeline, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
+        cls, pipeline: Pipeline, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
     ) -> List[Job]:
         """Submit the given `Pipeline^` for an execution.
 
@@ -98,10 +108,11 @@ class _Scheduler(_AbstractScheduler):
         tasks = pipeline._get_sorted_tasks()
         for ts in tasks:
             for task in ts:
-                res.append(self.submit_task(task, callbacks, force))
+                res.append(cls.submit_task(task, callbacks, force))
         return res
 
-    def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
+    @classmethod
+    def submit_task(cls, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
         """Submit the given `Task^` for an execution.
 
         Parameters:
@@ -115,16 +126,17 @@ class _Scheduler(_AbstractScheduler):
         for dn in task.output.values():
             dn.lock_edition()
             _DataManager._set(dn)
-        job = _JobManager._create(task, itertools.chain([self._on_status_change], callbacks or []))
-        if self.is_blocked(job):
+        job = _JobManager._create(task, itertools.chain([cls._on_status_change], callbacks or []))
+        if cls.is_blocked(job):
             job.blocked()
             _JobManager._set(job)
-            self.blocked_jobs.append(job)
+            cls.blocked_jobs.append(job)
         else:
             job.pending()
             _JobManager._set(job)
-            self.jobs_to_run.put(job)
-            self.__run()
+            cls.jobs_to_run.put(job)
+            cls.__run()
+
         return job
 
     @staticmethod
@@ -140,33 +152,37 @@ class _Scheduler(_AbstractScheduler):
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
         return any(not _DataManager._get(dn.id).is_ready_for_reading for dn in data_nodes)
 
-    def __run(self):
-        with self.lock:
-            self.__execute_jobs()
+    @classmethod
+    def __run(cls):
+        with cls.lock:
+            cls.__execute_jobs()
 
-    def __execute_jobs(self):
-        while not self.jobs_to_run.empty() and self._dispatcher._can_execute():
-            job_to_run = self.jobs_to_run.get()
-            self._dispatcher._dispatch(job_to_run)
+    @classmethod
+    def __execute_jobs(cls):
+        while not cls.jobs_to_run.empty() and cls._dispatcher._can_execute():
+            job_to_run = cls.jobs_to_run.get()
+            cls._dispatcher._dispatch(job_to_run)
 
-    def _on_status_change(self, job: Job):
+    @classmethod
+    def _on_status_change(cls, job: Job):
         if job.is_finished():
-            if self.lock.acquire(block=False):
+            if cls.lock.acquire(block=False):
                 try:
-                    self.__unblock_jobs()
-                    self.__execute_jobs()
+                    cls.__unblock_jobs()
+                    cls.__execute_jobs()
                 except:
                     ...
                 finally:
-                    self.lock.release()
+                    cls.lock.release()
 
-    def __unblock_jobs(self):
-        jobs_to_unblock = [job for job in self.blocked_jobs if not self.is_blocked(job)]
+    @classmethod
+    def __unblock_jobs(cls):
+        jobs_to_unblock = [job for job in cls.blocked_jobs if not cls.is_blocked(job)]
         for job in jobs_to_unblock:
             job.pending()
             _JobManager._set(job)
-            self.blocked_jobs.remove(job)
-            self.jobs_to_run.put(job)
+            cls.blocked_jobs.remove(job)
+            cls.jobs_to_run.put(job)
 
     def is_running(self) -> bool:
         """Returns False since the default scheduler is not runnable."""

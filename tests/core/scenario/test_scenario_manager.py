@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 from multiprocessing import Process
+from queue import Queue
 
 import pytest
 
@@ -43,6 +44,14 @@ from taipy.core.scenario.scenario import Scenario
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core.utils.NotifyMock import NotifyMock
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset_scheduler_singleton():
+    yield
+    _Scheduler._set_nb_of_workers(None)
+    _Scheduler.jobs_to_run = Queue()
+    _Scheduler.blocked_jobs = []
 
 
 def test_set_and_get_scenario(cycle):
@@ -670,8 +679,9 @@ def test_submit():
     class MockScheduler(_Scheduler):
         submit_calls = []
 
-        def submit_task(self, task: Task, callbacks=None, force=False):
-            self.submit_calls.append(task.id)
+        @classmethod
+        def submit_task(cls, task: Task, callbacks=None, force=False):
+            cls.submit_calls.append(task.id)
             return super().submit_task(task, callbacks)
 
     _TaskManager._scheduler = MockScheduler

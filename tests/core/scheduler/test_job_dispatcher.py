@@ -169,11 +169,10 @@ def test_need_to_run_output_cacheable_no_input():
     task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = _Scheduler()
-    assert scheduler._dispatcher._needs_to_run(task)
-    scheduler.submit_task(task)
+    assert _Scheduler._dispatcher._needs_to_run(task)
+    _Scheduler.submit_task(task)
 
-    assert not scheduler._dispatcher._needs_to_run(task)
+    assert not _Scheduler._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_output_cacheable_no_validity_period():
@@ -184,11 +183,10 @@ def test_need_to_run_output_cacheable_no_validity_period():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = _Scheduler()
-    assert scheduler._dispatcher._needs_to_run(task)
-    scheduler.submit_task(task)
+    assert _Scheduler._dispatcher._needs_to_run(task)
+    _Scheduler.submit_task(task)
 
-    assert not scheduler._dispatcher._needs_to_run(task)
+    assert not _Scheduler._dispatcher._needs_to_run(task)
 
 
 def concat(a, b):
@@ -202,12 +200,11 @@ def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = _Scheduler()
-    assert scheduler._dispatcher._needs_to_run(task)
-    job = scheduler.submit_task(task)
+    assert _Scheduler._dispatcher._needs_to_run(task)
+    job = _Scheduler.submit_task(task)
 
-    assert not scheduler._dispatcher._needs_to_run(task)
-    job_skipped = scheduler.submit_task(task)
+    assert not _Scheduler._dispatcher._needs_to_run(task)
+    job_skipped = _Scheduler.submit_task(task)
 
     assert job.is_completed()
     assert job.is_finished()
@@ -225,14 +222,13 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _TaskManager()._get_or_create(task_cfg)
 
-    scheduler = _Scheduler()
-    assert scheduler._dispatcher._needs_to_run(task)
-    scheduler.submit_task(task)
+    assert _Scheduler._dispatcher._needs_to_run(task)
+    _Scheduler.submit_task(task)
 
     output = task.hello_world
     output._last_edition_date = datetime.now() - timedelta(days=1, minutes=30)
     _DataManager()._set(output)
-    assert scheduler._dispatcher._needs_to_run(task)
+    assert _Scheduler._dispatcher._needs_to_run(task)
 
 
 def _error():
