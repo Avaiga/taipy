@@ -59,6 +59,43 @@ describe("Input Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
+    it("dispatch a well formed message on enter", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByDisplayValue } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Input value="Val" type="text" updateVarName="varname" tp_onAction="on_action" />
+            </TaipyContext.Provider>
+        );
+        const elt = getByDisplayValue("Val");
+        userEvent.click(elt);
+        userEvent.keyboard("data{Enter}");
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "",
+            payload: { action: "on_action", args: ["Enter", "varname", "Valdata"] },
+            type: "SEND_ACTION_ACTION",
+        });
+    });
+    it("dispatch a no action message on unsupported key", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByDisplayValue } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Input value="Val" type="text" updateVarName="varname" tp_onAction="on_action" />
+            </TaipyContext.Provider>
+        );
+        const elt = getByDisplayValue("Val");
+        userEvent.click(elt);
+        userEvent.keyboard("data{Escape}");
+        await waitFor(() => expect(dispatch).toHaveBeenCalled());
+        expect(dispatch).toHaveBeenLastCalledWith({
+            name: "varname",
+            payload: { value: "Valdata" },
+            propagate: true,
+            type: "SEND_UPDATE_ACTION",
+        });
+    });
 });
 
 describe("Number Component", () => {
