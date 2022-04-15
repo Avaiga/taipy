@@ -1027,7 +1027,8 @@ class Gui:
                 server is always run in a separate thread.
             ssl_context (Optional[Union[ssl.SSLContext, Tuple[str, Optional[str]], te.Literal['adhoc']]]):
                 Configure TLS to serve over HTTPS. Can be an ssl.SSLContext object, a (cert_file, key_file) tuple to
-                create a typical context, or the string 'adhoc' to generate a temporary self-signed certificate.
+                create a typical context, or the string 'adhoc' to generate a temporary self-signed certificate.</br>
+                The default value is None.
             kwargs: Additional keywords that configure how this `Gui` is run.
                 Please refer to the
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
