@@ -16,6 +16,7 @@ import json
 import os
 import pathlib
 import re
+import ssl
 import tempfile
 import typing as t
 import warnings
@@ -1006,7 +1007,7 @@ class Gui:
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
 
-    def run(self, run_server: bool = True, run_in_thread: bool = False, **kwargs) -> t.Optional[Flask]:
+    def run(self, run_server: bool = True, run_in_thread: bool = False, ssl_context: t.Optional[t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal['adhoc']]] = None, **kwargs) -> t.Optional[Flask]:
         """
         Starts the server that delivers pages to Web clients.
 
@@ -1024,6 +1025,10 @@ class Gui:
                 If set to _True_, the Web server is run is a separated thread.
                 Note that if you are running in an IPython notebook context, the Web
                 server is always run in a separate thread.
+            ssl_context (Optional[Union[ssl.SSLContext, Tuple[str, Optional[str]], te.Literal['adhoc']]]):
+                Configure TLS to serve over HTTPS. Can be an ssl.SSLContext object, a (cert_file, key_file) tuple to
+                create a typical context, or the string 'adhoc' to generate a temporary self-signed certificate.</br>
+                The default value is None.
             kwargs: Additional keywords that configure how this `Gui` is run.
                 Please refer to the
                 [Configuration](../gui/configuration.md#configuring-the-gui-instance)
@@ -1168,6 +1173,7 @@ class Gui:
             use_reloader=app_config["use_reloader"],
             flask_log=app_config["flask_log"],
             run_in_thread=run_in_thread,
+            ssl_context=ssl_context
         )
 
     def stop(self):

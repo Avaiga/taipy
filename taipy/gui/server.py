@@ -65,7 +65,7 @@ class _Server:
             ping_interval=5,
             json=json,
         )
-        # this is necessary since CORS resources can't been None eventhough python stub allows for None
+
         CORS(self._flask)
 
         if force_https or content_security_policy:
@@ -228,7 +228,7 @@ class _Server:
     def _run_notebook(self):
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
-    def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread):
+    def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread, ssl_context):
         host_value = host if host != "0.0.0.0" else "localhost"
         if not flask_log:
             log = logging.getLogger("werkzeug")
@@ -247,4 +247,4 @@ class _Server:
             self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
-        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)
+        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader, ssl_context=ssl_context)
