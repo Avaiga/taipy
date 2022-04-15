@@ -44,7 +44,7 @@ const Dialog = (props: DialogProps) => {
         title,
         defaultOpen,
         open,
-        tp_onAction = "dialog_action",
+        tp_onAction = "",
         closeLabel = "Close",
         page,
         partial,

@@ -1,6 +1,5 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(any),None,The value represented by this control.
-change_delay,int,<i>App config</i>,"Minimum time between triggering two <i>on_change</i> calls.
-The default value is defined at the application configuration level by the <strong>change_delay</strong> configuration option. if None, the delay is set to 300ms."
+>sharedInput,,,
 >on_change,,,
 >propagate,,,

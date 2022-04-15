@@ -8,7 +8,7 @@ width,str,"""15vw""","The width, in CSS units, of the menu when unfolded.
 Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
 width[mobile],str,"""85vw""","The width, in CSS units, of the menu when unfolded, on a mobile device."
 >active,,,
-on_action,Callback,"""on_menu_action""","The name of the function that will is triggered when a menu option is selected.
+on_action,Callback,,"The name of the function that will be triggered when a menu option is selected.
 All the parameters of that function are optional:
 <ul>
 <li>state (State^): state instance.</li>
