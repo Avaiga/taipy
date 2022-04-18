@@ -51,6 +51,7 @@ class _Scheduler(_AbstractScheduler):
         res = list()
         blocked_or_submitted_jobs = list()
         jobs = _JobManager._get_all()
+        jobs.sort(key=lambda x: x.creation_date)
 
         # alrogithm explanation:
         #   - if job is running -> put to a list
@@ -66,7 +67,6 @@ class _Scheduler(_AbstractScheduler):
             else:
                 continue
 
-        blocked_or_submitted_jobs.sort(key=lambda x: x.creation_date)
         for job in blocked_or_submitted_jobs:
             if cls.is_blocked(job):
                 cls.__set_block_job(job)

@@ -28,6 +28,11 @@ from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.job.job import Job, JobId
+from taipy.core.job.status import Status
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_1_minute_max
 
@@ -297,3 +302,123 @@ def _create_task(function, nb_outputs=1):
         input=input_dn,
         output=output_dn,
     )
+
+
+def test_recover_jobs():
+    dn_inp = InMemoryDataNode('inp', Scope.PIPELINE, properties={'default_data': 'hello'})
+    dn_inp_locked = InMemoryDataNode('inp_locked', Scope.PIPELINE, properties={'default_data': 'hello'})
+    dn_inp_locked.lock_edition()
+
+    task = Task('task', print, input=[dn_inp])
+    task_locked = Task('task_locked', print, input=[dn_inp_locked])
+
+    _DataManager._set(dn_inp)
+    _DataManager._set(dn_inp_locked)
+    _TaskManager._set(task)
+    _TaskManager._set(task_locked)
+
+    job_id_1 = JobId('job_1')
+    job_1 = Job(job_id_1, task)
+    job_id_2 = JobId('job_2')
+    job_2 = Job(job_id_2, task)
+    job_id_3 = JobId('job_3')
+    job_3 = Job(job_id_3, task)
+    job_id_4 = JobId('job_4')
+    job_4 = Job(job_id_4, task)
+    job_id_5 = JobId('job_5')
+    job_5 = Job(job_id_5, task)
+    job_id_6 = JobId('job_6')
+    job_6 = Job(job_id_6, task)
+    job_id_7 = JobId('job_7')
+    job_7 = Job(job_id_7, task)
+    job_id_8 = JobId('job_8')
+    job_8 = Job(job_id_8, task)
+    job_id_9 = JobId('job_9')
+    job_9 = Job(job_id_9, task)
+    job_id_10 = JobId('job_10')
+    job_10 = Job(job_id_10, task)
+    job_id_11 = JobId('job_11')
+    job_11 = Job(job_id_11, task)
+    job_id_12 = JobId('job_12')
+    job_12 = Job(job_id_12, task)
+    job_id_13 = JobId('job_13')
+    job_13 = Job(job_id_13, task)
+    job_id_14 = JobId('job_14')
+    job_14 = Job(job_id_14, task)
+    job_id_15 = JobId('job_15')
+    job_15 = Job(job_id_15, task_locked)
+    job_id_16 = JobId('job_16')
+    job_16 = Job(job_id_16, task_locked)
+
+    _JobManager._set(job_1)
+    _JobManager._set(job_2)
+    _JobManager._set(job_3)
+    _JobManager._set(job_4)
+    _JobManager._set(job_5)
+    _JobManager._set(job_6)
+    _JobManager._set(job_7)
+    _JobManager._set(job_8)
+    _JobManager._set(job_9)
+    _JobManager._set(job_10)
+    _JobManager._set(job_11)
+    _JobManager._set(job_12)
+    _JobManager._set(job_13)
+    _JobManager._set(job_14)
+    _JobManager._set(job_15)
+    _JobManager._set(job_16)
+
+    job_1.blocked()
+    job_2.blocked()
+    # job_3 -> submitted
+    # job_4 -> submitted
+    job_5.skipped()
+    job_6.skipped()
+    job_7.cancelled()
+    job_8.cancelled()
+    job_9.completed()
+    job_10.completed()
+    job_11.pending()
+    job_12.pending()
+    job_13.running()
+    job_14.running()
+    job_15.blocked()
+
+    assert job_1.status == Status.BLOCKED
+    assert job_2.status == Status.BLOCKED
+    assert job_3.status == Status.SUBMITTED
+    assert job_4.status == Status.SUBMITTED
+    assert job_5.status == Status.SKIPPED
+    assert job_6.status == Status.SKIPPED
+    assert job_7.status == Status.CANCELLED
+    assert job_8.status == Status.CANCELLED
+    assert job_9.status == Status.COMPLETED
+    assert job_10.status == Status.COMPLETED
+    assert job_11.status == Status.PENDING
+    assert job_12.status == Status.PENDING
+    assert job_13.status == Status.RUNNING
+    assert job_14.status == Status.RUNNING
+    assert job_15.status == Status.BLOCKED
+    assert job_16.status == Status.SUBMITTED
+
+    assert len(_Scheduler.blocked_jobs) == 0
+    assert _Scheduler.jobs_to_run.empty()
+
+    res = _Scheduler._recover_jobs()
+    print('-- status: ', [job.status for job in res])
+    expected_order_job_executed_1 = ['job_11', 'job_12', 'job_13', 'job_14', 'job_1',
+                                     'job_2', 'job_3', 'job_4', 'job_15', 'job_16']
+    assert len(res) == 10
+    assert [job.id for job in res] == expected_order_job_executed_1
+    assert [job.status for job in res[:-2]] == [Status.COMPLETED for _ in range(8)]
+    assert [job.status for job in res[-2:]] == [Status.BLOCKED for _ in range(2)]
+
+    dn_inp_locked.unlock_edition()
+    res = _Scheduler._recover_jobs()
+
+    expected_order_job_executed_2 = ['job_15', 'job_16']
+    assert len(res) == 2
+    assert [job.id for job in res] == expected_order_job_executed_2
+    assert [job.status for job in res] == [Status.COMPLETED for _ in range(2)]
+
+    assert len(_Scheduler.blocked_jobs) == 0
+    assert _Scheduler.jobs_to_run.empty()
