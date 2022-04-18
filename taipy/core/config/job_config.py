@@ -10,10 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 from importlib import util
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, Type
 
 from taipy.core.common._utils import _load_fct
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
+from taipy.core.config.job_mode_config import _JobModeConfig
+from taipy.core.config.standalone_config import StandaloneConfig
 from taipy.core.exceptions.exceptions import DependencyNotInstalled
 
 
@@ -24,70 +26,68 @@ class JobConfig:
     Parameters:
         mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise,
             the "airflow" mode is available.
-        nb_of_workers (int): The maximum number of running workers to execute jobs. It must be a positive integer.
-            The default value is 1.
         **properties: A dictionary of additional properties.
     """
 
     _MODE_KEY = "mode"
     _DEFAULT_MODE = "standalone"
 
-    _NB_OF_WORKERS_KEY = "nb_of_workers"
-    _DEFAULT_NB_OF_WORKERS = 1
+    _MODE_TO_MODULE: Dict[str, str] = {
+        "airflow": "taipy.airflow",
+    }
 
-    def __init__(self, mode: str = None, nb_of_workers: Union[int, str] = None, **properties):
-        self.mode = mode
+    def __init__(self, mode: str = None, **properties):
+        self.mode = mode or self._DEFAULT_MODE
+        self._config_cls = self._get_config_cls(self.mode)
+        self._config = self._create_config(self._config_cls, **properties)
 
-        self.nb_of_workers = nb_of_workers
-
-        self.config = None
-        if self.mode and self.mode != self._DEFAULT_MODE:
-            self.config = self._external_config(mode, **properties)
-
-        self.properties = properties
-
-    def __getattr__(self, item: str) -> Optional[Any]:
-        if self.config:
-            if r := getattr(self.config, item, None):
-                return r
-        return self.properties.get(item)
+    def __getattr__(self, key: str) -> Optional[Any]:
+        return self._config.get(key, None)
 
     @classmethod
     def default_config(cls):
-        return JobConfig(cls._DEFAULT_MODE, cls._DEFAULT_NB_OF_WORKERS)
+        return JobConfig(cls._DEFAULT_MODE)
 
     def _to_dict(self):
         as_dict = {}
         if self.mode is not None:
             as_dict[self._MODE_KEY] = self.mode
-        if self.nb_of_workers is not None:
-            as_dict[self._NB_OF_WORKERS_KEY] = self.nb_of_workers
-        if self.config:
-            as_dict.update(self.config._to_dict())
-        as_dict.update(self.properties)
+        as_dict.update(self._config)
         return as_dict
 
     @classmethod
     def _from_dict(cls, config_as_dict: Dict[str, Any]):
         mode = config_as_dict.pop(cls._MODE_KEY, None)
-        nb_of_workers = config_as_dict.pop(cls._NB_OF_WORKERS_KEY, None)
-        config = JobConfig(mode, nb_of_workers, **config_as_dict)
+        config = JobConfig(mode, **config_as_dict)
         return config
 
-    def _update(self, cfg_as_dict):
-        mode = _tpl._replace_templates(cfg_as_dict.pop(self._MODE_KEY, self.mode))
-        self.nb_of_workers = _tpl._replace_templates(cfg_as_dict.pop(self._NB_OF_WORKERS_KEY, self.nb_of_workers), int)
-
+    def _update(self, config_as_dict: Dict[str, Any]):
+        mode = _tpl._replace_templates(config_as_dict.pop(self._MODE_KEY, self.mode))
         if self.mode != mode:
             self.mode = mode
-            self.config = self._external_config(mode, **cfg_as_dict)
-            self.config._update(cfg_as_dict)
-        elif self.config:
-            self.config._update(cfg_as_dict)
+            self._config_cls = self._get_config_cls(self.mode)
+            self._config = self._create_config(self._config_cls, **config_as_dict)
+        if self._config:
+            self._update_config(config_as_dict)
 
-        self.properties.update(cfg_as_dict)
-        for k, v in self.properties.items():
-            self.properties[k] = _tpl._replace_templates(v)
+    def _update_config(self, config_as_dict: Dict[str, Any]):
+        default_config = self._config_cls._DEFAULT_CONFIG
+        for k, v in config_as_dict.items():
+            type_to_convert = type(default_config.get(k, None)) or str
+            value = _tpl._replace_templates(v, type_to_convert)
+            if value is not None:
+                self._config[k] = value
+
+    @classmethod
+    def _get_config_cls(cls, mode: str) -> Type[_JobModeConfig]:
+        if mode == cls._DEFAULT_MODE:
+            return StandaloneConfig
+
+        module = cls._MODE_TO_MODULE.get(mode, None)
+        if not module or not util.find_spec(module):
+            raise DependencyNotInstalled(mode)
+        config_cls = _load_fct(module + ".config", "Config")
+        return config_cls  # type:ignore
 
     @property
     def is_standalone(self) -> bool:
@@ -99,12 +99,10 @@ class JobConfig:
         """True if the config is set to standalone execution and nb_of_workers is greater than 1"""
         return self.is_standalone and int(self.nb_of_workers) > 1  # type: ignore
 
-    @staticmethod
-    def _external_config(mode, **properties):
-        dep = f"taipy.{mode}"
-        if not util.find_spec(dep):
-            raise DependencyNotInstalled(mode)
-        return _load_fct(dep + ".config", "Config")(**properties)
+    @classmethod
+    def _create_config(cls, config_cls: Type[_JobModeConfig], **properties):
+        default_config = config_cls._DEFAULT_CONFIG
+        return {**default_config, **properties}
 
     def _is_default_mode(self) -> bool:
         return self.mode == self._DEFAULT_MODE

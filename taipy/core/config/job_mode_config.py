@@ -9,16 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.core.config.config import Config
+from typing import Any, Dict
 
 
-def test_job_config():
-    assert Config.job_config.mode == "standalone"
-    assert Config.job_config.nb_of_workers == 1
-
-    Config.configure_job_executions(nb_of_workers=2)
-    assert Config.job_config.mode == "standalone"
-    assert Config.job_config.nb_of_workers == 2
-
-    Config.configure_job_executions(foo="bar")
-    assert Config.job_config.foo == "bar"
+class _JobModeConfig:
+    _DEFAULT_CONFIG: Dict[str, Any] = {}

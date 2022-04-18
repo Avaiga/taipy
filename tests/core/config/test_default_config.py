@@ -17,6 +17,7 @@ from taipy.core.config.global_app_config import GlobalAppConfig
 from taipy.core.config.job_config import JobConfig
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
+from taipy.core.config.standalone_config import StandaloneConfig
 from taipy.core.config.task_config import TaskConfig
 
 
@@ -34,7 +35,6 @@ def _test_default_job_config(job_config: JobConfig):
     assert job_config is not None
     assert job_config.mode == "standalone"
     assert job_config.nb_of_workers == 1
-    assert len(job_config.properties) == 0
 
 
 def _test_default_data_node_config(dn_config: DataNodeConfig):
