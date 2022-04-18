@@ -305,6 +305,7 @@ def _create_task(function, nb_outputs=1):
 
 
 def test_recover_jobs():
+    _Scheduler._set_nb_of_workers(None)
     dn_inp = InMemoryDataNode('inp', Scope.PIPELINE, properties={'default_data': 'hello'})
     dn_inp_locked = InMemoryDataNode('inp_locked', Scope.PIPELINE, properties={'default_data': 'hello'})
     dn_inp_locked.lock_edition()
@@ -411,7 +412,10 @@ def test_recover_jobs():
     assert [job.id for job in res] == expected_order_job_executed_1
     assert [job.status for job in res[:-2]] == [Status.COMPLETED for _ in range(8)]
     assert [job.status for job in res[-2:]] == [Status.BLOCKED for _ in range(2)]
+    assert len(_Scheduler.blocked_jobs) == 2
+    assert _Scheduler.jobs_to_run.empty()
 
+    _Scheduler.blocked_jobs = []
     dn_inp_locked.unlock_edition()
     res = _Scheduler._recover_jobs()
 
@@ -419,6 +423,8 @@ def test_recover_jobs():
     assert len(res) == 2
     assert [job.id for job in res] == expected_order_job_executed_2
     assert [job.status for job in res] == [Status.COMPLETED for _ in range(2)]
+
+    print('hello ', [job.id for job in _Scheduler.blocked_jobs])
 
     assert len(_Scheduler.blocked_jobs) == 0
     assert _Scheduler.jobs_to_run.empty()

@@ -72,7 +72,7 @@ class _Scheduler(_AbstractScheduler):
                 cls.__set_block_job(job)
             else:
                 cls.__set_pending_job(job)
-            cls.__run()
+                cls.__run()
             res.append(job)
 
         return res
