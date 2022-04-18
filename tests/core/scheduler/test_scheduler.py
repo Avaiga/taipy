@@ -320,36 +320,52 @@ def test_recover_jobs():
 
     job_id_1 = JobId('job_1')
     job_1 = Job(job_id_1, task)
+    job_1.creation_date = job_1.creation_date + 10
     job_id_2 = JobId('job_2')
     job_2 = Job(job_id_2, task)
+    job_2.creation_date = job_2.creation_date + 20
     job_id_3 = JobId('job_3')
     job_3 = Job(job_id_3, task)
+    job_3.creation_date = job_3.creation_date + 30
     job_id_4 = JobId('job_4')
     job_4 = Job(job_id_4, task)
+    job_4.creation_date = job_4.creation_date + 40
     job_id_5 = JobId('job_5')
     job_5 = Job(job_id_5, task)
+    job_5.creation_date = job_5.creation_date + 50
     job_id_6 = JobId('job_6')
     job_6 = Job(job_id_6, task)
+    job_6.creation_date = job_6.creation_date + 60
     job_id_7 = JobId('job_7')
     job_7 = Job(job_id_7, task)
+    job_7.creation_date = job_7.creation_date + 70
     job_id_8 = JobId('job_8')
     job_8 = Job(job_id_8, task)
+    job_8.creation_date = job_8.creation_date + 80
     job_id_9 = JobId('job_9')
     job_9 = Job(job_id_9, task)
+    job_9.creation_date = job_9.creation_date + 90
     job_id_10 = JobId('job_10')
     job_10 = Job(job_id_10, task)
+    job_10.creation_date = job_10.creation_date + 100
     job_id_11 = JobId('job_11')
     job_11 = Job(job_id_11, task)
+    job_11.creation_date = job_11.creation_date + 110
     job_id_12 = JobId('job_12')
     job_12 = Job(job_id_12, task)
+    job_12.creation_date = job_12.creation_date + 120
     job_id_13 = JobId('job_13')
     job_13 = Job(job_id_13, task)
+    job_13.creation_date = job_13.creation_date + 130
     job_id_14 = JobId('job_14')
     job_14 = Job(job_id_14, task)
+    job_14.creation_date = job_14.creation_date + 140
     job_id_15 = JobId('job_15')
     job_15 = Job(job_id_15, task_locked)
+    job_15.creation_date = job_15.creation_date + 150
     job_id_16 = JobId('job_16')
     job_16 = Job(job_id_16, task_locked)
+    job_16.creation_date = job_16.creation_date + 160
 
     _JobManager._set(job_1)
     _JobManager._set(job_2)
@@ -423,8 +439,6 @@ def test_recover_jobs():
     assert len(res) == 2
     assert [job.id for job in res] == expected_order_job_executed_2
     assert [job.status for job in res] == [Status.COMPLETED for _ in range(2)]
-
-    print('hello ', [job.id for job in _Scheduler.blocked_jobs])
 
     assert len(_Scheduler.blocked_jobs) == 0
     assert _Scheduler.jobs_to_run.empty()
