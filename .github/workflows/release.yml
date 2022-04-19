@@ -6,6 +6,8 @@ on:
       version:
         description: "The release/package version to create (ex: 1.0.0)"
         required: true
+    branches:
+      - 'releases/**'
 
 jobs:
   test-package:
@@ -39,9 +41,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Ensure package version is well set
+      - name: Ensure package version is properly set
         run: |
-          echo ${{ github.event.inputs.version }} | grep -f - setup.py
+          echo 'version="'${{ github.event.inputs.version }}'"' | grep -f - setup.py
 
       - name: Extract commit hash
         shell: bash
@@ -50,10 +52,6 @@ jobs:
 
       - name: Create/update release and tag
         run: |
-            gh release view ${{ github.event.inputs.version }} &&
-            gh release delete ${{ github.event.inputs.version }} &&
-            git tag -f ${{ github.event.inputs.version }} &&
-            git push -f origin ${{ github.event.inputs.version }}
             gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
