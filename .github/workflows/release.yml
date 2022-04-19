@@ -1,15 +1,11 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Publish package
+name: Create Github Release and Push on Pypi
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "The release/package version to create (ex: 1.0.0)"
+        required: true
 
 jobs:
   test-package:
@@ -29,13 +25,39 @@ jobs:
       - name: Build and test the package
         run: |
           python setup.py build_py && python -m build
+          rm -rf src taipy
           pip install dist/*.tar.gz
+          pip install pytest pytest-mock
+          pytest
 
+  release:
+    needs: [test-package]
+    timeout-minutes: 20
+    name: Release taipy-core Package
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Ensure package version is well set
+        run: |
+          echo 'version="'${{ github.event.inputs.version }}'"' | grep -f - setup.py
+
+      - name: Extract commit hash
+        shell: bash
+        run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
+        id: extract_hash
+
+      - name: Create/update release and tag
+        run: |
+            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-pypi:
     needs: [test-package]
     timeout-minutes: 20
-    environment: production
+    environment: publish
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -57,7 +79,6 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
-
   test-published-package:
     needs: [publish-to-pypi]
     timeout-minutes: 30
@@ -72,6 +93,19 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Install the package
+      - name: Prepare tests on unix
+        if: matrix.os != 'windows-latest'
+        run: |
+          rm -rf taipy
+          pip install pytest pytest-mock
+
+      - name: Prepare tests on windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          rmdir -Recurse -Force taipy
+          pip install pytest pytest-mock
+
+      - name: Install and test package
         run: |
           pip install ${{ github.event.repository.name }}
+          pytest

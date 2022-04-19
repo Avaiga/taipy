@@ -17,9 +17,6 @@ jobs:
 
       - name: Lint and Coverage
         run: |
-          sed 's/ssh/https/g' Pipfile > Pipfile.copy
-          sed 's/git@github/${{ secrets.PERSONAL_TOKEN }}@github/g' Pipfile.copy > Pipfile
-
           pip install tox
           tox
 

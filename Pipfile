@@ -4,17 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-marshmallow = ">=3"
-flask-marshmallow = ">=0.14"
-passlib = ">=1"
-apispec = {extras = ["yaml"], version = ">=5"}
-apispec-webframeworks = ">=0.5"
-Flask = "<2"
-Flask-RESTful = ">=0.3"
-Flask-Migrate = ">=3"
-Flask-JWT-Extended = ">=4"
+flask-marshmallow = "==0.14"
+marshmallow-sqlalchemy = "==0.25"
+passlib = "==1.7.4"
+apispec = {extras = ["yaml"], version = "==5.0"}
+apispec-webframeworks = "==0.5.2"
+Flask = "==2.1"
+Flask-RESTful = "==0.3.9"
+Flask-Migrate = "==3.0"
+Flask-JWT-Extended = "==4.3"
 markupsafe = "==2.0.1"
-taipy-core = {git = "ssh://git@github.com/avaiga/taipy-core.git"}
+taipy-core = "==1.0"
 
 [dev-packages]
 tox = "3.24.5"

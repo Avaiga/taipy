@@ -76,7 +76,7 @@ def test_read_datanode(client, default_df_datanode):
         config_mock.side_effect = [default_df_datanode]
         # without operators
         datanodes_url = url_for("api.datanode_reader", datanode_id="foo")
-        rep = client.get(datanodes_url)
+        rep = client.get(datanodes_url, json={})
         assert rep.status_code == 200
 
         # TODO: Revisit filter test
@@ -90,7 +90,7 @@ def test_write_datanode(client, default_datanode):
         config_mock.return_value = default_datanode
         # Get DataNode
         datanodes_read_url = url_for("api.datanode_reader", datanode_id=default_datanode.id)
-        rep = client.get(datanodes_read_url)
+        rep = client.get(datanodes_read_url, json={})
         assert rep.status_code == 200
         assert rep.json == {"data": [1, 2, 3, 4, 5, 6]}
 
@@ -98,6 +98,6 @@ def test_write_datanode(client, default_datanode):
         rep = client.put(datanodes_write_url, json=[1, 2, 3])
         assert rep.status_code == 200
 
-        rep = client.get(datanodes_read_url)
+        rep = client.get(datanodes_read_url, json={})
         assert rep.status_code == 200
         assert rep.json == {"data": [1, 2, 3]}
