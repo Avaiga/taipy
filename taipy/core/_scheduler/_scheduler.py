@@ -53,10 +53,6 @@ class _Scheduler(_AbstractScheduler):
         jobs = _JobManager._get_all()
         jobs.sort(key=lambda x: x.creation_date)
 
-        # alrogithm explanation:
-        #   - if job is running -> put to a list
-        #   - if job is pending -> put to a list
-        #   - else sort by creation date -> put to a list
         for job in jobs:
             if job.status == Status.RUNNING or job.status == Status.PENDING:
                 cls.__set_pending_job(job)
@@ -68,25 +64,27 @@ class _Scheduler(_AbstractScheduler):
                 continue
 
         for job in blocked_or_submitted_jobs:
-            if cls.is_blocked(job):
-                cls.__set_block_job(job)
-            else:
-                cls.__set_pending_job(job)
-                cls.__run()
+            cls.__check_block_and_run_job(job)
             res.append(job)
 
         return res
 
     @classmethod
+    def __check_block_and_run_job(cls, job):
+        if cls.is_blocked(job):
+            cls.__set_block_job(job)
+        else:
+            cls.__set_pending_job(job)
+            cls.__run()
+
+    @classmethod
     def __set_block_job(cls, job):
         job.blocked()
-        _JobManager._set(job)
         cls.blocked_jobs.append(job)
 
     @classmethod
     def __set_pending_job(cls, job):
         job.pending()
-        _JobManager._set(job)
         cls.jobs_to_run.put(job)
 
     @classmethod
@@ -125,17 +123,8 @@ class _Scheduler(_AbstractScheduler):
         """
         for dn in task.output.values():
             dn.lock_edition()
-            _DataManager._set(dn)
         job = _JobManager._create(task, itertools.chain([cls._on_status_change], callbacks or []))
-        if cls.is_blocked(job):
-            job.blocked()
-            _JobManager._set(job)
-            cls.blocked_jobs.append(job)
-        else:
-            job.pending()
-            _JobManager._set(job)
-            cls.jobs_to_run.put(job)
-            cls.__run()
+        cls.__check_block_and_run_job(job)
 
         return job
 
@@ -180,7 +169,6 @@ class _Scheduler(_AbstractScheduler):
         jobs_to_unblock = [job for job in cls.blocked_jobs if not cls.is_blocked(job)]
         for job in jobs_to_unblock:
             job.pending()
-            _JobManager._set(job)
             cls.blocked_jobs.remove(job)
             cls.jobs_to_run.put(job)
 
