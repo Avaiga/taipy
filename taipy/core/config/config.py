@@ -142,8 +142,8 @@ class Config:
             mode (Optional[str]): The job execution mode.
                 Possible values are: _"standalone"_ (the default value) or
                 _"airflow"_ (Enterprise version only).
-            nb_of_workers (Optional[int, str]): The maximum number of jobs able to run in
-                parallel. The default value is 1.<br/>
+            nb_of_workers (Optional[int, str]): Parameter used only in default _"standalone"_ mode. The maximum
+                number of jobs able to run in parallel. The default value is 1.<br/>
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
                 `&lt;env_var&gt;` is the name of environment variable.
@@ -152,7 +152,7 @@ class Config:
         """
         job_config = JobConfig(
             mode,
-            nb_of_workers,
+            nb_of_workers=nb_of_workers,
             **properties,
         )
         cls._python_config._job_config = job_config
@@ -371,7 +371,7 @@ class Config:
         **properties,
     ) -> ScenarioConfig:
         """Configure a new scenario configuration made of a single new pipeline configuration.
-        
+
         A new pipeline configuration is created as well. If _pipeline_id_ is not provided,
         the new pipeline configuration identifier is set to the scenario configuration identifier
         post-fixed by '_pipeline'.
@@ -464,7 +464,7 @@ class Config:
     @classmethod
     def check(cls) -> IssueCollector:
         """Check configuration.
-        
+
         This method logs issue messages and returns an issue collector.
 
         Returns:
@@ -487,12 +487,7 @@ class Config:
 
     @classmethod
     def configure_csv_data_node(
-        cls,
-        id: str,
-        path: str,
-        has_header: bool = True,
-        scope=DataNodeConfig._DEFAULT_SCOPE,
-        **properties
+        cls, id: str, path: str, has_header: bool = True, scope=DataNodeConfig._DEFAULT_SCOPE, **properties
     ):
         """Configure a new CSV data node configuration.
 
