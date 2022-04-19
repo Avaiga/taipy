@@ -25,7 +25,7 @@ from taipy.gui import Gui
 def test_markdown_render_with_style(page: "Page", gui: Gui, helpers):
     markdown_content = """
 <|Hey|id=text1|>
-<|There|id=text2|classname=custom-text|>
+<|There|id=text2|class_name=custom-text|>
 """
     style = """
 .taipy-text {
