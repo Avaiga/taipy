@@ -18,7 +18,7 @@ default_config: Config = {
     "debug": True,
     "host": "127.0.0.1",
     "use_reloader": True,
-    "time_zone": "client",
+    "time_zone": None,
     "propagate": True,
     "favicon": None,
     "title": None,

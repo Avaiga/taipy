@@ -4,6 +4,7 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import { getUpdateVars } from "../components/Taipy/utils";
 import { TaipyContext } from "../context/taipyContext";
 import { createRequestUpdateAction, FormatConfig, TaipyBaseAction } from "../context/taipyReducers";
+import { TIMEZONE_CLIENT } from "../utils";
 
 export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T): T => {
     return useMemo(() => {
@@ -36,7 +37,8 @@ export const useFormatConfig = (): FormatConfig => {
     return useMemo(
         () =>
             ({
-                timeZone: state.timeZone,
+                timeZone: state.timeZone || TIMEZONE_CLIENT,
+                forceTZ: !!state.timeZone,
                 dateTime: state.dateTimeFormat || "yyyy-MM-dd HH:mm:ss zzz",
                 number: state.numberFormat || "%f",
             } as FormatConfig),

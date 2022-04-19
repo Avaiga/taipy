@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from ..gui import Gui
-from ..utils import _get_date_col_str_name
+from ..utils import _get_date_col_str_name, _RE_PD_TYPE
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
 
@@ -78,10 +78,16 @@ class _PandasDataAccessor(_DataAccessor):
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
                 data = data.copy()
+            tz = Gui._get_timezone()
             for col in datecols:
                 newcol = _get_date_col_str_name(cols, col)
                 cols.append(newcol)
-                data[newcol] = data[col].dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
+                re_type = _RE_PD_TYPE.match(str(col_types[col]))
+                grps = re_type.groups() if re_type else ()
+                if len(grps) > 4 and grps[4]:
+                    data[newcol] = data[col].dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
+                else:
+                    data[newcol] = data[col].dt.tz_localize(tz).dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
         data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]

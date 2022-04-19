@@ -130,6 +130,6 @@ class _TaipyTag(object):
         for k, v in self.properties.items():
             self.properties[k] = v if v is not None else "true"
         # allow usage of 'class' property in html taipy tag
-        if "class" in self.properties and "classname" not in self.properties:
-            self.properties["classname"] = self.properties["class"]
+        if "class" in self.properties and "class_name" not in self.properties:
+            self.properties["class_name"] = self.properties["class"]
         return _HtmlFactory.create_element(gui, self.control_type, self.properties)

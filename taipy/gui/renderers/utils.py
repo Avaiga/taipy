@@ -14,7 +14,7 @@ import typing as t
 import warnings
 
 from ..types import NumberTypes
-from ..utils import _get_date_col_str_name, _MapDict
+from ..utils import _get_date_col_str_name, _MapDict, _RE_PD_TYPE
 
 
 def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:
@@ -62,32 +62,36 @@ def _get_columns_dict(
             columns[col] = {"index": idx}
             idx += 1
     idx = 0
-    for col, type in col_types.items():
+    for col, ctype in col_types.items():
         col = str(col)
         if col in columns.keys():
-            columns[col]["type"] = type
+            re_type = _RE_PD_TYPE.match(ctype)
+            grps = re_type.groups() if re_type else ()
+            ctype = grps[0] if grps else ctype
+            columns[col]["type"] = ctype
             columns[col]["dfid"] = col
+            if len(grps) > 4 and grps[4]:
+                columns[col]["tz"] = grps[4]
             idx = _add_to_dict_and_get(columns[col], "index", idx) + 1
-            if type.startswith("datetime64"):
+            if ctype == "datetime":
                 if date_format:
                     _add_to_dict_and_get(columns[col], "format", date_format)
                 columns[_get_date_col_str_name(col_types.keys(), col)] = columns.pop(col)  # type: ignore
-            elif number_format and type in NumberTypes:
+            elif number_format and ctype in NumberTypes:
                 _add_to_dict_and_get(columns[col], "format", number_format)
     return columns
 
-
-_indexed_data = re.compile(r"^(\d+)\/(.*)")
+__RE_INDEXED_DATA = re.compile(r"^(\d+)\/(.*)")
 
 
 def _get_col_from_indexed(col_name: str, idx: int) -> t.Optional[str]:
-    if re_res := _indexed_data.search(col_name):
+    if re_res := __RE_INDEXED_DATA.search(col_name):
         return col_name if str(idx) == re_res.group(1) else None
     return col_name
 
 
 def _get_idx_from_col(col_name) -> int:
-    if re_res := _indexed_data.search(col_name):
+    if re_res := __RE_INDEXED_DATA.search(col_name):
         return int(re_res.group(1))
     return 0
 

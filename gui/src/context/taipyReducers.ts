@@ -35,7 +35,7 @@ export interface TaipyState {
     data: Record<string, unknown>;
     theme: Theme;
     locations: Record<string, string>;
-    timeZone: string;
+    timeZone?: string;
     dateTimeFormat?: string;
     numberFormat?: string;
     alert?: AlertMessage;
@@ -118,6 +118,7 @@ interface TaipyPartialAction extends TaipyBaseAction {
 
 export interface FormatConfig {
     timeZone: string;
+    forceTZ: boolean;
     dateTime: string;
     number: string;
 }
@@ -155,7 +156,11 @@ export const INITIAL_STATE: TaipyState = {
     data: {},
     theme: window.taipyConfig?.darkMode ? themes.dark : themes.light,
     locations: {},
-    timeZone: (!window.taipyConfig?.timeZone || window.taipyConfig.timeZone === "client") ? TIMEZONE_CLIENT : window.taipyConfig.timeZone,
+    timeZone: window.taipyConfig?.timeZone
+        ? window.taipyConfig.timeZone === "client"
+            ? TIMEZONE_CLIENT
+            : window.taipyConfig.timeZone
+        : undefined,
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
 };
@@ -187,7 +192,7 @@ const messageToAction = (message: WsMessage) => {
         } else if (message.type === "PR") {
             return createPartialAction((message as unknown as Record<string, string>).name, true);
         }
-}
+    }
     return {} as TaipyBaseAction;
 };
 
@@ -346,7 +351,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         }
         case Types.Partial: {
             const pAction = baseAction as TaipyPartialAction;
-            const data = {...state.data}
+            const data = { ...state.data };
             if (pAction.create) {
                 data[pAction.name] = true;
             } else {
@@ -381,7 +386,13 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
-export const createSendUpdateAction = (name = "", value: unknown, onChange?: string, propagate = true, relName?: string): TaipyAction => ({
+export const createSendUpdateAction = (
+    name = "",
+    value: unknown,
+    onChange?: string,
+    propagate = true,
+    relName?: string
+): TaipyAction => ({
     type: Types.SendUpdate,
     name: name,
     propagate: propagate,
@@ -389,7 +400,7 @@ export const createSendUpdateAction = (name = "", value: unknown, onChange?: str
 });
 
 const getPayload = (value: unknown, onChange?: string, relName?: string) => {
-    const ret: Record<string, unknown> = {value: value};
+    const ret: Record<string, unknown> = { value: value };
     if (relName) {
         ret.relvar = relName;
     }
@@ -397,7 +408,7 @@ const getPayload = (value: unknown, onChange?: string, relName?: string) => {
         ret.on_change = onChange;
     }
     return ret;
-}
+};
 
 export const createSendActionNameAction = (
     name: string | undefined,

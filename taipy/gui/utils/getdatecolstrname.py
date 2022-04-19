@@ -10,7 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import typing as t
+import re
 
+_RE_PD_TYPE = re.compile(r"^([^\s\d\[]+)(\d+)(\[(.*,\s(\S+))\])?")
 
 def _get_date_col_str_name(columns: t.List[str], col: str) -> str:
     suffix = "_str"

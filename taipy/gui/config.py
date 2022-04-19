@@ -59,7 +59,7 @@ Config = t.TypedDict(
         "debug": bool,
         "host": str,
         "use_reloader": bool,
-        "time_zone": str,
+        "time_zone": t.Union[str, None],
         "propagate": bool,
         "favicon": t.Union[str, None],
         "title": t.Union[str, None],
@@ -116,19 +116,20 @@ class _Config(object):
             return self.config[name]
         return default_value
 
-    def get_time_zone(self) -> str:
-        if "time_zone" not in self.config or self.config["time_zone"] == "client":
-            return "client"
-        if self.config["time_zone"] == "server":
+    def get_time_zone(self) -> t.Optional[str]:
+        tz = self.config.get("time_zone")
+        if tz is None or tz == "client":
+            return tz
+        if tz == "server":
             # return python tzlocal IANA Time Zone
             return str(tzlocal.get_localzone())
         # Verify user defined IANA Time Zone is valid
-        if self.config["time_zone"] not in pytz.all_timezones_set:
+        if tz not in pytz.all_timezones_set:
             raise Exception(
                 "Time Zone configuration is not valid. Mistyped 'server', 'client' options or invalid IANA Time Zone"
             )
         # return user defined IANA Time Zone (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)
-        return self.config["time_zone"]
+        return tz
 
     def _init_argparse(self):
         parser = argparse.ArgumentParser()
