@@ -84,7 +84,11 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
     def __init__(self, model: Type[ModelType], dir_name: str):
         self.model = model
-        self.dir_path = self._storage_folder / dir_name
+        self._dir_name = dir_name
+
+    @property
+    def dir_path(self):
+        return self._storage_folder / self._dir_name
 
     @property
     def _directory(self) -> pathlib.Path:
