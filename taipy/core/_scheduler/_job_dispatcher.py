@@ -143,7 +143,7 @@ class _JobDispatcher:
         else:
             return _Synchronous(), 1
 
-    def _set_executer_and_nb_available_workers(self, max_number_of_parallel_execution):
+    def _set_executer_and_nb_available_workers(self, max_number_of_parallel_execution: int):
         self._executor, self._nb_available_workers = self.__create(max_number_of_parallel_execution or 1)
 
     @staticmethod

@@ -23,4 +23,4 @@ class _SchedulerFactory:
             return _Scheduler
 
         package = f"taipy.{Config.job_config.mode}.scheduler"
-        return _load_fct(package, "Scheduler")()
+        return _load_fct(package, "Scheduler")

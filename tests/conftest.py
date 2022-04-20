@@ -11,6 +11,7 @@
 
 import os
 import pickle
+from queue import Queue
 import shutil
 from datetime import datetime
 
@@ -18,6 +19,7 @@ import pandas as pd
 import pytest
 
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
@@ -180,9 +182,12 @@ def pipeline_model():
 @pytest.fixture(scope="function", autouse=True)
 def setup():
     delete_everything()
-
+    
 
 def delete_everything():
+    _Scheduler._set_nb_of_workers(None)
+    _Scheduler.jobs_to_run = Queue()
+    _Scheduler.blocked_jobs = []
     _TaskManager._scheduler = _SchedulerFactory._build_scheduler
     _ScenarioManager._delete_all()
     _PipelineManager._delete_all()

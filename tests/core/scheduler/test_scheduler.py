@@ -50,14 +50,6 @@ def reset_configuration_singleton():
         os.remove(f)
 
 
-@pytest.fixture(scope="function", autouse=True)
-def reset_scheduler_singleton():
-    yield
-    _Scheduler._set_nb_of_workers(None)
-    _Scheduler.jobs_to_run = Queue()
-    _Scheduler.blocked_jobs = []
-
-
 def multiply(nb1: float, nb2: float):
     sleep(0.1)
     return nb1 * nb2

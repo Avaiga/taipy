@@ -166,11 +166,11 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def __unblock_jobs(cls):
-        jobs_to_unblock = [job for job in cls.blocked_jobs if not cls.is_blocked(job)]
-        for job in jobs_to_unblock:
-            job.pending()
-            cls.blocked_jobs.remove(job)
-            cls.jobs_to_run.put(job)
+        for job in cls.blocked_jobs:
+            if not cls.is_blocked(job):
+                job.pending()
+                cls.blocked_jobs.remove(job)
+                cls.jobs_to_run.put(job)
 
     def is_running(self) -> bool:
         """Returns False since the default scheduler is not runnable."""

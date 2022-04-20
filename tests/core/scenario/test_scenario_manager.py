@@ -46,14 +46,6 @@ from taipy.core.task.task import Task
 from tests.core.utils.NotifyMock import NotifyMock
 
 
-@pytest.fixture(scope="function", autouse=True)
-def reset_scheduler_singleton():
-    yield
-    _Scheduler._set_nb_of_workers(None)
-    _Scheduler.jobs_to_run = Queue()
-    _Scheduler.blocked_jobs = []
-
-
 def test_set_and_get_scenario(cycle):
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
