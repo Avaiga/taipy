@@ -1,10 +1,10 @@
-name: Create Github Release
+name: Publish on Pypi
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "The release/package version to create (ex: 1.0.0)"
+        description: "The Pypi package version to create (ex: 1.0.0)"
         required: true
 
 jobs:
@@ -52,22 +52,60 @@ jobs:
           pip install pytest pytest-mock
           pytest
 
-  release:
+  publish-to-pypi:
     needs: [test-package]
     timeout-minutes: 20
-    name: Release taipy-core Package
+    environment: publish
     runs-on: ubuntu-18.04
-
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
-      - name: Extract commit hash
-        shell: bash
-        run: echo "##[set-output name=hash;]$(echo $(git rev-parse HEAD))"
-        id: extract_hash
-
-      - name: Create/update release and tag
+      - name: Install dependencies
         run: |
-            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build package
+        run: python setup.py build_py && python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  test-published-package:
+    needs: [publish-to-pypi]
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-versions: ['3.8','3.9','3.10']
+        os: [ubuntu-18.04,windows-latest,macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-versions }}
+
+      - name: Prepare tests on unix
+        if: matrix.os != 'windows-latest'
+        run: |
+          rm -rf taipy
+          pip install --upgrade pip
+          pip install pytest pytest-mock
+
+      - name: Prepare tests on windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          rmdir -Recurse -Force taipy
+          pip install --upgrade pip
+          pip install pytest pytest-mock
+
+      - name: Install and test package
+        run: |
+          pip install --no-cache-dir ${{ github.event.repository.name }}==${{ github.event.inputs.version }}
+          pytest
