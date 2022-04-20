@@ -42,7 +42,7 @@ setup(
         "flask-restful>=0.3.9",
         "flask-migrate>=3.1",
         "flask-jwt-extended>=4.3",
-        "flask-marshmallow>=3.14",
+        "flask-marshmallow>=0.14",
         "passlib>=1.7.4",
         "apispec[yaml]>=5.1",
         "apispec-webframeworks>=0.5.2",
