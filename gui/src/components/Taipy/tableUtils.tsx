@@ -23,6 +23,7 @@ export interface ColumnDesc {
     notEditable?: boolean;
     style?: string;
     nanValue?: string;
+    tz?: string;
 }
 
 export type Order = "asc" | "desc";
@@ -52,10 +53,10 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
         return "";
     }
     switch (col.type) {
-        case "datetime64[ns]":
-            return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf);
-        case "int64":
-        case "float64":
+        case "datetime":
+            return getDateTimeString(val as string, col.format || defaultDateFormat, formatConf, col.tz);
+        case "int":
+        case "float":
             if (val === "NaN") {
                 return nanValue || "";
             }
@@ -75,8 +76,8 @@ const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: F
 export const getCellProps = (col: ColumnDesc): Partial<TableCellProps> => {
     const ret: Partial<TableCellProps> = {};
     switch (col.type) {
-        case "int64":
-        case "float64":
+        case "int":
+        case "float":
             ret.align = "right";
     }
     if (col.width) {

@@ -577,7 +577,7 @@ class _Builder:
 
     def __set_class_names(self):
         classes = ["taipy-" + self.__control_type.replace("_", "-")]
-        if cl := self.__attributes.get("classname"):
+        if cl := self.__attributes.get("class_name"):
             classes.append(str(cl))
 
         return self.set_attribute("className", " ".join(classes))

@@ -26,6 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 from flask import Blueprint, Flask, request, send_from_directory
+import tzlocal
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -113,6 +114,8 @@ class Gui:
 
     __reserved_routes: t.List[str] = ["taipy-init", "taipy-jsx", "taipy-content", "taipy-uploads"]
     _aggregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
+
+    __LOCAL_TZ = str(tzlocal.get_localzone())
 
     def __init__(
         self,
@@ -706,6 +709,14 @@ class Gui:
 
     def _set_flask(self, flask: Flask):
         self._flask = flask
+
+    @staticmethod
+    def _get_timezone() -> str:
+        return Gui.__LOCAL_TZ
+
+    @staticmethod
+    def _set_timezone(tz: str):
+        Gui.__LOCAL_TZ = tz
 
     # Public methods
     def add_page(

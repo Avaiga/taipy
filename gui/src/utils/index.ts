@@ -1,14 +1,14 @@
-import { utcToZonedTime, format, getTimezoneOffset } from "date-fns-tz";
+import { utcToZonedTime, getTimezoneOffset, formatInTimeZone } from "date-fns-tz";
 import { sprintf } from "sprintf-js";
 import { FormatConfig } from "../context/taipyReducers";
 
 declare global {
     interface Window {
         taipyConfig: {
-            darkMode: boolean,
-            themes: Record<string, Record<string, unknown>>,
-            timeZone: string,
-        }
+            darkMode: boolean;
+            themes: Record<string, Record<string, unknown>>;
+            timeZone: string;
+        };
     }
 }
 
@@ -16,12 +16,12 @@ declare global {
 export const getClientServerTimeZoneOffset = (tz: string): number =>
     (getTimezoneOffset(TIMEZONE_CLIENT) - getTimezoneOffset(tz)) / 60000;
 
-export const getDateTime = (value: string | null | undefined, tz: string): Date | null => {
+export const getDateTime = (value: string | null | undefined, tz?: string): Date | null => {
     if (value === null || value === undefined) {
         return null;
     }
     try {
-        return utcToZonedTime(value, tz);
+        return tz ? utcToZonedTime(value, tz) : new Date(value);
     } catch (e) {
         return null;
     }
@@ -30,11 +30,10 @@ export const getDateTime = (value: string | null | undefined, tz: string): Date 
 export const getDateTimeString = (
     value: string,
     datetimeformat: string | undefined,
-    formatConf: FormatConfig
+    formatConf: FormatConfig,
+    tz?: string
 ): string =>
-    format(getDateTime(value, formatConf.timeZone) || "", datetimeformat || formatConf.dateTime, {
-        timeZone: formatConf.timeZone,
-    });
+    formatInTimeZone(getDateTime(value) || "", formatConf.forceTZ || !tz ? formatConf.timeZone : tz, datetimeformat || formatConf.dateTime);
 
 export const getNumberString = (value: number, numberformat: string | undefined, formatConf: FormatConfig): string => {
     try {
