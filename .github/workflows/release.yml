@@ -1,69 +1,71 @@
-name: release workflow
+name: Create Github Release
 
 on:
-  push:
-    branches:
-      - 'release/**'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "The release/package version to create (ex: 1.0.0)"
+        required: true
 
 jobs:
-  build:
-    name: Build Gui React Frontend
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-        os: [ubuntu-18.04]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-
-      - name: npm build ${{ matrix.node-version }} on ${{ matrix.os }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install Gui Dependencies
-        working-directory: ./gui
-        run: npm ci
-
-      - name: Build Gui React
-        working-directory: ./gui
-        run: npm run build
-
-      - name: Remove .gitignore
-        working-directory: ./taipy/gui
-        run: rm -f .gitignore
-
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v7
-        with:
-          default_author: github_actions
-          message: 'React Build for Frontend'
-          add: './taipy/gui'
-
-  release:
-    name: Release Taipy Package
-
-    needs: build
-
-    strategy:
-      matrix:
-        os: [ubuntu-18.04]
-
-    runs-on: ${{ matrix.os }}
-
+  test-package:
+    timeout-minutes: 20
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
 
-      - run: git pull
+      - name: Install npm
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16'
 
-      - name: Extract branch tag
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=tag;]$(echo ${GITHUB_REF#refs/heads/release/})"
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
+
+      - name: Ensure package version is properly set
+        run: |
+          echo 'version="${{ github.event.inputs.version }}"' | grep -f - setup.py
+
+      - name: Validate branch name
+        run: |
+          echo """
+          import re, sys
+          setup = open('setup.py').read()
+          x = re.search(r'version=\"(\d+)\.(\d+)\.(\d+)(?:\.([a-zA-Z0-9_]+))?\"', setup)
+          if not x:
+              raise ValueError('Invalid version expression')
+          if f'release/{x.group(1)}.{x.group(2)}' != sys.argv[1]:
+              raise ValueError('Branch name mismatch')
+          """ > /tmp/check.py
+          python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build and test the package
+        run: |
+          python setup.py build_py && python -m build
+          rm -rf taipy
+          pip install dist/*.tar.gz
+          pip install pytest pytest-mock
+          pytest
+
+  release:
+    needs: [test-package]
+    timeout-minutes: 20
+    name: Release package
+    runs-on: ubuntu-18.04
+
+    steps:
+      - uses: actions/checkout@v2
 
       - name: Extract commit hash
         shell: bash
@@ -72,10 +74,6 @@ jobs:
 
       - name: Create/update release and tag
         run: |
-            gh release view ${{ steps.extract_branch.outputs.tag }} &&
-            gh release delete ${{ steps.extract_branch.outputs.tag }} &&
-            git tag -f ${{ steps.extract_branch.outputs.tag }} &&
-            git push -f origin ${{ steps.extract_branch.outputs.tag }};
-            gh release create ${{ steps.extract_branch.outputs.tag }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
+            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

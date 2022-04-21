@@ -1,15 +1,11 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Publish package
+name: Publish on Pypi
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "The Pypi package version to create (ex: 1.0.0)"
+        required: true
 
 jobs:
   test-package:
@@ -26,6 +22,28 @@ jobs:
         with:
           node-version: '16'
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
+      - name: Ensure package version is properly set
+        run: |
+          echo 'version="${{ github.event.inputs.version }}"' | grep -f - setup.py
+
+      - name: Validate branch name
+        run: |
+          echo """
+          import re, sys
+          setup = open('setup.py').read()
+          x = re.search(r'version=\"(\d+)\.(\d+)\.(\d+)(?:\.([a-zA-Z0-9_]+))?\"', setup)
+          if not x:
+              raise ValueError('Invalid version expression')
+          if f'release/{x.group(1)}.{x.group(2)}' != sys.argv[1]:
+              raise ValueError('Branch name mismatch')
+          """ > /tmp/check.py
+          python /tmp/check.py "${{ steps.extract_branch.outputs.branch }}"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -40,10 +58,9 @@ jobs:
           playwright install chromium
           pytest
 
-
   publish-to-pypi:
-    timeout-minutes: 20
     needs: [test-package]
+    timeout-minutes: 20
     environment: publish
     runs-on: ubuntu-18.04
     steps:
@@ -56,6 +73,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '16'
+
 
       - name: Install dependencies
         run: |
@@ -71,10 +89,9 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
-
   test-published-package:
-    timeout-minutes: 30
     needs: [publish-to-pypi]
+    timeout-minutes: 30
     strategy:
       matrix:
         python-versions: ['3.8','3.9','3.10']
@@ -86,22 +103,23 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Remove taipy folder on unix
+      - name: Prepare tests on unix
         if: matrix.os != 'windows-latest'
         run: |
           rm -rf taipy
 
-      - name: Remove taipy folder on windows
+      - name: Prepare tests on windows
         if: matrix.os == 'windows-latest'
         run: |
           rmdir -Recurse -Force taipy
 
       - name: Prepare tests
         run: |
+          pip install --upgrade pip
           pip install pytest pytest-mock pytest-playwright
           playwright install chromium
 
       - name: Install and test package
         run: |
-          pip install ${{ github.event.repository.name }}
+          pip install --no-cache-dir ${{ github.event.repository.name }}==${{ github.event.inputs.version }}
           pytest
