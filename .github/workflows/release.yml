@@ -22,6 +22,10 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
+      - name: Ensure package version is properly set
+        run: |
+          echo 'version="${{ github.event.inputs.version }}"' | grep -f - setup.py
+
       - name: Validate branch name
         run: |
           echo """
