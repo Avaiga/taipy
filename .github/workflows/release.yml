@@ -49,7 +49,6 @@ jobs:
           python setup.py build_py && python -m build
           rm -rf taipy
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock
           python -c "import taipy as tp; tp.Scenario"
           python -c "import taipy as tp; tp.gui"
           python -c "import taipy as tp; tp.rest"
