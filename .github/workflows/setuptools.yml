@@ -30,11 +30,6 @@ jobs:
 
       - name: Install Taipy without dependencies
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY_TAIPY_CORE }}" > ~/.ssh/id_ed25519
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519
-
           pip install .
           rm -r taipy
 
