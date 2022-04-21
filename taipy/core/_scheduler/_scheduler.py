@@ -47,29 +47,6 @@ class _Scheduler(_AbstractScheduler):
         cls._dispatcher._set_executer_and_nb_available_workers(job_config.nb_of_workers)  # type: ignore
 
     @classmethod
-    def _recover_jobs(cls):
-        res = list()
-        blocked_or_submitted_jobs = list()
-        jobs = _JobManager._get_all()
-        jobs.sort(key=lambda x: x.creation_date)
-
-        for job in jobs:
-            if job.status == Status.RUNNING or job.status == Status.PENDING:
-                cls.__set_pending_job(job)
-                cls.__run()
-                res.append(job)
-            elif job.status == Status.BLOCKED or job.status == Status.SUBMITTED:
-                blocked_or_submitted_jobs.append(job)
-            else:
-                continue
-
-        for job in blocked_or_submitted_jobs:
-            cls._check_block_and_run_job(job)
-            res.append(job)
-
-        return res
-
-    @classmethod
     def _check_block_and_run_job(cls, job):
         if cls.is_blocked(job):
             cls.__set_block_job(job)
