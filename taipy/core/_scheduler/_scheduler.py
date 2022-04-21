@@ -64,13 +64,13 @@ class _Scheduler(_AbstractScheduler):
                 continue
 
         for job in blocked_or_submitted_jobs:
-            cls.__check_block_and_run_job(job)
+            cls._check_block_and_run_job(job)
             res.append(job)
 
         return res
 
     @classmethod
-    def __check_block_and_run_job(cls, job):
+    def _check_block_and_run_job(cls, job):
         if cls.is_blocked(job):
             cls.__set_block_job(job)
         else:
@@ -124,7 +124,7 @@ class _Scheduler(_AbstractScheduler):
         for dn in task.output.values():
             dn.lock_edition()
         job = _JobManager._create(task, itertools.chain([cls._on_status_change], callbacks or []))
-        cls.__check_block_and_run_job(job)
+        cls._check_block_and_run_job(job)
 
         return job
 
@@ -172,12 +172,15 @@ class _Scheduler(_AbstractScheduler):
                 cls.blocked_jobs.remove(job)
                 cls.jobs_to_run.put(job)
 
-    def is_running(self) -> bool:
+    @classmethod
+    def is_running(cls) -> bool:
         """Returns False since the default scheduler is not runnable."""
         return False
 
-    def start(self):
+    @classmethod
+    def start(cls):
         RuntimeError("The default scheduler cannot be started.")
 
-    def stop(self):
+    @classmethod
+    def stop(cls):
         RuntimeError("The default scheduler cannot be started nor stopped.")
