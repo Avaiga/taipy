@@ -35,7 +35,7 @@ class _Scheduler(_AbstractScheduler):
     """
 
     jobs_to_run: Queue = Queue()
-    blocked_jobs: List = list()
+    blocked_jobs: List = []
     _dispatcher = _JobDispatcher(Config.job_config.nb_of_workers)  # type: ignore
     lock = Lock()
 
