@@ -21,7 +21,6 @@ from taipy.core.config.job_config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
-from taipy.core.job.status import Status
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task.task import Task
 
