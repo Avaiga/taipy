@@ -182,7 +182,6 @@ def pipeline_model():
 @pytest.fixture(scope="function", autouse=True)
 def setup():
     delete_everything()
-    
 
 def delete_everything():
     _Scheduler._set_nb_of_workers(None)
