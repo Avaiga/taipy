@@ -15,9 +15,8 @@ import os
 import random
 import string
 from concurrent.futures import ProcessPoolExecutor
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import partial
-from queue import Queue
 from time import sleep
 
 import pytest
@@ -28,11 +27,6 @@ from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.job.job import Job, JobId
-from taipy.core.job.status import Status
-from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_1_minute_max
 

@@ -25,7 +25,7 @@ class JobConfig:
 
     Parameters:
         mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise,
-            the "airflow" mode is available.
+            "enterprise" and "airflow" mode are available.
         **properties: A dictionary of additional properties.
     """
 
@@ -33,7 +33,8 @@ class JobConfig:
     _DEFAULT_MODE = "standalone"
 
     _MODE_TO_MODULE: Dict[str, str] = {
-        "airflow": "taipy.airflow",
+        "airflow": "taipy.airflow.scheduler",
+        "enterprise": "taipy.enterprise.core.scheduler.scheduler",
     }
 
     def __init__(self, mode: str = None, **properties):
@@ -104,5 +105,5 @@ class JobConfig:
         default_config = config_cls._DEFAULT_CONFIG
         return {**default_config, **properties}
 
-    def _is_default_mode(self) -> bool:
-        return self.mode == self._DEFAULT_MODE
+    def _mode_to_module(self):
+        return self._MODE_TO_MODULE[self.mode]

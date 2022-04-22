@@ -22,18 +22,11 @@ class _SchedulerFactory:
     @classmethod
     def _build_scheduler(cls) -> _AbstractScheduler:
 
-        if Config.job_config._is_default_mode():
-            if util.find_spec("taipy.enterprise"):
-                # Mode standalone with enterprise version
-                package = "taipy.enterprise.core.scheduler"
-                scheduler = _load_fct(package, "Scheduler")
-            else:
-                # Mode standalone with community version
-                scheduler = _Scheduler
+        if Config.job_config.is_standalone:
+            scheduler = _Scheduler
         else:
-            # Mode airflow with enterprise version
-            package = f"taipy.{Config.job_config.mode}.scheduler"
-            scheduler = _load_fct(package, "Scheduler")
+            # Mode "airflow" or "enterprise" in the enterprise version
+            scheduler = _load_fct(Config.job_config._mode_to_module(), "Scheduler")
 
         scheduler.initialize_scheduler()
         return scheduler
