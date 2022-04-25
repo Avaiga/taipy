@@ -25,10 +25,10 @@ from taipy.core.task.task import Task
 
 
 def _run_callbacks(fn):
-    def __run_callbacks(self):
-        fn(self)
-        for fct in self._subscribers:
-            fct(self)
+    def __run_callbacks(job):
+        fn(job)
+        for fct in job._subscribers:
+            fct(job)
 
     return __run_callbacks
 
@@ -251,8 +251,7 @@ class Job(_Entity):
             self._on_status_change(*functions)
 
     def update_status(self, ft: Future):
-        """Update the job status based on the success or the failure of its execution.
-        """
+        """Update the job status based on the success or the failure of its execution."""
         exceptions = ft.result()
         if exceptions:
             self.failed()

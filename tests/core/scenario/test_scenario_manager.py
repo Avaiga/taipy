@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 from multiprocessing import Process
+from queue import Queue
 
 import pytest
 
@@ -670,8 +671,9 @@ def test_submit():
     class MockScheduler(_Scheduler):
         submit_calls = []
 
-        def submit_task(self, task: Task, callbacks=None, force=False):
-            self.submit_calls.append(task.id)
+        @classmethod
+        def submit_task(cls, task: Task, callbacks=None, force=False):
+            cls.submit_calls.append(task.id)
             return super().submit_task(task, callbacks)
 
     _TaskManager._scheduler = MockScheduler

@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from multiprocessing import Process
+from queue import Queue
 from unittest import mock
 
 import pytest
@@ -135,8 +136,9 @@ def test_submit():
     class MockScheduler(_Scheduler):
         submit_calls = []
 
-        def submit_task(self, task: Task, callbacks=None, force=False):
-            self.submit_calls.append(task)
+        @classmethod
+        def submit_task(cls, task: Task, callbacks=None, force=False):
+            cls.submit_calls.append(task)
             return None
 
     _TaskManager._scheduler = MockScheduler
@@ -355,8 +357,6 @@ def test_pipeline_notification_subscribe(mocker):
 
     # test subscription
     callback = mock.MagicMock()
-    callback.__name__ = "callback"
-    callback.__module__ = "callback"
     _PipelineManager._submit(pipeline.id, [callback])
     callback.assert_called()
 

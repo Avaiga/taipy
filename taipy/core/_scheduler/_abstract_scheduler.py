@@ -19,22 +19,31 @@ from taipy.core.task.task import Task
 class _AbstractScheduler:
     """Creates, Enqueues and schedules jobs as instances of `Job^` class."""
 
-    @abstractmethod
-    def submit(self, pipeline, callbacks: Optional[Iterable[Callable]], force: bool = False) -> List[Job]:
+    @classmethod
+    def initialize(cls):
         return NotImplemented
 
+    @classmethod
     @abstractmethod
-    def submit_task(self, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
+    def submit(cls, pipeline, callbacks: Optional[Iterable[Callable]], force: bool = False) -> List[Job]:
         return NotImplemented
 
+    @classmethod
     @abstractmethod
-    def is_running(self) -> bool:
+    def submit_task(cls, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
         return NotImplemented
 
+    @classmethod
     @abstractmethod
-    def start(self):
+    def is_running(cls) -> bool:
         return NotImplemented
 
+    @classmethod
     @abstractmethod
-    def stop(self):
+    def start(cls):
+        return NotImplemented
+
+    @classmethod
+    @abstractmethod
+    def stop(cls):
         return NotImplemented

@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from importlib import util
+
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common._utils import _load_fct
@@ -16,10 +18,15 @@ from taipy.core.config.config import Config
 
 
 class _SchedulerFactory:
+
     @classmethod
     def _build_scheduler(cls) -> _AbstractScheduler:
-        if Config.job_config._is_default_mode():
-            return _Scheduler()
 
-        package = f"taipy.{Config.job_config.mode}.scheduler"
-        return _load_fct(package, "Scheduler")()
+        if Config.job_config.is_standalone:
+            scheduler = _Scheduler
+        else:
+            # Mode "airflow" or "enterprise" in the enterprise version
+            scheduler = _load_fct(Config.job_config._mode_to_module(), "Scheduler")
+
+        scheduler.initialize()
+        return scheduler

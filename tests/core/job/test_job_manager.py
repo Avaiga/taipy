@@ -14,6 +14,7 @@ import multiprocessing
 import os
 import random
 import string
+from queue import Queue
 from time import sleep
 
 import pytest
@@ -54,34 +55,32 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 
 def test_get_job():
-    scheduler = _Scheduler()
     task = _create_task(multiply, name="get_job")
 
-    job_1 = scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task)
     assert _JobManager._get(job_1.id) == job_1
 
-    job_2 = scheduler.submit_task(task)
+    job_2 = _Scheduler.submit_task(task)
     assert job_1 != job_2
     assert _JobManager._get(job_1.id).id == job_1.id
     assert _JobManager._get(job_2.id).id == job_2.id
 
 
 def test_get_latest_job():
-    scheduler = _Scheduler()
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
 
-    job_1 = scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task)
     assert _JobManager._get_latest(task) == job_1
     assert _JobManager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = scheduler.submit_task(task_2)
+    job_2 = _Scheduler.submit_task(task_2)
     assert _JobManager._get_latest(task).id == job_1.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_1_bis = scheduler.submit_task(task)
+    job_1_bis = _Scheduler.submit_task(task)
     assert _JobManager._get_latest(task).id == job_1_bis.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
@@ -91,22 +90,19 @@ def test_get_job_unknown():
 
 
 def test_get_jobs():
-    scheduler = _Scheduler()
-
     task = _create_task(multiply, name="get_all_jobs")
 
-    job_1 = scheduler.submit_task(task)
-    job_2 = scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task)
+    job_2 = _Scheduler.submit_task(task)
 
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
 
 def test_delete_job():
-    scheduler = _Scheduler()
     task = _create_task(multiply, name="delete_job")
 
-    job_1 = scheduler.submit_task(task)
-    job_2 = scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task)
+    job_2 = _Scheduler.submit_task(task)
 
     _JobManager._delete(job_1)
 
@@ -124,10 +120,10 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    scheduler = _Scheduler(Config.configure_job_executions(nb_of_workers=2))
+    _Scheduler._set_nb_of_workers(Config.configure_job_executions(nb_of_workers=2))
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
-        job = scheduler.submit_task(task)
+        job = _Scheduler.submit_task(task)
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
     utils.assert_true_after_1_minute_max(job.is_completed)
