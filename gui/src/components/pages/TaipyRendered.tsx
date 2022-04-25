@@ -63,7 +63,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
             .get<AxiosRenderer>(`/taipy-jsx${path}?client_id=${state.id || ""}`)
             .then((result) => {
                 // set rendered JSX and CSS style from fetch result
-                result.data.jsx && setJSX(result.data.jsx);
+                typeof result.data.jsx === "string" && setJSX(result.data.jsx);
                 if (!fromBlock) {
                     setStyle("Taipy_style", result.data.style || "");
                     result.data.head && setHead(result.data.head);
