@@ -231,7 +231,7 @@ class _Server:
 
     def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread, ssl_context):
         host_value = host if host != "0.0.0.0" else "localhost"
-        if debug:
+        if debug and not is_running_from_reloader():
             # Check that the port is not already opened
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             result = sock.connect_ex((host_value,port))
