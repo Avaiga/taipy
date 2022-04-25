@@ -28,5 +28,5 @@ class _SchedulerFactory:
             # Mode "airflow" or "enterprise" in the enterprise version
             scheduler = _load_fct(Config.job_config._mode_to_module(), "Scheduler")
 
-        scheduler.initialize_scheduler()
+        scheduler.initialize()
         return scheduler
