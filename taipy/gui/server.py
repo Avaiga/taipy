@@ -16,6 +16,7 @@ import os
 import re
 import typing as t
 import webbrowser
+import socket
 
 import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, render_template_string, request, send_from_directory
@@ -230,6 +231,13 @@ class _Server:
 
     def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread, ssl_context):
         host_value = host if host != "0.0.0.0" else "localhost"
+        if debug:
+            # Check that the port is not already opened
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex((host_value,port))
+            sock.close()
+            if result == 0:
+                raise ConnectionError(f"Port {port} is already opened on {host_value}. You have another server application running on the same port.")
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
