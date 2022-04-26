@@ -33,7 +33,7 @@ class JobConfig:
     _DEFAULT_MODE = "standalone"
 
     _MODE_TO_MODULE: Dict[str, str] = {
-        "airflow": "taipy.airflow.scheduler",
+        "airflow": "taipy.airflow",
         "enterprise": "taipy.enterprise.core.scheduler.scheduler",
     }
 
