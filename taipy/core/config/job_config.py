@@ -34,7 +34,12 @@ class JobConfig:
 
     _MODE_TO_MODULE: Dict[str, str] = {
         "airflow": "taipy.airflow",
-        "enterprise": "taipy.enterprise.core.scheduler.scheduler",
+        "enterprise": "taipy.enterprise",
+    }
+
+    _MODE_TO_SCHEDULER_PATH: Dict[str, str] = {
+        "airflow": ".scheduler",
+        "enterprise": ".core.scheduler.scheduler",
     }
 
     def __init__(self, mode: str = None, **properties):
@@ -107,3 +112,6 @@ class JobConfig:
 
     def _mode_to_module(self):
         return self._MODE_TO_MODULE[self.mode]
+
+    def _mode_to_scheduler_path(self):
+        return self._MODE_TO_MODULE[self.mode] + self._MODE_TO_SCHEDULER_PATH[self.mode]
