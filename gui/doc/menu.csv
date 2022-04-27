@@ -11,7 +11,7 @@ width[mobile],str,"""85vw""","The width, in CSS units, of the menu when unfolded
 on_action,Callback,,"The name of the function that will be triggered when a menu option is selected.
 All the parameters of that function are optional:
 <ul>
-<li>state (State^): state instance.</li>
+<li>state (`State^`): state instance.</li>
 <li>id (optional[str]): the identifier of the button.</li>
 <li>action (optional[str]): the name of the action that provoked the change.</li>
 <li>payload with selected id in args</li>
