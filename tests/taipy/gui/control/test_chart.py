@@ -97,7 +97,8 @@ def test_map_md(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     expected_list = [
         "<Chart",
-        'config="{&quot;columns&quot;: &#x7B;&quot;Globvalue&quot;: &#x7B;&quot;index&quot;: 0, &quot;type&quot;: &quot;float&quot;, &quot;dfid&quot;: &quot;Globvalue&quot;&#x7D;, &quot;Lat&quot;: &#x7B;&quot;index&quot;: 1, &quot;type&quot;: &quot;float&quot;, &quot;dfid&quot;: &quot;Lat&quot;&#x7D;, &quot;Lon&quot;: &#x7B;&quot;index&quot;: 2, &quot;type&quot;: &quot;float&quot;, &quot;dfid&quot;: &quot;Lon&quot;&#x7D;}, &quot;labels&quot;: [&quot;&quot;], &quot;texts&quot;: [&quot;Globvalue&quot;], &quot;modes&quot;: [&quot;markers&quot;], &quot;types&quot;: [&quot;scattermapbox&quot;], &quot;xaxis&quot;: [&quot;x&quot;], &quot;yaxis&quot;: [&quot;y&quot;], &quot;markers&quot;: [&#x7B;&quot;color&quot;: &quot;fuchsia&quot;, &quot;size&quot;: 4&#x7D;], &quot;selectedMarkers&quot;: [null], &quot;traces&quot;: [[&quot;Lat&quot;, &quot;Lon&quot;, null]], &quot;orientations&quot;: [null], &quot;names&quot;: [null], &quot;lines&quot;: [&#x7B;&quot;dash&quot;: null&#x7D;], &quot;textAnchors&quot;: [null], &quot;options&quot;: [null]}',
+        '&quot;Lat&quot;: &#x7B;&quot;index&quot;:',
+        '&quot;Lon&quot;: &#x7B;&quot;index&quot;:',
         'data={_TpD_mapData}',
         'layout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;mapbox&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',
         'updateVarName="_TpD_mapData"',
