@@ -69,10 +69,13 @@ export const useLovListMemo = (lov: LoV | undefined, defaultLov: string, tree = 
         return [];
     }, [lov, defaultLov, tree]);
 
+
 const cardSx = { padding: 0 } as CSSProperties;
-export const LovImage = ({ item, titleTypographyProps }: { item: Icon, titleTypographyProps?: TypographyProps }) => (
-    <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar alt={item.text} src={item.path} /></Tooltip>} title={item.text} titleTypographyProps={titleTypographyProps} />
-);
+export const LovImage = ({ item, disableTypo, height, titleTypographyProps }: { item: Icon, disableTypo?: boolean, height?: string, titleTypographyProps?: TypographyProps }) => {
+    const sx = useMemo(() => height ? {height: height, "& .MuiAvatar-img": { objectFit: "contain" }} : undefined, [height]);
+    return (
+    <CardHeader sx={cardSx} avatar={<Tooltip title={item.text}><Avatar alt={item.text} src={item.path} sx={sx} /></Tooltip>} title={item.text} disableTypography={disableTypo} titleTypographyProps={titleTypographyProps} />
+)};
 
 export const showItem = (elt: LovItem, searchValue: string) => {
     return (
