@@ -73,7 +73,11 @@ interface CustomTreeProps extends HTMLAttributes<HTMLElement>{
     height?: string;
 }
 
-const CustomTreeItem = (props: TreeItemProps & CustomTreeProps ) => <TreeItem ContentComponent={CustomContent} ContentProps={props as CustomTreeProps} {...props} />;
+const CustomTreeItem = (props: TreeItemProps & CustomTreeProps ) => {
+    const {allowSelection, lovIcon, height, ...tiProps} = props;
+    const ctProps = {allowSelection, lovIcon, height} as CustomTreeProps;
+    return <TreeItem ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />
+}
 
 const renderTree = (lov: LovItem[], active: boolean, searchValue: string, childrenOnlySelection: boolean, rowHeight?: string) => {
     return lov.map((li) => {
