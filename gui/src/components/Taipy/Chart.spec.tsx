@@ -46,6 +46,31 @@ const chartConfig = JSON.stringify({
     modes: ["lines+markers"],
 });
 
+const mapValue = {
+    default: {
+        Lat: [
+            48.4113, 18.0057, 48.6163, 48.5379, 48.5843, 48.612, 48.6286, 48.6068, 48.4489, 48.6548, 18.5721, 48.3734,
+            17.6398, 48.5765, 48.4407, 48.2286,
+        ],
+        Lon: [
+            -112.8352, -65.804, -113.4784, -114.0702, -111.0188, -110.7939, -109.4629, -114.9123, -112.9705, -113.965,
+            -66.5401, -111.5245, -64.7246, -112.1932, -113.3159, -104.5863,
+        ],
+        Globvalue: [
+            0.0875, 0.0892, 0.0908, 0.0933, 0.0942, 0.095, 0.095, 0.095, 0.0958, 0.0958, 0.0958, 0.0958, 0.0958, 0.0975,
+            0.0983, 0.0992,
+        ],
+    },
+};
+const mapConfig = JSON.stringify({
+    columns: { Lat: { dfid: "Lat" }, "Lon": { dfid: "Lon" } },
+    traces: [["Lat", "Lon"]],
+    xaxis: ["x"],
+    yaxis: ["y"],
+    types: ["scattermapbox"],
+    modes: ["markers"],
+});
+
 describe("Chart Component", () => {
     it("renders", async () => {
         const { getByTestId } = render(<Chart data={chartValue} config={chartConfig} testId="test" />);
@@ -171,5 +196,12 @@ describe("Chart Component", () => {
         const elts = getAllByText("Austria");
         expect(elts.length).toBeGreaterThan(1);
         expect(elts[0].tagName).toBe("TD");
+    });
+    describe("Chart Component as Map", () => {
+        it("renders", async () => {
+            const { getByTestId } = render(<Chart data={mapValue} config={mapConfig} testId="test" />);
+            const elt = getByTestId("test");
+            expect(elt.tagName).toBe("DIV");
+        });
     });
 });

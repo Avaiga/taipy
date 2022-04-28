@@ -31,6 +31,7 @@ import {
 } from "../../context/taipyReducers";
 import { ColumnDesc } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
+import { useTheme } from "@mui/system";
 
 const Plot = lazy(() => import("react-plotly.js"));
 
@@ -102,6 +103,7 @@ const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number)
 const selectedPropRe = /selected(\d+)/;
 
 const ONE_COLUMN_CHART = ["pie"];
+const LAT_LON_CHART = ["scattermapbox", "scattergeo", "densitymapbox"]; // choropleth doesn't rely on latlon
 
 const Chart = (props: ChartProp) => {
     const {
@@ -121,6 +123,7 @@ const Chart = (props: ChartProp) => {
     const [selected, setSelected] = useState<number[][]>([]);
     const plotRef = useRef<HTMLDivElement>(null);
     const dataKey = useRef("default");
+    const theme = useTheme();
 
     const refresh = data === null;
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -217,6 +220,9 @@ const Chart = (props: ChartProp) => {
                 console.info(`Error while parsing Chart.layout\n${(e as Error).message || e}`);
             }
         }
+        if (playout.mapbox && !playout.mapbox.style) {
+            playout.mapbox.style = theme.palette.mode;
+        }
         return {
             ...playout,
             title: title || playout.title,
@@ -236,7 +242,7 @@ const Chart = (props: ChartProp) => {
             },
             clickmode: "event+select",
         } as Layout;
-    }, [title, config.columns, config.traces, props.layout]);
+    }, [theme.palette.mode, title, config.columns, config.traces, props.layout]);
 
     const style = useMemo(
         () =>
@@ -271,12 +277,17 @@ const Chart = (props: ChartProp) => {
                 }
                 const xs = getValue(datum, trace, 0);
                 const ys = getValue(datum, trace, 1);
-                if (ys.length) {
-                    ret.x = xs;
-                    ret.y = ys;
+                if (LAT_LON_CHART.includes(ret.type as string)) {
+                    ret.lat = xs;
+                    ret.lon = ys;
                 } else {
-                    ret.x = Array.from(Array(xs.length).keys());
-                    ret.y = xs;
+                    if (ys.length) {
+                        ret.x = xs;
+                        ret.y = ys;
+                    } else {
+                        ret.x = Array.from(Array(xs.length).keys());
+                        ret.y = xs;
+                    }
                 }
                 ret.z = getValue(datum, trace, 2);
                 ret.text = getValue(datum, config.texts, idx);
