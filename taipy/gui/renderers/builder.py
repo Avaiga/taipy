@@ -411,26 +411,32 @@ class _Builder:
 
     def get_chart_config(self, default_type="scatter", default_mode="lines+markers"):
         names = (
-            "x",
+            "x",  # 0
             "y",
-            "z",
+            "z",  # 2
             "label",
-            "text",
+            "text",  # 4
             "mode",
-            "type",
+            "type",  # 6
             "color",
-            "xaxis",
+            "xaxis",  # 8
             "yaxis",
-            "selected_color",
+            "selected_color",  # 10
             "marker",
-            "selected_marker",
+            "selected_marker",  # 12
             "orientation",
-            "name",
+            "name",  # 14
             "line",
-            "text_anchor",
+            "text_anchor",  # 16
             "options",
+            "lat",  # 18
+            "lon",
         )
         trace = self.__get_multiple_indexed_attributes(names)
+        if not trace[0] and trace[18]:
+            trace[0] = trace[18]  # substitute Lat to x
+        if not trace[1] and trace[19]:
+            trace[1] = trace[19]  # substitute Lon to y
         if not trace[5]:
             # mode
             trace[5] = default_mode
@@ -447,6 +453,10 @@ class _Builder:
         indexed_trace = self.__get_multiple_indexed_attributes(names, idx)
         if len([x for x in indexed_trace if x]):
             while len([x for x in indexed_trace if x]):
+                if not indexed_trace[0] and indexed_trace[18]:
+                    indexed_trace[0] = indexed_trace[18]  # substitute Lat to x
+                if not indexed_trace[1] and indexed_trace[19]:
+                    indexed_trace[1] = indexed_trace[19]  # substitute Lon to y
                 self.__check_dict(indexed_trace, (11, 12, 17), names)
                 traces.append([x or trace[i] for i, x in enumerate(indexed_trace)])
                 idx += 1
