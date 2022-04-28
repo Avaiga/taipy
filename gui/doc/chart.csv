@@ -4,11 +4,11 @@ type,indexed(str),scatter,"Chart type.
 See the Plotly <a href=""https://plotly.com/javascript/reference/"">chart type</a> documentation for details."
 mode,indexed(str),lines+markers,"Chart mode.
 See the Plotly <a href=""https://plotly.com/javascript/reference/scatter/#scatter-mode"">chart mode</a> documentation for details."
-x,indexed(str),,Column name for the <i>x</i> axis. Synonym <i>lat</i>.
-y,indexed(str),,Column name for the <i>y</i> axis. Synonym <i>lon</i>.
+x,indexed(str),,Column name for the <i>x</i> axis. Synonym for <i>lon</i>.
+y,indexed(str),,Column name for the <i>y</i> axis. Synonym for <i>lat</i>.
 z,indexed(str),,Column name for the <i>z</i> axis.
-lat,indexed(str),,Column name for the <i>latitude</i> value. Synonym <i>x</i>.
-lon,indexed(str),,Column name for the <i>longitude</i> value. Synonym <i>y</i>.
+lon,indexed(str),,Column name for the <i>longitude</i> value. Synonym for <i>x</i>.
+lat,indexed(str),,Column name for the <i>latitude</i> value. Synonym for <i>y</i>.
 text,indexed(str),,"Column name for the text associated to the point for the indicated trace.
 This is meaningful only when _mode_ has the <i>text</i> option."
 title,str,,The title of this chart control.

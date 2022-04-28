@@ -278,8 +278,8 @@ const Chart = (props: ChartProp) => {
                 const xs = getValue(datum, trace, 0);
                 const ys = getValue(datum, trace, 1);
                 if (LAT_LON_CHART.includes(ret.type as string)) {
-                    ret.lat = xs;
-                    ret.lon = ys;
+                    ret.lon = xs;
+                    ret.lat = ys;
                 } else {
                     if (ys.length) {
                         ret.x = xs;
