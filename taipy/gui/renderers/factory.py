@@ -498,7 +498,7 @@ class _Factory:
                 ("multiple", _AttributeType.boolean),
                 ("width", _AttributeType.string_or_number),
                 ("on_change", _AttributeType.function),
-                ("children_only_selection", _AttributeType.boolean),
+                ("select_leafs_only", _AttributeType.boolean),
                 ("row_height", _AttributeType.string),
             ]
         )

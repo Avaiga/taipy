@@ -79,9 +79,9 @@ const CustomTreeItem = (props: TreeItemProps & CustomTreeProps ) => {
     return <TreeItem ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />
 }
 
-const renderTree = (lov: LovItem[], active: boolean, searchValue: string, childrenOnlySelection: boolean, rowHeight?: string) => {
+const renderTree = (lov: LovItem[], active: boolean, searchValue: string, selectLeafsOnly: boolean, rowHeight?: string) => {
     return lov.map((li) => {
-        const children = li.children ? renderTree(li.children, active, searchValue, childrenOnlySelection, rowHeight) : [];
+        const children = li.children ? renderTree(li.children, active, searchValue, selectLeafsOnly, rowHeight) : [];
         if (!children.filter((c) => c).length && !showItem(li, searchValue)) {
             return null;
         }
@@ -91,7 +91,7 @@ const renderTree = (lov: LovItem[], active: boolean, searchValue: string, childr
                 nodeId={li.id}
                 label={typeof li.item === "string" ? li.item : "undefined item"}
                 disabled={!active}
-                allowSelection={childrenOnlySelection ? (!children || children.length == 0) : true}
+                allowSelection={selectLeafsOnly ? (!children || children.length == 0) : true}
                 lovIcon={typeof li.item !== "string" ? li.item as Icon : undefined}
                 height={rowHeight}
             >
@@ -104,7 +104,7 @@ const renderTree = (lov: LovItem[], active: boolean, searchValue: string, childr
 interface TreeViewProps extends SelTreeProps {
     defaultExpanded?: string | boolean;
     expanded?: string[] | boolean;
-    childrenOnlySelection?: boolean;
+    selectLeafsOnly?: boolean;
     rowHeight?: string;
 }
 
@@ -124,7 +124,7 @@ const TreeView = (props: TreeViewProps) => {
         width = 360,
         height,
         valueById,
-        childrenOnlySelection = false,
+        selectLeafsOnly = false,
         rowHeight
     } = props;
     const [searchValue, setSearchValue] = useState("");
@@ -283,7 +283,7 @@ const TreeView = (props: TreeViewProps) => {
                         onNodeToggle={handleNodeToggle}
                         {...treeProps}
                     >
-                        {renderTree(lovList, !!active, searchValue, childrenOnlySelection, rowHeight)}
+                        {renderTree(lovList, !!active, searchValue, selectLeafsOnly, rowHeight)}
                     </MuiTreeView>
                 </Paper>
             </Tooltip>
