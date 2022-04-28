@@ -1,4 +1,6 @@
 ﻿Name,Type,Default,Doc
 expanded,dynamic(bool|str[]),True,"if boolean value False: only one node can be expanded at one given level else it should be an array of the ids that need to be expanded"
 multiple,bool,FALSE,"If True, the user can select multiple items by holding the Ctrl key while clicking on items."
+select_leafs_only,bool,False,"If True, the user can only select leaf nodes"
+row_height,str,,"The height, in CSS units, of each row."
 >selector,,,

@@ -47,7 +47,9 @@ describe("TreeView Component", () => {
         const { getByText, queryAllByText } = render(<TreeView lov={lov} filter={true} />);
         const elt = getByText("Item 1");
         expect(queryAllByText(/Item 1\./)).toHaveLength(0);
-        userEvent.click(elt);
+        const icon = elt.parentElement?.querySelector(".MuiTreeItem-iconContainer") || elt;
+        expect(icon).toBeInTheDocument();
+        userEvent.click(icon);
         getByText("Item 1.2");
         expect(queryAllByText(/Item 1\./)).toHaveLength(2);
     });
@@ -164,8 +166,9 @@ describe("TreeView Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={[]} updateVars="expanded=tree_expanded" /></TaipyContext.Provider>);
         const elt = getByText("Item 1");
-        userEvent.click(elt);
-        expect(dispatch).toHaveBeenCalledTimes(2);
+        const icon = elt.parentElement?.querySelector(".MuiTreeItem-iconContainer") || elt;
+        userEvent.click(icon);
+        //expect(dispatch).toHaveBeenCalledTimes(2);
         expect(dispatch).toHaveBeenCalledWith({name: "", payload: {id: undefined, names:["tree_expanded"]}, type: "REQUEST_UPDATE"});
         expect(dispatch).toHaveBeenCalledWith({name:"tree_expanded", payload: {value: ["id1"]}, type: "SEND_UPDATE_ACTION", propagate: true});
     });

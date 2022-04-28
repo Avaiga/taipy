@@ -1,12 +1,13 @@
-import React, { useState, useContext, useCallback, useEffect, useMemo, SyntheticEvent } from "react";
+import React, { useState, useContext, useCallback, useEffect, useMemo, SyntheticEvent, HTMLAttributes, forwardRef, Ref } from "react";
 import Box from "@mui/material/Box";
 import MuiTreeView from "@mui/lab/TreeView";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import TreeItem from "@mui/lab/TreeItem";
+import TreeItem, { TreeItemContentProps, useTreeItem, TreeItemProps } from "@mui/lab/TreeItem";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -23,22 +24,79 @@ import {
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty } from "../../utils/hooks";
 import { LovItem } from "../../utils/lov";
 import { getUpdateVar } from "./utils";
+import { Icon } from "../../utils/icon";
 
-const renderTree = (lov: LovItem[], active: boolean, searchValue: string) => {
+const CustomContent = forwardRef(function CustomContent(props: TreeItemContentProps, ref) { // need a display name
+    const { classes, className, label, nodeId, icon: iconProp, expansionIcon, displayIcon } = props;
+    const { allowSelection, lovIcon, height } = props as unknown as CustomTreeProps;
+
+    const { disabled, expanded, selected, focused, handleExpansion, handleSelection, preventSelection } =
+        useTreeItem(nodeId);
+
+    const icon = iconProp || expansionIcon || displayIcon;
+
+    const classNames = [className, classes.root];
+    if (expanded) {
+        classNames.push(classes.expanded);
+    }
+    if (selected) {
+        classNames.push(classes.selected);
+    }
+    if (allowSelection && focused) {
+        classNames.push(classes.focused);
+    }
+    if (disabled) {
+        classNames.push(classes.disabled);
+    }
+    const divStyle = useMemo(() => (height ? {height: height}: undefined), [height]);
+
+    return (
+        <div
+            className={classNames. join(" ")}
+            onMouseDown={preventSelection}
+            ref={ref as Ref<HTMLDivElement>}
+            style={divStyle}
+        >
+            <div onClick={handleExpansion} className={classes.iconContainer}>
+                {icon}
+            </div>
+            <Typography onClick={allowSelection ? handleSelection : handleExpansion} component="div" className={classes.label}>
+                {lovIcon ? <LovImage item={lovIcon} disableTypo={true} height={height} /> : label}
+            </Typography>
+        </div>
+    );
+});
+
+interface CustomTreeProps extends HTMLAttributes<HTMLElement>{
+    allowSelection: boolean;
+    lovIcon?: Icon;
+    height?: string;
+}
+
+const CustomTreeItem = (props: TreeItemProps & CustomTreeProps ) => {
+    const {allowSelection, lovIcon, height, ...tiProps} = props;
+    const ctProps = {allowSelection, lovIcon, height} as CustomTreeProps;
+    return <TreeItem ContentComponent={CustomContent} ContentProps={ctProps} {...tiProps} />
+}
+
+const renderTree = (lov: LovItem[], active: boolean, searchValue: string, selectLeafsOnly: boolean, rowHeight?: string) => {
     return lov.map((li) => {
-        const children = li.children ? renderTree(li.children, active, searchValue) : [];
+        const children = li.children ? renderTree(li.children, active, searchValue, selectLeafsOnly, rowHeight) : [];
         if (!children.filter((c) => c).length && !showItem(li, searchValue)) {
             return null;
         }
         return (
-            <TreeItem
+            <CustomTreeItem 
                 key={li.id}
                 nodeId={li.id}
-                label={typeof li.item === "string" ? li.item : li.item ? <LovImage item={li.item} /> : "undefined item"}
+                label={typeof li.item === "string" ? li.item : "undefined item"}
                 disabled={!active}
+                allowSelection={selectLeafsOnly ? (!children || children.length == 0) : true}
+                lovIcon={typeof li.item !== "string" ? li.item as Icon : undefined}
+                height={rowHeight}
             >
                 {children}
-            </TreeItem>
+            </CustomTreeItem>
         );
     });
 };
@@ -46,6 +104,8 @@ const renderTree = (lov: LovItem[], active: boolean, searchValue: string) => {
 interface TreeViewProps extends SelTreeProps {
     defaultExpanded?: string | boolean;
     expanded?: string[] | boolean;
+    selectLeafsOnly?: boolean;
+    rowHeight?: string;
 }
 
 const TreeView = (props: TreeViewProps) => {
@@ -64,6 +124,8 @@ const TreeView = (props: TreeViewProps) => {
         width = 360,
         height,
         valueById,
+        selectLeafsOnly = false,
+        rowHeight
     } = props;
     const [searchValue, setSearchValue] = useState("");
     const [selectedValue, setSelectedValue] = useState<string[] | string>(multiple ? [] : "");
@@ -152,7 +214,7 @@ const TreeView = (props: TreeViewProps) => {
                 dispatch(
                     createSendUpdateAction(
                         updateVarName,
-                        Array.isArray(nodeIds) ? nodeIds : [nodeIds], 
+                        Array.isArray(nodeIds) ? nodeIds : [nodeIds],
                         props.tp_onChange,
                         propagate,
                         valueById ? undefined : getUpdateVar(updateVars, "lov")
@@ -221,7 +283,7 @@ const TreeView = (props: TreeViewProps) => {
                         onNodeToggle={handleNodeToggle}
                         {...treeProps}
                     >
-                        {renderTree(lovList, !!active, searchValue)}
+                        {renderTree(lovList, !!active, searchValue, selectLeafsOnly, rowHeight)}
                     </MuiTreeView>
                 </Paper>
             </Tooltip>
