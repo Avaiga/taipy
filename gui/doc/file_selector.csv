@@ -4,7 +4,7 @@ label,str,,The label of the button.
 on_action,Callback,,"The name of the function that will be triggered.
 All the parameters of that function are optional:
 <ul>
-<li>state (State^): state instance.</li>
+<li>state (`State^`): state instance.</li>
 <li>id (optional[str]): the identifier of the button.</li>
 <li>action (optional[str]): the name of the action that provoked the change.</li>
 </ul>"
