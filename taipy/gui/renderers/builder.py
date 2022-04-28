@@ -763,10 +763,10 @@ class _Builder:
             warnings.warn(f"{self.__element_name} page_size_options should be a list")
         return self
 
-    def set_type(self, type_name: str):
-        self.type_name = type_name
-        self.set_attribute("type", type_name)
-        return self
+    def set_input_type(self, type_name: str, allow_password = False):
+        if allow_password and self.__get_boolean_attribute("password", False):
+            return self.set_attribute("type", "password")
+        return self.set_attribute("type", type_name)
 
     def set_kind(self):
         theme = self.__attributes.get("theme", False)

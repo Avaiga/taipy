@@ -232,7 +232,7 @@ class _Factory:
             element_name="Input",
             attributes=attrs,
         )
-        .set_type("text")
+        .set_input_type("text", True)
         .set_value_and_default()
         .set_change_delay()
         .set_propagate()
@@ -298,7 +298,7 @@ class _Factory:
             attributes=attrs,
             default_value=0,
         )
-        .set_type("number")
+        .set_input_type("number")
         .set_value_and_default()
         .set_change_delay()
         .set_propagate()
