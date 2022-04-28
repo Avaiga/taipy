@@ -1,5 +1,6 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(any),None,The value represented by this control.
+password,bool,False,"If True, the text is obscured: all input characters are displayed as an asterisk ('*')."
 >sharedInput,,,
 >on_change,,,
 >propagate,,,
