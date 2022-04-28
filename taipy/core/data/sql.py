@@ -11,6 +11,7 @@
 
 import os
 import re
+import urllib
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Iterable
 
@@ -117,6 +118,9 @@ class SQLDataNode(DataNode):
         # TODO: Add support to other SQL engines, the engine value should be checked.
         if engine == "mssql":
             driver = re.sub(r"\s+", "+", driver)
+            username = urllib.parse.quote_plus(username)
+            password = urllib.parse.quote_plus(password)
+            database = urllib.parse.quote_plus(database)
             return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?driver={driver}"
         elif engine == "sqlite":
             return os.path.join("sqlite:///", path, f"{database}.sqlite3")
