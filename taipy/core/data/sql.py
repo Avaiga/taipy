@@ -13,7 +13,7 @@ import os
 import re
 import urllib
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Iterable
+from typing import Any, Dict, Iterable, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -87,17 +87,6 @@ class SQLDataNode(DataNode):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
 
-        self.__engine = self.__create_engine(
-            properties.get("db_engine"),
-            properties.get("db_username"),
-            properties.get("db_host", "localhost"),
-            properties.get("db_password"),
-            properties.get("db_name"),
-            properties.get("db_port", 1433),
-            properties.get("db_driver", "ODBC Driver 17 for SQL Server"),
-            properties.get("path", ""),
-        )
-
         super().__init__(
             config_id,
             scope,
@@ -112,6 +101,18 @@ class SQLDataNode(DataNode):
         )
         if not self._last_edition_date:
             self.unlock_edition()
+
+    def __engine(self):
+        return self.__create_engine(
+            self.properties.get("db_engine"),
+            self.properties.get("db_username"),
+            self.properties.get("db_host", "localhost"),
+            self.properties.get("db_password"),
+            self.properties.get("db_name"),
+            self.properties.get("db_port", 1433),
+            self.properties.get("db_driver", "ODBC Driver 17 for SQL Server"),
+            self.properties.get("path", ""),
+        )
 
     @staticmethod
     def __build_conn_string(engine, username, host, password, database, port, driver, path) -> str:
@@ -142,7 +143,7 @@ class SQLDataNode(DataNode):
         return self._read_as_pandas_dataframe()
 
     def _read_as(self, query, custom_class):
-        with self.__engine.connect() as connection:
+        with self.__engine().connect() as connection:
             query_result = connection.execute(text(query))
         return list(map(lambda row: custom_class(**row), query_result))
 
@@ -151,12 +152,12 @@ class SQLDataNode(DataNode):
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
         if columns:
-            return pd.read_sql_query(self.read_query, con=self.__engine)[columns]
-        return pd.read_sql_query(self.read_query, con=self.__engine)
+            return pd.read_sql_query(self.read_query, con=self.__engine())[columns]
+        return pd.read_sql_query(self.read_query, con=self.__engine())
 
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database."""
-        with self.__engine.connect() as connection:
+        with self.__engine().connect() as connection:
             write_table = table(self.write_table)
             if isinstance(data, pd.DataFrame):
                 self.__insert_dicts(data.to_dict(orient="records"), write_table, connection)
