@@ -25,8 +25,8 @@ from types import FrameType
 
 import __main__
 import markdown as md_lib
-from flask import Blueprint, Flask, request, send_from_directory
 import tzlocal
+from flask import Blueprint, Flask, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -267,6 +267,7 @@ class Gui:
                 self.__request_var_update(message.get("payload"))
             elif msg_type == _WsType.CLIENT_ID.value:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
+            self._bindings()._reset_client_id()
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
