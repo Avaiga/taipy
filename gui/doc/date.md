@@ -1,4 +1,4 @@
-A control that can display and specified a formatted date, with or without time.
+A control that can display and specify a formatted date, with or without time.
 
 ## Usage
 

@@ -1,5 +1,4 @@
 ﻿Name,Type,Default,Doc
-*value,dict|list[dict]|tuple|list[tuple],,"The different statuses to represent.
-See below."
-without_close,bool,FALSE,"If <i>True</i>, the user cannot hide the child statuses."
+*value,dict|list[dict]|tuple|list[tuple],,"The different statuses to represent. See below."
+without_close,bool,FALSE,"If True, the user cannot hide the child statuses."
 >shared,,,

@@ -1,8 +1,8 @@
 ﻿Name,Type,Default,Doc
-on_change,Callback,,"The name of a function that is triggered when the value is updated.
+on_change,Callback,,"The name of a function that is triggered when the value is updated.<br/>
 The parameters of that function are all optional:
 <ul>
-<li>state (`State^`): state instance.</li>
+<li>state (<code>State^</code>): the state instance.</li>
 <li>var_name (str): the variable name.</li>
 <li>value (any): the new value.</li>
 </ul>"

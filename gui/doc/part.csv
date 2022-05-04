@@ -1,5 +1,5 @@
 ﻿Name,Type,Default,Doc
-*render,bool,TRUE,"If <i>True</i>, this part is visible on the page.
-If <i>False</i>, the part is hidden and all its content is not displayed."
+*render,bool,TRUE,"If True, this part is visible on the page.<br/>
+If False, the part is hidden and all its content is not displayed."
 >partial,,,
 >shared,,,

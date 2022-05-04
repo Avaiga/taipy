@@ -4,14 +4,14 @@ label,dynamic(str),,The label of the button.
 on_action,Callback,,"The name of a function that is triggered when the download is initiated.
 All the parameters of that function are optional:
 <ul>
-<li>state (`State^`): state instance.</li>
+<li>state (<code>State^</code>): the state instance.</li>
 <li>id (optional[str]): the identifier of the button.</li>
 <li>action (optional[str]): the name of the action that provoked the change.</li>
 </ul>"
-auto,bool,False,"If <i>True</i>, the download starts as soon as the page is loaded."
-render,dynamic(bool),True,"If <i>True</i>, the control is displayed.
-If <i>False</i>, the control is not displayed."
-bypass_preview,bool,True,"If <i>False</i>, allows the browser to try to show the content in a different tab.
+auto,bool,False,"If True, the download starts as soon as the page is loaded."
+render,dynamic(bool),True,"If True, the control is displayed.
+If False, the control is not displayed."
+bypass_preview,bool,True,"If False, allows the browser to try to show the content in a different tab.
 The file download is always performed."
 name,str,,"A name proposition for the file to save, that the user can change."
 >active,,,

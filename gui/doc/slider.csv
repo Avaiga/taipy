@@ -1,23 +1,23 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(int | float | str),,"The value that is set for this slider.
 It would be a <i>lov</i> label if it is used."
-min,int|float,0,"The minimum value.
+min,int | float,0,"The minimum value.
 This is ignored when <i>lov</i> is defined."
-max,int|float,100,"The maximum value.
+max,int | float,100,"The maximum value.
 This is ignored when <i>lov</i> is defined."
 text_anchor,str,"""bottom""","When the <i>lov</i> property is used, this property indicates the location of the label.
 Possible values are:
 <ul>
-<li>bottom</li>
-<li>top</li>
-<li>left</li>
-<li>right</li>
-<li>none (no label is displayed)</li>
+<li>""bottom""</li>
+<li>""top""</li>
+<li>""left""</li>
+<li>""right""</li>
+<li>""none"" (no label is displayed)</li>
 </ul>"
 labels,bool|dict,,"The labels for specific points of the slider.
 If set to True, this slider uses the labels of the <i>lov</i> if there are any.
 If set to a dictionary, the slider uses the dictionary keys as a <i>lov</i> key or index, and the associated value as the label."
-continuous,bool,True,"If set to False, the control emits an on_change notification only when the mouse button is released, 
+continuous,bool,TRUE,"If set to False, the control emits an on_change notification only when the mouse button is released, 
 otherwise notifications are emitted during the cursor movements. 
 If <i>lov</i> is defined, the default value is False."
 change_delay,int,<i>App config</i>,"Minimum time between triggering two <i>on_change</i> calls.

@@ -1,6 +1,6 @@
 ﻿Name,Type,Default,Doc
-propagate,bool,<i>App config</i>,"Allows the control's main value to be automatically propagated.
+propagate,bool,<i>App config</i>,"Allows the control's main value to be automatically propagated.<br/>
 The default value is defined at the application configuration level.
-If <i>True</i>, any change to the control's value is immediately reflected in the bound application variable."
+If True, any change to the control's value is immediately reflected in the bound application variable."
 >active,,,
 >shared,,,

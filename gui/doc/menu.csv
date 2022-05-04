@@ -1,21 +1,21 @@
 ﻿Name,Type,Default,Doc
 *lov,dynamic(str|List[str|Icon|any]),,The list of menu option values.
 adapter,Function,"`""lambda x: str(x)""`","The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
-type,str,<i>Type of first lov element</i>,"Must be specified if `lov` contains a non specific type of data (ex: dict).
+type,str,<i>Type of the first lov element</i>,"Must be specified if <i>lov</i> contains a non specific type of data (ex: dict).
 <i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."
 label,str,,The title of the menu.
 width,str,"""15vw""","The width, in CSS units, of the menu when unfolded.
 Note that when running on a mobile device, the property <i>width[active]</i> is used instead."
 width[mobile],str,"""85vw""","The width, in CSS units, of the menu when unfolded, on a mobile device."
 >active,,,
-on_action,Callback,,"The name of the function that will be triggered when a menu option is selected.
+on_action,Callback,,"The name of the function that will be triggered when a menu option is selected.<br/>
 All the parameters of that function are optional:
 <ul>
-<li>state (`State^`): state instance.</li>
-<li>id (optional[str]): the identifier of the button.</li>
-<li>action (optional[str]): the name of the action that provoked the change.</li>
-<li>payload with selected id in args</li>
-<li>payload
+<li>state (<code>State^</code>): the state instance.</li>
+<li>id (str): the identifier of the button.</li>
+<li>action (str): the name of the action that provoked the change.</li>
+<li>payload (dict): the details on this callback's invocation.<br/>
+This dictionary has the following keys:
 <ul>
 <li>args: List where the first element contains the id of the selected option.</li>
 </ul>

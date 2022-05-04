@@ -16,10 +16,10 @@ render,bool,True,"If True, this chart is visible on the page."
 on_range_change,Callback,,"Callback function called when the visible part of the x axis changes.
 The function receives four parameters:
 <ul>
-<li>state (`State^`): state instance.</li>
+<li>state (<code>State^</code>): the state instance.</li>
 <li>id (optional[str]): the identifier of the chart control.</li>
 <li>action (optional[str]): the name of the action that provoked the change.</li>
-<li>payload (dict[str, any]): all the event information, as emitted by <a href=""https://plotly.com/javascript/plotlyjs-events/#update-data"">plotly</a>.</li>
+<li>payload (dict[str, any]): the full details on this callback's invocation, as emitted by <a href=""https://plotly.com/javascript/plotlyjs-events/#update-data"">plotly</a>.</li>
 </ul>"
 columns,"str|List[str]|dict[str, dict[str, str]]",_All columns_,"List of column names
 <ul>

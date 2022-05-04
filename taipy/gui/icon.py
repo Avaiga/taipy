@@ -34,7 +34,15 @@ class Icon:
         """Initialize a new Icon.
 
         Arguments:
-            path (str): The path to an image file.
+            path (str): The path to an image file.<br/>
+                This path must be relative to and inside the root directory of the
+                application (where the Python file that created the `Gui` instance
+                is located).<br/>
+                In situations where the image file is located outside the application
+                directory, a _path mapping_ must be used: the _path_mapping_ parameter
+                of the `Gui^` constructor makes it possible to access a resource anywhere
+                on the server filesystem, as if it were located in a subdirectory of
+                the application directory.
             text (Optional[str]): The text associated to the image. If _text_ is None,
                 there is no text associated to this image.
         """
