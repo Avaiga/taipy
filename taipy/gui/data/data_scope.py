@@ -22,7 +22,7 @@ class _DataScopes:
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {}
         self.__scopes["global"] = SimpleNamespace()
-        self.__single_client = False
+        self.__single_client = True
         self.__client_id: t.Optional[str] = None
 
     def set_single_client(self, value: bool) -> None:
