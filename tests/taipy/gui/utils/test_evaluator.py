@@ -17,12 +17,12 @@ from taipy.gui.utils.types import _TaipyNumber
 
 
 def test_unbind_variable_in_expression(gui: Gui):
-    gui.run(run_server=False)
+    gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True) as records:
         gui._evaluate_expr("{x}")
-        assert len(records) == 3
-        assert "Variable 'x' is not defined" in str(records[1].message)
-        assert "Cannot evaluate expression 'x': name 'x' is not defined" in str(records[2].message)
+        assert len(records) == 2
+        assert "Variable 'x' is not defined" in str(records[0].message)
+        assert "Cannot evaluate expression 'x': name 'x' is not defined" in str(records[1].message)
 
 
 def test_evaluate_same_expression_multiple_times(gui: Gui):
