@@ -314,8 +314,8 @@ class Gui:
         if holder:
             var_name = holder.get_name()
         hash_expr = self.__evaluator.get_hash_from_expr(var_name)
+        # if the variable has been evaluated then skip updating to prevent infinite loop
         if self.__modified_vars_update_var is not None and hash_expr in self.__modified_vars_update_var:
-            warnings.warn("Failed to update {var_name} as it has been updated previously. Review `on_change` function to fix this issue.")
             return
         modified_vars = {hash_expr}
         # Use custom attrsetter function to allow value binding for _MapDict
