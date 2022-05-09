@@ -98,7 +98,7 @@ class _Scheduler(_AbstractScheduler):
             The created `Job^`.
         """
         for dn in task.output.values():
-            dn.lock_edition()
+            dn.lock_edit()
         job = _JobManager._create(task, itertools.chain([cls._on_status_change], callbacks or []))
         cls._check_block_and_run_job(job)
 

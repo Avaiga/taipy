@@ -249,9 +249,9 @@ class TestDataManager:
             Scope.PIPELINE,
             id=DataNodeId("id"),
             parent_id=None,
-            last_edition_date=None,
+            last_edit_date=None,
             job_ids=[],
-            edition_in_progress=False,
+            edit_in_progress=False,
             properties={"foo": "bar"},
         )
         assert len(_DataManager._get_all()) == 0

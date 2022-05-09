@@ -11,6 +11,7 @@
 
 from datetime import datetime, timedelta
 from time import sleep
+from unittest import mock
 
 import pytest
 
@@ -105,7 +106,7 @@ class TestDataNode:
             "a_scenario_id",
             a_date,
             [JobId("a_job_id")],
-            edition_in_progress=False,
+            edit_in_progress=False,
             prop="erty",
         )
         assert dn.config_id == "foo_bar"
@@ -230,7 +231,7 @@ class TestDataNode:
         assert dn._is_in_cache is True
 
         # Has been writen more than 30 minutes ago
-        dn._last_edition_date = datetime.now() - timedelta(days=1)
+        dn._last_edit_date = datetime.now() - timedelta(days=1)
         _DataManager()._set(dn)
         assert dn._is_in_cache is False
 
@@ -244,7 +245,7 @@ class TestDataNode:
         assert dn._is_in_cache is True
 
         # Has been writen more than 30 minutes ago
-        dn._last_edition_date = datetime.now() - timedelta(days=6)
+        dn._last_edit_date = datetime.now() - timedelta(days=6)
         _DataManager()._set(dn)
         assert dn._is_in_cache is False
 
@@ -450,9 +451,9 @@ class TestDataNode:
             id=DataNodeId("an_id"),
             name="foo",
             parent_id=None,
-            last_edition_date=current_datetime,
+            last_edit_date=current_datetime,
             job_ids=[JobId("a_job_id")],
-            edition_in_progress=False,
+            edit_in_progress=False,
             validity_period=None,
         )
 
@@ -550,3 +551,39 @@ class TestDataNode:
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
+
+    def test_unlock_edition_deprecated(self):
+        dn = FakeDataNode("foo")
+
+        with pytest.warns(DeprecationWarning):
+            with mock.patch("taipy.core.data.data_node.DataNode.unlock_edit") as unlock_edit:
+                dn.unlock_edition(d := datetime.now(), None)
+                unlock_edit.assert_called_once_with(d, None)
+
+    def test_lock_edition_deprecated(self):
+        dn = FakeDataNode("foo")
+
+        with pytest.warns(DeprecationWarning):
+            with mock.patch("taipy.core.data.data_node.DataNode.lock_edit") as lock_edit:
+                dn.lock_edition()
+                lock_edit.assert_called_once()
+
+    def test_edition_in_progress_deprecated(self):
+        dn = FakeDataNode("foo")
+
+        with pytest.warns(DeprecationWarning):
+            dn.edition_in_progress
+
+        assert dn.edit_in_progress == dn.edition_in_progress
+        dn.edition_in_progress = True
+        assert dn.edit_in_progress == dn.edition_in_progress
+
+    def test_last_edition_date_deprecated(self):
+        dn = FakeDataNode("foo")
+
+        with pytest.warns(DeprecationWarning):
+            dn.last_edition_date
+
+        assert dn.last_edit_date == dn.last_edition_date
+        dn.last_edition_date = datetime.now()
+        assert dn.last_edit_date == dn.last_edition_date

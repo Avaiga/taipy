@@ -226,7 +226,7 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     _Scheduler.submit_task(task)
 
     output = task.hello_world
-    output._last_edition_date = datetime.now() - timedelta(days=1, minutes=30)
+    output._last_edit_date = datetime.now() - timedelta(days=1, minutes=30)
     _DataManager()._set(output)
     assert _Scheduler._dispatcher._needs_to_run(task)
 

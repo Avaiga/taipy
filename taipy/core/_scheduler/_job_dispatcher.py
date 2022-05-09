@@ -53,14 +53,13 @@ class _JobDispatcher:
         else:
             job.skipped()
             _JobManager._set(job)
-            self.__unlock_edition_on_outputs(job)
+            self.__unlock_edit_on_outputs(job)
             self.__logger.info(f"job {job.id} is skipped.")
 
     @staticmethod
     def _needs_to_run(task: Task) -> bool:
         """
-        Returns True if the task outputs are in cache and if the output's last edition date is prior the input's last
-        edition date.
+        Returns True if the task has no output or if at least one input was modified since the latest run.
 
         Parameters:
              task (Task^): The task to run.
@@ -74,9 +73,9 @@ class _JobDispatcher:
             return True
         if len(task.input) == 0:
             return False
-        input_last_edition = max(_DataManager()._get(dn.id).last_edition_date for dn in task.input.values())
-        output_last_edition = min(_DataManager()._get(dn.id).last_edition_date for dn in task.output.values())
-        return input_last_edition > output_last_edition
+        input_last_edit = max(_DataManager()._get(dn.id).last_edit_date for dn in task.input.values())
+        output_last_edit = min(_DataManager()._get(dn.id).last_edit_date for dn in task.output.values())
+        return input_last_edit > output_last_edit
 
     @classmethod
     def _run_wrapped_function(cls, job_id: JobId, task: Task):
@@ -147,6 +146,6 @@ class _JobDispatcher:
         self._executor, self._nb_available_workers = self.__create(max_number_of_parallel_execution or 1)
 
     @staticmethod
-    def __unlock_edition_on_outputs(job):
+    def __unlock_edit_on_outputs(job):
         for dn in job.task.output.values():
-            dn.unlock_edition(job_id=job.id)
+            dn.unlock_edit(job_id=job.id)

@@ -128,9 +128,6 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
                 return entity
         return None
 
-    def _build_model(self, model_data: Dict) -> ModelType:
-        return self.model.from_dict(model_data)  # type: ignore
-
     def __search(self, attribute: str, value: str) -> Iterator[Entity]:
         return filter(lambda e: getattr(e, attribute, None) == value, self._load_all())
 

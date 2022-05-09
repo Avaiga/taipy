@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import itertools
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional, Type, Union
 
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
@@ -33,7 +33,7 @@ class _TaskManager(_Manager[Task]):
     __scheduler = None
 
     @classmethod
-    def _scheduler(cls) -> _AbstractScheduler:
+    def _scheduler(cls) -> Type[_AbstractScheduler]:
         if not cls.__scheduler:
             cls.__scheduler = _SchedulerFactory._build_scheduler()
         return cls.__scheduler

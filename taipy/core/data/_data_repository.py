@@ -67,11 +67,11 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
             data_node.storage_type(),
             data_node._name,
             data_node.parent_id,
-            data_node._last_edition_date.isoformat() if data_node._last_edition_date else None,
+            data_node._last_edit_date.isoformat() if data_node._last_edit_date else None,
             data_node._job_ids.data,
             data_node._validity_period.days if data_node._validity_period else None,
             data_node._validity_period.seconds if data_node._validity_period else None,
-            data_node._edition_in_progress,
+            data_node._edit_in_progress,
             properties,
         )
 
@@ -118,10 +118,10 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
             id=model.id,
             name=model.name,
             parent_id=model.parent_id,
-            last_edition_date=datetime.fromisoformat(model.last_edition_date) if model.last_edition_date else None,
+            last_edit_date=datetime.fromisoformat(model.last_edit_date) if model.last_edit_date else None,
             job_ids=model.job_ids,
             validity_period=validity_period,
-            edition_in_progress=model.edition_in_progress,
+            edit_in_progress=model.edit_in_progress,
             properties=model.data_node_properties,
         )
 

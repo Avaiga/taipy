@@ -9,17 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from collections import UserDict
+import warnings
 
 
-class _Properties(UserDict):
-    def __init__(self, parent, **kwargs):
-        super().__init__(**kwargs)
-        self.parent = parent
-
-    def __setitem__(self, key, value):
-        super(_Properties, self).__setitem__(key, value)
-        import taipy.core as tp
-
-        if hasattr(self, "parent"):
-            tp.set(self.parent)
+def _warn_deprecated(deprecated: str, suggest: str = None, stacklevel: int = 3) -> None:
+    category = DeprecationWarning
+    message = f"{deprecated} is deprecated."
+    if suggest:
+        message += f" Use {suggest} instead."
+    warnings.warn(message=message, category=category, stacklevel=stacklevel)

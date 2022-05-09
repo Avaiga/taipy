@@ -31,12 +31,12 @@ class PickleDataNode(DataNode):
         name (str): A user-readable name of this data node.
         parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
             `None`.
-        last_edition_date (datetime): The date and time of the last edition.
+        last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
             always up-to-date.
-        edition_in_progress (bool): True if a task computing the data node has been submitted
+        edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties.
             When creating a pickle data node, if the _properties_ dictionary contains a
@@ -58,10 +58,10 @@ class PickleDataNode(DataNode):
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         parent_id: Optional[str] = None,
-        last_edition_date: Optional[datetime] = None,
+        last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         validity_period: Optional[timedelta] = None,
-        edition_in_progress: bool = False,
+        edit_in_progress: bool = False,
         properties=None,
     ):
         if properties is None:
@@ -73,15 +73,15 @@ class PickleDataNode(DataNode):
             id,
             name,
             parent_id,
-            last_edition_date,
+            last_edit_date,
             job_ids,
             validity_period,
-            edition_in_progress,
+            edit_in_progress,
             **properties,
         )
         self.__pickle_file_path = self.__build_path()
-        if not self._last_edition_date and os.path.exists(self.__pickle_file_path):
-            self.unlock_edition()
+        if not self._last_edit_date and os.path.exists(self.__pickle_file_path):
+            self.unlock_edit()
         if default_value is not None and not os.path.exists(self.__pickle_file_path):
             self.write(default_value)
 
