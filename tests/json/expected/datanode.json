@@ -5,11 +5,11 @@
     "storage_type": "pickle",
     "name": "DATANODE_day_8c0595aa-2dcf-4080-aa78-2eebd7619c9b",
     "parent_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
-    "last_edition_date": null,
+    "last_edit_date": null,
     "job_ids": [],
     "validity_days": null,
     "validity_seconds": null,
-    "edition_in_progress": false,
+    "edit_in_progress": false,
     "data_node_properties": {
         "cacheable": false
     }
