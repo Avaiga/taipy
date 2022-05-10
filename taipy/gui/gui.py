@@ -121,9 +121,7 @@ class Gui:
         self,
         page: t.Optional[t.Union[str, Page]] = None,
         pages: t.Optional[dict] = None,
-        css_file: str = os.path.splitext(os.path.basename(__main__.__file__))[0]
-        if hasattr(__main__, "__file__")
-        else "Taipy",
+        css_file: t.Optional[str] = None,
         path_mapping: t.Optional[dict] = {},
         env_filename: t.Optional[str] = None,
         flask: t.Optional[Flask] = None,
@@ -172,6 +170,8 @@ class Gui:
         # Preserve server config for server initialization
         self._path_mapping = path_mapping
         self._flask = flask
+        if css_file is None:
+            css_file = os.path.splitext(os.path.basename(self.__frame.f_code.co_filename))[0] or "Taipy"
         self._css_file = css_file
 
         self._config = _Config()
