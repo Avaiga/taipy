@@ -190,7 +190,7 @@ class Gui:
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
 
-        # gui syncrhonous state variable
+        # gui synchronous state variable
         self.__modified_vars_update_var: t.Optional[t.Set] = None
 
         # Load default config
