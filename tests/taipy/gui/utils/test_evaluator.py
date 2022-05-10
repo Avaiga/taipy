@@ -17,7 +17,7 @@ from taipy.gui.utils.types import _TaipyNumber
 
 
 def test_unbind_variable_in_expression(gui: Gui):
-    gui.run(run_server=False)
+    gui.run(run_server=False, single_client=True)
     with warnings.catch_warnings(record=True) as records:
         gui._evaluate_expr("{x}")
         assert len(records) == 2
@@ -28,7 +28,7 @@ def test_unbind_variable_in_expression(gui: Gui):
 def test_evaluate_same_expression_multiple_times(gui: Gui):
     x = 10
     gui._set_frame(inspect.currentframe())
-    gui.run(run_server=False)
+    gui.run(run_server=False, single_client=True)
     s1 = gui._evaluate_expr("x + 10 = {x + 10}")
     s2 = gui._evaluate_expr("x + 10 = {x + 10}")
     assert s1 == s2
@@ -37,7 +37,7 @@ def test_evaluate_same_expression_multiple_times(gui: Gui):
 def test_evaluate_expressions_same_variable(gui: Gui):
     x = 10
     gui._set_frame(inspect.currentframe())
-    gui.run(run_server=False)
+    gui.run(run_server=False, single_client=True)
     s1 = gui._evaluate_expr("x + 10 = {x + 10}")
     s2 = gui._evaluate_expr("x = {x}")
     assert "tp_x" in s1 and "tp_x" in s2
