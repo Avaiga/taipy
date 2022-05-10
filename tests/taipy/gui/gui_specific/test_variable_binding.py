@@ -25,7 +25,7 @@ def test_variable_binding(helpers):
     z = "button label"
     gui = Gui()
     gui.add_page("test", Markdown("<|{x}|> | <|{y}|> | <|{z}|button|on_action=another_function|>"))
-    gui.run(run_server=False)
+    gui.run(run_server=False, single_client=True)
     client = gui._server.test_client()
     jsx = client.get("/taipy-jsx/test/").json["jsx"]
     for expected in ["<Button", f'defaultLabel="{z}"', "label={z}"]:

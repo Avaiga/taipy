@@ -39,7 +39,7 @@ class Helpers:
 
     @staticmethod
     def _test_control(gui: Gui, expected_values: t.Union[str, t.List]):
-        gui.run(run_server=False)
+        gui.run(run_server=False, single_client=True)
         client = gui._server.test_client()
         response = client.get("/taipy-jsx/test/")
         assert response.status_code == 200

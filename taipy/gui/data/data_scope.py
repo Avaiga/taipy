@@ -22,7 +22,8 @@ class _DataScopes:
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {}
         self.__scopes["global"] = SimpleNamespace()
-        self.__single_client = False
+        self.__single_client = True
+        self.__client_id: t.Optional[str] = None
 
     def set_single_client(self, value: bool) -> None:
         self.__single_client = value
@@ -31,11 +32,11 @@ class _DataScopes:
         return self.__single_client
 
     def get_scope(self) -> SimpleNamespace:
-        if self.__single_client or not request:
+        if self.__single_client:
             return self.__scopes["global"]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
-        client_id = getattr(request, "taipy_client_id", "")
-        if not client_id:
+        client_id = self.__client_id
+        if not client_id and request:
             client_id = request.args.get("client_id", "")
         if not client_id:
             warnings.warn("Empty session id, using global scope instead")
@@ -49,7 +50,10 @@ class _DataScopes:
 
     def _set_client_id(self, client_id: t.Optional[str]):
         if client_id:
-            setattr(request, "taipy_client_id", client_id)
+            self.__client_id = client_id
+
+    def _reset_client_id(self):
+        self.__client_id = None
 
     def get_all_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__scopes
@@ -57,7 +61,7 @@ class _DataScopes:
     def broadcast_data(self, name, value):
         if self.__single_client:
             return
-        if not hasattr(request, "taipy_client_id"):
+        if not self.__client_id:
             for _, v in self.__scopes.items():
                 if hasattr(v, name):
                     setattr(v, name, value)
