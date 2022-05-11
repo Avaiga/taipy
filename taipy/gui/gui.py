@@ -190,6 +190,9 @@ class Gui:
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
 
+        # gui synchronous state variable
+        self.__modified_vars_update_var: t.Optional[t.Set] = None
+
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
         self._config._load(default_config)
@@ -312,6 +315,9 @@ class Gui:
         if holder:
             var_name = holder.get_name()
         hash_expr = self.__evaluator.get_hash_from_expr(var_name)
+        # if the variable has been evaluated then skip updating to prevent infinite loop
+        if self.__modified_vars_update_var is not None and hash_expr in self.__modified_vars_update_var:
+            return
         modified_vars = {hash_expr}
         # Use custom attrsetter function to allow value binding for _MapDict
         if propagate:
@@ -321,12 +327,20 @@ class Gui:
                 modified_vars.update(self._re_evaluate_expr(var_name))
         elif holder:
             modified_vars.update(self._evaluate_holders(hash_expr))
+        send_var_list = False
+        if self.__modified_vars_update_var is None:
+            self.__modified_vars_update_var = modified_vars
+            send_var_list = True
+        else:
+            self.__modified_vars_update_var.update(modified_vars)
         self.__call_on_change(
             var_name,
             value.get() if isinstance(value, _TaipyBase) else value._dict if isinstance(value, _MapDict) else value,
             on_change,
         )
-        self.__send_var_list_update(list(modified_vars), var_name)
+        if send_var_list:
+            self.__send_var_list_update(list(self.__modified_vars_update_var), var_name)
+            self.__modified_vars_update_var = None
 
     def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         # TODO: what if _update_function changes 'var_name'... infinite loop?

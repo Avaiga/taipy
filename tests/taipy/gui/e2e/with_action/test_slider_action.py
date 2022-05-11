@@ -56,7 +56,7 @@ def test_slider_action_on_change(page: "Page", gui: Gui, helpers):
 
     def on_change(state, var, val):
         if var == "d.v2":
-            d = {"v1": 2 * val, "v2": val}
+            d = {"v1": 2 * val}
             state.d.update(d)
 
     page_md = """
