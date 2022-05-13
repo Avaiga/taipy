@@ -12,7 +12,7 @@
 import uuid
 from typing import Callable, Iterable, Optional
 
-from taipy.core.common._manager import _Manager
+from taipy.core._manager._manager import _Manager
 from taipy.core.common.alias import JobId
 from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_repository import _JobRepository

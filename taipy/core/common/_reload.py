@@ -18,11 +18,11 @@ def _get_manager(manager: str):
     from taipy.core.data._data_manager import _DataManager
     from taipy.core.job._job_manager import _JobManager
     from taipy.core.pipeline._pipeline_manager import _PipelineManager
-    from taipy.core.scenario._scenario_manager import _ScenarioManager
+    from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
     from taipy.core.task._task_manager import _TaskManager
 
     return {
-        "scenario": _ScenarioManager,
+        "scenario": _ScenarioManagerFactory._build_manager(),
         "pipeline": _PipelineManager,
         "data": _DataManager,
         "cycle": _CycleManager,

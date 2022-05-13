@@ -12,7 +12,7 @@
 import os
 from typing import Iterable, Optional, Union
 
-from taipy.core.common._manager import _Manager
+from taipy.core._manager._manager import _Manager
 from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
 from taipy.core.common.scope import Scope
 from taipy.core.config.data_node_config import DataNodeConfig

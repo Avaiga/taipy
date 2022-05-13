@@ -13,8 +13,8 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
+from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
-from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
@@ -90,11 +90,11 @@ class _CycleManager(_Manager[Cycle]):
 
     @classmethod
     def _get_owned_entities(cls, cycle: Cycle) -> _EntityIds:
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
         entity_ids = _EntityIds()
 
-        scenarios = _ScenarioManager._get_all_by_cycle(cycle)
+        scenarios = _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
 
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)

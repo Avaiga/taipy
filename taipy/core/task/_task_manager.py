@@ -12,10 +12,10 @@
 import itertools
 from typing import Callable, List, Optional, Type, Union
 
+from taipy.core._manager._manager import _Manager
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common._entity_ids import _EntityIds
-from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.config.task_config import TaskConfig

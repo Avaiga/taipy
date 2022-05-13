@@ -12,8 +12,8 @@
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
-from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.common.scope import Scope
 from taipy.core.config.pipeline_config import PipelineConfig

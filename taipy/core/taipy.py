@@ -12,6 +12,7 @@
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
+from taipy.core._manager._manager_factory import _ManagerFactory
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.config.config import Config
@@ -26,7 +27,7 @@ from taipy.core.job._job_manager import _JobManager
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
@@ -44,7 +45,7 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
     if isinstance(entity, Cycle):
         return _CycleManager._set(entity)
     if isinstance(entity, Scenario):
-        return _ScenarioManager._set(entity)
+        return _ScenarioManagerFactory._build_manager()._set(entity)
     if isinstance(entity, Pipeline):
         return _PipelineManager._set(entity)
     if isinstance(entity, Task):
@@ -64,7 +65,7 @@ def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
         force (bool): If True, the execution is forced even if the data nodes are in cache.
     """
     if isinstance(entity, Scenario):
-        return _ScenarioManager._submit(entity, force=force)
+        return _ScenarioManagerFactory._build_manager()._submit(entity, force=force)
     if isinstance(entity, Pipeline):
         return _PipelineManager._submit(entity, force=force)
     if isinstance(entity, Task):
@@ -92,7 +93,7 @@ def get(
     if entity_id.startswith(Cycle._ID_PREFIX):
         return _CycleManager._get(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
-        return _ScenarioManager._get(ScenarioId(entity_id))
+        return _ScenarioManagerFactory._build_manager()._get(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline._ID_PREFIX):
         return _PipelineManager._get(PipelineId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
@@ -133,7 +134,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     if entity_id.startswith(Cycle._ID_PREFIX):
         return _CycleManager._hard_delete(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
-        return _ScenarioManager._hard_delete(ScenarioId(entity_id))
+        return _ScenarioManagerFactory._build_manager()._hard_delete(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline._ID_PREFIX):
         return _PipelineManager._hard_delete(PipelineId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
@@ -156,13 +157,13 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
         List[Scenario^]: The list of scenarios filtered by cycle or tag.
     """
     if not cycle and not tag:
-        return _ScenarioManager._get_all()
+        return _ScenarioManagerFactory._build_manager()._get_all()
     if cycle and not tag:
-        return _ScenarioManager._get_all_by_cycle(cycle)
+        return _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
     if not cycle and tag:
-        return _ScenarioManager._get_all_by_tag(tag)
+        return _ScenarioManagerFactory._build_manager()._get_all_by_tag(tag)
     if cycle and tag:
-        cycles_scenarios = _ScenarioManager._get_all_by_cycle(cycle)
+        cycles_scenarios = _ScenarioManagerFactory._build_manager()()._get_all_by_cycle(cycle)
         return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
     return []
 
@@ -176,7 +177,7 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
         Optional[Scenario^]: The primary scenario of the cycle _cycle_.
             If the cycle has no primary scenario, this method returns None.
     """
-    return _ScenarioManager._get_primary(cycle)
+    return _ScenarioManagerFactory._build_manager()._get_primary(cycle)
 
 
 def get_primary_scenarios() -> List[Scenario]:
@@ -185,24 +186,24 @@ def get_primary_scenarios() -> List[Scenario]:
     Returns:
         List[Scenario^]: The list of all primary scenarios.
     """
-    return _ScenarioManager._get_primary_scenarios()
+    return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
 
 
 def set_primary(scenario: Scenario):
     """Promote a scenario as the primary scenario of its cycle.
-    
+
     If the cycle of _scenario_ already has a primary scenario, it is demoted and
     is no longer the primary scenario for its cycle.
 
     Parameters:
         scenario (Scenario^): The scenario to promote as _primary_.
     """
-    return _ScenarioManager._set_primary(scenario)
+    return _ScenarioManagerFactory._build_manager()._set_primary(scenario)
 
 
 def tag(scenario: Scenario, tag: str):
     """Add a tag to a scenario.
-    
+
     If the _scenario_'s cycle already has another scenario tagged with _tag_, then this other
     scenario is untagged.
 
@@ -210,7 +211,7 @@ def tag(scenario: Scenario, tag: str):
         scenario (Scenario^): The scenario to tag.
         tag (str): The tag to apply to the scenario.
     """
-    return _ScenarioManager._tag(scenario, tag)
+    return _ScenarioManagerFactory._build_manager()._tag(scenario, tag)
 
 
 def untag(scenario: Scenario, tag: str):
@@ -220,12 +221,12 @@ def untag(scenario: Scenario, tag: str):
         scenario (Scenario^): The scenario to remove the tag from.
         tag (str): The _tag_ to remove from _scenario_.
     """
-    return _ScenarioManager._untag(scenario, tag)
+    return _ScenarioManagerFactory._build_manager()._untag(scenario, tag)
 
 
 def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] = None):
     """Compare the data nodes of several scenarios.
-    
+
     You can specify which data node config identifier should the comparison be performed
     on.
 
@@ -245,12 +246,12 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
         NonExistingScenarioConfig^: The scenario config of the provided scenarios could not
             be found.
     """
-    return _ScenarioManager._compare(*scenarios, data_node_config_id=data_node_config_id)
+    return _ScenarioManagerFactory._build_manager()._compare(*scenarios, data_node_config_id=data_node_config_id)
 
 
 def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
     """Subscribe a function to be called on job status change.
-    
+
     The subscription is applied to all jobs created for the execution of _scenario_.
     If no scenario is provided, the subscription applies to all scenarios.
 
@@ -262,7 +263,7 @@ def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Opti
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _ScenarioManager._subscribe(callback, scenario)
+    return _ScenarioManagerFactory._build_manager()._subscribe(callback, scenario)
 
 
 def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -277,12 +278,12 @@ def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Op
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _ScenarioManager._unsubscribe(callback, scenario)
+    return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, scenario)
 
 
 def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
     """Subscribe a function to be called on job status change.
-    
+
     The subscription is applied to all jobs created for the execution of _pipeline_.
 
     Parameters:
@@ -392,7 +393,7 @@ def create_scenario(
     Returns:
         Scenario^: The new scenario.
     """
-    return _ScenarioManager._create(config, creation_date, name)
+    return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
 
 
 def create_pipeline(config: PipelineConfig) -> Pipeline:
@@ -408,7 +409,7 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
 
 def clean_all_entities() -> bool:
     """Delete all entities from the Taipy data folder.
-    
+
     !!! important
         Invoking this function is only recommended for development purposes.
 
@@ -422,7 +423,7 @@ def clean_all_entities() -> bool:
     _DataManager._delete_all()
     _TaskManager._delete_all()
     _PipelineManager._delete_all()
-    _ScenarioManager._delete_all()
+    _ScenarioManagerFactory._build_manager()._delete_all()
     _CycleManager._delete_all()
     _JobManager._delete_all()
     return True

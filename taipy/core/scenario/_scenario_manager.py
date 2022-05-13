@@ -13,8 +13,8 @@ import datetime
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
-from taipy.core.common._manager import _Manager
 from taipy.core.common.alias import ScenarioId
 from taipy.core.config.config import Config
 from taipy.core.config.scenario_config import ScenarioConfig

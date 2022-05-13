@@ -75,9 +75,9 @@ class Scenario(_Entity):
         return self.id
 
     def __setstate__(self, id):
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        sc = _ScenarioManager._get(id)
+        sc = tp.get(id)
         self.__dict__ = sc.__dict__
 
     @property  # type: ignore
@@ -216,9 +216,9 @@ class Scenario(_Entity):
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        return _ScenarioManager._subscribe(callback, self)
+        return tp.subscribe_scenario(callback, self)
 
     def unsubscribe(self, callback: Callable[[Scenario, Job], None]):
         """Unsubscribe a function that is called when the status of a `Job^` changes.
@@ -229,9 +229,9 @@ class Scenario(_Entity):
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        return _ScenarioManager._unsubscribe(callback, self)
+        return tp.unsubscribe_scenario(callback, self)
 
     def submit(self, force: bool = False):
         """Submit this scenario for execution.
@@ -241,32 +241,32 @@ class Scenario(_Entity):
         Parameters:
             force (bool): Force execution even if the data nodes are in cache.
         """
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        return _ScenarioManager._submit(self, force)
+        return tp.submit(self, force)
 
     def set_primary(self):
         """Promote the scenario as the primary scenario of its cycle.
-        
+
         If the cycle already has a primary scenario, it will be demoted, and it will no longer
         be primary for the cycle.
         """
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        return _ScenarioManager._set_primary(self)
+        return tp.set_primary(self)
 
     def add_tag(self, tag: str):
         """Add a tag to this scenario.
-        
+
         If the scenario's cycle already have another scenario tagged with _tag_ the other
         scenario will be untagged.
 
         Parameters:
             tag (str): The tag to add to this scenario.
         """
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        return _ScenarioManager._tag(self, tag)
+        return tp.tag(self, tag)
 
     def remove_tag(self, tag: str):
         """Remove a tag from this scenario.
@@ -274,6 +274,6 @@ class Scenario(_Entity):
         Parameters:
             tag (str): The tag to remove from the set of the scenario's tags.
         """
-        from taipy.core.scenario._scenario_manager import _ScenarioManager
+        import taipy.core as tp
 
-        return _ScenarioManager._untag(self, tag)
+        return tp.untag(self, tag)
