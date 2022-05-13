@@ -19,7 +19,7 @@ from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.job._job_manager import _JobManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 
 
 class _CycleManager(_Manager[Cycle]):
@@ -109,7 +109,7 @@ class _CycleManager(_Manager[Cycle]):
                         if data_node.parent_id in parent_ids:
                             entity_ids.data_node_ids.add(data_node.id)
 
-        jobs = _JobManager._get_all()
+        jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)

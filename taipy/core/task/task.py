@@ -115,6 +115,6 @@ class Task(_Entity):
                 change.
             force (bool): Force execution even if the data nodes are in cache.
         """
-        from taipy.core.task._task_manager import _TaskManager
+        from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
-        _TaskManager._submit(self, callbacks, force)
+        _TaskManagerFactory._build_manager()._submit(self, callbacks, force)

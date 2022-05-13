@@ -17,10 +17,10 @@ from taipy.core._repository import _FileSystemRepository
 from taipy.core.common import _utils
 from taipy.core.common.alias import CycleId, PipelineId
 from taipy.core.config.config import Config
-from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.exceptions.exceptions import NonExistingPipeline
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_model import _ScenarioModel
 from taipy.core.scenario.scenario import Scenario
@@ -70,8 +70,9 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
     @staticmethod
     def __to_pipelines(pipeline_ids) -> List[Pipeline]:
         pipelines = []
+        pipeline_manager = _PipelineManagerFactory._build_manager()
         for _id in pipeline_ids:
-            if pipeline := _PipelineManager._get(_id):
+            if pipeline := pipeline_manager._get(_id):
                 pipelines.append(pipeline)
             else:
                 raise NonExistingPipeline(_id)
@@ -79,7 +80,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
 
     @staticmethod
     def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
-        return _CycleManager._get(cycle_id) if cycle_id else None
+        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
 
     @staticmethod
     def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:

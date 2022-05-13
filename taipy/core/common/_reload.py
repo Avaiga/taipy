@@ -14,20 +14,20 @@ import functools
 
 @functools.lru_cache
 def _get_manager(manager: str):
-    from taipy.core.cycle._cycle_manager import _CycleManager
-    from taipy.core.data._data_manager import _DataManager
-    from taipy.core.job._job_manager import _JobManager
-    from taipy.core.pipeline._pipeline_manager import _PipelineManager
+    from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+    from taipy.core.data._data_manager_factory import _DataManagerFactory
+    from taipy.core.job._job_manager_factory import _JobManagerFactory
+    from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
     from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-    from taipy.core.task._task_manager import _TaskManager
+    from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
     return {
         "scenario": _ScenarioManagerFactory._build_manager(),
-        "pipeline": _PipelineManager,
-        "data": _DataManager,
-        "cycle": _CycleManager,
-        "job": _JobManager,
-        "task": _TaskManager,
+        "pipeline": _PipelineManagerFactory._build_manager(),
+        "data": _DataManagerFactory._build_manager(),
+        "cycle": _CycleManagerFactory._build_manager(),
+        "job": _JobManagerFactory._build_manager(),
+        "task": _TaskManagerFactory._build_manager(),
     }[manager]
 
 

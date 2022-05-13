@@ -76,16 +76,16 @@ class _Manager(Generic[EntityType]):
         """
         Deletes entities of multiple types.
         """
-        from taipy.core.cycle._cycle_manager import _CycleManager
-        from taipy.core.data._data_manager import _DataManager
-        from taipy.core.job._job_manager import _JobManager
-        from taipy.core.pipeline._pipeline_manager import _PipelineManager
+        from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+        from taipy.core.data._data_manager_factory import _DataManagerFactory
+        from taipy.core.job._job_manager_factory import _JobManagerFactory
+        from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
         from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-        from taipy.core.task._task_manager import _TaskManager
+        from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
-        _CycleManager._delete_many(_entity_ids.cycle_ids)
+        _CycleManagerFactory._build_manager()._delete_many(_entity_ids.cycle_ids)
         _ScenarioManagerFactory._build_manager()._delete_many(_entity_ids.scenario_ids)
-        _PipelineManager._delete_many(_entity_ids.pipeline_ids)
-        _TaskManager._delete_many(_entity_ids.task_ids)
-        _JobManager._delete_many(_entity_ids.job_ids)
-        _DataManager._delete_many(_entity_ids.data_node_ids)
+        _PipelineManagerFactory._build_manager()._delete_many(_entity_ids.pipeline_ids)
+        _TaskManagerFactory._build_manager()._delete_many(_entity_ids.task_ids)
+        _JobManagerFactory._build_manager()._delete_many(_entity_ids.job_ids)
+        _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)

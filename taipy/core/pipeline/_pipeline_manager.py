@@ -18,11 +18,11 @@ from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.common.scope import Scope
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.exceptions.exceptions import NonExistingPipeline
-from taipy.core.job._job_manager import _JobManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_repository import _PipelineRepository
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 
 class _PipelineManager(_Manager[Pipeline]):
@@ -63,8 +63,9 @@ class _PipelineManager(_Manager[Pipeline]):
     @classmethod
     def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         pipeline_id = Pipeline._new_id(pipeline_config.id)
+        task_manager = _TaskManagerFactory._build_manager()
         tasks = [
-            _TaskManager._get_or_create(t_config, scenario_id, pipeline_id) for t_config in pipeline_config.task_configs
+            task_manager._get_or_create(t_config, scenario_id, pipeline_id) for t_config in pipeline_config.task_configs
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
@@ -86,7 +87,9 @@ class _PipelineManager(_Manager[Pipeline]):
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
-        _TaskManager._scheduler().submit(pipeline, callbacks=pipeline_subscription_callback, force=force)
+        _TaskManagerFactory._build_manager()._scheduler().submit(
+            pipeline, callbacks=pipeline_subscription_callback, force=force
+        )
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:
@@ -108,7 +111,7 @@ class _PipelineManager(_Manager[Pipeline]):
             for data_node in task.data_nodes.values():
                 if data_node.parent_id == pipeline.id:
                     entity_ids.data_node_ids.add(data_node.id)
-        jobs = _JobManager._get_all()
+        jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)

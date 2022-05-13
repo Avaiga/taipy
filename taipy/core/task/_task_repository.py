@@ -15,7 +15,7 @@ from taipy.core._repository import _FileSystemRepository
 from taipy.core.common._utils import _load_fct
 from taipy.core.common.alias import TaskId
 from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.exceptions.exceptions import NonExistingDataNode
 from taipy.core.task._task_model import _TaskModel
 from taipy.core.task.task import Task
@@ -57,8 +57,9 @@ class _TaskRepository(_FileSystemRepository[_TaskModel, Task]):
     @staticmethod
     def __to_data_nodes(data_nodes_ids):
         data_nodes = []
+        data_manager = _DataManagerFactory._build_manager()
         for _id in data_nodes_ids:
-            if data_node := _DataManager._get(_id):
+            if data_node := data_manager._get(_id):
                 data_nodes.append(data_node)
             else:
                 raise NonExistingDataNode(_id)

@@ -253,11 +253,11 @@ class DataNode(_Entity):
             data (Any): The data to write to this data node.
             job_id (JobId^): An optional identifier of the writer.
         """
-        from taipy.core.data._data_manager import _DataManager
+        from taipy.core.data._data_manager_factory import _DataManagerFactory
 
         self._write(data)
         self.unlock_edit(job_id=job_id)
-        _DataManager._set(self)
+        _DataManagerFactory._build_manager()._set(self)
 
     def lock_edit(self):
         """Lock the edit of this data node.

@@ -296,14 +296,14 @@ def test_auto_set_and_reload(task):
 
 
 def test_subscribe_pipeline():
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._subscribe") as mck:
+    with mock.patch("taipy.core.subscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.subscribe(None)
         mck.assert_called_once_with(None, pipeline)
 
 
 def test_unsubscribe_pipeline():
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._unsubscribe") as mck:
+    with mock.patch("taipy.core.unsubscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.unsubscribe(None)
         mck.assert_called_once_with(None, pipeline)

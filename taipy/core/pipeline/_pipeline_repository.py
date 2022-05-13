@@ -18,7 +18,7 @@ from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
 from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 
 class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
@@ -68,8 +68,9 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
     @staticmethod
     def __to_tasks(task_ids):
         tasks = []
+        task_manager = _TaskManagerFactory._build_manager()
         for _id in task_ids:
-            if task := _TaskManager._get(_id):
+            if task := task_manager._get(_id):
                 tasks.append(task)
             else:
                 raise NonExistingTask(_id)

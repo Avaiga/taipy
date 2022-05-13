@@ -18,18 +18,18 @@ from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, Scen
 from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
-from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.cycle.cycle import Cycle
-from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.exceptions.exceptions import ModelNotFound
-from taipy.core.job._job_manager import _JobManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.task._task_manager import _TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 __logger = _TaipyLogger._get_logger()
@@ -43,15 +43,15 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
             entity to save.
     """
     if isinstance(entity, Cycle):
-        return _CycleManager._set(entity)
+        return _CycleManagerFactory._build_manager()._set(entity)
     if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._set(entity)
     if isinstance(entity, Pipeline):
-        return _PipelineManager._set(entity)
+        return _PipelineManagerFactory._build_manager()._set(entity)
     if isinstance(entity, Task):
-        return _TaskManager._set(entity)
+        return _TaskManagerFactory._build_manager()._set(entity)
     if isinstance(entity, DataNode):
-        return _DataManager._set(entity)
+        return _DataManagerFactory._build_manager()._set(entity)
 
 
 def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
@@ -67,9 +67,9 @@ def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
     if isinstance(entity, Scenario):
         return _ScenarioManagerFactory._build_manager()._submit(entity, force=force)
     if isinstance(entity, Pipeline):
-        return _PipelineManager._submit(entity, force=force)
+        return _PipelineManagerFactory._build_manager()._submit(entity, force=force)
     if isinstance(entity, Task):
-        return _TaskManager._submit(entity, force=force)
+        return _TaskManagerFactory._build_manager()._submit(entity, force=force)
 
 
 def get(
@@ -88,18 +88,18 @@ def get(
     Raises:
         ModelNotFound^: If _entity_id_ does not match a correct entity pattern.
     """
-    if entity_id.startswith(_JobManager._ID_PREFIX):
-        return _JobManager._get(JobId(entity_id))
+    if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
+        return _JobManagerFactory._build_manager()._get(JobId(entity_id))
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return _CycleManager._get(CycleId(entity_id))
+        return _CycleManagerFactory._build_manager()._get(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManagerFactory._build_manager()._get(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManager._get(PipelineId(entity_id))
+        return _PipelineManagerFactory._build_manager()._get(PipelineId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
-        return _TaskManager._get(TaskId(entity_id))
+        return _TaskManagerFactory._build_manager()._get(TaskId(entity_id))
     if entity_id.startswith(DataNode._ID_PREFIX):
-        return _DataManager._get(DataNodeId(entity_id))
+        return _DataManagerFactory._build_manager()._get(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -109,7 +109,7 @@ def get_tasks() -> List[Task]:
     Returns:
         List[Task^]: The list of tasks.
     """
-    return _TaskManager._get_all()
+    return _TaskManagerFactory._build_manager()._get_all()
 
 
 def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
@@ -129,18 +129,19 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     Raises:
         ModelNotFound^: No entity corresponds to _entity_id_.
     """
-    if entity_id.startswith(_JobManager._ID_PREFIX):
-        return _JobManager._delete(_JobManager._get(JobId(entity_id)))  # type: ignore
+    if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
+        job_manager = _JobManagerFactory._build_manager()
+        return job_manager._delete(job_manager._get(JobId(entity_id)))  # type: ignore
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return _CycleManager._hard_delete(CycleId(entity_id))
+        return _CycleManagerFactory._build_manager()._hard_delete(CycleId(entity_id))
     if entity_id.startswith(Scenario._ID_PREFIX):
         return _ScenarioManagerFactory._build_manager()._hard_delete(ScenarioId(entity_id))
     if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManager._hard_delete(PipelineId(entity_id))
+        return _PipelineManagerFactory._build_manager()._hard_delete(PipelineId(entity_id))
     if entity_id.startswith(Task._ID_PREFIX):
-        return _TaskManager._hard_delete(TaskId(entity_id))
+        return _TaskManagerFactory._build_manager()._hard_delete(TaskId(entity_id))
     if entity_id.startswith(DataNode._ID_PREFIX):
-        return _DataManager._delete(DataNodeId(entity_id))
+        return _DataManagerFactory._build_manager()._delete(DataNodeId(entity_id))
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
@@ -294,7 +295,7 @@ def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Opti
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _PipelineManager._subscribe(callback, pipeline)
+    return _PipelineManagerFactory._build_manager()._subscribe(callback, pipeline)
 
 
 def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -308,7 +309,7 @@ def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Op
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _PipelineManager._unsubscribe(callback, pipeline)
+    return _PipelineManagerFactory._build_manager()._unsubscribe(callback, pipeline)
 
 
 def get_pipelines() -> List[Pipeline]:
@@ -317,7 +318,7 @@ def get_pipelines() -> List[Pipeline]:
     Returns:
         List[Pipeline^]: The list of all pipelines.
     """
-    return _PipelineManager._get_all()
+    return _PipelineManagerFactory._build_manager()._get_all()
 
 
 def get_jobs() -> List[Job]:
@@ -326,7 +327,7 @@ def get_jobs() -> List[Job]:
     Returns:
         List[Job^]: The list of all jobs.
     """
-    return _JobManager._get_all()
+    return _JobManagerFactory._build_manager()._get_all()
 
 
 def delete_job(job: Job, force=False):
@@ -339,12 +340,12 @@ def delete_job(job: Job, force=False):
     Raises:
         JobNotDeletedException^: If the job is not finished.
     """
-    return _JobManager._delete(job, force)
+    return _JobManagerFactory._build_manager()._delete(job, force)
 
 
 def delete_jobs():
     """Delete all jobs."""
-    return _JobManager._delete_all()
+    return _JobManagerFactory._build_manager()._delete_all()
 
 
 def get_latest_job(task: Task) -> Optional[Job]:
@@ -356,7 +357,7 @@ def get_latest_job(task: Task) -> Optional[Job]:
         Optional[Job^]: The latest job created from _task_. This is None if no job has been
             created from _task_.
     """
-    return _JobManager._get_latest(task)
+    return _JobManagerFactory._build_manager()._get_latest(task)
 
 
 def get_data_nodes() -> List[DataNode]:
@@ -365,7 +366,7 @@ def get_data_nodes() -> List[DataNode]:
     Returns:
         List[DataNode^]: The list of all data nodes.
     """
-    return _DataManager._get_all()
+    return _DataManagerFactory._build_manager()._get_all()
 
 
 def get_cycles() -> List[Cycle]:
@@ -374,7 +375,7 @@ def get_cycles() -> List[Cycle]:
     Returns:
         List[Cycle^]: The list of all cycles.
     """
-    return _CycleManager._get_all()
+    return _CycleManagerFactory._build_manager()._get_all()
 
 
 def create_scenario(
@@ -404,7 +405,7 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Returns:
         Pipeline^: The new pipeline.
     """
-    return _PipelineManager._get_or_create(config)
+    return _PipelineManagerFactory._build_manager()._get_or_create(config)
 
 
 def clean_all_entities() -> bool:
@@ -420,10 +421,10 @@ def clean_all_entities() -> bool:
         __logger.warning("Please set 'clean_entities_enabled' to True to clean all entities.")
         return False
 
-    _DataManager._delete_all()
-    _TaskManager._delete_all()
-    _PipelineManager._delete_all()
+    _DataManagerFactory._build_manager()._delete_all()
+    _TaskManagerFactory._build_manager()._delete_all()
+    _PipelineManagerFactory._build_manager()._delete_all()
     _ScenarioManagerFactory._build_manager()._delete_all()
-    _CycleManager._delete_all()
-    _JobManager._delete_all()
+    _CycleManagerFactory._build_manager()._delete_all()
+    _JobManagerFactory._build_manager()._delete_all()
     return True

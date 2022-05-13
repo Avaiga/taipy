@@ -16,10 +16,10 @@ from typing import Any, List
 from taipy.core._scheduler._executor._synchronous import _Synchronous
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
-from taipy.core.data._data_manager import _DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.exceptions.exceptions import DataNodeWritingError
-from taipy.core.job._job_manager import _JobManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task
 
@@ -45,14 +45,14 @@ class _JobDispatcher:
             if job.force:
                 self.__logger.info(f"job {job.id} is forced to be executed.")
             job.running()
-            _JobManager._set(job)
+            _JobManagerFactory._build_manager()._set(job)
             self._nb_available_workers -= 1
             future = self._executor.submit(self._run_wrapped_function, job.id, job.task)
             future.add_done_callback(self.__release_worker)
             future.add_done_callback(partial(self.__update_status, job))
         else:
             job.skipped()
-            _JobManager._set(job)
+            _JobManagerFactory._build_manager()._set(job)
             self.__unlock_edit_on_outputs(job)
             self.__logger.info(f"job {job.id} is skipped.")
 
@@ -66,20 +66,21 @@ class _JobDispatcher:
         Returns:
              True if the task needs to run. False otherwise.
         """
+        data_manager = _DataManagerFactory._build_manager()
         if len(task.output) == 0:
             return True
-        are_outputs_in_cache = all(_DataManager()._get(dn.id)._is_in_cache for dn in task.output.values())
+        are_outputs_in_cache = all(data_manager._get(dn.id)._is_in_cache for dn in task.output.values())
         if not are_outputs_in_cache:
             return True
         if len(task.input) == 0:
             return False
-        input_last_edit = max(_DataManager()._get(dn.id).last_edit_date for dn in task.input.values())
-        output_last_edit = min(_DataManager()._get(dn.id).last_edit_date for dn in task.output.values())
+        input_last_edit = max(data_manager._get(dn.id).last_edit_date for dn in task.input.values())
+        output_last_edit = min(data_manager._get(dn.id).last_edit_date for dn in task.output.values())
         return input_last_edit > output_last_edit
 
     @classmethod
     def _run_wrapped_function(cls, job_id: JobId, task: Task):
-        """
+        """)
         Reads inputs, execute function, and write outputs.
 
         Parameters:
@@ -103,23 +104,25 @@ class _JobDispatcher:
     @staticmethod
     def __update_status(job: Job, ft):
         job.update_status(ft)
-        _JobManager._set(job)
+        _JobManagerFactory._build_manager()._set(job)
 
     @classmethod
     def __read_inputs(cls, inputs: List[DataNode]) -> List[Any]:
-        return [_DataManager._get(dn.id).read_or_raise() for dn in inputs]
+        data_manager = _DataManagerFactory._build_manager()
+        return [data_manager._get(dn.id).read_or_raise() for dn in inputs]
 
     @classmethod
     def __write_data(cls, outputs: List[DataNode], results, job_id: JobId):
+        data_manager = _DataManagerFactory._build_manager()
         try:
             if outputs:
                 _results = cls.__extract_results(outputs, results)
                 exceptions = []
                 for res, dn in zip(_results, outputs):
                     try:
-                        data_node = _DataManager._get(dn.id)
+                        data_node = data_manager._get(dn.id)
                         data_node.write(res, job_id=job_id)
-                        _DataManager._set(data_node)
+                        data_manager._set(data_node)
                     except Exception as e:
                         exceptions.append(DataNodeWritingError(f"Error writing in datanode id {dn.id}: {e}"))
                 return exceptions

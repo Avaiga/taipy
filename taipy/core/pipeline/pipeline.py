@@ -65,9 +65,9 @@ class Pipeline(_Entity):
         return self.id
 
     def __setstate__(self, id):
-        from taipy.core.pipeline._pipeline_manager import _PipelineManager
+        import taipy.core as tp
 
-        p = _PipelineManager._get(id)
+        p = tp.get(id)
         self.__dict__ = p.__dict__
 
     @property  # type: ignore
@@ -174,9 +174,9 @@ class Pipeline(_Entity):
         Note:
             Notification will be available only for jobs created after this subscription.
         """
-        from taipy.core.pipeline._pipeline_manager import _PipelineManager
+        import taipy.core as tp
 
-        return _PipelineManager._subscribe(callback, self)
+        return tp.subscribe_pipeline(callback, self)
 
     def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
         """Unsubscribe a function that is called when the status of a `Job^` changes.
@@ -186,9 +186,9 @@ class Pipeline(_Entity):
         Note:
             The function will continue to be called for ongoing jobs.
         """
-        from taipy.core.pipeline._pipeline_manager import _PipelineManager
+        import taipy.core as tp
 
-        return _PipelineManager._unsubscribe(callback, self)
+        return tp.unsubscribe_pipeline(callback, self)
 
     def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
         """Submit the pipeline for execution.
@@ -200,6 +200,6 @@ class Pipeline(_Entity):
                 change.
             force (bool): Force execution even if the data nodes are in cache.
         """
-        from taipy.core.pipeline._pipeline_manager import _PipelineManager
+        from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 
-        return _PipelineManager._submit(self, callbacks, force)
+        return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force)
