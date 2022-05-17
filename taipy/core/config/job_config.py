@@ -33,13 +33,7 @@ class JobConfig:
     _DEFAULT_MODE = "standalone"
 
     _MODE_TO_MODULE: Dict[str, str] = {
-        "airflow": "taipy.airflow",
         "enterprise": "taipy.enterprise",
-    }
-
-    _MODE_TO_SCHEDULER_PATH: Dict[str, str] = {
-        "airflow": ".scheduler",
-        "enterprise": ".core.scheduler.scheduler",
     }
 
     def __init__(self, mode: str = None, **properties):
@@ -88,7 +82,6 @@ class JobConfig:
     def _get_config_cls(cls, mode: str) -> Type[_JobModeConfig]:
         if mode == cls._DEFAULT_MODE:
             return StandaloneConfig
-
         module = cls._MODE_TO_MODULE.get(mode, None)
         if not module or not util.find_spec(module):
             raise DependencyNotInstalled(mode)
@@ -109,9 +102,3 @@ class JobConfig:
     def _create_config(cls, config_cls: Type[_JobModeConfig], **properties):
         default_config = config_cls._DEFAULT_CONFIG
         return {**default_config, **properties}
-
-    def _mode_to_module(self):
-        return self._MODE_TO_MODULE[self.mode]
-
-    def _mode_to_scheduler_path(self):
-        return self._MODE_TO_MODULE[self.mode] + self._MODE_TO_SCHEDULER_PATH[self.mode]

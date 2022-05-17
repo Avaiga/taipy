@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+
 class LoadingError(Exception):
     """Raised if an error occurs while loading the configuration file."""
 
@@ -133,7 +134,7 @@ class MultiplePipelineFromSameConfigWithSameParent(Exception):
 
 class ModelNotFound(Exception):
     """Raised when trying to fetch a non-existent model.
-    
+
     This exception can be raised by `taipy.get()^` and `taipy.delete()^`.
     """
 
@@ -150,7 +151,7 @@ class NonExistingScenario(Exception):
 
 class NonExistingScenarioConfig(Exception):
     """Raised if a requested scenario configuration is not known by the Scenario Manager.
-    
+
     This exception can be raised by `taipy.compare_scenarios()^`.
     """
 
@@ -168,23 +169,23 @@ class DeletingPrimaryScenario(Exception):
 
 class DifferentScenarioConfigs(Exception):
     """Raised if scenario comparison is requested on scenarios with different scenario configs.
-    
+
     This exception can be raised by `taipy.compare_scenarios()^`.
     """
 
 
 class InsufficientScenarioToCompare(Exception):
     """Raised if too few scenarios are requested to be compared.
-    
+
     Scenario comparison need at least two scenarios to compare.
-    
+
     This exception can be raised by `taipy.compare_scenarios()^`.
     """
 
 
 class NonExistingComparator(Exception):
     """Raised if a scenario comparator does not exist.
-        
+
     This exception can be raised by `taipy.compare_scenarios()^`.
     """
 
@@ -219,3 +220,7 @@ class NonExistingTaskConfig(Exception):
 
 class MultipleTaskFromSameConfigWithSameParent(Exception):
     """Raised if there are multiple tasks from the same task configuration and the same parent identifier."""
+
+
+class ModeNotAvailable(Exception):
+    """Raised if the mode in JobConfig is not supported."""
