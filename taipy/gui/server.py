@@ -34,7 +34,6 @@ if t.TYPE_CHECKING:
 
 class _Server:
 
-    __RE_JSX_RENDER_ROUTE = re.compile(r"/taipy-jsx/(.*)/")
     __RE_OPENING_CURLY = re.compile(r"([^\"])(\{)")
     __RE_CLOSING_CURLY = re.compile(r"(\})([^\"])")
     __OPENING_CURLY = r"\1&#x7B;"
@@ -154,22 +153,22 @@ class _Server:
     def _direct_render_json(self, data):
         return jsonify(data)
 
-    def _render_page(self) -> t.Any:
+    def _render_page(self, page_name: str) -> t.Any:
         page = None
-        render_path_name = _Server.__RE_JSX_RENDER_ROUTE.match(request.path).group(1)  # type: ignore
         # Get page instance
         for page_i in self._gui._config.pages:
-            if page_i._route == render_path_name:
+            if page_i._route == page_name:
                 page = page_i
+                break
         # try partials
         if page is None:
-            page = self._gui._get_partial(render_path_name)
+            page = self._gui._get_partial(page_name)
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         page.render(self._gui)
         if (
-            render_path_name == self._root_page_name
+            page_name == self._root_page_name
             and page._rendered_jsx is not None
             and "<PageContent" not in page._rendered_jsx
         ):
@@ -234,7 +233,7 @@ class _Server:
         if debug and not is_running_from_reloader():
             # Check that the port is not already opened
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            result = sock.connect_ex((host_value,port))
+            result = sock.connect_ex((host_value, port))
             sock.close()
             if result == 0:
                 raise ConnectionError(f"Port {port} is already opened on {host_value}. You have another server application running on the same port.")

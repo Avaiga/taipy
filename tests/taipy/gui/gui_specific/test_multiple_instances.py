@@ -26,7 +26,7 @@ def test_multiple_instance():
 
 
 def assert_multiple_instance(client, expected_value):
-    response = client.get("/taipy-jsx/TaiPy_root_page/")
+    response = client.get("/taipy-jsx/TaiPy_root_page")
     response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
     assert response.status_code == 200
     assert isinstance(response_data, dict)

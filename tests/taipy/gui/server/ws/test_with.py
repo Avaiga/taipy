@@ -28,7 +28,7 @@ def test_sending_messages_in_group(gui: Gui, helpers):
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
     sid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test/?client_id={sid}")
+    flask_client.get(f"/taipy-jsx/test?client_id={sid}")
     assert gui._bindings()._get_all_scopes()[sid].name == "World!"  # type: ignore
     assert gui._bindings()._get_all_scopes()[sid].btn_id == "button1"  # type: ignore
 
