@@ -1173,7 +1173,7 @@ class Gui:
         pages_bp.add_url_rule("/taipy-jsx/<path:page_name>", view_func=self._server._render_page)
 
         # server URL Rule for flask rendered react-router
-        pages_bp.add_url_rule("/taipy-init/", view_func=self.__init_route)
+        pages_bp.add_url_rule("/taipy-init", view_func=self.__init_route)
 
         # Register Flask Blueprint if available
         for bp in self._flask_blueprint:
