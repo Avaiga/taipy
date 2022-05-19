@@ -27,7 +27,7 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
-def _get_columns_dict(
+def _get_columns_dict( # noqa: C901
     value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
     col_types: t.Optional[t.Dict[str, str]] = None,
