@@ -76,6 +76,7 @@ def test_override_default_config_with_code_config_including_env_variable_values(
     with mock.patch.dict(os.environ, {"ENV_VAR": "foo"}):
         with pytest.raises(InconsistentEnvVariableError):
             Config.configure_global_app(clean_entities_enabled="ENV[ENV_VAR]")
+            Config.global_config.clean_entities_enabled
 
 
 def test_override_default_configuration_with_file_configuration():

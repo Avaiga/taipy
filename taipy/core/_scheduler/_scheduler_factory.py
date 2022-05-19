@@ -35,5 +35,5 @@ class _SchedulerFactory:
                 scheduler = _Scheduler
         else:
             raise ModeNotAvailable
-        scheduler.initialize()
-        return scheduler
+        scheduler.initialize()  # type: ignore
+        return scheduler  # type: ignore

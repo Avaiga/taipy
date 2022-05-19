@@ -82,3 +82,5 @@ def test_task_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "plop", "BAR": "baz"}):
         Config.configure_task("task_name", print, input_config, output_config, prop="ENV[BAR]")
         assert Config.tasks["task_name"].prop == "baz"
+        assert Config.tasks["task_name"].properties["prop"] == "baz"
+        assert Config.tasks["task_name"]._properties["prop"] == "ENV[BAR]"

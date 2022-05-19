@@ -213,8 +213,8 @@ class DataNode(_Entity):
 
     def __getattr__(self, attribute_name):
         protected_attribute_name = _validate_id(attribute_name)
-        if protected_attribute_name in self.properties:
-            return self.properties[protected_attribute_name]
+        if protected_attribute_name in self._properties:
+            return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
 
     @classmethod

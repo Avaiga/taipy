@@ -75,15 +75,15 @@ custom = "custom property"
 default_data = "dn1"
 
 [DATA_NODE.dn2]
-storage_type = "in_memory"
+storage_type = "ENV[FOO]"
 scope = "SCENARIO"
 cacheable = "False:bool"
 custom = "default_custom_prop"
 foo = "bar"
 default_data = "dn2"
-baz = "qux"
-quux = "True:bool"
-corge = [ "grault", "garply", "17:int", "3.0:float",]
+baz = "ENV[QUX]"
+quux = "ENV[QUUZ]:bool"
+corge = [ "grault", "ENV[GARPLY]", "ENV[WALDO]:int", "3.0:float",]
 
 [TASK.default]
 inputs = []
@@ -113,7 +113,9 @@ frequency = "QUARTERLY"
 owner = "Raymond Kopa"
     """.strip()
     tf = NamedTemporaryFile()
-    with mock.patch.dict(os.environ, {"QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}):
+    with mock.patch.dict(
+        os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
+    ):
         Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_job_executions(mode="standalone")
         Config.configure_default_data_node(storage_type="in_memory", custom="default_custom_prop")
@@ -122,7 +124,7 @@ owner = "Raymond Kopa"
         )
         dn2_cfg_v2 = Config.configure_data_node(
             "dn2",
-            storage_type="in_memory",
+            storage_type="ENV[FOO]",
             foo="bar",
             default_data="dn2",
             baz="ENV[QUX]",

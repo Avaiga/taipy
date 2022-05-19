@@ -19,6 +19,15 @@ from taipy.core.config.global_app_config import GlobalAppConfig
 from taipy.core.exceptions.exceptions import InconsistentEnvVariableError
 
 
+def test_scenario_config_with_env_variable_value():
+    with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
+        Config.configure_global_app(root_folder="ENV[FOO]", storage_folder="ENV[BAZ]")
+        assert Config.global_config.root_folder == "bar"
+        assert Config.global_config._root_folder == "ENV[FOO]"
+        assert Config.global_config.storage_folder == "qux"
+        assert Config.global_config._storage_folder == "ENV[BAZ]"
+
+
 def test_clean_entities_enabled_default():
     Config.configure_global_app()
     assert Config.global_config.clean_entities_enabled is GlobalAppConfig._DEFAULT_CLEAN_ENTITIES_ENABLED

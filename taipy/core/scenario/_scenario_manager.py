@@ -91,7 +91,7 @@ class _ScenarioManager(_Manager[Scenario]):
             else None
         )
         is_primary_scenario = len(cls._get_all_by_cycle(cycle)) == 0 if cycle else False
-        props = config.properties.copy()
+        props = config._properties.copy()
         if name:
             props["name"] = name
         scenario = Scenario(

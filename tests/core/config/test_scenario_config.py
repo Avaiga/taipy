@@ -118,6 +118,8 @@ def test_scenario_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "bar"}):
         Config.configure_scenario("scenario_name", [pipeline1_config, pipeline2_config], prop="ENV[FOO]")
         assert Config.scenarios["scenario_name"].prop == "bar"
+        assert Config.scenarios["scenario_name"].properties["prop"] == "bar"
+        assert Config.scenarios["scenario_name"]._properties["prop"] == "ENV[FOO]"
 
 
 def test_scenario_create_from_tasks():

@@ -52,7 +52,7 @@ class _DataManager(_Manager[DataNode]):
     @classmethod
     def __create(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
         try:
-            props = data_node_config.properties.copy()
+            props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
                 config_id=data_node_config.id,

@@ -12,6 +12,7 @@
 import os
 import re
 
+from taipy.core.common._properties import _Properties
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
 from taipy.core.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
@@ -29,6 +30,8 @@ class _ConfigTemplateHandler:
         if isinstance(template, list):
             return [cls._replace_template(item, type, required, default) for item in template]
         if isinstance(template, dict):
+            return {str(k): cls._replace_template(v, type, required, default) for k, v in template.items()}
+        if isinstance(template, _Properties):
             return {str(k): cls._replace_template(v, type, required, default) for k, v in template.items()}
         return cls._replace_template(template, type, required, default)
 

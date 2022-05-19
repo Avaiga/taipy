@@ -31,17 +31,25 @@ class PipelineConfig:
 
     def __init__(self, id: str, tasks: Union[TaskConfig, List[TaskConfig]] = None, **properties):
         self.id = _validate_id(id)
-        self.properties = properties
+        self._properties = properties
         if tasks:
             self._tasks = [tasks] if isinstance(tasks, TaskConfig) else copy(tasks)
         else:
             self._tasks = []
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        return self.properties.get(item)
+        return _tpl._replace_templates(self._properties.get(item))
 
     def __copy__(self):
-        return PipelineConfig(self.id, copy(self._tasks), **copy(self.properties))
+        return PipelineConfig(self.id, copy(self._tasks), **copy(self._properties))
+
+    @property
+    def properties(self):
+        return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
+
+    @properties.setter  # type: ignore
+    def properties(self, val):
+        self._properties = val
 
     @classmethod
     def default_config(cls, id):
@@ -52,7 +60,7 @@ class PipelineConfig:
         return self._tasks
 
     def _to_dict(self):
-        return {self._TASK_KEY: self._tasks, **self.properties}
+        return {self._TASK_KEY: self._tasks, **self._properties}
 
     @classmethod
     def _from_dict(cls, id: str, config_as_dict: Dict[str, Any], task_configs: Dict[str, TaskConfig]):
@@ -60,7 +68,7 @@ class PipelineConfig:
         config.id = _validate_id(id)
         if tasks := config_as_dict.pop(cls._TASK_KEY, None):
             config._tasks = [task_configs[task_id] for task_id in tasks if task_id in task_configs]
-        config.properties = config_as_dict
+        config._properties = config_as_dict
         return config
 
     def _update(self, config_as_dict, default_pipeline_cfg=None):
@@ -71,6 +79,4 @@ class PipelineConfig:
         )
         if self._tasks is None and default_pipeline_cfg:
             self._tasks = default_pipeline_cfg._tasks
-        self.properties.update(config_as_dict)
-        for k, v in self.properties.items():
-            self.properties[k] = _tpl._replace_templates(v)
+        self._properties.update(config_as_dict)

@@ -23,3 +23,8 @@ class _Properties(UserDict):
 
         if hasattr(self, "parent"):
             tp.set(self.parent)
+
+    def __getitem__(self, key):
+        from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
+
+        return _tpl._replace_templates(super(_Properties, self).__getitem__(key))

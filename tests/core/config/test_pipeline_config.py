@@ -73,3 +73,5 @@ def test_pipeline_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "bar"}):
         Config.configure_pipeline("pipeline_name", [task1_config, task2_config], prop="ENV[FOO]")
         assert Config.pipelines["pipeline_name"].prop == "bar"
+        assert Config.pipelines["pipeline_name"].properties["prop"] == "bar"
+        assert Config.pipelines["pipeline_name"]._properties["prop"] == "ENV[FOO]"

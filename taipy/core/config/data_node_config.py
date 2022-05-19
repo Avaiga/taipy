@@ -51,17 +51,41 @@ class DataNodeConfig:
 
     def __init__(self, id: str, storage_type: str = None, scope: Scope = None, **properties):
         self.id = _validate_id(id)
-        self.storage_type = storage_type
-        self.scope = scope
-        self.properties = properties
-        if self.properties.get(self._IS_CACHEABLE_KEY) is None:
-            self.properties[self._IS_CACHEABLE_KEY] = self._DEFAULT_IS_CACHEABLE_VALUE
+        self._storage_type = storage_type
+        self._scope = scope
+        self._properties = properties
+        if self._properties.get(self._IS_CACHEABLE_KEY) is None:
+            self._properties[self._IS_CACHEABLE_KEY] = self._DEFAULT_IS_CACHEABLE_VALUE
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        return self.properties.get(item)
+        return _tpl._replace_templates(self._properties.get(item))
 
     def __copy__(self):
-        return DataNodeConfig(self.id, self.storage_type, self.scope, **copy(self.properties))
+        return DataNodeConfig(self.id, self._storage_type, self._scope, **copy(self._properties))
+
+    @property
+    def storage_type(self):
+        return _tpl._replace_templates(self._storage_type)
+
+    @storage_type.setter  # type: ignore
+    def storage_type(self, val):
+        self._storage_type = val
+
+    @property
+    def properties(self):
+        return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
+
+    @properties.setter  # type: ignore
+    def properties(self, val):
+        self._properties = val
+
+    @property
+    def scope(self):
+        return _tpl._replace_templates(self._scope)
+
+    @scope.setter  # type: ignore
+    def scope(self, val):
+        self._scope = val
 
     @classmethod
     def default_config(cls, id):
@@ -69,31 +93,27 @@ class DataNodeConfig:
 
     def _to_dict(self):
         as_dict = {}
-        if self.storage_type is not None:
-            as_dict[self._STORAGE_TYPE_KEY] = self.storage_type
-        if self.scope is not None:
-            as_dict[self._SCOPE_KEY] = self.scope
-        as_dict.update(self.properties)
+        if self._storage_type is not None:
+            as_dict[self._STORAGE_TYPE_KEY] = self._storage_type
+        if self._scope is not None:
+            as_dict[self._SCOPE_KEY] = self._scope
+        as_dict.update(self._properties)
         return as_dict
 
     @classmethod
     def _from_dict(cls, id: str, config_as_dict: Dict[str, Any]):
         config = DataNodeConfig(id)
         config.id = _validate_id(id)
-        config.storage_type = config_as_dict.pop(cls._STORAGE_TYPE_KEY, None)
-        config.scope = config_as_dict.pop(cls._SCOPE_KEY, None)
-        config.properties = config_as_dict
+        config._storage_type = config_as_dict.pop(cls._STORAGE_TYPE_KEY, None)
+        config._scope = config_as_dict.pop(cls._SCOPE_KEY, None)
+        config._properties = config_as_dict
         return config
 
     def _update(self, config_as_dict, default_dn_cfg=None):
-        self.storage_type = config_as_dict.pop(self._STORAGE_TYPE_KEY, self.storage_type) or default_dn_cfg.storage_type
-        self.storage_type = _tpl._replace_templates(self.storage_type)
-        self.scope = config_as_dict.pop(self._SCOPE_KEY, self.scope) or default_dn_cfg.scope
-        self.scope = _tpl._replace_templates(
-            config_as_dict.pop(self._SCOPE_KEY, self.scope) or default_dn_cfg.scope, Scope
+        self._storage_type = (
+            config_as_dict.pop(self._STORAGE_TYPE_KEY, self._storage_type) or default_dn_cfg.storage_type
         )
-        self.properties.update(config_as_dict)
+        self._scope = config_as_dict.pop(self._SCOPE_KEY, self._scope) or default_dn_cfg.scope
+        self._properties.update(config_as_dict)
         if default_dn_cfg:
-            self.properties = {**default_dn_cfg.properties, **self.properties}
-        for k, v in self.properties.items():
-            self.properties[k] = _tpl._replace_templates(v)
+            self._properties = {**default_dn_cfg.properties, **self._properties}

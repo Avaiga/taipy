@@ -73,7 +73,7 @@ class _PipelineManager(_Manager[Pipeline]):
         if pipelines_from_parent := cls._repository._get_by_config_and_parent_ids(pipeline_config.id, parent_id):
             return pipelines_from_parent
 
-        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config.properties), tasks, pipeline_id, parent_id)
+        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)
         cls._set(pipeline)
         return pipeline
 

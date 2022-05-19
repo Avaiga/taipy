@@ -47,51 +47,80 @@ class GlobalAppConfig:
         clean_entities_enabled: Union[bool, str] = None,
         **properties,
     ):
-        self.root_folder = root_folder
-        self.storage_folder = storage_folder
-        self.clean_entities_enabled = clean_entities_enabled
-        self.properties = properties
+        self._root_folder = root_folder
+        self._storage_folder = storage_folder
+        self._clean_entities_enabled = clean_entities_enabled
+        self._properties = properties
+
+    @property
+    def storage_folder(self):
+        return _tpl._replace_templates(self._storage_folder)
+
+    @storage_folder.setter  # type: ignore
+    def storage_folder(self, val):
+        self._storage_folder = val
+
+    @property
+    def root_folder(self):
+        return _tpl._replace_templates(self._root_folder)
+
+    @root_folder.setter  # type: ignore
+    def root_folder(self, val):
+        self._root_folder = val
+
+    @property
+    def clean_entities_enabled(self):
+        return _tpl._replace_templates(
+            self._clean_entities_enabled, type=bool, required=False, default=self._DEFAULT_CLEAN_ENTITIES_ENABLED
+        )
+
+    @clean_entities_enabled.setter  # type: ignore
+    def clean_entities_enabled(self, val):
+        self._clean_entities_enabled = val
+
+    @property
+    def properties(self):
+        return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
+
+    @properties.setter  # type: ignore
+    def properties(self, val):
+        self._properties = val
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        return self.properties.get(item)
+        return _tpl._replace_templates(self._properties.get(item))
 
     @classmethod
     def default_config(cls) -> GlobalAppConfig:
         config = GlobalAppConfig()
-        config.root_folder = cls._DEFAULT_ROOT_FOLDER
-        config.storage_folder = cls._DEFAULT_STORAGE_FOLDER
-        config.clean_entities_enabled = cls._CLEAN_ENTITIES_ENABLED_TEMPLATE
+        config._root_folder = cls._DEFAULT_ROOT_FOLDER
+        config._storage_folder = cls._DEFAULT_STORAGE_FOLDER
+        config._clean_entities_enabled = cls._CLEAN_ENTITIES_ENABLED_TEMPLATE
         return config
 
     def _to_dict(self):
         as_dict = {}
-        if self.root_folder:
-            as_dict[self._ROOT_FOLDER_KEY] = self.root_folder
-        if self.storage_folder:
-            as_dict[self._STORAGE_FOLDER_KEY] = self.storage_folder
-        if self.clean_entities_enabled is not None:
-            as_dict[self._CLEAN_ENTITIES_ENABLED_KEY] = self.clean_entities_enabled
-        as_dict.update(self.properties)
+        if self._root_folder:
+            as_dict[self._ROOT_FOLDER_KEY] = self._root_folder
+        if self._storage_folder:
+            as_dict[self._STORAGE_FOLDER_KEY] = self._storage_folder
+        if self._clean_entities_enabled is not None:
+            as_dict[self._CLEAN_ENTITIES_ENABLED_KEY] = self._clean_entities_enabled
+        as_dict.update(self._properties)
         return as_dict
 
     @classmethod
     def _from_dict(cls, config_as_dict: Dict[str, Any]):
         config = GlobalAppConfig()
-        config.root_folder = config_as_dict.pop(cls._ROOT_FOLDER_KEY, None)
-        config.storage_folder = config_as_dict.pop(cls._STORAGE_FOLDER_KEY, None)
-        config.clean_entities_enabled = config_as_dict.pop(cls._CLEAN_ENTITIES_ENABLED_KEY, None)
-        config.properties = config_as_dict
+        config._root_folder = config_as_dict.pop(cls._ROOT_FOLDER_KEY, None)
+        config._storage_folder = config_as_dict.pop(cls._STORAGE_FOLDER_KEY, None)
+        config._clean_entities_enabled = config_as_dict.pop(cls._CLEAN_ENTITIES_ENABLED_KEY, None)
+        config._properties = config_as_dict
         return config
 
     def _update(self, config_as_dict):
-        self.root_folder = _tpl._replace_templates(config_as_dict.pop(self._ROOT_FOLDER_KEY, self.root_folder))
-        self.storage_folder = _tpl._replace_templates(config_as_dict.pop(self._STORAGE_FOLDER_KEY, self.storage_folder))
-        self.clean_entities_enabled = _tpl._replace_templates(
-            config_as_dict.pop(self._CLEAN_ENTITIES_ENABLED_KEY, self.clean_entities_enabled),
-            type=bool,
-            required=False,
-            default=self._DEFAULT_CLEAN_ENTITIES_ENABLED,
+        self._root_folder = config_as_dict.pop(self._ROOT_FOLDER_KEY, self._root_folder)
+        self._storage_folder = config_as_dict.pop(self._STORAGE_FOLDER_KEY, self._storage_folder)
+        self._clean_entities_enabled = config_as_dict.pop(
+            self._CLEAN_ENTITIES_ENABLED_KEY, self._clean_entities_enabled
         )
-        self.properties.update(config_as_dict)
-        for k, v in self.properties.items():
-            self.properties[k] = _tpl._replace_templates(v)
+        self._properties.update(config_as_dict)

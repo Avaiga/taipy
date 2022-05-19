@@ -44,7 +44,7 @@ class ScenarioConfig:
         **properties,
     ):
         self.id = _validate_id(id)
-        self.properties = properties
+        self._properties = properties
         if pipelines:
             self._pipelines = [pipelines] if isinstance(pipelines, PipelineConfig) else copy(pipelines)
         else:
@@ -59,11 +59,19 @@ class ScenarioConfig:
                     self.comparators[_validate_id(k)].append(v)
 
     def __getattr__(self, item: str) -> Optional[Any]:
-        return self.properties.get(item)
+        return _tpl._replace_templates(self._properties.get(item))
 
     def __copy__(self):
         comp = None if self.comparators is None else self.comparators
-        return ScenarioConfig(self.id, copy(self._pipelines), self.frequency, copy(comp), **copy(self.properties))
+        return ScenarioConfig(self.id, copy(self._pipelines), self.frequency, copy(comp), **copy(self._properties))
+
+    @property
+    def properties(self):
+        return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
+
+    @properties.setter  # type: ignore
+    def properties(self, val):
+        self._properties = val
 
     @classmethod
     def default_config(cls, id):
@@ -74,7 +82,7 @@ class ScenarioConfig:
         return self._pipelines
 
     def _to_dict(self):
-        return {self._PIPELINE_KEY: self._pipelines, self._FREQUENCY_KEY: self.frequency, **self.properties}
+        return {self._PIPELINE_KEY: self._pipelines, self._FREQUENCY_KEY: self.frequency, **self._properties}
 
     @classmethod
     def _from_dict(cls, id: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
@@ -84,7 +92,7 @@ class ScenarioConfig:
             config._pipelines = [pipeline_configs[p_id] for p_id in pipeline_ids if p_id in pipeline_configs]
         config.frequency = config_as_dict.pop(cls._FREQUENCY_KEY, None)
         config.comparators = config_as_dict.pop(cls._COMPARATOR_KEY, dict())
-        config.properties = config_as_dict
+        config._properties = config_as_dict
         return config
 
     def _update(self, config_as_dict, default_scenario_cfg=None):
@@ -99,9 +107,7 @@ class ScenarioConfig:
         self.comparators = config_as_dict.pop(self._COMPARATOR_KEY, self.comparators)
         if self.comparators is None and default_scenario_cfg:
             self.comparators = default_scenario_cfg.comparators
-        self.properties.update(config_as_dict)
-        for k, v in self.properties.items():
-            self.properties[k] = _tpl._replace_templates(v)
+        self._properties.update(config_as_dict)
 
     def add_comparator(self, dn_config_id: str, comparator: Callable):
         self.comparators[dn_config_id].append(comparator)

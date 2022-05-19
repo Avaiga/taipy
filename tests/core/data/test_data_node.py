@@ -8,7 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import os
 from datetime import datetime, timedelta
 from time import sleep
 from unittest import mock
@@ -587,3 +587,11 @@ class TestDataNode:
         assert dn.last_edit_date == dn.last_edition_date
         dn.last_edition_date = datetime.now()
         assert dn.last_edit_date == dn.last_edition_date
+
+    def test_data_node_with_env_variable_value_not_stored(self):
+        dn_config = Config.configure_data_node("A", prop="ENV[FOO]")
+        with mock.patch.dict(os.environ, {"FOO": "bar"}):
+            dn = _DataManager._get_or_create(dn_config)
+            assert dn._properties.data["prop"] == "ENV[FOO]"
+            assert dn.properties["prop"] == "bar"
+            assert dn.prop == "bar"

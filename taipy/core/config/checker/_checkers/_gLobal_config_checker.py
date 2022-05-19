@@ -27,12 +27,12 @@ class _GlobalConfigChecker(_ConfigChecker):
         return self._collector
 
     def _check_clean_entities_enabled_type(self, global_config: GlobalAppConfig):
-        value = global_config.clean_entities_enabled
+        value = global_config._clean_entities_enabled
 
-        if isinstance(global_config.clean_entities_enabled, str):
+        if isinstance(global_config._clean_entities_enabled, str):
             try:
                 value = tpl._replace_templates(
-                    global_config.clean_entities_enabled,
+                    global_config._clean_entities_enabled,
                     type=bool,
                     required=False,
                     default=GlobalAppConfig._DEFAULT_CLEAN_ENTITIES_ENABLED,
