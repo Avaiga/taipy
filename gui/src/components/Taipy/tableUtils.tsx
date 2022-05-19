@@ -243,11 +243,11 @@ export const EditableCell = (props: EditableCellProps) => {
                     </>
                 }
             />
-        ) : (
+        ) : onDeletion ? (
             <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
                 <DeleteIcon />
             </IconButton>
-        )
+        ) : null
     ) : onValidation ? (
         <Box sx={cellBoxSx}>
             {formatValue(value, colDesc, formatConfig)}

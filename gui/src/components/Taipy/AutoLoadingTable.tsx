@@ -225,7 +225,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         if (props.columns) {
             try {
                 const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                addDeleteColumn(!!(active && editable && tp_onDelete), columns);
+                addDeleteColumn(!!(active && editable && (tp_onAdd || tp_onDelete)), columns);
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
                 const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                     if (columns[col].style) {
@@ -243,7 +243,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             }
         }
         return [[], {}, {}, hNan];
-    }, [active, editable, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
+    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
