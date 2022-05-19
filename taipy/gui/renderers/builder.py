@@ -477,7 +477,20 @@ class _Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[:5] if t])
-        columns = _get_columns_dict(data, list(columns), col_types)
+        # add optionnal column if any
+        markers = [t[11] or ({"color": t[7]} if t[7] else None) for t in traces]
+        opt_cols = set()
+        for m in markers:
+            if isinstance(m, (dict, _MapDict)):
+                color = m.get("color") 
+                if isinstance(color, str) and color not in columns:
+                    opt_cols.add(color)
+                size = m.get("size")
+                if isinstance(size, str) and size not in columns:
+                    opt_cols.add(size)
+                    
+        # Validate the column names
+        columns = _get_columns_dict(data, list(columns), col_types, opt_columns = opt_cols)
         # set default columns if not defined
         icols = [[c for c in [_get_col_from_indexed(c, i) for c in columns.keys()] if c] for i in range(len(traces))]
 
@@ -499,7 +512,7 @@ class _Builder:
                 "types": [t[6] for t in traces],
                 "xaxis": [t[8] for t in traces],
                 "yaxis": [t[9] for t in traces],
-                "markers": [t[11] or ({"color": t[7]} if t[7] else None) for t in traces],
+                "markers": markers,
                 "selectedMarkers": [t[12] or ({"color": t[10]} if t[10] else None) for t in traces],
                 "traces": [[reverse_cols.get(c, c) for c in [t[0], t[1], t[2]]] for t in traces],
                 "orientations": [t[13] for t in traces],
