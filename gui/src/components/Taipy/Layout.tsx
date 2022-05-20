@@ -20,16 +20,14 @@ const EXPR_COLS = /\D*(\d)+[^\d*]*\*[^\d*]*(\d)+\D*/;
 
 const expandCols = (cols: string) => {
     const m = cols.match(EXPR_COLS);
-    if (m) {
-         if (m.length > 2) {
-            const n1 = parseInt(m[1], 10);
-            const n2 = parseInt(m[2], 10);
-            if (n1 > n2) {
-                return Array.from(Array(n1), () => m[2]).join(" ");
-            } else {
-                return Array.from(Array(n2), () => m[1]).join(" ");
-            }
-         }
+    if (m && m.length > 2) {
+        const n1 = parseInt(m[1], 10);
+        const n2 = parseInt(m[2], 10);
+        if (n1 > n2) {
+            return Array.from(Array(n1), () => m[2]).join(" ");
+        } else {
+            return Array.from(Array(n2), () => m[1]).join(" ");
+        }
     }
     return cols;
 }
