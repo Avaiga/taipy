@@ -24,6 +24,11 @@ describe("Layout Component", () => {
         const elt = getByText("foo");
         expect(elt.parentElement).toHaveStyle({"grid-template-columns": "1fr 1fr 1fr 1fr"})
     })
+    it("handles the concise column expression", async () => {
+        const {getByText} = render(<Layout gap="1rem" columns="1*3" ><div>foo</div></Layout>);
+        const elt = getByText("foo");
+        expect(elt.parentElement).toHaveStyle({"grid-template-columns": "1fr 1fr 1fr"})
+    })
     it("displays the default value for mobile", async () => {
         Object.defineProperty(window, "matchMedia", {
             writable: true,
