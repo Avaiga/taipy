@@ -24,26 +24,26 @@ with open("README.md") as readme_file:
 
 
 requirements = [
-    "flask>=2.1",
-    "flask-cors>=3.0.10",
-    "flask-socketio>=5.1.1",
-    "markdown>=3.3.4",
-    "pandas>=1.4",
-    "python-dotenv>=0.19",
-    "pytz>=2021.3",
-    "simple-websocket>=0.3",
-    "tzlocal>=3.0",
-    "backports.zoneinfo>=0.2.1;python_version<'3.9'",
-    "flask-talisman>=1.0",
+    "flask>=2.1,<3.0",
+    "flask-cors>=3.0.10,<4.0",
+    "flask-socketio>=5.1.1,<6.0",
+    "markdown>=3.3.4,<4.0",
+    "pandas>=1.4,<2.0",
+    "python-dotenv>=0.19,<0.21",
+    "pytz>=2021.3,<2022.2",
+    "simple-websocket>=0.3,<0.6",
+    "tzlocal>=3.0,<5.0",
+    "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
+    "flask-talisman>=1.0,<2.0",
 ]
 
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
-    "ngrok": ["pyngrok>=5.1"],
-    "image": ["python-magic>=0.4.24;platform_system!='Windows'", "python-magic-bin>=0.4.14;platform_system=='Windows'"],
+    "ngrok": ["pyngrok>=5.1,<6.0"],
+    "image": ["python-magic>=0.4.24,<0.5;platform_system!='Windows'", "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'"],
     "rdp": ["rdp>=0.8"],
-    "arrow": ["pyarrow>=7.0"],
+    "arrow": ["pyarrow>=7.0,<9.0"],
 }
 
 
