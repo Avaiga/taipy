@@ -17,6 +17,7 @@ import {
     PlotMouseEvent,
     PlotSelectionEvent,
     ScatterLine,
+    Color,
 } from "plotly.js";
 import Skeleton from "@mui/material/Skeleton";
 import Box from "@mui/material/Box";
@@ -84,16 +85,19 @@ const getColNameFromIndexed = (colName: string): string => {
 };
 
 const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number): (string | number)[] => {
+    return getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
+};
+
+const getValueFromCol = (values: TraceValueType | undefined, col: string): (string | number)[] => {
     if (values) {
-        const confValue = getArrayValue(arr, idx) as unknown as string;
-        if (confValue) {
+        if (col) {
             if (Array.isArray(values)) {
-                const reRes = indexedData.exec(confValue);
+                const reRes = indexedData.exec(col);
                 if (reRes && reRes.length > 2) {
-                    return values[parseInt(reRes[1], 10) || 0][reRes[2] || confValue] || [];
+                    return values[parseInt(reRes[1], 10) || 0][reRes[2] || col] || [];
                 }
             } else {
-                return values[confValue] || [];
+                return values[col] || [];
             }
         }
     }
@@ -272,8 +276,17 @@ const Chart = (props: ChartProp) => {
                 }
             } else {
                 ret.marker = getArrayValue(config.markers, idx, {});
-                if ((ret.marker as PlotMarker).opacity !== undefined && ret.type === "bar") {
-                    ret.opacity = (ret.marker as PlotMarker).opacity;
+                if ((ret.marker as PlotMarker).color !== undefined && typeof (ret.marker as PlotMarker).color === "string") {
+                    const arr = getValueFromCol(datum, (ret.marker as PlotMarker).color as string);
+                    if (arr.length) {
+                        (ret.marker as PlotMarker).color = arr as Color[];
+                    }
+                }
+                if ((ret.marker as PlotMarker).size !== undefined && typeof (ret.marker as PlotMarker).size === "string") {
+                    const arr = getValueFromCol(datum, (ret.marker as PlotMarker).size as unknown as string);
+                    if (arr.length) {
+                        (ret.marker as PlotMarker).size = arr as number[];
+                    }
                 }
                 const xs = getValue(datum, trace, 0);
                 const ys = getValue(datum, trace, 1);

@@ -32,10 +32,11 @@ label,indexed(str),,"The label for the indicated trace.
 This is used when the mouse hovers over a trace."
 name,indexed(str),,The name of the indicated trace.
 selected,dynamic(list[int]|str),,List of the selected point indices.
-color,indexed(str),,The color of the indicated trace.
+color,indexed(str),,The color of the indicated trace (or a column name for scattered).
 selected_color,indexed(str),,The color of the selected points for the indicated trace.
 marker,"indexed(dict[str, any])",,"The type of markers used for the indicated trace.
-See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-marker"">marker</a> for details."
+See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-marker"">marker</a> for details.
+Color and size can be column name."
 line,"indexed(str|dict[str, any])",,"The configuration of the line used for the indicated trace.
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-line"">line</a> for details. if str then dash??"
 selected_marker,"indexed(dict[str, any])",,"The type of markers used for selected points in the indicated trace.

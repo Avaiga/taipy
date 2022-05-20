@@ -27,12 +27,13 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
-def _get_columns_dict(
+def _get_columns_dict( # noqa: C901
     value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
     col_types: t.Optional[t.Dict[str, str]] = None,
     date_format: t.Optional[str] = None,
     number_format: t.Optional[str] = None,
+    opt_columns: t.Optional[t.Set[str]] = None,
 ):
     if col_types is None:
         return None
@@ -50,6 +51,11 @@ def _get_columns_dict(
             else:
                 coldict[col] = {"index": idx}
                 idx += 1
+        if opt_columns is not None:
+            for col in opt_columns:
+                if col in col_types_keys:
+                    coldict[col] = {"index": idx}
+                    idx += 1
         columns = coldict
     if isinstance(columns, _MapDict):
         columns = columns._dict
