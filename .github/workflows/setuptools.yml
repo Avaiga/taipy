@@ -5,6 +5,8 @@ on:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
+  schedule:
+    - cron: "0 8 * * *"
 
 jobs:
   standard-packages:
@@ -12,7 +14,7 @@ jobs:
     strategy:
       matrix:
         python-versions: [ '3.8', '3.9', '3.10' ]
-        os: [ubuntu-18.04]
+        os: [ ubuntu-18.04, windows-latest, macos-latest ]
 
     runs-on: ${{ matrix.os }}
 
@@ -22,10 +24,10 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Install Taipy without dependencies
+      - name: Install Taipy
         run: |
           pip install .
-          rm -r taipy  # Removal of Taipy code to ensure the use of the installed package
+          rm -r taipy
 
           pip install pytest pytest-mock
           pytest
@@ -35,7 +37,7 @@ jobs:
     strategy:
       matrix:
         python-versions: [ '3.8', '3.9', '3.10' ]
-        os: [ ubuntu-18.04 ]
+        os: [ ubuntu-18.04, windows-latest, macos-latest ]
 
     runs-on: ${{ matrix.os }}
 
@@ -45,14 +47,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Add an ssh key for cloning
-        run: |
-          mkdir -p ~/.ssh
-          ls ~/.ssh
-          echo "${{ secrets.SSH_KEY_TAIPY_AIRFLOW }}" > ~/.ssh/id_ed25519
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/id_ed25519
-
       - name: Add optionals dependencies
         run: |
           # Extract optionals packages before installing them
@@ -60,7 +54,7 @@ jobs:
           echo "[print(k) for k in extras_require.keys()]" >> setup_packages.py
           python setup_packages.py | xargs -I% bash -c "pip install .[%]"
 
-          rm -r taipy  # Removal of Taipy code to ensure the use of the installed package.
+          rm -r taipy
 
           # Run test with optionals packages installed
           pip install pytest pytest-mock

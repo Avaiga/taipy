@@ -19,17 +19,17 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "networkx>=2.6",
-    "openpyxl>=3.0.3",
-    "pandas>=1.4",
-    "sqlalchemy>=1.4",
-    "toml>=0.10",
+    "networkx>=2.6,<3.0",
+    "openpyxl>=3.0.3,<4.0",
+    "pandas>=1.4,<2.0",
+    "sqlalchemy>=1.4,<2.0",
+    "toml>=0.10,<0.11",
 ]
 
 test_requirements = ["pytest>=3.8"]
 
 extras_require = {
-    "mssql": ["pyodbc>=4"],
+    "mssql": ["pyodbc>=4,<4.1"],
 }
 
 setup(
