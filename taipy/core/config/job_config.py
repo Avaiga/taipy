@@ -16,6 +16,7 @@ from taipy.core.common._utils import _load_fct
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.config.job_mode_config import _JobModeConfig
 from taipy.core.config.standalone_config import StandaloneConfig
+
 from taipy.core.exceptions.exceptions import DependencyNotInstalled
 
 
@@ -31,9 +32,10 @@ class JobConfig:
 
     _MODE_KEY = "mode"
     _DEFAULT_MODE = "standalone"
+    _ENTERPRISE_MODE = "enterprise"
 
     _MODE_TO_MODULE: Dict[str, str] = {
-        "enterprise": "taipy.enterprise",
+        _ENTERPRISE_MODE: "taipy.enterprise.core.config",
     }
 
     def __init__(self, mode: str = None, **properties):
@@ -92,6 +94,11 @@ class JobConfig:
     def is_standalone(self) -> bool:
         """True if the config is set to standalone execution"""
         return self.mode == self._DEFAULT_MODE
+
+    @property
+    def is_enterprise(self) -> bool:
+        """True if the config is set to standalone execution"""
+        return self.mode == self._ENTERPRISE_MODE
 
     @property
     def is_multiprocess(self) -> bool:
