@@ -12,26 +12,27 @@ interface LayoutProps {
     gap?: string;
 }
 
-const baseSx = { display: "grid" };
+const EXPR_COLS = /(\d+)\s*\*\s*(\d+)([^\s]*)/;
+const NON_UNIT_COLS = /(\d+)\s+/g;
 
-const HAS_TEXT = /[^\d\s]/;
-const SPLIT_COLS = /\D/;
+const expandCols = (cols: string) => {
+    let m = cols.match(EXPR_COLS);
+    while (m && m.length > 3) {
+        const n1 = parseInt(m[1], 10);
+        cols = cols.replace(m[0],  Array.from(Array(n1), () => m && (m[2] + m[3])).join(" "));
+        m = cols.match(EXPR_COLS);
+    }
+    return (cols + " ").replaceAll(NON_UNIT_COLS, (v, g) => g + "fr ").trim();
+}
 
 const Layout = (props: LayoutProps) => {
     const { columns = "1 1", gap = "0.5rem", columns_Mobile_ = "1" } = props;
     const isMobile = useIsMobile();
     const sx = useMemo(() => {
-        const cols = isMobile ? columns_Mobile_ : columns;
         return {
-            ...baseSx,
+            display: "grid",
             gap: gap,
-            gridTemplateColumns: HAS_TEXT.test(cols)
-                ? cols
-                : cols
-                      .split(SPLIT_COLS)
-                      .filter((t) => t)
-                      .map((t) => t + "fr")
-                      .join(" "),
+            gridTemplateColumns: expandCols(isMobile ? columns_Mobile_ : columns),
         };
     }, [columns, columns_Mobile_, gap, isMobile]);
 
