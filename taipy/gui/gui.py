@@ -1033,7 +1033,17 @@ class Gui:
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
 
-    def run(self, run_server: bool = True, run_in_thread: bool = False, ssl_context: t.Optional[t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal['adhoc']]] = None, **kwargs) -> t.Optional[Flask]:
+    def _set_state(self, state: State):
+        if isinstance(state, State):
+            self.__state = state
+
+    def run(
+        self,
+        run_server: bool = True,
+        run_in_thread: bool = False,
+        ssl_context: t.Optional[t.Union[ssl.SSLContext, t.Tuple[str, t.Optional[str]], t.Literal["adhoc"]]] = None,
+        **kwargs,
+    ) -> t.Optional[Flask]:
         """
         Starts the server that delivers pages to Web clients.
 
@@ -1120,7 +1130,8 @@ class Gui:
         else:
             self.__locals_bind = self.__frame.f_locals
 
-        self.__state = State(self, self.__locals_bind.keys())
+        if self.__state is None:
+            self.__state = State(self, self.__locals_bind.keys())
 
         if _is_in_notebook():
             # to allow gui.state.x in notebook mode
@@ -1196,7 +1207,7 @@ class Gui:
             use_reloader=app_config["use_reloader"],
             flask_log=app_config["flask_log"],
             run_in_thread=run_in_thread,
-            ssl_context=ssl_context
+            ssl_context=ssl_context,
         )
 
     def stop(self):

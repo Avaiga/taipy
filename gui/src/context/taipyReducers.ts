@@ -27,6 +27,8 @@ enum Types {
     SetMenu = "SET_MENU",
     DownloadFile = "DOWNLOAD_FILE",
     Partial = "PARTIAL",
+    SetToken = "SET_TOKEN",
+    RemoveToken = "REMOVE_TOKEN",
 }
 
 export interface TaipyState {
@@ -44,6 +46,7 @@ export interface TaipyState {
     id: string;
     menu: MenuProps;
     download?: FileDownloadProps;
+    token?: string;
 }
 
 export interface TaipyBaseAction {
@@ -116,6 +119,10 @@ interface TaipyPartialAction extends TaipyBaseAction {
     create: boolean;
 }
 
+interface TaipySetTokenAction extends TaipyBaseAction {
+    token: string;
+}
+
 export interface FormatConfig {
     timeZone: string;
     forceTZ: boolean;
@@ -163,6 +170,7 @@ export const INITIAL_STATE: TaipyState = {
         : undefined,
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
+    token: localStorage && localStorage.getItem("token") || undefined,
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -191,6 +199,10 @@ const messageToAction = (message: WsMessage) => {
             return createDownloadAction(message as unknown as FileDownloadProps);
         } else if (message.type === "PR") {
             return createPartialAction((message as unknown as Record<string, string>).name, true);
+        } else if (message.type === "ST") {
+            return createSetTokenAction((message as unknown as Record<string, string>).token)
+        } else if (message.type === "RT") {
+            return createRemoveTokenAction()
         }
     }
     return {} as TaipyBaseAction;
@@ -201,7 +213,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
         // Websocket confirm successful initialization
         socket.on("connect", () => {
             const id = getLocalStorageValue("TaipyClientId", "");
-            sendWsMessage(socket, "ID", "TaipyClientId", id, id);
+            sendWsMessage(socket, "ID", "TaipyClientId", id, id, "");
             dispatch({ type: Types.SocketConnected });
         });
         // handle message data from backend
@@ -359,6 +371,15 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             return { ...state, data: data };
         }
+        case Types.SetToken: {
+            const stAction = baseAction as TaipySetTokenAction;
+            localStorage && localStorage.setItem("token", stAction.token);
+            return {...state, token: stAction.token}
+        }
+        case Types.RemoveToken: {
+            localStorage && localStorage.removeItem("token");
+            return {...state, token: undefined}
+        }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -366,16 +387,16 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const msgAction = baseAction as TaipyMultipleMessageAction;
             return msgAction.actions.reduce((pState, act) => taipyReducer(pState, act), state);
         case Types.SendUpdate:
-            sendWsMessage(state.socket, "U", action.name, action.payload, state.id, action.propagate);
+            sendWsMessage(state.socket, "U", action.name, action.payload, state.id, state.token, action.propagate);
             break;
         case Types.Action:
-            sendWsMessage(state.socket, "A", action.name, action.payload, state.id);
+            sendWsMessage(state.socket, "A", action.name, action.payload, state.id, state.token);
             break;
         case Types.RequestDataUpdate:
-            sendWsMessage(state.socket, "DU", action.name, action.payload, state.id);
+            sendWsMessage(state.socket, "DU", action.name, action.payload, state.id, state.token);
             break;
         case Types.RequestUpdate:
-            sendWsMessage(state.socket, "RU", action.name, action.payload, state.id);
+            sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, state.token);
             break;
     }
     return state;
@@ -590,12 +611,21 @@ export const createPartialAction = (name: string, create: boolean): TaipyPartial
     create: create,
 });
 
+export const createSetTokenAction = (token: string): TaipySetTokenAction => ({
+    type: Types.SetToken,
+    token: token,
+})
+
+export const createRemoveTokenAction = (): TaipyBaseAction => ({
+    type: Types.RemoveToken,
+})
+
 const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
     type: Types.MultipleMessages,
     actions: messages.map(messageToAction),
 });
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR";
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ST" | "RT";
 
 interface WsMessage {
     type: WsMessageType;
@@ -603,6 +633,7 @@ interface WsMessage {
     payload: Record<string, unknown> | unknown;
     propagate: boolean;
     client_id: string;
+    token: string;
 }
 
 const sendWsMessage = (
@@ -611,8 +642,9 @@ const sendWsMessage = (
     name: string,
     payload: Record<string, unknown> | unknown,
     id: string,
-    propagate = true
+    token: string | undefined,
+    propagate = true,
 ): void => {
-    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate, client_id: id };
+    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate, client_id: id, token: token || ""};
     socket?.emit("message", msg);
 };
