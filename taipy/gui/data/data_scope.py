@@ -52,6 +52,9 @@ class _DataScopes:
         if client_id:
             self.__client_id = client_id
 
+    def _get_client_id(self):
+        return self.__client_id
+
     def _reset_client_id(self):
         self.__client_id = None
 

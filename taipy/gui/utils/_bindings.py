@@ -61,6 +61,9 @@ class _Bindings:
     def _set_client_id(self, message: dict):
         self.__scopes._set_client_id(message.get("client_id"))
 
+    def _get_client_id(self):
+        return self.__scopes._get_client_id()
+
     def _reset_client_id(self):
         self.__scopes._reset_client_id()
 
