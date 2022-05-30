@@ -16,6 +16,8 @@ interface IndicatorProps extends TaipyBaseProps, TaipyHoverProps {
     defaultDisplay: number | string;
     format?: string;
     orientation?: string;
+    width?: string;
+    height?: string;
 }
 
 const getValue = (value: number, min: number, max: number) => {
@@ -25,7 +27,7 @@ const getValue = (value: number, min: number, max: number) => {
 };
 
 const Indicator = (props: IndicatorProps) => {
-    const { min = 0, max = 100, display, defaultDisplay, format, value, defaultValue = 0 } = props;
+    const { min = 0, max = 100, display, defaultDisplay, format, value, defaultValue = 0, width, height } = props;
 
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
@@ -43,6 +45,10 @@ const Indicator = (props: IndicatorProps) => {
     const TpSlider = useMemo(
         () =>
             styled(Slider)({
+                "&": {
+                    width: horizontalOrientation ? width : undefined,
+                    height: horizontalOrientation ? undefined : height,
+                },
                 "&.Mui-disabled": {
                     color: "transparent",
                 },
@@ -73,7 +79,7 @@ const Indicator = (props: IndicatorProps) => {
                     bottom: horizontalOrientation ? "0" : "50%",
                 },
             }),
-        [horizontalOrientation]
+        [horizontalOrientation, width, height]
     );
 
     return (
