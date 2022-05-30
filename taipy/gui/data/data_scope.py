@@ -15,8 +15,6 @@ import typing as t
 import warnings
 from types import SimpleNamespace
 
-from flask import request
-
 
 class _DataScopes:
     def __init__(self) -> None:
@@ -36,8 +34,6 @@ class _DataScopes:
             return self.__scopes["global"]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
         client_id = self.__client_id
-        if not client_id and request:
-            client_id = request.args.get("client_id", "")
         if not client_id:
             warnings.warn("Empty session id, using global scope instead")
             return self.__scopes["global"]
@@ -51,6 +47,9 @@ class _DataScopes:
     def _set_client_id(self, client_id: t.Optional[str]):
         if client_id:
             self.__client_id = client_id
+
+    def _get_client_id(self) -> t.Optional[str]:
+        return self.__client_id
 
     def _reset_client_id(self):
         self.__client_id = None

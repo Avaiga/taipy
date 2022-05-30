@@ -67,6 +67,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
+from .utils.callback_param import _Callback_params
 
 
 class Gui:
@@ -193,6 +194,9 @@ class Gui:
         # gui synchronous state variable
         self.__modified_vars_update_var: t.Optional[t.Set] = None
 
+        # sid from client_id
+        self.__client_id_2_sid: t.Dict[str, str] = {}
+
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
         self._config._load(default_config)
@@ -250,9 +254,30 @@ class Gui:
     def _bind(self, name: str, value: t.Any) -> None:
         self._bindings()._bind(name, value)
 
+    def get_callback(self, user_callback: t.Callable) -> t.Callable:
+        return _Callback_params._get_callback(self, self._get_client_id(), user_callback)
+
+    def _get_state(self):
+        return self.__state
+
+    def _set_client_id(self, client_id: t.Optional[str] = None):
+        if not client_id and request:
+            client_id = request.args.get("client_id", "")
+        if client_id and request:
+            sid = getattr(request, "sid", None)
+            if sid:
+                self.__client_id_2_sid[client_id] = sid
+        self._bindings()._set_client_id(client_id)
+
+    def _get_client_id(self) -> t.Optional[str]:
+        return self._bindings()._get_client_id()
+
+    def _reset_client_id(self):
+        self._bindings()._reset_client_id()
+
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
-            self._bindings()._set_client_id(message)
+            self._set_client_id(message.get("client_id"))
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
@@ -270,9 +295,10 @@ class Gui:
                 self.__request_var_update(message.get("payload"))
             elif msg_type == _WsType.CLIENT_ID.value:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
-            self._bindings()._reset_client_id()
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
+        finally:
+            self._reset_client_id()
 
     def __front_end_update(
         self,
@@ -368,64 +394,72 @@ class Gui:
         return Gui.__CONTENT_ROOT + ret_value[0] if isinstance(ret_value, tuple) else ret_value
 
     def __serve_content(self, path: str) -> t.Any:
-        parts = path.split("/")
-        if len(parts) > 1:
-            file_name = parts[-1]
-            (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
-                path[: -len(file_name) - 1], file_name, request.args.get("bypass")
-            )
-            if dir_path:
-                return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
-        return ("", 404)
+        try:
+            self._set_client_id()
+            parts = path.split("/")
+            if len(parts) > 1:
+                file_name = parts[-1]
+                (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
+                    path[: -len(file_name) - 1], file_name, request.args.get("bypass")
+                )
+                if dir_path:
+                    return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
+            return ("", 404)
+        finally:
+            self._reset_client_id()
 
     def __upload_files(self):
-        if "var_name" not in request.form:
-            warnings.warn("No var name")
-            return ("No var name", 400)
-        var_name = request.form["var_name"]
-        multiple = "multiple" in request.form and request.form["multiple"] == "True"
-        if "blob" not in request.files:
-            warnings.warn("No file part")
-            return ("No file part", 400)
-        file = request.files["blob"]
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == "":
-            warnings.warn("No selected file")
-            return ("No selected file", 400)
-        suffix = ""
-        complete = True
-        part = 0
-        if "total" in request.form:
-            total = int(request.form["total"])
-            if total > 1 and "part" in request.form:
-                part = int(request.form["part"])
-                suffix = f".part.{part}"
-                complete = part == total - 1
-        if file:  # and allowed_file(file.filename)
-            upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
-            file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
-            file.save(str(upload_path / (file_path.name + suffix)))
-            if complete:
-                if part > 0:
-                    try:
-                        with open(file_path, "wb") as grouped_file:
-                            for nb in range(part + 1):
-                                with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
-                                    grouped_file.write(part_file.read())
-                    except EnvironmentError as ee:
-                        warnings.warn(f"cannot group file after chunk upload {ee}")
-                        return
-                # notify the file is uploaded
-                newvalue = str(file_path)
-                if multiple:
-                    value = _getscopeattr(self, var_name)
-                    if not isinstance(value, t.List):
-                        value = [] if value is None else [value]
-                    value.append(newvalue)
-                    newvalue = value
-                setattr(self._bindings(), var_name, newvalue)
-        return ("", 200)
+        try:
+            self._set_client_id()
+            if "var_name" not in request.form:
+                warnings.warn("No var name")
+                return ("No var name", 400)
+            var_name = request.form["var_name"]
+            multiple = "multiple" in request.form and request.form["multiple"] == "True"
+            if "blob" not in request.files:
+                warnings.warn("No file part")
+                return ("No file part", 400)
+            file = request.files["blob"]
+            # If the user does not select a file, the browser submits an
+            # empty file without a filename.
+            if file.filename == "":
+                warnings.warn("No selected file")
+                return ("No selected file", 400)
+            suffix = ""
+            complete = True
+            part = 0
+            if "total" in request.form:
+                total = int(request.form["total"])
+                if total > 1 and "part" in request.form:
+                    part = int(request.form["part"])
+                    suffix = f".part.{part}"
+                    complete = part == total - 1
+            if file:  # and allowed_file(file.filename)
+                upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
+                file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
+                file.save(str(upload_path / (file_path.name + suffix)))
+                if complete:
+                    if part > 0:
+                        try:
+                            with open(file_path, "wb") as grouped_file:
+                                for nb in range(part + 1):
+                                    with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
+                                        grouped_file.write(part_file.read())
+                        except EnvironmentError as ee:
+                            warnings.warn(f"cannot group file after chunk upload {ee}")
+                            return
+                    # notify the file is uploaded
+                    newvalue = str(file_path)
+                    if multiple:
+                        value = _getscopeattr(self, var_name)
+                        if not isinstance(value, t.List):
+                            value = [] if value is None else [value]
+                        value.append(newvalue)
+                        newvalue = value
+                    setattr(self._bindings(), var_name, newvalue)
+            return ("", 200)
+        finally:
+            self._reset_client_id()
 
     def __send_var_list_update(
         self,
@@ -564,7 +598,7 @@ class Gui:
         self.__send_ws({"type": _WsType.MULTIPLE_UPDATE.value, "payload": payload})
 
     def __get_ws_receiver(self) -> t.Union[t.List[str], t.Any, None]:
-        return None if self._bindings()._get_single_client() else getattr(request, "sid", None)
+        return None if self._bindings()._get_single_client() else self.__client_id_2_sid.get(self._bindings()._get_client_id())
 
     def __get_message_grouping(self):
         if not _hasscopeattr(self, Gui.__MESSAGE_GROUPING_NAME):
@@ -1008,14 +1042,18 @@ class Gui:
         self.__send_ws_navigate(to)
 
     def __init_route(self):
-        if hasattr(self, "on_init") and callable(self.on_init):
-            if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
-                _setscopeattr(self, Gui.__ON_INIT_NAME, True)
-                try:
-                    self._call_function_with_state(self.on_init, [])
-                except Exception as e:
-                    warnings.warn(f"Exception on on_init execution \n{e}")
-        return self._server._render_route()
+        try:
+            self._set_client_id()
+            if hasattr(self, "on_init") and callable(self.on_init):
+                if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
+                    _setscopeattr(self, Gui.__ON_INIT_NAME, True)
+                    try:
+                        self._call_function_with_state(self.on_init, [])
+                    except Exception as e:
+                        warnings.warn(f"Exception on on_init execution \n{e}")
+            return self._server._render_route()
+        finally:
+            self._reset_client_id()
 
     def _register_data_accessor(self, data_accessor_class: t.Type[_DataAccessor]) -> None:
         self._accessors._register(data_accessor_class)
