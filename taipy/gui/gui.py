@@ -254,7 +254,7 @@ class Gui:
     def _bind(self, name: str, value: t.Any) -> None:
         self._bindings()._bind(name, value)
 
-    def get_callback(self, user_callback: t.Callable) -> t.Callable:
+    def _get_callback(self, user_callback: t.Callable) -> t.Callable:
         return _Callback_params._get_callback(self, self._get_client_id(), user_callback)
 
     def _get_state(self):
