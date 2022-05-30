@@ -85,6 +85,8 @@ const Indicator = (props: IndicatorProps) => {
     return (
         <Tooltip title={hover || ""}>
             <TpSlider
+                id={props.id}
+                className={props.className}
                 min={0}
                 max={100}
                 value={getValue(value === undefined ? defaultValue : value, min, max)}
