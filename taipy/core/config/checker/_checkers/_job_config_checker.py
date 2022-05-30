@@ -29,11 +29,11 @@ class _JobConfigChecker(_ConfigChecker):
         return self._collector
 
     def _check_multiprocess_mode(self, job_config: JobConfig, data_node_configs: Dict[str, DataNodeConfig]):
-        if job_config.is_multiprocess:
+        if job_config.is_standalone:
             for cfg_id, data_node_config in data_node_configs.items():
                 if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_IN_MEMORY:
                     self._error(
                         DataNodeConfig._STORAGE_TYPE_KEY,
                         data_node_config.storage_type,
-                        f"DataNode {cfg_id}: In-memory storage type cannot be used in multiprocess mode",
+                        f"DataNode {cfg_id}: In-memory storage type can ONLY be used in {JobConfig._DEVELOPMENT_MODE} mode",
                     )

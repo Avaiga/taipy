@@ -9,11 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from importlib import util
 from typing import Any, Dict, Optional, Type
 
-from taipy.core.common._utils import _load_fct
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
+from taipy.core.config.development_config import DevelopmentConfig
 from taipy.core.config.job_mode_config import _JobModeConfig
 from taipy.core.config.standalone_config import StandaloneConfig
 
@@ -25,18 +24,14 @@ class JobConfig:
     Configuration fields related to the jobs' executions.
 
     Parameters:
-        mode (str): The Taipy operating mode. By default, the "standalone" mode is set. On Taipy enterprise,
-            "enterprise" and "airflow" mode are available.
+        mode (str): The Taipy operating mode. By default, the "standalone" mode is set. A "development" mode is also
+            available for testing and debugging the executions of jobs.
         **properties: A dictionary of additional properties.
     """
 
     _MODE_KEY = "mode"
     _DEFAULT_MODE = "standalone"
-    _ENTERPRISE_MODE = "enterprise"
-
-    _MODE_TO_MODULE: Dict[str, str] = {
-        _ENTERPRISE_MODE: "taipy.enterprise.core.config",
-    }
+    _DEVELOPMENT_MODE = "development"
 
     def __init__(self, mode: str = None, **properties):
         self.mode = mode or self._DEFAULT_MODE
@@ -84,21 +79,19 @@ class JobConfig:
     def _get_config_cls(cls, mode: str) -> Type[_JobModeConfig]:
         if mode == cls._DEFAULT_MODE:
             return StandaloneConfig
-        module = cls._MODE_TO_MODULE.get(mode, None)
-        if not module or not util.find_spec(module):
-            raise DependencyNotInstalled(mode)
-        config_cls = _load_fct(module + ".config", "Config")
-        return config_cls  # type:ignore
+        if mode == cls._DEVELOPMENT_MODE:
+            return DevelopmentConfig
+        raise DependencyNotInstalled(mode)
 
     @property
     def is_standalone(self) -> bool:
-        """True if the config is set to standalone execution"""
+        """True if the config is set to standalone mode"""
         return self.mode == self._DEFAULT_MODE
 
     @property
-    def is_enterprise(self) -> bool:
-        """True if the config is set to standalone execution"""
-        return self.mode == self._ENTERPRISE_MODE
+    def is_development(self) -> bool:
+        """True if the config is set to development mode"""
+        return self.mode == self._DEVELOPMENT_MODE
 
     @property
     def is_multiprocess(self) -> bool:

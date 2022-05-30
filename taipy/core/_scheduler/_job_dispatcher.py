@@ -16,6 +16,7 @@ from typing import Any, List
 from taipy.core._scheduler._executor._synchronous import _Synchronous
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
+from taipy.core.config import Config, JobConfig
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
 from taipy.core.exceptions.exceptions import DataNodeWritingError
@@ -27,8 +28,8 @@ from taipy.core.task.task import Task
 class _JobDispatcher:
     """Manages executors and dispatch jobs (instances of `Job^` class) on it."""
 
-    def __init__(self, max_number_of_parallel_execution):
-        self._set_executer_and_nb_available_workers(max_number_of_parallel_execution)
+    def __init__(self):
+        self._set_executer_and_nb_available_workers(Config.job_config)
         self.__logger = _TaipyLogger._get_logger()
 
     def _can_execute(self) -> bool:
@@ -47,7 +48,9 @@ class _JobDispatcher:
             job.running()
             _JobManagerFactory._build_manager()._set(job)
             self._nb_available_workers -= 1
-            future = self._executor.submit(self._run_wrapped_function, job.id, job.task)
+            future = self._executor.submit(
+                self._run_wrapped_function, Config.global_config.storage_folder, job.id, job.task
+            )
             future.add_done_callback(self.__release_worker)
             future.add_done_callback(partial(self.__update_status, job))
         else:
@@ -79,7 +82,7 @@ class _JobDispatcher:
         return input_last_edit > output_last_edit
 
     @classmethod
-    def _run_wrapped_function(cls, job_id: JobId, task: Task):
+    def _run_wrapped_function(cls, storage_folder: str, job_id: JobId, task: Task):
         """)
         Reads inputs, execute function, and write outputs.
 
@@ -90,6 +93,7 @@ class _JobDispatcher:
              True if the task needs to run. False otherwise.
         """
         try:
+            Config.configure_global_app(storage_folder=storage_folder)
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
             fct = task.function
@@ -138,15 +142,15 @@ class _JobDispatcher:
         return _results
 
     @staticmethod
-    def __create(max_number_of_parallel_execution):
-        if max_number_of_parallel_execution > 1:
-            executor = ProcessPoolExecutor(max_number_of_parallel_execution)
-            return executor, (executor._max_workers)
+    def __create(job_config: JobConfig):
+        if job_config.is_standalone:
+            executor = ProcessPoolExecutor(job_config.nb_of_workers or 1)
+            return executor, (executor._max_workers)  # type: ignore
         else:
             return _Synchronous(), 1
 
-    def _set_executer_and_nb_available_workers(self, max_number_of_parallel_execution: int):
-        self._executor, self._nb_available_workers = self.__create(max_number_of_parallel_execution or 1)
+    def _set_executer_and_nb_available_workers(self, job_config: JobConfig):
+        self._executor, self._nb_available_workers = self.__create(job_config)
 
     @staticmethod
     def __unlock_edit_on_outputs(job):

@@ -11,9 +11,11 @@
 
 from datetime import datetime
 
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
+from taipy.core.config import JobConfig
 from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle.cycle import Cycle
@@ -180,6 +182,7 @@ def test_get_cycle_start_date_and_end_date():
 
 
 def test_hard_delete_shared_entities():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_config_3 = Config.configure_data_node("my_input_3", "in_memory", scope=Scope.CYCLE, default_data="testing")

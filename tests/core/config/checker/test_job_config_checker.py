@@ -18,7 +18,7 @@ from taipy.core.data._data_manager import _DataManager
 
 
 class TestJobConfigChecker:
-    def test_check_multiprocess_mode(self):
+    def test_check_standalone_mode(self):
         collector = IssueCollector()
         config = Config._python_config
         _JobConfigChecker(config, collector)._check()
@@ -30,8 +30,12 @@ class TestJobConfigChecker:
 
         Config.configure_job_executions(mode=JobConfig._DEFAULT_MODE, nb_of_workers=1)
         _JobConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
+        assert len(collector.errors) == 1
 
         Config.configure_job_executions(mode=JobConfig._DEFAULT_MODE, nb_of_workers=2)
         _JobConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 2
+
+        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE, nb_of_workers=2)
+        _JobConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 2

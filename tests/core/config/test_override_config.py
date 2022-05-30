@@ -128,16 +128,16 @@ def test_override_default_config_with_file_config_including_env_variable_values(
         """
 [JOB]
 nb_of_workers = "ENV[FOO]"
-start_airflow = "ENV[BAR]"
+start_executor = "ENV[BAR]"
 """
     )
     assert Config.job_config.nb_of_workers == 1
-    assert not Config.job_config.start_airflow
+    assert not Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
         Config.load(tf.filename)
         assert Config.job_config.nb_of_workers == 6
-        assert Config.job_config.start_airflow
+        assert Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
         with pytest.raises(InconsistentEnvVariableError):

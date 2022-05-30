@@ -9,8 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from multiprocessing import Process
-from queue import Queue
 from unittest import mock
 
 import pytest
@@ -20,6 +18,7 @@ from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.common.scope import Scope
+from taipy.core.config import JobConfig
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
@@ -34,6 +33,8 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 
 def test_set_and_get_pipeline():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     pipeline_id_1 = PipelineId("id1")
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
 
@@ -114,6 +115,8 @@ def test_set_and_get_pipeline():
 
 
 def test_submit():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
     data_node_3 = InMemoryDataNode("baz", Scope.PIPELINE, "s3")
@@ -194,6 +197,8 @@ def mock_function_no_input_one_output():
 
 
 def test_submit_scenario_from_tasks_with_one_or_no_input_output():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     # test no input and no output Task
     task_no_input_no_output = Task("task_no_input_no_output", mock_function_no_input_no_output)
     pipeline_1 = Pipeline("my_pipeline", {}, [task_no_input_no_output])
@@ -240,7 +245,7 @@ def test_submit_scenario_from_tasks_with_one_or_no_input_output():
     assert data_node_output.read() == 3
 
 
-def mult_by_2(nb: int):
+def mult_by_two(nb: int):
     return nb * 2
 
 
@@ -250,15 +255,16 @@ def mult_by_3(nb: int):
 
 def test_get_or_create_data():
     # only create intermediate data node once
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
     dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_config_mult_by_2 = Config.configure_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_config_mult_by_two = Config.configure_task("mult_by_two", mult_by_two, [dn_config_1], dn_config_2)
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
-    pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3])
-    # dn_1 ---> mult_by_2 ---> dn_2 ---> mult_by_3 ---> dn_6
+    pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_two, task_config_mult_by_3])
+    # dn_1 ---> mult_by_two ---> dn_2 ---> mult_by_3 ---> dn_6
 
     assert len(_DataManager._get_all()) == 0
     assert len(_TaskManager._get_all()) == 0
@@ -271,7 +277,7 @@ def test_get_or_create_data():
     assert pipeline.foo.read() == 1
     assert pipeline.bar.read() == 0
     assert pipeline.baz.read() == 0
-    assert pipeline._get_sorted_tasks()[0][0].config_id == task_config_mult_by_2.id
+    assert pipeline._get_sorted_tasks()[0][0].config_id == task_config_mult_by_two.id
     assert pipeline._get_sorted_tasks()[1][0].config_id == task_config_mult_by_3.id
 
     _PipelineManager._submit(pipeline.id)
@@ -294,13 +300,15 @@ def test_get_or_create_data():
 
 
 def test_create_pipeline_and_modify_properties_does_not_modify_config():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
     dn_config_6 = Config.configure_data_node("baz", "in_memory", Scope.PIPELINE, default_data=0)
 
-    task_config_mult_by_2 = Config.configure_task("mult_by_2", mult_by_2, [dn_config_1], dn_config_2)
+    task_config_mult_by_two = Config.configure_task("mult_by_two", mult_by_two, [dn_config_1], dn_config_2)
     task_config_mult_by_3 = Config.configure_task("mult_by_3", mult_by_3, [dn_config_2], dn_config_6)
-    pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_2, task_config_mult_by_3], foo="bar")
+    pipeline_config = Config.configure_pipeline("by_6", [task_config_mult_by_two, task_config_mult_by_3], foo="bar")
 
     assert len(pipeline_config.properties) == 1
     assert pipeline_config.properties.get("foo") == "bar"
@@ -329,14 +337,16 @@ def notify2(*args, **kwargs):
 
 
 def test_pipeline_notification_subscribe(mocker):
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.configure_pipeline(
         "by_6",
         [
             Config.configure_task(
-                "mult_by_2",
-                mult_by_2,
+                "mult_by_two",
+                mult_by_two,
                 [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
@@ -379,14 +389,16 @@ def test_pipeline_notification_subscribe(mocker):
 
 
 def test_pipeline_notification_unsubscribe(mocker):
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.configure_pipeline(
         "by_6",
         [
             Config.configure_task(
-                "mult_by_2",
-                mult_by_2,
+                "mult_by_two",
+                mult_by_two,
                 [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
@@ -409,12 +421,14 @@ def test_pipeline_notification_unsubscribe(mocker):
 
 
 def test_pipeline_notification_subscribe_all():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     pipeline_config = Config.configure_pipeline(
         "by_6",
         [
             Config.configure_task(
-                "mult_by_2",
-                mult_by_2,
+                "mult_by_two",
+                mult_by_two,
                 [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
                 Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
             )
@@ -561,6 +575,8 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 
 
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node(
         "my_output", "in_memory", scope=Scope.PIPELINE, default_data="works !"
@@ -584,12 +600,14 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
 
 
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     pipeline = _PipelineManager._get_or_create(pipeline_config)
-    _PipelineManager._submit(pipeline.id)
+    pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
@@ -605,12 +623,14 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     pipeline = _PipelineManager._get_or_create(pipeline_config)
-    _PipelineManager._submit(pipeline.id)
+    pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
@@ -626,12 +646,14 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
 
 
 def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     pipeline = _PipelineManager._get_or_create(pipeline_config)
-    _PipelineManager._submit(pipeline.id)
+    pipeline.submit()
 
     assert len(_ScenarioManager._get_all()) == 0
     assert len(_PipelineManager._get_all()) == 1
@@ -647,6 +669,8 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
 
 
 def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
     task_config = Config.configure_task("task_config", print, dn_input_config, dn_output_config)
@@ -670,6 +694,8 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
 
 
 def test_hard_delete_shared_entities():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE, default_data="testing")
@@ -692,17 +718,3 @@ def test_hard_delete_shared_entities():
     assert len(_TaskManager._get_all()) == 2
     assert len(_DataManager._get_all()) == 3
     assert len(_JobManager._get_all()) == 3
-
-
-def test_automatic_reload():
-    dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
-    dn_output_config = Config.configure_data_node("output", "pickle")
-    task_config = Config.configure_task("task_config", mult_by_2, dn_input_config, dn_output_config)
-    pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
-    pipeline = _PipelineManager._get_or_create(pipeline_config)
-
-    p1 = Process(target=_PipelineManager._submit, args=(pipeline,))
-    p1.start()
-    p1.join()
-
-    assert 2 == pipeline.output.read()

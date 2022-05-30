@@ -141,7 +141,7 @@ class Config:
         Parameters:
             mode (Optional[str]): The job execution mode.
                 Possible values are: _"standalone"_ (the default value) or
-                _"airflow"_ (Enterprise version only).
+                _"development"_.
             nb_of_workers (Optional[int, str]): Parameter used only in default _"standalone"_ mode. The maximum
                 number of jobs able to run in parallel. The default value is 1.<br/>
                 A string can be provided to dynamically set the value using an environment

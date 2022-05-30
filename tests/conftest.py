@@ -11,21 +11,20 @@
 
 import os
 import pickle
-from queue import Queue
 import shutil
 from datetime import datetime
+from queue import Queue
 
 import pandas as pd
 import pytest
 
-from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
+from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
-from taipy.core.config.global_app_config import GlobalAppConfig
-from taipy.core.config.job_config import JobConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.cycle._cycle_model import _CycleModel
 from taipy.core.cycle.cycle import Cycle
@@ -183,8 +182,9 @@ def pipeline_model():
 def setup():
     delete_everything()
 
+
 def delete_everything():
-    _Scheduler._set_nb_of_workers(None)
+    _Scheduler._set_job_config(None)
     _Scheduler.jobs_to_run = Queue()
     _Scheduler.blocked_jobs = []
     _TaskManager._scheduler = _SchedulerFactory._build_scheduler
@@ -194,12 +194,11 @@ def delete_everything():
     _TaskManager._delete_all()
     _JobManager._delete_all()
     _CycleManager._delete_all()
-    Config._python_config._global_config = GlobalAppConfig()
-    Config._python_config._job_config = JobConfig()
-    Config._python_config._data_nodes.clear()
-    Config._python_config._tasks.clear()
-    Config._python_config._pipelines.clear()
-    Config._python_config._scenarios.clear()
+
+    Config._python_config = _Config()
+    Config._file_config = None
+    Config._env_file_config = None
+    Config._applied_config = _Config._default_config()
 
 
 @pytest.fixture(scope="function", autouse=True)

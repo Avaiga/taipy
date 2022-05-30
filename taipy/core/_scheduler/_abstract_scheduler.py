@@ -20,6 +20,7 @@ class _AbstractScheduler:
     """Creates, Enqueues and schedules jobs as instances of `Job^` class."""
 
     @classmethod
+    @abstractmethod
     def initialize(cls):
         return NotImplemented
 

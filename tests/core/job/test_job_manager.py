@@ -14,7 +14,6 @@ import multiprocessing
 import os
 import random
 import string
-from queue import Queue
 from time import sleep
 
 import pytest
@@ -22,6 +21,7 @@ import pytest
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import JobId
 from taipy.core.common.scope import Scope
+from taipy.core.config import JobConfig
 from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
@@ -55,6 +55,8 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 
 def test_get_job():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     task = _create_task(multiply, name="get_job")
 
     job_1 = _Scheduler.submit_task(task)
@@ -67,6 +69,8 @@ def test_get_job():
 
 
 def test_get_latest_job():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
 
@@ -90,6 +94,8 @@ def test_get_job_unknown():
 
 
 def test_get_jobs():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     task = _create_task(multiply, name="get_all_jobs")
 
     job_1 = _Scheduler.submit_task(task)
@@ -99,6 +105,8 @@ def test_get_jobs():
 
 
 def test_delete_job():
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+
     task = _create_task(multiply, name="delete_job")
 
     job_1 = _Scheduler.submit_task(task)
@@ -120,7 +128,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    _Scheduler._set_nb_of_workers(Config.configure_job_executions(nb_of_workers=2))
+    _Scheduler._set_job_config(Config.configure_job_executions(nb_of_workers=2))
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = _Scheduler.submit_task(task)

@@ -17,8 +17,10 @@ import pytest
 
 import taipy.core as tp
 from taipy.core import Config
+from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.common.scope import Scope
+from taipy.core.config import JobConfig
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data._filter import _FilterDataNode
 from taipy.core.data.data_node import DataNode
@@ -250,6 +252,7 @@ class TestDataNode:
         assert dn._is_in_cache is False
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
+        _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle", cacheable=True)
         c = Config.configure_data_node("C", "pickle")

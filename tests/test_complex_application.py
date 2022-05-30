@@ -1,10 +1,22 @@
+# Copyright 2022 Avaiga Private Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+# an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations under the License.
+
 import os
 import pathlib
 
 import pandas as pd
 
 import taipy.core.taipy as tp
-from taipy.core.config import Config
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.config import Config, JobConfig
 
 
 def sum(a, b):
@@ -49,7 +61,7 @@ def test_complex():
     # |      |
     # |      |
     # t4     d4
-
+    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
