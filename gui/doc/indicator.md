@@ -51,11 +51,33 @@ The _orientation_ can be specified to "vertical" (or "v") to create a vertical i
     === "Markdown"
 
         ```
-        <|{50}|indicator|orientation=v|value=10|>
+        <|message|indicator|orientation=v|value=10|>
         ```
   
     === "HTML"
 
         ```html
-        <taipy:indicator orientation="vertical" value="10">{50}</taipy:indicator>
+        <taipy:indicator orientation="vertical" value="10">message</taipy:indicator>
+        ```
+
+### Dimensions
+
+Properties _width_ and _height_ can be specified depending of the _orientation_.
+
+!!! example "Page content"
+
+    === "Markdown"
+
+        ```
+        <|message|indicator|value={val}|width=50vw|>
+
+        <|message|indicator|value={val}|orientation=vertical|height=50vh|>
+        ```
+  
+    === "HTML"
+
+        ```html
+        <taipy:indicator value="{val}" width="50vw">message</taipy:indicator>
+
+        <taipy:indicator value="{val}" orientation="vertical" height="50vh">message</taipy:indicator>
         ```
