@@ -62,7 +62,7 @@ def mult_by_2(n):
 
 
 def test_submit_task():
-    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
 
     before_creation = datetime.now()
     sleep(0.1)
@@ -87,7 +87,7 @@ def test_submit_task():
 
 
 def test_submit_task_that_return_multiple_outputs():
-    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
 
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
@@ -114,7 +114,7 @@ def test_submit_task_that_return_multiple_outputs():
 
 
 def test_submit_task_returns_single_iterable_output():
-    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
 
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
@@ -132,7 +132,7 @@ def test_submit_task_returns_single_iterable_output():
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
-    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
 
     def return_2tuple():
         return lambda nb1, nb2: (multiply(nb1, nb2), multiply(nb1, nb2) / 2)
@@ -148,7 +148,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    _Scheduler._set_job_config(Config.configure_job_executions(nb_of_workers=2))
+    _Scheduler._update_job_config(Config.configure_job_executions(nb_of_workers=2))
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
@@ -160,7 +160,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_task_multithreading_multiple_task():
-    _Scheduler._set_job_config(Config.configure_job_executions(nb_of_workers=2))
+    _Scheduler._update_job_config(Config.configure_job_executions(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -192,7 +192,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    _Scheduler._set_job_config(Config.configure_job_executions(nb_of_workers=2))
+    _Scheduler._update_job_config(Config.configure_job_executions(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_0 = m.Lock()
@@ -227,7 +227,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 
 def test_blocked_task():
-    _Scheduler._set_job_config(Config.configure_job_executions(nb_of_workers=2))
+    _Scheduler._update_job_config(Config.configure_job_executions(nb_of_workers=2))
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -273,13 +273,13 @@ class MyScheduler(_Scheduler):
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
-    MyScheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    MyScheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
     assert isinstance(MyScheduler.getJobDispatcher()._executor, _Synchronous)
     assert MyScheduler.getJobDispatcher()._nb_available_workers == 1
 
 
 def test_task_scheduler_create_parallel_dispatcher():
-    MyScheduler._set_job_config(Config.configure_job_executions(nb_of_workers=42))
+    MyScheduler._update_job_config(Config.configure_job_executions(nb_of_workers=42))
     assert isinstance(MyScheduler.getJobDispatcher()._executor, ProcessPoolExecutor)
     assert MyScheduler.getJobDispatcher()._nb_available_workers == 42
 

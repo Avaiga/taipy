@@ -61,7 +61,7 @@ def test_complex():
     # |      |
     # |      |
     # t4     d4
-    _Scheduler._set_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
 
