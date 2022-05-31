@@ -14,7 +14,7 @@ Flask-RESTful = "==0.3.9"
 Flask-Migrate = "==3.0"
 Flask-JWT-Extended = "==4.3"
 markupsafe = "==2.0.1"
-taipy-core = "==1.0"
+taipy-core = {git = "https://git@github.com/avaiga/taipy-core.git@develop"}
 
 [dev-packages]
 tox = "3.24.5"
