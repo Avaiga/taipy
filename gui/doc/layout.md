@@ -1,6 +1,6 @@
 Organizes its children into cells in a regular grid.
 
-The _columns_ property follows the [css standard](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-columns).
+The _columns_ property follows the [CSS standard](https://developer.mozilla.org/en-US/docs/Web/CSS/grid-template-columns) syntax.
 If the _columns_ property contains only digits and spaces, it is considered as flex-factor unit:
 "1 1" => "1fr 1fr"
 

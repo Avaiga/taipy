@@ -26,7 +26,7 @@ variable _data_ (all columns will be displayed), you can use the following conte
     === "Markdown"
 
         ```
-        <{data}|table|>
+        <|{data}|table|>
         ```
   
     === "HTML"
@@ -35,7 +35,7 @@ variable _data_ (all columns will be displayed), you can use the following conte
         <taipy:table data="{data}" />
         ```
 
-### show specific clomuns
+### Show specific columns
 
 !!! example "Page content"
 
@@ -116,7 +116,7 @@ You can then add the definition of this class in your CSS file.
     === "Markdown"
 
         ```
-        <{data}|table|style={lambda state, idx, row: "red-row" if idx % 2 == 0 else "blue-row"}|>
+        <|{data}|table|style={lambda state, idx, row: "red-row" if idx % 2 == 0 else "blue-row"}|>
         ```
   
     === "HTML"
