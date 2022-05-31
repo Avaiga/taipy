@@ -53,7 +53,7 @@ setup(
     name="taipy",
     packages=find_packages(include=['taipy']),
     url="https://github.com/avaiga/taipy",
-    version="1.0.0",
+    version="1.1.0.dev",
     zip_safe=False,
     extras_require=extras_require,
 )
