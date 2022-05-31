@@ -101,6 +101,10 @@ class Job(_Entity):
     def creation_date(self, val):
         self._creation_date = val
 
+    @property
+    def stacktrace(self) -> List[str]:
+        return self._stacktrace
+
     def __contains__(self, task: Task):
         return self.task.id == task.id
 
@@ -118,10 +122,6 @@ class Job(_Entity):
 
     def __eq__(self, other):
         return self.id == other.id
-
-    @property
-    def stacktrace(self) -> List[str]:
-        return self._stacktrace
 
     @_run_callbacks
     def blocked(self):
