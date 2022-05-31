@@ -140,7 +140,7 @@ def invoke_state_callback(gui: Gui, context_id: str, user_callback: t.Callable, 
     Arguments:
         gui (Gui^): The current gui instance.
         context_id: The context id as returned by get_context_id()^.
-        user_callback (Callable[[State, ...], None): The user-defined function that is invoked. The first parameter of this function must be a State^.
+        user_callback (Callable[[State, ...], None): The user-defined function that is invoked. The first parameter of this function must be a `State^`.
         args: The remaining arguments, as a List or a Tuple.
     """
     if isinstance(gui, Gui):

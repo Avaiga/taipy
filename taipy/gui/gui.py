@@ -684,7 +684,7 @@ class Gui:
         try:
             return self._call_function_with_state(user_callback, args)
         except Exception as e:
-            warnings.warn(f"'invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
+            warnings.warn(f"invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
         finally:
             self._reset_client_id()
         return None
