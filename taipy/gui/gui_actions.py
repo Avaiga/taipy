@@ -133,3 +133,17 @@ def get_context_id(state: State) -> t.Optional[str]:
     if state and isinstance(state._gui, Gui):
         return state._gui._get_client_id()
     return None
+
+def invoke_state_callback(gui: Gui, context_id: str, user_callback: t.Callable, args: t.Union[t.Tuple, t.List]):
+    """Invoke a user defined function with state (^State) as first parameter and args other parameters
+
+    Arguments:
+        gui (Gui^): The current gui instance.
+        context_id: The context id as returned by ^get_context_id.
+        user_callback (Callable[[State, ...], None): A user defined function that takes parameters of which the first one should be a state (^State).
+        args: A list/tuple of arguments.
+    """
+    if isinstance(gui, Gui):
+        gui._call_user_callback(context_id, user_callback, list(args))
+    else:
+        warnings.warn("'invoke_state_callback()' must be called with a valid Gui instance")
