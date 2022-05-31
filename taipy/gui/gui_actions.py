@@ -122,3 +122,14 @@ def navigate(state: State, to: t.Optional[str] = ""):
         state._gui._navigate(to)
     else:
         warnings.warn("'navigate()' must be called in the context of a callback")
+
+
+def get_context_id(state: State) -> t.Optional[str]:
+    """Get the current context identifier (as needed for serializable callbacks).
+
+    Arguments:
+        state (State^): The current user state as received in any callback.
+    """
+    if state and isinstance(state._gui, Gui):
+        return state._gui._get_client_id()
+    return None
