@@ -39,10 +39,10 @@ class _TaskManager(_Manager[Task]):
         return cls.__scheduler
 
     @classmethod
-    def _set(cls, task: Task):
+    def _set(cls, task: Task, *args, **kwargs):  # type: ignore
         cls.__save_data_nodes(task.input.values())
         cls.__save_data_nodes(task.output.values())
-        super()._set(task)
+        super()._set(task, *args, **kwargs)
 
     @classmethod
     def _get_or_create(
@@ -50,9 +50,13 @@ class _TaskManager(_Manager[Task]):
         task_config: TaskConfig,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
+        *args,
+        **kwargs,
     ) -> Task:
         data_nodes = {
-            dn_config: _DataManagerFactory._build_manager()._get_or_create(dn_config, scenario_id, pipeline_id)
+            dn_config: _DataManagerFactory._build_manager()._get_or_create(
+                dn_config, scenario_id, pipeline_id, *args, **kwargs
+            )
             for dn_config in set(itertools.chain(task_config.input_configs, task_config.output_configs))
         }
         scope = min(dn.scope for dn in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
@@ -64,35 +68,37 @@ class _TaskManager(_Manager[Task]):
         inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
         outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
         task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
-        cls._set(task)
+        cls._set(task, *args, **kwargs)
         return task
 
     @classmethod
-    def __save_data_nodes(cls, data_nodes):
+    def __save_data_nodes(cls, data_nodes, *args, **kwargs):
         data_manager = _DataManagerFactory._build_manager()
         for i in data_nodes:
-            data_manager._set(i)
+            data_manager._set(i, *args, **kwargs)
 
     @classmethod
-    def _hard_delete(cls, task_id: TaskId):
-        task = cls._get(task_id)
-        entity_ids_to_delete = cls._get_owned_entity_ids(task)
+    def _hard_delete(cls, task_id: TaskId, *args, **kwargs):
+        task = cls._get(task_id, *args, **kwargs)
+        entity_ids_to_delete = cls._get_owned_entity_ids(task, *args, **kwargs)
         entity_ids_to_delete.task_ids.add(task.id)
-        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete, *args, **kwargs)
 
     @classmethod
-    def _get_owned_entity_ids(cls, task: Task):
+    def _get_owned_entity_ids(cls, task: Task, *args, **kwargs):
         entity_ids = _EntityIds()
-        jobs = _JobManagerFactory._build_manager()._get_all()
+        jobs = _JobManagerFactory._build_manager()._get_all(*args, **kwargs)
         for job in jobs:
             if job.task.id == task.id:
                 entity_ids.job_ids.add(job.id)
         return entity_ids
 
     @classmethod
-    def _submit(cls, task: Union[TaskId, Task], callbacks: Optional[List[Callable]] = None, force: bool = False):
+    def _submit(
+        cls, task: Union[TaskId, Task], callbacks: Optional[List[Callable]] = None, force: bool = False, *args, **kwargs
+    ):
         task_id = task.id if isinstance(task, Task) else task
-        task = cls._get(task_id)
+        task = cls._get(task_id, *args, **kwargs)
         if task is None:
             raise NonExistingTask(task_id)
         cls._scheduler().submit_task(task, callbacks, force)

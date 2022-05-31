@@ -14,10 +14,11 @@ from typing import Callable, Iterable, Optional
 
 from taipy.core._manager._manager import _Manager
 from taipy.core.common.alias import JobId
-from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_repository import _JobRepository
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task
+
+from taipy.core.exceptions.exceptions import JobNotDeletedException
 
 
 class _JobManager(_Manager[Job]):
@@ -27,24 +28,24 @@ class _JobManager(_Manager[Job]):
     _ID_PREFIX = "JOB_"
 
     @classmethod
-    def _create(cls, task: Task, callbacks: Iterable[Callable], force=False) -> Job:
+    def _create(cls, task: Task, callbacks: Iterable[Callable], force=False, *args, **kwargs) -> Job:
         job = Job(id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"), task=task, force=force)
-        cls._set(job)
+        cls._set(job, *args, **kwargs)
         job._on_status_change(*callbacks)
         return job
 
     @classmethod
-    def _delete(cls, job: Job, force=False, **kwargs):  # type:ignore
+    def _delete(cls, job: Job, force=False, *args, **kwargs):  # type:ignore
         if job.is_finished() or force:
-            super()._delete(job.id)
+            super()._delete(job.id, *args, **kwargs)
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)
             raise err
 
     @classmethod
-    def _get_latest(cls, task: Task) -> Optional[Job]:
-        jobs_of_task = list(filter(lambda job: task in job, cls._get_all()))
+    def _get_latest(cls, task: Task, *args, **kwargs) -> Optional[Job]:
+        jobs_of_task = list(filter(lambda job: task in job, cls._get_all(*args, **kwargs)))
         if len(jobs_of_task) == 0:
             return None
         if len(jobs_of_task) == 1:

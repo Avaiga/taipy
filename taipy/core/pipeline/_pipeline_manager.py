@@ -30,42 +30,49 @@ class _PipelineManager(_Manager[Pipeline]):
     _ENTITY_NAME = Pipeline.__name__
 
     @classmethod
-    def _subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+    def _subscribe(
+        cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None, *args, **kwargs
+    ):
         if pipeline is None:
-            pipelines = cls._get_all()
+            pipelines = cls._get_all(*args, **kwargs)
             for pln in pipelines:
-                cls.__add_subscriber(callback, pln)
+                cls.__add_subscriber(callback, pln, *args, **kwargs)
             return
 
-        cls.__add_subscriber(callback, pipeline)
+        cls.__add_subscriber(callback, pipeline, *args, **kwargs)
 
     @classmethod
-    def _unsubscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+    def _unsubscribe(
+        cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None, *args, **kwargs
+    ):
 
         if pipeline is None:
-            pipelines = cls._get_all()
+            pipelines = cls._get_all(*args, **kwargs)
             for pln in pipelines:
-                cls.__remove_subscriber(callback, pln)
+                cls.__remove_subscriber(callback, pln, *args, **kwargs)
             return
 
-        cls.__remove_subscriber(callback, pipeline)
+        cls.__remove_subscriber(callback, pipeline, *args, **kwargs)
 
     @classmethod
-    def __add_subscriber(cls, callback, pipeline):
+    def __add_subscriber(cls, callback, pipeline: Pipeline, *args, **kwargs):
         pipeline._add_subscriber(callback)
-        cls._set(pipeline)
+        cls._set(pipeline, *args, **kwargs)
 
     @classmethod
-    def __remove_subscriber(cls, callback, pipeline):
+    def __remove_subscriber(cls, callback, pipeline: Pipeline, *args, **kwargs):
         pipeline._remove_subscriber(callback)
-        cls._set(pipeline)
+        cls._set(pipeline, *args, **kwargs)
 
     @classmethod
-    def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
+    def _get_or_create(
+        cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None, *args, **kwargs
+    ) -> Pipeline:
         pipeline_id = Pipeline._new_id(pipeline_config.id)
         task_manager = _TaskManagerFactory._build_manager()
         tasks = [
-            task_manager._get_or_create(t_config, scenario_id, pipeline_id) for t_config in pipeline_config.task_configs
+            task_manager._get_or_create(t_config, scenario_id, pipeline_id, *args, **kwargs)
+            for t_config in pipeline_config.task_configs
         ]
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
@@ -74,16 +81,21 @@ class _PipelineManager(_Manager[Pipeline]):
             return pipelines_from_parent
 
         pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)
-        cls._set(pipeline)
+        cls._set(pipeline, *args, **kwargs)
         return pipeline
 
     @classmethod
     def _submit(
-        cls, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None, force: bool = False
+        cls,
+        pipeline: Union[PipelineId, Pipeline],
+        callbacks: Optional[List[Callable]] = None,
+        force: bool = False,
+        *args,
+        **kwargs,
     ):
         callbacks = callbacks or []
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
-        pipeline = cls._get(pipeline_id)
+        pipeline = cls._get(pipeline_id, *args, **kwargs)
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
@@ -96,14 +108,14 @@ class _PipelineManager(_Manager[Pipeline]):
         return [partial(c, pipeline) for c in pipeline.subscribers]
 
     @classmethod
-    def _hard_delete(cls, pipeline_id: PipelineId):
-        pipeline = cls._get(pipeline_id)
-        entity_ids_to_delete = cls._get_owned_entity_ids(pipeline)
+    def _hard_delete(cls, pipeline_id: PipelineId, *args, **kwargs):
+        pipeline = cls._get(pipeline_id, *args, **kwargs)
+        entity_ids_to_delete = cls._get_owned_entity_ids(pipeline, *args, **kwargs)
         entity_ids_to_delete.pipeline_ids.add(pipeline.id)
-        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete, *args, **kwargs)
 
     @classmethod
-    def _get_owned_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:
+    def _get_owned_entity_ids(cls, pipeline: Pipeline, *args, **kwargs) -> _EntityIds:
         entity_ids = _EntityIds()
         for task in pipeline._tasks.values():
             if task.parent_id == pipeline.id:
@@ -111,7 +123,7 @@ class _PipelineManager(_Manager[Pipeline]):
             for data_node in task.data_nodes.values():
                 if data_node.parent_id == pipeline.id:
                     entity_ids.data_node_ids.add(data_node.id)
-        jobs = _JobManagerFactory._build_manager()._get_all()
+        jobs = _JobManagerFactory._build_manager()._get_all(*args, **kwargs)
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)

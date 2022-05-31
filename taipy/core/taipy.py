@@ -12,7 +12,6 @@
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
-from taipy.core._manager._manager_factory import _ManagerFactory
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.config.config import Config
@@ -35,7 +34,7 @@ from taipy.core.task.task import Task
 __logger = _TaipyLogger._get_logger()
 
 
-def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
+def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle], *args, **kwargs):
     """Save or update an entity.
 
     Parameters:
@@ -43,18 +42,18 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
             entity to save.
     """
     if isinstance(entity, Cycle):
-        return _CycleManagerFactory._build_manager()._set(entity)
+        return _CycleManagerFactory._build_manager()._set(entity, *args, **kwargs)
     if isinstance(entity, Scenario):
-        return _ScenarioManagerFactory._build_manager()._set(entity)
+        return _ScenarioManagerFactory._build_manager()._set(entity, *args, **kwargs)
     if isinstance(entity, Pipeline):
-        return _PipelineManagerFactory._build_manager()._set(entity)
+        return _PipelineManagerFactory._build_manager()._set(entity, *args, **kwargs)
     if isinstance(entity, Task):
-        return _TaskManagerFactory._build_manager()._set(entity)
+        return _TaskManagerFactory._build_manager()._set(entity, *args, **kwargs)
     if isinstance(entity, DataNode):
-        return _DataManagerFactory._build_manager()._set(entity)
+        return _DataManagerFactory._build_manager()._set(entity, *args, **kwargs)
 
 
-def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
+def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False, *args, **kwargs):
     """Submit an entity for execution.
 
     If the entity is a pipeline or a scenario, all the tasks of the entity are
@@ -65,15 +64,15 @@ def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
         force (bool): If True, the execution is forced even if the data nodes are in cache.
     """
     if isinstance(entity, Scenario):
-        return _ScenarioManagerFactory._build_manager()._submit(entity, force=force)
+        return _ScenarioManagerFactory._build_manager()._submit(entity, *args, force=force, **kwargs)  # type:ignore
     if isinstance(entity, Pipeline):
-        return _PipelineManagerFactory._build_manager()._submit(entity, force=force)
+        return _PipelineManagerFactory._build_manager()._submit(entity, *args, force=force, **kwargs)  # type:ignore
     if isinstance(entity, Task):
-        return _TaskManagerFactory._build_manager()._submit(entity, force=force)
+        return _TaskManagerFactory._build_manager()._submit(entity, *args, force=force, **kwargs)  # type:ignore
 
 
 def get(
-    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]
+    entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId], *args, **kwargs
 ) -> Union[Task, DataNode, Pipeline, Scenario, Job, Cycle]:
     """Get an entity from its identifier.
 
@@ -89,30 +88,30 @@ def get(
         ModelNotFound^: If _entity_id_ does not match a correct entity pattern.
     """
     if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
-        return _JobManagerFactory._build_manager()._get(JobId(entity_id))
+        return _JobManagerFactory._build_manager()._get(JobId(entity_id), *args, **kwargs)
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return _CycleManagerFactory._build_manager()._get(CycleId(entity_id))
+        return _CycleManagerFactory._build_manager()._get(CycleId(entity_id), *args, **kwargs)
     if entity_id.startswith(Scenario._ID_PREFIX):
-        return _ScenarioManagerFactory._build_manager()._get(ScenarioId(entity_id))
+        return _ScenarioManagerFactory._build_manager()._get(ScenarioId(entity_id), *args, **kwargs)
     if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManagerFactory._build_manager()._get(PipelineId(entity_id))
+        return _PipelineManagerFactory._build_manager()._get(PipelineId(entity_id), *args, **kwargs)
     if entity_id.startswith(Task._ID_PREFIX):
-        return _TaskManagerFactory._build_manager()._get(TaskId(entity_id))
+        return _TaskManagerFactory._build_manager()._get(TaskId(entity_id), *args, **kwargs)
     if entity_id.startswith(DataNode._ID_PREFIX):
-        return _DataManagerFactory._build_manager()._get(DataNodeId(entity_id))
+        return _DataManagerFactory._build_manager()._get(DataNodeId(entity_id), *args, **kwargs)
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
-def get_tasks() -> List[Task]:
+def get_tasks(*args, **kwargs) -> List[Task]:
     """Return the list of all existing tasks.
 
     Returns:
         List[Task^]: The list of tasks.
     """
-    return _TaskManagerFactory._build_manager()._get_all()
+    return _TaskManagerFactory._build_manager()._get_all(*args, **kwargs)
 
 
-def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId]):
+def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, CycleId], *args, **kwargs) -> bool:
     """Delete an entity and its nested entities.
 
     The given entity is deleted. The deletion is propagated to all nested entities that are
@@ -131,21 +130,21 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
     """
     if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
         job_manager = _JobManagerFactory._build_manager()
-        return job_manager._delete(job_manager._get(JobId(entity_id)))  # type: ignore
+        return job_manager._delete(job_manager._get(JobId(entity_id)), *args, **kwargs)  # type: ignore
     if entity_id.startswith(Cycle._ID_PREFIX):
-        return _CycleManagerFactory._build_manager()._hard_delete(CycleId(entity_id))
+        return _CycleManagerFactory._build_manager()._hard_delete(CycleId(entity_id), *args, **kwargs)
     if entity_id.startswith(Scenario._ID_PREFIX):
-        return _ScenarioManagerFactory._build_manager()._hard_delete(ScenarioId(entity_id))
+        return _ScenarioManagerFactory._build_manager()._hard_delete(ScenarioId(entity_id), *args, **kwargs)
     if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManagerFactory._build_manager()._hard_delete(PipelineId(entity_id))
+        return _PipelineManagerFactory._build_manager()._hard_delete(PipelineId(entity_id), *args, **kwargs)
     if entity_id.startswith(Task._ID_PREFIX):
-        return _TaskManagerFactory._build_manager()._hard_delete(TaskId(entity_id))
+        return _TaskManagerFactory._build_manager()._hard_delete(TaskId(entity_id), *args, **kwargs)
     if entity_id.startswith(DataNode._ID_PREFIX):
-        return _DataManagerFactory._build_manager()._delete(DataNodeId(entity_id))
+        return _DataManagerFactory._build_manager()._delete(DataNodeId(entity_id), *args, **kwargs)
     raise ModelNotFound("NOT_DETERMINED", entity_id)
 
 
-def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> List[Scenario]:
+def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None, *args, **kwargs) -> List[Scenario]:
     """Return the list of all existing scenarios filtered by a cycle or a tag.
 
     If both _cycle_ and _tag_ are provided, the returned list contains scenarios
@@ -158,18 +157,18 @@ def get_scenarios(cycle: Optional[Cycle] = None, tag: Optional[str] = None) -> L
         List[Scenario^]: The list of scenarios filtered by cycle or tag.
     """
     if not cycle and not tag:
-        return _ScenarioManagerFactory._build_manager()._get_all()
+        return _ScenarioManagerFactory._build_manager()._get_all(*args, **kwargs)
     if cycle and not tag:
-        return _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
+        return _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle, *args, **kwargs)
     if not cycle and tag:
-        return _ScenarioManagerFactory._build_manager()._get_all_by_tag(tag)
+        return _ScenarioManagerFactory._build_manager()._get_all_by_tag(tag, *args, **kwargs)
     if cycle and tag:
-        cycles_scenarios = _ScenarioManagerFactory._build_manager()()._get_all_by_cycle(cycle)
+        cycles_scenarios = _ScenarioManagerFactory._build_manager()()._get_all_by_cycle(cycle, *args, **kwargs)
         return [scenario for scenario in cycles_scenarios if scenario.has_tag(tag)]
     return []
 
 
-def get_primary(cycle: Cycle) -> Optional[Scenario]:
+def get_primary(cycle: Cycle, *args, **kwargs) -> Optional[Scenario]:
     """Return the primary scenario of a cycle.
 
     Parameters:
@@ -178,19 +177,19 @@ def get_primary(cycle: Cycle) -> Optional[Scenario]:
         Optional[Scenario^]: The primary scenario of the cycle _cycle_.
             If the cycle has no primary scenario, this method returns None.
     """
-    return _ScenarioManagerFactory._build_manager()._get_primary(cycle)
+    return _ScenarioManagerFactory._build_manager()._get_primary(cycle, *args, **kwargs)
 
 
-def get_primary_scenarios() -> List[Scenario]:
+def get_primary_scenarios(*args, **kwargs) -> List[Scenario]:
     """Return the list of all primary scenarios.
 
     Returns:
         List[Scenario^]: The list of all primary scenarios.
     """
-    return _ScenarioManagerFactory._build_manager()._get_primary_scenarios()
+    return _ScenarioManagerFactory._build_manager()._get_primary_scenarios(*args, **kwargs)
 
 
-def set_primary(scenario: Scenario):
+def set_primary(scenario: Scenario, *args, **kwargs):
     """Promote a scenario as the primary scenario of its cycle.
 
     If the cycle of _scenario_ already has a primary scenario, it is demoted and
@@ -199,10 +198,10 @@ def set_primary(scenario: Scenario):
     Parameters:
         scenario (Scenario^): The scenario to promote as _primary_.
     """
-    return _ScenarioManagerFactory._build_manager()._set_primary(scenario)
+    return _ScenarioManagerFactory._build_manager()._set_primary(scenario, *args, **kwargs)
 
 
-def tag(scenario: Scenario, tag: str):
+def tag(scenario: Scenario, tag: str, *args, **kwargs):
     """Add a tag to a scenario.
 
     If the _scenario_'s cycle already has another scenario tagged with _tag_, then this other
@@ -212,20 +211,24 @@ def tag(scenario: Scenario, tag: str):
         scenario (Scenario^): The scenario to tag.
         tag (str): The tag to apply to the scenario.
     """
-    return _ScenarioManagerFactory._build_manager()._tag(scenario, tag)
+    return _ScenarioManagerFactory._build_manager()._tag(scenario, tag, *args, **kwargs)
 
 
-def untag(scenario: Scenario, tag: str):
+def untag(scenario: Scenario, tag: str, *args, **kwargs):
     """Remove a tag from a scenario.
 
     Parameters:
         scenario (Scenario^): The scenario to remove the tag from.
         tag (str): The _tag_ to remove from _scenario_.
     """
-    return _ScenarioManagerFactory._build_manager()._untag(scenario, tag)
+    return _ScenarioManagerFactory._build_manager()._untag(scenario, tag, *args, **kwargs)
 
 
-def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] = None):
+def compare_scenarios(
+    *scenarios: Scenario,
+    data_node_config_id: Optional[str] = None,
+    **kwargs,
+) -> List[Scenario]:
     """Compare the data nodes of several scenarios.
 
     You can specify which data node config identifier should the comparison be performed
@@ -247,10 +250,12 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
         NonExistingScenarioConfig^: The scenario config of the provided scenarios could not
             be found.
     """
-    return _ScenarioManagerFactory._build_manager()._compare(*scenarios, data_node_config_id=data_node_config_id)
+    return _ScenarioManagerFactory._build_manager()._compare(
+        *scenarios, data_node_config_id=data_node_config_id, **kwargs
+    )
 
 
-def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
+def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None, *args, **kwargs):
     """Subscribe a function to be called on job status change.
 
     The subscription is applied to all jobs created for the execution of _scenario_.
@@ -264,10 +269,12 @@ def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Opti
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _ScenarioManagerFactory._build_manager()._subscribe(callback, scenario)
+    return _ScenarioManagerFactory._build_manager()._subscribe(callback, scenario, *args, **kwargs)
 
 
-def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
+def unsubscribe_scenario(
+    callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None, *args, **kwargs
+):
     """Unsubscribe a function that is called when the status of a `Job^` changes.
 
     If _scenario_ is not provided, the subscription is removed for all scenarios.
@@ -279,10 +286,10 @@ def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Op
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, scenario)
+    return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, scenario, *args, **kwargs)
 
 
-def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None, *args, **kwargs):
     """Subscribe a function to be called on job status change.
 
     The subscription is applied to all jobs created for the execution of _pipeline_.
@@ -295,10 +302,12 @@ def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Opti
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _PipelineManagerFactory._build_manager()._subscribe(callback, pipeline)
+    return _PipelineManagerFactory._build_manager()._subscribe(callback, pipeline, *args, **kwargs)
 
 
-def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+def unsubscribe_pipeline(
+    callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None, *args, **kwargs
+):
     """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:
@@ -309,28 +318,28 @@ def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Op
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _PipelineManagerFactory._build_manager()._unsubscribe(callback, pipeline)
+    return _PipelineManagerFactory._build_manager()._unsubscribe(callback, pipeline, *args, **kwargs)
 
 
-def get_pipelines() -> List[Pipeline]:
+def get_pipelines(*args, **kwargs) -> List[Pipeline]:
     """Return all existing pipelines.
 
     Returns:
         List[Pipeline^]: The list of all pipelines.
     """
-    return _PipelineManagerFactory._build_manager()._get_all()
+    return _PipelineManagerFactory._build_manager()._get_all(*args, **kwargs)
 
 
-def get_jobs() -> List[Job]:
+def get_jobs(*args, **kwargs) -> List[Job]:
     """Return all the existing jobs.
 
     Returns:
         List[Job^]: The list of all jobs.
     """
-    return _JobManagerFactory._build_manager()._get_all()
+    return _JobManagerFactory._build_manager()._get_all(*args, **kwargs)
 
 
-def delete_job(job: Job, force=False):
+def delete_job(job: Job, force=False, *args, **kwargs):
     """Delete a job.
 
     Parameters:
@@ -340,15 +349,15 @@ def delete_job(job: Job, force=False):
     Raises:
         JobNotDeletedException^: If the job is not finished.
     """
-    return _JobManagerFactory._build_manager()._delete(job, force)
+    return _JobManagerFactory._build_manager()._delete(job, force, *args, **kwargs)
 
 
-def delete_jobs():
+def delete_jobs(*args, **kwargs):
     """Delete all jobs."""
-    return _JobManagerFactory._build_manager()._delete_all()
+    return _JobManagerFactory._build_manager()._delete_all(*args, **kwargs)
 
 
-def get_latest_job(task: Task) -> Optional[Job]:
+def get_latest_job(task: Task, *args, **kwargs) -> Optional[Job]:
     """Return the latest job of a task.
 
     Parameters:
@@ -357,29 +366,29 @@ def get_latest_job(task: Task) -> Optional[Job]:
         Optional[Job^]: The latest job created from _task_. This is None if no job has been
             created from _task_.
     """
-    return _JobManagerFactory._build_manager()._get_latest(task)
+    return _JobManagerFactory._build_manager()._get_latest(task, *args, **kwargs)
 
 
-def get_data_nodes() -> List[DataNode]:
+def get_data_nodes(*args, **kwargs) -> List[DataNode]:
     """Return all the existing data nodes.
 
     Returns:
         List[DataNode^]: The list of all data nodes.
     """
-    return _DataManagerFactory._build_manager()._get_all()
+    return _DataManagerFactory._build_manager()._get_all(*args, **kwargs)
 
 
-def get_cycles() -> List[Cycle]:
+def get_cycles(*args, **kwargs) -> List[Cycle]:
     """Return the list of all existing cycles.
 
     Returns:
         List[Cycle^]: The list of all cycles.
     """
-    return _CycleManagerFactory._build_manager()._get_all()
+    return _CycleManagerFactory._build_manager()._get_all(*args, **kwargs)
 
 
 def create_scenario(
-    config: ScenarioConfig, creation_date: Optional[datetime] = None, name: Optional[str] = None
+    config: ScenarioConfig, creation_date: Optional[datetime] = None, name: Optional[str] = None, *args, **kwargs
 ) -> Scenario:
     """Create and return a new scenario from a scenario configuration.
 
@@ -394,10 +403,10 @@ def create_scenario(
     Returns:
         Scenario^: The new scenario.
     """
-    return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name)
+    return _ScenarioManagerFactory._build_manager()._create(config, creation_date, name, *args, **kwargs)
 
 
-def create_pipeline(config: PipelineConfig) -> Pipeline:
+def create_pipeline(config: PipelineConfig, *args, **kwargs) -> Pipeline:
     """Create and return a new pipeline from a pipeline configuration.
 
     Parameters:
@@ -405,10 +414,10 @@ def create_pipeline(config: PipelineConfig) -> Pipeline:
     Returns:
         Pipeline^: The new pipeline.
     """
-    return _PipelineManagerFactory._build_manager()._get_or_create(config)
+    return _PipelineManagerFactory._build_manager()._get_or_create(config, *args, **kwargs)
 
 
-def clean_all_entities() -> bool:
+def clean_all_entities(*args, **kwargs) -> bool:
     """Delete all entities from the Taipy data folder.
 
     !!! important
@@ -421,10 +430,10 @@ def clean_all_entities() -> bool:
         __logger.warning("Please set 'clean_entities_enabled' to True to clean all entities.")
         return False
 
-    _DataManagerFactory._build_manager()._delete_all()
-    _TaskManagerFactory._build_manager()._delete_all()
-    _PipelineManagerFactory._build_manager()._delete_all()
-    _ScenarioManagerFactory._build_manager()._delete_all()
-    _CycleManagerFactory._build_manager()._delete_all()
-    _JobManagerFactory._build_manager()._delete_all()
+    _DataManagerFactory._build_manager()._delete_all(*args, **kwargs)
+    _TaskManagerFactory._build_manager()._delete_all(*args, **kwargs)
+    _PipelineManagerFactory._build_manager()._delete_all(*args, **kwargs)
+    _ScenarioManagerFactory._build_manager()._delete_all(*args, **kwargs)
+    _CycleManagerFactory._build_manager()._delete_all(*args, **kwargs)
+    _JobManagerFactory._build_manager()._delete_all(*args, **kwargs)
     return True
