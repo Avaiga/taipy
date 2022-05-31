@@ -135,13 +135,13 @@ def get_context_id(state: State) -> t.Optional[str]:
     return None
 
 def invoke_state_callback(gui: Gui, context_id: str, user_callback: t.Callable, args: t.Union[t.Tuple, t.List]):
-    """Invoke a user defined function with state (^State) as first parameter and args other parameters
+    """Invoke a user callback with context.
 
     Arguments:
         gui (Gui^): The current gui instance.
-        context_id: The context id as returned by ^get_context_id.
-        user_callback (Callable[[State, ...], None): A user defined function that takes parameters of which the first one should be a state (^State).
-        args: A list/tuple of arguments.
+        context_id: The context id as returned by get_context_id()^.
+        user_callback (Callable[[State, ...], None): The user-defined function that is invoked. The first parameter of this function must be a State^.
+        args: The remaining arguments, as a List or a Tuple.
     """
     if isinstance(gui, Gui):
         gui._call_user_callback(context_id, user_callback, list(args))
