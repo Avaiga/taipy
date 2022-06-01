@@ -224,6 +224,8 @@ class _Factory:
                 ("format",),
                 ("orientation"),
                 ("hover_text", _AttributeType.dynamic_string),
+                ("width",),
+                ("height",),
             ]
         ),
         "input": lambda gui, control_type, attrs: _Builder(

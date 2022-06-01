@@ -33,9 +33,11 @@ def test_sending_messages_in_group(gui: Gui, helpers):
     assert gui._bindings()._get_all_scopes()[sid].btn_id == "button1"  # type: ignore
 
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
+        gui._set_client_id(sid)
         with gui as aGui:
             aGui._Gui__state.name = "Monde!"
             aGui._Gui__state.btn_id = "button2"
+        gui._reset_client_id()
 
     assert gui._bindings()._get_all_scopes()[sid].name == "Monde!"
     assert gui._bindings()._get_all_scopes()[sid].btn_id == "button2"  # type: ignore

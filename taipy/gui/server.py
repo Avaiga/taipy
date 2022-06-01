@@ -19,7 +19,7 @@ import webbrowser
 import socket
 
 import __main__
-from flask import Blueprint, Flask, json, jsonify, render_template, render_template_string, request, send_from_directory
+from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from flask_talisman import Talisman
@@ -120,8 +120,8 @@ class _Server:
                 return send_from_directory(static_folder + os.path.sep, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
-                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
-                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
+                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1:])
             if hasattr(__main__, "__file__") and os.path.isfile(
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):
@@ -154,30 +154,34 @@ class _Server:
         return jsonify(data)
 
     def _render_page(self, page_name: str) -> t.Any:
-        page = None
-        # Get page instance
-        for page_i in self._gui._config.pages:
-            if page_i._route == page_name:
-                page = page_i
-                break
-        # try partials
-        if page is None:
-            page = self._gui._get_partial(page_name)
-        # Make sure that there is a page instance found
-        if page is None:
-            return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-        page.render(self._gui)
-        if (
-            page_name == self._root_page_name
-            and page._rendered_jsx is not None
-            and "<PageContent" not in page._rendered_jsx
-        ):
-            page._rendered_jsx += "<PageContent />"
-        # Return jsx page
-        if page._rendered_jsx is not None:
-            return self._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
-        else:
-            return ("No page template", 404)
+        try:
+            self._gui._set_client_id()
+            page = None
+            # Get page instance
+            for page_i in self._gui._config.pages:
+                if page_i._route == page_name:
+                    page = page_i
+                    break
+            # try partials
+            if page is None:
+                page = self._gui._get_partial(page_name)
+            # Make sure that there is a page instance found
+            if page is None:
+                return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+            page.render(self._gui)
+            if (
+                page_name == self._root_page_name
+                and page._rendered_jsx is not None
+                and "<PageContent" not in page._rendered_jsx
+            ):
+                page._rendered_jsx += "<PageContent />"
+            # Return jsx page
+            if page._rendered_jsx is not None:
+                return self._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
+            else:
+                return ("No page template", 404)
+        finally:
+            self._gui._reset_client_id()
 
     def _render_route(self) -> t.Any:
         router = '<Routes key="routes">'
@@ -236,7 +240,8 @@ class _Server:
             result = sock.connect_ex((host_value, port))
             sock.close()
             if result == 0:
-                raise ConnectionError(f"Port {port} is already opened on {host_value}. You have another server application running on the same port.")
+                raise ConnectionError(
+                    f"Port {port} is already opened on {host_value}. You have another server application running on the same port.")
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
