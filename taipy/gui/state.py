@@ -67,8 +67,9 @@ class State:
     """
 
     __attrs = ("_gui", "_user_var_list")
-    __methods = ("assign",)
+    __methods = ("assign", "_get_placeholder", "_set_placeholder", "_get_gui_attr", "_get_placeholder_attrs")
     __gui_attr = "_gui"
+    __placeholder_attrs = ("_taipy_p1",)
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
         super().__setattr__(State.__attrs[1], list(var_list))
@@ -96,6 +97,20 @@ class State:
             if not hasattr(gui._bindings(), name):
                 gui._bind_var(name)
             setattr(gui._bindings(), name, value)
+
+    def _get_placeholder(self, name: str):
+        if name in State.__placeholder_attrs:
+            super().__getattribute__(name)
+
+    def _set_placeholder(self, name: str, value: t.Any):
+        if name in State.__placeholder_attrs:
+            super().__setattr__(name, value)
+
+    def _get_gui_attr(self):
+        return State.__gui_attr
+
+    def _get_placeholder_attrs(self):
+        return State.__placeholder_attrs
 
     def assign(self, name: str, value: t.Any) -> t.Any:
         """Assign a value to a state variable.
