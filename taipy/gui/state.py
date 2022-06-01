@@ -72,8 +72,13 @@ class State:
     __placeholder_attrs = ("_taipy_p1",)
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
-        super().__setattr__(State.__attrs[1], list(var_list))
+        self.__excluded_attrs = State.__attrs + State.__methods + State.__placeholder_attrs
+        super().__setattr__(State.__attrs[1], list(State.__filter_var_list(var_list, self.__excluded_attrs)))
         super().__setattr__(State.__attrs[0], gui)
+
+    @staticmethod
+    def __filter_var_list(var_list: t.Iterable[str], excluded_attrs: t.Iterable[str]) -> t.Iterable[str]:
+        return filter(lambda n: n not in excluded_attrs, var_list)
 
     def __getattribute__(self, name: str) -> t.Any:
         if name in State.__methods:
@@ -81,6 +86,8 @@ class State:
         gui = super().__getattribute__(State.__attrs[0])
         if name == State.__gui_attr:
             return gui
+        if name in self.__excluded_attrs:
+            raise AttributeError(f"Variable '{name}' is protected and is not accessible.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
         if not hasattr(gui._bindings(), name):
@@ -88,15 +95,12 @@ class State:
         return getattr(gui._bindings(), name)
 
     def __setattr__(self, name: str, value: t.Any) -> None:
-        if name in State.__attrs:
-            super().__setattr__(name, value)
-        else:
-            if name not in super().__getattribute__(State.__attrs[1]):
-                raise AttributeError(f"Variable '{name}' is not accessible.")
-            gui = super().__getattribute__(State.__attrs[0])
-            if not hasattr(gui._bindings(), name):
-                gui._bind_var(name)
-            setattr(gui._bindings(), name, value)
+        if name not in super().__getattribute__(State.__attrs[1]):
+            raise AttributeError(f"Variable '{name}' is not accessible.")
+        gui = super().__getattribute__(State.__attrs[0])
+        if not hasattr(gui._bindings(), name):
+            gui._bind_var(name)
+        setattr(gui._bindings(), name, value)
 
     def _get_placeholder(self, name: str):
         if name in State.__placeholder_attrs:
