@@ -679,6 +679,16 @@ class Gui:
             args = args[:arg_count]
         return user_function(*args)
 
+    def _call_user_callback(self, context_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
+        self._set_client_id(context_id)
+        try:
+            return self._call_function_with_state(user_callback, args)
+        except Exception as e:
+            warnings.warn(f"invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
+        finally:
+            self._reset_client_id()
+        return None
+
     # Proxy methods for Evaluator
     def _evaluate_expr(self, expr: str) -> t.Any:
         return self.__evaluator.evaluate_expr(self, expr)
