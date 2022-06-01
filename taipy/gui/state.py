@@ -100,7 +100,8 @@ class State:
 
     def _get_placeholder(self, name: str):
         if name in State.__placeholder_attrs:
-            super().__getattribute__(name)
+            return super().__getattribute__(name)
+        return None
 
     def _set_placeholder(self, name: str, value: t.Any):
         if name in State.__placeholder_attrs:
