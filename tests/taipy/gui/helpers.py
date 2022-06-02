@@ -68,6 +68,17 @@ class Helpers:
         logging.getLogger().debug(payload["payload"]["value"])
 
     @staticmethod
+    def assert_outward_ws_simple_message(received_message, aType, values):
+        assert isinstance(received_message, dict)
+        assert "name" in received_message and received_message["name"] == "message"
+        assert "args" in received_message
+        args = received_message["args"]
+        assert "type" in args and args["type"] == aType
+        for k, v in values.items():
+            assert k in args and args[k] == v
+            logging.getLogger().debug(f"{k}: {args[k]}")
+
+    @staticmethod
     def assert_outward_ws_multiple_message(received_message, type, array_len: int):
         assert isinstance(received_message, dict)
         assert "name" in received_message and received_message["name"] == "message"
