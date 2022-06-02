@@ -70,10 +70,10 @@ class State:
     __methods = ("assign", "_get_placeholder", "_set_placeholder", "_get_gui_attr", "_get_placeholder_attrs")
     __gui_attr = "_gui"
     __placeholder_attrs = ("_taipy_p1",)
+    __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
     def __init__(self, gui: "Gui", var_list: t.Iterable[str]) -> None:
-        self.__excluded_attrs = State.__attrs + State.__methods + State.__placeholder_attrs
-        super().__setattr__(State.__attrs[1], list(State.__filter_var_list(var_list, self.__excluded_attrs)))
+        super().__setattr__(State.__attrs[1], list(State.__filter_var_list(var_list, State.__excluded_attrs)))
         super().__setattr__(State.__attrs[0], gui)
 
     @staticmethod
@@ -86,7 +86,7 @@ class State:
         gui = super().__getattribute__(State.__attrs[0])
         if name == State.__gui_attr:
             return gui
-        if name in self.__excluded_attrs:
+        if name in State.__excluded_attrs:
             raise AttributeError(f"Variable '{name}' is protected and is not accessible.")
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not defined.")
@@ -104,7 +104,10 @@ class State:
 
     def _get_placeholder(self, name: str):
         if name in State.__placeholder_attrs:
-            return super().__getattribute__(name)
+            try:
+                return super().__getattribute__(name)
+            except AttributeError:
+                return None
         return None
 
     def _set_placeholder(self, name: str, value: t.Any):
