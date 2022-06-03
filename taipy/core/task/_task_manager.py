@@ -40,8 +40,8 @@ class _TaskManager(_Manager[Task]):
 
     @classmethod
     def _set(cls, task: Task, *args, **kwargs):  # type: ignore
-        cls.__save_data_nodes(task.input.values())
-        cls.__save_data_nodes(task.output.values())
+        cls.__save_data_nodes(task.input.values(), *args, **kwargs)
+        cls.__save_data_nodes(task.output.values(), *args, **kwargs)
         super()._set(task, *args, **kwargs)
 
     @classmethod

@@ -13,13 +13,14 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
-from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
-from taipy.core.cycle.cycle import Cycle
 from taipy.core.job._job_manager_factory import _JobManagerFactory
+
+from taipy.core._manager._manager import _Manager
+from taipy.core.cycle.cycle import Cycle
 
 
 class _CycleManager(_Manager[Cycle]):
@@ -41,16 +42,14 @@ class _CycleManager(_Manager[Cycle]):
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date, *args, **properties)
         end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date, *args, **properties)
         properties["display_name"] = display_name if display_name else start_date.isoformat()
-        cls._clean_properties(*args, **properties)
-        cycle = Cycle(
-            frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
-        )
+        prop = cls._clean_properties(properties)
+        cycle = Cycle(frequency, prop, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name)
         cls._set(cycle, *args, **properties)
         return cycle
 
     @classmethod
-    def _clean_properties(cls, *args, **kwargs):
-        pass
+    def _clean_properties(cls, prop):
+        return prop
 
     @classmethod
     def _get_or_create(
