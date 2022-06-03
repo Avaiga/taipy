@@ -18,28 +18,28 @@ if t.TYPE_CHECKING:
 
 def _getscopeattr(gui: "Gui", name: str, *more) -> t.Any:
     if more:
-        return getattr(gui._bindings()._get_data_scope(), name, more[0])
-    return getattr(gui._bindings()._get_data_scope(), name)
+        return getattr(gui._get_data_scope(), name, more[0])
+    return getattr(gui._get_data_scope(), name)
 
 
 def _getscopeattr_drill(gui: "Gui", name: str) -> t.Any:
-    return attrgetter(name)(gui._bindings()._get_data_scope())
+    return attrgetter(name)(gui._get_data_scope())
 
 
 def _setscopeattr(gui: "Gui", name: str, value: t.Any):
-    setattr(gui._bindings()._get_data_scope(), name, value)
+    setattr(gui._get_data_scope(), name, value)
 
 
 def _setscopeattr_drill(gui: "Gui", name: str, value: t.Any):
-    _attrsetter(gui._bindings()._get_data_scope(), name, value)
+    _attrsetter(gui._get_data_scope(), name, value)
 
 
 def _hasscopeattr(gui: "Gui", name: str) -> bool:
-    return hasattr(gui._bindings()._get_data_scope(), name)
+    return hasattr(gui._get_data_scope(), name)
 
 
 def _delscopeattr(gui: "Gui", name: str):
-    delattr(gui._bindings()._get_data_scope(), name)
+    delattr(gui._get_data_scope(), name)
 
 
 def _attrsetter(obj: object, attr_str: str, value: object) -> None:

@@ -29,15 +29,12 @@ def test_invoke_state_callback(gui: Gui, helpers):
     gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
-    # WS client and emit
-    ws_client = gui._server._ws.test_client(gui._server.get_flask())
-    sid = helpers.create_scope_and_get_sid(gui)
+    # client id
+    cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test?client_id={sid}")
-    invoke_state_callback(gui, sid, user_callback, [])
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    invoke_state_callback(gui, cid, user_callback, [])
 
-    gui._set_client_id(sid)
-    assert gui._Gui__state.val == 10
-    gui._reset_client_id()
-
-
+    with gui._Gui__lock as l:
+        l.set_client_id(cid)
+        assert gui._Gui__state.val == 10

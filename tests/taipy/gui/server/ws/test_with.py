@@ -26,21 +26,21 @@ def test_sending_messages_in_group(gui: Gui, helpers):
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
-    sid = helpers.create_scope_and_get_sid(gui)
+    cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test?client_id={sid}")
-    assert gui._bindings()._get_all_scopes()[sid].name == "World!"  # type: ignore
-    assert gui._bindings()._get_all_scopes()[sid].btn_id == "button1"  # type: ignore
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    assert gui._bindings()._get_all_scopes()[cid].name == "World!"  # type: ignore
+    assert gui._bindings()._get_all_scopes()[cid].btn_id == "button1"  # type: ignore
 
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
-        gui._set_client_id(sid)
-        with gui as aGui:
-            aGui._Gui__state.name = "Monde!"
-            aGui._Gui__state.btn_id = "button2"
-        gui._reset_client_id()
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        with gui._Gui__lock as l:
+            l.set_client_id(cid)
+            with gui as aGui:
+                aGui._Gui__state.name = "Monde!"
+                aGui._Gui__state.btn_id = "button2"
 
-    assert gui._bindings()._get_all_scopes()[sid].name == "Monde!"
-    assert gui._bindings()._get_all_scopes()[sid].btn_id == "button2"  # type: ignore
+    assert gui._bindings()._get_all_scopes()[cid].name == "Monde!"
+    assert gui._bindings()._get_all_scopes()[cid].btn_id == "button2"  # type: ignore
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_multiple_message(received_messages[0], "MS", 2)

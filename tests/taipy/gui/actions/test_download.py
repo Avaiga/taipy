@@ -29,13 +29,13 @@ def test_download(gui: Gui, helpers):
     flask_client = gui._server.test_client()
     # WS client and emit
     ws_client = gui._server._ws.test_client(gui._server.get_flask())
-    sid = helpers.create_scope_and_get_sid(gui)
+    cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    flask_client.get(f"/taipy-jsx/test?client_id={sid}")
-    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={sid}", data={"client_id": sid}):
-        gui._set_client_id(sid)
-        download(gui._Gui__state, "some text", "filename.txt", "on_download_action")
-        gui._reset_client_id()
+    flask_client.get(f"/taipy-jsx/test?client_id={cid}")
+    with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
+        with gui._Gui__lock as l:
+            l.set_client_id(cid)
+            download(gui._Gui__state, "some text", "filename.txt", "on_download_action")
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "DF", {"name": "filename.txt", "on_action": "on_download_action"})
