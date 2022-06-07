@@ -67,7 +67,7 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils.lockbyclientid import _LockByClientId
+from .utils.contextforstate import _ContextForState
 
 
 class Gui:
@@ -169,7 +169,7 @@ class Gui:
         self.__frame = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back)
 
         # lock by client id
-        self.__lock = _LockByClientId()
+        self.__state_context = _ContextForState()
 
         # Preserve server config for server initialization
         self._path_mapping = path_mapping
@@ -260,8 +260,11 @@ class Gui:
     def _bind(self, name: str, value: t.Any) -> None:
         self._bindings()._bind(name, value)
 
-    def _get_state(self, client_id: str):
-        return self.__state._specify(client_id)
+    def _get_state(self):
+        return self.__state
+
+    def __get_state(self):
+        return self.__state
 
     def __get_client_id_from_request(self, client_id: t.Optional[str] = None):
         if not client_id and request:
@@ -277,12 +280,12 @@ class Gui:
         return client_id
 
     def _get_client_id(self) -> t.Optional[str]:
-        return self.__lock.get_client_id()
+        return self.__state_context.get_client_id()
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
-            with self.__lock as l:
-                l.set_client_id(self.__get_client_id_from_request(message.get("client_id")))
+            with self.__state_context as c:
+                c.set_client_id(self.__get_client_id_from_request(message.get("client_id")))
                 if msg_type == _WsType.UPDATE.value:
                     payload = message.get("payload", {})
                     self.__front_end_update(
@@ -383,7 +386,7 @@ class Gui:
                 argcount = on_change_fn.__code__.co_argcount
                 args: t.List[t.Any] = [None for _ in range(argcount)]
                 if argcount > 0:
-                    args[0] = self.__state
+                    args[0] = self.__get_state()
                 if argcount > 1:
                     args[1] = var_name
                 if argcount > 2:
@@ -397,8 +400,8 @@ class Gui:
         return Gui.__CONTENT_ROOT + ret_value[0] if isinstance(ret_value, tuple) else ret_value
 
     def __serve_content(self, path: str) -> t.Any:
-        with self.__lock as l:
-            l.set_client_id(self.__get_client_id_from_request())
+        with self.__state_context as c:
+            c.set_client_id(self.__get_client_id_from_request())
             parts = path.split("/")
             if len(parts) > 1:
                 file_name = parts[-1]
@@ -410,8 +413,8 @@ class Gui:
             return ("", 404)
 
     def __upload_files(self):
-        with self.__lock as l:
-            l.set_client_id(self.__get_client_id_from_request())
+        with self.__state_context as c:
+            c.set_client_id(self.__get_client_id_from_request())
             if "var_name" not in request.form:
                 warnings.warn("No var name")
                 return ("No var name", 400)
@@ -665,7 +668,7 @@ class Gui:
                 argcount = action_function.__code__.co_argcount
                 args = [None for _ in range(argcount)]
                 if argcount > 0:
-                    args[0] = self.__state
+                    args[0] = self.__get_state()
                 if argcount > 1:
                     args[1] = id
                 if argcount > 2:
@@ -679,7 +682,7 @@ class Gui:
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
-        args.insert(0, self.__state)
+        args.insert(0, self.__get_state())
         arg_count = user_function.__code__.co_argcount
         if arg_count > len(args):
             args += (arg_count - len(args)) * [None]
@@ -689,8 +692,8 @@ class Gui:
 
     def _call_user_callback(self, context_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
         try:
-            with self.__lock as l:
-                l.set_client_id(context_id)
+            with self.__state_context as c:
+                c.set_client_id(context_id)
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
             warnings.warn(f"invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
@@ -1055,8 +1058,8 @@ class Gui:
         self.__send_ws_navigate(to)
 
     def __init_route(self):
-        with self.__lock as l:
-            l.set_client_id(self.__get_client_id_from_request())
+        with self.__state_context as c:
+            c.set_client_id(self.__get_client_id_from_request())
             if hasattr(self, "on_init") and callable(self.on_init):
                 if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
                     _setscopeattr(self, Gui.__ON_INIT_NAME, True)
@@ -1067,8 +1070,8 @@ class Gui:
             return self._render_route()
 
     def __render_page(self, page_name: str) -> t.Any:
-        with self.__lock as l:
-            l.set_client_id(self.__get_client_id_from_request())
+        with self.__state_context as c:
+            c.set_client_id(self.__get_client_id_from_request())
             page = None
             # Get page instance
             for page_i in self._config.pages:
