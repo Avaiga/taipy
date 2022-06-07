@@ -31,7 +31,7 @@ class _DataScopes:
     def get_single_client(self) -> bool:
         return self.__single_client
 
-    def get_scope(self, client_id) -> SimpleNamespace:
+    def get_scope(self, client_id: t.Optional[str]) -> SimpleNamespace:
         if self.__single_client:
             return self.__scopes[_DataScopes._GLOBAL_ID]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
