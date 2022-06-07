@@ -595,7 +595,8 @@ class Gui:
             return None
         sid = getattr(request, "sid", None) if request else None
         sids = self.__client_id_2_sid.get(self._get_client_id(), set())
-        sids.add(sid)
+        if sid:
+            sids.add(sid)
         return list(sids)
 
     def __get_message_grouping(self):
