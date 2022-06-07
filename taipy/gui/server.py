@@ -59,7 +59,6 @@ class _Server:
         # Add cors for frontend access
         self._ws = SocketIO(
             self._flask,
-            async_mode=None,
             cors_allowed_origins="*",
             ping_timeout=10,
             ping_interval=5,
@@ -189,4 +188,4 @@ class _Server:
             self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
-        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader, ssl_context=ssl_context)
+        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)

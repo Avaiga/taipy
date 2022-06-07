@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-
+from flask import g
 from taipy.gui import Gui, State, Markdown, download
 
 
@@ -33,9 +33,8 @@ def test_download(gui: Gui, helpers):
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        with gui._Gui__lock as l:
-            l.set_client_id(cid)
-            download(gui._Gui__state, "some text", "filename.txt", "on_download_action")
+        g.client_id = cid
+        download(gui._Gui__state, "some text", "filename.txt", "on_download_action")
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "DF", {"name": "filename.txt", "on_action": "on_download_action"})

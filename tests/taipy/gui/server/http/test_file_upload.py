@@ -17,6 +17,7 @@ import pytest
 
 from taipy.gui import Gui
 from taipy.gui.utils import _get_non_existent_file_path
+from taipy.gui.data.data_scope import _DataScopes
 
 
 def test_file_upload_no_varname(gui: Gui, helpers):
@@ -101,11 +102,11 @@ def test_file_upload_multi_part(gui: Gui, helpers):
 
 def test_file_upload_multiple(gui: Gui, helpers):
     var_name = "varname"
-    gui._bind_var_val(var_name, None)
-    gui.run(run_server=False)
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
+    gui._bind_var_val(var_name, None)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
-    sid = helpers.create_scope_and_get_sid(gui)
+    sid = _DataScopes._GLOBAL_ID
     file = (io.BytesIO(b"abcdef"), "test.jpg")
     ret = flask_client.post(
         f"/taipy-uploads?client_id={sid}", data={"var_name": var_name, "blob": file}, content_type="multipart/form-data"

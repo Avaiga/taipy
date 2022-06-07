@@ -17,9 +17,12 @@ from types import SimpleNamespace
 
 
 class _DataScopes:
+
+    _GLOBAL_ID = "global"
+
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {}
-        self.__scopes["global"] = SimpleNamespace()
+        self.__scopes[_DataScopes._GLOBAL_ID] = SimpleNamespace()
         self.__single_client = True
 
     def set_single_client(self, value: bool) -> None:
@@ -30,11 +33,11 @@ class _DataScopes:
 
     def get_scope(self, client_id) -> SimpleNamespace:
         if self.__single_client:
-            return self.__scopes["global"]
+            return self.__scopes[_DataScopes._GLOBAL_ID]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
         if not client_id:
             warnings.warn("Empty session id, using global scope instead")
-            return self.__scopes["global"]
+            return self.__scopes[_DataScopes._GLOBAL_ID]
         if client_id not in self.__scopes:
             warnings.warn(
                 f"session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you might have to reload your webpage"

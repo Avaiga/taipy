@@ -26,7 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, jsonify, request, send_from_directory
+from flask import Blueprint, Flask, jsonify, request, send_from_directory, g
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -38,6 +38,7 @@ from .config import Config, ConfigParameter, _Config
 from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
+from .data.data_scope import _DataScopes
 from .page import Page
 from .partial import Partial
 from .renderers import _EmptyPage
@@ -67,7 +68,6 @@ from .utils import (
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
-from .utils.contextforstate import _ContextForState
 
 
 class Gui:
@@ -168,9 +168,6 @@ class Gui:
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back)
 
-        # lock by client id
-        self.__state_context = _ContextForState()
-
         # Preserve server config for server initialization
         self._path_mapping = path_mapping
         self._flask = flask
@@ -260,9 +257,6 @@ class Gui:
     def _bind(self, name: str, value: t.Any) -> None:
         self._bindings()._bind(name, value)
 
-    def _get_state(self):
-        return self.__state
-
     def __get_state(self):
         return self.__state
 
@@ -280,29 +274,28 @@ class Gui:
         return client_id
 
     def _get_client_id(self) -> t.Optional[str]:
-        return self.__state_context.get_client_id()
+        return _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id")
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
-            with self.__state_context as c:
-                c.set_client_id(self.__get_client_id_from_request(message.get("client_id")))
-                if msg_type == _WsType.UPDATE.value:
-                    payload = message.get("payload", {})
-                    self.__front_end_update(
-                        str(message.get("name")),
-                        payload.get("value"),
-                        message.get("propagate", True),
-                        payload.get("relvar"),
-                        payload.get("on_change"),
-                    )
-                elif msg_type == _WsType.ACTION.value:
-                    self.__on_action(message.get("name"), message.get("payload"))
-                elif msg_type == _WsType.DATA_UPDATE.value:
-                    self.__request_data_update(str(message.get("name")), message.get("payload"))
-                elif msg_type == _WsType.REQUEST_UPDATE.value:
-                    self.__request_var_update(message.get("payload"))
-                elif msg_type == _WsType.CLIENT_ID.value:
-                    self._bindings()._get_or_create_scope(message.get("payload", ""))
+            g.client_id = self.__get_client_id_from_request(message.get("client_id"))
+            if msg_type == _WsType.UPDATE.value:
+                payload = message.get("payload", {})
+                self.__front_end_update(
+                    str(message.get("name")),
+                    payload.get("value"),
+                    message.get("propagate", True),
+                    payload.get("relvar"),
+                    payload.get("on_change"),
+                )
+            elif msg_type == _WsType.ACTION.value:
+                self.__on_action(message.get("name"), message.get("payload"))
+            elif msg_type == _WsType.DATA_UPDATE.value:
+                self.__request_data_update(str(message.get("name")), message.get("payload"))
+            elif msg_type == _WsType.REQUEST_UPDATE.value:
+                self.__request_var_update(message.get("payload"))
+            elif msg_type == _WsType.CLIENT_ID.value:
+                self._bindings()._get_or_create_scope(message.get("payload", ""))
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
@@ -400,68 +393,66 @@ class Gui:
         return Gui.__CONTENT_ROOT + ret_value[0] if isinstance(ret_value, tuple) else ret_value
 
     def __serve_content(self, path: str) -> t.Any:
-        with self.__state_context as c:
-            c.set_client_id(self.__get_client_id_from_request())
-            parts = path.split("/")
-            if len(parts) > 1:
-                file_name = parts[-1]
-                (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
-                    path[: -len(file_name) - 1], file_name, request.args.get("bypass")
-                )
-                if dir_path:
-                    return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
-            return ("", 404)
+        g.client_id = self.__get_client_id_from_request()
+        parts = path.split("/")
+        if len(parts) > 1:
+            file_name = parts[-1]
+            (dir_path, as_attachment) = self.__get_content_accessor().get_content_path(
+                path[: -len(file_name) - 1], file_name, request.args.get("bypass")
+            )
+            if dir_path:
+                return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
+        return ("", 404)
 
     def __upload_files(self):
-        with self.__state_context as c:
-            c.set_client_id(self.__get_client_id_from_request())
-            if "var_name" not in request.form:
-                warnings.warn("No var name")
-                return ("No var name", 400)
-            var_name = request.form["var_name"]
-            multiple = "multiple" in request.form and request.form["multiple"] == "True"
-            if "blob" not in request.files:
-                warnings.warn("No file part")
-                return ("No file part", 400)
-            file = request.files["blob"]
-            # If the user does not select a file, the browser submits an
-            # empty file without a filename.
-            if file.filename == "":
-                warnings.warn("No selected file")
-                return ("No selected file", 400)
-            suffix = ""
-            complete = True
-            part = 0
-            if "total" in request.form:
-                total = int(request.form["total"])
-                if total > 1 and "part" in request.form:
-                    part = int(request.form["part"])
-                    suffix = f".part.{part}"
-                    complete = part == total - 1
-            if file:  # and allowed_file(file.filename)
-                upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
-                file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
-                file.save(str(upload_path / (file_path.name + suffix)))
-                if complete:
-                    if part > 0:
-                        try:
-                            with open(file_path, "wb") as grouped_file:
-                                for nb in range(part + 1):
-                                    with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
-                                        grouped_file.write(part_file.read())
-                        except EnvironmentError as ee:
-                            warnings.warn(f"cannot group file after chunk upload {ee}")
-                            return
-                    # notify the file is uploaded
-                    newvalue = str(file_path)
-                    if multiple:
-                        value = _getscopeattr(self, var_name)
-                        if not isinstance(value, t.List):
-                            value = [] if value is None else [value]
-                        value.append(newvalue)
-                        newvalue = value
-                    setattr(self._bindings(), var_name, newvalue)
-            return ("", 200)
+        g.client_id = self.__get_client_id_from_request()
+        if "var_name" not in request.form:
+            warnings.warn("No var name")
+            return ("No var name", 400)
+        var_name = request.form["var_name"]
+        multiple = "multiple" in request.form and request.form["multiple"] == "True"
+        if "blob" not in request.files:
+            warnings.warn("No file part")
+            return ("No file part", 400)
+        file = request.files["blob"]
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == "":
+            warnings.warn("No selected file")
+            return ("No selected file", 400)
+        suffix = ""
+        complete = True
+        part = 0
+        if "total" in request.form:
+            total = int(request.form["total"])
+            if total > 1 and "part" in request.form:
+                part = int(request.form["part"])
+                suffix = f".part.{part}"
+                complete = part == total - 1
+        if file:  # and allowed_file(file.filename)
+            upload_path = pathlib.Path(self._get_config("upload_folder", tempfile.gettempdir())).resolve()
+            file_path = _get_non_existent_file_path(upload_path, secure_filename(file.filename))
+            file.save(str(upload_path / (file_path.name + suffix)))
+            if complete:
+                if part > 0:
+                    try:
+                        with open(file_path, "wb") as grouped_file:
+                            for nb in range(part + 1):
+                                with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
+                                    grouped_file.write(part_file.read())
+                    except EnvironmentError as ee:
+                        warnings.warn(f"cannot group file after chunk upload {ee}")
+                        return
+                # notify the file is uploaded
+                newvalue = str(file_path)
+                if multiple:
+                    value = _getscopeattr(self, var_name)
+                    if not isinstance(value, t.List):
+                        value = [] if value is None else [value]
+                    value.append(newvalue)
+                    newvalue = value
+                setattr(self._bindings(), var_name, newvalue)
+        return ("", 200)
 
     def __send_var_list_update(
         self,
@@ -692,8 +683,8 @@ class Gui:
 
     def _call_user_callback(self, context_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
         try:
-            with self.__state_context as c:
-                c.set_client_id(context_id)
+            with self.get_flask_app().app_context():
+                g.client_id = context_id
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
             warnings.warn(f"invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
@@ -1058,44 +1049,42 @@ class Gui:
         self.__send_ws_navigate(to)
 
     def __init_route(self):
-        with self.__state_context as c:
-            c.set_client_id(self.__get_client_id_from_request())
-            if hasattr(self, "on_init") and callable(self.on_init):
-                if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
-                    _setscopeattr(self, Gui.__ON_INIT_NAME, True)
-                    try:
-                        self._call_function_with_state(self.on_init, [])
-                    except Exception as e:
-                        warnings.warn(f"Exception on on_init execution \n{e}")
-            return self._render_route()
+        g.client_id = self.__get_client_id_from_request()
+        if hasattr(self, "on_init") and callable(self.on_init):
+            if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
+                _setscopeattr(self, Gui.__ON_INIT_NAME, True)
+                try:
+                    self._call_function_with_state(self.on_init, [])
+                except Exception as e:
+                    warnings.warn(f"Exception on on_init execution \n{e}")
+        return self._render_route()
 
     def __render_page(self, page_name: str) -> t.Any:
-        with self.__state_context as c:
-            c.set_client_id(self.__get_client_id_from_request())
-            page = None
-            # Get page instance
-            for page_i in self._config.pages:
-                if page_i._route == page_name:
-                    page = page_i
-                    break
-            # try partials
-            if page is None:
-                page = self._get_partial(page_name)
-            # Make sure that there is a page instance found
-            if page is None:
-                return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-            page.render(self)
-            if (
-                page_name == self._server._root_page_name
-                and page._rendered_jsx is not None
-                and "<PageContent" not in page._rendered_jsx
-            ):
-                page._rendered_jsx += "<PageContent />"
-            # Return jsx page
-            if page._rendered_jsx is not None:
-                return self._server._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
-            else:
-                return ("No page template", 404)
+        g.client_id = self.__get_client_id_from_request()
+        page = None
+        # Get page instance
+        for page_i in self._config.pages:
+            if page_i._route == page_name:
+                page = page_i
+                break
+        # try partials
+        if page is None:
+            page = self._get_partial(page_name)
+        # Make sure that there is a page instance found
+        if page is None:
+            return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+        page.render(self)
+        if (
+            page_name == self._server._root_page_name
+            and page._rendered_jsx is not None
+            and "<PageContent" not in page._rendered_jsx
+        ):
+            page._rendered_jsx += "<PageContent />"
+        # Return jsx page
+        if page._rendered_jsx is not None:
+            return self._server._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
+        else:
+            return ("No page template", 404)
 
     def _render_route(self) -> t.Any:
         router = '<Routes key="routes">'

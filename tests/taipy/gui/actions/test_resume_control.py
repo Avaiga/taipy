@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-
+from flask import g
 from taipy.gui import Gui, Markdown, resume_control
 
 
@@ -30,9 +30,8 @@ def test_resume_control(gui: Gui, helpers):
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        with gui._Gui__lock as l:
-            l.set_client_id(cid)
-            resume_control(gui._Gui__state)
+        g.client_id = cid
+        resume_control(gui._Gui__state)
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "BL", {"message": None})

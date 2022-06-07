@@ -12,7 +12,7 @@
 from taipy.gui import Gui
 
 
-def test_indicator_md(gui: Gui, helpers):
+def test_indicator_md(gui: Gui, test_client, helpers):
     gui._bind_var_val("val", 15)
     md_string = "<|12|indicator|value={val}|min=1|max=20|format=%.2f|>"
     expected_list = [
@@ -28,7 +28,7 @@ def test_indicator_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_menu_html(gui: Gui, helpers):
+def test_menu_html(gui: Gui, test_client, helpers):
     gui._bind_var_val("val", 15)
     html_string = '<taipy:indicator value="{val}" min="1" max="20" format="%.2f" >12</taipy:indicator>'
     expected_list = [

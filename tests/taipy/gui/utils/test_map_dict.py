@@ -120,17 +120,14 @@ def test_map_dict_set(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.run(run_server=False)
-    cid = helpers.create_scope_and_get_sid(gui)
-    with gui._Gui__lock as l:
-        l.set_client_id(cid)
+    gui.run(run_server=False, single_client=True)
 
-        assert isinstance(gui._Gui__state.d, _MapDict)
-        gui._Gui__state.d = {"b": 2}
-        assert isinstance(gui._Gui__state.d, _MapDict)
-        assert len(gui._Gui__state.d) == 1
-        assert gui._Gui__state.d.get("a", None) is None
-        assert gui._Gui__state.d.get("b", None) == 2
+    assert isinstance(gui._Gui__state.d, _MapDict)
+    gui._Gui__state.d = {"b": 2}
+    assert isinstance(gui._Gui__state.d, _MapDict)
+    assert len(gui._Gui__state.d) == 1
+    assert gui._Gui__state.d.get("a", None) is None
+    assert gui._Gui__state.d.get("b", None) == 2
 
 
 def test_map_dict_items():

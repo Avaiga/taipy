@@ -16,7 +16,7 @@ from importlib import util
 from taipy.gui import Gui
 
 
-def test_file_download_url_md(gui: Gui, helpers):
+def test_file_download_url_md(gui: Gui, test_client, helpers):
     gui._bind_var_val("content", "some_url")
     md_string = "<|{content}|file_download|>"
     expected_list = [
@@ -27,7 +27,7 @@ def test_file_download_url_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_file_download_file_md(gui: Gui, helpers):
+def test_file_download_file_md(gui: Gui, test_client, helpers):
     with open((pathlib.Path(__file__).parent.parent / "resources" / "fred.png").resolve(), "rb") as content:
         gui._bind_var_val("content", content.read())
         md_string = "<|{content}|file_download|>"
@@ -40,7 +40,7 @@ def test_file_download_file_md(gui: Gui, helpers):
         helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_file_download_path_md(gui: Gui, helpers):
+def test_file_download_path_md(gui: Gui, test_client, helpers):
     gui._bind_var_val("content", str((pathlib.Path(__file__).parent.parent / "resources" / "fred.png").resolve()))
     md_string = "<|{content}|file_download|>"
     expected_list = [
@@ -50,7 +50,7 @@ def test_file_download_path_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_file_download_any_file_md(gui: Gui, helpers):
+def test_file_download_any_file_md(gui: Gui, test_client, helpers):
     with open(os.path.abspath(__file__), "rb") as content:
         gui._bind_var_val("content", content.read())
         md_string = "<|{content}|file_download|>"
@@ -64,7 +64,7 @@ def test_file_download_any_file_md(gui: Gui, helpers):
         helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_file_download_url_html(gui: Gui, helpers):
+def test_file_download_url_html(gui: Gui, test_client, helpers):
     gui._bind_var_val("content", "some_url")
     html_string = '<taipy:file_download content="{content}" />'
     expected_list = [

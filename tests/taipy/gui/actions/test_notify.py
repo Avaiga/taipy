@@ -10,8 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-
-from taipy.gui import Gui, State, Markdown, notify
+from flask import g
+from taipy.gui import Gui, Markdown, notify
 
 
 def test_notify(gui: Gui, helpers):
@@ -30,9 +30,8 @@ def test_notify(gui: Gui, helpers):
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().test_request_context(f"/taipy-jsx/test/?client_id={cid}", data={"client_id": cid}):
-        with gui._Gui__lock as l:
-            l.set_client_id(cid)
-            notify(gui._Gui__state, "Info", "Message")
+        g.client_id = cid
+        notify(gui._Gui__state, "Info", "Message")
 
     received_messages = ws_client.get_received()
     helpers.assert_outward_ws_simple_message(received_messages[0], "AL", {"atype": "Info", "message": "Message"})

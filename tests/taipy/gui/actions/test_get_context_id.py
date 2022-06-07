@@ -12,7 +12,7 @@
 import inspect
 
 from taipy.gui import Gui, Markdown, get_context_id
-
+from flask import g
 
 def test_get_context_id(gui: Gui, helpers):
     name = "World!"  # noqa: F841
@@ -27,6 +27,6 @@ def test_get_context_id(gui: Gui, helpers):
     cid = helpers.create_scope_and_get_sid(gui)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
-    with gui._Gui__lock as l:
-        l.set_client_id(cid)
+    with gui.get_flask_app().app_context():
+        g.client_id = cid
         assert cid == get_context_id(gui._Gui__state)
