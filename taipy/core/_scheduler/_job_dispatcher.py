@@ -93,7 +93,7 @@ class _JobDispatcher:
              True if the task needs to run. False otherwise.
         """
         try:
-            Config.configure_global_app(storage_folder=storage_folder)
+            Config.global_config.storage_folder = storage_folder
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
             fct = task.function

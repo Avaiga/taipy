@@ -252,7 +252,9 @@ class TestDataNode:
         assert dn._is_in_cache is False
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
-        _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+        _Scheduler._update_job_config()
+
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle", cacheable=True)
         c = Config.configure_data_node("C", "pickle")

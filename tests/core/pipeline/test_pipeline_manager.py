@@ -33,7 +33,8 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 
 def test_set_and_get_pipeline():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     pipeline_id_1 = PipelineId("id1")
     pipeline_1 = Pipeline("name_1", {}, [], pipeline_id_1)
@@ -115,7 +116,8 @@ def test_set_and_get_pipeline():
 
 
 def test_submit():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
@@ -197,7 +199,8 @@ def mock_function_no_input_one_output():
 
 
 def test_submit_scenario_from_tasks_with_one_or_no_input_output():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     # test no input and no output Task
     task_no_input_no_output = Task("task_no_input_no_output", mock_function_no_input_no_output)
@@ -255,7 +258,8 @@ def mult_by_3(nb: int):
 
 def test_get_or_create_data():
     # only create intermediate data node once
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
@@ -300,7 +304,8 @@ def test_get_or_create_data():
 
 
 def test_create_pipeline_and_modify_properties_does_not_modify_config():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0)
@@ -337,7 +342,8 @@ def notify2(*args, **kwargs):
 
 
 def test_pipeline_notification_subscribe(mocker):
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
@@ -389,7 +395,8 @@ def test_pipeline_notification_subscribe(mocker):
 
 
 def test_pipeline_notification_unsubscribe(mocker):
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
@@ -421,7 +428,8 @@ def test_pipeline_notification_unsubscribe(mocker):
 
 
 def test_pipeline_notification_subscribe_all():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     pipeline_config = Config.configure_pipeline(
         "by_6",
@@ -575,7 +583,8 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
 
 
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node(
@@ -600,7 +609,8 @@ def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
 
 
 def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
@@ -623,7 +633,8 @@ def test_hard_delete_one_single_pipeline_with_scenario_data_nodes():
 
 
 def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
@@ -646,7 +657,8 @@ def test_hard_delete_one_single_pipeline_with_cycle_data_nodes():
 
 
 def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
@@ -669,7 +681,8 @@ def test_hard_delete_one_single_pipeline_with_pipeline_and_global_data_nodes():
 
 
 def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.GLOBAL)
@@ -694,7 +707,8 @@ def test_hard_delete_one_pipeline_among_two_with_pipeline_data_nodes():
 
 
 def test_hard_delete_shared_entities():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.SCENARIO, default_data="testing")

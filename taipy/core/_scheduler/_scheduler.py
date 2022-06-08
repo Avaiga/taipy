@@ -35,7 +35,7 @@ class _Scheduler(_AbstractScheduler):
 
     jobs_to_run: Queue = Queue()
     blocked_jobs: List = []
-    _dispatcher = _JobDispatcher()  # type: ignore
+    _dispatcher = None  # type: ignore
     lock = Lock()
 
     @classmethod
@@ -125,9 +125,10 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def __execute_jobs(cls):
+        if not cls._dispatcher:
+            cls._dispatcher = _JobDispatcher()
         while not cls.jobs_to_run.empty() and cls._dispatcher._can_execute():
             job_to_run = cls.jobs_to_run.get()
-
             cls._dispatcher._dispatch(job_to_run)
 
     @classmethod
@@ -154,5 +155,6 @@ class _Scheduler(_AbstractScheduler):
     def _update_job_config(cls, job_config: JobConfig = None):
         if not job_config:
             job_config = Config.job_config
-
+        if not cls._dispatcher:
+            cls._dispatcher = _JobDispatcher()
         cls._dispatcher._set_executer_and_nb_available_workers(job_config)  # type: ignore

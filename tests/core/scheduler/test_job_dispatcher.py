@@ -93,7 +93,8 @@ def test_can_execute_parallel_multiple_submit():
 
 
 def test_can_execute_synchronous_2():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     task_id = TaskId("task_id1")
     task = Task(config_id="name", input=[], function=print, output=[], id=task_id)
@@ -108,7 +109,9 @@ def test_can_execute_synchronous_2():
 
 
 def test_handle_exception_in_user_function():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
@@ -121,7 +124,9 @@ def test_handle_exception_in_user_function():
 
 
 def test_handle_exception_when_writing_datanode():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     output = MagicMock()
@@ -171,7 +176,8 @@ def nothing():
 
 
 def test_need_to_run_output_cacheable_no_input():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
     task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg])
@@ -184,7 +190,8 @@ def test_need_to_run_output_cacheable_no_input():
 
 
 def test_need_to_run_output_cacheable_no_validity_period():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")
@@ -203,7 +210,8 @@ def concat(a, b):
 
 
 def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")

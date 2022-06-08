@@ -55,7 +55,8 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 
 def test_get_job():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     task = _create_task(multiply, name="get_job")
 
@@ -69,7 +70,8 @@ def test_get_job():
 
 
 def test_get_latest_job():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
@@ -94,7 +96,8 @@ def test_get_job_unknown():
 
 
 def test_get_jobs():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     task = _create_task(multiply, name="get_all_jobs")
 
@@ -105,7 +108,8 @@ def test_get_jobs():
 
 
 def test_delete_job():
-    _Scheduler._update_job_config(Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE))
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
 
     task = _create_task(multiply, name="delete_job")
 
@@ -128,7 +132,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    _Scheduler._update_job_config(Config.configure_job_executions(nb_of_workers=2))
+    Config.configure_job_executions(nb_of_workers=2)
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = _Scheduler.submit_task(task)
@@ -141,7 +145,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 
 def test_force_deleting_unfinished_job():
-    _Scheduler._update_job_config(Config.configure_job_executions(nb_of_workers=2))
+    Config.configure_job_executions(nb_of_workers=2)
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = _Scheduler.submit_task(task)
