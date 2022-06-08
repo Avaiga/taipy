@@ -195,7 +195,7 @@ class Gui:
         self.__modified_vars_update_var: t.Optional[t.Set] = None
 
         # sid from client_id
-        self.__client_id_2_sid: t.Dict[str, str] = {}
+        self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
 
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
@@ -260,7 +260,7 @@ class Gui:
     def __get_state(self):
         return self.__state
 
-    def _get_client_id(self) -> t.Optional[str]:
+    def _get_client_id(self) -> str:
         return _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id", "unknown id")
     
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None):
