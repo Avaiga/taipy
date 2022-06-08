@@ -260,7 +260,10 @@ class Gui:
     def __get_state(self):
         return self.__state
 
-    def __get_client_id_from_request(self, client_id: t.Optional[str] = None):
+    def _get_client_id(self) -> t.Optional[str]:
+        return _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id", "unknown id")
+    
+    def __set_client_id_in_context(self, client_id: t.Optional[str] = None):
         if not client_id and request:
             client_id = request.args.get("client_id", "")
         if client_id and request:
@@ -271,14 +274,11 @@ class Gui:
                     sids = set()
                     self.__client_id_2_sid[client_id] = sids    
                 sids.add(sid)
-        return client_id
-
-    def _get_client_id(self) -> t.Optional[str]:
-        return _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id")
+        g.client_id = client_id
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
-            g.client_id = self.__get_client_id_from_request(message.get("client_id"))
+            self.__set_client_id_in_context(message.get("client_id"))
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
@@ -393,7 +393,7 @@ class Gui:
         return Gui.__CONTENT_ROOT + ret_value[0] if isinstance(ret_value, tuple) else ret_value
 
     def __serve_content(self, path: str) -> t.Any:
-        g.client_id = self.__get_client_id_from_request()
+        self.__set_client_id_in_context()
         parts = path.split("/")
         if len(parts) > 1:
             file_name = parts[-1]
@@ -405,7 +405,7 @@ class Gui:
         return ("", 404)
 
     def __upload_files(self):
-        g.client_id = self.__get_client_id_from_request()
+        self.__set_client_id_in_context()
         if "var_name" not in request.form:
             warnings.warn("No var name")
             return ("No var name", 400)
@@ -685,7 +685,7 @@ class Gui:
     def _call_user_callback(self, context_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
         try:
             with self.get_flask_app().app_context():
-                g.client_id = context_id
+                self.__set_client_id_in_context(context_id)
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
             warnings.warn(f"invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
@@ -1050,7 +1050,7 @@ class Gui:
         self.__send_ws_navigate(to)
 
     def __init_route(self):
-        g.client_id = self.__get_client_id_from_request()
+        self.__set_client_id_in_context()
         if hasattr(self, "on_init") and callable(self.on_init):
             if not _hasscopeattr(self, Gui.__ON_INIT_NAME):
                 _setscopeattr(self, Gui.__ON_INIT_NAME, True)
@@ -1061,7 +1061,7 @@ class Gui:
         return self._render_route()
 
     def __render_page(self, page_name: str) -> t.Any:
-        g.client_id = self.__get_client_id_from_request()
+        self.__set_client_id_in_context()
         page = None
         # Get page instance
         for page_i in self._config.pages:
