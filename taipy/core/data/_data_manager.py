@@ -19,6 +19,7 @@ from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_repository import _DataRepository
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.pickle import PickleDataNode
+
 from taipy.core.exceptions.exceptions import InvalidDataNodeType
 
 
@@ -34,8 +35,6 @@ class _DataManager(_Manager[DataNode]):
         data_node_config: DataNodeConfig,
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
-        *args,
-        **kwargs,
     ) -> DataNode:
         scope = data_node_config.scope
         parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
@@ -43,16 +42,16 @@ class _DataManager(_Manager[DataNode]):
         if dn_from_parent := cls._repository._get_by_config_and_parent_ids(data_node_config.id, parent_id):
             return dn_from_parent
 
-        return cls._create_and_set(data_node_config, parent_id, *args, **kwargs)
+        return cls._create_and_set(data_node_config, parent_id)
 
     @classmethod
-    def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str], *args, **kwargs) -> DataNode:
-        data_node = cls.__create(data_node_config, parent_id, *args, **kwargs)
-        cls._set(data_node, *args, **kwargs)
+    def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
+        data_node = cls.__create(data_node_config, parent_id)
+        cls._set(data_node)
         return data_node
 
     @classmethod
-    def __create(cls, data_node_config: DataNodeConfig, parent_id: Optional[str], *args, **kwargs) -> DataNode:
+    def __create(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
         try:
             props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
@@ -67,29 +66,29 @@ class _DataManager(_Manager[DataNode]):
             raise InvalidDataNodeType(data_node_config.storage_type)
 
     @classmethod
-    def _clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId], *args, **kwargs):
-        data_node = cls._get(data_node, *args, **kwargs) if isinstance(data_node, str) else data_node
+    def _clean_pickle_file(cls, data_node: Union[DataNode, DataNodeId]):
+        data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
         if not isinstance(data_node, PickleDataNode):
             return
         if data_node.is_file_generated and os.path.exists(data_node.path):
             os.remove(data_node.path)
 
     @classmethod
-    def _clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]], *args, **kwargs):
+    def _clean_pickle_files(cls, data_nodes: Iterable[Union[DataNode, DataNodeId]]):
         for data_node in data_nodes:
-            cls._clean_pickle_file(data_node, *args, **kwargs)
+            cls._clean_pickle_file(data_node)
 
     @classmethod
-    def _delete(cls, data_node_id: DataNodeId, *args, **kwargs):  # type:ignore
-        cls._clean_pickle_file(data_node_id, *args, **kwargs)
-        super()._delete(data_node_id, *args, **kwargs)
+    def _delete(cls, data_node_id: DataNodeId):  # type:ignore
+        cls._clean_pickle_file(data_node_id)
+        super()._delete(data_node_id)
 
     @classmethod
-    def _delete_many(cls, data_node_ids: Iterable[DataNodeId], *args, **kwargs):  # type:ignore
-        cls._clean_pickle_files(data_node_ids, *args, **kwargs)
-        super()._delete_many(data_node_ids, *args, **kwargs)
+    def _delete_many(cls, data_node_ids: Iterable[DataNodeId]):  # type:ignore
+        cls._clean_pickle_files(data_node_ids)
+        super()._delete_many(data_node_ids)
 
     @classmethod
-    def _delete_all(cls, *args, **kwargs):
-        cls._clean_pickle_files(cls._get_all(*args, **kwargs), *args, **kwargs)
-        super()._delete_all(*args, **kwargs)
+    def _delete_all(cls):
+        cls._clean_pickle_files(cls._get_all())
+        super()._delete_all()

@@ -13,65 +13,49 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
+from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 
-from taipy.core._manager._manager import _Manager
 from taipy.core.cycle.cycle import Cycle
 
 
 class _CycleManager(_Manager[Cycle]):
 
-    _repository: _CycleRepository = _CycleRepository()
+    _repository = _CycleRepository()
     _ENTITY_NAME = Cycle.__name__
 
     @classmethod
     def _create(
-        cls,
-        frequency: Frequency,
-        name: str = None,
-        creation_date: datetime = None,
-        display_name=None,
-        *args,
-        **properties
+        cls, frequency: Frequency, name: str = None, creation_date: datetime = None, display_name=None, **properties
     ):
         creation_date = creation_date if creation_date else datetime.now()
-        start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date, *args, **properties)
-        end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date, *args, **properties)
+        start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
+        end_date = _CycleManager._get_end_date_of_cycle(frequency, start_date)
         properties["display_name"] = display_name if display_name else start_date.isoformat()
-        prop = cls._clean_properties(properties)
-        cycle = Cycle(frequency, prop, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name)
-        cls._set(cycle, *args, **properties)
+        cycle = Cycle(
+            frequency, properties, creation_date=creation_date, start_date=start_date, end_date=end_date, name=name
+        )
+        cls._set(cycle)
         return cycle
 
     @classmethod
-    def _clean_properties(cls, prop):
-        return prop
-
-    @classmethod
     def _get_or_create(
-        cls,
-        frequency: Frequency,
-        creation_date: Optional[datetime] = None,
-        display_name: Optional[str] = None,
-        *args,
-        **properties
+        cls, frequency: Frequency, creation_date: Optional[datetime] = None, display_name: Optional[str] = None
     ) -> Cycle:
         creation_date = creation_date if creation_date else datetime.now()
-        start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date, *args, **properties)
+        start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
         cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
         if len(cycles) > 0:
             return cycles[0]
         else:
-            return cls._create(
-                frequency=frequency, creation_date=creation_date, display_name=display_name, *args, **properties
-            )  # type: ignore
+            return cls._create(frequency=frequency, creation_date=creation_date, display_name=display_name)
 
     @staticmethod
-    def _get_start_date_of_cycle(frequency: Frequency, creation_date: datetime, *args, **kwargs):
+    def _get_start_date_of_cycle(frequency: Frequency, creation_date: datetime):
         start_date = creation_date.date()
         start_time = time()
         if frequency == Frequency.DAILY:
@@ -85,7 +69,7 @@ class _CycleManager(_Manager[Cycle]):
         return datetime.combine(start_date, start_time)
 
     @staticmethod
-    def _get_end_date_of_cycle(frequency: Frequency, start_date: datetime, *args, **kwargs):
+    def _get_end_date_of_cycle(frequency: Frequency, start_date: datetime):
         end_date = start_date
         if frequency == Frequency.DAILY:
             end_date = end_date + timedelta(days=1)
@@ -99,19 +83,19 @@ class _CycleManager(_Manager[Cycle]):
         return end_date - timedelta(microseconds=1)
 
     @classmethod
-    def _hard_delete(cls, cycle_id: CycleId, *args, **kwargs):
-        cycle = cls._get(cycle_id, *args, **kwargs)
-        entity_ids_to_delete = cls._get_owned_entities(cycle, *args, **kwargs)
+    def _hard_delete(cls, cycle_id: CycleId):
+        cycle = cls._get(cycle_id)
+        entity_ids_to_delete = cls._get_owned_entities(cycle)
         entity_ids_to_delete.cycle_ids.add(cycle.id)
-        cls._delete_entities_of_multiple_types(entity_ids_to_delete, *args, **kwargs)
+        cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_owned_entities(cls, cycle: Cycle, *args, **kwargs) -> _EntityIds:
+    def _get_owned_entities(cls, cycle: Cycle) -> _EntityIds:
         from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
         entity_ids = _EntityIds()
 
-        scenarios = _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle, *args, **kwargs)
+        scenarios = _ScenarioManagerFactory._build_manager()._get_all_by_cycle(cycle)
 
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
@@ -126,7 +110,7 @@ class _CycleManager(_Manager[Cycle]):
                         if data_node.parent_id in parent_ids:
                             entity_ids.data_node_ids.add(data_node.id)
 
-        jobs = _JobManagerFactory._build_manager()._get_all(*args, **kwargs)
+        jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:
             if job.task.id in entity_ids.task_ids:
                 entity_ids.job_ids.add(job.id)
