@@ -30,7 +30,7 @@ def test_partial(gui: Gui):
 def test_partial_update(gui: Gui):
     with warnings.catch_warnings(record=True):
         partial = gui.add_partial(Markdown("#This is a partial"))
-        gui.run(run_server=False)
+        gui.run(run_server=False, single_client=True)
         client = gui._server.test_client()
         response = client.get(f"/taipy-jsx/{gui._config.partial_routes[0]}")
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))

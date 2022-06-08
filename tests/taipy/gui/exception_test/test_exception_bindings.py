@@ -14,7 +14,7 @@ import pytest
 from taipy.gui.utils._bindings import _Bindings
 
 
-def test_exception_binding_twice(gui):
+def test_exception_binding_twice(gui, test_client):
     bind = _Bindings(gui)
     bind._new_scopes()
     bind._bind("x", 10)

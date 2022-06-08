@@ -17,11 +17,13 @@ from types import SimpleNamespace
 
 
 class _DataScopes:
+
+    _GLOBAL_ID = "global"
+
     def __init__(self) -> None:
         self.__scopes: t.Dict[str, SimpleNamespace] = {}
-        self.__scopes["global"] = SimpleNamespace()
+        self.__scopes[_DataScopes._GLOBAL_ID] = SimpleNamespace()
         self.__single_client = True
-        self.__client_id: t.Optional[str] = None
 
     def set_single_client(self, value: bool) -> None:
         self.__single_client = value
@@ -29,30 +31,19 @@ class _DataScopes:
     def get_single_client(self) -> bool:
         return self.__single_client
 
-    def get_scope(self) -> SimpleNamespace:
+    def get_scope(self, client_id: t.Optional[str]) -> SimpleNamespace:
         if self.__single_client:
-            return self.__scopes["global"]
+            return self.__scopes[_DataScopes._GLOBAL_ID]
         # global context in case request is not registered or client_id is not available (such as in the context of running tests)
-        client_id = self.__client_id
         if not client_id:
             warnings.warn("Empty session id, using global scope instead")
-            return self.__scopes["global"]
+            return self.__scopes[_DataScopes._GLOBAL_ID]
         if client_id not in self.__scopes:
             warnings.warn(
                 f"session id {client_id} not found in data scope. Taipy will automatically create a scope for this session id but you might have to reload your webpage"
             )
             self.create_scope(client_id)
         return self.__scopes[client_id]
-
-    def _set_client_id(self, client_id: t.Optional[str]):
-        if client_id:
-            self.__client_id = client_id
-
-    def _get_client_id(self) -> t.Optional[str]:
-        return self.__client_id
-
-    def _reset_client_id(self):
-        self.__client_id = None
 
     def get_all_scopes(self) -> t.Dict[str, SimpleNamespace]:
         return self.__scopes

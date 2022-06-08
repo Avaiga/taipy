@@ -20,7 +20,7 @@ def test_state(gui: Gui):
     a = 10
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
-    state = gui._get_state()
+    state = gui._Gui__state
     assert state.a == 10
     assert state._gui == gui
     with pytest.raises(Exception) as e:

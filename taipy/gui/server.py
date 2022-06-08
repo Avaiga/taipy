@@ -59,7 +59,6 @@ class _Server:
         # Add cors for frontend access
         self._ws = SocketIO(
             self._flask,
-            async_mode=None,
             cors_allowed_origins="*",
             ping_timeout=10,
             ping_interval=5,
@@ -78,7 +77,7 @@ class _Server:
         def handle_message(message) -> None:
             if "status" in message:
                 print(message["status"])
-            elif "type" in message.keys():
+            elif "type" in message:
                 gui._manage_message(message["type"], message)
 
     def __get_client_config(self) -> t.Dict[str, t.Any]:
@@ -153,76 +152,6 @@ class _Server:
     def _direct_render_json(self, data):
         return jsonify(data)
 
-    def _render_page(self, page_name: str) -> t.Any:
-        try:
-            self._gui._set_client_id()
-            page = None
-            # Get page instance
-            for page_i in self._gui._config.pages:
-                if page_i._route == page_name:
-                    page = page_i
-                    break
-            # try partials
-            if page is None:
-                page = self._gui._get_partial(page_name)
-            # Make sure that there is a page instance found
-            if page is None:
-                return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-            page.render(self._gui)
-            if (
-                page_name == self._root_page_name
-                and page._rendered_jsx is not None
-                and "<PageContent" not in page._rendered_jsx
-            ):
-                page._rendered_jsx += "<PageContent />"
-            # Return jsx page
-            if page._rendered_jsx is not None:
-                return self._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
-            else:
-                return ("No page template", 404)
-        finally:
-            self._gui._reset_client_id()
-
-    def _render_route(self) -> t.Any:
-        router = '<Routes key="routes">'
-        router += (
-            '<Route path="/" key="'
-            + self._root_page_name
-            + '" element={<MainPage key="tr'
-            + self._root_page_name
-            + '" path="/'
-            + self._root_page_name
-            + '"'
-        )
-        routes = self._gui._config.routes
-        route = next((r for r in routes if r != self._root_page_name), None)
-        router += (' route="/' + route + '"') if route else ""
-        router += " />} >"
-        locations = {"/": f"/{self._root_page_name}"}
-        for route in routes:
-            if route != self._root_page_name:
-                router += (
-                    '<Route path="'
-                    + route
-                    + '" key="'
-                    + route
-                    + '" element={<TaipyRendered key="tr'
-                    + route
-                    + '"/>} />'
-                )
-                locations[f"/{route}"] = f"/{route}"
-        router += '<Route path="*" key="NotFound" element={<NotFound404 />} />'
-        router += "</Route>"
-        router += "</Routes>"
-
-        return self._direct_render_json(
-            {
-                "router": router,
-                "locations": locations,
-                "blockUI": self._gui._is_ui_blocked(),
-            }
-        )
-
     def get_flask(self):
         return self._flask
 
@@ -259,4 +188,4 @@ class _Server:
             self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
-        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader, ssl_context=ssl_context)
+        self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)

@@ -12,7 +12,7 @@
 from taipy.gui import Gui
 
 
-def test_navbar_md(gui: Gui, helpers):
+def test_navbar_md(gui: Gui, test_client, helpers):
     gui._bind_var_val(
         "navlov",
         [
@@ -31,7 +31,7 @@ def test_navbar_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_navbar_html(gui: Gui, helpers):
+def test_navbar_html(gui: Gui, test_client, helpers):
     gui._bind_var_val(
         "navlov",
         [

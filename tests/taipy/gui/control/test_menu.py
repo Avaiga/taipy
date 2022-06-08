@@ -12,7 +12,7 @@
 from taipy.gui import Gui
 
 
-def test_menu_md(gui: Gui, helpers):
+def test_menu_md(gui: Gui, test_client, helpers):
     gui._bind_var_val("lov", ["Item 1", "Item 2", "Item 3", "Item 4"])
     md_string = "<|menu|lov={lov}|on_action=on_menu_action|>"
     expected_list = [
@@ -26,7 +26,7 @@ def test_menu_md(gui: Gui, helpers):
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_menu_html(gui: Gui, helpers):
+def test_menu_html(gui: Gui, test_client, helpers):
     gui._bind_var_val("lov", ["Item 1", "Item 2", "Item 3", "Item 4"])
     html_string = '<taipy:menu lov="{lov}" />'
     expected_list = [

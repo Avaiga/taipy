@@ -66,9 +66,9 @@ class State:
     ```
     """
 
-    __attrs = ("_gui", "_user_var_list")
-    __methods = ("assign", "_get_placeholder", "_set_placeholder", "_get_gui_attr", "_get_placeholder_attrs")
     __gui_attr = "_gui"
+    __attrs = (__gui_attr, "_user_var_list")
+    __methods = ("assign", "_get_placeholder", "_set_placeholder", "_get_gui_attr", "_get_placeholder_attrs")
     __placeholder_attrs = ("_taipy_p1",)
     __excluded_attrs = __attrs + __methods + __placeholder_attrs
 
@@ -83,7 +83,7 @@ class State:
     def __getattribute__(self, name: str) -> t.Any:
         if name in State.__methods:
             return super().__getattribute__(name)
-        gui = super().__getattribute__(State.__attrs[0])
+        gui = super().__getattribute__(State.__gui_attr)
         if name == State.__gui_attr:
             return gui
         if name in State.__excluded_attrs:
@@ -97,7 +97,7 @@ class State:
     def __setattr__(self, name: str, value: t.Any) -> None:
         if name not in super().__getattribute__(State.__attrs[1]):
             raise AttributeError(f"Variable '{name}' is not accessible.")
-        gui = super().__getattribute__(State.__attrs[0])
+        gui = super().__getattribute__(State.__gui_attr)
         if not hasattr(gui._bindings(), name):
             gui._bind_var(name)
         setattr(gui._bindings(), name, value)
