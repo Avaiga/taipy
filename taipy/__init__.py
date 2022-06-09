@@ -17,7 +17,7 @@ if find_spec('taipy.core'):
 if find_spec('taipy.gui'):
     from taipy.gui import Gui
 
-    if find_spec('taipy.enterprise.gui'):
+    if find_spec('taipy.enterprise') and find_spec('taipy.enterprise.gui'):
         from taipy.enterprise.gui import _init_gui_enterprise
 
         _init_gui_enterprise(Gui)
