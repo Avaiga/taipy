@@ -15,7 +15,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from taipy.core._scheduler._job_dispatcher import _JobDispatcher
+from taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
+from taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from taipy.core.common.alias import JobId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.config import JobConfig
@@ -54,6 +55,14 @@ def replace_in_memory_write_fct():
     InMemoryDataNode.write = _error
     yield
     InMemoryDataNode.write = default_write
+
+
+def _foo():
+    return 42
+
+
+def _error():
+    raise RuntimeError("Something bad has happened")
 
 
 def test_create_job(task, job):
@@ -215,17 +224,11 @@ def test_auto_set_and_reload(current_datetime, job_id):
     assert not job_1._is_in_context
 
 
-def _error():
-    raise RuntimeError("Something bad has happened")
-
-
 def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     Config.configure_job_executions(mode=mode)
     _TaskManager._set(task)
     _JobManager._set(job)
-    executor = _JobDispatcher()
-    executor._dispatch(job)
-
-
-def _foo():
-    return 42
+    dispatcher = _StandaloneJobDispatcher()
+    if mode == JobConfig._DEVELOPMENT_MODE:
+        dispatcher = _DevelopmentJobDispatcher()
+    dispatcher._dispatch(job)

@@ -15,6 +15,7 @@ from unittest import mock
 import taipy.core.taipy as tp
 from taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.common.scope import Scope
+from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
@@ -24,8 +25,6 @@ from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.task._task_manager import _TaskManager
-
-from taipy.core.config.config import Config
 
 
 class TestTaipy:

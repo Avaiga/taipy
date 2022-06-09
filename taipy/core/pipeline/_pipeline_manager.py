@@ -17,13 +17,12 @@ from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.common.scope import Scope
 from taipy.core.config.pipeline_config import PipelineConfig
+from taipy.core.exceptions.exceptions import NonExistingPipeline
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_repository import _PipelineRepository
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
-
-from taipy.core.exceptions.exceptions import NonExistingPipeline
 
 
 class _PipelineManager(_Manager[Pipeline]):

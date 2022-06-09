@@ -12,14 +12,16 @@
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Union
 
-from taipy.core._manager._manager_factory import _ManagerFactory
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
+from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.cycle.cycle import Cycle
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
+from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
@@ -28,10 +30,6 @@ from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactor
 from taipy.core.scenario.scenario import Scenario
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
-
-from taipy.core.config.config import Config
-from taipy.core.cycle.cycle import Cycle
-from taipy.core.exceptions.exceptions import ModelNotFound
 
 __logger = _TaipyLogger._get_logger()
 

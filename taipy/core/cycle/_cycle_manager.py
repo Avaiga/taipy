@@ -18,9 +18,8 @@ from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
-from taipy.core.job._job_manager_factory import _JobManagerFactory
-
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 
 
 class _CycleManager(_Manager[Cycle]):

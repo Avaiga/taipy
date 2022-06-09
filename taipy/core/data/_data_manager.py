@@ -19,7 +19,6 @@ from taipy.core.config.data_node_config import DataNodeConfig
 from taipy.core.data._data_repository import _DataRepository
 from taipy.core.data.data_node import DataNode
 from taipy.core.data.pickle import PickleDataNode
-
 from taipy.core.exceptions.exceptions import InvalidDataNodeType
 
 

@@ -20,11 +20,10 @@ from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.exceptions.exceptions import NonExistingTask
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_repository import _TaskRepository
 from taipy.core.task.task import Task
-
-from taipy.core.exceptions.exceptions import NonExistingTask
 
 
 class _TaskManager(_Manager[Task]):
