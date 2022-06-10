@@ -11,14 +11,17 @@
 
 import pathlib
 from collections import defaultdict
+from typing import Dict
+
+from taipy.core.pipeline._pipeline_model import _PipelineModel
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 from taipy.core._repository import _FileSystemRepository
 from taipy.core.common import _utils
 from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
-from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager_factory import _TaskManagerFactory
+from taipy.core.task.task import Task
 
 
 class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
@@ -28,7 +31,10 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
     def _to_model(self, pipeline: Pipeline) -> _PipelineModel:
         datanode_task_edges = defaultdict(list)
         task_datanode_edges = defaultdict(list)
-        for task in pipeline._tasks.values():
+
+        tasks = pipeline._get_tasks()
+
+        for task in tasks.values():
             task_id = str(task.id)
             for predecessor in task.input.values():
                 datanode_task_edges[str(predecessor.id)].append(task_id)
@@ -39,17 +45,16 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
             pipeline.parent_id,
             pipeline.config_id,
             pipeline._properties.data,
-            [task.id for task in pipeline._tasks.values()],
+            self.__to_task_ids(pipeline._tasks),
             _utils._fcts_to_dict(pipeline._subscribers),
         )
 
     def _from_model(self, model: _PipelineModel) -> Pipeline:
         try:
-            tasks = self.__to_tasks(model.tasks)
             pipeline = Pipeline(
                 model.config_id,
                 model.properties,
-                tasks,
+                model.tasks,
                 model.id,
                 model.parent_id,
                 {_utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers},  # type: ignore
@@ -66,12 +71,5 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
-    def __to_tasks(task_ids):
-        tasks = []
-        task_manager = _TaskManagerFactory._build_manager()
-        for _id in task_ids:
-            if task := task_manager._get(_id):
-                tasks.append(task)
-            else:
-                raise NonExistingTask(_id)
-        return tasks
+    def __to_task_ids(tasks):
+        return [t.id if isinstance(t, Task) else t for t in tasks]

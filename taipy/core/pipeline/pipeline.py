@@ -12,18 +12,19 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import networkx as nx
-
 from taipy.core.common._entity import _Entity
 from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
-from taipy.core.common.alias import PipelineId
+from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.data.data_node import DataNode
+
+from taipy.core.exceptions.exceptions import NonExistingTask
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task
 
@@ -48,7 +49,7 @@ class Pipeline(_Entity):
         self,
         config_id: str,
         properties: Dict[str, Any],
-        tasks: List[Task],
+        tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,
         subscribers: List[Callable] = None,
@@ -56,7 +57,7 @@ class Pipeline(_Entity):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
         self.parent_id = parent_id
-        self._tasks = {task.config_id: task for task in tasks}
+        self._tasks = tasks
         self.is_consistent = self.__is_consistent()
 
         self._subscribers = _ListAttributes(self, subscribers or list())
@@ -74,12 +75,12 @@ class Pipeline(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def tasks(self):
-        return self._tasks
+        return self._get_tasks()
 
     @tasks.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def tasks(self, val):
-        self._tasks = {task.config_id: task for task in val}
+    def tasks(self, tasks: List[Union[TaskId, Task]]):
+        self._tasks = tasks
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -107,9 +108,10 @@ class Pipeline(_Entity):
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self._properties:
             return _tpl._replace_templates(self._properties[protected_attribute_name])
-        if protected_attribute_name in self._tasks:
-            return self._tasks[protected_attribute_name]
-        for task in self._tasks.values():
+        tasks = self._get_tasks()
+        if protected_attribute_name in tasks:
+            return tasks[protected_attribute_name]
+        for task in tasks.values():
             if protected_attribute_name in task.input:
                 return task.input[protected_attribute_name]
             if protected_attribute_name in task.output:
@@ -132,7 +134,8 @@ class Pipeline(_Entity):
 
     def __build_dag(self):
         graph = nx.DiGraph()
-        for task in self._tasks.values():
+        tasks = self._get_tasks()
+        for task in tasks.values():
             if has_input := task.input:
                 for predecessor in task.input.values():
                     graph.add_edges_from([(predecessor, task)])
@@ -142,6 +145,19 @@ class Pipeline(_Entity):
             if not has_input and not has_output:
                 graph.add_node(task)
         return graph
+
+    def _get_tasks(self):
+        from taipy.core.task._task_manager_factory import _TaskManagerFactory
+
+        tasks = {}
+        task_manager = _TaskManagerFactory._build_manager()
+        for task_or_id in self._tasks:
+            t = task_manager._get(task_or_id, task_or_id)
+            if not isinstance(t, Task):
+                raise NonExistingTask(task_or_id)
+            tasks[t.config_id] = t
+
+        return tasks
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

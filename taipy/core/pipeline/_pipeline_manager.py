@@ -12,17 +12,18 @@
 from functools import partial
 from typing import Callable, List, Optional, Union
 
-from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.common.scope import Scope
 from taipy.core.config.pipeline_config import PipelineConfig
-from taipy.core.exceptions.exceptions import NonExistingPipeline
 from taipy.core.job._job_manager_factory import _JobManagerFactory
-from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_repository import _PipelineRepository
-from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
+
+from taipy.core._manager._manager import _Manager
+from taipy.core.exceptions.exceptions import NonExistingPipeline
+from taipy.core.job.job import Job
+from taipy.core.pipeline.pipeline import Pipeline
 
 
 class _PipelineManager(_Manager[Pipeline]):
@@ -105,7 +106,7 @@ class _PipelineManager(_Manager[Pipeline]):
     @classmethod
     def _get_owned_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:
         entity_ids = _EntityIds()
-        for task in pipeline._tasks.values():
+        for task in pipeline.tasks.values():
             if task.parent_id == pipeline.id:
                 entity_ids.task_ids.add(task.id)
             for data_node in task.data_nodes.values():

@@ -13,13 +13,14 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
-from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import CycleId
 from taipy.core.common.frequency import Frequency
 from taipy.core.cycle._cycle_repository import _CycleRepository
-from taipy.core.cycle.cycle import Cycle
 from taipy.core.job._job_manager_factory import _JobManagerFactory
+
+from taipy.core._manager._manager import _Manager
+from taipy.core.cycle.cycle import Cycle
 
 
 class _CycleManager(_Manager[Cycle]):
@@ -102,7 +103,7 @@ class _CycleManager(_Manager[Cycle]):
                 parent_ids = {pipeline.id, scenario.id, cycle.id}
                 if pipeline.parent_id in parent_ids:
                     entity_ids.pipeline_ids.add(pipeline.id)
-                for task in pipeline._tasks.values():
+                for task in pipeline.tasks.values():
                     if task.parent_id in parent_ids:
                         entity_ids.task_ids.add(task.id)
                     for data_node in task.data_nodes.values():
