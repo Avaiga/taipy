@@ -2,6 +2,7 @@ import React, { useState, useContext, useCallback, useEffect, useMemo, CSSProper
 import { Theme, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Checkbox from "@mui/material/Checkbox";
+import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -135,12 +136,24 @@ const Selector = (props: SelTreeProps) => {
                             newKeys.splice(p, 1);
                         }
                         dispatch(
-                            createSendUpdateAction(updateVarName, newKeys, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
+                            createSendUpdateAction(
+                                updateVarName,
+                                newKeys,
+                                props.tp_onChange,
+                                propagate,
+                                valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            )
                         );
                         return newKeys;
                     } else {
                         dispatch(
-                            createSendUpdateAction(updateVarName, key, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov"))
+                            createSendUpdateAction(
+                                updateVarName,
+                                key,
+                                props.tp_onChange,
+                                propagate,
+                                valueById ? undefined : getUpdateVar(updateVars, "lov")
+                            )
                         );
                         return [key];
                     }
@@ -156,7 +169,15 @@ const Selector = (props: SelTreeProps) => {
                 target: { value },
             } = event;
             setSelectedValue(Array.isArray(value) ? value : [value]);
-            dispatch(createSendUpdateAction(updateVarName, value, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+            dispatch(
+                createSendUpdateAction(
+                    updateVarName,
+                    value,
+                    props.tp_onChange,
+                    propagate,
+                    valueById ? undefined : getUpdateVar(updateVars, "lov")
+                )
+            );
         },
         [dispatch, updateVarName, propagate, updateVars, valueById, props.tp_onChange]
     );
@@ -167,7 +188,15 @@ const Selector = (props: SelTreeProps) => {
             id &&
                 setSelectedValue((vals) => {
                     const keys = vals.filter((valId) => valId !== id);
-                    dispatch(createSendUpdateAction(updateVarName, keys, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                    dispatch(
+                        createSendUpdateAction(
+                            updateVarName,
+                            keys,
+                            props.tp_onChange,
+                            propagate,
+                            valueById ? undefined : getUpdateVar(updateVars, "lov")
+                        )
+                    );
                     return keys;
                 });
         },
@@ -181,12 +210,14 @@ const Selector = (props: SelTreeProps) => {
 
     return dropdown ? (
         <FormControl sx={controlSx} className={className}>
+            {props.label ? <InputLabel>{props.label}</InputLabel> : null}
             <Tooltip title={hover || ""}>
                 <Select
+                    id={id}
                     multiple={multiple}
                     value={dropdownValue}
                     onChange={handleChange}
-                    input={<OutlinedInput />}
+                    input={<OutlinedInput label={props.label} />}
                     renderValue={(selected) => (
                         <Box sx={renderBoxSx}>
                             {lovList
