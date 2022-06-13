@@ -114,7 +114,7 @@ def test_map_dict_update_full_dictionary_2():
     assert temp_values["b"] == 5
 
 
-def test_map_dict_set(gui: Gui, helpers):
+def test_map_dict_set(gui: Gui, test_client):
     d = {"a": 1}  # noqa: F841
 
     # set gui frame
