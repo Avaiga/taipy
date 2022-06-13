@@ -19,8 +19,8 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
+    "taipy-gui>=1.1,<1.2",
+    "taipy-rest>=1.1,<1.2",
 ]
 
 extras_require = {
