@@ -1,5 +1,6 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(any),,The numerical value represented by this control.
+label,str,None,The label associated with the input.
 >sharedInput,,,
 >on_change,,,
 >propagate,,,
