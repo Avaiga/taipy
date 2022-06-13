@@ -99,7 +99,7 @@ class _CycleManager(_Manager[Cycle]):
 
         for scenario in scenarios:
             entity_ids.scenario_ids.add(scenario.id)
-            for pipeline in scenario._pipelines.values():
+            for pipeline in scenario.pipelines.values():
                 parent_ids = {pipeline.id, scenario.id, cycle.id}
                 if pipeline.parent_id in parent_ids:
                     entity_ids.pipeline_ids.add(pipeline.id)

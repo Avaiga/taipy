@@ -34,7 +34,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
         return _ScenarioModel(
             id=scenario.id,
             config_id=scenario.config_id,
-            pipelines=self.__to_pipeline_ids(scenario._pipelines.values()),
+            pipelines=self.__to_pipeline_ids(scenario._pipelines),
             properties=scenario._properties.data,
             creation_date=scenario._creation_date.isoformat(),
             primary_scenario=scenario._primary_scenario,
@@ -47,7 +47,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
         scenario = Scenario(
             scenario_id=model.id,
             config_id=model.config_id,
-            pipelines=self.__to_pipelines(model.pipelines),
+            pipelines=model.pipelines,  # type: ignore
             properties=model.properties,
             creation_date=datetime.fromisoformat(model.creation_date),
             is_primary=model.primary_scenario,
@@ -65,18 +65,7 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:
-        return [pipeline.id for pipeline in pipelines]
-
-    @staticmethod
-    def __to_pipelines(pipeline_ids) -> List[Pipeline]:
-        pipelines = []
-        pipeline_manager = _PipelineManagerFactory._build_manager()
-        for _id in pipeline_ids:
-            if pipeline := pipeline_manager._get(_id):
-                pipelines.append(pipeline)
-            else:
-                raise NonExistingPipeline(_id)
-        return pipelines
+        return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
 
     @staticmethod
     def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:

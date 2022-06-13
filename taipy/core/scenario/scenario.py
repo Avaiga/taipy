@@ -13,17 +13,19 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from taipy.core.common._entity import _Entity
 from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
-from taipy.core.common.alias import ScenarioId
+from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.cycle.cycle import Cycle
+from taipy.core.exceptions.exceptions import NonExistingPipeline
 from taipy.core.job.job import Job
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
 
 
@@ -52,7 +54,7 @@ class Scenario(_Entity):
     def __init__(
         self,
         config_id: str,
-        pipelines: List[Pipeline],
+        pipelines: Union[List[PipelineId], List[Pipeline]],
         properties: Dict[str, Any],
         scenario_id: ScenarioId = None,
         creation_date=None,
@@ -63,7 +65,7 @@ class Scenario(_Entity):
     ):
         self.config_id = _validate_id(config_id)
         self.id: ScenarioId = scenario_id or self._new_id(self.config_id)
-        self._pipelines = {p.config_id: p for p in pipelines}
+        self._pipelines = pipelines
         self._creation_date = creation_date or datetime.now()
         self._cycle = cycle
         self._subscribers = _ListAttributes(self, subscribers or list())
@@ -84,12 +86,12 @@ class Scenario(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def pipelines(self):
-        return self._pipelines
+        return self.__get_pipelines()
 
     @pipelines.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def pipelines(self, val: List[Pipeline]):
-        self._pipelines = {p.config_id: p for p in val}
+    def pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
+        self._pipelines = pipelines
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -168,9 +170,10 @@ class Scenario(_Entity):
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self._properties:
             return _tpl._replace_templates(self._properties[protected_attribute_name])
-        if protected_attribute_name in self.pipelines:
+        pipelines = self.__get_pipelines()
+        if protected_attribute_name in pipelines:
             return self.pipelines[protected_attribute_name]
-        for pipeline in self.pipelines.values():
+        for pipeline in pipelines.values():
             if protected_attribute_name in pipeline.tasks:
                 return pipeline.tasks[protected_attribute_name]
             for task in pipeline.tasks.values():
@@ -278,3 +281,15 @@ class Scenario(_Entity):
         import taipy.core as tp
 
         return tp.untag(self, tag)
+
+    def __get_pipelines(self):
+        pipelines = {}
+        pipeline_manager = _PipelineManagerFactory._build_manager()
+
+        for pipeline_or_id in self._pipelines:
+            p = pipeline_manager._get(pipeline_or_id, pipeline_or_id)
+
+            if not isinstance(p, Pipeline):
+                raise NonExistingPipeline(pipeline_or_id)
+            pipelines[p.config_id] = p
+        return pipelines
