@@ -43,7 +43,7 @@ def test_evaluate_expressions_same_variable(gui: Gui):
     assert "tp_x" in s1 and "tp_x" in s2
 
 
-def test_evaluate_holder(gui: Gui):
+def test_evaluate_holder(gui: Gui, test_client):
     x = 10
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
