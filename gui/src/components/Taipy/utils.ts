@@ -36,13 +36,17 @@ export interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
     format?: string;
 }
 
-export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps {
+export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, TaipyLabelProps {
     type: string;
     value: string;
     defaultValue?: string;
     changeDelay?: number;
     tp_onAction?: string;
     actionKeys?: string;
+}
+
+export interface TaipyLabelProps {
+    label?: string;
 }
 
 export const getArrayValue = <T>(arr: T[], idx: number, defVal?: T): T | undefined =>

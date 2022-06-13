@@ -80,6 +80,7 @@ const Input = (props: TaipyInputProps) => {
                 className={className}
                 type={type}
                 id={id}
+                label={props.label}
                 onChange={handleInput}
                 disabled={!active}
                 onKeyDown={tp_onAction ? handleAction : undefined}
