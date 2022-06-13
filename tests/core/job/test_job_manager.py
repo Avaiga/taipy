@@ -132,7 +132,8 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = _Scheduler.submit_task(task)
@@ -145,7 +146,8 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 
 def test_force_deleting_unfinished_job():
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = _Scheduler.submit_task(task)

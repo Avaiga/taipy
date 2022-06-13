@@ -33,8 +33,7 @@ def _test_default_global_app_config(global_config: GlobalAppConfig):
 
 def _test_default_job_config(job_config: JobConfig):
     assert job_config is not None
-    assert job_config.mode == "standalone"
-    assert job_config.nb_of_workers == 1
+    assert job_config.mode == JobConfig._DEFAULT_MODE
 
 
 def _test_default_data_node_config(dn_config: DataNodeConfig):

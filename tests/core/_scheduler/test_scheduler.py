@@ -167,7 +167,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
     _Scheduler._update_job_config()
     task = _create_task(partial(lock_multiply, lock))
 
@@ -180,7 +180,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_task_multithreading_multiple_task():
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
     _Scheduler._update_job_config()
 
     m = multiprocessing.Manager()
@@ -213,7 +213,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
     _Scheduler._update_job_config()
 
     m = multiprocessing.Manager()
@@ -250,7 +250,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 
 def test_blocked_task():
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
     _Scheduler._update_job_config()
 
     m = multiprocessing.Manager()
@@ -299,7 +299,7 @@ def test_task_scheduler_create_synchronous_dispatcher():
 
 
 def test_task_scheduler_create_standalone_dispatcher():
-    Config.configure_job_executions(nb_of_workers=42)
+    Config.configure_job_executions(mode="standalone", nb_of_workers=42)
     _Scheduler._update_job_config()
     assert isinstance(_Scheduler._dispatcher._executor, ProcessPoolExecutor)
     assert _Scheduler._dispatcher._nb_available_workers == 42
@@ -324,9 +324,6 @@ def test_can_exec_task_with_modified_config():
 
 
 def test_can_execute_task_with_development_mode():
-    assert Config.job_config.mode == "standalone"
-    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
     assert Config.job_config.mode == JobConfig._DEVELOPMENT_MODE
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)

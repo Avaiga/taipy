@@ -20,7 +20,6 @@ from tests.core.config.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():
-    assert Config.job_config.nb_of_workers == 1
     assert not Config.global_config.root_folder == "foo"
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
@@ -98,7 +97,7 @@ nb_of_workers = -1
 """
     )
     Config.configure_global_app()
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.nb_of_workers is None
     assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
@@ -127,11 +126,11 @@ def test_override_default_config_with_file_config_including_env_variable_values(
     tf = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = "ENV[FOO]"
+nb_of_workers = "ENV[FOO]:int"
 start_executor = "ENV[BAR]"
 """
     )
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.nb_of_workers is None
     assert not Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
@@ -193,7 +192,7 @@ def test_file_configuration_override_code_configuration_including_env_variable_v
     config_from_filename = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = "ENV[FOO]"
+nb_of_workers = "ENV[FOO]:int"
     """
     )
     Config.configure_job_executions(nb_of_workers=21)
@@ -221,7 +220,7 @@ clean_entities_enabled = false
 
     Config.configure_global_app()
     # Default config is applied
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.nb_of_workers is None
     assert Config.global_config.clean_entities_enabled is False
 
     # Code config is applied
@@ -258,7 +257,7 @@ clean_entities_enabled = false
     Config.configure_global_app()
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
-        assert Config.job_config.nb_of_workers == 1
+        assert Config.job_config.nb_of_workers is None
         assert Config.global_config.clean_entities_enabled is False
 
         # Code config is applied

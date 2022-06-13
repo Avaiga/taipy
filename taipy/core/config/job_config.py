@@ -15,7 +15,6 @@ from taipy.core.config._config_template_handler import _ConfigTemplateHandler as
 from taipy.core.config.development_config import DevelopmentConfig
 from taipy.core.config.job_mode_config import _JobModeConfig
 from taipy.core.config.standalone_config import StandaloneConfig
-
 from taipy.core.exceptions.exceptions import DependencyNotInstalled
 
 
@@ -30,8 +29,9 @@ class JobConfig:
     """
 
     _MODE_KEY = "mode"
-    _DEFAULT_MODE = "standalone"
+    _STANDALONE_MODE = "standalone"
     _DEVELOPMENT_MODE = "development"
+    _DEFAULT_MODE = _DEVELOPMENT_MODE
 
     def __init__(self, mode: str = None, **properties):
         self.mode = mode or self._DEFAULT_MODE
@@ -64,7 +64,7 @@ class JobConfig:
             self.mode = mode
             self._config_cls = self._get_config_cls(self.mode)
             self._config = self._create_config(self._config_cls, **config_as_dict)
-        if self._config:
+        if self._config is not None:
             self._update_config(config_as_dict)
 
     def _update_config(self, config_as_dict: Dict[str, Any]):
@@ -77,7 +77,7 @@ class JobConfig:
 
     @classmethod
     def _get_config_cls(cls, mode: str) -> Type[_JobModeConfig]:
-        if mode == cls._DEFAULT_MODE:
+        if mode == cls._STANDALONE_MODE:
             return StandaloneConfig
         if mode == cls._DEVELOPMENT_MODE:
             return DevelopmentConfig
@@ -86,7 +86,7 @@ class JobConfig:
     @property
     def is_standalone(self) -> bool:
         """True if the config is set to standalone mode"""
-        return self.mode == self._DEFAULT_MODE
+        return self.mode == self._STANDALONE_MODE
 
     @property
     def is_development(self) -> bool:

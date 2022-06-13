@@ -40,14 +40,13 @@ nb_of_workers = 10
 def test_read_skip_configuration_outside_nodes():
     config = NamedTemporaryFile(
         """
-nb_of_workers = 10
+mode = "standalone"
     """
     )
 
     Config.load(config.filename)
 
-    assert not Config.job_config.parallel_execution
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.mode == "development"
 
 
 def test_write_configuration_file():
@@ -117,7 +116,7 @@ owner = "Raymond Kopa"
         os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
     ):
         Config.configure_global_app(clean_entities_enabled=True)
-        Config.configure_job_executions(mode="standalone")
+        Config.configure_job_executions(mode="standalone", nb_of_workers=1)
         Config.configure_default_data_node(storage_type="in_memory", custom="default_custom_prop")
         dn1_cfg_v2 = Config.configure_data_node(
             "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"
