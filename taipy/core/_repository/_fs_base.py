@@ -12,11 +12,13 @@
 import json
 import pathlib
 import shutil
+import time
 from abc import abstractmethod
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Generic, Iterable, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Any, Generic, Iterable, Iterator, List, Optional, Type, TypeVar, Union
 
+from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import ModelNotFound
 
 ModelType = TypeVar("ModelType")
@@ -139,11 +141,17 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
         return filepath
 
-    def __to_entity(self, filepath):
-        with open(filepath, "r") as f:
-            data = json.load(f, cls=_CustomDecoder)
-        model = self.model.from_dict(data)  # type: ignore
-        return self._from_model(model)
+    def __to_entity(self, filepath, retry=Config.global_config.read_entity_retry or 0):
+        try:
+            with open(filepath, "r") as f:
+                data = json.load(f, cls=_CustomDecoder)
+            model = self.model.from_dict(data)  # type: ignore
+            return self._from_model(model)
+        except Exception as e:
+            if retry > 0:
+                time.sleep(0.5)
+                return self.__to_entity(filepath, retry=retry - 1)
+            raise e
 
     def __create_directory_if_not_exists(self):
         if not self.dir_path.exists():
