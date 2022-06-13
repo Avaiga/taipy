@@ -761,8 +761,9 @@ class Gui:
     def _get_locals_bind(self):
         return self.__locals_bind
 
-    def _get_root_page_name(self):
-        return self.__root_page_name
+    @staticmethod
+    def _get_root_page_name():
+        return Gui.__root_page_name
 
     def _set_flask(self, flask: Flask):
         self._flask = flask
@@ -1076,7 +1077,7 @@ class Gui:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         page.render(self)
         if (
-            page_name == self._server._root_page_name
+            page_name == Gui.__root_page_name
             and page._rendered_jsx is not None
             and "<PageContent" not in page._rendered_jsx
         ):
@@ -1091,20 +1092,20 @@ class Gui:
         router = '<Routes key="routes">'
         router += (
             '<Route path="/" key="'
-            + self._server._root_page_name
+            + Gui.__root_page_name
             + '" element={<MainPage key="tr'
-            + self._server._root_page_name
+            + Gui.__root_page_name
             + '" path="/'
-            + self._server._root_page_name
+            + Gui.__root_page_name
             + '"'
         )
         routes = self._config.routes
-        route = next((r for r in routes if r != self._server._root_page_name), None)
+        route = next((r for r in routes if r != Gui.__root_page_name), None)
         router += (' route="/' + route + '"') if route else ""
         router += " />} >"
-        locations = {"/": f"/{self._server._root_page_name}"}
+        locations = {"/": f"/{Gui.__root_page_name}"}
         for route in routes:
-            if route != self._server._root_page_name:
+            if route != Gui.__root_page_name:
                 router += (
                     '<Route path="'
                     + route

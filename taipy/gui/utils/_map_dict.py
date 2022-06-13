@@ -65,7 +65,13 @@ class _MapDict(object):
 
     # to be able to use getattr
     def __getattr__(self, attr):
-        return self._dict.get(attr)
+        value = self._dict.__getitem__(attr)
+        if isinstance(value, dict):
+            if self._update_var:
+                return _MapDict(value, lambda s, v: self._update_var(f"{attr}.{s}", v))
+            else:
+                return _MapDict(value)
+        return value
 
     def __setattr__(self, attr, value):
         if attr in _MapDict.__local_vars:
