@@ -97,10 +97,12 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
         return self.dir_path
 
     def load(self, model_id: str) -> Entity:
-        return self.__to_entity(self.__get_model_filepath(model_id))
+        return self.__to_entity(self.__get_model_filepath(model_id), Config.global_config.read_entity_retry or 0)
 
     def _load_all(self) -> List[Entity]:
-        return [self.__to_entity(f) for f in self._directory.glob("*.json")]
+        return [
+            self.__to_entity(f, Config.global_config.read_entity_retry or 0) for f in self._directory.glob("*.json")
+        ]
 
     def _save(self, entity):
         self.__create_directory_if_not_exists()
@@ -125,7 +127,7 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
     def _get_by_config_and_parent_ids(self, config_id: str, parent_id: Optional[str]) -> Optional[Entity]:
         for f in self._directory.glob(f"*_{config_id}_*.json"):
-            entity = self.__to_entity(f)
+            entity = self.__to_entity(f, Config.global_config.read_entity_retry or 0)
             if entity.config_id == config_id and entity.parent_id == parent_id:
                 return entity
         return None
@@ -141,7 +143,7 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
         return filepath
 
-    def __to_entity(self, filepath, retry=Config.global_config.read_entity_retry or 0):
+    def __to_entity(self, filepath, retry):
         try:
             with open(filepath, "r") as f:
                 data = json.load(f, cls=_CustomDecoder)
