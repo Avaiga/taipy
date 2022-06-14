@@ -284,7 +284,7 @@ class Gui:
         if der_vars is None:
             g.derived_vars = derived_vars
         else:
-            der_vars.update(derived_vars),
+            der_vars.update(derived_vars)
         if var_name in modified_vars:
             return True
         else:
@@ -295,7 +295,7 @@ class Gui:
         update_count = getattr(g, "update_count", 0) - 1
         print(f"__clean_vars_on_exit: {update_count} \n\tmodified_vars: {getattr(g, 'modified_vars', None)} \n\tderived_vars: {getattr(g, 'derived_vars', None)}")
         if update_count < 1:
-            vars = getattr(g, "derived_vars", set())
+            vars: t.Set[str] = getattr(g, "derived_vars", set())
             delattr(g, "update_count")
             delattr(g, "modified_vars")
             delattr(g, "derived_vars")
