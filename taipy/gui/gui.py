@@ -191,9 +191,6 @@ class Gui:
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
 
-        # gui synchronous state variable
-        self.__modified_vars_update_var: t.Optional[t.Set] = None
-
         # sid from client_id
         self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
 
@@ -262,7 +259,7 @@ class Gui:
 
     def _get_client_id(self) -> str:
         return _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id", "unknown id")
-    
+
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None):
         if not client_id and request:
             client_id = request.args.get("client_id", "")
@@ -272,9 +269,38 @@ class Gui:
                 sids = self.__client_id_2_sid.get(client_id, None)
                 if sids is None:
                     sids = set()
-                    self.__client_id_2_sid[client_id] = sids    
+                    self.__client_id_2_sid[client_id] = sids
                 sids.add(sid)
         g.client_id = client_id
+
+    def __is_var_modified_in_context(self, var_name: str, derived_vars: t.Set[str]) -> bool:
+        modified_vars: t.Optional[t.Set[str]] = getattr(g, "modified_vars", None)
+        der_vars: t.Optional[t.Set[str]] = getattr(g, "derived_vars", None)
+        setattr(g, "update_count", getattr(g, "update_count", 0) + 1)
+        if modified_vars is None:
+            modified_vars = set()
+            g.modified_vars = modified_vars
+        if der_vars is None:
+            g.derived_vars = derived_vars
+        else:
+            der_vars.update(derived_vars)
+        if var_name in modified_vars:
+            return True
+        else:
+            modified_vars.add(var_name)
+            return False
+
+    def __clean_vars_on_exit(self) -> t.Optional[t.Set[str]]:
+        update_count = getattr(g, "update_count", 0) - 1
+        if update_count < 1:
+            vars: t.Set[str] = getattr(g, "derived_vars", set())
+            delattr(g, "update_count")
+            delattr(g, "modified_vars")
+            delattr(g, "derived_vars")
+            return vars
+        else:
+            setattr(g, "update_count", update_count)
+            return None
 
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
@@ -340,32 +366,26 @@ class Gui:
         if holder:
             var_name = holder.get_name()
         hash_expr = self.__evaluator.get_hash_from_expr(var_name)
-        # if the variable has been evaluated then skip updating to prevent infinite loop
-        if self.__modified_vars_update_var is not None and hash_expr in self.__modified_vars_update_var:
-            return
-        modified_vars = {hash_expr}
+        derived_vars = {hash_expr}
         # Use custom attrsetter function to allow value binding for _MapDict
         if propagate:
             _setscopeattr_drill(self, hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
             if var_name == hash_expr:
-                modified_vars.update(self._re_evaluate_expr(var_name))
+                derived_vars.update(self._re_evaluate_expr(var_name))
         elif holder:
-            modified_vars.update(self._evaluate_holders(hash_expr))
-        send_var_list = False
-        if self.__modified_vars_update_var is None:
-            self.__modified_vars_update_var = modified_vars
-            send_var_list = True
-        else:
-            self.__modified_vars_update_var.update(modified_vars)
-        self.__call_on_change(
-            var_name,
-            value.get() if isinstance(value, _TaipyBase) else value._dict if isinstance(value, _MapDict) else value,
-            on_change,
-        )
-        if send_var_list:
-            self.__send_var_list_update(list(self.__modified_vars_update_var), var_name)
-            self.__modified_vars_update_var = None
+            derived_vars.update(self._evaluate_holders(hash_expr))
+        # if the variable has been evaluated then skip updating to prevent infinite loop
+        var_modified = self.__is_var_modified_in_context(hash_expr, derived_vars)
+        if not var_modified:
+            self.__call_on_change(
+                var_name,
+                value.get() if isinstance(value, _TaipyBase) else value._dict if isinstance(value, _MapDict) else value,
+                on_change,
+            )
+        derived_modified = self.__clean_vars_on_exit()
+        if derived_modified is not None:
+            self.__send_var_list_update(list(derived_modified), var_name)
 
     def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
