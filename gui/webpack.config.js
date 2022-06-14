@@ -24,7 +24,7 @@ module.exports = (env, options) => {
         mode: options.mode, //'development', //'production',
         entry: ["./src/index.tsx"],
         output: {
-            filename: "taipy.js",
+            filename: "taipy.[contenthash].js",
             path: path.resolve(__dirname, "../taipy/gui/webapp"),
             library: "Taipy",
             publicPath: "/",
@@ -66,7 +66,7 @@ module.exports = (env, options) => {
             }),
             new HtmlWebpackPlugin({
                 template: "public/index.html",
-                hash: true,
+                hash: false,
             }),
             new MiniCssExtractPlugin(),
             new ESLintPlugin({
