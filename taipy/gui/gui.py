@@ -277,7 +277,6 @@ class Gui:
         modified_vars: t.Optional[t.Set[str]] = getattr(g, "modified_vars", None)
         der_vars: t.Optional[t.Set[str]] = getattr(g, "derived_vars", None)
         setattr(g, "update_count", getattr(g, "update_count", 0) + 1)
-        print(f"__clean_modified_vars_on_enter: {g.update_count}")
         if modified_vars is None:
             modified_vars = set()
             g.modified_vars = modified_vars
@@ -293,7 +292,6 @@ class Gui:
 
     def __clean_vars_on_exit(self) -> t.Optional[t.Set[str]]:
         update_count = getattr(g, "update_count", 0) - 1
-        print(f"__clean_vars_on_exit: {update_count} \n\tmodified_vars: {getattr(g, 'modified_vars', None)} \n\tderived_vars: {getattr(g, 'derived_vars', None)}")
         if update_count < 1:
             vars: t.Set[str] = getattr(g, "derived_vars", set())
             delattr(g, "update_count")
