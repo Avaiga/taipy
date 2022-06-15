@@ -118,12 +118,22 @@ class _Server:
             for k, v in self.__path_mapping.items():
                 if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
                     return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
-            if hasattr(__main__, "__file__") and os.path.isfile(
-                os.path.dirname(__main__.__file__) + os.path.sep + path
+            print(os.path.dirname(__main__.__file__))
+            print(self._gui._root_dir)
+            if (
+                hasattr(__main__, "__file__")
+                and str(
+                    os.path.normpath(
+                        file_path := ((base_path := os.path.dirname(__main__.__file__) + os.path.sep) + path)
+                    )
+                ).startswith(base_path)
+                and os.path.isfile(file_path)
             ):
-                return send_from_directory(os.path.dirname(__main__.__file__) + os.path.sep, path)
-            if os.path.isfile(self._gui._root_dir + os.path.sep + path):
-                return send_from_directory(self._gui._root_dir + os.path.sep, path)
+                return send_from_directory(base_path, path)
+            if str(os.path.normpath(file_path := (base_path := self._gui._root_dir + os.path.sep) + path)).startswith(
+                base_path
+            ) and os.path.isfile(file_path):
+                return send_from_directory(base_path, path)
             return ("", 404)
 
         @taipy_bp.errorhandler(404)
