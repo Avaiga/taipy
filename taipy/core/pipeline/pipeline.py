@@ -15,6 +15,7 @@ import uuid
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import networkx as nx
+
 from taipy.core.common._entity import _Entity
 from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
@@ -23,7 +24,6 @@ from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
 from taipy.core.data.data_node import DataNode
-
 from taipy.core.exceptions.exceptions import NonExistingTask
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task
@@ -58,7 +58,6 @@ class Pipeline(_Entity):
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
         self.parent_id = parent_id
         self._tasks = tasks
-        self.is_consistent = self.__is_consistent()
 
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._properties = _Properties(self, **properties)
@@ -79,7 +78,7 @@ class Pipeline(_Entity):
 
     @tasks.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
-    def tasks(self, tasks: List[Union[TaskId, Task]]):
+    def tasks(self, tasks: Union[List[TaskId], List[Task]]):
         self._tasks = tasks
 
     @property  # type: ignore
@@ -118,7 +117,7 @@ class Pipeline(_Entity):
                 return task.output[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of pipeline {self.id}")
 
-    def __is_consistent(self) -> bool:
+    def _is_consistent(self) -> bool:
         dag = self.__build_dag()
         if not nx.is_directed_acyclic_graph(dag):
             return False

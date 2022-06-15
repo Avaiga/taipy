@@ -59,25 +59,25 @@ def test_create_pipeline():
 
 def test_check_consistency():
     pipeline_1 = Pipeline("name_1", {}, [])
-    assert pipeline_1.is_consistent
+    assert pipeline_1._is_consistent()
 
     input_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     output_2 = InMemoryDataNode("foo", Scope.PIPELINE)
     task_2 = Task("foo", print, [input_2], [output_2], TaskId("task_id_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_2])
-    assert pipeline_2.is_consistent
+    assert pipeline_2._is_consistent()
 
     data_node_3 = InMemoryDataNode("foo", Scope.PIPELINE)
     task_3 = Task("foo", print, [data_node_3], [data_node_3], TaskId("task_id_3"))
     pipeline_3 = Pipeline("name_3", {}, [task_3])
-    assert not pipeline_3.is_consistent  # Not a dag
+    assert not pipeline_3._is_consistent()  # Not a dag
 
     input_4 = InMemoryDataNode("foo", Scope.PIPELINE)
     output_4 = InMemoryDataNode("foo", Scope.PIPELINE)
     task_4_1 = Task("foo", print, [input_4], [output_4], TaskId("task_id_4_1"))
     task_4_2 = Task("bar", print, [output_4], [input_4], TaskId("task_id_4_2"))
     pipeline_4 = Pipeline("name_4", {}, [task_4_1, task_4_2])
-    assert not pipeline_4.is_consistent  # Not a Dag
+    assert not pipeline_4._is_consistent()  # Not a Dag
 
     class FakeDataNode:
         config_id = "config_id_of_a_fake_dn"
@@ -87,7 +87,7 @@ def test_check_consistency():
     task_5_1 = Task("foo", print, [input_5], [output_5], TaskId("task_id_5_1"))
     task_5_2 = Task("bar", print, [output_5], [FakeDataNode()], TaskId("task_id_5_2"))
     pipeline_2 = Pipeline("name_2", {}, [task_5_1, task_5_2])
-    assert not pipeline_2.is_consistent
+    assert not pipeline_2._is_consistent()
 
 
 def test_get_sorted_tasks():

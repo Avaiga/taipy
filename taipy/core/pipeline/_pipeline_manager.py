@@ -64,14 +64,14 @@ class _PipelineManager(_Manager[Pipeline]):
     @classmethod
     def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         pipeline_id = Pipeline._new_id(pipeline_config.id)
+
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = [
-            task_manager._get_or_create(t_config, scenario_id, pipeline_id) for t_config in pipeline_config.task_configs
-        ]
+        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, scenario_id, pipeline_id)
+
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
 
-        if pipelines_from_parent := cls._repository._get_by_config_and_parent_ids(pipeline_config.id, parent_id):
+        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(pipeline_config.id, parent_id):
             return pipelines_from_parent
 
         pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)

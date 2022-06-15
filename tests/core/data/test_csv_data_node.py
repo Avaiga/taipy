@@ -55,12 +55,12 @@ class TestCSVDataNode:
 
     def test_new_csv_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "csv", path="NOT_EXISTING.csv")
-        not_ready_dn = _DataManager._get_or_create(not_ready_dn_cfg)
+        not_ready_dn = _DataManager._bulk_get_or_create([not_ready_dn_cfg])[not_ready_dn_cfg]
         assert not not_ready_dn.is_ready_for_reading
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         ready_dn_cfg = Config.configure_data_node("ready_data_node_config_id", "csv", path=path)
-        ready_dn = _DataManager._get_or_create(ready_dn_cfg)
+        ready_dn = _DataManager._bulk_get_or_create([ready_dn_cfg])[ready_dn_cfg]
         assert ready_dn.is_ready_for_reading
 
     def test_create_with_missing_parameters(self):

@@ -22,10 +22,11 @@ from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.exceptions.exceptions import NonExistingPipeline
 from taipy.core.job.job import Job
-from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
 
 
@@ -170,13 +171,14 @@ class Scenario(_Entity):
         protected_attribute_name = _validate_id(attribute_name)
         if protected_attribute_name in self._properties:
             return _tpl._replace_templates(self._properties[protected_attribute_name])
-        pipelines = self.__get_pipelines()
+        pipelines = self.pipelines
         if protected_attribute_name in pipelines:
-            return self.pipelines[protected_attribute_name]
+            return pipelines[protected_attribute_name]
         for pipeline in pipelines.values():
-            if protected_attribute_name in pipeline.tasks:
-                return pipeline.tasks[protected_attribute_name]
-            for task in pipeline.tasks.values():
+            tasks = pipeline.tasks
+            if protected_attribute_name in tasks:
+                return tasks[protected_attribute_name]
+            for task in tasks.values():
                 if protected_attribute_name in task.input:
                     return task.input[protected_attribute_name]
                 if protected_attribute_name in task.output:

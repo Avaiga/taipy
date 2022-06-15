@@ -732,3 +732,43 @@ def test_hard_delete_shared_entities():
     assert len(_TaskManager._get_all()) == 2
     assert len(_DataManager._get_all()) == 3
     assert len(_JobManager._get_all()) == 3
+
+
+def test_data_node_creation_pipeline():
+    input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
+    input_global_dn = Config.configure_data_node("my_global_input", "in_memory", scope=Scope.GLOBAL)
+    input_global_dn_2 = Config.configure_data_node("my_global_input_2", "in_memory", scope=Scope.GLOBAL)
+    intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.PIPELINE)
+    output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
+    task_1 = Config.configure_task("task_1", print, [input_dn, input_global_dn, input_global_dn_2], intermediate_dn)
+    task_2 = Config.configure_task("task_2", print, [input_dn, intermediate_dn], output_dn)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_1, task_2])
+    pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
+
+    assert len(_DataManager._get_all()) == 8
+    assert pipeline_1.my_input.id != pipeline_2.my_input.id
+    assert pipeline_1.my_global_input.id == pipeline_2.my_global_input.id
+    assert pipeline_1.my_global_input_2.id == pipeline_2.my_global_input_2.id
+    assert pipeline_1.my_inter.id != pipeline_2.my_inter.id
+    assert pipeline_1.my_output.id != pipeline_2.my_output.id
+
+
+def test_data_node_creation_scenario():
+    input_dn = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO)
+    input_global_dn = Config.configure_data_node("my_global_input", "in_memory", scope=Scope.GLOBAL)
+    input_global_dn_2 = Config.configure_data_node("my_global_input_2", "in_memory", scope=Scope.GLOBAL)
+    intermediate_dn = Config.configure_data_node("my_inter", "in_memory", scope=Scope.SCENARIO)
+    output_dn = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
+    task_1 = Config.configure_task("task_1", print, [input_dn, input_global_dn, input_global_dn_2], intermediate_dn)
+    task_2 = Config.configure_task("task_2", print, [input_dn, intermediate_dn], output_dn)
+    pipeline_config = Config.configure_pipeline("pipeline_config", [task_1, task_2])
+    pipeline_1 = _PipelineManager._get_or_create(pipeline_config)
+    pipeline_2 = _PipelineManager._get_or_create(pipeline_config)
+
+    assert len(_DataManager._get_all()) == 5
+    assert pipeline_1.my_input.id == pipeline_2.my_input.id
+    assert pipeline_1.my_global_input.id == pipeline_2.my_global_input.id
+    assert pipeline_1.my_global_input_2.id == pipeline_2.my_global_input_2.id
+    assert pipeline_1.my_inter.id == pipeline_2.my_inter.id
+    assert pipeline_1.my_output.id == pipeline_2.my_output.id

@@ -147,11 +147,7 @@ class _ScenarioManager(_Manager[Scenario]):
 
     @classmethod
     def _get_all_by_cycle(cls, cycle: Cycle) -> List[Scenario]:
-        scenarios = []
-        for scenario in cls._get_all():
-            if scenario.cycle and scenario.cycle == cycle:
-                scenarios.append(scenario)
-        return scenarios
+        return cls._get_all_by(cycle.id)
 
     @classmethod
     def _get_primary_scenarios(cls) -> List[Scenario]:

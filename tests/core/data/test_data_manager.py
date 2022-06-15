@@ -284,6 +284,9 @@ class TestDataManager:
         assert len(_DataManager._get_all()) == 0
 
     def test_get_or_create(self):
+        def _get_or_create_dn(config, *args):
+            return _DataManager._bulk_get_or_create([config], *args)[config]
+
         _DataManager._delete_all()
 
         global_dn_config = Config.configure_data_node(
@@ -297,44 +300,44 @@ class TestDataManager:
         )
 
         assert len(_DataManager._get_all()) == 0
-        global_dn = _DataManager._get_or_create(global_dn_config, None, None)
+        global_dn = _get_or_create_dn(global_dn_config, None, None)
         assert len(_DataManager._get_all()) == 1
-        global_dn_bis = _DataManager._get_or_create(global_dn_config, None)
+        global_dn_bis = _get_or_create_dn(global_dn_config, None)
         assert len(_DataManager._get_all()) == 1
         assert global_dn.id == global_dn_bis.id
 
-        scenario_dn = _DataManager._get_or_create(scenario_dn_config, "scenario_id")
+        scenario_dn = _get_or_create_dn(scenario_dn_config, "scenario_id")
         assert len(_DataManager._get_all()) == 2
-        scenario_dn_bis = _DataManager._get_or_create(scenario_dn_config, "scenario_id")
+        scenario_dn_bis = _get_or_create_dn(scenario_dn_config, "scenario_id")
         assert len(_DataManager._get_all()) == 2
         assert scenario_dn.id == scenario_dn_bis.id
-        scenario_dn_ter = _DataManager._get_or_create(scenario_dn_config, "scenario_id", "whatever_pipeline_id")
+        scenario_dn_ter = _get_or_create_dn(scenario_dn_config, "scenario_id", "whatever_pipeline_id")
         assert len(_DataManager._get_all()) == 2
         assert scenario_dn.id == scenario_dn_bis.id
         assert scenario_dn_bis.id == scenario_dn_ter.id
-        scenario_dn_quater = _DataManager._get_or_create(scenario_dn_config, "scenario_id_2")
+        scenario_dn_quater = _get_or_create_dn(scenario_dn_config, "scenario_id_2")
         assert len(_DataManager._get_all()) == 3
         assert scenario_dn.id == scenario_dn_bis.id
         assert scenario_dn_bis.id == scenario_dn_ter.id
         assert scenario_dn_ter.id != scenario_dn_quater.id
 
-        pipeline_dn = _DataManager._get_or_create(pipeline_dn_config, "scenario_id", "pipeline_1")
+        pipeline_dn = _get_or_create_dn(pipeline_dn_config, "scenario_id", "pipeline_1")
         assert len(_DataManager._get_all()) == 4
-        pipeline_dn_bis = _DataManager._get_or_create(pipeline_dn_config, "scenario_id", "pipeline_1")
+        pipeline_dn_bis = _get_or_create_dn(pipeline_dn_config, "scenario_id", "pipeline_1")
         assert len(_DataManager._get_all()) == 4
         assert pipeline_dn.id == pipeline_dn_bis.id
-        pipeline_dn_ter = _DataManager._get_or_create(pipeline_dn_config, "scenario_id", "pipeline_2")
+        pipeline_dn_ter = _get_or_create_dn(pipeline_dn_config, "scenario_id", "pipeline_2")
         assert len(_DataManager._get_all()) == 5
         assert pipeline_dn.id == pipeline_dn_bis.id
         assert pipeline_dn.id != pipeline_dn_ter.id
-        pipeline_dn_quater = _DataManager._get_or_create(pipeline_dn_config, "other_scenario_id", "pipeline_2")
+        pipeline_dn_quater = _get_or_create_dn(pipeline_dn_config, "other_scenario_id", "pipeline_2")
         assert len(_DataManager._get_all()) == 5
         assert pipeline_dn.id == pipeline_dn_bis.id
         assert pipeline_dn_bis.id != pipeline_dn_ter.id
         assert pipeline_dn_ter.id == pipeline_dn_quater.id
 
         pipeline_dn_config.id = "test_data_node4"
-        pipeline_dn_quinquies = _DataManager._get_or_create(pipeline_dn_config, None)
+        pipeline_dn_quinquies = _get_or_create_dn(pipeline_dn_config, None)
         assert len(_DataManager._get_all()) == 6
         assert pipeline_dn.id == pipeline_dn_bis.id
         assert pipeline_dn_bis.id != pipeline_dn_ter.id
@@ -352,15 +355,14 @@ class TestDataManager:
             id="data_node_2", storage_type="in_memory", data="In memory pipeline 2"
         )
 
-        # Create and save
-        dm._get_or_create(dn_config_1)
-        dm._get_or_create(dn_config_2)
+        dm._bulk_get_or_create([dn_config_1, dn_config_2])
+
         assert len(dm._get_all()) == 2
 
         # Delete the DataManager to ensure it's get from the storage system
         del dm
         dm = _DataManager()
-        dm._get_or_create(dn_config_1)
+        dm._bulk_get_or_create([dn_config_1])
         assert len(dm._get_all()) == 2
 
         dm._delete_all()
@@ -369,12 +371,16 @@ class TestDataManager:
         user_pickle_dn_config = Config.configure_data_node(
             id="d1", storage_type="pickle", path=pickle_file_path, default_data="d"
         )
-        generated_pickle_dn_config_1 = Config.configure_data_node(id="d2", storage_type="pickle", default_data="d")
-        generated_pickle_dn_config_2 = Config.configure_data_node(id="d3", storage_type="pickle", default_data="d")
+        generated_pickle_dn_1_config = Config.configure_data_node(id="d2", storage_type="pickle", default_data="d")
+        generated_pickle_dn_2_config = Config.configure_data_node(id="d3", storage_type="pickle", default_data="d")
 
-        user_pickle_dn = _DataManager._get_or_create(user_pickle_dn_config)
-        generated_pickle_dn_1 = _DataManager._get_or_create(generated_pickle_dn_config_1)
-        generated_pickle_dn_2 = _DataManager._get_or_create(generated_pickle_dn_config_2)
+        dns = _DataManager._bulk_get_or_create(
+            [user_pickle_dn_config, generated_pickle_dn_1_config, generated_pickle_dn_2_config]
+        )
+
+        user_pickle_dn = dns[user_pickle_dn_config]
+        generated_pickle_dn_1 = dns[generated_pickle_dn_1_config]
+        generated_pickle_dn_2 = dns[generated_pickle_dn_2_config]
 
         _DataManager._clean_pickle_file(user_pickle_dn.id)
         assert file_exists(user_pickle_dn.path)
@@ -391,10 +397,19 @@ class TestDataManager:
         generated_pickle_dn_config_2 = Config.configure_data_node(id="d3", storage_type="pickle", default_data="d")
         generated_pickle_dn_config_3 = Config.configure_data_node(id="d4", storage_type="pickle", default_data="d")
 
-        user_pickle_dn = _DataManager._get_or_create(user_pickle_dn_config)
-        generated_pickle_dn_1 = _DataManager._get_or_create(generated_pickle_dn_config_1)
-        generated_pickle_dn_2 = _DataManager._get_or_create(generated_pickle_dn_config_2)
-        generated_pickle_dn_3 = _DataManager._get_or_create(generated_pickle_dn_config_3)
+        dns = _DataManager._bulk_get_or_create(
+            [
+                user_pickle_dn_config,
+                generated_pickle_dn_config_1,
+                generated_pickle_dn_config_2,
+                generated_pickle_dn_config_3,
+            ]
+        )
+
+        user_pickle_dn = dns[user_pickle_dn_config]
+        generated_pickle_dn_1 = dns[generated_pickle_dn_config_1]
+        generated_pickle_dn_2 = dns[generated_pickle_dn_config_2]
+        generated_pickle_dn_3 = dns[generated_pickle_dn_config_3]
 
         _DataManager._delete(user_pickle_dn.id)
         assert file_exists(user_pickle_dn.path)

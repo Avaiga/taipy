@@ -53,13 +53,13 @@ class TestPickleDataNodeEntity:
 
     def test_new_pickle_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "pickle", path="NOT_EXISTING.p")
-        not_ready_dn = _DataManager._get_or_create(not_ready_dn_cfg)
-        assert not not_ready_dn.is_ready_for_reading
-
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
         ready_dn_cfg = Config.configure_data_node("ready_data_node_config_id", "pickle", path=path)
-        ready_dn = _DataManager._get_or_create(ready_dn_cfg)
-        assert ready_dn.is_ready_for_reading
+
+        dns = _DataManager._bulk_get_or_create([not_ready_dn_cfg, ready_dn_cfg])
+
+        assert not dns[not_ready_dn_cfg].is_ready_for_reading
+        assert dns[ready_dn_cfg].is_ready_for_reading
 
     def test_create_with_file_name(self):
         dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_data": "bar", "path": "foo.FILE.p"})

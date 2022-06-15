@@ -26,7 +26,7 @@ def test_create_and_save():
     input_configs = [Config.configure_data_node("my_input", "in_memory")]
     output_configs = Config.configure_data_node("my_output", "in_memory")
     task_config = Config.configure_task("foo", print, input_configs, output_configs)
-    task = _TaskManager._get_or_create(task_config)
+    task = _create_task_from_config(task_config)
     assert task.id is not None
     assert task.config_id == "foo"
     assert len(task.input) == 1
@@ -56,7 +56,7 @@ def test_do_not_recreate_existing_data_node():
     assert len(_DataManager._get_all()) == 1
 
     task_config = Config.configure_task("foo", print, input_config, output_config)
-    _TaskManager._get_or_create(task_config, pipeline_id="pipeline_id")
+    _create_task_from_config(task_config, pipeline_id="pipeline_id")
     assert len(_DataManager._get_all()) == 2
 
 
@@ -66,20 +66,20 @@ def test_do_not_recreate_existing_task():
     task_config = Config.configure_task("foo", print, input_config_scope_pipeline, output_config_scope_pipeline)
     # task_config scope is Pipeline
 
-    task_1 = _TaskManager._get_or_create(task_config)
+    task_1 = _create_task_from_config(task_config)
     assert len(_TaskManager._get_all()) == 1
-    _TaskManager._get_or_create(task_config)  # Do not create. It already exists for None pipeline
+    _TaskManager._bulk_get_or_create([task_config])  # Do not create. It already exists for None pipeline
     assert len(_TaskManager._get_all()) == 1
-    task_2 = _TaskManager._get_or_create(
+    task_2 = _create_task_from_config(
         task_config, "whatever_scenario"
     )  # Do not create. It already exists for None pipeline
     assert len(_TaskManager._get_all()) == 1
     assert task_1.id == task_2.id
-    task_3 = _TaskManager._get_or_create(task_config, "whatever_scenario", "pipeline_1")
+    task_3 = _create_task_from_config(task_config, "whatever_scenario", "pipeline_1")
     assert len(_TaskManager._get_all()) == 2
     assert task_1.id == task_2.id
     assert task_2.id != task_3.id
-    task_4 = _TaskManager._get_or_create(
+    task_4 = _create_task_from_config(
         task_config, "other_sc", "pipeline_1"
     )  # Do not create. It already exists for pipeline_1
     assert len(_TaskManager._get_all()) == 2
@@ -92,25 +92,23 @@ def test_do_not_recreate_existing_task():
     task_config_2 = Config.configure_task("bar", print, input_config_scope_scenario, output_config_scope_scenario)
     # task_config_2 scope is Scenario
 
-    task_5 = _TaskManager._get_or_create(task_config_2)
+    task_5 = _create_task_from_config(task_config_2)
     assert len(_TaskManager._get_all()) == 3
-    task_6 = _TaskManager._get_or_create(task_config_2)  # Do not create. It already exists for None scenario
+    task_6 = _create_task_from_config(task_config_2)  # Do not create. It already exists for None scenario
     assert len(_TaskManager._get_all()) == 3
     assert task_5.id == task_6.id
-    task_7 = _TaskManager._get_or_create(
+    task_7 = _create_task_from_config(
         task_config_2, None, "A_pipeline"
     )  # Do not create. It already exists for None scenario
     assert len(_TaskManager._get_all()) == 3
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
-    task_8 = _TaskManager._get_or_create(
-        task_config_2, "scenario_1", "A_pipeline"
-    )  # Create even if pipeline is the same.
+    task_8 = _create_task_from_config(task_config_2, "scenario_1", "A_pipeline")  # Create even if pipeline is the same.
     assert len(_TaskManager._get_all()) == 4
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
     assert task_7.id != task_8.id
-    task_9 = _TaskManager._get_or_create(
+    task_9 = _create_task_from_config(
         task_config_2, "scenario_1", "bar"
     )  # Do not create. It already exists for scenario_1
     assert len(_TaskManager._get_all()) == 4
@@ -118,7 +116,7 @@ def test_do_not_recreate_existing_task():
     assert task_6.id == task_7.id
     assert task_7.id != task_8.id
     assert task_8.id == task_9.id
-    task_10 = _TaskManager._get_or_create(task_config_2, "scenario_2", "baz")
+    task_10 = _create_task_from_config(task_config_2, "scenario_2", "baz")
     assert len(_TaskManager._get_all()) == 5
     assert task_5.id == task_6.id
     assert task_6.id == task_7.id
@@ -188,25 +186,17 @@ def test_ensure_conservation_of_order_of_data_nodes_on_task_creation():
 
     input = [embedded_1, embedded_2, embedded_3]
     output = [embedded_4, embedded_5]
-    task_config = Config.configure_task("name_1", print, input, output)
-    task = _TaskManager._get_or_create(task_config)
 
-    assert [i.config_id for i in task.input.values()] == [embedded_1.id, embedded_2.id, embedded_3.id]
-    assert [o.config_id for o in task.output.values()] == [embedded_4.id, embedded_5.id]
+    task_config_1 = Config.configure_task("name_1", print, input, output)
+    task_config_2 = Config.configure_task("name_2", print, input, output)
 
-    data_nodes = {
-        embedded_1: InMemoryDataNode(embedded_1.id, Scope.PIPELINE),
-        embedded_2: InMemoryDataNode(embedded_2.id, Scope.PIPELINE),
-        embedded_3: InMemoryDataNode(embedded_3.id, Scope.PIPELINE),
-        embedded_4: InMemoryDataNode(embedded_4.id, Scope.PIPELINE),
-        embedded_5: InMemoryDataNode(embedded_5.id, Scope.PIPELINE),
-    }
+    task_1, task_2 = _TaskManager._bulk_get_or_create([task_config_1, task_config_2])
 
-    task_config = Config.configure_task("name_2", print, input, output)
-    task = _TaskManager._get_or_create(task_config, data_nodes)
+    assert [i.config_id for i in task_1.input.values()] == [embedded_1.id, embedded_2.id, embedded_3.id]
+    assert [o.config_id for o in task_1.output.values()] == [embedded_4.id, embedded_5.id]
 
-    assert [i.config_id for i in task.input.values()] == [embedded_1.id, embedded_2.id, embedded_3.id]
-    assert [o.config_id for o in task.output.values()] == [embedded_4.id, embedded_5.id]
+    assert [i.config_id for i in task_2.input.values()] == [embedded_1.id, embedded_2.id, embedded_3.id]
+    assert [o.config_id for o in task_2.output.values()] == [embedded_4.id, embedded_5.id]
 
 
 def test_delete_raise_exception():
@@ -215,7 +205,7 @@ def test_delete_raise_exception():
     )
     dn_output_config_1 = Config.configure_data_node("my_output_1", "in_memory")
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    task_1 = _TaskManager._get_or_create(task_config_1)
+    task_1 = _create_task_from_config(task_config_1)
     _TaskManager._delete(task_1.id)
 
     with pytest.raises(ModelNotFound):
@@ -228,7 +218,7 @@ def test_hard_delete():
     )
     dn_output_config_1 = Config.configure_data_node("my_output_1", "in_memory")
     task_config_1 = Config.configure_task("task_config_1", print, dn_input_config_1, dn_output_config_1)
-    task_1 = _TaskManager._get_or_create(task_config_1)
+    task_1 = _create_task_from_config(task_config_1)
 
     assert len(_TaskManager._get_all()) == 1
     assert len(_DataManager._get_all()) == 2
@@ -251,7 +241,7 @@ def test_submit_task():
     class MockScheduler(_Scheduler):
         submit_calls = []
 
-        def submit_task(self, task: Task, callbacks=None, force=False):
+        def submit_task(self, task, callbacks=None, force=False):
             self.submit_calls.append(task)
             return None
 
@@ -267,3 +257,7 @@ def test_submit_task():
     _TaskManager._submit(task_1)
     call_ids = [call.id for call in MockScheduler.submit_calls]
     assert call_ids == [task_1.id]
+
+
+def _create_task_from_config(task_config, *args, **kwargs):
+    return _TaskManager._bulk_get_or_create([task_config], *args, **kwargs)[0]
