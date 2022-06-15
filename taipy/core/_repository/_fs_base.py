@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import json
-import os
 import pathlib
 import shutil
 import time
@@ -94,13 +93,15 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
     def load(self, model_id: str) -> Entity:
         try:
-            return self.__to_entity(self.__get_model_filepath(model_id), Config.global_config.read_entity_retry or 0)  # type: ignore
+            return self.__to_entity(
+                self.__get_model_filepath(model_id), retry=Config.global_config.read_entity_retry or 0
+            )  # type: ignore
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), model_id)
 
     def _load_all(self) -> List[Entity]:
         try:
-            return [self.__to_entity(f, Config.global_config.read_entity_retry or 0) for f in self.dir_path.iterdir()]  # type: ignore
+            return [self.__to_entity(f, retry=Config.global_config.read_entity_retry or 0) for f in self.dir_path.iterdir()]  # type: ignore
         except FileNotFoundError:
             return []
 
@@ -160,7 +161,9 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
 
         try:
             for f in self.dir_path.iterdir():
-                config_id, parent_id, entity = self.__match_file_and_get_entity(f, configs_and_parent_ids, retry=Config.global_config.read_entity_retry or 0)
+                config_id, parent_id, entity = self.__match_file_and_get_entity(
+                    f, configs_and_parent_ids, retry=Config.global_config.read_entity_retry or 0
+                )
 
                 if entity:
                     key = config_id, parent_id
@@ -220,9 +223,8 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
                     if entity.parent_id == parent_id and entity.config_id == config_id.id:
                         return config_id, parent_id, entity
             except Exception as e:
-                 if retry and retry > 0:
-                     return self.__match_file_and_get_entity(filepath, config_and_parent_ids, 
-                                                             retry=retry - 1)
-                 raise e
-                
+                if retry and retry > 0:
+                    return self.__match_file_and_get_entity(filepath, config_and_parent_ids, retry=retry - 1)
+                raise e
+
         return None, None, None
