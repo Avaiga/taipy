@@ -16,12 +16,12 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 import pytest
-
 from taipy.core.common.alias import DataNodeId
 from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.excel import ExcelDataNode
+
+from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import (
     MissingRequiredProperty,
     NoData,
@@ -658,3 +658,17 @@ class TestExcelDataNode:
 
         for sheet_name in sheet_names:
             assert np.array_equal(data_pandas[sheet_name].values, multi_sheet_content[sheet_name].values)
+
+    def test_set_path(self):
+        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.xlsx"})
+        assert dn.path == "foo.xlsx"
+        dn.path = "bar.xlsx"
+        assert dn.path == "bar.xlsx"
+
+    def test_path_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "foo.csv"})
+
+    def test_raise_error_when_path_not_exist(self):
+        with pytest.raises(MissingRequiredProperty):
+            ExcelDataNode("foo", Scope.PIPELINE)

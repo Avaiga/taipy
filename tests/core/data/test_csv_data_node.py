@@ -166,3 +166,17 @@ class TestCSVDataNode:
 
         csv_dn.write(None)
         assert len(csv_dn.read()) == 0
+
+    def test_set_path(self):
+        dn = CSVDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.csv"})
+        assert dn.path == "foo.csv"
+        dn.path = "bar.csv"
+        assert dn.path == "bar.csv"
+
+    def test_path_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            CSVDataNode("foo", Scope.PIPELINE, properties={"path": "foo.csv"})
+
+    def test_raise_error_when_path_not_exist(self):
+        with pytest.raises(MissingRequiredProperty):
+            CSVDataNode("foo", Scope.PIPELINE)

@@ -49,7 +49,7 @@ class TestDataNodeConfigChecker:
         config._data_nodes["default"].storage_type = "csv"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "sql"
         collector = IssueCollector()
@@ -59,7 +59,7 @@ class TestDataNodeConfigChecker:
         config._data_nodes["default"].storage_type = "excel"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "pickle"
         collector = IssueCollector()
@@ -115,13 +115,13 @@ class TestDataNodeConfigChecker:
         config._data_nodes["default"].storage_type = "csv"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "csv"
         config._data_nodes["default"].properties = {"has_header": True}
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "csv"
         config._data_nodes["default"].properties = {"path": "bar"}
@@ -144,13 +144,13 @@ class TestDataNodeConfigChecker:
         config._data_nodes["default"].storage_type = "excel"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "excel"
         config._data_nodes["default"].properties = {"has_header": True}
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 1
+        assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "excel"
         config._data_nodes["default"].properties = {"path": "bar"}

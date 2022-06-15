@@ -73,16 +73,16 @@ def test_complex():
     excel_path_out = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/res.xlsx")
     csv_path_out = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/res.csv")
 
-    inp_csv_dn_1 = Config.configure_csv_data_node("dn_csv_in_1", path=csv_path_inp)
-    inp_csv_dn_2 = Config.configure_csv_data_node("dn_csv_in_2", path=csv_path_inp)
+    inp_csv_dn_1 = Config.configure_csv_data_node("dn_csv_in_1", default_path=csv_path_inp)
+    inp_csv_dn_2 = Config.configure_csv_data_node("dn_csv_in_2", default_path=csv_path_inp)
 
-    inp_excel_dn_1 = Config.configure_excel_data_node("dn_excel_in_1", path=excel_path_inp, sheet_name="Sheet1")
-    inp_excel_dn_2 = Config.configure_excel_data_node("dn_excel_in_2", path=excel_path_inp, sheet_name="Sheet1")
+    inp_excel_dn_1 = Config.configure_excel_data_node("dn_excel_in_1", default_path=excel_path_inp, sheet_name="Sheet1")
+    inp_excel_dn_2 = Config.configure_excel_data_node("dn_excel_in_2", default_path=excel_path_inp, sheet_name="Sheet1")
 
     placeholder = Config.configure_in_memory_data_node("dn_placeholder", 10)
 
-    dn_csv_sum = Config.configure_csv_data_node("dn_sum_csv", path=csv_path_sum)
-    dn_excel_sum = Config.configure_excel_data_node("dn_sum_excel", path=excel_path_sum, sheet_name="Sheet1")
+    dn_csv_sum = Config.configure_csv_data_node("dn_sum_csv", default_path=csv_path_sum)
+    dn_excel_sum = Config.configure_excel_data_node("dn_sum_excel", default_path=excel_path_sum, sheet_name="Sheet1")
 
     dn_subtract_csv_excel = Config.configure_pickle_data_node("dn_subtract_csv_excel")
     dn_mult = Config.configure_pickle_data_node("dn_mult")

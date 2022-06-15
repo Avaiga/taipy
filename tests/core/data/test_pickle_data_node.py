@@ -13,11 +13,11 @@ import os
 import pathlib
 
 import pytest
-
 from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.pickle import PickleDataNode
+
+from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import InvalidConfigurationId, NoData
 
 
@@ -93,3 +93,31 @@ class TestPickleDataNodeEntity:
         )
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
+
+    def test_default_path_overrides_path(self):
+        dn = PickleDataNode(
+            "foo",
+            Scope.PIPELINE,
+            properties={
+                "default_data": "bar",
+                "default_path": "foo.FILE.p",
+                "path": "bar.FILE.p",
+            },
+        )
+        assert dn.path == "foo.FILE.p"
+
+    def test_set_path(self):
+        dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.p"})
+        assert dn.path == "foo.p"
+        dn.path = "bar.p"
+        assert dn.path == "bar.p"
+
+    def test_is_file_generated(self):
+        dn = PickleDataNode("foo", Scope.PIPELINE, properties={})
+        assert dn.is_file_generated
+        dn.path = "bar.p"
+        assert not dn.is_file_generated
+
+    def test_path_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            PickleDataNode("foo", Scope.PIPELINE, properties={"path": "foo.p"})

@@ -19,13 +19,13 @@ class TestConfig:
         a, b, c, d, e = "foo", "path", True, Scope.PIPELINE, "numpy"
         with mock.patch("taipy.core.config.config.Config.configure_data_node") as mck:
             Config.configure_csv_data_node(a, b, c, d, exposed_type=e)
-            mck.assert_called_once_with(a, "csv", scope=d, path=b, has_header=c, exposed_type=e)
+            mck.assert_called_once_with(a, "csv", scope=d, default_path=b, has_header=c, exposed_type=e)
 
     def test_configure_excel_data_node(self):
         a, b, c, d, e, f = "foo", "path", True, "Sheet1", Scope.PIPELINE, "numpy"
         with mock.patch("taipy.core.config.config.Config.configure_data_node") as mck:
             Config.configure_excel_data_node(a, b, c, d, e, exposed_type=f)
-            mck.assert_called_once_with(a, "excel", scope=e, path=b, has_header=c, sheet_name=d, exposed_type=f)
+            mck.assert_called_once_with(a, "excel", scope=e, default_path=b, has_header=c, sheet_name=d, exposed_type=f)
 
     def test_configure_generic_data_node(self):
         a, b, c, d, e, f, g = "foo", print, print, Scope.PIPELINE, tuple([]), tuple([]), "qux"

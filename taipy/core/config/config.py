@@ -487,13 +487,13 @@ class Config:
 
     @classmethod
     def configure_csv_data_node(
-        cls, id: str, path: str, has_header: bool = True, scope=DataNodeConfig._DEFAULT_SCOPE, **properties
+        cls, id: str, default_path: str, has_header: bool = True, scope=DataNodeConfig._DEFAULT_SCOPE, **properties
     ):
         """Configure a new CSV data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
-            path (str): The path of the CSV file.
+            default_path (str): The default path of the CSV file.
             has_header (bool): If True, indicates that the CSV file has a header.
             scope (Scope^): The scope of the CSV data node configuration. The default value
                 is `Scope.SCENARIO`.
@@ -505,14 +505,14 @@ class Config:
         from taipy.core.data import CSVDataNode
 
         return cls.configure_data_node(
-            id, CSVDataNode.storage_type(), scope=scope, path=path, has_header=has_header, **properties
+            id, CSVDataNode.storage_type(), scope=scope, default_path=default_path, has_header=has_header, **properties
         )
 
     @classmethod
     def configure_excel_data_node(
         cls,
         id: str,
-        path: str,
+        default_path: str,
         has_header: bool = True,
         sheet_name: Union[List[str], str] = None,
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
@@ -522,7 +522,7 @@ class Config:
 
         Parameters:
             id (str): The unique identifier of the new Excel data node configuration.
-            path (str): The path of the Excel file.
+            default_path (str): The path of the Excel file.
             has_header (bool): If True, indicates that the Excel file has a header.
             sheet_name (Union[List[str], str]): The list of sheet names to be used. This
                 can be a unique name.
@@ -539,7 +539,7 @@ class Config:
             id,
             ExcelDataNode.storage_type(),
             scope=scope,
-            path=path,
+            default_path=default_path,
             has_header=has_header,
             sheet_name=sheet_name,
             **properties,
