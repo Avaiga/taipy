@@ -487,7 +487,12 @@ class Config:
 
     @classmethod
     def configure_csv_data_node(
-        cls, id: str, default_path: str, has_header: bool = True, scope=DataNodeConfig._DEFAULT_SCOPE, **properties
+        cls,
+        id: str,
+        default_path: str = None,
+        has_header: bool = True,
+        scope=DataNodeConfig._DEFAULT_SCOPE,
+        **properties,
     ):
         """Configure a new CSV data node configuration.
 
@@ -512,7 +517,7 @@ class Config:
     def configure_excel_data_node(
         cls,
         id: str,
-        default_path: str,
+        default_path: str = None,
         has_header: bool = True,
         sheet_name: Union[List[str], str] = None,
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
