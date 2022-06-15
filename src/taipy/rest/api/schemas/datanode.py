@@ -41,6 +41,7 @@ class DataNodeConfigSchema(Schema):
 
 class CSVDataNodeConfigSchema(DataNodeConfigSchema):
     path = fields.String()
+    default_path = fields.String()
     has_header = fields.Boolean()
 
 
@@ -50,6 +51,7 @@ class InMemoryDataNodeConfigSchema(DataNodeConfigSchema):
 
 class PickleDataNodeConfigSchema(DataNodeConfigSchema):
     path = fields.String()
+    default_path = fields.String()
     default_data = fields.Inferred()
 
 
