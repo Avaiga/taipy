@@ -21,7 +21,7 @@ def test_image_url_md(gui: Gui, test_client, helpers):
     md_string = "<|{content}|image|>"
     expected_list = [
         "<Image",
-        "content={_TpCi_content}",
+        "content={_TpCi_tpec_content_TPMDL_0}",
         'defaultContent="some_url"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)

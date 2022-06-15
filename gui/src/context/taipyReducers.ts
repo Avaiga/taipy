@@ -27,6 +27,7 @@ enum Types {
     SetMenu = "SET_MENU",
     DownloadFile = "DOWNLOAD_FILE",
     Partial = "PARTIAL",
+    ModuleContext = "MODULE_CONTEXT"
 }
 
 export interface TaipyState {
@@ -44,6 +45,7 @@ export interface TaipyState {
     id: string;
     menu: MenuProps;
     download?: FileDownloadProps;
+    moduleContext: string;
 }
 
 export interface TaipyBaseAction {
@@ -105,6 +107,10 @@ export interface FileDownloadProps {
 
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
+interface TaipyModuleContextAction extends TaipyBaseAction {
+    context: string;
+}
+
 interface TaipyDownloadAction extends TaipyBaseAction, FileDownloadProps {}
 
 interface TaipySetMenuAction extends TaipyBaseAction {
@@ -163,6 +169,7 @@ export const INITIAL_STATE: TaipyState = {
         : undefined,
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
+    moduleContext: "",
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -359,6 +366,10 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             }
             return { ...state, data: data };
         }
+        case Types.ModuleContext: {
+            const mcAction = baseAction as TaipyModuleContextAction;
+            return { ...state, moduleContext: mcAction.context }
+        }
         case Types.MultipleUpdate:
             const mAction = baseAction as TaipyMultipleAction;
             return mAction.payload.reduce((nState, pl) => taipyReducer(nState, { ...pl, type: Types.Update }), state);
@@ -366,16 +377,16 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const msgAction = baseAction as TaipyMultipleMessageAction;
             return msgAction.actions.reduce((pState, act) => taipyReducer(pState, act), state);
         case Types.SendUpdate:
-            sendWsMessage(state.socket, "U", action.name, action.payload, state.id, action.propagate);
+            sendWsMessage(state.socket, "U", action.name, action.payload, state.id, state.moduleContext, action.propagate);
             break;
         case Types.Action:
-            sendWsMessage(state.socket, "A", action.name, action.payload, state.id);
+            sendWsMessage(state.socket, "A", action.name, action.payload, state.id, state.moduleContext);
             break;
         case Types.RequestDataUpdate:
-            sendWsMessage(state.socket, "DU", action.name, action.payload, state.id);
+            sendWsMessage(state.socket, "DU", action.name, action.payload, state.id, state.moduleContext);
             break;
         case Types.RequestUpdate:
-            sendWsMessage(state.socket, "RU", action.name, action.payload, state.id);
+            sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, state.moduleContext);
             break;
     }
     return state;
@@ -590,6 +601,11 @@ export const createPartialAction = (name: string, create: boolean): TaipyPartial
     create: create,
 });
 
+export const createModuleContextAction = (context: string): TaipyModuleContextAction => ({
+    type: Types.ModuleContext,
+    context: context,
+})
+
 const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
     type: Types.MultipleMessages,
     actions: messages.map(messageToAction),
@@ -603,6 +619,7 @@ interface WsMessage {
     payload: Record<string, unknown> | unknown;
     propagate: boolean;
     client_id: string;
+    module_context: string;
 }
 
 const sendWsMessage = (
@@ -611,8 +628,9 @@ const sendWsMessage = (
     name: string,
     payload: Record<string, unknown> | unknown,
     id: string,
-    propagate = true
+    moduleContext = "",
+    propagate = true,
 ): void => {
-    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate, client_id: id };
+    const msg: WsMessage = { type: type, name: name, payload: payload, propagate: propagate, client_id: id, module_context: moduleContext };
     socket?.emit("message", msg);
 };

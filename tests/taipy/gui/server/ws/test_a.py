@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import pytest
+import time
 
 from taipy.gui import Gui, Markdown
 

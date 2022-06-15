@@ -26,7 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, jsonify, request, send_from_directory, g
+from flask import Blueprint, Flask, g, jsonify, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -49,12 +49,15 @@ from .state import State
 from .types import _WsType
 from .utils import (
     _delscopeattr,
+    _filter_locals,
     _get_client_var_name,
+    _get_module_name_from_frame,
     _get_non_existent_file_path,
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
     _is_in_notebook,
+    _LocalsContext,
     _MapDict,
     _setscopeattr,
     _setscopeattr_drill,
@@ -64,10 +67,13 @@ from .utils import (
     _TaipyData,
     _TaipyLov,
     _TaipyLovValue,
+    _variable_decode,
+    _variable_encode,
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
+from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
 
 
 class Gui:
@@ -167,6 +173,7 @@ class Gui:
         """
         # store suspected local containing frame
         self.__frame = t.cast(FrameType, t.cast(FrameType, inspect.currentframe()).f_back)
+        self.__default_module_name = _get_module_name_from_frame(self.__frame)
 
         # Preserve server config for server initialization
         self._path_mapping = path_mapping
@@ -180,7 +187,8 @@ class Gui:
         self._accessors = _DataAccessors()
         self.__state: t.Optional[State] = None
         self.__bindings = _Bindings(self)
-        self.__locals_bind: t.Dict[str, t.Any] = {}
+        self.__locals_context = _LocalsContext()
+        self.__var_dir = _VariableDirectory(self.__locals_context)
 
         self.__evaluator: _Evaluator = None  # type: ignore
         self.__adapter = _Adapter()
@@ -258,14 +266,15 @@ class Gui:
         return self.__state
 
     def _get_client_id(self) -> str:
-        return _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id", "unknown id")
+        return (
+            _DataScopes._GLOBAL_ID if self._bindings()._get_single_client() else getattr(g, "client_id", "unknown id")
+        )
 
     def __set_client_id_in_context(self, client_id: t.Optional[str] = None):
         if not client_id and request:
             client_id = request.args.get("client_id", "")
         if client_id and request:
-            sid = getattr(request, "sid", None)
-            if sid:
+            if sid := getattr(request, "sid", None):
                 sids = self.__client_id_2_sid.get(client_id, None)
                 if sids is None:
                     sids = set()
@@ -305,6 +314,7 @@ class Gui:
     def _manage_message(self, msg_type: _WsType, message: dict) -> None:
         try:
             self.__set_client_id_in_context(message.get("client_id"))
+            self._set_locals_context(message.get("module_context") or None)
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
@@ -322,6 +332,7 @@ class Gui:
                 self.__request_var_update(message.get("payload"))
             elif msg_type == _WsType.CLIENT_ID.value:
                 self._bindings()._get_or_create_scope(message.get("payload", ""))
+            self._reset_locals_context()
         except Exception as e:
             warnings.warn(f"Decoding Message has failed: {message}\n{e}")
 
@@ -362,7 +373,10 @@ class Gui:
         propagate=True,
         holder: t.Optional[_TaipyBase] = None,
         on_change: t.Optional[str] = None,
+        from_map_dict: bool = False,
     ) -> None:
+        if from_map_dict:
+            var_name = _variable_encode(var_name, self._get_locals_context())
         if holder:
             var_name = holder.get_name()
         hash_expr = self.__evaluator.get_hash_from_expr(var_name)
@@ -371,7 +385,7 @@ class Gui:
         if propagate:
             _setscopeattr_drill(self, hash_expr, value)
             # In case expression == hash (which is when there is only a single variable in expression)
-            if var_name == hash_expr:
+            if var_name == hash_expr or hash_expr.startswith("tpec_"):
                 derived_vars.update(self._re_evaluate_expr(var_name))
         elif holder:
             derived_vars.update(self._evaluate_holders(hash_expr))
@@ -389,9 +403,24 @@ class Gui:
 
     def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         # TODO: what if _update_function changes 'var_name'... infinite loop?
-        on_change_fn = None
-        if on_change:
-            on_change_fn = self._get_user_function(on_change)
+        var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
+        current_context = self._get_locals_context()
+        if module_name == current_context:
+            var_name = var_name_decode
+        else:
+            if var_name not in self.__var_dir._var_head:
+                warnings.warn(f"Can't find matching variable for {var_name} on {current_context} context")
+                return
+            _found = False
+            for k, v in self.__var_dir._var_head[var_name]:
+                if v == current_context:
+                    var_name = k
+                    _found = True
+                    break
+            if not _found:
+                warnings.warn(f"Can't find matching variable for {var_name} on {current_context} context")
+                return
+        on_change_fn = self._get_user_function(on_change) if on_change else None
         if not callable(on_change_fn) and hasattr(self, "on_change") and callable(self.on_change):
             on_change_fn = self.on_change
         if callable(on_change_fn):
@@ -404,6 +433,8 @@ class Gui:
                     args[1] = var_name
                 if argcount > 2:
                     args[2] = value
+                if argcount > 3:
+                    args[3] = current_context
                 on_change_fn(*args)
             except Exception as e:
                 warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception: {e}")
@@ -652,7 +683,7 @@ class Gui:
     def _get_user_function(self, func_name: str) -> t.Union[t.Callable, str]:
         func = _getscopeattr(self, func_name, None)
         if not callable(func):
-            func = self.__locals_bind.get(func_name)
+            func = self._get_locals_bind().get(func_name)
         if callable(func):
             return func
         return func_name
@@ -768,18 +799,29 @@ class Gui:
             from .renderers import Html, Markdown
 
             if re_match := Gui.__RE_HTML.match(file_name):
-                renderers = Html(os.path.join(folder_path, file_name))
+                renderers = Html(os.path.join(folder_path, file_name), frame=None)
                 renderers.modify_taipy_base_url(folder_name)
                 self.add_page(name=f"{folder_name}/{re_match.group(1)}", page=renderers)
             elif re_match := Gui.__RE_MD.match(file_name):
-                renderers_md = Markdown(os.path.join(folder_path, file_name))
+                renderers_md = Markdown(os.path.join(folder_path, file_name), frame=None)
                 self.add_page(name=f"{folder_name}/{re_match.group(1)}", page=renderers_md)
             elif os.path.isdir(child_dir_path := os.path.join(folder_path, file_name)):
                 child_dir_name = f"{folder_name}/{file_name}"
                 self.__add_pages_in_folder(child_dir_name, child_dir_path)
 
-    def _get_locals_bind(self):
-        return self.__locals_bind
+    # Proxy methods for LocalsContext
+    def _get_locals_bind(self) -> t.Dict[str, t.Any]:
+        return self.__locals_context.get_locals()
+
+    def _get_locals_context(self) -> str:
+        current_context = self.__locals_context.get_context()
+        return current_context if current_context is not None else self.__default_module_name
+
+    def _set_locals_context(self, context: t.Optional[str]) -> None:
+        self.__locals_context.set_locals_context(context)
+
+    def _reset_locals_context(self) -> None:
+        self.__locals_context.reset_locals_context()
 
     @staticmethod
     def _get_root_page_name():
@@ -787,6 +829,9 @@ class Gui:
 
     def _set_flask(self, flask: Flask):
         self._flask = flask
+
+    def _get_default_module_name(self):
+        return self.__default_module_name
 
     @staticmethod
     def _get_timezone() -> str:
@@ -838,7 +883,7 @@ class Gui:
         if isinstance(page, str):
             from .renderers import Markdown
 
-            page = Markdown(page)
+            page = Markdown(page, frame=None)
         elif not isinstance(page, Page):
             raise Exception(f'"page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}')
         # Init a new page
@@ -849,8 +894,12 @@ class Gui:
         # Append page to _config
         self._config.pages.append(new_page)
         self._config.routes.append(name)
+        # Update locals context
+        self.__locals_context.add(page._get_module_name(), page._get_locals())
+        # Update variable directory
+        self.__var_dir.add_frame(page._frame)
 
-    def add_pages(self, pages: t.Union[dict[str, t.Union[str, Page]], str] = None) -> None:
+    def add_pages(self, pages: t.Union[t.Dict[str, t.Union[str, Page]], str] = None) -> None:
         """Add several pages to the graphical User Interface.
 
         Arguments:
@@ -971,13 +1020,17 @@ class Gui:
         if isinstance(page, str):
             from .renderers import Markdown
 
-            page = Markdown(page)
+            page = Markdown(page, frame=None)
         elif not isinstance(page, Page):
             raise Exception(f'Partial name "{new_partial._route}" has invalid Page')
         new_partial._renderer = page
         # Append partial to _config
         self._config.partials.append(new_partial)
         self._config.partial_routes.append(str(new_partial._route))
+        # Update locals context
+        self.__locals_context.add(page._get_module_name(), page._get_locals())
+        # Update variable directory
+        self.__var_dir.add_frame(page._frame)
         return new_partial
 
     def _update_partial(self, partial: Partial):
@@ -994,13 +1047,15 @@ class Gui:
         return partial
 
     # Main binding method (bind in markdown declaration)
-    def _bind_var(self, var_name: str) -> bool:
-        if not hasattr(self._bindings(), var_name) and var_name in self.__locals_bind.keys():
-            self._bind(var_name, self.__locals_bind[var_name])
-            return True
-        return False
+    def _bind_var(self, var_name: str) -> str:
+        encoded_var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
+        if not hasattr(self._bindings(), encoded_var_name) and var_name in self._get_locals_bind().keys():
+            self._bind(encoded_var_name, self._get_locals_bind()[var_name])
+        return encoded_var_name
 
     def _bind_var_val(self, var_name: str, value: t.Any) -> bool:
+        if not _RE_TPMDL_DECODE.match(var_name):
+            var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
         if not hasattr(self._bindings(), var_name):
             self._bind(var_name, value)
             return True
@@ -1014,7 +1069,7 @@ class Gui:
             )
             func = None
         if func is None:
-            func = self.__locals_bind.get(name)
+            func = self._get_locals_bind().get(name)
         if func is not None:
             if callable(func):
                 setattr(self, name, func)
@@ -1083,19 +1138,15 @@ class Gui:
 
     def __render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
-        page = None
-        # Get page instance
-        for page_i in self._config.pages:
-            if page_i._route == page_name:
-                page = page_i
-                break
+        page = next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
+
         # try partials
         if page is None:
             page = self._get_partial(page_name)
         # Make sure that there is a page instance found
         if page is None:
             return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
-        page.render(self)
+        context = page.render(self)
         if (
             page_name == Gui.__root_page_name
             and page._rendered_jsx is not None
@@ -1104,7 +1155,9 @@ class Gui:
             page._rendered_jsx += "<PageContent />"
         # Return jsx page
         if page._rendered_jsx is not None:
-            return self._server._render(page._rendered_jsx, page._style if page._style is not None else "", page._head)
+            return self._server._render(
+                page._rendered_jsx, page._style if page._style is not None else "", page._head, context
+            )
         else:
             return ("No page template", 404)
 
@@ -1163,6 +1216,7 @@ class Gui:
         if not isinstance(frame, FrameType):
             raise RuntimeError("frame must be a FrameType where Gui can collect the local variables.")
         self.__frame = frame
+        self.__default_module_name = _get_module_name_from_frame(self.__frame)
 
     def _set_state(self, state: State):
         if isinstance(state, State):
@@ -1254,29 +1308,30 @@ class Gui:
             app_config["use_reloader"] = False
             print(f" * NGROK Public Url: {http_tunnel.public_url}")
 
-        # Save all local variables of the parent frame (usually __main__)
-        if isinstance(kwargs.get("locals_bind"), dict):
-            self.__locals_bind = kwargs.get("locals_bind")  # type: ignore
-            warnings.warn("Caution: the Gui instance is using a custom 'locals_bind' setting.")
-        else:
-            self.__locals_bind = self.__frame.f_locals
+        locals_bind = _filter_locals(self.__frame.f_locals)
+
+        self.__locals_context.set_default(locals_bind)
+
+        self.__var_dir.set_default(self.__frame)
 
         if self.__state is None:
-            self.__state = State(self, self.__locals_bind.keys())
+            self.__state = State(self, self.__locals_context.get_all_keys())
 
         if _is_in_notebook():
             # to allow gui.state.x in notebook mode
             self.state = self.__state
 
+        with self.get_flask_app().app_context():
+            self.__var_dir.process_imported_var()
+            # bind on_change and on_action function if available
+            self.__bind_local_func("on_init")
+            self.__bind_local_func("on_change")
+            self.__bind_local_func("on_action")
+
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
-        glob_ctx.update({k: v for k, v in self.__locals_bind.items() if inspect.ismodule(v) or callable(v)})
+        glob_ctx.update({k: v for k, v in locals_bind.items() if inspect.ismodule(v) or callable(v)})
         self.__evaluator = _Evaluator(glob_ctx)
-
-        # bind on_change and on_action function if available
-        self.__bind_local_func("on_init")
-        self.__bind_local_func("on_change")
-        self.__bind_local_func("on_action")
 
         # add en empty main page if it is not defined
         if Gui.__root_page_name not in self._config.routes:

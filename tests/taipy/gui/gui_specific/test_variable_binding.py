@@ -28,19 +28,20 @@ def test_variable_binding(helpers):
     gui.run(run_server=False, single_client=True)
     client = gui._server.test_client()
     jsx = client.get("/taipy-jsx/test").json["jsx"]
-    for expected in ["<Button", f'defaultLabel="{z}"', "label={z}"]:
+    for expected in ["<Button", f'defaultLabel="button label"', "label={tpec_z_TPMDL_0}"]:
         assert expected in jsx
     assert gui._bindings().x == x
     assert gui._bindings().y == y
     assert gui._bindings().z == z
-    assert callable(gui._get_user_function("another_function"))
+    with gui.get_flask_app().app_context():
+        assert callable(gui._get_user_function("another_function"))
     helpers.test_cleanup()
 
 
 def test_properties_binding(helpers):
     gui = Gui()
     modifier = "nice "  # noqa: F841
-    button_properties = { "label": "A {modifier}button" }  # noqa: F841
+    button_properties = {"label": "A {modifier}button"}  # noqa: F841
     gui.add_page("test", Markdown("<|button|properties=button_properties|>"))
     gui.run(run_server=False)
     client = gui._server.test_client()
@@ -54,7 +55,6 @@ def test_dict_binding(helpers):
     """
     Tests the binding of a dictionary property
     """
-
     d = {"k": "test"}  # noqa: F841
     gui = Gui("<|{d.k}|>")
     gui.run(run_server=False)

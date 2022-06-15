@@ -302,7 +302,7 @@ class _Factory:
             default_value=0,
         )
         .set_input_type("number")
-        .set_value_and_default()
+        .set_value_and_default(var_type=_AttributeType.dynamic_number)
         .set_change_delay()
         .set_propagate()
         .set_attributes(
@@ -347,11 +347,7 @@ class _Factory:
             ]
         ),
         "selector": lambda gui, control_type, attrs: _Builder(
-            gui=gui,
-            control_type=control_type,
-            element_name="Selector",
-            attributes=attrs,
-            default_value=None
+            gui=gui, control_type=control_type, element_name="Selector", attributes=attrs, default_value=None
         )
         .set_value_and_default(with_default=False, var_type=_AttributeType.lov_value)
         .get_adapter("lov")  # need to be called before set_lov

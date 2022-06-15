@@ -23,7 +23,7 @@ def test_indicator_md(gui: Gui, test_client, helpers):
         'format="%.2f"',
         "max={20.0}",
         "min={1.0}",
-        "value={_TpN_val}",
+        "value={_TpN_tpec_val_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -39,6 +39,6 @@ def test_menu_html(gui: Gui, test_client, helpers):
         'format="%.2f"',
         "max={20.0}",
         "min={1.0}",
-        "value={_TpN_val}",
+        "value={_TpN_tpec_val_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

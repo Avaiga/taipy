@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from taipy.gui import Gui
 
 
@@ -23,8 +24,8 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 30, 100]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_csvdata"',
-        "data={_TpD_csvdata}",
+        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
@@ -32,20 +33,20 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
 
 def test_table_md_2(gui: Gui, helpers, csvdata):
     table_properties = {
-            "page_size": 10,
-            "page_size_options": [10, 50, 100, 500],
-            "allow_all_rows": True,
-            "columns": {
-                "Day": {"index": 0, "format": "dd/MM/yyyy", "title": "Date of measure"},
-                "Entity": {"index": 1},
-                "Code": {"index": 2},
-                "Daily hospital occupancy": {"index": 3},
-            },
-            "date_format": "eee dd MMM yyyy",
-            "number_format": "%.3f",
-            "width": "60vw",
-            "height": "60vh",
-        }
+        "page_size": 10,
+        "page_size_options": [10, 50, 100, 500],
+        "allow_all_rows": True,
+        "columns": {
+            "Day": {"index": 0, "format": "dd/MM/yyyy", "title": "Date of measure"},
+            "Entity": {"index": 1},
+            "Code": {"index": 2},
+            "Daily hospital occupancy": {"index": 3},
+        },
+        "date_format": "eee dd MMM yyyy",
+        "number_format": "%.3f",
+        "width": "60vw",
+        "height": "60vh",
+    }
     md_string = "<|{csvdata}|table|properties=table_properties|auto_loading|not editable|>"
     expected_list = [
         "<Table",
@@ -58,8 +59,8 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 50, 100, 500]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_csvdata"',
-        "data={_TpD_csvdata}",
+        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
@@ -75,8 +76,8 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 30, 100]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_csvdata"',
-        "data={_TpD_csvdata}",
+        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_html(gui, html_string, expected_list)
@@ -84,20 +85,20 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
 
 def test_table_html_2(gui: Gui, helpers, csvdata):
     table_properties = {
-            "page_size": 10,
-            "page_size_options": [10, 50, 100, 500],
-            "allow_all_rows": True,
-            "columns": {
-                "Day": {"index": 0, "format": "dd/MM/yyyy", "title": "Date of measure"},
-                "Entity": {"index": 1},
-                "Code": {"index": 2},
-                "Daily hospital occupancy": {"index": 3},
-            },
-            "date_format": "eee dd MMM yyyy",
-            "number_format": "%.3f",
-            "width": "60vw",
-            "height": "60vh",
-        }
+        "page_size": 10,
+        "page_size_options": [10, 50, 100, 500],
+        "allow_all_rows": True,
+        "columns": {
+            "Day": {"index": 0, "format": "dd/MM/yyyy", "title": "Date of measure"},
+            "Entity": {"index": 1},
+            "Code": {"index": 2},
+            "Daily hospital occupancy": {"index": 3},
+        },
+        "date_format": "eee dd MMM yyyy",
+        "number_format": "%.3f",
+        "width": "60vw",
+        "height": "60vh",
+    }
     html_string = '<taipy:table data="{csvdata}" properties="table_properties" auto_loading="Yes" show_all="Sure" />'
     expected_list = [
         "<Table",
@@ -110,8 +111,8 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 50, 100, 500]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_csvdata"',
-        "data={_TpD_csvdata}",
+        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_html(gui, html_string, expected_list)

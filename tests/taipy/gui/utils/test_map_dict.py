@@ -83,7 +83,6 @@ def test_map_dict_update():
     md.__setitem__("a", 3)
     assert update_values[0] == "a"
     assert update_values[1] == 3
-    print("")
     pass
 
 
@@ -121,13 +120,13 @@ def test_map_dict_set(gui: Gui, test_client):
     gui._set_frame(inspect.currentframe())
 
     gui.run(run_server=False, single_client=True)
-
-    assert isinstance(gui._Gui__state.d, _MapDict)
-    gui._Gui__state.d = {"b": 2}
-    assert isinstance(gui._Gui__state.d, _MapDict)
-    assert len(gui._Gui__state.d) == 1
-    assert gui._Gui__state.d.get("a", None) is None
-    assert gui._Gui__state.d.get("b", None) == 2
+    with gui.get_flask_app().app_context():
+        assert isinstance(gui._Gui__state.d, _MapDict)
+        gui._Gui__state.d = {"b": 2}
+        assert isinstance(gui._Gui__state.d, _MapDict)
+        assert len(gui._Gui__state.d) == 1
+        assert gui._Gui__state.d.get("a", None) is None
+        assert gui._Gui__state.d.get("b", None) == 2
 
 
 def test_map_dict_items():

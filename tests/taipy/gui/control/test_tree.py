@@ -19,8 +19,8 @@ def test_tree_md(gui: Gui, test_client, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'updateVarName="_TpLv_value"',
-        "value={_TpLv_value}",
+        'updateVarName="_TpLv_tpec_value_TPMDL_0"',
+        "value={_TpLv_tpec_value_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -32,8 +32,8 @@ def test_tree_expanded_md_1(gui: Gui, test_client, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'updateVarName="_TpLv_value"',
-        "value={_TpLv_value}",
+        'updateVarName="_TpLv_tpec_value_TPMDL_0"',
+        "value={_TpLv_tpec_value_TPMDL_0}",
         "expanded={false}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
@@ -47,11 +47,11 @@ def test_tree_expanded_md_2(gui: Gui, test_client, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'updateVarName="_TpLv_value"',
-        "value={_TpLv_value}",
+        'updateVarName="_TpLv_tpec_value_TPMDL_0"',
+        "value={_TpLv_tpec_value_TPMDL_0}",
         'defaultExpanded="[&quot;Item1&quot;]"',
-        "expanded={expa}",
-        'updateVars="expanded=expa"',
+        "expanded={tpec_expa_TPMDL_0}",
+        'updateVars="expanded=tpec_expa_TPMDL_0"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -63,8 +63,8 @@ def test_tree_html_1(gui: Gui, test_client, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'updateVarName="_TpLv_value"',
-        "value={_TpLv_value}",
+        'updateVarName="_TpLv_tpec_value_TPMDL_0"',
+        "value={_TpLv_tpec_value_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -76,7 +76,7 @@ def test_tree_html_2(gui: Gui, test_client, helpers):
         "<TreeView",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;]"',
         'defaultValue="[&quot;Item 1&quot;]"',
-        'updateVarName="_TpLv_value"',
-        "value={_TpLv_value}",
+        'updateVarName="_TpLv_tpec_value_TPMDL_0"',
+        "value={_TpLv_tpec_value_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

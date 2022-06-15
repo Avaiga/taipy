@@ -20,21 +20,23 @@ from types import FrameType
 
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import _Builder
+from taipy.gui.utils._variable_directory import _reset_name_map
 
 
 class Helpers:
     @staticmethod
     def test_cleanup():
         _Builder._reset_key()
+        _reset_name_map()
 
     @staticmethod
     def test_control_md(gui: Gui, md_string: str, expected_values: t.Union[str, t.List]):
-        gui.add_page("test", Markdown(md_string))
+        gui.add_page("test", Markdown(md_string, frame=None))
         Helpers._test_control(gui, expected_values)
 
     @staticmethod
     def test_control_html(gui: Gui, html_string: str, expected_values: t.Union[str, t.List]):
-        gui.add_page("test", Html(html_string))
+        gui.add_page("test", Html(html_string, frame=None))
         Helpers._test_control(gui, expected_values)
 
     @staticmethod
@@ -63,7 +65,7 @@ class Helpers:
         assert "type" in args and args["type"] == type
         assert "payload" in args
         payload = args["payload"][0]
-        assert "name" in payload and payload["name"] == varname
+        assert "name" in payload and varname in payload["name"]
         assert "payload" in payload and "value" in payload["payload"] and payload["payload"]["value"] == value
         logging.getLogger().debug(payload["payload"]["value"])
 

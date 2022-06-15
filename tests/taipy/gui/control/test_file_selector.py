@@ -17,7 +17,7 @@ def test_file_selector_md(gui: Gui, test_client, helpers):
     md_string = "<|{content}|file_selector|label=label|on_action=action|>"
     expected_list = [
         "<FileSelector",
-        'updateVarName="content"',
+        'updateVarName="tpec_content_TPMDL_0"',
         'label="label"',
         'tp_onAction="action"',
     ]
@@ -29,7 +29,7 @@ def test_file_selector_html(gui: Gui, test_client, helpers):
     html_string = '<taipy:file_selector content="{content}" label="label" on_action="action" />'
     expected_list = [
         "<FileSelector",
-        'updateVarName="content"',
+        'updateVarName="tpec_content_TPMDL_0"',
         'label="label"',
         'tp_onAction="action"',
     ]

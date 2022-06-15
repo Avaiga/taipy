@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import inspect
 import io
 import pathlib
 import tempfile
@@ -16,8 +17,8 @@ import tempfile
 import pytest
 
 from taipy.gui import Gui
-from taipy.gui.utils import _get_non_existent_file_path
 from taipy.gui.data.data_scope import _DataScopes
+from taipy.gui.utils import _get_non_existent_file_path
 
 
 def test_file_upload_no_varname(gui: Gui, helpers):
@@ -102,9 +103,11 @@ def test_file_upload_multi_part(gui: Gui, helpers):
 
 def test_file_upload_multiple(gui: Gui, helpers):
     var_name = "varname"
+    gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
-    gui._bind_var_val(var_name, None)
+    with gui.get_flask_app().app_context():
+        gui._bind_var_val(var_name, None)
     # Get the jsx once so that the page will be evaluated -> variable will be registered
     sid = _DataScopes._GLOBAL_ID
     file = (io.BytesIO(b"abcdef"), "test.jpg")

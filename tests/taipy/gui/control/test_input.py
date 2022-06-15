@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from taipy.gui import Gui
 
 
@@ -17,7 +18,13 @@ def test_input_md(gui: Gui, helpers):
     x = "Hello World!"
     gui._set_frame(inspect.currentframe())
     md_string = "<|{x}|input|>"
-    expected_list = ["<Input", 'updateVarName="x"', 'defaultValue="Hello World!"', 'type="text"', "value={x}"]
+    expected_list = [
+        "<Input",
+        'updateVarName="tpec_x_TPMDL_0"',
+        'defaultValue="Hello World!"',
+        'type="text"',
+        "value={tpec_x_TPMDL_0}",
+    ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -25,7 +32,13 @@ def test_password_md(gui: Gui, helpers):
     x = "Hello World!"
     gui._set_frame(inspect.currentframe())
     md_string = "<|{x}|input|password|>"
-    expected_list = ["<Input", 'updateVarName="x"', 'defaultValue="Hello World!"', 'type="password"', "value={x}"]
+    expected_list = [
+        "<Input",
+        'updateVarName="tpec_x_TPMDL_0"',
+        'defaultValue="Hello World!"',
+        'type="password"',
+        "value={tpec_x_TPMDL_0}",
+    ]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
@@ -33,7 +46,13 @@ def test_input_html_1(gui: Gui, helpers):
     x = "Hello World!"
     gui._set_frame(inspect.currentframe())
     html_string = '<taipy:input value="{x}" />'
-    expected_list = ["<Input", 'updateVarName="x"', 'defaultValue="Hello World!"', 'type="text"', "value={x}"]
+    expected_list = [
+        "<Input",
+        'updateVarName="tpec_x_TPMDL_0"',
+        'defaultValue="Hello World!"',
+        'type="text"',
+        "value={tpec_x_TPMDL_0}",
+    ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -41,7 +60,13 @@ def test_password_html(gui: Gui, helpers):
     x = "Hello World!"
     gui._set_frame(inspect.currentframe())
     html_string = '<taipy:input value="{x}" password="True" />'
-    expected_list = ["<Input", 'updateVarName="x"', 'defaultValue="Hello World!"', 'type="password"', "value={x}"]
+    expected_list = [
+        "<Input",
+        'updateVarName="tpec_x_TPMDL_0"',
+        'defaultValue="Hello World!"',
+        'type="password"',
+        "value={tpec_x_TPMDL_0}",
+    ]
     helpers.test_control_html(gui, html_string, expected_list)
 
 
@@ -49,5 +74,11 @@ def test_input_html_2(gui: Gui, helpers):
     x = "Hello World!"
     gui._set_frame(inspect.currentframe())
     html_string = "<taipy:input>{x}</taipy:input>"
-    expected_list = ["<Input", 'updateVarName="x"', 'defaultValue="Hello World!"', 'type="text"', "value={x}"]
+    expected_list = [
+        "<Input",
+        'updateVarName="tpec_x_TPMDL_0"',
+        'defaultValue="Hello World!"',
+        'type="text"',
+        "value={tpec_x_TPMDL_0}",
+    ]
     helpers.test_control_html(gui, html_string, expected_list)

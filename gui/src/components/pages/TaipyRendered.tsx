@@ -7,7 +7,7 @@ import { Helmet } from "react-helmet-async";
 import { TaipyContext } from "../../context/taipyContext";
 import { taipyComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
-import { createPartialAction } from "../../context/taipyReducers";
+import { createModuleContextAction, createPartialAction } from "../../context/taipyReducers";
 
 interface TaipyRenderedProps {
     path?: string;
@@ -25,6 +25,7 @@ interface AxiosRenderer {
     jsx: string;
     style: string;
     head: HeadProps[];
+    context: string;
 }
 
 // set global style the traditional way
@@ -68,6 +69,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                     setStyle("Taipy_style", result.data.style || "");
                     result.data.head && setHead(result.data.head);
                 }
+                dispatch(createModuleContextAction(result.data.context));
             })
             .catch((error) => setJSX(`<h1>No data fetched from backend from ${path}</h1><br></br>${error}`));
         }

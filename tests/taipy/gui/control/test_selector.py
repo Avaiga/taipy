@@ -22,8 +22,8 @@ def test_selector_md_1(gui: Gui, test_client, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'updateVarName="_TpLv_selected_val"',
-        "value={_TpLv_selected_val}",
+        'updateVarName="_TpLv_tpec_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_selected_val_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -35,8 +35,8 @@ def test_selector_md_2(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'updateVarName="_TpLv_selected_val"',
-        "value={_TpLv_selected_val}",
+        'updateVarName="_TpLv_tpec_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_selected_val_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -53,11 +53,11 @@ def test_selector_md_3(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[[&quot;1&quot;, &quot;scenario 1&quot;], [&quot;3&quot;, &quot;scenario 3&quot;], [&quot;2&quot;, &quot;scenario 2&quot;]]"',
         'defaultValue="[&quot;1&quot;]"',
-        "lov={_TpL_scenario_list}",
+        "lov={_TpL_tpec_scenario_list_TPMDL_0}",
         "propagate={false}",
-        'updateVars="lov=_TpL_scenario_list"',
-        'updateVarName="_TpLv_selected_obj"',
-        "value={_TpLv_selected_obj}",
+        'updateVars="lov=_TpL_tpec_scenario_list_TPMDL_0"',
+        'updateVarName="_TpLv_tpec_selected_obj_TPMDL_0"',
+        "value={_TpLv_tpec_selected_obj_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -72,8 +72,8 @@ def test_selector_html_1_1(gui: Gui, test_client, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'updateVarName="_TpLv_selected_val"',
-        "value={_TpLv_selected_val}",
+        'updateVarName="_TpLv_tpec_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_selected_val_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -88,8 +88,8 @@ def test_selector_html_1_2(gui: Gui, test_client, helpers):
         'defaultValue="[&quot;l1&quot;, &quot;l2&quot;]"',
         "filter={true}",
         "multiple={true}",
-        'updateVarName="_TpLv_selected_val"',
-        "value={_TpLv_selected_val}",
+        'updateVarName="_TpLv_tpec_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_selected_val_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -101,8 +101,8 @@ def test_selector_html_2_1(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'updateVarName="_TpLv_selected_val"',
-        "value={_TpLv_selected_val}",
+        'updateVarName="_TpLv_tpec_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_selected_val_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -114,7 +114,7 @@ def test_selector_html_2_2(gui: Gui, test_client, helpers):
         "<Selector",
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot; This is a another value&quot;]"',
         'defaultValue="[&quot;Item 2&quot;]"',
-        'updateVarName="_TpLv_selected_val"',
-        "value={_TpLv_selected_val}",
+        'updateVarName="_TpLv_tpec_selected_val_TPMDL_0"',
+        "value={_TpLv_tpec_selected_val_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

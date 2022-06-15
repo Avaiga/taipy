@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import pytest
 
 from taipy.gui import Gui, Markdown
 
@@ -32,12 +31,12 @@ def ws_u_assert_template(gui: Gui, helpers, value_before_update, value_after_upd
     sid = helpers.create_scope_and_get_sid(gui)
     flask_client.get(f"/taipy-jsx/test?client_id={sid}")
     assert gui._bindings()._get_all_scopes()[sid].var == value_before_update
-    ws_client.emit("message", {"client_id": sid, "type": "U", "name": "var", "payload": payload})
+    ws_client.emit("message", {"client_id": sid, "type": "U", "name": "tpec_var_TPMDL_0", "payload": payload})
     assert gui._bindings()._get_all_scopes()[sid].var == value_after_update
     # assert for received message (message that would be sent to the frontend client)
     received_message = ws_client.get_received()
     assert len(received_message)
-    helpers.assert_outward_ws_message(received_message[0], "MU", "var", value_after_update)
+    helpers.assert_outward_ws_message(received_message[0], "MU", "tpec_var_TPMDL_0", value_after_update)
 
 
 def test_ws_u_string(gui: Gui, helpers):

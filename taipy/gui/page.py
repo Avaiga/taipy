@@ -9,16 +9,18 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import inspect
 import typing as t
 from abc import ABC, abstractmethod
 from os import path
+from types import FrameType
 
-from .utils import _is_in_notebook, _varname_from_content
+from .utils import _filter_locals, _get_module_name_from_frame, _is_in_notebook, _varname_from_content
 
 
 class Page(ABC):
     """Generic page generator.
-    
+
     The `Page` class transforms template text into actual pages that can be displayed
     on a Web browser.
 
@@ -28,7 +30,7 @@ class Page(ABC):
     your application variables and interact with them.
     """
 
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, **kwargs) -> None:
         """Initialize a new Page with the indicated content.
 
         Arguments:
@@ -38,6 +40,12 @@ class Page(ABC):
         """
         self._content = ""
         self._filepath = ""
+        self._frame: t.Optional[FrameType] = None
+        if "frame" in kwargs:
+            self._frame = kwargs.get("frame")
+        else:
+            # Get the correct frame from Markdown, Html class by going back 2 stacks
+            self._frame = t.cast(FrameType, t.cast(FrameType, inspect.stack()[2].frame))
         self.__process_content(content)
 
     def __process_content(self, content: str) -> None:
@@ -75,6 +83,12 @@ class Page(ABC):
         if varname := _varname_from_content(gui, self._content):
             return f"in variable '{varname}'"
         return ""
+
+    def _get_locals(self) -> t.Optional[t.Dict[str, t.Any]]:
+        return None if self._frame is None else _filter_locals(self._frame.f_locals)
+
+    def _get_module_name(self) -> t.Optional[str]:
+        return None if self._frame is None else _get_module_name_from_frame(self._frame)
 
     @abstractmethod
     def render(self, gui) -> str:

@@ -21,30 +21,31 @@ def test_state(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
     state = gui._Gui__state
-    assert state.a == 10
-    assert state._gui == gui
-    with pytest.raises(Exception) as e:
-        state.b
-    assert e.value.args[0] == "Variable 'b' is not defined."
+    with gui.get_flask_app().app_context():
+        assert state.a == 10
+        assert state._gui == gui
+        with pytest.raises(Exception) as e:
+            state.b
+        assert e.value.args[0] == "Variable 'b' is not defined."
 
-    with pytest.raises(Exception) as e:
-        state.b = 10
-    assert e.value.args[0] == "Variable 'b' is not accessible."
+        with pytest.raises(Exception) as e:
+            state.b = 10
+        assert e.value.args[0] == "Variable 'b' is not accessible."
 
-    with pytest.raises(Exception) as e:
-        state._taipy_p1
-    assert e.value.args[0] == "Variable '_taipy_p1' is protected and is not accessible."
+        with pytest.raises(Exception) as e:
+            state._taipy_p1
+        assert e.value.args[0] == "Variable '_taipy_p1' is protected and is not accessible."
 
-    with pytest.raises(Exception) as e:
-        state._taipy_p1 = 10
-    assert e.value.args[0] == "Variable '_taipy_p1' is not accessible."
+        with pytest.raises(Exception) as e:
+            state._taipy_p1 = 10
+        assert e.value.args[0] == "Variable '_taipy_p1' is not accessible."
 
-    assert state._get_placeholder("_taipy_p1") is None
+        assert state._get_placeholder("_taipy_p1") is None
 
-    state._set_placeholder("_taipy_p1", 10)
+        state._set_placeholder("_taipy_p1", 10)
 
-    assert state._get_placeholder("_taipy_p1") == 10
+        assert state._get_placeholder("_taipy_p1") == 10
 
-    assert state._get_gui_attr() == "_gui"
+        assert state._get_gui_attr() == "_gui"
 
-    assert state._get_placeholder_attrs() == ("_taipy_p1",)
+        assert state._get_placeholder_attrs() == ("_taipy_p1",)

@@ -10,7 +10,6 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-import pytest
 
 from taipy.gui import Gui, Markdown
 
@@ -22,7 +21,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     # set gui frame
     gui._set_frame(inspect.currentframe())
     Gui._set_timezone("UTC")
-    
+
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page(
         "test",
@@ -42,7 +41,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
         {
             "client_id": sid,
             "type": "DU",
-            "name": "_TpD_csvdata",
+            "name": "_TpD_tpec_csvdata_TPMDL_0",
             "payload": {
                 "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
                 "pagekey": "0-100--asc",
@@ -59,7 +58,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     helpers.assert_outward_ws_message(
         received_messages[0],
         "MU",
-        "_TpD_csvdata",
+        "_TpD_tpec_csvdata_TPMDL_0",
         {
             "data": [
                 {

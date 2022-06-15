@@ -10,8 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from flask import g
-from taipy.gui import Gui, State, Markdown, invoke_state_callback, get_context_id
+
+from taipy.gui import Gui, Markdown, State, get_context_id, invoke_state_callback
 
 
 def test_invoke_state_callback(gui: Gui, helpers):
@@ -26,8 +28,8 @@ def test_invoke_state_callback(gui: Gui, helpers):
     # set gui frame
     gui._set_frame(inspect.currentframe())
 
-    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>"))
-    gui.run(run_server=False)
+    gui.add_page("test", Markdown("<|Hello {name}|button|id={btn_id}|>\n<|{val}|>"))
+    gui.run(run_server=False, single_client=True)
     flask_client = gui._server.test_client()
     # client id
     cid = helpers.create_scope_and_get_sid(gui)
@@ -36,5 +38,4 @@ def test_invoke_state_callback(gui: Gui, helpers):
     with gui.get_flask_app().app_context():
         g.client_id = cid
         invoke_state_callback(gui, cid, user_callback, [])
-
         assert gui._Gui__state.val == 10

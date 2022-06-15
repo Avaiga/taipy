@@ -14,9 +14,9 @@ from __future__ import annotations
 import logging
 import os
 import re
+import socket
 import typing as t
 import webbrowser
-import socket
 
 import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
@@ -84,8 +84,7 @@ class _Server:
             "timeZone": self._gui._config.get_time_zone(),
             "darkMode": self._gui._get_config("dark_mode", True),
         }
-        themes = self._gui._get_themes()
-        if themes:
+        if themes := self._gui._get_themes():
             config["themes"] = themes
         return config
 
@@ -111,15 +110,14 @@ class _Server:
                     favicon=favicon,
                     root_margin=root_margin,
                     watermark=self._gui._get_config("watermark", None),
-                    config=self.__get_client_config()
-
+                    config=self.__get_client_config(),
                 )
             if os.path.isfile(static_folder + os.path.sep + path):
                 return send_from_directory(static_folder + os.path.sep, path)
             # use the path mapping to detect and find resources
             for k, v in self.__path_mapping.items():
-                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1:]):
-                    return send_from_directory(v + os.path.sep, path[len(k) + 1:])
+                if path.startswith(f"{k}/") and os.path.isfile(v + os.path.sep + path[len(k) + 1 :]):
+                    return send_from_directory(v + os.path.sep, path[len(k) + 1 :])
             if hasattr(__main__, "__file__") and os.path.isfile(
                 os.path.dirname(__main__.__file__) + os.path.sep + path
             ):
@@ -135,7 +133,7 @@ class _Server:
         return taipy_bp
 
     # Update to render as JSX
-    def _render(self, html_fragment, style, head):
+    def _render(self, html_fragment, style, head, context):
         template_str = _Server.__RE_OPENING_CURLY.sub(_Server.__OPENING_CURLY, html_fragment)
         template_str = _Server.__RE_CLOSING_CURLY.sub(_Server.__CLOSING_CURLY, template_str)
         template_str = template_str.replace('"{!', "{")
@@ -145,6 +143,7 @@ class _Server:
                 "jsx": template_str,
                 "style": (style + os.linesep) if style else "",
                 "head": head or [],
+                "context": context or self._gui._get_default_module_name(),
             }
         )
 
@@ -169,7 +168,8 @@ class _Server:
             sock.close()
             if result == 0:
                 raise ConnectionError(
-                    f"Port {port} is already opened on {host_value}. You have another server application running on the same port.")
+                    f"Port {port} is already opened on {host_value}. You have another server application running on the same port."
+                )
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True

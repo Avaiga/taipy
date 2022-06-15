@@ -82,7 +82,7 @@ class _Builder:
             (prop_dict, prop_hash) = self.__parse_attribute_value(self.__attributes["properties"])
             if prop_hash is None:
                 prop_hash = prop_dict
-                self.__gui._bind_var(prop_hash)
+                prop_hash = self.__gui._bind_var(prop_hash)
                 if hasattr(self.__gui._bindings(), prop_hash):
                     prop_dict = _getscopeattr(self.__gui, prop_hash)
             if isinstance(prop_dict, _MapDict):
@@ -307,7 +307,8 @@ class _Builder:
             if len(lov) > 0:
                 for elt in lov:
                     ret = self.__gui._run_adapter(
-                        t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter")  # type: ignore
+                        t.cast(t.Callable, adapter), elt, adapter.__name__ if callable(adapter) else "adapter"
+                    )  # type: ignore
                     if ret is not None:
                         ret_list.append(ret)
             self.__attributes[f"default_{property_name}"] = ret_list
@@ -317,7 +318,8 @@ class _Builder:
             val_list = value if isinstance(value, list) else [value]
             for val in val_list:
                 ret = self.__gui._run_adapter(
-                    t.cast(t.Callable, adapter), val, adapter.__name__ if callable(adapter) else "adapter", id_only=True)  # type: ignore
+                    t.cast(t.Callable, adapter), val, adapter.__name__ if callable(adapter) else "adapter", id_only=True
+                )  # type: ignore
                 if ret is not None:
                     ret_list.append(ret)
             if multi_selection:
@@ -482,15 +484,15 @@ class _Builder:
         opt_cols = set()
         for m in markers:
             if isinstance(m, (dict, _MapDict)):
-                color = m.get("color") 
+                color = m.get("color")
                 if isinstance(color, str) and color not in columns:
                     opt_cols.add(color)
                 size = m.get("size")
                 if isinstance(size, str) and size not in columns:
                     opt_cols.add(size)
-                    
+
         # Validate the column names
-        columns = _get_columns_dict(data, list(columns), col_types, opt_columns = opt_cols)
+        columns = _get_columns_dict(data, list(columns), col_types, opt_columns=opt_cols)
         # set default columns if not defined
         icols = [[c for c in [_get_col_from_indexed(c, i) for c in columns.keys()] if c] for i in range(len(traces))]
 
@@ -544,7 +546,9 @@ class _Builder:
                 self.__set_string_attribute(var_name, default_value)
         return self
 
-    def __set_list_attribute(self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type, dynamic=True) -> t.List[str]:
+    def __set_list_attribute(
+        self, name: str, hash_name: t.Optional[str], val: t.Any, elt_type: t.Type, dynamic=True
+    ) -> t.List[str]:
         if not hash_name and isinstance(val, str):
             val = [elt_type(t.strip()) for t in val.split(";")]
         if isinstance(val, list):
@@ -786,7 +790,7 @@ class _Builder:
             warnings.warn(f"{self.__element_name} page_size_options should be a list")
         return self
 
-    def set_input_type(self, type_name: str, allow_password = False):
+    def set_input_type(self, type_name: str, allow_password=False):
         if allow_password and self.__get_boolean_attribute("password", False):
             return self.set_attribute("type", "password")
         return self.set_attribute("type", type_name)
@@ -843,8 +847,9 @@ class _Builder:
                     attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False)
                 )
             elif var_type == _AttributeType.string_list:
-                self.__set_list_attribute(attr[0], self.__hashes.get(
-                    attr[0]), self.__attributes.get(attr[0]), str, False)
+                self.__set_list_attribute(
+                    attr[0], self.__hashes.get(attr[0]), self.__attributes.get(attr[0]), str, False
+                )
             elif var_type == _AttributeType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
             elif var_type == _AttributeType.react:

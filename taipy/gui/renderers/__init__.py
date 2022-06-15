@@ -38,7 +38,7 @@ class Markdown(Page):
     of the User Manual.
     """
 
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, **kwargs) -> None:
         """Initialize a new `Markdown` page.
 
         Arguments:
@@ -47,7 +47,7 @@ class Markdown(Page):
                 If _content_ is a path to a readable file, the file is read as the Markdown
                 template content.
         """
-        super().__init__(content)
+        super().__init__(content, **kwargs)
 
     # Generate JSX from Markdown
     def render(self, gui) -> str:
@@ -66,7 +66,7 @@ class Html(Page):
     of the User Manual.
     """
 
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, **kwargs) -> None:
         """Initialize a new `Html` page.
 
         Arguments:
@@ -75,7 +75,7 @@ class Html(Page):
                 If _content_ is a path to a readable file, the file is read as the HTML
                 template content.
         """
-        super().__init__(content)
+        super().__init__(content, **kwargs)
         self.head = None
 
     # Modify path routes

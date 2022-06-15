@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from taipy.gui import Gui, Markdown
 
 
@@ -22,8 +23,8 @@ def test_dialog_md_1(gui: Gui, helpers):
         'tp_onAction="validate_action"',
         'page="page_test"',
         'title="This is a Dialog"',
-        'updateVarName="_TpB_dialog_open"',
-        "open={_TpB_dialog_open}",
+        'updateVarName="_TpB_tpec_dialog_open_TPMDL_0"',
+        "open={_TpB_tpec_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -38,23 +39,26 @@ def test_dialog_md_2(gui: Gui, helpers):
         'page="TaiPy_partials',
         'title="Another Dialog"',
         'tp_onAction="validate_action"',
-        'updateVarName="_TpB_dialog_open"',
-        "open={_TpB_dialog_open}",
+        'updateVarName="_TpB_tpec_dialog_open_TPMDL_0"',
+        "open={_TpB_tpec_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
+
 
 def test_dialog_labels_md(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     dialog_open = False
-    md_string = "<|dialog|title=Another Dialog|open={dialog_open}|page=page_test|labels=Cancel;Validate|close_label=MYClose|>"
+    md_string = (
+        "<|dialog|title=Another Dialog|open={dialog_open}|page=page_test|labels=Cancel;Validate|close_label=MYClose|>"
+    )
     expected_list = [
         "<Dialog",
         'page="page_test"',
         'title="Another Dialog"',
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
-        'updateVarName="_TpB_dialog_open"',
+        'updateVarName="_TpB_tpec_dialog_open_TPMDL_0"',
         'closeLabel="MYClose"',
-        "open={_TpB_dialog_open}",
+        "open={_TpB_tpec_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -62,14 +66,16 @@ def test_dialog_labels_md(gui: Gui, helpers):
 def test_dialog_html_1(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     dialog_open = False
-    html_string = '<taipy:dialog title="This is a Dialog" open="{dialog_open}" page="page1" on_action="validate_action" />'
+    html_string = (
+        '<taipy:dialog title="This is a Dialog" open="{dialog_open}" page="page1" on_action="validate_action" />'
+    )
     expected_list = [
         "<Dialog",
         'page="page1"',
         'title="This is a Dialog"',
         'tp_onAction="validate_action"',
-        'updateVarName="_TpB_dialog_open"',
-        "open={_TpB_dialog_open}",
+        'updateVarName="_TpB_tpec_dialog_open_TPMDL_0"',
+        "open={_TpB_tpec_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -86,21 +92,24 @@ def test_dialog_html_2(gui: Gui, helpers):
         'page="TaiPy_partials',
         'title="Another Dialog"',
         'tp_onAction="validate_action"',
-        'updateVarName="_TpB_dialog_open"',
-        "open={_TpB_dialog_open}",
+        'updateVarName="_TpB_tpec_dialog_open_TPMDL_0"',
+        "open={_TpB_tpec_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
+
 
 def test_dialog_labels_html(gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
     dialog_open = False
-    html_string = '<taipy:dialog title="Another Dialog" open="{dialog_open}" page="page_test" labels="Cancel;Validate" />'
+    html_string = (
+        '<taipy:dialog title="Another Dialog" open="{dialog_open}" page="page_test" labels="Cancel;Validate" />'
+    )
     expected_list = [
         "<Dialog",
         'page="page_test"',
         'title="Another Dialog"',
         'labels="[&quot;Cancel&quot;, &quot;Validate&quot;]"',
-        'updateVarName="_TpB_dialog_open"',
-        "open={_TpB_dialog_open}",
+        'updateVarName="_TpB_tpec_dialog_open_TPMDL_0"',
+        "open={_TpB_tpec_dialog_open_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
