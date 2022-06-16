@@ -1,6 +1,6 @@
 ﻿Name,Type,Default,Doc
 *value,dynamic(any),,Bound to the selection value.
-lov,"dict[str, any]",,The list of values. See [GLOBAL-LOV] for details.
+lov,"dict[str, any]",,"The list of values. See the <a href=""../../binding/#list-of-values"">section on List of Values</a> for details."
 adapter,Function,`lambda x: str(x)`,"The function that transforms an element of <i>lov</i> into a <i>tuple(id:str, label:str|Icon)</i>."
 type,str,<i>Type of first lov element</i>,"Must be specified if <i>lov</i> contains a non-specific type of data (ex: dict).
 <i>value</i> must be of that type, <i>lov</i> must be an iterable on this type, and the adapter function will receive an object of this type."

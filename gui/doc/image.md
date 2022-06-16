@@ -1,5 +1,12 @@
 A control that can display an image.
 
+!!! Note "Image format"
+    Note that if the content is provided as a buffer of bytes, it can be converted
+    to an image content if and only if you have installed the
+    [`python-magic`](https://pypi.org/project/python-magic/) Python package (as well
+    as [`python-magic-bin`](https://pypi.org/project/python-magic-bin/) if your
+    platform is Windows).
+
 You can indicate a function to be called when the user clicks on the image.
 
 ## Usage
@@ -7,9 +14,6 @@ You can indicate a function to be called when the user clicks on the image.
 ### Default behavior
 
 Shows an image specified as a local file path or as raw content.
-The raw content is generated as a data base64 url 
-if the size of the buffer is lesser than the limit set in the config (data_url_max_size with default value = 50kB).
-The raw content is written to a temporary file if it's size is greater than the limit.
 
 !!! example "Page content"
 

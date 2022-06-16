@@ -1,5 +1,17 @@
 ﻿Name,Type,Default,Doc
-*content,dynamic(url | path | file),,The content of the file.
+*content,dynamic(url | path | file | ReadableBuffer),,"The content of the file.
+
+<p>
+If a buffer is provided (string, array of bytes...), and in order to prevent the bandwidth to be
+consumed too much, the way the data is transferred depends on the the <i>data_url_max_size</i>
+parameter of the application configuration (which is set to 50kB by default):
+<ul>
+<li>If the size of the buffer is smaller than this setting, then the raw content is generated as a
+  data URL, encoded using base64 (i.e. <code>""data:&lt;mimetype&gt;;base64,&lt;data&gt;""</code>).</li>
+<li>If the size of the buffer is greater than this setting, then it is transferred through a temporary
+  file.</li>
+</ul>
+</p>"
 label,dynamic(str),,The label of the button.
 on_action,Callback,,"The name of a function that is triggered when the download is initiated.
 All the parameters of that function are optional:

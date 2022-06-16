@@ -19,15 +19,15 @@ If <i>format</i> is specified, it is used for numbers or dates.</li>
 date_format,str,"""MM/dd/yyyy""",The date format that is used for all date columns when format is not specifically defined.
 number_format,str,,The number format that is used for all number columns when format is not specifically defined.
 group_by[<i>col_name</i>],bool,FALSE,"Indicates, if True, that the given column can be aggregated.
-See [below](#aggregation) for details."
+See <a href=""#aggregation"">below</a> for details."
 apply[<i>col_name</i>],str,"""first""","The name of the aggregation function to use.
 This is used only if <i>group_by[column_name]</i> is set to True.
-See [below](#aggregation) for details.
+See <a href=""#aggregation"">below</a> for details.
 "
 style,str,,"Allows the styling of table lines.
-See [below](#styling) for details."
+See <a href=""#styling"">below</a> for details."
 style[<i>col_name</i>],str,,"Allows the styling of table cells.
-See [below](#styling) for details."
+See <a href=""#styling"">below</a> for details."
 width,str|int|float,"""100vw""","The width, in CSS units, of this table control."
 height,str|int|float,"""80vh""","The height, in CSS units, of this table control."
 nan_value,str,"""""",The replacement text for NaN (not-a-number) values.
