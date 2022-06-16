@@ -47,10 +47,7 @@ jobs:
       - name: Build and test the package
         run: |
           python setup.py build_py && python -m build
-          rm -rf src taipy
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock
-          pytest
 
   publish-to-pypi:
     needs: [test-package]
@@ -79,7 +76,7 @@ jobs:
 
   test-published-package:
     needs: [publish-to-pypi]
-    timeout-minutes: 30
+    timeout-minutes: 5
     strategy:
       matrix:
         python-versions: ['3.8','3.9','3.10']
@@ -91,21 +88,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Prepare tests on unix
-        if: matrix.os != 'windows-latest'
-        run: |
-          rm -rf taipy
-          pip install --upgrade pip
-          pip install pytest pytest-mock
-
-      - name: Prepare tests on windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          rmdir -Recurse -Force taipy
-          pip install --upgrade pip
-          pip install pytest pytest-mock
-
       - name: Install and test package
         run: |
           pip install --no-cache-dir ${{ github.event.repository.name }}==${{ github.event.inputs.version }}
-          pytest

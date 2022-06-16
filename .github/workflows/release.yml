@@ -47,10 +47,7 @@ jobs:
       - name: Build and test the package
         run: |
           python setup.py build_py && python -m build
-          rm -rf src taipy
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock
-          pytest
 
   release:
     needs: [test-package]
