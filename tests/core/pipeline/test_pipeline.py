@@ -299,7 +299,7 @@ def test_subscribe_pipeline():
     with mock.patch("taipy.core.subscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.subscribe(None)
-        mck.assert_called_once_with(None, pipeline)
+        mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_unsubscribe_pipeline():

@@ -45,17 +45,26 @@ class _ScenarioManager(_Manager[Scenario]):
     _ENTITY_NAME = Scenario.__name__
 
     @classmethod
-    def _subscribe(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
+    def _subscribe(
+        cls,
+        callback: Callable[[Scenario, Job], None],
+        params: Optional[List[str]] = None,
+        scenario: Optional[Scenario] = None,
+    ):
         if scenario is None:
             scenarios = cls._get_all()
             for scn in scenarios:
-                cls.__add_subscriber(callback, scn)
+                cls.__add_subscriber(callback, params, scn)
             return
 
-        cls.__add_subscriber(callback, scenario)
+        cls.__add_subscriber(callback, params, scenario)
 
     @classmethod
-    def _unsubscribe(cls, callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
+    def _unsubscribe(
+        cls,
+        callback: Callable[[Scenario, Job], None],
+        scenario: Optional[Scenario] = None,
+    ):
         if scenario is None:
             scenarios = cls._get_all()
             for scn in scenarios:
@@ -65,8 +74,8 @@ class _ScenarioManager(_Manager[Scenario]):
         cls.__remove_subscriber(callback, scenario)
 
     @classmethod
-    def __add_subscriber(cls, callback, scenario):
-        scenario._add_subscriber(callback)
+    def __add_subscriber(cls, callback, params, scenario):
+        scenario._add_subscriber(callback, params)
         cls._set(scenario)
 
     @classmethod
@@ -83,11 +92,15 @@ class _ScenarioManager(_Manager[Scenario]):
     ) -> Scenario:
         scenario_id = Scenario._new_id(config.id)
         pipelines = [
-            _PipelineManagerFactory._build_manager()._get_or_create(p_config, scenario_id)
+            _PipelineManagerFactory._build_manager()._get_or_create(
+                p_config, scenario_id
+            )
             for p_config in config.pipeline_configs
         ]
         cycle = (
-            _CycleManagerFactory._build_manager()._get_or_create(config.frequency, creation_date)
+            _CycleManagerFactory._build_manager()._get_or_create(
+                config.frequency, creation_date
+            )
             if config.frequency
             else None
         )
@@ -115,11 +128,13 @@ class _ScenarioManager(_Manager[Scenario]):
             raise NonExistingScenario(scenario_id)
         callbacks = cls.__get_status_notifier_callbacks(scenario)
         for pipeline in scenario.pipelines.values():
-            _PipelineManagerFactory._build_manager()._submit(pipeline, callbacks=callbacks, force=force)
+            _PipelineManagerFactory._build_manager()._submit(
+                pipeline, callbacks=callbacks, force=force
+            )
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:
-        return [partial(c, scenario) for c in scenario.subscribers]
+        return [partial(c.callback, scenario) for c in scenario.subscribers]
 
     @classmethod
     def _get_primary(cls, cycle: Cycle) -> Optional[Scenario]:
@@ -173,7 +188,9 @@ class _ScenarioManager(_Manager[Scenario]):
     def _tag(cls, scenario: Scenario, tag: str):
         tags = scenario.properties.get(cls._AUTHORIZED_TAGS_KEY, set())
         if len(tags) > 0 and tag not in tags:
-            raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
+            raise UnauthorizedTagError(
+                f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`"
+            )
         if scenario.cycle:
             old_tagged_scenario = cls._get_by_tag(scenario.cycle, tag)
             if old_tagged_scenario:
@@ -198,23 +215,33 @@ class _ScenarioManager(_Manager[Scenario]):
         if len(scenarios) < 2:
             raise InsufficientScenarioToCompare
 
-        if not all([scenarios[0].config_id == scenario.config_id for scenario in scenarios]):
+        if not all(
+            [scenarios[0].config_id == scenario.config_id for scenario in scenarios]
+        ):
             raise DifferentScenarioConfigs
 
         if scenario_config := _ScenarioManager.__get_config(scenarios[0]):
             results = {}
             if data_node_config_id:
                 if data_node_config_id in scenario_config.comparators.keys():
-                    dn_comparators = {data_node_config_id: scenario_config.comparators[data_node_config_id]}
+                    dn_comparators = {
+                        data_node_config_id: scenario_config.comparators[
+                            data_node_config_id
+                        ]
+                    }
                 else:
                     raise NonExistingComparator
             else:
                 dn_comparators = scenario_config.comparators
 
             for data_node_config_id, comparators in dn_comparators.items():
-                data_nodes = [scenario.__getattr__(data_node_config_id).read() for scenario in scenarios]
+                data_nodes = [
+                    scenario.__getattr__(data_node_config_id).read()
+                    for scenario in scenarios
+                ]
                 results[data_node_config_id] = {
-                    comparator.__name__: comparator(*data_nodes) for comparator in comparators
+                    comparator.__name__: comparator(*data_nodes)
+                    for comparator in comparators
                 }
 
             return results

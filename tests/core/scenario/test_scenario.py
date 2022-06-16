@@ -14,6 +14,7 @@ from unittest import mock
 
 import pytest
 
+from taipy.core.common._utils import Subscriber
 from taipy.core.common.alias import ScenarioId
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.exceptions.exceptions import InvalidConfigurationId
@@ -110,7 +111,14 @@ def test_add_and_remove_tag():
 
 
 def test_auto_set_and_reload(cycle, current_datetime, pipeline):
-    scenario_1 = Scenario("foo", [], {"name": "bar"}, creation_date=current_datetime, is_primary=False, cycle=None)
+    scenario_1 = Scenario(
+        "foo",
+        [],
+        {"name": "bar"},
+        creation_date=current_datetime,
+        is_primary=False,
+        cycle=None,
+    )
     _ScenarioManager._set(scenario_1)
     _PipelineManager._set(pipeline)
     _CycleManager._set(cycle)
@@ -149,7 +157,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_2.is_primary
 
     assert len(scenario_1.subscribers) == 0
-    scenario_1.subscribers.append(print)
+    scenario_1.subscribers.append(Subscriber(print, []))
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
 
@@ -157,11 +165,11 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.subscribers) == 0
     assert len(scenario_2.subscribers) == 0
 
-    scenario_1.subscribers.extend([print, map])
+    scenario_1.subscribers.extend([Subscriber(print, []), Subscriber(map, [])])
     assert len(scenario_1.subscribers) == 2
     assert len(scenario_2.subscribers) == 2
 
-    scenario_1.subscribers.remove(print)
+    scenario_1.subscribers.remove(Subscriber(print, []))
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
 
@@ -238,7 +246,7 @@ def test_subscribe_scenario():
     with mock.patch("taipy.core.subscribe_scenario") as mock_subscribe:
         scenario = Scenario("foo", [], {})
         scenario.subscribe(None)
-        mock_subscribe.assert_called_once_with(None, scenario)
+        mock_subscribe.assert_called_once_with(None, None, scenario)
 
 
 def test_unsubscribe_scenario():

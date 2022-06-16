@@ -20,6 +20,7 @@ from taipy.core.common._entity import _Entity
 from taipy.core.common._listattributes import _ListAttributes
 from taipy.core.common._properties import _Properties
 from taipy.core.common._reload import _reload, _self_reload, _self_setter
+from taipy.core.common._utils import Subscriber
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
@@ -52,7 +53,7 @@ class Pipeline(_Entity):
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,
-        subscribers: List[Callable] = None,
+        subscribers: List[Subscriber] = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
@@ -168,11 +169,15 @@ class Pipeline(_Entity):
     def subscribers(self, val):
         self._subscribers = _ListAttributes(self, val)
 
-    def _add_subscriber(self, callback: Callable):
-        self._subscribers.append(callback)
+    def _add_subscriber(self, callback: Callable, params: Optional[List[str]] = None):
+        params = [] if params is None else params
+        self._subscribers.append(Subscriber(callback=callback, params=params))
 
     def _remove_subscriber(self, callback: Callable):
-        self._subscribers.remove(callback)
+        elem = [x for x in self._subscribers if x.callback == callback]
+        if not elem:
+            raise ValueError
+        self._subscribers.remove(elem[0])
 
     def _get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
@@ -180,19 +185,24 @@ class Pipeline(_Entity):
         dag.remove_nodes_from(remove)
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
-    def subscribe(self, callback: Callable[[Pipeline, Job], None]):
+    def subscribe(
+        self,
+        callback: Callable[[Pipeline, Job], None],
+        params: Optional[List[str]] = None,
+    ):
         """Subscribe a function to be called on `Job^` status change.
         The subscription is applied to all jobs created from the pipeline's execution.
 
         Parameters:
             callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
                 status change.
+            params (Optional[List[str]]): The parameters to be passed to the _callback_.
         Note:
             Notification will be available only for jobs created after this subscription.
         """
         import taipy.core as tp
 
-        return tp.subscribe_pipeline(callback, self)
+        return tp.subscribe_pipeline(callback, params, self)
 
     def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
         """Unsubscribe a function that is called when the status of a `Job^` changes.

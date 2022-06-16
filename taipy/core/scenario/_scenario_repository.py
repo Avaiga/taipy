@@ -15,6 +15,7 @@ from typing import List, Optional
 
 from taipy.core._repository import _FileSystemRepository
 from taipy.core.common import _utils
+from taipy.core.common._utils import Subscriber
 from taipy.core.common.alias import CycleId, PipelineId
 from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
@@ -53,9 +54,12 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             is_primary=model.primary_scenario,
             tags=set(model.tags),
             cycle=self.__to_cycle(model.cycle),
-            subscribers={
-                _utils._load_fct(it["fct_module"], it["fct_name"]) for it in model.subscribers
-            },  # type: ignore
+            subscribers=[
+                Subscriber(
+                    _utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"]
+                )
+                for it in model.subscribers
+            ],
         )
         return scenario
 
@@ -69,7 +73,9 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
 
     @staticmethod
     def __to_cycle(cycle_id: CycleId = None) -> Optional[Cycle]:
-        return _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
+        return (
+            _CycleManagerFactory._build_manager()._get(cycle_id) if cycle_id else None
+        )
 
     @staticmethod
     def __to_cycle_id(cycle: Cycle = None) -> Optional[CycleId]:
