@@ -20,6 +20,7 @@ setup(
     author="Avaiga",
     name="taipy-rest",
     keywords="taipy-rest",
+    python_requires=">=3.8",
     version="1.1.0.dev",
     author_email="dev@taipy.io",
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.rest"]),
