@@ -65,6 +65,6 @@ jobs:
 
       - name: Create/update release and tag
         run: |
-            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --notes "Release created using Github Workflows"
+            gh release create ${{ github.event.inputs.version }} --target ${{ steps.extract_hash.outputs.hash }} --title ${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
