@@ -178,7 +178,7 @@ class DataNodeList(Resource):
             config = self.fetch_config(config_id)
             schema = ds_schema_map.get(config.storage_type)()
             manager = DataManager()
-            manager._get_or_create(config)
+            manager._bulk_get_or_create({config})
 
             return {
                 "msg": "datanode created",

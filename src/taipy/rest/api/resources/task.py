@@ -160,7 +160,7 @@ class TaskList(Resource):
 
         try:
             config = self.fetch_config(config_id)
-            task = manager._get_or_create(config)
+            task = manager._bulk_get_or_create([config])[0]
 
             return {
                 "msg": "task created",
