@@ -27,7 +27,7 @@ setup(
     package_dir={"": "src"},
     long_description=readme,
     long_description_content_type="text/markdown",
-    description="A 360° open-source platform from Python pilots to production-ready web apps.",
+    description="Library to expose taipy-core REST APIs.",
     license="Apache License 2.0",
     classifiers=[
         "Intended Audience :: Developers",
