@@ -421,8 +421,8 @@ class Gui:
                 warnings.warn(f"Can't find matching variable for {var_name} on {current_context} context")
                 return
         on_change_fn = self._get_user_function(on_change) if on_change else None
-        if not callable(on_change_fn) and hasattr(self, "on_change") and callable(self.on_change):
-            on_change_fn = self.on_change
+        if not callable(on_change_fn):
+            on_change_fn = self._get_user_function("on_change")
         if callable(on_change_fn):
             try:
                 argcount = on_change_fn.__code__.co_argcount
@@ -684,6 +684,8 @@ class Gui:
         func = _getscopeattr(self, func_name, None)
         if not callable(func):
             func = self._get_locals_bind().get(func_name)
+        if not callable(func):
+            func = self.__locals_context.get_default().get(func_name)
         if callable(func):
             return func
         return func_name

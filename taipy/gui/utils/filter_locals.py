@@ -16,4 +16,4 @@ _RE_MODULE = re.compile(r"^__(.*?)__$")
 
 
 def _filter_locals(locals_dict: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
-    return {k: v for k, v in locals_dict.items() if not _RE_MODULE.match(k)}
+    return {k: v for k, v in locals_dict.items() if (not _RE_MODULE.match(k) or k == "__name__")}
