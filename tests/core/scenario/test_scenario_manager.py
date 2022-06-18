@@ -326,7 +326,7 @@ def test_notification_subscribe(mocker):
     # test unsubscribing notification
     # test notis subscribe only on new jobs
     # _ScenarioManager._get(scenario)
-    _ScenarioManager._unsubscribe(notify_1, scenario)
+    _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario)
 
@@ -372,13 +372,13 @@ def test_notification_unsubscribe(mocker):
 
     # test subscribing notification
     _ScenarioManager._subscribe(callback=notify_1, scenario=scenario)
-    _ScenarioManager._unsubscribe(notify_1, scenario)
+    _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario.id)
 
     with pytest.raises(ValueError):
-        _ScenarioManager._unsubscribe(notify_1, scenario)
-    _ScenarioManager._unsubscribe(notify_2, scenario)
+        _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
+    _ScenarioManager._unsubscribe(callback=notify_2, scenario=scenario)
 
 
 def test_scenario_notification_subscribe_all():

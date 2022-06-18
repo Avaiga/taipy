@@ -386,7 +386,7 @@ def test_pipeline_notification_subscribe(mocker):
 
     # test pipeline unsubscribe notification
     # test subscribe notification only on new job
-    _PipelineManager._unsubscribe(notify_1, pipeline)
+    _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
     _PipelineManager._subscribe(callback=notify_2, pipeline=pipeline)
     _PipelineManager._submit(pipeline.id)
 
@@ -418,13 +418,13 @@ def test_pipeline_notification_unsubscribe(mocker):
     notify_2 = notify2
 
     _PipelineManager._subscribe(callback=notify_1, pipeline=pipeline)
-    _PipelineManager._unsubscribe(notify_1, pipeline)
+    _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
     _PipelineManager._subscribe(callback=notify_2, pipeline=pipeline)
     _PipelineManager._submit(pipeline.id)
 
     with pytest.raises(ValueError):
-        _PipelineManager._unsubscribe(notify_1, pipeline)
-        _PipelineManager._unsubscribe(notify_2, pipeline)
+        _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
+        _PipelineManager._unsubscribe(callback=notify_2, pipeline=pipeline)
 
 
 def test_pipeline_notification_subscribe_all():

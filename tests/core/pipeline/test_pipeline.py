@@ -306,7 +306,7 @@ def test_unsubscribe_pipeline():
     with mock.patch("taipy.core.unsubscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.unsubscribe(None)
-        mck.assert_called_once_with(None, pipeline)
+        mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_submit_pipeline():

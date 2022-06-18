@@ -253,7 +253,7 @@ def test_unsubscribe_scenario():
     with mock.patch("taipy.core.unsubscribe_scenario") as mock_unsubscribe:
         scenario = Scenario("foo", [], {})
         scenario.unsubscribe(None)
-        mock_unsubscribe.assert_called_once_with(None, scenario)
+        mock_unsubscribe.assert_called_once_with(None, None, scenario)
 
 
 def test_add_tag_scenario():

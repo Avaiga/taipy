@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from functools import partial
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
@@ -45,15 +45,20 @@ class _PipelineManager(_Manager[Pipeline]):
         cls.__add_subscriber(callback, params, pipeline)
 
     @classmethod
-    def _unsubscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+    def _unsubscribe(
+        cls,
+        callback: Callable[[Pipeline, Job], None],
+        params: Optional[List[Any]] = None,
+        pipeline: Optional[Pipeline] = None,
+    ):
 
         if pipeline is None:
             pipelines = cls._get_all()
             for pln in pipelines:
-                cls.__remove_subscriber(callback, pln)
+                cls.__remove_subscriber(callback, params, pln)
             return
 
-        cls.__remove_subscriber(callback, pipeline)
+        cls.__remove_subscriber(callback, params, pipeline)
 
     @classmethod
     def __add_subscriber(cls, callback, params, pipeline):
@@ -61,8 +66,8 @@ class _PipelineManager(_Manager[Pipeline]):
         cls._set(pipeline)
 
     @classmethod
-    def __remove_subscriber(cls, callback, pipeline):
-        pipeline._remove_subscriber(callback)
+    def __remove_subscriber(cls, callback, params, pipeline):
+        pipeline._remove_subscriber(callback, params)
         cls._set(pipeline)
 
     @classmethod
