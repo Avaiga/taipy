@@ -55,7 +55,7 @@ jobs:
   release:
     needs: [test-package]
     timeout-minutes: 20
-    name: Release taipy-config Package
+    name: Release taipy-toolkit Package
     runs-on: ubuntu-18.04
 
     steps:
