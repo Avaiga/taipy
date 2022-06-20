@@ -1,4 +1,4 @@
-# Taipy Core
+# Taipy toolkit
 
 ## License
 Copyright 2022 Avaiga Private Limited
@@ -32,15 +32,15 @@ A more in depth documentation of taipy can be found [here](https://docs.taipy.io
 
 ## Installation
 
-Want to install _Taipy Core_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
+Want to install _Taipy toolkit_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
 
 ## Contributing
 
-Want to help build _Taipy Core_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+Want to help build _Taipy toolkit_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 
 ## Code of conduct
 
-Want to be part of the _Taipy Core_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+Want to be part of the _Taipy toolkit_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
