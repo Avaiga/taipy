@@ -13,7 +13,7 @@
 
 """The setup script."""
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, find_namespace_packages
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -44,7 +44,8 @@ setup(
     license="Apache License 2.0",
     keywords="taipy-toolkit",
     name="taipy-toolkit",
-    packages=find_packages(include=["taipy", "taipy.config", "taipy.config.*"]),
+    package_dir={"": "src"},
+    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.config", "taipy.config.*", "taipy.logger", "taipy.logger.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-toolkit",
