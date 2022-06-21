@@ -11,14 +11,16 @@
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
+
 from taipy.core.common._utils import _load_fct
 from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager as DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.exceptions.exceptions import ModelNotFound
-from taipy.core.task._task_manager import _TaskManager as TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 from ...commons.to_from_model import to_model
+from ..middlewares._middleware import _middleware
 from ..schemas import TaskSchema
 
 REPOSITORY = "task"
@@ -75,17 +77,19 @@ class TaskResource(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def get(self, task_id):
         schema = TaskSchema()
-        manager = TaskManager()
+        manager = _TaskManagerFactory._build_manager()
         task = manager._get(task_id)
         if not task:
             return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
         return {"task": schema.dump(to_model(REPOSITORY, task))}
 
+    @_middleware
     def delete(self, task_id):
         try:
-            manager = TaskManager()
+            manager = _TaskManagerFactory._build_manager()
             manager._delete(task_id)
         except ModelNotFound:
             return make_response(jsonify({"message": f"DataNode {task_id} not found"}), 404)
@@ -143,18 +147,20 @@ class TaskList(Resource):
     def fetch_config(self, config_id):
         return Config.tasks[config_id]
 
+    @_middleware
     def get(self):
         schema = TaskSchema(many=True)
-        manager = TaskManager()
+        manager = _TaskManagerFactory._build_manager()
         tasks = [to_model(REPOSITORY, task) for task in manager._get_all()]
         return schema.dump(tasks)
 
+    @_middleware
     def post(self):
         args = request.args
         config_id = args.get("config_id")
 
         schema = TaskSchema()
-        manager = TaskManager()
+        manager = _TaskManagerFactory._build_manager()
         if not config_id:
             return {"msg": "Config id is mandatory"}, 400
 
@@ -170,7 +176,7 @@ class TaskList(Resource):
             return {"msg": f"Config id {config_id} not found"}, 404
 
     def __create_task_from_schema(self, task_schema: TaskSchema):
-        data_manager = DataManager()
+        data_manager = _DataManagerFactory._build_manager()
         return Task(
             task_schema.get("config_id"),
             _load_fct(task_schema.get("function_module"), task_schema.get("function_name")),
@@ -212,8 +218,9 @@ class TaskExecutor(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def post(self, task_id):
-        manager = TaskManager()
+        manager = _TaskManagerFactory._build_manager()
         task = manager._get(task_id)
         if not task:
             return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)

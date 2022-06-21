@@ -11,7 +11,7 @@
 
 from taipy.core import Config, Frequency
 
-from .algorithms import forecast, evaluate
+from .algorithms import evaluate, forecast
 
 model_cfg = Config.configure_data_node("model", path="my_model.p", storage_type="pickle")
 

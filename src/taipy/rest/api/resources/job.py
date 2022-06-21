@@ -14,13 +14,15 @@ from typing import Optional
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
+
 from taipy.core import Job
 from taipy.core.common.alias import JobId
 from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import ModelNotFound
-from taipy.core.job._job_manager import _JobManager as JobManager
-from taipy.core.task._task_manager import _TaskManager as TaskManager
+from taipy.core.job._job_manager_factory import _JobManagerFactory
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
+from ..middlewares._middleware import _middleware
 from ..schemas import JobSchema
 
 
@@ -75,17 +77,19 @@ class JobResource(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def get(self, job_id):
         schema = JobSchema()
-        manager = JobManager()
+        manager = _JobManagerFactory._build_manager()
         job = manager._get(job_id)
         if not job:
             return make_response(jsonify({"message": f"Job {job_id} not found"}), 404)
         return {"job": schema.dump(job)}
 
+    @_middleware
     def delete(self, job_id):
         try:
-            manager = JobManager()
+            manager = _JobManagerFactory._build_manager()
             manager._delete(job_id)
         except ModelNotFound:
             return make_response(jsonify({"message": f"DataNode {job_id} not found"}), 404)
@@ -143,12 +147,14 @@ class JobList(Resource):
     def fetch_config(self, config_id):
         return Config.tasks[config_id]
 
+    @_middleware
     def get(self):
         schema = JobSchema(many=True)
-        manager = JobManager()
+        manager = _JobManagerFactory._build_manager()
         jobs = manager._get_all()
         return schema.dump(jobs)
 
+    @_middleware
     def post(self):
         args = request.args
         task_name = args.get("task_name")
@@ -156,7 +162,7 @@ class JobList(Resource):
         if not task_name:
             return {"msg": "Config id is mandatory"}, 400
 
-        manager = JobManager()
+        manager = _JobManagerFactory._build_manager()
         schema = JobSchema()
         job = self.__create_job_from_schema(task_name)
 
@@ -171,7 +177,7 @@ class JobList(Resource):
         }, 201
 
     def __create_job_from_schema(self, task_name: str) -> Optional[Job]:
-        task_manager = TaskManager()
+        task_manager = _TaskManagerFactory._build_manager()
         try:
             task = task_manager._bulk_get_or_create([self.fetch_config(task_name)])[0]
         except KeyError:

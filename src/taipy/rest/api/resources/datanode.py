@@ -9,19 +9,20 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
 from typing import List
 
 import numpy as np
 import pandas as pd
 from flask import jsonify, make_response, request
 from flask_restful import Resource
+
 from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager as DataManager
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.operator import Operator
 from taipy.core.exceptions.exceptions import NonExistingDataNode
 
 from ...commons.to_from_model import to_model
+from ..middlewares._middleware import _middleware
 from ..schemas import (
     CSVDataNodeConfigSchema,
     DataNodeFilterSchema,
@@ -92,17 +93,19 @@ class DataNodeResource(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def get(self, datanode_id):
         schema = DataNodeSchema()
-        manager = DataManager()
+        manager = _DataManagerFactory._build_manager()
         datanode = manager._get(datanode_id)
         if not datanode:
             return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
         return {"datanode": schema.dump(to_model(REPOSITORY, datanode, class_map=datanode.storage_type()))}
 
+    @_middleware
     def delete(self, datanode_id):
         try:
-            manager = DataManager()
+            manager = _DataManagerFactory._build_manager()
             manager._delete(datanode_id)
         except NonExistingDataNode:
             return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
@@ -159,14 +162,16 @@ class DataNodeList(Resource):
     def fetch_config(self, config_id):
         return Config.data_nodes[config_id]
 
+    @_middleware
     def get(self):
         schema = DataNodeSchema(many=True)
-        manager = DataManager()
+        manager = _DataManagerFactory._build_manager()
         datanodes = [
             to_model(REPOSITORY, datanode, class_map=datanode.storage_type()) for datanode in manager._get_all()
         ]
         return schema.dump(datanodes)
 
+    @_middleware
     def post(self):
         args = request.args
         config_id = args.get("config_id")
@@ -177,7 +182,7 @@ class DataNodeList(Resource):
         try:
             config = self.fetch_config(config_id)
             schema = ds_schema_map.get(config.storage_type)()
-            manager = DataManager()
+            manager = _DataManagerFactory._build_manager()
             manager._bulk_get_or_create({config})
 
             return {
@@ -227,10 +232,11 @@ class DataNodeReader(Resource):
             for x in schema.get("operators")
         ]
 
+    @_middleware
     def get(self, datanode_id):
         try:
             schema = DataNodeFilterSchema()
-            manager = DataManager()
+            manager = _DataManagerFactory._build_manager()
             datanode = manager._get(datanode_id)
 
             data = request.json
@@ -274,9 +280,10 @@ class DataNodeWriter(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def put(self, datanode_id):
         try:
-            manager = DataManager()
+            manager = _DataManagerFactory._build_manager()
             data = request.json
             datanode = manager._get(datanode_id)
             datanode.write(data)

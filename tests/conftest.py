@@ -12,21 +12,21 @@
 import os
 import shutil
 import uuid
-
-import pytest
-from dotenv import load_dotenv
-from taipy.core import Config, Cycle, Frequency, Job, Pipeline, Scenario, Task, Scope
-from taipy.core.common.alias import DataNodeId, JobId
-from taipy.core.cycle._cycle_manager import _CycleManager as CycleManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.job._job_manager import _JobManager as JobManager
-from taipy.core.task._task_manager import _TaskManager as TaskManager
-import pandas as pd
 from datetime import datetime, timedelta
 
+import pandas as pd
+import pytest
+from dotenv import load_dotenv
 
 from src.taipy.rest.app import create_app
-from .setup.shared.algorithms import forecast, evaluate
+from taipy.core import Config, Cycle, Frequency, Job, Pipeline, Scenario, Scope, Task
+from taipy.core.common.alias import DataNodeId, JobId
+from taipy.core.cycle._cycle_manager import _CycleManager
+from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.task._task_manager import _TaskManager
+
+from .setup.shared.algorithms import evaluate, forecast
 
 
 @pytest.fixture
@@ -263,7 +263,7 @@ def __create_cycle(name="foo"):
 @pytest.fixture
 def create_cycle_list():
     cycles = []
-    manager = CycleManager()
+    manager = _CycleManager
     for i in range(10):
         c = __create_cycle(f"cycle_{1}")
         manager._set(c)
@@ -288,7 +288,7 @@ def default_cycle():
 
 
 def __create_job():
-    task_manager = TaskManager()
+    task_manager = _TaskManager
     task = __default_task()
     task_manager._set(task)
     return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
@@ -302,7 +302,7 @@ def default_job():
 @pytest.fixture
 def create_job_list():
     jobs = []
-    manager = JobManager()
+    manager = _JobManager
     for i in range(10):
         c = __create_job()
         manager._set(c)

@@ -33,6 +33,16 @@ jobs:
           pip install tox
           tox -e tests
 
+      - name: Ensure no usage of manager classes without factory
+        if: matrix.python-versions == '3.10' && matrix.os == 'ubuntu-18.04'
+        run: |
+          ! grep -rP '_ScenarioManager(?!Factory)' src
+          ! grep -rP '_DataManager(?!Factory)' src
+          ! grep -rP '_TaskManager(?!Factory)' src
+          ! grep -rP '_PipelineManager(?!Factory)' src
+          ! grep -rP '_JobManager(?!Factory)' src
+          ! grep -rP '_CycleManager(?!Factory)' src
+
       - name: Notify user if failed
         if: failure() && github.event_name == 'workflow_dispatch'
         run: |

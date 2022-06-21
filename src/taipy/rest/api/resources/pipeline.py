@@ -11,13 +11,15 @@
 
 from flask import jsonify, make_response, request
 from flask_restful import Resource
+
 from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingPipeline
-from taipy.core.pipeline._pipeline_manager import _PipelineManager as PipelineManager
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager import _TaskManager as TaskManager
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 from ...commons.to_from_model import to_model
+from ..middlewares._middleware import _middleware
 from ..schemas import PipelineResponseSchema, PipelineSchema
 
 REPOSITORY = "pipeline"
@@ -74,17 +76,19 @@ class PipelineResource(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def get(self, pipeline_id):
         schema = PipelineResponseSchema()
-        manager = PipelineManager()
+        manager = _PipelineManagerFactory._build_manager()
         pipeline = manager._get(pipeline_id)
         if not pipeline:
             return make_response(jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404)
         return {"pipeline": schema.dump(to_model(REPOSITORY, pipeline))}
 
+    @_middleware
     def delete(self, pipeline_id):
         try:
-            manager = PipelineManager()
+            manager = _PipelineManagerFactory._build_manager()
             manager._delete(pipeline_id)
         except ModelNotFound:
             return make_response(jsonify({"message": f"DataNode {pipeline_id} not found"}), 404)
@@ -142,18 +146,20 @@ class PipelineList(Resource):
     def fetch_config(self, config_id):
         return Config.pipelines[config_id]
 
+    @_middleware
     def get(self):
         schema = PipelineResponseSchema(many=True)
-        manager = PipelineManager()
+        manager = _PipelineManagerFactory._build_manager()
         pipelines = [to_model(REPOSITORY, pipeline) for pipeline in manager._get_all()]
         return schema.dump(pipelines)
 
+    @_middleware
     def post(self):
         args = request.args
         config_id = args.get("config_id")
 
         response_schema = PipelineResponseSchema()
-        manager = PipelineManager()
+        manager = _PipelineManagerFactory._build_manager()
         if not config_id:
             return {"msg": "Config id is mandatory"}, 400
 
@@ -169,7 +175,7 @@ class PipelineList(Resource):
             return {"msg": f"Config id {config_id} not found"}, 404
 
     def __create_pipeline_from_schema(self, pipeline_schema: PipelineSchema):
-        task_manager = TaskManager()
+        task_manager = _TaskManagerFactory._build_manager()
         return Pipeline(
             config_id=pipeline_schema.get("name"),
             properties=pipeline_schema.get("properties", {}),
@@ -210,9 +216,10 @@ class PipelineExecutor(Resource):
     def __init__(self, **kwargs):
         self.logger = kwargs.get("logger")
 
+    @_middleware
     def post(self, pipeline_id):
         try:
-            manager = PipelineManager()
+            manager = _PipelineManagerFactory._build_manager()
             manager._submit(pipeline_id)
             return {"message": f"Executed pipeline {pipeline_id}"}
         except NonExistingPipeline:

@@ -9,16 +9,26 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from importlib.util import find_spec
+from functools import wraps
+from importlib import util
 
-if find_spec("taipy.core"):
-    from taipy.core import *
+from taipy.core.common._utils import _load_fct
 
-if find_spec("taipy.gui"):
-    from taipy.gui import Gui
 
-if find_spec("taipy.rest"):
-    from taipy.rest import Rest
+def _middleware(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if _using_enterprise():
+            return _enterprise_middleware()(f)(*args, **kwargs)
+        else:
+            return f(*args, **kwargs)
 
-if find_spec("taipy._run"):
-    from taipy._run import _run as run
+    return wrapper
+
+
+def _using_enterprise():
+    return util.find_spec("taipy.enterprise") is not None
+
+
+def _enterprise_middleware():
+    return _load_fct("taipy.enterprise.rest.api.middlewares._middleware", "_middleware")
