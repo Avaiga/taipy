@@ -176,10 +176,11 @@ class Pipeline(_Entity):
     def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         if params is not None:
             self._subscribers.remove(Subscriber(callback, params))
-        elem = [x for x in self._subscribers if x.callback == callback]
-        if not elem:
-            raise ValueError
-        self._subscribers.remove(elem[0])
+        else:
+            elem = [x for x in self._subscribers if x.callback == callback]
+            if not elem:
+                raise ValueError
+            self._subscribers.remove(elem[0])
 
     def _get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
@@ -211,6 +212,7 @@ class Pipeline(_Entity):
 
         Parameters:
             callback (Callable[[Pipeline^, Job^], None]): The callable function to unsubscribe.
+            params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         Note:
             The function will continue to be called for ongoing jobs.
         """

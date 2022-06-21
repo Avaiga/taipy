@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+
 class NotifyMock:
     """
     A shared class for testing notification on jobStatus of pipeline level and scenario level
@@ -21,7 +22,7 @@ class NotifyMock:
         self.nb_called = 0
         self.__name__ = "NotifyMock"
 
-    def __call__(self, entity, job):
+    def __call__(self, param, entity, job):
         assert entity == self.scenario
         if self.nb_called == 0:
             assert job.is_pending()
