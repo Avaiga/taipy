@@ -1,4 +1,4 @@
-# Taipy toolkit
+# Taipy config
 
 ## License
 Copyright 2022 Avaiga Private Limited
@@ -14,33 +14,33 @@ specific language governing permissions and limitations under the License.
 ## Usage
 - [License](#license)
 - [Usage](#usage)
-- [Taipy toolkit](#what-is-taipy-toolkit)
+- [Taipy config](#what-is-taipy-config)
 - [Installation](#installation)
 - [Contributing](#contributing)
 - [Code of conduct](#code-of-conduct)
 - [Directory Structure](#directory-structure)
 
-## What is Taipy toolkit
+## What is Taipy config
 
 Taipy is a Python library for creating Business Applications. More information on our
-[website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-toolkit_ to let users
+[website](https://www.taipy.io). Taipy is split into multiple repositories including _taipy-config_ to let users
 install the minimum they need.
 
-[Taipy toolkit](https://github.com/Avaiga/taipy-toolkit) is dedicated to help the user configure a Taipy application.
+[Taipy config](https://github.com/Avaiga/taipy-config) is dedicated to help the user configure a Taipy application.
 
 A more in depth documentation of taipy can be found [here](https://docs.taipy.io).
 
 ## Installation
 
-Want to install _Taipy toolkit_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
+Want to install _Taipy config_? Check out our [`INSTALLATION.md`](INSTALLATION.md) file.
 
 ## Contributing
 
-Want to help build _Taipy toolkit_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
+Want to help build _Taipy config_? Check out our [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 
 ## Code of conduct
 
-Want to be part of the _Taipy toolkit_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
+Want to be part of the _Taipy config_ community? Check out our [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) file.
 
 ## Directory Structure
 
@@ -49,11 +49,11 @@ Want to be part of the _Taipy toolkit_ community? Check out our [`CODE_OF_CONDUC
       entrypoint for configuring a Taipy Core application.
     - `logger`: Taipy logger.
     - `tests`: Unit tests following the `taipy/` structure.
-- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-toolkit_.
-- `CONTRIBUTING.md`: Instructions to contribute to _taipy-toolkit_.
-- `INSTALLATION.md`: Instructions to install _taipy-toolkit_.
+- `CODE_OF_CONDUCT.md`: Code of conduct for members and contributors of _taipy-config_.
+- `CONTRIBUTING.md`: Instructions to contribute to _taipy-config_.
+- `INSTALLATION.md`: Instructions to install _taipy-config_.
 - `LICENSE`: The Apache 2.0 License.
 - `Pipfile`: File used by the Pipenv virtual environment to manage project dependencies.
 - `README.md`: Current file.
-- `setup.py`: The setup script managing building, distributing, and installing _taipy-toolkit_.
+- `setup.py`: The setup script managing building, distributing, and installing _taipy-config_.
 - `tox.ini`: Contains test scenarios to be run.

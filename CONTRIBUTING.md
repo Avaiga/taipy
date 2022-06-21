@@ -43,7 +43,7 @@ attached to the `current sprint`. Please, do not work on it, the Taipy team is o
 
 Taipy is organised in five main repositories:
 
-- [taipy-toolkit](https://github.com/Avaiga/taipy-toolkit).
+- [taipy-config](https://github.com/Avaiga/taipy-config).
 - [taipy-core](https://github.com/Avaiga/taipy-core).
 - [taipy-gui](https://github.com/Avaiga/taipy-gui).
 - [taipy-rest](https://github.com/Avaiga/taipy-rest).
