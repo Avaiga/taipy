@@ -24,8 +24,8 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 30, 100]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
@@ -59,8 +59,8 @@ def test_table_md_2(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 50, 100, 500]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
@@ -76,8 +76,8 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 30, 100]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_html(gui, html_string, expected_list)
@@ -111,8 +111,8 @@ def test_table_html_2(gui: Gui, helpers, csvdata):
         'pageSizeOptions="[10, 50, 100, 500]"',
         "pageSize={100}",
         "selected={[]}",
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_html(gui, html_string, expected_list)

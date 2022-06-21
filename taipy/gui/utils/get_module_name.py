@@ -26,7 +26,7 @@ def _get_module_name_from_imported_var(var_name: str, value: t.Any, sub_module_n
     potential_matched_module = [m for m in module_list if m.endswith(sub_module_name)]
     for m in potential_matched_module:
         module = sys.modules[m]
-        if hasattr(module, var_name) and getattr(module, var_name) == value:
+        if hasattr(module, var_name) and getattr(module, var_name) is value:
             return m
     # failed fetching any matched module with variable and value
     return sub_module_name

@@ -41,7 +41,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
         {
             "client_id": sid,
             "type": "DU",
-            "name": "_TpD_tpec_csvdata_TPMDL_0",
+            "name": "_TpD_tpec_TpExPr_csvdata_TPMDL_0",
             "payload": {
                 "columns": ["Day", "Entity", "Code", "Daily hospital occupancy"],
                 "pagekey": "0-100--asc",
@@ -58,7 +58,7 @@ def test_du_table_data_fetched(gui: Gui, helpers, csvdata):
     helpers.assert_outward_ws_message(
         received_messages[0],
         "MU",
-        "_TpD_tpec_csvdata_TPMDL_0",
+        "_TpD_tpec_TpExPr_csvdata_TPMDL_0",
         {
             "data": [
                 {

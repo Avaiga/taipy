@@ -43,7 +43,7 @@ def test_evaluate_expressions_same_variable(gui: Gui):
     with gui.get_flask_app().app_context():
         s1 = gui._evaluate_expr("x + 10 = {x + 10}")
         s2 = gui._evaluate_expr("x = {x}")
-        assert "tp_x" in s1 and "tp_x" in s2
+        assert "tp_TpExPr_x" in s1 and "tp_TpExPr_x" in s2
 
 
 def test_evaluate_holder(gui: Gui, test_client):
@@ -53,11 +53,11 @@ def test_evaluate_holder(gui: Gui, test_client):
     with warnings.catch_warnings(record=True) as w:
         with gui.get_flask_app().app_context():
             gui._evaluate_expr("{x + 10}")
-            hash = gui._evaluate_bind_holder(_TaipyNumber, "x + 10_TPMDL_0")
-            assert "_TpN_tp_x_10_" in hash
-            lst = gui._evaluate_holders("x + 10_TPMDL_0")
+            hash = gui._evaluate_bind_holder(_TaipyNumber, "TpExPr_x + 10_TPMDL_0")
+            assert "_TpN_tp_TpExPr_x_10_TPMDL_0_0" in hash
+            lst = gui._evaluate_holders("TpExPr_x + 10_TPMDL_0")
             assert len(lst) == 1
-            assert "_TpN_tp_x_10_" in lst[0]
+            assert "_TpN_tp_TpExPr_x_10_TPMDL_0_0" in lst[0]
             # test re-evaluate holders
             gui._bindings().x = 20
             gui._re_evaluate_expr(lst[0])

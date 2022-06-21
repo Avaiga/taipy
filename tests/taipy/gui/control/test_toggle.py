@@ -27,11 +27,11 @@ def test_toggle_md_2(gui: Gui, test_client, helpers):
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;]]"',
         'defaultValue="l1"',
         'label="Label"',
-        "lov={_TpL_tpec_lov_TPMDL_0}",
-        'updateVars="lov=_TpL_tpec_lov_TPMDL_0"',
-        'updateVarName="_TpLv_tpec_x_TPMDL_0"',
+        "lov={_TpL_tpec_TpExPr_lov_TPMDL_0}",
+        'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',
+        'updateVarName="_TpLv_tpec_TpExPr_x_TPMDL_0"',
         'unselectedValue=""',
-        "value={_TpLv_tpec_x_TPMDL_0}",
+        "value={_TpLv_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -51,10 +51,10 @@ def test_toggle_html_2(gui: Gui, test_client, helpers):
         'defaultLov="[[&quot;l1&quot;, &quot;v1&quot;], [&quot;l2&quot;, &quot;v2&quot;]]"',
         'defaultValue="l1"',
         'label="Label"',
-        "lov={_TpL_tpec_lov_TPMDL_0}",
-        'updateVars="lov=_TpL_tpec_lov_TPMDL_0"',
-        'updateVarName="_TpLv_tpec_x_TPMDL_0"',
+        "lov={_TpL_tpec_TpExPr_lov_TPMDL_0}",
+        'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',
+        'updateVarName="_TpLv_tpec_TpExPr_x_TPMDL_0"',
         'unselectedValue=""',
-        "value={_TpLv_tpec_x_TPMDL_0}",
+        "value={_TpLv_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

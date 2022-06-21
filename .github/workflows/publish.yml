@@ -54,7 +54,7 @@ jobs:
           python setup.py build_py && python -m build
           rm -rf taipy
           pip install dist/*.tar.gz
-          pip install pytest pytest-mock pytest-playwright
+          pip install pytest pytest-mock pytest-playwright pytest-timeout
           playwright install chromium
           pytest
 
@@ -116,7 +116,7 @@ jobs:
       - name: Prepare tests
         run: |
           pip install --upgrade pip
-          pip install pytest pytest-mock pytest-playwright
+          pip install pytest pytest-mock pytest-playwright pytest-timeout
           playwright install chromium
 
       - name: Install and test package

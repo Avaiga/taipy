@@ -111,9 +111,11 @@ def _variable_encode(var_name: str, module_name: t.Optional[str]):
 
 
 def _variable_decode(var_name: str):
+    from ._evaluator import _Evaluator
+
     if result := _RE_TPMDL_DECODE.match(var_name):
-        return str(result[1]), _MODULE_NAME_MAP[int(result[2])]
-    return var_name, None
+        return _Evaluator._expr_decode(str(result[1])), _MODULE_NAME_MAP[int(result[2])]
+    return _Evaluator._expr_decode(var_name), None
 
 
 def _reset_name_map():

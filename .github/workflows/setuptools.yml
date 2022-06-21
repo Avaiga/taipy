@@ -35,7 +35,7 @@ jobs:
 
           # Run tests
           echo "installing playwright"
-          pip install pytest pytest-mock pytest-playwright
+          pip install pytest pytest-mock pytest-playwright pytest-timeout
           playwright install chromium
 
           echo "running pytest"
@@ -79,7 +79,7 @@ jobs:
 
           # Run test with optionals packages installed
           echo "installing playwright"
-          pip install pytest pytest-mock pytest-playwright
+          pip install pytest pytest-mock pytest-playwright pytest-timeout
           playwright install chromium
 
           echo "running pytest"

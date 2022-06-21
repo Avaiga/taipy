@@ -49,6 +49,7 @@ types-flask = "*"
 types-Flask-Cors = "*"
 pandas-stubs = "*"
 pyopenssl = "*"
+pytest-timeout = "*"
 
 [requires]
 python_version = "3"

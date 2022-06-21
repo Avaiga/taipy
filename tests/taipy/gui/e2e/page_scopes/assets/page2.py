@@ -9,21 +9,27 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import re
-import typing as t
+from taipy.gui import Markdown
 
-__expr_var_name_index: t.Dict[str, int] = {}
-_RE_NOT_IN_VAR_NAME = r"[^A-Za-z0-9]+"
-
-
-def _get_expr_var_name(expr: str) -> str:
-    var_name = re.sub(_RE_NOT_IN_VAR_NAME, "_", expr)
-    index = 0
-    if var_name in __expr_var_name_index.keys():
-        index = __expr_var_name_index[var_name]
-    __expr_var_name_index[var_name] = index + 1
-    return f"tp_{var_name}_{index}"
+from .page1 import x as y
+from .page1 import y as x
 
 
-def _reset_expr_var_name():
-    __expr_var_name_index.clear()
+def on_change(state, var, val):
+    if var == "x":
+        state.y = val * 5
+
+
+page = Markdown(
+    """
+y = <|{x}|id=x1|>
+
+y * 2 = <|{x*2}|id=x2|>
+
+y number: <|{x}|number|id=xinput|>
+
+x = <|{y}|id=y1|>
+
+x * 2 = <|{y*2}|id=y2|>
+"""
+)

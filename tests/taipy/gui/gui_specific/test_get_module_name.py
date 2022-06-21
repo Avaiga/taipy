@@ -9,21 +9,19 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import re
-import typing as t
+import inspect
 
-__expr_var_name_index: t.Dict[str, int] = {}
-_RE_NOT_IN_VAR_NAME = r"[^A-Za-z0-9]+"
+from taipy.gui.utils.get_module_name import _get_module_name_from_frame, _get_module_name_from_imported_var
 
-
-def _get_expr_var_name(expr: str) -> str:
-    var_name = re.sub(_RE_NOT_IN_VAR_NAME, "_", expr)
-    index = 0
-    if var_name in __expr_var_name_index.keys():
-        index = __expr_var_name_index[var_name]
-    __expr_var_name_index[var_name] = index + 1
-    return f"tp_{var_name}_{index}"
+x = 10
 
 
-def _reset_expr_var_name():
-    __expr_var_name_index.clear()
+def test_get_module_name():
+    assert "tests.taipy.gui.gui_specific.test_get_module_name" == _get_module_name_from_frame(inspect.currentframe())
+
+
+def test_get_module_name_imported_var():
+    assert "tests.taipy.gui.gui_specific.test_get_module_name" == _get_module_name_from_imported_var(
+        "x", 10, "test_get_module_name"
+    )
+    assert "test_get_module_name" == _get_module_name_from_imported_var("x", 11, "test_get_module_name")

@@ -20,7 +20,7 @@ def test_status_md(gui: Gui, helpers):
     expected_list = [
         "<Status",
         'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',
-        "value={tpec_status_TPMDL_0}",
+        "value={tpec_TpExPr_status_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_md(gui, md_string, expected_list)
@@ -32,7 +32,7 @@ def test_status_html(gui: Gui, helpers):
     expected_list = [
         "<Status",
         'defaultValue="[&#x7B;&quot;status&quot;: &quot;info&quot;, &quot;message&quot;: &quot;Info Message&quot;&#x7D;]"',
-        "value={tpec_status_TPMDL_0}",
+        "value={tpec_TpExPr_status_TPMDL_0}",
     ]
     gui._set_frame(inspect.currentframe())
     helpers.test_control_html(gui, html_string, expected_list)

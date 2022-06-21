@@ -53,7 +53,7 @@ class _LocalsContext:
         return getattr(g, _LocalsContext.__ctx_g_name) if hasattr(g, _LocalsContext.__ctx_g_name) else None
 
     def is_default(self) -> bool:
-        return self.get_default == self.get_locals()
+        return self.get_default() == self.get_locals()
 
     def reset_locals_context(self) -> None:
         if hasattr(g, _LocalsContext.__ctx_g_name):

@@ -21,6 +21,7 @@ from types import FrameType
 from taipy.gui import Gui, Html, Markdown
 from taipy.gui.renderers.builder import _Builder
 from taipy.gui.utils._variable_directory import _reset_name_map
+from taipy.gui.utils.expr_var_name import _reset_expr_var_name
 
 
 class Helpers:
@@ -28,6 +29,7 @@ class Helpers:
     def test_cleanup():
         _Builder._reset_key()
         _reset_name_map()
+        _reset_expr_var_name()
 
     @staticmethod
     def test_control_md(gui: Gui, md_string: str, expected_values: t.Union[str, t.List]):

@@ -20,14 +20,14 @@ def test_chart_md_1(gui: Gui, helpers, csvdata):
     md_string = "<|{csvdata}|chart|x=Day|selected_color=green|y[1]=Daily hospital occupancy|label[1]=Entity|y[2]=Daily hospital occupancy|label[2]=Code|mode[2]=markers|color[2]=red|type[2]=scatter|xaxis[2]=x2|layout={subplot_layout}|on_range_change=range_change|width=100%|height=100%|selected={selected_indices}|>"
     expected_list = [
         "<Chart",
-        "selected0={tpec_selected_indices_TPMDL_0}",
-        "selected1={tpec_selected_indices_TPMDL_0}",
+        "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
+        "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
         'height="100%"',
         'layout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',
         'tp_onRangeChange="range_change"',
-        'updateVars="selected0=tpec_selected_indices_TPMDL_0;selected1=tpec_selected_indices_TPMDL_0"',
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVars="selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
     gui._set_frame(inspect.currentframe())
@@ -40,14 +40,14 @@ def test_chart_html_1(gui: Gui, helpers, csvdata):
     html_string = '<taipy:chart data="{csvdata}" x="Day" selected_color="green" y[1]="Daily hospital occupancy" label[1]="Entity" y[2]="Daily hospital occupancy" label[2]="Code" mode[2]="markers" color[2]="red" type[2]="scatter" xaxis[2]="x2" layout="{subplot_layout}" on_range_change="range_change" width="100%" height="100%" selected="{selected_indices}"  />'
     expected_list = [
         "<Chart",
-        "selected0={tpec_selected_indices_TPMDL_0}",
-        "selected1={tpec_selected_indices_TPMDL_0}",
+        "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
+        "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
         'height="100%"',
         'layout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',
         'tp_onRangeChange="range_change"',
-        'updateVars="selected0=tpec_selected_indices_TPMDL_0;selected1=tpec_selected_indices_TPMDL_0"',
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVars="selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
     gui._set_frame(inspect.currentframe())
@@ -60,14 +60,14 @@ def test_chart_html_2(gui: Gui, helpers, csvdata):
     html_string = '<taipy:chart x="Day" selected_color="green" y[1]="Daily hospital occupancy" label[1]="Entity" y[2]="Daily hospital occupancy" label[2]="Code" mode[2]="markers" color[2]="red" type[2]="scatter" xaxis[2]="x2" layout="{subplot_layout}" on_range_change="range_change" width="100%" height="100%" selected="{selected_indices}" >{csvdata}</taipy:chart>'
     expected_list = [
         "<Chart",
-        "selected0={tpec_selected_indices_TPMDL_0}",
-        "selected1={tpec_selected_indices_TPMDL_0}",
+        "selected0={tpec_TpExPr_selected_indices_TPMDL_0}",
+        "selected1={tpec_TpExPr_selected_indices_TPMDL_0}",
         'height="100%"',
         'layout="{&quot;grid&quot;: &#x7B;&quot;rows&quot;: 1, &quot;columns&quot;: 2, &quot;subplots&quot;: [[&quot;xy&quot;, &quot;x2y&quot;]], &quot;roworder&quot;: &quot;bottom to top&quot;&#x7D;}"',
         'tp_onRangeChange="range_change"',
-        'updateVars="selected0=tpec_selected_indices_TPMDL_0;selected1=tpec_selected_indices_TPMDL_0"',
-        'updateVarName="_TpD_tpec_csvdata_TPMDL_0"',
-        "data={_TpD_tpec_csvdata_TPMDL_0}",
+        'updateVars="selected0=tpec_TpExPr_selected_indices_TPMDL_0;selected1=tpec_TpExPr_selected_indices_TPMDL_0"',
+        'updateVarName="_TpD_tpec_TpExPr_csvdata_TPMDL_0"',
+        "data={_TpD_tpec_TpExPr_csvdata_TPMDL_0}",
         'width="100%"',
     ]
     gui._set_frame(inspect.currentframe())
@@ -143,8 +143,8 @@ def test_map_md(gui: Gui, helpers):
         "<Chart",
         "&quot;Lat&quot;: &#x7B;&quot;index&quot;:",
         "&quot;Lon&quot;: &#x7B;&quot;index&quot;:",
-        "data={_TpD_tpec_mapData_TPMDL_0}",
+        "data={_TpD_tpec_TpExPr_mapData_TPMDL_0}",
         'layout="{&quot;dragmode&quot;: &quot;zoom&quot;, &quot;mapbox&quot;: &#x7B;&quot;style&quot;: &quot;open-street-map&quot;, &quot;center&quot;: &#x7B;&quot;lat&quot;: 38, &quot;lon&quot;: -90&#x7D;, &quot;zoom&quot;: 3&#x7D;, &quot;margin&quot;: &#x7B;&quot;r&quot;: 0, &quot;t&quot;: 0, &quot;b&quot;: 0, &quot;l&quot;: 0&#x7D;}"',
-        'updateVarName="_TpD_tpec_mapData_TPMDL_0"',
+        'updateVarName="_TpD_tpec_TpExPr_mapData_TPMDL_0"',
     ]
     helpers.test_control_md(gui, md, expected_list)

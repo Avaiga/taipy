@@ -23,10 +23,10 @@ def test_number_md_2(gui: Gui, test_client, helpers):
     md_string = "<|{x}|number|>"
     expected_list = [
         "<Input",
-        'updateVarName="_TpN_tpec_x_TPMDL_0"',
+        'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="10"',
         'type="number"',
-        "value={_TpN_tpec_x_TPMDL_0}",
+        "value={_TpN_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -36,10 +36,10 @@ def test_number_html_1(gui: Gui, test_client, helpers):
     html_string = '<taipy:number value="{x}" />'
     expected_list = [
         "<Input",
-        'updateVarName="_TpN_tpec_x_TPMDL_0"',
+        'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="10"',
         'type="number"',
-        "alue={_TpN_tpec_x_TPMDL_0}",
+        "value={_TpN_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)
 
@@ -49,9 +49,9 @@ def test_number_html_2(gui: Gui, test_client, helpers):
     html_string = "<taipy:number>{x}</taipy:number>"
     expected_list = [
         "<Input",
-        'updateVarName="_TpN_tpec_x_TPMDL_0"',
+        'updateVarName="_TpN_tpec_TpExPr_x_TPMDL_0"',
         'defaultValue="10"',
         'type="number"',
-        "value={_TpN_tpec_x_TPMDL_0}",
+        "value={_TpN_tpec_TpExPr_x_TPMDL_0}",
     ]
     helpers.test_control_html(gui, html_string, expected_list)

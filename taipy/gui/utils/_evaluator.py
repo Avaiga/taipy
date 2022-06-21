@@ -42,6 +42,7 @@ class _Evaluator:
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
     __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9]*)$")
     __EXPR_EDGE_CASE_F_STRING = re.compile(r"[\{]*[a-zA-Z_][a-zA-Z0-9_]*:.+")
+    __IS_TAIPYEXPR_RE = re.compile(r"TpExPr_(.*)")
 
     def __init__(self, default_bindings: t.Dict[str, t.Any]) -> None:
         # key = expression, value = hashed value of the expression
@@ -60,6 +61,10 @@ class _Evaluator:
         self.__global_ctx = default_bindings
         # expr to holders
         self.__expr_to_holders: t.Dict[str, t.Set[t.Type[_TaipyBase]]] = {}
+
+    @staticmethod
+    def _expr_decode(s: str):
+        return str(result[1]) if (result := _Evaluator.__IS_TAIPYEXPR_RE.match(s)) else s
 
     def get_hash_from_expr(self, expr: str) -> str:
         return self.__expr_to_hash.get(expr, expr)
@@ -196,7 +201,7 @@ class _Evaluator:
         # validate whether expression has already been evaluated
         module_name = gui._get_locals_context()
         not_encoded_expr = expr
-        expr = _variable_encode(expr, module_name)
+        expr = f"TpExPr_{_variable_encode(expr, module_name)}"
         if expr in self.__expr_to_hash and _hasscopeattr(gui, self.__expr_to_hash[expr]):
             return self.__expr_to_hash[expr]
         try:
@@ -240,30 +245,30 @@ class _Evaluator:
         if var_name not in self.__var_to_expr_list:
             # warnings.warn("{var_name} not found")
             return modified_vars
+        # refresh expressions and holders
         for expr in self.__var_to_expr_list[var_name]:
             if expr == expr_original or expr.startswith("_Taipy"):
                 continue
             expr_decoded, _ = _variable_decode(expr)
-            if expr == var_name:
-                continue
             hash_expr = self.__expr_to_hash.get(expr, "UnknownExpr")
-            expr_var_map = self.__expr_to_var_map.get(expr)  # ["x", "y"]
-            if expr_var_map is None:
-                warnings.warn(f"Someting is amiss with expression list for {expr}")
-                continue
-            eval_dict = {k: _getscopeattr_drill(gui, v) for k, v in expr_var_map.items()}
-            if self._is_expression(expr_decoded):
-                expr_string = 'f"' + expr.replace('"', '\\"') + '"'
-            else:
-                expr_string = expr_decoded
-            try:
-                ctx: t.Dict[str, t.Any] = {}
-                ctx.update(self.__global_ctx)
-                ctx.update(eval_dict)
-                expr_evaluated = eval(expr_string, ctx)
-                _setscopeattr(gui, hash_expr, expr_evaluated)
-            except Exception as e:
-                warnings.warn(f"Problem evaluating {expr_string}: {e}")
+            if expr != var_name:
+                expr_var_map = self.__expr_to_var_map.get(expr)  # ["x", "y"]
+                if expr_var_map is None:
+                    warnings.warn(f"Someting is amiss with expression list for {expr}")
+                    continue
+                eval_dict = {k: _getscopeattr_drill(gui, v) for k, v in expr_var_map.items()}
+                if self._is_expression(expr_decoded):
+                    expr_string = 'f"' + expr.replace('"', '\\"') + '"'
+                else:
+                    expr_string = expr_decoded
+                try:
+                    ctx: t.Dict[str, t.Any] = {}
+                    ctx.update(self.__global_ctx)
+                    ctx.update(eval_dict)
+                    expr_evaluated = eval(expr_string, ctx)
+                    _setscopeattr(gui, hash_expr, expr_evaluated)
+                except Exception as e:
+                    warnings.warn(f"Problem evaluating {expr_string}: {e}")
             # refresh holders if any
             for h in self.__expr_to_holders.get(expr, []):
                 holder_hash = self.__get_holder_hash(h, self.get_hash_from_expr(expr))
