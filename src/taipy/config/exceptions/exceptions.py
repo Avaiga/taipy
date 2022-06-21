@@ -30,12 +30,5 @@ class InvalidConfigurationId(Exception):
     """Configuration id is not valid."""
 
 
-class NonExistingComparator(Exception):
-    """Raised if a scenario comparator does not exist.
-
-    This exception can be raised by `taipy.compare_scenarios()^`.
-    """
-
-
 class ModeNotAvailable(Exception):
     """Raised if the mode in JobConfig is not supported."""

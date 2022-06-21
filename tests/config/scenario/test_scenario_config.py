@@ -14,11 +14,10 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.config.scenario.frequency import Frequency
-from src.taipy.config.data_node.scope import Scope
 from src.taipy.config._config import _Config
 from src.taipy.config.config import Config
-from src.taipy.config.exceptions.exceptions import NonExistingComparator
+from src.taipy.config.data_node.scope import Scope
+from src.taipy.config.scenario.frequency import Frequency
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -108,8 +107,7 @@ def test_scenario_get_set_and_remove_comparators():
     scenario_config_2.add_comparator(dn_config_1, my_func)
     assert len(scenario_config_2.comparators.keys()) == 1
 
-    with pytest.raises(NonExistingComparator):
-        scenario_config_2.delete_comparator("dn_config_3")
+    scenario_config_2.delete_comparator("dn_config_3")
 
 
 def test_scenario_config_with_env_variable_value():
