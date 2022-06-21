@@ -118,3 +118,28 @@ def test_scenario_config_with_env_variable_value():
         assert Config.scenarios["scenario_name"].prop == "bar"
         assert Config.scenarios["scenario_name"].properties["prop"] == "bar"
         assert Config.scenarios["scenario_name"]._properties["prop"] == "ENV[FOO]"
+
+
+def test_scenario_create_from_task_config():
+    data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+    data_node_2_config = Config.configure_data_node(
+        id="d2", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+    )
+    data_node_3_config = Config.configure_data_node(
+        id="d3", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+    )
+    task_config_1 = Config.configure_task("t1", print, data_node_1_config, data_node_2_config, scope=Scope.GLOBAL)
+    task_config_2 = Config.configure_task("t2", print, data_node_2_config, data_node_3_config, scope=Scope.GLOBAL)
+    scenario_config_1 = Config.configure_scenario_from_tasks("s1", task_configs=[task_config_1, task_config_2])
+
+    assert len(scenario_config_1.pipeline_configs) == 1
+    assert len(scenario_config_1.pipeline_configs[0].task_configs) == 2
+    # Should create a default pipeline name
+    assert isinstance(scenario_config_1.pipeline_configs[0].id, str)
+    assert scenario_config_1.pipeline_configs[0].id == f"{scenario_config_1.id}_pipeline"
+
+    pipeline_name = "p1"
+    scenario_config_2 = Config.configure_scenario_from_tasks(
+        "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
+    )
+    assert scenario_config_2.pipeline_configs[0].id == pipeline_name
