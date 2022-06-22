@@ -22,7 +22,7 @@ class NotifyMock:
         self.nb_called = 0
         self.__name__ = "NotifyMock"
 
-    def __call__(self, param, entity, job):
+    def __call__(self, entity, job):
         assert entity == self.scenario
         if self.nb_called == 0:
             assert job.is_pending()

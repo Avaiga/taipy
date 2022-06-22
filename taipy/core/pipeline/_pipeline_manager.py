@@ -103,7 +103,7 @@ class _PipelineManager(_Manager[Pipeline]):
 
     @staticmethod
     def __get_status_notifier_callbacks(pipeline: Pipeline) -> List:
-        return [partial(c.callback, c.params, pipeline) for c in pipeline.subscribers]
+        return [partial(c.callback, *c.params, pipeline) for c in pipeline.subscribers]
 
     @classmethod
     def _hard_delete(cls, pipeline_id: PipelineId):

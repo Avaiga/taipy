@@ -128,7 +128,7 @@ class _ScenarioManager(_Manager[Scenario]):
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:
-        return [partial(c.callback, c.params, scenario) for c in scenario.subscribers]
+        return [partial(c.callback, *c.params, scenario) for c in scenario.subscribers]
 
     @classmethod
     def _get_primary(cls, cycle: Cycle) -> Optional[Scenario]:

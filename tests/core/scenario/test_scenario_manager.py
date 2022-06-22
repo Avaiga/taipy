@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from unittest.mock import ANY
 
 import pytest
 
@@ -335,9 +336,18 @@ def test_notification_subscribe(mocker):
     notify_2.assert_called_3_times()
 
 
-def test_notification_subscribe_multiple_params():
+class Notify:
+    def __call__(self, *args, **kwargs):
+        self.args = args
+
+    def assert_called_with(self, args):
+        assert args in self.args
+
+
+def test_notification_subscribe_multiple_params(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _Scheduler._update_job_config()
+    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -355,10 +365,15 @@ def test_notification_subscribe_multiple_params():
             )
         ],
     )
+    notify = mocker.Mock()
 
     scenario = _ScenarioManager._create(scenario_config)
-    _ScenarioManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 1.2], scenario=scenario)
+    _ScenarioManager._subscribe(callback=notify, params=["foobar", 123, 1.2], scenario=scenario)
+    mocker.patch.object(_ScenarioManager, "_get", return_value=scenario)
+
     _ScenarioManager._submit(scenario)
+
+    notify.assert_called_with("foobar", 123, 1.2, scenario, ANY)
 
 
 def notify_multi_param(param, *args):

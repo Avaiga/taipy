@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from unittest import mock
+from unittest.mock import ANY
 
 import pytest
 
@@ -342,8 +343,8 @@ def notify2(*args, **kwargs):
     ...
 
 
-def notify_multi_param(param, *args):
-    assert len(param) == 3
+def notify_multi_param(*args, **kwargs):
+    ...
 
 
 def test_pipeline_notification_subscribe(mocker):
@@ -399,9 +400,11 @@ def test_pipeline_notification_subscribe(mocker):
     notify_2.assert_called_3_times()
 
 
-def test_pipeline_notification_subscribe_multi_param():
+def test_pipeline_notification_subscribe_multi_param(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _Scheduler._update_job_config()
+
+    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     pipeline_config = Config.configure_pipeline(
         "by_6",
@@ -416,10 +419,18 @@ def test_pipeline_notification_subscribe_multi_param():
     )
 
     pipeline = _PipelineManager._get_or_create(pipeline_config)
+    notify = mocker.Mock()
 
     # test pipeline subscribe notification
-    _PipelineManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 1.2], pipeline=pipeline)
+    _PipelineManager._subscribe(callback=notify, params=["foobar", 123, 1.2], pipeline=pipeline)
+    mocker.patch.object(_PipelineManager, "_get", return_value=pipeline)
+
     _PipelineManager._submit(pipeline.id)
+
+    # as the callback is called with Pipeline/Scenario and Job objects
+    # we can assert that is called with params plus a pipeline object that we know
+    # of and a job object that is represented by ANY in this case
+    notify.assert_called_with("foobar", 123, 1.2, pipeline, ANY)
 
 
 def test_pipeline_notification_unsubscribe(mocker):
