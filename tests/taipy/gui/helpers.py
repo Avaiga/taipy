@@ -117,8 +117,23 @@ class Helpers:
         kwargs["run_in_thread"] = True
         kwargs["single_client"] = True
         kwargs["run_browser"] = False
-        kwargs["locals_bind"] = t.cast(FrameType, inspect.currentframe().f_back).f_locals
         with warnings.catch_warnings(record=True):
             gui.run(**kwargs)
+        while not Helpers.port_check():
+            time.sleep(0.1)
+
+    @staticmethod
+    def run_e2e_multi_client(gui: Gui):
+        with warnings.catch_warnings(record=True):
+            gui.run(run_server=False, run_browser=False, single_client=False)
+            gui._server.runWithWS(
+                host=gui._get_config("host", "127.0.0.1"),
+                port=gui._get_config("port", 5000),
+                debug=False,
+                use_reloader=False,
+                flask_log=False,
+                run_in_thread=True,
+                ssl_context=None,
+            )
         while not Helpers.port_check():
             time.sleep(0.1)
