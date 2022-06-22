@@ -13,7 +13,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -222,7 +222,7 @@ class DataNode(_Entity):
     def storage_type(cls) -> str:
         return NotImplemented
 
-    def read_or_raise(self):
+    def read_or_raise(self) -> Any:
         """Read the data referenced by this data node.
 
         Returns:
@@ -234,7 +234,7 @@ class DataNode(_Entity):
             raise NoData
         return self._read()
 
-    def read(self):
+    def read(self) -> Any:
         """Read the data referenced by this data node.
 
         Returns:
@@ -410,7 +410,7 @@ class DataNode(_Entity):
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
-    def is_ready_for_reading(self):
+    def is_ready_for_reading(self) -> bool:
         """Indicate if this data node is ready for reading.
 
         Returns:

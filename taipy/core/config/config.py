@@ -410,7 +410,7 @@ class Config:
         frequency: Optional[Frequency] = None,
         comparators: Optional[Dict[str, Union[List[Callable], Callable]]] = None,
         **properties,
-    ):
+    ) -> ScenarioConfig:
         """Configure the default values for scenario configurations.
 
         This function creates the _default scenario configuration_ object,
@@ -493,7 +493,7 @@ class Config:
         has_header: bool = True,
         scope=DataNodeConfig._DEFAULT_SCOPE,
         **properties,
-    ):
+    ) -> DataNodeConfig:
         """Configure a new CSV data node configuration.
 
         Parameters:
@@ -522,7 +522,7 @@ class Config:
         sheet_name: Union[List[str], str] = None,
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
-    ):
+    ) -> DataNodeConfig:
         """Configure a new Excel data node configuration.
 
         Parameters:
@@ -560,7 +560,7 @@ class Config:
         write_fct_params: List = None,
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
-    ):
+    ) -> DataNodeConfig:
         """Configure a new generic data node configuration.
 
         Parameters:
@@ -596,7 +596,7 @@ class Config:
     @classmethod
     def configure_in_memory_data_node(
         cls, id: str, default_data: Optional[Any] = None, scope: Scope = DataNodeConfig._DEFAULT_SCOPE, **properties
-    ):
+    ) -> DataNodeConfig:
         """Configure a new _in_memory_ data node configuration.
 
         Parameters:
@@ -619,7 +619,7 @@ class Config:
     @classmethod
     def configure_pickle_data_node(
         cls, id: str, default_data: Optional[Any] = None, scope: Scope = DataNodeConfig._DEFAULT_SCOPE, **properties
-    ):
+    ) -> DataNodeConfig:
         """Configure a new pickle data node configuration.
 
         Parameters:
@@ -654,7 +654,7 @@ class Config:
         db_driver: str = "ODBC Driver 17 for SQL Server",
         scope: Scope = DataNodeConfig._DEFAULT_SCOPE,
         **properties,
-    ):
+    ) -> DataNodeConfig:
         """Configure a new SQL data node configuration.
 
         Parameters:

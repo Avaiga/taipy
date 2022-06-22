@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
@@ -224,14 +224,14 @@ def untag(scenario: Scenario, tag: str):
     return _ScenarioManagerFactory._build_manager()._untag(scenario, tag)
 
 
-def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] = None):
+def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] = None) -> Dict[str, Any]:
     """Compare the data nodes of several scenarios.
 
     You can specify which data node config identifier should the comparison be performed
     on.
 
     Parameters:
-        scenarios (*Scenario^): The list of the scenarios to compare.
+        *scenarios (*Scenario^): The list of the scenarios to compare.
         data_node_config_id (Optional[str]): Config identifier of the DataNode to compare
             scenarios.<br/>
             if _datanode_config_id_ is None, the scenarios are compared based on all the defined
