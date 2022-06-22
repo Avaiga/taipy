@@ -19,7 +19,7 @@ from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
-from ...commons.to_from_model import to_model
+from ...commons.to_from_model import _to_model
 from ..middlewares._middleware import _middleware
 from ..schemas import TaskSchema
 
@@ -84,7 +84,7 @@ class TaskResource(Resource):
         task = manager._get(task_id)
         if not task:
             return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
-        return {"task": schema.dump(to_model(REPOSITORY, task))}
+        return {"task": schema.dump(_to_model(REPOSITORY, task))}
 
     @_middleware
     def delete(self, task_id):
@@ -151,7 +151,7 @@ class TaskList(Resource):
     def get(self):
         schema = TaskSchema(many=True)
         manager = _TaskManagerFactory._build_manager()
-        tasks = [to_model(REPOSITORY, task) for task in manager._get_all()]
+        tasks = [_to_model(REPOSITORY, task) for task in manager._get_all()]
         return schema.dump(tasks)
 
     @_middleware
@@ -170,7 +170,7 @@ class TaskList(Resource):
 
             return {
                 "msg": "task created",
-                "task": schema.dump(to_model(REPOSITORY, task)),
+                "task": schema.dump(_to_model(REPOSITORY, task)),
             }, 201
         except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404

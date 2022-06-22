@@ -33,6 +33,6 @@ class Rest:
         Start a REST API server. This method is blocking.
 
         Parameters:
-            kwargs: Options to provide to the application server.
+            **kwargs : Options to provide to the application server.
         """
         self._app.run(**kwargs)

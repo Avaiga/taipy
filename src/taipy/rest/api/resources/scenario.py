@@ -18,7 +18,7 @@ from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactor
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
 
-from ...commons.to_from_model import to_model
+from ...commons.to_from_model import _to_model
 from ..middlewares._middleware import _middleware
 from ..schemas import ScenarioResponseSchema, ScenarioSchema
 
@@ -83,7 +83,7 @@ class ScenarioResource(Resource):
         scenario = manager._get(scenario_id)
         if not scenario:
             return make_response(jsonify({"message": f"Scenario {scenario_id} not found"}), 404)
-        return {"scenario": schema.dump(to_model(REPOSITORY, scenario))}
+        return {"scenario": schema.dump(_to_model(REPOSITORY, scenario))}
 
     @_middleware
     def delete(self, scenario_id):
@@ -150,7 +150,7 @@ class ScenarioList(Resource):
     def get(self):
         schema = ScenarioResponseSchema(many=True)
         manager = _ScenarioManagerFactory._build_manager()
-        scenarios = [to_model(REPOSITORY, scenario) for scenario in manager._get_all()]
+        scenarios = [_to_model(REPOSITORY, scenario) for scenario in manager._get_all()]
         return schema.dump(scenarios)
 
     @_middleware
@@ -170,7 +170,7 @@ class ScenarioList(Resource):
 
             return {
                 "msg": "scenario created",
-                "scenario": response_schema.dump(to_model(REPOSITORY, scenario)),
+                "scenario": response_schema.dump(_to_model(REPOSITORY, scenario)),
             }, 201
         except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404

@@ -18,7 +18,7 @@ from taipy.core import Cycle, Frequency
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
 from taipy.core.exceptions.exceptions import ModelNotFound
 
-from ...commons.to_from_model import to_model
+from ...commons.to_from_model import _to_model
 from ..middlewares._middleware import _middleware
 from ..schemas import CycleResponseSchema, CycleSchema
 
@@ -83,7 +83,7 @@ class CycleResource(Resource):
         cycle = manager._get(cycle_id)
         if not cycle:
             return make_response(jsonify({"message": f"Cycle {cycle_id} not found"}), 404)
-        return {"cycle": schema.dump(to_model(REPOSITORY, cycle))}
+        return {"cycle": schema.dump(_to_model(REPOSITORY, cycle))}
 
     @_middleware
     def delete(self, cycle_id):
@@ -147,7 +147,7 @@ class CycleList(Resource):
     def get(self):
         schema = CycleResponseSchema(many=True)
         manager = _CycleManagerFactory._build_manager()
-        cycles = [to_model(REPOSITORY, cycle) for cycle in manager._get_all()]
+        cycles = [_to_model(REPOSITORY, cycle) for cycle in manager._get_all()]
         return schema.dump(cycles)
 
     @_middleware
@@ -160,7 +160,7 @@ class CycleList(Resource):
 
         return {
             "msg": "cycle created",
-            "cycle": schema.dump(to_model(REPOSITORY, cycle)),
+            "cycle": schema.dump(_to_model(REPOSITORY, cycle)),
         }, 201
 
     def __create_cycle_from_schema(self, cycle_schema: CycleSchema):

@@ -18,7 +18,7 @@ from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactor
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
-from ...commons.to_from_model import to_model
+from ...commons.to_from_model import _to_model
 from ..middlewares._middleware import _middleware
 from ..schemas import PipelineResponseSchema, PipelineSchema
 
@@ -83,7 +83,7 @@ class PipelineResource(Resource):
         pipeline = manager._get(pipeline_id)
         if not pipeline:
             return make_response(jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404)
-        return {"pipeline": schema.dump(to_model(REPOSITORY, pipeline))}
+        return {"pipeline": schema.dump(_to_model(REPOSITORY, pipeline))}
 
     @_middleware
     def delete(self, pipeline_id):
@@ -150,7 +150,7 @@ class PipelineList(Resource):
     def get(self):
         schema = PipelineResponseSchema(many=True)
         manager = _PipelineManagerFactory._build_manager()
-        pipelines = [to_model(REPOSITORY, pipeline) for pipeline in manager._get_all()]
+        pipelines = [_to_model(REPOSITORY, pipeline) for pipeline in manager._get_all()]
         return schema.dump(pipelines)
 
     @_middleware
@@ -169,7 +169,7 @@ class PipelineList(Resource):
 
             return {
                 "msg": "pipeline created",
-                "pipeline": response_schema.dump(to_model(REPOSITORY, pipeline)),
+                "pipeline": response_schema.dump(_to_model(REPOSITORY, pipeline)),
             }, 201
         except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404

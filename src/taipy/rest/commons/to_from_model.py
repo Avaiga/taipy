@@ -24,5 +24,5 @@ repositories = {
 }
 
 
-def to_model(repository, entity, **kwargs):
+def _to_model(repository, entity, **kwargs):
     return repositories[repository](**kwargs)._to_model(entity)

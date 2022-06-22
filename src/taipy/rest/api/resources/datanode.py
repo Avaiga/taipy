@@ -21,7 +21,7 @@ from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.operator import Operator
 from taipy.core.exceptions.exceptions import NonExistingDataNode
 
-from ...commons.to_from_model import to_model
+from ...commons.to_from_model import _to_model
 from ..middlewares._middleware import _middleware
 from ..schemas import (
     CSVDataNodeConfigSchema,
@@ -100,7 +100,7 @@ class DataNodeResource(Resource):
         datanode = manager._get(datanode_id)
         if not datanode:
             return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
-        return {"datanode": schema.dump(to_model(REPOSITORY, datanode, class_map=datanode.storage_type()))}
+        return {"datanode": schema.dump(_to_model(REPOSITORY, datanode, class_map=datanode.storage_type()))}
 
     @_middleware
     def delete(self, datanode_id):
@@ -167,7 +167,7 @@ class DataNodeList(Resource):
         schema = DataNodeSchema(many=True)
         manager = _DataManagerFactory._build_manager()
         datanodes = [
-            to_model(REPOSITORY, datanode, class_map=datanode.storage_type()) for datanode in manager._get_all()
+            _to_model(REPOSITORY, datanode, class_map=datanode.storage_type()) for datanode in manager._get_all()
         ]
         return schema.dump(datanodes)
 
