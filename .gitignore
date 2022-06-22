@@ -133,6 +133,7 @@ Dockerfile.dev
 
 # python notebook
 *.ipynb
+!simple_gui.ipynb
 
 .airflow
 *.dags
