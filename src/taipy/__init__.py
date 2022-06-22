@@ -11,14 +11,19 @@
 
 from importlib.util import find_spec
 
-if find_spec("taipy.core"):
+if find_spec('taipy.core'):
     from taipy.core import *
 
-if find_spec("taipy.gui"):
+if find_spec('taipy.gui'):
     from taipy.gui import Gui
 
-if find_spec("taipy.rest"):
+    if find_spec('taipy.enterprise') and find_spec('taipy.enterprise.gui'):
+        from taipy.enterprise.gui import _init_gui_enterprise
+
+        _init_gui_enterprise(Gui)
+
+if find_spec('taipy.rest'):
     from taipy.rest import Rest
 
-if find_spec("taipy._run"):
+if find_spec('taipy._run'):
     from taipy._run import _run as run
