@@ -13,58 +13,103 @@ from datetime import timedelta
 from unittest import mock
 
 import pytest
-
-from taipy.core.common.alias import ScenarioId
+from taipy.core.common.alias import ScenarioId, TaskId
+from taipy.core.common.scope import Scope
 from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager import _ScenarioManager
+
+from taipy.core.exceptions.exceptions import InvalidConfigurationId
+from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario.scenario import Scenario
+from taipy.core.task.task import Task
 
 
 def test_create_scenario(cycle, current_datetime):
-    scenario_entity_1 = Scenario("foo", [], {"key": "value"}, is_primary=True, cycle=cycle)
-    assert scenario_entity_1.id is not None
-    assert scenario_entity_1.config_id == "foo"
-    assert scenario_entity_1.pipelines == {}
-    assert scenario_entity_1.properties == {"key": "value"}
-    assert scenario_entity_1.key == "value"
-    assert scenario_entity_1.creation_date is not None
-    assert scenario_entity_1.is_primary
-    assert scenario_entity_1.cycle == cycle
-    assert scenario_entity_1.tags == set()
+    scenario_1 = Scenario("foo", [], {"key": "value"}, is_primary=True, cycle=cycle)
+    assert scenario_1.id is not None
+    assert scenario_1.config_id == "foo"
+    assert scenario_1.pipelines == {}
+    assert scenario_1.properties == {"key": "value"}
+    assert scenario_1.key == "value"
+    assert scenario_1.creation_date is not None
+    assert scenario_1.is_primary
+    assert scenario_1.cycle == cycle
+    assert scenario_1.tags == set()
 
-    scenario_entity_2 = Scenario("bar", [], {}, ScenarioId("baz"), creation_date=current_datetime)
-    assert scenario_entity_2.id == "baz"
-    assert scenario_entity_2.config_id == "bar"
-    assert scenario_entity_2.pipelines == {}
-    assert scenario_entity_2.properties == {}
-    assert scenario_entity_2.creation_date == current_datetime
-    assert not scenario_entity_2.is_primary
-    assert scenario_entity_2.cycle is None
-    assert scenario_entity_2.tags == set()
+    scenario_2 = Scenario("bar", [], {}, ScenarioId("baz"), creation_date=current_datetime)
+    assert scenario_2.id == "baz"
+    assert scenario_2.config_id == "bar"
+    assert scenario_2.pipelines == {}
+    assert scenario_2.properties == {}
+    assert scenario_2.creation_date == current_datetime
+    assert not scenario_2.is_primary
+    assert scenario_2.cycle is None
+    assert scenario_2.tags == set()
 
-    pipeline_entity = Pipeline("qux", {}, [])
-    scenario_entity_3 = Scenario("quux", [pipeline_entity], {})
-    assert scenario_entity_3.id is not None
-    assert scenario_entity_3.config_id == "quux"
-    assert len(scenario_entity_3.pipelines) == 1
-    assert scenario_entity_3.qux == pipeline_entity
-    assert scenario_entity_3.properties == {}
-    assert scenario_entity_3.tags == set()
+    pipeline = Pipeline("qux", {}, [])
+    scenario_3 = Scenario("quux", [pipeline], {})
+    assert scenario_3.id is not None
+    assert scenario_3.config_id == "quux"
+    assert len(scenario_3.pipelines) == 1
+    assert scenario_3.qux == pipeline
+    assert scenario_3.properties == {}
+    assert scenario_3.tags == set()
 
-    pipeline_entity_1 = Pipeline("abcx", {}, [])
-    scenario_entity_4 = Scenario("abcxy", [pipeline_entity_1], {})
-    assert scenario_entity_4.id is not None
-    assert scenario_entity_4.config_id == "abcxy"
-    assert len(scenario_entity_4.pipelines) == 1
-    assert scenario_entity_4.abcx == pipeline_entity_1
-    assert scenario_entity_4.properties == {}
-    assert scenario_entity_4.tags == set()
+    pipeline_1 = Pipeline("abcx", {}, [])
+    scenario_4 = Scenario("abcxy", [pipeline_1], {})
+    assert scenario_4.id is not None
+    assert scenario_4.config_id == "abcxy"
+    assert len(scenario_4.pipelines) == 1
+    assert scenario_4.abcx == pipeline_1
+    assert scenario_4.properties == {}
+    assert scenario_4.tags == set()
 
     with pytest.raises(InvalidConfigurationId):
         Scenario("foo bar", [], {})
+
+    input_1 = InMemoryDataNode("input_1", Scope.SCENARIO)
+    input_2 = InMemoryDataNode("input_2", Scope.SCENARIO)
+    output_1 = InMemoryDataNode("output_1", Scope.SCENARIO)
+    output_2 = InMemoryDataNode("output_2", Scope.SCENARIO)
+    task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
+    task_2 = Task("task_2", print, [input_2], [output_2], TaskId("task_id_2"))
+
+    pipeline_2 = Pipeline("pipeline_2", {"description": "description"}, [task_1], parent_id="parent_id")
+    pipeline_3 = Pipeline("pipeline_3", {"description": "description"}, [task_2], parent_id="parent_id")
+    pipeline_4 = Pipeline("pipeline_4", {"description": "description"}, [task_1, task_2], parent_id="parent_id")
+
+    scenario_5 = Scenario("scenario_5", [pipeline_2], {})
+    assert scenario_5.id is not None
+    assert scenario_5.config_id == "scenario_5"
+    assert len(scenario_5.pipelines) == 1
+    assert scenario_5.pipelines == {pipeline_2.config_id: pipeline_2}
+    assert scenario_5.data_nodes == {input_1.config_id: input_1, output_1.config_id: output_1}
+
+    scenario_6 = Scenario("scenario_6", [pipeline_2, pipeline_3], {})
+    assert scenario_6.id is not None
+    assert scenario_6.config_id == "scenario_6"
+    assert len(scenario_6.pipelines) == 2
+    assert scenario_6.pipelines == {pipeline_2.config_id: pipeline_2, pipeline_3.config_id: pipeline_3}
+    assert scenario_6.data_nodes == {
+        input_1.config_id: input_1,
+        output_1.config_id: output_1,
+        input_2.config_id: input_2,
+        output_2.config_id: output_2,
+    }
+
+    scenario_7 = Scenario("scenario_7", [pipeline_4], {})
+    assert scenario_7.id is not None
+    assert scenario_7.config_id == "scenario_7"
+    assert len(scenario_7.pipelines) == 1
+    assert scenario_7.pipelines == {pipeline_4.config_id: pipeline_4}
+    assert scenario_7.data_nodes == {
+        input_1.config_id: input_1,
+        output_1.config_id: output_1,
+        input_2.config_id: input_2,
+        output_2.config_id: output_2,
+    }
 
 
 def test_add_property_to_scenario():

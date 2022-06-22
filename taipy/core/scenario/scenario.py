@@ -22,10 +22,12 @@ from taipy.core.common._reload import _reload, _self_reload, _self_setter
 from taipy.core.common._validate_id import _validate_id
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.config._config_template_handler import _ConfigTemplateHandler as _tpl
+from taipy.core.data.data_node import DataNode
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
+
 from taipy.core.cycle.cycle import Cycle
 from taipy.core.exceptions.exceptions import NonExistingPipeline
 from taipy.core.job.job import Job
-from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
 
 
@@ -92,6 +94,15 @@ class Scenario(_Entity):
     @_self_setter(_MANAGER_NAME)
     def pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
         self._pipelines = pipelines
+
+    @property
+    def data_nodes(self) -> Dict[str, DataNode]:
+        data_nodes = {}
+        list_data_nodes = [pipeline.data_nodes for pipeline in self.pipelines.values()]
+        for data_node in list_data_nodes:
+            for k, v in data_node.items():
+                data_nodes[k] = v
+        return data_nodes
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

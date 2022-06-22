@@ -82,6 +82,15 @@ class Pipeline(_Entity):
     def tasks(self, tasks: List[Union[TaskId, Task]]):
         self._tasks = tasks
 
+    @property
+    def data_nodes(self) -> Dict[str, DataNode]:
+        data_nodes = {}
+        list_data_nodes = [task.data_nodes for task in self._get_tasks().values()]
+        for data_node in list_data_nodes:
+            for k, v in data_node.items():
+                data_nodes[k] = v
+        return data_nodes
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def subscribers(self):
