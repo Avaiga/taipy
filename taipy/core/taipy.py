@@ -317,6 +317,7 @@ def unsubscribe_pipeline(
     Parameters:
         callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
             status change.
+        params (Optional[List[str]]): The parameters to be passed to the _callback_.
         pipeline (Optional[Pipeline^]): The pipeline to unsubscribe to. If None, all pipelines
             unsubscribe to _callback_.
     Note:
