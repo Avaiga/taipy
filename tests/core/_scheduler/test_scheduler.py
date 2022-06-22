@@ -20,17 +20,17 @@ from functools import partial
 from time import sleep
 
 import pytest
-
-from taipy.core import taipy
 from taipy.core._scheduler._executor._synchronous import _Synchronous
-from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
 from taipy.core.config._config import _Config
-from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.task._task_manager import _TaskManager
+
+from taipy.core import taipy
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.config import JobConfig
+from taipy.core.config.config import Config
 from taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_1_minute_max
 
@@ -258,11 +258,12 @@ def test_blocked_task():
     lock_2 = m.Lock()
 
     foo_cfg = Config.configure_data_node("foo", default_data=1)
-    foo = _DataManager._get_or_create(foo_cfg)
     bar_cfg = Config.configure_data_node("bar")
-    bar = _DataManager._get_or_create(bar_cfg)
     baz_cfg = Config.configure_data_node("baz")
-    baz = _DataManager._get_or_create(baz_cfg)
+    dns = _DataManager._bulk_get_or_create([foo_cfg, bar_cfg, baz_cfg])
+    foo = dns[foo_cfg]
+    bar = dns[bar_cfg]
+    baz = dns[baz_cfg]
     task_1 = Task("by_2", partial(lock_multiply, lock_1, 2), [foo], [bar])
     task_2 = Task("by_3", partial(lock_multiply, lock_2, 3), [bar], [baz])
 
@@ -342,7 +343,7 @@ def test_need_to_run_no_output():
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
-    task = _TaskManager()._get_or_create(task_cfg)
+    task = _create_task_from_config(task_cfg)
 
     assert _Scheduler()._needs_to_run(task)
 
@@ -352,7 +353,7 @@ def test_need_to_run_output_not_cacheable():
     world_cfg = Config.configure_data_node("world", default_data="world !")
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=False)
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
-    task = _TaskManager()._get_or_create(task_cfg)
+    task = _create_task_from_config(task_cfg)
 
     assert _Scheduler()._needs_to_run(task)
 
@@ -363,7 +364,7 @@ def test_need_to_run_output_cacheable_no_input():
 
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
     task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg])
-    task = _TaskManager()._get_or_create(task_cfg)
+    task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
     _Scheduler.submit_task(task)
@@ -379,7 +380,7 @@ def test_need_to_run_output_cacheable_no_validity_period():
     world_cfg = Config.configure_data_node("world", default_data="world !")
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
-    task = _TaskManager()._get_or_create(task_cfg)
+    task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
     _Scheduler.submit_task(task)
@@ -395,7 +396,7 @@ def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     world_cfg = Config.configure_data_node("world", default_data="world !")
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True, validity_days=1)
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
-    task = _TaskManager()._get_or_create(task_cfg)
+    task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
     job = _Scheduler.submit_task(task)
@@ -414,7 +415,7 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     world_cfg = Config.configure_data_node("world", default_data="world !")
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True, validity_days=1)
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
-    task = _TaskManager()._get_or_create(task_cfg)
+    task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
     _Scheduler.submit_task(task)
@@ -430,16 +431,16 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
 
 def _create_task(function, nb_outputs=1):
     output_dn_config_id = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
-    input_dn = [
-        _DataManager._get_or_create(Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)),
-        _DataManager._get_or_create(Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)),
+    dn_input_configs = [
+        Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21),
+        Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2),
     ]
-    output_dn = [
-        _DataManager._get_or_create(
-            Config.configure_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
-        )
+    dn_output_configs = [
+        Config.configure_data_node(f"{output_dn_config_id}_output{i}", "pickle", Scope.PIPELINE, default_data=0)
         for i in range(nb_outputs)
     ]
+    input_dn = _DataManager._bulk_get_or_create(dn_input_configs).values()
+    output_dn = _DataManager._bulk_get_or_create(dn_output_configs).values()
 
     return Task(
         output_dn_config_id,
@@ -447,3 +448,7 @@ def _create_task(function, nb_outputs=1):
         input=input_dn,
         output=output_dn,
     )
+
+
+def _create_task_from_config(task_cfg):
+    return _TaskManager()._bulk_get_or_create([task_cfg])[0]

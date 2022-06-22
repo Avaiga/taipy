@@ -16,12 +16,12 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 import pytest
-
 from taipy.core.common.alias import DataNodeId
 from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.excel import ExcelDataNode
+
+from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import (
     MissingRequiredProperty,
     NoData,
@@ -54,13 +54,13 @@ class MyCustomObject2:
 class TestExcelDataNode:
     def test_new_excel_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "excel", path="NOT_EXISTING.csv")
-        not_ready_dn = _DataManager._get_or_create(not_ready_dn_cfg)
-        assert not not_ready_dn.is_ready_for_reading
-
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")
         ready_dn_cfg = Config.configure_data_node("ready_data_node_config_id", "excel", path=path)
-        ready_dn = _DataManager._get_or_create(ready_dn_cfg)
-        assert ready_dn.is_ready_for_reading
+
+        dns = _DataManager._bulk_get_or_create([not_ready_dn_cfg, ready_dn_cfg])
+
+        assert not dns[not_ready_dn_cfg].is_ready_for_reading
+        assert dns[ready_dn_cfg].is_ready_for_reading
 
     def test_create(self):
         path = "data/node/path"
@@ -658,3 +658,17 @@ class TestExcelDataNode:
 
         for sheet_name in sheet_names:
             assert np.array_equal(data_pandas[sheet_name].values, multi_sheet_content[sheet_name].values)
+
+    def test_set_path(self):
+        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.xlsx"})
+        assert dn.path == "foo.xlsx"
+        dn.path = "bar.xlsx"
+        assert dn.path == "bar.xlsx"
+
+    def test_path_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "foo.csv"})
+
+    def test_raise_error_when_path_not_exist(self):
+        with pytest.raises(MissingRequiredProperty):
+            ExcelDataNode("foo", Scope.PIPELINE)

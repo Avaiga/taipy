@@ -12,18 +12,17 @@
 from functools import partial
 from typing import Callable, List, Optional, Union
 
+from taipy.core._manager._manager import _Manager
 from taipy.core.common._entity_ids import _EntityIds
 from taipy.core.common.alias import PipelineId, ScenarioId
 from taipy.core.common.scope import Scope
 from taipy.core.config.pipeline_config import PipelineConfig
-from taipy.core.job._job_manager_factory import _JobManagerFactory
-from taipy.core.pipeline._pipeline_repository import _PipelineRepository
-from taipy.core.task._task_manager_factory import _TaskManagerFactory
-
-from taipy.core._manager._manager import _Manager
 from taipy.core.exceptions.exceptions import NonExistingPipeline
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
+from taipy.core.pipeline._pipeline_repository import _PipelineRepository
 from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 
 class _PipelineManager(_Manager[Pipeline]):
@@ -31,14 +30,19 @@ class _PipelineManager(_Manager[Pipeline]):
     _ENTITY_NAME = Pipeline.__name__
 
     @classmethod
-    def _subscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+    def _subscribe(
+        cls,
+        callback: Callable[[Pipeline, Job], None],
+        params: Optional[List[str]] = None,
+        pipeline: Optional[Pipeline] = None,
+    ):
         if pipeline is None:
             pipelines = cls._get_all()
             for pln in pipelines:
-                cls.__add_subscriber(callback, pln)
+                cls.__add_subscriber(callback, params, pln)
             return
 
-        cls.__add_subscriber(callback, pipeline)
+        cls.__add_subscriber(callback, params, pipeline)
 
     @classmethod
     def _unsubscribe(cls, callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -52,8 +56,8 @@ class _PipelineManager(_Manager[Pipeline]):
         cls.__remove_subscriber(callback, pipeline)
 
     @classmethod
-    def __add_subscriber(cls, callback, pipeline):
-        pipeline._add_subscriber(callback)
+    def __add_subscriber(cls, callback, params, pipeline):
+        pipeline._add_subscriber(callback, params)
         cls._set(pipeline)
 
     @classmethod
@@ -64,14 +68,14 @@ class _PipelineManager(_Manager[Pipeline]):
     @classmethod
     def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
         pipeline_id = Pipeline._new_id(pipeline_config.id)
+
         task_manager = _TaskManagerFactory._build_manager()
-        tasks = [
-            task_manager._get_or_create(t_config, scenario_id, pipeline_id) for t_config in pipeline_config.task_configs
-        ]
+        tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, scenario_id, pipeline_id)
+
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
 
-        if pipelines_from_parent := cls._repository._get_by_config_and_parent_ids(pipeline_config.id, parent_id):
+        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(pipeline_config.id, parent_id):
             return pipelines_from_parent
 
         pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)

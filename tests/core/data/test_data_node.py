@@ -596,7 +596,7 @@ class TestDataNode:
     def test_data_node_with_env_variable_value_not_stored(self):
         dn_config = Config.configure_data_node("A", prop="ENV[FOO]")
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
-            dn = _DataManager._get_or_create(dn_config)
+            dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
             assert dn._properties.data["prop"] == "ENV[FOO]"
             assert dn.properties["prop"] == "bar"
             assert dn.prop == "bar"

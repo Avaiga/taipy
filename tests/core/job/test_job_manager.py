@@ -17,17 +17,17 @@ import string
 from time import sleep
 
 import pytest
-
-from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import JobId
 from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
 from taipy.core.config._config import _Config
-from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
-from taipy.core.exceptions.exceptions import JobNotDeletedException
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.task._task_manager import _TaskManager
+
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.config import JobConfig
+from taipy.core.config.config import Config
+from taipy.core.exceptions.exceptions import JobNotDeletedException
 from tests.core import utils
 
 
@@ -163,7 +163,7 @@ def _create_task(function, nb_outputs=1, name=None):
     output_dn_configs = [
         Config.configure_data_node(f"output{i}", "pickle", Scope.PIPELINE, default_data=0) for i in range(nb_outputs)
     ]
-    [_DataManager._get_or_create(cfg) for cfg in output_dn_configs]
+    _DataManager._bulk_get_or_create([cfg for cfg in output_dn_configs])
     name = name or "".join(random.choice(string.ascii_lowercase) for _ in range(10))
     task_config = Config.configure_task(
         name,
@@ -171,4 +171,4 @@ def _create_task(function, nb_outputs=1, name=None):
         [input1_dn_config, input2_dn_config],
         output_dn_configs,
     )
-    return _TaskManager._get_or_create(task_config)
+    return _TaskManager._bulk_get_or_create([task_config])[0]

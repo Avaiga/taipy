@@ -249,7 +249,11 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
     return _ScenarioManagerFactory._build_manager()._compare(*scenarios, data_node_config_id=data_node_config_id)
 
 
-def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
+def subscribe_scenario(
+    callback: Callable[[Scenario, Job], None],
+    params: Optional[List[str]] = None,
+    scenario: Optional[Scenario] = None,
+):
     """Subscribe a function to be called on job status change.
 
     The subscription is applied to all jobs created for the execution of _scenario_.
@@ -258,12 +262,14 @@ def subscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Opti
     Parameters:
         callback (Callable[[Scenario^, Job^], None]): The function to be called on
             status change.
+        params (Optional[List[str]]): The parameters to be passed to the _callback_.
         scenario (Optional[Scenario^]): The scenario that subscribes to _callback_.
             If None, the subscription is registered for all scenarios.
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _ScenarioManagerFactory._build_manager()._subscribe(callback, scenario)
+    params = [] if params is None else params
+    return _ScenarioManagerFactory._build_manager()._subscribe(callback, params, scenario)
 
 
 def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
@@ -281,7 +287,9 @@ def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Op
     return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, scenario)
 
 
-def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+def subscribe_pipeline(
+    callback: Callable[[Pipeline, Job], None], params: Optional[List[str]] = None, pipeline: Optional[Pipeline] = None
+):
     """Subscribe a function to be called on job status change.
 
     The subscription is applied to all jobs created for the execution of _pipeline_.
@@ -289,12 +297,13 @@ def subscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Opti
     Parameters:
         callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
             status change.
+        params (Optional[List[str]]): The parameters to be passed to the _callback_.
         pipeline (Optional[Pipeline^]): The pipeline to subscribe on. If None, the subscription
             is actived for all pipelines.
     Note:
         Notifications are applied only for jobs created **after** this subscription.
     """
-    return _PipelineManagerFactory._build_manager()._subscribe(callback, pipeline)
+    return _PipelineManagerFactory._build_manager()._subscribe(callback, params, pipeline)
 
 
 def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
@@ -378,7 +387,9 @@ def get_cycles() -> List[Cycle]:
 
 
 def create_scenario(
-    config: ScenarioConfig, creation_date: Optional[datetime] = None, name: Optional[str] = None
+    config: ScenarioConfig,
+    creation_date: Optional[datetime] = None,
+    name: Optional[str] = None,
 ) -> Scenario:
     """Create and return a new scenario from a scenario configuration.
 

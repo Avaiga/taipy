@@ -15,10 +15,12 @@ from os.path import isfile
 from typing import Any, Dict, List, Optional
 
 import pandas as pd
-
+from taipy.core.common._reload import _self_reload
+from taipy.core.common._warnings import _warn_deprecated
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
+
 from taipy.core.exceptions.exceptions import MissingRequiredProperty
 
 
@@ -47,9 +49,10 @@ class CSVDataNode(DataNode):
     __STORAGE_TYPE = "csv"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"
-    __REQUIRED_PATH_PROPERTY = "path"
+    __PATH_KEY = "path"
+    __DEFAULT_PATH_KEY = "default_path"
     __HAS_HEADER_PROPERTY = "has_header"
-    _REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
+    _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
         self,
@@ -72,7 +75,6 @@ class CSVDataNode(DataNode):
             )
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
             properties[self.__HAS_HEADER_PROPERTY] = True
-
         super().__init__(
             config_id,
             scope,
@@ -85,12 +87,30 @@ class CSVDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
-        if not self._last_edit_date and isfile(self._properties[self.__REQUIRED_PATH_PROPERTY]):
+        self._path = self.__build_path()
+        if not self._last_edit_date and isfile(self._path):
             self.unlock_edit()
 
     @classmethod
     def storage_type(cls) -> str:
         return cls.__STORAGE_TYPE
+
+    @property  # type: ignore
+    @_self_reload(DataNode._MANAGER_NAME)
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        self.properties[self.__DEFAULT_PATH_KEY] = value
+
+    def __build_path(self):
+        if path := self._properties.get(self.__DEFAULT_PATH_KEY):
+            return path
+        if path := self._properties.get(self.__PATH_KEY):
+            _warn_deprecated("path", suggest="default_path")
+            return path
+        raise MissingRequiredProperty("default_path is required")
 
     def _read(self):
         if self.__EXPOSED_TYPE_PROPERTY in self.properties:
@@ -100,7 +120,7 @@ class CSVDataNode(DataNode):
         return self._read_as_pandas_dataframe()
 
     def _read_as(self, custom_class):
-        with open(self.properties[self.__REQUIRED_PATH_PROPERTY]) as csvFile:
+        with open(self._path) as csvFile:
             res = list()
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 reader = csv.DictReader(csvFile)
@@ -121,17 +141,17 @@ class CSVDataNode(DataNode):
         try:
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 if column_names:
-                    return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])[column_names]
-                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY])
+                    return pd.read_csv(self._path)[column_names]
+                return pd.read_csv(self._path)
             else:
                 if usecols:
-                    return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None, usecols=usecols)
-                return pd.read_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], header=None)
+                    return pd.read_csv(self._path, header=None, usecols=usecols)
+                return pd.read_csv(self._path, header=None)
         except pd.errors.EmptyDataError:
             return pd.DataFrame()
 
     def _write(self, data: Any):
-        pd.DataFrame(data).to_csv(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
+        pd.DataFrame(data).to_csv(self._path, index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a selection of columns.
@@ -145,7 +165,7 @@ class CSVDataNode(DataNode):
             df = pd.DataFrame(data)
         else:
             df = pd.DataFrame(data, columns=columns)
-        df.to_csv(self.path, index=False)
+        df.to_csv(self._path, index=False)
         self._last_edit_date = datetime.now()
         if job_id:
             self.job_ids.append(job_id)

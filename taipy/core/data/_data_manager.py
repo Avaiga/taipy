@@ -10,7 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 import os
-from typing import Iterable, Optional, Union
+from collections import defaultdict
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from taipy.core._manager._manager import _Manager
 from taipy.core.common.alias import DataNodeId, PipelineId, ScenarioId
@@ -29,19 +30,25 @@ class _DataManager(_Manager[DataNode]):
     _ENTITY_NAME = DataNode.__name__
 
     @classmethod
-    def _get_or_create(
+    def _bulk_get_or_create(
         cls,
-        data_node_config: DataNodeConfig,
+        data_node_configs: Set[DataNodeConfig],
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
-    ) -> DataNode:
-        scope = data_node_config.scope
-        parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+    ) -> Dict[DataNodeConfig, DataNode]:
+        dn_configs_and_parent_id = []
 
-        if dn_from_parent := cls._repository._get_by_config_and_parent_ids(data_node_config.id, parent_id):
-            return dn_from_parent
+        for dn_config in data_node_configs:
+            scope = dn_config.scope
+            parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+            dn_configs_and_parent_id.append((dn_config, parent_id))
 
-        return cls._create_and_set(data_node_config, parent_id)
+        data_nodes = cls._repository._get_by_configs_and_parent_ids(dn_configs_and_parent_id)
+
+        return {
+            dn_config: data_nodes.get((dn_config, parent_id)) or cls._create_and_set(dn_config, parent_id)
+            for dn_config, parent_id in dn_configs_and_parent_id
+        }
 
     @classmethod
     def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:

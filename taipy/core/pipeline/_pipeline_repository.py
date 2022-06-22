@@ -11,15 +11,12 @@
 
 import pathlib
 from collections import defaultdict
-from typing import Dict
-
-from taipy.core.pipeline._pipeline_model import _PipelineModel
-from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
 from taipy.core._repository import _FileSystemRepository
 from taipy.core.common import _utils
 from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
+from taipy.core.pipeline._pipeline_model import _PipelineModel
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task.task import Task
 
@@ -32,9 +29,7 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
         datanode_task_edges = defaultdict(list)
         task_datanode_edges = defaultdict(list)
 
-        tasks = pipeline._get_tasks()
-
-        for task in tasks.values():
+        for task in pipeline._get_tasks().values():
             task_id = str(task.id)
             for predecessor in task.input.values():
                 datanode_task_edges[str(predecessor.id)].append(task_id)

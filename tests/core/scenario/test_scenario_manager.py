@@ -317,7 +317,7 @@ def test_notification_subscribe(mocker):
     mocker.patch.object(_utils, "_load_fct", side_effect=[notify_1, notify_2])
 
     # test subscribing notification
-    _ScenarioManager._subscribe(notify_1, scenario)
+    _ScenarioManager._subscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._submit(scenario)
     notify_1.assert_called_3_times()
 
@@ -327,7 +327,7 @@ def test_notification_subscribe(mocker):
     # test notis subscribe only on new jobs
     # _ScenarioManager._get(scenario)
     _ScenarioManager._unsubscribe(notify_1, scenario)
-    _ScenarioManager._subscribe(notify_2, scenario)
+    _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario)
 
     notify_1.assert_not_called()
@@ -371,9 +371,9 @@ def test_notification_unsubscribe(mocker):
     notify_2 = notify2
 
     # test subscribing notification
-    _ScenarioManager._subscribe(notify_1, scenario)
+    _ScenarioManager._subscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._unsubscribe(notify_1, scenario)
-    _ScenarioManager._subscribe(notify_2, scenario)
+    _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario.id)
 
     with pytest.raises(ValueError):
@@ -849,15 +849,33 @@ def test_tags():
     _Scheduler._update_job_config()
 
     cycle_1 = _CycleManager._create(Frequency.DAILY, name="today", creation_date=datetime.now())
-    cycle_2 = _CycleManager._create(Frequency.DAILY, name="tomorrow", creation_date=datetime.now() + timedelta(days=1))
+    cycle_2 = _CycleManager._create(
+        Frequency.DAILY,
+        name="tomorrow",
+        creation_date=datetime.now() + timedelta(days=1),
+    )
     cycle_3 = _CycleManager._create(
-        Frequency.DAILY, name="yesterday", creation_date=datetime.now() + timedelta(days=-1)
+        Frequency.DAILY,
+        name="yesterday",
+        creation_date=datetime.now() + timedelta(days=-1),
     )
 
     scenario_no_tag = Scenario("SCENARIO_no_tag", [], {}, ScenarioId("SCENARIO_no_tag"), cycle=cycle_1)
-    scenario_1_tag = Scenario("SCENARIO_1_tag", [], {}, ScenarioId("SCENARIO_1_tag"), cycle=cycle_1, tags={"fst"})
+    scenario_1_tag = Scenario(
+        "SCENARIO_1_tag",
+        [],
+        {},
+        ScenarioId("SCENARIO_1_tag"),
+        cycle=cycle_1,
+        tags={"fst"},
+    )
     scenario_2_tags = Scenario(
-        "SCENARIO_2_tags", [], {}, ScenarioId("SCENARIO_2_tags"), cycle=cycle_2, tags={"fst", "scd"}
+        "SCENARIO_2_tags",
+        [],
+        {},
+        ScenarioId("SCENARIO_2_tags"),
+        cycle=cycle_2,
+        tags={"fst", "scd"},
     )
 
     # Test has_tag

@@ -45,7 +45,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
     ],
-    description="A 360° open-source platform from Python pilots to production-ready web apps.",
+    description="A Python library made to build powerful and customized data-driven back-end applications.",
     install_requires=requirements,
     long_description=readme,
     long_description_content_type="text/markdown",

@@ -54,15 +54,7 @@ def test_data_node_config_check():
         Config.check()
 
     with pytest.raises(ConfigurationIssueError):
-        Config.configure_data_node("data_nodes", storage_type="csv")
-        Config.check()
-
-    with pytest.raises(ConfigurationIssueError):
         Config.configure_data_node("data_nodes", storage_type="sql")
-        Config.check()
-
-    with pytest.raises(ConfigurationIssueError):
-        Config.configure_data_node("data_nodes", storage_type="excel")
         Config.check()
 
     with pytest.raises(ConfigurationIssueError):
@@ -109,7 +101,7 @@ def test_date_node_create_with_datetime():
         test=1,
         test_dict={"type": "Datetime", 2: "daw"},
     )
-    dn = _DataManager._get_or_create(data_node_config)
+    dn = _DataManager._bulk_get_or_create([data_node_config])[data_node_config]
     dn = _DataManager._get(dn)
     assert dn.foo == "hello"
     assert dn.my_property == datetime(1991, 1, 1)
@@ -141,3 +133,20 @@ def test_data_node_with_env_variable_in_read_fct_params():
             "data_node", storage_type="generic", read_fct_params=["ENV[FOO]", "my_param", "ENV[BAZ]"]
         )
         assert Config.data_nodes["data_node"].read_fct_params == ["bar", "my_param", "qux"]
+
+
+def test_config_data_node_default_path():
+    dn_config = Config.configure_data_node("data_node", "pickle", default_path="foo.p")
+    assert dn_config.default_path == "foo.p"
+    dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
+    assert dn.path == "foo.p"
+    dn.path = "baz.p"
+    assert dn.path == "baz.p"
+
+
+def test_config_data_node_path_deprecated():
+    with pytest.warns(DeprecationWarning):
+        dn_config = Config.configure_data_node("data_node", "pickle", path="foo.p")
+        assert dn_config.path == "foo.p"
+        dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
+        assert dn.path == "foo.p"

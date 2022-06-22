@@ -37,6 +37,8 @@ class _ConfigTemplateHandler:
 
     @classmethod
     def _replace_template(cls, template, type, required, default):
+        if "ENV" not in str(template):
+            return template
         match = re.fullmatch(cls._PATTERN, str(template))
         if match:
             var = match.group(1)

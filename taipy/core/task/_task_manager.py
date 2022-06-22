@@ -45,27 +45,45 @@ class _TaskManager(_Manager[Task]):
         super()._set(task)
 
     @classmethod
-    def _get_or_create(
+    def _bulk_get_or_create(
         cls,
-        task_config: TaskConfig,
+        task_configs: List[TaskConfig],
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
-    ) -> Task:
-        data_nodes = {
-            dn_config: _DataManagerFactory._build_manager()._get_or_create(dn_config, scenario_id, pipeline_id)
-            for dn_config in set(itertools.chain(task_config.input_configs, task_config.output_configs))
-        }
-        scope = min(dn.scope for dn in data_nodes.values()) if len(data_nodes) != 0 else Scope.GLOBAL
-        parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+    ) -> List[Task]:
+        data_node_configs = set()
+        for task_config in task_configs:
+            data_node_configs.update(task_config.input_configs)
+            data_node_configs.update(task_config.output_configs)
 
-        if tasks_from_parent := cls._repository._get_by_config_and_parent_ids(task_config.id, parent_id):
-            return tasks_from_parent
+        data_nodes = _DataManagerFactory._build_manager()._bulk_get_or_create(
+            data_node_configs, scenario_id, pipeline_id
+        )
 
-        inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
-        outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
-        task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
-        cls._set(task)
-        return task
+        tasks_configs_and_parent_id = []
+        for task_config in task_configs:
+            task_dn_configs = task_config.output_configs + task_config.input_configs
+            task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
+
+            scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
+            parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+
+            tasks_configs_and_parent_id.append((task_config, parent_id))
+
+        tasks_by_config = cls._repository._get_by_configs_and_parent_ids(tasks_configs_and_parent_id)
+
+        tasks = []
+        for task_config, parent_id in tasks_configs_and_parent_id:
+            if task := tasks_by_config.get((task_config, parent_id)):
+                tasks.append(task)
+            else:
+                inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
+                outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
+                task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
+                cls._set(task)
+                tasks.append(task)
+
+        return tasks
 
     @classmethod
     def __save_data_nodes(cls, data_nodes):

@@ -103,12 +103,13 @@ class _Scheduler(_AbstractScheduler):
     def _check_block_and_run_job(cls, job: Job):
         if cls._is_blocked(job):
             job.blocked()
-            cls.blocked_jobs.append(job)
+            with cls.lock:
+                cls.blocked_jobs.append(job)
         else:
             job.pending()
-            cls.jobs_to_run.put(job)
             with cls.lock:
-                cls.__execute_jobs()
+                cls.jobs_to_run.put(job)
+            cls.__execute_jobs()
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -129,7 +130,8 @@ class _Scheduler(_AbstractScheduler):
         if not cls._dispatcher:
             cls._update_job_config()
         while not cls.jobs_to_run.empty() and cls._dispatcher._can_execute():
-            job = cls.jobs_to_run.get()
+            with cls.lock:
+                job = cls.jobs_to_run.get()
             if job.force or cls._needs_to_run(job.task):
                 if job.force:
                     cls.__logger.info(f"job {job.id} is forced to be executed.")
@@ -137,9 +139,9 @@ class _Scheduler(_AbstractScheduler):
                 _JobManagerFactory._build_manager()._set(job)
                 cls._dispatcher._dispatch(job)
             else:
+                cls.__unlock_edit_on_outputs(job)
                 job.skipped()
                 _JobManagerFactory._build_manager()._set(job)
-                cls.__unlock_edit_on_outputs(job)
                 cls.__logger.info(f"job {job.id} is skipped.")
 
     @staticmethod
@@ -172,22 +174,20 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_finished():
-            if cls.lock.acquire(block=False):
-                try:
-                    cls.__unblock_jobs()
-                    cls.__execute_jobs()
-                except:
-                    ...
-                finally:
-                    cls.lock.release()
+            cls.__unblock_jobs()
+            cls.__execute_jobs()
 
     @classmethod
     def __unblock_jobs(cls):
         for job in cls.blocked_jobs:
             if not cls._is_blocked(job):
-                job.pending()
-                cls.blocked_jobs.remove(job)
-                cls.jobs_to_run.put(job)
+                with cls.lock:
+                    try:
+                        job.pending()
+                        cls.blocked_jobs.remove(job)
+                        cls.jobs_to_run.put(job)
+                    except:
+                        cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
 
     @classmethod
     def _update_job_config(cls):

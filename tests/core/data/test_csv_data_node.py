@@ -55,12 +55,12 @@ class TestCSVDataNode:
 
     def test_new_csv_data_node_with_existing_file_is_ready_for_reading(self):
         not_ready_dn_cfg = Config.configure_data_node("not_ready_data_node_config_id", "csv", path="NOT_EXISTING.csv")
-        not_ready_dn = _DataManager._get_or_create(not_ready_dn_cfg)
+        not_ready_dn = _DataManager._bulk_get_or_create([not_ready_dn_cfg])[not_ready_dn_cfg]
         assert not not_ready_dn.is_ready_for_reading
 
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         ready_dn_cfg = Config.configure_data_node("ready_data_node_config_id", "csv", path=path)
-        ready_dn = _DataManager._get_or_create(ready_dn_cfg)
+        ready_dn = _DataManager._bulk_get_or_create([ready_dn_cfg])[ready_dn_cfg]
         assert ready_dn.is_ready_for_reading
 
     def test_create_with_missing_parameters(self):
@@ -166,3 +166,17 @@ class TestCSVDataNode:
 
         csv_dn.write(None)
         assert len(csv_dn.read()) == 0
+
+    def test_set_path(self):
+        dn = CSVDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.csv"})
+        assert dn.path == "foo.csv"
+        dn.path = "bar.csv"
+        assert dn.path == "bar.csv"
+
+    def test_path_deprecated(self):
+        with pytest.warns(DeprecationWarning):
+            CSVDataNode("foo", Scope.PIPELINE, properties={"path": "foo.csv"})
+
+    def test_raise_error_when_path_not_exist(self):
+        with pytest.raises(MissingRequiredProperty):
+            CSVDataNode("foo", Scope.PIPELINE)

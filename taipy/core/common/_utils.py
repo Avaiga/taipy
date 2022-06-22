@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import functools
+from collections import namedtuple
 from importlib import import_module
 from operator import attrgetter
 from typing import Callable, Optional
@@ -30,11 +31,25 @@ def _get_fct_name(f) -> Optional[str]:
 
 
 def _fct_to_dict(obj):
-    fct_name = _get_fct_name(obj)
+    params = []
+    callback = obj
+
+    if isinstance(obj, Subscriber):
+        callback = obj.callback
+        params = obj.params
+
+    fct_name = _get_fct_name(callback)
     if not fct_name:
         return None
-    return {"fct_name": fct_name, "fct_module": obj.__module__}
+    return {
+        "fct_name": fct_name,
+        "fct_params": params,
+        "fct_module": callback.__module__,
+    }
 
 
 def _fcts_to_dict(objs):
     return [d for obj in objs if (d := _fct_to_dict(obj)) is not None]
+
+
+Subscriber = namedtuple("Subscriber", "callback params")

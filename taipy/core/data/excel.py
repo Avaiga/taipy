@@ -16,10 +16,12 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 from openpyxl import load_workbook
-
+from taipy.core.common._reload import _self_reload
+from taipy.core.common._warnings import _warn_deprecated
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
+
 from taipy.core.exceptions.exceptions import (
     MissingRequiredProperty,
     NonExistingExcelSheet,
@@ -55,10 +57,11 @@ class ExcelDataNode(DataNode):
     __STORAGE_TYPE = "excel"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"
-    __REQUIRED_PATH_PROPERTY = "path"
+    __PATH_KEY = "path"
+    __DEFAULT_PATH_KEY = "default_path"
     __HAS_HEADER_PROPERTY = "has_header"
     __SHEET_NAME_PROPERTY = "sheet_name"
-    _REQUIRED_PROPERTIES: List[str] = [__REQUIRED_PATH_PROPERTY]
+    _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
         self,
@@ -98,8 +101,26 @@ class ExcelDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
-        if not self._last_edit_date and isfile(self._properties[self.__REQUIRED_PATH_PROPERTY]):
+        self._path = self.__build_path()
+        if not self._last_edit_date and isfile(self._path):
             self.unlock_edit()
+
+    @property  # type: ignore
+    @_self_reload(DataNode._MANAGER_NAME)
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        self.properties[self.__DEFAULT_PATH_KEY] = value
+
+    def __build_path(self):
+        if path := self._properties.get(self.__DEFAULT_PATH_KEY):
+            return path
+        if path := self._properties.get(self.__PATH_KEY):
+            _warn_deprecated("path", suggest="default_path")
+            return path
+        raise MissingRequiredProperty("default_path is required")
 
     def __exposed_types_to_dict(self, properties):
         if properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
@@ -131,19 +152,19 @@ class ExcelDataNode(DataNode):
         if properties[self.__SHEET_NAME_PROPERTY]:
             sheet_names = properties[self.__SHEET_NAME_PROPERTY]
         else:
-            excel_file = load_workbook(properties[self.__REQUIRED_PATH_PROPERTY])
+            excel_file = load_workbook(properties[self.__PATH_KEY])
             sheet_names = excel_file.sheetnames
             excel_file.close()
         return sheet_names if isinstance(sheet_names, (List, Set, Tuple)) else [sheet_names]
 
     def _read_as(self):
-        excel_file = load_workbook(self.properties[self.__REQUIRED_PATH_PROPERTY])
+        excel_file = load_workbook(self._path)
         custom_class_dict = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         work_books = defaultdict()
 
         for sheet_name, custom_class in custom_class_dict.items():
             if not (sheet_name in excel_file.sheetnames):
-                raise NonExistingExcelSheet(sheet_name, self.properties[self.__REQUIRED_PATH_PROPERTY])
+                raise NonExistingExcelSheet(sheet_name, self._path)
 
             work_sheet = excel_file[sheet_name]
             res = list()
@@ -176,23 +197,23 @@ class ExcelDataNode(DataNode):
             if self.properties[self.__HAS_HEADER_PROPERTY]:
                 if column_names:
                     return pd.read_excel(
-                        self.properties[self.__REQUIRED_PATH_PROPERTY],
+                        self._path,
                         sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                     )[column_names]
                 return pd.read_excel(
-                    self.properties[self.__REQUIRED_PATH_PROPERTY],
+                    self._path,
                     sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                 )
             else:
                 if usecols:
                     return pd.read_excel(
-                        self.properties[self.__REQUIRED_PATH_PROPERTY],
+                        self._path,
                         header=None,
                         usecols=usecols,
                         sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                     )
                 return pd.read_excel(
-                    self.properties[self.__REQUIRED_PATH_PROPERTY],
+                    self._path,
                     header=None,
                     sheet_name=self.properties[self.__SHEET_NAME_PROPERTY],
                 )
@@ -201,12 +222,12 @@ class ExcelDataNode(DataNode):
 
     def _write(self, data: Any):
         if isinstance(data, Dict) and all([isinstance(x, pd.DataFrame) for x in data.values()]):
-            writer = pd.ExcelWriter(self.properties[self.__REQUIRED_PATH_PROPERTY])
+            writer = pd.ExcelWriter(self._path)
             for key in data.keys():
                 data[key].to_excel(writer, key, index=False)
             writer.save()
         else:
-            pd.DataFrame(data).to_excel(self.properties[self.__REQUIRED_PATH_PROPERTY], index=False)
+            pd.DataFrame(data).to_excel(self._path, index=False)
 
     def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
         """Write a set of columns.
