@@ -15,7 +15,7 @@ from .gui import Gui
 from .rest import Rest
 
 
-def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs):
+def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs) -> t.Optional[t.Union[Gui, Rest]]:
     """Run one or multiple Taipy services.
 
     A Taipy service is an instance of a class that runs code as a Web application.
@@ -28,14 +28,14 @@ def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs):
     rest = __typing_get(apps, Rest)
 
     if not rest and not gui:
-        return
+        return None
 
     if gui and rest:
         gui._set_flask(rest._app)
-        gui.run(**kwargs)
+        return gui.run(**kwargs)
     else:
         app = rest or gui
-        app.run(**kwargs)
+        return app.run(**kwargs)
 
 
 def __typing_get(l, type_):
