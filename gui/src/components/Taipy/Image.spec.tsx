@@ -54,7 +54,7 @@ describe("Image Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByRole("button");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: { args: [], action: "on_action" },

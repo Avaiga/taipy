@@ -8,6 +8,8 @@ import { LoV } from "./lovUtils";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
 import { stringIcon } from "../../utils/icon";
+import { UserEvent } from "@testing-library/user-event/dist/types/setup";
+
 
 const lov: LoV = [
     [
@@ -49,7 +51,7 @@ describe("TreeView Component", () => {
         expect(queryAllByText(/Item 1\./)).toHaveLength(0);
         const icon = elt.parentElement?.querySelector(".MuiTreeItem-iconContainer") || elt;
         expect(icon).toBeInTheDocument();
-        userEvent.click(icon);
+        await userEvent.click(icon);
         getByText("Item 1.2");
         expect(queryAllByText(/Item 1\./)).toHaveLength(2);
     });
@@ -98,7 +100,7 @@ describe("TreeView Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
             payload: { value: ["id1"] },
@@ -112,6 +114,7 @@ describe("TreeView Component", () => {
         expect(document.querySelectorAll(".Mui-selected")).toHaveLength(2);
     });
     it("dispatch a well formed message for multiple", async () => {
+        const user = userEvent.setup()
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
@@ -120,12 +123,14 @@ describe("TreeView Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
-        userEvent.click(elt);
+        await user.click(elt);
         const elt2 = getByText("Item 2");
-        userEvent.click(elt2, { ctrlKey: true });
         const elt3 = getByText("Item 3");
-        userEvent.click(elt3, { ctrlKey: true });
-        userEvent.click(elt2, { ctrlKey: true });
+        await user.keyboard('{Control>}')
+        await user.click(elt2)
+        await user.click(elt3)
+        await user.click(elt2)
+        await user.keyboard('{/Control}')
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
             payload: { value: ["id3", "id1"] },
@@ -146,9 +151,9 @@ describe("TreeView Component", () => {
         const { getByPlaceholderText, queryAllByText } = render(<TreeView lov={lov} filter={true} />);
         expect(queryAllByText(/Item /)).toHaveLength(4);
         const search = getByPlaceholderText("Search field");
-        userEvent.type(search, "m 3");
+        await userEvent.type(search, "m 3");
         expect(queryAllByText(/Item /)).toHaveLength(1);
-        userEvent.clear(search);
+        await userEvent.clear(search);
         expect(queryAllByText(/Item /)).toHaveLength(4);
     });
     // expanded
@@ -157,7 +162,7 @@ describe("TreeView Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={true} updateVars="expanded=tree_expanded" /></TaipyContext.Provider>);
         const elt = getByText("Item 1");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledTimes(1);
         expect(dispatch).toHaveBeenCalledWith({name: "", payload: {id: undefined, names:["tree_expanded"]}, type: "REQUEST_UPDATE"});
     });
@@ -167,7 +172,7 @@ describe("TreeView Component", () => {
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}><TreeView lov={lov} expanded={[]} updateVars="expanded=tree_expanded" /></TaipyContext.Provider>);
         const elt = getByText("Item 1");
         const icon = elt.parentElement?.querySelector(".MuiTreeItem-iconContainer") || elt;
-        userEvent.click(icon);
+        await userEvent.click(icon);
         //expect(dispatch).toHaveBeenCalledTimes(2);
         expect(dispatch).toHaveBeenCalledWith({name: "", payload: {id: undefined, names:["tree_expanded"]}, type: "REQUEST_UPDATE"});
         expect(dispatch).toHaveBeenCalledWith({name:"tree_expanded", payload: {value: ["id1"]}, type: "SEND_UPDATE_ACTION", propagate: true});

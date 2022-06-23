@@ -31,7 +31,7 @@ const Input = (props: TaipyInputProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleInput = useCallback(
-        (e) => {
+        (e: React.ChangeEvent<HTMLInputElement>) => {
             const val = e.target.value;
             setValue(val);
             if (changeDelay) {
@@ -76,7 +76,7 @@ const Input = (props: TaipyInputProps) => {
             <TextField
                 margin="dense"
                 hiddenLabel
-                value={value}
+                value={value || ""}
                 className={className}
                 type={type}
                 id={id}

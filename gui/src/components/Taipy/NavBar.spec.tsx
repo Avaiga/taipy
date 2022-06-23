@@ -58,7 +58,7 @@ describe("NavBar Component", () => {
         window.open = jest.fn().mockReturnValue({ focus: focusSpy })
         const { getByText } = render(<BrowserRouter><NavBar lov={lov}/></BrowserRouter>);
         const elt = getByText("Item 1");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(focusSpy).toHaveBeenCalled();
     });
     it("shows a default list when no lov", async () => {

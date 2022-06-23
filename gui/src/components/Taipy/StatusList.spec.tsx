@@ -42,17 +42,17 @@ describe("StatusList Component", () => {
     it("opens on click", async () => {
         const {getByTestId, getByText} = render(<StatusList value={statuses} />);
         const elt = getByTestId("ArrowDownwardIcon");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         const selt = getByText("info");
         expect(selt.parentElement?.parentElement?.childElementCount).toBe(4);
     })
     it("hide closed statuses", async () => {
         const {getByTestId, queryAllByTestId} = render(<StatusList value={statuses} />);
         const elt = getByTestId("ArrowDownwardIcon");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         const icons = queryAllByTestId("CancelIcon");
         expect(icons).toHaveLength(4);
-        userEvent.click(icons[0]);
+        await userEvent.click(icons[0]);
         expect(queryAllByTestId("CancelIcon")).toHaveLength(3);
     })
 });

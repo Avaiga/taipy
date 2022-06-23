@@ -9,7 +9,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList as List } from "react-window";
+import { FixedSizeList as List, ListOnItemsRenderedProps } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import Skeleton from "@mui/material/Skeleton";
 import IconButton from "@mui/material/IconButton";
@@ -181,13 +181,16 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
-    const handleRequestSort = useCallback(
-        (event: React.MouseEvent<unknown>, col: string) => {
-            const isAsc = orderBy === col && order === "asc";
-            setOrder(isAsc ? "desc" : "asc");
-            setOrderBy(col);
-            setRows([]);
-            setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+    const onSort = useCallback(
+        (e: React.MouseEvent<HTMLElement>) => {
+            const col = e.currentTarget.getAttribute("data-dfid");
+            if (col) {
+                const isAsc = orderBy === col && order === "asc";
+                setOrder(isAsc ? "desc" : "asc");
+                setOrderBy(col);
+                setRows([]);
+                setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
+            }
         },
         [orderBy, order]
     );
@@ -198,13 +201,6 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             setTimeout(() => infiniteLoaderRef.current?.resetloadMoreItemsCache(true), 1); // So that the state can be changed
         }
     }, [props.data]);
-
-    const createSortHandler = useCallback(
-        (col: string) => (event: MouseEvent<unknown>) => {
-            handleRequestSort(event, col);
-        },
-        [handleRequestSort]
-    );
 
     const onAggregate = useCallback((e: MouseEvent<HTMLElement>) => {
         const groupBy = e.currentTarget.getAttribute("data-dfid");
@@ -349,10 +345,10 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     );
 
     const onTaipyItemsRendered = useCallback(
-        (onItemsR) =>
+        (onItemsR: (props: ListOnItemsRenderedProps) => undefined) =>
             ({ visibleStartIndex, visibleStopIndex }: { visibleStartIndex: number; visibleStopIndex: number }) => {
                 setVisibleStartIndex(visibleStartIndex);
-                onItemsR({ visibleStartIndex, visibleStopIndex });
+                onItemsR({ visibleStartIndex, visibleStopIndex } as ListOnItemsRenderedProps);
             },
         []
     );
@@ -425,7 +421,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                 <TableSortLabel
                                                     active={orderBy === columns[col].dfid}
                                                     direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                    onClick={createSortHandler(columns[col].dfid)}
+                                                    data-dfid={columns[col].dfid}
+                                                    onClick={onSort}
                                                     disabled={!active}
                                                 >
                                                     <Box sx={headBoxSx}>

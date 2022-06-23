@@ -113,7 +113,7 @@ const StatusList = (props: StatusListProps) => {
         setMultiple(val.length > 1);
     }, [value, defaultValue]);
 
-    const onClose = useCallback((val) => {
+    const onClose = useCallback((val: StatusDel) => {
         setValues((vals) => {
             const res = vals.map((v) => {
                 if (!v.hidden && statusEqual(v, val)) {

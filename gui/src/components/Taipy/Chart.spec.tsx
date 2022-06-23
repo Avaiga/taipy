@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import userEvent from "@testing-library/user-event";
 
@@ -71,6 +71,12 @@ const mapConfig = JSON.stringify({
     modes: ["markers"],
 });
 
+const mapLayout = JSON.stringify({
+    dragmode: "zoom",
+    mapbox: { style: "open-street-map", center: { lat: 38, lon: -90 }, zoom: 3 },
+    margin: { r: 0, t: 0, b: 0, l: 0 }
+})
+
 describe("Chart Component", () => {
     it("renders", async () => {
         const { getByTestId } = render(<Chart data={chartValue} config={chartConfig} testId="test" />);
@@ -133,7 +139,7 @@ describe("Chart Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByTestId("test");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {
@@ -173,7 +179,7 @@ describe("Chart Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("Go to next page");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {
@@ -198,8 +204,9 @@ describe("Chart Component", () => {
         expect(elts[0].tagName).toBe("TD");
     });
     describe("Chart Component as Map", () => {
-        it("renders", async () => {
-            const { getByTestId } = render(<Chart data={mapValue} config={mapConfig} testId="test" />);
+        xit("renders", async () => {
+            const { getByTestId } = render(<Chart data={mapValue} config={mapConfig} layout={mapLayout} testId="test" />);
+            await waitFor(() => expect(getByTestId("test")))
             const elt = getByTestId("test");
             expect(elt.tagName).toBe("DIV");
         });

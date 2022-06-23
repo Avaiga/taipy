@@ -164,7 +164,8 @@ export const EditableCell = (props: EditableCellProps) => {
     const [edit, setEdit] = useState(false);
     const [deletion, setDeletion] = useState(false);
 
-    const onChange = useCallback((e) => setVal(e.target.value), []);
+    const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
+    
     const onCheckClick = useCallback(() => {
         onValidation && onValidation(val, rowIndex, colDesc.dfid);
         setEdit((e) => !e);
@@ -176,12 +177,12 @@ export const EditableCell = (props: EditableCellProps) => {
     }, [onValidation, value]);
 
     const onKeyDown = useCallback(
-        (e) => {
-            switch (e.keyCode) {
-                case 13:
+        (e: React.KeyboardEvent<HTMLInputElement>) => {
+            switch (e.key) {
+                case "Enter":
                     onCheckClick();
                     break;
-                case 27:
+                case "Escape":
                     onEditClick();
                     break;
             }
@@ -196,12 +197,12 @@ export const EditableCell = (props: EditableCellProps) => {
 
     const onDeleteClick = useCallback(() => onDeletion && setDeletion((d) => !d), [onDeletion]);
     const onDeleteKeyDown = useCallback(
-        (e) => {
-            switch (e.keyCode) {
-                case 13:
+        (e: React.KeyboardEvent<HTMLInputElement>) => {
+            switch (e.key) {
+                case "Enter":
                     onDeleteCheckClick();
                     break;
-                case 27:
+                case "Escape":
                     onDeleteClick();
                     break;
             }

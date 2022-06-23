@@ -194,20 +194,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         dispatch,
     ]);
 
-    const handleRequestSort = useCallback(
-        (event: MouseEvent<unknown>, col: string) => {
-            const isAsc = orderBy === col && order === "asc";
-            setOrder(isAsc ? "desc" : "asc");
-            setOrderBy(col);
+    const onSort = useCallback(
+        (e: MouseEvent<HTMLElement>) => {
+            const col = e.currentTarget.getAttribute("data-dfid");
+            if (col) {
+                const isAsc = orderBy === col && order === "asc";
+                setOrder(isAsc ? "desc" : "asc");
+                setOrderBy(col);
+            }
         },
         [orderBy, order]
-    );
-
-    const createSortHandler = useCallback(
-        (col: string) => (event: MouseEvent<unknown>) => {
-            handleRequestSort(event, col);
-        },
-        [handleRequestSort]
     );
 
     const handleChangePage = useCallback(
@@ -334,7 +330,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                 <TableSortLabel
                                                     active={orderBy === columns[col].dfid}
                                                     direction={orderBy === columns[col].dfid ? order : "asc"}
-                                                    onClick={createSortHandler(columns[col].dfid)}
+                                                    data-dfid={columns[col].dfid}
+                                                    onClick={onSort}
                                                     disabled={!active}
                                                 >
                                                     <Box sx={headBoxSx}>
@@ -387,17 +384,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             key={"row" + index}
                                             selected={sel > -1}
                                             ref={sel == 0 ? selectedRowRef : undefined}
-                                            className={getClassName(rows[index], props.lineStyle)}
+                                            className={getClassName(row, props.lineStyle)}
                                         >
                                             {colsOrder.map((col, cidx) => (
                                                 <TableCell
                                                     key={"val" + index + "-" + cidx}
                                                     {...getCellProps(columns[col])}
-                                                    className={getClassName(rows[index], columns[col].style)}
+                                                    className={getClassName(row, columns[col].style)}
                                                 >
                                                     <EditableCell
                                                         colDesc={columns[col]}
-                                                        value={rows[index][col]}
+                                                        value={row[col]}
                                                         formatConfig={formatConfig}
                                                         rowIndex={index}
                                                         onValidation={

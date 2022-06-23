@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
-import DatePicker from "@mui/lab/DatePicker";
-import DateTimePicker from "@mui/lab/DateTimePicker";
-import TextField from "@mui/material/TextField";
+import TextField, { TextFieldProps } from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
+import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
 import { isValid } from "date-fns";
 
 import { TaipyContext } from "../../context/taipyContext";
@@ -36,10 +35,10 @@ const DateSelector = (props: DateSelectorProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleChange = useCallback(
-        (v) => {
+        (v: Date | null) => {
             setValue(v);
-            const newDate = new Date(v);
-            if (isValid(newDate)) {
+            if (v !== null && isValid(v)) {
+                const newDate = v;
                 // dispatch new date which offset by the timeZone differences between client and server
                 const hours = getClientServerTimeZoneOffset(tz) / 60;
                 const minutes = getClientServerTimeZoneOffset(tz) % 60;
@@ -61,7 +60,7 @@ const DateSelector = (props: DateSelectorProps) => {
     );
 
     const renderInput = useCallback(
-        (params) => <TextField id={id} {...params} className={className} />,
+        (params: TextFieldProps) => <TextField id={id} {...params} className={className} />,
         [id, className]
     );
 

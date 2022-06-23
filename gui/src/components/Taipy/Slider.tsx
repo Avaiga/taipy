@@ -11,6 +11,7 @@ import { useDynamicProperty } from "../../utils/hooks";
 import { LovImage, LovProps, useLovListMemo } from "./lovUtils";
 import { getCssSize, getUpdateVar } from "./utils";
 import { Icon } from "../../utils/icon";
+import { SyntheticEvent } from "react";
 
 interface SliderProps extends LovProps<number | string, number | string> {
     width?: string;
@@ -55,7 +56,7 @@ const Slider = (props: SliderProps) => {
     const horizontalOrientation = props.orientation ? props.orientation.charAt(0).toLowerCase() !== "v" : true;
 
     const handleRange = useCallback(
-        (e, val: number | number[]) => {
+        (e: Event, val: number | number[]) => {
             setValue(val as number);
             if (update) {
                 lastVal.current = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val as number;
@@ -76,7 +77,7 @@ const Slider = (props: SliderProps) => {
     );
 
     const handleRangeCommitted = useCallback(
-        (e, val: number | number[]) => {
+        (e: Event | SyntheticEvent, val: number | number[]) => {
             setValue(val as number);
             if (!update) {
                 const value = lovList.length && lovList.length > (val as number) ? lovList[val as number].id : val;
@@ -95,10 +96,10 @@ const Slider = (props: SliderProps) => {
     );
 
     const getLabel = useCallback(
-        (value) =>
+        (value: number) =>
             lovList.length && lovList.length > value ? (
                 typeof lovList[value].item === "string" ? (
-                    <Typography>{lovList[value].item}</Typography>
+                    <Typography>{lovList[value].item as string}</Typography>
                 ) : (
                     <LovImage item={lovList[value].item as Icon} />
                 )
@@ -109,7 +110,7 @@ const Slider = (props: SliderProps) => {
     );
 
     const getText = useCallback(
-        (value, before) => {
+        (value: number, before: boolean) => {
             if (lovList.length) {
                 if (before && (textAnchor === "top" || textAnchor === "left")) {
                     return getLabel(value);

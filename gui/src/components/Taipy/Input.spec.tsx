@@ -50,7 +50,7 @@ describe("Input Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
-        userEvent.clear(elt);
+        await userEvent.clear(elt);
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
@@ -68,8 +68,8 @@ describe("Input Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
-        userEvent.click(elt);
-        userEvent.keyboard("data{Enter}");
+        await userEvent.click(elt);
+        await userEvent.keyboard("data{Enter}");
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "",
@@ -86,8 +86,8 @@ describe("Input Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
-        userEvent.click(elt);
-        userEvent.keyboard("data{Escape}");
+        await userEvent.click(elt);
+        await userEvent.keyboard("data{Escape}");
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
@@ -141,8 +141,8 @@ describe("Number Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("33");
-        userEvent.clear(elt);
-        userEvent.type(elt, "666");
+        await userEvent.clear(elt);
+        await userEvent.type(elt, "666");
         await waitFor(() => expect(dispatch).toHaveBeenCalled());
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
