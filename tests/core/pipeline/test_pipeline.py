@@ -13,6 +13,7 @@ from unittest import mock
 
 import pytest
 
+from taipy.core.common._utils import Subscriber
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.data.data_node import DataNode
@@ -257,7 +258,7 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_1.subscribers) == 2
     assert len(pipeline_2.subscribers) == 2
 
-    pipeline_1.subscribers.remove(print)
+    pipeline_1.subscribers.remove(Subscriber(print, []))
     assert len(pipeline_1.subscribers) == 1
     assert len(pipeline_2.subscribers) == 1
 
@@ -306,7 +307,7 @@ def test_unsubscribe_pipeline():
     with mock.patch("taipy.core.unsubscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.unsubscribe(None)
-        mck.assert_called_once_with(None, pipeline)
+        mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_submit_pipeline():

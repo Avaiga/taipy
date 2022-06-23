@@ -10,12 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 from unittest import mock
+from unittest.mock import ANY
 
 import pytest
 
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
+from taipy.core.common._utils import Subscriber
 from taipy.core.common.alias import PipelineId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.config import JobConfig
@@ -341,6 +343,10 @@ def notify2(*args, **kwargs):
     ...
 
 
+def notify_multi_param(*args, **kwargs):
+    ...
+
+
 def test_pipeline_notification_subscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _Scheduler._update_job_config()
@@ -386,12 +392,45 @@ def test_pipeline_notification_subscribe(mocker):
 
     # test pipeline unsubscribe notification
     # test subscribe notification only on new job
-    _PipelineManager._unsubscribe(notify_1, pipeline)
+    _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
     _PipelineManager._subscribe(callback=notify_2, pipeline=pipeline)
     _PipelineManager._submit(pipeline.id)
 
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()
+
+
+def test_pipeline_notification_subscribe_multi_param(mocker):
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+
+    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+
+    pipeline_config = Config.configure_pipeline(
+        "by_6",
+        [
+            Config.configure_task(
+                "mult_by_two",
+                mult_by_two,
+                [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
+            )
+        ],
+    )
+
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+    notify = mocker.Mock()
+
+    # test pipeline subscribe notification
+    _PipelineManager._subscribe(callback=notify, params=["foobar", 123, 1.2], pipeline=pipeline)
+    mocker.patch.object(_PipelineManager, "_get", return_value=pipeline)
+
+    _PipelineManager._submit(pipeline.id)
+
+    # as the callback is called with Pipeline/Scenario and Job objects
+    # we can assert that is called with params plus a pipeline object that we know
+    # of and a job object that is represented by ANY in this case
+    notify.assert_called_with("foobar", 123, 1.2, pipeline, ANY)
 
 
 def test_pipeline_notification_unsubscribe(mocker):
@@ -418,13 +457,49 @@ def test_pipeline_notification_unsubscribe(mocker):
     notify_2 = notify2
 
     _PipelineManager._subscribe(callback=notify_1, pipeline=pipeline)
-    _PipelineManager._unsubscribe(notify_1, pipeline)
+    _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
     _PipelineManager._subscribe(callback=notify_2, pipeline=pipeline)
     _PipelineManager._submit(pipeline.id)
 
     with pytest.raises(ValueError):
-        _PipelineManager._unsubscribe(notify_1, pipeline)
-        _PipelineManager._unsubscribe(notify_2, pipeline)
+        _PipelineManager._unsubscribe(callback=notify_1, pipeline=pipeline)
+        _PipelineManager._unsubscribe(callback=notify_2, pipeline=pipeline)
+
+
+def test_pipeline_notification_unsubscribe_multi_param():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+
+    pipeline_config = Config.configure_pipeline(
+        "by_6",
+        [
+            Config.configure_task(
+                "mult_by_two",
+                mult_by_two,
+                [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                Config.configure_data_node("bar", "in_memory", Scope.PIPELINE, default_data=0),
+            )
+        ],
+    )
+
+    pipeline = _PipelineManager._get_or_create(pipeline_config)
+
+    _PipelineManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 0], pipeline=pipeline)
+    _PipelineManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 1], pipeline=pipeline)
+    _PipelineManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 2], pipeline=pipeline)
+
+    assert len(pipeline.subscribers) == 3
+
+    pipeline.unsubscribe(notify_multi_param)
+    assert len(pipeline.subscribers) == 2
+    assert Subscriber(notify_multi_param, ["foobar", 123, 0]) not in pipeline.subscribers
+
+    pipeline.unsubscribe(notify_multi_param, ["foobar", 123, 2])
+    assert len(pipeline.subscribers) == 1
+    assert Subscriber(notify_multi_param, ["foobar", 123, 2]) not in pipeline.subscribers
+
+    with pytest.raises(ValueError):
+        pipeline.unsubscribe(notify_multi_param, ["foobar", 123, 10000])
 
 
 def test_pipeline_notification_subscribe_all():

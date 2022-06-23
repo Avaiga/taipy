@@ -169,15 +169,18 @@ class Pipeline(_Entity):
     def subscribers(self, val):
         self._subscribers = _ListAttributes(self, val)
 
-    def _add_subscriber(self, callback: Callable, params: Optional[List[str]] = None):
+    def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         params = [] if params is None else params
         self._subscribers.append(Subscriber(callback=callback, params=params))
 
-    def _remove_subscriber(self, callback: Callable):
-        elem = [x for x in self._subscribers if x.callback == callback]
-        if not elem:
-            raise ValueError
-        self._subscribers.remove(elem[0])
+    def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
+        if params is not None:
+            self._subscribers.remove(Subscriber(callback, params))
+        else:
+            elem = [x for x in self._subscribers if x.callback == callback]
+            if not elem:
+                raise ValueError
+            self._subscribers.remove(elem[0])
 
     def _get_sorted_tasks(self) -> List[List[Task]]:
         dag = self.__build_dag()
@@ -188,7 +191,7 @@ class Pipeline(_Entity):
     def subscribe(
         self,
         callback: Callable[[Pipeline, Job], None],
-        params: Optional[List[str]] = None,
+        params: Optional[List[Any]] = None,
     ):
         """Subscribe a function to be called on `Job^` status change.
         The subscription is applied to all jobs created from the pipeline's execution.
@@ -196,7 +199,7 @@ class Pipeline(_Entity):
         Parameters:
             callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
                 status change.
-            params (Optional[List[str]]): The parameters to be passed to the _callback_.
+            params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         Note:
             Notification will be available only for jobs created after this subscription.
         """
@@ -204,17 +207,18 @@ class Pipeline(_Entity):
 
         return tp.subscribe_pipeline(callback, params, self)
 
-    def unsubscribe(self, callback: Callable[[Pipeline, Job], None]):
+    def unsubscribe(self, callback: Callable[[Pipeline, Job], None], params: Optional[List[Any]] = None):
         """Unsubscribe a function that is called when the status of a `Job^` changes.
 
         Parameters:
             callback (Callable[[Pipeline^, Job^], None]): The callable function to unsubscribe.
+            params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         Note:
             The function will continue to be called for ongoing jobs.
         """
         import taipy.core as tp
 
-        return tp.unsubscribe_pipeline(callback, self)
+        return tp.unsubscribe_pipeline(callback, params, self)
 
     def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
         """Submit the pipeline for execution.

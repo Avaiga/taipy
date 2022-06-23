@@ -262,7 +262,7 @@ def subscribe_scenario(
     Parameters:
         callback (Callable[[Scenario^, Job^], None]): The function to be called on
             status change.
-        params (Optional[List[str]]): The parameters to be passed to the _callback_.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         scenario (Optional[Scenario^]): The scenario that subscribes to _callback_.
             If None, the subscription is registered for all scenarios.
     Note:
@@ -272,19 +272,22 @@ def subscribe_scenario(
     return _ScenarioManagerFactory._build_manager()._subscribe(callback, params, scenario)
 
 
-def unsubscribe_scenario(callback: Callable[[Scenario, Job], None], scenario: Optional[Scenario] = None):
+def unsubscribe_scenario(
+    callback: Callable[[Scenario, Job], None], params: Optional[List[Any]] = None, scenario: Optional[Scenario] = None
+):
     """Unsubscribe a function that is called when the status of a `Job^` changes.
 
     If _scenario_ is not provided, the subscription is removed for all scenarios.
 
     Parameters:
         callback (Callable[[Scenario^, Job^], None]): The function to unsubscribe to.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         scenario (Optional[Scenario^]): The scenario to unsubscribe to. If None, all scenarios
             unsubscribe to _callback_.
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, scenario)
+    return _ScenarioManagerFactory._build_manager()._unsubscribe(callback, params, scenario)
 
 
 def subscribe_pipeline(
@@ -306,18 +309,21 @@ def subscribe_pipeline(
     return _PipelineManagerFactory._build_manager()._subscribe(callback, params, pipeline)
 
 
-def unsubscribe_pipeline(callback: Callable[[Pipeline, Job], None], pipeline: Optional[Pipeline] = None):
+def unsubscribe_pipeline(
+    callback: Callable[[Pipeline, Job], None], params: Optional[List[str]] = None, pipeline: Optional[Pipeline] = None
+):
     """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:
         callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
             status change.
+        params (Optional[List[str]]): The parameters to be passed to the _callback_.
         pipeline (Optional[Pipeline^]): The pipeline to unsubscribe to. If None, all pipelines
             unsubscribe to _callback_.
     Note:
         The function will continue to be called for ongoing jobs.
     """
-    return _PipelineManagerFactory._build_manager()._unsubscribe(callback, pipeline)
+    return _PipelineManagerFactory._build_manager()._unsubscribe(callback, params, pipeline)
 
 
 def get_pipelines() -> List[Pipeline]:

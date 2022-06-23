@@ -153,10 +153,10 @@ class TestTaipy:
     def test_unsubscribe_scenario(self, scenario):
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(print)
-            mck.assert_called_once_with(print, None)
+            mck.assert_called_once_with(print, None, None)
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._unsubscribe") as mck:
             tp.unsubscribe_scenario(print, scenario=scenario)
-            mck.assert_called_once_with(print, scenario)
+            mck.assert_called_once_with(print, None, scenario)
 
     def test_subscribe_pipeline(self, pipeline):
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._subscribe") as mck:
@@ -168,11 +168,11 @@ class TestTaipy:
 
     def test_unsubscribe_pipeline(self, pipeline):
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._unsubscribe") as mck:
-            tp.unsubscribe_pipeline(print)
-            mck.assert_called_once_with(print, None)
+            tp.unsubscribe_pipeline(callback=print)
+            mck.assert_called_once_with(print, None, None)
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._unsubscribe") as mck:
-            tp.unsubscribe_pipeline(print, pipeline=pipeline)
-            mck.assert_called_once_with(print, pipeline)
+            tp.unsubscribe_pipeline(callback=print, pipeline=pipeline)
+            mck.assert_called_once_with(print, None, pipeline)
 
     def test_delete_pipeline(self):
         with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._hard_delete") as mck:

@@ -10,12 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from unittest.mock import ANY
 
 import pytest
 
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common import _utils
+from taipy.core.common._utils import Subscriber
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
@@ -326,12 +328,56 @@ def test_notification_subscribe(mocker):
     # test unsubscribing notification
     # test notis subscribe only on new jobs
     # _ScenarioManager._get(scenario)
-    _ScenarioManager._unsubscribe(notify_1, scenario)
+    _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario)
 
     notify_1.assert_not_called()
     notify_2.assert_called_3_times()
+
+
+class Notify:
+    def __call__(self, *args, **kwargs):
+        self.args = args
+
+    def assert_called_with(self, args):
+        assert args in self.args
+
+
+def test_notification_subscribe_multiple_params(mocker):
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+
+    scenario_config = Config.configure_scenario(
+        "awesome_scenario",
+        [
+            Config.configure_pipeline(
+                "by_6",
+                [
+                    Config.configure_task(
+                        "mult_by_2",
+                        mult_by_2,
+                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
+    notify = mocker.Mock()
+
+    scenario = _ScenarioManager._create(scenario_config)
+    _ScenarioManager._subscribe(callback=notify, params=["foobar", 123, 1.2], scenario=scenario)
+    mocker.patch.object(_ScenarioManager, "_get", return_value=scenario)
+
+    _ScenarioManager._submit(scenario)
+
+    notify.assert_called_with("foobar", 123, 1.2, scenario, ANY)
+
+
+def notify_multi_param(param, *args):
+    assert len(param) == 3
 
 
 def notify1(*args, **kwargs):
@@ -372,13 +418,58 @@ def test_notification_unsubscribe(mocker):
 
     # test subscribing notification
     _ScenarioManager._subscribe(callback=notify_1, scenario=scenario)
-    _ScenarioManager._unsubscribe(notify_1, scenario)
+    _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
     _ScenarioManager._subscribe(callback=notify_2, scenario=scenario)
     _ScenarioManager._submit(scenario.id)
 
     with pytest.raises(ValueError):
-        _ScenarioManager._unsubscribe(notify_1, scenario)
-    _ScenarioManager._unsubscribe(notify_2, scenario)
+        _ScenarioManager._unsubscribe(callback=notify_1, scenario=scenario)
+    _ScenarioManager._unsubscribe(callback=notify_2, scenario=scenario)
+
+
+def test_notification_unsubscribe_multi_param():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+
+    scenario_config = Config.configure_scenario(
+        "awesome_scenario",
+        [
+            Config.configure_pipeline(
+                "by_6",
+                [
+                    Config.configure_task(
+                        "mult_by_2",
+                        mult_by_2,
+                        [Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)],
+                        Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0),
+                    )
+                ],
+            )
+        ],
+    )
+
+    scenario = _ScenarioManager._create(scenario_config)
+
+    # test subscribing notification
+    _ScenarioManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 0], scenario=scenario)
+    _ScenarioManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 1], scenario=scenario)
+    _ScenarioManager._subscribe(callback=notify_multi_param, params=["foobar", 123, 2], scenario=scenario)
+
+    assert len(scenario.subscribers) == 3
+
+    # if no params are passed, removes the first occurrence of the subscriber when theres more than one copy
+    scenario.unsubscribe(notify_multi_param)
+    assert len(scenario.subscribers) == 2
+    assert Subscriber(notify_multi_param, ["foobar", 123, 0]) not in scenario.subscribers
+
+    # If params are passed, find the corresponding pair of callback and params to remove
+    scenario.unsubscribe(notify_multi_param, ["foobar", 123, 2])
+    assert len(scenario.subscribers) == 1
+    assert Subscriber(notify_multi_param, ["foobar", 123, 2]) not in scenario.subscribers
+
+    # If params are passed but is not on the list of subscribers, throws a ValueErrors
+    with pytest.raises(ValueError):
+        scenario.unsubscribe(notify_multi_param, ["foobar", 123, 10000])
 
 
 def test_scenario_notification_subscribe_all():
