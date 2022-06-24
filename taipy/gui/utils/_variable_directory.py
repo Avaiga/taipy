@@ -42,6 +42,8 @@ class _VariableDirectory:
         default_imported_dir = self._imported_var_dir[self._default_module]
         self._locals_context.set_locals_context(self._default_module)
         for name, asname, module in default_imported_dir:
+            if name == "*" and asname == "*":
+                continue
             imported_module_name = _get_module_name_from_imported_var(
                 name, self._locals_context.get_locals()[asname], module
             )
@@ -52,6 +54,8 @@ class _VariableDirectory:
         for k, v in self._imported_var_dir.items():
             self._locals_context.set_locals_context(k)
             for name, asname, module in v:
+                if name == "*" and asname == "*":
+                    continue
                 imported_module_name = _get_module_name_from_imported_var(
                     name, self._locals_context.get_locals()[asname], module
                 )
