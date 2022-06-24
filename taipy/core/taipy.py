@@ -18,17 +18,18 @@ from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
-from taipy.core.cycle.cycle import Cycle
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
-from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager_factory import _JobManagerFactory
-from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from taipy.core.scenario.scenario import Scenario
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
+
+from taipy.core.cycle.cycle import Cycle
+from taipy.core.exceptions.exceptions import ModelNotFound
+from taipy.core.job.job import Job
+from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.scenario.scenario import Scenario
 from taipy.core.task.task import Task
 
 __logger = _TaipyLogger._get_logger()
@@ -251,7 +252,7 @@ def compare_scenarios(*scenarios: Scenario, data_node_config_id: Optional[str] =
 
 def subscribe_scenario(
     callback: Callable[[Scenario, Job], None],
-    params: Optional[List[str]] = None,
+    params: Optional[List[Any]] = None,
     scenario: Optional[Scenario] = None,
 ):
     """Subscribe a function to be called on job status change.
@@ -291,7 +292,7 @@ def unsubscribe_scenario(
 
 
 def subscribe_pipeline(
-    callback: Callable[[Pipeline, Job], None], params: Optional[List[str]] = None, pipeline: Optional[Pipeline] = None
+    callback: Callable[[Pipeline, Job], None], params: Optional[List[Any]] = None, pipeline: Optional[Pipeline] = None
 ):
     """Subscribe a function to be called on job status change.
 
@@ -300,7 +301,7 @@ def subscribe_pipeline(
     Parameters:
         callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
             status change.
-        params (Optional[List[str]]): The parameters to be passed to the _callback_.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         pipeline (Optional[Pipeline^]): The pipeline to subscribe on. If None, the subscription
             is actived for all pipelines.
     Note:
@@ -310,14 +311,14 @@ def subscribe_pipeline(
 
 
 def unsubscribe_pipeline(
-    callback: Callable[[Pipeline, Job], None], params: Optional[List[str]] = None, pipeline: Optional[Pipeline] = None
+    callback: Callable[[Pipeline, Job], None], params: Optional[List[Any]] = None, pipeline: Optional[Pipeline] = None
 ):
     """Unsubscribe a function that is called when the status of a Job changes.
 
     Parameters:
         callback (Callable[[Pipeline^, Job^], None]): The callable function to be called on
             status change.
-        params (Optional[List[str]]): The parameters to be passed to the _callback_.
+        params (Optional[List[Any]]): The parameters to be passed to the _callback_.
         pipeline (Optional[Pipeline^]): The pipeline to unsubscribe to. If None, all pipelines
             unsubscribe to _callback_.
     Note:
