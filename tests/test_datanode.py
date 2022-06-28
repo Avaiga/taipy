@@ -11,6 +11,7 @@
 
 from unittest import mock
 
+import pytest
 from flask import url_for
 
 
@@ -73,10 +74,15 @@ def test_get_all_datanodes(client, default_datanode_config_list):
 
 def test_read_datanode(client, default_df_datanode):
     with mock.patch("taipy.core.data._data_manager._DataManager._get") as config_mock:
-        config_mock.side_effect = [default_df_datanode]
+        config_mock.return_value = default_df_datanode
+
         # without operators
         datanodes_url = url_for("api.datanode_reader", datanode_id="foo")
         rep = client.get(datanodes_url, json={})
+        assert rep.status_code == 200
+
+        # Without operators and body
+        rep = client.get(datanodes_url)
         assert rep.status_code == 200
 
         # TODO: Revisit filter test
