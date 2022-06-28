@@ -157,6 +157,37 @@ def test_force_deleting_unfinished_job():
     assert _JobManager._get(job.id) is None
 
 
+def test_cancel_job():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _Scheduler._update_job_config()
+    # task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+    # with lock:
+    #     job = _Scheduler.submit_task(task)
+
+    #     assert job.is_running()
+    #     assert len(_Scheduler._processes) == 1
+    #     _JobManager._cancel(job.id)
+    #     assert job.is_cancelled()
+    #     assert len(_Scheduler._processes) == 0
+    # assert job.is_cancelled()
+
+    task_1 = _create_task(inner_lock_multiply, name="delete_unfinished_job_1")
+    task_2 = _create_task(inner_lock_multiply, name="delete_unfinished_job_2")
+    with lock:
+        job_1 = _Scheduler.submit_task(task_1)
+        job_2 = _Scheduler.submit_task(task_2)
+
+        assert job_1.is_running()
+        assert job_2.is_running()
+        assert len(_Scheduler._processes) == 2
+        _JobManager._cancel(job_1.id)
+        assert job_1.is_cancelled()
+        assert len(_Scheduler._processes) == 1
+    assert job_1.is_cancelled()
+    print(job_2.status)
+    # assert job_2.is_finished()
+
+
 def _create_task(function, nb_outputs=1, name=None):
     input1_dn_config = Config.configure_data_node("input1", "pickle", Scope.PIPELINE, default_data=21)
     input2_dn_config = Config.configure_data_node("input2", "pickle", Scope.PIPELINE, default_data=2)

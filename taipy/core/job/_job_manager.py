@@ -10,12 +10,14 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Iterable, Optional
+from concurrent.futures import Future
+from typing import Callable, Iterable, Optional, Union
+
+from taipy.core.common.alias import JobId
+from taipy.core.job._job_repository import _JobRepository
 
 from taipy.core._manager._manager import _Manager
-from taipy.core.common.alias import JobId
 from taipy.core.exceptions.exceptions import JobNotDeletedException
-from taipy.core.job._job_repository import _JobRepository
 from taipy.core.job.job import Job
 from taipy.core.task.task import Task
 
@@ -41,6 +43,20 @@ class _JobManager(_Manager[Job]):
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)
             raise err
+
+    @classmethod
+    def _cancel(cls, job: Union[str, Job]):
+        job_id = job if isinstance(job, str) else job.id
+        from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+
+        process = _SchedulerFactory._build_scheduler()._processes.pop(job_id, None)  # type: ignore
+
+        if process:
+            process.cancel()
+            job = _JobManager._get(job) if isinstance(job, str) else job
+            job.cancelled()
+        # else:
+        # TODO: raise error for no processes of said job id
 
     @classmethod
     def _get_latest(cls, task: Task) -> Optional[Job]:

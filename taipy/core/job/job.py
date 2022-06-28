@@ -20,6 +20,7 @@ from taipy.core.common._reload import _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.job.status import Status
+
 from taipy.core.task.task import Task
 
 
@@ -260,4 +261,7 @@ class Job(_Entity):
                 self.__logger.error(st)
         else:
             self.completed()
+            from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+
+            _SchedulerFactory._build_scheduler()._processes.pop(self.id, None)
             self.__logger.info(f"job {self.id} is completed.")
