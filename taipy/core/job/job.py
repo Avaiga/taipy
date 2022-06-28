@@ -261,7 +261,4 @@ class Job(_Entity):
                 self.__logger.error(st)
         else:
             self.completed()
-            from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-
-            _SchedulerFactory._build_scheduler()._processes.pop(self.id, None)
             self.__logger.info(f"job {self.id} is completed.")

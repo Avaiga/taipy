@@ -13,6 +13,7 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
 from taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
+from taipy.core.common._utils import _pop_process_in_scheduler, _set_process_in_scheduler
 
 from taipy.core.config import Config
 from taipy.core.job.job import Job
@@ -40,14 +41,14 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         future = self._executor.submit(
             self._run_wrapped_function, Config.global_config.storage_folder, job.id, job.task
         )
+        _set_process_in_scheduler(job.id, future)
+
         future.add_done_callback(self.__release_worker)
         future.add_done_callback(partial(self._update_status_from_future, job))
-        from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-
-        _SchedulerFactory._build_scheduler()._processes[job.id] = future  # type: ignore
 
     def __release_worker(self, _):
         self._nb_available_workers += 1
 
     def _update_status_from_future(self, job: Job, ft):
+        _pop_process_in_scheduler(job.id)
         self._update_status(job, ft.result())

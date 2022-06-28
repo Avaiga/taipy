@@ -10,9 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from concurrent.futures import Future
 from typing import Callable, Iterable, Optional, Union
 
+from taipy.core.common._utils import _pop_process_in_scheduler
 from taipy.core.common.alias import JobId
 from taipy.core.job._job_repository import _JobRepository
 
@@ -39,6 +39,7 @@ class _JobManager(_Manager[Job]):
     def _delete(cls, job: Job, force=False):  # type:ignore
         if job.is_finished() or force:
             super()._delete(job.id)
+            _pop_process_in_scheduler(job.id)
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)
@@ -47,9 +48,7 @@ class _JobManager(_Manager[Job]):
     @classmethod
     def _cancel(cls, job: Union[str, Job]):
         job_id = job if isinstance(job, str) else job.id
-        from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-
-        process = _SchedulerFactory._build_scheduler()._processes.pop(job_id, None)  # type: ignore
+        process = _pop_process_in_scheduler(job_id)
 
         if process:
             process.cancel()
