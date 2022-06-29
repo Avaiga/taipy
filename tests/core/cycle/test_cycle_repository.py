@@ -11,9 +11,10 @@
 
 from datetime import datetime
 
-from taipy.core.common.frequency import Frequency
-from taipy.core.cycle._cycle_repository import _CycleRepository
-from taipy.core.cycle.cycle import Cycle
+from taipy.config.scenario.frequency import Frequency
+
+from src.taipy.core.cycle._cycle_repository import _CycleRepository
+from src.taipy.core.cycle.cycle import Cycle
 
 
 def test_save_and_load(tmpdir, cycle):

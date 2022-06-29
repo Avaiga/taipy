@@ -17,17 +17,17 @@ import string
 from time import sleep
 
 import pytest
-from taipy.core.common.alias import JobId
-from taipy.core.common.scope import Scope
-from taipy.core.config._config import _Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.task._task_manager import _TaskManager
+from taipy.config import JobConfig
+from taipy.config._config import _Config
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
-from taipy.core.exceptions.exceptions import JobNotDeletedException
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core.common.alias import JobId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.exceptions.exceptions import JobNotDeletedException
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.task._task_manager import _TaskManager
 from tests.core import utils
 
 

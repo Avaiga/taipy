@@ -12,17 +12,17 @@
 from unittest import mock
 
 import pytest
+from taipy.config.config import Config
+from taipy.config.data_node.data_node_config import DataNodeConfig
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
-from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
-from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.data_node import DataNode
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import InvalidConfigurationId
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.data.data_node import DataNode
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
 
 
 @pytest.fixture
@@ -169,6 +169,6 @@ def test_auto_set_and_reload(data_node):
 
 
 def test_submit_task(task: Task):
-    with mock.patch("taipy.core.task._task_manager._TaskManager._submit") as mock_submit:
+    with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mock_submit:
         task.submit([], True)
         mock_submit.assert_called_once_with(task, [], True)

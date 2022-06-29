@@ -9,8 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_model import _DataNodeModel
+from taipy.config.data_node.scope import Scope
+
+from src.taipy.core.data._data_model import _DataNodeModel
 
 
 class TestDataModel:

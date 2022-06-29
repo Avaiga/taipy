@@ -20,18 +20,17 @@ from functools import partial
 from time import sleep
 
 import pytest
-from taipy.core._scheduler._executor._synchronous import _Synchronous
-from taipy.core.common.scope import Scope
-from taipy.core.config._config import _Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.task._task_manager import _TaskManager
+from taipy.config import Config, JobConfig
+from taipy.config._config import _Config
+from taipy.config.data_node.scope import Scope
 
-from taipy.core import taipy
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
-from taipy.core.task.task import Task
+from src.taipy.core import taipy
+from src.taipy.core._scheduler._executor._synchronous import _Synchronous
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
 from tests.core.utils import assert_true_after_1_minute_max
 
 

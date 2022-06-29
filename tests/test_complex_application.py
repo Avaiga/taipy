@@ -13,10 +13,10 @@ import os
 import pathlib
 
 import pandas as pd
+from taipy.config import Config, JobConfig
 
-import taipy.core.taipy as tp
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.config import Config, JobConfig
+import src.taipy.core.taipy as tp
+from src.taipy.core._scheduler._scheduler import _Scheduler
 
 
 def sum(a, b):

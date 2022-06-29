@@ -12,15 +12,15 @@
 import datetime
 
 import pytest
+from taipy.config.data_node.scope import Scope
 
-from taipy.core.common.alias import DataNodeId, JobId, TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.exceptions.exceptions import NonExistingDataNode
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task._task_model import _TaskModel
-from taipy.core.task.task import Task
+from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.exceptions.exceptions import NonExistingDataNode
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task._task_model import _TaskModel
+from src.taipy.core.task.task import Task
 
 data_node = CSVDataNode(
     "test_data_node",

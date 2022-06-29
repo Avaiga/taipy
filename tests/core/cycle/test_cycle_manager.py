@@ -11,19 +11,20 @@
 
 from datetime import datetime
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.common.alias import CycleId
-from taipy.core.common.frequency import Frequency
-from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
-from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.cycle.cycle import Cycle
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.core.task._task_manager import _TaskManager
+from taipy.config import JobConfig
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.scenario.frequency import Frequency
+
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core.common.alias import CycleId
+from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.cycle.cycle import Cycle
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.task._task_manager import _TaskManager
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):

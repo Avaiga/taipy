@@ -14,14 +14,14 @@ from unittest import mock
 
 import pytest
 
-from taipy.core.common._utils import Subscriber
-from taipy.core.common.alias import ScenarioId
-from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.exceptions.exceptions import InvalidConfigurationId
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.core.scenario.scenario import Scenario
+from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common.alias import ScenarioId
+from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario.scenario import Scenario
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def test_create_scenario(cycle, current_datetime):
@@ -236,35 +236,35 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
 
 
 def test_submit_scenario():
-    with mock.patch("taipy.core.submit") as mock_submit:
+    with mock.patch("src.taipy.core.submit") as mock_submit:
         scenario = Scenario("foo", [], {})
         scenario.submit(False)
         mock_submit.assert_called_once_with(scenario, False)
 
 
 def test_subscribe_scenario():
-    with mock.patch("taipy.core.subscribe_scenario") as mock_subscribe:
+    with mock.patch("src.taipy.core.subscribe_scenario") as mock_subscribe:
         scenario = Scenario("foo", [], {})
         scenario.subscribe(None)
         mock_subscribe.assert_called_once_with(None, None, scenario)
 
 
 def test_unsubscribe_scenario():
-    with mock.patch("taipy.core.unsubscribe_scenario") as mock_unsubscribe:
+    with mock.patch("src.taipy.core.unsubscribe_scenario") as mock_unsubscribe:
         scenario = Scenario("foo", [], {})
         scenario.unsubscribe(None)
         mock_unsubscribe.assert_called_once_with(None, None, scenario)
 
 
 def test_add_tag_scenario():
-    with mock.patch("taipy.core.tag") as mock_add_tag:
+    with mock.patch("src.taipy.core.tag") as mock_add_tag:
         scenario = Scenario("foo", [], {})
         scenario.add_tag("tag")
         mock_add_tag.assert_called_once_with(scenario, "tag")
 
 
 def test_remove_tag_scenario():
-    with mock.patch("taipy.core.untag") as mock_remove_tag:
+    with mock.patch("src.taipy.core.untag") as mock_remove_tag:
         scenario = Scenario("foo", [], {})
         scenario.remove_tag("tag")
         mock_remove_tag.assert_called_once_with(scenario, "tag")

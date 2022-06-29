@@ -14,19 +14,15 @@ from unittest.mock import ANY
 
 import pytest
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from taipy.core.common import _utils
-from taipy.core.common._utils import Subscriber
-from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
-from taipy.core.common.frequency import Frequency
-from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
-from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import (
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core.common import _utils
+from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
+from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.exceptions.exceptions import (
     DeletingPrimaryScenario,
     DifferentScenarioConfigs,
     InsufficientScenarioToCompare,
@@ -37,13 +33,16 @@ from taipy.core.exceptions.exceptions import (
     NonExistingTask,
     UnauthorizedTagError,
 )
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.core.scenario.scenario import Scenario
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
+from taipy.config.config import Config, JobConfig
+from taipy.config.data_node.scope import Scope
+from taipy.config.scenario.frequency import Frequency
 from tests.core.utils.NotifyMock import NotifyMock
 
 
@@ -293,7 +292,7 @@ def test_notification_subscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _Scheduler._update_job_config()
 
-    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+    mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -347,7 +346,7 @@ class Notify:
 def test_notification_subscribe_multiple_params(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _Scheduler._update_job_config()
-    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+    mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -392,7 +391,7 @@ def test_notification_unsubscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _Scheduler._update_job_config()
 
-    mocker.patch("taipy.core.common._reload._reload", side_effect=lambda m, o: o)
+    mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -1110,3 +1109,33 @@ def test_authorized_tags():
     _ScenarioManager._untag(scenario_2, "foo")
     assert len(scenario.tags) == 1
     assert len(scenario_2.tags) == 1
+
+
+def test_scenario_create_from_task_config():
+    data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+    data_node_2_config = Config.configure_data_node(
+        id="d2", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+    )
+    data_node_3_config = Config.configure_data_node(
+        id="d3", storage_type="in_memory", default_data="abc", scope=Scope.SCENARIO
+    )
+    task_config_1 = Config.configure_task("t1", print, data_node_1_config, data_node_2_config, scope=Scope.GLOBAL)
+    task_config_2 = Config.configure_task("t2", print, data_node_2_config, data_node_3_config, scope=Scope.GLOBAL)
+    scenario_config_1 = Config.configure_scenario_from_tasks("s1", task_configs=[task_config_1, task_config_2])
+    _ScenarioManager._submit(_ScenarioManager._create(scenario_config_1))
+    assert len(_ScenarioManager._get_all()) == 1
+    assert len(_PipelineManager._get_all()) == 1
+    assert len(scenario_config_1.pipeline_configs) == 1
+    assert len(scenario_config_1.pipeline_configs[0].task_configs) == 2
+    # Should create a default pipeline name
+    assert isinstance(scenario_config_1.pipeline_configs[0].id, str)
+    assert scenario_config_1.pipeline_configs[0].id == f"{scenario_config_1.id}_pipeline"
+
+    pipeline_name = "p1"
+    scenario_config_2 = Config.configure_scenario_from_tasks(
+        "s2", task_configs=[task_config_1, task_config_2], pipeline_id=pipeline_name
+    )
+    _ScenarioManager._submit(_ScenarioManager._create(scenario_config_2))
+    assert len(_ScenarioManager._get_all()) == 2
+    assert len(_PipelineManager._get_all()) == 2
+    assert scenario_config_2.pipeline_configs[0].id == pipeline_name

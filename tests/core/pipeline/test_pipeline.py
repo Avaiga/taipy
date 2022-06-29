@@ -13,16 +13,16 @@ from unittest import mock
 
 import pytest
 
-from taipy.core.common._utils import Subscriber
-from taipy.core.common.alias import PipelineId, TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.data.data_node import DataNode
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import InvalidConfigurationId
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common.alias import PipelineId, TaskId
+from src.taipy.core.data.data_node import DataNode
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def test_create_pipeline():
@@ -297,21 +297,21 @@ def test_auto_set_and_reload(task):
 
 
 def test_subscribe_pipeline():
-    with mock.patch("taipy.core.subscribe_pipeline") as mck:
+    with mock.patch("src.taipy.core.subscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.subscribe(None)
         mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_unsubscribe_pipeline():
-    with mock.patch("taipy.core.unsubscribe_pipeline") as mck:
+    with mock.patch("src.taipy.core.unsubscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.unsubscribe(None)
         mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_submit_pipeline():
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
+    with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.submit(None, False)
         mck.assert_called_once_with(pipeline, None, False)

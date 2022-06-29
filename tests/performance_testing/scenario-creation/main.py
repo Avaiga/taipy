@@ -12,9 +12,8 @@
 import time
 from datetime import datetime
 
-from config import *
-
-import taipy as tp
+import src.taipy.core as tp
+from config import scenario_cfg
 
 if __name__ == "__main__":
     nb_scenario_to_create = 30
