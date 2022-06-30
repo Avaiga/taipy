@@ -24,8 +24,8 @@ class _LocalsContext:
         self.__default_module: str = ""
         self._locals_map: t.Dict[str, t.Dict[str, t.Any]] = {}
 
-    def set_default(self, default: t.Dict[str, t.Any]) -> None:
-        self.__default_module = default.get("__name__", "")
+    def set_default(self, default: t.Dict[str, t.Any], default_module_name: str = "") -> None:
+        self.__default_module = default_module_name
         self._locals_map[self.__default_module] = default
 
     def get_default(self) -> t.Dict[str, t.Any]:
@@ -54,6 +54,11 @@ class _LocalsContext:
 
     def is_default(self) -> bool:
         return self.get_default() == self.get_locals()
+
+    def _get_locals_bind_from_context(self, context: t.Optional[str]):
+        if context is None:
+            context = self.__default_module
+        return self._locals_map[context]
 
     def reset_locals_context(self) -> None:
         if hasattr(g, _LocalsContext.__ctx_g_name):

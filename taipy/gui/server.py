@@ -181,7 +181,6 @@ class _Server:
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True
-            self._flask.logger.disabled = True
             print(f" * Server starting on http://{host_value}:{port}")
         if (
             not is_running_from_reloader()

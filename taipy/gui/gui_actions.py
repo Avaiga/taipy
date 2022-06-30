@@ -134,7 +134,36 @@ def get_context_id(state: State) -> t.Optional[str]:
         return state._gui._get_client_id()
     return None
 
-def invoke_state_callback(gui: Gui, context_id: str, user_callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
+
+def get_module_name_from_state(state: State) -> t.Optional[str]:
+    """Get the module name that triggered a callback.
+
+    Pages can be defined in different modules yet share callbacks declared elsewhere (typically, the
+    application's main module).
+
+    This function returns the name of the module where the page (that holds the control that triggered the
+    callback) was declared.  This lets applications implement different behaviors depending on what page
+    is involved.
+
+    This function must be called only in the body of a callback function.
+
+    Arguments:
+
+        state: (State^): The `State` instance, which is an argument of the callback function.
+
+    Returns:
+
+        str: The name of the module that holds the definition of the page containing the control that
+            triggered this callback.
+    """
+    if state and isinstance(state._gui, Gui):
+        return state._gui._get_locals_context()
+    return None
+
+
+def invoke_state_callback(
+    gui: Gui, context_id: str, user_callback: t.Callable, args: t.Union[t.Tuple, t.List]
+) -> t.Any:
     """Invoke a user callback with context.
 
     Arguments:

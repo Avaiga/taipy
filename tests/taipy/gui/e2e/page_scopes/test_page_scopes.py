@@ -26,6 +26,7 @@ from .assets.page3 import page as page3
 
 
 @pytest.mark.timeout(300)
+@pytest.mark.teste2e
 def test_page_scopes(page: "Page", gui: Gui, helpers):
     gui._set_frame(inspect.currentframe())
 

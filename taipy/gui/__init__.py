@@ -64,7 +64,16 @@ application.
 """
 
 from .gui import Gui
-from .gui_actions import download, hold_control, navigate, notify, resume_control, get_context_id, invoke_state_callback
+from .gui_actions import (
+    download,
+    get_context_id,
+    get_module_name_from_state,
+    hold_control,
+    invoke_state_callback,
+    navigate,
+    notify,
+    resume_control,
+)
 from .icon import Icon
 from .renderers import Html, Markdown
 from .state import State

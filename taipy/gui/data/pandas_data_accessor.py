@@ -17,7 +17,7 @@ import numpy as np
 import pandas as pd
 
 from ..gui import Gui
-from ..utils import _get_date_col_str_name, _RE_PD_TYPE
+from ..utils import _RE_PD_TYPE, _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
 
@@ -73,7 +73,7 @@ class _PandasDataAccessor(_DataAccessor):
                     data[v] = v
                 cols.append(v)
         # deal with dates
-        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()
+        datecols = col_types[col_types.astype(str).str.startswith("datetime")].index.tolist()  # type: ignore
         if len(datecols) != 0:
             if not is_copied:
                 # copy the df so that we don't "mess" with the user's data
@@ -87,10 +87,16 @@ class _PandasDataAccessor(_DataAccessor):
                 if len(grps) > 4 and grps[4]:
                     data[newcol] = data[col].dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
                 else:
-                    data[newcol] = data[col].dt.tz_localize(tz).dt.tz_convert("UTC").dt.strftime(_DataAccessor._WS_DATE_FORMAT).astype(str)
+                    data[newcol] = (
+                        data[col]
+                        .dt.tz_localize(tz)
+                        .dt.tz_convert("UTC")
+                        .dt.strftime(_DataAccessor._WS_DATE_FORMAT)
+                        .astype(str)
+                    )
             # remove the date columns from the list of columns
             cols = list(set(cols) - set(datecols))
-        data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]
+        data = data.loc[:, data.dtypes[data.dtypes.index.astype(str).isin(cols)].index]  # type: ignore
         return data
 
     def __apply_user_function(
@@ -170,7 +176,7 @@ class _PandasDataAccessor(_DataAccessor):
     ) -> t.Dict[str, t.Any]:
         columns = payload.get("columns", [])
         if col_prefix:
-            columns = [c[len(col_prefix):] if c.startswith(col_prefix) else c for c in columns]
+            columns = [c[len(col_prefix) :] if c.startswith(col_prefix) else c for c in columns]
         ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
         if paged:
