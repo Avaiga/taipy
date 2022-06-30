@@ -191,6 +191,10 @@ def register_views():
     apispec.spec.path(view=JobResource, app=current_app)
     apispec.spec.path(view=JobList, app=current_app)
 
+    if _using_enterprise():
+        _register_views = _load_fct("taipy.enterprise.rest.api.views", "_register_views")
+        _register_views(apispec)
+
 
 @blueprint.errorhandler(ValidationError)
 def handle_marshmallow_error(e):
