@@ -239,7 +239,7 @@ class DataNodeReader(Resource):
             manager = _DataManagerFactory._build_manager()
             datanode = manager._get(datanode_id)
 
-            data = request.json
+            data = request.get_json(silent=True)
             operators = self.__make_operators(schema.load(data)) if data else []
             data = datanode.filter(operators)
             if isinstance(data, pd.DataFrame):
