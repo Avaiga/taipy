@@ -46,3 +46,22 @@ from .taipy import (
     untag,
 )
 from .task.task import Task
+
+"""# Taipy Core.
+
+The Taipy Core package is a Python library made to build powerful and customized data-driven back-end applications.
+It provides the necessary tools to help Python developers transform their algorithms into a complete
+back-end application.
+
+!!! Note "Optional packages"
+
+    There are Python packages that you can install in your environment to
+    add functionality to Taipy Core:
+
+    - [`pyodbc`](https://pypi.org/project/pyodbc/): is used by data nodes configured using the predefined
+    [`SQL data node config`](../../core/config/data-node-config.md#sql) with `mssql` engine.
+    You can install that package :
+        - directly with the regular `pip install pyodbc` command
+        - by installing Taipy Core with extra package mssql, using: `pip install taipy-core[mssql]`
+        - or by installing complete Taipy with extra package mssql, using: `pip install taipy[mssql]`
+"""
