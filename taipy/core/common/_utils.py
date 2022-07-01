@@ -52,16 +52,4 @@ def _fcts_to_dict(objs):
     return [d for obj in objs if (d := _fct_to_dict(obj)) is not None]
 
 
-def _pop_process_in_scheduler(job_id, default=None):
-    from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-
-    return _SchedulerFactory._build_scheduler()._processes.pop(job_id, default)  # type: ignore
-
-
-def _set_process_in_scheduler(job_id, process):
-    from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-
-    _SchedulerFactory._build_scheduler()._processes[job_id] = process
-
-
 Subscriber = namedtuple("Subscriber", "callback params")

@@ -13,19 +13,23 @@ from datetime import datetime, timedelta
 from unittest.mock import ANY
 
 import pytest
-
-from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from taipy.core.common import _utils
 from taipy.core.common._utils import Subscriber
 from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.frequency import Frequency
 from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
+from taipy.core.scenario._scenario_manager import _ScenarioManager
+from taipy.core.task._task_manager import _TaskManager
+
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.common import _utils
+from taipy.core.config import JobConfig
+from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import (
     DeletingPrimaryScenario,
     DifferentScenarioConfigs,
@@ -37,12 +41,8 @@ from taipy.core.exceptions.exceptions import (
     NonExistingTask,
     UnauthorizedTagError,
 )
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.scenario.scenario import Scenario
-from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core.utils.NotifyMock import NotifyMock
 
@@ -813,7 +813,7 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def submit_task(cls, task: Task, callbacks=None, force=False):
+        def submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False):
             cls.submit_calls.append(task.id)
             return super().submit_task(task, callbacks)
 

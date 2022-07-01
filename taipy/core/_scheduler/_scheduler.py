@@ -10,9 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 import itertools
+import uuid
 from multiprocessing import Lock
 from queue import Queue
-from typing import Callable, Dict, Iterable, List, Optional, Union
+from typing import Callable, Dict, Iterable, List, Optional, Set, Union
 
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
@@ -74,15 +75,18 @@ class _Scheduler(_AbstractScheduler):
         Returns:
             The created Jobs.
         """
+        submit_id = f"SUBMISSION_{str(uuid.uuid4())}"
         res = []
         tasks = pipeline._get_sorted_tasks()
         for ts in tasks:
             for task in ts:
-                res.append(cls.submit_task(task, callbacks, force))
+                res.append(cls.submit_task(task, submit_id, callbacks=callbacks, force=force))
         return res
 
     @classmethod
-    def submit_task(cls, task: Task, callbacks: Optional[Iterable[Callable]] = None, force: bool = False) -> Job:
+    def submit_task(
+        cls, task: Task, submit_id: str, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
+    ) -> Job:
         """Submit the given `Task^` for an execution.
 
         Parameters:
@@ -96,7 +100,7 @@ class _Scheduler(_AbstractScheduler):
         for dn in task.output.values():
             dn.lock_edit()
         job = _JobManagerFactory._build_manager()._create(
-            task, itertools.chain([cls._on_status_change], callbacks or [])
+            task, itertools.chain([cls._on_status_change], callbacks or []), submit_id
         )
         cls._check_block_and_run_job(job)
         return job
@@ -176,18 +180,21 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_finished():
+            if job.is_cancelled():
+                cls.__unblock_jobs(if_canceled=True)
             cls.__unblock_jobs()
             cls.__execute_jobs()
 
     @classmethod
-    def __unblock_jobs(cls):
+    def __unblock_jobs(cls, if_canceled: bool = False):
         for job in cls.blocked_jobs:
             if not cls._is_blocked(job):
                 with cls.lock:
                     try:
-                        job.pending()
+                        if not if_canceled:
+                            job.pending()
+                            cls.jobs_to_run.put(job)
                         cls.blocked_jobs.remove(job)
-                        cls.jobs_to_run.put(job)
                     except:
                         cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
 
@@ -197,3 +204,38 @@ class _Scheduler(_AbstractScheduler):
             cls._dispatcher = _StandaloneJobDispatcher()
         else:
             cls._dispatcher = _DevelopmentJobDispatcher()
+
+    @classmethod
+    def _set_process_in_scheduler(cls, job_id, process):
+        cls._processes[job_id] = process
+
+    @classmethod
+    def _pop_process_in_scheduler(cls, job_id, default=None):
+        return cls._processes.pop(job_id, default)  # type: ignore
+
+    @classmethod
+    def _cancel_job(cls, job):
+        if process := cls._pop_process_in_scheduler(job.id):
+            process.cancel()  # TODO: this doesn't cancel the running process
+        job.cancelled()
+        cls.__unlock_edit_on_outputs(job)
+
+        # if job in cls._needs_to_run:
+        #     cls._needs_to_run.remove(job)
+
+        if job in cls.blocked_jobs:
+            cls.blocked_jobs.remove(job)
+        next_output_dn_config_ids = set(job.task.output.keys())
+        cls.__cancel_subsequent_jobs(job.submit_id, next_output_dn_config_ids)
+
+    @classmethod
+    def __cancel_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set):
+        next_output_dn_config_ids = set()
+        for job in cls.blocked_jobs:
+            job_input_dn_config_ids = job.task.input.keys()
+            if job.submit_id == submit_id and len(output_dn_config_ids.intersection(job_input_dn_config_ids)) > 0:
+                next_output_dn_config_ids.update(job.task.output.keys())
+                job.cancelled()
+                cls.__unlock_edit_on_outputs(job)
+        if len(next_output_dn_config_ids) > 0:
+            cls.__cancel_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)

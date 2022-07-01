@@ -21,13 +21,17 @@ from taipy.core.common.alias import JobId
 from taipy.core.common.scope import Scope
 from taipy.core.config._config import _Config
 from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.job._job_manager import _JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.task._task_manager import _TaskManager
 
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.config import JobConfig
 from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import JobNotDeletedException
+from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.task.task import Task
 from tests.core import utils
 
 
@@ -60,10 +64,10 @@ def test_get_job():
 
     task = _create_task(multiply, name="get_job")
 
-    job_1 = _Scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task, "submit_id_1")
     assert _JobManager._get(job_1.id) == job_1
 
-    job_2 = _Scheduler.submit_task(task)
+    job_2 = _Scheduler.submit_task(task, "submit_id_2")
     assert job_1 != job_2
     assert _JobManager._get(job_1.id).id == job_1.id
     assert _JobManager._get(job_2.id).id == job_2.id
@@ -76,17 +80,17 @@ def test_get_latest_job():
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
 
-    job_1 = _Scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task, "submit_id_1")
     assert _JobManager._get_latest(task) == job_1
     assert _JobManager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = _Scheduler.submit_task(task_2)
+    job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
     assert _JobManager._get_latest(task).id == job_1.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_1_bis = _Scheduler.submit_task(task)
+    job_1_bis = _Scheduler.submit_task(task, "submit_id_1_bis")
     assert _JobManager._get_latest(task).id == job_1_bis.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
@@ -101,8 +105,8 @@ def test_get_jobs():
 
     task = _create_task(multiply, name="get_all_jobs")
 
-    job_1 = _Scheduler.submit_task(task)
-    job_2 = _Scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task, "submit_id_1")
+    job_2 = _Scheduler.submit_task(task, "submit_id_2")
 
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
@@ -113,8 +117,8 @@ def test_delete_job():
 
     task = _create_task(multiply, name="delete_job")
 
-    job_1 = _Scheduler.submit_task(task)
-    job_2 = _Scheduler.submit_task(task)
+    job_1 = _Scheduler.submit_task(task, "submit_id_1")
+    job_2 = _Scheduler.submit_task(task, "submit_id_2")
 
     _JobManager._delete(job_1)
 
@@ -136,7 +140,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
     _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
-        job = _Scheduler.submit_task(task)
+        job = _Scheduler.submit_task(task, "submit_id")
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
         with pytest.raises(JobNotDeletedException):
@@ -150,7 +154,7 @@ def test_force_deleting_unfinished_job():
     _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
-        job = _Scheduler.submit_task(task)
+        job = _Scheduler.submit_task(task, "submit_id")
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
         _JobManager._delete(job, force=True)
@@ -162,7 +166,7 @@ def test_cancel_job():
     _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
-        job = _Scheduler.submit_task(task)
+        job = _Scheduler.submit_task(task, "submit_id")
 
         assert job.is_running()
         assert len(_Scheduler._processes) == 1
@@ -171,22 +175,29 @@ def test_cancel_job():
         assert len(_Scheduler._processes) == 0
     assert job.is_cancelled()
 
-    # TODO: test with multiple task? with asynchronous task?
-    # task_1 = _create_task(inner_lock_multiply, name="delete_unfinished_job_1")
-    # task_2 = _create_task(inner_lock_multiply, name="delete_unfinished_job_2")
-    # with lock:
-    #     job_1 = _Scheduler.submit_task(task_1)
-    #     job_2 = _Scheduler.submit_task(task_2)
+    # test cancelling subsequent jobs
+    pipeline = _create_pipeline()
 
-    #     assert job_1.is_running()
-    #     assert job_2.is_running()
-    #     assert len(_Scheduler._processes) == 2
-    #     _JobManager._cancel(job_1.id)
-    #     assert job_1.is_cancelled()
-    #     assert len(_Scheduler._processes) == 1
-    # assert job_1.is_cancelled()
-    # print(job_2.status)
-    # assert job_2.is_finished()
+    with lock:
+        jobs = _Scheduler.submit(pipeline)
+        job_1 = jobs[0]
+        job_2 = jobs[1]
+        job_3 = jobs[2]
+
+        assert job_1.is_running()
+        assert job_2.is_blocked()
+        assert job_3.is_blocked()
+        assert len(_Scheduler.blocked_jobs) == 2
+
+        _JobManager._cancel(job_1.id)
+        assert job_1.is_cancelled()
+        assert job_2.is_cancelled()
+        assert job_3.is_cancelled()
+        assert len(_Scheduler.blocked_jobs) == 0
+
+    assert job_1.is_cancelled()
+    assert job_2.is_cancelled()
+    assert job_3.is_cancelled()
 
 
 def _create_task(function, nb_outputs=1, name=None):
@@ -204,3 +215,27 @@ def _create_task(function, nb_outputs=1, name=None):
         output_dn_configs,
     )
     return _TaskManager._bulk_get_or_create([task_config])[0]
+
+
+def _create_pipeline():
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
+    dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
+
+    task_1 = Task("task_config_1", lock_multiply, [dn_1, dn_2], [dn_3], id="task_1")
+    task_2 = Task("task_config_2", multiply, [dn_1, dn_3], [dn_4], id="task_2")
+    task_3 = Task("task_config_3", print, [dn_4], id="task_3")
+
+    pipeline = Pipeline("pipeline_config", {}, [task_1, task_2, task_3], pipeline_id="pipeline_id")
+
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+    _DataManager._set(dn_3)
+    _DataManager._set(dn_4)
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+    _TaskManager._set(task_3)
+    _PipelineManager._set(pipeline)
+
+    return _PipelineManager._get(pipeline)

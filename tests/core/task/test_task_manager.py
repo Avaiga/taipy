@@ -10,15 +10,15 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
-
-from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.common.alias import TaskId
 from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from taipy.core.task._task_manager import _TaskManager
+
+from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.config.config import Config
+from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from taipy.core.task.task import Task
 
 
@@ -240,9 +240,11 @@ def test_submit_task():
 
     class MockScheduler(_Scheduler):
         submit_calls = []
+        submit_ids = []
 
-        def submit_task(self, task, callbacks=None, force=False):
+        def submit_task(self, task, submit_id, callbacks=None, force=False):
             self.submit_calls.append(task)
+            self.submit_ids.append(submit_id)
             return None
 
     _TaskManager._scheduler = MockScheduler
@@ -257,6 +259,15 @@ def test_submit_task():
     _TaskManager._submit(task_1)
     call_ids = [call.id for call in MockScheduler.submit_calls]
     assert call_ids == [task_1.id]
+    assert len(MockScheduler.submit_ids) == 1
+
+    _TaskManager._submit(task_1)
+    assert len(MockScheduler.submit_ids) == 2
+    assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
+
+    _TaskManager._submit(task_1)
+    assert len(MockScheduler.submit_ids) == 3
+    assert len(MockScheduler.submit_ids) == len(set(MockScheduler.submit_ids))
 
 
 def _create_task_from_config(task_config, *args, **kwargs):

@@ -12,7 +12,6 @@
 import uuid
 from typing import Callable, Iterable, Optional, Union
 
-from taipy.core.common._utils import _pop_process_in_scheduler
 from taipy.core.common.alias import JobId
 from taipy.core.job._job_repository import _JobRepository
 
@@ -29,8 +28,10 @@ class _JobManager(_Manager[Job]):
     _ID_PREFIX = "JOB_"
 
     @classmethod
-    def _create(cls, task: Task, callbacks: Iterable[Callable], force=False) -> Job:
-        job = Job(id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"), task=task, force=force)
+    def _create(cls, task: Task, callbacks: Iterable[Callable], submit_id: str, force=False) -> Job:
+        job = Job(
+            id=JobId(f"{cls._ID_PREFIX}{task.config_id}_{uuid.uuid4()}"), task=task, submit_id=submit_id, force=force
+        )
         cls._set(job)
         job._on_status_change(*callbacks)
         return job
@@ -39,7 +40,9 @@ class _JobManager(_Manager[Job]):
     def _delete(cls, job: Job, force=False):  # type:ignore
         if job.is_finished() or force:
             super()._delete(job.id)
-            _pop_process_in_scheduler(job.id)
+            from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+
+            _SchedulerFactory._build_scheduler()._pop_process_in_scheduler(job.id)  # type: ignore
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)
@@ -47,15 +50,11 @@ class _JobManager(_Manager[Job]):
 
     @classmethod
     def _cancel(cls, job: Union[str, Job]):
-        job_id = job if isinstance(job, str) else job.id
-        process = _pop_process_in_scheduler(job_id)
+        job = cls._get(job) if isinstance(job, str) else job
 
-        if process:
-            process.cancel()
-            job = _JobManager._get(job) if isinstance(job, str) else job
-            job.cancelled()
-        # else:
-        # TODO: raise error for no processes of said job id
+        from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+
+        _SchedulerFactory._build_scheduler()._cancel_job(job)
 
     @classmethod
     def _get_latest(cls, task: Task) -> Optional[Job]:

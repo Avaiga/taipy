@@ -13,18 +13,18 @@ import datetime
 import traceback
 
 import pytest
-
 from taipy.core.common.alias import DataNodeId, JobId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.data.csv import CSVDataNode
-from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager import _JobManager
 from taipy.core.job._job_model import _JobModel
 from taipy.core.job._job_repository import _JobRepository
-from taipy.core.job.job import Job
 from taipy.core.job.status import Status
 from taipy.core.task._task_manager import _TaskManager
+
+from taipy.core.exceptions.exceptions import ModelNotFound
+from taipy.core.job.job import Job
 from taipy.core.task.task import Task
 
 data_node = CSVDataNode(
@@ -64,15 +64,16 @@ class A:
         pass
 
 
-job = Job(JobId("id"), task)
+job = Job(JobId("id"), task, "submit_id")
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
-job._exceptions = [traceback.TracebackException.from_exception(Exception())]
+# job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
 job_model = _JobModel(
     id=JobId("id"),
     task_id=task.id,
     status=Status(Status.SUBMITTED),
     force=False,
+    submit_id="submit_id",
     creation_date=job._creation_date.isoformat(),
     subscribers=_JobRepository._serialize_subscribers(job._subscribers),
     stacktrace=job._stacktrace,

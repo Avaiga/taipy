@@ -9,10 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import itertools
+import uuid
 from typing import Callable, List, Optional, Type, Union
 
-from taipy.core._manager._manager import _Manager
 from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.core.common._entity_ids import _EntityIds
@@ -20,9 +19,11 @@ from taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from taipy.core.common.scope import Scope
 from taipy.core.config.task_config import TaskConfig
 from taipy.core.data._data_manager_factory import _DataManagerFactory
-from taipy.core.exceptions.exceptions import NonExistingTask
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_repository import _TaskRepository
+
+from taipy.core._manager._manager import _Manager
+from taipy.core.exceptions.exceptions import NonExistingTask
 from taipy.core.task.task import Task
 
 
@@ -113,4 +114,6 @@ class _TaskManager(_Manager[Task]):
         task = cls._get(task_id)
         if task is None:
             raise NonExistingTask(task_id)
-        cls._scheduler().submit_task(task, callbacks, force)
+
+        submit_id = f"SUBMISSION_{str(uuid.uuid4())}"
+        return cls._scheduler().submit_task(task, submit_id, callbacks, force)

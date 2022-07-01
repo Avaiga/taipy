@@ -51,12 +51,13 @@ class Job(_Entity):
 
     _MANAGER_NAME = "job"
 
-    def __init__(self, id: JobId, task: Task, force=False):
+    def __init__(self, id: JobId, task: Task, submit_id: str, force=False):
         self.id = id
         self._task = task
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
+        self.__submit_id: str = submit_id
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
@@ -80,6 +81,10 @@ class Job(_Entity):
     @_self_setter(_MANAGER_NAME)
     def force(self, val):
         self._force = val
+
+    @property
+    def submit_id(self):
+        return self.__submit_id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

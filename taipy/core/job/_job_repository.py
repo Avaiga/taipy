@@ -13,14 +13,15 @@ import pathlib
 from datetime import datetime
 from typing import List
 
-from taipy.core._repository import _FileSystemRepository
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common._utils import _fcts_to_dict, _load_fct
+from taipy.core.job._job_model import _JobModel
+from taipy.core.task._task_repository import _TaskRepository
+
+from taipy.core._repository import _FileSystemRepository
 from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import InvalidSubscriber
-from taipy.core.job._job_model import _JobModel
 from taipy.core.job.job import Job
-from taipy.core.task._task_repository import _TaskRepository
 
 
 class _JobRepository(_FileSystemRepository[_JobModel, Job]):
@@ -35,13 +36,14 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
             job._task.id,
             job._status,
             job._force,
+            job.submit_id,
             job._creation_date.isoformat(),
             self._serialize_subscribers(job._subscribers),
             job._stacktrace,
         )
 
     def _from_model(self, model: _JobModel):
-        job = Job(id=model.id, task=_TaskRepository().load(model.task_id))
+        job = Job(id=model.id, task=_TaskRepository().load(model.task_id), submit_id=model.submit_id)
 
         job.status = model.status  # type: ignore
         job.force = model.force  # type: ignore

@@ -11,12 +11,15 @@
 
 import os
 import pathlib
+from time import sleep
 
 import pandas as pd
-
 import taipy.core.taipy as tp
+
 from taipy.core._scheduler._scheduler import _Scheduler
 from taipy.core.config import Config, JobConfig
+
+# ################################  USER FUNCTIONS  ##################################
 
 
 def sum(a, b):
@@ -43,8 +46,36 @@ def average(a):
     return [a.sum() / len(a)]
 
 
+def add_constant(a):
+    a = a["number"]
+    return a + 10
+
+
+def mult_constant(a):
+    a = a["number"]
+    return a * 10
+
+
+def div_constant_with_sleep(a):
+    sleep(1000)
+    return a / 10
+
+
+def sub_with_sleep(a, b):
+    sleep(1000)
+    return a - b["number"]
+
+
 def return_a_number():
     return 10
+
+
+def return_a_number_with_sleep():
+    sleep(1000)
+    return 10
+
+
+# ################################  TEST METHODS    ##################################
 
 
 def test_complex():
@@ -125,9 +156,9 @@ def test_complex():
         ],
     )
 
-    scenario_1 = Config.configure_scenario("scenario_1", [pipeline_sum_print_mul_print_avg_placeholder_mul])
+    scenario_config = Config.configure_scenario("scenario", [pipeline_sum_print_mul_print_avg_placeholder_mul])
 
-    scenario = tp.create_scenario(scenario_1)
+    scenario = tp.create_scenario(scenario_config)
 
     tp.submit(scenario)
 

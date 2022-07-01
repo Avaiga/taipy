@@ -98,8 +98,10 @@ class _PipelineManager(_Manager[Pipeline]):
         if pipeline is None:
             raise NonExistingPipeline(pipeline_id)
         pipeline_subscription_callback = cls.__get_status_notifier_callbacks(pipeline) + callbacks
-        _TaskManagerFactory._build_manager()._scheduler().submit(
-            pipeline, callbacks=pipeline_subscription_callback, force=force
+        return (
+            _TaskManagerFactory._build_manager()
+            ._scheduler()
+            .submit(pipeline, callbacks=pipeline_subscription_callback, force=force)
         )
 
     @staticmethod
