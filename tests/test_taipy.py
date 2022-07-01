@@ -15,17 +15,16 @@ from unittest import mock
 import taipy.core.taipy as tp
 from taipy.core.common.alias import CycleId, JobId, PipelineId, ScenarioId, TaskId
 from taipy.core.common.scope import Scope
+from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager import _CycleManager
 from taipy.core.data._data_manager import _DataManager
 from taipy.core.job._job_manager import _JobManager
+from taipy.core.job.job import Job
 from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.scenario._scenario_manager import _ScenarioManager
 from taipy.core.task._task_manager import _TaskManager
-
-from taipy.core.config.config import Config
-from taipy.core.job.job import Job
 
 
 class TestTaipy:
@@ -226,6 +225,11 @@ class TestTaipy:
         with mock.patch("taipy.core.job._job_manager._JobManager._get_latest") as mck:
             tp.get_latest_job(task)
             mck.assert_called_once_with(task)
+
+    def test_cancel_job(self):
+        with mock.patch("taipy.core.job._job_manager._JobManager._cancel") as mck:
+            tp.cancel_job("job_id")
+            mck.assert_called_once_with("job_id")
 
     def test_get_data_node(self, data_node):
         with mock.patch("taipy.core.data._data_manager._DataManager._get") as mck:

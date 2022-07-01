@@ -18,18 +18,17 @@ from taipy.core.config.config import Config
 from taipy.core.config.pipeline_config import PipelineConfig
 from taipy.core.config.scenario_config import ScenarioConfig
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.cycle.cycle import Cycle
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.data_node import DataNode
-from taipy.core.job._job_manager_factory import _JobManagerFactory
-from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
-from taipy.core.task._task_manager_factory import _TaskManagerFactory
-
-from taipy.core.cycle.cycle import Cycle
 from taipy.core.exceptions.exceptions import ModelNotFound
+from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.job.job import Job
+from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
+from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
 __logger = _TaipyLogger._get_logger()
@@ -361,6 +360,11 @@ def delete_job(job: Job, force=False):
 def delete_jobs():
     """Delete all jobs."""
     return _JobManagerFactory._build_manager()._delete_all()
+
+
+def cancel_job(job: Union[str, Job]):
+    """Cancel job"""
+    _JobManagerFactory._build_manager()._cancel(job)
 
 
 def get_latest_job(task: Task) -> Optional[Job]:
