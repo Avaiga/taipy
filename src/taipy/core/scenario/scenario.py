@@ -17,7 +17,6 @@ from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.common._validate_id import _validate_id
-from taipy.core.data.data_node import DataNode
 
 from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
@@ -26,6 +25,7 @@ from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._utils import Subscriber
 from ..common.alias import PipelineId, ScenarioId
 from ..cycle.cycle import Cycle
+from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
