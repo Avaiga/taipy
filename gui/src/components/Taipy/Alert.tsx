@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { useSnackbar, VariantType } from "notistack";
+import { SnackbarKey, useSnackbar, VariantType } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -14,14 +14,14 @@ const Alert = (props: AlertProps) => {
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
     const resetAlert = useCallback(
-        (key: string) => () => {
+        (key: SnackbarKey) => () => {
             closeSnackbar(key);
         },
         [closeSnackbar]
     );
 
     const notifAction = useCallback(
-        (key: string) => (
+        (key: SnackbarKey) => (
             <IconButton size="small" aria-label="close" color="inherit" onClick={resetAlert(key)}>
                 <CloseIcon fontSize="small" />
             </IconButton>

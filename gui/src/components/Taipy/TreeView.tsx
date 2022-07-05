@@ -224,7 +224,7 @@ const TreeView = (props: TreeViewProps) => {
         [updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
     );
 
-    const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
+    const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
 
     const handleNodeToggle = useCallback(
         (event: React.SyntheticEvent, nodeIds: string[]) => {

@@ -83,7 +83,7 @@ describe("Selector Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
             payload: { value: "id1", relvar: "lov" },
@@ -115,6 +115,7 @@ describe("Selector Component", () => {
             expect(ck.checked).toBe(true);
         });
         it("dispatch a well formed message for multiple", async () => {
+            const user = userEvent.setup();
             const dispatch = jest.fn();
             const state: TaipyState = INITIAL_STATE;
             const { getByText } = render(
@@ -123,12 +124,12 @@ describe("Selector Component", () => {
                 </TaipyContext.Provider>
             );
             const elt = getByText("Item 1");
-            userEvent.click(elt);
+            await user.click(elt);
             const elt2 = getByText("Item 2");
-            userEvent.click(elt2);
+            await user.click(elt2);
             const elt3 = getByText("Item 3");
-            userEvent.click(elt3);
-            userEvent.click(elt2);
+            await user.click(elt3);
+            await user.click(elt2);
             expect(dispatch).toHaveBeenLastCalledWith({
                 name: "varname",
                 payload: { value: ["id1", "id3"] },
@@ -151,9 +152,9 @@ describe("Selector Component", () => {
             const { getByPlaceholderText, queryAllByText } = render(<Selector lov={lov} filter={true} />);
             expect(queryAllByText(/Item /)).toHaveLength(4);
             const search = getByPlaceholderText("Search field");
-            userEvent.type(search, "m 3");
+            await userEvent.type(search, "m 3");
             expect(queryAllByText(/Item /)).toHaveLength(1);
-            userEvent.clear(search);
+            await userEvent.clear(search);
             expect(queryAllByText(/Item /)).toHaveLength(4);
         });
     });
@@ -176,10 +177,10 @@ describe("Selector Component", () => {
         it("opens a dropdown on click", async () => {
             const { getByText, getByRole, getByTestId, queryAllByRole } = render(<Selector lov={lov} dropdown={true} />);
             const butElt = getByRole("button");
-            userEvent.click(butElt);
+            await userEvent.click(butElt);
             getByRole("listbox");
             const elt = getByText("Item 2");
-            userEvent.click(elt);
+            await userEvent.click(elt);
             expect(queryAllByRole("listbox")).toHaveLength(0);
         });
     });

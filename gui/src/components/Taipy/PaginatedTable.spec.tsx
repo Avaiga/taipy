@@ -150,7 +150,7 @@ describe("PaginatedTable Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText("Entity");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {
@@ -194,7 +194,7 @@ describe("PaginatedTable Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByLabelText("Go to next page");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "",
             payload: {

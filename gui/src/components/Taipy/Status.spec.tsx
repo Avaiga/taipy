@@ -26,7 +26,7 @@ describe("Status Component", () => {
         const myClose = jest.fn();
         const {getByTestId} = render(<Status value={status} onClose={myClose} />);
         const elt = getByTestId("CancelIcon");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(myClose).toHaveBeenCalled();
     })
     it("displays the icon", async () => {

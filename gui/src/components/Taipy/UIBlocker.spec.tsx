@@ -33,7 +33,7 @@ describe("UIBlocker Component", () => {
                 <UIBlocker block={blockWithCancel} />
             </TaipyContext.Provider>);
         const elt = getByText("Cancel");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({"name": "UIBlocker", "payload": {"action": "action", "args": []}, "type": "SEND_ACTION_ACTION"});
     });
 });

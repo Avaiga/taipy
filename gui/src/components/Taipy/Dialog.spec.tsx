@@ -172,7 +172,7 @@ describe("Dialog Component", () => {
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
-        userEvent.click(getByTitle("Close"));
+        await userEvent.click(getByTitle("Close"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
             payload: { action: "testValidateAction", args: [-1] },
@@ -197,7 +197,7 @@ describe("Dialog Component", () => {
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
-        userEvent.click(getByText("testValidate"));
+        await userEvent.click(getByText("testValidate"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
             payload: { action: "testValidateAction", args: [0] },
@@ -222,7 +222,7 @@ describe("Dialog Component", () => {
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
-        userEvent.click(getByText("Another One"));
+        await userEvent.click(getByText("Another One"));
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
             payload: { action: "testValidateAction", args: [2] },

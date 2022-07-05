@@ -1,14 +1,14 @@
 import React, { useEffect, useReducer, useState, ComponentType } from "react";
-import JsxParser from "react-jsx-parser";
 import axios from "axios";
 import type {} from "@mui/lab/themeAugmentation";
-import { ThemeProvider } from "@mui/material/styles";
-import { HelmetProvider } from "react-helmet-async";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import { SnackbarProvider } from "notistack";
+import { HelmetProvider } from "react-helmet-async";
+import JsxParser from "react-jsx-parser";
 import { BrowserRouter } from "react-router-dom";
 
 import { TaipyContext } from "../context/taipyContext";

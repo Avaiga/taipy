@@ -70,7 +70,7 @@ describe("Menu Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText(lov[0].item as string);
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "menu",
             payload: { action: "action", args: [lov[0].id] },

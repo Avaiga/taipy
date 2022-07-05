@@ -93,7 +93,7 @@ describe("Toggle Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 1");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
             payload: { value: "id1" },
@@ -110,7 +110,7 @@ describe("Toggle Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 2");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({
             name: "varname",
             payload: { value: "uv" },

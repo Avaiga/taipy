@@ -76,7 +76,7 @@ describe("ThemeToggle Component", () => {
                 <ThemeToggle />
             </TaipyContext.Provider>);
         const elt = getByTitle("Dark");
-        userEvent.click(elt);
+        await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalledWith({name: "theme", payload: {value: "dark", "fromBackend": false}, "type": "SET_THEME"});
     });
 });

@@ -37,7 +37,7 @@ const NavBar = (props: LovProps) => {
     }
 
     const linkChange = useCallback(
-        (evt, val: string) => {
+        (evt: React.SyntheticEvent, val: string) => {
             if (Object.keys(state.locations || {}).some((route) => val === route)) {
                 navigate(val);
             } else {

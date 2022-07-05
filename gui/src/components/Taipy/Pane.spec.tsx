@@ -77,8 +77,8 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && userEvent.click(elt);
-        expect(dispatch).not.toHaveBeenCalled();
+        elt && await userEvent.click(elt);
+        expect(dispatch).toHaveBeenCalledWith({context: undefined, type: "MODULE_CONTEXT"});
     });
     it("is enabled by default", async () => {
         const dispatch = jest.fn();
@@ -92,7 +92,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && userEvent.click(elt);
+        elt && await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalled();
     });
     it("is enabled by active", async () => {
@@ -107,7 +107,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && userEvent.click(elt);
+        elt && await userEvent.click(elt);
         expect(dispatch).toHaveBeenCalled();
     });
     it("persistent is disabled", async () => {
@@ -137,7 +137,7 @@ describe("Pane Component", () => {
         );
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeInTheDocument();
-        elt && userEvent.click(elt);
+        elt && await userEvent.click(elt);
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "testId",
             payload: { action: "testCloseAction", args: [] },
@@ -157,7 +157,7 @@ describe("Pane Component", () => {
         const elt = document.querySelector(".MuiBackdrop-root");
         expect(elt).toBeNull();
         const but = getByRole("button");
-        userEvent.click(but);
+        await userEvent.click(but);
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
             payload: { value: false },

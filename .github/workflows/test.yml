@@ -28,7 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         working-directory: ./gui
-        run: npm ci
+        run: npm ci --omit=optional
       - name: Run npm build
         run: npm run build --if-present
         working-directory: ./gui
@@ -72,7 +72,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --omit=optional
       - run: npm run build --if-present
       - run: npm test
 

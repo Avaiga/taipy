@@ -183,8 +183,8 @@ const Selector = (props: SelTreeProps) => {
     );
 
     const handleDelete = useCallback(
-        (e) => {
-            const id = e.currentTarget.parentElement.getAttribute("data-id");
+        (e: React.SyntheticEvent) => {
+            const id = e.currentTarget?.parentElement?.getAttribute("data-id");
             id &&
                 setSelectedValue((vals) => {
                     const keys = vals.filter((valId) => valId !== id);
@@ -203,7 +203,7 @@ const Selector = (props: SelTreeProps) => {
         [updateVarName, propagate, dispatch, updateVars, valueById, props.tp_onChange]
     );
 
-    const handleInput = useCallback((e) => setSearchValue(e.target.value), []);
+    const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
 
     const dropdownValue = (dropdown &&
         (multiple ? selectedValue : selectedValue.length > 0 ? selectedValue[0] : "")) as string[];

@@ -1,9 +1,9 @@
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-import { LocalizationProvider } from "@mui/lab";
+import { LocalizationProvider } from "@mui/x-date-pickers";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 
 import DateSelector from "./DateSelector";
@@ -122,7 +122,7 @@ describe("DateSelector Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue(testDate);
-        userEvent.clear(elt);
+        await userEvent.clear(elt);
         await userEvent.type(elt, "01012001", { delay: 1 });
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "",
@@ -198,7 +198,7 @@ describe("DateSelector with time Component", () => {
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue(testTime);
-        userEvent.clear(elt);
+        await userEvent.clear(elt);
         await userEvent.type(elt, "01/01/2001 01:01 am", { delay: 1 });
         expect(dispatch).toHaveBeenLastCalledWith({
             name: "varname",
