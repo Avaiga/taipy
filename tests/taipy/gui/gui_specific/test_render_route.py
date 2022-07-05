@@ -15,6 +15,7 @@ import warnings
 
 from taipy.gui import Gui
 
+
 def test_render_route(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.add_page("page1", "# first page")

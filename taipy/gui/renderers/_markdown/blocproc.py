@@ -59,9 +59,9 @@ class _StartBlockProcessor(BlockProcessor):
                 e = _MarkdownFactory.create_element(self._gui, original_match.group(1), original_match.group(2))
                 parent.append(e)
                 # parse inside blocks
-                self.parser.parseBlocks(e, blocks[:block_num + 1])
+                self.parser.parseBlocks(e, blocks[: block_num + 1])
                 # remove used blocks
-                del blocks[:block_num + 1]
+                del blocks[: block_num + 1]
                 return True  # or could have had no return statement
         # No closing marker!  Restore and do nothing
         blocks[0] = original_block

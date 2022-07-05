@@ -11,8 +11,10 @@
 
 import inspect
 
-from taipy.gui import Gui, Markdown, get_context_id
 from flask import g
+
+from taipy.gui import Gui, Markdown, get_context_id
+
 
 def test_get_context_id(gui: Gui, helpers):
     name = "World!"  # noqa: F841

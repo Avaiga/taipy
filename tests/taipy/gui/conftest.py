@@ -14,7 +14,6 @@ from pathlib import Path
 
 import pandas as pd  # type: ignore
 import pytest
-
 from flask import Flask, g
 
 from taipy.gui import Gui
@@ -50,9 +49,10 @@ def gui(helpers):
 def helpers():
     return Helpers
 
+
 @pytest.fixture
 def test_client():
-    flask_app = Flask('Test App')
+    flask_app = Flask("Test App")
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as testing_client:

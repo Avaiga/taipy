@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 import pytest
 
 from taipy.gui import Gui, Markdown
@@ -21,7 +22,7 @@ def test_ru_selector(gui: Gui, helpers, csvdata):
 
     # set gui frame
     gui._set_frame(inspect.currentframe())
-    
+
     # Bind a page so that the variable will be evaluated as expression
     gui.add_page(
         "test",

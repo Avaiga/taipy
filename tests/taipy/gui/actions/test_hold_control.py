@@ -10,7 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from flask import g
+
 from taipy.gui import Gui, Markdown, hold_control
 
 
@@ -34,4 +36,6 @@ def test_hold_control(gui: Gui, helpers):
         hold_control(gui._Gui__state)
 
     received_messages = ws_client.get_received()
-    helpers.assert_outward_ws_simple_message(received_messages[0], "BL", {"action": "_taipy_on_cancel_block_ui", "message": "Work in Progress..."})
+    helpers.assert_outward_ws_simple_message(
+        received_messages[0], "BL", {"action": "_taipy_on_cancel_block_ui", "message": "Work in Progress..."}
+    )

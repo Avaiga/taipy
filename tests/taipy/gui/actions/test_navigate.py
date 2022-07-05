@@ -10,7 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from flask import g
+
 from taipy.gui import Gui, Markdown, navigate
 
 
@@ -34,4 +36,4 @@ def test_navigate(gui: Gui, helpers):
         navigate(gui._Gui__state, "test")
 
     received_messages = ws_client.get_received()
-    helpers.assert_outward_ws_simple_message(received_messages[0], "NA", {'to': 'test'})
+    helpers.assert_outward_ws_simple_message(received_messages[0], "NA", {"to": "test"})

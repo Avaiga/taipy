@@ -10,7 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from flask import g
+
 from taipy.gui import Gui, Markdown, notify
 
 

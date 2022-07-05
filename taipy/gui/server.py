@@ -47,6 +47,7 @@ class _Server:
         path_mapping: t.Optional[dict] = {},
         content_security_policy: t.Optional[dict] = None,
         force_https: bool = False,
+        async_mode: t.Optional[str] = None,
     ):
         self._gui = gui
         self._flask = Flask("Taipy") if flask is None else flask
@@ -57,11 +58,7 @@ class _Server:
         self._flask.json_encoder = _TaipyJsonEncoder
         # Add cors for frontend access
         self._ws = SocketIO(
-            self._flask,
-            cors_allowed_origins="*",
-            ping_timeout=10,
-            ping_interval=5,
-            json=json,
+            self._flask, cors_allowed_origins="*", ping_timeout=10, ping_interval=5, json=json, async_mode=async_mode
         )
 
         CORS(self._flask)
@@ -167,6 +164,9 @@ class _Server:
     def _run_notebook(self):
         self._ws.run(self._flask, host=self._host, port=self._port, debug=False, use_reloader=False)
 
+    def _get_async_mode(self) -> str:
+        return self._ws.async_mode
+
     def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread, ssl_context):
         host_value = host if host != "0.0.0.0" else "localhost"
         if debug and not is_running_from_reloader():
@@ -194,4 +194,13 @@ class _Server:
             self._thread = _KillableThread(target=self._run_notebook)
             self._thread.start()
             return
+        if self._get_async_mode() != "threading":
+            use_reloader = False
         self._ws.run(self._flask, host=host, port=port, debug=debug, use_reloader=use_reloader)
+
+    def stop_thread(self):
+        if hasattr(self, "_thread"):
+            if self._get_async_mode() != "threading":
+                self._ws.stop()
+            self._thread.kill()
+            self._thread.join()

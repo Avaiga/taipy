@@ -14,7 +14,7 @@ import typing as t
 import warnings
 
 from ..types import NumberTypes
-from ..utils import _get_date_col_str_name, _MapDict, _RE_PD_TYPE
+from ..utils import _RE_PD_TYPE, _get_date_col_str_name, _MapDict
 
 
 def _add_to_dict_and_get(dico: t.Dict[str, t.Any], key: str, value: t.Any) -> t.Any:
@@ -27,7 +27,7 @@ def _get_tuple_val(attr: tuple, index: int, default_val: t.Any) -> t.Any:
     return attr[index] if len(attr) > index else default_val
 
 
-def _get_columns_dict( # noqa: C901
+def _get_columns_dict(  # noqa: C901
     value: t.Any,
     columns: t.Union[str, t.List[str], t.Tuple[str], t.Dict[str, t.Any], _MapDict],
     col_types: t.Optional[t.Dict[str, str]] = None,
@@ -86,6 +86,7 @@ def _get_columns_dict( # noqa: C901
             elif number_format and ctype in NumberTypes:
                 _add_to_dict_and_get(columns[col], "format", number_format)
     return columns
+
 
 __RE_INDEXED_DATA = re.compile(r"^(\d+)\/(.*)")
 

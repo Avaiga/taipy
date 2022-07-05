@@ -17,7 +17,6 @@ from taipy.gui import Gui, Markdown, State, navigate
 
 
 def test_navigate(gui: Gui, helpers):
-    
     def navigate_to(state: State):
         navigate(state, "test")
 
@@ -34,6 +33,7 @@ def test_navigate(gui: Gui, helpers):
         ws_client.emit("message", {"client_id": sid, "type": "A", "name": "my_button", "payload": "navigate_to"})
         # assert for received message (message that would be sent to the frontend client)
         assert ws_client.get_received()
+
 
 def test_navigate_to_no_route(gui: Gui, helpers):
     def navigate_to(state: State):

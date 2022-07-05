@@ -10,8 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from flask import g
-from taipy.gui import Gui, State, Markdown, download
+
+from taipy.gui import Gui, Markdown, State, download
 
 
 def test_download(gui: Gui, helpers):
@@ -37,4 +39,6 @@ def test_download(gui: Gui, helpers):
         download(gui._Gui__state, "some text", "filename.txt", "on_download_action")
 
     received_messages = ws_client.get_received()
-    helpers.assert_outward_ws_simple_message(received_messages[0], "DF", {"name": "filename.txt", "on_action": "on_download_action"})
+    helpers.assert_outward_ws_simple_message(
+        received_messages[0], "DF", {"name": "filename.txt", "on_action": "on_download_action"}
+    )

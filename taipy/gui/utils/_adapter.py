@@ -114,7 +114,7 @@ class _Adapter:
         children = self.__get_children(value)
         return (id, label) if children is None else (id, label, children)  # type: ignore
 
-    def __get_id(self, value: t.Any, dig = True) -> str:
+    def __get_id(self, value: t.Any, dig=True) -> str:
         if isinstance(value, str):
             return value
         elif dig:
@@ -129,7 +129,7 @@ class _Adapter:
             self.__warning_by_type.add(type(value).__name__)
         return str(value)
 
-    def __get_label(self, value: t.Any, dig = True) -> t.Union[str, t.Dict, None]:
+    def __get_label(self, value: t.Any, dig=True) -> t.Union[str, t.Dict, None]:
         if isinstance(value, (str, Icon)):
             return Icon.get_dict_or(value)
         elif dig:

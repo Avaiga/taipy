@@ -20,6 +20,8 @@ tzlocal = "==3.0"
 "backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
 pyngrok = "==5.1"
 flask-talisman = "==1.0"
+gevent = "==21.12.0"
+gevent-websocket = "==0.10.1"
 
 [dev-packages]
 black = "*"

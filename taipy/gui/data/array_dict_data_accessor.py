@@ -14,10 +14,9 @@ import typing as t
 import pandas as pd
 
 from ..gui import Gui
+from ..utils import _MapDict
 from .data_format import _DataFormat
 from .pandas_data_accessor import _PandasDataAccessor
-
-from ..utils import _MapDict
 
 
 class _ArrayDictDataAccessor(_PandasDataAccessor):

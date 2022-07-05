@@ -26,7 +26,7 @@ def test_download_file(gui: Gui, helpers):
     # gui.add_page(
     #     "test", Markdown("<|Do something!|button|on_action=do_something|id=my_button|>")
     # )
-        # set gui frame
+    # set gui frame
     gui._set_frame(inspect.currentframe())
 
     gui.run(run_server=False)
