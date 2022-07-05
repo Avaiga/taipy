@@ -11,9 +11,10 @@
 
 from datetime import timedelta
 
-from taipy.core.common.frequency import Frequency
-from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.cycle.cycle import Cycle
+from taipy.config.scenario.frequency import Frequency
+
+from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.cycle.cycle import Cycle
 
 
 def test_create_cycle_entity(current_datetime):

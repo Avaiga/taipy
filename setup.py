@@ -13,7 +13,7 @@
 
 """The setup script."""
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, find_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -24,6 +24,7 @@ requirements = [
     "pandas>=1.3.4,<2.0",
     "sqlalchemy>=1.4,<2.0",
     "toml>=0.10,<0.11",
+    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -52,11 +53,12 @@ setup(
     license="Apache License 2.0",
     keywords="taipy-core",
     name="taipy-core",
-    packages=find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
+    package_dir={"": "src"},
+    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.core", "taipy.core.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
-    version="1.1.0.dev",
+    version="1.2.0.dev",
     zip_safe=False,
     extras_require=extras_require,
 )

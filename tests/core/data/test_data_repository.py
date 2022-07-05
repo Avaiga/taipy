@@ -13,12 +13,13 @@ import datetime
 import os
 from unittest import mock
 
-from taipy.core.common.alias import DataNodeId, JobId
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data._data_model import _DataNodeModel
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.data_node import DataNode
+from taipy.config.data_node.scope import Scope
+
+from src.taipy.core.common.alias import DataNodeId, JobId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data._data_model import _DataNodeModel
+from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.data.data_node import DataNode
 
 
 class TestDataRepository:

@@ -13,19 +13,19 @@ import datetime
 import traceback
 
 import pytest
+from taipy.config.data_node.scope import Scope
 
-from taipy.core.common.alias import DataNodeId, JobId, TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.exceptions.exceptions import ModelNotFound
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.job._job_model import _JobModel
-from taipy.core.job._job_repository import _JobRepository
-from taipy.core.job.job import Job
-from taipy.core.job.status import Status
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.exceptions.exceptions import ModelNotFound
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.job._job_model import _JobModel
+from src.taipy.core.job._job_repository import _JobRepository
+from src.taipy.core.job.job import Job
+from src.taipy.core.job.status import Status
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
 
 data_node = CSVDataNode(
     "test_data_node",

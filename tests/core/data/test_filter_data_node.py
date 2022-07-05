@@ -14,8 +14,8 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-from taipy.core.data._filter import _FilterDataNode
-from taipy.core.data.data_node import DataNode
+from src.taipy.core.data._filter import _FilterDataNode
+from src.taipy.core.data.data_node import DataNode
 
 
 class FakeDataframeDataNode(DataNode):

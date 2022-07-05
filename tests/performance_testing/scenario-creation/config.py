@@ -14,8 +14,9 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error
-
-from taipy.core import Config, Frequency, Scope
+from taipy.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.scenario.frequency import Frequency
 
 group_info = {
     "Toto": {

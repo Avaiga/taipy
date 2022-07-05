@@ -14,9 +14,10 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from taipy.core._manager._manager import _Manager
-from taipy.core._repository import _FileSystemRepository
-from taipy.core.config.config import Config
+from taipy.config.config import Config
+
+from src.taipy.core._manager._manager import _Manager
+from src.taipy.core._repository import _FileSystemRepository
 
 
 @dataclass

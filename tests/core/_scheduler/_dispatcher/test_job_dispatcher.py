@@ -19,15 +19,15 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
+from taipy.config import JobConfig
+from taipy.config.config import Config
 
-from taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.common.alias import DataNodeId, JobId, TaskId
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.job.job import Job
-from taipy.core.task.task import Task
+from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.job.job import Job
+from src.taipy.core.task.task import Task
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -125,7 +125,7 @@ def test_exception_in_writing_data():
 
     dispatcher = _Scheduler._dispatcher
 
-    with mock.patch("taipy.core.data._data_manager._DataManager._get") as get:
+    with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as get:
         get.return_value = output
         dispatcher._dispatch(job)
         assert job.is_failed()

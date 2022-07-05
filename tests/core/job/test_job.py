@@ -14,19 +14,19 @@ from time import sleep
 from unittest.mock import MagicMock
 
 import pytest
+from taipy.config import JobConfig
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 
-from taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
-from taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-from taipy.core.common.alias import JobId, TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
-from taipy.core.config.config import Config
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.job.job import Job
-from taipy.core.job.status import Status
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
+from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+from src.taipy.core.common.alias import JobId, TaskId
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.job.job import Job
+from src.taipy.core.job.status import Status
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
 
 
 @pytest.fixture

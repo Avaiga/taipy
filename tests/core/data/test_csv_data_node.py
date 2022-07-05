@@ -15,13 +15,14 @@ import pathlib
 import numpy as np
 import pandas as pd
 import pytest
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
-from taipy.core.common.alias import DataNodeId
-from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.exceptions.exceptions import InvalidConfigurationId, MissingRequiredProperty, NoData
+from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.exceptions.exceptions import MissingRequiredProperty, NoData
 
 
 class MyCustomObject:

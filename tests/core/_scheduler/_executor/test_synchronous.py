@@ -11,7 +11,7 @@
 
 import pytest
 
-from taipy.core._scheduler._executor._synchronous import _Synchronous
+from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 
 
 def mult(nb1, nb2):
