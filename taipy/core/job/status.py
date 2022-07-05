@@ -16,7 +16,7 @@ class Status(_ReprEnum):
     """Execution status of a `Job^`.
 
     It is implemented as an enumeration.
-    
+
     The possible values are:
 
     - `SUBMITTED`: A `SUBMITTED` job has been submitted for execution but not processed yet by
@@ -47,3 +47,4 @@ class Status(_ReprEnum):
     FAILED = 6
     COMPLETED = 7
     SKIPPED = 8
+    ABUNDANT = 9

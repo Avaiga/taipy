@@ -19,10 +19,9 @@ from taipy.core._scheduler._abstract_scheduler import _AbstractScheduler
 from taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from taipy.core.common._taipy_logger import _TaipyLogger
+from taipy.core.config.config import Config
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.job._job_manager_factory import _JobManagerFactory
-
-from taipy.core.config.config import Config
 from taipy.core.job.job import Job
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task.task import Task
@@ -182,8 +181,9 @@ class _Scheduler(_AbstractScheduler):
         if job.is_finished():
             if job.is_cancelled():
                 cls.__unblock_jobs(if_canceled=True)
-            cls.__unblock_jobs()
-            cls.__execute_jobs()
+            else:
+                cls.__unblock_jobs()
+                cls.__execute_jobs()
 
     @classmethod
     def __unblock_jobs(cls, if_canceled: bool = False):
@@ -215,6 +215,8 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def _cancel_job(cls, job):
+        to_cancel_jobs = cls.__find_subsequent_jobs(job.submit_id, next_output_dn_config_ids)
+
         if process := cls._pop_process_in_scheduler(job.id):
             process.cancel()  # TODO: this doesn't cancel the running process
         job.cancelled()
@@ -229,13 +231,19 @@ class _Scheduler(_AbstractScheduler):
         cls.__cancel_subsequent_jobs(job.submit_id, next_output_dn_config_ids)
 
     @classmethod
-    def __cancel_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set):
+    # def __cancel_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set):
+    def __find_subsequent_jobs() -> List[Job]:
         next_output_dn_config_ids = set()
         for job in cls.blocked_jobs:
             job_input_dn_config_ids = job.task.input.keys()
             if job.submit_id == submit_id and len(output_dn_config_ids.intersection(job_input_dn_config_ids)) > 0:
                 next_output_dn_config_ids.update(job.task.output.keys())
-                job.cancelled()
+                # job.cancelled()
                 cls.__unlock_edit_on_outputs(job)
         if len(next_output_dn_config_ids) > 0:
-            cls.__cancel_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)
+            # cls.__cancel_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)
+            return cls.__cancel_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)
+
+
+# must be cache friendly both queue
+# must be under cls.lock
