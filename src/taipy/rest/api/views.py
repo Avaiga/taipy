@@ -13,7 +13,7 @@ from flask import Blueprint, current_app, jsonify
 from flask_restful import Api
 from marshmallow import ValidationError
 
-from taipy.core.common._taipy_logger import _TaipyLogger
+from taipy.logger._taipy_logger import _TaipyLogger
 from taipy.core.common._utils import _load_fct
 
 from ..extensions import apispec

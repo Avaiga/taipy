@@ -12,7 +12,7 @@
 from flask import jsonify, make_response, request
 from flask_restful import Resource
 
-from taipy.core.config.config import Config
+from taipy.config import Config
 from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingScenario
 from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory

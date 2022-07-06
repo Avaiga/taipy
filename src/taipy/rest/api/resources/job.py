@@ -15,9 +15,9 @@ from typing import Optional
 from flask import jsonify, make_response, request
 from flask_restful import Resource
 
+from taipy.config import Config
 from taipy.core import Job
 from taipy.core.common.alias import JobId
-from taipy.core.config.config import Config
 from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory

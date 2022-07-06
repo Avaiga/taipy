@@ -1,4 +1,4 @@
-name: Setuptools
+name: Test package installation
 
 on:
   push:
@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Make sure the system is working
+      - name: Test packaging
         run: |
           pip install .
+
+          python -c "import taipy as tp; tp.Scenario"
+          python -c "import taipy as tp; tp.rest"
