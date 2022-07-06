@@ -207,8 +207,8 @@ class _Scheduler(_AbstractScheduler):
             cls.blocked_jobs.remove(job)
 
     @classmethod
-    def __remove_jobs_to_run(cls, jobs: Union[Job, List[Job]]):
-        jobs = jobs if isinstance(jobs, List) else [jobs]
+    def __remove_jobs_to_run(cls, jobs: Union[Job, List[Job], Set[Job]]):
+        jobs = jobs if isinstance(jobs, List) or isinstance(jobs, Set) else [jobs]
         new_jobs_to_run: Queue = Queue()
         while not cls.jobs_to_run.empty():
             current_job = cls.jobs_to_run.get()
@@ -252,8 +252,8 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
         next_output_dn_config_ids = set()
-        subsequent_jobs = set()
 
+        subsequent_jobs = set()
         for job in cls.blocked_jobs:
             job_input_dn_config_ids = job.task.input.keys()
             if job.submit_id == submit_id and len(output_dn_config_ids.intersection(job_input_dn_config_ids)) > 0:
@@ -268,8 +268,8 @@ class _Scheduler(_AbstractScheduler):
         return subsequent_jobs
 
     @classmethod
-    def __remove_jobs_from_running(cls, jobs: Union[Job, List[Job]]):
-        jobs = jobs if isinstance(jobs, List) else [jobs]
+    def __remove_jobs_from_running(cls, jobs: Union[Job, List[Job], Set[Job]]):
+        jobs = jobs if isinstance(jobs, List) or isinstance(jobs, Set) else [jobs]
         with cls.lock:
             for job in jobs:
                 cls.__remove_blocked_job(job)
