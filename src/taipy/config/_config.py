@@ -12,6 +12,7 @@
 from copy import copy
 from typing import Dict
 
+from .auth.auth_config import AuthConfig
 from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
 from .job_execution.job_config import JobConfig
@@ -25,6 +26,7 @@ class _Config:
 
     def __init__(self):
         self._global_config: GlobalAppConfig = GlobalAppConfig()
+        self._auth_config: AuthConfig = AuthConfig()
         self._job_config: JobConfig = JobConfig()
         self._data_nodes: Dict[str, DataNodeConfig] = {}
         self._tasks: Dict[str, TaskConfig] = {}
@@ -35,6 +37,7 @@ class _Config:
     def _default_config(cls):
         config = _Config()
         config._global_config = GlobalAppConfig.default_config()
+        config._auth_config = AuthConfig.default_config()
         config._job_config = JobConfig().default_config()
         config._data_nodes = {cls.DEFAULT_KEY: DataNodeConfig.default_config(cls.DEFAULT_KEY)}
         config._tasks = {cls.DEFAULT_KEY: TaskConfig.default_config(cls.DEFAULT_KEY)}
@@ -44,6 +47,7 @@ class _Config:
 
     def _update(self, other_config):
         self._global_config._update(other_config._global_config._to_dict())
+        self._auth_config._update(other_config._auth_config._to_dict())
         self._job_config._update(other_config._job_config._to_dict())
         self.__update_entity_configs(self._data_nodes, other_config._data_nodes, DataNodeConfig)
         self.__update_entity_configs(self._tasks, other_config._tasks, TaskConfig)

@@ -12,6 +12,7 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from .auth.auth_config import AuthConfig
 from .common._classproperty import _Classproperty
 from ..logger._taipy_logger import _TaipyLogger
 from .scenario.frequency import Frequency
@@ -39,6 +40,11 @@ class Config:
     _env_file_config = None
     _applied_config = _Config._default_config()
     _collector = IssueCollector()
+
+    @_Classproperty
+    def auth(cls) -> AuthConfig:
+        """Return configuration values related to the authentication as a `AuthConfig^`."""
+        return cls._applied_config._job_config
 
     @_Classproperty
     def job_config(cls) -> JobConfig:
@@ -102,6 +108,16 @@ class Config:
     @classmethod
     def _export_code_config(cls, filename):
         _TomlSerializer()._write(cls._python_config, filename)
+
+    @classmethod
+    def configure_auth(
+        cls,
+        protocol: str = None,
+        **properties,
+    ) -> AuthConfig:
+        cls._python_config._auth_config = AuthConfig(protocol, **properties)
+        cls.__compile_configs()
+        return cls._applied_config._auth_config
 
     @classmethod
     def configure_global_app(
