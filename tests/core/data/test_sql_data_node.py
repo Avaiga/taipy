@@ -14,11 +14,11 @@ from unittest import mock
 
 import pandas as pd
 import pytest
+from taipy.config.data_node.scope import Scope
 
-from taipy.core.common.alias import DataNodeId
-from taipy.core.common.scope import Scope
-from taipy.core.data.sql import SQLDataNode
-from taipy.core.exceptions.exceptions import MissingRequiredProperty
+from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.sql import SQLDataNode
+from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
 
 if not util.find_spec("pyodbc"):
     pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
@@ -74,9 +74,9 @@ class TestSQLDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
 
-    @mock.patch("taipy.core.data.sql.SQLDataNode._read_as", return_value="custom")
-    @mock.patch("taipy.core.data.sql.SQLDataNode._read_as_pandas_dataframe", return_value="pandas")
-    @mock.patch("taipy.core.data.sql.SQLDataNode._read_as_numpy", return_value="numpy")
+    @mock.patch("src.taipy.core.data.sql.SQLDataNode._read_as", return_value="custom")
+    @mock.patch("src.taipy.core.data.sql.SQLDataNode._read_as_pandas_dataframe", return_value="pandas")
+    @mock.patch("src.taipy.core.data.sql.SQLDataNode._read_as_numpy", return_value="numpy")
     @pytest.mark.parametrize("properties", __properties)
     def test_read(self, mock_read_as, mock_read_as_pandas_dataframe, mock_read_as_numpy, properties):
 

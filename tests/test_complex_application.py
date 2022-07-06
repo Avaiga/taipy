@@ -14,10 +14,10 @@ import pathlib
 from time import sleep
 
 import pandas as pd
-import taipy.core.taipy as tp
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.config import Config, JobConfig
+import src.taipy.core.taipy as tp
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from taipy.config import Config, JobConfig
 
 # ################################  USER FUNCTIONS  ##################################
 

@@ -13,15 +13,15 @@ import uuid
 
 import pytest
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.common.alias import TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core.common.alias import TaskId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 
 
 def test_create_and_save():

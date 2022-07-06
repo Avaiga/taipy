@@ -13,16 +13,16 @@ import os
 import pathlib
 
 import pytest
-from taipy.core.common.alias import DataNodeId
-from taipy.core.common.scope import Scope
-from taipy.core.config.data_node_config import DataNodeConfig
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.csv import CSVDataNode
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.data.pickle import PickleDataNode
+from taipy.config.config import Config
+from taipy.config.data_node.data_node_config import DataNodeConfig
+from taipy.config.data_node.scope import Scope
 
-from taipy.core.config.config import Config
-from taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
+from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.csv import CSVDataNode
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.data.pickle import PickleDataNode
+from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
 
 
 def file_exists(file_path: str) -> bool:

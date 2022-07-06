@@ -13,12 +13,13 @@ import os
 import pathlib
 
 import pytest
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.pickle import PickleDataNode
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
-from taipy.core.config.config import Config
-from taipy.core.exceptions.exceptions import InvalidConfigurationId, NoData
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.pickle import PickleDataNode
+from src.taipy.core.exceptions.exceptions import NoData
 
 
 class TestPickleDataNodeEntity:

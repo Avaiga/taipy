@@ -17,28 +17,28 @@ from queue import Queue
 
 import pandas as pd
 import pytest
+from taipy.config._config import _Config
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.scenario.frequency import Frequency
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from taipy.core.common.alias import CycleId, PipelineId, ScenarioId
-from taipy.core.common.frequency import Frequency
-from taipy.core.common.scope import Scope
-from taipy.core.config._config import _Config
-from taipy.core.config.config import Config
-from taipy.core.cycle._cycle_manager import _CycleManager
-from taipy.core.cycle._cycle_model import _CycleModel
-from taipy.core.cycle.cycle import Cycle
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline._pipeline_model import _PipelineModel
-from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.scenario._scenario_manager import _ScenarioManager
-from taipy.core.scenario._scenario_model import _ScenarioModel
-from taipy.core.scenario.scenario import Scenario
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
+from src.taipy.core.cycle._cycle_manager import _CycleManager
+from src.taipy.core.cycle._cycle_model import _CycleModel
+from src.taipy.core.cycle.cycle import Cycle
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline._pipeline_model import _PipelineModel
+from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.scenario._scenario_manager import _ScenarioManager
+from src.taipy.core.scenario._scenario_model import _ScenarioModel
+from src.taipy.core.scenario.scenario import Scenario
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
 
 current_time = datetime.now()
 

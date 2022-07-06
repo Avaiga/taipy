@@ -16,13 +16,13 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 import pytest
-from taipy.core.common.alias import DataNodeId
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.excel import ExcelDataNode
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 
-from taipy.core.config.config import Config
-from taipy.core.exceptions.exceptions import (
+from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.excel import ExcelDataNode
+from src.taipy.core.exceptions.exceptions import (
     MissingRequiredProperty,
     NoData,
     NonExistingExcelSheet,

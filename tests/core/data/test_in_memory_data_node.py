@@ -10,11 +10,12 @@
 # specific language governing permissions and limitations under the License.
 
 import pytest
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
-from taipy.core.common.alias import DataNodeId
-from taipy.core.common.scope import Scope
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import InvalidConfigurationId, NoData
+from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.exceptions.exceptions import NoData
 
 
 class TestInMemoryDataNodeEntity:

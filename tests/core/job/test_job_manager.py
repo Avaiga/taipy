@@ -19,20 +19,20 @@ from time import sleep
 
 import pytest
 
-from taipy.core._scheduler._scheduler import _Scheduler
-from taipy.core.common.alias import JobId
-from taipy.core.common.scope import Scope
-from taipy.core.config import JobConfig
-from taipy.core.config._config import _Config
-from taipy.core.config.config import Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import JobNotDeletedException
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core.common.alias import JobId
+from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.exceptions.exceptions import JobNotDeletedException
+from src.taipy.core.job._job_manager import _JobManager
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
+from taipy.config import JobConfig
+from taipy.config._config import _Config
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 from tests.core import utils
 
 

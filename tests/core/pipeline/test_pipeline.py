@@ -13,22 +13,23 @@ from unittest import mock
 
 import pytest
 
-from taipy.core.common._utils import Subscriber
-from taipy.core.common.alias import PipelineId, TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.data.data_node import DataNode
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.exceptions.exceptions import InvalidConfigurationId
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.pipeline.pipeline import Pipeline
-from taipy.core.task._task_manager import _TaskManager
-from taipy.core.task.task import Task
+from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common.alias import PipelineId, TaskId
+from src.taipy.core.data.data_node import DataNode
+from src.taipy.core.data.in_memory import InMemoryDataNode
+from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline.pipeline import Pipeline
+from src.taipy.core.task._task_manager import _TaskManager
+from src.taipy.core.task.task import Task
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 def test_create_pipeline():
     input = InMemoryDataNode("foo", Scope.PIPELINE)
     output = InMemoryDataNode("bar", Scope.PIPELINE)
     task = Task("baz", print, [input], [output], TaskId("task_id"))
+
     pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
     assert pipeline.parent_id is None
@@ -36,7 +37,9 @@ def test_create_pipeline():
     assert pipeline.description == "description"
     assert pipeline.foo == input
     assert pipeline.bar == output
-    assert pipeline.baz == task
+    assert pipeline.baz.id == task.id
+    assert pipeline.tasks == {task.config_id: task}
+    assert pipeline.data_nodes == {"foo": input, "bar": output}
 
     with pytest.raises(AttributeError):
         pipeline.qux
@@ -52,10 +55,20 @@ def test_create_pipeline():
     assert pipeline_1.input == input_1
     assert pipeline_1.output == output_1
     assert pipeline_1.task_1 == task_1
+    assert pipeline_1.tasks == {task_1.config_id: task_1}
+    assert pipeline_1.data_nodes == {"input": input_1, "output": output_1}
 
     assert pipeline_1.id is not None
     with pytest.raises(InvalidConfigurationId):
         Pipeline("name 1", {"description": "description"}, [task_1], parent_id="parent_id")
+
+    pipeline_2 = Pipeline("name_2", {"description": "description"}, [task, task_1], parent_id="parent_id")
+    assert pipeline_2.id is not None
+    assert pipeline_2.parent_id == "parent_id"
+    assert pipeline_2.config_id == "name_2"
+    assert pipeline_2.description == "description"
+    assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
+    assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
 
 
 def test_check_consistency():
@@ -297,21 +310,21 @@ def test_auto_set_and_reload(task):
 
 
 def test_subscribe_pipeline():
-    with mock.patch("taipy.core.subscribe_pipeline") as mck:
+    with mock.patch("src.taipy.core.subscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.subscribe(None)
         mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_unsubscribe_pipeline():
-    with mock.patch("taipy.core.unsubscribe_pipeline") as mck:
+    with mock.patch("src.taipy.core.unsubscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.unsubscribe(None)
         mck.assert_called_once_with(None, None, pipeline)
 
 
 def test_submit_pipeline():
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
+    with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.submit(None, False)
         mck.assert_called_once_with(pipeline, None, False)
