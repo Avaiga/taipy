@@ -20,7 +20,6 @@ from taipy.core.common._reload import _self_reload, _self_setter
 from taipy.core.common._taipy_logger import _TaipyLogger
 from taipy.core.common.alias import JobId
 from taipy.core.job.status import Status
-
 from taipy.core.task.task import Task
 
 
@@ -267,3 +266,6 @@ class Job(_Entity):
         else:
             self.completed()
             self.__logger.info(f"job {self.id} is completed.")
+
+    def __hash__(self):
+        return hash(self.id)

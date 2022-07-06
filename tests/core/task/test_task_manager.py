@@ -9,16 +9,18 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import uuid
+
 import pytest
-from taipy.core.common.alias import TaskId
-from taipy.core.common.scope import Scope
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.task._task_manager import _TaskManager
 
 from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.common.alias import TaskId
+from taipy.core.common.scope import Scope
 from taipy.core.config.config import Config
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 
 
@@ -242,7 +244,8 @@ def test_submit_task():
         submit_calls = []
         submit_ids = []
 
-        def submit_task(self, task, submit_id, callbacks=None, force=False):
+        def submit_task(self, task, submit_id=None, callbacks=None, force=False):
+            submit_id = submit_id if submit_id else f"SUBMISSION_{str(uuid.uuid4())}"
             self.submit_calls.append(task)
             self.submit_ids.append(submit_id)
             return None

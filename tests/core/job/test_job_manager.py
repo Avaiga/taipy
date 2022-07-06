@@ -14,23 +14,24 @@ import multiprocessing
 import os
 import random
 import string
+from functools import partial
 from time import sleep
 
 import pytest
-from taipy.core.common.alias import JobId
-from taipy.core.common.scope import Scope
-from taipy.core.config._config import _Config
-from taipy.core.data._data_manager import _DataManager
-from taipy.core.data.in_memory import InMemoryDataNode
-from taipy.core.job._job_manager import _JobManager
-from taipy.core.pipeline._pipeline_manager import _PipelineManager
-from taipy.core.task._task_manager import _TaskManager
 
 from taipy.core._scheduler._scheduler import _Scheduler
+from taipy.core.common.alias import JobId
+from taipy.core.common.scope import Scope
 from taipy.core.config import JobConfig
+from taipy.core.config._config import _Config
 from taipy.core.config.config import Config
+from taipy.core.data._data_manager import _DataManager
+from taipy.core.data.in_memory import InMemoryDataNode
 from taipy.core.exceptions.exceptions import JobNotDeletedException
+from taipy.core.job._job_manager import _JobManager
+from taipy.core.pipeline._pipeline_manager import _PipelineManager
 from taipy.core.pipeline.pipeline import Pipeline
+from taipy.core.task._task_manager import _TaskManager
 from taipy.core.task.task import Task
 from tests.core import utils
 
@@ -49,7 +50,6 @@ def reset_configuration_singleton():
 
 
 def multiply(nb1: float, nb2: float):
-    sleep(0.1)
     return nb1 * nb2
 
 
@@ -165,6 +165,7 @@ def test_cancel_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+
     with lock:
         job = _Scheduler.submit_task(task, "submit_id")
 
@@ -188,16 +189,38 @@ def test_cancel_job():
         assert job_2.is_blocked()
         assert job_3.is_blocked()
         assert len(_Scheduler.blocked_jobs) == 2
+        assert _Scheduler.jobs_to_run.qsize() == 0
+
+        jobs = _Scheduler.submit(pipeline)
+        job_4 = jobs[0]
+        job_5 = jobs[1]
+        job_6 = jobs[2]
+
+        assert job_4.is_pending()
+        assert job_5.is_blocked()
+        assert job_6.is_blocked()
+        assert _Scheduler.jobs_to_run.qsize() == 1
+        assert len(_Scheduler.blocked_jobs) == 4
+
+        _JobManager._cancel(job_4.id)
+        assert job_4.is_cancelled()
+        assert job_5.is_cancelled()
+        assert job_6.is_cancelled()
+        assert _Scheduler.jobs_to_run.qsize() == 0
+        assert len(_Scheduler.blocked_jobs) == 2
 
         _JobManager._cancel(job_1.id)
         assert job_1.is_cancelled()
         assert job_2.is_cancelled()
         assert job_3.is_cancelled()
-        assert len(_Scheduler.blocked_jobs) == 0
 
     assert job_1.is_cancelled()
     assert job_2.is_cancelled()
     assert job_3.is_cancelled()
+    assert job_4.is_cancelled()
+    assert job_5.is_cancelled()
+    assert job_6.is_cancelled()
+    assert _Scheduler.jobs_to_run.qsize() == 0
 
 
 def _create_task(function, nb_outputs=1, name=None):
