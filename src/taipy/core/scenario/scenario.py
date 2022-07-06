@@ -25,6 +25,7 @@ from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._utils import Subscriber
 from ..common.alias import PipelineId, ScenarioId
 from ..cycle.cycle import Cycle
+from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
@@ -94,6 +95,15 @@ class Scenario(_Entity):
     @_self_setter(_MANAGER_NAME)
     def pipelines(self, pipelines: Union[List[PipelineId], List[Pipeline]]):
         self._pipelines = pipelines
+
+    @property
+    def data_nodes(self) -> Dict[str, DataNode]:
+        data_nodes = {}
+        list_data_nodes = [pipeline.data_nodes for pipeline in self.pipelines.values()]
+        for data_node in list_data_nodes:
+            for k, v in data_node.items():
+                data_nodes[k] = v
+        return data_nodes
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

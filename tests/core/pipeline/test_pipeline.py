@@ -29,6 +29,7 @@ def test_create_pipeline():
     input = InMemoryDataNode("foo", Scope.PIPELINE)
     output = InMemoryDataNode("bar", Scope.PIPELINE)
     task = Task("baz", print, [input], [output], TaskId("task_id"))
+
     pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
     assert pipeline.parent_id is None
@@ -36,7 +37,9 @@ def test_create_pipeline():
     assert pipeline.description == "description"
     assert pipeline.foo == input
     assert pipeline.bar == output
-    assert pipeline.baz == task
+    assert pipeline.baz.id == task.id
+    assert pipeline.tasks == {task.config_id: task}
+    assert pipeline.data_nodes == {"foo": input, "bar": output}
 
     with pytest.raises(AttributeError):
         pipeline.qux
@@ -52,10 +55,20 @@ def test_create_pipeline():
     assert pipeline_1.input == input_1
     assert pipeline_1.output == output_1
     assert pipeline_1.task_1 == task_1
+    assert pipeline_1.tasks == {task_1.config_id: task_1}
+    assert pipeline_1.data_nodes == {"input": input_1, "output": output_1}
 
     assert pipeline_1.id is not None
     with pytest.raises(InvalidConfigurationId):
         Pipeline("name 1", {"description": "description"}, [task_1], parent_id="parent_id")
+
+    pipeline_2 = Pipeline("name_2", {"description": "description"}, [task, task_1], parent_id="parent_id")
+    assert pipeline_2.id is not None
+    assert pipeline_2.parent_id == "parent_id"
+    assert pipeline_2.config_id == "name_2"
+    assert pipeline_2.description == "description"
+    assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
+    assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
 
 
 def test_check_consistency():
