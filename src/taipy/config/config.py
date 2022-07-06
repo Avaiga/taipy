@@ -115,6 +115,18 @@ class Config:
         protocol: str = None,
         **properties,
     ) -> AuthConfig:
+        """Configure authentication.
+
+        Parameters:
+            protocol (Optional[str]): protocol (str):  identifier of the authentication protocol. Taipy already
+                implements three predefined protocols:
+                    - None: ...
+                    - taipy: ...
+                    - ldap: ...
+            **properties: A dictionary of additional properties.
+        Returns:
+            AuthConfig^: The auth configuration.
+        """
         cls._python_config._auth_config = AuthConfig(protocol, **properties)
         cls.__compile_configs()
         return cls._applied_config._auth_config
