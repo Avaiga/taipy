@@ -102,6 +102,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     defaultEditable?: boolean;
     lineStyle?: string;
     nanValue?: string;
+    filter?: boolean;
     defaultKey?: string; // for testing purposes only
 }
 
@@ -142,10 +143,10 @@ interface EditableCellProps {
     nanValue?: string;
 }
 
-export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnDesc>) => {
+export const addDeleteColumn = (render: number, columns: Record<string, ColumnDesc>) => {
     if (render) {
         Object.keys(columns).forEach((key) => columns[key].index++);
-        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: "2em" };
+        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: (render * 4) + "em" };
     }
     return columns;
 };

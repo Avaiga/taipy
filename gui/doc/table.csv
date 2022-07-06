@@ -30,6 +30,8 @@ style[<i>col_name</i>],str,,"Allows the styling of table cells.
 See <a href=""#styling"">below</a> for details."
 width,str|int|float,"""100vw""","The width, in CSS units, of this table control."
 height,str|int|float,"""80vh""","The height, in CSS units, of this table control."
+filter,bool,FALSE,"Indicates, if True, that all columns can be filtered."
+filter[<i>col_name</i>],bool,FALSE,"Indicates, if True, that the indicated column can be filtered."
 nan_value,str,"""""",The replacement text for NaN (not-a-number) values.
 nan_value[<i>col_name</i>],str,"""""",The replacement text for NaN (not-a-number) values for the indicated column.
 on_edit,Callback,,"The name of a function that is to be triggered when a cell edition is validated.<br/>

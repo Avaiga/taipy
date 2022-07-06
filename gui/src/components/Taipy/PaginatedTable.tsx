@@ -52,6 +52,7 @@ import {
     TaipyPaginatedTableProps,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import { FilterDesc, TableFilter } from "./TableFilter";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skelSx = { width: "100%", height: "3em" };
@@ -84,7 +85,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [aggregates, setAggregates] = useState<string[]>([]);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
-    const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
+    const selectedRowRef = useRef<HTMLTableRowElement|null>(null);
     const formatConfig = useFormatConfig();
 
     const refresh = props.data === null;
@@ -92,12 +93,17 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    const [colsOrder, columns, styles, handleNan] = useMemo(() => {
+    const [colsOrder, columns, styles, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
+        const pFilter = !!props.filter;
         if (props.columns) {
             try {
                 const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                addDeleteColumn(!!(active && editable && (tp_onAdd || tp_onDelete)), columns);
+                const filter = pFilter || Object.keys(columns).some((col) => !!columns[col].filter);
+                addDeleteColumn(
+                    (!!active && editable && (tp_onAdd || tp_onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
+                    columns
+                );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
                 const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
                     if (columns[col].style) {
@@ -109,13 +115,13 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 if (props.lineStyle) {
                     styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, columns, styles, hNan];
+                return [colsOrder, columns, styles, hNan, filter];
             } catch (e) {
                 console.info("PTable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {}, {}, hNan];
-    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
+        return [[], {}, {}, hNan, pFilter];
+    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
@@ -244,6 +250,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         [startIndex, dispatch, updateVarName, tp_onAdd]
     );
 
+    const onFilterValidation = useCallback((data: Array<FilterDesc>) => console.info(data), []);
+
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string) =>
             dispatch(
@@ -318,14 +326,25 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         <TableCell
                                             key={col + idx}
                                             sortDirection={orderBy === columns[col].dfid && order}
-                                            width={columns[col].width}
+                                            sx={columns[col].width ? { width: columns[col].width } : {}}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
-                                                active && editable && tp_onAdd ? (
-                                                    <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
-                                                        <AddIcon />
-                                                    </IconButton>
-                                                ) : null
+                                                [
+                                                    active && editable && tp_onAdd ? (
+                                                        <Tooltip title="Add a row">
+                                                            <IconButton
+                                                                onClick={onAddRowClick}
+                                                                size="small"
+                                                                sx={iconInRowSx}
+                                                            >
+                                                                <AddIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    ) : null,
+                                                    active && filter ? (
+                                                        <TableFilter columns={columns} onValidate={onFilterValidation} />
+                                                    ) : null,
+                                                ]
                                             ) : (
                                                 <TableSortLabel
                                                     active={orderBy === columns[col].dfid}
@@ -373,7 +392,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     const sel = selected.indexOf(index + startIndex);
                                     if (sel == 0) {
                                         setTimeout(
-                                            () => selectedRowRef.current?.scrollIntoView && selectedRowRef.current.scrollIntoView({ block: "center" }),
+                                            () =>
+                                                selectedRowRef.current?.scrollIntoView &&
+                                                selectedRowRef.current.scrollIntoView({ block: "center" }),
                                             1
                                         );
                                     }

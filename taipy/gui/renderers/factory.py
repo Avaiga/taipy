@@ -438,6 +438,7 @@ class _Factory:
                 ("on_delete", _AttributeType.function),
                 ("on_add", _AttributeType.function),
                 ("nan_value",),
+                ("filter", _AttributeType.boolean),
                 ("hover_text", _AttributeType.dynamic_string),
             ]
         )
