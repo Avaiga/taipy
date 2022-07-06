@@ -14,6 +14,7 @@ from .checker.issue_collector import IssueCollector
 from .config import Config
 from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
+from .auth.auth_config import AuthConfig
 from .job_execution.job_config import JobConfig
 from .pipeline.pipeline_config import PipelineConfig
 from .scenario.scenario_config import ScenarioConfig
