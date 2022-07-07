@@ -17,7 +17,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import SendIcon from "@mui/icons-material/Send";
 
 import { ColumnDesc, iconInRowSx } from "./tableUtils";
-import { getTypeFromDf } from "../../utils";
+import { getDateTime, getTypeFromDf } from "../../utils";
 import { Button } from "@mui/material";
 
 export interface FilterDesc {
@@ -47,7 +47,7 @@ const anchorOrigin = {
 } as PopoverOrigin;
 
 const actionsByType = {
-    string: { "==": "equal", like: "like", "!=": "not equal" },
+    string: { "==": "equal", contains: "contains", "!=": "not equal" },
     number: {
         "<": "less",
         "<=": "less equal",
@@ -105,7 +105,14 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
             return;
         }
         try {
-            const typedVal = colType == "number" ? parseFloat(val) : colType == "boolean" ? val == "1" : val;
+            const typedVal =
+                colType == "number"
+                    ? parseFloat(val)
+                    : colType == "boolean"
+                    ? val == "1"
+                    : colType == "date"
+                    ? getDateTime(val)
+                    : val;
             return {
                 col: columns[colId].dfid,
                 action: act,
@@ -172,7 +179,7 @@ const FilterRow = (props: FilterRowProps) => {
 
     useEffect(() => {
         if (filter && idx > -1) {
-            const col = Object.keys(columns).find(col => columns[col].dfid === filter.col) || "";
+            const col = Object.keys(columns).find((col) => columns[col].dfid === filter.col) || "";
             setColId(col);
             setAction(filter.action);
             setVal(filter.value as string);

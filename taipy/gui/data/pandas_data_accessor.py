@@ -13,6 +13,7 @@ import typing as t
 import warnings
 from importlib import util
 
+from datetime import datetime
 import numpy as np
 import pandas as pd
 
@@ -51,6 +52,10 @@ class _PandasDataAccessor(_DataAccessor):
         except Exception as e:
             warnings.warn(f"Exception raised when calling user style function {function_name}\n{e}")
         return ""
+
+    def __is_date_column(self, data: pd.DataFrame, col_name: str):
+        col_types = data.dtypes[data.dtypes.index.astype(str) == col_name]
+        return len(col_types[col_types.astype(str).str.startswith("datetime")]) > 0
 
     def __build_transferred_cols(
         self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
@@ -180,6 +185,25 @@ class _PandasDataAccessor(_DataAccessor):
             columns = [c[len(col_prefix) :] if c.startswith(col_prefix) else c for c in columns]
         ret_payload = {"pagekey": payload.get("pagekey", "unknown page")}
         paged = not payload.get("alldata", False)
+        # filtering
+        filters = payload.get("filters")
+        if isinstance(filters, list) and len(filters) > 0:
+            query = ""
+            vars = []
+            for fd in filters:
+                col = fd.get("col")
+                val = fd.get("value")
+                action = fd.get("action")
+                if isinstance(val, str) and self.__is_date_column(value, col):
+                    val = datetime.fromisoformat(val[:-1])
+                    vars.append(val)
+                val = f'"{val}"' if isinstance(val, str) else f"@vars[{len(vars) - 1}]" if isinstance(val, datetime) else val
+                right = f'.str.contains({val})' if action == "contains" else f" {action} {val}"
+                if query:
+                    query += " and "
+                query += f'`{fd.get("col")}`{right}'
+            value = value.query(query)
+
         if paged:
             aggregates = payload.get("aggregates")
             applies = payload.get("applies")
