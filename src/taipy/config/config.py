@@ -486,6 +486,37 @@ class Config:
             raise ConfigurationIssueError
 
     @classmethod
+    def configure_csv_data_node(
+        cls,
+        id: str,
+        default_path: str = None,
+        has_header: bool = True,
+        scope=DataNodeConfig._DEFAULT_SCOPE,
+        **properties,
+    ):
+        """Configure a new CSV data node configuration.
+
+        Parameters:
+            id (str): The unique identifier of the new CSV data node configuration.
+            default_path (str): The default path of the CSV file.
+            has_header (bool): If True, indicates that the CSV file has a header.
+            scope (Scope^): The scope of the CSV data node configuration. The default value
+                is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
+        Returns:
+            DataNodeConfig^: The new CSV data node configuration.
+        """
+        return cls.configure_data_node(
+            id,
+            DataNodeConfig._STORAGE_TYPE_VALUE_CSV,
+            scope=scope,
+            default_path=default_path,
+            has_header=has_header,
+            **properties,
+        )
+
+    @classmethod
     def configure_json_data_node(
         cls,
         id: str,
