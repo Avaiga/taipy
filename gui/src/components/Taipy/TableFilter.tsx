@@ -47,10 +47,17 @@ const anchorOrigin = {
 } as PopoverOrigin;
 
 const actionsByType = {
-    string: {"==" : "equal", "like": "like", "!=": "not equal"},
-    number: {"<": "less", "<=": "less equal", "==": "equal", "!=": "not equal", ">=": "greater equal", ">": "greater"},
-    boolean: {"==": "equal", "!=": "not equal"},
-    date: {"<": "before", "<=": "before equal", "==": "equal", "!=": "not equal", ">=": "after equal", ">": "after"},
+    string: { "==": "equal", like: "like", "!=": "not equal" },
+    number: {
+        "<": "less",
+        "<=": "less equal",
+        "==": "equal",
+        "!=": "not equal",
+        ">=": "greater equal",
+        ">": "greater",
+    },
+    boolean: { "==": "equal", "!=": "not equal" },
+    date: { "<": "before", "<=": "before equal", "==": "equal", "!=": "not equal", ">=": "after equal", ">": "after" },
 } as Record<string, Record<string, string>>;
 
 const getActionsByType = (colType?: string) =>
@@ -87,20 +94,20 @@ const buttonBoxSx = {
     gap: "4em",
 };
 
-const colSx = {width: "15em"};
-const actSx = {width: "10em"};
-const valSx = {width: "15em"};
+const colSx = { width: "15em" };
+const actSx = { width: "10em" };
+const valSx = { width: "15em" };
 
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
-        if (!val && (colType == "date"  || colType == "number" || colType == "boolean")) {
+        if (!val && (colType == "date" || colType == "number" || colType == "boolean")) {
             return;
         }
         try {
             const typedVal = colType == "number" ? parseFloat(val) : colType == "boolean" ? val == "1" : val;
             return {
-                col: colId,
+                col: columns[colId].dfid,
                 action: act,
                 value: typedVal,
             } as FilterDesc;
@@ -165,11 +172,12 @@ const FilterRow = (props: FilterRowProps) => {
 
     useEffect(() => {
         if (filter && idx > -1) {
-            setColId(filter.col);
+            const col = Object.keys(columns).find(col => columns[col].dfid === filter.col) || "";
+            setColId(col);
             setAction(filter.action);
             setVal(filter.value as string);
             setEnableCheck(false);
-            setEnableDel(!!getFilterDesc(columns, filter.col, filter.action, filter.value as string));
+            setEnableDel(!!getFilterDesc(columns, col, filter.action, filter.value as string));
         } else {
             setColId("");
             setAction("");
@@ -186,15 +194,10 @@ const FilterRow = (props: FilterRowProps) => {
         <Box sx={filterBoxSx}>
             <FormControl>
                 <InputLabel>Column</InputLabel>
-                <Select
-                    value={colId || ""}
-                    onChange={onColSelect}
-                    sx={colSx}
-                    input={<OutlinedInput label="Column" />}
-                >
-                    {colsOrder.map((col, idx) =>
+                <Select value={colId || ""} onChange={onColSelect} sx={colSx} input={<OutlinedInput label="Column" />}>
+                    {colsOrder.map((col) =>
                         columns[col].filter ? (
-                            <MenuItem key={"col" + idx} value={col}>
+                            <MenuItem key={col} value={col}>
                                 {columns[col].title || columns[col].dfid}
                             </MenuItem>
                         ) : null
@@ -203,14 +206,9 @@ const FilterRow = (props: FilterRowProps) => {
             </FormControl>
             <FormControl>
                 <InputLabel>Action</InputLabel>
-                <Select
-                    value={action || ""}
-                    onChange={onActSelect}
-                    sx={actSx}
-                    input={<OutlinedInput label="Action" />}
-                >
-                    {Object.keys(getActionsByType(colType)).map((a, idx) => (
-                        <MenuItem key={"act" + idx} value={a}>
+                <Select value={action || ""} onChange={onActSelect} sx={actSx} input={<OutlinedInput label="Action" />}>
+                    {Object.keys(getActionsByType(colType)).map((a) => (
+                        <MenuItem key={a} value={a}>
                             {getActionsByType(colType)[a]}
                         </MenuItem>
                     ))}
@@ -245,7 +243,12 @@ const FilterRow = (props: FilterRowProps) => {
                     inputFormat={colFormat}
                 />
             ) : (
-                <TextField value={val || ""} onChange={onValueChange} label={`${val ? "" : "Empty "}String`} sx={valSx} />
+                <TextField
+                    value={val || ""}
+                    onChange={onValueChange}
+                    label={`${val ? "" : "Empty "}String`}
+                    sx={valSx}
+                />
             )}
             <Tooltip title="Validate">
                 <span>
@@ -290,8 +293,14 @@ export const TableFilter = (props: TableFilterProps) => {
         });
     }, []);
 
-    const onApply = useCallback(() => onValidate(filters), [onValidate, filters]);
-    const onRemove = useCallback(() => onValidate([]), [onValidate]);
+    const onApply = useCallback(() => {
+        onValidate(filters);
+        onShowFilterClick();
+    }, [onValidate, filters, onShowFilterClick]);
+    const onRemove = useCallback(() => {
+        onValidate([]);
+        onShowFilterClick();
+    }, [onValidate, onShowFilterClick]);
 
     return (
         <>
@@ -317,10 +326,19 @@ export const TableFilter = (props: TableFilterProps) => {
                             setFilter={updateFilter}
                         />
                     ))}
-                    <FilterRow idx={-(filters.length + 1)} columns={props.columns} colsOrder={props.colsOrder} setFilter={updateFilter} />
+                    <FilterRow
+                        idx={-(filters.length + 1)}
+                        columns={props.columns}
+                        colsOrder={props.colsOrder}
+                        setFilter={updateFilter}
+                    />
                     <Box sx={buttonBoxSx}>
-                        <Button endIcon={<ClearIcon />} onClick={onRemove}>{`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}</Button>
-                        <Button endIcon={<SendIcon />} onClick={onApply}>{`Apply ${filters.length} filter${filters.length > 1 ? "s" : ""}`}</Button>
+                        <Button endIcon={<ClearIcon />} onClick={onRemove}>{`Reset list (remove applied filter${
+                            filters.length > 1 ? "s" : ""
+                        })`}</Button>
+                        <Button endIcon={<SendIcon />} onClick={onApply}>{`Apply ${filters.length} filter${
+                            filters.length > 1 ? "s" : ""
+                        }`}</Button>
                     </Box>
                 </Box>
             </Popover>

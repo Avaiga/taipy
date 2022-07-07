@@ -84,6 +84,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [orderBy, setOrderBy] = useState("");
     const [loading, setLoading] = useState(true);
     const [aggregates, setAggregates] = useState<string[]>([]);
+    const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
     const selectedRowRef = useRef<HTMLTableRowElement|null>(null);
@@ -158,7 +159,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
               }, "-agg")
             : "";
         const cols = colsOrder.map((col) => columns[col].dfid);
-        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}`;
+        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${appliedFilters.map(af => `${af.col}${af.action}${af.value}`)}`;
         if (refresh || !props.data || props.data[pageKey.current] === undefined) {
             setLoading(true);
             const applies = aggregates.length
@@ -182,7 +183,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     aggregates,
                     applies,
                     styles,
-                    handleNan
+                    handleNan,
+                    appliedFilters,
                 )
             );
         } else {
@@ -203,6 +205,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         updateVarName,
         id,
         handleNan,
+        appliedFilters,
         dispatch,
     ]);
 
@@ -255,8 +258,6 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             ),
         [startIndex, dispatch, updateVarName, tp_onAdd]
     );
-
-    const onFilterValidation = useCallback((data: Array<FilterDesc>) => console.info(data), []);
 
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string) =>
@@ -348,7 +349,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                         </Tooltip>
                                                     ) : null,
                                                     active && filter ? (
-                                                        <TableFilter key="filter" columns={columns} colsOrder={colsOrder} onValidate={onFilterValidation} />
+                                                        <TableFilter key="filter" columns={columns} colsOrder={colsOrder} onValidate={setAppliedFilters} appliedFilters={appliedFilters} />
                                                     ) : null,
                                                 ]
                                             ) : (

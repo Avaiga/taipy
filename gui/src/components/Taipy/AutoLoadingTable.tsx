@@ -154,11 +154,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
     const [orderBy, setOrderBy] = useState("");
     const [order, setOrder] = useState<Order>("asc");
+    const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
+    const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+    const [aggregates, setAggregates] = useState<string[]>([]);
     const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
-    const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-    const [aggregates, setAggregates] = useState<string[]>([]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
@@ -312,15 +313,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         aggregates,
                         applies,
                         styles,
-                        handleNan
+                        handleNan,
+                        appliedFilters,
                     )
                 );
             });
         },
-        [aggregates, styles, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, dispatch]
+        [aggregates, styles, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, appliedFilters, dispatch]
     );
-
-    const onFilterValidation = useCallback((data: Array<FilterDesc>) => console.info(data), []);
 
     const onAddRowClick = useCallback(
         () =>
@@ -444,7 +444,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                             key="filter"
                                                             columns={columns}
                                                             colsOrder={colsOrder}
-                                                            onValidate={onFilterValidation}
+                                                            onValidate={setAppliedFilters}
+                                                            appliedFilters={appliedFilters}
                                                         />
                                                     ) : null,
                                                 ]

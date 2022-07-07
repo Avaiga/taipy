@@ -72,7 +72,7 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
 
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
-        return <Switch checked={val as boolean} title={"" + val} />;
+        return <Switch checked={val as boolean} title={val ? "True": "False"} />;
     }
     return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
 };

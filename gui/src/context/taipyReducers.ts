@@ -7,6 +7,7 @@ import merge from "lodash/merge";
 import { TIMEZONE_CLIENT } from "../utils";
 import { parseData } from "../utils/dataFormat";
 import { MenuProps } from "../utils/lov";
+import { FilterDesc } from "../components/Taipy/TableFilter";
 
 enum Types {
     SocketConnected = "SOCKET_CONNECTED",
@@ -466,7 +467,8 @@ export const createRequestTableUpdateAction = (
     aggregates?: string[],
     applies?: Record<string, unknown>,
     styles?: Record<string, unknown>,
-    handleNan?: boolean
+    handleNan?: boolean,
+    filters?: Array<FilterDesc>,
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -482,6 +484,7 @@ export const createRequestTableUpdateAction = (
         applies: applies,
         styles: styles,
         handlenan: handleNan,
+        filters: filters,
     },
 });
 
@@ -497,7 +500,8 @@ export const createRequestInfiniteTableUpdateAction = (
     aggregates?: string[],
     applies?: Record<string, unknown>,
     styles?: Record<string, unknown>,
-    handleNan?: boolean
+    handleNan?: boolean,
+    filters?: Array<FilterDesc>,
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -514,6 +518,7 @@ export const createRequestInfiniteTableUpdateAction = (
         applies: applies,
         styles: styles,
         handlenan: handleNan,
+        filters: filters,
     },
 });
 
