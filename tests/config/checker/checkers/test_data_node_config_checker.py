@@ -79,7 +79,7 @@ class TestDataNodeConfigChecker:
         config._data_nodes["default"].storage_type = "json"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
-        assert len(collector.errors) == 0
+        assert len(collector.errors) == 1
 
     def test_check_scope(self):
         config = _Config._default_config()
