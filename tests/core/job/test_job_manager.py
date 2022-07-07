@@ -181,7 +181,6 @@ def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
     _Scheduler._update_job_config()
 
-    # test cancelling subsequent jobs
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
 
@@ -258,27 +257,3 @@ def _create_task(function, nb_outputs=1, name=None):
         output_dn_configs,
     )
     return _TaskManager._bulk_get_or_create([task_config])[0]
-
-
-def _create_pipeline():
-    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
-    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
-    dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
-    dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
-
-    task_1 = Task("task_config_1", lock_multiply, [dn_1, dn_2], [dn_3], id="task_1")
-    task_2 = Task("task_config_2", multiply, [dn_1, dn_3], [dn_4], id="task_2")
-    task_3 = Task("task_config_3", print, [dn_4], id="task_3")
-
-    pipeline = Pipeline("pipeline_config", {}, [task_1, task_2, task_3], pipeline_id="pipeline_id")
-
-    _DataManager._set(dn_1)
-    _DataManager._set(dn_2)
-    _DataManager._set(dn_3)
-    _DataManager._set(dn_4)
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-    _TaskManager._set(task_3)
-    _PipelineManager._set(pipeline)
-
-    return _PipelineManager._get(pipeline)
