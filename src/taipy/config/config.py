@@ -12,7 +12,6 @@
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .auth.auth_config import AuthConfig
 from .common._classproperty import _Classproperty
 from ..logger._taipy_logger import _TaipyLogger
 from .scenario.frequency import Frequency
@@ -42,9 +41,15 @@ class Config:
     _collector = IssueCollector()
 
     @_Classproperty
-    def auth(cls) -> AuthConfig:
-        """Return configuration values related to the authentication as a `AuthConfig^`."""
-        return cls._applied_config._job_config
+    def sub_configs(cls):
+        """Return sub configuration value."""
+        return cls._applied_config._sub_configs
+
+    @classmethod
+    def register(cls, sub_config):
+        cls._python_config._sub_configs = sub_config
+        cls.__compile_configs()
+        return cls._applied_config._sub_configs
 
     @_Classproperty
     def job_config(cls) -> JobConfig:
@@ -108,28 +113,6 @@ class Config:
     @classmethod
     def _export_code_config(cls, filename):
         _TomlSerializer()._write(cls._python_config, filename)
-
-    @classmethod
-    def configure_auth(
-        cls,
-        protocol: str = None,
-        **properties,
-    ) -> AuthConfig:
-        """Configure authentication.
-
-        Parameters:
-            protocol (Optional[str]): protocol (str):  identifier of the authentication protocol. Taipy already
-                implements three predefined protocols:
-                    - None: ...
-                    - taipy: ...
-                    - ldap: ...
-            **properties: A dictionary of additional properties.
-        Returns:
-            AuthConfig^: The auth configuration.
-        """
-        cls._python_config._auth_config = AuthConfig(protocol, **properties)
-        cls.__compile_configs()
-        return cls._applied_config._auth_config
 
     @classmethod
     def configure_global_app(

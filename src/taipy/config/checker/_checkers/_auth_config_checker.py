@@ -12,7 +12,6 @@
 from ._config_checker import _ConfigChecker
 from ..issue_collector import IssueCollector
 from ..._config import _Config
-from ...auth.auth_config import AuthConfig
 
 
 class _AuthConfigChecker(_ConfigChecker):
@@ -24,7 +23,7 @@ class _AuthConfigChecker(_ConfigChecker):
         self._check_predefined_protocol(auth_config)
         return self._collector
 
-    def _check_predefined_protocol(self, auth_config: AuthConfig):
+    def _check_predefined_protocol(self, auth_config):
         if auth_config.protocol == auth_config._PROTOCOL_LDAP:
             self.__check_ldap(auth_config)
         if auth_config.protocol == auth_config._PROTOCOL_TAIPY:
