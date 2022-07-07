@@ -219,11 +219,18 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
 
     const [colsOrder, columns, styles, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
-        const pFilter = !!props.filter;
         if (props.columns) {
             try {
-                const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                const filter = pFilter || Object.keys(columns).some((col) => !!columns[col].filter);
+                const columns = (
+                    typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns
+                ) as Record<string, ColumnDesc>;
+                let filter = false;
+                Object.values(columns).forEach((col) => {
+                    if (typeof col.filter != "boolean") {
+                        col.filter = !!props.filter;
+                    }
+                    filter = filter || col.filter;
+                });
                 addDeleteColumn(
                     (!!(active && editable && (tp_onAdd || tp_onDelete)) ? 1 : 0) + (active && filter ? 1 : 0),
                     columns
@@ -244,7 +251,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {}, {}, hNan, pFilter];
+        return [[], {}, {}, hNan, false];
     }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
@@ -422,16 +429,22 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
                                                     active && editable && tp_onAdd ? (
-                                                        <IconButton
-                                                            onClick={onAddRowClick}
-                                                            size="small"
-                                                            sx={iconInRowSx}
-                                                        >
-                                                            <AddIcon />
-                                                        </IconButton>
+                                                        <Tooltip title="Add a row" key="addARow">
+                                                            <IconButton
+                                                                onClick={onAddRowClick}
+                                                                size="small"
+                                                                sx={iconInRowSx}
+                                                            >
+                                                                <AddIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
                                                     ) : null,
                                                     active && filter ? (
-                                                        <TableFilter columns={columns} onValidate={onFilterValidation} />
+                                                        <TableFilter
+                                                            key="filter"
+                                                            columns={columns}
+                                                            onValidate={onFilterValidation}
+                                                        />
                                                     ) : null,
                                                 ]
                                             ) : (

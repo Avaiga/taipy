@@ -24,6 +24,10 @@ export interface ColumnDesc {
     style?: string;
     nanValue?: string;
     tz?: string;
+    filter?: boolean;
+    apply?: string;
+    groupBy?: boolean;
+    widthHint?: number;
 }
 
 export type Order = "asc" | "desc";
@@ -146,7 +150,7 @@ interface EditableCellProps {
 export const addDeleteColumn = (render: number, columns: Record<string, ColumnDesc>) => {
     if (render) {
         Object.keys(columns).forEach((key) => columns[key].index++);
-        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: (render * 4) + "em" };
+        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: (render * 4) + "em", filter: false };
     }
     return columns;
 };

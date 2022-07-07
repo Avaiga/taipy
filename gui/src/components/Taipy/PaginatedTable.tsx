@@ -50,6 +50,7 @@ import {
     RowValue,
     tableSx,
     TaipyPaginatedTableProps,
+    ColumnDesc,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import { FilterDesc, TableFilter } from "./TableFilter";
@@ -95,11 +96,16 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
 
     const [colsOrder, columns, styles, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
-        const pFilter = !!props.filter;
         if (props.columns) {
             try {
-                const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                const filter = pFilter || Object.keys(columns).some((col) => !!columns[col].filter);
+                const columns = (typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns) as Record<string, ColumnDesc>;
+                let filter = false;
+                Object.values(columns).forEach((col) => {
+                    if (typeof col.filter != "boolean") {
+                        col.filter = !!props.filter;
+                    }
+                    filter = filter || col.filter;
+                });
                 addDeleteColumn(
                     (!!active && editable && (tp_onAdd || tp_onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
                     columns
@@ -107,7 +113,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
                 const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
                     if (columns[col].style) {
-                        pv[columns[col].dfid] = columns[col].style;
+                        pv[columns[col].dfid] = columns[col].style as string;
                     }
                     hNan = hNan || !!columns[col].nanValue;
                     return pv;
@@ -120,7 +126,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 console.info("PTable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {}, {}, hNan, pFilter];
+        return [[], {}, {}, hNan, false];
     }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
@@ -331,7 +337,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
                                                     active && editable && tp_onAdd ? (
-                                                        <Tooltip title="Add a row">
+                                                        <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}
                                                                 size="small"
@@ -342,7 +348,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                         </Tooltip>
                                                     ) : null,
                                                     active && filter ? (
-                                                        <TableFilter columns={columns} onValidate={onFilterValidation} />
+                                                        <TableFilter key="filter" columns={columns} onValidate={onFilterValidation} />
                                                     ) : null,
                                                 ]
                                             ) : (

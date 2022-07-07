@@ -16,7 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SendIcon from "@mui/icons-material/Send";
 
-import { ColumnDesc, iconInRowSx, EDIT_COL } from "./tableUtils";
+import { ColumnDesc, iconInRowSx } from "./tableUtils";
 import { getTypeFromDf } from "../../utils";
 import { Button } from "@mui/material";
 
@@ -45,11 +45,11 @@ const anchorOrigin = {
 } as PopoverOrigin;
 
 const actionsByType = {
-    string: ["==", "like", "!="],
-    number: ["<", "<=", "==", "!=", ">=", ">"],
-    boolean: ["==", "!="],
-    date: ["<", "<=", "==", "!=", ">=", ">"],
-} as Record<string, Array<string>>;
+    string: {"==" : "equal", "like": "like", "!=": "not equal"},
+    number: {"<": "less", "<=": "less equal", "==": "equal", "!=": "not equal", ">=": "greater equal", ">": "greater"},
+    boolean: {"==": "equal", "!=": "not equal"},
+    date: {"<": "before", "<=": "before equal", "==": "equal", "!=": "not equal", ">=": "after equal", ">": "after"},
+} as Record<string, Record<string, string>>;
 
 const getActionsByType = (colType?: string) =>
     (colType && colType in actionsByType && actionsByType[colType]) || actionsByType["string"];
@@ -74,6 +74,10 @@ const filterBoxSx = {
     gap: "1em",
 };
 
+const colSx = {width: "15em"};
+const actSx = {width: "10em"};
+const valSx = {width: "15em"};
+
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
@@ -89,7 +93,7 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
     }
 };
 
-const renderInput = (params: TextFieldProps) => <TextField {...params} />;
+const renderInput = (params: TextFieldProps) => <TextField {...params} sx={valSx} />;
 
 const FilterRow = (props: FilterRowProps) => {
     const { idx, setFilter, columns, filter } = props;
@@ -168,15 +172,15 @@ const FilterRow = (props: FilterRowProps) => {
                 <Select
                     value={colId || ""}
                     onChange={onColSelect}
-                    sx={{ width: "15em" }}
+                    sx={colSx}
                     input={<OutlinedInput label="Column" />}
                 >
                     {Object.keys(columns).map((col, idx) =>
-                        col == EDIT_COL ? null : (
+                        columns[col].filter ? (
                             <MenuItem key={"col" + idx} value={col}>
                                 {columns[col].title || columns[col].dfid}
                             </MenuItem>
-                        )
+                        ) : null
                     )}
                 </Select>
             </FormControl>
@@ -185,12 +189,12 @@ const FilterRow = (props: FilterRowProps) => {
                 <Select
                     value={action || ""}
                     onChange={onActSelect}
-                    sx={{ width: "6em" }}
+                    sx={actSx}
                     input={<OutlinedInput label="Action" />}
                 >
-                    {getActionsByType(colType).map((a, idx) => (
+                    {Object.keys(getActionsByType(colType)).map((a, idx) => (
                         <MenuItem key={"act" + idx} value={a}>
-                            {a}
+                            {getActionsByType(colType)[a]}
                         </MenuItem>
                     ))}
                 </Select>
@@ -201,6 +205,7 @@ const FilterRow = (props: FilterRowProps) => {
                     value={typeof val == "number" ? val : val || ""}
                     onChange={onValueChange}
                     label="Number"
+                    sx={valSx}
                 />
             ) : colType == "boolean" ? (
                 <FormControl>
@@ -208,7 +213,7 @@ const FilterRow = (props: FilterRowProps) => {
                     <Select
                         value={typeof val === "boolean" ? (val ? "1" : "0") : val || ""}
                         onChange={onValueSelect}
-                        sx={{ width: "7em" }}
+                        sx={valSx}
                         input={<OutlinedInput label="Boolean" />}
                     >
                         <MenuItem value={"1"}>True</MenuItem>
@@ -216,9 +221,14 @@ const FilterRow = (props: FilterRowProps) => {
                     </Select>
                 </FormControl>
             ) : colType == "date" ? (
-                <DatePicker value={val || null} onChange={onDateChange} renderInput={renderInput} inputFormat={colFormat} />
+                <DatePicker
+                    value={val || null}
+                    onChange={onDateChange}
+                    renderInput={renderInput}
+                    inputFormat={colFormat}
+                />
             ) : (
-                <TextField value={val || ""} onChange={onValueChange} label="Empty String" />
+                <TextField value={val || ""} onChange={onValueChange} label="Empty String" sx={valSx} />
             )}
             <Tooltip title="Validate">
                 <span>
@@ -286,8 +296,9 @@ export const TableFilter = (props: TableFilterProps) => {
                     ))}
                     <FilterRow idx={-(filters.length + 1)} columns={props.columns} setFilter={updateFilter} />
                     <Box sx={filterBoxSx}>
-                        <Button endIcon={<SendIcon />}>{"Apply filter" + (filters.length > 1 ? "s" : "")}</Button>
                         <Button endIcon={<ClearIcon />}>{"Remove filter" + (filters.length > 1 ? "s" : "")}</Button>
+                        <Box sx={actSx}/>
+                        <Button endIcon={<SendIcon />}>{"Apply filter" + (filters.length > 1 ? "s" : "")}</Button>
                     </Box>
                 </Box>
             </Popover>
