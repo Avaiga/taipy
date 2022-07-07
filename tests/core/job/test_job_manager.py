@@ -161,7 +161,7 @@ def test_force_deleting_unfinished_job():
     assert _JobManager._get(job.id) is None
 
 
-def test_cancel_job():
+def test_cancel_single_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
@@ -176,14 +176,34 @@ def test_cancel_job():
         assert len(_Scheduler._processes) == 0
     assert job.is_cancelled()
 
-    # test cancelling subsequent jobs
-    pipeline = _create_pipeline()
 
-    with lock:
-        jobs = _Scheduler.submit(pipeline)
-        job_1 = jobs[0]
-        job_2 = jobs[1]
-        job_3 = jobs[2]
+def test_cancel_subsequent_jobs():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    _Scheduler._update_job_config()
+
+    # test cancelling subsequent jobs
+    m = multiprocessing.Manager()
+    lock_1 = m.Lock()
+
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
+    dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
+
+    task_1 = Task("task_config_1", partial(lock_multiply, lock_1), [dn_1, dn_2], [dn_3], id="task_1")
+    task_2 = Task("task_config_2", multiply, [dn_1, dn_3], [dn_4], id="task_2")
+    task_3 = Task("task_config_3", print, [dn_4], id="task_3")
+
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+    _DataManager._set(dn_3)
+    _DataManager._set(dn_4)
+
+    with lock_1:
+        submit_id_1 = "submit_1"
+        job_1 = _Scheduler.submit_task(task_1, submit_id=submit_id_1)
+        job_2 = _Scheduler.submit_task(task_2, submit_id=submit_id_1)
+        job_3 = _Scheduler.submit_task(task_3, submit_id=submit_id_1)
 
         assert job_1.is_running()
         assert job_2.is_blocked()
@@ -191,10 +211,10 @@ def test_cancel_job():
         assert len(_Scheduler.blocked_jobs) == 2
         assert _Scheduler.jobs_to_run.qsize() == 0
 
-        jobs = _Scheduler.submit(pipeline)
-        job_4 = jobs[0]
-        job_5 = jobs[1]
-        job_6 = jobs[2]
+        submit_id_2 = "submit_2"
+        job_4 = _Scheduler.submit_task(task_1, submit_id=submit_id_2)
+        job_5 = _Scheduler.submit_task(task_2, submit_id=submit_id_2)
+        job_6 = _Scheduler.submit_task(task_3, submit_id=submit_id_2)
 
         assert job_4.is_pending()
         assert job_5.is_blocked()
@@ -202,14 +222,14 @@ def test_cancel_job():
         assert _Scheduler.jobs_to_run.qsize() == 1
         assert len(_Scheduler.blocked_jobs) == 4
 
-        _JobManager._cancel(job_4.id)
+        _JobManager._cancel(job_4)
         assert job_4.is_cancelled()
         assert job_5.is_cancelled()
         assert job_6.is_cancelled()
         assert _Scheduler.jobs_to_run.qsize() == 0
         assert len(_Scheduler.blocked_jobs) == 2
 
-        _JobManager._cancel(job_1.id)
+        _JobManager._cancel(job_1)
         assert job_1.is_cancelled()
         assert job_2.is_cancelled()
         assert job_3.is_cancelled()
