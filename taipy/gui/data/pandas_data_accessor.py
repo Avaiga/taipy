@@ -53,9 +53,9 @@ class _PandasDataAccessor(_DataAccessor):
             warnings.warn(f"Exception raised when calling user style function {function_name}\n{e}")
         return ""
 
-    def __is_date_column(self, data: pd.DataFrame, col_name: str):
+    def __is_date_column(self, data: pd.DataFrame, col_name: str) -> bool:
         col_types = data.dtypes[data.dtypes.index.astype(str) == col_name]
-        return len(col_types[col_types.astype(str).str.startswith("datetime")]) > 0
+        return len(col_types[col_types.astype(str).str.startswith("datetime")]) > 0  # type: ignore
 
     def __build_transferred_cols(
         self, gui: Gui, payload_cols: t.Any, data: pd.DataFrame, styles: t.Optional[t.Dict[str, str]] = None
