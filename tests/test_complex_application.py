@@ -16,6 +16,7 @@ import pandas as pd
 from taipy.config import Config, JobConfig
 
 import src.taipy.core.taipy as tp
+from src.taipy.core import Status
 from src.taipy.core._scheduler._scheduler import _Scheduler
 
 
@@ -35,6 +36,10 @@ def mult(a, b):
     return a * b
 
 
+def mult_by_2(a):
+    return a
+
+
 def divide(a, b):
     return a / b
 
@@ -45,6 +50,32 @@ def average(a):
 
 def return_a_number():
     return 10
+
+
+def test_skipped_jobs():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _Scheduler._update_job_config()
+    input_config = Config.configure_in_memory_data_node("input")
+    intermediate_config = Config.configure_in_memory_data_node("intermediate", cacheable=True)
+    output_config = Config.configure_in_memory_data_node("output", cacheable=True)
+    task_config_1 = Config.configure_task("first", mult_by_2, input_config, intermediate_config)
+    task_config_2 = Config.configure_task("second", mult_by_2, intermediate_config, output_config)
+    pipeline_config = Config.configure_pipeline("pipeline", [task_config_1, task_config_2])
+
+    pipeline = tp.create_pipeline(pipeline_config)
+    pipeline.input.write(2)
+    pipeline.submit()
+    assert len(tp.get_jobs()) == 2
+    for job in tp.get_jobs():
+        assert job.status == Status.COMPLETED
+    pipeline.submit()
+    assert len(tp.get_jobs()) == 4
+    skipped = []
+    for job in tp.get_jobs():
+        if job.status != Status.COMPLETED:
+            assert job.status == Status.SKIPPED
+            skipped.append(job)
+    assert len(skipped) == 2
 
 
 def test_complex():

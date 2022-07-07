@@ -170,7 +170,7 @@ class _Scheduler(_AbstractScheduler):
     @staticmethod
     def __unlock_edit_on_outputs(job):
         for dn in job.task.output.values():
-            dn.unlock_edit(job_id=job.id)
+            dn.unlock_edit(job_id=job.id, at=dn.last_edit_date)
 
     @classmethod
     def _on_status_change(cls, job: Job):
