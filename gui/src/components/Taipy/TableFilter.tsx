@@ -9,7 +9,7 @@ import Tooltip from "@mui/material/Tooltip";
 import FormControl from "@mui/material/FormControl";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import TextField, { TextFieldProps } from "@mui/material/TextField";
-import { DatePicker } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,7 +29,7 @@ export interface FilterDesc {
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
     onValidate: (data: Array<FilterDesc>) => void;
-    filters?: Array<FilterDesc>;
+    appliedFilters?: Array<FilterDesc>;
 }
 
 interface FilterRowProps {
@@ -74,6 +74,17 @@ const filterBoxSx = {
     gap: "1em",
 };
 
+const buttonBoxSx = {
+    display: "flex",
+    flexDirection: "row",
+    px: 4,
+    py: 1,
+    m: 1,
+    bgcolor: "background.paper",
+    borderRadius: 1,
+    gap: "4em",
+};
+
 const colSx = {width: "15em"};
 const actSx = {width: "10em"};
 const valSx = {width: "15em"};
@@ -81,15 +92,19 @@ const valSx = {width: "15em"};
 const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?: string, val?: string) => {
     if (colId && act && val !== undefined) {
         const colType = getTypeFromDf(columns[colId].type);
-        if (colType == "date" && !val) {
+        if (!val && (colType == "date"  || colType == "number" || colType == "boolean")) {
             return;
         }
-        const typedVal = colType == "number" ? parseFloat(val) : colType == "boolean" ? val == "1" : val;
-        return {
-            col: colId,
-            action: act,
-            value: typedVal,
-        } as FilterDesc;
+        try {
+            const typedVal = colType == "number" ? parseFloat(val) : colType == "boolean" ? val == "1" : val;
+            return {
+                col: colId,
+                action: act,
+                value: typedVal,
+            } as FilterDesc;
+        } catch (e) {
+            console.info("could not parse value ", val, e);
+        }
     }
 };
 
@@ -228,7 +243,7 @@ const FilterRow = (props: FilterRowProps) => {
                     inputFormat={colFormat}
                 />
             ) : (
-                <TextField value={val || ""} onChange={onValueChange} label="Empty String" sx={valSx} />
+                <TextField value={val || ""} onChange={onValueChange} label={`${val ? "" : "Empty "}String`} sx={valSx} />
             )}
             <Tooltip title="Validate">
                 <span>
@@ -249,6 +264,8 @@ const FilterRow = (props: FilterRowProps) => {
 };
 
 export const TableFilter = (props: TableFilterProps) => {
+    const {onValidate} = props;
+
     const [showFilter, setShowFilter] = useState(false);
     const filterRef = useRef<HTMLButtonElement | null>(null);
     const [filters, setFilters] = useState<Array<FilterDesc>>([]);
@@ -270,6 +287,9 @@ export const TableFilter = (props: TableFilterProps) => {
             return [...fds, nfd];
         });
     }, []);
+
+    const onApply = useCallback(() => onValidate(filters), [onValidate, filters]);
+    const onRemove = useCallback(() => onValidate([]), [onValidate]);
 
     return (
         <>
@@ -295,10 +315,9 @@ export const TableFilter = (props: TableFilterProps) => {
                         />
                     ))}
                     <FilterRow idx={-(filters.length + 1)} columns={props.columns} setFilter={updateFilter} />
-                    <Box sx={filterBoxSx}>
-                        <Button endIcon={<ClearIcon />}>{"Remove filter" + (filters.length > 1 ? "s" : "")}</Button>
-                        <Box sx={actSx}/>
-                        <Button endIcon={<SendIcon />}>{"Apply filter" + (filters.length > 1 ? "s" : "")}</Button>
+                    <Box sx={buttonBoxSx}>
+                        <Button endIcon={<ClearIcon />} onClick={onRemove}>{`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}</Button>
+                        <Button endIcon={<SendIcon />} onClick={onApply}>{`Apply ${filters.length} filter${filters.length > 1 ? "s" : ""}`}</Button>
                     </Box>
                 </Box>
             </Popover>
