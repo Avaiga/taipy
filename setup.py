@@ -45,7 +45,6 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "rdp": ["rdp>=0.8"],
     "arrow": ["pyarrow>=7.0,<9.0"],
     "gevent": [
         "gevent>=21.12.0,<22.0",

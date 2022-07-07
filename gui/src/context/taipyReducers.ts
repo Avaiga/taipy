@@ -439,7 +439,8 @@ export const createRequestChartUpdateAction = (
     id: string | undefined,
     dataKey: string,
     columns: string[],
-    width: number | undefined
+    width: number | undefined,
+    limitThreshold: number | undefined
 ): TaipyAction => ({
     type: Types.RequestDataUpdate,
     name: name || "",
@@ -449,6 +450,7 @@ export const createRequestChartUpdateAction = (
         columns: columns,
         alldata: true,
         width: width,
+        limitThreshold: limitThreshold,
     },
 });
 

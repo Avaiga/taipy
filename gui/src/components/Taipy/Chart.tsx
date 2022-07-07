@@ -49,6 +49,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     testId?: string;
     render?: boolean;
     defaultRender?: boolean;
+    limitThreshold?: number;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -122,6 +123,7 @@ const Chart = (props: ChartProp) => {
         tp_onRangeChange,
         propagate = true,
         limitRows = false,
+        limitThreshold,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [selected, setSelected] = useState<number[][]>([]);
@@ -206,12 +208,13 @@ const Chart = (props: ChartProp) => {
                     id,
                     dataKey.current,
                     backCols,
-                    limitRows ? plotRef.current?.clientWidth : undefined
+                    limitRows ? plotRef.current?.clientWidth : undefined,
+                    limitThreshold
                 )
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, updateVarName, id, limitRows]);
+    }, [refresh, dispatch, config.columns, updateVarName, id, limitRows, limitThreshold]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 

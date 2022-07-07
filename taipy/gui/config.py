@@ -49,6 +49,7 @@ ConfigParameter = t.Literal[
     "force_https",
     "watermark",
     "change_delay",
+    "chart_limit_threshold",
 ]
 
 Config = t.TypedDict(
@@ -80,6 +81,7 @@ Config = t.TypedDict(
         "force_https": bool,
         "watermark": t.Union[str, None],
         "change_delay": t.Union[int, None],
+        "chart_limit_threshold": int,
     },
     total=False,
 )

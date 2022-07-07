@@ -85,6 +85,7 @@ class _Factory:
                 ("on_range_change", _AttributeType.function),
                 ("active", _AttributeType.dynamic_boolean, True),
                 ("limit_rows", _AttributeType.boolean),
+                ("limit_threshold", _AttributeType.number),
                 ("render", _AttributeType.dynamic_boolean, True),
                 ("hover_text", _AttributeType.dynamic_string),
                 ("on_change", _AttributeType.function),

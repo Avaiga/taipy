@@ -20,6 +20,7 @@ from ..gui import Gui
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
+from .utils import _df_data_filter
 
 _has_arrow_module = False
 if util.find_spec("pyarrow"):
@@ -238,10 +239,13 @@ class _PandasDataAccessor(_DataAccessor):
             nb_rows_max = payload.get("width")
             # view with the requested columns
             if nb_rows_max and nb_rows_max < len(value) / 2:
-                value = value.copy()
-                value["tp_index"] = value.index
-                # we need to be more clever than this :-)
-                value = value.iloc[:: (len(value) // nb_rows_max)]
+                x_column, y_column = columns[1] if len(columns) > 1 else None, columns[0]
+                try:
+                    threshold = payload.get("limitThreshold", gui._get_config("chart_limit_threshold", None))
+                    if threshold is not None:
+                        value = _df_data_filter(value, x_column, y_column, epsilon=threshold)
+                except Exception as e:
+                    warnings.warn(f"Limit rows error for dataframe: {e}")
             value = self.__build_transferred_cols(gui, columns, value)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret
