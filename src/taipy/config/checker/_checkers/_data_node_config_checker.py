@@ -12,10 +12,10 @@
 from typing import List
 
 from ..._config import _Config
-from ._config_checker import _ConfigChecker
-from ..issue_collector import IssueCollector
-from ...data_node.scope import Scope
 from ...data_node.data_node_config import DataNodeConfig
+from ...data_node.scope import Scope
+from ..issue_collector import IssueCollector
+from ._config_checker import _ConfigChecker
 
 
 class _DataNodeConfigChecker(_ConfigChecker):
@@ -39,7 +39,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 data_node_config._STORAGE_TYPE_KEY,
                 data_node_config.storage_type,
                 f"`{data_node_config._STORAGE_TYPE_KEY}` field of DataNode `{data_node_config_id}` must be either csv, "
-                f"sql, pickle, excel, generic or in_memory.",
+                f"sql, pickle, excel, generic, json or in_memory.",
             )
 
     def _check_scope(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -58,10 +58,12 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 if storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_SQL:
                     if engine := data_node_config.properties.get(DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY):
                         if engine == DataNodeConfig._REQUIRED_DB_ENGINE_SQLITE:
-                            required_properties = [DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
-                                                   DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
-                                                   DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
-                                                   DataNodeConfig._REQUIRED_WRITE_TABLE_SQL_PROPERTY]
+                            required_properties = [
+                                DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
+                                DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
+                                DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
+                                DataNodeConfig._REQUIRED_WRITE_TABLE_SQL_PROPERTY,
+                            ]
                 for required_property in required_properties:
                     if required_property not in data_node_config.properties:
                         self._error(
@@ -73,17 +75,20 @@ class _DataNodeConfigChecker(_ConfigChecker):
 
     def _check_generic_read_write_fct_params(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:
-            properties_to_check = [DataNodeConfig._OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
-                                   DataNodeConfig._OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY]
+            properties_to_check = [
+                DataNodeConfig._OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
+                DataNodeConfig._OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY,
+            ]
             for prop_key in properties_to_check:
                 if prop_key in data_node_config.properties:
                     prop_value = data_node_config.properties[prop_key]
                     if not isinstance(prop_value, tuple):  # type: ignore
-                        self._error(prop_key,
-                                    prop_value,
-                                    f"`{prop_key}` field of DataNode"
-                                    f" `{data_node_config_id}` must be populated with a Tuple value.",
-                                    )
+                        self._error(
+                            prop_key,
+                            prop_value,
+                            f"`{prop_key}` field of DataNode"
+                            f" `{data_node_config_id}` must be populated with a Tuple value.",
+                        )
 
     def _check_generic_read_write_fct(self, data_node_config_id: str, data_node_config: DataNodeConfig):
         if data_node_config.storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC:

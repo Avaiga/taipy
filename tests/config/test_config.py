@@ -48,6 +48,18 @@ class TestConfig:
             Config.configure_pickle_data_node(a, b, c, path=d)
             mck.assert_called_once_with(a, "pickle", scope=c, default_data=b, path=d)
 
+    def test_configure_json_data_node(self):
+        a, b, c, d = "foo", "path", Scope.PIPELINE, "qux"
+        with mock.patch("src.taipy.config.config.Config.configure_data_node") as mck:
+            Config.configure_json_data_node(a, b, c, path=d)
+            mck.assert_called_once_with(
+                a,
+                "json",
+                default_path=b,
+                scope=c,
+                path=d,
+            )
+
     def test_configure_sql_data_node(self):
         a, b, c, d, e, f, g, h, i, j, scope, k = (
             "foo",
