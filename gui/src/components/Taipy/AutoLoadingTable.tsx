@@ -443,6 +443,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                         <TableFilter
                                                             key="filter"
                                                             columns={columns}
+                                                            colsOrder={colsOrder}
                                                             onValidate={onFilterValidation}
                                                         />
                                                     ) : null,

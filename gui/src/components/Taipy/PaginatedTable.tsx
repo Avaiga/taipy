@@ -348,7 +348,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                         </Tooltip>
                                                     ) : null,
                                                     active && filter ? (
-                                                        <TableFilter key="filter" columns={columns} onValidate={onFilterValidation} />
+                                                        <TableFilter key="filter" columns={columns} colsOrder={colsOrder} onValidate={onFilterValidation} />
                                                     ) : null,
                                                 ]
                                             ) : (

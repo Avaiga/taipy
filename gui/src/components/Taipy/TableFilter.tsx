@@ -28,6 +28,7 @@ export interface FilterDesc {
 
 interface TableFilterProps {
     columns: Record<string, ColumnDesc>;
+    colsOrder: Array<string>;
     onValidate: (data: Array<FilterDesc>) => void;
     appliedFilters?: Array<FilterDesc>;
 }
@@ -36,6 +37,7 @@ interface FilterRowProps {
     idx: number;
     filter?: FilterDesc;
     columns: Record<string, ColumnDesc>;
+    colsOrder: Array<string>;
     setFilter: (idx: number, fd: FilterDesc, remove?: boolean) => void;
 }
 
@@ -111,7 +113,7 @@ const getFilterDesc = (columns: Record<string, ColumnDesc>, colId?: string, act?
 const renderInput = (params: TextFieldProps) => <TextField {...params} sx={valSx} />;
 
 const FilterRow = (props: FilterRowProps) => {
-    const { idx, setFilter, columns, filter } = props;
+    const { idx, setFilter, columns, colsOrder, filter } = props;
 
     const [colId, setColId] = useState<string>("");
     const [action, setAction] = useState<string>("");
@@ -190,7 +192,7 @@ const FilterRow = (props: FilterRowProps) => {
                     sx={colSx}
                     input={<OutlinedInput label="Column" />}
                 >
-                    {Object.keys(columns).map((col, idx) =>
+                    {colsOrder.map((col, idx) =>
                         columns[col].filter ? (
                             <MenuItem key={"col" + idx} value={col}>
                                 {columns[col].title || columns[col].dfid}
@@ -264,7 +266,7 @@ const FilterRow = (props: FilterRowProps) => {
 };
 
 export const TableFilter = (props: TableFilterProps) => {
-    const {onValidate} = props;
+    const { onValidate } = props;
 
     const [showFilter, setShowFilter] = useState(false);
     const filterRef = useRef<HTMLButtonElement | null>(null);
@@ -311,10 +313,11 @@ export const TableFilter = (props: TableFilterProps) => {
                             idx={idx}
                             filter={fd}
                             columns={props.columns}
+                            colsOrder={props.colsOrder}
                             setFilter={updateFilter}
                         />
                     ))}
-                    <FilterRow idx={-(filters.length + 1)} columns={props.columns} setFilter={updateFilter} />
+                    <FilterRow idx={-(filters.length + 1)} columns={props.columns} colsOrder={props.colsOrder} setFilter={updateFilter} />
                     <Box sx={buttonBoxSx}>
                         <Button endIcon={<ClearIcon />} onClick={onRemove}>{`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}</Button>
                         <Button endIcon={<SendIcon />} onClick={onApply}>{`Apply ${filters.length} filter${filters.length > 1 ? "s" : ""}`}</Button>
