@@ -11,3 +11,4 @@
 
 from ._fs_base import _FileSystemRepository
 from ._repository import _AbstractRepository
+from ._repository_factory import _RepositoryFactory

@@ -78,7 +78,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         ...
 
     def __init__(self, model: Type[ModelType], dir_name: str):
-        super().__init__()
         self.model = model
         self._dir_name = dir_name
 
