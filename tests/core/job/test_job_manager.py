@@ -25,8 +25,6 @@ from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import JobNotDeletedException
 from src.taipy.core.job._job_manager import _JobManager
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
-from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config import JobConfig
@@ -223,22 +221,22 @@ def test_cancel_subsequent_jobs():
 
         _JobManager._cancel(job_4)
         assert job_4.is_cancelled()
-        assert job_5.is_cancelled()
-        assert job_6.is_cancelled()
+        assert job_5.is_abandoned()
+        assert job_6.is_abandoned()
         assert _Scheduler.jobs_to_run.qsize() == 0
         assert len(_Scheduler.blocked_jobs) == 2
 
         _JobManager._cancel(job_1)
         assert job_1.is_cancelled()
-        assert job_2.is_cancelled()
-        assert job_3.is_cancelled()
+        assert job_2.is_abandoned()
+        assert job_3.is_abandoned()
 
     assert job_1.is_cancelled()
-    assert job_2.is_cancelled()
-    assert job_3.is_cancelled()
+    assert job_2.is_abandoned()
+    assert job_3.is_abandoned()
     assert job_4.is_cancelled()
-    assert job_5.is_cancelled()
-    assert job_6.is_cancelled()
+    assert job_5.is_abandoned()
+    assert job_6.is_abandoned()
     assert _Scheduler.jobs_to_run.qsize() == 0
 
 

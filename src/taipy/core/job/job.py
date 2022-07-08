@@ -149,6 +149,11 @@ class Job(_Entity):
         self.status = Status.CANCELLED
 
     @_run_callbacks
+    def abandoned(self):
+        """Set the status to _cancelled_ and notify subscribers."""
+        self.status = Status.ABANDONED
+
+    @_run_callbacks
     def failed(self):
         """Set the status to _failed_ and notify subscribers."""
         self.status = Status.FAILED
@@ -186,6 +191,14 @@ class Job(_Entity):
             True if the job was cancelled.
         """
         return self.status == Status.CANCELLED
+
+    def is_abandoned(self) -> bool:
+        """Indicate if the job was abandoned.
+
+        Returns:
+            True if the job was abandoned.
+        """
+        return self.status == Status.ABANDONED
 
     def is_submitted(self) -> bool:
         """Indicate if the job is submitted.
@@ -233,7 +246,9 @@ class Job(_Entity):
         Returns:
             True if the job is finished.
         """
-        return self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped()
+        return (
+            self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped() or self.is_abandoned()
+        )
 
     def _on_status_change(self, *functions):
         """Get a notification when the status of the job changes.

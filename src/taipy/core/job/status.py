@@ -47,4 +47,4 @@ class Status(_ReprEnum):
     FAILED = 6
     COMPLETED = 7
     SKIPPED = 8
-    ABUNDANT = 9
+    ABANDONED = 9

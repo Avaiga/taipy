@@ -221,7 +221,7 @@ class _Scheduler(_AbstractScheduler):
         with cls.lock:
             cls.__remove_blocked_jobs(to_cancel_jobs)
             cls.__remove_jobs_to_run(to_cancel_jobs)
-            cls.__cancel_processes(to_cancel_jobs)
+            cls.__cancel_processes(job.id, to_cancel_jobs)
             cls.__unlock_edit_on_outputs(to_cancel_jobs)
         # if not cls.jobs_to_run.empty():
         #     cls.__execute_jobs()
@@ -264,11 +264,14 @@ class _Scheduler(_AbstractScheduler):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def __cancel_processes(cls, jobs):
+    def __cancel_processes(cls, job_id_to_cancel, jobs):
         for job in jobs:
             if process := cls._pop_process_in_scheduler(job.id):
                 process.cancel()  # TODO: this doesn't kill the running process
-            job.cancelled()
+            if job_id_to_cancel == job.id:
+                job.cancelled()
+            else:
+                job.abandoned()
 
     @classmethod
     def _set_process_in_scheduler(cls, job_id, process):
