@@ -10,3 +10,4 @@
 # specific language governing permissions and limitations under the License.
 
 from ._fs_base import _FileSystemRepository
+from ._repository import _AbstractRepository
