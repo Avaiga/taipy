@@ -16,7 +16,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SendIcon from "@mui/icons-material/Send";
 
-import { ColumnDesc, iconInRowSx } from "./tableUtils";
+import { ColumnDesc, defaultDateFormat, iconInRowSx } from "./tableUtils";
 import { getDateTime, getTypeFromDf } from "../../utils";
 import { Button } from "@mui/material";
 
@@ -165,8 +165,15 @@ const FilterRow = (props: FilterRowProps) => {
     );
     const onDateChange = useCallback(
         (v: Date | null) => {
-            setVal(v?.toISOString() || "");
-            setEnableCheck(!!getFilterDesc(columns, colId, action, v?.toISOString()));
+            let dv;
+            try {
+                dv = v?.toISOString() || "";
+            } catch (e) {
+                dv = "";
+                console.info("TableFilter.onDateChange", v);
+            }
+            setVal(dv);
+            setEnableCheck(!!getFilterDesc(columns, colId, action, dv));
         },
         [columns, colId, action]
     );
@@ -195,7 +202,7 @@ const FilterRow = (props: FilterRowProps) => {
     }, [columns, filter, idx]);
 
     const colType = getTypeFromDf(colId in columns ? columns[colId].type : "");
-    const colFormat = colId in columns ? columns[colId].format : undefined;
+    const colFormat = colId in columns && columns[colId].format ? columns[colId].format : defaultDateFormat;
 
     return (
         <Box sx={filterBoxSx}>
@@ -248,6 +255,7 @@ const FilterRow = (props: FilterRowProps) => {
                     onChange={onDateChange}
                     renderInput={renderInput}
                     inputFormat={colFormat}
+                    disableMaskedInput={true}
                 />
             ) : (
                 <TextField
@@ -275,7 +283,7 @@ const FilterRow = (props: FilterRowProps) => {
     );
 };
 
-export const TableFilter = (props: TableFilterProps) => {
+const TableFilter = (props: TableFilterProps) => {
     const { onValidate } = props;
 
     const [showFilter, setShowFilter] = useState(false);
@@ -352,3 +360,5 @@ export const TableFilter = (props: TableFilterProps) => {
         </>
     );
 };
+
+export default TableFilter;

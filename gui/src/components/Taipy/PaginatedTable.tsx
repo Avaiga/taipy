@@ -53,7 +53,7 @@ import {
     ColumnDesc,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
-import { FilterDesc, TableFilter } from "./TableFilter";
+import TableFilter, { FilterDesc } from "./TableFilter";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skelSx = { width: "100%", height: "3em" };

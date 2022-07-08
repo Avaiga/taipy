@@ -46,7 +46,7 @@ import {
     LINE_STYLE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
-import { FilterDesc, TableFilter } from "./TableFilter";
+import TableFilter, { FilterDesc } from "./TableFilter";
 
 interface RowData {
     colsOrder: string[];

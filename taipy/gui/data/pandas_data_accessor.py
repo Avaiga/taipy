@@ -202,7 +202,10 @@ class _PandasDataAccessor(_DataAccessor):
                 if query:
                     query += " and "
                 query += f'`{fd.get("col")}`{right}'
-            value = value.query(query)
+            try:
+                value = value.query(query)
+            except Exception:
+                warnings.warn(f"Dataframe filtering: invalid query '{query}' on {value.head()}")
 
         if paged:
             aggregates = payload.get("aggregates")
