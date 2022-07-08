@@ -144,7 +144,7 @@ describe("AutoLoadingTable Component", () => {
                 aggregates: [],
                 applies: undefined,
                 styles: {},
-                filter: []
+                filters: []
             },
             type: "REQUEST_DATA_UPDATE",
         });

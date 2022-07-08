@@ -137,7 +137,7 @@ describe("PaginatedTable Component", () => {
                 aggregates: [],
                 applies: undefined,
                 styles: {},
-                filter: []
+                filters: []
             },
             type: "REQUEST_DATA_UPDATE",
         });
@@ -166,7 +166,7 @@ describe("PaginatedTable Component", () => {
                 aggregates: [],
                 applies: undefined,
                 styles: {},
-                filter: []
+                filters: []
             },
             type: "REQUEST_DATA_UPDATE",
         });
@@ -211,7 +211,7 @@ describe("PaginatedTable Component", () => {
                 aggregates: [],
                 applies: undefined,
                 styles: {},
-                filter: []
+                filters: []
             },
             type: "REQUEST_DATA_UPDATE",
         });
