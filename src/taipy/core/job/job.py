@@ -57,7 +57,7 @@ class Job(_Entity):
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
-        self.__submit_id: str = submit_id
+        self._submit_id: str = submit_id
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
@@ -84,7 +84,7 @@ class Job(_Entity):
 
     @property
     def submit_id(self):
-        return self.__submit_id
+        return self._submit_id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

@@ -53,7 +53,7 @@ class _JobManager(_Manager[Job]):
 
         from .._scheduler._scheduler_factory import _SchedulerFactory
 
-        _SchedulerFactory._build_scheduler()._cancel_job(job)
+        _SchedulerFactory._build_scheduler().cancel_job(job)
 
     @classmethod
     def _get_latest(cls, task: Task) -> Optional[Job]:

@@ -143,7 +143,10 @@ class _Scheduler(_AbstractScheduler):
             cls._update_job_config()
         while not cls.jobs_to_run.empty() and cls._dispatcher._can_execute():
             with cls.lock:
-                job = cls.jobs_to_run.get()
+                try:
+                    job = cls.jobs_to_run.get()
+                except:  # In case between line 144 and 145 the last job of the queue has been removed.
+                    cls.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             if job.force or cls._needs_to_run(job.task):
                 if job.force:
                     cls.__logger.info(f"job {job.id} is forced to be executed.")
@@ -179,43 +182,29 @@ class _Scheduler(_AbstractScheduler):
         return input_last_edit > output_last_edit
 
     @staticmethod
-    def __unlock_edit_on_outputs(job):
-        for dn in job.task.output.values():
-            dn.unlock_edit(job_id=job.id, at=dn.last_edit_date)
+    def __unlock_edit_on_outputs(jobs: Union[Job, List[Job], Set[Job]]):
+        jobs = [jobs] if isinstance(jobs, Job) else jobs
+        for job in jobs:
+            for dn in job.task.output.values():
+                dn.unlock_edit(at=dn.last_edit_date)
 
     @classmethod
     def _on_status_change(cls, job: Job):
         if job.is_finished():
-            if not job.is_cancelled():
-                cls.__unblock_jobs()
-                cls.__execute_jobs()
+            cls.__unblock_jobs()
+            cls.__execute_jobs()
 
     @classmethod
     def __unblock_jobs(cls):
         for job in cls.blocked_jobs:
             if not cls._is_blocked(job):
                 with cls.lock:
-                    try:
+                    try:  # In case between line 199 and 201 the job has been removed from the list.
                         job.pending()
+                        cls.blocked_jobs.remove(job)
                         cls.jobs_to_run.put(job)
-                        cls.__remove_blocked_job(job)
                     except:
                         cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
-
-    @classmethod
-    def __remove_blocked_job(cls, job: Job):
-        if job in cls.blocked_jobs:
-            cls.blocked_jobs.remove(job)
-
-    @classmethod
-    def __remove_jobs_to_run(cls, jobs: Union[Job, List[Job], Set[Job]]):
-        jobs = jobs if isinstance(jobs, List) or isinstance(jobs, Set) else [jobs]
-        new_jobs_to_run: Queue = Queue()
-        while not cls.jobs_to_run.empty():
-            current_job = cls.jobs_to_run.get()
-            if current_job not in jobs:
-                new_jobs_to_run.put(current_job)
-        cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
     def _update_job_config(cls):
@@ -225,35 +214,24 @@ class _Scheduler(_AbstractScheduler):
             cls._dispatcher = _DevelopmentJobDispatcher()
 
     @classmethod
-    def _set_process_in_scheduler(cls, job_id, process):
-        cls._processes[job_id] = process
-
-    @classmethod
-    def _pop_process_in_scheduler(cls, job_id, default=None):
-        return cls._processes.pop(job_id, default)  # type: ignore
-
-    @classmethod
-    def _cancel_job(cls, job):
+    def cancel_job(cls, job: Job):
         to_cancel_jobs = set()
         to_cancel_jobs.update([job])
         to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
-        cls.__remove_jobs_from_running(to_cancel_jobs)
-        for job in to_cancel_jobs:
-            cls.__cancel_process(job)
-            job.cancelled()
-
-            # cls.__unlock_edit_on_outputs(job)
-
-        if not cls.jobs_to_run.empty():
-            cls.__execute_jobs()
-        else:
-            cls.__unblock_jobs()
-            cls.__execute_jobs()
+        with cls.lock:
+            cls.__remove_blocked_jobs(to_cancel_jobs)
+            cls.__remove_jobs_to_run(to_cancel_jobs)
+            cls.__cancel_processes(to_cancel_jobs)
+            cls.__unlock_edit_on_outputs(to_cancel_jobs)
+        # if not cls.jobs_to_run.empty():
+        #     cls.__execute_jobs()
+        # else:
+        #     cls.__unblock_jobs()
+        #     cls.__execute_jobs()
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
         next_output_dn_config_ids = set()
-
         subsequent_jobs = set()
         for job in cls.blocked_jobs:
             job_input_dn_config_ids = job.task.input.keys()
@@ -269,14 +247,33 @@ class _Scheduler(_AbstractScheduler):
         return subsequent_jobs
 
     @classmethod
-    def __remove_jobs_from_running(cls, jobs: Union[Job, List[Job], Set[Job]]):
-        jobs = jobs if isinstance(jobs, List) or isinstance(jobs, Set) else [jobs]
-        with cls.lock:
-            for job in jobs:
-                cls.__remove_blocked_job(job)
-            cls.__remove_jobs_to_run(jobs)
+    def __remove_blocked_jobs(cls, jobs):
+        for job in jobs:
+            try:  # In case before line 250, the job has been dispatched.
+                cls.blocked_jobs.remove(job)
+            except:
+                cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
 
     @classmethod
-    def __cancel_process(cls, job):
-        if process := cls._pop_process_in_scheduler(job.id):
-            process.cancel()  # TODO: this doesn't kill the running process
+    def __remove_jobs_to_run(cls, jobs):
+        new_jobs_to_run: Queue = Queue()
+        while not cls.jobs_to_run.empty():
+            current_job = cls.jobs_to_run.get()
+            if current_job not in jobs:
+                new_jobs_to_run.put(current_job)
+        cls.jobs_to_run = new_jobs_to_run
+
+    @classmethod
+    def __cancel_processes(cls, jobs):
+        for job in jobs:
+            if process := cls._pop_process_in_scheduler(job.id):
+                process.cancel()  # TODO: this doesn't kill the running process
+            job.cancelled()
+
+    @classmethod
+    def _set_process_in_scheduler(cls, job_id, process):
+        cls._processes[job_id] = process
+
+    @classmethod
+    def _pop_process_in_scheduler(cls, job_id, default=None):
+        return cls._processes.pop(job_id, default)  # type: ignore

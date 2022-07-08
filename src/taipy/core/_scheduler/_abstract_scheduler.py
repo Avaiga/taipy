@@ -38,7 +38,7 @@ class _AbstractScheduler:
 
     @classmethod
     @abstractmethod
-    def _cancel_job(cls, job):
+    def cancel_job(cls, job):
         return NotImplemented
 
     @classmethod
