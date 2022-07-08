@@ -60,10 +60,6 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
         )
         return scenario
 
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:
         return [p.id if isinstance(p, Pipeline) else p for p in pipelines]
