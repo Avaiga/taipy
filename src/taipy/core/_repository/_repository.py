@@ -9,8 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from abc import ABC, abstractmethod
-from typing import Any, Generic, List, Optional, Type, TypeVar
+from abc import abstractmethod
+from typing import Any, Generic, Iterable, List, Optional, TypeVar
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
@@ -34,6 +34,16 @@ class _AbstractRepository(Generic[ModelType, Entity]):
     def _load_all(self) -> List[Entity]:
         """
         Retrieve all the entities' data from the repository.
+
+        Returns: A list of entities.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _load_all_by(self, by) -> List[Entity]:
+        """
+        Retrieve all the entities' data from the repository based
+        on a criteria.
 
         Returns: A list of entities.
         """
@@ -69,7 +79,7 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _delete_many(self, ids: List[str]):
+    def _delete_many(self, ids: Iterable[str]):
         """
         Delete all entities from the list of ids from the repository.
         """

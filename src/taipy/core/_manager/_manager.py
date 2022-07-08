@@ -13,7 +13,7 @@ from typing import Generic, Iterable, List, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._repository import _FileSystemRepository
+from .._repository import _AbstractRepository, _RepositoryFactory
 from ..common._entity_ids import _EntityIds
 from ..exceptions.exceptions import ModelNotFound
 
@@ -21,7 +21,7 @@ EntityType = TypeVar("EntityType")
 
 
 class _Manager(Generic[EntityType]):
-    _repository: _FileSystemRepository
+    _repository: _AbstractRepository
     _logger = _TaipyLogger._get_logger()
     _ENTITY_NAME: str = "Entity"
 
