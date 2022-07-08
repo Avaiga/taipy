@@ -70,14 +70,6 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         """
         ...
 
-    @property
-    @abstractmethod
-    def _storage_folder(self) -> pathlib.Path:
-        """
-        Base folder used by _repository to store data
-        """
-        ...
-
     @abstractmethod
     def _from_model(self, model):
         """
@@ -93,7 +85,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     @property
     def dir_path(self):
         return self._storage_folder / self._dir_name
-    
+
     @property
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
