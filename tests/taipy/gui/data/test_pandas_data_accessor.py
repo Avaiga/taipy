@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from importlib import util
+from datetime import datetime
 
 import pandas  # type: ignore
 
@@ -87,7 +88,7 @@ def test_aggregate(gui: Gui, helpers, small_dataframe):
     data = value["data"]
     assert {"name": "A", "value": 5} in data
 
-def test_filter(gui: Gui, helpers, small_dataframe):
+def test_filters(gui: Gui, helpers, small_dataframe):
     accessor = _PandasDataAccessor()
     pd = pandas.DataFrame(data=small_dataframe)
     pd = pandas.concat(
@@ -106,5 +107,25 @@ def test_filter(gui: Gui, helpers, small_dataframe):
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 0
     query = {"columns": ["name", "value"], "start": 0, "end": -1, "filters": [{"col": "name", "action": "!=", "value": "A"},{"col": "value", "action": "==", "value": 2}]}
+    value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
+    assert len(value["value"]["data"]) == 1
+
+def test_filter_by_date(gui: Gui, helpers, small_dataframe):
+    accessor = _PandasDataAccessor()
+    pd = pandas.DataFrame(data=small_dataframe)
+    pd["a date"] = [datetime.fromisocalendar(2022, 28, 1),datetime.fromisocalendar(2022, 28, 2), datetime.fromisocalendar(2022, 28, 3)]
+    query = {"columns": ["name", "value"], "start": 0, "end": -1, "filters": [{"col": "a date", "action": ">", "value": datetime.fromisocalendar(2022, 28, 3).isoformat() + "Z"}]}
+    value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
+    assert len(value["value"]["data"]) == 0
+    query = {"columns": ["name", "value"], "start": 0, "end": -1, "filters": [{"col": "a date", "action": ">", "value": datetime.fromisocalendar(2022, 28, 2).isoformat() + "Z"}]}
+    value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
+    assert len(value["value"]["data"]) == 1
+    query = {"columns": ["name", "value"], "start": 0, "end": -1, "filters": [{"col": "a date", "action": "<", "value": datetime.fromisocalendar(2022, 28, 3).isoformat() + "Z"}]}
+    value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
+    assert len(value["value"]["data"]) == 2
+    query = {"columns": ["name", "value"], "start": 0, "end": -1, "filters": [{"col": "a date", "action": "<", "value": datetime.fromisocalendar(2022, 28, 2).isoformat() + "Z"}, {"col": "a date", "action": ">", "value": datetime.fromisocalendar(2022, 28, 2).isoformat() + "Z"}]}
+    value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
+    assert len(value["value"]["data"]) == 0
+    query = {"columns": ["name", "value"], "start": 0, "end": -1, "filters": [{"col": "a date", "action": "<", "value": datetime.fromisocalendar(2022, 28, 3).isoformat() + "Z"}, {"col": "a date", "action": ">", "value": datetime.fromisocalendar(2022, 28, 1).isoformat() + "Z"}]}
     value = accessor.get_data(gui, "x", pd, query, _DataFormat.JSON)
     assert len(value["value"]["data"]) == 1
