@@ -194,14 +194,15 @@ class _PandasDataAccessor(_DataAccessor):
                 col = fd.get("col")
                 val = fd.get("value")
                 action = fd.get("action")
-                if isinstance(val, str) and self.__is_date_column(value, col):
-                    val = datetime.fromisoformat(val[:-1])
+                if isinstance(val, str):
+                    if self.__is_date_column(value, col):
+                        val = datetime.fromisoformat(val[:-1])
                     vars.append(val)
-                val = f'"{val}"' if isinstance(val, str) else f"@vars[{len(vars) - 1}]" if isinstance(val, datetime) else val
+                val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
                 right = f'.str.contains({val})' if action == "contains" else f" {action} {val}"
                 if query:
                     query += " and "
-                query += f'`{fd.get("col")}`{right}'
+                query += f'`{col}`{right}'
             try:
                 value = value.query(query)
             except Exception:
