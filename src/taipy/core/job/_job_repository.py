@@ -61,10 +61,6 @@ class _JobRepository(_RepositoryFactory.build_repository()[_JobModel, Job]):  # 
 
         return job
 
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
     @staticmethod
     def _serialize_subscribers(subscribers: List) -> List:
         return _fcts_to_dict(subscribers)

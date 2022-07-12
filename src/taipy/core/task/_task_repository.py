@@ -52,10 +52,6 @@ class _TaskRepository(_RepositoryFactory.build_repository()[_TaskModel, Task]): 
             output=self.__to_data_nodes(model.output_ids),
         )
 
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
     @staticmethod
     def __to_ids(data_nodes):
         return [i.id for i in data_nodes]

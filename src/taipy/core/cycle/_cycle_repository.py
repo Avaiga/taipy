@@ -52,10 +52,6 @@ class _CycleRepository(_RepositoryFactory.build_repository()[_CycleModel, Cycle]
             end_date=datetime.fromisoformat(model.end_date),
         )
 
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         return self.__get_cycles_cdt(lambda cycle: cycle.frequency == frequency and cycle.start_date == start_date)
 

@@ -71,10 +71,6 @@ class _PipelineRepository(_RepositoryFactory.build_repository()[_PipelineModel, 
             pipeline_err = NonExistingPipeline(model.id)
             raise pipeline_err
 
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
-
     @staticmethod
     def __to_task_ids(tasks):
         return [t.id if isinstance(t, Task) else t for t in tasks]

@@ -130,7 +130,3 @@ class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, Data
             edit_in_progress=model.edit_in_progress,
             properties=model.data_node_properties,
         )
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
