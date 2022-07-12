@@ -47,17 +47,17 @@ const anchorOrigin = {
 } as PopoverOrigin;
 
 const actionsByType = {
-    string: { "==": "equals", contains: "contains", "!=": "is not" },
+    string: { "==": "equals", contains: "contains", "!=": "not equals" },
     number: {
         "<": "less",
         "<=": "less equals",
         "==": "equals",
-        "!=": "is not",
+        "!=": "not equals",
         ">=": "greater equals",
         ">": "greater",
     },
-    boolean: { "==": "equals", "!=": "is not" },
-    date: { "<": "before", "<=": "before equal", "==": "equals", "!=": "is not", ">=": "after equal", ">": "after" },
+    boolean: { "==": "equals", "!=": "not equals" },
+    date: { "<": "before", "<=": "before equal", "==": "equals", "!=": "not equals", ">=": "after equal", ">": "after" },
 } as Record<string, Record<string, string>>;
 
 const getActionsByType = (colType?: string) =>

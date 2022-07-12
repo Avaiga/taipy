@@ -201,7 +201,7 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dataKey.current = backCols.join("-");
+            dataKey.current = backCols.join("-") + (limitRows ? `--${limitThreshold}` : "");
             dispatch(
                 createRequestChartUpdateAction(
                     updateVarName,
