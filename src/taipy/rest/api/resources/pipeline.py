@@ -209,8 +209,8 @@ class PipelineExecutor(Resource):
                     type: string
                     example: pipeline created
                   pipeline: PipelineSchema
-      404:
-          description: pipeline does not exist
+        404:
+            description: pipeline does not exist
     """
 
     def __init__(self, **kwargs):

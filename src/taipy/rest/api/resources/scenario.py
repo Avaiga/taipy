@@ -212,7 +212,7 @@ class ScenarioExecutor(Resource):
                     type: string
                     example: scenario created
                   scenario: ScenarioSchema
-      404:
+        404:
           description: scenario does not exist
     """
 
