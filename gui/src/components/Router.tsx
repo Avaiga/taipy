@@ -1,10 +1,10 @@
 import React, { useEffect, useReducer, useState, ComponentType } from "react";
 import axios from "axios";
 import type {} from "@mui/lab/themeAugmentation";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { SnackbarProvider } from "notistack";
 import { HelmetProvider } from "react-helmet-async";

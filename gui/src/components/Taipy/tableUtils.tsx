@@ -24,6 +24,10 @@ export interface ColumnDesc {
     style?: string;
     nanValue?: string;
     tz?: string;
+    filter?: boolean;
+    apply?: string;
+    groupBy?: boolean;
+    widthHint?: number;
 }
 
 export type Order = "asc" | "desc";
@@ -68,7 +72,7 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
 
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
-        return <Switch checked={val as boolean} title={"" + val} />;
+        return <Switch checked={val as boolean} title={val ? "True": "False"} />;
     }
     return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
 };
@@ -102,6 +106,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     defaultEditable?: boolean;
     lineStyle?: string;
     nanValue?: string;
+    filter?: boolean;
     defaultKey?: string; // for testing purposes only
 }
 
@@ -142,10 +147,10 @@ interface EditableCellProps {
     nanValue?: string;
 }
 
-export const addDeleteColumn = (render: boolean, columns: Record<string, ColumnDesc>) => {
+export const addDeleteColumn = (render: number, columns: Record<string, ColumnDesc>) => {
     if (render) {
         Object.keys(columns).forEach((key) => columns[key].index++);
-        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: "2em" };
+        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: (render * 4) + "em", filter: false };
     }
     return columns;
 };

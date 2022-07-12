@@ -50,8 +50,10 @@ import {
     RowValue,
     tableSx,
     TaipyPaginatedTableProps,
+    ColumnDesc,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import TableFilter, { FilterDesc } from "./TableFilter";
 
 const loadingStyle: CSSProperties = { width: "100%", height: "3em", textAlign: "right", verticalAlign: "center" };
 const skelSx = { width: "100%", height: "3em" };
@@ -82,9 +84,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [orderBy, setOrderBy] = useState("");
     const [loading, setLoading] = useState(true);
     const [aggregates, setAggregates] = useState<string[]>([]);
+    const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
-    const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
+    const selectedRowRef = useRef<HTMLTableRowElement|null>(null);
     const formatConfig = useFormatConfig();
 
     const refresh = props.data === null;
@@ -92,16 +95,26 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
-    const [colsOrder, columns, styles, handleNan] = useMemo(() => {
+    const [colsOrder, columns, styles, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (props.columns) {
             try {
-                const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                addDeleteColumn(!!(active && editable && (tp_onAdd || tp_onDelete)), columns);
+                const columns = (typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns) as Record<string, ColumnDesc>;
+                let filter = false;
+                Object.values(columns).forEach((col) => {
+                    if (typeof col.filter != "boolean") {
+                        col.filter = !!props.filter;
+                    }
+                    filter = filter || col.filter;
+                });
+                addDeleteColumn(
+                    (!!active && editable && (tp_onAdd || tp_onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
+                    columns
+                );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
                 const styles = colsOrder.reduce<Record<string, string>>((pv, col) => {
                     if (columns[col].style) {
-                        pv[columns[col].dfid] = columns[col].style;
+                        pv[columns[col].dfid] = columns[col].style as string;
                     }
                     hNan = hNan || !!columns[col].nanValue;
                     return pv;
@@ -109,13 +122,13 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                 if (props.lineStyle) {
                     styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, columns, styles, hNan];
+                return [colsOrder, columns, styles, hNan, filter];
             } catch (e) {
                 console.info("PTable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {}, {}, hNan];
-    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
+        return [[], {}, {}, hNan, false];
+    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
@@ -146,7 +159,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
               }, "-agg")
             : "";
         const cols = colsOrder.map((col) => columns[col].dfid);
-        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}`;
+        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${appliedFilters.map(af => `${af.col}${af.action}${af.value}`)}`;
         if (refresh || !props.data || props.data[pageKey.current] === undefined) {
             setLoading(true);
             const applies = aggregates.length
@@ -170,7 +183,8 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     aggregates,
                     applies,
                     styles,
-                    handleNan
+                    handleNan,
+                    appliedFilters,
                 )
             );
         } else {
@@ -191,6 +205,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         updateVarName,
         id,
         handleNan,
+        appliedFilters,
         dispatch,
     ]);
 
@@ -318,14 +333,25 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         <TableCell
                                             key={col + idx}
                                             sortDirection={orderBy === columns[col].dfid && order}
-                                            width={columns[col].width}
+                                            sx={columns[col].width ? { width: columns[col].width } : {}}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
-                                                active && editable && tp_onAdd ? (
-                                                    <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
-                                                        <AddIcon />
-                                                    </IconButton>
-                                                ) : null
+                                                [
+                                                    active && editable && tp_onAdd ? (
+                                                        <Tooltip title="Add a row" key="addARow">
+                                                            <IconButton
+                                                                onClick={onAddRowClick}
+                                                                size="small"
+                                                                sx={iconInRowSx}
+                                                            >
+                                                                <AddIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    ) : null,
+                                                    active && filter ? (
+                                                        <TableFilter key="filter" columns={columns} colsOrder={colsOrder} onValidate={setAppliedFilters} appliedFilters={appliedFilters} />
+                                                    ) : null,
+                                                ]
                                             ) : (
                                                 <TableSortLabel
                                                     active={orderBy === columns[col].dfid}
@@ -373,7 +399,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                     const sel = selected.indexOf(index + startIndex);
                                     if (sel == 0) {
                                         setTimeout(
-                                            () => selectedRowRef.current?.scrollIntoView && selectedRowRef.current.scrollIntoView({ block: "center" }),
+                                            () =>
+                                                selectedRowRef.current?.scrollIntoView &&
+                                                selectedRowRef.current.scrollIntoView({ block: "center" }),
                                             1
                                         );
                                     }

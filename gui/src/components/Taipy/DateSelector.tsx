@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import TextField, { TextFieldProps } from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
-import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
 
 import { TaipyContext } from "../../context/taipyContext";

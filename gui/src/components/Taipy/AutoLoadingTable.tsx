@@ -13,10 +13,10 @@ import { FixedSizeList as List, ListOnItemsRenderedProps } from "react-window";
 import InfiniteLoader from "react-window-infinite-loader";
 import Skeleton from "@mui/material/Skeleton";
 import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import AddIcon from "@mui/icons-material/Add";
 import DataSaverOn from "@mui/icons-material/DataSaverOn";
 import DataSaverOff from "@mui/icons-material/DataSaverOff";
-import Tooltip from "@mui/material/Tooltip";
 
 import { TaipyContext } from "../../context/taipyContext";
 import {
@@ -46,6 +46,7 @@ import {
     LINE_STYLE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
+import TableFilter, { FilterDesc } from "./TableFilter";
 
 interface RowData {
     colsOrder: string[];
@@ -153,11 +154,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
     const page = useRef<key2Rows>({ key: defaultKey, promises: {} });
     const [orderBy, setOrderBy] = useState("");
     const [order, setOrder] = useState<Order>("asc");
+    const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
+    const [visibleStartIndex, setVisibleStartIndex] = useState(0);
+    const [aggregates, setAggregates] = useState<string[]>([]);
     const infiniteLoaderRef = useRef<InfiniteLoader>(null);
     const headerRow = useRef<HTMLTableRowElement>(null);
     const formatConfig = useFormatConfig();
-    const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-    const [aggregates, setAggregates] = useState<string[]>([]);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const editable = useDynamicProperty(props.editable, props.defaultEditable, true);
@@ -216,12 +218,24 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         e.stopPropagation();
     }, []);
 
-    const [colsOrder, columns, styles, handleNan] = useMemo(() => {
+    const [colsOrder, columns, styles, handleNan, filter] = useMemo(() => {
         let hNan = !!props.nanValue;
         if (props.columns) {
             try {
-                const columns = typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns;
-                addDeleteColumn(!!(active && editable && (tp_onAdd || tp_onDelete)), columns);
+                const columns = (
+                    typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns
+                ) as Record<string, ColumnDesc>;
+                let filter = false;
+                Object.values(columns).forEach((col) => {
+                    if (typeof col.filter != "boolean") {
+                        col.filter = !!props.filter;
+                    }
+                    filter = filter || col.filter;
+                });
+                addDeleteColumn(
+                    (!!(active && editable && (tp_onAdd || tp_onDelete)) ? 1 : 0) + (active && filter ? 1 : 0),
+                    columns
+                );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
                 const styles = colsOrder.reduce<Record<string, unknown>>((pv, col) => {
                     if (columns[col].style) {
@@ -233,13 +247,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                 if (props.lineStyle) {
                     styles[LINE_STYLE] = props.lineStyle;
                 }
-                return [colsOrder, columns, styles, hNan];
+                return [colsOrder, columns, styles, hNan, filter];
             } catch (e) {
                 console.info("ATable.columns: " + ((e as Error).message || e));
             }
         }
-        return [[], {}, {}, hNan];
-    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue]);
+        return [[], {}, {}, hNan, false];
+    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -299,12 +313,13 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         aggregates,
                         applies,
                         styles,
-                        handleNan
+                        handleNan,
+                        appliedFilters,
                     )
                 );
             });
         },
-        [aggregates, styles, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, dispatch]
+        [aggregates, styles, updateVarName, orderBy, order, id, colsOrder, columns, handleNan, appliedFilters, dispatch]
     );
 
     const onAddRowClick = useCallback(
@@ -409,14 +424,31 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         <TableCell
                                             key={col + idx}
                                             sortDirection={orderBy === columns[col].dfid && order}
-                                            width={columns[col].width}
+                                            sx={columns[col].width ? { width: columns[col].width } : {}}
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
-                                                active && editable && tp_onAdd ? (
-                                                    <IconButton onClick={onAddRowClick} size="small" sx={iconInRowSx}>
-                                                        <AddIcon />
-                                                    </IconButton>
-                                                ) : null
+                                                [
+                                                    active && editable && tp_onAdd ? (
+                                                        <Tooltip title="Add a row" key="addARow">
+                                                            <IconButton
+                                                                onClick={onAddRowClick}
+                                                                size="small"
+                                                                sx={iconInRowSx}
+                                                            >
+                                                                <AddIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    ) : null,
+                                                    active && filter ? (
+                                                        <TableFilter
+                                                            key="filter"
+                                                            columns={columns}
+                                                            colsOrder={colsOrder}
+                                                            onValidate={setAppliedFilters}
+                                                            appliedFilters={appliedFilters}
+                                                        />
+                                                    ) : null,
+                                                ]
                                             ) : (
                                                 <TableSortLabel
                                                     active={orderBy === columns[col].dfid}

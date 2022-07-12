@@ -50,6 +50,22 @@ export const getNumberString = (value: number, numberformat: string | undefined,
     }
 };
 
+export const getTypeFromDf = (dataType?: string) => {
+    switch (dataType) {
+        case "datetime.datetime":
+        case "datetime.date":
+        case "datetime.time":
+        case "datetime":
+            return "date";
+        case "int":
+        case "float":
+            return "number";
+        case "bool":
+            return "boolean";
+    }
+    return dataType;
+}
+
 export const formatWSValue = (
     value: string | number,
     dataType: string | undefined,
