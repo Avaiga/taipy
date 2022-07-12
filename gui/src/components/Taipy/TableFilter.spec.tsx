@@ -94,7 +94,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(getByText("NumberCol"));
         await userEvent.click(dropdownElts[1].parentElement?.firstElementChild || dropdownElts[1]);
         await findByRole("listbox");
-        await userEvent.click(getByText("less equal"));
+        await userEvent.click(getByText("less equals"));
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).toBeDisabled();
         const labels = getAllByText("Number");
@@ -117,7 +117,7 @@ describe("Table Filter Component", () => {
         await userEvent.click(getByText("BoolCol"));
         await userEvent.click(dropdownElts[1].parentElement?.firstElementChild || dropdownElts[1]);
         await findByRole("listbox");
-        await userEvent.click(getByText("equal"));
+        await userEvent.click(getByText("equals"));
         const validate = getByTestId("CheckIcon").parentElement;
         expect(validate).toBeDisabled();
         const dddElts = getAllByTestId("ArrowDropDownIcon");
@@ -172,6 +172,7 @@ describe("Table Filter Component", () => {
         const ddElts = getAllByTestId("ArrowDropDownIcon");
         expect(ddElts).toHaveLength(4);
         const applyElt = getByText("Apply 1 filter");
+        expect(applyElt).toBeEnabled();
         await userEvent.click(applyElt);
         expect(onValidate).toHaveBeenCalled();
     });
@@ -202,16 +203,18 @@ describe("Table Filter Component", () => {
         await userEvent.click(deletes[0]);
         const ddElts2 = getAllByTestId("ArrowDropDownIcon");
         expect(ddElts2).toHaveLength(2);
-        getByText("Apply 0 filter");
+        expect(getByText("Apply 0 filter")).toBeDisabled();
+        expect(getByText("Reset list (remove applied filter)")).toBeDisabled();
     });
     it("reset filters", async () => {
         const onValidate = jest.fn();
         const { getByText, getByTestId } = render(
-            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={onValidate} />
+            <TableFilter columns={tableColumns} colsOrder={colsOrder} onValidate={onValidate} appliedFilters={[{col: "col", action: "action", value: ""}]} />
         );
         const elt = getByTestId("FilterListIcon");
         await userEvent.click(elt);
         const resetBut = getByText("Reset list (remove applied filter)");
+        expect(resetBut).toBeEnabled();
         await userEvent.click(resetBut);
         expect(onValidate).toHaveBeenCalled();
     });

@@ -284,7 +284,7 @@ const FilterRow = (props: FilterRowProps) => {
 };
 
 const TableFilter = (props: TableFilterProps) => {
-    const { onValidate } = props;
+    const { onValidate, appliedFilters = [], columns, colsOrder } = props;
 
     const [showFilter, setShowFilter] = useState(false);
     const filterRef = useRef<HTMLButtonElement | null>(null);
@@ -336,22 +336,22 @@ const TableFilter = (props: TableFilterProps) => {
                             key={"fd" + idx}
                             idx={idx}
                             filter={fd}
-                            columns={props.columns}
-                            colsOrder={props.colsOrder}
+                            columns={columns}
+                            colsOrder={colsOrder}
                             setFilter={updateFilter}
                         />
                     ))}
                     <FilterRow
                         idx={-(filters.length + 1)}
-                        columns={props.columns}
-                        colsOrder={props.colsOrder}
+                        columns={columns}
+                        colsOrder={colsOrder}
                         setFilter={updateFilter}
                     />
                     <Box sx={buttonBoxSx}>
-                        <Button endIcon={<ClearIcon />} onClick={onRemove}>{`Reset list (remove applied filter${
+                        <Button endIcon={<ClearIcon />} onClick={onRemove} disabled={appliedFilters.length == 0}>{`Reset list (remove applied filter${
                             filters.length > 1 ? "s" : ""
                         })`}</Button>
-                        <Button endIcon={<SendIcon />} onClick={onApply}>{`Apply ${filters.length} filter${
+                        <Button endIcon={<SendIcon />} onClick={onApply} disabled={filters.length == 0}>{`Apply ${filters.length} filter${
                             filters.length > 1 ? "s" : ""
                         }`}</Button>
                     </Box>
