@@ -50,14 +50,14 @@ const actionsByType = {
     string: { "==": "equals", contains: "contains", "!=": "is not" },
     number: {
         "<": "less",
-        "<=": "less equal",
-        "==": "equal",
-        "!=": "not equal",
-        ">=": "greater equal",
+        "<=": "less equals",
+        "==": "equals",
+        "!=": "is not",
+        ">=": "greater equals",
         ">": "greater",
     },
-    boolean: { "==": "equal", "!=": "not equal" },
-    date: { "<": "before", "<=": "before equal", "==": "equal", "!=": "not equal", ">=": "after equal", ">": "after" },
+    boolean: { "==": "equals", "!=": "is not" },
+    date: { "<": "before", "<=": "before equal", "==": "equals", "!=": "is not", ">=": "after equal", ">": "after" },
 } as Record<string, Record<string, string>>;
 
 const getActionsByType = (colType?: string) =>
