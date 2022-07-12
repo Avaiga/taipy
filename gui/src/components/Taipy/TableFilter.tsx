@@ -47,7 +47,7 @@ const anchorOrigin = {
 } as PopoverOrigin;
 
 const actionsByType = {
-    string: { "==": "equal", contains: "contains", "!=": "not equal" },
+    string: { "==": "equals", contains: "contains", "!=": "is not" },
     number: {
         "<": "less",
         "<=": "less equal",
