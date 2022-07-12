@@ -11,9 +11,8 @@
 
 from .checker.issue import Issue
 from .checker.issue_collector import IssueCollector
+from .section import Section
 from .config import Config
-from .abstractSubConfig import AbstractSubConfig
-
 from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
 from .job_execution.job_config import JobConfig
