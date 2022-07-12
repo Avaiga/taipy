@@ -11,10 +11,10 @@
 
 from copy import copy
 
-from src.taipy.config.data_node.scope import Scope
 from src.taipy.config._config import _Config
 from src.taipy.config.checker._checkers._data_node_config_checker import _DataNodeConfigChecker
 from src.taipy.config.checker.issue_collector import IssueCollector
+from src.taipy.config.data_node.scope import Scope
 
 
 class TestDataNodeConfigChecker:
@@ -75,6 +75,11 @@ class TestDataNodeConfigChecker:
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
+
+        config._data_nodes["default"].storage_type = "json"
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 1
 
     def test_check_scope(self):
         config = _Config._default_config()
@@ -191,6 +196,12 @@ class TestDataNodeConfigChecker:
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
 
+        config._data_nodes["default"].storage_type = "json"
+        config._data_nodes["default"].properties = {"default_path": "bar"}
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
     def test_check_read_write_fct(self):
         config = _Config._default_config()
 
@@ -240,10 +251,7 @@ class TestDataNodeConfigChecker:
         assert len(collector.errors) == 0
 
         config._data_nodes["default"].storage_type = "generic"
-        config._data_nodes["default"].properties = {
-            "write_fct": print,
-            "read_fct": print,
-            "write_fct_params": []}
+        config._data_nodes["default"].properties = {"write_fct": print, "read_fct": print, "write_fct_params": []}
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 1
@@ -252,7 +260,8 @@ class TestDataNodeConfigChecker:
         config._data_nodes["default"].properties = {
             "write_fct": print,
             "read_fct": print,
-            "write_fct_params": tuple("foo")}
+            "write_fct_params": tuple("foo"),
+        }
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
