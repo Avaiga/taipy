@@ -272,6 +272,8 @@ class Job(_Entity):
 
     def update_status(self, exceptions):
         """Update the job status based on the success or the failure of its execution."""
+        # TODO: handle cancel case
+
         if exceptions:
             self.failed()
             self.__logger.error(f" {len(exceptions)} errors occurred during execution of job {self.id}")

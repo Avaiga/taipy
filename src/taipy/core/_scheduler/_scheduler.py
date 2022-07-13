@@ -190,7 +190,7 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def _on_status_change(cls, job: Job):
-        if job.is_finished():
+        if job.is_completed():
             cls.__unblock_jobs()
             cls.__execute_jobs()
 
@@ -223,11 +223,8 @@ class _Scheduler(_AbstractScheduler):
             cls.__remove_jobs_to_run(to_cancel_jobs)
             cls.__cancel_processes(job.id, to_cancel_jobs)
             cls.__unlock_edit_on_outputs(to_cancel_jobs)
-        # if not cls.jobs_to_run.empty():
-        #     cls.__execute_jobs()
-        # else:
-        #     cls.__unblock_jobs()
-        #     cls.__execute_jobs()
+        if not cls.jobs_to_run.empty():
+            cls.__execute_jobs()
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -268,10 +265,25 @@ class _Scheduler(_AbstractScheduler):
         for job in jobs:
             if process := cls._pop_process_in_scheduler(job.id):
                 process.cancel()  # TODO: this doesn't kill the running process
+                cls.__cancel_process(process)
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:
                 job.abandoned()
+
+    @staticmethod
+    def __cancel_process(process):
+        with process._condition:
+            if process._state == "FINISHED":
+                return False
+            if process._state in ["CANCELLED", "CANCELLED_AND_NOTIFIED"]:
+                return True
+
+            process._state = "CANCELLED"
+            process._condition.notify_all()
+
+        process._invoke_callbacks()
+        return True
 
     @classmethod
     def _set_process_in_scheduler(cls, job_id, process):

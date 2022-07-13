@@ -66,7 +66,7 @@ class A:
 
 job = Job(JobId("id"), task, "submit_id")
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
-# job._exceptions = [traceback.TracebackException.from_exception(Exception())]
+job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
 job_model = _JobModel(
     id=JobId("id"),

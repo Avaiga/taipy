@@ -364,8 +364,8 @@ def delete_jobs():
 
 
 def cancel_job(job: Union[str, Job]):
-    """Cancel a job and set the status of the subsequent jobs to abandoned.
-    
+    """Cancel a job and set the status of the subsequent jobs to ABANDONED.
+
     Parameters:
         job (Job^): The job to cancel.
     """

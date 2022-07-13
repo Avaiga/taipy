@@ -51,24 +51,9 @@ def average(a):
     return [a.sum() / len(a)]
 
 
-def add_constant(a):
-    a = a["number"]
-    return a + 10
-
-
-def mult_constant(a):
-    a = a["number"]
-    return a * 10
-
-
 def div_constant_with_sleep(a):
-    sleep(1000)
-    return a / 10
-
-
-def sub_with_sleep(a, b):
-    sleep(1000)
-    return a - b["number"]
+    sleep(1)
+    return a["number"] / 10
 
 
 def return_a_number():
@@ -76,8 +61,12 @@ def return_a_number():
 
 
 def return_a_number_with_sleep():
-    sleep(1000)
+    sleep(1)
     return 10
+
+
+def print_with_sleep(a):
+    print(a)
 
 
 # ################################  TEST METHODS    ##################################
@@ -204,3 +193,78 @@ def test_complex():
 
     for path in [csv_path_sum, excel_path_sum, csv_path_out, excel_path_out]:
         os.remove(path)
+
+
+def test_same_pipeline_submission_with_overlap_datanode():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    _Scheduler._update_job_config()
+
+    # d1 ---- t1 ---- d2 ---- t2
+    # t3 ---- d2
+
+    csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+
+    dn1_inp_csv = Config.configure_csv_data_node("dn1_inp_csv", default_path=csv_path_inp)
+    dn2_div = Config.configure_pickle_data_node("dn2_div")
+
+    task1_div_csv_with_constant = Config.configure_task(
+        "task1_div_csv_with_constant", div_constant_with_sleep, input=dn1_inp_csv, output=dn2_div
+    )
+    task2_print_pickle = Config.configure_task("task2_print_pickle", print_with_sleep, input=dn2_div)
+    task3_populate_constant = Config.configure_task(
+        "task3_populate_constant", return_a_number_with_sleep, output=dn2_div
+    )
+
+    pipeline_div_print_config = Config.configure_pipeline(
+        "pipeline_div_print", [task1_div_csv_with_constant, task2_print_pickle]
+    )
+    pipeline_populate_constant_config = Config.configure_pipeline(
+        "pipeline_populate_constant", [task3_populate_constant]
+    )
+
+    pipeline_div_print = tp.create_pipeline(pipeline_div_print_config)
+    pipeline_populate_constant = tp.create_pipeline(pipeline_populate_constant_config)
+
+    tp.submit(pipeline_div_print)
+    tp.submit(pipeline_div_print)
+    tp.submit(pipeline_populate_constant)
+
+    assert _Scheduler.jobs_to_run.qsize() == 2
+    assert pipeline_div_print.dn2_div.read() is None
+
+    sleep(1.5)
+    assert _Scheduler.jobs_to_run.qsize() == 2
+    assert pipeline_div_print.dn2_div.read() is not None
+    assert len(pipeline_div_print.dn2_div.read()) == 10
+
+    sleep(1)
+    assert _Scheduler.jobs_to_run.qsize() == 2
+    assert pipeline_div_print.dn2_div.read() is not None
+    assert len(pipeline_div_print.dn2_div.read()) == 10
+
+    sleep(1.5)
+    assert _Scheduler.jobs_to_run.qsize() == 0
+    assert pipeline_div_print.dn2_div.read() == 10
+
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _Scheduler._update_job_config()
+
+    tp.submit(pipeline_div_print)
+    tp.submit(pipeline_div_print)
+    tp.submit(pipeline_populate_constant)
+
+    assert _Scheduler.jobs_to_run.qsize() == 1
+
+    sleep(2)
+    assert _Scheduler.jobs_to_run.qsize() == 0
+    assert pipeline_div_print.dn2_div.read() is not None
+    assert len(pipeline_div_print.dn2_div.read()) == 10
+
+    sleep(0.5)
+    assert _Scheduler.jobs_to_run.qsize() == 0
+    assert pipeline_div_print.dn2_div.read() is not None
+    assert len(pipeline_div_print.dn2_div.read()) == 10
+
+    sleep(1)
+    assert _Scheduler.jobs_to_run.qsize() == 0
+    assert pipeline_div_print.dn2_div.read() == 10
