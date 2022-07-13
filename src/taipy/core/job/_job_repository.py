@@ -16,19 +16,24 @@ from typing import List
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._job_model import _JobModel
-from .job import Job
-from .._repository import _FileSystemRepository
+from .._repository import _RepositoryFactory
 from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions.exceptions import InvalidSubscriber
 from ..task._task_repository import _TaskRepository
+from ._job_model import _JobModel
+from .job import Job
 
 
-class _JobRepository(_FileSystemRepository[_JobModel, Job]):
+class _JobRepository(_RepositoryFactory.build_repository()[_JobModel, Job]):  # type: ignore
     __logger = _TaipyLogger._get_logger()
 
     def __init__(self):
-        super().__init__(model=_JobModel, dir_name="jobs")
+        kwargs = {
+            "model": _JobModel,
+            "dir_name": "jobs",
+        }  # TODO: Change kwargs base on repository type when new ones are implemented
+
+        super().__init__(**kwargs)
 
     def _to_model(self, job: Job):
         return _JobModel(
@@ -55,10 +60,6 @@ class _JobRepository(_FileSystemRepository[_JobModel, Job]):
         job._stacktrace = model.stacktrace
 
         return job
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
     def _serialize_subscribers(subscribers: List) -> List:

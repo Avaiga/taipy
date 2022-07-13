@@ -9,6 +9,17 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from ._filesystem_repository import _FileSystemRepository
-from ._repository import _AbstractRepository
-from ._repository_factory import _RepositoryFactory
+from src.taipy.core._repository import _FileSystemRepository, _RepositoryFactory
+from taipy.config import Config
+
+
+def test_build_repository():
+    # Config not set, returns default repository
+    repo = _RepositoryFactory.build_repository()
+    assert isinstance(repo, _FileSystemRepository.__class__)
+
+    # Non existing repository, returns default repository
+    Config.global_config.repository_type = "foo"
+
+    repo = _RepositoryFactory.build_repository()
+    assert isinstance(repo, _FileSystemRepository.__class__)

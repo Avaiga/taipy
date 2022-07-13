@@ -15,20 +15,25 @@ from typing import List, Optional
 
 from taipy.config.config import Config
 
-from ._scenario_model import _ScenarioModel
-from .scenario import Scenario
-from .._repository import _FileSystemRepository
+from .._repository import _RepositoryFactory
 from ..common import _utils
 from ..common._utils import Subscriber
 from ..common.alias import CycleId, PipelineId
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
 from ..pipeline.pipeline import Pipeline
+from ._scenario_model import _ScenarioModel
+from .scenario import Scenario
 
 
-class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
+class _ScenarioRepository(_RepositoryFactory.build_repository()[_ScenarioModel, Scenario]):  # type: ignore
     def __init__(self):
-        super().__init__(model=_ScenarioModel, dir_name="scenarios")
+        kwargs = {
+            "model": _ScenarioModel,
+            "dir_name": "scenarios",
+        }  # TODO: Change kwargs base on repository type when new ones are implemented
+
+        super().__init__(**kwargs)
 
     def _to_model(self, scenario: Scenario):
         return _ScenarioModel(
@@ -59,10 +64,6 @@ class _ScenarioRepository(_FileSystemRepository[_ScenarioModel, Scenario]):
             ],
         )
         return scenario
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:

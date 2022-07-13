@@ -16,14 +16,14 @@ from typing import Dict
 
 from taipy.config.config import Config
 
+from .._repository import _RepositoryFactory
+from ..common._utils import _load_fct
 from ._data_model import _DataNodeModel
 from .data_node import DataNode
 from .generic import GenericDataNode
-from .._repository import _FileSystemRepository
-from ..common._utils import _load_fct
 
 
-class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
+class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, DataNode]):  # type: ignore
     _READ_FCT_NAME_KEY = "read_fct_name"
     _READ_FCT_MODULE_KEY = "read_fct_module"
     _WRITE_FCT_NAME_KEY = "write_fct_name"
@@ -31,7 +31,12 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
     _EXPOSED_TYPE_KEY = "exposed_type"
 
     def __init__(self, class_map):
-        super().__init__(model=_DataNodeModel, dir_name="data_nodes")
+        kwargs = {
+            "model": _DataNodeModel,
+            "dir_name": "data_nodes",
+        }  # TODO: Change kwargs base on repository type when new ones are implemented
+
+        super().__init__(**kwargs)
         self.class_map = class_map
 
     def _to_model(self, data_node: DataNode):
@@ -125,7 +130,3 @@ class _DataRepository(_FileSystemRepository[_DataNodeModel, DataNode]):
             edit_in_progress=model.edit_in_progress,
             properties=model.data_node_properties,
         )
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
