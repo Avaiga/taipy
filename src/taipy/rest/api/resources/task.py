@@ -211,7 +211,7 @@ class TaskExecutor(Resource):
                     type: string
                     example: task created
                   task: TaskSchema
-      404:
+        404:
           description: task does not exist
     """
 
