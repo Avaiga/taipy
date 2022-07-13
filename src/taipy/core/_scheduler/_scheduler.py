@@ -265,7 +265,7 @@ class _Scheduler(_AbstractScheduler):
         for job in jobs:
             if process := cls._pop_process_in_scheduler(job.id):
                 process.cancel()  # TODO: this doesn't kill the running process
-                cls.__cancel_process(process)
+                # cls.__cancel_process(process)
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:

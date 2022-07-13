@@ -255,7 +255,7 @@ def test_same_pipeline_submission_with_overlap_datanode():
 
     assert _Scheduler.jobs_to_run.qsize() == 1
 
-    sleep(2)
+    sleep(1.8)
     assert _Scheduler.jobs_to_run.qsize() == 0
     assert pipeline_div_print.dn2_div.read() is not None
     assert len(pipeline_div_print.dn2_div.read()) == 10
