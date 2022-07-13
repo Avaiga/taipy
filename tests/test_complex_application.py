@@ -251,20 +251,9 @@ def test_same_pipeline_submission_with_overlap_datanode():
 
     tp.submit(pipeline_div_print)
     tp.submit(pipeline_div_print)
-    tp.submit(pipeline_populate_constant)
 
-    assert _Scheduler.jobs_to_run.qsize() == 1
-
-    sleep(1.8)
     assert _Scheduler.jobs_to_run.qsize() == 0
+
+    sleep(2.5)
     assert pipeline_div_print.dn2_div.read() is not None
     assert len(pipeline_div_print.dn2_div.read()) == 10
-
-    sleep(0.5)
-    assert _Scheduler.jobs_to_run.qsize() == 0
-    assert pipeline_div_print.dn2_div.read() is not None
-    assert len(pipeline_div_print.dn2_div.read()) == 10
-
-    sleep(1)
-    assert _Scheduler.jobs_to_run.qsize() == 0
-    assert pipeline_div_print.dn2_div.read() == 10
