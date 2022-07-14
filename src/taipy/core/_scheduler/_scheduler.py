@@ -194,6 +194,8 @@ class _Scheduler(_AbstractScheduler):
         if job.is_completed():
             cls.__unblock_jobs()
             cls.__execute_jobs()
+        elif job.is_cancelled():
+            cls.__execute_jobs()
 
     @classmethod
     def __unblock_jobs(cls):
@@ -222,10 +224,8 @@ class _Scheduler(_AbstractScheduler):
         with cls.lock:
             cls.__remove_blocked_jobs(to_cancel_jobs)
             cls.__remove_jobs_to_run(to_cancel_jobs)
-            cls.__cancel_processes(job.id, to_cancel_jobs)
+            cls.__cancel_jobs_and_processes(job.id, to_cancel_jobs)
             cls.__unlock_edit_on_outputs(to_cancel_jobs)
-        if not cls.jobs_to_run.empty():
-            cls.__execute_jobs()
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -262,10 +262,10 @@ class _Scheduler(_AbstractScheduler):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def __cancel_processes(cls, job_id_to_cancel, jobs):
+    def __cancel_jobs_and_processes(cls, job_id_to_cancel, jobs):
         for job in jobs:
             if process := cls._pop_process_in_scheduler(job.id):
-                process.cancel()  # TODO: this doesn't kill the running process
+                process.cancel()  # TODO: this doesn't terminate the running process
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:
