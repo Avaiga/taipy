@@ -91,6 +91,7 @@ class _Scheduler(_AbstractScheduler):
 
         Parameters:
              task (Task^): The task to submit for execution.
+             submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
 
@@ -145,7 +146,7 @@ class _Scheduler(_AbstractScheduler):
             with cls.lock:
                 try:
                     job = cls.jobs_to_run.get()
-                except:  # In case between line 144 and 145 the last job of the queue has been removed.
+                except:  # In case the last job of the queue has been removed.
                     cls.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
             if job.force or cls._needs_to_run(job.task):
                 if job.force:
@@ -199,7 +200,7 @@ class _Scheduler(_AbstractScheduler):
         for job in cls.blocked_jobs:
             if not cls._is_blocked(job):
                 with cls.lock:
-                    try:  # In case between line 199 and 201 the job has been removed from the list.
+                    try:  # In case the job has been removed from the list of blocked_jobs.
                         job.pending()
                         cls.blocked_jobs.remove(job)
                         cls.jobs_to_run.put(job)
@@ -246,7 +247,7 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def __remove_blocked_jobs(cls, jobs):
         for job in jobs:
-            try:  # In case before line 250, the job has been dispatched.
+            try:  # In case before removal, the job has been dispatched.
                 cls.blocked_jobs.remove(job)
             except:
                 cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
@@ -265,25 +266,10 @@ class _Scheduler(_AbstractScheduler):
         for job in jobs:
             if process := cls._pop_process_in_scheduler(job.id):
                 process.cancel()  # TODO: this doesn't kill the running process
-                # cls.__cancel_process(process)
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:
                 job.abandoned()
-
-    @staticmethod
-    def __cancel_process(process):
-        with process._condition:
-            if process._state == "FINISHED":
-                return False
-            if process._state in ["CANCELLED", "CANCELLED_AND_NOTIFIED"]:
-                return True
-
-            process._state = "CANCELLED"
-            process._condition.notify_all()
-
-        process._invoke_callbacks()
-        return True
 
     @classmethod
     def _set_process_in_scheduler(cls, job_id, process):
