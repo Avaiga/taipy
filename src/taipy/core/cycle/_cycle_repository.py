@@ -16,14 +16,19 @@ from typing import Callable, List
 from taipy.config.config import Config
 from taipy.config.scenario.frequency import Frequency
 
-from .._repository import _FileSystemRepository
+from .._repository import _RepositoryFactory
 from ..cycle._cycle_model import _CycleModel
 from ..cycle.cycle import Cycle
 
 
-class _CycleRepository(_FileSystemRepository[_CycleModel, Cycle]):
+class _CycleRepository(_RepositoryFactory.build_repository()[_CycleModel, Cycle]):  # type: ignore
     def __init__(self):
-        super().__init__(model=_CycleModel, dir_name="cycles")
+        kwargs = {
+            "model": _CycleModel,
+            "dir_name": "cycles",
+        }  # TODO: Change kwargs base on repository type when new ones are implemented
+
+        super().__init__(**kwargs)
 
     def _to_model(self, cycle: Cycle) -> _CycleModel:
         return _CycleModel(
@@ -46,10 +51,6 @@ class _CycleRepository(_FileSystemRepository[_CycleModel, Cycle]):
             start_date=datetime.fromisoformat(model.start_date),
             end_date=datetime.fromisoformat(model.end_date),
         )
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         return self.__get_cycles_cdt(lambda cycle: cycle.frequency == frequency and cycle.start_date == start_date)

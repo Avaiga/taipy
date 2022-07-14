@@ -13,18 +13,23 @@ import pathlib
 
 from taipy.config.config import Config
 
-from ._task_model import _TaskModel
-from .task import Task
-from .._repository import _FileSystemRepository
+from .._repository import _RepositoryFactory
 from ..common._utils import _load_fct
 from ..common.alias import TaskId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingDataNode
+from ._task_model import _TaskModel
+from .task import Task
 
 
-class _TaskRepository(_FileSystemRepository[_TaskModel, Task]):
+class _TaskRepository(_RepositoryFactory.build_repository()[_TaskModel, Task]):  # type: ignore
     def __init__(self):
-        super().__init__(model=_TaskModel, dir_name="tasks")
+        kwargs = {
+            "model": _TaskModel,
+            "dir_name": "tasks",
+        }  # TODO: Change kwargs base on repository type when new ones are implemented
+
+        super().__init__(**kwargs)
 
     def _to_model(self, task: Task) -> _TaskModel:
         return _TaskModel(
@@ -46,10 +51,6 @@ class _TaskRepository(_FileSystemRepository[_TaskModel, Task]):
             input=self.__to_data_nodes(model.input_ids),
             output=self.__to_data_nodes(model.output_ids),
         )
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
     def __to_ids(data_nodes):

@@ -14,10 +14,9 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from taipy.config.config import Config
-
 from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository import _FileSystemRepository
+from src.taipy.core._repository import _RepositoryFactory
+from taipy.config.config import Config
 
 
 @dataclass
@@ -39,7 +38,7 @@ class MockEntity:
     name: str
 
 
-class MockRepository(_FileSystemRepository):
+class MockRepository(_RepositoryFactory.build_repository()):  # type: ignore
     def _to_model(self, obj: MockEntity):
         return MockModel(obj.id, obj.name)
 

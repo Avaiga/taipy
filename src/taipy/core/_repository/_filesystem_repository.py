@@ -21,6 +21,7 @@ from typing import Any, Generic, Iterable, Iterator, List, Optional, Type, TypeV
 from taipy.config.config import Config
 
 from ..exceptions.exceptions import ModelNotFound
+from ._repository import _AbstractRepository
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
@@ -49,7 +50,7 @@ class _CustomDecoder(json.JSONDecoder):
             return source
 
 
-class _FileSystemRepository(Generic[ModelType, Entity]):
+class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     """
     Holds common methods to be used and extended when the need for saving
     dataclasses as JSON files in local storage emerges.
@@ -69,14 +70,6 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
         """
         ...
 
-    @property
-    @abstractmethod
-    def _storage_folder(self) -> pathlib.Path:
-        """
-        Base folder used by _repository to store data
-        """
-        ...
-
     @abstractmethod
     def _from_model(self, model):
         """
@@ -91,6 +84,10 @@ class _FileSystemRepository(Generic[ModelType, Entity]):
     @property
     def dir_path(self):
         return self._storage_folder / self._dir_name
+
+    @property
+    def _storage_folder(self) -> pathlib.Path:
+        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     def load(self, model_id: str) -> Entity:
         try:

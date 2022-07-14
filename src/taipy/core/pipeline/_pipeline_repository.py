@@ -14,7 +14,7 @@ from collections import defaultdict
 
 from taipy.config.config import Config
 
-from .._repository import _FileSystemRepository
+from .._repository import _RepositoryFactory
 from ..common import _utils
 from ..common._utils import Subscriber
 from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
@@ -23,9 +23,14 @@ from ._pipeline_model import _PipelineModel
 from .pipeline import Pipeline
 
 
-class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
+class _PipelineRepository(_RepositoryFactory.build_repository()[_PipelineModel, Pipeline]):  # type: ignore
     def __init__(self):
-        super().__init__(model=_PipelineModel, dir_name="pipelines")
+        kwargs = {
+            "model": _PipelineModel,
+            "dir_name": "pipelines",
+        }  # TODO: Change kwargs base on repository type when new ones are implemented
+
+        super().__init__(**kwargs)
 
     def _to_model(self, pipeline: Pipeline) -> _PipelineModel:
         datanode_task_edges = defaultdict(list)
@@ -65,10 +70,6 @@ class _PipelineRepository(_FileSystemRepository[_PipelineModel, Pipeline]):
         except KeyError:
             pipeline_err = NonExistingPipeline(model.id)
             raise pipeline_err
-
-    @property
-    def _storage_folder(self) -> pathlib.Path:
-        return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
 
     @staticmethod
     def __to_task_ids(tasks):
