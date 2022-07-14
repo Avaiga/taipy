@@ -202,12 +202,16 @@ class _Scheduler(_AbstractScheduler):
         for job in cls.blocked_jobs:
             if not cls._is_blocked(job):
                 with cls.lock:
-                    try:  # In case the job has been removed from the list of blocked_jobs.
-                        job.pending()
-                        cls.blocked_jobs.remove(job)
-                        cls.jobs_to_run.put(job)
-                    except:
-                        cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
+                    job.pending()
+                    cls.__remove_blocked_job(job)
+                    cls.jobs_to_run.put(job)
+
+    @classmethod
+    def __remove_blocked_job(cls, job):
+        try:  # In case the job has been removed from the list of blocked_jobs.
+            cls.blocked_jobs.remove(job)
+        except:
+            cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
 
     @classmethod
     def _update_job_config(cls):
@@ -247,10 +251,7 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def __remove_blocked_jobs(cls, jobs):
         for job in jobs:
-            try:  # In case before removal, the job has been dispatched.
-                cls.blocked_jobs.remove(job)
-            except:
-                cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
+            cls.__remove_blocked_job(job)
 
     @classmethod
     def __remove_jobs_to_run(cls, jobs):
