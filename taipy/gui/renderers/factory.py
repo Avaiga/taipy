@@ -15,6 +15,10 @@ from datetime import datetime
 
 from ..types import _AttributeType
 from .builder import _Builder
+from .user_control import UserControl
+
+if t.TYPE_CHECKING:
+    from ..gui import Gui
 
 
 class _Factory:
@@ -51,7 +55,9 @@ class _Factory:
     __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
     __TEXT_ANCHOR_NONE = "none"
 
-    CONTROL_BUILDERS = {
+    __USER_CONTROLS: t.Dict[str, UserControl] = {}
+
+    __CONTROL_BUILDERS = {
         "button": lambda gui, control_type, attrs: _Builder(
             gui=gui,
             control_type=control_type,
@@ -514,5 +520,26 @@ class _Factory:
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
+    def set_user_builders(user_builders: t.Dict[str, UserControl]):
+        _Factory.__USER_CONTROLS.update(user_builders)
+
+    @staticmethod
     def get_default_property_name(control_name: str) -> t.Optional[str]:
-        return _Factory.__CONTROL_DEFAULT_PROP_NAME.get(control_name.split(".", 1)[0])
+        name = control_name.split(".", 1)[0]
+        prop = _Factory.__CONTROL_DEFAULT_PROP_NAME.get(name)
+        if prop is None:
+            builder = _Factory.__USER_CONTROLS.get(name)
+            if builder is not None:
+                prop = builder.default_attribute
+        return prop
+
+    @staticmethod
+    def call_builder(gui: "Gui", name: str, all_properties: str) -> _Builder:
+        builder = _Factory.__CONTROL_BUILDERS.get(name)
+        if builder is None:
+            control = _Factory.__USER_CONTROLS.get(name)
+            if control is not None:
+                return control.call_builder(gui, all_properties)
+        else:
+            return builder(gui, name, all_properties)
+        return builder
