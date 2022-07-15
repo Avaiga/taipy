@@ -164,6 +164,8 @@ def test_cancel_single_job():
     _Scheduler._update_job_config()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
 
+    assert _Scheduler._dispatcher._nb_available_workers == 2
+
     with lock:
         job = _Scheduler.submit_task(task, "submit_id")
 
@@ -173,6 +175,8 @@ def test_cancel_single_job():
         assert job.is_cancelled()
         assert len(_Scheduler._processes) == 0
     assert job.is_cancelled()
+    sleep(1)
+    assert _Scheduler._dispatcher._nb_available_workers == 2
 
 
 def test_cancel_subsequent_jobs():
