@@ -175,7 +175,7 @@ def test_cancel_single_job():
         assert job.is_cancelled()
         assert len(_Scheduler._processes) == 0
     assert job.is_cancelled()
-    sleep(1)
+    sleep(2)
     assert _Scheduler._dispatcher._nb_available_workers == 2
 
 
