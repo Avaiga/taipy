@@ -532,8 +532,8 @@ class Config:
         Parameters:
             id (str): The unique identifier of the new JSON data node configuration.
             default_path (str): The default path of the JSON file.
-            encoder (json.JSONEncoder): The JSON encoder that is used to write into the JSON file.
-            decoder (json.JSONDecoder): The JSON decoder that is used to read from the JSON file.
+            encoder (json.JSONEncoder): The JSON encoder used to write data into the JSON file.
+            decoder (json.JSONDecoder): The JSON decoder used to read data from the JSON file.
             scope (Scope^): The scope of the JSON data node configuration. The default value
                 is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
