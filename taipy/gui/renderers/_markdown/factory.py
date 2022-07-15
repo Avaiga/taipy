@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import typing as t
+
 from ..factory import _Factory
 
 
@@ -20,7 +22,7 @@ class _MarkdownFactory(_Factory):
     _TAIPY_BLOCK_TAGS = ["layout", "part", "expandable", "dialog", "pane"]
 
     @staticmethod
-    def create_element(gui, control_type: str, all_properties: str) -> str:
+    def create_element(gui, control_type: str, all_properties: str) -> t.Union[t.Any, str]:
         # Create properties dict from all_properties
         property_pairs = _Factory._PROPERTY_RE.findall(all_properties)
         properties = {property[0]: property[1] for property in property_pairs}

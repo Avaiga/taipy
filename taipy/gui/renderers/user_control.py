@@ -69,7 +69,7 @@ class UserControl(ABC):
         if not default_found:
             warnings.warn(f"User Default Attribute should be describe in the 'attributes' List '{self.name}{self.default_attribute}'")
     
-    def call_builder(self, gui: "Gui", all_properties: str):
+    def call_builder(self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]]):
         default_attr: t.Optional[UserAttribute] = None
         attrs = []
         for ua in self.attributes:

@@ -534,7 +534,7 @@ class _Factory:
         return prop
 
     @staticmethod
-    def call_builder(gui: "Gui", name: str, all_properties: str) -> _Builder:
+    def call_builder(gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None) -> t.Optional[_Builder]:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         if builder is None:
             control = _Factory.__USER_CONTROLS.get(name)
@@ -542,4 +542,4 @@ class _Factory:
                 return control.call_builder(gui, all_properties)
         else:
             return builder(gui, name, all_properties)
-        return builder
+        return None
