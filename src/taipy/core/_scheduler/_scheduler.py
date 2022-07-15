@@ -222,8 +222,7 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def cancel_job(cls, job: Job):
-        to_cancel_jobs = set()
-        to_cancel_jobs.update([job])
+        to_cancel_jobs = set([job])
         to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
         with cls.lock:
             cls.__remove_blocked_jobs(to_cancel_jobs)
