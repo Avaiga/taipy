@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -521,6 +522,8 @@ class Config:
         cls,
         id: str,
         default_path: str = None,
+        encoder: json.JSONEncoder = None,
+        decoder: json.JSONDecoder = None,
         scope=DataNodeConfig._DEFAULT_SCOPE,
         **properties,
     ):
@@ -529,6 +532,8 @@ class Config:
         Parameters:
             id (str): The unique identifier of the new JSON data node configuration.
             default_path (str): The default path of the JSON file.
+            encoder (json.JSONEncoder): The JSON encoder used to write data into the JSON file.
+            decoder (json.JSONDecoder): The JSON decoder used to read data from the JSON file.
             scope (Scope^): The scope of the JSON data node configuration. The default value
                 is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
@@ -537,7 +542,13 @@ class Config:
             DataNodeConfig^: The new JSON data node configuration.
         """
         return cls.configure_data_node(
-            id, DataNodeConfig._STORAGE_TYPE_VALUE_JSON, scope=scope, default_path=default_path, **properties
+            id,
+            DataNodeConfig._STORAGE_TYPE_VALUE_JSON,
+            scope=scope,
+            default_path=default_path,
+            encoder=encoder,
+            decoder=decoder,
+            **properties,
         )
 
     @classmethod
