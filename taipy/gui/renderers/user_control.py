@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from abc import ABC
 import typing as t
 import warnings
 
@@ -21,7 +20,7 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-class UserAttribute(ABC):
+class UserAttribute():
 
     def __init__(self, name: str, attribute_type: _AttributeType, default_value: t.Optional[t.Any], js_name: t.Optional[str] = None) -> None:
         self.name = name
@@ -43,7 +42,7 @@ class UserAttribute(ABC):
         return (self.name, self.attribute_type, self.default_value)
 
 
-class UserControl(ABC):
+class UserControl():
     
     def __init__(self, name: str, default_attribute: str, attributes: t.List[UserAttribute], js_name: t.Optional[str] = None) -> None:
         self.name = name
@@ -73,10 +72,11 @@ class UserControl(ABC):
         default_attr: t.Optional[UserAttribute] = None
         attrs = []
         for ua in self.attributes:
-            if self.default_attribute == ua.name:
-                default_attr = ua
-            else:
-                attrs.append(ua.get_tuple())
+            if isinstance(ua, UserAttribute):
+                if self.default_attribute == ua.name:
+                    default_attr = ua
+                else:
+                    attrs.append(ua.get_tuple())
         build = _Builder(
             gui=gui,
             control_type=self.name,

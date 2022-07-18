@@ -538,7 +538,7 @@ class _Factory:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         if builder is None:
             control = _Factory.__USER_CONTROLS.get(name)
-            if control is not None:
+            if isinstance(control, UserControl):
                 return control.call_builder(gui, all_properties)
         else:
             return builder(gui, name, all_properties)
