@@ -21,6 +21,9 @@ if t.TYPE_CHECKING:
 
 
 class UserAttribute():
+    """
+    TODO
+    """
 
     def __init__(self, name: str, attribute_type: _AttributeType, default_value: t.Optional[t.Any], js_name: t.Optional[str] = None) -> None:
         self.name = name
@@ -29,7 +32,7 @@ class UserAttribute():
         self.js_name = js_name
         super().__init__()
     
-    def get_js_name(self) -> str:
+    def _get_js_name(self) -> str:
         return self.js_name or _to_camel_case(self.name)
 
     def check(self, control: str):
@@ -38,11 +41,14 @@ class UserAttribute():
         if not isinstance(self.attribute_type, _AttributeType):
             warnings.warn(f"User Attribute '{control}.{self.name}' should have a valid type '{self.attribute_type}'")
     
-    def get_tuple(self) -> tuple:
+    def _get_tuple(self) -> tuple:
         return (self.name, self.attribute_type, self.default_value)
 
 
 class UserControl():
+    """
+    TODO
+    """
     
     def __init__(self, name: str, default_attribute: str, attributes: t.List[UserAttribute], js_name: t.Optional[str] = None) -> None:
         self.name = name
@@ -51,7 +57,7 @@ class UserControl():
         self.js_name = js_name
         super().__init__()
 
-    def get_js_name(self) -> str:
+    def _get_js_name(self) -> str:
         return self.js_name or _to_camel_case(self.name)
 
     def check(self):
@@ -68,7 +74,7 @@ class UserControl():
         if not default_found:
             warnings.warn(f"User Default Attribute should be describe in the 'attributes' List '{self.name}{self.default_attribute}'")
     
-    def call_builder(self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]]):
+    def _call_builder(self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]]):
         default_attr: t.Optional[UserAttribute] = None
         attrs = []
         for ua in self.attributes:
@@ -76,11 +82,11 @@ class UserControl():
                 if self.default_attribute == ua.name:
                     default_attr = ua
                 else:
-                    attrs.append(ua.get_tuple())
+                    attrs.append(ua._get_tuple())
         build = _Builder(
             gui=gui,
             control_type=self.name,
-            element_name=self.get_js_name(),
+            element_name=self._get_js_name(),
             attributes=all_properties,
         )
         if default_attr is not None:

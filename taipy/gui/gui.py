@@ -232,7 +232,11 @@ class Gui:
         if env_filename is not None:
             self.__env_filename = env_filename
 
-    def add_components(self, user_controls: t.List[UserControl]):
+    @staticmethod
+    def add_components(user_controls: t.List[UserControl]):
+        """
+        TODO
+        """
         _Factory.set_user_builders({us.name: us for us in user_controls})
 
     def __get_content_accessor(self):
