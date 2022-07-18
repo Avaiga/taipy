@@ -41,13 +41,14 @@ class _JobRepository(_RepositoryFactory.build_repository()[_JobModel, Job]):  # 
             job._task.id,
             job._status,
             job._force,
+            job.submit_id,
             job._creation_date.isoformat(),
             self._serialize_subscribers(job._subscribers),
             job._stacktrace,
         )
 
     def _from_model(self, model: _JobModel):
-        job = Job(id=model.id, task=_TaskRepository().load(model.task_id))
+        job = Job(id=model.id, task=_TaskRepository().load(model.task_id), submit_id=model.submit_id)
 
         job.status = model.status  # type: ignore
         job.force = model.force  # type: ignore

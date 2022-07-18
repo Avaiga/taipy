@@ -17,11 +17,11 @@ from typing import Callable, List
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .status import Status
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter
 from ..common.alias import JobId
 from ..task.task import Task
+from .status import Status
 
 
 def _run_callbacks(fn):
@@ -51,12 +51,13 @@ class Job(_Entity):
 
     _MANAGER_NAME = "job"
 
-    def __init__(self, id: JobId, task: Task, force=False):
+    def __init__(self, id: JobId, task: Task, submit_id: str, force=False):
         self.id = id
         self._task = task
         self._force = force
         self._status = Status.SUBMITTED
         self._creation_date = datetime.now()
+        self._submit_id: str = submit_id
         self._subscribers: List[Callable] = []
         self._stacktrace: List[str] = []
         self.__logger = _TaipyLogger._get_logger()
@@ -80,6 +81,10 @@ class Job(_Entity):
     @_self_setter(_MANAGER_NAME)
     def force(self, val):
         self._force = val
+
+    @property
+    def submit_id(self):
+        return self._submit_id
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -144,6 +149,11 @@ class Job(_Entity):
         self.status = Status.CANCELLED
 
     @_run_callbacks
+    def abandoned(self):
+        """Set the status to _abandoned_ and notify subscribers."""
+        self.status = Status.ABANDONED
+
+    @_run_callbacks
     def failed(self):
         """Set the status to _failed_ and notify subscribers."""
         self.status = Status.FAILED
@@ -181,6 +191,14 @@ class Job(_Entity):
             True if the job was cancelled.
         """
         return self.status == Status.CANCELLED
+
+    def is_abandoned(self) -> bool:
+        """Indicate if the job was abandoned.
+
+        Returns:
+            True if the job was abandoned.
+        """
+        return self.status == Status.ABANDONED
 
     def is_submitted(self) -> bool:
         """Indicate if the job is submitted.
@@ -228,7 +246,9 @@ class Job(_Entity):
         Returns:
             True if the job is finished.
         """
-        return self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped()
+        return (
+            self.is_completed() or self.is_failed() or self.is_cancelled() or self.is_skipped() or self.is_abandoned()
+        )
 
     def _on_status_change(self, *functions):
         """Get a notification when the status of the job changes.
@@ -262,3 +282,6 @@ class Job(_Entity):
         else:
             self.completed()
             self.__logger.info(f"job {self.id} is completed.")
+
+    def __hash__(self):
+        return hash(self.id)

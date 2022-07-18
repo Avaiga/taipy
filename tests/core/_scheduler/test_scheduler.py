@@ -20,17 +20,18 @@ from functools import partial
 from time import sleep
 
 import pytest
-from taipy.config import Config, JobConfig
-from taipy.config._config import _Config
-from taipy.config.data_node.scope import Scope
 
 from src.taipy.core import taipy
 from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core.data._data_manager import _DataManager
+from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from taipy.config import Config, JobConfig
+from taipy.config._config import _Config
+from taipy.config.data_node.scope import Scope
 from tests.core.utils import assert_true_after_1_minute_max
 
 
@@ -90,7 +91,7 @@ def test_submit_task():
 
     before_submission_creation = datetime.now()
     sleep(0.1)
-    job = _Scheduler.submit_task(task)
+    job = _Scheduler.submit_task(task, "submit_id")
     sleep(0.1)
     after_submission_creation = datetime.now()
     assert _DataManager._get(output_dn_id).read() == 42
@@ -99,6 +100,30 @@ def test_submit_task():
     assert _DataManager._get(output_dn_id).job_ids == [job.id]
     assert _DataManager._get(output_dn_id).is_ready_for_reading
     assert job.is_completed()
+
+
+def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
+    dn_1 = InMemoryDataNode("dn_config_id_1", Scope.PIPELINE)
+    dn_2 = InMemoryDataNode("dn_config_id_2", Scope.PIPELINE)
+    task_1 = Task("task_config_id_1", print, [dn_1])
+    task_2 = Task("task_config_id_2", print, [dn_2])
+    pipeline.tasks = [task_1, task_2]
+
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+    _TaskManager._set(task_1)
+    _TaskManager._set(task_2)
+    _PipelineManager._set(pipeline)
+
+    jobs_1 = taipy.submit(pipeline)
+    jobs_2 = taipy.submit(pipeline)
+    assert len(jobs_1) == 2
+    assert len(jobs_2) == 2
+    submit_ids_1 = [job.submit_id for job in jobs_1]
+    submit_ids_2 = [job.submit_id for job in jobs_2]
+    assert len(set(submit_ids_1)) == 1
+    assert len(set(submit_ids_2)) == 1
+    assert set(submit_ids_1) != set(submit_ids_2)
 
 
 def test_submit_task_that_return_multiple_outputs():
@@ -114,8 +139,8 @@ def test_submit_task_that_return_multiple_outputs():
     with_tuple = _create_task(return_2tuple, 2)
     with_list = _create_task(return_list, 2)
 
-    _Scheduler.submit_task(with_tuple)
-    _Scheduler.submit_task(with_list)
+    _Scheduler.submit_task(with_tuple, "submit_id_1")
+    _Scheduler.submit_task(with_list, "submit_id_2")
 
     assert (
         with_tuple.output[f"{with_tuple.config_id}_output0"].read()
@@ -142,10 +167,12 @@ def test_submit_task_returns_single_iterable_output():
     task_with_tuple = _create_task(return_2tuple, 1)
     task_with_list = _create_task(return_list, 1)
 
-    _Scheduler.submit_task(task_with_tuple)
+    _Scheduler.submit_task(task_with_tuple, "submit_id_1")
     assert task_with_tuple.output[f"{task_with_tuple.config_id}_output0"].read() == (42, 21)
-    _Scheduler.submit_task(task_with_list)
+    assert len(_Scheduler._processes) == 0
+    _Scheduler.submit_task(task_with_list, "submit_id_2")
     assert task_with_list.output[f"{task_with_list.config_id}_output0"].read() == [42, 21]
+    assert len(_Scheduler._processes) == 0
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
@@ -157,9 +184,10 @@ def test_data_node_not_written_due_to_wrong_result_nb():
 
     task = _create_task(return_2tuple(), 3)
 
-    job = _Scheduler.submit_task(task)
+    job = _Scheduler.submit_task(task, "submit_id")
     assert task.output[f"{task.config_id}_output0"].read() == 0
     assert job.is_failed()
+    assert len(_Scheduler._processes) == 0
 
 
 def test_submit_task_in_parallel():
@@ -171,11 +199,13 @@ def test_submit_task_in_parallel():
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
-        job = _Scheduler.submit_task(task)
+        job = _Scheduler.submit_task(task, "submit_id")
         assert task.output[f"{task.config_id}_output0"].read() == 0
         assert job.is_running()
+        assert len(_Scheduler._processes) == 1
 
     assert_true_after_1_minute_max(job.is_completed)
+    assert len(_Scheduler._processes) == 0
 
 
 def test_submit_task_multithreading_multiple_task():
@@ -191,9 +221,10 @@ def test_submit_task_multithreading_multiple_task():
 
     with lock_1:
         with lock_2:
-            job_1 = _Scheduler.submit_task(task_1)
-            job_2 = _Scheduler.submit_task(task_2)
+            job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
+            job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
 
+            assert len(_Scheduler._processes) == 2
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert job_1.is_running()
@@ -204,11 +235,13 @@ def test_submit_task_multithreading_multiple_task():
         assert_true_after_1_minute_max(job_2.is_completed)
         assert job_1.is_running()
         assert job_2.is_completed()
+        assert len(_Scheduler._processes) == 1
 
     assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert task_2.output[f"{task_2.config_id}_output0"].read() == 42
     assert_true_after_1_minute_max(job_1.is_completed)
     assert job_2.is_completed()
+    assert len(_Scheduler._processes) == 0
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
@@ -225,19 +258,22 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     task_2 = _create_task(partial(lock_multiply, lock_2))
 
     with lock_0:
-        job_0 = _Scheduler.submit_task(task_0)
+        job_0 = _Scheduler.submit_task(task_0, "submit_id_0")
         assert job_0.is_running()
+        assert len(_Scheduler._processes) == 1
         with lock_1:
             with lock_2:
-                job_1 = _Scheduler.submit_task(task_2)
-                job_2 = _Scheduler.submit_task(task_1)
+                job_1 = _Scheduler.submit_task(task_2, "submit_id_2")
+                job_2 = _Scheduler.submit_task(task_1, "submit_id_1")
 
+                assert len(_Scheduler._processes) == 2
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
                 assert job_1.is_running()
                 assert job_2.is_pending()
 
             assert_true_after_1_minute_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
+            assert len(_Scheduler._processes) == 2
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert_true_after_1_minute_max(job_1.is_completed)
             assert_true_after_1_minute_max(job_2.is_running)
@@ -271,23 +307,27 @@ def test_blocked_task():
     assert not task_2.baz.is_ready_for_reading  # neither does baz
 
     assert len(_Scheduler.blocked_jobs) == 0
-    job_2 = _Scheduler.submit_task(task_2)  # job 2 is submitted first
+    job_2 = _Scheduler.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not up_to_date the job 2 is blocked
+    assert len(_Scheduler._processes) == 0
     assert len(_Scheduler.blocked_jobs) == 1
     with lock_2:
         with lock_1:
-            job_1 = _Scheduler.submit_task(task_1)  # job 1 is submitted and locked
+            job_1 = _Scheduler.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
             assert job_1.is_running()  # so it is still running
+            assert len(_Scheduler._processes) == 1
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
         assert_true_after_1_minute_max(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_1_minute_max(job_2.is_running)  # And job 2 can start running
+        assert len(_Scheduler._processes) == 1
         assert len(_Scheduler.blocked_jobs) == 0
     assert_true_after_1_minute_max(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
+    assert len(_Scheduler._processes) == 0
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
@@ -366,7 +406,7 @@ def test_need_to_run_output_cacheable_no_input():
     task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
-    _Scheduler.submit_task(task)
+    _Scheduler.submit_task(task, "submit_id")
 
     assert not _Scheduler._needs_to_run(task)
 
@@ -382,7 +422,7 @@ def test_need_to_run_output_cacheable_no_validity_period():
     task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
-    _Scheduler.submit_task(task)
+    _Scheduler.submit_task(task, "submit_id")
 
     assert not _Scheduler._needs_to_run(task)
 
@@ -398,10 +438,10 @@ def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
-    job = _Scheduler.submit_task(task)
+    job = _Scheduler.submit_task(task, "submit_id_1")
 
     assert not _Scheduler._needs_to_run(task)
-    job_skipped = _Scheduler.submit_task(task)
+    job_skipped = _Scheduler.submit_task(task, "submit_id_2")
 
     assert job.is_completed()
     assert job.is_finished()
@@ -417,7 +457,7 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     task = _create_task_from_config(task_cfg)
 
     assert _Scheduler._needs_to_run(task)
-    _Scheduler.submit_task(task)
+    _Scheduler.submit_task(task, "submit_id")
 
     output = task.hello_world
     output._last_edit_date = datetime.now() - timedelta(days=1, minutes=30)

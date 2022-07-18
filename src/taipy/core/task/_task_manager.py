@@ -113,4 +113,5 @@ class _TaskManager(_Manager[Task]):
         task = cls._get(task_id)
         if task is None:
             raise NonExistingTask(task_id)
-        cls._scheduler().submit_task(task, callbacks, force)
+
+        return cls._scheduler().submit_task(task, callbacks=callbacks, force=force)

@@ -13,8 +13,8 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from .status import Status
 from ..common.alias import JobId
+from .status import Status
 
 
 @dataclass
@@ -23,6 +23,7 @@ class _JobModel:
     task_id: str
     status: Status
     force: bool
+    submit_id: str
     creation_date: str
     subscribers: List[Dict]
     stacktrace: List[str]
@@ -37,6 +38,7 @@ class _JobModel:
             task_id=data["task_id"],
             status=Status._from_repr(data["status"]),
             force=data["force"],
+            submit_id=data["submit_id"],
             creation_date=data["creation_date"],
             subscribers=data["subscribers"],
             stacktrace=data["stacktrace"],

@@ -124,8 +124,12 @@ class _ScenarioManager(_Manager[Scenario]):
         if scenario is None:
             raise NonExistingScenario(scenario_id)
         callbacks = cls.__get_status_notifier_callbacks(scenario)
+        jobs_in_pipelines = {}
         for pipeline in scenario.pipelines.values():
-            _PipelineManagerFactory._build_manager()._submit(pipeline, callbacks=callbacks, force=force)
+            jobs_in_pipelines[pipeline.id] = _PipelineManagerFactory._build_manager()._submit(
+                pipeline, callbacks=callbacks, force=force
+            )
+        return jobs_in_pipelines
 
     @classmethod
     def __get_status_notifier_callbacks(cls, scenario: Scenario) -> List:

@@ -363,6 +363,15 @@ def delete_jobs():
     return _JobManagerFactory._build_manager()._delete_all()
 
 
+def cancel_job(job: Union[str, Job]):
+    """Cancel a job and set the status of the subsequent jobs to ABANDONED.
+
+    Parameters:
+        job (Job^): The job to cancel.
+    """
+    _JobManagerFactory._build_manager()._cancel(job)
+
+
 def get_latest_job(task: Task) -> Optional[Job]:
     """Return the latest job of a task.
 

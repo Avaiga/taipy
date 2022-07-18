@@ -204,15 +204,15 @@ class TestTaipy:
 
     def test_delete_job(self, task):
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task)
+            job = Job(JobId("job_id"), task, "submit_id")
             tp.delete_job(job)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task)
+            job = Job(JobId("job_id"), task, "submit_id")
             tp.delete_job(job, False)
             mck.assert_called_once_with(job, False)
         with mock.patch("src.taipy.core.job._job_manager._JobManager._delete") as mck:
-            job = Job(JobId("job_id"), task)
+            job = Job(JobId("job_id"), task, "submit_id")
             tp.delete_job(job, True)
             mck.assert_called_once_with(job, True)
 
@@ -225,6 +225,11 @@ class TestTaipy:
         with mock.patch("src.taipy.core.job._job_manager._JobManager._get_latest") as mck:
             tp.get_latest_job(task)
             mck.assert_called_once_with(task)
+
+    def test_cancel_job(self):
+        with mock.patch("src.taipy.core.job._job_manager._JobManager._cancel") as mck:
+            tp.cancel_job("job_id")
+            mck.assert_called_once_with("job_id")
 
     def test_get_data_node(self, data_node):
         with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as mck:

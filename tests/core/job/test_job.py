@@ -14,9 +14,6 @@ from time import sleep
 from unittest.mock import MagicMock
 
 import pytest
-from taipy.config import JobConfig
-from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 
 from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
@@ -27,6 +24,9 @@ from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from taipy.config import JobConfig
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def job_id():
 
 @pytest.fixture
 def job(task, job_id):
-    return Job(job_id, task)
+    return Job(job_id, task, "submit_id")
 
 
 @pytest.fixture
@@ -69,15 +69,16 @@ def test_create_job(task, job):
     assert job.id == "id1"
     assert task in job
     assert job.is_submitted()
+    assert job.submit_id is not None
 
 
 def test_comparison(task):
     job_id_1 = JobId("id1")
     job_id_2 = JobId("id2")
 
-    job_1 = Job(job_id_1, task)
+    job_1 = Job(job_id_1, task, "submit_id")
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = Job(job_id_2, task)
+    job_2 = Job(job_id_2, task, "submit_id")
 
     assert job_1 < job_2
     assert job_2 > job_1
@@ -133,7 +134,7 @@ def test_notification_job(job):
 
 def test_handle_exception_in_user_function(task_id, job_id):
     task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     _dispatch(task, job)
 
@@ -145,7 +146,7 @@ def test_handle_exception_in_user_function(task_id, job_id):
 def test_handle_exception_in_input_data_node(task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", input=[data_node], function=print, output=[], id=task_id)
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     _dispatch(task, job)
 
@@ -157,7 +158,7 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", input=[], function=_foo, output=[data_node], id=task_id)
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     _dispatch(task, job)
 
@@ -170,13 +171,13 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
 def test_auto_set_and_reload(current_datetime, job_id):
     task_1 = Task(config_id="name_1", function=_foo, id=TaskId("task_1"))
     task_2 = Task(config_id="name_2", function=_foo, id=TaskId("task_2"))
-    job_1 = Job(job_id, task_1)
+    job_1 = Job(job_id, task_1, "submit_id_1")
 
     _TaskManager._set(task_1)
     _TaskManager._set(task_2)
     _JobManager._set(job_1)
 
-    job_2 = _JobManager._get(job_1)
+    job_2 = _JobManager._get(job_1, "submit_id_2")
 
     assert job_1.task.id == task_1.id
     job_1.task = task_2

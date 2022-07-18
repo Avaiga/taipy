@@ -19,8 +19,6 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
-from taipy.config import JobConfig
-from taipy.config.config import Config
 
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler import _Scheduler
@@ -28,6 +26,8 @@ from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.task.task import Task
+from taipy.config import JobConfig
+from taipy.config.config import Config
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -64,7 +64,7 @@ def test_can_execute_2_workers():
         id=task_id,
     )
     job_id = JobId("id1")
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     dispatcher = _StandaloneJobDispatcher()
 
@@ -85,7 +85,7 @@ def test_can_execute_synchronous():
     task_id = TaskId("task_id1")
     task = Task(config_id="name", input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     dispatcher = _Scheduler._dispatcher
 
@@ -101,7 +101,7 @@ def test_exception_in_user_function():
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     dispatcher = _Scheduler._dispatcher
     dispatcher._dispatch(job)
@@ -121,7 +121,7 @@ def test_exception_in_writing_data():
     output._is_in_cache = False
     output.write.side_effect = ValueError()
     task = Task(config_id="name", input=[], function=print, output=[output], id=task_id)
-    job = Job(job_id, task)
+    job = Job(job_id, task, "submit_id")
 
     dispatcher = _Scheduler._dispatcher
 

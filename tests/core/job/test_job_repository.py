@@ -13,7 +13,6 @@ import datetime
 import traceback
 
 import pytest
-from taipy.config.data_node.scope import Scope
 
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
@@ -26,6 +25,7 @@ from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from taipy.config.data_node.scope import Scope
 
 data_node = CSVDataNode(
     "test_data_node",
@@ -64,7 +64,7 @@ class A:
         pass
 
 
-job = Job(JobId("id"), task)
+job = Job(JobId("id"), task, "submit_id")
 job._subscribers = [f, A.f, A.g, A.h, A.B.f]
 job._exceptions = [traceback.TracebackException.from_exception(Exception())]
 
@@ -73,6 +73,7 @@ job_model = _JobModel(
     task_id=task.id,
     status=Status(Status.SUBMITTED),
     force=False,
+    submit_id="submit_id",
     creation_date=job._creation_date.isoformat(),
     subscribers=_JobRepository._serialize_subscribers(job._subscribers),
     stacktrace=job._stacktrace,
