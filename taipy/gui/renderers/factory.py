@@ -16,11 +16,10 @@ import xml.etree.ElementTree as etree
 
 from ..types import PropertyType
 from .builder import _Builder
-from ..extension.user_element import ElementLibrary
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
-    from ..extension.user_element import Element
+    from ..extension.user_element import Element, ElementLibrary
 
 
 class _Factory:
@@ -527,7 +526,8 @@ class _Factory:
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
-    def set_library(library: ElementLibrary):
+    def set_library(library: "ElementLibrary"):
+        from ..extension.user_element import ElementLibrary
         if isinstance(library, ElementLibrary) and isinstance(library.get_name(), str) and len(library.get_elements()) > 0:
             for ua in library.get_elements():
                 ua.check()
