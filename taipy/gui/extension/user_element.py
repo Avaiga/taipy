@@ -13,7 +13,7 @@ from abc import ABC, abstractmethod
 import typing as t
 import warnings
 
-from ..types import _AttributeType
+from ..types import PropertyType
 from ..renderers.utils import _to_camel_case
 from ..renderers.builder import _Builder
 
@@ -26,7 +26,7 @@ class ElementAttribute():
     TODO
     """
 
-    def __init__(self, name: str, attribute_type: _AttributeType, default_value: t.Optional[t.Any], js_name: t.Optional[str] = None) -> None:
+    def __init__(self, name: str, attribute_type: PropertyType, default_value: t.Optional[t.Any], js_name: t.Optional[str] = None) -> None:
         self.name = name
         self.attribute_type = attribute_type
         self.default_value = default_value
@@ -39,7 +39,7 @@ class ElementAttribute():
     def check(self, control: str):
         if not isinstance(self.name, str) or not self.name or not self.name.isidentifier():
             warnings.warn(f"Element '{control}' should have a valid attribute name '{self.name}'")
-        if not isinstance(self.attribute_type, _AttributeType):
+        if not isinstance(self.attribute_type, PropertyType):
             warnings.warn(f"Element Attribute '{control}.{self.name}' should have a valid type '{self.attribute_type}'")
     
     def _get_tuple(self) -> tuple:
