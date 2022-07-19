@@ -16,7 +16,7 @@ import xml.etree.ElementTree as etree
 
 from ..types import PropertyType
 from .builder import _Builder
-from ..extension import ElementLibrary
+from ..extension.user_element import Element, ElementLibrary
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -61,7 +61,7 @@ class _Factory:
     __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
     __TEXT_ANCHOR_NONE = "none"
 
-    __LIBRARIES: t.Dict[str, t.Dict[str, t.Any]] = {}
+    __LIBRARIES: t.Dict[str, t.Dict[str, Element]] = {}
 
     __CONTROL_BUILDERS = {
         "button": lambda gui, control_type, attrs: _Builder(
