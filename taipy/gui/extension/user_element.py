@@ -75,7 +75,7 @@ class Element():
         if not default_found:
             warnings.warn(f"User Default Attribute should be describe in the 'attributes' List '{self.name}{self.default_attribute}'")
     
-    def _call_builder(self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]], is_html: t.Optional[bool] = False) -> t.Union[t.Any, t.Tuple[str, str]]:
+    def _call_builder(self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]], lib_name: str, is_html: t.Optional[bool] = False) -> t.Union[t.Any, t.Tuple[str, str]]:
         res = self.render(gui, all_properties, is_html)
         if res is None:
             default_attr: t.Optional[ElementAttribute] = None
@@ -91,6 +91,7 @@ class Element():
                 control_type=self.name,
                 element_name=self._get_js_name(),
                 attributes=all_properties,
+                lib_name=lib_name
             )
             if default_attr is not None:
                 build.set_value_and_default(var_name=default_attr.name, var_type = default_attr.attribute_type, default_val=default_attr.default_value)

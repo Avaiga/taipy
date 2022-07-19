@@ -527,8 +527,8 @@ class _Factory:
 
     @staticmethod
     def set_library(library: "ElementLibrary"):
-        from ..extension.user_element import ElementLibrary
-        if isinstance(library, ElementLibrary) and isinstance(library.get_name(), str) and len(library.get_elements()) > 0:
+        from ..extension.user_element import ElementLibrary, Element
+        if isinstance(library, ElementLibrary) and isinstance(library.get_name(), str) and len(library.get_elements()) > 0 and isinstance(library.get_elements()[0], Element):
             for ua in library.get_elements():
                 ua.check()
             _Factory.__LIBRARIES.update({library.get_name(): {ua.name: ua for ua in library.get_elements()} })
@@ -558,9 +558,10 @@ class _Factory:
             if len(parts) > 0:
                 elements = _Factory.__LIBRARIES.get(parts[0])
                 if isinstance(elements, dict):
+                    from ..extension.user_element import Element
                     element = elements.get(parts[1])
                     if isinstance(element, Element):
-                        return element._call_builder(gui, all_properties, is_html)
+                        return element._call_builder(gui, all_properties, parts[0], is_html)
         else:
             builded = builder(gui, name, all_properties)
         if isinstance(builded, _Builder):

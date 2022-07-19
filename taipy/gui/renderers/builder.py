@@ -59,6 +59,7 @@ class _Builder:
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
         default_value="<Empty>",
+        lib_name: t.Optional[str] = "taipy"
     ):
         from ..gui import Gui
         from .factory import _Factory
@@ -67,6 +68,7 @@ class _Builder:
 
         self.__control_type = control_type
         self.__element_name = element_name
+        self.__lib_name = lib_name
         self.__attributes = attributes or {}
         self.__hashes = {}
         self.__update_vars: t.List[str] = []
@@ -610,7 +612,7 @@ class _Builder:
         return self
 
     def __set_class_names(self):
-        classes = ["taipy-" + self.__control_type.replace("_", "-")]
+        classes = [self.__lib_name + "-" + self.__control_type.replace("_", "-")]
         if cl := self.__attributes.get("class_name"):
             classes.append(str(cl))
 
