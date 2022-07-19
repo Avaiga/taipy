@@ -12,10 +12,11 @@
 import re
 import typing as t
 from datetime import datetime
+import xml.etree.ElementTree as etree
 
 from ..types import _AttributeType
 from .builder import _Builder
-from .user_control import UserControl
+from ..extension import Element, ElementLibrary
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -24,6 +25,9 @@ if t.TYPE_CHECKING:
 class _Factory:
 
     DEFAULT_CONTROL = "text"
+
+    _START_SUFFIX = ".start"
+    _END_SUFFIX = ".end"
 
     __CONTROL_DEFAULT_PROP_NAME = {
         "button": "label",
@@ -55,7 +59,7 @@ class _Factory:
     __TEXT_ANCHORS = ["bottom", "top", "left", "right"]
     __TEXT_ANCHOR_NONE = "none"
 
-    __USER_CONTROLS: t.Dict[str, UserControl] = {}
+    __LIBRARIES: t.Dict[str, t.Dict[str, Element]] = {}
 
     __CONTROL_BUILDERS = {
         "button": lambda gui, control_type, attrs: _Builder(
@@ -520,26 +524,40 @@ class _Factory:
     _PROPERTY_RE = re.compile(r"\s+([a-zA-Z][\.a-zA-Z_$0-9]*(?:\[(?:.*?)\])?)=\"((?:(?:(?<=\\)\")|[^\"])*)\"")
 
     @staticmethod
-    def set_user_builders(user_builders: t.Dict[str, UserControl]):
-        _Factory.__USER_CONTROLS.update(user_builders)
+    def set_library(library: ElementLibrary):
+        if isinstance(library, ElementLibrary) and isinstance(library.get_name(), str) and len(library.get_elements()) > 0:
+            for ua in library.get_elements():
+                ua.check()
+            _Factory.__LIBRARIES.update({library.get_name(): {ua.name: ua for ua in library.get_elements()} })
 
     @staticmethod
     def get_default_property_name(control_name: str) -> t.Optional[str]:
-        name = control_name.split(".", 1)[0]
+        name = control_name[:-len(_Factory._START_SUFFIX)] if control_name.endswith(_Factory._START_SUFFIX) else control_name[:-len(_Factory._END_SUFFIX)] if control_name.endswith(_Factory._END_SUFFIX) else control_name
         prop = _Factory.__CONTROL_DEFAULT_PROP_NAME.get(name)
         if prop is None:
-            builder = _Factory.__USER_CONTROLS.get(name)
-            if builder is not None:
-                prop = builder.default_attribute
+            parts = name.split(".")
+            if len(parts) > 1:
+                elements = _Factory.__LIBRARIES.get(parts[0])
+                if elements is not None:
+                    builder = elements.get(".".join(parts[1:]))
+                    if builder is not None:
+                        prop = builder.default_attribute
         return prop
 
     @staticmethod
-    def call_builder(gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None) -> t.Optional[_Builder]:
+    def call_builder(gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
         builder = _Factory.__CONTROL_BUILDERS.get(name)
+        builded = None
         if builder is None:
-            control = _Factory.__USER_CONTROLS.get(name)
-            if isinstance(control, UserControl):
-                return control._call_builder(gui, all_properties)
+            parts = name.split(".")
+            if len(parts) > 0:
+                elements = _Factory.__LIBRARIES.get(parts[0])
+                if isinstance(elements, dict):
+                    element = elements.get(parts[1])
+                    if isinstance(element, Element):
+                        return element._call_builder(gui, all_properties, is_html)
         else:
-            return builder(gui, name, all_properties)
+            builded = builder(gui, name, all_properties)
+        if isinstance(builded, _Builder):
+            return builded.build_to_string() if is_html else builded.el
         return None

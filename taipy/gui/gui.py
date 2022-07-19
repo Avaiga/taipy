@@ -74,7 +74,7 @@ from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
-from .renderers.user_control import UserControl
+from .extension.user_element import Element, ElementLibrary
 from .renderers.factory import _Factory
 
 
@@ -233,11 +233,11 @@ class Gui:
             self.__env_filename = env_filename
 
     @staticmethod
-    def add_components(user_controls: t.List[UserControl]):
+    def add_library(library: ElementLibrary):
         """
         TODO
         """
-        _Factory.set_user_builders({us.name: us for us in user_controls})
+        _Factory.set_library(library)
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:

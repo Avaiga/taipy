@@ -26,7 +26,8 @@ class _MarkdownFactory(_Factory):
         # Create properties dict from all_properties
         property_pairs = _Factory._PROPERTY_RE.findall(all_properties)
         properties = {property[0]: property[1] for property in property_pairs}
-        if builder := _Factory.call_builder(gui, control_type, properties):
-            return builder.el
-        else:
+        builder_md = _Factory.call_builder(gui, control_type, properties)
+        if builder_md is None:
             return f"<|INVALID SYNTAX - Control is '{control_type}'|>"
+        return builder_md
+
