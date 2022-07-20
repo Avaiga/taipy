@@ -113,9 +113,8 @@ ENV/
 site/
 
 # Demo Testing File
-demo*.py
+demo*.*
 *.csv
-demo*.css
 object_selection.py
 gui_assets
 dataset

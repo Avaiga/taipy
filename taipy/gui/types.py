@@ -43,7 +43,7 @@ class _WsType(Enum):
 NumberTypes = {"int", "int64", "float", "float64"}
 
 
-class _AttributeType(Enum):
+class PropertyType(Enum):
     boolean = "boolean"
     content = _TaipyContent
     data = _TaipyData
@@ -67,11 +67,11 @@ class _AttributeType(Enum):
     string_list = "stringlist"
 
 
-def _get_taipy_type(a_type: t.Optional[_AttributeType]) -> t.Optional[t.Type[_TaipyBase]]:
-    if isinstance(a_type, _AttributeType) and not isinstance(a_type.value, str):
+def _get_taipy_type(a_type: t.Optional[PropertyType]) -> t.Optional[t.Type[_TaipyBase]]:
+    if isinstance(a_type, PropertyType) and not isinstance(a_type.value, str):
         return a_type.value
-    if a_type == _AttributeType.boolean:
+    if a_type == PropertyType.boolean:
         return _TaipyBool
-    elif a_type == _AttributeType.number:
+    elif a_type == PropertyType.number:
         return _TaipyNumber
     return None

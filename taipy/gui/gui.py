@@ -26,7 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_from_directory
+from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -74,6 +74,8 @@ from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
+from .extension.user_element import ElementLibrary
+from .renderers.factory import _Factory
 
 
 class Gui:
@@ -114,6 +116,7 @@ class Gui:
     __ON_INIT_NAME = "TaipyOnInit"
     __CONTENT_ROOT = "/taipy-content/"
     __UPLOAD_URL = "/taipy-uploads"
+    __EXTENSION_ROOT = "/taipy-extensions/"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -123,6 +126,8 @@ class Gui:
     _aggregate_functions: t.List[str] = ["count", "sum", "mean", "median", "min", "max", "std", "first", "last"]
 
     __LOCAL_TZ = str(tzlocal.get_localzone())
+
+    __extensions: t.Dict[str, ElementLibrary] = {}
 
     def __init__(
         self,
@@ -229,6 +234,14 @@ class Gui:
             self.add_pages(pages)
         if env_filename is not None:
             self.__env_filename = env_filename
+
+    @staticmethod
+    def add_library(library: ElementLibrary):
+        """
+        TODO
+        """
+        _Factory.set_library(library)
+        Gui.__extensions[library.get_name()] = library
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -453,6 +466,16 @@ class Gui:
             )
             if dir_path:
                 return send_from_directory(str(dir_path), file_name, as_attachment=as_attachment)
+        return ("", 404)
+
+    def __serve_extension(self, path: str) -> t.Any:
+        parts = path.split("/")
+        if len(parts) > 1:
+            library = Gui.__extensions.get(parts[0])
+            if library is not None:
+                resource_name = library.get_resource("/".join(parts[1:]))
+                if resource_name:
+                    return send_file(resource_name)
         return ("", 404)
 
     def __upload_files(self):
@@ -1378,13 +1401,19 @@ class Gui:
         # server URL Rule for taipy images
         images_bp = Blueprint("taipy_images", __name__)
         images_bp.add_url_rule(f"{Gui.__CONTENT_ROOT}<path:path>", view_func=self.__serve_content)
-
         self._flask_blueprint.append(images_bp)
 
         # server URL for uploaded files
         upload_bp = Blueprint("taipy_upload", __name__)
         upload_bp.add_url_rule(Gui.__UPLOAD_URL, view_func=self.__upload_files, methods=["POST"])
         self._flask_blueprint.append(upload_bp)
+
+        # server URL for extension resources
+        extension_bp = Blueprint("taipy_extensions", __name__)
+        extension_bp.add_url_rule(f"{Gui.__EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
+        scripts = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in (lib.get_scripts() or [])]
+        styles = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in (lib.get_styles() or [])]
+        self._flask_blueprint.append(extension_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
         self._flask_blueprint.append(
@@ -1394,6 +1423,8 @@ class Gui:
                 title=self._get_config("title", "Taipy App"),
                 favicon=self._get_config("favicon", "/favicon.png"),
                 root_margin=self._get_config("margin", None),
+                scripts=scripts,
+                styles=styles
             )
         )
 

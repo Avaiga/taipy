@@ -7,15 +7,21 @@
     <link rel="icon" type="image/png" href="{{favicon}}" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <title>{{title}}</title>
-    <script>{%- if config -%}
-    window.taipyConfig={{config|tojson|safe}};{% endif %}
-    </script>
+    {%- if config -%}<script>
+    window.taipyConfig={{config|tojson|safe}};
+    </script>{% endif %}
+    {% for script in scripts %}
+      <script defer src="{{script}}" ></script>
+    {% endfor %}
   </head>
   <body >
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
     />
+    {% for css in styles %}
+      <link rel="stylesheet" href="{{css}}" />
+    {% endfor %}
     <link rel="stylesheet" href="{{app_css}}" />
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"{%- if root_margin -%} style="margin:{{root_margin}};"{% endif %}></div>

@@ -19,7 +19,7 @@ from .factory import _HtmlFactory
 
 class _TaipyHTMLParser(HTMLParser):
 
-    __TAIPY_NAMESPACE_RE = re.compile(r"taipy:([a-zA-Z\_]*)")
+    __TAIPY_NAMESPACE_RE = re.compile(r"([a-zA-Z\_]+):([a-zA-Z\_]*)")
 
     def __init__(self, gui):
         super().__init__()
@@ -48,7 +48,7 @@ class _TaipyHTMLParser(HTMLParser):
         elif tag == "body":
             self.is_body = True
         elif m := self.__TAIPY_NAMESPACE_RE.match(tag):
-            self.taipy_tag = _TaipyTag(m.group(1), props)
+            self.taipy_tag = _TaipyTag(m.group(1), m.group(2), props)
         elif not self.is_body:
             head_props = {prop[0]: prop[1] for prop in props}
             self.head_tag = {"tag": tag, "props": head_props, "content": ""}
@@ -111,7 +111,8 @@ class _TaipyHTMLParser(HTMLParser):
 
 
 class _TaipyTag(object):
-    def __init__(self, tag_name: str, properties: t.List[t.Tuple[str, str]]) -> None:
+    def __init__(self, namespace: str, tag_name: str, properties: t.List[t.Tuple[str, str]]) -> None:
+        self.namespace = namespace
         self.control_type = tag_name
         self.properties = {prop[0]: prop[1] for prop in properties}
         self.has_set_value = False
@@ -119,7 +120,7 @@ class _TaipyTag(object):
     def set_value(self, value: str) -> bool:
         if self.has_set_value:
             return False
-        property_name = _HtmlFactory.get_default_property_name(self.control_type)
+        property_name = _HtmlFactory.get_default_property_name(f"{self.namespace}.{self.control_type}")
         # Set property only if it is not already defined
         if property_name and property_name not in self.properties.keys():
             self.properties[property_name] = value
@@ -132,4 +133,4 @@ class _TaipyTag(object):
         # allow usage of 'class' property in html taipy tag
         if "class" in self.properties and "class_name" not in self.properties:
             self.properties["class_name"] = self.properties["class"]
-        return _HtmlFactory.create_element(gui, self.control_type, self.properties)
+        return _HtmlFactory.create_element(gui, self.namespace, self.control_type, self.properties)

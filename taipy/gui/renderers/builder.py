@@ -20,7 +20,7 @@ from datetime import date, datetime, time
 from inspect import isclass
 
 from ..partial import Partial
-from ..types import _AttributeType, _get_taipy_type
+from ..types import PropertyType, _get_taipy_type
 from ..utils import (
     _date_to_ISO,
     _get_client_var_name,
@@ -59,6 +59,7 @@ class _Builder:
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
         default_value="<Empty>",
+        lib_name: t.Optional[str] = "taipy"
     ):
         from ..gui import Gui
         from .factory import _Factory
@@ -67,6 +68,7 @@ class _Builder:
 
         self.__control_type = control_type
         self.__element_name = element_name
+        self.__lib_name = lib_name
         self.__attributes = attributes or {}
         self.__hashes = {}
         self.__update_vars: t.List[str] = []
@@ -588,7 +590,7 @@ class _Builder:
             name_idx = f"{name}[{idx}]"
             sel = self.__attributes.get(name_idx)
 
-    def get_list_attribute(self, name: str, list_type: _AttributeType):
+    def get_list_attribute(self, name: str, list_type: PropertyType):
         varname = self.__hashes.get(name)
         if varname is None:
             list_val = self.__attributes.get(name)
@@ -596,7 +598,7 @@ class _Builder:
                 list_val = [s for s in list_val.split(";")]
             if isinstance(list_val, list):
                 # TODO catch the cast exception
-                if list_type.value == _AttributeType.number.value:
+                if list_type.value == PropertyType.number.value:
                     list_val = [int(v) for v in list_val]
                 else:
                     list_val = [int(v) for v in list_val]
@@ -610,7 +612,7 @@ class _Builder:
         return self
 
     def __set_class_names(self):
-        classes = ["taipy-" + self.__control_type.replace("_", "-")]
+        classes = [self.__lib_name + "-" + self.__control_type.replace("_", "-")]
         if cl := self.__attributes.get("class_name"):
             classes.append(str(cl))
 
@@ -633,7 +635,7 @@ class _Builder:
         if content is None and hash_name is None:
             return self
         if hash_name:
-            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.image if image else _AttributeType.content)
+            hash_name = self.__get_typed_hash_name(hash_name, PropertyType.image if image else PropertyType.content)
         value = self.__gui._get_content(hash_name or var_name, content, image)
         if hash_name:
             self.__set_react_attribute(
@@ -646,7 +648,7 @@ class _Builder:
         property_name = var_name if property_name is None else property_name
         self.__set_list_of_(f"default_{property_name}")
         if hash_name := self.__hashes.get(var_name):
-            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.lov)
+            hash_name = self.__get_typed_hash_name(hash_name, PropertyType.lov)
             self.__update_vars.append(f"{property_name}={hash_name}")
             self.__set_react_attribute(property_name, hash_name)
         return self
@@ -681,7 +683,7 @@ class _Builder:
         elif numVal is not None:
             warnings.warn(f"{self.__element_name} {var_name} value is not not valid {numVal}")
         if hash_name:
-            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.number)
+            hash_name = self.__get_typed_hash_name(hash_name, PropertyType.number)
             self.__update_vars.append(f"{var_name}={hash_name}")
             self.__set_react_attribute(var_name, hash_name)
         return self
@@ -714,14 +716,14 @@ class _Builder:
         with_update=True,
         with_default=True,
         native_type=False,
-        var_type: t.Optional[_AttributeType] = None,
+        var_type: t.Optional[PropertyType] = None,
         default_val: t.Any = None,
     ):
         var_name = self.__default_property_name if var_name is None else var_name
-        if var_type == _AttributeType.number_or_lov_value:
-            var_type = _AttributeType.lov_value if self.__attributes.get("lov") else _AttributeType.dynamic_number
-            native_type = native_type if var_type == _AttributeType.dynamic_number else False
-        if var_type == _AttributeType.dynamic_boolean:
+        if var_type == PropertyType.number_or_lov_value:
+            var_type = PropertyType.lov_value if self.__attributes.get("lov") else PropertyType.dynamic_number
+            native_type = native_type if var_type == PropertyType.dynamic_number else False
+        if var_type == PropertyType.dynamic_boolean:
             return self.set_attributes([(var_name, var_type, bool(default_val), with_update)])
         if hash_name := self.__hashes.get(var_name):
             hash_name = self.__get_typed_hash_name(hash_name, var_type)
@@ -808,7 +810,7 @@ class _Builder:
             self.set_attribute("kind", "theme")
         return self
 
-    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[_AttributeType]) -> str:
+    def __get_typed_hash_name(self, hash_name: str, var_type: t.Optional[PropertyType]) -> str:
         if taipy_type := _get_taipy_type(var_type):
             expr = self.__gui._get_expr_from_hash(hash_name)
             hash_name = self.__gui._evaluate_bind_holder(taipy_type, expr)
@@ -821,7 +823,7 @@ class _Builder:
         if val != def_val:
             self.__set_boolean_attribute(default_name, val)
         if hash_name is not None:
-            hash_name = self.__get_typed_hash_name(hash_name, _AttributeType.dynamic_boolean)
+            hash_name = self.__get_typed_hash_name(hash_name, PropertyType.dynamic_boolean)
             self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash_name))
             if with_update:
                 if update_main:
@@ -833,41 +835,41 @@ class _Builder:
         for attr in attributes:
             if not isinstance(attr, tuple):
                 attr = (attr,)
-            var_type = _get_tuple_val(attr, 1, _AttributeType.string)
-            if var_type == _AttributeType.boolean:
+            var_type = _get_tuple_val(attr, 1, PropertyType.string)
+            if var_type == PropertyType.boolean:
                 def_val = _get_tuple_val(attr, 2, False)
                 val = self.__get_boolean_attribute(attr[0], def_val)
                 if val != def_val:
                     self.__set_boolean_attribute(attr[0], val)
-            elif var_type == _AttributeType.dynamic_boolean:
+            elif var_type == PropertyType.dynamic_boolean:
                 self.__set_dynamic_bool_attribute(
                     attr[0], _get_tuple_val(attr, 2, False), _get_tuple_val(attr, 3, False)
                 )
-            elif var_type == _AttributeType.number:
+            elif var_type == PropertyType.number:
                 self.__set_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == _AttributeType.dynamic_number:
+            elif var_type == PropertyType.dynamic_number:
                 self.__set_dynamic_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == _AttributeType.string:
+            elif var_type == PropertyType.string:
                 self.__set_string_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
-            elif var_type == _AttributeType.dynamic_string:
+            elif var_type == PropertyType.dynamic_string:
                 self.__set_dynamic_string_attribute(
                     attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, False)
                 )
-            elif var_type == _AttributeType.string_list:
+            elif var_type == PropertyType.string_list:
                 self.__set_list_attribute(
                     attr[0], self.__hashes.get(attr[0]), self.__attributes.get(attr[0]), str, False
                 )
-            elif var_type == _AttributeType.function:
+            elif var_type == PropertyType.function:
                 self.__set_function_attribute(attr[0], _get_tuple_val(attr, 2, None), _get_tuple_val(attr, 3, True))
-            elif var_type == _AttributeType.react:
+            elif var_type == PropertyType.react:
                 self.__set_react_attribute(_to_camel_case(attr[0]), _get_tuple_val(attr, 2, None))
-            elif var_type == _AttributeType.string_or_number:
+            elif var_type == PropertyType.string_or_number:
                 self.__set_string_or_number_attribute(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == _AttributeType.dict:
+            elif var_type == PropertyType.dict:
                 self.__set_dict_attribute(attr[0])
-            elif var_type == _AttributeType.dynamic_list:
+            elif var_type == PropertyType.dynamic_list:
                 self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
-            elif var_type == _AttributeType.boolean_or_list:
+            elif var_type == PropertyType.boolean_or_list:
                 if _is_boolean(self.__attributes.get(attr[0])):
                     self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(attr, 2, False), True, update_main=False)
                 else:
