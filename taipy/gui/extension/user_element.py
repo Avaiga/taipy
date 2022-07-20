@@ -104,6 +104,9 @@ class Element():
     def render(self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]], is_html: t.Optional[bool] = False)-> t.Union[None, t.Any, t.Tuple[str, str]]:
         """
         TODO
+        returns a tuple of string with the full React component instanciation and the component name if is_html 
+        else an xtree Element in markdown context
+        returns None to let taipy render the component
         """
         return None
 
@@ -116,6 +119,7 @@ class ElementLibrary(ABC):
     def get_elements(self) -> t.List[Element]:
         """
         TODO
+        list of visual elements
         """
         pass
 
@@ -123,6 +127,7 @@ class ElementLibrary(ABC):
     def get_name(self) -> str:
         """
         TODO
+        library name
         """
         pass
 
@@ -147,5 +152,6 @@ class ElementLibrary(ABC):
     def get_resource(self, name: str) -> Path:
         """
         TODO
+        returns a path for a resource name
         """
         pass
