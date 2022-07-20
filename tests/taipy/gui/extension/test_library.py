@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 import inspect
+from pathlib import Path
 from taipy.gui import Gui
 from taipy.gui.extension import ElementLibrary, Element, ElementAttribute, PropertyType
 
@@ -23,6 +24,15 @@ class MyLibrary(ElementLibrary):
 
     def get_elements(self) -> t.List[Element]:
         return MyLibrary.elts
+
+    def get_scripts(self) -> t.List[str]:
+        return []
+    
+    def get_styles(self) -> t.List[str]:
+        return None
+    
+    def get_resource(self, name: str) -> Path:
+        return None
 
 Gui.add_library(MyLibrary())
 

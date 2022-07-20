@@ -1411,8 +1411,8 @@ class Gui:
         # server URL for extension resources
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"{Gui.__EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
-        scripts = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in lib.get_scripts()]
-        styles = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in lib.get_styles()]
+        scripts = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in (lib.get_scripts() or [])]
+        styles = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in (lib.get_styles() or [])]
         self._flask_blueprint.append(extension_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
