@@ -87,11 +87,13 @@ class _Server:
 
     def _get_default_blueprint(
         self,
-        static_folder: t.Optional[str] = "",
-        template_folder: str = "",
-        title: str = "",
-        favicon: str = "",
-        root_margin: t.Optional[str] = None,
+        static_folder: str,
+        template_folder: str,
+        title: str,
+        favicon: str,
+        root_margin: str,
+        scripts: t.List[str],
+        styles: t.List[str],
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -108,6 +110,8 @@ class _Server:
                     root_margin=root_margin,
                     watermark=self._gui._get_config("watermark", None),
                     config=self.__get_client_config(),
+                    scripts=scripts,
+                    styles=styles
                 )
             if os.path.isfile(static_folder + os.path.sep + path):
                 return send_from_directory(static_folder + os.path.sep, path)

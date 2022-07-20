@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 import typing as t
 import warnings
 
@@ -120,6 +121,30 @@ class ElementLibrary(ABC):
 
     @abstractmethod
     def get_name(self) -> str:
+        """
+        TODO
+        """
+        pass
+
+    @abstractmethod
+    def get_scripts(self) -> t.List[str]:
+        """
+        TODO
+        list of resources names for the scripts
+        """
+        pass
+
+    @abstractmethod
+    def get_styles(self) -> t.List[str]:
+        """
+        TODO
+        list of resources names for the css stylesheets
+
+        """
+        pass
+
+    @abstractmethod
+    def get_resource(self, name: str) -> Path:
         """
         TODO
         """
