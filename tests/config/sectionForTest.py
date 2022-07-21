@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
+from functools import partial
 from typing import Dict, Any, Optional
 
 from src.taipy.config import Section, Config
@@ -53,5 +54,13 @@ class SectionForTest(Section):
         self._attribute = as_dict.pop(self._MY_ATTRIBUTE_KEY, self._attribute)
         self._properties.update(as_dict)
 
+    @staticmethod
+    def configure(attribute: str, **properties):
+        section = SectionForTest(attribute, **properties)
+        Config._register(section)
+        return Config.sections[SectionForTest.name]
 
-Config._register_default(SectionForTest("default_attribute", register=False))
+
+Config._register_default(SectionForTest("default_attribute"))
+Config.configure_section_for_test = SectionForTest.configure
+

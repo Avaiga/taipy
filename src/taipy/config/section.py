@@ -7,12 +7,7 @@ from .common._template_handler import _TemplateHandler as _tpl
 class Section:
 
     def __init__(self, **properties):
-        register = properties.pop("register", True)
         self._properties = properties
-        if register:
-            from .config import Config
-
-            Config._register(self)
 
     @abstractmethod
     def __copy__(self):
@@ -38,6 +33,11 @@ class Section:
 
     def __getattr__(self, item: str) -> Optional[Any]:
         return self._replace_templates(self._properties.get(item, None))
+
+    def register(self):
+        from .config import Config
+        Config._register(self)
+        return Config.sections[self.name]
 
     @property
     def properties(self):
