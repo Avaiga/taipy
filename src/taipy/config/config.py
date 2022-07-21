@@ -13,6 +13,7 @@ import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from .section import Section
 from ..logger._taipy_logger import _TaipyLogger
 from ._config import _Config
 from ._toml_serializer import _TomlSerializer
@@ -35,11 +36,22 @@ class Config:
 
     _ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH = "TAIPY_CONFIG_PATH"
     __logger = _TaipyLogger._get_logger()
+    _default_config = _Config._default_config()
     _python_config = _Config()
     _file_config = None
     _env_file_config = None
     _applied_config = _Config._default_config()
     _collector = IssueCollector()
+
+    @_Classproperty
+    def sections(cls) -> Section:
+        """Return all sub configurations."""
+        return cls._applied_config._sections
+
+    @classmethod
+    def __getattr__(cls, item: str) -> Optional[Any]:
+        """Return a sub configuration value."""
+        return cls._applied_config._sections[item]
 
     @_Classproperty
     def job_config(cls) -> JobConfig:
@@ -445,48 +457,6 @@ class Config:
         return cls._applied_config._scenarios[_Config.DEFAULT_KEY]
 
     @classmethod
-    def _load_environment_file_config(cls):
-        if config_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
-            cls.__logger.info(f"Loading configuration provided by environment variable. Filename: '{config_filename}'")
-            cls._env_file_config = _TomlSerializer()._read(config_filename)
-            cls.__logger.info(f"Configuration '{config_filename}' successfully loaded.")
-
-    @classmethod
-    def __compile_configs(cls):
-        Config._load_environment_file_config()
-        cls._applied_config = _Config._default_config()
-        if cls._python_config:
-            cls._applied_config._update(cls._python_config)
-        if cls._file_config:
-            cls._applied_config._update(cls._file_config)
-        if cls._env_file_config:
-            cls._applied_config._update(cls._env_file_config)
-
-    @classmethod
-    def check(cls) -> IssueCollector:
-        """Check configuration.
-
-        This method logs issue messages and returns an issue collector.
-
-        Returns:
-            IssueCollector^: Collector containing the info, warning and error issues.
-        """
-        cls._collector = _Checker()._check(cls._applied_config)
-        cls.__log_message(cls)
-        return cls._collector
-
-    @classmethod
-    def __log_message(cls, config):
-        for issue in config._collector._warnings:
-            cls.__logger.warning(str(issue))
-        for issue in config._collector._infos:
-            cls.__logger.info(str(issue))
-        for issue in config._collector._errors:
-            cls.__logger.error(str(issue))
-        if len(config._collector._errors) != 0:
-            raise ConfigurationIssueError
-
-    @classmethod
     def configure_csv_data_node(
         cls,
         id: str,
@@ -722,6 +692,66 @@ class Config:
             db_port=db_port,
             **properties,
         )
+
+    @classmethod
+    def check(cls) -> IssueCollector:
+        """Check configuration.
+
+        This method logs issue messages and returns an issue collector.
+
+        Returns:
+            IssueCollector^: Collector containing the info, warning and error issues.
+        """
+        cls._collector = _Checker()._check(cls._applied_config)
+        cls.__log_message(cls)
+        return cls._collector
+
+    @classmethod
+    def _register_default(cls, default_section):
+        if cls._default_config._sections.get(default_section.name, None):
+            cls._default_config._sections[default_section.name]._update(default_section._to_dict())
+        else:
+            cls._default_config._sections[default_section.name] = default_section
+        cls.__compile_configs()
+
+    @classmethod
+    def _register(cls, section):
+        if cls._python_config._sections.get(section.name, None):
+            cls._python_config._sections[section.name]._update(section._to_dict())
+        else:
+            cls._python_config._sections[section.name] = section
+        cls.__compile_configs()
+
+    @classmethod
+    def _load_environment_file_config(cls):
+        if config_filename := os.environ.get(cls._ENVIRONMENT_VARIABLE_NAME_WITH_CONFIG_PATH):
+            cls.__logger.info(f"Loading configuration provided by environment variable. Filename: '{config_filename}'")
+            cls._env_file_config = _TomlSerializer()._read(config_filename)
+            cls.__logger.info(f"Configuration '{config_filename}' successfully loaded.")
+
+    @classmethod
+    def __compile_configs(cls):
+        Config._load_environment_file_config()
+        cls._applied_config = _Config._default_config()
+        if cls._default_config:
+            cls._applied_config._update(cls._default_config)
+        if cls._python_config:
+            cls._applied_config._update(cls._python_config)
+        if cls._file_config:
+            cls._applied_config._update(cls._file_config)
+        if cls._env_file_config:
+            cls._applied_config._update(cls._env_file_config)
+
+    @classmethod
+    def __log_message(cls, config):
+        for issue in config._collector._warnings:
+            cls.__logger.warning(str(issue))
+        for issue in config._collector._infos:
+            cls.__logger.info(str(issue))
+        for issue in config._collector._errors:
+            cls.__logger.error(str(issue))
+        if len(config._collector._errors) != 0:
+            raise ConfigurationIssueError
 
 
 Config._load_environment_file_config()

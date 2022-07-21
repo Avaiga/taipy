@@ -203,7 +203,9 @@ class DataNodeConfig:
         self._storage_type = (
             config_as_dict.pop(self._STORAGE_TYPE_KEY, self._storage_type) or default_dn_cfg.storage_type
         )
-        self._scope = config_as_dict.pop(self._SCOPE_KEY, self._scope) or default_dn_cfg.scope
+        self._scope = config_as_dict.pop(self._SCOPE_KEY, self._scope)
+        if self._scope is None and default_dn_cfg:
+            self._scope = default_dn_cfg.scope
         self._properties.update(config_as_dict)
         if default_dn_cfg:
             self._properties = {**default_dn_cfg.properties, **self._properties}

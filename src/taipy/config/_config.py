@@ -12,6 +12,7 @@
 from copy import copy
 from typing import Dict
 
+from . import Section
 from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
 from .job_execution.job_config import JobConfig
@@ -24,6 +25,8 @@ class _Config:
     DEFAULT_KEY = "default"
 
     def __init__(self):
+        self._sections: Dict[str, Section] = {}
+        # TO REFACTOR
         self._global_config: GlobalAppConfig = GlobalAppConfig()
         self._job_config: JobConfig = JobConfig()
         self._data_nodes: Dict[str, DataNodeConfig] = {}
@@ -34,6 +37,7 @@ class _Config:
     @classmethod
     def _default_config(cls):
         config = _Config()
+        # TO REFACTOR
         config._global_config = GlobalAppConfig.default_config()
         config._job_config = JobConfig().default_config()
         config._data_nodes = {cls.DEFAULT_KEY: DataNodeConfig.default_config(cls.DEFAULT_KEY)}
@@ -43,6 +47,13 @@ class _Config:
         return config
 
     def _update(self, other_config):
+        if other_config._sections:
+            for section_name, other_section in other_config._sections.items():
+                if section := self._sections.get(section_name, None):
+                    section._update(other_section._to_dict())
+                else:
+                    self._sections[section_name] = other_config._sections[section_name]
+        # TO REFACTOR
         self._global_config._update(other_config._global_config._to_dict())
         self._job_config._update(other_config._job_config._to_dict())
         self.__update_entity_configs(self._data_nodes, other_config._data_nodes, DataNodeConfig)
@@ -50,16 +61,16 @@ class _Config:
         self.__update_entity_configs(self._pipelines, other_config._pipelines, PipelineConfig)
         self.__update_entity_configs(self._scenarios, other_config._scenarios, ScenarioConfig)
 
-    def __update_entity_configs(self, sub_configs, other_sub_configs, _class):
-        if self.DEFAULT_KEY in other_sub_configs:
-            if self.DEFAULT_KEY in sub_configs:
-                sub_configs[self.DEFAULT_KEY]._update(other_sub_configs[self.DEFAULT_KEY]._to_dict())
+    def __update_entity_configs(self, entity_config, other_entity_configs, _class):
+        if self.DEFAULT_KEY in other_entity_configs:
+            if self.DEFAULT_KEY in entity_config:
+                entity_config[self.DEFAULT_KEY]._update(other_entity_configs[self.DEFAULT_KEY]._to_dict())
             else:
-                sub_configs[self.DEFAULT_KEY] = other_sub_configs[self.DEFAULT_KEY]
-        for cfg_id, sub_config in other_sub_configs.items():
+                entity_config[self.DEFAULT_KEY] = other_entity_configs[self.DEFAULT_KEY]
+        for cfg_id, sub_config in other_entity_configs.items():
             if cfg_id != self.DEFAULT_KEY:
-                if cfg_id in sub_configs:
-                    sub_configs[cfg_id]._update(sub_config._to_dict(), sub_configs.get(self.DEFAULT_KEY))
+                if cfg_id in entity_config:
+                    entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))
                 else:
-                    sub_configs[cfg_id] = copy(sub_config)
-                    sub_configs[cfg_id]._update(sub_config._to_dict(), sub_configs.get(self.DEFAULT_KEY))
+                    entity_config[cfg_id] = copy(sub_config)
+                    entity_config[cfg_id]._update(sub_config._to_dict(), entity_config.get(self.DEFAULT_KEY))

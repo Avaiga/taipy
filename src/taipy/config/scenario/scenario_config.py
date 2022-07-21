@@ -102,7 +102,9 @@ class ScenarioConfig:
         )
         if self._pipelines is None and default_scenario_cfg:
             self._pipelines = default_scenario_cfg._pipelines
-        self.frequency = config_as_dict.pop(self._FREQUENCY_KEY, self.frequency) or default_scenario_cfg.frequency
+        self.frequency = config_as_dict.pop(self._FREQUENCY_KEY, self.frequency)
+        if self.frequency is None and default_scenario_cfg:
+            self.frequency = default_scenario_cfg.frequency
         self.comparators = config_as_dict.pop(self._COMPARATOR_KEY, self.comparators)
         if self.comparators is None and default_scenario_cfg:
             self.comparators = default_scenario_cfg.comparators

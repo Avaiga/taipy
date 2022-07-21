@@ -11,6 +11,7 @@
 
 from .checker.issue import Issue
 from .checker.issue_collector import IssueCollector
+from .section import Section
 from .config import Config
 from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
