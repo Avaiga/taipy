@@ -61,8 +61,8 @@ class _TaipyNumber(_TaipyBase):
     def get(self):
         try:
             return float(super().get())
-        except ValueError:
-            raise ValueError(f"Variable {self.get_name()} should hold a number")
+        except Exception as e:
+            raise TypeError(f"Variable {self.get_name()} should hold a number: {e}")
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):

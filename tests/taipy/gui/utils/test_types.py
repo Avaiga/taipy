@@ -38,7 +38,7 @@ def test_taipy_bool():
 
 
 def test_taipy_number():
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         _TaipyNumber("a string", "x").get()
     with warnings.catch_warnings(record=True) as r:
         _TaipyNumber("a string", "x").cast_value("a string")
