@@ -18,7 +18,6 @@ import pathlib
 import re
 import ssl
 import tempfile
-import traceback
 import typing as t
 import warnings
 from importlib import util
