@@ -14,15 +14,16 @@ from typing import Type
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ModeNotAvailable
 
+from ..common._utils import _load_fct
 from ._abstract_scheduler import _AbstractScheduler
 from ._scheduler import _Scheduler
-from ..common._utils import _load_fct
 
 
 class _SchedulerFactory:
 
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._scheduler"
+    __dispatcher = None
 
     @classmethod
     def _build_scheduler(cls) -> Type[_AbstractScheduler]:
@@ -34,6 +35,15 @@ class _SchedulerFactory:
                 )
             else:
                 scheduler = _Scheduler
+            if cls.__dispatcher is None:
+                # Get the correct _StandaloneJobDispatcher or _DevelopmentJobDispatcher
+                from ._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+
+                cls.__dispatcher = _StandaloneJobDispatcher(
+                    scheduler
+                )  # TODO: this should be _StandaloneJobDispatcher or _DevelopmentJobDispatcher
+                cls.__dispatcher.start()
+
         else:
             raise ModeNotAvailable
         scheduler.initialize()  # type: ignore

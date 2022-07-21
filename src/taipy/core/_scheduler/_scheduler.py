@@ -38,10 +38,10 @@ class _Scheduler(_AbstractScheduler):
 
     jobs_to_run: Queue = Queue()
     blocked_jobs: List = []
-    _dispatcher = None  # type: ignore
+    # _dispatcher = None  # type: ignore
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
-    _processes: Dict = {}
+    _processes: Dict = {}  # TODO: move to dispatcher?
 
     @classmethod
     def initialize(cls):
@@ -122,7 +122,8 @@ class _Scheduler(_AbstractScheduler):
             job.pending()
             with cls.lock:
                 cls.jobs_to_run.put(job)
-            cls.__execute_jobs()
+            # if dev_mode:  # TODO: add solution for dev mode
+            #     cls.__execute_jobs()
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -137,28 +138,6 @@ class _Scheduler(_AbstractScheduler):
         data_nodes = obj.task.input.values() if isinstance(obj, Job) else obj.input.values()
         data_manager = _DataManagerFactory._build_manager()
         return any(not data_manager._get(dn.id).is_ready_for_reading for dn in data_nodes)
-
-    @classmethod
-    def __execute_jobs(cls):
-        if not cls._dispatcher:
-            cls._update_job_config()
-        while not cls.jobs_to_run.empty() and cls._dispatcher._can_execute():
-            with cls.lock:
-                try:
-                    job = cls.jobs_to_run.get()
-                except:  # In case the last job of the queue has been removed.
-                    cls.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
-            if job.force or cls._needs_to_run(job.task):
-                if job.force:
-                    cls.__logger.info(f"job {job.id} is forced to be executed.")
-                job.running()
-                _JobManagerFactory._build_manager()._set(job)
-                cls._dispatcher._dispatch(job)
-            else:
-                cls.__unlock_edit_on_outputs(job)
-                job.skipped()
-                _JobManagerFactory._build_manager()._set(job)
-                cls.__logger.info(f"job {job.id} is skipped.")
 
     @staticmethod
     def _needs_to_run(task: Task) -> bool:
@@ -183,7 +162,7 @@ class _Scheduler(_AbstractScheduler):
         return input_last_edit > output_last_edit
 
     @staticmethod
-    def __unlock_edit_on_outputs(jobs: Union[Job, List[Job], Set[Job]]):
+    def _unlock_edit_on_outputs(jobs: Union[Job, List[Job], Set[Job]]):
         jobs = [jobs] if isinstance(jobs, Job) else jobs
         for job in jobs:
             for dn in job.task.output.values():
@@ -193,9 +172,9 @@ class _Scheduler(_AbstractScheduler):
     def _on_status_change(cls, job: Job):
         if job.is_completed():
             cls.__unblock_jobs()
-            cls.__execute_jobs()
-        elif job.is_cancelled():
-            cls.__execute_jobs()
+            # cls.__execute_jobs()  # TODO: remove job execution
+        # elif job.is_cancelled():
+        # cls.__execute_jobs()  # TODO: remove job execution
 
     @classmethod
     def __unblock_jobs(cls):
@@ -228,7 +207,7 @@ class _Scheduler(_AbstractScheduler):
             cls.__remove_blocked_jobs(to_cancel_jobs)
             cls.__remove_jobs_to_run(to_cancel_jobs)
             cls.__cancel_jobs_and_processes(job.id, to_cancel_jobs)
-            cls.__unlock_edit_on_outputs(to_cancel_jobs)
+            cls._unlock_edit_on_outputs(to_cancel_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
