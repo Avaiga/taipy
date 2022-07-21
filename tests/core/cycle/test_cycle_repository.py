@@ -11,14 +11,13 @@
 
 from datetime import datetime
 
-from taipy.config.scenario.frequency import Frequency
-
-from src.taipy.core.cycle._cycle_repository import _CycleRepository
+from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
 from src.taipy.core.cycle.cycle import Cycle
+from taipy.config.scenario.frequency import Frequency
 
 
 def test_save_and_load(tmpdir, cycle):
-    repository = _CycleRepository()
+    repository = _CycleRepositoryFactory._build_repository()
     repository.base_path = tmpdir
     repository._save(cycle)
     cc = repository.load(cycle.id)
@@ -30,14 +29,14 @@ def test_save_and_load(tmpdir, cycle):
 
 
 def test_from_and_to_model(cycle, cycle_model):
-    repository = _CycleRepository()
+    repository = _CycleRepositoryFactory._build_repository()
     assert repository._to_model(cycle) == cycle_model
     assert repository._from_model(cycle_model) == cycle
 
 
 def test_get_primary(tmpdir, cycle, current_datetime):
 
-    cycle_repository = _CycleRepository()
+    cycle_repository = _CycleRepositoryFactory._build_repository()
     cycle_repository.base_path = tmpdir
 
     assert len(cycle_repository._load_all()) == 0

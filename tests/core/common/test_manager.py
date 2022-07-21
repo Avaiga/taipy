@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import Any, Dict
 
 from src.taipy.core._manager._manager import _Manager
-from src.taipy.core._repository import _RepositoryFactory
+from src.taipy.core._repository._repository_adapter import _RepositoryAdapter
 from taipy.config.config import Config
 
 
@@ -38,7 +38,7 @@ class MockEntity:
     name: str
 
 
-class MockRepository(_RepositoryFactory.build_repository()):  # type: ignore
+class MockRepository(_RepositoryAdapter.select_base_repository()):  # type: ignore
     def _to_model(self, obj: MockEntity):
         return MockModel(obj.id, obj.name)
 

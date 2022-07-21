@@ -1,0 +1,17 @@
+{
+"id": "DATANODE_input_995718a9-f47a-4160-881c-fe8107fed7ab",
+"config_id": "input",
+"scope": "<Scope.PIPELINE: 1>",
+"storage_type": "pickle",
+"name": "DATANODE_input_995718a9-f47a-4160-881c-fe8107fed7ab",
+"parent_id": "PIPELINE_pipeline_config_e6239979-586b-4300-939f-32174632cde1",
+"last_edit_date": "2022-08-03T05:54:41.521476",
+"job_ids": [],
+"validity_days": null,
+"validity_seconds": null,
+"edit_in_progress": false,
+"data_node_properties": {
+"cacheable": false,
+"is_generated": true
+}
+}

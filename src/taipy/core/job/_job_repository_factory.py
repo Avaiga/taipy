@@ -9,22 +9,17 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from abc import abstractmethod
-from importlib import util
 from typing import Type
 
-from ._repository import _AbstractRepository
+from .._repository._repository_factory import _RepositoryFactory
+from ..common._utils import _load_fct
+from ._job_fs_repository import _JobFSRepository
+from ._job_repository import _JobRepository
 
 
-class _RepositoryFactory:
-    _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
-    _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
-
+class _JobRepositoryFactory(_RepositoryFactory):
     @classmethod
-    @abstractmethod
-    def _build_repository(cls) -> Type[_AbstractRepository]:  # type: ignore
-        return NotImplemented
-
-    @classmethod
-    def _using_enterprise(cls) -> bool:
-        return util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None
+    def _build_repository(cls) -> Type[_JobRepository]:  # type: ignore
+        if cls._using_enterprise():
+            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_repository", "_JobRepository")  # type: ignore
+        return _JobFSRepository()

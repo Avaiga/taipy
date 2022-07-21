@@ -10,5 +10,5 @@
 # specific language governing permissions and limitations under the License.
 
 from ._filesystem_repository import _FileSystemRepository
-from ._repository import _AbstractRepository
+from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
 from ._repository_factory import _RepositoryFactory

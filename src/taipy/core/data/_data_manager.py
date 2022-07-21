@@ -18,7 +18,7 @@ from taipy.config.data_node.scope import Scope
 from .._manager._manager import _Manager
 from ..common.alias import DataNodeId, PipelineId, ScenarioId
 from ..exceptions.exceptions import InvalidDataNodeType
-from ._data_repository import _DataRepository
+from ._data_repository_factory import _DataRepositoryFactory
 from .data_node import DataNode
 from .pickle import PickleDataNode
 
@@ -26,7 +26,7 @@ from .pickle import PickleDataNode
 class _DataManager(_Manager[DataNode]):
 
     __DATA_NODE_CLASS_MAP = {c.storage_type(): c for c in DataNode.__subclasses__()}  # type: ignore
-    _repository = _DataRepository(__DATA_NODE_CLASS_MAP)
+    _repository = _DataRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = DataNode.__name__
 
     @classmethod
@@ -43,7 +43,7 @@ class _DataManager(_Manager[DataNode]):
             parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
             dn_configs_and_parent_id.append((dn_config, parent_id))
 
-        data_nodes = cls._repository._get_by_configs_and_parent_ids(dn_configs_and_parent_id)
+        data_nodes = cls._repository._get_by_configs_and_parent_ids(dn_configs_and_parent_id)  # type: ignore
 
         return {
             dn_config: data_nodes.get((dn_config, parent_id)) or cls._create_and_set(dn_config, parent_id)

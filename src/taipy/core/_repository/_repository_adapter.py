@@ -8,22 +8,21 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
-from abc import abstractmethod
 from importlib import util
-from typing import Type
+from typing import Any, Optional, Union
 
-from ._repository import _AbstractRepository
+from src.taipy.core._repository import _FileSystemRepository
 
 
-class _RepositoryFactory:
+class _RepositoryAdapter:
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core"
 
+    _REPOSITORY_MAP = {"default": _FileSystemRepository}
+
     @classmethod
-    @abstractmethod
-    def _build_repository(cls) -> Type[_AbstractRepository]:  # type: ignore
-        return NotImplemented
+    def select_base_repository(cls) -> Optional[Union[_FileSystemRepository, Any]]:
+        return cls._REPOSITORY_MAP.get("default")
 
     @classmethod
     def _using_enterprise(cls) -> bool:

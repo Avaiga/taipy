@@ -9,17 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from src.taipy.core._repository import _FileSystemRepository, _RepositoryFactory
-from taipy.config import Config
+from ._data_model import _DataNodeModel
+from ._data_repository import _DataRepository
 
 
-def test_build_repository():
-    # Config not set, returns default repository
-    repo = _RepositoryFactory.build_repository()
-    assert isinstance(repo, _FileSystemRepository.__class__)
-
-    # Non existing repository, returns default repository
-    Config.global_config.repository_type = "foo"
-
-    repo = _RepositoryFactory.build_repository()
-    assert isinstance(repo, _FileSystemRepository.__class__)
+class _DataFSRepository(_DataRepository):
+    def __init__(self):
+        super().__init__(model=_DataNodeModel, dir_name="data_nodes")

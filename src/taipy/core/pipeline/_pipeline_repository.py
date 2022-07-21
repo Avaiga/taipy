@@ -9,12 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
 from collections import defaultdict
 
-from taipy.config.config import Config
-
-from .._repository import _RepositoryFactory
+from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
 from ..common._utils import Subscriber
 from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
@@ -23,13 +20,8 @@ from ._pipeline_model import _PipelineModel
 from .pipeline import Pipeline
 
 
-class _PipelineRepository(_RepositoryFactory.build_repository()[_PipelineModel, Pipeline]):  # type: ignore
-    def __init__(self):
-        kwargs = {
-            "model": _PipelineModel,
-            "dir_name": "pipelines",
-        }  # TODO: Change kwargs base on repository type when new ones are implemented
-
+class _PipelineRepository(_RepositoryAdapter.select_base_repository()[_PipelineModel, Pipeline]):  # type: ignore
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _to_model(self, pipeline: Pipeline) -> _PipelineModel:

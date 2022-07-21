@@ -15,16 +15,16 @@ from typing import Optional
 
 from taipy.config.scenario.frequency import Frequency
 
-from .cycle import Cycle
 from .._manager._manager import _Manager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import CycleId
-from ..cycle._cycle_repository import _CycleRepository
 from ..job._job_manager_factory import _JobManagerFactory
+from ._cycle_repository_factory import _CycleRepositoryFactory
+from .cycle import Cycle
 
 
 class _CycleManager(_Manager[Cycle]):
-    _repository = _CycleRepository()
+    _repository = _CycleRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Cycle.__name__
 
     @classmethod
@@ -47,7 +47,7 @@ class _CycleManager(_Manager[Cycle]):
     ) -> Cycle:
         creation_date = creation_date if creation_date else datetime.now()
         start_date = _CycleManager._get_start_date_of_cycle(frequency, creation_date)
-        cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)
+        cycles = cls._repository.get_cycles_by_frequency_and_start_date(frequency=frequency, start_date=start_date)  # type: ignore
         if len(cycles) > 0:
             return cycles[0]
         else:

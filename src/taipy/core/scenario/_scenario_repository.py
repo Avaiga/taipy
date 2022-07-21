@@ -9,13 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
 from datetime import datetime
 from typing import List, Optional
 
-from taipy.config.config import Config
-
-from .._repository import _RepositoryFactory
+from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
 from ..common._utils import Subscriber
 from ..common.alias import CycleId, PipelineId
@@ -26,13 +23,8 @@ from ._scenario_model import _ScenarioModel
 from .scenario import Scenario
 
 
-class _ScenarioRepository(_RepositoryFactory.build_repository()[_ScenarioModel, Scenario]):  # type: ignore
-    def __init__(self):
-        kwargs = {
-            "model": _ScenarioModel,
-            "dir_name": "scenarios",
-        }  # TODO: Change kwargs base on repository type when new ones are implemented
-
+class _ScenarioRepository(_RepositoryAdapter.select_base_repository()[_ScenarioModel, Scenario]):  # type: ignore
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _to_model(self, scenario: Scenario):
