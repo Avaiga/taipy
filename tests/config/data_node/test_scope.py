@@ -11,8 +11,8 @@
 
 import pytest
 
-from taipy.config.data_node.scope import Scope
-from taipy.config.config import Config
+from src.taipy.config.data_node.scope import Scope
+from src.taipy.config.config import Config
 
 
 def test_scope():
