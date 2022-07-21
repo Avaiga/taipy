@@ -64,6 +64,22 @@ class SQLDataNodeConfigSchema(DataNodeConfigSchema):
     write_table = fields.String()
 
 
+class ExcelDataNodeConfigSchema(DataNodeConfigSchema):
+    path = fields.String()
+    default_path = fields.String()
+    has_header = fields.Boolean()
+    sheet_name = fields.String()
+
+
+class GenericDataNodeConfigSchema(DataNodeConfigSchema):
+    pass
+
+
+class JSONDataNodeConfigSchema(DataNodeConfigSchema):
+    path = fields.String()
+    default_path = fields.String()
+
+
 class OperatorSchema(Schema):
     key = fields.String()
     value = fields.Inferred()

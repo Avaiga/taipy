@@ -15,7 +15,10 @@ from .datanode import (
     DataNodeConfigSchema,
     DataNodeFilterSchema,
     DataNodeSchema,
+    ExcelDataNodeConfigSchema,
+    GenericDataNodeConfigSchema,
     InMemoryDataNodeConfigSchema,
+    JSONDataNodeConfigSchema,
     PickleDataNodeConfigSchema,
     SQLDataNodeConfigSchema,
 )

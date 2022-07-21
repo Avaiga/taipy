@@ -27,7 +27,10 @@ from ..schemas import (
     CSVDataNodeConfigSchema,
     DataNodeFilterSchema,
     DataNodeSchema,
+    ExcelDataNodeConfigSchema,
+    GenericDataNodeConfigSchema,
     InMemoryDataNodeConfigSchema,
+    JSONDataNodeConfigSchema,
     PickleDataNodeConfigSchema,
     SQLDataNodeConfigSchema,
 )
@@ -37,6 +40,9 @@ ds_schema_map = {
     "pickle": PickleDataNodeConfigSchema,
     "in_memory": InMemoryDataNodeConfigSchema,
     "sql": SQLDataNodeConfigSchema,
+    "excel": ExcelDataNodeConfigSchema,
+    "generic": GenericDataNodeConfigSchema,
+    "json": JSONDataNodeConfigSchema,
 }
 
 REPOSITORY = "data"
