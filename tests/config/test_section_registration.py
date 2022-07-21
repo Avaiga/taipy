@@ -32,7 +32,6 @@ def test_section_registration():
     assert Config.sections[SectionForTest.name].attribute == "default_attribute"
     assert Config.sections[SectionForTest.name].prop is None
 
-    # mySection = SectionForTest(attribute="my_attribute", prop="my_prop").register()
     mySection = Config.configure_section_for_test(attribute="my_attribute", prop="my_prop")
 
     assert Config.sections is not None
@@ -43,7 +42,7 @@ def test_section_registration():
     assert mySection.attribute == "my_attribute"
     assert mySection.prop == "my_prop"
 
-    myNewSection = SectionForTest(attribute="my_new_attribute", prop="my_new_prop").register()
+    myNewSection = Config.configure_section_for_test(attribute="my_new_attribute", prop="my_new_prop")
 
     assert Config.sections is not None
     assert Config.sections[SectionForTest.name] is not None

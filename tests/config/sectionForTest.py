@@ -55,12 +55,12 @@ class SectionForTest(Section):
         self._properties.update(as_dict)
 
     @staticmethod
-    def configure(attribute: str, **properties):
+    def _configure(attribute: str, **properties):
         section = SectionForTest(attribute, **properties)
         Config._register(section)
         return Config.sections[SectionForTest.name]
 
 
 Config._register_default(SectionForTest("default_attribute"))
-Config.configure_section_for_test = SectionForTest.configure
+Config.configure_section_for_test = SectionForTest._configure
 

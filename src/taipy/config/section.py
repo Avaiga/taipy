@@ -34,11 +34,6 @@ class Section:
     def __getattr__(self, item: str) -> Optional[Any]:
         return self._replace_templates(self._properties.get(item, None))
 
-    def register(self):
-        from .config import Config
-        Config._register(self)
-        return Config.sections[self.name]
-
     @property
     def properties(self):
         return {k: _tpl._replace_templates(v) for k, v in self._properties.items()}
