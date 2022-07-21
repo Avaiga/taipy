@@ -9,25 +9,26 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from .section import Section
-from .common._classproperty import _Classproperty
 from ..logger._taipy_logger import _TaipyLogger
-from .scenario.frequency import Frequency
-from .data_node.scope import Scope
 from ._config import _Config
 from ._toml_serializer import _TomlSerializer
 from .checker._checker import _Checker
 from .checker.issue_collector import IssueCollector
+from .common._classproperty import _Classproperty
 from .data_node.data_node_config import DataNodeConfig
+from .data_node.scope import Scope
+from .exceptions.exceptions import ConfigurationIssueError
 from .global_app.global_app_config import GlobalAppConfig
 from .job_execution.job_config import JobConfig
 from .pipeline.pipeline_config import PipelineConfig
+from .scenario.frequency import Frequency
 from .scenario.scenario_config import ScenarioConfig
 from .task.task_config import TaskConfig
-from .exceptions.exceptions import ConfigurationIssueError
 
 
 class Config:
@@ -214,7 +215,7 @@ class Config:
         Parameters:
             storage_type (str): The default storage type for all data node configurations.
                 The possible values are _"pickle"_ (the default value), _"csv"_, _"excel"_,
-                _"sql"_, _"in_memory"_, or _"generic"_.
+                _"sql"_, _"in_memory"_, _"json"_ or _"generic"_.
             scope (Scope^): The default scope fot all data node configurations.
                 The default value is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
@@ -477,8 +478,48 @@ class Config:
         Returns:
             DataNodeConfig^: The new CSV data node configuration.
         """
-        return cls.configure_data_node(id, DataNodeConfig._STORAGE_TYPE_VALUE_CSV, scope=scope,
-                                       default_path=default_path, has_header=has_header, **properties)
+        return cls.configure_data_node(
+            id,
+            DataNodeConfig._STORAGE_TYPE_VALUE_CSV,
+            scope=scope,
+            default_path=default_path,
+            has_header=has_header,
+            **properties,
+        )
+
+    @classmethod
+    def configure_json_data_node(
+        cls,
+        id: str,
+        default_path: str = None,
+        encoder: json.JSONEncoder = None,
+        decoder: json.JSONDecoder = None,
+        scope=DataNodeConfig._DEFAULT_SCOPE,
+        **properties,
+    ):
+        """Configure a new JSON data node configuration.
+
+        Parameters:
+            id (str): The unique identifier of the new JSON data node configuration.
+            default_path (str): The default path of the JSON file.
+            encoder (json.JSONEncoder): The JSON encoder used to write data into the JSON file.
+            decoder (json.JSONDecoder): The JSON decoder used to read data from the JSON file.
+            scope (Scope^): The scope of the JSON data node configuration. The default value
+                is `Scope.SCENARIO`.
+            **properties (Dict[str, Any]): A keyworded variable length list of additional
+                arguments.
+        Returns:
+            DataNodeConfig^: The new JSON data node configuration.
+        """
+        return cls.configure_data_node(
+            id,
+            DataNodeConfig._STORAGE_TYPE_VALUE_JSON,
+            scope=scope,
+            default_path=default_path,
+            encoder=encoder,
+            decoder=decoder,
+            **properties,
+        )
 
     @classmethod
     def configure_excel_data_node(
@@ -506,9 +547,15 @@ class Config:
             DataNodeConfig^: The new CSV data node configuration.
         """
 
-        return cls.configure_data_node(id, DataNodeConfig._STORAGE_TYPE_VALUE_EXCEL, scope=scope,
-                                       default_path=default_path, has_header=has_header, sheet_name=sheet_name,
-                                       **properties)
+        return cls.configure_data_node(
+            id,
+            DataNodeConfig._STORAGE_TYPE_VALUE_EXCEL,
+            scope=scope,
+            default_path=default_path,
+            has_header=has_header,
+            sheet_name=sheet_name,
+            **properties,
+        )
 
     @classmethod
     def configure_generic_data_node(
@@ -540,9 +587,16 @@ class Config:
         Returns:
             DataNodeConfig^: The new Generic data node configuration.
         """
-        return cls.configure_data_node(id,DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC,scope=scope,read_fct=read_fct,
-                                       write_fct=write_fct,read_fct_params=read_fct_params,
-                                       write_fct_params=write_fct_params,**properties)
+        return cls.configure_data_node(
+            id,
+            DataNodeConfig._STORAGE_TYPE_VALUE_GENERIC,
+            scope=scope,
+            read_fct=read_fct,
+            write_fct=write_fct,
+            read_fct_params=read_fct_params,
+            write_fct_params=write_fct_params,
+            **properties,
+        )
 
     @classmethod
     def configure_in_memory_data_node(

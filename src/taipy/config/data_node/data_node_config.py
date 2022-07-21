@@ -10,11 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 
+from ..common._template_handler import _TemplateHandler as _tpl
 from ..common._validate_id import _validate_id
 from .scope import Scope
-from ..common._template_handler import _TemplateHandler as _tpl
 
 
 class DataNodeConfig:
@@ -27,7 +27,7 @@ class DataNodeConfig:
     Attributes:
         id (str):  Unique identifier of the data node config. It must be a valid Python variable name.
         storage_type (str): Storage type of the data nodes created from the data node config. The possible values
-            are : "csv", "excel", "pickle", "sql", "generic" and "In_memory". The default value is "pickle".
+            are : "csv", "excel", "pickle", "sql", "generic", "json" and "in_memory". The default value is "pickle".
             Note that the "in_memory" value can only be used when `JobConfig^`.mode is "standalone".
         scope (Scope^):  The `Scope^` of the data nodes instantiated from the data node config. The default value is
             SCENARIO.
@@ -41,9 +41,17 @@ class DataNodeConfig:
     _STORAGE_TYPE_VALUE_EXCEL = "excel"
     _STORAGE_TYPE_VALUE_IN_MEMORY = "in_memory"
     _STORAGE_TYPE_VALUE_GENERIC = "generic"
+    _STORAGE_TYPE_VALUE_JSON = "json"
     _DEFAULT_STORAGE_TYPE = _STORAGE_TYPE_VALUE_PICKLE
-    _ALL_STORAGE_TYPES = [_STORAGE_TYPE_VALUE_PICKLE, _STORAGE_TYPE_VALUE_SQL, _STORAGE_TYPE_VALUE_CSV,
-                          _STORAGE_TYPE_VALUE_EXCEL, _STORAGE_TYPE_VALUE_IN_MEMORY, _STORAGE_TYPE_VALUE_GENERIC]
+    _ALL_STORAGE_TYPES = [
+        _STORAGE_TYPE_VALUE_PICKLE,
+        _STORAGE_TYPE_VALUE_SQL,
+        _STORAGE_TYPE_VALUE_CSV,
+        _STORAGE_TYPE_VALUE_EXCEL,
+        _STORAGE_TYPE_VALUE_IN_MEMORY,
+        _STORAGE_TYPE_VALUE_GENERIC,
+        _STORAGE_TYPE_VALUE_JSON,
+    ]
     # Generic
     _REQUIRED_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
     _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY = "read_fct_params"
@@ -57,7 +65,7 @@ class DataNodeConfig:
     # Excel
     _OPTIONAL_EXPOSED_TYPE_EXCEL_PROPERTY = "exposed_type"
     _OPTIONAL_EXPOSED_TYPE_EXCEL_NUMPY = "numpy"
-    _OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY = "path"
+    _OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY = "default_path"
     _OPTIONAL_HAS_HEADER_EXCEL_PROPERTY = "has_header"
     _OPTIONAL_SHEET_NAME_EXCEL_PROPERTY = "sheet_name"
     # In memory
@@ -76,34 +84,54 @@ class DataNodeConfig:
     # Pickle
     _OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY = "default_path"
     _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY = "default_data"
+    # JSON
+    _OPTIONAL_ENCODER_JSON_PROPERTY = "encoder"
+    _OPTIONAL_DECODER_TYPE_JSON_PROPERTY = "decoder"
+    _REQUIRED_DEFAULT_PATH_JSON_PROPERTY = "default_path"
 
-    _REQUIRED_PROPERTIES: Dict[str, List] = {_STORAGE_TYPE_VALUE_PICKLE: [],
-                            _STORAGE_TYPE_VALUE_SQL: [_REQUIRED_DB_USERNAME_SQL_PROPERTY,
-                                                      _REQUIRED_DB_PASSWORD_SQL_PROPERTY,
-                                                      _REQUIRED_DB_NAME_SQL_PROPERTY,
-                                                      _REQUIRED_DB_ENGINE_SQL_PROPERTY,
-                                                      _REQUIRED_READ_QUERY_SQL_PROPERTY,
-                                                      _REQUIRED_WRITE_TABLE_SQL_PROPERTY ],
-                            _STORAGE_TYPE_VALUE_CSV: [],
-                            _STORAGE_TYPE_VALUE_EXCEL: [],
-                            _STORAGE_TYPE_VALUE_IN_MEMORY: [],
-                            _STORAGE_TYPE_VALUE_GENERIC: [_REQUIRED_READ_FUNCTION_GENERIC_PROPERTY,
-                                                          _REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY]}
+    _REQUIRED_PROPERTIES: Dict[str, List] = {
+        _STORAGE_TYPE_VALUE_PICKLE: [],
+        _STORAGE_TYPE_VALUE_SQL: [
+            _REQUIRED_DB_USERNAME_SQL_PROPERTY,
+            _REQUIRED_DB_PASSWORD_SQL_PROPERTY,
+            _REQUIRED_DB_NAME_SQL_PROPERTY,
+            _REQUIRED_DB_ENGINE_SQL_PROPERTY,
+            _REQUIRED_READ_QUERY_SQL_PROPERTY,
+            _REQUIRED_WRITE_TABLE_SQL_PROPERTY,
+        ],
+        _STORAGE_TYPE_VALUE_CSV: [],
+        _STORAGE_TYPE_VALUE_EXCEL: [],
+        _STORAGE_TYPE_VALUE_IN_MEMORY: [],
+        _STORAGE_TYPE_VALUE_GENERIC: [
+            _REQUIRED_READ_FUNCTION_GENERIC_PROPERTY,
+            _REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY,
+        ],
+        _STORAGE_TYPE_VALUE_JSON: [
+            _REQUIRED_DEFAULT_PATH_JSON_PROPERTY
+        ],
+    }
 
-    _OPTIONAL_PROPERTIES = {_STORAGE_TYPE_VALUE_GENERIC: [_OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
-                                                          _OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY],
-                            _STORAGE_TYPE_VALUE_CSV: [_OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY,
-                                                      _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY,
-                                                      _OPTIONAL_HAS_HEADER_CSV_PROPERTY],
-                            _STORAGE_TYPE_VALUE_EXCEL: [_OPTIONAL_EXPOSED_TYPE_EXCEL_PROPERTY,
-                                                        _OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY,
-                                                        _OPTIONAL_HAS_HEADER_EXCEL_PROPERTY,
-                                                        _OPTIONAL_SHEET_NAME_EXCEL_PROPERTY],
-                            _STORAGE_TYPE_VALUE_IN_MEMORY: [_OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY],
-                            _STORAGE_TYPE_VALUE_SQL: [_OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY],
-                            _STORAGE_TYPE_VALUE_PICKLE: [_OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY,
-                                                         _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY],
-                            }
+    _OPTIONAL_PROPERTIES = {
+        _STORAGE_TYPE_VALUE_GENERIC: [
+            _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY,
+            _OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY,
+        ],
+        _STORAGE_TYPE_VALUE_CSV: [
+            _OPTIONAL_EXPOSED_TYPE_CSV_PROPERTY,
+            _OPTIONAL_DEFAULT_PATH_CSV_PROPERTY,
+            _OPTIONAL_HAS_HEADER_CSV_PROPERTY,
+        ],
+        _STORAGE_TYPE_VALUE_EXCEL: [
+            _OPTIONAL_EXPOSED_TYPE_EXCEL_PROPERTY,
+            _OPTIONAL_DEFAULT_PATH_EXCEL_PROPERTY,
+            _OPTIONAL_HAS_HEADER_EXCEL_PROPERTY,
+            _OPTIONAL_SHEET_NAME_EXCEL_PROPERTY,
+        ],
+        _STORAGE_TYPE_VALUE_IN_MEMORY: [_OPTIONAL_DEFAULT_DATA_IN_MEMORY_PROPERTY],
+        _STORAGE_TYPE_VALUE_SQL: [_OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY],
+        _STORAGE_TYPE_VALUE_PICKLE: [_OPTIONAL_DEFAULT_PATH_PICKLE_PROPERTY, _OPTIONAL_DEFAULT_DATA_PICKLE_PROPERTY],
+        _STORAGE_TYPE_VALUE_JSON: [_OPTIONAL_ENCODER_JSON_PROPERTY, _OPTIONAL_DECODER_TYPE_JSON_PROPERTY],
+    }
 
     _SCOPE_KEY = "scope"
     _DEFAULT_SCOPE = Scope.SCENARIO
