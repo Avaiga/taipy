@@ -11,6 +11,10 @@
 
 from importlib.util import find_spec
 
+if find_spec('taipy.config'):
+    from taipy.config import *
+    from taipy.logger import *
+
 if find_spec('taipy.core'):
     from taipy.core import *
 

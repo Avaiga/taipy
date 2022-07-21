@@ -10,8 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from copy import copy
-from functools import partial
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 from src.taipy.config import Section, Config
 

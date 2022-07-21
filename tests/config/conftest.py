@@ -9,13 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import copy
-import os
-
 import pytest
 
-from src.taipy.config.config import Config
 from src.taipy.config._config import _Config
+from src.taipy.config import Config
 from tests.config.sectionForTest import SectionForTest
 
 
