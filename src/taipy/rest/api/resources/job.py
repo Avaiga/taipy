@@ -182,5 +182,47 @@ class JobList(Resource):
             task = task_manager._bulk_get_or_create([self.fetch_config(task_name)])[0]
         except KeyError:
             return None
+        
+        return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task, submit_id=f"SUBMISSION_{uuid.uuid4()}")
 
-        return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task)
+
+class JobExecutor(Resource):
+    """Cancel a job
+
+    ---
+    post:
+      tags:
+        - api
+      summary: Cancel a job
+      description: Cancel a job
+      parameters:
+        - in: path
+          name: job_id
+          schema:
+            type: string
+      responses:
+        204:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    example: job cancelled
+                  job: JobSchema
+        404:
+          description: job does not exist
+    """
+
+    def __init__(self, **kwargs):
+        self.logger = kwargs.get("logger")
+
+    @_middleware
+    def post(self, job_id):
+        manager = _JobManagerFactory._build_manager()
+        job = manager._get(job_id)
+        if not job:
+            return make_response(jsonify({"message": f"Job {job_id} not found"}), 404)
+        manager._cancel(job)
+        return {"message": f"Cancelled job {job_id}"}
