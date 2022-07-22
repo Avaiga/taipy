@@ -14,7 +14,7 @@ import warnings
 from abc import ABC
 from datetime import datetime
 
-from . import _date_to_ISO, _ISO_to_date
+from . import _date_to_ISO, _ISO_to_date, _variable_decode
 
 
 class _TaipyBase(ABC):
@@ -33,6 +33,13 @@ class _TaipyBase(ABC):
 
     def cast_value(self, value: t.Any):
         return value
+
+    def _get_readable_name(self):
+        try:
+            name, mod = _variable_decode(self.__hash_name[5:] if self.__hash_name.startswith("tpec_") else self.__hash_name)
+            return name if mod is None or mod == "__main__" else f"{mod}.{name}"
+        except:
+            return self.__hash_name
 
     @staticmethod
     def get_hash():
@@ -62,14 +69,14 @@ class _TaipyNumber(_TaipyBase):
         try:
             return float(super().get())
         except Exception as e:
-            raise TypeError(f"Variable {self.get_name()} should hold a number: {e}")
+            raise TypeError(f"Variable '{self._get_readable_name()}' should hold a number: {e}")
 
     def cast_value(self, value: t.Any):
         if isinstance(value, str):
             try:
                 return float(value) if value else 0.0
             except Exception as e:
-                warnings.warn(f"{self.get_name()}: Parsing {value} as float:\n{e}")
+                warnings.warn(f"{self._get_readable_name()}: Parsing {value} as float: {e}")
                 return 0.0
         return super().cast_value(value)
 
