@@ -27,6 +27,7 @@ from .resources import (
     DataNodeWriter,
     JobList,
     JobResource,
+    JobExecutor,
     PipelineExecutor,
     PipelineList,
     PipelineResource,
@@ -146,7 +147,12 @@ api.add_resource(
     resource_class_kwargs={"logger": _logger},
 )
 api.add_resource(JobList, "/jobs", endpoint="jobs", resource_class_kwargs={"logger": _logger})
-
+api.add_resource(
+    JobExecutor,
+    "/jobs/cancel/<string:job_id>",
+    endpoint="job_cancel",
+    resource_class_kwargs={"logger": _logger},
+)
 
 def load_enterprise_resources(api: Api):
     """
@@ -190,6 +196,7 @@ def register_views():
     apispec.spec.components.schema("JobSchema", schema=JobSchema)
     apispec.spec.path(view=JobResource, app=current_app)
     apispec.spec.path(view=JobList, app=current_app)
+    apispec.spec.path(view=JobExecutor, app=current_app)
 
     if _using_enterprise():
         _register_views = _load_fct("taipy.enterprise.rest.api.views", "_register_views")

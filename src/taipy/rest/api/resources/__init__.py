@@ -11,7 +11,7 @@
 
 from .cycle import CycleList, CycleResource
 from .datanode import DataNodeList, DataNodeReader, DataNodeResource, DataNodeWriter
-from .job import JobList, JobResource
+from .job import JobList, JobResource, JobExecutor
 from .pipeline import PipelineExecutor, PipelineList, PipelineResource
 from .scenario import ScenarioExecutor, ScenarioList, ScenarioResource
 from .task import TaskExecutor, TaskList, TaskResource
@@ -34,4 +34,5 @@ __all__ = [
     "CycleList",
     "JobResource",
     "JobList",
+    "JobExecutor",
 ]

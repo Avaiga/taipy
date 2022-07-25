@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pytest
 from unittest import mock
 
 from flask import url_for
@@ -60,3 +61,17 @@ def test_get_all_jobs(client, create_job_list):
 
     results = rep.get_json()
     assert len(results) == 10
+
+# @pytest.mark.xfail()
+def test_cancel_job(client, default_job):
+    # test 404
+    user_url = url_for("api.job_cancel", job_id="foo")
+    rep = client.post(user_url)
+    assert rep.status_code == 404
+
+    with mock.patch("taipy.core.job._job_manager._JobManager._get") as manager_mock:
+        manager_mock.return_value = default_job
+
+        # test get_job
+        rep = client.post(url_for("api.job_cancel", job_id="foo"))
+        assert rep.status_code == 200
