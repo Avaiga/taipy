@@ -13,8 +13,8 @@ from flask import Blueprint, current_app, jsonify
 from flask_restful import Api
 from marshmallow import ValidationError
 
-from taipy.logger._taipy_logger import _TaipyLogger
 from taipy.core.common._utils import _load_fct
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..extensions import apispec
 from .middlewares._middleware import _using_enterprise
@@ -173,6 +173,8 @@ def register_views():
     apispec.spec.components.schema("DataNodeSchema", schema=DataNodeSchema)
     apispec.spec.path(view=DataNodeResource, app=current_app)
     apispec.spec.path(view=DataNodeList, app=current_app)
+    apispec.spec.path(view=DataNodeReader, app=current_app)
+    apispec.spec.path(view=DataNodeWriter, app=current_app)
 
     apispec.spec.components.schema("TaskSchema", schema=TaskSchema)
     apispec.spec.path(view=TaskResource, app=current_app)
@@ -197,6 +199,14 @@ def register_views():
     apispec.spec.path(view=JobResource, app=current_app)
     apispec.spec.path(view=JobList, app=current_app)
     apispec.spec.path(view=JobExecutor, app=current_app)
+
+    apispec.spec.components.schema(
+        "Any",
+        {
+            "description": "Any value",
+            "nullable": True,
+        },
+    )
 
     if _using_enterprise():
         _register_views = _load_fct("taipy.enterprise.rest.api.views", "_register_views")

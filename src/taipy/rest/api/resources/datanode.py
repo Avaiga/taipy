@@ -206,13 +206,18 @@ class DataNodeReader(Resource):
     get:
       tags:
         - api
-      summary: Read a DataNode content
-      description: Return a content of a DataNode
+      summary: Read a data node content
+      description: Return a content of a data node
       parameters:
         - in: path
           name: datanode_id
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              DataNodeFilterSchema
       responses:
         200:
           content:
@@ -264,13 +269,18 @@ class DataNodeWriter(Resource):
     put:
       tags:
         - api
-      summary: Write new data to DataNode
-      description: Write new data to DataNode
+      summary: Write into a data node
+      description: Write into a data node
       parameters:
         - in: path
           name: datanode_id
           schema:
             type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              Any
       responses:
         200:
           content:
