@@ -35,6 +35,8 @@ requirements = [
     "tzlocal>=3.0,<5.0",
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
     "flask-talisman>=1.0,<2.0",
+    "gevent>=21.12.0,<22.0",
+    "gevent-websocket>=0.10.1,<0.11",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -46,10 +48,6 @@ extras_require = {
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
     "arrow": ["pyarrow>=7.0,<9.0"],
-    "gevent": [
-        "gevent>=21.12.0,<22.0",
-        "gevent-websocket>=0.10.1,<0.11",
-    ],
 }
 
 
