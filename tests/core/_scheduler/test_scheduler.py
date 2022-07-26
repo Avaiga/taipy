@@ -203,10 +203,10 @@ def test_submit_task_in_parallel():
         job = _Scheduler.submit_task(task, "submit_id")
         assert task.output[f"{task.config_id}_output0"].read() == 0
         assert job.is_running()
-        assert len(_JobDispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
 
     assert_true_after_1_minute_max(job.is_completed)
-    assert len(_JobDispatcher._dispatched_processes) == 0
+    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
 
 
 def test_submit_task_multithreading_multiple_task():
@@ -225,7 +225,7 @@ def test_submit_task_multithreading_multiple_task():
             job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
             job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
 
-            assert len(_JobDispatcher._dispatched_processes) == 2
+            assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 2)
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert job_1.is_running()
@@ -236,13 +236,13 @@ def test_submit_task_multithreading_multiple_task():
         assert_true_after_1_minute_max(job_2.is_completed)
         assert job_1.is_running()
         assert job_2.is_completed()
-        assert len(_JobDispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
 
     assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert task_2.output[f"{task_2.config_id}_output0"].read() == 42
     assert_true_after_1_minute_max(job_1.is_completed)
     assert job_2.is_completed()
-    assert len(_JobDispatcher._dispatched_processes) == 0
+    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
@@ -261,20 +261,20 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     with lock_0:
         job_0 = _Scheduler.submit_task(task_0, "submit_id_0")
         assert job_0.is_running()
-        assert len(_JobDispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         with lock_1:
             with lock_2:
                 job_1 = _Scheduler.submit_task(task_2, "submit_id_2")
                 job_2 = _Scheduler.submit_task(task_1, "submit_id_1")
 
-                assert len(_JobDispatcher._dispatched_processes) == 2
+                assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 2)
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
                 assert job_1.is_running()
                 assert job_2.is_pending()
 
             assert_true_after_1_minute_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
-            assert len(_JobDispatcher._dispatched_processes) == 2
+            assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 2)
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert_true_after_1_minute_max(job_1.is_completed)
             assert_true_after_1_minute_max(job_2.is_running)
@@ -310,25 +310,25 @@ def test_blocked_task():
     assert len(_Scheduler.blocked_jobs) == 0
     job_2 = _Scheduler.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not up_to_date the job 2 is blocked
-    assert len(_JobDispatcher._dispatched_processes) == 0
+    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     assert len(_Scheduler.blocked_jobs) == 1
     with lock_2:
         with lock_1:
             job_1 = _Scheduler.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
             assert job_1.is_running()  # so it is still running
-            assert len(_JobDispatcher._dispatched_processes) == 1
+            assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
         assert_true_after_1_minute_max(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_1_minute_max(job_2.is_running)  # And job 2 can start running
-        assert len(_JobDispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         assert len(_Scheduler.blocked_jobs) == 0
     assert_true_after_1_minute_max(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-    assert len(_JobDispatcher._dispatched_processes) == 0
+    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
 
 
 def test_task_scheduler_create_synchronous_dispatcher():

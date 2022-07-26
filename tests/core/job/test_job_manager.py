@@ -171,13 +171,12 @@ def test_cancel_single_job():
         job = _Scheduler.submit_task(task, "submit_id")
 
         assert job.is_running()
-        assert len(_JobDispatcher._dispatched_processes) == 1
+        utils.assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         _JobManager._cancel(job.id)
         assert job.is_cancelled()
-        assert len(_JobDispatcher._dispatched_processes) == 0
+        utils.assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     assert job.is_cancelled()
-    sleep(4)
-    assert _Scheduler._dispatcher._nb_available_workers == 2
+    utils.assert_true_after_1_minute_max(lambda: _Scheduler._dispatcher._nb_available_workers == 2)
 
 
 def test_cancel_subsequent_jobs():
