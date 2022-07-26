@@ -16,7 +16,7 @@
 import os
 from pathlib import Path
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
 
 with open("README.md") as readme_file:
@@ -37,6 +37,7 @@ requirements = [
     "flask-talisman>=1.0,<2.0",
     "gevent>=21.12.0,<22.0",
     "gevent-websocket>=0.10.1,<0.11",
+    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -52,7 +53,7 @@ extras_require = {
 
 
 def _build_webapp():
-    already_exists = Path(f"./taipy/gui/webapp/index.html").exists()
+    already_exists = Path(f"./src/taipy/gui/webapp/index.html").exists()
     if not already_exists:
         os.system("cd gui && npm ci --omit=optional && npm run build")
 
@@ -84,7 +85,8 @@ setup(
     include_package_data=True,
     keywords="taipy-gui",
     name="taipy-gui",
-    packages=find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
+    package_dir={"": "src"},
+    packages=find_namespace_packages(where="src") + find_packages(include=["taipy", "taipy.gui", "taipy.gui.*"]),
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-gui",

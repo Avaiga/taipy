@@ -30,4 +30,3 @@ class _MarkdownFactory(_Factory):
         if builder_md is None:
             return f"<|INVALID SYNTAX - Control is '{control_type}'|>"
         return builder_md
-

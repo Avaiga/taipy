@@ -52,7 +52,7 @@ jobs:
       - name: Build and test the package
         run: |
           python setup.py build_py && python -m build
-          rm -rf taipy
+          rm -rf src
           pip install dist/*.tar.gz
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
@@ -108,12 +108,12 @@ jobs:
       - name: Prepare tests on unix
         if: matrix.os != 'windows-latest'
         run: |
-          rm -rf taipy
+          rm -rf src
 
       - name: Prepare tests on windows
         if: matrix.os == 'windows-latest'
         run: |
-          rmdir -Recurse -Force taipy
+          rmdir -Recurse -Force src
 
       - name: Prepare tests
         run: |

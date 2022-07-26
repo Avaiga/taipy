@@ -10,15 +10,31 @@
 # specific language governing permissions and limitations under the License.
 
 import os
+import sys
+from importlib.util import find_spec
 from pathlib import Path
 
 import pandas as pd  # type: ignore
 import pytest
 from flask import Flask, g
 
-from taipy.gui import Gui
 
-from .helpers import Helpers
+def pytest_configure(config):
+    if (find_spec("src") and find_spec("src.taipy")) and (not find_spec("taipy") or not find_spec("taipy.gui")):
+        import src.taipy.gui
+        import src.taipy.gui.extension
+        import src.taipy.gui.renderers.builder
+        import src.taipy.gui.utils._map_dict
+        import src.taipy.gui.utils._variable_directory
+        import src.taipy.gui.utils.expr_var_name
+
+        sys.modules["taipy.gui.renderers.builder"] = sys.modules["src.taipy.gui.renderers.builder"]
+        sys.modules["taipy.gui.utils._variable_directory"] = sys.modules["src.taipy.gui.utils._variable_directory"]
+        sys.modules["taipy.gui.utils.expr_var_name"] = sys.modules["src.taipy.gui.utils.expr_var_name"]
+        sys.modules["taipy.gui.utils._map_dict"] = sys.modules["src.taipy.gui.utils._map_dict"]
+        sys.modules["taipy.gui.extension"] = sys.modules["src.taipy.gui.extension"]
+        sys.modules["taipy.gui"] = sys.modules["src.taipy.gui"]
+
 
 csv = pd.read_csv(
     f"{Path(Path(__file__).parent.resolve())}{os.path.sep}current-covid-patients-hospital.csv", parse_dates=["Day"]
@@ -38,6 +54,8 @@ def small_dataframe():
 
 @pytest.fixture(scope="function")
 def gui(helpers):
+    from taipy.gui import Gui
+
     gui = Gui()
     yield gui
     # Delete Gui instance and state of some classes after each test
@@ -47,6 +65,8 @@ def gui(helpers):
 
 @pytest.fixture
 def helpers():
+    from .helpers import Helpers
+
     return Helpers
 
 

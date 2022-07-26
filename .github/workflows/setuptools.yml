@@ -27,7 +27,7 @@ jobs:
           # Install package
           echo "Install package"
           pip install .
-          rm -r taipy
+          rm -r src
 
           # Ensure `webapp` folder is present in lib package
           echo "Ensure webapp folder is present in lib package"
@@ -77,7 +77,7 @@ jobs:
           python -c "import taipy.gui as gui;from pathlib import Path; assert Path(f'{gui.__path__[0]}/webapp/index.html').exists()"
 
           # Removal of Taipy code to ensure the use of the installed package.
-          rm -r taipy
+          rm -r src
 
           # Run test with optionals packages installed
           echo "installing playwright"

@@ -14,6 +14,7 @@ import os
 import re
 import typing as t
 import warnings
+from importlib.util import find_spec
 
 import pytz
 import tzlocal
@@ -200,3 +201,59 @@ class _Config(object):
                         )
         # Load from system arguments
         self._init_argparse()
+
+        # Taipy-config
+        if find_spec("taipy") and find_spec("taipy.config"):
+            from taipy.config import Config as TaipyConfig
+
+            try:
+                section = TaipyConfig.sections["gui"]
+                self.config.update(section._to_dict())
+            except KeyError:
+                warnings.warn("taipy-config section for taipy-gui is not initialized")
+
+
+def _register_gui_config():
+    if find_spec("taipy") and find_spec("taipy.config"):
+        from copy import copy
+
+        from taipy.config import Config as TaipyConfig
+        from taipy.config import Section
+
+        from ._default_config import default_config
+
+        class _GuiSection(Section):
+
+            name = "gui"
+
+            def __init__(self, property_list: t.Optional[t.List] = None, **properties):
+                self._property_list = property_list
+                super().__init__(**properties)
+
+            def __copy__(self):
+                return _GuiSection(property_list=copy(self._property_list), **copy(self._properties))
+
+            def _to_dict(self):
+                as_dict = {}
+                as_dict.update(self._properties)
+                return as_dict
+
+            @classmethod
+            def _from_dict(cls, as_dict: t.Dict[str, t.Any]):
+                config = _GuiSection(property_list=list(default_config))
+                config._update(as_dict)
+                return config
+
+            def _update(self, as_dict: t.Dict[str, t.Any]):
+                if self._property_list:
+                    as_dict = {k: v for k, v in as_dict.items() if k in self._property_list}
+                self._properties.update(as_dict)
+
+            @staticmethod
+            def _configure(**properties):
+                section = _GuiSection(**properties)
+                TaipyConfig._register(section)
+                return TaipyConfig.sections[_GuiSection.name]
+
+        TaipyConfig._register_default(_GuiSection(property_list=list(default_config)))
+        TaipyConfig.configure_gui = _GuiSection._configure

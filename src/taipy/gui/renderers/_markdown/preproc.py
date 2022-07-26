@@ -83,7 +83,13 @@ class _Preprocessor(MdPreprocessor):
                 if tag in _MarkdownFactory._TAIPY_BLOCK_TAGS:
                     tag_queue.append((tag, line_count, m.group(1) or None))
                     new_line_delimeter = "\n" if line.startswith("<|") else "\n\n"
-                    line = line[: m.start()] + new_line_delimeter + _MarkdownFactory._TAIPY_START + tag + _MarkdownFactory._START_SUFFIX
+                    line = (
+                        line[: m.start()]
+                        + new_line_delimeter
+                        + _MarkdownFactory._TAIPY_START
+                        + tag
+                        + _MarkdownFactory._START_SUFFIX
+                    )
                     for property in properties:
                         prop_value = property[1].replace('"', '\\"')
                         line += f' {property[0]}="{prop_value}"'
@@ -153,7 +159,9 @@ class _Preprocessor(MdPreprocessor):
             new_lines.insert(0, "")
         # Check for tags left unclosed (but close them anyway)
         for tag, line_no, _ in tag_queue:
-            new_lines.append(_MarkdownFactory._TAIPY_START + tag + _MarkdownFactory._END_SUFFIX + _MarkdownFactory._TAIPY_END)
+            new_lines.append(
+                _MarkdownFactory._TAIPY_START + tag + _MarkdownFactory._END_SUFFIX + _MarkdownFactory._TAIPY_END
+            )
             warnings.warn(f"Opened tag {tag} in line {line_no} is not closed")
         return new_lines
 

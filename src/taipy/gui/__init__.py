@@ -63,6 +63,7 @@ application.
 
 """
 
+from .config import _register_gui_config
 from .gui import Gui
 from .gui_actions import (
     download,
@@ -77,3 +78,5 @@ from .gui_actions import (
 from .icon import Icon
 from .renderers import Html, Markdown
 from .state import State
+
+_register_gui_config()

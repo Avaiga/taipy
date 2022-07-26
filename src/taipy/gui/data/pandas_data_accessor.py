@@ -11,9 +11,9 @@
 
 import typing as t
 import warnings
+from datetime import datetime
 from importlib import util
 
-from datetime import datetime
 import numpy as np
 import pandas as pd
 
@@ -199,10 +199,10 @@ class _PandasDataAccessor(_DataAccessor):
                         val = datetime.fromisoformat(val[:-1])
                     vars.append(val)
                 val = f"@vars[{len(vars) - 1}]" if isinstance(val, (str, datetime)) else val
-                right = f'.str.contains({val})' if action == "contains" else f" {action} {val}"
+                right = f".str.contains({val})" if action == "contains" else f" {action} {val}"
                 if query:
                     query += " and "
-                query += f'`{col}`{right}'
+                query += f"`{col}`{right}"
             try:
                 value = value.query(query)
             except Exception as e:

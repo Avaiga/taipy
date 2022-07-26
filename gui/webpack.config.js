@@ -25,7 +25,7 @@ module.exports = (env, options) => {
         entry: ["./src/index.tsx"],
         output: {
             filename: "taipy.[contenthash].js",
-            path: path.resolve(__dirname, "../taipy/gui/webapp"),
+            path: path.resolve(__dirname, "../src/taipy/gui/webapp"),
             library: "Taipy",
             publicPath: "/",
             libraryTarget: "umd", //"var" "commonjs" "umd"

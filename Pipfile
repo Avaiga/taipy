@@ -21,6 +21,7 @@ pyngrok = "==5.1"
 flask-talisman = "==1.0"
 gevent = "==21.12.0"
 gevent-websocket = "==0.10.1"
+taipy-config = {git = "https://git@github.com/avaiga/taipy-config.git@develop"}
 
 [dev-packages]
 black = "*"

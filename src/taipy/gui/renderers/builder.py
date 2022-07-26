@@ -59,7 +59,7 @@ class _Builder:
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
         default_value="<Empty>",
-        lib_name: t.Optional[str] = "taipy"
+        lib_name: t.Optional[str] = "taipy",
     ):
         from ..gui import Gui
         from .factory import _Factory

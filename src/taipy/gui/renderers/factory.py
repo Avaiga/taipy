@@ -11,15 +11,15 @@
 
 import re
 import typing as t
-from datetime import datetime
 import xml.etree.ElementTree as etree
+from datetime import datetime
 
 from ..types import PropertyType
 from .builder import _Builder
 
 if t.TYPE_CHECKING:
-    from ..gui import Gui
     from ..extension.user_element import Element, ElementLibrary
+    from ..gui import Gui
 
 
 class _Factory:
@@ -527,16 +527,28 @@ class _Factory:
 
     @staticmethod
     def set_library(library: "ElementLibrary"):
-        from ..extension.user_element import ElementLibrary, Element
-        if isinstance(library, ElementLibrary) and isinstance(library.get_name(), str) and len(library.get_elements()) > 0 and isinstance(library.get_elements()[0], Element):
+        from ..extension.user_element import Element, ElementLibrary
+
+        if (
+            isinstance(library, ElementLibrary)
+            and isinstance(library.get_name(), str)
+            and len(library.get_elements()) > 0
+            and isinstance(library.get_elements()[0], Element)
+        ):
             for ua in library.get_elements():
                 ua.check()
-            _Factory.__LIBRARIES.update({library.get_name(): {ua.name: ua for ua in library.get_elements()} })
+            _Factory.__LIBRARIES.update({library.get_name(): {ua.name: ua for ua in library.get_elements()}})
 
     @staticmethod
     def get_default_property_name(control_name: str) -> t.Optional[str]:
-        name = control_name[:-len(_Factory._START_SUFFIX)] if control_name.endswith(_Factory._START_SUFFIX) else control_name[:-len(_Factory._END_SUFFIX)] if control_name.endswith(_Factory._END_SUFFIX) else control_name
-        name = name[len(_Factory.__TAIPY_NAME_SPACE):] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
+        name = (
+            control_name[: -len(_Factory._START_SUFFIX)]
+            if control_name.endswith(_Factory._START_SUFFIX)
+            else control_name[: -len(_Factory._END_SUFFIX)]
+            if control_name.endswith(_Factory._END_SUFFIX)
+            else control_name
+        )
+        name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         prop = _Factory.__CONTROL_DEFAULT_PROP_NAME.get(name)
         if prop is None:
             parts = name.split(".")
@@ -549,8 +561,10 @@ class _Factory:
         return prop
 
     @staticmethod
-    def call_builder(gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
-        name = name[len(_Factory.__TAIPY_NAME_SPACE):] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
+    def call_builder(
+        gui: "Gui", name: str, all_properties: t.Optional[t.Dict[str, t.Any]] = None, is_html: t.Optional[bool] = False
+    ) -> t.Optional[t.Union[t.Any, t.Tuple[str, str]]]:
+        name = name[len(_Factory.__TAIPY_NAME_SPACE) :] if name.startswith(_Factory.__TAIPY_NAME_SPACE) else name
         builder = _Factory.__CONTROL_BUILDERS.get(name)
         builded = None
         if builder is None:
@@ -559,6 +573,7 @@ class _Factory:
                 elements = _Factory.__LIBRARIES.get(parts[0])
                 if isinstance(elements, dict):
                     from ..extension.user_element import Element
+
                     element = elements.get(parts[1])
                     if isinstance(element, Element):
                         return element._call_builder(gui, all_properties, parts[0], is_html)

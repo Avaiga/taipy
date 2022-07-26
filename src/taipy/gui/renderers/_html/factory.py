@@ -20,4 +20,4 @@ class _HtmlFactory(_Factory):
         builder_html = _Factory.call_builder(gui, f"{namespace}.{control_type}", all_properties, True)
         if builder_html is None:
             return f"<div>INVALID SYNTAX - Control is '{namespace}:{control_type}'", "div"
-        return builder_html #type: ignore
+        return builder_html  # type: ignore

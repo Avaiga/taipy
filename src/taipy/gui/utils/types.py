@@ -36,7 +36,9 @@ class _TaipyBase(ABC):
 
     def _get_readable_name(self):
         try:
-            name, mod = _variable_decode(self.__hash_name[5:] if self.__hash_name.startswith("tpec_") else self.__hash_name)
+            name, mod = _variable_decode(
+                self.__hash_name[5:] if self.__hash_name.startswith("tpec_") else self.__hash_name
+            )
             return name if mod is None or mod == "__main__" else f"{mod}.{name}"
         except:
             return self.__hash_name

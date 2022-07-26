@@ -39,10 +39,12 @@ from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
+from .extension.user_element import ElementLibrary
 from .page import Page
 from .partial import Partial
 from .renderers import _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
+from .renderers.factory import _Factory
 from .renderers.jsonencoder import _TaipyJsonEncoder
 from .server import _Server
 from .state import State
@@ -74,8 +76,6 @@ from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
-from .extension.user_element import ElementLibrary
-from .renderers.factory import _Factory
 
 
 class Gui:
@@ -1411,8 +1411,16 @@ class Gui:
         # server URL for extension resources
         extension_bp = Blueprint("taipy_extensions", __name__)
         extension_bp.add_url_rule(f"{Gui.__EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
-        scripts = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in (lib.get_scripts() or [])]
-        styles = [f"{Gui.__EXTENSION_ROOT}{name}/{s}" for name, lib in Gui.__extensions.items() for s in (lib.get_styles() or [])]
+        scripts = [
+            f"{Gui.__EXTENSION_ROOT}{name}/{s}"
+            for name, lib in Gui.__extensions.items()
+            for s in (lib.get_scripts() or [])
+        ]
+        styles = [
+            f"{Gui.__EXTENSION_ROOT}{name}/{s}"
+            for name, lib in Gui.__extensions.items()
+            for s in (lib.get_styles() or [])
+        ]
         self._flask_blueprint.append(extension_bp)
 
         _absolute_path = str(pathlib.Path(__file__).parent.resolve())
@@ -1424,7 +1432,7 @@ class Gui:
                 favicon=self._get_config("favicon", "/favicon.png"),
                 root_margin=self._get_config("margin", None),
                 scripts=scripts,
-                styles=styles
+                styles=styles,
             )
         )
 
