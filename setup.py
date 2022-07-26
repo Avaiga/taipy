@@ -23,7 +23,7 @@ from setuptools.command.build_py import build_py
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
-with open(f"taipy{os.sep}gui{os.sep}version.json") as version_file:
+with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
     version = json.load(version_file)
     version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
     if vext := version.get("ext"):
