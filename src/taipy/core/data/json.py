@@ -9,12 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import csv
-from datetime import datetime, timedelta
+import dataclasses
+import json
+from datetime import date, datetime, timedelta
+from enum import Enum
 from os.path import isfile
 from typing import Any, Dict, List, Optional
-
-import pandas as pd
 
 from taipy.config.data_node.scope import Scope
 
@@ -24,8 +24,8 @@ from ..exceptions.exceptions import MissingRequiredProperty
 from .data_node import DataNode
 
 
-class CSVDataNode(DataNode):
-    """Data Node stored as a CSV file.
+class JSONDataNode(DataNode):
+    """Data Node stored as a JSON file.
 
     Attributes:
         config_id (str): Identifier of the data node configuration. This string must be a valid
@@ -41,17 +41,18 @@ class CSVDataNode(DataNode):
             always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
-        path (str): The path to the CSV file.
+        path (str): The path to the JSON file.
+        encoder (json.JSONEncoder): The JSON encoder that is used to write into the JSON file.
+        decoder (json.JSONDecoder): The JSON decoder that is used to read from the JSON file.
         properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the CSV file.
+            must have a _"default_path"_ or _"path"_ entry with the path of the JSON file.
     """
 
-    __STORAGE_TYPE = "csv"
-    __EXPOSED_TYPE_PROPERTY = "exposed_type"
-    __EXPOSED_TYPE_NUMPY = "numpy"
-    __PATH_KEY = "path"
+    __STORAGE_TYPE = "json"
     __DEFAULT_PATH_KEY = "default_path"
-    __HAS_HEADER_PROPERTY = "has_header"
+    __PATH_KEY = "path"
+    _ENCODER_KEY = "encoder"
+    _DECODER_KEY = "decoder"
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -74,12 +75,9 @@ class CSVDataNode(DataNode):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
 
-        if self.__HAS_HEADER_PROPERTY not in properties.keys():
-            properties[self.__HAS_HEADER_PROPERTY] = True
-
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
         if self._path is None:
-            raise MissingRequiredProperty("default_path is required in a CSV data node config")
+            raise MissingRequiredProperty("default_path is required in a JSON data node config")
         else:
             properties[self.__PATH_KEY] = self._path
 
@@ -95,7 +93,10 @@ class CSVDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
-        if not self._last_edit_date and isfile(self._path):
+        self._decoder = self._properties.get(self._DECODER_KEY, DefaultJSONDecoder)
+        self._encoder = self._properties.get(self._ENCODER_KEY, DefaultJSONEncoder)
+
+        if not self._last_edit_date and isfile(self._path):  # type: ignore
             self.unlock_edit()
 
     @classmethod
@@ -111,60 +112,43 @@ class CSVDataNode(DataNode):
     def path(self, value):
         self.properties[self.__PATH_KEY] = value
 
+    @property  # type: ignore
+    @_self_reload(DataNode._MANAGER_NAME)
+    def encoder(self):
+        return self._encoder
+
+    @encoder.setter
+    def encoder(self, encoder: json.JSONEncoder):
+        self.properties[self._ENCODER_KEY] = encoder
+
+    @property  # type: ignore
+    @_self_reload(DataNode._MANAGER_NAME)
+    def decoder(self):
+        return self._decoder
+
+    @decoder.setter
+    def decoder(self, decoder: json.JSONDecoder):
+        self.properties[self._DECODER_KEY] = decoder
+
     def _read(self):
-        if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-            if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
-                return self._read_as_numpy()
-            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
-        return self._read_as_pandas_dataframe()
-
-    def _read_as(self, custom_class):
-        with open(self._path) as csvFile:
-            res = list()
-            if self.properties[self.__HAS_HEADER_PROPERTY]:
-                reader = csv.DictReader(csvFile)
-                for line in reader:
-                    res.append(custom_class(**line))
-            else:
-                reader = csv.reader(
-                    csvFile,
-                )
-                for line in reader:
-                    res.append(custom_class(*line))
-            return res
-
-    def _read_as_numpy(self):
-        return self._read_as_pandas_dataframe().to_numpy()
-
-    def _read_as_pandas_dataframe(self, usecols: Optional[List[int]] = None, column_names: Optional[List[str]] = None):
-        try:
-            if self.properties[self.__HAS_HEADER_PROPERTY]:
-                if column_names:
-                    return pd.read_csv(self._path)[column_names]
-                return pd.read_csv(self._path)
-            else:
-                if usecols:
-                    return pd.read_csv(self._path, header=None, usecols=usecols)
-                return pd.read_csv(self._path, header=None)
-        except pd.errors.EmptyDataError:
-            return pd.DataFrame()
+        with open(self._path, "r") as f:
+            return json.load(f, cls=self._decoder)
 
     def _write(self, data: Any):
-        pd.DataFrame(data).to_csv(self._path, index=False)
+        with open(self._path, "w") as f:  # type: ignore
+            json.dump(data, f, indent=4, cls=self._encoder)
 
-    def write_with_column_names(self, data: Any, columns: List[str] = None, job_id: Optional[JobId] = None):
-        """Write a selection of columns.
 
-        Parameters:
-            data (Any): The data to write.
-            columns (List[str]): The list of column names to write.
-            job_id (JobId^): An optional identifier of the writer.
-        """
-        if not columns:
-            df = pd.DataFrame(data)
-        else:
-            df = pd.DataFrame(data, columns=columns)
-        df.to_csv(self._path, index=False)
-        self._last_edit_date = datetime.now()
-        if job_id:
-            self.job_ids.append(job_id)
+class DefaultJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Enum):
+            return o.value
+        if isinstance(o, (datetime, date)):
+            return o.isoformat()
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        return super().default(o)
+
+
+class DefaultJSONDecoder(json.JSONDecoder):
+    pass

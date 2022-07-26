@@ -17,10 +17,6 @@ from queue import Queue
 
 import pandas as pd
 import pytest
-from taipy.config._config import _Config
-from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
-from taipy.config.scenario.frequency import Frequency
 
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
@@ -39,6 +35,10 @@ from src.taipy.core.scenario._scenario_model import _ScenarioModel
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from taipy.config._config import _Config
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.scenario.frequency import Frequency
 
 current_time = datetime.now()
 
@@ -56,6 +56,14 @@ def excel_file(tmpdir_factory) -> str:
     excel = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
     fn = tmpdir_factory.mktemp("data").join("df.xlsx")
     excel.to_excel(str(fn), index=False)
+    return fn.strpath
+
+
+@pytest.fixture(scope="function")
+def json_file(tmpdir_factory) -> str:
+    json = pd.DataFrame([{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}])
+    fn = tmpdir_factory.mktemp("data").join("df.json")
+    json.to_json(str(fn))
     return fn.strpath
 
 

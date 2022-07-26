@@ -15,12 +15,12 @@ from typing import Dict, Iterable, Optional, Set, Union
 from taipy.config.data_node.data_node_config import DataNodeConfig
 from taipy.config.data_node.scope import Scope
 
-from ._data_repository import _DataRepository
-from .data_node import DataNode
-from .pickle import PickleDataNode
 from .._manager._manager import _Manager
 from ..common.alias import DataNodeId, PipelineId, ScenarioId
 from ..exceptions.exceptions import InvalidDataNodeType
+from ._data_repository import _DataRepository
+from .data_node import DataNode
+from .pickle import PickleDataNode
 
 
 class _DataManager(_Manager[DataNode]):
@@ -76,7 +76,7 @@ class _DataManager(_Manager[DataNode]):
         data_node = cls._get(data_node) if isinstance(data_node, str) else data_node
         if not isinstance(data_node, PickleDataNode):
             return
-        if data_node.is_file_generated and os.path.exists(data_node.path):
+        if data_node.is_generated and os.path.exists(data_node.path):
             os.remove(data_node.path)
 
     @classmethod

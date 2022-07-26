@@ -16,8 +16,6 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 import pytest
-from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data._data_manager import _DataManager
@@ -28,6 +26,8 @@ from src.taipy.core.exceptions.exceptions import (
     NonExistingExcelSheet,
     NotMatchSheetNameAndCustomObject,
 )
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
 
 
 class MyCustomObject:
@@ -664,10 +664,6 @@ class TestExcelDataNode:
         assert dn.path == "foo.xlsx"
         dn.path = "bar.xlsx"
         assert dn.path == "bar.xlsx"
-
-    def test_path_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            ExcelDataNode("foo", Scope.PIPELINE, properties={"path": "foo.csv"})
 
     def test_raise_error_when_path_not_exist(self):
         with pytest.raises(MissingRequiredProperty):

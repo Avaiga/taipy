@@ -14,9 +14,6 @@ from time import sleep
 from unittest import mock
 
 import pytest
-from taipy.config import Config, JobConfig
-from taipy.config.data_node.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 import src.taipy.core as tp
 from src.taipy.core._scheduler._scheduler import _Scheduler
@@ -27,6 +24,9 @@ from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import NoData
+from taipy.config import Config, JobConfig
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 class FakeDataNode(InMemoryDataNode):
@@ -608,10 +608,3 @@ class TestDataNode:
         assert data_node.path == "foo.p"
         data_node.path = "baz.p"
         assert data_node.path == "baz.p"
-
-    def test_path_on_config_is_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            dn_config = Config.configure_data_node("data_node", "pickle", path="foo.p")
-            assert dn_config.path == "foo.p"
-            dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
-            assert dn.path == "foo.p"
