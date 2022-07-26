@@ -215,7 +215,7 @@ class Gui:
         # get taipy version
         try:
             gui_file = pathlib.Path(__file__ or ".").resolve()
-            with open(gui_file.parent.parent / "version.json") as version_file:
+            with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
         except Exception as e:
             warnings.warn(f"Cannot retrieve version.json file: {e}")
