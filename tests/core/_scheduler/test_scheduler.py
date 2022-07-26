@@ -345,21 +345,31 @@ def test_task_scheduler_create_standalone_dispatcher():
     assert _Scheduler._dispatcher._nb_available_workers == 42
 
 
-def test_can_exec_task_with_modified_config():
-    assert Config.global_config.storage_folder == ".data/"
-    Config.configure_global_app(storage_folder=".my_data/", clean_entities_enabled=True)
+def modified_config_task(n):
+    from taipy.config import Config
+
     assert Config.global_config.storage_folder == ".my_data/"
+    # assert Config.global_config.custom_property == "custom_property"
+    return n * 2
+
+
+def test_can_exec_task_with_modified_config():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _Scheduler._update_job_config()
+    Config.configure_global_app(storage_folder=".my_data/", clean_entities_enabled=True)
+    # Config.configure_global_app(storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property")
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
-    task_config = Config.configure_task("task_config", mult_by_2, dn_input_config, dn_output_config)
+    task_config = Config.configure_task("task_config", modified_config_task, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
-    pipeline.submit()
-    while pipeline.output.edit_in_progress:
+    jobs = pipeline.submit()
+    while not jobs[0].is_finished():
         sleep(1)
-    assert 2 == pipeline.output.read()
+    assert jobs[0].is_completed()  # Otherwise the job failed
+    assert pipeline.output.read() == 2
     taipy.clean_all_entities()
 
 
