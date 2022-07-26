@@ -36,26 +36,12 @@ class _Scheduler(_AbstractScheduler):
 
     jobs_to_run: Queue = Queue()
     blocked_jobs: List = []
-    # _dispatcher = None  # type: ignore
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
 
     @classmethod
     def initialize(cls):
         pass
-
-    @classmethod
-    def is_running(cls) -> bool:
-        """Returns False since the default scheduler is not runnable."""
-        return False
-
-    @classmethod
-    def start(cls):
-        RuntimeError("The default scheduler cannot be started.")
-
-    @classmethod
-    def stop(cls):
-        RuntimeError("The default scheduler cannot be started nor stopped.")
 
     @classmethod
     def submit(

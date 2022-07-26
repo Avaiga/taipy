@@ -40,18 +40,3 @@ class _AbstractScheduler:
     @abstractmethod
     def cancel_job(cls, job):
         return NotImplemented
-
-    @classmethod
-    @abstractmethod
-    def is_running(cls) -> bool:
-        return NotImplemented
-
-    @classmethod
-    @abstractmethod
-    def start(cls):
-        return NotImplemented
-
-    @classmethod
-    @abstractmethod
-    def stop(cls):
-        return NotImplemented

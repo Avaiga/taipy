@@ -23,7 +23,7 @@ class _SchedulerFactory:
 
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._scheduler"
-    __dispatcher = None
+    _dispatcher = None
 
     @classmethod
     def _build_scheduler(cls) -> Type[_AbstractScheduler]:
@@ -35,16 +35,27 @@ class _SchedulerFactory:
                 )
             else:
                 scheduler = _Scheduler
-            if cls.__dispatcher is None:
+            if cls._dispatcher is None:
+                # If dispatcher mode is standalone => load dispatcher and run thread, if not, don't load dispatcher
                 # Get the correct _StandaloneJobDispatcher or _DevelopmentJobDispatcher
                 from ._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 
-                cls.__dispatcher = _StandaloneJobDispatcher(
+                cls._dispatcher = _StandaloneJobDispatcher(
                     scheduler
                 )  # TODO: this should be _StandaloneJobDispatcher or _DevelopmentJobDispatcher
-                cls.__dispatcher.start()
+                cls._dispatcher.start()
 
         else:
             raise ModeNotAvailable
         scheduler.initialize()  # type: ignore
         return scheduler  # type: ignore
+
+    # @classmethod
+    # def _update_job_config(cls):
+    #     if Config.job_config.is_standalone:  # type: ignore
+    #         from ._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+    #         cls._dispatcher = _StandaloneJobDispatcher() # TODO: pass in the scheduler
+    #         cls._dispatcher.start()
+    #     else:
+    #         from ._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
+    #         cls._dispatcher = _DevelopmentJobDispatcher()

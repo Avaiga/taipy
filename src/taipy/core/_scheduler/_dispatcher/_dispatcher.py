@@ -12,7 +12,7 @@
 import threading
 from abc import abstractmethod
 from multiprocessing import Lock
-from typing import Any, List
+from typing import Any, Dict, List
 
 from taipy.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -32,13 +32,24 @@ class _JobDispatcher(threading.Thread):
         self.daemon = True
         self.scheduler = scheduler
         self.lock = Lock()
+        _processes: Dict = {}
         self.__logger = _TaipyLogger._get_logger()
+
+    @classmethod
+    @abstractmethod
+    def is_running(cls) -> bool:
+        return NotImplemented
 
     def run(self):
         while True:
-            # if not self.scheduler.jobs_to_run.empty() and self._can_execute():
-            # self.__execute_jobs()
+            # try:
+            # if self._can_execute() and job := self.scheduler.jobs_to_run.get(block=True):
+            # self.__execute_jobs(job)
             # else:
+            # except:  # In case the last job of the queue has been removed.
+            # TODO: instantiate logger object
+            # self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
+
             from time import sleep
 
             print("going to sleep")
@@ -59,14 +70,14 @@ class _JobDispatcher(threading.Thread):
         """
         raise NotImplementedError
 
-    def __execute_jobs(self):
+    def __execute_jobs(self, job):
         with self.lock:
             try:
                 job = self.scheduler.jobs_to_run.get()
             except:  # In case the last job of the queue has been removed.
                 # TODO: instantiate logger object
                 self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
-        if job.force or self.scheduler._needs_to_run(job.task):
+        if job.force or self._needs_to_run(job.task):
             if job.force:
                 self.__logger.info(f"job {job.id} is forced to be executed.")
             job.running()
@@ -78,6 +89,28 @@ class _JobDispatcher(threading.Thread):
             job.skipped()
             _JobManagerFactory._build_manager()._set(job)
             self.__logger.info(f"job {job.id} is skipped.")
+
+    @staticmethod
+    def _needs_to_run(task: Task) -> bool:
+        """
+        Returns True if the task has no output or if at least one input was modified since the latest run.
+
+        Parameters:
+             task (Task^): The task to run.
+        Returns:
+             True if the task needs to run. False otherwise.
+        """
+        data_manager = _DataManagerFactory._build_manager()
+        if len(task.output) == 0:
+            return True
+        are_outputs_in_cache = all(data_manager._get(dn.id)._is_in_cache for dn in task.output.values())
+        if not are_outputs_in_cache:
+            return True
+        if len(task.input) == 0:
+            return False
+        input_last_edit = max(data_manager._get(dn.id).last_edit_date for dn in task.input.values())
+        output_last_edit = min(data_manager._get(dn.id).last_edit_date for dn in task.output.values())
+        return input_last_edit > output_last_edit
 
     @classmethod
     def _run_wrapped_function(cls, storage_folder: str, job_id: JobId, task: Task):
@@ -134,3 +167,11 @@ class _JobDispatcher(threading.Thread):
     def _update_status(job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
+
+    @classmethod
+    def _set_process_in_scheduler(cls, job_id, process):
+        cls._processes[job_id] = process
+
+    @classmethod
+    def _pop_process_in_scheduler(cls, job_id, default=None):
+        return cls._processes.pop(job_id, default)  # type: ignore
