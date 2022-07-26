@@ -184,7 +184,8 @@ class Gui:
         self._path_mapping = path_mapping
         self._flask = flask
         if css_file is None:
-            css_file = os.path.splitext(os.path.basename(self.__frame.f_code.co_filename))[0] or "Taipy"
+            script_file = pathlib.Path(self.__frame.f_code.co_filename or ".").resolve()
+            css_file = script_file.stem or "Taipy"
         self._css_file = css_file
 
         self._config = _Config()
@@ -210,6 +211,15 @@ class Gui:
         # Load default config
         self._flask_blueprint: t.List[Blueprint] = []
         self._config._load(default_config)
+
+        # get taipy version
+        try:
+            gui_file = pathlib.Path(__file__ or ".").resolve()
+            with open(gui_file.parent.parent / "version.json") as version_file:
+                self.__version = json.load(version_file)
+        except Exception as e:
+            warnings.warn(f"Cannot retrieve version.json file: {e}")
+            self.__version = {}
 
         # Load Markdown extension
         # NOTE: Make sure, if you change this extension list, that the User Manual gets updated.
@@ -1433,6 +1443,7 @@ class Gui:
                 root_margin=self._get_config("margin", None),
                 scripts=scripts,
                 styles=styles,
+                version=f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
             )
         )
 

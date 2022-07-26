@@ -55,7 +55,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get<AxiosRouter>("/taipy-init", {params: {client_id:state.id || ""}})
+            .get<AxiosRouter>("/taipy-init", {params: {client_id:state.id || "", v: window.taipyVersion}})
             .then((result) => {
                 setJSX(result.data.router);
                 dispatch(createSetLocationsAction(result.data.locations));

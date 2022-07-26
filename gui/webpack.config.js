@@ -19,13 +19,17 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const ESLintPlugin = require("eslint-webpack-plugin");
 
+const resolveApp = relativePath => path.resolve(__dirname, relativePath);
+
+const getEnvVariables = () => ({ VERSION: require(resolveApp('package.json')).version });
+
 module.exports = (env, options) => {
     return {
         mode: options.mode, //'development', //'production',
         entry: ["./src/index.tsx"],
         output: {
             filename: "taipy.[contenthash].js",
-            path: path.resolve(__dirname, "../src/taipy/gui/webapp"),
+            path: resolveApp("../src/taipy/gui/webapp"),
             library: "Taipy",
             publicPath: "/",
             libraryTarget: "umd", //"var" "commonjs" "umd"
@@ -67,6 +71,7 @@ module.exports = (env, options) => {
             new HtmlWebpackPlugin({
                 template: "public/index.html",
                 hash: false,
+                ...getEnvVariables()
             }),
             new MiniCssExtractPlugin(),
             new ESLintPlugin({

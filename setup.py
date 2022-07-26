@@ -15,6 +15,7 @@
 
 import os
 from pathlib import Path
+import json
 
 from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
@@ -22,6 +23,11 @@ from setuptools.command.build_py import build_py
 with open("README.md") as readme_file:
     readme = readme_file.read()
 
+with open(f"taipy{os.sep}gui{os.sep}version.json") as version_file:
+    version = json.load(version_file)
+    version_string = f'{version.get("major", 0)}.{version.get("minor", 0)}.{version.get("patch", 0)}'
+    if vext := version.get("ext"):
+        version_string = f"{version_string}.{vext}"
 
 requirements = [
     "flask>=2.1,<3.0",
@@ -90,7 +96,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-gui",
-    version="1.2.0.dev0",
+    version=version_string,
     zip_safe=False,
     extras_require=extras_require,
     cmdclass={"build_py": NPMInstall},

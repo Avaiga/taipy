@@ -9,6 +9,7 @@ declare global {
             themes: Record<string, Record<string, unknown>>;
             timeZone: string;
         };
+        taipyVersion: string;
     }
 }
 

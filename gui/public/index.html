@@ -7,9 +7,12 @@
     <link rel="icon" type="image/png" href="{{favicon}}" />
     <link rel="apple-touch-icon" href="/favicon.png" />
     <title>{{title}}</title>
-    {%- if config -%}<script>
-    window.taipyConfig={{config|tojson|safe}};
-    </script>{% endif %}
+    <script>{%- if config -%}
+    window.taipyConfig={{config|tojson|safe}};{% endif %}
+    {%- if version -%}
+    window.taipyVersion="{{version}}"
+    {% endif %}</script>
+    <!-- Taipy Gui js version <%= htmlWebpackPlugin.options.VERSION %> -->
     {% for script in scripts %}
       <script defer src="{{script}}" ></script>
     {% endfor %}
