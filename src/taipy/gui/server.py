@@ -94,6 +94,7 @@ class _Server:
         root_margin: str,
         scripts: t.List[str],
         styles: t.List[str],
+        version: str
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -112,6 +113,7 @@ class _Server:
                     config=self.__get_client_config(),
                     scripts=scripts,
                     styles=styles,
+                    version=version
                 )
             if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path

@@ -8,6 +8,7 @@
     "@mui/icons-material": "^5.0.5",
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
+    "@mui/x-date-pickers": "^5.0.0-beta.2",
     "apache-arrow": "^6.0.1",
     "axios": "^0.27.2",
     "date-fns": "^2.25.0",
@@ -38,7 +39,8 @@
     "test": "cross-env TZ=UTC jest",
     "lint": "eslint --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "coverage": "npm test -- --coverage"
+    "coverage": "npm test -- --coverage",
+    "types": "dts-bundle-generator -o extension-types/taipoy-gui.d.ts src/context/taipyContext.ts"
   },
   "husky": {
     "hooks": {
@@ -84,7 +86,8 @@
     "cross-env": "^7.0.3",
     "css-loader": "^6.5.0",
     "css-mediaquery": "^0.1.2",
-    "dotenv-webpack": "^7.0.3",
+    "dotenv-webpack": "^8.0.0",
+    "dts-bundle-generator": "^6.12.0",
     "eslint": "^8.3.0",
     "eslint-plugin-react": "^7.26.1",
     "eslint-plugin-react-hooks": "^4.2.0",
