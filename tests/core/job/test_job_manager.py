@@ -19,6 +19,7 @@ from time import sleep
 
 import pytest
 
+from src.taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core.common.alias import JobId
 from src.taipy.core.data._data_manager import _DataManager
@@ -170,10 +171,10 @@ def test_cancel_single_job():
         job = _Scheduler.submit_task(task, "submit_id")
 
         assert job.is_running()
-        assert len(_Scheduler._processes) == 1
+        assert len(_JobDispatcher._dispatched_processes) == 1
         _JobManager._cancel(job.id)
         assert job.is_cancelled()
-        assert len(_Scheduler._processes) == 0
+        assert len(_JobDispatcher._dispatched_processes) == 0
     assert job.is_cancelled()
     sleep(2)
     assert _Scheduler._dispatcher._nb_available_workers == 2
