@@ -11,12 +11,7 @@
 
 from datetime import datetime
 
-from taipy.config import JobConfig
-from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
-from taipy.config.scenario.frequency import Frequency
-
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import CycleId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle.cycle import Cycle
@@ -25,6 +20,10 @@ from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.task._task_manager import _TaskManager
+from taipy.config import JobConfig
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.scenario.frequency import Frequency
 
 
 def test_save_and_get_cycle_entity(tmpdir, cycle, current_datetime):
@@ -184,7 +183,7 @@ def test_get_cycle_start_date_and_end_date():
 
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")

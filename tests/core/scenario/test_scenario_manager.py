@@ -48,7 +48,7 @@ from tests.core.utils.NotifyMock import NotifyMock
 
 def test_set_and_get_scenario(cycle):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     scenario_id_1 = ScenarioId("scenario_id_1")
     scenario_1 = Scenario("scenario_name_1", [], {}, scenario_id_1)
@@ -150,7 +150,7 @@ def test_set_and_get_scenario(cycle):
 
 def test_create_scenario_does_not_modify_config():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     creation_date_1 = datetime.now()
     name_1 = "name_1"
@@ -178,7 +178,7 @@ def test_create_scenario_does_not_modify_config():
 
 def test_create_and_delete_scenario():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     creation_date_1 = datetime.now()
     creation_date_2 = creation_date_1 + timedelta(minutes=10)
@@ -248,7 +248,7 @@ def mult_by_4(nb: int):
 
 def test_scenario_manager_only_creates_data_node_once():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_config_1 = Config.configure_data_node("foo", "in_memory", Scope.PIPELINE, default_data=1)
     dn_config_2 = Config.configure_data_node("bar", "in_memory", Scope.SCENARIO, default_data=0)
@@ -290,7 +290,7 @@ def test_scenario_manager_only_creates_data_node_once():
 
 def test_notification_subscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
@@ -345,7 +345,7 @@ class Notify:
 
 def test_notification_subscribe_multiple_params(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
     mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
     scenario_config = Config.configure_scenario(
@@ -389,7 +389,7 @@ def notify2(*args, **kwargs):
 
 def test_notification_unsubscribe(mocker):
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     mocker.patch("src.taipy.core.common._reload._reload", side_effect=lambda m, o: o)
 
@@ -428,7 +428,7 @@ def test_notification_unsubscribe(mocker):
 
 def test_notification_unsubscribe_multi_param():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -473,7 +473,7 @@ def test_notification_unsubscribe_multi_param():
 
 def test_scenario_notification_subscribe_all():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     scenario_config = Config.configure_scenario(
         "awesome_scenario",
@@ -507,7 +507,7 @@ def test_scenario_notification_subscribe_all():
 
 def test_get_set_primary_scenario():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     cycle_1 = _CycleManager._create(Frequency.DAILY, name="foo")
 
@@ -543,7 +543,7 @@ def test_get_set_primary_scenario():
 
 def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
@@ -568,7 +568,7 @@ def test_hard_delete_one_single_scenario_with_scenario_data_nodes():
 
 def test_hard_delete_one_single_scenario_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
@@ -593,7 +593,7 @@ def test_hard_delete_one_single_scenario_with_pipeline_data_nodes():
 
 def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
@@ -618,7 +618,7 @@ def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_scenario_data
 
 def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
@@ -658,7 +658,7 @@ def test_hard_delete_one_single_scenario_with_one_pipeline_and_one_global_data_n
 
 def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.GLOBAL, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
@@ -686,7 +686,7 @@ def test_hard_delete_one_scenario_among_two_with_one_pipeline_and_one_global_dat
 
 def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.SCENARIO, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.SCENARIO)
@@ -714,7 +714,7 @@ def test_hard_delete_one_scenario_among_two_with_scenario_data_nodes():
 
 def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.CYCLE, default_data="testing")
     dn_output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.CYCLE)
@@ -742,7 +742,7 @@ def test_hard_delete_one_scenario_among_two_with_cycle_data_nodes():
 
 def test_hard_delete_shared_entities():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     dn_config_1 = Config.configure_data_node("my_input_1", "in_memory", scope=Scope.PIPELINE, default_data="testing")
     dn_config_2 = Config.configure_data_node("my_input_2", "in_memory", scope=Scope.SCENARIO, default_data="testing")
@@ -777,7 +777,7 @@ def test_hard_delete_shared_entities():
 
 def test_submit():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     data_node_1 = InMemoryDataNode("foo", Scope.PIPELINE, "s1")
     data_node_2 = InMemoryDataNode("bar", Scope.PIPELINE, "s2")
@@ -871,7 +871,7 @@ def test_submit():
 
 def test_scenarios_comparison():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     def subtraction(inp, out):
         return inp - out
@@ -936,7 +936,7 @@ def test_scenarios_comparison():
 
 def test_tags():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     cycle_1 = _CycleManager._create(Frequency.DAILY, name="today", creation_date=datetime.now())
     cycle_2 = _CycleManager._create(
@@ -1074,7 +1074,7 @@ def test_tags():
 
 def test_authorized_tags():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     scenario = Scenario("SCENARIO_1", [], {"authorized_tags": ["foo", "bar"]}, ScenarioId("SCENARIO_1"))
     scenario_2_cfg = Config.configure_scenario("SCENARIO_2", [], Frequency.DAILY, authorized_tags=["foo", "bar"])

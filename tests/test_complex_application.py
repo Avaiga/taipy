@@ -17,7 +17,7 @@ import pandas as pd
 
 import src.taipy.core.taipy as tp
 from src.taipy.core import Status
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from taipy.config import Config, JobConfig
 
 # ################################  USER FUNCTIONS  ##################################
@@ -74,7 +74,7 @@ def print_with_sleep(a):
 
 def test_skipped_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._build_scheduler()
     input_config = Config.configure_in_memory_data_node("input")
     intermediate_config = Config.configure_in_memory_data_node("intermediate", cacheable=True)
     output_config = Config.configure_in_memory_data_node("output", cacheable=True)
@@ -113,7 +113,7 @@ def test_complex():
     # |      |
     # t4     d4
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._build_scheduler()
 
     csv_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
     excel_path_inp = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.xlsx")

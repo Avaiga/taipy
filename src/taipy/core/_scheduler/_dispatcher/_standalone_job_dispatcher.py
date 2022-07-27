@@ -52,7 +52,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             self._run_wrapped_function, Config.global_config.storage_folder, job.id, job.task
         )
 
-        self._set_process_in_scheduler(job.id, future)  # type: ignore
+        self._set_dispatched_processes(job.id, future)  # type: ignore
 
         future.add_done_callback(self.__release_worker)
         future.add_done_callback(partial(self._update_status_from_future, job))
@@ -62,5 +62,5 @@ class _StandaloneJobDispatcher(_JobDispatcher):
 
     def _update_status_from_future(self, job: Job, ft):
 
-        self._pop_process_in_scheduler(job.id)  # type: ignore
+        self._pop_dispatched_process(job.id)  # type: ignore
         self._update_status(job, ft.result())

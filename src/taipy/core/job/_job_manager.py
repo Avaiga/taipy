@@ -39,9 +39,9 @@ class _JobManager(_Manager[Job]):
     def _delete(cls, job: Job, force=False):  # type:ignore
         if job.is_finished() or force:
             super()._delete(job.id)
-            from .._scheduler._scheduler_factory import _SchedulerFactory
+            from .._scheduler._dispatcher import _JobDispatcher
 
-            _SchedulerFactory._build_scheduler()._pop_process_in_scheduler(job.id)  # type: ignore
+            _JobDispatcher._pop_dispatched_process(job.id)  # type: ignore
         else:
             err = JobNotDeletedException(job.id)
             cls._logger.warning(err)

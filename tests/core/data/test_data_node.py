@@ -14,12 +14,9 @@ from time import sleep
 from unittest import mock
 
 import pytest
-from taipy.config import Config, JobConfig
-from taipy.config.data_node.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 import src.taipy.core as tp
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import DataNodeId, JobId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._filter import _FilterDataNode
@@ -27,6 +24,9 @@ from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.data.operator import JoinOperator, Operator
 from src.taipy.core.exceptions.exceptions import NoData
+from taipy.config import Config, JobConfig
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 class FakeDataNode(InMemoryDataNode):
@@ -253,7 +253,7 @@ class TestDataNode:
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-        _Scheduler._update_job_config()
+        _SchedulerFactory._update_job_config()
 
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle", cacheable=True)

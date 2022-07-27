@@ -209,4 +209,4 @@ class _Scheduler(_AbstractScheduler):
         if Config.job_config.is_development:
             from ._scheduler_factory import _SchedulerFactory
 
-            _SchedulerFactory._get_dispatcher()._execute_jobs()
+            _SchedulerFactory._get_dispatcher()._execute_jobs_synchronously()
