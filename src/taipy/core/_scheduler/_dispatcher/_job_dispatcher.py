@@ -36,24 +36,21 @@ class _JobDispatcher(threading.Thread):
     lock = Lock()
 
     def __init__(self, scheduler: _AbstractScheduler):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
         self.daemon = True
         self.scheduler = scheduler
 
-    # @abstractmethod
-    # def start(self):
-    #     """TODO: doc"""
-    #     threading.Thread.start(self)
+    def start(self):
+        #     """TODO: doc"""
+        return NotImplemented
 
-    # @abstractmethod
-    # def is_running(self) -> bool:
-    #     """TODO: doc"""
-    #     return self.is_alive()
+    def is_running(self) -> bool:
+        #     """TODO: doc"""
+        return NotImplemented
 
-    # @abstractmethod
-    # def stop(self):
-    #     """TODO: doc"""
-    #     self.__STOP_FLAG = True
+    def stop(self):
+        #     """TODO: doc"""
+        return NotImplemented
 
     def run(self):
         while True and not self.__STOP_FLAG:

@@ -21,3 +21,12 @@ class _DevelopmentJobDispatcher(_StandaloneJobDispatcher):
         super().__init__(scheduler)
         self._executor = _Synchronous()  # type: ignore
         self._nb_available_workers = 1
+
+    def start(self):
+        return NotImplemented
+
+    def is_running(self) -> bool:
+        return True
+
+    def stop(self):
+        return NotImplemented

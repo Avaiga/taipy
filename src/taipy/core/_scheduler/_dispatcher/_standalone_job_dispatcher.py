@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import threading
 from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
@@ -26,6 +27,15 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         super().__init__(scheduler)
         self._executor = ProcessPoolExecutor(Config.job_config.nb_of_workers or 1)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
+
+    def start(self):
+        threading.Thread.start(self)
+
+    def is_running(self) -> bool:
+        return self.is_alive()
+
+    def stop(self):
+        self.__STOP_FLAG = True
 
     def _can_execute(self) -> bool:
         """Returns True if a worker is available for a new run."""

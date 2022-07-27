@@ -31,7 +31,7 @@ class _SchedulerFactory:
     @classmethod
     def _build_scheduler(cls) -> Type[_AbstractScheduler]:
         # Build scheduler
-        if not util.find_spec(cls._TAIPY_ENTERPRISE_MODULE):
+        if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
             cls._scheduler = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE,
                 "Scheduler",
@@ -64,7 +64,9 @@ class _SchedulerFactory:
 
     @classmethod
     def __build_standalone_job_dispatcher(cls, force_restart=False):
-        if isinstance(cls._dispatcher, _StandaloneJobDispatcher):
+        if isinstance(cls._dispatcher, _StandaloneJobDispatcher) and not isinstance(
+            cls._dispatcher, _DevelopmentJobDispatcher
+        ):
             if force_restart:
                 cls._dispatcher.stop()
                 cls._dispatcher.join()  # wait for thread to be terminated
