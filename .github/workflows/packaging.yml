@@ -1,4 +1,4 @@
-name: Setuptools
+name: Test package installation
 
 on:
   push:
