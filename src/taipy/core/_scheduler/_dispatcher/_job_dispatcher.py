@@ -8,10 +8,14 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import threading
 from abc import abstractmethod
-from typing import Any, List
+from multiprocessing import Lock
+from time import sleep
+from typing import Any, Dict, List
 
 from taipy.config import Config
+from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...common.alias import JobId
 from ...data._data_manager_factory import _DataManagerFactory
@@ -20,18 +24,95 @@ from ...exceptions.exceptions import DataNodeWritingError
 from ...job._job_manager_factory import _JobManagerFactory
 from ...job.job import Job
 from ...task.task import Task
+from .._abstract_scheduler import _AbstractScheduler
 
 
-class _JobDispatcher:
+class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
-    def __init__(self):
-        pass
+    __STOP_FLAG = False
+    _dispatched_processes: Dict = {}
+    __logger = _TaipyLogger._get_logger()
+    lock = Lock()
+
+    def __init__(self, scheduler: _AbstractScheduler):
+        threading.Thread.__init__(self)
+        self.daemon = True
+        self.scheduler = scheduler
+
+    # @abstractmethod
+    # def start(self):
+    #     """TODO: doc"""
+    #     threading.Thread.start(self)
+
+    # @abstractmethod
+    # def is_running(self) -> bool:
+    #     """TODO: doc"""
+    #     return self.is_alive()
+
+    # @abstractmethod
+    # def stop(self):
+    #     """TODO: doc"""
+    #     self.__STOP_FLAG = True
+
+    def run(self):
+        while True and not self.__STOP_FLAG:
+            try:
+                if self._can_execute() and (job := self.scheduler.jobs_to_run.get(block=True)):
+                    self._execute_job(job)
+                else:
+                    sleep(0.1)  # Limit CPU usage
+            except:  # In case the last job of the queue has been removed.
+                self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
 
     @abstractmethod
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
         raise NotImplementedError
+
+    def _execute_job(self, job):
+        if job.force or self._needs_to_run(job.task):
+            if job.force:
+                self.__logger.info(f"job {job.id} is forced to be executed.")
+            job.running()
+            _JobManagerFactory._build_manager()._set(job)
+            self._dispatch(job)
+        else:
+            self.scheduler._unlock_edit_on_outputs(job)
+            job.skipped()
+            _JobManagerFactory._build_manager()._set(job)
+            self.__logger.info(f"job {job.id} is skipped.")
+
+    def _execute_jobs_synchronously(self):
+        while not self.scheduler.jobs_to_run.empty() and self._can_execute():
+            with self.lock:
+                try:
+                    job = self.scheduler.jobs_to_run.get()
+                except:  # In case the last job of the queue has been removed.
+                    self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
+            self._execute_job(job)
+
+    @staticmethod
+    def _needs_to_run(task: Task) -> bool:
+        """
+        Returns True if the task has no output or if at least one input was modified since the latest run.
+
+        Parameters:
+             task (Task^): The task to run.
+        Returns:
+             True if the task needs to run. False otherwise.
+        """
+        data_manager = _DataManagerFactory._build_manager()
+        if len(task.output) == 0:
+            return True
+        are_outputs_in_cache = all(data_manager._get(dn.id)._is_in_cache for dn in task.output.values())
+        if not are_outputs_in_cache:
+            return True
+        if len(task.input) == 0:
+            return False
+        input_last_edit = max(data_manager._get(dn.id).last_edit_date for dn in task.input.values())
+        output_last_edit = min(data_manager._get(dn.id).last_edit_date for dn in task.output.values())
+        return input_last_edit > output_last_edit
 
     @abstractmethod
     def _dispatch(self, job: Job):
@@ -98,3 +179,11 @@ class _JobDispatcher:
     def _update_status(job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
+
+    @classmethod
+    def _set_dispatched_processes(cls, job_id, process):
+        cls._dispatched_processes[job_id] = process
+
+    @classmethod
+    def _pop_dispatched_process(cls, job_id, default=None):
+        return cls._dispatched_processes.pop(job_id, default)  # type: ignore

@@ -15,7 +15,9 @@ from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import ModeNotAvailable
 
 from ..common._utils import _load_fct
+from ..exceptions.exceptions import SchedulerNotBuilt
 from ._abstract_scheduler import _AbstractScheduler
+from ._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
 from ._scheduler import _Scheduler
 
 
@@ -24,38 +26,61 @@ class _SchedulerFactory:
     _TAIPY_ENTERPRISE_MODULE = "taipy.enterprise"
     _TAIPY_ENTERPRISE_CORE_MODULE = _TAIPY_ENTERPRISE_MODULE + ".core._scheduler._scheduler"
     _dispatcher = None
+    _scheduler = None
 
     @classmethod
     def _build_scheduler(cls) -> Type[_AbstractScheduler]:
-        if Config.job_config.is_standalone or Config.job_config.is_development:
-            if util.find_spec(cls._TAIPY_ENTERPRISE_MODULE) is not None:
-                scheduler = _load_fct(
-                    cls._TAIPY_ENTERPRISE_CORE_MODULE,
-                    "Scheduler",
-                )
-            else:
-                scheduler = _Scheduler
-            if cls._dispatcher is None:
-                # If dispatcher mode is standalone => load dispatcher and run thread, if not, don't load dispatcher
-                # Get the correct _StandaloneJobDispatcher or _DevelopmentJobDispatcher
-                from ._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+        # Build scheduler
+        if not util.find_spec(cls._TAIPY_ENTERPRISE_MODULE):
+            cls._scheduler = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE,
+                "Scheduler",
+            )
+        else:
+            cls._scheduler = _Scheduler
 
-                cls._dispatcher = _StandaloneJobDispatcher(
-                    scheduler
-                )  # TODO: this should be _StandaloneJobDispatcher or _DevelopmentJobDispatcher
-                cls._dispatcher.start()
+        # Build dispatcher
+        cls.__build_dispatcher()
 
+        # Initialize the scheduler
+        cls._scheduler.initialize()  # type: ignore
+
+        return cls._scheduler  # type: ignore
+
+    @classmethod
+    def _update_job_config(cls, force_restart=False):
+        cls.__build_dispatcher(force_restart=force_restart)
+
+    @classmethod
+    def __build_dispatcher(cls, force_restart=False):
+        if not cls._scheduler:
+            raise SchedulerNotBuilt
+        if Config.job_config.is_standalone:
+            cls.__build_standalone_job_dispatcher(force_restart=force_restart)
+        elif Config.job_config.is_development:
+            cls.__build_development_job_dispatcher()
         else:
             raise ModeNotAvailable
-        scheduler.initialize()  # type: ignore
-        return scheduler  # type: ignore
 
-    # @classmethod
-    # def _update_job_config(cls):
-    #     if Config.job_config.is_standalone:  # type: ignore
-    #         from ._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-    #         cls._dispatcher = _StandaloneJobDispatcher() # TODO: pass in the scheduler
-    #         cls._dispatcher.start()
-    #     else:
-    #         from ._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
-    #         cls._dispatcher = _DevelopmentJobDispatcher()
+    @classmethod
+    def __build_standalone_job_dispatcher(cls, force_restart=False):
+        if isinstance(cls._dispatcher, _StandaloneJobDispatcher):
+            if force_restart:
+                cls._dispatcher.stop()
+                cls._dispatcher.join()  # wait for thread to be terminated
+            else:
+                return
+        cls._dispatcher = _StandaloneJobDispatcher(cls._scheduler)
+        cls._dispatcher.start()
+
+    @classmethod
+    def __build_development_job_dispatcher(cls):
+        cls._dispatcher = _DevelopmentJobDispatcher(cls._scheduler)
+
+    @classmethod
+    def _get_dispatcher(cls) -> _JobDispatcher:
+        if not cls._scheduler:
+            cls._build_scheduler()
+        elif not cls._dispatcher:
+            cls.__build_dispatcher()
+        return cls._dispatcher  # type: ignore

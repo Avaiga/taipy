@@ -89,9 +89,7 @@ class _Scheduler(_AbstractScheduler):
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id
         )
         cls._schedule_job_to_run_or_block(job)
-        # if Config.job_config.is_development:
-        # from
-        # cls._execute_job(job)    # TODO:
+
         return job
 
     @staticmethod
@@ -108,6 +106,7 @@ class _Scheduler(_AbstractScheduler):
             job.pending()
             with cls.lock:
                 cls.jobs_to_run.put(job)
+            cls.__check_and_execute_jobs_if_development_mode()
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -134,6 +133,9 @@ class _Scheduler(_AbstractScheduler):
     def _on_status_change(cls, job: Job):
         if job.is_completed():
             cls.__unblock_jobs()
+            cls.__check_and_execute_jobs_if_development_mode()
+        elif job.is_cancelled():
+            cls.__check_and_execute_jobs_if_development_mode()
 
     @classmethod
     def __unblock_jobs(cls):
@@ -192,12 +194,19 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def __cancel_jobs_and_processes(cls, job_id_to_cancel, jobs):
-        from ._dispatcher._dispatcher import _JobDispatcher
+        from ._dispatcher import _JobDispatcher
 
         for job in jobs:
-            if process := _JobDispatcher._pop_process_in_scheduler(job.id):
+            if process := _JobDispatcher._pop_dispatched_process(job.id):
                 process.cancel()  # TODO: this doesn't terminate the running process
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:
                 job.abandoned()
+
+    @staticmethod
+    def __check_and_execute_jobs_if_development_mode():
+        if Config.job_config.is_development:
+            from ._scheduler_factory import _SchedulerFactory
+
+            _SchedulerFactory._get_dispatcher()._execute_jobs()

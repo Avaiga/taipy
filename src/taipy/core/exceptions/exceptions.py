@@ -200,3 +200,7 @@ class NonExistingTaskConfig(Exception):
 
 class MultipleTaskFromSameConfigWithSameParent(Exception):
     """Raised if there are multiple tasks from the same task configuration and the same parent identifier."""
+
+
+class SchedulerNotBuilt(Exception):
+    """Raised if the scheduler was not built in the SchedulerFactory"""
