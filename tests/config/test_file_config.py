@@ -110,6 +110,10 @@ owner = "Michel Platini"
 pipelines = [ "p1",]
 frequency = "QUARTERLY"
 owner = "Raymond Kopa"
+
+[SCENARIO.default.comparators]
+
+[SCENARIO.s1.comparators]
     """.strip()
     tf = NamedTemporaryFile()
     with mock.patch.dict(

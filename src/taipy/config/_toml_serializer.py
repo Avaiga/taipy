@@ -40,6 +40,28 @@ class _TomlSerializer:
 
     @classmethod
     def _write(cls, configuration: _Config, filename: str):
+        with open(filename, "w") as fd:
+            toml.dump(cls.__str(configuration), fd)
+
+    @classmethod
+    def _read(cls, filename: str) -> _Config:
+        try:
+            config_as_dict = cls._pythonify(dict(toml.load(filename)))
+            return cls.__from_dict(config_as_dict)
+        except toml.TomlDecodeError as e:
+            error_msg = f"Can not load configuration {e}"
+            raise LoadingError(error_msg)
+
+    @classmethod
+    def _serialize(cls, configuration: _Config) -> str:
+        return toml.dumps(cls.__str(configuration))
+
+    @classmethod
+    def _deserialize(cls, config_as_string: str) -> _Config:
+        return cls.__from_dict(cls._pythonify(dict(toml.loads(config_as_string))))
+
+    @classmethod
+    def __str(cls, configuration: _Config):
         config = {
             cls._GLOBAL_NODE_NAME: configuration._global_config._to_dict(),
             cls._JOB_NODE_NAME: configuration._job_config._to_dict(),
@@ -48,8 +70,7 @@ class _TomlSerializer:
             cls._PIPELINE_NODE_NAME: cls.__to_dict(configuration._pipelines),
             cls._SCENARIO_NODE_NAME: cls.__to_dict(configuration._scenarios),
         }
-        with open(filename, "w") as fd:
-            toml.dump(cls.__stringify(config), fd)
+        return cls.__stringify(config)
 
     @classmethod
     def __to_dict(cls, dict_of_configs: Dict[str, Any]):
@@ -82,15 +103,6 @@ class _TomlSerializer:
         if isinstance(config, tuple):
             return [cls.__stringify(val) for val in config]
         return config
-
-    @classmethod
-    def _read(cls, filename: str) -> _Config:
-        try:
-            config_as_dict = cls._pythonify(dict(toml.load(filename)))
-            return cls.__from_dict(config_as_dict)
-        except toml.TomlDecodeError as e:
-            error_msg = f"Can not load configuration {e}"
-            raise LoadingError(error_msg)
 
     @staticmethod
     def _extract_node(config_as_dict, cls_config, node, config: Optional[dict]):

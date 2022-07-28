@@ -81,7 +81,7 @@ class ScenarioConfig:
         return self._pipelines
 
     def _to_dict(self):
-        return {self._PIPELINE_KEY: self._pipelines, self._FREQUENCY_KEY: self.frequency, **self._properties}
+        return {self._COMPARATOR_KEY: self.comparators, self._PIPELINE_KEY: self._pipelines, self._FREQUENCY_KEY: self.frequency, **self._properties}
 
     @classmethod
     def _from_dict(cls, id: str, config_as_dict: Dict[str, Any], pipeline_configs: Dict[str, PipelineConfig]):
