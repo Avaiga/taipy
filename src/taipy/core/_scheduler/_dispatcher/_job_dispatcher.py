@@ -42,18 +42,18 @@ class _JobDispatcher(threading.Thread):
 
     def start(self):
         #     """TODO: doc"""
-        return NotImplemented
+        threading.Thread.start(self)
 
     def is_running(self) -> bool:
         #     """TODO: doc"""
-        return NotImplemented
+        return self.is_alive()
 
     def stop(self):
         #     """TODO: doc"""
-        return NotImplemented
+        self.__STOP_FLAG = True
 
     def run(self):
-        while True and not self.__STOP_FLAG:
+        while not self.__STOP_FLAG:
             try:
                 if self._can_execute() and (job := self.scheduler.jobs_to_run.get(block=True)):
                     self._execute_job(job)

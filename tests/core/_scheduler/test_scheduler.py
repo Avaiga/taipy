@@ -24,6 +24,7 @@ import pytest
 from src.taipy.core import taipy
 from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
@@ -78,7 +79,7 @@ def concat(a, b):
 
 def test_submit_task():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     before_creation = datetime.now()
     sleep(0.1)
@@ -128,7 +129,7 @@ def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
 
 def test_submit_task_that_return_multiple_outputs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
@@ -156,7 +157,7 @@ def test_submit_task_that_return_multiple_outputs():
 
 def test_submit_task_returns_single_iterable_output():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
@@ -169,15 +170,15 @@ def test_submit_task_returns_single_iterable_output():
 
     _Scheduler.submit_task(task_with_tuple, "submit_id_1")
     assert task_with_tuple.output[f"{task_with_tuple.config_id}_output0"].read() == (42, 21)
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
     _Scheduler.submit_task(task_with_list, "submit_id_2")
     assert task_with_list.output[f"{task_with_list.config_id}_output0"].read() == [42, 21]
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_data_node_not_written_due_to_wrong_result_nb():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     def return_2tuple():
         return lambda nb1, nb2: (multiply(nb1, nb2), multiply(nb1, nb2) / 2)
@@ -187,7 +188,7 @@ def test_data_node_not_written_due_to_wrong_result_nb():
     job = _Scheduler.submit_task(task, "submit_id")
     assert task.output[f"{task.config_id}_output0"].read() == 0
     assert job.is_failed()
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_task_in_parallel():
@@ -195,22 +196,23 @@ def test_submit_task_in_parallel():
     lock = m.Lock()
 
     Config.configure_job_executions(mode="standalone", nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
         job = _Scheduler.submit_task(task, "submit_id")
         assert task.output[f"{task.config_id}_output0"].read() == 0
         assert job.is_running()
-        assert len(_Scheduler._processes) == 1
+        assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
 
     assert_true_after_1_minute_max(job.is_completed)
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_task_multithreading_multiple_task():
     Config.configure_job_executions(mode="standalone", nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -224,7 +226,7 @@ def test_submit_task_multithreading_multiple_task():
             job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
             job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
 
-            assert len(_Scheduler._processes) == 2
+            assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 2
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
             assert job_1.is_running()
@@ -235,18 +237,18 @@ def test_submit_task_multithreading_multiple_task():
         assert_true_after_1_minute_max(job_2.is_completed)
         assert job_1.is_running()
         assert job_2.is_completed()
-        assert len(_Scheduler._processes) == 1
+        assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
 
     assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert task_2.output[f"{task_2.config_id}_output0"].read() == 42
     assert_true_after_1_minute_max(job_1.is_completed)
     assert job_2.is_completed()
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
     Config.configure_job_executions(mode="standalone", nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     m = multiprocessing.Manager()
     lock_0 = m.Lock()
@@ -260,20 +262,20 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     with lock_0:
         job_0 = _Scheduler.submit_task(task_0, "submit_id_0")
         assert job_0.is_running()
-        assert len(_Scheduler._processes) == 1
+        assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
         with lock_1:
             with lock_2:
                 job_1 = _Scheduler.submit_task(task_2, "submit_id_2")
                 job_2 = _Scheduler.submit_task(task_1, "submit_id_1")
 
-                assert len(_Scheduler._processes) == 2
+                assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 2
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
                 assert job_1.is_running()
                 assert job_2.is_pending()
 
             assert_true_after_1_minute_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
-            assert len(_Scheduler._processes) == 2
+            assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 2
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert_true_after_1_minute_max(job_1.is_completed)
             assert_true_after_1_minute_max(job_2.is_running)
@@ -286,7 +288,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 def test_blocked_task():
     Config.configure_job_executions(mode="standalone", nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -309,40 +311,40 @@ def test_blocked_task():
     assert len(_Scheduler.blocked_jobs) == 0
     job_2 = _Scheduler.submit_task(task_2, "submit_id_2")  # job 2 is submitted first
     assert job_2.is_blocked()  # since bar is not up_to_date the job 2 is blocked
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
     assert len(_Scheduler.blocked_jobs) == 1
     with lock_2:
         with lock_1:
             job_1 = _Scheduler.submit_task(task_1, "submit_id_1")  # job 1 is submitted and locked
             assert job_1.is_running()  # so it is still running
-            assert len(_Scheduler._processes) == 1
+            assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
             assert not _DataManager._get(task_1.bar.id).is_ready_for_reading  # And bar still not ready
             assert job_2.is_blocked()  # the job_2 remains blocked
         assert_true_after_1_minute_max(job_1.is_completed)  # job1 unlocked and can complete
         assert _DataManager._get(task_1.bar.id).is_ready_for_reading  # bar becomes ready
         assert _DataManager._get(task_1.bar.id).read() == 2  # the data is computed and written
         assert_true_after_1_minute_max(job_2.is_running)  # And job 2 can start running
-        assert len(_Scheduler._processes) == 1
+        assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
         assert len(_Scheduler.blocked_jobs) == 0
     assert_true_after_1_minute_max(job_2.is_completed)  # job 2 unlocked so it can complete
     assert _DataManager._get(task_2.baz.id).is_ready_for_reading  # baz becomes ready
     assert _DataManager._get(task_2.baz.id).read() == 6  # the data is computed and written
-    assert len(_Scheduler._processes) == 0
+    assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_task_scheduler_create_synchronous_dispatcher():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
-    assert isinstance(_Scheduler._dispatcher._executor, _Synchronous)
-    assert _Scheduler._dispatcher._nb_available_workers == 1
+    assert isinstance(_SchedulerFactory._dispatcher._executor, _Synchronous)
+    assert _SchedulerFactory._dispatcher._nb_available_workers == 1
 
 
 def test_task_scheduler_create_standalone_dispatcher():
     Config.configure_job_executions(mode="standalone", nb_of_workers=42)
-    _Scheduler._update_job_config()
-    assert isinstance(_Scheduler._dispatcher._executor, ProcessPoolExecutor)
-    assert _Scheduler._dispatcher._nb_available_workers == 42
+    _SchedulerFactory._update_job_config()
+    assert isinstance(_SchedulerFactory._dispatcher._executor, ProcessPoolExecutor)
+    assert _SchedulerFactory._dispatcher._nb_available_workers == 42
 
 
 def test_can_exec_task_with_modified_config():
@@ -384,7 +386,7 @@ def test_need_to_run_no_output():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[])
     task = _create_task_from_config(task_cfg)
 
-    assert _Scheduler()._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_output_not_cacheable():
@@ -394,26 +396,26 @@ def test_need_to_run_output_not_cacheable():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _create_task_from_config(task_cfg)
 
-    assert _Scheduler()._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_output_cacheable_no_input():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
     task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg])
     task = _create_task_from_config(task_cfg)
 
-    assert _Scheduler._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
     _Scheduler.submit_task(task, "submit_id")
 
-    assert not _Scheduler._needs_to_run(task)
+    assert not _SchedulerFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_output_cacheable_no_validity_period():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")
@@ -421,15 +423,15 @@ def test_need_to_run_output_cacheable_no_validity_period():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _create_task_from_config(task_cfg)
 
-    assert _Scheduler._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
     _Scheduler.submit_task(task, "submit_id")
 
-    assert not _Scheduler._needs_to_run(task)
+    assert not _SchedulerFactory._dispatcher._needs_to_run(task)
 
 
 def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")
@@ -437,10 +439,10 @@ def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _create_task_from_config(task_cfg)
 
-    assert _Scheduler._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
     job = _Scheduler.submit_task(task, "submit_id_1")
 
-    assert not _Scheduler._needs_to_run(task)
+    assert not _SchedulerFactory._dispatcher._needs_to_run(task)
     job_skipped = _Scheduler.submit_task(task, "submit_id_2")
 
     assert job.is_completed()
@@ -456,13 +458,13 @@ def test_need_to_run_output_cacheable_with_validity_period_obsolete():
     task_cfg = Config.configure_task("name", input=[hello_cfg, world_cfg], function=concat, output=[hello_world_cfg])
     task = _create_task_from_config(task_cfg)
 
-    assert _Scheduler._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
     _Scheduler.submit_task(task, "submit_id")
 
     output = task.hello_world
     output._last_edit_date = datetime.now() - timedelta(days=1, minutes=30)
     _DataManager()._set(output)
-    assert _Scheduler._needs_to_run(task)
+    assert _SchedulerFactory._dispatcher._needs_to_run(task)
 
 
 # ################################  UTIL METHODS    ##################################
