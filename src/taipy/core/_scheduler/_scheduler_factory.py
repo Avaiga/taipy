@@ -69,7 +69,7 @@ class _SchedulerFactory:
         ):
             if force_restart:
                 cls._dispatcher.stop()
-                cls._dispatcher.join()  # wait for thread to be terminated
+                cls._dispatcher.join()  # wait for thread to be terminated TODO: investigate the effect,
             else:
                 return
         cls._dispatcher = _StandaloneJobDispatcher(cls._scheduler)
@@ -77,6 +77,10 @@ class _SchedulerFactory:
 
     @classmethod
     def __build_development_job_dispatcher(cls):
+        if isinstance(cls._dispatcher, _StandaloneJobDispatcher) and not isinstance(
+            cls._dispatcher, _DevelopmentJobDispatcher
+        ):
+            cls._dispatcher.stop()
         cls._dispatcher = _DevelopmentJobDispatcher(cls._scheduler)
 
     @classmethod

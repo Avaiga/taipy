@@ -19,7 +19,7 @@ from time import sleep
 
 import pytest
 
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import JobId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -58,14 +58,15 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_get_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
 
     task = _create_task(multiply, name="get_job")
 
-    job_1 = _Scheduler.submit_task(task, "submit_id_1")
+    job_1 = scheduler.submit_task(task, "submit_id_1")
     assert _JobManager._get(job_1.id) == job_1
 
-    job_2 = _Scheduler.submit_task(task, "submit_id_2")
+    job_2 = scheduler.submit_task(task, "submit_id_2")
     assert job_1 != job_2
     assert _JobManager._get(job_1.id).id == job_1.id
     assert _JobManager._get(job_2.id).id == job_2.id
@@ -73,22 +74,23 @@ def test_get_job():
 
 def test_get_latest_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
 
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
 
-    job_1 = _Scheduler.submit_task(task, "submit_id_1")
+    job_1 = scheduler.submit_task(task, "submit_id_1")
     assert _JobManager._get_latest(task) == job_1
     assert _JobManager._get_latest(task_2) is None
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
+    job_2 = scheduler.submit_task(task_2, "submit_id_2")
     assert _JobManager._get_latest(task).id == job_1.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
     sleep(0.01)  # Comparison is based on time, precision on Windows is not enough important
-    job_1_bis = _Scheduler.submit_task(task, "submit_id_1_bis")
+    job_1_bis = scheduler.submit_task(task, "submit_id_1_bis")
     assert _JobManager._get_latest(task).id == job_1_bis.id
     assert _JobManager._get_latest(task_2).id == job_2.id
 
@@ -99,24 +101,26 @@ def test_get_job_unknown():
 
 def test_get_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
 
     task = _create_task(multiply, name="get_all_jobs")
 
-    job_1 = _Scheduler.submit_task(task, "submit_id_1")
-    job_2 = _Scheduler.submit_task(task, "submit_id_2")
+    job_1 = scheduler.submit_task(task, "submit_id_1")
+    job_2 = scheduler.submit_task(task, "submit_id_2")
 
     assert {job.id for job in _JobManager._get_all()} == {job_1.id, job_2.id}
 
 
 def test_delete_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
 
     task = _create_task(multiply, name="delete_job")
 
-    job_1 = _Scheduler.submit_task(task, "submit_id_1")
-    job_2 = _Scheduler.submit_task(task, "submit_id_2")
+    job_1 = scheduler.submit_task(task, "submit_id_1")
+    job_2 = scheduler.submit_task(task, "submit_id_2")
 
     _JobManager._delete(job_1)
 
@@ -135,10 +139,12 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
+
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
-        job = _Scheduler.submit_task(task, "submit_id")
+        job = scheduler.submit_task(task, "submit_id")
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job)
         with pytest.raises(JobNotDeletedException):
@@ -149,10 +155,12 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
+
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
-        job = _Scheduler.submit_task(task, "submit_id")
+        job = scheduler.submit_task(task, "submit_id")
         with pytest.raises(JobNotDeletedException):
             _JobManager._delete(job, force=False)
         _JobManager._delete(job, force=True)
@@ -161,27 +169,31 @@ def test_force_deleting_unfinished_job():
 
 def test_cancel_single_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
+    dispatcher = _SchedulerFactory._dispatcher
+
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
 
-    assert _Scheduler._dispatcher._nb_available_workers == 2
+    assert dispatcher._nb_available_workers == 2
 
     with lock:
-        job = _Scheduler.submit_task(task, "submit_id")
+        job = scheduler.submit_task(task, "submit_id")
 
         assert job.is_running()
-        assert len(_Scheduler._processes) == 1
+        assert len(dispatcher._dispatched_processes) == 1
         _JobManager._cancel(job.id)
         assert job.is_cancelled()
-        assert len(_Scheduler._processes) == 0
+        assert len(dispatcher._dispatched_processes) == 0
     assert job.is_cancelled()
     sleep(2)
-    assert _Scheduler._dispatcher._nb_available_workers == 2
+    assert dispatcher._nb_available_workers == 2
 
 
 def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
+    scheduler = _SchedulerFactory._scheduler
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -202,33 +214,33 @@ def test_cancel_subsequent_jobs():
 
     with lock_1:
         submit_id_1 = "submit_1"
-        job_1 = _Scheduler.submit_task(task_1, submit_id=submit_id_1)
-        job_2 = _Scheduler.submit_task(task_2, submit_id=submit_id_1)
-        job_3 = _Scheduler.submit_task(task_3, submit_id=submit_id_1)
+        job_1 = scheduler.submit_task(task_1, submit_id=submit_id_1)
+        job_2 = scheduler.submit_task(task_2, submit_id=submit_id_1)
+        job_3 = scheduler.submit_task(task_3, submit_id=submit_id_1)
 
         assert job_1.is_running()
         assert job_2.is_blocked()
         assert job_3.is_blocked()
-        assert len(_Scheduler.blocked_jobs) == 2
-        assert _Scheduler.jobs_to_run.qsize() == 0
+        assert len(scheduler.blocked_jobs) == 2
+        assert scheduler.jobs_to_run.qsize() == 0
 
         submit_id_2 = "submit_2"
-        job_4 = _Scheduler.submit_task(task_1, submit_id=submit_id_2)
-        job_5 = _Scheduler.submit_task(task_2, submit_id=submit_id_2)
-        job_6 = _Scheduler.submit_task(task_3, submit_id=submit_id_2)
+        job_4 = scheduler.submit_task(task_1, submit_id=submit_id_2)
+        job_5 = scheduler.submit_task(task_2, submit_id=submit_id_2)
+        job_6 = scheduler.submit_task(task_3, submit_id=submit_id_2)
 
         assert job_4.is_pending()
         assert job_5.is_blocked()
         assert job_6.is_blocked()
-        assert _Scheduler.jobs_to_run.qsize() == 1
-        assert len(_Scheduler.blocked_jobs) == 4
+        assert scheduler.jobs_to_run.qsize() == 1
+        assert len(scheduler.blocked_jobs) == 4
 
         _JobManager._cancel(job_4)
         assert job_4.is_cancelled()
         assert job_5.is_abandoned()
         assert job_6.is_abandoned()
-        assert _Scheduler.jobs_to_run.qsize() == 0
-        assert len(_Scheduler.blocked_jobs) == 2
+        assert scheduler.jobs_to_run.qsize() == 0
+        assert len(scheduler.blocked_jobs) == 2
 
         _JobManager._cancel(job_1)
         assert job_1.is_cancelled()
@@ -241,7 +253,7 @@ def test_cancel_subsequent_jobs():
     assert job_4.is_cancelled()
     assert job_5.is_abandoned()
     assert job_6.is_abandoned()
-    assert _Scheduler.jobs_to_run.qsize() == 0
+    assert scheduler.jobs_to_run.qsize() == 0
 
 
 def _create_task(function, nb_outputs=1, name=None):
