@@ -14,6 +14,7 @@ import multiprocessing
 import os
 import random
 import string
+from datetime import datetime
 from functools import partial
 from time import sleep
 
@@ -175,8 +176,17 @@ def test_cancel_single_job():
         assert job.is_cancelled()
         assert len(_Scheduler._processes) == 0
     assert job.is_cancelled()
-    sleep(2)
+    wait_120_second_max_on_nb_of_workers(2)
     assert _Scheduler._dispatcher._nb_available_workers == 2
+
+
+def wait_120_second_max_on_nb_of_workers(nb_of_workers):
+    start = datetime.now()
+    while (datetime.now() - start).seconds < 120:
+        sleep(0.1)  # Limit CPU usage
+        if _Scheduler._dispatcher._nb_available_workers == nb_of_workers:
+            return
+    assert _Scheduler._dispatcher._nb_available_workers == nb_of_workers
 
 
 def test_cancel_subsequent_jobs():

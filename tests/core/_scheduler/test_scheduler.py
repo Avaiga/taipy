@@ -47,6 +47,9 @@ def reset_configuration_singleton():
         print(f"deleting file {f}")
         os.remove(f)
 
+    for f in glob.glob("./my_data/*"):
+        os.remove(f)
+
 
 # ################################  USER FUNCTIONS  ##################################
 
@@ -273,6 +276,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
                 assert job_2.is_pending()
 
             assert_true_after_1_minute_max(lambda: task_2.output[f"{task_2.config_id}_output0"].read() == 42)
+            sleep(1)
             assert len(_Scheduler._processes) == 2
             assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
             assert_true_after_1_minute_max(job_1.is_completed)
@@ -349,15 +353,16 @@ def modified_config_task(n):
     from taipy.config import Config
 
     assert Config.global_config.storage_folder == ".my_data/"
-    # assert Config.global_config.custom_property == "custom_property"
+    assert Config.global_config.custom_property == "custom_property"
     return n * 2
 
 
 def test_can_exec_task_with_modified_config():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _Scheduler._update_job_config()
-    Config.configure_global_app(storage_folder=".my_data/", clean_entities_enabled=True)
-    # Config.configure_global_app(storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property")
+    Config.configure_global_app(
+        storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property"
+    )
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
@@ -368,8 +373,7 @@ def test_can_exec_task_with_modified_config():
     jobs = pipeline.submit()
     while not jobs[0].is_finished():
         sleep(1)
-    assert jobs[0].is_completed()  # Otherwise the job failed
-    assert pipeline.output.read() == 2
+    assert jobs[0].is_completed()  # If the job is completed, that means the asserts in the task are successful
     taipy.clean_all_entities()
 
 
@@ -501,3 +505,11 @@ def _create_task(function, nb_outputs=1):
 
 def _create_task_from_config(task_cfg):
     return _TaskManager()._bulk_get_or_create([task_cfg])[0]
+
+
+def wait_job_to_complete(job):
+    start = datetime.now()
+    while (datetime.now() - start).seconds < 60:
+        sleep(0.1)  # Limit CPU usage
+        if job.is_finished():
+            return
