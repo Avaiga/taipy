@@ -16,13 +16,14 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pandas as pd
 from openpyxl import load_workbook
+
 from taipy.config.data_node.scope import Scope
 
-from .data_node import DataNode
 from ..common._reload import _self_reload
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import MissingRequiredProperty, NonExistingExcelSheet, NotMatchSheetNameAndCustomObject
+from .data_node import DataNode
 
 
 class ExcelDataNode(DataNode):
@@ -45,9 +46,9 @@ class ExcelDataNode(DataNode):
             always up-to-date.
         edit_in_progress (bool): True if a task computing the data node has been submitted
             and not completed yet. False otherwise.
-        properties (dict[str, Any]): A dictionary of additional properties. Note that the
-            _properties_ parameter must at least contain a _"path"_ entry representing the path
-            of the Excel file (xlsx format).
+        path (str): The path to the Excel file.
+        properties (dict[str, Any]): A dictionary of additional properties. The _properties_
+            must have a _"default_path"_ or _"path"_ entry with the path of the Excel file.
     """
 
     __STORAGE_TYPE = "excel"
@@ -85,6 +86,12 @@ class ExcelDataNode(DataNode):
         if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties)
 
+        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if self._path is None:
+            raise MissingRequiredProperty("default_path is required in a Excel data node config")
+        else:
+            properties[self.__PATH_KEY] = self._path
+
         super().__init__(
             config_id,
             scope,
@@ -97,7 +104,7 @@ class ExcelDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
-        self._path = self.__build_path()
+
         if not self._last_edit_date and isfile(self._path):
             self.unlock_edit()
 
@@ -108,15 +115,7 @@ class ExcelDataNode(DataNode):
 
     @path.setter
     def path(self, value):
-        self.properties[self.__DEFAULT_PATH_KEY] = value
-
-    def __build_path(self):
-        if path := self._properties.get(self.__DEFAULT_PATH_KEY):
-            return path
-        if path := self._properties.get(self.__PATH_KEY):
-            _warn_deprecated("path", suggest="default_path")
-            return path
-        raise MissingRequiredProperty("default_path is required")
+        self.properties[self.__PATH_KEY] = value
 
     def __exposed_types_to_dict(self, properties):
         if properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:

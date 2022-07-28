@@ -17,10 +17,10 @@ from typing import Any, List, Optional
 
 from taipy.config.data_node.scope import Scope
 
-from .data_node import DataNode
 from ..common._reload import _self_reload
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, JobId
+from .data_node import DataNode
 
 
 class PickleDataNode(DataNode):
@@ -45,14 +45,15 @@ class PickleDataNode(DataNode):
             When creating a pickle data node, if the _properties_ dictionary contains a
             _"default_data"_ entry, the data node is automatically written with the corresponding
             _"default_data"_ value.
-            If the _properties_ dictionary contains a _"path"_ entry, the data will be stored
+            If the _properties_ dictionary contains a _"default_path"_ or _"path"_ entry, the data will be stored
             using the corresponding value as the name of the pickle file.
     """
 
     __STORAGE_TYPE = "pickle"
-    __PICKLE_PATH_KEY = "path"
-    __PICKLE_DEFAULT_PATH_KEY = "default_path"
-    __DEFAULT_DATA_VALUE = "default_data"
+    __PATH_KEY = "path"
+    __DEFAULT_PATH_KEY = "default_path"
+    __DEFAULT_DATA_KEY = "default_data"
+    __IS_GENERATED_KEY = "is_generated"
     _REQUIRED_PROPERTIES: List[str] = []
 
     def __init__(
@@ -70,7 +71,12 @@ class PickleDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
-        default_value = properties.pop(self.__DEFAULT_DATA_VALUE, None)
+        default_value = properties.pop(self.__DEFAULT_DATA_KEY, None)
+        self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
+        if self._path is not None:
+            properties[self.__PATH_KEY] = self._path
+        self._is_generated = properties.get(self.__IS_GENERATED_KEY, self._path is None)
+        properties[self.__IS_GENERATED_KEY] = self._is_generated
         super().__init__(
             config_id,
             scope,
@@ -83,11 +89,11 @@ class PickleDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
-        self.__is_file_generated = False
-        self._pickle_path = self.__build_path()
-        if not self._last_edit_date and os.path.exists(self._pickle_path):
+        if self._path is None:
+            self._path = self.__build_path()
+        if not self._last_edit_date and os.path.exists(self._path):
             self.unlock_edit()
-        if default_value is not None and not os.path.exists(self._pickle_path):
+        if default_value is not None and not os.path.exists(self._path):
             self.write(default_value)
 
     @classmethod
@@ -97,33 +103,29 @@ class PickleDataNode(DataNode):
     @property  # type: ignore
     @_self_reload(DataNode._MANAGER_NAME)
     def path(self) -> Any:
-        return self._pickle_path
+        return self._path
 
     @path.setter  # type: ignore
     def path(self, value):
-        self.properties[self.__PICKLE_DEFAULT_PATH_KEY] = value
-        self.__is_file_generated = False
+        self.properties[self.__PATH_KEY] = value
+        self.properties[self.__IS_GENERATED_KEY] = False
 
-    @property
-    def is_file_generated(self) -> bool:
-        return self.__is_file_generated
+    @property  # type: ignore
+    @_self_reload(DataNode._MANAGER_NAME)
+    def is_generated(self) -> bool:
+        return self._is_generated
 
     def _read(self):
-        return pickle.load(open(self._pickle_path, "rb"))
+        return pickle.load(open(self._path, "rb"))
 
     def _write(self, data):
-        pickle.dump(data, open(self._pickle_path, "wb"))
+        pickle.dump(data, open(self._path, "wb"))
 
     def __build_path(self):
-        if file_name := self._properties.get(self.__PICKLE_DEFAULT_PATH_KEY):
-            return file_name
-        if file_name := self._properties.get(self.__PICKLE_PATH_KEY):
-            _warn_deprecated("path", suggest="default_path")
-            return file_name
+
         from taipy.config.config import Config
 
         dir_path = pathlib.Path(Config.global_config.storage_folder) / "pickles"
         if not dir_path.exists():
             dir_path.mkdir(parents=True, exist_ok=True)
-        self.__is_file_generated = True
         return dir_path / f"{self.id}.p"

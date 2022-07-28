@@ -14,5 +14,6 @@ from .data_node import DataNode
 from .excel import ExcelDataNode
 from .generic import GenericDataNode
 from .in_memory import InMemoryDataNode
+from .json import JSONDataNode
 from .pickle import PickleDataNode
 from .sql import SQLDataNode

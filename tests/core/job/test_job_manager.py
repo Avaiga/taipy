@@ -14,6 +14,7 @@ import multiprocessing
 import os
 import random
 import string
+from datetime import datetime
 from functools import partial
 from time import sleep
 
@@ -177,7 +178,7 @@ def test_cancel_single_job():
         utils.assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     assert job.is_cancelled()
     utils.assert_true_after_1_minute_max(lambda: _Scheduler._dispatcher._nb_available_workers == 2)
-
+    
 
 def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)

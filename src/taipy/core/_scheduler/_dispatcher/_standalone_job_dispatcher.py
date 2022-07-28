@@ -13,6 +13,7 @@ from concurrent.futures import ProcessPoolExecutor
 from functools import partial
 
 from taipy.config import Config
+from taipy.config._toml_serializer import _TomlSerializer
 
 from ...job.job import Job
 from ._job_dispatcher import _JobDispatcher
@@ -37,8 +38,10 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             job (Job^): The job to submit on an executor with an available worker.
         """
         self._nb_available_workers -= 1
+
+        config_as_string = _TomlSerializer()._serialize(Config._applied_config)
         future = self._executor.submit(
-            self._run_wrapped_function, Config.global_config.storage_folder, job.id, job.task
+            self._run_wrapped_function, Config.job_config.mode, config_as_string, job.id, job.task
         )
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
