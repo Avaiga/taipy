@@ -21,5 +21,5 @@ class _ScenarioRepositoryFactory(_RepositoryFactory):
     @classmethod
     def _build_repository(cls) -> Type[_ScenarioRepository]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_repository", "_ScenarioRepository")  # type: ignore
+            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".scenario._scenario_repository", "_ScenarioRepository")()  # type: ignore
         return _ScenarioFSRepository()

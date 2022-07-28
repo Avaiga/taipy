@@ -21,5 +21,5 @@ class _DataRepositoryFactory(_RepositoryFactory):
     @classmethod
     def _build_repository(cls) -> Type[_DataRepository]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_repository", "_DataRepository")  # type: ignore
+            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".data._data_repository", "_DataRepository")()  # type: ignore
         return _DataFSRepository()

@@ -21,5 +21,5 @@ class _CycleRepositoryFactory(_RepositoryFactory):
     @classmethod
     def _build_repository(cls) -> Type[_CycleRepository]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_repository", "_CycleRepository")  # type: ignore
+            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".cycle._cycle_repository", "_CycleRepository")()  # type: ignore
         return _CycleFSRepository()
