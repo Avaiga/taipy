@@ -11,8 +11,7 @@
 from abc import abstractmethod
 from typing import Any, Dict, List
 
-from taipy import JobConfig
-from taipy.config import Config
+from taipy.config import Config, JobConfig
 from taipy.config._toml_serializer import _TomlSerializer
 
 from ...common.alias import JobId
