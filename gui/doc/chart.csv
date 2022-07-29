@@ -12,7 +12,7 @@ lat,indexed(str),,Column name for the <i>latitude</i> value. Synonym for <i>y</i
 text,indexed(str),,"Column name for the text associated to the point for the indicated trace.
 This is meaningful only when _mode_ has the <i>text</i> option."
 title,str,,The title of this chart control.
-render,bool,True,"If True, this chart is visible on the page."
+render,bool,TRUE,"If True, this chart is visible on the page."
 on_range_change,Callback,,"Callback function called when the visible part of the x axis changes.
 The function receives four parameters:
 <ul>
@@ -38,7 +38,8 @@ marker,"indexed(dict[str, any])",,"The type of markers used for the indicated tr
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-marker"">marker</a> for details.
 Color and size can be column name."
 line,"indexed(str|dict[str, any])",,"The configuration of the line used for the indicated trace.
-See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-line"">line</a> for details. if str then dash??"
+See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-line"">line</a> for details.
+If the value is a string, it must be a dash type or pattern (see <a href=""https://plotly.com/python/reference/scatter/#scatter-line-dash"">dash style of lines</a> for details)."
 selected_marker,"indexed(dict[str, any])",,"The type of markers used for selected points in the indicated trace.
 See <a href=""https://plotly.com/javascript/reference/scatter/#scatter-selected-marker"">selected marker for details."
 layout,"dict[str, any]",,"The <i>plotly.js</i> compatible <a href=""https://plotly.com/javascript/reference/layout/"">layout object</a>."

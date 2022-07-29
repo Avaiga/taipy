@@ -5,12 +5,13 @@ Displays a status or a list of statuses.
 
 _value_ can be a list of tuples:
 
-   - first element: status
-   - second element: message
+   - first element: *status*
+   - second element: *message*
+
 or a list of dictionaries that contain the keys:
 
-       - status
-       - message
+       - *status*
+       - *message*
 
 ### Show the current status
 

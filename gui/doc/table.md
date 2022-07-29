@@ -75,7 +75,7 @@ The value of this property, which is a string, can be:
     === "Markdown"
 
         ```
-        <{data}|table|group_by[Group column]|apply[Apply column]=count|>
+        <|{data}|table|group_by[Group column]|apply[Apply column]=count|>
         ```
   
     === "HTML"
