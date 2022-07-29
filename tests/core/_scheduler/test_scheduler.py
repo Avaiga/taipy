@@ -22,6 +22,7 @@ from time import sleep
 import pytest
 
 from src.taipy.core import taipy
+from src.taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
@@ -46,6 +47,9 @@ def reset_configuration_singleton():
 
     for f in glob.glob("*.p"):
         print(f"deleting file {f}")
+        os.remove(f)
+
+    for f in glob.glob("./my_data/*"):
         os.remove(f)
 
 
@@ -195,7 +199,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._update_job_config()
 
     task = _create_task(partial(lock_multiply, lock))
@@ -212,7 +216,7 @@ def test_submit_task_in_parallel():
 
 
 def test_submit_task_multithreading_multiple_task():
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._update_job_config()
 
     m = multiprocessing.Manager()
@@ -241,12 +245,12 @@ def test_submit_task_multithreading_multiple_task():
 
     assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_1_minute_max(job_1.is_completed)
-    assert_true_after_1_minute_max(job_2.is_completed)
+    assert job_2.is_completed()
     assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._update_job_config()
 
     m = multiprocessing.Manager()
@@ -285,17 +289,18 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
         assert task_0.output[f"{task_0.config_id}_output0"].read() == 0
         assert_true_after_1_minute_max(job_0.is_running)
         assert_true_after_1_minute_max(job_1.is_completed)
-        assert_true_after_1_minute_max(job_2.is_completed)
+        assert job_2.is_completed()
         assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
 
-    assert_true_after_1_minute_max(lambda: task_0.output[f"{task_0.config_id}_output0"].read() == 42)
+    assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
+    assert task_0.output[f"{task_0.config_id}_output0"].read() == 42
     assert job_0.is_completed()
     assert job_1.is_completed()
     assert job_2.is_completed()
 
 
 def test_blocked_task():
-    Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._update_job_config()
 
     m = multiprocessing.Manager()
@@ -349,32 +354,42 @@ def test_task_scheduler_create_synchronous_dispatcher():
 
 
 def test_task_scheduler_create_standalone_dispatcher():
-    Config.configure_job_executions(mode="standalone", nb_of_workers=42)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=42)
     _SchedulerFactory._update_job_config()
     assert isinstance(_SchedulerFactory._dispatcher._executor, ProcessPoolExecutor)
     assert _SchedulerFactory._dispatcher._nb_available_workers == 42
 
 
-def test_can_exec_task_with_modified_config():
-    assert Config.global_config.storage_folder == ".data/"
-    Config.configure_global_app(storage_folder=".my_data/", clean_entities_enabled=True)
+def modified_config_task(n):
+    from taipy.config import Config
+
     assert Config.global_config.storage_folder == ".my_data/"
+    assert Config.global_config.custom_property == "custom_property"
+    return n * 2
+
+
+def test_can_exec_task_with_modified_config():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _SchedulerFactory._update_job_config()
+    Config.configure_global_app(
+        storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property"
+    )
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
-    task_config = Config.configure_task("task_config", mult_by_2, dn_input_config, dn_output_config)
+    task_config = Config.configure_task("task_config", modified_config_task, dn_input_config, dn_output_config)
     pipeline_config = Config.configure_pipeline("pipeline_config", [task_config])
     pipeline = _PipelineManager._get_or_create(pipeline_config)
 
-    pipeline.submit()
-    while pipeline.output.edit_in_progress:
-        sleep(1)
-    assert 2 == pipeline.output.read()
+    jobs = pipeline.submit()
+    assert_true_after_1_minute_max(jobs[0].is_finished)
+    assert jobs[0].is_completed()  # If the job is completed, that means the asserts in the task are successful
     taipy.clean_all_entities()
 
 
 def test_can_execute_task_with_development_mode():
-    assert Config.job_config.mode == JobConfig._DEVELOPMENT_MODE
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _SchedulerFactory._update_job_config()
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
@@ -501,3 +516,11 @@ def _create_task(function, nb_outputs=1):
 
 def _create_task_from_config(task_cfg):
     return _TaskManager()._bulk_get_or_create([task_cfg])[0]
+
+
+def wait_job_to_complete(job):
+    start = datetime.now()
+    while (datetime.now() - start).seconds < 60:
+        sleep(0.1)  # Limit CPU usage
+        if job.is_finished():
+            return

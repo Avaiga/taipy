@@ -608,10 +608,3 @@ class TestDataNode:
         assert data_node.path == "foo.p"
         data_node.path = "baz.p"
         assert data_node.path == "baz.p"
-
-    def test_path_on_config_is_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            dn_config = Config.configure_data_node("data_node", "pickle", path="foo.p")
-            assert dn_config.path == "foo.p"
-            dn = _DataManager._bulk_get_or_create([dn_config])[dn_config]
-            assert dn.path == "foo.p"

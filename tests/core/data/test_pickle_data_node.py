@@ -13,13 +13,13 @@ import os
 import pathlib
 
 import pytest
-from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
-from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import NoData
+from taipy.config.config import Config
+from taipy.config.data_node.scope import Scope
+from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
 class TestPickleDataNodeEntity:
@@ -95,7 +95,7 @@ class TestPickleDataNodeEntity:
         assert isinstance(pickle_dict.read(), dict)
         assert pickle_dict.read() == {"bar": 12, "baz": "qux", "quux": [13]}
 
-    def test_default_path_overrides_path(self):
+    def test_path_overrides_default_path(self):
         dn = PickleDataNode(
             "foo",
             Scope.PIPELINE,
@@ -105,7 +105,7 @@ class TestPickleDataNodeEntity:
                 "path": "bar.FILE.p",
             },
         )
-        assert dn.path == "foo.FILE.p"
+        assert dn.path == "bar.FILE.p"
 
     def test_set_path(self):
         dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_path": "foo.p"})
@@ -113,12 +113,8 @@ class TestPickleDataNodeEntity:
         dn.path = "bar.p"
         assert dn.path == "bar.p"
 
-    def test_is_file_generated(self):
+    def test_is_generated(self):
         dn = PickleDataNode("foo", Scope.PIPELINE, properties={})
-        assert dn.is_file_generated
+        assert dn.is_generated
         dn.path = "bar.p"
-        assert not dn.is_file_generated
-
-    def test_path_deprecated(self):
-        with pytest.warns(DeprecationWarning):
-            PickleDataNode("foo", Scope.PIPELINE, properties={"path": "foo.p"})
+        assert not dn.is_generated

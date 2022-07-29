@@ -39,7 +39,7 @@ class _JobManager(_Manager[Job]):
     def _delete(cls, job: Job, force=False):  # type:ignore
         if job.is_finished() or force:
             super()._delete(job.id)
-            from .._scheduler._dispatcher import _JobDispatcher
+            from .._scheduler._dispatcher._job_dispatcher import _JobDispatcher
 
             _JobDispatcher._pop_dispatched_process(job.id)  # type: ignore
         else:

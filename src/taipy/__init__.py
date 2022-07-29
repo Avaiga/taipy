@@ -11,19 +11,23 @@
 
 from importlib.util import find_spec
 
-if find_spec("taipy.core"):
-    from taipy.core import *
+if find_spec("taipy"):
+    if find_spec("taipy.config"):
+        pass
 
-if find_spec("taipy.gui"):
-    from taipy.gui import Gui
+    if find_spec("taipy.core"):
+        from taipy.core import *
 
-    if find_spec("taipy.enterprise") and find_spec("taipy.enterprise.gui"):
-        from taipy.enterprise.gui import _init_gui_enterprise
+    if find_spec("taipy.gui"):
+        from taipy.gui import Gui
 
-        _init_gui_enterprise(Gui)
+        if find_spec("taipy.enterprise") and find_spec("taipy.enterprise.gui"):
+            from taipy.enterprise.gui import _init_gui_enterprise
 
-if find_spec("taipy.rest"):
-    pass
+            _init_gui_enterprise(Gui)
 
-if find_spec("taipy._run"):
-    pass
+    if find_spec("taipy.rest"):
+        pass
+
+    if find_spec("taipy._run"):
+        pass

@@ -21,6 +21,7 @@ from ..common._utils import _load_fct
 from ._data_model import _DataNodeModel
 from .data_node import DataNode
 from .generic import GenericDataNode
+from .json import JSONDataNode
 
 
 class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, DataNode]):  # type: ignore
@@ -28,6 +29,10 @@ class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, Data
     _READ_FCT_MODULE_KEY = "read_fct_module"
     _WRITE_FCT_NAME_KEY = "write_fct_name"
     _WRITE_FCT_MODULE_KEY = "write_fct_module"
+    _JSON_ENCODER_NAME_KEY = "encoder_name"
+    _JSON_ENCODER_MODULE_KEY = "encoder_module"
+    _JSON_DECODER_NAME_KEY = "decoder_name"
+    _JSON_DECODER_MODULE_KEY = "decoder_module"
     _EXPOSED_TYPE_KEY = "exposed_type"
 
     def __init__(self, class_map):
@@ -54,6 +59,17 @@ class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, Data
                 properties[GenericDataNode._REQUIRED_READ_FUNCTION_PROPERTY],
                 properties[GenericDataNode._REQUIRED_WRITE_FUNCTION_PROPERTY],
             )
+
+        if data_node.storage_type() == JSONDataNode.storage_type():
+            encoder = data_node._properties.get(JSONDataNode._ENCODER_KEY)
+            properties[self._JSON_ENCODER_NAME_KEY] = encoder.__name__ if encoder else None
+            properties[self._JSON_ENCODER_MODULE_KEY] = encoder.__module__ if encoder else None
+            properties.pop(JSONDataNode._ENCODER_KEY, None)
+
+            decoder = data_node._properties.get(JSONDataNode._DECODER_KEY)
+            properties[self._JSON_DECODER_NAME_KEY] = decoder.__name__ if decoder else None
+            properties[self._JSON_DECODER_MODULE_KEY] = decoder.__module__ if decoder else None
+            properties.pop(JSONDataNode._DECODER_KEY, None)
 
         if self._EXPOSED_TYPE_KEY in properties.keys():
             if not isinstance(properties[self._EXPOSED_TYPE_KEY], str):
@@ -103,6 +119,28 @@ class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, Data
             del model.data_node_properties[self._READ_FCT_MODULE_KEY]
             del model.data_node_properties[self._WRITE_FCT_NAME_KEY]
             del model.data_node_properties[self._WRITE_FCT_MODULE_KEY]
+
+        if model.storage_type == JSONDataNode.storage_type():
+            if model.data_node_properties[self._JSON_ENCODER_MODULE_KEY]:
+                model.data_node_properties[JSONDataNode._ENCODER_KEY] = _load_fct(
+                    model.data_node_properties[self._JSON_ENCODER_MODULE_KEY],
+                    model.data_node_properties[self._JSON_ENCODER_NAME_KEY],
+                )
+            else:
+                model.data_node_properties[JSONDataNode._ENCODER_KEY] = None
+
+            if model.data_node_properties[self._JSON_DECODER_MODULE_KEY]:
+                model.data_node_properties[JSONDataNode._DECODER_KEY] = _load_fct(
+                    model.data_node_properties[self._JSON_DECODER_MODULE_KEY],
+                    model.data_node_properties[self._JSON_DECODER_NAME_KEY],
+                )
+            else:
+                model.data_node_properties[JSONDataNode._DECODER_KEY] = None
+
+            del model.data_node_properties[self._JSON_ENCODER_NAME_KEY]
+            del model.data_node_properties[self._JSON_ENCODER_MODULE_KEY]
+            del model.data_node_properties[self._JSON_DECODER_NAME_KEY]
+            del model.data_node_properties[self._JSON_DECODER_MODULE_KEY]
 
         if self._EXPOSED_TYPE_KEY in model.data_node_properties.keys():
             if model.data_node_properties[self._EXPOSED_TYPE_KEY] != "numpy":

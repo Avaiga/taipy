@@ -14,11 +14,14 @@ import multiprocessing
 import os
 import random
 import string
+from datetime import datetime
 from functools import partial
 from time import sleep
 
 import pytest
 
+from src.taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
+from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import JobId
 from src.taipy.core.data._data_manager import _DataManager
@@ -180,27 +183,21 @@ def inner_lock_multiply(nb1: float, nb2: float):
 def test_cancel_single_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._update_job_config()
-    scheduler = _SchedulerFactory._scheduler
-    dispatcher = _SchedulerFactory._dispatcher
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
     assert _SchedulerFactory._dispatcher.is_running()
-    assert dispatcher._nb_available_workers == 2
+    assert _SchedulerFactory._dispatcher._nb_available_workers == 2
 
     with lock:
-        job = scheduler.submit_task(task, "submit_id")
-        # sleep(2)
-        # utils.assert_true_after_1_minute_max(lambda: len(dispatcher._dispatched_processes) == 1)
-        len(dispatcher._dispatched_processes) == 1
-        print("surprise 1")
+        job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+        utils.assert_true_after_1_minute_max(job.is_running)
+        assert len(_JobDispatcher._dispatched_processes) == 1
         _JobManager._cancel(job.id)
-        # assert job.is_cancelled()
-        # utils.assert_true_after_1_minute_max(lambda: len(dispatcher._dispatched_processes) == 0)
-        print("surprise 2")
-        len(dispatcher._dispatched_processes) == 0
-    # assert job.is_cancelled()
-    # sleep(2)
-    utils.assert_true_after_1_minute_max(lambda: dispatcher._nb_available_workers == 2)
+        utils.assert_true_after_1_minute_max(job.is_cancelled)
+        utils.assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
+    assert job.is_cancelled()
+    # TODO: remove assert_true_after_1_minute_max to test cancelling running process
+    utils.assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
 
 
 def test_cancel_subsequent_jobs():

@@ -14,7 +14,8 @@ from multiprocessing import Lock
 from time import sleep
 from typing import Any, Dict, List
 
-from taipy.config import Config
+from taipy.config import Config, JobConfig
+from taipy.config._toml_serializer import _TomlSerializer
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...common.alias import JobId
@@ -122,18 +123,21 @@ class _JobDispatcher(threading.Thread):
         raise NotImplementedError
 
     @classmethod
-    def _run_wrapped_function(cls, storage_folder: str, job_id: JobId, task: Task):
+    def _run_wrapped_function(cls, mode, config_as_string, job_id: JobId, task: Task):
         """
         Reads inputs, execute function, and write outputs.
 
         Parameters:
-             job_id (JobId^): The id of the job.
-             task (Task^): The task to be executed.
+            mode: The job execution mode.
+            config_as_string: The applied config passed as string to be reloaded iff the mode is `standalone`.
+            job_id (JobId^): The id of the job.
+            task (Task^): The task to be executed.
         Returns:
              True if the task needs to run. False otherwise.
         """
         try:
-            Config.global_config.storage_folder = storage_folder
+            if mode != JobConfig._DEVELOPMENT_MODE:
+                Config._applied_config = _TomlSerializer()._deserialize(config_as_string)
             inputs: List[DataNode] = list(task.input.values())
             outputs: List[DataNode] = list(task.output.values())
             fct = task.function
