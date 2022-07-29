@@ -64,6 +64,10 @@ def test_get_all_jobs(client, create_job_list):
 
 # @pytest.mark.xfail()
 def test_cancel_job(client, default_job):
+    #TODO: improve this test after the PR refactoring dispatcher
+    from taipy.core._scheduler._scheduler import _Scheduler
+    _Scheduler._update_job_config()
+    
     # test 404
     user_url = url_for("api.job_cancel", job_id="foo")
     rep = client.post(user_url)
@@ -71,7 +75,7 @@ def test_cancel_job(client, default_job):
 
     with mock.patch("taipy.core.job._job_manager._JobManager._get") as manager_mock:
         manager_mock.return_value = default_job
-
+        
         # test get_job
         rep = client.post(url_for("api.job_cancel", job_id="foo"))
         assert rep.status_code == 200
