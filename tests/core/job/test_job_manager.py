@@ -155,26 +155,26 @@ def inner_lock_multiply(nb1: float, nb2: float):
 #     _JobManager._delete(job)
 
 
-def test_force_deleting_unfinished_job():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
-    scheduler = _SchedulerFactory._scheduler
+# def test_force_deleting_unfinished_job():
+#     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+#     _SchedulerFactory._update_job_config()
+#     scheduler = _SchedulerFactory._scheduler
 
-    task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
-    with lock:
-        job = scheduler.submit_task(task, "submit_id")
-        print(_JobManager._get_all())
-        print(_SchedulerFactory._scheduler.jobs_to_run.qsize())
-        print(_SchedulerFactory._dispatcher.is_running())
-        print(_SchedulerFactory._dispatcher)
-        # sleep(10)
-        # utils.assert_true_after_1_minute_max(lambda: job.status == 4)
-        with pytest.raises(JobNotDeletedException):
-            # print('job: ', job.id, job._task, job._force, job._creation_date)
-            # print('satus: ', _JobManager._get(job.id).is_finished())
-            _JobManager._delete(job, force=False)
-        _JobManager._delete(job, force=True)
-    assert _JobManager._get(job.id) is None
+#     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
+#     with lock:
+#         job = scheduler.submit_task(task, "submit_id")
+#         print(_JobManager._get_all())
+#         print(_SchedulerFactory._scheduler.jobs_to_run.qsize())
+#         print(_SchedulerFactory._dispatcher.is_running())
+#         print(_SchedulerFactory._dispatcher)
+#         # sleep(10)
+#         # utils.assert_true_after_1_minute_max(lambda: job.status == 4)
+#         with pytest.raises(JobNotDeletedException):
+#             # print('job: ', job.id, job._task, job._force, job._creation_date)
+#             # print('satus: ', _JobManager._get(job.id).is_finished())
+#             _JobManager._delete(job, force=False)
+#         _JobManager._delete(job, force=True)
+#     assert _JobManager._get(job.id) is None
 
 
 def test_cancel_single_job():
