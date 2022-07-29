@@ -44,10 +44,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
             self._run_wrapped_function, Config.job_config.mode, config_as_string, job.id, job.task
         )
 
-        from .._scheduler_factory import _SchedulerFactory
-
-        _SchedulerFactory._build_scheduler()._set_process_in_scheduler(job.id, future)  # type: ignore
-
+        self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self.__release_worker)
         future.add_done_callback(partial(self._update_status_from_future, job))
 
@@ -55,7 +52,5 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._nb_available_workers += 1
 
     def _update_status_from_future(self, job: Job, ft):
-        from .._scheduler_factory import _SchedulerFactory
-
-        _SchedulerFactory._build_scheduler()._pop_process_in_scheduler(job.id)  # type: ignore
+        self._pop_dispatched_process(job.id)  # type: ignore
         self._update_status(job, ft.result())

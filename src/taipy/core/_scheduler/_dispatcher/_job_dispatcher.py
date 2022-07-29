@@ -9,7 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 from abc import abstractmethod
-from typing import Any, List
+from typing import Any, Dict, List
 
 from taipy import JobConfig
 from taipy.config import Config
@@ -26,6 +26,8 @@ from ...task.task import Task
 
 class _JobDispatcher:
     """Manages job dispatching (instances of `Job^` class) on executors."""
+
+    _dispatched_processes: Dict = {}
 
     def __init__(self):
         pass
@@ -103,3 +105,11 @@ class _JobDispatcher:
     def _update_status(job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
+
+    @classmethod
+    def _set_dispatched_processes(cls, job_id, process):
+        cls._dispatched_processes[job_id] = process
+
+    @classmethod
+    def _pop_dispatched_process(cls, job_id, default=None):
+        return cls._dispatched_processes.pop(job_id, default)  # type: ignore

@@ -41,7 +41,6 @@ class _Scheduler(_AbstractScheduler):
     _dispatcher = None  # type: ignore
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
-    _processes: Dict = {}
 
     @classmethod
     def initialize(cls):
@@ -264,17 +263,9 @@ class _Scheduler(_AbstractScheduler):
     @classmethod
     def __cancel_jobs_and_processes(cls, job_id_to_cancel, jobs):
         for job in jobs:
-            if process := cls._pop_process_in_scheduler(job.id):
+            if process := cls._dispatcher._pop_dispatched_process(job.id):
                 process.cancel()  # TODO: this doesn't terminate the running process
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:
                 job.abandoned()
-
-    @classmethod
-    def _set_process_in_scheduler(cls, job_id, process):
-        cls._processes[job_id] = process
-
-    @classmethod
-    def _pop_process_in_scheduler(cls, job_id, default=None):
-        return cls._processes.pop(job_id, default)  # type: ignore
