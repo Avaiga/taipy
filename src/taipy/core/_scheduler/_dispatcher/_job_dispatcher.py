@@ -11,8 +11,9 @@
 from abc import abstractmethod
 from typing import Any, Dict, List
 
-from taipy.config import Config, JobConfig
 from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config.config import Config
+from taipy.config.job_execution.job_config import JobConfig
 
 from ...common.alias import JobId
 from ...data._data_manager_factory import _DataManagerFactory
