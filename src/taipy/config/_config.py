@@ -12,7 +12,7 @@
 from copy import copy
 from typing import Dict
 
-from . import Section
+from .section import Section
 from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
 from .job_execution.job_config import JobConfig
