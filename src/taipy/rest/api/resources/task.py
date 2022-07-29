@@ -12,7 +12,7 @@
 from flask import jsonify, make_response, request
 from flask_restful import Resource
 
-from taipy.config import Config
+from taipy.config.config import Config
 from taipy.core.common._utils import _load_fct
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.exceptions.exceptions import ModelNotFound
