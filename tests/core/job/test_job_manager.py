@@ -211,7 +211,7 @@ def test_cancel_subsequent_jobs():
         job_2 = _SchedulerFactory._scheduler.submit_task(task_2, submit_id=submit_id_1)
         job_3 = _SchedulerFactory._scheduler.submit_task(task_3, submit_id=submit_id_1)
 
-        assert job_1.is_running()
+        assert_true_after_1_minute_max(job_1.is_running)
         assert job_2.is_blocked()
         assert job_3.is_blocked()
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 2
