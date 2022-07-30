@@ -92,14 +92,17 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
     def load(self, model_id: str) -> Entity:
         try:
             return self.__to_entity(
-                self.__get_model_filepath(model_id), retry=Config.global_config.read_entity_retry or 0
+                self._get_model_filepath(model_id), retry=Config.global_config.read_entity_retry or 0
             )  # type: ignore
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), model_id)
 
     def _load_all(self) -> List[Entity]:
         try:
-            return [self.__to_entity(f, retry=Config.global_config.read_entity_retry or 0) for f in self.dir_path.iterdir()]  # type: ignore
+            # type: ignore
+            return [
+                self.__to_entity(f, retry=Config.global_config.read_entity_retry or 0) for f in self.dir_path.iterdir()
+            ]
         except FileNotFoundError:
             return []
 
@@ -117,7 +120,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         self.__create_directory_if_not_exists()
 
         model = self._to_model(entity)
-        self.__get_model_filepath(model.id).write_text(
+        self._get_model_filepath(model.id).write_text(
             json.dumps(model.to_dict(), ensure_ascii=False, indent=0, cls=_CustomEncoder, check_circular=False)
         )
 
@@ -126,7 +129,7 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
     def _delete(self, model_id: str):
         try:
-            self.__get_model_filepath(model_id).unlink()
+            self._get_model_filepath(model_id).unlink()
         except FileNotFoundError:
             raise ModelNotFound(str(self.dir_path), model_id)
 
@@ -176,11 +179,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
         return res
 
+    def _get_model_filepath(self, model_id) -> pathlib.Path:
+        return self.dir_path / f"{model_id}.json"
+
     def __search(self, attribute: str, value: str) -> Iterator[Entity]:
         return filter(lambda e: getattr(e, attribute, None) == value, self._load_all())
-
-    def __get_model_filepath(self, model_id) -> pathlib.Path:
-        return self.dir_path / f"{model_id}.json"
 
     def __to_entity(self, filepath, by: Optional[str] = None, retry: Optional[int] = 0) -> Entity:
         try:

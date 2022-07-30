@@ -11,7 +11,7 @@
 
 from typing import Any, Optional, Union
 
-from taipy.config import Config
+from taipy.config.config import Config
 
 from .._repository import _FileSystemRepository
 

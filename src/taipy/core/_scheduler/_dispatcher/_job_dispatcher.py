@@ -14,8 +14,9 @@ from multiprocessing import Lock
 from time import sleep
 from typing import Any, Dict, List
 
-from taipy.config import Config, JobConfig
 from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config.config import Config
+from taipy.config.job_execution.job_config import JobConfig
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...common.alias import JobId
