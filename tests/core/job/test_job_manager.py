@@ -184,22 +184,15 @@ def test_cancel_single_job():
     assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
 
 
-lock_1 = m.Lock()
-
-
 def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
     _SchedulerFactory._dispatcher = None
     _SchedulerFactory._update_job_config()
-    print("-------------------------- 1st time: ---", _SchedulerFactory._dispatcher._nb_available_workers)
-    global lock
 
     dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
     dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
     dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
-
-    # task_1 = Task("task_config_1", partial(lock_multiply, lock_1), [dn_1, dn_2], [dn_3], id="task_1")
     task_1 = Task("task_config_1", inner_lock_multiply, [dn_1, dn_2], [dn_3], id="task_1")
     task_2 = Task("task_config_2", multiply, [dn_1, dn_3], [dn_4], id="task_2")
     task_3 = Task("task_config_3", print, [dn_4], id="task_3")
@@ -221,24 +214,13 @@ def test_cancel_subsequent_jobs():
         assert job_3.is_blocked()
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 2
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
-        print(
-            "-------------------------- 2nd time: ---",
-            _SchedulerFactory._dispatcher._nb_available_workers,
-            job_1.status,
-        )
+
         submit_id_2 = "submit_2"
         job_4 = _SchedulerFactory._scheduler.submit_task(task_1, submit_id=submit_id_2)
         job_5 = _SchedulerFactory._scheduler.submit_task(task_2, submit_id=submit_id_2)
         job_6 = _SchedulerFactory._scheduler.submit_task(task_3, submit_id=submit_id_2)
 
-        # assert job_1.is_completed()
-        # assert job_4.is_pending()
-        print(
-            "-------------------------- 3rd time: ---",
-            _SchedulerFactory._dispatcher._nb_available_workers,
-            job_1.status,
-            job_4.status,
-        )
+        assert job_4.is_pending()
         assert job_5.is_blocked()
         assert job_6.is_blocked()
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 1
