@@ -244,7 +244,7 @@ def test_submit_task_multithreading_multiple_task():
 
     assert_true_after_1_minute_max(lambda: task_1.output[f"{task_1.config_id}_output0"].read() == 42)
     assert_true_after_1_minute_max(job_1.is_completed)
-    assert job_2.is_completed()
+    assert_true_after_1_minute_max(job_2.is_completed)
     assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 0)
 
 
