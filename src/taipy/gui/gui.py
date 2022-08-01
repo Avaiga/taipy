@@ -104,7 +104,8 @@ class Gui:
             application.
         on_exception (Callable): The function that is called an exception occurs on user code.<br/>
             It defaults to the `on_exception()` global function defined in the Python
-            application.
+            application. If there is no such function, exceptions will not trigger
+            anything.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
@@ -1199,7 +1200,7 @@ class Gui:
                     self._call_function_with_state(self.on_init, [])
                 except Exception as e:
                     if not self.__call_on_exception("on_init", e):
-                        warnings.warn(f"Exception on on_init execution \n{e}")
+                        warnings.warn(f"Exception raised in on_init\n{e}")
         return self._render_route()
 
     def __call_on_exception(self, function_name: str, exception: Exception) -> bool:
@@ -1207,7 +1208,7 @@ class Gui:
             try:
                 self.on_exception(self.__get_state(), str(function_name), exception)
             except Exception as e:
-                warnings.warn(f"Exception occured on on_exception execution\n{e}")
+                warnings.warn(f"Exception raised in on_exception\n{e}")
             return True
         return False
 
