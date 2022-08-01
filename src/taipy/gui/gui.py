@@ -96,6 +96,9 @@ class Gui:
         on_init (Callable): The function that is called on the first connection of a new user.<br/>
             It defaults to the `on_init()` global function defined in the Python
             application.
+        on_navigate (Callable): The function that is called when a page is requested.<br/>
+            It defaults to the `on_navigate()` global function defined in the Python
+            application.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
@@ -204,6 +207,7 @@ class Gui:
         self.on_action: t.Optional[t.Callable] = None
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
+        self.on_navigate: t.Optional[t.Callable] = None
 
         # sid from client_id
         self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
@@ -1186,22 +1190,31 @@ class Gui:
                 try:
                     self._call_function_with_state(self.on_init, [])
                 except Exception as e:
-                    warnings.warn(f"Exception on on_init execution \n{e}")
+                    warnings.warn(f"Exception on on_init execution\n{e}")
         return self._render_route()
 
     def __render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
-        page = next((page_i for page_i in self._config.pages if page_i._route == page_name), None)
+        nav_page = page_name
+        if hasattr(self, "on_navigate") and callable(self.on_navigate):
+            try:
+                nav_page = self.on_navigate(self.__get_state(), page_name)
+                if not isinstance(nav_page, str):
+                    warnings.warn(f"on_navigate returned a invalid page name '{nav_page}'")
+                    nav_page = page_name
+            except Exception as e:
+                warnings.warn(f"Exception on on_navigate execution\n{e}")
+        page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
 
         # try partials
         if page is None:
-            page = self._get_partial(page_name)
+            page = self._get_partial(nav_page)
         # Make sure that there is a page instance found
         if page is None:
-            return (jsonify({"error": "Page doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
+            return (jsonify({"error": f"Page '{nav_page}' doesn't exist!"}), 400, {"Content-Type": "application/json; charset=utf-8"})
         context = page.render(self)
         if (
-            page_name == Gui.__root_page_name
+            nav_page == Gui.__root_page_name
             and page._rendered_jsx is not None
             and "<PageContent" not in page._rendered_jsx
         ):
@@ -1403,10 +1416,11 @@ class Gui:
 
         with self.get_flask_app().app_context():
             self.__var_dir.process_imported_var()
-            # bind on_change and on_action function if available
+            # bind on_* function if available
             self.__bind_local_func("on_init")
             self.__bind_local_func("on_change")
             self.__bind_local_func("on_action")
+            self.__bind_local_func("on_navigate")
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
