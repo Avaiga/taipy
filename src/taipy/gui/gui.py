@@ -95,10 +95,12 @@ class Gui:
             anything.
         on_init (Callable): The function that is called on the first connection of a new user.<br/>
             It defaults to the `on_init()` global function defined in the Python
-            application.
+            application. If there is no such function, the first connection will not trigger
+            anything.
         on_navigate (Callable): The function that is called when a page is requested.<br/>
             It defaults to the `on_navigate()` global function defined in the Python
-            application.
+            application. If there is no such function, page requests will not trigger
+            anything.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
