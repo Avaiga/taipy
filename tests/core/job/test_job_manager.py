@@ -238,10 +238,10 @@ def test_cancel_subsequent_jobs():
         assert job_2.is_abandoned()
         assert job_3.is_abandoned()
 
-    assert job_1.is_cancelled()
+    assert_true_after_1_minute_max(job_1.is_cancelled)
     assert job_2.is_abandoned()
     assert job_3.is_abandoned()
-    assert job_4.is_cancelled()
+    assert_true_after_1_minute_max(job_4.is_cancelled)
     assert job_5.is_abandoned()
     assert job_6.is_abandoned()
     assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
