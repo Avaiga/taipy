@@ -22,7 +22,6 @@ from time import sleep
 import pytest
 
 from src.taipy.core import taipy
-from src.taipy.core._scheduler._dispatcher._job_dispatcher import _JobDispatcher
 from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory

@@ -193,7 +193,10 @@ def setup():
 
 
 def delete_everything():
-    _SchedulerFactory._update_job_config()
+    if _SchedulerFactory._scheduler is None:
+        _SchedulerFactory._build_scheduler()
+    else:
+        _SchedulerFactory._update_job_config()
     _Scheduler.jobs_to_run = Queue()
     _Scheduler.blocked_jobs = []
     _TaskManager._scheduler = _SchedulerFactory._build_scheduler

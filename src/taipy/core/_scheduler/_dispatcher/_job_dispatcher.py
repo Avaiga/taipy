@@ -57,12 +57,12 @@ class _JobDispatcher(threading.Thread):
     def run(self):
         while not self.__STOP_FLAG:
             try:
-                if self._can_execute() and (job := self.scheduler.jobs_to_run.get(block=True)):
+                if self._can_execute():
+                    job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
+                    print("--------------- can execute????: ", self._nb_available_workers)
                     self._execute_job(job)
-                else:
-                    sleep(0.1)  # Limit CPU usage
             except:  # In case the last job of the queue has been removed.
-                self.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
+                pass
 
     @abstractmethod
     def _can_execute(self) -> bool:

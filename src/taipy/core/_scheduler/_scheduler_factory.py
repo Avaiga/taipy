@@ -40,7 +40,8 @@ class _SchedulerFactory:
             cls._scheduler = _Scheduler
 
         # Build dispatcher
-        cls.__build_dispatcher()
+        if not cls._dispatcher:
+            cls._build_dispatcher()
 
         # Initialize the scheduler
         cls._scheduler.initialize()  # type: ignore
@@ -49,12 +50,13 @@ class _SchedulerFactory:
 
     @classmethod
     def _update_job_config(cls, force_restart=False):
-        cls.__build_dispatcher(force_restart=force_restart)
+        cls._build_dispatcher(force_restart=force_restart)
 
     @classmethod
-    def __build_dispatcher(cls, force_restart=False):
+    def _build_dispatcher(cls, force_restart=False):
         if not cls._scheduler:
             raise SchedulerNotBuilt
+
         if Config.job_config.is_standalone:
             cls.__build_standalone_job_dispatcher(force_restart=force_restart)
         elif Config.job_config.is_development:
@@ -69,7 +71,7 @@ class _SchedulerFactory:
         ):
             if force_restart:
                 cls._dispatcher.stop()
-                cls._dispatcher.join()  # wait for thread to be terminated TODO: investigate the effect,
+                cls._dispatcher.join()  # wait for thread to be terminated TODO: investigate the effect
             else:
                 return
         cls._dispatcher = _StandaloneJobDispatcher(cls._scheduler)
@@ -88,5 +90,5 @@ class _SchedulerFactory:
         if not cls._scheduler:
             cls._build_scheduler()
         elif not cls._dispatcher:
-            cls.__build_dispatcher()
+            cls._build_dispatcher()
         return cls._dispatcher  # type: ignore

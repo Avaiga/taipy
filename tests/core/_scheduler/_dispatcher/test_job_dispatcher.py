@@ -12,6 +12,7 @@
 import glob
 import multiprocessing
 import os
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from functools import partial
 from time import sleep
@@ -20,7 +21,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
+from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
@@ -47,6 +50,35 @@ def execute(lock):
 
 def _error():
     raise RuntimeError("Something bad has happened")
+
+
+def test_build_development_job_dispatcher():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _SchedulerFactory._update_job_config()
+    dispatcher = _SchedulerFactory._dispatcher
+
+    assert isinstance(dispatcher, _DevelopmentJobDispatcher)
+    assert isinstance(dispatcher._executor, _Synchronous)
+    assert dispatcher._nb_available_workers == 1
+
+    assert dispatcher.start() == NotImplemented
+    assert dispatcher.is_running()
+    assert dispatcher.stop() == NotImplemented
+
+
+def test_build_standalone_job_dispatcher():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _SchedulerFactory._update_job_config()
+    dispatcher = _SchedulerFactory._dispatcher
+
+    assert not isinstance(dispatcher, _DevelopmentJobDispatcher)
+    assert isinstance(dispatcher, _StandaloneJobDispatcher)
+    assert isinstance(dispatcher._executor, ProcessPoolExecutor)
+    assert dispatcher._nb_available_workers == 2
+    assert_true_after_120_second_max(dispatcher.is_running)
+    dispatcher.stop()
+    dispatcher.join()
+    assert_true_after_120_second_max(lambda: not dispatcher.is_running())
 
 
 def test_can_execute_2_workers():
