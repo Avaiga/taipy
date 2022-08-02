@@ -101,7 +101,6 @@ class Gui:
             It defaults to the `on_navigate()` global function defined in the Python
             application. If there is no such function, page requests will not trigger
             anything.
-            application.
         on_exception (Callable): The function that is called an exception occurs on user code.<br/>
             It defaults to the `on_exception()` global function defined in the Python
             application. If there is no such function, exceptions will not trigger
@@ -1222,7 +1221,8 @@ class Gui:
                     warnings.warn(f"on_navigate returned a invalid page name '{nav_page}'")
                     nav_page = page_name
             except Exception as e:
-                warnings.warn(f"Exception on on_navigate execution\n{e}")
+                if not self.__call_on_exception("on_navigate", e):
+                    warnings.warn(f"Exception raised in on_navigate\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
 
         # try partials
