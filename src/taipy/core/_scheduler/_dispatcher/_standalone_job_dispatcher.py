@@ -16,15 +16,16 @@ from taipy.config._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
 
 from ...job.job import Job
+from .._abstract_scheduler import _AbstractScheduler
 from ._job_dispatcher import _JobDispatcher
 
 
 class _StandaloneJobDispatcher(_JobDispatcher):
     """Manages job dispatching (instances of `Job^` class) in an asynchronous way using a ProcessPoolExecutor."""
 
-    def __init__(self):
-        super().__init__()
-        self._executor = ProcessPoolExecutor(Config.job_config.nb_of_workers or 1)
+    def __init__(self, scheduler: _AbstractScheduler):
+        super().__init__(scheduler)
+        self._executor = ProcessPoolExecutor(Config.job_config.nb_of_workers or 1)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _can_execute(self) -> bool:

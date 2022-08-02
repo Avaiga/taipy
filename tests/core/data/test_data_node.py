@@ -16,7 +16,7 @@ from unittest import mock
 import pytest
 
 import src.taipy.core as tp
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import DataNodeId, JobId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._filter import _FilterDataNode
@@ -253,7 +253,7 @@ class TestDataNode:
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-        _Scheduler._update_job_config()
+        _SchedulerFactory._update_job_config()
 
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle", cacheable=True)

@@ -13,7 +13,7 @@ import itertools
 import uuid
 from multiprocessing import Lock
 from queue import Queue
-from typing import Callable, Dict, Iterable, List, Optional, Set, Union
+from typing import Callable, Iterable, List, Optional, Set, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -24,8 +24,6 @@ from ..job.job import Job
 from ..pipeline.pipeline import Pipeline
 from ..task.task import Task
 from ._abstract_scheduler import _AbstractScheduler
-from ._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
-from ._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 
 
 class _Scheduler(_AbstractScheduler):
@@ -38,26 +36,12 @@ class _Scheduler(_AbstractScheduler):
 
     jobs_to_run: Queue = Queue()
     blocked_jobs: List = []
-    _dispatcher = None  # type: ignore
     lock = Lock()
     __logger = _TaipyLogger._get_logger()
 
     @classmethod
     def initialize(cls):
         pass
-
-    @classmethod
-    def is_running(cls) -> bool:
-        """Returns False since the default scheduler is not runnable."""
-        return False
-
-    @classmethod
-    def start(cls):
-        RuntimeError("The default scheduler cannot be started.")
-
-    @classmethod
-    def stop(cls):
-        RuntimeError("The default scheduler cannot be started nor stopped.")
 
     @classmethod
     def submit(
@@ -104,7 +88,8 @@ class _Scheduler(_AbstractScheduler):
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id
         )
-        cls._check_block_and_run_job(job)
+        cls._schedule_job_to_run_or_block(job)
+
         return job
 
     @staticmethod
@@ -112,7 +97,7 @@ class _Scheduler(_AbstractScheduler):
         return f"SUBMISSION_{str(uuid.uuid4())}"
 
     @classmethod
-    def _check_block_and_run_job(cls, job: Job):
+    def _schedule_job_to_run_or_block(cls, job: Job):
         if cls._is_blocked(job):
             job.blocked()
             with cls.lock:
@@ -121,7 +106,7 @@ class _Scheduler(_AbstractScheduler):
             job.pending()
             with cls.lock:
                 cls.jobs_to_run.put(job)
-            cls.__execute_jobs()
+            cls.__check_and_execute_jobs_if_development_mode()
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -137,52 +122,8 @@ class _Scheduler(_AbstractScheduler):
         data_manager = _DataManagerFactory._build_manager()
         return any(not data_manager._get(dn.id).is_ready_for_reading for dn in data_nodes)
 
-    @classmethod
-    def __execute_jobs(cls):
-        if not cls._dispatcher:
-            cls._update_job_config()
-        while not cls.jobs_to_run.empty() and cls._dispatcher._can_execute():
-            with cls.lock:
-                try:
-                    job = cls.jobs_to_run.get()
-                except:  # In case the last job of the queue has been removed.
-                    cls.__logger.warning(f"{job.id} is no longer in the list of jobs to run.")
-            if job.force or cls._needs_to_run(job.task):
-                if job.force:
-                    cls.__logger.info(f"job {job.id} is forced to be executed.")
-                job.running()
-                _JobManagerFactory._build_manager()._set(job)
-                cls._dispatcher._dispatch(job)
-            else:
-                cls.__unlock_edit_on_outputs(job)
-                job.skipped()
-                _JobManagerFactory._build_manager()._set(job)
-                cls.__logger.info(f"job {job.id} is skipped.")
-
     @staticmethod
-    def _needs_to_run(task: Task) -> bool:
-        """
-        Returns True if the task has no output or if at least one input was modified since the latest run.
-
-        Parameters:
-             task (Task^): The task to run.
-        Returns:
-             True if the task needs to run. False otherwise.
-        """
-        data_manager = _DataManagerFactory._build_manager()
-        if len(task.output) == 0:
-            return True
-        are_outputs_in_cache = all(data_manager._get(dn.id)._is_in_cache for dn in task.output.values())
-        if not are_outputs_in_cache:
-            return True
-        if len(task.input) == 0:
-            return False
-        input_last_edit = max(data_manager._get(dn.id).last_edit_date for dn in task.input.values())
-        output_last_edit = min(data_manager._get(dn.id).last_edit_date for dn in task.output.values())
-        return input_last_edit > output_last_edit
-
-    @staticmethod
-    def __unlock_edit_on_outputs(jobs: Union[Job, List[Job], Set[Job]]):
+    def _unlock_edit_on_outputs(jobs: Union[Job, List[Job], Set[Job]]):
         jobs = [jobs] if isinstance(jobs, Job) else jobs
         for job in jobs:
             for dn in job.task.output.values():
@@ -192,9 +133,9 @@ class _Scheduler(_AbstractScheduler):
     def _on_status_change(cls, job: Job):
         if job.is_completed():
             cls.__unblock_jobs()
-            cls.__execute_jobs()
+            cls.__check_and_execute_jobs_if_development_mode()
         elif job.is_cancelled():
-            cls.__execute_jobs()
+            cls.__check_and_execute_jobs_if_development_mode()
 
     @classmethod
     def __unblock_jobs(cls):
@@ -213,13 +154,6 @@ class _Scheduler(_AbstractScheduler):
             cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
 
     @classmethod
-    def _update_job_config(cls):
-        if Config.job_config.is_standalone:  # type: ignore
-            cls._dispatcher = _StandaloneJobDispatcher()
-        else:
-            cls._dispatcher = _DevelopmentJobDispatcher()
-
-    @classmethod
     def cancel_job(cls, job: Job):
         to_cancel_jobs = set([job])
         to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
@@ -227,7 +161,7 @@ class _Scheduler(_AbstractScheduler):
             cls.__remove_blocked_jobs(to_cancel_jobs)
             cls.__remove_jobs_to_run(to_cancel_jobs)
             cls.__cancel_jobs_and_processes(job.id, to_cancel_jobs)
-            cls.__unlock_edit_on_outputs(to_cancel_jobs)
+            cls._unlock_edit_on_outputs(to_cancel_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -238,12 +172,10 @@ class _Scheduler(_AbstractScheduler):
             if job.submit_id == submit_id and len(output_dn_config_ids.intersection(job_input_dn_config_ids)) > 0:
                 next_output_dn_config_ids.update(job.task.output.keys())
                 subsequent_jobs.update([job])
-
         if len(next_output_dn_config_ids) > 0:
             subsequent_jobs.update(
                 cls.__find_subsequent_jobs(submit_id, output_dn_config_ids=next_output_dn_config_ids)
             )
-
         return subsequent_jobs
 
     @classmethod
@@ -262,10 +194,19 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def __cancel_jobs_and_processes(cls, job_id_to_cancel, jobs):
+        from ._dispatcher import _JobDispatcher
+
         for job in jobs:
-            if process := cls._dispatcher._pop_dispatched_process(job.id):
+            if process := _JobDispatcher._pop_dispatched_process(job.id):
                 process.cancel()  # TODO: this doesn't terminate the running process
             if job_id_to_cancel == job.id:
                 job.cancelled()
             else:
                 job.abandoned()
+
+    @staticmethod
+    def __check_and_execute_jobs_if_development_mode():
+        if Config.job_config.is_development:
+            from ._scheduler_factory import _SchedulerFactory
+
+            _SchedulerFactory._get_dispatcher()._execute_jobs_synchronously()

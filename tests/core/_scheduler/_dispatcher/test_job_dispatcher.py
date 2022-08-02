@@ -12,6 +12,7 @@
 import glob
 import multiprocessing
 import os
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime
 from functools import partial
 from time import sleep
@@ -20,8 +21,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-from src.taipy.core._scheduler._scheduler import _Scheduler
+from src.taipy.core._scheduler._executor._synchronous import _Synchronous
+from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job
@@ -49,8 +52,39 @@ def _error():
     raise RuntimeError("Something bad has happened")
 
 
+def test_build_development_job_dispatcher():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _SchedulerFactory._update_job_config()
+    dispatcher = _SchedulerFactory._dispatcher
+
+    assert isinstance(dispatcher, _DevelopmentJobDispatcher)
+    assert isinstance(dispatcher._executor, _Synchronous)
+    assert dispatcher._nb_available_workers == 1
+
+    assert dispatcher.start() == NotImplemented
+    assert dispatcher.is_running()
+    assert dispatcher.stop() == NotImplemented
+
+
+def test_build_standalone_job_dispatcher():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _SchedulerFactory._update_job_config()
+    dispatcher = _SchedulerFactory._dispatcher
+
+    assert not isinstance(dispatcher, _DevelopmentJobDispatcher)
+    assert isinstance(dispatcher, _StandaloneJobDispatcher)
+    assert isinstance(dispatcher._executor, ProcessPoolExecutor)
+    assert dispatcher._nb_available_workers == 2
+    assert_true_after_120_second_max(dispatcher.is_running)
+    dispatcher.stop()
+    dispatcher.join()
+    assert_true_after_120_second_max(lambda: not dispatcher.is_running())
+
+
 def test_can_execute_2_workers():
-    Config.configure_job_executions(nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _SchedulerFactory._update_job_config()
+
     m = multiprocessing.Manager()
     lock = m.Lock()
 
@@ -66,7 +100,7 @@ def test_can_execute_2_workers():
     job_id = JobId("id1")
     job = Job(job_id, task, "submit_id")
 
-    dispatcher = _StandaloneJobDispatcher()
+    dispatcher = _StandaloneJobDispatcher(_SchedulerFactory._scheduler)
 
     with lock:
         assert dispatcher._can_execute()
@@ -80,14 +114,14 @@ def test_can_execute_2_workers():
 
 def test_can_execute_synchronous():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     task_id = TaskId("task_id1")
     task = Task(config_id="name", input=[], function=print, output=[], id=task_id)
     job_id = JobId("id1")
     job = Job(job_id, task, "submit_id")
 
-    dispatcher = _Scheduler._dispatcher
+    dispatcher = _SchedulerFactory._dispatcher
 
     assert dispatcher._can_execute()
     dispatcher._dispatch(job)
@@ -96,14 +130,14 @@ def test_can_execute_synchronous():
 
 def test_exception_in_user_function():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
     task = Task(config_id="name", input=[], function=_error, output=[], id=task_id)
     job = Job(job_id, task, "submit_id")
 
-    dispatcher = _Scheduler._dispatcher
+    dispatcher = _SchedulerFactory._dispatcher
     dispatcher._dispatch(job)
     assert job.is_failed()
     assert 'RuntimeError("Something bad has happened")' in str(job.stacktrace[0])
@@ -111,7 +145,7 @@ def test_exception_in_user_function():
 
 def test_exception_in_writing_data():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _Scheduler._update_job_config()
+    _SchedulerFactory._update_job_config()
 
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
@@ -123,7 +157,7 @@ def test_exception_in_writing_data():
     task = Task(config_id="name", input=[], function=print, output=[output], id=task_id)
     job = Job(job_id, task, "submit_id")
 
-    dispatcher = _Scheduler._dispatcher
+    dispatcher = _SchedulerFactory._dispatcher
 
     with mock.patch("src.taipy.core.data._data_manager._DataManager._get") as get:
         get.return_value = output

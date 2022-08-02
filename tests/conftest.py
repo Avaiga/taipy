@@ -41,6 +41,7 @@ from taipy.config.data_node.scope import Scope
 from taipy.config.scenario.frequency import Frequency
 
 current_time = datetime.now()
+_SchedulerFactory._build_scheduler()
 
 
 @pytest.fixture(scope="function")
@@ -192,7 +193,10 @@ def setup():
 
 
 def delete_everything():
-    _Scheduler._update_job_config()
+    if _SchedulerFactory._scheduler is None:
+        _SchedulerFactory._build_scheduler()
+    else:
+        _SchedulerFactory._update_job_config()
     _Scheduler.jobs_to_run = Queue()
     _Scheduler.blocked_jobs = []
     _TaskManager._scheduler = _SchedulerFactory._build_scheduler
