@@ -175,10 +175,10 @@ def test_cancel_single_job():
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
         assert_true_after_1_minute_max(job.is_running)
-        assert len(_JobDispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
         _JobManager._cancel(job.id)
         assert_true_after_1_minute_max(job.is_cancelled)
-        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
+    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
     # TODO: this test is broken due to the new dispatcher thread writing and main test thread at the same time
     # reopen the test when we can terminate running processes or having better behavior
     # assert job.is_cancelled()
