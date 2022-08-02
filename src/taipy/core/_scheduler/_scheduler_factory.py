@@ -39,11 +39,9 @@ class _SchedulerFactory:
         else:
             cls._scheduler = _Scheduler
 
-        # Build dispatcher
         if not cls._dispatcher:
             cls._build_dispatcher()
 
-        # Initialize the scheduler
         cls._scheduler.initialize()  # type: ignore
 
         return cls._scheduler  # type: ignore
@@ -71,7 +69,6 @@ class _SchedulerFactory:
         ):
             if force_restart:
                 cls._dispatcher.stop()
-                cls._dispatcher.join()  # wait for thread to be terminated TODO: investigate the effect
             else:
                 return
         cls._dispatcher = _StandaloneJobDispatcher(cls._scheduler)
