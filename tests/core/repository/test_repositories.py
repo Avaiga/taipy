@@ -23,8 +23,7 @@ class TestRepositoriesStorage:
         "mock_repo,params",
         [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
     )
-    def test_save_and_fetch_model(self, mock_repo, params, tmp_sqlite):
-        Config.global_config.repository_properties = {"db_location": tmp_sqlite}
+    def test_save_and_fetch_model(self, mock_repo, params):
 
         r = mock_repo(**params)
         m = MockObj("uuid", "foo")
@@ -37,8 +36,7 @@ class TestRepositoriesStorage:
         "mock_repo,params",
         [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
     )
-    def test_get_all(self, mock_repo, params, tmp_sqlite):
-        Config.global_config.repository_properties = {"db_location": tmp_sqlite}
+    def test_get_all(self, mock_repo, params):
 
         objs = []
         r = mock_repo(**params)
@@ -58,9 +56,7 @@ class TestRepositoriesStorage:
         "mock_repo,params",
         [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
     )
-    def test_delete_all(self, mock_repo, params, tmp_sqlite):
-        Config.global_config.repository_properties = {"db_location": tmp_sqlite}
-
+    def test_delete_all(self, mock_repo, params):
         r = mock_repo(**params)
 
         for i in range(5):
@@ -78,8 +74,7 @@ class TestRepositoriesStorage:
         "mock_repo,params",
         [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
     )
-    def test_delete_many(self, mock_repo, params, tmp_sqlite):
-        Config.global_config.repository_properties = {"db_location": tmp_sqlite}
+    def test_delete_many(self, mock_repo, params):
 
         r = mock_repo(**params)
         for i in range(5):
@@ -96,8 +91,7 @@ class TestRepositoriesStorage:
         "mock_repo,params",
         [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
     )
-    def test_search(self, mock_repo, params, tmp_sqlite):
-        Config.global_config.repository_properties = {"db_location": tmp_sqlite}
+    def test_search(self, mock_repo, params):
         r = mock_repo(**params)
 
         m = MockObj("uuid", "foo")

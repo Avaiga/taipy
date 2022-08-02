@@ -21,5 +21,8 @@ class _JobRepositoryFactory(_RepositoryFactory):
     @classmethod
     def _build_repository(cls) -> Type[_JobRepository]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_repository", "_JobRepository")()  # type: ignore
+            factory = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".job._job_repository_factory", "_JobRepositoryFactory"
+            )
+            return factory._build_repository()  # type: ignore
         return _JobFSRepository()

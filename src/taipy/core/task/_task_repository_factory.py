@@ -21,5 +21,8 @@ class _TaskRepositoryFactory(_RepositoryFactory):
     @classmethod
     def _build_repository(cls) -> Type[_TaskRepository]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_repository", "_TaskRepository")()  # type: ignore
+            factory = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_repository_factory", "_TaskRepositoryFactory"
+            )
+            return factory._build_repository()  # type: ignore
         return _TaskFSRepository()

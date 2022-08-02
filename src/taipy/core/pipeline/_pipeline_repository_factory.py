@@ -21,5 +21,9 @@ class _PipelineRepositoryFactory(_RepositoryFactory):
     @classmethod
     def _build_repository(cls) -> Type[_PipelineRepository]:  # type: ignore
         if cls._using_enterprise():
-            return _load_fct(cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_repository", "_PipelineRepository")()  # type: ignore
+            factory = _load_fct(
+                cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_repository_factory",
+                "_PipelineRepositoryFactory",
+            )
+            return factory._build_repository()  # type: ignore
         return _PipelineFSRepository()

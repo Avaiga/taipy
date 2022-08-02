@@ -187,12 +187,6 @@ def pipeline_model():
     return _PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, [], [])
 
 
-@pytest.fixture(scope="function")
-def tmp_sqlite(tmpdir_factory):
-    fn = tmpdir_factory.mktemp("db")
-    return os.path.join(fn.strpath, "test.db")
-
-
 @pytest.fixture(scope="function", autouse=True)
 def setup():
     delete_everything()
