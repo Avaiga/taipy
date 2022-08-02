@@ -101,6 +101,10 @@ class Gui:
             It defaults to the `on_navigate()` global function defined in the Python
             application. If there is no such function, page requests will not trigger
             anything.
+        on_exception (Callable): The function that is called an exception occurs on user code.<br/>
+            It defaults to the `on_exception()` global function defined in the Python
+            application. If there is no such function, exceptions will not trigger
+            anything.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
@@ -210,6 +214,7 @@ class Gui:
         self.on_change: t.Optional[t.Callable] = None
         self.on_init: t.Optional[t.Callable] = None
         self.on_navigate: t.Optional[t.Callable] = None
+        self.on_exception: t.Optional[t.Callable] = None
 
         # sid from client_id
         self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
@@ -431,7 +436,6 @@ class Gui:
             self.__send_var_list_update(list(derived_modified), var_name)
 
     def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
-        # TODO: what if _update_function changes 'var_name'... infinite loop?
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
         if module_name == current_context:
@@ -466,7 +470,8 @@ class Gui:
                     args[3] = current_context
                 on_change_fn(*args)
             except Exception as e:
-                warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception: {e}")
+                if not self.__call_on_exception(on_change or "on_change", e):
+                    warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception: {e}")
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
         ret_value = self.__get_content_accessor().get_info(var_name, value, image)
@@ -737,7 +742,7 @@ class Gui:
             ):
                 return
             else:
-                warnings.warn(f"on_action: '{action}' is not a function")
+                warnings.warn(f"on_action: '{action}' is not a valid function")
         if hasattr(self, "on_action"):
             self.__call_function_with_args(action_function=self.on_action, id=id, payload=payload, action=action)
 
@@ -762,7 +767,8 @@ class Gui:
                 action_function(*args)
                 return True
             except Exception as e:
-                warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
+                if not self.__call_on_exception(action_function.__name__, e):
+                    warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
@@ -1192,8 +1198,18 @@ class Gui:
                 try:
                     self._call_function_with_state(self.on_init, [])
                 except Exception as e:
-                    warnings.warn(f"Exception on on_init execution\n{e}")
+                    if not self.__call_on_exception("on_init", e):
+                        warnings.warn(f"Exception raised in on_init\n{e}")
         return self._render_route()
+
+    def __call_on_exception(self, function_name: str, exception: Exception) -> bool:
+        if hasattr(self, "on_exception") and callable(self.on_exception):
+            try:
+                self.on_exception(self.__get_state(), str(function_name), exception)
+            except Exception as e:
+                warnings.warn(f"Exception raised in on_exception\n{e}")
+            return True
+        return False
 
     def __render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
@@ -1205,7 +1221,8 @@ class Gui:
                     warnings.warn(f"on_navigate returned a invalid page name '{nav_page}'")
                     nav_page = page_name
             except Exception as e:
-                warnings.warn(f"Exception on on_navigate execution\n{e}")
+                if not self.__call_on_exception("on_navigate", e):
+                    warnings.warn(f"Exception raised in on_navigate\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
 
         # try partials
@@ -1423,6 +1440,7 @@ class Gui:
             self.__bind_local_func("on_change")
             self.__bind_local_func("on_action")
             self.__bind_local_func("on_navigate")
+            self.__bind_local_func("on_exception")
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
