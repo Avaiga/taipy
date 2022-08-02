@@ -30,7 +30,7 @@ with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "flask>=2.1,<3.0",
+    "flask>=2.1,<2.2",
     "flask-cors>=3.0.10,<4.0",
     "flask-socketio>=5.1.1,<6.0",
     "markdown>=3.3.4,<4.0",
