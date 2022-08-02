@@ -160,8 +160,8 @@ class _Scheduler(_AbstractScheduler):
         with cls.lock:
             cls.__remove_blocked_jobs(to_cancel_jobs)
             cls.__remove_jobs_to_run(to_cancel_jobs)
-            cls.__cancel_jobs_and_processes(job.id, to_cancel_jobs)
-            cls._unlock_edit_on_outputs(to_cancel_jobs)
+            cls.__cancel_jobs(job.id, to_cancel_jobs)
+            cls.__unlock_edit_on_outputs(to_cancel_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -193,17 +193,18 @@ class _Scheduler(_AbstractScheduler):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def __cancel_jobs_and_processes(cls, job_id_to_cancel, jobs):
+    def __cancel_jobs(cls, job_id_to_cancel, jobs):
         from ._dispatcher import _JobDispatcher
-
+        
         for job in jobs:
-            if process := _JobDispatcher._pop_dispatched_process(job.id):
-                process.cancel()  # TODO: this doesn't terminate the running process
-            if job_id_to_cancel == job.id:
-                job.cancelled()
+            if job.id in _JobDispatcher._dispatched_processes.keys():
+                cls.__logger.warning(f"{job.id} is running and cannot be cancelled.")
             else:
-                job.abandoned()
-
+                if job_id_to_cancel == job.id:
+                    job.cancelled()
+                else:
+                    job.abandoned()
+                    
     @staticmethod
     def __check_and_execute_jobs_if_development_mode():
         if Config.job_config.is_development:

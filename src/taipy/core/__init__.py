@@ -18,6 +18,7 @@ from .job.status import Status
 from .pipeline.pipeline import Pipeline
 from .scenario.scenario import Scenario
 from .taipy import (
+    cancel_job,
     clean_all_entities,
     compare_scenarios,
     create_pipeline,
