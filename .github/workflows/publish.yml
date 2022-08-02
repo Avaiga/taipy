@@ -29,7 +29,7 @@ jobs:
 
       - name: Ensure package version is properly set
         run: |
-        echo """
+          echo """
           import json, sys, os
           with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
             version_o = json.load(version_file)
