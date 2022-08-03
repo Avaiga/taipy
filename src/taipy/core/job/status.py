@@ -30,7 +30,7 @@ class Status(_ReprEnum):
 
     - `RUNNING`: A `RUNNING` job is currently executed by a dedicated executor.
 
-    - `CANCELLED`: A `CANCELLED` job has been submitted but its execution has been cancelled.
+    - `CANCELED`: A `CANCELED` job has been submitted but its execution has been canceled.
 
     - `FAILED`: A `FAILED` job raised an exception during its execution.
 
@@ -43,7 +43,7 @@ class Status(_ReprEnum):
     BLOCKED = 2
     PENDING = 3
     RUNNING = 4
-    CANCELLED = 5
+    CANCELED = 5
     FAILED = 6
     COMPLETED = 7
     SKIPPED = 8

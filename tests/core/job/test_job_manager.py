@@ -179,8 +179,8 @@ def test_cancel_single_job():
         assert_true_after_1_minute_max(job.is_pending)
         assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
         _JobManager._cancel(job.id)
-        assert_true_after_1_minute_max(job.is_cancelled)
-    assert_true_after_1_minute_max(job.is_cancelled)
+        assert_true_after_1_minute_max(job.is_canceled)
+    assert_true_after_1_minute_max(job.is_canceled)
 
 
 def test_cancel_single_running_job():
@@ -247,7 +247,7 @@ def test_cancel_subsequent_jobs():
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 4
 
         _JobManager._cancel(job_4)
-        assert_true_after_1_minute_max(job_4.is_cancelled)
+        assert_true_after_1_minute_max(job_4.is_canceled)
         assert_true_after_1_minute_max(job_5.is_abandoned)
         assert_true_after_1_minute_max(job_6.is_abandoned)
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
@@ -261,7 +261,7 @@ def test_cancel_subsequent_jobs():
     assert_true_after_1_minute_max(job_1.is_completed)
     assert_true_after_1_minute_max(job_2.is_abandoned)
     assert_true_after_1_minute_max(job_3.is_abandoned)
-    assert_true_after_1_minute_max(job_4.is_cancelled)
+    assert_true_after_1_minute_max(job_4.is_canceled)
     assert_true_after_1_minute_max(job_5.is_abandoned)
     assert_true_after_1_minute_max(job_6.is_abandoned)
     assert_true_after_1_minute_max(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
