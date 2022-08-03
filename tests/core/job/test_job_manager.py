@@ -54,7 +54,7 @@ def multiply(nb1: float, nb2: float):
 
 def lock_multiply(lock, nb1: float, nb2: float):
     with lock:
-        return multiply(nb1, nb2)
+        return multiply(1 or nb1, 2 or nb2)
 
 
 def test_get_job():
@@ -131,7 +131,7 @@ lock = m.Lock()
 
 def inner_lock_multiply(nb1: float, nb2: float):
     with lock:
-        return multiply(nb1, nb2)
+        return multiply(1 or nb1, 2 or nb2)
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
@@ -165,35 +165,56 @@ def test_force_deleting_unfinished_job():
 
 
 def test_cancel_single_job():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    _SchedulerFactory._update_job_config()
+
+    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    _SchedulerFactory._dispatcher._nb_available_workers = 0
+    assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 0)
+
+    with lock:
+        job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+
+        assert_true_after_1_minute_max(job.is_pending)
+        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
+        _JobManager._cancel(job.id)
+        assert_true_after_1_minute_max(job.is_cancelled)
+    assert_true_after_1_minute_max(job.is_cancelled)
+
+
+def test_cancel_single_running_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._update_job_config()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
-    assert _SchedulerFactory._dispatcher.is_running()
-    assert _SchedulerFactory._dispatcher._nb_available_workers == 2
+    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
 
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+
         assert_true_after_1_minute_max(job.is_running)
         assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 1)
+        assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 1)
         _JobManager._cancel(job.id)
-        assert_true_after_1_minute_max(job.is_cancelled)
+        assert_true_after_1_minute_max(job.is_running)
+    assert_true_after_1_minute_max(job.is_completed)
     assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
-    # TODO: this test is broken due to the new dispatcher thread writing and main test thread at the same time
-    # reopen the test when we can terminate running processes or having better behavior
-    # assert job.is_cancelled()
-    # assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
+    assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 2)
 
 
 def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
     _SchedulerFactory._update_job_config()
 
+    lock_0 = m.Lock()
+
     dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
     dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
     dn_3 = InMemoryDataNode("dn_config_3", Scope.PIPELINE, properties={"default_data": 3})
     dn_4 = InMemoryDataNode("dn_config_4", Scope.PIPELINE, properties={"default_data": 4})
-    task_1 = Task("task_config_1", inner_lock_multiply, [dn_1, dn_2], [dn_3], id="task_1")
+    task_1 = Task("task_config_1", partial(lock_multiply, lock_0), [dn_1, dn_2], [dn_3], id="task_1")
     task_2 = Task("task_config_2", multiply, [dn_1, dn_3], [dn_4], id="task_2")
     task_3 = Task("task_config_3", print, [dn_4], id="task_3")
 
@@ -202,16 +223,15 @@ def test_cancel_subsequent_jobs():
     _DataManager._set(dn_3)
     _DataManager._set(dn_4)
 
-    with lock:
+    with lock_0:
         submit_id_1 = "submit_1"
         job_1 = _SchedulerFactory._scheduler.submit_task(task_1, submit_id=submit_id_1)
         job_2 = _SchedulerFactory._scheduler.submit_task(task_2, submit_id=submit_id_1)
         job_3 = _SchedulerFactory._scheduler.submit_task(task_3, submit_id=submit_id_1)
 
         assert_true_after_1_minute_max(job_1.is_running)
-
-        assert job_2.is_blocked()
-        assert job_3.is_blocked()
+        assert_true_after_1_minute_max(job_2.is_blocked)
+        assert_true_after_1_minute_max(job_3.is_blocked)
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 2
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
 
@@ -220,34 +240,31 @@ def test_cancel_subsequent_jobs():
         job_5 = _SchedulerFactory._scheduler.submit_task(task_2, submit_id=submit_id_2)
         job_6 = _SchedulerFactory._scheduler.submit_task(task_3, submit_id=submit_id_2)
 
-        assert job_4.is_pending()
-        assert job_5.is_blocked()
-        assert job_6.is_blocked()
+        assert_true_after_1_minute_max(job_4.is_pending)
+        assert_true_after_1_minute_max(job_5.is_blocked)
+        assert_true_after_1_minute_max(job_6.is_blocked)
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 1
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 4
 
         _JobManager._cancel(job_4)
-        assert job_4.is_cancelled()
-        assert job_5.is_abandoned()
-        assert job_6.is_abandoned()
+        assert_true_after_1_minute_max(job_4.is_cancelled)
+        assert_true_after_1_minute_max(job_5.is_abandoned)
+        assert_true_after_1_minute_max(job_6.is_abandoned)
         assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
         assert len(_SchedulerFactory._scheduler.blocked_jobs) == 2
 
         _JobManager._cancel(job_1)
-        assert job_1.is_cancelled()
-        assert job_2.is_abandoned()
-        assert job_3.is_abandoned()
+        assert_true_after_1_minute_max(job_1.is_running)
+        assert_true_after_1_minute_max(job_2.is_abandoned)
+        assert_true_after_1_minute_max(job_3.is_abandoned)
 
-    # TODO: this test is broken due to the new dispatcher thread writing and main test thread at the same time
-    # reopen the test when we can terminate running processes or having better behavior
-    # assert job_1.is_cancelled()
-    assert job_2.is_abandoned()
-    assert job_3.is_abandoned()
-    # TODO: reopen later, reason same as above
-    # assert job_4.is_cancelled()
-    assert job_5.is_abandoned()
-    assert job_6.is_abandoned()
-    assert _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0
+    assert_true_after_1_minute_max(job_1.is_completed)
+    assert_true_after_1_minute_max(job_2.is_abandoned)
+    assert_true_after_1_minute_max(job_3.is_abandoned)
+    assert_true_after_1_minute_max(job_4.is_cancelled)
+    assert_true_after_1_minute_max(job_5.is_abandoned)
+    assert_true_after_1_minute_max(job_6.is_abandoned)
+    assert_true_after_1_minute_max(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
 
 
 def _create_task(function, nb_outputs=1, name=None):
