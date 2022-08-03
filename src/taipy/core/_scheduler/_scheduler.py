@@ -134,7 +134,7 @@ class _Scheduler(_AbstractScheduler):
         if job.is_completed():
             cls.__unblock_jobs()
             cls.__check_and_execute_jobs_if_development_mode()
-        elif job.is_cancelled():
+        elif job.is_canceled():
             cls.__check_and_execute_jobs_if_development_mode()
 
     @classmethod
@@ -198,10 +198,10 @@ class _Scheduler(_AbstractScheduler):
 
         for job in jobs:
             if job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():
-                cls.__logger.warning(f"{job.id} is running and cannot be cancelled.")
+                cls.__logger.warning(f"{job.id} is running and cannot be canceled.")
             else:
                 if job_id_to_cancel == job.id:
-                    job.cancelled()
+                    job.canceled()
                 else:
                     job.abandoned()
 

@@ -96,13 +96,13 @@ def test_status_job(job):
     assert job.is_skipped() is False
     assert job.is_pending() is False
     assert job.is_blocked() is False
-    assert job.is_cancelled() is False
+    assert job.is_canceled() is False
     assert job.is_failed() is False
     assert job.is_completed() is False
     assert job.is_running() is False
 
-    job.cancelled()
-    assert job.is_cancelled()
+    job.canceled()
+    assert job.is_canceled()
     job.failed()
     assert job.is_failed()
     job.running()
