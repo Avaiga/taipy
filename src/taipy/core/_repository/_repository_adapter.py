@@ -11,8 +11,7 @@
 from importlib import util
 from typing import Any, Optional, Union
 
-from src.taipy.core.common._utils import _load_fct
-
+from ..common._utils import _load_fct
 from ._filesystem_repository import _FileSystemRepository
 
 
@@ -28,7 +27,7 @@ class _RepositoryAdapter:
             adapter = _load_fct(
                 f"{cls._TAIPY_ENTERPRISE_MODULE}.core._repository._repository_adapter", "_RepositoryAdapter"
             )
-            return adapter.select_base_repository()
+            return adapter.select_base_repository()  # type: ignore
         return cls._REPOSITORY_MAP.get("default")
 
     @classmethod
