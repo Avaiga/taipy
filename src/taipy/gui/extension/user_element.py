@@ -140,7 +140,7 @@ class ElementLibrary(ABC):
         TODO
         list of visual elements
         """
-        pass
+        return NotImplemented
 
     @abstractmethod
     def get_name(self) -> str:
@@ -148,7 +148,7 @@ class ElementLibrary(ABC):
         TODO
         library name
         """
-        pass
+        return NotImplemented
 
     @abstractmethod
     def get_scripts(self) -> t.List[str]:
@@ -156,7 +156,7 @@ class ElementLibrary(ABC):
         TODO
         list of resources names for the scripts
         """
-        pass
+        return NotImplemented
 
     @abstractmethod
     def get_styles(self) -> t.List[str]:
@@ -165,7 +165,7 @@ class ElementLibrary(ABC):
         list of resources names for the css stylesheets
 
         """
-        pass
+        return NotImplemented
 
     @abstractmethod
     def get_resource(self, name: str) -> Path:
@@ -173,4 +173,13 @@ class ElementLibrary(ABC):
         TODO
         returns a path for a resource name
         """
-        pass
+        return NotImplemented
+
+    @abstractmethod
+    def get_register_js_function(self) -> str:
+        """
+        TODO
+        returns the name of the function that will register new js components
+        signature (libName: string) => Record<string, ComponentType>
+        """
+        return NotImplemented

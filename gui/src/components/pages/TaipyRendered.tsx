@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, ComponentType } from "react";
 import axios from "axios";
 import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
 import { TaipyContext } from "../../context/taipyContext";
-import { taipyComponents } from "../Taipy";
+import { getRegisteredComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 import { createModuleContextAction, createPartialAction } from "../../context/taipyReducers";
 
@@ -81,7 +81,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
             <JsxParser
                 disableKeyGeneration={true}
                 bindings={state.data}
-                components={taipyComponents}
+                components={getRegisteredComponents() as Record<string, ComponentType>}
                 jsx={JSX}
                 renderUnrecognized={unregisteredRender}
                 allowUnknownElements={false}

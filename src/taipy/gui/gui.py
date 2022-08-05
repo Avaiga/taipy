@@ -262,7 +262,8 @@ class Gui:
         TODO
         """
         _Factory.set_library(library)
-        Gui.__extensions[library.get_name()] = library
+        if len(library.get_scripts()) != 0:
+            Gui.__extensions[library.get_name()] = library
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -1307,6 +1308,17 @@ class Gui:
         if isinstance(state, State):
             self.__state = state
 
+    def __get_client_config(self) -> t.Dict[str, t.Any]:
+        config = {
+            "timeZone": self._config.get_time_zone(),
+            "darkMode": self._get_config("dark_mode", True),
+        }
+        if themes := self._get_themes():
+            config["themes"] = themes
+        if len(self.__extensions):
+            config["extensions"] = {f".{Gui.__EXTENSION_ROOT}{k}/{v.get_scripts()[0]}": v.get_register_js_function() for k, v in self.__extensions.items()}
+        return config
+
     def run(
         self,
         run_server: bool = True,
@@ -1493,7 +1505,9 @@ class Gui:
                 root_margin=self._get_config("margin", None),
                 scripts=scripts,
                 styles=styles,
-                version=f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
+                version=f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}',
+                client_config=self.__get_client_config(),
+                watermark=self._get_config("watermark", None)
             )
         )
 

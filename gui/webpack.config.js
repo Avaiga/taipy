@@ -16,69 +16,148 @@ const path = require("path");
 const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const ESLintPlugin = require("eslint-webpack-plugin");
 
 const resolveApp = relativePath => path.resolve(__dirname, relativePath);
 
 const getEnvVariables = () => ({ VERSION: require(resolveApp('package.json')).version });
 
+const reactBundle = "taipy-vendor"
+const taipyBundle = "taipy-gui"
+
+const reactBundleName = "TaipyVendor"
+const taipyBundleName = "TaipyGui"
+
+const basePath = "../src/taipy/gui/webapp";
+const webAppPath = resolveApp(basePath);
+const reactManifestPath = resolveApp(basePath + "/" + reactBundle + "-manifest.json");
+const reactDllPath = resolveApp(basePath + "/" + reactBundle + ".dll.js")
+const taipyDllPath = resolveApp(basePath + "/" + taipyBundle + ".js")
+
 module.exports = (env, options) => {
-    return {
-        mode: options.mode, //'development', //'production',
-        entry: ["./src/index.tsx"],
-        output: {
-            filename: "taipy.[contenthash].js",
-            path: resolveApp("../src/taipy/gui/webapp"),
-            library: "Taipy",
-            publicPath: "/",
-            libraryTarget: "umd", //"var" "commonjs" "umd"
+    return [{
+            mode: options.mode, //'development', //'production',
+            name: reactBundleName,
+            entry: ["react", "react-dom", 
+            "@emotion/react","@emotion/styled",
+            "@mui/icons-material","@mui/lab","@mui/material","@mui/x-date-pickers"],
+            output: {
+                filename: reactBundle + ".dll.js",
+                path: webAppPath,
+                library: reactBundleName
+            },
+            plugins: [
+                new webpack.DllPlugin({
+                    name: reactBundleName, 
+                    path: reactManifestPath
+                })
+            ]
         },
-
-        // Enable sourcemaps for debugging webpack's output.
-        devtool: options.mode === "development" && "inline-source-map",
-
-        resolve: {
-            // Add '.ts' and '.tsx' as resolvable extensions.
-            extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
-        },
-
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: "ts-loader",
-                    exclude: /node_modules/,
-                },
-                {
-                    test: /\.css$/,
-                    use: [MiniCssExtractPlugin.loader, "css-loader", "postcss-loader"],
-                },
-                {
-                    // added to resolve apache-arrow library (don't really understand the problem tbh)
-                    // Reference: https://github.com/graphql/graphql-js/issues/2721
-                    test: /\.m?js/,
-                    resolve: {
-                        fullySpecified: false,
+        {
+            mode: options.mode, //'development', //'production',
+            name: taipyBundleName,
+            entry: ["./src/extensions/exports.ts"],
+            output: {
+                filename: taipyBundle + ".js",
+                path: webAppPath,
+                library: {
+                    name: taipyBundleName,
+                    type: "umd"
+                }
+            },
+            dependencies: [reactBundleName],
+            devtool: options.mode === "development" && "inline-source-map",
+            resolve: {
+                // Add '.ts' and '.tsx' as resolvable extensions.
+                extensions: [".ts", ".tsx", ".js"],
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: "ts-loader",
+                        exclude: /node_modules/,
                     },
-                },
-            ],
+                    {
+                        // added to resolve apache-arrow library (don't really understand the problem tbh)
+                        // Reference: https://github.com/graphql/graphql-js/issues/2721
+                        test: /\.m?js/,
+                        resolve: {
+                            fullySpecified: false,
+                        },
+                    },
+                ]
+            },
+            plugins: [
+                new ESLintPlugin({
+                    extensions: [`ts`, `tsx`],
+                    exclude: [`/node_modules/`],
+                    eslintPath: require.resolve("eslint"),
+                }),
+                new webpack.DllReferencePlugin({
+                    name: reactBundleName,
+                    manifest: reactManifestPath
+                })
+            ]
         },
-        plugins: [
-            new CopyWebpackPlugin({
-                patterns: [{ from: "public", filter: (name) => !name.endsWith(".html") }],
-            }),
-            new HtmlWebpackPlugin({
-                template: "public/index.html",
-                hash: false,
-                ...getEnvVariables()
-            }),
-            new MiniCssExtractPlugin(),
-            new ESLintPlugin({
-                extensions: [`ts`, `tsx`],
-                exclude: [`/node_modules/`],
-                eslintPath: require.resolve("eslint"),
-            }),
-        ],
-    };
+        {
+            mode: options.mode, //'development', //'production',
+            context: resolveApp("dom"),
+            entry: ["./src/index.tsx"],
+            output: {
+                filename: "taipy-gui-dom.js",
+                path: webAppPath,
+                publicPath: "/"
+            },
+            dependencies: [taipyBundleName, reactBundleName],
+            externals: {"taipy-gui": taipyBundleName},
+
+            // Enable sourcemaps for debugging webpack's output.
+            devtool: options.mode === "development" && "inline-source-map",
+
+            resolve: {
+                // Add '.ts' and '.tsx' as resolvable extensions.
+                extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: "ts-loader",
+                        exclude: /node_modules/,
+                    },
+                ]
+            },
+    
+            plugins: [
+                new CopyWebpackPlugin({
+                    patterns: [
+                        { from: "../public", filter: (name) => !name.endsWith(".html") },
+                        { from: "../packaging", filter: (name) => !name.includes(".gen.") }
+                    ],
+                }),
+                new HtmlWebpackPlugin({
+                    template: "../public/index.html",
+                    hash: true,
+                    ...getEnvVariables()
+                }),
+                new ESLintPlugin({
+                    extensions: [`ts`, `tsx`],
+                    exclude: [`/node_modules/`],
+                    eslintPath: require.resolve("eslint"),
+                }),
+                new webpack.DllReferencePlugin({
+                    name: reactBundleName,
+                    manifest: reactManifestPath
+                }),
+                new AddAssetHtmlPlugin([{
+                    filepath: reactDllPath,
+                    hash: true
+                },{
+                    filepath: taipyDllPath,
+                    hash: true
+                }]),
+            ],
+    }];
 };

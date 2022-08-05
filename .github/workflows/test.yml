@@ -26,6 +26,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Install dom dependencies
+        working-directory: ./gui/dom
+        run: npm ci
       - name: Install dependencies
         working-directory: ./gui
         run: npm ci --omit=optional
@@ -71,6 +74,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Install dom dependencies
+        working-directory: ./gui/dom
+        run: npm ci
       - name: Install dependencies
         run: npm ci --omit=optional
       - run: npm run build --if-present
