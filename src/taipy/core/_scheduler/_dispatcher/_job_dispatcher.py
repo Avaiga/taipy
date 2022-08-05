@@ -44,15 +44,15 @@ class _JobDispatcher(threading.Thread):
         self.scheduler = scheduler
 
     def start(self):
-        #     """TODO: doc"""
+        """Start the dispatcher"""
         threading.Thread.start(self)
 
     def is_running(self) -> bool:
-        #     """TODO: doc"""
+        """Return True if the dispatcher is running"""
         return self.is_alive()
 
     def stop(self):
-        #     """TODO: doc"""
+        """Stop the dispatcher"""
         self.__STOP_FLAG = True
 
     def run(self):
