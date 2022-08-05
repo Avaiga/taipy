@@ -8,8 +8,6 @@ import { LoV } from "./lovUtils";
 import { INITIAL_STATE, TaipyState } from "../../context/taipyReducers";
 import { TaipyContext } from "../../context/taipyContext";
 import { stringIcon } from "../../utils/icon";
-import { UserEvent } from "@testing-library/user-event/dist/types/setup";
-
 
 const lov: LoV = [
     [
