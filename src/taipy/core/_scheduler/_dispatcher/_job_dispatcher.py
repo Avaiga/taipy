@@ -36,6 +36,7 @@ class _JobDispatcher(threading.Thread):
     _dispatched_processes: Dict = {}
     __logger = _TaipyLogger._get_logger()
     lock = Lock()
+    _nb_available_workers: int = 0
 
     def __init__(self, scheduler: _AbstractScheduler):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
@@ -63,10 +64,9 @@ class _JobDispatcher(threading.Thread):
             except:  # In case the last job of the queue has been removed.
                 pass
 
-    @abstractmethod
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
-        raise NotImplementedError
+        return self._nb_available_workers > 0
 
     def _execute_job(self, job):
         if job.force or self._needs_to_run(job.task):
@@ -177,7 +177,7 @@ class _JobDispatcher(threading.Thread):
         return _results
 
     @staticmethod
-    def _update_status(job, exceptions):
+    def _update_job_status(job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
 

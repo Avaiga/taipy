@@ -58,7 +58,6 @@ def test_build_development_job_dispatcher():
     dispatcher = _SchedulerFactory._dispatcher
 
     assert isinstance(dispatcher, _DevelopmentJobDispatcher)
-    assert isinstance(dispatcher._executor, _Synchronous)
     assert dispatcher._nb_available_workers == 1
 
     assert dispatcher.start() == NotImplemented

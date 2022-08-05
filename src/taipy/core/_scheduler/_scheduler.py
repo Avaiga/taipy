@@ -197,7 +197,7 @@ class _Scheduler(_AbstractScheduler):
         from ._scheduler_factory import _SchedulerFactory
 
         for job in jobs:
-            if job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():
+            if Config.job_config.is_standalone and job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():
                 cls.__logger.warning(f"{job.id} is running and cannot be canceled.")
             else:
                 if job_id_to_cancel == job.id:

@@ -348,7 +348,6 @@ def test_task_scheduler_create_synchronous_dispatcher():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
     _SchedulerFactory._update_job_config()
 
-    assert isinstance(_SchedulerFactory._dispatcher._executor, _Synchronous)
     assert _SchedulerFactory._dispatcher._nb_available_workers == 1
 
 
