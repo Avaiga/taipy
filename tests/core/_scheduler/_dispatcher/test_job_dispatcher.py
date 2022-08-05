@@ -23,7 +23,6 @@ import pytest
 
 from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _DevelopmentJobDispatcher
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
-from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
@@ -54,7 +53,7 @@ def _error():
 
 def test_build_development_job_dispatcher():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
     dispatcher = _SchedulerFactory._dispatcher
 
     assert isinstance(dispatcher, _DevelopmentJobDispatcher)
@@ -67,7 +66,7 @@ def test_build_development_job_dispatcher():
 
 def test_build_standalone_job_dispatcher():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
     dispatcher = _SchedulerFactory._dispatcher
 
     assert not isinstance(dispatcher, _DevelopmentJobDispatcher)
@@ -82,7 +81,7 @@ def test_build_standalone_job_dispatcher():
 
 def test_can_execute_2_workers():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
     lock = m.Lock()
@@ -113,7 +112,7 @@ def test_can_execute_2_workers():
 
 def test_can_execute_synchronous():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task_id = TaskId("task_id1")
     task = Task(config_id="name", input=[], function=print, output=[], id=task_id)
@@ -129,7 +128,7 @@ def test_can_execute_synchronous():
 
 def test_exception_in_user_function():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task_id = TaskId("task_id1")
     job_id = JobId("id1")
@@ -144,7 +143,7 @@ def test_exception_in_user_function():
 
 def test_exception_in_writing_data():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task_id = TaskId("task_id1")
     job_id = JobId("id1")

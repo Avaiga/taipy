@@ -195,11 +195,10 @@ def setup():
 def delete_everything():
     if _SchedulerFactory._scheduler is None:
         _SchedulerFactory._build_scheduler()
-    else:
-        _SchedulerFactory._update_job_config()
-    _Scheduler.jobs_to_run = Queue()
-    _Scheduler.blocked_jobs = []
-    _TaskManager._scheduler = _SchedulerFactory._build_scheduler
+    _SchedulerFactory._build_dispatcher()
+
+    _SchedulerFactory._scheduler.jobs_to_run = Queue()
+    _SchedulerFactory._scheduler.blocked_jobs = []
     _ScenarioManager._delete_all()
     _PipelineManager._delete_all()
     _DataManager._delete_all()

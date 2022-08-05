@@ -22,7 +22,6 @@ from time import sleep
 import pytest
 
 from src.taipy.core import taipy
-from src.taipy.core._scheduler._executor._synchronous import _Synchronous
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.data._data_manager import _DataManager
@@ -82,7 +81,7 @@ def concat(a, b):
 
 def test_submit_task():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     before_creation = datetime.now()
     sleep(0.1)
@@ -132,7 +131,7 @@ def test_submit_pipeline_generate_unique_submit_id(pipeline, task):
 
 def test_submit_task_that_return_multiple_outputs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
@@ -160,7 +159,7 @@ def test_submit_task_that_return_multiple_outputs():
 
 def test_submit_task_returns_single_iterable_output():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     def return_2tuple(nb1, nb2):
         return multiply(nb1, nb2), multiply(nb1, nb2) / 2
@@ -181,7 +180,7 @@ def test_submit_task_returns_single_iterable_output():
 
 def test_data_node_not_written_due_to_wrong_result_nb():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     def return_2tuple():
         return lambda nb1, nb2: (multiply(nb1, nb2), multiply(nb1, nb2) / 2)
@@ -199,7 +198,7 @@ def test_submit_task_in_parallel():
     lock = m.Lock()
 
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(partial(lock_multiply, lock))
 
@@ -216,7 +215,7 @@ def test_submit_task_in_parallel():
 
 def test_submit_task_multithreading_multiple_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -250,7 +249,7 @@ def test_submit_task_multithreading_multiple_task():
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
     lock_0 = m.Lock()
@@ -300,7 +299,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 def test_blocked_task():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
     lock_1 = m.Lock()
@@ -346,14 +345,14 @@ def test_blocked_task():
 
 def test_task_scheduler_create_synchronous_dispatcher():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     assert _SchedulerFactory._dispatcher._nb_available_workers == 1
 
 
 def test_task_scheduler_create_standalone_dispatcher():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=42)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher._executor, ProcessPoolExecutor)
     assert _SchedulerFactory._dispatcher._nb_available_workers == 42
 
@@ -361,14 +360,14 @@ def test_task_scheduler_create_standalone_dispatcher():
 def modified_config_task(n):
     from taipy.config import Config
 
-    assert Config.global_config.storage_folder == ".my_data/"
-    assert Config.global_config.custom_property == "custom_property"
+    assert_true_after_1_minute_max(lambda: Config.global_config.storage_folder == ".my_data/")
+    assert_true_after_1_minute_max(lambda: Config.global_config.custom_property == "custom_property")
     return n * 2
 
 
 def test_can_exec_task_with_modified_config():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
     Config.configure_global_app(
         storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property"
     )
@@ -389,7 +388,7 @@ def test_can_exec_task_with_modified_config():
 
 def test_can_execute_task_with_development_mode():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     dn_input_config = Config.configure_data_node("input", "pickle", scope=Scope.PIPELINE, default_data=1)
     dn_output_config = Config.configure_data_node("output", "pickle")
@@ -424,7 +423,7 @@ def test_need_to_run_output_not_cacheable():
 
 def test_need_to_run_output_cacheable_no_input():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     hello_world_cfg = Config.configure_data_node("hello_world", cacheable=True)
     task_cfg = Config.configure_task("name", input=[], function=nothing, output=[hello_world_cfg])
@@ -438,7 +437,7 @@ def test_need_to_run_output_cacheable_no_input():
 
 def test_need_to_run_output_cacheable_no_validity_period():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")
@@ -454,7 +453,7 @@ def test_need_to_run_output_cacheable_no_validity_period():
 
 def test_need_to_run_output_cacheable_with_validity_period_up_to_date():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     hello_cfg = Config.configure_data_node("hello", default_data="Hello ")
     world_cfg = Config.configure_data_node("world", default_data="world !")

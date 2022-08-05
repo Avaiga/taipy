@@ -59,7 +59,7 @@ def lock_multiply(lock, nb1: float, nb2: float):
 
 def test_get_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="get_job")
 
@@ -74,7 +74,7 @@ def test_get_job():
 
 def test_get_latest_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="get_latest_job")
     task_2 = _create_task(multiply, name="get_latest_job_2")
@@ -100,7 +100,7 @@ def test_get_job_unknown():
 
 def test_get_jobs():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="get_all_jobs")
 
@@ -112,7 +112,7 @@ def test_get_jobs():
 
 def test_delete_job():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(multiply, name="delete_job")
 
@@ -136,7 +136,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 def test_raise_when_trying_to_delete_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
         job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
@@ -152,7 +152,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 def test_force_deleting_unfinished_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
@@ -166,7 +166,7 @@ def test_force_deleting_unfinished_job():
 
 def test_cancel_single_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
@@ -185,7 +185,7 @@ def test_cancel_single_job():
 
 def test_cancel_single_running_job():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
@@ -206,7 +206,7 @@ def test_cancel_single_running_job():
 
 def test_cancel_subsequent_jobs():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
 
     lock_0 = m.Lock()
 

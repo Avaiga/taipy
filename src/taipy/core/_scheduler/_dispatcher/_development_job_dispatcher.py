@@ -33,6 +33,9 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
     def stop(self):
         return NotImplemented
 
+    def run(self):
+        return NotImplemented
+
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
 

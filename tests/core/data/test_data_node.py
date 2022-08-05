@@ -253,7 +253,7 @@ class TestDataNode:
 
     def test_do_not_recompute_data_node_in_cache_but_continue_pipeline_execution(self):
         Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
-        _SchedulerFactory._update_job_config()
+        _SchedulerFactory._build_dispatcher()
 
         a = Config.configure_data_node("A", "pickle", default_data="A")
         b = Config.configure_data_node("B", "pickle", cacheable=True)
