@@ -14,40 +14,16 @@ import pathlib
 import shutil
 import time
 from abc import abstractmethod
-from datetime import datetime
-from enum import Enum
-from typing import Any, Generic, Iterable, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Iterable, Iterator, List, Optional, Type, TypeVar, Union
 
 from taipy.config.config import Config
 
 from ..exceptions.exceptions import ModelNotFound
-from ._repository import _AbstractRepository
+from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
 Json = Union[dict, list, str, int, float, bool, None]
-
-
-class _CustomEncoder(json.JSONEncoder):
-    def default(self, o: Any) -> Json:
-        if isinstance(o, Enum):
-            result = o.value
-        elif isinstance(o, datetime):
-            result = {"__type__": "Datetime", "__value__": o.isoformat()}
-        else:
-            result = json.JSONEncoder.default(self, o)
-        return result
-
-
-class _CustomDecoder(json.JSONDecoder):
-    def __init__(self, *args, **kwargs):
-        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
-
-    def object_hook(self, source):
-        if source.get("__type__") == "Datetime":
-            return datetime.fromisoformat(source.get("__value__"))
-        else:
-            return source
 
 
 class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):

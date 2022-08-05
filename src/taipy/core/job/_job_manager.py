@@ -16,13 +16,13 @@ from .._manager._manager import _Manager
 from ..common.alias import JobId
 from ..exceptions.exceptions import JobNotDeletedException
 from ..task.task import Task
-from ._job_repository import _JobRepository
+from ._job_repository_factory import _JobRepositoryFactory
 from .job import Job
 
 
 class _JobManager(_Manager[Job]):
 
-    _repository = _JobRepository()
+    _repository = _JobRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Job.__name__
     _ID_PREFIX = "JOB_"
 

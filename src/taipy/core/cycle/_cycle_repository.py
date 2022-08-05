@@ -13,21 +13,15 @@ import pathlib
 from datetime import datetime
 from typing import Callable, List
 
-from taipy.config.config import Config
 from taipy.config.scenario.frequency import Frequency
 
-from .._repository import _RepositoryFactory
+from .._repository._repository_adapter import _RepositoryAdapter
 from ..cycle._cycle_model import _CycleModel
 from ..cycle.cycle import Cycle
 
 
-class _CycleRepository(_RepositoryFactory.build_repository()[_CycleModel, Cycle]):  # type: ignore
-    def __init__(self):
-        kwargs = {
-            "model": _CycleModel,
-            "dir_name": "cycles",
-        }  # TODO: Change kwargs base on repository type when new ones are implemented
-
+class _CycleRepository(_RepositoryAdapter.select_base_repository()[_CycleModel, Cycle]):  # type: ignore
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _to_model(self, cycle: Cycle) -> _CycleModel:

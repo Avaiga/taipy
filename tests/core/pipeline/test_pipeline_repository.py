@@ -9,13 +9,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
 from src.taipy.core.pipeline.pipeline import Pipeline
 
 
 class TestPipelineRepository:
     def test_save_and_load(self, tmpdir, pipeline):
-        repository = _PipelineManager._repository
+        repository = _PipelineRepositoryFactory._build_repository()
         repository.base_path = tmpdir
         repository._save(pipeline)
         loaded_pipeline = repository.load("pipeline_id")
@@ -24,6 +24,6 @@ class TestPipelineRepository:
         assert pipeline.id == loaded_pipeline.id
 
     def test_from_and_to_model(self, pipeline, pipeline_model):
-        repository = _PipelineManager._repository
+        repository = _PipelineRepositoryFactory._build_repository()
         assert repository._to_model(pipeline) == pipeline_model
         assert repository._from_model(pipeline_model) == pipeline

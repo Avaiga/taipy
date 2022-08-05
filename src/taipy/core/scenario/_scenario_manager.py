@@ -34,14 +34,14 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from ._scenario_repository import _ScenarioRepository
+from ._scenario_repository_factory import _ScenarioRepositoryFactory
 from .scenario import Scenario
 
 
 class _ScenarioManager(_Manager[Scenario]):
 
     _AUTHORIZED_TAGS_KEY = "authorized_tags"
-    _repository = _ScenarioRepository()
+    _repository = _ScenarioRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Scenario.__name__
 
     @classmethod

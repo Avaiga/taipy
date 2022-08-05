@@ -13,13 +13,12 @@ import datetime
 import os
 from unittest import mock
 
-from taipy.config.data_node.scope import Scope
-
 from src.taipy.core.common.alias import DataNodeId, JobId
-from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data._data_model import _DataNodeModel
+from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.data_node import DataNode
+from taipy.config.data_node.scope import Scope
 
 
 class TestDataRepository:
@@ -53,7 +52,7 @@ class TestDataRepository:
     )
 
     def test_save_and_load(self, tmpdir):
-        repository = _DataManager._repository
+        repository = _DataRepositoryFactory._build_repository()
         repository.base_path = tmpdir
         repository._save(self.data_node)
         dn = repository.load("my_dn_id")
@@ -62,13 +61,13 @@ class TestDataRepository:
         assert isinstance(dn, DataNode)
 
     def test_from_and_to_model(self):
-        repository = _DataManager._repository
+        repository = _DataRepositoryFactory._build_repository()
         assert repository._to_model(self.data_node) == self.data_node_model
         assert repository._from_model(self.data_node_model) == self.data_node
 
     def test_data_node_with_env_variable_value_not_serialized(self):
         with mock.patch.dict(os.environ, {"FOO": "bar"}):
-            repository = _DataManager._repository
+            repository = _DataRepositoryFactory._build_repository()
             assert repository._to_model(self.data_node).data_node_properties["prop"] == "ENV[FOO]"
             assert self.data_node._properties.data["prop"] == "ENV[FOO]"
             assert self.data_node.properties["prop"] == "bar"

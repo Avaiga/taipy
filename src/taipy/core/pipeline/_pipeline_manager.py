@@ -22,12 +22,12 @@ from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..task._task_manager_factory import _TaskManagerFactory
-from ._pipeline_repository import _PipelineRepository
+from ._pipeline_repository_factory import _PipelineRepositoryFactory
 from .pipeline import Pipeline
 
 
 class _PipelineManager(_Manager[Pipeline]):
-    _repository = _PipelineRepository()
+    _repository = _PipelineRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Pipeline.__name__
 
     @classmethod
@@ -81,7 +81,7 @@ class _PipelineManager(_Manager[Pipeline]):
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
 
-        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(pipeline_config.id, parent_id):
+        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(pipeline_config.id, parent_id):  # type: ignore
             return pipelines_from_parent
 
         pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)

@@ -9,12 +9,12 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from src.taipy.core.scenario._scenario_repository import _ScenarioRepository
+from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
 from src.taipy.core.scenario.scenario import Scenario
 
 
 def test_save_and_load(tmpdir, scenario):
-    repository = _ScenarioRepository()
+    repository = _ScenarioRepositoryFactory._build_repository()
     repository.base_path = tmpdir
     repository._save(scenario)
     sc = repository.load(scenario.id)
@@ -24,6 +24,6 @@ def test_save_and_load(tmpdir, scenario):
 
 
 def test_from_and_to_model(scenario, scenario_model):
-    repository = _ScenarioRepository()
+    repository = _ScenarioRepositoryFactory._build_repository()
     assert repository._to_model(scenario) == scenario_model
     assert repository._from_model(scenario_model) == scenario

@@ -22,13 +22,13 @@ from ..common.alias import PipelineId, ScenarioId, TaskId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..job._job_manager_factory import _JobManagerFactory
-from ..task._task_repository import _TaskRepository
+from ..task._task_repository_factory import _TaskRepositoryFactory
 from ..task.task import Task
 
 
 class _TaskManager(_Manager[Task]):
 
-    _repository: _TaskRepository = _TaskRepository()
+    _repository = _TaskRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Task.__name__
     __scheduler = None
 
@@ -70,7 +70,7 @@ class _TaskManager(_Manager[Task]):
 
             tasks_configs_and_parent_id.append((task_config, parent_id))
 
-        tasks_by_config = cls._repository._get_by_configs_and_parent_ids(tasks_configs_and_parent_id)
+        tasks_by_config = cls._repository._get_by_configs_and_parent_ids(tasks_configs_and_parent_id)  # type: ignore
 
         tasks = []
         for task_config, parent_id in tasks_configs_and_parent_id:

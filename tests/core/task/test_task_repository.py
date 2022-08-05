@@ -12,15 +12,15 @@
 import datetime
 
 import pytest
-from taipy.config.data_node.scope import Scope
 
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.exceptions.exceptions import NonExistingDataNode
-from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task._task_model import _TaskModel
+from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
+from taipy.config.data_node.scope import Scope
 
 data_node = CSVDataNode(
     "test_data_node",
@@ -50,7 +50,7 @@ task_model = _TaskModel(
 
 class TestTaskRepository:
     def test_save_and_load(self, tmpdir):
-        repository = _TaskManager._repository
+        repository = _TaskRepositoryFactory._build_repository()  # type: ignore
         repository.base_path = tmpdir
         repository._save(task)
         with pytest.raises(NonExistingDataNode):
@@ -61,7 +61,7 @@ class TestTaskRepository:
         assert len(t.input) == 1
 
     def test_from_and_to_model(self):
-        repository = _TaskManager._repository
+        repository = _TaskRepositoryFactory._build_repository()  # type: ignore
         assert repository._to_model(task) == task_model
         with pytest.raises(NonExistingDataNode):
             repository._from_model(task_model)

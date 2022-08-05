@@ -9,30 +9,23 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
 from datetime import datetime
 from typing import List
 
-from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from .._repository import _RepositoryFactory
+from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _fcts_to_dict, _load_fct
 from ..exceptions.exceptions import InvalidSubscriber
-from ..task._task_repository import _TaskRepository
+from ..task._task_repository_factory import _TaskRepositoryFactory
 from ._job_model import _JobModel
 from .job import Job
 
 
-class _JobRepository(_RepositoryFactory.build_repository()[_JobModel, Job]):  # type: ignore
+class _JobRepository(_RepositoryAdapter.select_base_repository()[_JobModel, Job]):  # type: ignore
     __logger = _TaipyLogger._get_logger()
 
-    def __init__(self):
-        kwargs = {
-            "model": _JobModel,
-            "dir_name": "jobs",
-        }  # TODO: Change kwargs base on repository type when new ones are implemented
-
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _to_model(self, job: Job):
@@ -48,7 +41,8 @@ class _JobRepository(_RepositoryFactory.build_repository()[_JobModel, Job]):  # 
         )
 
     def _from_model(self, model: _JobModel):
-        job = Job(id=model.id, task=_TaskRepository().load(model.task_id), submit_id=model.submit_id)
+        task_repository = _TaskRepositoryFactory._build_repository()
+        job = Job(id=model.id, task=task_repository.load(model.task_id), submit_id=model.submit_id)
 
         job.status = model.status  # type: ignore
         job.force = model.force  # type: ignore

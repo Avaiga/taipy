@@ -8,15 +8,33 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-
+import json
 from abc import abstractmethod
-from typing import Any, Generic, Iterable, List, Optional, TypeVar
+from datetime import datetime
+from enum import Enum
+from typing import Any, Generic, Iterable, Iterator, List, Optional, TypeVar, Union
+
+Json = Union[dict, list, str, int, float, bool, None]
 
 ModelType = TypeVar("ModelType")
 Entity = TypeVar("Entity")
 
 
 class _AbstractRepository(Generic[ModelType, Entity]):
+    @abstractmethod
+    def _to_model(self, obj):
+        """
+        Converts the object to be saved to its model.
+        """
+        ...
+
+    @abstractmethod
+    def _from_model(self, model):
+        """
+        Converts a model to its functional object.
+        """
+        ...
+
     @abstractmethod
     def load(self, model_id: str) -> Entity:
         """
@@ -96,3 +114,25 @@ class _AbstractRepository(Generic[ModelType, Entity]):
 
         """
         raise NotImplementedError
+
+
+class _CustomEncoder(json.JSONEncoder):
+    def default(self, o: Any) -> Json:
+        if isinstance(o, Enum):
+            result = o.value
+        elif isinstance(o, datetime):
+            result = {"__type__": "Datetime", "__value__": o.isoformat()}
+        else:
+            result = json.JSONEncoder.default(self, o)
+        return result
+
+
+class _CustomDecoder(json.JSONDecoder):
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+    def object_hook(self, source):
+        if source.get("__type__") == "Datetime":
+            return datetime.fromisoformat(source.get("__value__"))
+        else:
+            return source

@@ -18,9 +18,9 @@ from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound
-from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job._job_model import _JobModel
 from src.taipy.core.job._job_repository import _JobRepository
+from src.taipy.core.job._job_repository_factory import _JobRepositoryFactory
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
@@ -82,7 +82,7 @@ job_model = _JobModel(
 
 class TestJobRepository:
     def test_save_and_load(self, tmpdir):
-        repository = _JobManager._repository
+        repository = _JobRepositoryFactory._build_repository()
         repository.base_path = tmpdir
         repository._save(job)
         with pytest.raises(ModelNotFound):
@@ -93,7 +93,7 @@ class TestJobRepository:
         assert j.id == job.id
 
     def test_from_and_to_model(self):
-        repository = _JobManager._repository
+        repository = _JobRepositoryFactory._build_repository()
         assert repository._to_model(job) == job_model
         with pytest.raises(ModelNotFound):
             repository._from_model(job_model)

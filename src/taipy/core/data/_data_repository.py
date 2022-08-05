@@ -14,9 +14,7 @@ from datetime import datetime, timedelta
 from pydoc import locate
 from typing import Dict
 
-from taipy.config.config import Config
-
-from .._repository import _RepositoryFactory
+from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
 from ._data_model import _DataNodeModel
 from .data_node import DataNode
@@ -24,7 +22,7 @@ from .generic import GenericDataNode
 from .json import JSONDataNode
 
 
-class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, DataNode]):  # type: ignore
+class _DataRepository(_RepositoryAdapter.select_base_repository()[_DataNodeModel, DataNode]):  # type: ignore
     _READ_FCT_NAME_KEY = "read_fct_name"
     _READ_FCT_MODULE_KEY = "read_fct_module"
     _WRITE_FCT_NAME_KEY = "write_fct_name"
@@ -35,14 +33,9 @@ class _DataRepository(_RepositoryFactory.build_repository()[_DataNodeModel, Data
     _JSON_DECODER_MODULE_KEY = "decoder_module"
     _EXPOSED_TYPE_KEY = "exposed_type"
 
-    def __init__(self, class_map):
-        kwargs = {
-            "model": _DataNodeModel,
-            "dir_name": "data_nodes",
-        }  # TODO: Change kwargs base on repository type when new ones are implemented
-
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.class_map = class_map
+        self.class_map = {c.storage_type(): c for c in DataNode.__subclasses__()}
 
     def _to_model(self, data_node: DataNode):
         properties = data_node._properties.data.copy()

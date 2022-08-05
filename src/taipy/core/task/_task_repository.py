@@ -9,11 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
-
-from taipy.config.config import Config
-
-from .._repository import _RepositoryFactory
+from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
 from ..common.alias import TaskId
 from ..data._data_manager_factory import _DataManagerFactory
@@ -22,13 +18,8 @@ from ._task_model import _TaskModel
 from .task import Task
 
 
-class _TaskRepository(_RepositoryFactory.build_repository()[_TaskModel, Task]):  # type: ignore
-    def __init__(self):
-        kwargs = {
-            "model": _TaskModel,
-            "dir_name": "tasks",
-        }  # TODO: Change kwargs base on repository type when new ones are implemented
-
+class _TaskRepository(_RepositoryAdapter.select_base_repository()[_TaskModel, Task]):  # type: ignore
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def _to_model(self, task: Task) -> _TaskModel:
