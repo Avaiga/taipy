@@ -33,8 +33,8 @@ class Core:
         """
         self._scheduler = _SchedulerFactory._build_scheduler()
 
-    def run(self):
+    def run(self, force_restart=False):
         """
         Start a Core service. This method is blocking.
         """
-        self._dispatcher = _SchedulerFactory._build_dispatcher()
+        self._dispatcher = _SchedulerFactory._build_dispatcher(force_restart=force_restart)
