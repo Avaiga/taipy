@@ -38,5 +38,4 @@ default_config: Config = {
     "force_https": False,
     "watermark": "Taipy inside",
     "change_delay": None,
-    "chart_limit_threshold": 50,
 }

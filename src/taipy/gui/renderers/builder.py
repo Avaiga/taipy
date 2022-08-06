@@ -253,6 +253,12 @@ class _Builder:
                 warnings.warn(f" {self.__control_type}.{name}: {strattr} is not a function")
         return self.set_attribute(_to_camel_case(name), strattr) if strattr else self
 
+    def __set_decimator_attribute(self, attr_name: str):
+        strattr = self.__attributes.get(attr_name)
+        cls = self.__gui._get_user_instance(class_name=str(strattr), class_type=PropertyType.decimator.value)
+        if isinstance(cls, PropertyType.decimator.value):
+            self.__set_string_or_number_attribute(attr_name, strattr)
+
     def __set_string_or_number_attribute(self, name: str, default_value: t.Optional[t.Any] = None):
         attr = self.__attributes.get(name, default_value)
         if attr is None:
@@ -831,7 +837,7 @@ class _Builder:
                 else:
                     self.__update_vars.append(f"{name}={hash_name}")
 
-    def set_attributes(self, attributes: t.List[tuple]):
+    def set_attributes(self, attributes: t.List[tuple]):  # noqa: C901
         for attr in attributes:
             if not isinstance(attr, tuple):
                 attr = (attr,)
@@ -874,6 +880,8 @@ class _Builder:
                     self.__set_dynamic_bool_attribute(attr[0], _get_tuple_val(attr, 2, False), True, update_main=False)
                 else:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
+            elif var_type == PropertyType.decimator:
+                self.__set_decimator_attribute(attr_name=attr[0])
         return self
 
     def set_attribute(self, name, value):
