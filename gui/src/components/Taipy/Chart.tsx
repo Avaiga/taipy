@@ -49,7 +49,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     testId?: string;
     render?: boolean;
     defaultRender?: boolean;
-    limitThreshold?: number;
+    decimator?: string;
     //[key: `selected_${number}`]: number[];
 }
 
@@ -123,7 +123,7 @@ const Chart = (props: ChartProp) => {
         tp_onRangeChange,
         propagate = true,
         limitRows = false,
-        limitThreshold,
+        decimator,
     } = props;
     const { dispatch } = useContext(TaipyContext);
     const [selected, setSelected] = useState<number[][]>([]);
@@ -201,7 +201,7 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            dataKey.current = backCols.join("-") + (limitRows ? `--${limitThreshold}` : "");
+            dataKey.current = backCols.join("-") + (limitRows ? `--${decimator}` : "");
             dispatch(
                 createRequestChartUpdateAction(
                     updateVarName,
@@ -209,12 +209,12 @@ const Chart = (props: ChartProp) => {
                     dataKey.current,
                     backCols,
                     limitRows ? plotRef.current?.clientWidth : undefined,
-                    limitThreshold
+                    decimator
                 )
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, updateVarName, id, limitRows, limitThreshold]);
+    }, [refresh, dispatch, config.columns, updateVarName, id, limitRows, decimator]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 

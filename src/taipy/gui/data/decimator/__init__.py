@@ -9,5 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from .data_accessor import _DataAccessor
-from .utils import Decimator
+from .lttb import LTTB
+from .minmax import MinMaxDecimator
+from .rdp import RDP
