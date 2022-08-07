@@ -43,7 +43,7 @@ class _SchedulerFactory:
         return cls._scheduler  # type: ignore
 
     @classmethod
-    def _build_dispatcher(cls, force_restart=False) -> _JobDispatcher:
+    def _build_dispatcher(cls, force_restart=False) -> Optional[_JobDispatcher]:
         if not cls._scheduler:
             raise SchedulerNotBuilt
 
@@ -55,14 +55,14 @@ class _SchedulerFactory:
             raise ModeNotAvailable
 
     @classmethod
-    def __build_standalone_job_dispatcher(cls, force_restart=False) -> _StandaloneJobDispatcher:
+    def __build_standalone_job_dispatcher(cls, force_restart=False) -> Optional[_StandaloneJobDispatcher]:
         if isinstance(cls._dispatcher, _StandaloneJobDispatcher) and not isinstance(
             cls._dispatcher, _DevelopmentJobDispatcher
         ):
             if force_restart:
                 cls._dispatcher.stop()
             else:
-                return  # type: ignore
+                return None
         cls._dispatcher = _StandaloneJobDispatcher(cls._scheduler)  # type: ignore
         cls._dispatcher.start()
         return cls._dispatcher

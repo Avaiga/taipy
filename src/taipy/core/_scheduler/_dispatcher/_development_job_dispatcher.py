@@ -22,7 +22,6 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
 
     def __init__(self, scheduler: _AbstractScheduler):
         super().__init__(scheduler)
-        self._nb_available_workers = 1
 
     def start(self):
         return NotImplemented
@@ -42,12 +41,10 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         Parameters:
             job (Job^): The job to submit on an executor with an available worker.
         """
-        self._nb_available_workers -= 1
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)
 
         rs = self._run_wrapped_function(Config.job_config.mode, config_as_string, job.id, job.task)
 
-        self.__release_worker()
         self.__update_job_status(job, rs)
 
     def __release_worker(self):

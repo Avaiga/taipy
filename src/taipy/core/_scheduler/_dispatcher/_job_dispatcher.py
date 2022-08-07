@@ -36,7 +36,7 @@ class _JobDispatcher(threading.Thread):
     _dispatched_processes: Dict = {}
     __logger = _TaipyLogger._get_logger()
     lock = Lock()
-    _nb_available_workers: int = 0
+    _nb_available_workers: int = 1
 
     def __init__(self, scheduler: _AbstractScheduler):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
@@ -82,7 +82,7 @@ class _JobDispatcher(threading.Thread):
             self.__logger.info(f"job {job.id} is skipped.")
 
     def _execute_jobs_synchronously(self):
-        while not self.scheduler.jobs_to_run.empty() and self._can_execute():
+        while not self.scheduler.jobs_to_run.empty():
             with self.lock:
                 try:
                     job = self.scheduler.jobs_to_run.get()

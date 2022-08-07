@@ -18,7 +18,7 @@ from ._scheduler._scheduler_factory import _SchedulerFactory
 
 class Core:
     """
-    Rest API server wrapper.
+    Core service
     """
 
     _scheduler: Optional[_Scheduler] = None
@@ -27,9 +27,6 @@ class Core:
     def __init__(self):
         """
         Initialize a Core service.
-
-        Parameters:
-            mode (str): development mode or standalone mode for job dispatcher
         """
         self._scheduler = _SchedulerFactory._build_scheduler()
 
@@ -37,4 +34,5 @@ class Core:
         """
         Start a Core service. This method is blocking.
         """
-        self._dispatcher = _SchedulerFactory._build_dispatcher(force_restart=force_restart)
+        dispatcher = _SchedulerFactory._build_dispatcher(force_restart=force_restart)
+        self._dispatcher = dispatcher if dispatcher else self._dispatcher
