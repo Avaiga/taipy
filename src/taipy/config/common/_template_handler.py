@@ -72,7 +72,7 @@ class _TemplateHandler:
     def _to_bool(val: str) -> bool:
         possible_values = ["true", "false"]
         if str.lower(val) not in possible_values:
-            raise InconsistentEnvVariableError("{val} is not a boolean.")
+            raise InconsistentEnvVariableError("{val} is not a Boolean.")
         return str.lower(val) == "true" or not (str.lower(val) == "false")
 
     @staticmethod
