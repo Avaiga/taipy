@@ -13,9 +13,9 @@ import os
 import re
 from collections import UserDict
 
-from ..scenario.frequency import Frequency
 from ..data_node.scope import Scope
 from ..exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
+from ..scenario.frequency import Frequency
 
 
 class _TemplateHandler:
@@ -46,7 +46,7 @@ class _TemplateHandler:
             val = os.environ.get(var)
             if val is None:
                 if required:
-                    raise MissingEnvVariableError()
+                    raise MissingEnvVariableError(f"Environment variable {var} is not set.")
                 return default
             if type == bool:
                 return cls._to_bool(val)
@@ -72,7 +72,7 @@ class _TemplateHandler:
     def _to_bool(val: str) -> bool:
         possible_values = ["true", "false"]
         if str.lower(val) not in possible_values:
-            raise InconsistentEnvVariableError()
+            raise InconsistentEnvVariableError("{val} is not a boolean.")
         return str.lower(val) == "true" or not (str.lower(val) == "false")
 
     @staticmethod
@@ -80,25 +80,25 @@ class _TemplateHandler:
         try:
             return int(val)
         except ValueError:
-            raise InconsistentEnvVariableError()
+            raise InconsistentEnvVariableError(f"{val} is not an integer.")
 
     @staticmethod
     def _to_float(val: str) -> float:
         try:
             return float(val)
         except ValueError:
-            raise InconsistentEnvVariableError()
+            raise InconsistentEnvVariableError(f"{val} is not a float.")
 
     @staticmethod
     def _to_scope(val: str) -> Scope:
         try:
             return Scope[str.upper(val)]
         except Exception:
-            raise InconsistentEnvVariableError()
+            raise InconsistentEnvVariableError(f"{val} is not a valid scope.")
 
     @staticmethod
     def _to_frequency(val: str) -> Frequency:
         try:
             return Frequency[str.upper(val)]
         except Exception:
-            raise InconsistentEnvVariableError()
+            raise InconsistentEnvVariableError(f"{val} is not a valid frequency.")
