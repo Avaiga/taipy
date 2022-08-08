@@ -203,10 +203,14 @@ def test_create_and_delete_scenario():
     assert scenario_1.properties["name"] == name_1
     assert scenario_1.tags == set()
 
-    with pytest.raises(DeletingPrimaryScenario):
-        _ScenarioManager._delete(
-            scenario_1.id,
-        )
+    cycle_id_1 = scenario_1.cycle.id
+    assert _CycleManager._get(cycle_id_1).id == cycle_id_1
+    _ScenarioManager._delete(scenario_1.id)
+    assert _ScenarioManager._get(scenario_1.id) is None
+    assert _CycleManager._get(cycle_id_1) is None
+
+    # Recreate scenario_1
+    scenario_1 = _ScenarioManager._create(scenario_config, creation_date=creation_date_1, name=name_1)
 
     scenario_2 = _ScenarioManager._create(scenario_config, creation_date=creation_date_2)
     assert scenario_2.config_id == "sc"
@@ -223,15 +227,17 @@ def test_create_and_delete_scenario():
     assert scenario_1.cycle == scenario_2.cycle
 
     assert len(_ScenarioManager._get_all()) == 2
-    _ScenarioManager._delete(
-        scenario_2.id,
-    )
-    assert len(_ScenarioManager._get_all()) == 1
     with pytest.raises(DeletingPrimaryScenario):
         _ScenarioManager._delete(
             scenario_1.id,
         )
-    assert _ScenarioManager._get(scenario_2) is None
+
+    _ScenarioManager._delete(
+        scenario_2.id,
+    )
+    assert len(_ScenarioManager._get_all()) == 1
+    _ScenarioManager._delete(scenario_1.id)
+    assert len(_ScenarioManager._get_all()) == 0
 
 
 def mult_by_2(nb: int):

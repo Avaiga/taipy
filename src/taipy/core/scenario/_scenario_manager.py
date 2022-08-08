@@ -203,8 +203,11 @@ class _ScenarioManager(_Manager[Scenario]):
 
     @classmethod
     def _delete(cls, scenario_id: ScenarioId):  # type: ignore
-        if cls._get(scenario_id).is_primary:
-            raise DeletingPrimaryScenario
+        scenario = cls._get(scenario_id)
+        if scenario.is_primary:
+            if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
+                raise DeletingPrimaryScenario
+            _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
         super()._delete(scenario_id)
 
     @classmethod
@@ -244,7 +247,10 @@ class _ScenarioManager(_Manager[Scenario]):
     def _hard_delete(cls, scenario_id: ScenarioId):
         scenario = cls._get(scenario_id)
         if scenario.is_primary:
-            raise DeletingPrimaryScenario
+            if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
+                raise DeletingPrimaryScenario
+            _CycleManagerFactory._build_manager()._hard_delete(scenario.cycle.id)
+            return
         entity_ids_to_delete = cls._get_owned_entity_ids(scenario)
         entity_ids_to_delete.scenario_ids.add(scenario.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)

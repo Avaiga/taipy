@@ -120,6 +120,7 @@ def delete(entity_id: Union[TaskId, DataNodeId, PipelineId, ScenarioId, JobId, C
 
     - If a `CycleId^` is provided, the nested scenarios, pipelines, data nodes, and jobs are deleted.
     - If a `ScenarioId^` is provided, the nested pipelines, tasks, data nodes, and jobs are deleted.
+    If the scenario is primary, it can only be deleted if it is the only scenario in the cycle. In that case, its cycle is also deleted.
     - If a `PipelineId^` is provided, the nested tasks, data nodes, and jobs are deleted.
     - If a `TaskId^` is provided, the nested data nodes, and jobs are deleted.
 
