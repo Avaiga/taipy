@@ -34,5 +34,5 @@ class Core:
         """
         Start a Core service. This method is blocking.
         """
-        dispatcher = _SchedulerFactory._build_dispatcher(force_restart=force_restart)
-        self._dispatcher = dispatcher if dispatcher else self._dispatcher
+        if dispatcher := _SchedulerFactory._build_dispatcher(force_restart=force_restart):
+            self._dispatcher = dispatcher
