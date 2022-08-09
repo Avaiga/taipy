@@ -13,7 +13,7 @@ from flask import jsonify, make_response, request
 from flask_restful import Resource
 
 from taipy.config.config import Config
-from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingPipeline
+from taipy.core.exceptions.exceptions import NonExistingPipeline
 from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.pipeline.pipeline import Pipeline
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
@@ -32,13 +32,25 @@ class PipelineResource(Resource):
     get:
       tags:
         - api
-      summary: Get a pipeline
-      description: Get a single pipeline by ID
+      summary: Get a pipeline.
+      description: |
+        Return a single pipeline by pipeline_id. If the pipeline does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_READER_ role.
+
+        Code example:
+
+        ```shell
+          curl -X GET http://localhost:5000/api/v1/pipelines/PIPELINE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: pipeline_id
           schema:
             type: string
+          description: The identifier of the pipeline.
       responses:
         200:
           content:
@@ -48,17 +60,29 @@ class PipelineResource(Resource):
                 properties:
                   pipeline: PipelineSchema
         404:
-          description: pipeline does not exist
+          description: No pipeline has the *pipeline_id* identifier.
     delete:
       tags:
         - api
-      summary: Delete a pipeline
-      description: Delete a single pipeline by ID
+      summary: Delete a pipeline.
+      description: |
+        Delete a pipeline. If the pipeline does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_EDITOR_ role.
+
+        Code example:
+
+        ```shell
+          curl -X DELETE http://localhost:5000/api/v1/pipelines/PIPELINE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: pipeline_id
           schema:
-            type: integer
+            type: string
+          description: The identifier of the pipeline.
       responses:
         200:
           content:
@@ -68,9 +92,9 @@ class PipelineResource(Resource):
                 properties:
                   msg:
                     type: string
-                    example: pipeline deleted
+                    description: Status message.
         404:
-          description: pipeline does not exist
+          description: No pipeline has the *pipeline_id* identifier.
     """
 
     def __init__(self, **kwargs):
@@ -87,13 +111,12 @@ class PipelineResource(Resource):
 
     @_middleware
     def delete(self, pipeline_id):
-        try:
-            manager = _PipelineManagerFactory._build_manager()
-            manager._delete(pipeline_id)
-        except ModelNotFound:
-            return make_response(jsonify({"message": f"DataNode {pipeline_id} not found"}), 404)
-
-        return {"msg": f"pipeline {pipeline_id} deleted"}
+        manager = _PipelineManagerFactory._build_manager()
+        pipeline = manager._get(pipeline_id)
+        if not pipeline:
+            return make_response(jsonify({"message": f"Pipeline {pipeline_id} not found"}), 404)
+        manager._delete(pipeline_id)
+        return {"msg": f"Pipeline {pipeline_id} deleted."}
 
 
 class PipelineList(Resource):
@@ -103,8 +126,19 @@ class PipelineList(Resource):
     get:
       tags:
         - api
-      summary: Get a list of pipelines
-      description: Get a list of paginated pipelines
+      summary: Get all pipelines.
+      description: |
+        Return an array of all pipelines.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_READER_ role.
+
+        Code example:
+
+        ```shell
+          curl -X GET http://localhost:5000/api/v1/pipelines
+        ```
+
       responses:
         200:
           content:
@@ -120,13 +154,25 @@ class PipelineList(Resource):
     post:
       tags:
         - api
-      summary: Create a pipeline
-      description: Create a new pipeline
-      requestBody:
-        content:
-          application/json:
-            schema:
-              PipelineSchema
+      summary: Create a pipeline.
+      description: |
+        Create a pipeline from its config_id. If the config does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires _TAIPY_EDITOR_ role.
+
+        Code example:
+
+        ```shell
+          curl -X POST http://localhost:5000/api/v1/pipelines?config_id=my_pipeline_config
+        ```
+
+      parameters:
+        - in: query
+          name: config_id
+          schema:
+            type: string
+          description: The identifier of the pipeline configuration.
       responses:
         201:
           content:
@@ -136,7 +182,7 @@ class PipelineList(Resource):
                 properties:
                   msg:
                     type: string
-                    example: pipeline created
+                    description: Status message.
                   pipeline: PipelineSchema
     """
 
@@ -168,20 +214,11 @@ class PipelineList(Resource):
             pipeline = manager._get_or_create(config)
 
             return {
-                "msg": "pipeline created",
+                "msg": "Pipeline created.",
                 "pipeline": response_schema.dump(_to_model(REPOSITORY, pipeline)),
             }, 201
         except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404
-
-    def __create_pipeline_from_schema(self, pipeline_schema: PipelineSchema):
-        task_manager = _TaskManagerFactory._build_manager()
-        return Pipeline(
-            config_id=pipeline_schema.get("name"),
-            properties=pipeline_schema.get("properties", {}),
-            tasks=[task_manager._get(ts) for ts in pipeline_schema.get("task_ids")],
-            parent_id=pipeline_schema.get("parent_id"),
-        )
 
 
 class PipelineExecutor(Resource):
@@ -191,8 +228,19 @@ class PipelineExecutor(Resource):
     post:
       tags:
         - api
-      summary: Execute a pipeline
-      description: Execute a pipeline
+      summary: Execute a pipeline.
+      description: |
+        Execute a pipeline from pipeline_id. If the pipeline does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), This endpoint requires _TAIPY_EXECUTOR_ role.
+
+        Code example:
+
+        ```shell
+          curl -X POST http://localhost:5000/api/v1/pipelines/submit/PIPELINE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: pipeline_id
@@ -207,10 +255,10 @@ class PipelineExecutor(Resource):
                 properties:
                   msg:
                     type: string
-                    example: pipeline created
+                    description: Status message.
                   pipeline: PipelineSchema
         404:
-            description: pipeline does not exist
+            description: No pipeline has the *pipeline_id* identifier.
     """
 
     def __init__(self, **kwargs):

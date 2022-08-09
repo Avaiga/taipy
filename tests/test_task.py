@@ -34,7 +34,9 @@ def test_delete_task(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.task._task_manager._TaskManager._delete"):
+    with mock.patch("taipy.core.task._task_manager._TaskManager._delete"), mock.patch(
+        "taipy.core.task._task_manager._TaskManager._get"
+    ):
         # test get_task
         rep = client.delete(url_for("api.task_by_id", task_id="foo"))
         assert rep.status_code == 200

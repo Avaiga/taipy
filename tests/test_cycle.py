@@ -34,7 +34,9 @@ def test_delete_cycle(client):
     rep = client.get(cycle_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._delete"):
+    with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._delete"), mock.patch(
+        "taipy.core.cycle._cycle_manager._CycleManager._get"
+    ):
         # test get_cycle
         rep = client.delete(url_for("api.cycle_by_id", cycle_id="foo"))
         assert rep.status_code == 200

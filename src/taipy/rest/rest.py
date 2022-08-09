@@ -15,17 +15,21 @@ from .app import create_app as _create_app
 
 class Rest:
     """
-    Rest API server wrapper.
+    Runnable Rest application serving REST APIs on top of Taipy Core functionalities.
     """
 
     def __init__(self):
         """
-        Initialise a REST API server.
+        Initialize a REST API server.
 
-        Parameters:
-            testing (bool): If you are on testing mode.
-            env (Optional[str]): The application environment.
-            secret_key (Optional[str]): Application server secret key.
+        A Flask application is instantiated and configured using three parameters from the global
+        config.
+            - Config.global_config.testing (bool): Run the application on testing mode.
+            - Config.global_config.env (Optional[str]): The application environment.
+            - Config.global_config.secret_key (Optional[str]): Application server secret key.
+
+        However, editing these parameters is only recommended for advanced users. Indeed, the default behavior of the
+        REST server without any required configuration satisfies all the standard and basic needs.
         """
         self._app = _create_app(Config.global_config.testing or False, Config.global_config.env,
                                 Config.global_config.secret_key)

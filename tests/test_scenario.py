@@ -35,7 +35,9 @@ def test_delete_scenario(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._delete"):
+    with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._delete"), mock.patch(
+        "taipy.core.scenario._scenario_manager._ScenarioManager._get"
+    ):
         # test get_scenario
         rep = client.delete(url_for("api.scenario_by_id", scenario_id="foo"))
         assert rep.status_code == 200

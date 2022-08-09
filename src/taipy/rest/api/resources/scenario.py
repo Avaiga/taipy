@@ -13,7 +13,7 @@ from flask import jsonify, make_response, request
 from flask_restful import Resource
 
 from taipy.config.config import Config
-from taipy.core.exceptions.exceptions import ModelNotFound, NonExistingScenario
+from taipy.core.exceptions.exceptions import NonExistingScenario
 from taipy.core.pipeline._pipeline_manager_factory import _PipelineManagerFactory
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 from taipy.core.scenario.scenario import Scenario
@@ -32,13 +32,25 @@ class ScenarioResource(Resource):
     get:
       tags:
         - api
-      summary: Get a scenario
-      description: Get a single scenario by ID
+      summary: Get a scenario.
+      description: |
+        Return a single scenario by *scenario_id*. If the scenario does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+
+        Code example:
+
+        ```
+          curl -X GET http://localhost:5000/api/v1/scenarios/SCENARIO_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: scenario_id
           schema:
             type: string
+          description: The identifier of the scenario.
       responses:
         200:
           content:
@@ -48,17 +60,29 @@ class ScenarioResource(Resource):
                 properties:
                   scenario: ScenarioSchema
         404:
-          description: scenario does not exist
+          description: No scenario has the *scenario_id* identifier.
     delete:
       tags:
         - api
-      summary: Delete a scenario
-      description: Delete a single scenario by ID
+      summary: Delete a scenario.
+      description: |
+        Delete a scenario. If the scenario does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+
+        Code example:
+
+        ```shell
+          curl -X DELETE http://localhost:5000/api/v1/scenarios/SCENARIO_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: scenario_id
           schema:
-            type: integer
+            type: string
+          description: The identifier of the scenario.
       responses:
         200:
           content:
@@ -68,9 +92,9 @@ class ScenarioResource(Resource):
                 properties:
                   msg:
                     type: string
-                    example: scenario deleted
+                    description: Status message.
         404:
-          description: scenario does not exist
+          description: No scenario has the *scenario_id* identifier.
     """
 
     def __init__(self, **kwargs):
@@ -87,13 +111,12 @@ class ScenarioResource(Resource):
 
     @_middleware
     def delete(self, scenario_id):
-        try:
-            manager = _ScenarioManagerFactory._build_manager()
-            manager._delete(scenario_id)
-        except ModelNotFound:
-            return make_response(jsonify({"message": f"DataNode {scenario_id} not found"}), 404)
-
-        return {"msg": f"scenario {scenario_id} deleted"}
+        manager = _ScenarioManagerFactory._build_manager()
+        scenario = manager._get(scenario_id)
+        if not scenario:
+            return make_response(jsonify({"message": f"Scenario {scenario_id} not found"}), 404)
+        manager._delete(scenario_id)
+        return {"msg": f"Scenario {scenario_id} deleted."}
 
 
 class ScenarioList(Resource):
@@ -103,8 +126,19 @@ class ScenarioList(Resource):
     get:
       tags:
         - api
-      summary: Get a list of scenarios
-      description: Get a list of paginated scenarios
+      summary: Get all scenarios.
+      description: |
+        Return an array of all scenarios.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+
+        Code example:
+
+        ```shell
+          curl -X GET http://localhost:5000/api/v1/scenarios
+        ```
+
       responses:
         200:
           content:
@@ -120,13 +154,24 @@ class ScenarioList(Resource):
     post:
       tags:
         - api
-      summary: Create a scenario
-      description: Create a new scenario
-      requestBody:
-        content:
-          application/json:
-            schema:
-              ScenarioSchema
+      summary: Create a scenario.
+      description: |
+        Create a new scenario from its *config_id*. If the config does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+
+        Code example:
+
+        ```shell
+          curl -X POST http://localhost:5000/api/v1/scenarios?config_id=my_scenario_config
+        ```
+      parameters:
+        - in: query
+          name: config_id
+          schema:
+            type: string
+          description: The identifier of the scenario configuration.
       responses:
         201:
           content:
@@ -136,7 +181,7 @@ class ScenarioList(Resource):
                 properties:
                   msg:
                     type: string
-                    example: scenario created
+                    description: Status message.
                   scenario: ScenarioSchema
     """
 
@@ -169,22 +214,11 @@ class ScenarioList(Resource):
             scenario = manager._create(config)
 
             return {
-                "msg": "scenario created",
+                "msg": "Scenario created.",
                 "scenario": response_schema.dump(_to_model(REPOSITORY, scenario)),
             }, 201
         except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404
-
-    def __create_scenario_from_schema(self, scenario_schema: ScenarioSchema):
-        pipeline_manager = _PipelineManagerFactory._build_manager()
-        return Scenario(
-            config_id=scenario_schema.get("name"),
-            properties=scenario_schema.get("properties", {}),
-            pipelines=[pipeline_manager._get(pl) for pl in scenario_schema.get("pipeline_ids")],
-            scenario_id=scenario_schema.get("id"),
-            is_master=scenario_schema.get("master_scenario"),
-            cycle=scenario_schema.get("cycle"),
-        )
 
 
 class ScenarioExecutor(Resource):
@@ -194,8 +228,19 @@ class ScenarioExecutor(Resource):
     post:
       tags:
         - api
-      summary: Execute a scenario
-      description: Execute a scenario
+      summary: Execute a scenario.
+      description: |
+        Execute a scenario by *scenario_id*. If the scenario does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EXECUTOR` role.
+
+        Code example:
+
+        ```shell
+          curl -X POST http://localhost:5000/api/v1/scenarios/submit/SCENARIO_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: scenario_id
@@ -210,10 +255,10 @@ class ScenarioExecutor(Resource):
                 properties:
                   msg:
                     type: string
-                    example: scenario created
+                    description: Status message.
                   scenario: ScenarioSchema
         404:
-          description: scenario does not exist
+          description: No scenario has the *scenario_id* identifier.
     """
 
     def __init__(self, **kwargs):

@@ -15,7 +15,6 @@ from flask_restful import Resource
 from taipy.config.config import Config
 from taipy.core.common._utils import _load_fct
 from taipy.core.data._data_manager_factory import _DataManagerFactory
-from taipy.core.exceptions.exceptions import ModelNotFound
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 from taipy.core.task.task import Task
 
@@ -33,13 +32,25 @@ class TaskResource(Resource):
     get:
       tags:
         - api
-      summary: Get a task
-      description: Get a single task by ID
+      summary: Get a task.
+      description: |
+        Return a single task by *task_id*. If the task does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+
+        Code example:
+
+        ```shell
+          curl -X GET http://localhost:5000/api/v1/tasks/TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: task_id
           schema:
             type: string
+          description: The identifier of the task.
       responses:
         200:
           content:
@@ -49,17 +60,28 @@ class TaskResource(Resource):
                 properties:
                   task: TaskSchema
         404:
-          description: task does not exist
+          description: No task has the *task_id* identifier.
     delete:
       tags:
         - api
-      summary: Delete a task
-      description: Delete a single task by ID
+      summary: Delete a task.
+      description: |
+        Delete a task. If the task does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+
+        Code example:
+
+        ```shell
+          curl -X DELETE http://localhost:5000/api/v1/tasks/TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
       parameters:
         - in: path
           name: task_id
           schema:
-            type: integer
+            type: string
+          description: The identifier of the task.
       responses:
         200:
           content:
@@ -69,9 +91,9 @@ class TaskResource(Resource):
                 properties:
                   msg:
                     type: string
-                    example: task deleted
+                    description: Status message.
         404:
-          description: task does not exist
+          description: No task has the *task_id* identifier.
     """
 
     def __init__(self, **kwargs):
@@ -88,13 +110,12 @@ class TaskResource(Resource):
 
     @_middleware
     def delete(self, task_id):
-        try:
-            manager = _TaskManagerFactory._build_manager()
-            manager._delete(task_id)
-        except ModelNotFound:
-            return make_response(jsonify({"message": f"DataNode {task_id} not found"}), 404)
-
-        return {"msg": f"task {task_id} deleted"}
+        manager = _TaskManagerFactory._build_manager()
+        task = manager._get(task_id)
+        if not task:
+            return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
+        manager._delete(task_id)
+        return {"msg": f"Task {task_id} deleted."}
 
 
 class TaskList(Resource):
@@ -104,8 +125,19 @@ class TaskList(Resource):
     get:
       tags:
         - api
-      summary: Get a list of tasks
-      description: Get a list of paginated tasks
+      summary: Get all tasks.
+      description: |
+        Return an array of all tasks.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+
+        Code example:
+
+        ```shell
+          curl -X GET http://localhost:5000/api/v1/tasks
+        ```
+
       responses:
         200:
           content:
@@ -121,13 +153,24 @@ class TaskList(Resource):
     post:
       tags:
         - api
-      summary: Create a task
-      description: Create a new task
-      requestBody:
-        content:
-          application/json:
-            schema:
-              TaskSchema
+      summary: Create a task.
+      description: |
+        Create a new task from its *config_id*. If the config does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+
+        Code example:
+
+        ```shell
+          curl -X POST http://localhost:5000/api/v1/tasks?config_id=my_task_config
+        ```
+      parameters:
+        - in: query
+          name: config_id
+          schema:
+            type: string
+          description: The identifier of the task configuration.
       responses:
         201:
           content:
@@ -137,7 +180,7 @@ class TaskList(Resource):
                 properties:
                   msg:
                     type: string
-                    example: task created
+                    description: Status message.
                   task: TaskSchema
     """
 
@@ -169,21 +212,11 @@ class TaskList(Resource):
             task = manager._bulk_get_or_create([config])[0]
 
             return {
-                "msg": "task created",
+                "msg": "Task created.",
                 "task": schema.dump(_to_model(REPOSITORY, task)),
             }, 201
         except KeyError:
             return {"msg": f"Config id {config_id} not found"}, 404
-
-    def __create_task_from_schema(self, task_schema: TaskSchema):
-        data_manager = _DataManagerFactory._build_manager()
-        return Task(
-            task_schema.get("config_id"),
-            _load_fct(task_schema.get("function_module"), task_schema.get("function_name")),
-            [data_manager._get(ds) for ds in task_schema.get("input_ids")],
-            [data_manager._get(ds) for ds in task_schema.get("output_ids")],
-            task_schema.get("parent_id"),
-        )
 
 
 class TaskExecutor(Resource):
@@ -193,8 +226,19 @@ class TaskExecutor(Resource):
     post:
       tags:
         - api
-      summary: Execute a task
-      description: Execute a task
+      summary: Execute a task.
+      description: |
+        Execute a task by *task_id*. If the task does not exist, a 404 error is returned.
+
+        !!! Note
+          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EXECUTOR` role.
+
+        Code example:
+
+        ```shell
+          curl -X POST http://localhost:5000/api/v1/tasks/submit/TASK_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
+        ```
+
       parameters:
         - in: path
           name: task_id
@@ -209,10 +253,10 @@ class TaskExecutor(Resource):
                 properties:
                   msg:
                     type: string
-                    example: task created
+                    description: Status message.
                   task: TaskSchema
         404:
-          description: task does not exist
+          description: No task has the *task_id* identifier.
     """
 
     def __init__(self, **kwargs):

@@ -9,9 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pytest
 from unittest import mock
 
+import pytest
 from flask import url_for
 
 
@@ -35,7 +35,9 @@ def test_delete_job(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.job._job_manager._JobManager._delete"):
+    with mock.patch("taipy.core.job._job_manager._JobManager._delete"), mock.patch(
+        "taipy.core.job._job_manager._JobManager._get"
+    ):
         # test get_job
         rep = client.delete(url_for("api.job_by_id", job_id="foo"))
         assert rep.status_code == 200
@@ -49,7 +51,7 @@ def test_create_job(client, default_task_config):
 
     with mock.patch("src.taipy.rest.api.resources.job.JobList.fetch_config") as config_mock:
         config_mock.return_value = default_task_config
-        jobs_url = url_for("api.jobs", task_name="foo")
+        jobs_url = url_for("api.jobs", task_id="foo")
         rep = client.post(jobs_url)
         assert rep.status_code == 201
 
@@ -62,12 +64,16 @@ def test_get_all_jobs(client, create_job_list):
     results = rep.get_json()
     assert len(results) == 10
 
+
 # @pytest.mark.xfail()
+
+
 def test_cancel_job(client, default_job):
-    #TODO: improve this test after the PR refactoring dispatcher
+    # TODO: improve this test after the PR refactoring dispatcher
     from taipy.core._scheduler._scheduler import _Scheduler
+
     _Scheduler._update_job_config()
-    
+
     # test 404
     user_url = url_for("api.job_cancel", job_id="foo")
     rep = client.post(user_url)
@@ -75,7 +81,7 @@ def test_cancel_job(client, default_job):
 
     with mock.patch("taipy.core.job._job_manager._JobManager._get") as manager_mock:
         manager_mock.return_value = default_job
-        
+
         # test get_job
         rep = client.post(url_for("api.job_cancel", job_id="foo"))
         assert rep.status_code == 200

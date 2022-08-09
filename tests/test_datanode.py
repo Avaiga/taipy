@@ -34,7 +34,9 @@ def test_delete_datanode(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.data._data_manager._DataManager._delete"):
+    with mock.patch("taipy.core.data._data_manager._DataManager._delete"), mock.patch(
+        "taipy.core.data._data_manager._DataManager._get"
+    ):
         # test get_datanode
         rep = client.delete(url_for("api.datanode_by_id", datanode_id="foo"))
         assert rep.status_code == 200

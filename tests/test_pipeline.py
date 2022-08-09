@@ -35,7 +35,9 @@ def test_delete_pipeline(client):
     rep = client.get(user_url)
     assert rep.status_code == 404
 
-    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._delete"):
+    with mock.patch("taipy.core.pipeline._pipeline_manager._PipelineManager._delete"), mock.patch(
+        "taipy.core.pipeline._pipeline_manager._PipelineManager._get"
+    ):
         # test get_pipeline
         rep = client.delete(url_for("api.pipeline_by_id", pipeline_id="foo"))
         assert rep.status_code == 200
