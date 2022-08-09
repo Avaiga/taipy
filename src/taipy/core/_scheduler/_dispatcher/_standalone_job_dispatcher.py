@@ -28,10 +28,6 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         self._executor = ProcessPoolExecutor(Config.job_config.nb_of_workers or 1)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
-    def _can_execute(self) -> bool:
-        """Returns True if a worker is available for a new run."""
-        return self._nb_available_workers > 0
-
     def _dispatch(self, job: Job):
         """Dispatches the given `Job^` on an available worker for execution.
 
@@ -47,11 +43,11 @@ class _StandaloneJobDispatcher(_JobDispatcher):
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
         future.add_done_callback(self.__release_worker)
-        future.add_done_callback(partial(self._update_status_from_future, job))
+        future.add_done_callback(partial(self.__update_job_status_from_future, job))
 
     def __release_worker(self, _):
         self._nb_available_workers += 1
 
-    def _update_status_from_future(self, job: Job, ft):
+    def __update_job_status_from_future(self, job: Job, ft):
         self._pop_dispatched_process(job.id)  # type: ignore
-        self._update_status(job, ft.result())
+        self._update_job_status(job, ft.result())

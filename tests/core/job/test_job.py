@@ -228,7 +228,7 @@ def test_auto_set_and_reload(current_datetime, job_id):
 
 def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     Config.configure_job_executions(mode=mode)
-    _SchedulerFactory._update_job_config()
+    _SchedulerFactory._build_dispatcher()
     _TaskManager._set(task)
     _JobManager._set(job)
     dispatcher = _StandaloneJobDispatcher(_SchedulerFactory._scheduler)

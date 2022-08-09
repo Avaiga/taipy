@@ -36,6 +36,7 @@ class _JobDispatcher(threading.Thread):
     _dispatched_processes: Dict = {}
     __logger = _TaipyLogger._get_logger()
     lock = Lock()
+    _nb_available_workers: int = 1
 
     def __init__(self, scheduler: _AbstractScheduler):
         threading.Thread.__init__(self, name="Thread-Taipy-JobDispatcher")
@@ -43,15 +44,15 @@ class _JobDispatcher(threading.Thread):
         self.scheduler = scheduler
 
     def start(self):
-        #     """TODO: doc"""
+        """Start the dispatcher"""
         threading.Thread.start(self)
 
     def is_running(self) -> bool:
-        #     """TODO: doc"""
+        """Return True if the dispatcher is running"""
         return self.is_alive()
 
     def stop(self):
-        #     """TODO: doc"""
+        """Stop the dispatcher"""
         self.__STOP_FLAG = True
 
     def run(self):
@@ -63,10 +64,9 @@ class _JobDispatcher(threading.Thread):
             except:  # In case the last job of the queue has been removed.
                 pass
 
-    @abstractmethod
     def _can_execute(self) -> bool:
         """Returns True if the dispatcher have resources to execute a new job."""
-        raise NotImplementedError
+        return self._nb_available_workers > 0
 
     def _execute_job(self, job):
         if job.force or self._needs_to_run(job.task):
@@ -82,7 +82,7 @@ class _JobDispatcher(threading.Thread):
             self.__logger.info(f"job {job.id} is skipped.")
 
     def _execute_jobs_synchronously(self):
-        while not self.scheduler.jobs_to_run.empty() and self._can_execute():
+        while not self.scheduler.jobs_to_run.empty():
             with self.lock:
                 try:
                     job = self.scheduler.jobs_to_run.get()
@@ -177,7 +177,7 @@ class _JobDispatcher(threading.Thread):
         return _results
 
     @staticmethod
-    def _update_status(job, exceptions):
+    def _update_job_status(job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
 

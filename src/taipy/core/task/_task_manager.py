@@ -30,13 +30,10 @@ class _TaskManager(_Manager[Task]):
 
     _repository = _TaskRepositoryFactory._build_repository()  # type: ignore
     _ENTITY_NAME = Task.__name__
-    __scheduler = None
 
     @classmethod
     def _scheduler(cls) -> Type[_AbstractScheduler]:
-        if not cls.__scheduler:
-            cls.__scheduler = _SchedulerFactory._build_scheduler()
-        return cls.__scheduler
+        return _SchedulerFactory._build_scheduler()
 
     @classmethod
     def _set(cls, task: Task):
