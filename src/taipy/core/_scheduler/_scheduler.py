@@ -155,13 +155,20 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def cancel_job(cls, job: Job):
-        to_cancel_jobs = set([job])
-        to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
-        with cls.lock:
-            cls.__remove_blocked_jobs(to_cancel_jobs)
-            cls.__remove_jobs_to_run(to_cancel_jobs)
-            cls.__cancel_jobs(job.id, to_cancel_jobs)
-            cls._unlock_edit_on_outputs(to_cancel_jobs)
+        if job.is_canceled():
+            cls.__logger.info(f"{job.id} has already been canceled.")
+        elif job.is_abandoned():
+            cls.__logger.info(f"{job.id} has already been abandoned and cannot be canceled.")
+        elif job.is_failed():
+            cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
+        else:
+            to_cancel_jobs = set([job])
+            to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
+            with cls.lock:
+                cls.__remove_blocked_jobs(to_cancel_jobs)
+                cls.__remove_jobs_to_run(to_cancel_jobs)
+                cls._cancel_jobs(job.id, to_cancel_jobs)
+                cls._unlock_edit_on_outputs(to_cancel_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -193,12 +200,16 @@ class _Scheduler(_AbstractScheduler):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def __cancel_jobs(cls, job_id_to_cancel, jobs):
+    def _cancel_jobs(cls, job_id_to_cancel, jobs):
         from ._scheduler_factory import _SchedulerFactory
 
         for job in jobs:
-            if Config.job_config.is_standalone and job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():
-                cls.__logger.warning(f"{job.id} is running and cannot be canceled.")
+            if job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():
+                cls.__logger.info(f"{job.id} is running and cannot be canceled.")
+            elif job.is_completed() or job.is_skipped():
+                cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")
+            elif job.is_skipped():
+                cls.__logger.info(f"{job.id} has already been skipped and cannot be canceled.")
             else:
                 if job_id_to_cancel == job.id:
                     job.canceled()
