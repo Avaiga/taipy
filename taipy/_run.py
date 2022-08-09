@@ -13,6 +13,7 @@ import typing as t
 
 from .gui import Gui
 from .rest import Rest
+from .core import Core
 
 
 def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs) -> t.Optional[t.Union[Gui, Rest]]:
@@ -26,6 +27,10 @@ def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs) -> t.Optional[t.Union[Gui,
     """
     gui = __typing_get(apps, Gui)
     rest = __typing_get(apps, Rest)
+    core = __typing_get(apps, Core)
+
+    if rest or core:
+        core.run()
 
     if not rest and not gui:
         return None
