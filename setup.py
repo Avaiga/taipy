@@ -13,7 +13,7 @@
 
 """The setup script."""
 
-from setuptools import find_packages, setup
+from setuptools import find_packages, find_namespace_packages, setup
 
 with open("README.md") as readme_file:
     readme = readme_file.read()
@@ -22,6 +22,8 @@ requirements = [
     "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
     "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
 ]
+
+test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "ngrok": ["pyngrok>=5"],
@@ -51,7 +53,9 @@ setup(
     long_description_content_type="text/markdown",
     keywords="taipy",
     name="taipy",
-    packages=find_packages(include=['taipy']),
+    package_dir={"": "src"},
+    packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
+    test_suite="tests",
     url="https://github.com/avaiga/taipy",
     version="1.2.0.dev",
     zip_safe=False,

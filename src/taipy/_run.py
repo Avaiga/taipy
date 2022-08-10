@@ -11,18 +11,18 @@
 
 import typing as t
 
-from .gui import Gui
-from .rest import Rest
-from .core import Core
+from . import Gui
+from . import Rest
+from . import Core
 
 
-def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs) -> t.Optional[t.Union[Gui, Rest]]:
+def _run(*apps: t.List[t.Union[Gui, Rest, Core]], **kwargs) -> t.Optional[t.Union[Gui, Rest, Core]]:
     """Run one or multiple Taipy services.
 
     A Taipy service is an instance of a class that runs code as a Web application.
 
     Parameters:
-        *args (List[Union[`Gui^`, `Rest^`]]): Services to run. If several services are provided, all the services run simultaneously. If this is empty or set to None, this method does nothing.
+        *args (List[Union[`Gui^`, `Rest^`, `Core^`]]): Services to run. If several services are provided, all the services run simultaneously. If this is empty or set to None, this method does nothing.
         **kwargs: Other parameters to provide to the services.
     """
     gui = __typing_get(apps, Gui)
@@ -30,6 +30,8 @@ def _run(*apps: t.List[t.Union[Gui, Rest]], **kwargs) -> t.Optional[t.Union[Gui,
     core = __typing_get(apps, Core)
 
     if rest or core:
+        if not core:
+            core = Core()
         core.run()
 
     if not rest and not gui:
