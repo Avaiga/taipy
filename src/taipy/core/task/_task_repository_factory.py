@@ -9,17 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Type
+from typing import Any, Union
 
 from .._repository._repository_factory import _RepositoryFactory
 from ..common._utils import _load_fct
 from ._task_fs_repository import _TaskFSRepository
-from ._task_repository import _TaskRepository
 
 
 class _TaskRepositoryFactory(_RepositoryFactory):
     @classmethod
-    def _build_repository(cls) -> Type[_TaskRepository]:  # type: ignore
+    def _build_repository(cls) -> Union[_TaskFSRepository, Any]:  # type: ignore
         if cls._using_enterprise():
             factory = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".task._task_repository_factory", "_TaskRepositoryFactory"

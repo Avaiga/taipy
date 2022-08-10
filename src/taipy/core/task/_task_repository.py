@@ -8,7 +8,9 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from typing import Any, Iterable, List, Optional
 
+from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
 from ..common.alias import TaskId
@@ -18,9 +20,14 @@ from ._task_model import _TaskModel
 from .task import Task
 
 
-class _TaskRepository(_RepositoryAdapter.select_base_repository()[_TaskModel, Task]):  # type: ignore
+class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
+
+    @property
+    def repository(self):
+        return self.repo
 
     def _to_model(self, task: Task) -> _TaskModel:
         return _TaskModel(
@@ -42,6 +49,30 @@ class _TaskRepository(_RepositoryAdapter.select_base_repository()[_TaskModel, Ta
             input=self.__to_data_nodes(model.input_ids),
             output=self.__to_data_nodes(model.output_ids),
         )
+
+    def load(self, model_id: str) -> Task:
+        return self.repo.load(model_id)
+
+    def _load_all(self) -> List[Task]:
+        return self.repo._load_all()
+
+    def _load_all_by(self, by) -> List[Task]:
+        return self.repo._load_all_by(by)
+
+    def _save(self, entity: Task):
+        return self.repo._save(entity)
+
+    def _delete(self, entity_id: str):
+        return self.repo._delete(entity_id)
+
+    def _delete_all(self):
+        return self.repo._delete_all()
+
+    def _delete_many(self, ids: Iterable[str]):
+        return self.repo._delete_many(ids)
+
+    def _search(self, attribute: str, value: Any) -> Optional[Task]:
+        return self.repo._search(attribute, value)
 
     @staticmethod
     def __to_ids(data_nodes):

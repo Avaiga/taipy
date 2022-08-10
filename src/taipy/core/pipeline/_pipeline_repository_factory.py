@@ -9,17 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Type
+from typing import Any, Union
 
 from .._repository._repository_factory import _RepositoryFactory
 from ..common._utils import _load_fct
 from ._pipeline_fs_repository import _PipelineFSRepository
-from ._pipeline_repository import _PipelineRepository
 
 
 class _PipelineRepositoryFactory(_RepositoryFactory):
     @classmethod
-    def _build_repository(cls) -> Type[_PipelineRepository]:  # type: ignore
+    def _build_repository(cls) -> Union[_PipelineFSRepository, Any]:  # type: ignore
         if cls._using_enterprise():
             factory = _load_fct(
                 cls._TAIPY_ENTERPRISE_CORE_MODULE + ".pipeline._pipeline_repository_factory",
