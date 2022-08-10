@@ -76,15 +76,6 @@ class _Server:
             elif "type" in message:
                 gui._manage_message(message["type"], message)
 
-    def __get_client_config(self) -> t.Dict[str, t.Any]:
-        config = {
-            "timeZone": self._gui._config.get_time_zone(),
-            "darkMode": self._gui._get_config("dark_mode", True),
-        }
-        if themes := self._gui._get_themes():
-            config["themes"] = themes
-        return config
-
     def _get_default_blueprint(
         self,
         static_folder: str,
@@ -94,7 +85,9 @@ class _Server:
         root_margin: str,
         scripts: t.List[str],
         styles: t.List[str],
-        version: str
+        version: str,
+        client_config: t.Dict[str, t.Any],
+        watermark: t.Union[str, None]
     ) -> Blueprint:
         taipy_bp = Blueprint("Taipy", __name__, static_folder=static_folder, template_folder=template_folder)
         # Serve static react build
@@ -109,8 +102,8 @@ class _Server:
                     title=title,
                     favicon=favicon,
                     root_margin=root_margin,
-                    watermark=self._gui._get_config("watermark", None),
-                    config=self.__get_client_config(),
+                    watermark=watermark,
+                    config=client_config,
                     scripts=scripts,
                     styles=styles,
                     version=version

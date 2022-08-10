@@ -13,11 +13,11 @@
     window.taipyVersion="{{version}}"
     {% endif %}</script>
     <!-- Taipy Gui js version <%= htmlWebpackPlugin.options.VERSION %> -->
+  </head>
+  <body >
     {% for script in scripts %}
       <script defer src="{{script}}" ></script>
     {% endfor %}
-  </head>
-  <body >
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"

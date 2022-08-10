@@ -29,7 +29,7 @@ import Toggle from "./Toggle";
 import TreeView from "./TreeView";
 
 // Need some more fidling to get the type right ...
-export const taipyComponents: Record<string, ComponentType> = {
+const taipyComponents: Record<string, ComponentType> = {
     a: Link as ComponentType,
     Button: Button as ComponentType,
     Chart: Chart as ComponentType,
@@ -54,6 +54,37 @@ export const taipyComponents: Record<string, ComponentType> = {
     Table: Table as ComponentType,
     Toggle: Toggle as ComponentType,
     TreeView: TreeView as ComponentType,
+};
+
+const registeredComponents: Record<string, ComponentType> = {};
+
+export const getRegisteredComponents = () => {
+    if (registeredComponents.TreeView === undefined) {
+        Object.keys(taipyComponents).forEach(name => registeredComponents[name] = taipyComponents[name]);
+        if (window.taipyConfig.extensions) {
+            Object.keys(window.taipyConfig.extensions).forEach(libName => {
+                if (window.taipyConfig.extensions[libName]) {
+                    const libParts = libName.split("/");
+                    const modName = libParts.length > 2 ? libParts[2] : libName;
+                    const mod: Record<string, (s: string) => Record<string, ComponentType>> = window[modName] as Record<string, (s: string) => Record<string, ComponentType>>;
+                    if (mod) {
+                        const fn = mod[window.taipyConfig.extensions[libName]];
+                        if (fn) {
+                            try {
+                                const comps = fn(modName);
+                                Object.keys(comps).forEach(name => registeredComponents[name] = comps[name]);
+                            } catch (e) {
+                                console.error("module '", modName, "'.'", window.taipyConfig.extensions[libName], "' error: ", e);
+                            }
+                        } else {
+                            console.error("module '", modName, "' doesn't export function '", window.taipyConfig.extensions[libName], "'");
+                        }
+                    }
+                }
+            });
+        }
+    }
+    return registeredComponents;
 };
 
 // for JSXParser in app.tsx (cant get redirect as componentType, will need more digging)

@@ -3,8 +3,8 @@
   "version": "1.2.0",
   "private": true,
   "dependencies": {
-    "@emotion/react": "^11.5.0",
-    "@emotion/styled": "^11.3.0",
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
     "@mui/icons-material": "^5.0.5",
     "@mui/lab": "^5.0.0-alpha.53",
     "@mui/material": "^5.0.6",
@@ -40,7 +40,7 @@
     "lint": "eslint --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
     "coverage": "npm test -- --coverage",
-    "types": "dts-bundle-generator -o extension-types/taipoy-gui.d.ts src/context/taipyContext.ts"
+    "types": "dts-bundle-generator -o packaging/taipy-gui.gen.d.ts src/extensions/exports.ts"
   },
   "husky": {
     "hooks": {
@@ -81,6 +81,7 @@
     "@types/sprintf-js": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^5.5.0",
     "@typescript-eslint/parser": "^5.5.0",
+    "add-asset-html-webpack-plugin": "^5.0.2",
     "autoprefixer": "^10.4.0",
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
@@ -98,11 +99,7 @@
     "jest-environment-jsdom": "^28.1.1",
     "jest-websocket-mock": "^2.2.1",
     "lint-staged": "^13.0.2",
-    "mini-css-extract-plugin": "^2.4.3",
     "mock-socket": "^9.0.7",
-    "postcss": "^8.3.11",
-    "postcss-loader": "^7.0.0",
-    "postcss-preset-env": "^7.0.1",
     "ts-jest": "^28.0.5",
     "ts-loader": "^9.2.6",
     "typescript": "^4.4.4",

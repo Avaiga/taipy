@@ -45,6 +45,9 @@ class MyLibrary(ElementLibrary):
     def get_resource(self, name: str) -> Path:
         return None
 
+    def get_register_js_function(self) -> str:
+        return "testRegister"
+
 
 Gui.add_library(MyLibrary())
 
