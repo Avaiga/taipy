@@ -11,7 +11,6 @@
 import pathlib
 from typing import Optional
 
-from .. import Job
 from ._job_model import _JobModel
 from ._job_repository import _JobRepository
 
@@ -28,7 +27,7 @@ class _JobFSRepository(_JobRepository):
     def _storage_folder(self) -> pathlib.Path:
         return super().repo._storage_folder
 
-    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]) -> Optional[Job]:
+    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]):
         return super().repo._get_by_config_and_parent_id(config_id, parent_id)
 
     def _get_by_configs_and_parent_ids(self, configs_and_parent_ids):
