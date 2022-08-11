@@ -20,6 +20,7 @@ def test_get_cycle(client, default_cycle):
     rep = client.get(cycle_url)
     assert rep.status_code == 404
 
+    #TODO: error message: AttributeError: module 'taipy.core.core' has no attribute 'core'
     with mock.patch("taipy.core.cycle._cycle_manager._CycleManager._get") as manager_mock:
         manager_mock.return_value = default_cycle
 
