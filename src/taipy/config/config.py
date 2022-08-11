@@ -13,7 +13,6 @@ import json
 import os
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from .section import Section
 from ..logger._taipy_logger import _TaipyLogger
 from ._config import _Config
 from ._toml_serializer import _TomlSerializer
@@ -28,6 +27,7 @@ from .job_execution.job_config import JobConfig
 from .pipeline.pipeline_config import PipelineConfig
 from .scenario.frequency import Frequency
 from .scenario.scenario_config import ScenarioConfig
+from .section import Section
 from .task.task_config import TaskConfig
 
 
@@ -751,7 +751,7 @@ class Config:
         for issue in config._collector._errors:
             cls.__logger.error(str(issue))
         if len(config._collector._errors) != 0:
-            raise ConfigurationIssueError
+            raise ConfigurationIssueError("Configuration issues found.")
 
 
 Config._load_environment_file_config()
