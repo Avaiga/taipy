@@ -9,8 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from ._core import Core
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
-from .core import Core
 from .cycle.cycle import Cycle
 from .data.data_node import DataNode
 from .exceptions import exceptions
