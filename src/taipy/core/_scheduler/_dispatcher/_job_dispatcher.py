@@ -59,6 +59,8 @@ class _JobDispatcher(threading.Thread):
         while not self.__STOP_FLAG:
             try:
                 if self._can_execute():
+                    breakpoint()
+                    print("hang on")
                     job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
             except:  # In case the last job of the queue has been removed.
