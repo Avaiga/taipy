@@ -16,6 +16,7 @@ import random
 import string
 from functools import partial
 from time import sleep
+from unittest import mock
 
 import pytest
 
@@ -170,17 +171,86 @@ def test_cancel_single_job():
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
     assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
-    _SchedulerFactory._dispatcher._nb_available_workers = 0
-    assert_true_after_1_minute_max(lambda: _SchedulerFactory._dispatcher._nb_available_workers == 0)
+    _SchedulerFactory._dispatcher.stop()
+    assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
 
-    with lock:
-        job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
 
-        assert_true_after_1_minute_max(job.is_pending)
-        assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
-        _JobManager._cancel(job.id)
-        assert_true_after_1_minute_max(job.is_canceled)
+    assert_true_after_1_minute_max(job.is_pending)
+    assert_true_after_1_minute_max(lambda: len(_JobDispatcher._dispatched_processes) == 0)
+    _JobManager._cancel(job.id)
     assert_true_after_1_minute_max(job.is_canceled)
+    assert_true_after_1_minute_max(job.is_canceled)
+
+
+@mock.patch(
+    "src.taipy.core._scheduler._scheduler._Scheduler._schedule_job_to_run_or_block", return_value="schedule_job"
+)
+@mock.patch("src.taipy.core._scheduler._scheduler._Scheduler._cancel_jobs")
+def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    _SchedulerFactory._build_dispatcher()
+
+    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    _SchedulerFactory._dispatcher.stop()
+    assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
+
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job.canceled()
+    assert job.is_canceled()
+    _JobManager._cancel(job)
+    cancel_jobs.assert_not_called()
+    assert job.is_canceled()
+
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job.failed()
+    assert job.is_failed()
+    _JobManager._cancel(job)
+    cancel_jobs.assert_not_called()
+    assert job.is_failed()
+
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job.abandoned()
+    assert job.is_abandoned()
+    _JobManager._cancel(job)
+    cancel_jobs.assert_not_called()
+    assert job.is_abandoned()
+
+
+@mock.patch(
+    "src.taipy.core._scheduler._scheduler._Scheduler._schedule_job_to_run_or_block", return_value="schedule_job"
+)
+@mock.patch("src.taipy.core.job.job.Job.canceled")
+def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    _SchedulerFactory._build_dispatcher()
+
+    task = _create_task(inner_lock_multiply, name="cancel_single_job")
+    assert_true_after_1_minute_max(_SchedulerFactory._dispatcher.is_running)
+    _SchedulerFactory._dispatcher.stop()
+    assert_true_after_1_minute_max(lambda: not _SchedulerFactory._dispatcher.is_running())
+
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job.completed()
+    assert job.is_completed()
+    cancel_jobs.assert_not_called()
+    _JobManager._cancel(job)
+    assert job.is_completed()
+
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job.failed()
+    assert job.is_failed()
+    cancel_jobs.assert_not_called()
+    _JobManager._cancel(job)
+    assert job.is_failed()
+
+    job = _SchedulerFactory._scheduler.submit_task(task, "submit_id")
+    job.skipped()
+    assert job.is_skipped()
+    cancel_jobs.assert_not_called()
+    _JobManager._cancel(job)
+    assert job.is_skipped()
 
 
 def test_cancel_single_running_job():
