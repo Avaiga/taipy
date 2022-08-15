@@ -263,14 +263,13 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
     with lock_0:
         job_0 = _Scheduler.submit_task(task_0, "submit_id_0")
         assert_true_after_1_minute_max(job_0.is_running)
-        assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
         with lock_1:
             with lock_2:
-                job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
-                job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
-
                 assert task_1.output[f"{task_1.config_id}_output0"].read() == 0
                 assert task_2.output[f"{task_2.config_id}_output0"].read() == 0
+                job_2 = _Scheduler.submit_task(task_2, "submit_id_2")
+                job_1 = _Scheduler.submit_task(task_1, "submit_id_1")
                 assert_true_after_1_minute_max(job_0.is_running)
                 assert_true_after_1_minute_max(job_1.is_pending)
                 assert_true_after_1_minute_max(job_2.is_running)
