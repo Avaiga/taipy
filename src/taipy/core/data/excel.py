@@ -130,7 +130,9 @@ class ExcelDataNode(DataNode):
                     sheet_name: custom_obj
                     for sheet_name, custom_obj in zip(sheet_names, properties[self.__EXPOSED_TYPE_PROPERTY])
                 }
-            raise NotMatchSheetNameAndCustomObject
+            raise NotMatchSheetNameAndCustomObject(
+                f"Sheet name and custom object do not match for data node config {self.config_id}."
+            )
         return {sheet_name: properties[self.__EXPOSED_TYPE_PROPERTY] for sheet_name in sheet_names}
 
     @classmethod

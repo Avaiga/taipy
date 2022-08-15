@@ -50,6 +50,13 @@ class NonExistingDataNode(Exception):
         self.message = f"DataNode: {data_node_id} does not exist."
 
 
+class NonExistingDataNodeConfig(Exception):
+    """Raised if a requested DataNodeConfig is not known by the DataNode Manager."""
+
+    def __init__(self, data_node_config_id: str):
+        self.message = f"Data node config: {data_node_config_id} does not exist."
+
+
 class NonExistingExcelSheet(Exception):
     """Raised if a requested Sheet name does not exist in the provided Excel file."""
 

@@ -181,7 +181,9 @@ class _ScenarioManager(_Manager[Scenario]):
             scenario._primary_scenario = True
             cls._set(scenario)
         else:
-            raise DoesNotBelongToACycle
+            raise DoesNotBelongToACycle(
+                f"Can't set scenario {scenario.id} to primary because it doesn't belong to a cycle."
+            )
 
     @classmethod
     def _tag(cls, scenario: Scenario, tag: str):
@@ -206,17 +208,19 @@ class _ScenarioManager(_Manager[Scenario]):
         scenario = cls._get(scenario_id)
         if scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
-                raise DeletingPrimaryScenario
+                raise DeletingPrimaryScenario(
+                    f"Scenario {scenario.id}, which has config id {scenario.config_id}, is primary and there are other scenarios in the same cycle."
+                )
             _CycleManagerFactory._build_manager()._delete(scenario.cycle.id)
         super()._delete(scenario_id)
 
     @classmethod
     def _compare(cls, *scenarios: Scenario, data_node_config_id: str = None):
         if len(scenarios) < 2:
-            raise InsufficientScenarioToCompare
+            raise InsufficientScenarioToCompare("At least two scenarios are required to compare.")
 
-        if not all([scenarios[0].config_id == scenario.config_id for scenario in scenarios]):
-            raise DifferentScenarioConfigs
+        if not all(scenarios[0].config_id == scenario.config_id for scenario in scenarios):
+            raise DifferentScenarioConfigs("Scenarios to compare must have the same configuration.")
 
         if scenario_config := _ScenarioManager.__get_config(scenarios[0]):
             results = {}
@@ -224,7 +228,7 @@ class _ScenarioManager(_Manager[Scenario]):
                 if data_node_config_id in scenario_config.comparators.keys():
                     dn_comparators = {data_node_config_id: scenario_config.comparators[data_node_config_id]}
                 else:
-                    raise NonExistingComparator
+                    raise NonExistingComparator(f"Data node config {data_node_config_id} has no comparator.")
             else:
                 dn_comparators = scenario_config.comparators
 
@@ -248,7 +252,9 @@ class _ScenarioManager(_Manager[Scenario]):
         scenario = cls._get(scenario_id)
         if scenario.is_primary:
             if len(cls._get_all_by_cycle(scenario.cycle)) > 1:
-                raise DeletingPrimaryScenario
+                raise DeletingPrimaryScenario(
+                    f"Scenario {scenario.id}, which has config id {scenario.config_id}, is primary and there are other scenarios in the same cycle."
+                )
             _CycleManagerFactory._build_manager()._hard_delete(scenario.cycle.id)
             return
         entity_ids_to_delete = cls._get_owned_entity_ids(scenario)
