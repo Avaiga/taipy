@@ -203,10 +203,10 @@ def test_submit_task_in_parallel():
     task = _create_task(partial(lock_multiply, lock))
 
     with lock:
-        job = _Scheduler.submit_task(task, "submit_id")
         assert task.output[f"{task.config_id}_output0"].read() == 0
+        job = _Scheduler.submit_task(task, "submit_id")
         assert_true_after_1_minute_max(job.is_running)
-        assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 1
+        assert_true_after_1_minute_max(lambda: len(_SchedulerFactory._dispatcher._dispatched_processes) == 1)
 
     assert_true_after_1_minute_max(lambda: task.output[f"{task.config_id}_output0"].read() == 42)
     assert_true_after_1_minute_max(job.is_completed)
