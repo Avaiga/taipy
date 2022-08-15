@@ -1,3 +1,14 @@
 .idea
 .venv
 __pycache__
+
+# Distribution / packaging
+Pipfile.lock
+build/
+*.egg-info/
+
+# IDE settings
+.vscode/
+.idea/
+.idea/taipy.iml
+.DS_Store

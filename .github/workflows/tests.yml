@@ -1,25 +1,18 @@
-name: Test package installation
+name: Python tests
 
 on:
   push:
     branches: [ develop ]
   pull_request:
     branches: [ develop ]
-  workflow_dispatch:
-    inputs:
-      user-to-notify:
-        description: "Github username to notify"
-        required: false
-        default: ""
 
 jobs:
-  standard-packages:
-    timeout-minutes: 15
+  backend:
+    timeout-minutes: 20
     strategy:
       matrix:
-        python-versions: [ '3.8', '3.9', '3.10' ]
-        os: [ubuntu-18.04, macos-latest] #, windows-latest]
-
+        python-versions: ['3.8', '3.9', '3.10']
+        os: [ubuntu-18.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -28,17 +21,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-versions }}
 
-      - name: Install Taipy without dependencies
+      - name: Tests
         run: |
-          pip install .
-          rm -rf src
-
-          python -c "import taipy as tp; tp.Scenario"
-          python -c "import taipy as tp; tp.gui"
-          python -c "import taipy as tp; tp.rest"
+          pip install tox
+          tox -e tests
 
       - name: Notify user if failed
-        if: failure()
+        if: failure() && github.event_name == 'workflow_dispatch'
         run: |
           if [[ -n "${{ github.event.inputs.user-to-notify }}" ]]; then
             curl "${{ secrets.notify_endpoint }}" -d '{"username": "${{ github.event.inputs.user-to-notify }}", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" }' -H "Content-Type: application/json"
