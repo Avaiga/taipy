@@ -107,6 +107,7 @@ class PickleDataNode(DataNode):
 
     @path.setter  # type: ignore
     def path(self, value):
+        self._path = value
         self.properties[self.__PATH_KEY] = value
         self.properties[self.__IS_GENERATED_KEY] = False
 

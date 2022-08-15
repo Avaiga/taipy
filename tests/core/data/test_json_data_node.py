@@ -28,6 +28,14 @@ from taipy.config.data_node.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup():
+    yield
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.json")
+    if os.path.isfile(path):
+        os.remove(path)
+
+
 class MyCustomObject:
     def __init__(self, id, integer, text):
         self.id = id
@@ -218,3 +226,15 @@ class TestJSONDataNode:
     def test_raise_error_when_path_not_exist(self):
         with pytest.raises(MissingRequiredProperty):
             JSONDataNode("foo", Scope.PIPELINE)
+
+    def test_read_write_after_modify_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_dict.json")
+        new_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.json")
+        dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": path})
+        read_data = dn.read()
+        assert read_data is not None
+        dn.path = new_path
+        with pytest.raises(FileNotFoundError):
+            dn.read()
+        dn.write({"other": "stuff"})
+        assert dn.read() == {"other": "stuff"}

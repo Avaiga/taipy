@@ -22,6 +22,14 @@ from taipy.config.data_node.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 
+@pytest.fixture(scope="function", autouse=True)
+def cleanup():
+    yield
+    path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.p")
+    if os.path.isfile(path):
+        os.remove(path)
+
+
 class TestPickleDataNodeEntity:
     @pytest.fixture(scope="function", autouse=True)
     def remove_pickle_files(self):
@@ -118,3 +126,15 @@ class TestPickleDataNodeEntity:
         assert dn.is_generated
         dn.path = "bar.p"
         assert not dn.is_generated
+
+    def test_read_write_after_modify_path(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.p")
+        new_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.p")
+        dn = PickleDataNode("foo", Scope.PIPELINE, properties={"default_path": path})
+        read_data = dn.read()
+        assert read_data is not None
+        dn.path = new_path
+        with pytest.raises(FileNotFoundError):
+            dn.read()
+        dn.write({"other": "stuff"})
+        assert dn.read() == {"other": "stuff"}

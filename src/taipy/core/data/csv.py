@@ -109,6 +109,7 @@ class CSVDataNode(DataNode):
 
     @path.setter
     def path(self, value):
+        self._path = value
         self.properties[self.__PATH_KEY] = value
 
     def _read(self):

@@ -115,6 +115,7 @@ class ExcelDataNode(DataNode):
 
     @path.setter
     def path(self, value):
+        self._path = value
         self.properties[self.__PATH_KEY] = value
 
     def __exposed_types_to_dict(self, properties):

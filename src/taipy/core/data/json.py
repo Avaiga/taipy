@@ -110,6 +110,7 @@ class JSONDataNode(DataNode):
 
     @path.setter
     def path(self, value):
+        self._path = value
         self.properties[self.__PATH_KEY] = value
 
     @property  # type: ignore
