@@ -128,7 +128,7 @@ class DataNodeResource(Resource):
         manager = _DataManagerFactory._build_manager()
         datanode = manager._get(datanode_id)
         if not datanode:
-            return make_response(jsonify({"message": f"DataNode {datanode_id} not found"}), 404)
+            return make_response(jsonify({"message": f"DataNode {datanode_id} not found."}), 404)
         return {"datanode": schema.dump(_to_model(REPOSITORY, datanode))}
 
     @_middleware
