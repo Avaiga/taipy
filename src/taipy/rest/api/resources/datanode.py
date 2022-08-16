@@ -128,8 +128,8 @@ class DataNodeResource(Resource):
         manager = _DataManagerFactory._build_manager()
         datanode = manager._get(datanode_id)
         if not datanode:
-            return make_response(jsonify({"message": f"Data node {datanode_id} not found"}), 404)
-        return {"datanode": schema.dump(_to_model(REPOSITORY, datanode, class_map=datanode.storage_type()))}
+            return make_response(jsonify({"message": f"DataNode {datanode_id} not found."}), 404)
+        return {"datanode": schema.dump(_to_model(REPOSITORY, datanode))}
 
     @_middleware
     def delete(self, datanode_id):
@@ -217,7 +217,7 @@ class DataNodeList(Resource):
         schema = DataNodeSchema(many=True)
         manager = _DataManagerFactory._build_manager()
         datanodes = [
-            _to_model(REPOSITORY, datanode, class_map=datanode.storage_type()) for datanode in manager._get_all()
+            _to_model(REPOSITORY, datanode) for datanode in manager._get_all()
         ]
         return schema.dump(datanodes)
 

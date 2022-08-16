@@ -9,18 +9,18 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from taipy.core.cycle._cycle_repository import _CycleRepository
-from taipy.core.data._data_repository import _DataRepository
-from taipy.core.pipeline._pipeline_repository import _PipelineRepository
-from taipy.core.scenario._scenario_repository import _ScenarioRepository
-from taipy.core.task._task_repository import _TaskRepository
+from taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
+from taipy.core.data._data_repository_factory import _DataRepositoryFactory
+from taipy.core.pipeline._pipeline_repository_factory import _PipelineRepositoryFactory
+from taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
+from taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 
 repositories = {
-    "scenario": _ScenarioRepository,
-    "pipeline": _PipelineRepository,
-    "task": _TaskRepository,
-    "data": _DataRepository,
-    "cycle": _CycleRepository,
+    "scenario": _ScenarioRepositoryFactory._build_repository,
+    "pipeline": _PipelineRepositoryFactory._build_repository,
+    "task": _TaskRepositoryFactory._build_repository,
+    "data": _DataRepositoryFactory._build_repository,
+    "cycle": _CycleRepositoryFactory._build_repository,
 }
 
 
