@@ -11,7 +11,7 @@
 from importlib import util
 from typing import Any, Optional, Union
 
-from ..common._utils import _load_fct
+from ..common import _utils
 from ._filesystem_repository import _FileSystemRepository
 
 
@@ -24,7 +24,7 @@ class _RepositoryAdapter:
     @classmethod
     def select_base_repository(cls) -> Optional[Union[_FileSystemRepository, Any]]:
         if cls._using_enterprise():
-            adapter = _load_fct(
+            adapter = _utils._load_fct(
                 f"{cls._TAIPY_ENTERPRISE_MODULE}.core._repository._repository_adapter", "_RepositoryAdapter"
             )
             return adapter.select_base_repository()  # type: ignore

@@ -12,9 +12,10 @@
 import dataclasses
 import pathlib
 from dataclasses import dataclass
-from typing import Any, Dict
+from typing import Any, Dict, Iterable, List, Optional
 
 from src.taipy.core._manager._manager import _Manager
+from src.taipy.core._repository._repository import _AbstractRepository
 from src.taipy.core._repository._repository_adapter import _RepositoryAdapter
 from taipy.config.config import Config
 
@@ -38,12 +39,40 @@ class MockEntity:
     name: str
 
 
-class MockRepository(_RepositoryAdapter.select_base_repository()):  # type: ignore
+class MockRepository(_AbstractRepository):  # type: ignore
+    def __init__(self, **kwargs):
+        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
+
     def _to_model(self, obj: MockEntity):
         return MockModel(obj.id, obj.name)
 
     def _from_model(self, model: MockModel):
         return MockEntity(model.id, model.name)
+
+    def load(self, model_id: str) -> MockEntity:
+        return self.repo.load(model_id)
+
+    def _load_all(self) -> List[MockEntity]:
+        return self.repo._load_all()
+
+    def _load_all_by(self, by) -> List[MockEntity]:
+        return self.repo._load_all_by(by)
+
+    def _save(self, entity: MockEntity):
+        return self.repo._save(entity)
+
+    def _delete(self, entity_id: str):
+        return self.repo._delete(entity_id)
+
+    def _delete_all(self):
+        return self.repo._delete_all()
+
+    def _delete_many(self, ids: Iterable[str]):
+        return self.repo._delete_many(ids)
+
+    def _search(self, attribute: str, value: Any) -> Optional[MockEntity]:
+        return self.repo._search(attribute, value)
 
     @property
     def _storage_folder(self) -> pathlib.Path:

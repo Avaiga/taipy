@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Iterable, List, Optional
 
+from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
 from ..common._utils import Subscriber
@@ -23,9 +24,14 @@ from ._scenario_model import _ScenarioModel
 from .scenario import Scenario
 
 
-class _ScenarioRepository(_RepositoryAdapter.select_base_repository()[_ScenarioModel, Scenario]):  # type: ignore
+class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # type: ignore
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
+
+    @property
+    def repository(self):
+        return self.repo
 
     def _to_model(self, scenario: Scenario):
         return _ScenarioModel(
@@ -56,6 +62,30 @@ class _ScenarioRepository(_RepositoryAdapter.select_base_repository()[_ScenarioM
             ],
         )
         return scenario
+
+    def load(self, model_id: str) -> Scenario:
+        return self.repo.load(model_id)
+
+    def _load_all(self) -> List[Scenario]:
+        return self.repo._load_all()
+
+    def _load_all_by(self, by) -> List[Scenario]:
+        return self.repo._load_all_by(by)
+
+    def _save(self, entity: Scenario):
+        return self.repo._save(entity)
+
+    def _delete(self, entity_id: str):
+        return self.repo._delete(entity_id)
+
+    def _delete_all(self):
+        return self.repo._delete_all()
+
+    def _delete_many(self, ids: Iterable[str]):
+        return self.repo._delete_many(ids)
+
+    def _search(self, attribute: str, value: Any) -> Optional[Scenario]:
+        return self.repo._search(attribute, value)
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:

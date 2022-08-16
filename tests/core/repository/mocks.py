@@ -38,6 +38,10 @@ class MockObj:
 
 
 class MockFSRepository(_FileSystemRepository):
+    def __init__(self, **kwargs):
+        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        super().__init__(**kwargs)
+
     def _to_model(self, obj: MockObj):
         return MockModel(obj.id, obj.name)
 

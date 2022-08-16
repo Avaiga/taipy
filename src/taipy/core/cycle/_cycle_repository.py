@@ -9,20 +9,25 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import pathlib
 from datetime import datetime
-from typing import Callable, List
+from typing import Any, Callable, Iterable, List, Optional
 
 from taipy.config.scenario.frequency import Frequency
 
+from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..cycle._cycle_model import _CycleModel
 from ..cycle.cycle import Cycle
 
 
-class _CycleRepository(_RepositoryAdapter.select_base_repository()[_CycleModel, Cycle]):  # type: ignore
+class _CycleRepository(_AbstractRepository[_CycleModel, Cycle]):  # type: ignore
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
+
+    @property
+    def repository(self):
+        return self.repo
 
     def _to_model(self, cycle: Cycle) -> _CycleModel:
         return _CycleModel(
@@ -45,6 +50,30 @@ class _CycleRepository(_RepositoryAdapter.select_base_repository()[_CycleModel, 
             start_date=datetime.fromisoformat(model.start_date),
             end_date=datetime.fromisoformat(model.end_date),
         )
+
+    def load(self, model_id: str) -> Cycle:
+        return self.repo.load(model_id)
+
+    def _load_all(self) -> List[Cycle]:
+        return self.repo._load_all()
+
+    def _load_all_by(self, by) -> List[Cycle]:
+        return self.repo._load_all_by(by)
+
+    def _save(self, entity: Cycle):
+        return self.repo._save(entity)
+
+    def _delete(self, entity_id: str):
+        return self.repo._delete(entity_id)
+
+    def _delete_all(self):
+        return self.repo._delete_all()
+
+    def _delete_many(self, ids: Iterable[str]):
+        return self.repo._delete_many(ids)
+
+    def _search(self, attribute: str, value: Any) -> Optional[Cycle]:
+        return self.repo._search(attribute, value)
 
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         return self.__get_cycles_cdt(lambda cycle: cycle.frequency == frequency and cycle.start_date == start_date)

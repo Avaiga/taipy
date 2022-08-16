@@ -12,8 +12,9 @@
 import pathlib
 from datetime import datetime, timedelta
 from pydoc import locate
-from typing import Dict
+from typing import Any, Dict, Iterable, List, Optional
 
+from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common._utils import _load_fct
 from ._data_model import _DataNodeModel
@@ -22,7 +23,7 @@ from .generic import GenericDataNode
 from .json import JSONDataNode
 
 
-class _DataRepository(_RepositoryAdapter.select_base_repository()[_DataNodeModel, DataNode]):  # type: ignore
+class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: ignore
     _READ_FCT_NAME_KEY = "read_fct_name"
     _READ_FCT_MODULE_KEY = "read_fct_module"
     _WRITE_FCT_NAME_KEY = "write_fct_name"
@@ -34,8 +35,13 @@ class _DataRepository(_RepositoryAdapter.select_base_repository()[_DataNodeModel
     _EXPOSED_TYPE_KEY = "exposed_type"
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        kwargs.update({"to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        self.repo = _RepositoryAdapter.select_base_repository()(**kwargs)
         self.class_map = {c.storage_type(): c for c in DataNode.__subclasses__()}
+
+    @property
+    def repository(self):
+        return self.repo
 
     def _to_model(self, data_node: DataNode):
         properties = data_node._properties.data.copy()
@@ -161,3 +167,27 @@ class _DataRepository(_RepositoryAdapter.select_base_repository()[_DataNodeModel
             edit_in_progress=model.edit_in_progress,
             properties=model.data_node_properties,
         )
+
+    def load(self, model_id: str) -> DataNode:
+        return self.repo.load(model_id)
+
+    def _load_all(self) -> List[DataNode]:
+        return self.repo._load_all()
+
+    def _load_all_by(self, by) -> List[DataNode]:
+        return self.repo._load_all_by(by)
+
+    def _save(self, entity: DataNode):
+        return self.repo._save(entity)
+
+    def _delete(self, entity_id: str):
+        return self.repo._delete(entity_id)
+
+    def _delete_all(self):
+        return self.repo._delete_all()
+
+    def _delete_many(self, ids: Iterable[str]):
+        return self.repo._delete_many(ids)
+
+    def _search(self, attribute: str, value: Any) -> Optional[DataNode]:
+        return self.repo._search(attribute, value)

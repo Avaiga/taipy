@@ -14,7 +14,7 @@ import pathlib
 import shutil
 import time
 from abc import abstractmethod
-from typing import Iterable, Iterator, List, Optional, Type, TypeVar, Union
+from typing import Callable, Iterable, Iterator, List, Optional, Type, TypeVar, Union
 
 from taipy.config.config import Config
 
@@ -53,9 +53,11 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         """
         ...
 
-    def __init__(self, model: Type[ModelType], dir_name: str):
+    def __init__(self, model: Type[ModelType], dir_name: str, to_model_fct: Callable, from_model_fct: Callable):
         self.model = model
         self._dir_name = dir_name
+        self._to_model = to_model_fct  # type: ignore
+        self._from_model = from_model_fct  # type: ignore
 
     @property
     def dir_path(self):
