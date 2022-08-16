@@ -84,7 +84,7 @@ class ExcelDataNode(DataNode):
         if self.__HAS_HEADER_PROPERTY not in properties.keys():
             properties[self.__HAS_HEADER_PROPERTY] = True
         if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
-            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties)
+            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties, config_id)
 
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
         if self._path is None:
@@ -118,7 +118,7 @@ class ExcelDataNode(DataNode):
         self._path = value
         self.properties[self.__PATH_KEY] = value
 
-    def __exposed_types_to_dict(self, properties):
+    def __exposed_types_to_dict(self, properties, config_id):
         if properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
             return properties[self.__EXPOSED_TYPE_PROPERTY]
         if isinstance(properties[self.__EXPOSED_TYPE_PROPERTY], Dict):
@@ -131,7 +131,7 @@ class ExcelDataNode(DataNode):
                     for sheet_name, custom_obj in zip(sheet_names, properties[self.__EXPOSED_TYPE_PROPERTY])
                 }
             raise NotMatchSheetNameAndCustomObject(
-                f"Sheet name and custom object do not match for data node config {self.config_id}."
+                f"Sheet name and custom object do not match for data node config {config_id}."
             )
         return {sheet_name: properties[self.__EXPOSED_TYPE_PROPERTY] for sheet_name in sheet_names}
 
