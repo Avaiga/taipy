@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    timeout-minutes: 20
+    timeout-minutes: 40
     strategy:
       matrix:
         node-version: [16.x]

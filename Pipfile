@@ -22,6 +22,8 @@ flask-talisman = "==1.0"
 gevent = "==21.12.0"
 gevent-websocket = "==0.10.1"
 taipy-config = {git = "https://git@github.com/avaiga/taipy-config.git@develop"}
+kthread = "==0.2.3"
+werkzeug = "==2.0.3"
 
 [dev-packages]
 black = "*"

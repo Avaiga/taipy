@@ -36,7 +36,7 @@ class _PandasDataAccessor(_DataAccessor):
 
     @staticmethod
     def get_supported_classes() -> t.List[str]:
-        return [t.__name__ for t in _PandasDataAccessor.__types]
+        return [t.__name__ for t in _PandasDataAccessor.__types]  # type: ignore
 
     @staticmethod
     def __style_function(
@@ -163,7 +163,7 @@ class _PandasDataAccessor(_DataAccessor):
         return ret
 
     def get_col_types(self, var_name: str, value: t.Any) -> t.Union[None, t.Dict[str, str]]:  # type: ignore
-        if isinstance(value, _PandasDataAccessor.__types):
+        if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
             return value.dtypes.apply(lambda x: x.name).to_dict()
         elif isinstance(value, list):
             ret_dict: t.Dict[str, str] = {}
@@ -310,6 +310,6 @@ class _PandasDataAccessor(_DataAccessor):
                 return ret_payload
             else:
                 value = value[0]
-        if isinstance(value, _PandasDataAccessor.__types):
+        if isinstance(value, _PandasDataAccessor.__types):  # type: ignore
             return self.__get_data(gui, var_name, value, payload, data_format)
         return {}

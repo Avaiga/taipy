@@ -13,9 +13,9 @@
 
 """The setup script."""
 
+import json
 import os
 from pathlib import Path
-import json
 
 from setuptools import find_namespace_packages, find_packages, setup
 from setuptools.command.build_py import build_py
@@ -43,6 +43,8 @@ requirements = [
     "flask-talisman>=1.0,<2.0",
     "gevent>=21.12.0,<22.0",
     "gevent-websocket>=0.10.1,<0.11",
+    "kthread>=0.2.3,<0.3",
+    "werkzeug>=2.0,<2.1",
     "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
 ]
 
