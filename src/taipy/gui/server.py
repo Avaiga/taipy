@@ -28,7 +28,7 @@ from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
 from .renderers.jsonencoder import _TaipyJsonEncoder
-from .utils import _is_in_notebook
+from .utils import _is_in_notebook, _RuntimeManager
 
 if t.TYPE_CHECKING:
     from .gui import Gui
@@ -184,6 +184,9 @@ class _Server:
 
     def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread, ssl_context):
         host_value = host if host != "0.0.0.0" else "localhost"
+        if _is_in_notebook() or run_in_thread:
+            runtime_manager = _RuntimeManager()
+            runtime_manager.add_gui(self._gui, port)
         if debug and not is_running_from_reloader():
             # Check that the port is not already opened
             if self._is_port_open(host_value, port):
