@@ -327,4 +327,4 @@ def test_submit_pipeline():
     with mock.patch("src.taipy.core.pipeline._pipeline_manager._PipelineManager._submit") as mck:
         pipeline = Pipeline("id", {}, [])
         pipeline.submit(None, False)
-        mck.assert_called_once_with(pipeline, None, False)
+        mck.assert_called_once_with(pipeline, None, False, False, None)

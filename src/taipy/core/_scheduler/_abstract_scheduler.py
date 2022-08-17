@@ -26,13 +26,26 @@ class _AbstractScheduler:
 
     @classmethod
     @abstractmethod
-    def submit(cls, pipeline, callbacks: Optional[Iterable[Callable]], force: bool = False) -> List[Job]:
+    def submit(
+        cls,
+        pipeline,
+        callbacks: Optional[Iterable[Callable]],
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[int] = None,
+    ) -> List[Job]:
         return NotImplemented
 
     @classmethod
     @abstractmethod
     def submit_task(
-        cls, task: Task, submit_id: str = None, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
+        cls,
+        task: Task,
+        submit_id: str = None,
+        callbacks: Optional[Iterable[Callable]] = None,
+        force: bool = False,
+        wait=False,
+        timeout=None,
     ) -> Job:
         return NotImplemented
 
