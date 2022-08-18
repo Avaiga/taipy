@@ -13,15 +13,16 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from flask import jsonify, make_response, request
+from flask import request
 from flask_restful import Resource
 
 from taipy.config.config import Config
 from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.operator import Operator
-from taipy.core.exceptions.exceptions import NonExistingDataNode
+from taipy.core.exceptions.exceptions import NonExistingDataNode, NonExistingDataNodeConfig
 
 from ...commons.to_from_model import _to_model
+from ..exceptions.exceptions import ConfigIdMissingException
 from ..middlewares._middleware import _middleware
 from ..schemas import (
     CSVDataNodeConfigSchema,
@@ -46,6 +47,14 @@ ds_schema_map = {
 }
 
 REPOSITORY = "data"
+
+
+def _get_or_raise(data_node_id: str) -> None:
+    manager = _DataManagerFactory._build_manager()
+    data_node = manager._get(data_node_id)
+    if not data_node:
+        raise NonExistingDataNode(data_node_id)
+    return data_node
 
 
 class DataNodeResource(Resource):
@@ -112,7 +121,7 @@ class DataNodeResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
         404:
@@ -125,20 +134,15 @@ class DataNodeResource(Resource):
     @_middleware
     def get(self, datanode_id):
         schema = DataNodeSchema()
-        manager = _DataManagerFactory._build_manager()
-        datanode = manager._get(datanode_id)
-        if not datanode:
-            return make_response(jsonify({"message": f"DataNode {datanode_id} not found."}), 404)
+        datanode = _get_or_raise(datanode_id)
         return {"datanode": schema.dump(_to_model(REPOSITORY, datanode))}
 
     @_middleware
     def delete(self, datanode_id):
-        try:
-            manager = _DataManagerFactory._build_manager()
-            manager._delete(datanode_id)
-        except NonExistingDataNode:
-            return make_response(jsonify({"message": f"Data node {datanode_id} not found"}), 404)
-        return {"msg": f"Data node {datanode_id} deleted."}
+        _get_or_raise(datanode_id)
+        manager = _DataManagerFactory._build_manager()
+        manager._delete(datanode_id)
+        return {"message": f"Data node {datanode_id} was deleted."}
 
 
 class DataNodeList(Resource):
@@ -200,7 +204,7 @@ class DataNodeList(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
                   datanode: DataNodeSchema
@@ -210,15 +214,16 @@ class DataNodeList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        return Config.data_nodes[config_id]
+        config = Config.data_nodes.get(config_id)
+        if not config:
+            raise NonExistingDataNodeConfig(config_id)
+        return config
 
     @_middleware
     def get(self):
         schema = DataNodeSchema(many=True)
         manager = _DataManagerFactory._build_manager()
-        datanodes = [
-            _to_model(REPOSITORY, datanode) for datanode in manager._get_all()
-        ]
+        datanodes = [_to_model(REPOSITORY, datanode) for datanode in manager._get_all()]
         return schema.dump(datanodes)
 
     @_middleware
@@ -227,20 +232,17 @@ class DataNodeList(Resource):
         config_id = args.get("config_id")
 
         if not config_id:
-            return {"msg": "Config id is mandatory"}, 400
+            raise ConfigIdMissingException
 
-        try:
-            config = self.fetch_config(config_id)
-            schema = ds_schema_map.get(config.storage_type)()
-            manager = _DataManagerFactory._build_manager()
-            manager._bulk_get_or_create({config})
+        config = self.fetch_config(config_id)
+        schema = ds_schema_map.get(config.storage_type)()
+        manager = _DataManagerFactory._build_manager()
+        manager._bulk_get_or_create({config})
 
-            return {
-                "msg": "Data node created.",
-                "datanode": schema.dump(config),
-            }, 201
-        except KeyError:
-            return {"msg": f"Config id {config_id} not found"}, 404
+        return {
+            "message": "Data node was created.",
+            "datanode": schema.dump(config),
+        }, 201
 
 
 class DataNodeReader(Resource):
@@ -286,7 +288,9 @@ class DataNodeReader(Resource):
               schema:
                 type: object
                 properties:
-                  datanode: DataNodeSchema
+                  data:
+                    type: Any
+                    description: The data read from the data node.
         404:
           description: No data node has the *datanode_id* identifier.
     """
@@ -307,11 +311,8 @@ class DataNodeReader(Resource):
     @_middleware
     def get(self, datanode_id):
         schema = DataNodeFilterSchema()
-        manager = _DataManagerFactory._build_manager()
-        data_node = manager._get(datanode_id)
         data = request.get_json(silent=True)
-        if not data_node:
-            return make_response(jsonify({"message": f"Data node {datanode_id} not found"}), 404)
+        data_node = _get_or_raise(datanode_id)
         operators = self.__make_operators(schema.load(data)) if data else []
         data = data_node.filter(operators)
         if isinstance(data, pd.DataFrame):
@@ -358,7 +359,9 @@ class DataNodeWriter(Resource):
               schema:
                 type: object
                 properties:
-                  datanode: DataNodeSchema
+                  message:
+                    type: string
+                    description: Status message.
         404:
           description: No data node has the *datanode_id* identifier.
     """
@@ -368,10 +371,7 @@ class DataNodeWriter(Resource):
 
     @_middleware
     def put(self, datanode_id):
-        manager = _DataManagerFactory._build_manager()
         data = request.json
-        data_node = manager._get(datanode_id)
-        if not data_node:
-            return make_response(jsonify({"message": f"Data node {datanode_id} not found"}), 404)
+        data_node = _get_or_raise(datanode_id)
         data_node.write(data)
-        return {"message": "Data node is successfully written"}
+        return {"message": f"Data node {datanode_id} was successfully written."}

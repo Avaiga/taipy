@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from . import error_handler, views
 
-__all__ = ["views", "error_handler"]
+class ConfigIdMissingException(Exception):
+    def __init__(self):
+        self.message = "Config id is missing."

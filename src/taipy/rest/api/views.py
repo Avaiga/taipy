@@ -9,9 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app
 from flask_restful import Api
-from marshmallow import ValidationError
 
 from taipy.core.common._utils import _load_fct
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -25,9 +24,9 @@ from .resources import (
     DataNodeReader,
     DataNodeResource,
     DataNodeWriter,
+    JobExecutor,
     JobList,
     JobResource,
-    JobExecutor,
     PipelineExecutor,
     PipelineList,
     PipelineResource,
@@ -154,6 +153,7 @@ api.add_resource(
     resource_class_kwargs={"logger": _logger},
 )
 
+
 def load_enterprise_resources(api: Api):
     """
     Load enterprise resources.
@@ -211,13 +211,3 @@ def register_views():
     if _using_enterprise():
         _register_views = _load_fct("taipy.enterprise.rest.api.views", "_register_views")
         _register_views(apispec)
-
-
-@blueprint.errorhandler(ValidationError)
-def handle_marshmallow_error(e):
-    """Return json error for marshmallow validation errors.
-
-    This will avoid having to try/catch ValidationErrors in all endpoints, returning
-    correct JSON response with associated HTTP 400 Status (https://tools.ietf.org/html/rfc7231#section-6.5.1)
-    """
-    return jsonify(e.messages), 400

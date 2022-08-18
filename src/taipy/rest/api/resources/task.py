@@ -9,18 +9,26 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from flask import jsonify, make_response, request
+from flask import request
 from flask_restful import Resource
 
 from taipy.config.config import Config
-from taipy.core.common._utils import _load_fct
-from taipy.core.data._data_manager_factory import _DataManagerFactory
+from taipy.core.exceptions.exceptions import NonExistingTask, NonExistingTaskConfig
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
-from taipy.core.task.task import Task
 
 from ...commons.to_from_model import _to_model
+from ..exceptions.exceptions import ConfigIdMissingException
 from ..middlewares._middleware import _middleware
 from ..schemas import TaskSchema
+
+
+def _get_or_raise(task_id: str):
+    manager = _TaskManagerFactory._build_manager()
+    task = manager._get(task_id)
+    if task is None:
+        raise NonExistingTask(task_id)
+    return task
+
 
 REPOSITORY = "task"
 
@@ -89,7 +97,7 @@ class TaskResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
         404:
@@ -102,20 +110,15 @@ class TaskResource(Resource):
     @_middleware
     def get(self, task_id):
         schema = TaskSchema()
-        manager = _TaskManagerFactory._build_manager()
-        task = manager._get(task_id)
-        if not task:
-            return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
+        task = _get_or_raise(task_id)
         return {"task": schema.dump(_to_model(REPOSITORY, task))}
 
     @_middleware
     def delete(self, task_id):
         manager = _TaskManagerFactory._build_manager()
-        task = manager._get(task_id)
-        if not task:
-            return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
+        _get_or_raise(task_id)
         manager._delete(task_id)
-        return {"msg": f"Task {task_id} deleted."}
+        return {"message": f"Task {task_id} was deleted."}
 
 
 class TaskList(Resource):
@@ -178,7 +181,7 @@ class TaskList(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
                   task: TaskSchema
@@ -188,7 +191,10 @@ class TaskList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        return Config.tasks[config_id]
+        config = Config.tasks.get(config_id)
+        if not config:
+            raise NonExistingTaskConfig(config_id)
+        return config
 
     @_middleware
     def get(self):
@@ -205,18 +211,15 @@ class TaskList(Resource):
         schema = TaskSchema()
         manager = _TaskManagerFactory._build_manager()
         if not config_id:
-            return {"msg": "Config id is mandatory"}, 400
+            raise ConfigIdMissingException
 
-        try:
-            config = self.fetch_config(config_id)
-            task = manager._bulk_get_or_create([config])[0]
+        config = self.fetch_config(config_id)
+        task = manager._bulk_get_or_create([config])[0]
 
-            return {
-                "msg": "Task created.",
-                "task": schema.dump(_to_model(REPOSITORY, task)),
-            }, 201
-        except KeyError:
-            return {"msg": f"Config id {config_id} not found"}, 404
+        return {
+            "message": "Task was created.",
+            "task": schema.dump(_to_model(REPOSITORY, task)),
+        }, 201
 
 
 class TaskExecutor(Resource):
@@ -251,7 +254,7 @@ class TaskExecutor(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
                   task: TaskSchema
@@ -265,8 +268,6 @@ class TaskExecutor(Resource):
     @_middleware
     def post(self, task_id):
         manager = _TaskManagerFactory._build_manager()
-        task = manager._get(task_id)
-        if not task:
-            return make_response(jsonify({"message": f"Task {task_id} not found"}), 404)
+        task = _get_or_raise(task_id)
         manager._scheduler().submit_task(task)
-        return {"message": f"Executed task {task_id}"}
+        return {"message": f"Task {task_id} was submitted."}

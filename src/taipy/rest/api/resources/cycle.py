@@ -11,18 +11,27 @@
 
 from datetime import datetime
 
-from flask import jsonify, make_response, request
+from flask import request
 from flask_restful import Resource
 
 from taipy.config.scenario.frequency import Frequency
 from taipy.core import Cycle
 from taipy.core.cycle._cycle_manager_factory import _CycleManagerFactory
+from taipy.core.exceptions.exceptions import NonExistingCycle
 
 from ...commons.to_from_model import _to_model
 from ..middlewares._middleware import _middleware
 from ..schemas import CycleResponseSchema, CycleSchema
 
 REPOSITORY = "cycle"
+
+
+def _get_or_raise(cycle_id: str) -> None:
+    manager = _CycleManagerFactory._build_manager()
+    cycle = manager._get(cycle_id)
+    if not cycle:
+        raise NonExistingCycle(cycle_id)
+    return cycle
 
 
 class CycleResource(Resource):
@@ -137,7 +146,7 @@ class CycleResource(Resource):
 
                 In case of success here is an example of the response:
                 ``` JSON
-                {"msg": "Cycle CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a deleted."}
+                {"message": "Cycle CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a was deleted."}
                 ```
 
                 In case of failure here is an example of the response:
@@ -159,7 +168,7 @@ class CycleResource(Resource):
                 In case of success here is an output example:
                 ```
                 <Response [200]>
-                {"msg": "Cycle CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a deleted."}
+                {"message": "Cycle CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a was deleted."}
                 ```
 
                 In case of failure here is an output example:
@@ -186,7 +195,7 @@ class CycleResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
         404:
@@ -199,20 +208,15 @@ class CycleResource(Resource):
     @_middleware
     def get(self, cycle_id):
         schema = CycleResponseSchema()
-        manager = _CycleManagerFactory._build_manager()
-        cycle = manager._get(cycle_id)
-        if not cycle:
-            return make_response(jsonify({"message": f"Cycle {cycle_id} not found."}), 404)
+        cycle = _get_or_raise(cycle_id)
         return {"cycle": schema.dump(_to_model(REPOSITORY, cycle))}
 
     @_middleware
     def delete(self, cycle_id):
         manager = _CycleManagerFactory._build_manager()
-        cycle = manager._get(cycle_id)
-        if not cycle:
-            return make_response(jsonify({"message": f"Cycle {cycle_id} not found."}), 404)
+        _get_or_raise(cycle_id)
         manager._delete(cycle_id)
-        return {"msg": f"Cycle {cycle_id} deleted."}
+        return {"message": f"Cycle {cycle_id} was deleted."}
 
 
 class CycleList(Resource):
@@ -351,7 +355,7 @@ class CycleList(Resource):
                 ```
                 <Response [201]>
                 {
-                    'msg': 'cycle created.',
+                    'message': 'Cycle was created.',
                     'cycle': {
                         'frequency': 'Frequency.DAILY',
                         'end_date': '2020-01-01T00:00:00',
@@ -379,7 +383,7 @@ class CycleList(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
                   cycle: CycleSchema
@@ -404,7 +408,7 @@ class CycleList(Resource):
         manager._set(cycle)
 
         return {
-            "msg": "Cycle created.",
+            "message": "Cycle was created.",
             "cycle": schema.dump(_to_model(REPOSITORY, cycle)),
         }, 201
 

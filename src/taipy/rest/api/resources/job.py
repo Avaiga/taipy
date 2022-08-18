@@ -12,17 +12,27 @@
 import uuid
 from typing import Optional
 
-from flask import jsonify, make_response, request
+from flask import request
 from flask_restful import Resource
 
 from taipy.config.config import Config
 from taipy.core import Job
 from taipy.core.common.alias import JobId
+from taipy.core.exceptions.exceptions import NonExistingJob, NonExistingTaskConfig
 from taipy.core.job._job_manager_factory import _JobManagerFactory
 from taipy.core.task._task_manager_factory import _TaskManagerFactory
 
+from ..exceptions.exceptions import ConfigIdMissingException
 from ..middlewares._middleware import _middleware
 from ..schemas import JobSchema
+
+
+def _get_or_raise(job_id: str):
+    manager = _JobManagerFactory._build_manager()
+    job = manager._get(job_id)
+    if job is None:
+        raise NonExistingJob(job_id)
+    return job
 
 
 class JobResource(Resource):
@@ -90,7 +100,7 @@ class JobResource(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
         404:
@@ -103,20 +113,15 @@ class JobResource(Resource):
     @_middleware
     def get(self, job_id):
         schema = JobSchema()
-        manager = _JobManagerFactory._build_manager()
-        job = manager._get(job_id)
-        if not job:
-            return make_response(jsonify({"message": f"Job {job_id} not found"}), 404)
+        job = _get_or_raise(job_id)
         return {"job": schema.dump(job)}
 
     @_middleware
     def delete(self, job_id):
         manager = _JobManagerFactory._build_manager()
-        job = manager._get(job_id)
-        if not job:
-            return make_response(jsonify({"message": f"Job {job_id} not found"}), 404)
+        job = _get_or_raise(job_id)
         manager._delete(job)
-        return {"msg": f"Job {job_id} deleted."}
+        return {"message": f"Job {job_id} was deleted."}
 
 
 class JobList(Resource):
@@ -180,7 +185,7 @@ class JobList(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
                   job: JobSchema
@@ -190,7 +195,10 @@ class JobList(Resource):
         self.logger = kwargs.get("logger")
 
     def fetch_config(self, config_id):
-        return Config.tasks[config_id]
+        config = Config.tasks.get(config_id)
+        if not config:
+            raise NonExistingTaskConfig(config_id)
+        return config
 
     @_middleware
     def get(self):
@@ -205,29 +213,20 @@ class JobList(Resource):
         task_config_id = args.get("task_id")
 
         if not task_config_id:
-            return {"msg": "Task config_id is mandatory"}, 400
+            raise ConfigIdMissingException
 
         manager = _JobManagerFactory._build_manager()
         schema = JobSchema()
         job = self.__create_job_from_schema(task_config_id)
-
-        if not job:
-            return {"msg": f"Task with config_id {task_config_id} not found"}, 404
-
         manager._set(job)
-
         return {
-            "msg": "Job created.",
+            "message": "Job was created.",
             "job": schema.dump(job),
         }, 201
 
     def __create_job_from_schema(self, task_config_id: str) -> Optional[Job]:
         task_manager = _TaskManagerFactory._build_manager()
-        try:
-            task = task_manager._bulk_get_or_create([self.fetch_config(task_config_id)])[0]
-        except KeyError:
-            return None
-
+        task = task_manager._bulk_get_or_create([self.fetch_config(task_config_id)])[0]
         return Job(id=JobId(f"JOB_{uuid.uuid4()}"), task=task, submit_id=f"SUBMISSION_{uuid.uuid4()}")
 
 
@@ -263,7 +262,7 @@ class JobExecutor(Resource):
               schema:
                 type: object
                 properties:
-                  msg:
+                  message:
                     type: string
                     description: Status message.
                   job: JobSchema
@@ -277,8 +276,6 @@ class JobExecutor(Resource):
     @_middleware
     def post(self, job_id):
         manager = _JobManagerFactory._build_manager()
-        job = manager._get(job_id)
-        if not job:
-            return make_response(jsonify({"message": f"Job {job_id} not found"}), 404)
+        job = _get_or_raise(job_id)
         manager._cancel(job)
-        return {"message": f"Cancelled job {job_id}"}
+        return {"message": f"Job {job_id} was cancelled."}
