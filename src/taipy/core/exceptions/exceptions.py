@@ -15,7 +15,10 @@ class CycleAlreadyExists(Exception):
 
 
 class NonExistingCycle(Exception):
-    """Raised if we request a cycle not known by the cycle manager."""
+    """Raised if a requested cycle is not known by the Cycle manager."""
+
+    def __init__(self, cycle_id: str):
+        self.message = f"Cycle: {cycle_id} does not exist."
 
 
 class MissingRequiredProperty(Exception):
@@ -77,7 +80,7 @@ class MissingWriteFunction(Exception):
 
 
 class JobNotDeletedException(RuntimeError):
-    """Raised if we try to delete a job that cannot be deleted.
+    """Raised if there is an attempt to delete a job that cannot be deleted.
 
     This exception can be raised by `taipy.delete_job()^`.
     """
@@ -87,7 +90,7 @@ class JobNotDeletedException(RuntimeError):
 
 
 class NonExistingJob(RuntimeError):
-    """Raised if we try to get a job that does not exist."""
+    """Raised if a requested job is not known by the Job manager."""
 
     def __init__(self, job_id: str):
         self.message = f"Job: {job_id} does not exist."
@@ -98,7 +101,7 @@ class DataNodeWritingError(RuntimeError):
 
 
 class InvalidSubscriber(RuntimeError):
-    """Raised if we try to load a function that is not valid."""
+    """Raised if the loaded function is not valid."""
 
 
 class NonExistingPipeline(Exception):
