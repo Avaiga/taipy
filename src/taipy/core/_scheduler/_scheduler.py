@@ -140,7 +140,7 @@ class _Scheduler(_AbstractScheduler):
             return True
 
         start = datetime.now()
-        jobs = jobs if isinstance(jobs, List) else list(jobs)
+        jobs = jobs if isinstance(jobs, Iterable) else [jobs]
 
         while __check_if_timeout(start, timeout):
             if all([job.is_finished() for job in jobs]):

@@ -60,7 +60,6 @@ class _JobDispatcher(threading.Thread):
             try:
                 if self._can_execute():
                     job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
-                    breakpoint()
                     self._execute_job(job)
             except:  # In case the last job of the queue has been removed.
                 pass
