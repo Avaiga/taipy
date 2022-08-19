@@ -43,6 +43,8 @@ from .utils import (
     _to_camel_case,
 )
 
+if t.TYPE_CHECKING:
+    from ..gui import Gui 
 
 class _Builder:
 
@@ -54,10 +56,11 @@ class _Builder:
 
     def __init__(
         self,
-        gui,
+        gui: "Gui",
         control_type: str,
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
+        hash_names: t.Optional[t.Dict[str, str]] = {},
         default_value="<Empty>",
         lib_name: t.Optional[str] = "taipy",
     ):
@@ -70,7 +73,7 @@ class _Builder:
         self.__element_name = element_name
         self.__lib_name = lib_name
         self.__attributes = attributes or {}
-        self.__hashes = {}
+        self.__hashes = hash_names.copy()
         self.__update_vars: t.List[str] = []
         self.__gui: Gui = gui
 
@@ -81,7 +84,7 @@ class _Builder:
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.__attributes:
-            (prop_dict, prop_hash) = self.__parse_attribute_value(self.__attributes["properties"])
+            (prop_dict, prop_hash) = _Builder.__parse_attribute_value(gui, self.__attributes["properties"])
             if prop_hash is None:
                 prop_hash = prop_dict
                 prop_hash = self.__gui._bind_var(prop_hash)
@@ -90,33 +93,55 @@ class _Builder:
             if isinstance(prop_dict, _MapDict):
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
-                    (val, key_hash) = self.__parse_attribute_value(v)
+                    (val, key_hash) = _Builder.__parse_attribute_value(gui, v)
                     self.__attributes[k] = f"{{{prop_hash}['{k}']}}" if key_hash is None else v
             else:
                 warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
         # Bind potential function and expressions in self.attributes
-        for k, v in self.__attributes.items():
-            val = v
-            hashname = None
-            if callable(v):
-                if v.__name__ == "<lambda>":
-                    hashname = _get_expr_var_name(v.__code__)
-                    self.__gui._bind_var_val(hashname, v)
-                else:
-                    hashname = _get_expr_var_name(v.__name__)
-            elif isinstance(v, str):
-                # need to unescape the double quotes that were escaped during preprocessing
-                (val, hashname) = self.__parse_attribute_value(v.replace('\\"', '"'))
+        self.__hashes.update(_Builder._get_variable_hash_names(gui, self.__attributes, hash_names))
 
-            if val is not None or hashname:
-                self.__attributes[k] = val
-            if hashname:
-                self.__hashes[k] = hashname
         # set classname
         self.__set_class_names()
         # define a unique key
         self.set_attribute("key", _Builder._get_key(self.__element_name))
+
+    @staticmethod
+    def __parse_attribute_value(gui: "Gui", value) -> t.Tuple:
+        if isinstance(value, str) and gui._is_expression(value):
+            hash_value = gui._evaluate_expr(value)
+            try:
+                func = gui._get_user_function(hash_value)
+                if callable(func):
+                    return (func, hash_value)
+                return (_getscopeattr_drill(gui, hash_value), hash_value)
+            except AttributeError:
+                warnings.warn(f"Expression '{value}' cannot be evaluated")
+        return (value, None)
+
+    @staticmethod
+    def _get_variable_hash_names(gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Optional[t.Dict[str, str]] = {}) -> t.Dict[str, str]:
+        hashes = {}
+        # Bind potential function and expressions in self.attributes
+        for k, v in attributes.items():
+            val = v
+            hashname = hash_names.get(k)
+            if hashname is None:
+                if callable(v):
+                    if v.__name__ == "<lambda>":
+                        hashname = _get_expr_var_name(v.__code__)
+                        gui._bind_var_val(hashname, v)
+                    else:
+                        hashname = _get_expr_var_name(v.__name__)
+                elif isinstance(v, str):
+                    # need to unescape the double quotes that were escaped during preprocessing
+                    (val, hashname) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
+
+                if val is not None or hashname:
+                    attributes[k] = val
+                if hashname:
+                    hashes[k] = hashname
+        return hashes
 
     @staticmethod
     def __to_string(x: t.Any) -> str:
@@ -151,18 +176,6 @@ class _Builder:
     ) -> t.List[t.Optional[str]]:
         names = names if index is None else [f"{n}[{index}]" for n in names]  # type: ignore
         return [self.__attributes.get(name) for name in names]
-
-    def __parse_attribute_value(self, value) -> t.Tuple:
-        if isinstance(value, str) and self.__gui._is_expression(value):
-            hash_value = self.__gui._evaluate_expr(value)
-            try:
-                func = self.__gui._get_user_function(hash_value)
-                if callable(func):
-                    return (func, hash_value)
-                return (_getscopeattr_drill(self.__gui, hash_value), hash_value)
-            except AttributeError:
-                warnings.warn(f"Expression '{value}' cannot be evaluated")
-        return (value, None)
 
     def __get_boolean_attribute(self, name: str, default_value=False):
         boolattr = self.__attributes.get(name, default_value)
