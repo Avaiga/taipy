@@ -517,7 +517,7 @@ export const createRequestDataUpdateAction = (
     columns: string[],
     pageKey: string,
     payload: Record<string, unknown>,
-    allData: boolean = false,
+    allData = false,
     library?: string,
 ) => {
     payload = payload || {};

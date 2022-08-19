@@ -74,7 +74,7 @@ jobs:
           python setup_packages.py | xargs -I% bash -c "pip install .[%]"
 
           # Ensure `webapp` folder is present in lib package
-          python -c "import taipy.gui as gui;from pathlib import Path; assert Path(f'{gui.__path__[0]}/webapp/index.html').exists()"
+          python -c "import taipy.gui as gui;from pathlib import Path; assert Path(f'{gui.__path__[0]}/webapp/index.html').exists(), f'{gui.__path__[0]}/webapp/index.html not found!'"
 
           # Removal of Taipy code to ensure the use of the installed package.
           rm -r src
