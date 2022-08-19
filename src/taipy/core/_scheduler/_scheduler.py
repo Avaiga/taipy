@@ -143,9 +143,12 @@ class _Scheduler(_AbstractScheduler):
         jobs = jobs if isinstance(jobs, Iterable) else [jobs]
 
         while __check_if_timeout(start, timeout):
-            if all([job.is_finished() for job in jobs]):
-                return
-            sleep(0.1)  # Limit CPU usage
+            try:
+                if all([job.is_finished() for job in jobs]):
+                    return
+                sleep(0.1)  # Limit CPU usage
+            except:
+                pass
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
