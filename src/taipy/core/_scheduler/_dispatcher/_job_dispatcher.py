@@ -11,7 +11,6 @@
 import threading
 from abc import abstractmethod
 from multiprocessing import Lock
-from time import sleep
 from typing import Any, Dict, List
 
 from taipy.config._toml_serializer import _TomlSerializer

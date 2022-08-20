@@ -231,7 +231,7 @@ def test_submit_task_synchronously_in_parallel():
     task = Task("sleep_task", function=partial(sleep, sleep_period))
     job = _Scheduler.submit_task(task, "submit_id", wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
-    assert job.is_completed()
+    assert_true_after_1_minute_max(job.is_completed)
 
 
 def test_submit_fail_task_synchronously_in_parallel():
@@ -243,7 +243,7 @@ def test_submit_fail_task_synchronously_in_parallel():
     task = Task("sleep_task", function=partial(sleep_and_raise_error_fct, sleep_period))
     job = _Scheduler.submit_task(task, "submit_id", wait=True)
     assert (datetime.now() - start_time).seconds >= sleep_period
-    assert job.is_failed()
+    assert_true_after_1_minute_max(job.is_failed)
 
 
 def test_submit_task_synchronously_in_parallel_with_timeout():

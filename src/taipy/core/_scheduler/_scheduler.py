@@ -144,7 +144,7 @@ class _Scheduler(_AbstractScheduler):
 
         while __check_if_timeout(start, timeout):
             try:
-                if all([job.is_finished() for job in jobs]):
+                if all([job._is_finished() for job in jobs]):
                     return
                 sleep(0.1)  # Limit CPU usage
             except:
