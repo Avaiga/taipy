@@ -229,7 +229,7 @@ class Gui:
             with open(gui_file.parent / "version.json") as version_file:
                 self.__version = json.load(version_file)
         except Exception as e:
-            warnings.warn(f"Cannot retrieve version.json file: {e}")
+            warnings.warn(f"Cannot retrieve version.json file:\n{e}")
             self.__version = {}
 
         # Load Markdown extension
@@ -475,7 +475,7 @@ class Gui:
                 on_change_fn(*args)
             except Exception as e:
                 if not self.__call_on_exception(on_change or "on_change", e):
-                    warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception: {e}")
+                    warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception:\n{e}")
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
         ret_value = self.__get_content_accessor().get_info(var_name, value, image)
@@ -540,7 +540,7 @@ class Gui:
                                 with open(upload_path / f"{file_path.name}.part.{nb}", "rb") as part_file:
                                     grouped_file.write(part_file.read())
                     except EnvironmentError as ee:
-                        warnings.warn(f"cannot group file after chunk upload {ee}")
+                        warnings.warn(f"cannot group file after chunk upload:\n{ee}")
                         return
                 # notify the file is uploaded
                 newvalue = str(file_path)
@@ -603,7 +603,19 @@ class Gui:
         # Use custom attrgetter function to allow value binding for _MapDict
         newvalue = _getscopeattr_drill(self, var_name)
         if isinstance(newvalue, _TaipyData):
-            ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
+            ret_payload = None
+            if isinstance(payload, dict):
+                lib_name = payload.get("library")
+                if isinstance(lib_name, str):
+                    lib = self.__extensions.get(lib_name)
+                    if isinstance(lib, ElementLibrary):
+                        try:
+                            # TODO need the "real" var name
+                            ret_payload = lib.get_data(lib_name, payload, var_name, newvalue)
+                        except Exception as e:
+                            warnings.warn(f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}")
+            if not isinstance(ret_payload, dict):
+                ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})
 
     def __request_var_update(self, payload: t.Any):
@@ -620,7 +632,7 @@ class Gui:
                     to=self.__get_ws_receiver(),
                 )
             except Exception as e:
-                warnings.warn(f"Web Socket communication error in {self.__frame.f_code.co_name}\n{e}")
+                warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
             grouping_message.append(payload)
 
@@ -711,7 +723,7 @@ class Gui:
         try:
             self.__send_messages()
         except Exception as e:
-            warnings.warn(f"An exception was raised while sending messages: {e}")
+            warnings.warn(f"Exception raised while sending messages:\n{e}")
         if exc_value:
             warnings.warn(f"An {exc_type or 'Exception'} was raised: {exc_value}")
         return True
@@ -782,7 +794,7 @@ class Gui:
                 return True
             except Exception as e:
                 if not self.__call_on_exception(action_function.__name__, e):
-                    warnings.warn(f"on_action: '{action_function.__name__}' function invocation exception: {e}")
+                    warnings.warn(f"on_action: Exception raised in function '{action_function.__name__}':\n{e}")
         return False
 
     def _call_function_with_state(self, user_function: t.Callable, args: t.List[t.Any]) -> t.Any:
@@ -800,7 +812,7 @@ class Gui:
                 self.__set_client_id_in_context(context_id)
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
-            warnings.warn(f"invoke_state_callback: '{user_callback.__name__}' function invocation exception: {e}")
+            warnings.warn(f"Exception raised in invoke_state_callback: '{user_callback.__name__}':\n{e}")
         return None
 
     # Proxy methods for Evaluator

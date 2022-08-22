@@ -46,17 +46,17 @@ class Helpers:
         gui.run(run_server=False, single_client=True)
         client = gui._server.test_client()
         response = client.get("/taipy-jsx/test")
-        assert response.status_code == 200
+        assert response.status_code == 200, f"response.status_code {response.status_code} != 200"
         response_data = json.loads(response.get_data().decode("utf-8", "ignore"))
-        assert isinstance(response_data, t.Dict)
-        assert "jsx" in response_data
+        assert isinstance(response_data, t.Dict), "response_data is not Dict"
+        assert "jsx" in response_data, "jsx not in response_data"
         jsx = response_data["jsx"]
         logging.getLogger().debug(jsx)
         if isinstance(expected_values, str):
-            assert jsx == expected_values
+            assert jsx == expected_values, f"{jsx} != {expected_values}"
         elif isinstance(expected_values, list):
             for expected_value in expected_values:
-                assert expected_value in jsx
+                assert expected_value in jsx, f"{expected_value} not in {jsx}"
 
     @staticmethod
     def assert_outward_ws_message(received_message, type, varname, value):

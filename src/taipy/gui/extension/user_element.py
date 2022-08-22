@@ -28,7 +28,7 @@ class ElementAttribute:
     """
 
     def __init__(
-        self, name: str, attribute_type: PropertyType, default_value: t.Optional[t.Any], js_name: t.Optional[str] = None
+        self, name: str, attribute_type: PropertyType, default_value: t.Optional[t.Any] = None, js_name: t.Optional[str] = None
     ) -> None:
         self.name = name
         self.attribute_type = attribute_type
@@ -85,40 +85,47 @@ class Element:
     def _call_builder(
         self,
         gui: "Gui",
-        all_properties: t.Optional[t.Dict[str, t.Any]],
+        properties: t.Union[t.Dict[str, t.Any], None],
         lib_name: str,
         is_html: t.Optional[bool] = False,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
-        res = self.render(gui, all_properties, is_html)
+        attributes = properties or {}
+        hash_names = _Builder._get_variable_hash_names(gui, attributes)
+        res = self.render(gui, attributes, hash_names, is_html)
         if res is None:
             default_attr: t.Optional[ElementAttribute] = None
+            default_value = None
             attrs = []
             for ua in self.attributes:
                 if isinstance(ua, ElementAttribute):
                     if self.default_attribute == ua.name:
                         default_attr = ua
+                        default_value = ua.default_value
                     else:
                         attrs.append(ua._get_tuple())
-            build = _Builder(
+            elt_built = _Builder(
                 gui=gui,
                 control_type=self.name,
                 element_name=self._get_js_name(),
-                attributes=all_properties,
+                attributes=properties,
+                hash_names=hash_names,
                 lib_name=lib_name,
+                default_value=default_value
             )
             if default_attr is not None:
-                build.set_value_and_default(
+                elt_built.set_value_and_default(
                     var_name=default_attr.name,
                     var_type=default_attr.attribute_type,
                     default_val=default_attr.default_value,
+                    with_default=default_attr.attribute_type != PropertyType.data
                 )
-            builded = build.set_attributes(attrs)
-            return builded.build_to_string() if is_html else builded.el
+            elt_built.set_attributes(attrs)
+            return elt_built.build_to_string() if is_html else elt_built.el
         else:
             return res
 
     def render(
-        self, gui: "Gui", all_properties: t.Optional[t.Dict[str, t.Any]], is_html: t.Optional[bool] = False
+        self, gui: "Gui", properties: t.Dict[str, t.Any], hash_names: t.Dict[str, str], is_html: t.Optional[bool] = False
     ) -> t.Union[None, t.Any, t.Tuple[str, str]]:
         """
         TODO
@@ -183,3 +190,10 @@ class ElementLibrary(ABC):
         signature (libName: string) => Record<string, ComponentType>
         """
         return NotImplemented
+
+    def get_data(self, library_name: str, payload: t.Dict, var_name: str, value: t.Any) -> t.Optional[t.Dict]:
+        """
+        TODO
+        called if implemented
+        """
+        return None

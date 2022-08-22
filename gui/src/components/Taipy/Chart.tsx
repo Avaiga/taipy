@@ -204,8 +204,8 @@ const Chart = (props: ChartProp) => {
                 createRequestChartUpdateAction(
                     updateVarName,
                     id,
-                    dataKey.current,
                     backCols,
+                    dataKey.current,
                     decimator ? plotRef.current?.clientWidth : undefined,
                     decimator
                 )
