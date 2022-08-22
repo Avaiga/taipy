@@ -60,9 +60,9 @@ class _Builder:
         control_type: str,
         element_name: str,
         attributes: t.Union[t.Dict[str, t.Any], None],
-        hash_names: t.Optional[t.Dict[str, str]] = {},
+        hash_names: t.Dict[str, str] = {},
         default_value="<Empty>",
-        lib_name: t.Optional[str] = "taipy",
+        lib_name: str = "taipy",
     ):
         from ..gui import Gui
         from .factory import _Factory
@@ -120,7 +120,7 @@ class _Builder:
         return (value, None)
 
     @staticmethod
-    def _get_variable_hash_names(gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Optional[t.Dict[str, str]] = {}) -> t.Dict[str, str]:
+    def _get_variable_hash_names(gui: "Gui", attributes: t.Dict[str, t.Any], hash_names: t.Dict[str, str] = {}) -> t.Dict[str, str]:
         hashes = {}
         # Bind potential function and expressions in self.attributes
         for k, v in attributes.items():

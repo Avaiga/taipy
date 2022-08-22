@@ -196,4 +196,4 @@ class ElementLibrary(ABC):
         TODO
         called if implemented
         """
-        raise None
+        return None
