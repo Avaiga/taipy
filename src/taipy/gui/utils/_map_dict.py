@@ -37,7 +37,7 @@ class _MapDict(object):
         value = self._dict.__getitem__(key)
         if isinstance(value, dict):
             if self._update_var:
-                return _MapDict(value, lambda s, v: self._update_var(f"{key}.{s}", v, from_map_dict=True))
+                return _MapDict(value, lambda s, v: self._update_var(f"{key}.{s}", v))
             else:
                 return _MapDict(value)
         return value

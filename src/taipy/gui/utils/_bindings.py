@@ -46,7 +46,7 @@ class _Bindings:
         def __getter(ud: _Bindings) -> t.Any:
             value = getattr(ud._get_data_scope(), name)
             if isinstance(value, _MapDict):
-                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v, from_map_dict=True))
+                return _MapDict(value._dict, lambda k, v: ud.__gui._update_var(f"{name}.{k}", v))
             else:
                 return value
 

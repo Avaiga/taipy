@@ -26,6 +26,7 @@ from . import (
     _getscopeattr,
     _getscopeattr_drill,
     _hasscopeattr,
+    _MapDict,
     _setscopeattr,
     _setscopeattr_drill,
     _TaipyBase,
@@ -40,7 +41,7 @@ class _Evaluator:
     __EXPR_RE = re.compile(r"\{(([^\}]*)([^\{]*))\}")
     __EXPR_IS_EXPR = re.compile(r"[^\\][{}]")
     __EXPR_IS_EDGE_CASE = re.compile(r"^\s*{([^}]*)}\s*$")
-    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9]*)$")
+    __EXPR_VALID_VAR_EDGE_CASE = re.compile(r"^([a-zA-Z\.\_0-9\[\]]*)$")
     __EXPR_EDGE_CASE_F_STRING = re.compile(r"[\{]*[a-zA-Z_][a-zA-Z0-9_]*:.+")
     __IS_TAIPYEXPR_RE = re.compile(r"TpExPr_(.*)")
 
@@ -231,15 +232,31 @@ class _Evaluator:
             # backup for later reference
             var_name_original = var_name
             expr_original = self.__hash_to_expr[var_name]
-            # since this is an edge case --> only 1 item in the dict and that item is the original var
-            for v in self.__expr_to_var_map[expr_original].values():
-                var_name = v
-            # construct correct var_path to reassign values
-            var_name_full, _ = _variable_decode(expr_original)
-            var_name_full = var_name_full.split(".")
-            var_name_full[0] = var_name
-            var_name_full = ".".join(var_name_full)
-            _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
+            temp_expr_var_map = self.__expr_to_var_map[expr_original]
+            if len(temp_expr_var_map) <= 1:
+                # since this is an edge case --> only 1 item in the dict and that item is the original var
+                for v in temp_expr_var_map.values():
+                    var_name = v
+                # construct correct var_path to reassign values
+                var_name_full, _ = _variable_decode(expr_original)
+                var_name_full = var_name_full.split(".")
+                var_name_full[0] = var_name
+                var_name_full = ".".join(var_name_full)
+                _setscopeattr_drill(gui, var_name_full, _getscopeattr(gui, var_name_original))
+            else:
+                # multiple key-value pair in expr_var_map --> expr is special case a["b"]
+                key = ""
+                for v in temp_expr_var_map.values():
+                    if isinstance(_getscopeattr(gui, v), _MapDict):
+                        var_name = v
+                    else:
+                        key = v
+                if key == "":
+                    return modified_vars
+                _setscopeattr_drill(gui, f"{var_name}.{_getscopeattr(gui, key)}", _getscopeattr(gui, var_name_original))
+        # A middle check to see if var_name is from _MapDict
+        if "." in var_name:
+            var_name = var_name[: var_name.index(".")]
         # otherwise, thar var_name is correct and doesn't require any resolution
         if var_name not in self.__var_to_expr_list:
             # warnings.warn("{var_name} not found")

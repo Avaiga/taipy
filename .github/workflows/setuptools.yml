@@ -93,3 +93,5 @@ jobs:
           tail -n1 pytest_res | grep --invert-match "skipped"
           echo "Ensure that no warnings are issued"
           tail -n1 pytest_res | grep --invert-match "warning"
+          echo "Ensure that no tests are failed"
+          tail -n1 pytest_res | grep --invert-match "failed"
