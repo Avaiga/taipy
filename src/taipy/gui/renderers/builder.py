@@ -382,6 +382,13 @@ class _Builder:
                         col_desc["filter"] = True
                     else:
                         warnings.warn(f"{self.__element_name} filter[{k}] is not in the list of displayed columns")
+            editables = self.__get_name_indexed_property("editable")
+            for k, v in editables.items():
+                if not _is_boolean_true(v):
+                    if col_desc := next((x for x in columns.values() if x["dfid"] == k), None):
+                        col_desc["notEditable"] = True
+                    else:
+                        warnings.warn(f"{self.__element_name} editable[{k}] is not in the list of displayed columns")
             group_by = self.__get_name_indexed_property("group_by")
             for k, v in group_by.items():
                 if _is_boolean_true(v):

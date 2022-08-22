@@ -20,11 +20,22 @@ const getActionKeys = (keys?: string): string[] => {
 };
 
 const Input = (props: TaipyInputProps) => {
-    const { className, type, id, updateVarName, propagate = true, defaultValue = "", tp_onAction, tp_onChange } = props;
+    const {
+        className,
+        type,
+        id,
+        updateVarName,
+        propagate = true,
+        defaultValue = "",
+        tp_onAction,
+        tp_onChange,
+        multiline = false,
+        linesShown = 5,
+    } = props;
     const [value, setValue] = useState(defaultValue);
     const { dispatch } = useContext(TaipyContext);
     const delayCall = useRef(-1);
-    const [actionKeys] = useState(() => tp_onAction ? getActionKeys(props.actionKeys): []);
+    const [actionKeys] = useState(() => (tp_onAction ? getActionKeys(props.actionKeys) : []));
 
     const changeDelay = typeof props.changeDelay === "number" && props.changeDelay >= 0 ? props.changeDelay : 300;
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -84,6 +95,8 @@ const Input = (props: TaipyInputProps) => {
                 onChange={handleInput}
                 disabled={!active}
                 onKeyDown={tp_onAction ? handleAction : undefined}
+                multiline={multiline}
+                minRows={linesShown}
             />
         </Tooltip>
     );

@@ -258,6 +258,8 @@ class _Factory:
                 ("action_keys",),
                 ("label",),
                 ("change_delay", PropertyType.number, gui._get_config("change_delay", None)),
+                ("multiline", PropertyType.boolean, False),
+                ("lines_shown", PropertyType.number, 5),
             ]
         ),
         "layout": lambda gui, control_type, attrs: _Builder(
