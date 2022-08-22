@@ -554,6 +554,7 @@ class _Builder:
 
             self.__set_json_attribute("config", ret_dict)
             self.set_chart_selected(max=len(traces))
+            self.__set_refresh_on_update()
         return self
 
     def set_chart_layout(self):
@@ -726,9 +727,6 @@ class _Builder:
     def __set_update_var_name(self, hash_name: str):
         return self.set_attribute("updateVarName", hash_name)
 
-    def set_change_delay(self):
-        return self.__set_number_attribute("change_delay", self.__gui._get_config("change_delay", None))
-
     def set_value_and_default(
         self,
         var_name: t.Optional[str] = None,
@@ -800,7 +798,7 @@ class _Builder:
             return self.__set_boolean_attribute("propagate", False)
         return self
 
-    def set_refresh_on_update(self):
+    def __set_refresh_on_update(self):
         if self.__update_vars:
             self.set_attribute("updateVars", ";".join(self.__update_vars))
         return self
@@ -849,6 +847,16 @@ class _Builder:
                     self.__set_update_var_name(hash_name)
                 else:
                     self.__update_vars.append(f"{name}={hash_name}")
+    
+    def __set_dynamic_property_without_default(self, name: str, property_type: PropertyType):
+        hash_name = self.__hashes.get(name)
+        if hash_name is None:
+            warnings.warn(f"{self.__element_name}.{name} should be binded.")
+        else:
+            hash_name = self.__get_typed_hash_name(hash_name, property_type)
+            self.__set_update_var_name(hash_name)
+            self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash_name))
+        return self
 
     def set_attributes(self, attributes: t.List[tuple]):  # noqa: C901
         for attr in attributes:
@@ -895,6 +903,14 @@ class _Builder:
                     self.__set_dynamic_string_list(attr[0], _get_tuple_val(attr, 2, None))
             elif var_type == PropertyType.decimator:
                 self.__set_decimator_attribute(attr_name=attr[0])
+            elif var_type == PropertyType.data:
+                self.__set_dynamic_property_without_default(attr[0], var_type)
+            elif var_type == PropertyType.lov:
+                self.get_adapter(attr[0]) # need to be called before set_lov
+                self.set_lov(attr[0])
+            elif var_type == PropertyType.lov_value:
+                self.__set_dynamic_property_without_default(attr[0], var_type)
+            self.__set_refresh_on_update()
         return self
 
     def set_attribute(self, name, value):
