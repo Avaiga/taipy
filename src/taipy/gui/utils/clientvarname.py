@@ -10,5 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 
+_replace_dict = {".": "__", "[": "_SqrOp_", "]": "_SqrCl_"}
+
+
 def _get_client_var_name(s: str) -> str:
-    return s.replace(".", "__")
+    for k, v in _replace_dict.items():
+        s = s.replace(k, v)
+    return s
