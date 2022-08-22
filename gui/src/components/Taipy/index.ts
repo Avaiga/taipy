@@ -61,7 +61,7 @@ const registeredComponents: Record<string, ComponentType> = {};
 export const getRegisteredComponents = () => {
     if (registeredComponents.TreeView === undefined) {
         Object.keys(taipyComponents).forEach(name => registeredComponents[name] = taipyComponents[name]);
-        if (window.taipyConfig.extensions) {
+        if (window.taipyConfig?.extensions) {
             Object.keys(window.taipyConfig.extensions).forEach(libName => {
                 if (window.taipyConfig.extensions[libName]) {
                     const libParts = libName.split("/");
