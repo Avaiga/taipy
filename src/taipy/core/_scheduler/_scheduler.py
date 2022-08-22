@@ -71,8 +71,6 @@ class _Scheduler(_AbstractScheduler):
         tasks = pipeline._get_sorted_tasks()
         for ts in tasks:
             for task in ts:
-                print("sup")
-                print(cls.submit_task.__code__)
                 res.append(cls.submit_task(task, submit_id, callbacks=callbacks, force=force))
 
         if wait:
