@@ -32,14 +32,12 @@ import { TaipyContext } from "../../context/taipyContext";
 import { createRequestTableUpdateAction, createSendActionNameAction } from "../../context/taipyReducers";
 import {
     addDeleteColumn,
-    getCellProps,
     baseBoxSx,
     EditableCell,
     EDIT_COL,
     getClassName,
     getsortByIndex,
     headBoxSx,
-    iconInRowSx,
     LINE_STYLE,
     OnCellValidation,
     OnRowDeletion,
@@ -51,6 +49,8 @@ import {
     tableSx,
     TaipyPaginatedTableProps,
     ColumnDesc,
+    iconInRowSx,
+    DEFAULT_SIZE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -76,6 +76,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         tp_onDelete = "",
         tp_onAdd = "",
         width = "100vw",
+        size = DEFAULT_SIZE,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -87,7 +88,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
     const [appliedFilters, setAppliedFilters] = useState<FilterDesc[]>([]);
     const { dispatch } = useContext(TaipyContext);
     const pageKey = useRef("no-page");
-    const selectedRowRef = useRef<HTMLTableRowElement|null>(null);
+    const selectedRowRef = useRef<HTMLTableRowElement | null>(null);
     const formatConfig = useFormatConfig();
 
     const refresh = props.data === null;
@@ -99,13 +100,20 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         let hNan = !!props.nanValue;
         if (props.columns) {
             try {
-                const columns = (typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns) as Record<string, ColumnDesc>;
+                const columns = (
+                    typeof props.columns === "string" ? JSON.parse(props.columns) : props.columns
+                ) as Record<string, ColumnDesc>;
                 let filter = false;
                 Object.values(columns).forEach((col) => {
                     if (typeof col.filter != "boolean") {
                         col.filter = !!props.filter;
                     }
                     filter = filter || col.filter;
+                    if (typeof col.notEditable != "boolean") {
+                        col.notEditable = !editable;
+                    } else {
+                        col.notEditable = col.notEditable || !editable;
+                    }
                 });
                 addDeleteColumn(
                     (!!active && editable && (tp_onAdd || tp_onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
@@ -159,7 +167,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
               }, "-agg")
             : "";
         const cols = colsOrder.map((col) => columns[col].dfid);
-        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${appliedFilters.map(af => `${af.col}${af.action}${af.value}`)}`;
+        pageKey.current = `${startIndex}-${endIndex}-${cols.join()}-${orderBy}-${order}${agg}${appliedFilters.map(
+            (af) => `${af.col}${af.action}${af.value}`
+        )}`;
         if (refresh || !props.data || props.data[pageKey.current] === undefined) {
             setLoading(true);
             const applies = aggregates.length
@@ -184,7 +194,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     applies,
                     styles,
                     handleNan,
-                    appliedFilters,
+                    appliedFilters
                 )
             );
         } else {
@@ -323,7 +333,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         <Table
                             sx={tableSx}
                             aria-labelledby="tableTitle"
-                            size={"medium"}
+                            size={size}
                             className={className}
                             stickyHeader={true}
                         >
@@ -344,12 +354,18 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                                 size="small"
                                                                 sx={iconInRowSx}
                                                             >
-                                                                <AddIcon />
+                                                                <AddIcon fontSize="inherit" />
                                                             </IconButton>
                                                         </Tooltip>
                                                     ) : null,
                                                     active && filter ? (
-                                                        <TableFilter key="filter" columns={columns} colsOrder={colsOrder} onValidate={setAppliedFilters} appliedFilters={appliedFilters} />
+                                                        <TableFilter
+                                                            key="filter"
+                                                            columns={columns}
+                                                            colsOrder={colsOrder}
+                                                            onValidate={setAppliedFilters}
+                                                            appliedFilters={appliedFilters}
+                                                        />
                                                     ) : null,
                                                 ]
                                             ) : (
@@ -366,14 +382,14 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                                 onClick={onAggregate}
                                                                 size="small"
                                                                 title="aggregate"
-                                                                sx={iconInRowSx}
                                                                 data-dfid={columns[col].dfid}
                                                                 disabled={!active}
+                                                                sx={iconInRowSx}
                                                             >
                                                                 {aggregates.includes(columns[col].dfid) ? (
-                                                                    <DataSaverOff />
+                                                                    <DataSaverOff fontSize="inherit" />
                                                                 ) : (
-                                                                    <DataSaverOn />
+                                                                    <DataSaverOn fontSize="inherit" />
                                                                 )}
                                                             </IconButton>
                                                         ) : null}
@@ -415,29 +431,21 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                             className={getClassName(row, props.lineStyle)}
                                         >
                                             {colsOrder.map((col, cidx) => (
-                                                <TableCell
+                                                <EditableCell
                                                     key={"val" + index + "-" + cidx}
-                                                    {...getCellProps(columns[col])}
                                                     className={getClassName(row, columns[col].style)}
-                                                >
-                                                    <EditableCell
-                                                        colDesc={columns[col]}
-                                                        value={row[col]}
-                                                        formatConfig={formatConfig}
-                                                        rowIndex={index}
-                                                        onValidation={
-                                                            active && editable && tp_onEdit
-                                                                ? onCellValidation
-                                                                : undefined
-                                                        }
-                                                        onDeletion={
-                                                            active && editable && tp_onDelete
-                                                                ? onRowDeletion
-                                                                : undefined
-                                                        }
-                                                        nanValue={columns[col].nanValue || props.nanValue}
-                                                    />
-                                                </TableCell>
+                                                    colDesc={columns[col]}
+                                                    value={row[col]}
+                                                    formatConfig={formatConfig}
+                                                    rowIndex={index}
+                                                    onValidation={
+                                                        active && editable && tp_onEdit ? onCellValidation : undefined
+                                                    }
+                                                    onDeletion={
+                                                        active && editable && tp_onDelete ? onRowDeletion : undefined
+                                                    }
+                                                    nanValue={columns[col].nanValue || props.nanValue}
+                                                />
                                             ))}
                                         </TableRow>
                                     );

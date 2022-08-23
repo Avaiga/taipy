@@ -57,7 +57,14 @@ const actionsByType = {
         ">": "greater",
     },
     boolean: { "==": "equals", "!=": "not equals" },
-    date: { "<": "before", "<=": "before equal", "==": "equals", "!=": "not equals", ">=": "after equal", ">": "after" },
+    date: {
+        "<": "before",
+        "<=": "before equal",
+        "==": "equals",
+        "!=": "not equals",
+        ">=": "after equal",
+        ">": "after",
+    },
 } as Record<string, Record<string, string>>;
 
 const getActionsByType = (colType?: string) =>
@@ -267,14 +274,14 @@ const FilterRow = (props: FilterRowProps) => {
             )}
             <Tooltip title="Validate">
                 <span>
-                    <IconButton onClick={onCheckClick} disabled={!enableCheck}>
+                    <IconButton onClick={onCheckClick} disabled={!enableCheck} sx={iconInRowSx}>
                         <CheckIcon />
                     </IconButton>
                 </span>
             </Tooltip>
             <Tooltip title="Delete">
                 <span>
-                    <IconButton onClick={onDeleteClick} disabled={!enableDel}>
+                    <IconButton onClick={onDeleteClick} disabled={!enableDel} sx={iconInRowSx}>
                         <DeleteIcon />
                     </IconButton>
                 </span>
@@ -320,8 +327,8 @@ const TableFilter = (props: TableFilterProps) => {
     return (
         <>
             <Tooltip title="Filter list">
-                <IconButton onClick={onShowFilterClick} size="small" sx={iconInRowSx} ref={filterRef}>
-                    <FilterListIcon />
+                <IconButton onClick={onShowFilterClick} size="small" ref={filterRef} sx={iconInRowSx}>
+                    <FilterListIcon fontSize="inherit" />
                 </IconButton>
             </Tooltip>
             <Popover
@@ -348,12 +355,14 @@ const TableFilter = (props: TableFilterProps) => {
                         setFilter={updateFilter}
                     />
                     <Box sx={buttonBoxSx}>
-                        <Button endIcon={<ClearIcon />} onClick={onRemove} disabled={appliedFilters.length == 0}>{`Reset list (remove applied filter${
-                            filters.length > 1 ? "s" : ""
-                        })`}</Button>
-                        <Button endIcon={<SendIcon />} onClick={onApply} disabled={filters.length == 0}>{`Apply ${filters.length} filter${
-                            filters.length > 1 ? "s" : ""
-                        }`}</Button>
+                        <Button
+                            endIcon={<ClearIcon />}
+                            onClick={onRemove}
+                            disabled={appliedFilters.length == 0}
+                        >{`Reset list (remove applied filter${filters.length > 1 ? "s" : ""})`}</Button>
+                        <Button endIcon={<SendIcon />} onClick={onApply} disabled={filters.length == 0}>{`Apply ${
+                            filters.length
+                        } filter${filters.length > 1 ? "s" : ""}`}</Button>
                     </Box>
                 </Box>
             </Popover>

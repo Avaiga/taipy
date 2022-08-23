@@ -1,5 +1,5 @@
 import React, { useState, useCallback, CSSProperties } from "react";
-import { TableCellProps } from "@mui/material/TableCell";
+import TableCell, { TableCellProps } from "@mui/material/TableCell";
 import Box from "@mui/material/Box";
 import Input from "@mui/material/Input";
 import IconButton from "@mui/material/IconButton";
@@ -29,6 +29,8 @@ export interface ColumnDesc {
     groupBy?: boolean;
     widthHint?: number;
 }
+
+export const DEFAULT_SIZE = "small";
 
 export type Order = "asc" | "desc";
 
@@ -72,22 +74,25 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
 
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
-        return <Switch checked={val as boolean} title={val ? "True": "False"} />;
+        return <Switch checked={val as boolean} size="small" title={val ? "True" : "False"} sx={iconInRowSx} />;
     }
     return <>{formatValue(val as RowValue, col, formatConf, nanValue)}</>;
 };
 
-export const getCellProps = (col: ColumnDesc): Partial<TableCellProps> => {
-    const ret: Partial<TableCellProps> = {};
+const getCellProps = (col: ColumnDesc, base: Partial<TableCellProps> = {}): Partial<TableCellProps> => {
     switch (col.type) {
         case "int":
         case "float":
-            ret.align = "right";
+            base.align = "right";
+            break;
+        case "bool":
+            base.align = "center";
+            break;
     }
     if (col.width) {
-        ret.width = col.width;
+        base.width = col.width;
     }
-    return ret;
+    return base;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,6 +112,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     lineStyle?: string;
     nanValue?: string;
     filter?: boolean;
+    size?: "small" | "medium";
     defaultKey?: string; // for testing purposes only
 }
 
@@ -145,12 +151,22 @@ interface EditableCellProps {
     onValidation?: OnCellValidation;
     onDeletion?: OnRowDeletion;
     nanValue?: string;
+    className?: string;
+    tableCellProps?: Partial<TableCellProps>;
 }
 
 export const addDeleteColumn = (render: number, columns: Record<string, ColumnDesc>) => {
     if (render) {
         Object.keys(columns).forEach((key) => columns[key].index++);
-        columns[EDIT_COL] = { dfid: EDIT_COL, type: "", format: "", title: "", index: 0, width: (render * 4) + "em", filter: false };
+        columns[EDIT_COL] = {
+            dfid: EDIT_COL,
+            type: "",
+            format: "",
+            title: "",
+            index: 0,
+            width: render * 4 + "em",
+            filter: false,
+        };
     }
     return columns;
 };
@@ -161,16 +177,27 @@ export const getClassName = (row: Record<string, unknown>, style?: string) =>
 const setInputFocus = (input: HTMLInputElement) => input && input.focus();
 
 const cellBoxSx = { display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center" } as CSSProperties;
-export const iconInRowSx = { height: "1em" } as CSSProperties;
+export const iconInRowSx = { fontSize: "body2.fontSize" };
+const tableFontSx = { fontSize: "body2.fontSize" };
 
 export const EditableCell = (props: EditableCellProps) => {
-    const { onValidation, value, colDesc, formatConfig, rowIndex, onDeletion, nanValue } = props;
+    const {
+        onValidation,
+        value,
+        colDesc,
+        formatConfig,
+        rowIndex,
+        onDeletion,
+        nanValue,
+        className,
+        tableCellProps = {},
+    } = props;
     const [val, setVal] = useState(value);
     const [edit, setEdit] = useState(false);
     const [deletion, setDeletion] = useState(false);
 
     const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
-    
+
     const onCheckClick = useCallback(() => {
         onValidation && onValidation(val, rowIndex, colDesc.dfid);
         setEdit((e) => !e);
@@ -215,55 +242,60 @@ export const EditableCell = (props: EditableCellProps) => {
         [onDeleteCheckClick, onDeleteClick]
     );
 
-    return edit ? (
-        <Input
-            value={val}
-            onChange={onChange}
-            onKeyDown={onKeyDown}
-            inputRef={setInputFocus}
-            endAdornment={
-                <>
-                    <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
-                        <CheckIcon />
+    return (
+        <TableCell {...getCellProps(colDesc, tableCellProps)} className={className}>
+            {edit ? (
+                <Input
+                    value={val}
+                    onChange={onChange}
+                    onKeyDown={onKeyDown}
+                    inputRef={setInputFocus}
+                    margin="dense"
+                    sx={tableFontSx}
+                    endAdornment={
+                        <>
+                            <IconButton onClick={onCheckClick} size="small" sx={iconInRowSx}>
+                                <CheckIcon fontSize="inherit" />
+                            </IconButton>
+                            <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                                <ClearIcon fontSize="inherit" />
+                            </IconButton>
+                        </>
+                    }
+                />
+            ) : EDIT_COL === colDesc.dfid ? (
+                deletion ? (
+                    <Input
+                        value="Confirm"
+                        onKeyDown={onDeleteKeyDown}
+                        inputRef={setInputFocus}
+                        sx={tableFontSx}
+                        endAdornment={
+                            <>
+                                <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
+                                    <CheckIcon fontSize="inherit" />
+                                </IconButton>
+                                <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
+                                    <ClearIcon fontSize="inherit" />
+                                </IconButton>
+                            </>
+                        }
+                    />
+                ) : onDeletion ? (
+                    <IconButton onClick={onDeleteClick} size="small">
+                        <DeleteIcon fontSize="inherit" />
                     </IconButton>
-                    <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                        <ClearIcon />
-                    </IconButton>
-                </>
-            }
-        />
-    ) : EDIT_COL === colDesc.dfid ? (
-        deletion ? (
-            <Input
-                value="Confirm"
-                onKeyDown={onDeleteKeyDown}
-                inputRef={setInputFocus}
-                endAdornment={
-                    <>
-                        <IconButton onClick={onDeleteCheckClick} size="small" sx={iconInRowSx}>
-                            <CheckIcon />
+                ) : null
+            ) : (
+                <Box sx={cellBoxSx}>
+                    {renderCellValue(value, colDesc, formatConfig, nanValue)}
+                    {onValidation && !colDesc.notEditable ? (
+                        <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
+                            <EditIcon fontSize="inherit" />
                         </IconButton>
-                        <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
-                            <ClearIcon />
-                        </IconButton>
-                    </>
-                }
-            />
-        ) : onDeletion ? (
-            <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
-                <DeleteIcon />
-            </IconButton>
-        ) : null
-    ) : onValidation ? (
-        <Box sx={cellBoxSx}>
-            {formatValue(value, colDesc, formatConfig)}
-            {!colDesc.notEditable ? (
-                <IconButton onClick={onEditClick} size="small" sx={iconInRowSx}>
-                    <EditIcon />
-                </IconButton>
-            ) : null}
-        </Box>
-    ) : (
-        renderCellValue(value, colDesc, formatConfig, nanValue)
+                    ) : null}
+                </Box>
+            )}
+        </TableCell>
     );
 };

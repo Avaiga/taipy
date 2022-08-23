@@ -4,4 +4,6 @@ password,bool,False,"If True, the text is obscured: all input characters are dis
 label,str,None,The label associated with the input.
 >sharedInput,,,
 >on_change,,,
+multiline,bool,False,"If True, the text is presented as a multi line input."
+lines_shown,int,5,"The height of the displayed element if multiline is True."
 >propagate,,,

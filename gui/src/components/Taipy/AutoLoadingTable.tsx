@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback, useRef, useMemo, CSSProperties, MouseEvent } from "react";
 import Box from "@mui/material/Box";
 import MuiTable from "@mui/material/Table";
-import TableCell from "@mui/material/TableCell";
+import TableCell, { TableCellProps } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
@@ -26,7 +26,6 @@ import {
 } from "../../context/taipyReducers";
 import {
     ColumnDesc,
-    getCellProps,
     getsortByIndex,
     Order,
     TaipyTableProps,
@@ -39,11 +38,12 @@ import {
     RowValue,
     EDIT_COL,
     OnRowDeletion,
-    iconInRowSx,
     addDeleteColumn,
     headBoxSx,
     getClassName,
     LINE_STYLE,
+    iconInRowSx,
+    DEFAULT_SIZE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -53,7 +53,7 @@ interface RowData {
     columns: Record<string, ColumnDesc>;
     rows: RowType[];
     classes: Record<string, string>;
-    cellStyles: CSSProperties[];
+    cellProps: Partial<TableCellProps>[];
     isItemLoaded: (index: number) => boolean;
     selection: number[];
     formatConfig: FormatConfig;
@@ -71,7 +71,7 @@ const Row = ({
         columns,
         rows,
         classes,
-        cellStyles,
+        cellProps,
         isItemLoaded,
         selection,
         formatConfig,
@@ -97,24 +97,18 @@ const Row = ({
             selected={selection.indexOf(index) > -1}
         >
             {colsOrder.map((col, cidx) => (
-                <TableCell
-                    component="div"
-                    variant="body"
+                <EditableCell
                     key={"val" + index + "-" + cidx}
-                    {...getCellProps(columns[col])}
-                    sx={cellStyles[cidx]}
                     className={getClassName(rows[index], columns[col].style)}
-                >
-                    <EditableCell
-                        colDesc={columns[col]}
-                        value={rows[index][col]}
-                        formatConfig={formatConfig}
-                        rowIndex={index}
-                        onValidation={onValidation}
-                        onDeletion={onDeletion}
-                        nanValue={columns[col].nanValue || nanValue}
-                    />
-                </TableCell>
+                    colDesc={columns[col]}
+                    value={rows[index][col]}
+                    formatConfig={formatConfig}
+                    rowIndex={index}
+                    onValidation={onValidation}
+                    onDeletion={onDeletion}
+                    nanValue={columns[col].nanValue || nanValue}
+                    tableCellProps={cellProps[cidx]}
+                />
             ))}
         </TableRow>
     ) : (
@@ -131,7 +125,8 @@ interface key2Rows {
     promises: Record<number, PromiseProps>;
 }
 
-const ROW_HEIGHT = 54;
+const getRowHeight = (size = DEFAULT_SIZE) => size == DEFAULT_SIZE ? 37 : 54;
+const getCellSx = (width: string | number | undefined, size = DEFAULT_SIZE) => ({ width: width, height: 22, padding: size == DEFAULT_SIZE ? "7px": undefined });
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
     const {
@@ -147,6 +142,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         tp_onEdit = "",
         tp_onDelete = "",
         tp_onAdd = "",
+        size = DEFAULT_SIZE,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
@@ -231,6 +227,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         col.filter = !!props.filter;
                     }
                     filter = filter || col.filter;
+                    if (typeof col.notEditable != "boolean") {
+                        col.notEditable = !editable;
+                    } else {
+                        col.notEditable = col.notEditable || !editable;
+                    }
                 });
                 addDeleteColumn(
                     (!!(active && editable && (tp_onAdd || tp_onDelete)) ? 1 : 0) + (active && filter ? 1 : 0),
@@ -314,7 +315,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         applies,
                         styles,
                         handleNan,
-                        appliedFilters,
+                        appliedFilters
                     )
                 );
             });
@@ -374,10 +375,12 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns: columns,
             rows: rows,
             classes: {},
-            cellStyles: colsOrder.map((col) => ({
-                width: columns[col].width || columns[col].widthHint,
-                height: ROW_HEIGHT - 32,
+            cellProps: colsOrder.map((col) => ({
+                sx: getCellSx(columns[col].width || columns[col].widthHint, size),
+                component: "div",
+                variant: "body",
             })),
+
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
@@ -401,6 +404,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowDeletion,
             props.lineStyle,
             props.nanValue,
+            size,
         ]
     );
 
@@ -414,7 +418,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable
                             sx={tableSx}
                             aria-labelledby="tableTitle"
-                            size={"medium"}
+                            size={size}
                             className={className}
                             stickyHeader={true}
                         >
@@ -435,7 +439,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                                 size="small"
                                                                 sx={iconInRowSx}
                                                             >
-                                                                <AddIcon />
+                                                                <AddIcon fontSize="inherit" />
                                                             </IconButton>
                                                         </Tooltip>
                                                     ) : null,
@@ -463,14 +467,14 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                                 onClick={onAggregate}
                                                                 size="small"
                                                                 title="aggregate"
-                                                                sx={iconInRowSx}
                                                                 data-dfid={columns[col].dfid}
                                                                 disabled={!active}
+                                                                sx={iconInRowSx}
                                                             >
                                                                 {aggregates.includes(columns[col].dfid) ? (
-                                                                    <DataSaverOff />
+                                                                    <DataSaverOff fontSize="inherit" />
                                                                 ) : (
-                                                                    <DataSaverOn />
+                                                                    <DataSaverOn fontSize="inherit" />
                                                                 )}
                                                             </IconButton>
                                                         ) : null}
@@ -507,7 +511,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                 height={height}
                                                 width={width}
                                                 itemCount={rowCount}
-                                                itemSize={ROW_HEIGHT}
+                                                itemSize={getRowHeight(size)}
                                                 onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
                                                 ref={ref}
                                                 itemData={rowData}

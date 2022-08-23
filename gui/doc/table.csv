@@ -34,6 +34,8 @@ filter,bool,FALSE,"Indicates, if True, that all columns can be filtered."
 filter[<i>col_name</i>],bool,FALSE,"Indicates, if True, that the indicated column can be filtered."
 nan_value,str,"""""",The replacement text for NaN (not-a-number) values.
 nan_value[<i>col_name</i>],str,"""""",The replacement text for NaN (not-a-number) values for the indicated column.
+editable,dynamic(bool),FALSE,"Indicates, if True, that all columns can be edited."
+editable[<i>col_name</i>],bool,"editable","Indicates, if False, that the indicated column cannot be edited when editable is True."
 on_edit,Callback,,"The name of a function that is to be triggered when a cell edition is validated.<br/>
 All parameters of that function are optional:
 <ul>
@@ -78,5 +80,6 @@ This dictionary has the following keys:
 </li>
 </ul>
 If this property is not set, the user cannot add rows."
+size,str,"""small""","The size of the rows, valid values are small or medium."
 >active,,,
 >shared,,,
