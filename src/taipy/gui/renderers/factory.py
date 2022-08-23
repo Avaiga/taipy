@@ -447,6 +447,7 @@ class _Factory:
                 ("nan_value",),
                 ("filter", PropertyType.boolean),
                 ("hover_text", PropertyType.dynamic_string),
+                ("size",)
             ]
         )
         .set_propagate()

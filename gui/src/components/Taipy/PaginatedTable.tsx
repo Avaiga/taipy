@@ -50,6 +50,7 @@ import {
     TaipyPaginatedTableProps,
     ColumnDesc,
     iconInRowSx,
+    DEFAULT_SIZE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -75,6 +76,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         tp_onDelete = "",
         tp_onAdd = "",
         width = "100vw",
+        size = DEFAULT_SIZE,
     } = props;
     const [value, setValue] = useState<Record<string, unknown>>({});
     const [startIndex, setStartIndex] = useState(0);
@@ -331,7 +333,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                         <Table
                             sx={tableSx}
                             aria-labelledby="tableTitle"
-                            size="small"
+                            size={size}
                             className={className}
                             stickyHeader={true}
                         >

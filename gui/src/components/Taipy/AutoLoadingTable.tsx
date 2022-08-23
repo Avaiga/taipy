@@ -43,6 +43,7 @@ import {
     getClassName,
     LINE_STYLE,
     iconInRowSx,
+    DEFAULT_SIZE,
 } from "./tableUtils";
 import { useDispatchRequestUpdateOnFirstRender, useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import TableFilter, { FilterDesc } from "./TableFilter";
@@ -124,7 +125,8 @@ interface key2Rows {
     promises: Record<number, PromiseProps>;
 }
 
-const ROW_HEIGHT = 54;
+const getRowHeight = (size = DEFAULT_SIZE) => size == DEFAULT_SIZE ? 37 : 54;
+const getCellSx = (width: string | number | undefined, size = DEFAULT_SIZE) => ({ width: width, height: 22, padding: size == DEFAULT_SIZE ? "7px": undefined });
 
 const AutoLoadingTable = (props: TaipyTableProps) => {
     const {
@@ -140,6 +142,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         tp_onEdit = "",
         tp_onDelete = "",
         tp_onAdd = "",
+        size = DEFAULT_SIZE,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
     const [rowCount, setRowCount] = useState(1000); // need someting > 0 to bootstrap the infinit loader
@@ -373,10 +376,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             rows: rows,
             classes: {},
             cellProps: colsOrder.map((col) => ({
-                sx: { width: columns[col].width || columns[col].widthHint, height: ROW_HEIGHT - 32 },
+                sx: getCellSx(columns[col].width || columns[col].widthHint, size),
                 component: "div",
                 variant: "body",
             })),
+
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
@@ -400,6 +404,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             onRowDeletion,
             props.lineStyle,
             props.nanValue,
+            size,
         ]
     );
 
@@ -413,7 +418,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                         <MuiTable
                             sx={tableSx}
                             aria-labelledby="tableTitle"
-                            size={"medium"}
+                            size={size}
                             className={className}
                             stickyHeader={true}
                         >
@@ -506,7 +511,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                                 height={height}
                                                 width={width}
                                                 itemCount={rowCount}
-                                                itemSize={ROW_HEIGHT}
+                                                itemSize={getRowHeight(size)}
                                                 onItemsRendered={onTaipyItemsRendered(onItemsRendered)}
                                                 ref={ref}
                                                 itemData={rowData}

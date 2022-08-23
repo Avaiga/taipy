@@ -30,6 +30,8 @@ export interface ColumnDesc {
     widthHint?: number;
 }
 
+export const DEFAULT_SIZE = "small";
+
 export type Order = "asc" | "desc";
 
 export type RowValue = string | number | null;
@@ -110,6 +112,7 @@ export interface TaipyTableProps extends TaipyActiveProps, TaipyMultiSelectProps
     lineStyle?: string;
     nanValue?: string;
     filter?: boolean;
+    size?: "small" | "medium";
     defaultKey?: string; // for testing purposes only
 }
 

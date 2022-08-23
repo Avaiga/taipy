@@ -80,5 +80,6 @@ This dictionary has the following keys:
 </li>
 </ul>
 If this property is not set, the user cannot add rows."
+size,str,"""small""","The size of the rows, valid values are small or medium."
 >active,,,
 >shared,,,
