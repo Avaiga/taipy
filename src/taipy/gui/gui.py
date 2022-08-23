@@ -433,6 +433,8 @@ class Gui:
             self.__send_var_list_update(list(derived_modified), var_name)
 
     def __get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
+        if not var_name:
+            return (var_name, var_name)
         # Handle holder prefix if needed
         if var_name.startswith(_HOLDER_PREFIX_START):
             for hp in _HOLDER_PREFIXES:
