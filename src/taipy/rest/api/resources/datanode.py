@@ -64,24 +64,101 @@ class DataNodeResource(Resource):
     get:
       tags:
         - api
-      summary: Get a data node.
       description: |
-        Return a single data node by *datanode_id*. If the data node does not exist, a 404 error is returned.
+        Returns a `DataNodeSchema^` representing the unique `DataNode^` identified by the *datanode_id*
+        given as parameter. If no data node corresponds to *datanode_id*, a `404` error is returned.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X GET http://localhost:5000/api/v1/datanodes/DATANODE_hist_cfg_75750ed8-4e09-4e00-958d
+                    -e352ee426cc9
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* parameter. It
+                represents the identifier of the data node we want to retrieve.
+
+                In case of success here is an example of the response:
+                ``` JSON
+                {"datanode": {
+                    "id": "DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d",
+                    "config_id": "historical_data_set",
+                    "scope": "<Scope.SCENARIO: 2>",
+                    "storage_type": "csv",
+                    "name": "Name of my historical data node",
+                    "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                    "last_edit_date": "2022-08-10T16:03:40.855082",
+                    "job_ids": [],
+                    "validity_days": null,
+                    "validity_seconds": null,
+                    "edit_in_progress": false,
+                    "data_node_properties": {
+                        "cacheable": false,
+                        "path": "daily-min-temperatures.csv",
+                        "has_header": true}
+                    }}
+                ```
+
+                In case of failure here is an example of the response:
+                ``` JSON
+                {"message":"DataNode DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d not found"}
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.get(
+                    "http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d")
+                    print(response)
+                    print(response.json())
+                ```
+                `DATANODE_hist_cfg_75750ed8-4e09-4e00-958d-e352ee426cc9` is the value of the *datanode_id* parameter. It
+                represents the identifier of the data node we want to retrieve.
+
+                In case of success here is an output example:
+                ```
+                <Response [200]>
+                {"datanode": {
+                    "id": "DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d",
+                    "config_id": "historical_data_set",
+                    "scope": "<Scope.SCENARIO: 2>",
+                    "storage_type": "csv",
+                    "name": "Name of my historical data node",
+                    "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                    "last_edit_date": "2022-08-10T16:03:40.855082",
+                    "job_ids": [],
+                    "validity_days": null,
+                    "validity_seconds": null,
+                    "edit_in_progress": false,
+                    "data_node_properties": {
+                        "cacheable": false,
+                        "path": "daily-min-temperatures.csv",
+                        "has_header": true}
+                    }}
+                ```
+
+                In case of failure here is an output example:
+                ```
+                <Response [404]>
+                {"message":"DataNode DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d not found"}
+
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+          When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_READER` role.
 
-        Code example:
-
-        ```shell
-          curl -X GET http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
-        ```
       parameters:
         - in: path
           name: datanode_id
           schema:
             type: string
-          description: The identifier of the data node.
+          description: The identifier of the data node to retrieve.
+
       responses:
         200:
           content:
@@ -97,23 +174,65 @@ class DataNodeResource(Resource):
         - api
       summary: Delete a data node.
       description: |
-        Delete a data node. If the data node does not exist, a 404 error is returned.
+        Deletes the `DataNode^` identified by the  *datanode_id* given as parameter. If the data node does not exist,
+        a 404 error is returned.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X DELETE http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the
+                *datanode_id* parameter. It represents the identifier of the data node we want to delete.
+
+                In case of success here is an example of the response:
+                ``` JSON
+                {"msg": "datanode DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d deleted"}
+                ```
+
+                In case of failure here is an example of the response:
+                ``` JSON
+                {"message": "Data node DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d not found."}
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.delete("http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d")
+                    print(response)
+                    print(response.json())
+                ```
+                `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the value of the  *datanode_id* parameter. It
+                represents the identifier of the Cycle we want to delete.
+
+                In case of success here is an output example:
+                ```
+                <Response [200]>
+                {"msg": "Data node DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d deleted."}
+                ```
+
+                In case of failure here is an output example:
+                ```
+                <Response [404]>
+                {'message': 'Data node DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d not found.'}
+
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
-
-        Code example:
-
-        ```shell
-          curl -X DELETE http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
-        ```
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_EDITOR` role.
 
       parameters:
         - in: path
           name: datanode_id
           schema:
             type: string
-          description: The identifier of the data node.
+          description: The identifier of the data node to delete.
       responses:
         200:
           content:
@@ -152,18 +271,89 @@ class DataNodeList(Resource):
     get:
       tags:
         - api
-      summary: Get all data nodes.
       description: |
-        Returns an array of all data nodes.
+        Returns a `DataNodeSchema^` list representing all existing data nodes.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X GET http://localhost:5000/api/v1/datanodes
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                Here is an example of the response:
+                ``` JSON
+                [
+                    {"datanode": {
+                        "id": "DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d",
+                        "config_id": "historical_data_set",
+                        "scope": "<Scope.SCENARIO: 2>",
+                        "storage_type": "csv",
+                        "name": "Name of my historical data node",
+                        "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                        "last_edit_date": "2022-08-10T16:03:40.855082",
+                        "job_ids": [],
+                        "validity_days": null,
+                        "validity_seconds": null,
+                        "edit_in_progress": false,
+                        "data_node_properties": {
+                            "cacheable": false,
+                            "path": "daily-min-temperatures.csv",
+                            "has_header": true}
+                    }}
+                ]
+                ```
+
+                If there is no data node, the response is an empty list as follows:
+                ``` JSON
+                []
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.get("http://localhost:5000/api/v1/datanodes")
+                    print(response)
+                    print(response.json())
+                ```
+
+                In case of success here is an output example:
+                ```
+                <Response [200]>
+                [
+                    {"datanode": {
+                        "id": "DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d",
+                        "config_id": "historical_data_set",
+                        "scope": "<Scope.SCENARIO: 2>",
+                        "storage_type": "csv",
+                        "name": "Name of my historical data node",
+                        "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                        "last_edit_date": "2022-08-10T16:03:40.855082",
+                        "job_ids": [],
+                        "validity_days": null,
+                        "validity_seconds": null,
+                        "edit_in_progress": false,
+                        "data_node_properties": {
+                            "cacheable": false,
+                            "path": "daily-min-temperatures.csv",
+                            "has_header": true}
+                    }}
+                ]
+                ```
+
+                If there is no data node, the response is an empty list as follows:
+                ```
+                <Response [200]>
+                []
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_READER` role.
 
-        Code example:
-
-        ```shell
-          curl -X GET http://localhost:5000/api/v1/datanodes
-        ```
       responses:
         200:
           content:
@@ -179,18 +369,62 @@ class DataNodeList(Resource):
     post:
       tags:
         - api
-      summary: Create a data node.
       description: |
-        Create a data node from its *config_id*. If the config does not exist, a 404 error is returned.
+        Creates a new data node from the *config_id* given as parameter.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X POST http://localhost:5000/api/v1/datanodes?config_id=historical_data_set
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                In this example the *config_id* value ("historical_data_set") is given as parameter directly in the
+                url. A corresponding `DataNodeConfig^` must exist and must have been configured before.
+
+                Here is the output message example:
+                ```
+                {"msg": "datanode created",
+                "datanode": {
+                    "default_path": null,
+                    "path": "daily-min-temperatures.csv",
+                    "name": null,
+                    "storage_type": "csv",
+                    "scope": 2,
+                    "has_header": true}
+                }
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.post("http://localhost:5000/api/v1/datanodes?config_id=historical_data_set")
+                    print(response)
+                    print(response.json())
+                ```
+                In this example the *config_id* value ("historical_data_set") is given as parameter directly in the
+                url. A corresponding `DataNodeConfig^` must exist and must have been configured before.
+
+                Here is the output example:
+                ```
+                <Response [201]>
+                {'msg': 'datanode created',
+                'datanode': {
+                    'name': None,
+                    'scope': 2,
+                    'path': 'daily-min-temperatures.csv',
+                    'storage_type': 'csv',
+                    'default_path': None,
+                    'has_header': True}}
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_EDITOR` role.
 
-        Code example:
-
-        ```shell
-          curl -X POST http://localhost:5000/api/v1/datanodes?config_id=my_data_node_config
-        ```
       parameters:
         - in: query
           name: config_id
@@ -234,11 +468,11 @@ class DataNodeList(Resource):
         if not config_id:
             raise ConfigIdMissingException
 
+
         config = self.fetch_config(config_id)
         schema = ds_schema_map.get(config.storage_type)()
         manager = _DataManagerFactory._build_manager()
         manager._bulk_get_or_create({config})
-
         return {
             "message": "Data node was created.",
             "datanode": schema.dump(config),
@@ -252,30 +486,66 @@ class DataNodeReader(Resource):
     get:
       tags:
         - api
-      summary: Read a data node.
       description: |
-        Return the data read from a data node by *datanode_id*. If the data node does not exist, a 404 error is returned.
+        Returns the data read from the data node identified by *datanode_id*. If the data node does not exist,
+        a 404 error is returned.
+
+        !!! Example
+
+            === "Curl"
+
+                ```shell
+                  curl -X GET http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read
+                ```
+
+                `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the *datanode_id*
+                parameter. It represents the identifier of the data node to read.
+
+                Here is an output example. In this case, the storage type of the data node to read is `csv`,
+                and no exposed type is specified. The data is exposed as a list of dictionaries, each dictionary
+                representing a raw of the csv file.
+                ```
+                {"data": [
+                    {"Date": "1981-01-01", "Temp": 20.7}, {"Date": "1981-01-02", "Temp": 17.9},
+                    {"Date": "1981-01-03", "Temp": 18.8}, {"Date": "1981-01-04", "Temp": 14.6},
+                    {"Date": "1981-01-05", "Temp": 15.8}, {"Date": "1981-01-06", "Temp": 15.8},
+                    {"Date": "1981-01-07", "Temp": 15.8}
+                    ]}
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.get("http://localhost:5000/api/v1/datanodes/DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d/read")
+                    print(response)
+                    print(response.json())
+                ```
+                `DATANODE_historical_data_set_9db1b542-2e45-44e7-8a85-03ef9ead173d` is the *datanode_id*
+                parameter. It represents the identifier of the data node to read.
+
+                Here is an output example. In this case, the storage type of the data node to read is `csv`,
+                and no exposed type is specified. The data is exposed as a list of dictionaries, each dictionary
+                representing a raw of the csv file.
+                ```
+                {"data": [
+                    {"Date": "1981-01-01", "Temp": 20.7}, {"Date": "1981-01-02", "Temp": 17.9},
+                    {"Date": "1981-01-03", "Temp": 18.8}, {"Date": "1981-01-04", "Temp": 14.6},
+                    {"Date": "1981-01-05", "Temp": 15.8}, {"Date": "1981-01-06", "Temp": 15.8},
+                    {"Date": "1981-01-07", "Temp": 15.8}
+                    ]}
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
-
-        Code example:
-
-        ```shell
-          curl -X GET http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9/read
-        ```
-
-        Code example with filters:
-
-        ```shell
-          curl -X GET -H 'Content-Type: application/json' -d '{"operators": [{"key": "foo", "value": 10, "operator": ">"}], "join_operator": "AND"}' http://localhost:5000/api/v1/datanodes/DATANODE_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9/read
-        ```
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_READER` role.
 
       parameters:
         - in: path
           name: datanode_id
           schema:
             type: string
+          description: The id of the data node to read.
       requestBody:
         content:
           application/json:

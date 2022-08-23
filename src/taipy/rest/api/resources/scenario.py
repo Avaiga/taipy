@@ -11,7 +11,6 @@
 
 from flask import request
 from flask_restful import Resource
-
 from taipy.config.config import Config
 from taipy.core.exceptions.exceptions import NonExistingScenario, NonExistingScenarioConfig
 from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
@@ -40,25 +39,86 @@ class ScenarioResource(Resource):
     get:
       tags:
         - api
-      summary: Get a scenario.
       description: |
-        Return a single scenario by *scenario_id*. If the scenario does not exist, a 404 error is returned.
+        Returns a `ScenarioSchema^` representing the unique scenario identified by *scenario_id*. If no scenario
+        corresponds to *scenario_id*, a `404` error is returned.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X GET http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                represents the identifier of the Scenario we want to retrieve.
+
+                In case of success here is an example of the response:
+                ``` JSON
+                {"scenario": {
+                    "cycle": "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
+                    "id": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
+                    "properties": {},
+                    "tags": [],
+                    "pipelines": [
+                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "subscribers": [],
+                    "creation_date": "2022-08-15T19:21:01.871587",
+                    "primary_scenario": true}}
+                ```
+
+                In case of failure here is an example of the response:
+                ``` JSON
+                {"message": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c not found."}
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.get("http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
+                    print(response)
+                    print(response.json())
+                ```
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* parameter. It
+                represents the identifier of the Cycle we want to retrieve.
+
+                In case of success here is an output example:
+                ```
+                <Response [200]>
+                {"scenario": {
+                    "cycle": "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
+                    "id": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
+                    "properties": {},
+                    "tags": [],
+                    "pipelines": [
+                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "subscribers": [],
+                    "creation_date": "2022-08-15T19:21:01.871587",
+                    "primary_scenario": true}}
+                ```
+
+                In case of failure here is an output example:
+                ```
+                <Response [404]>
+                {'message': 'Scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c not found.'}
+
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_READER` role.
 
-        Code example:
-
-        ```
-          curl -X GET http://localhost:5000/api/v1/scenarios/SCENARIO_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
-        ```
-
-      parameters:
+        parameters:
         - in: path
           name: scenario_id
           schema:
             type: string
-          description: The identifier of the scenario.
+          description: The identifier of the scenario to retrieve.
       responses:
         200:
           content:
@@ -72,25 +132,66 @@ class ScenarioResource(Resource):
     delete:
       tags:
         - api
-      summary: Delete a scenario.
       description: |
-        Delete a scenario. If the scenario does not exist, a 404 error is returned.
+        Delete the `Scenario^` scenario identified by the *scenario_id* given as parameter. If the scenario does not
+        exist, a 404 error is returned.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X DELETE http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the  *scenario_id* parameter. It
+                represents the identifier of the scenario we want to delete.
+
+                In case of success here is an example of the response:
+                ``` JSON
+                {"msg": "Scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c deleted."}
+                ```
+
+                In case of failure here is an example of the response:
+                ``` JSON
+                {"message": "Scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c not found."}
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.delete("http://localhost:5000/api/v1/scenarios/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
+                    print(response)
+                    print(response.json())
+                ```
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                represents the identifier of the Scenario we want to delete.
+
+                In case of success here is an output example:
+                ```
+                <Response [200]>
+                {"msg": "Scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c deleted."}
+                ```
+
+                In case of failure here is an output example:
+                ```
+                <Response [404]>
+                {'message': 'Scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c not found.'}
+
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
-
-        Code example:
-
-        ```shell
-          curl -X DELETE http://localhost:5000/api/v1/scenarios/SCENARIO_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
-        ```
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_EDITOR` role.
 
       parameters:
         - in: path
           name: scenario_id
           schema:
             type: string
-          description: The identifier of the scenario.
+          description: The identifier of the scenario to delete.
       responses:
         200:
           content:
@@ -131,16 +232,75 @@ class ScenarioList(Resource):
         - api
       summary: Get all scenarios.
       description: |
-        Return an array of all scenarios.
+        Returns a `ScenarioSchema^` list representing all existing Scenarios.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X GET http://localhost:5000/api/v1/scenarios
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                Here is an example of the response:
+                ``` JSON
+                [{
+                    "cycle": "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
+                    "id": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
+                    "properties": {},
+                    "tags": [],
+                    "pipelines": [
+                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "subscribers": [],
+                    "creation_date": "2022-08-15T19:21:01.871587",
+                    "primary_scenario": true
+                    }
+                ]
+                ```
+
+                If there is no scenario, the response is an empty list as follows:
+                ``` JSON
+                []
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.get("http://localhost:5000/api/v1/scenarios")
+                    print(response)
+                    print(response.json())
+                ```
+
+                In case of success here is an output example:
+                ```
+                <Response [200]>
+                [{
+                    "cycle": "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
+                    "id": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
+                    "properties": {},
+                    "tags": [],
+                    "pipelines": [
+                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "subscribers": [],
+                    "creation_date": "2022-08-15T19:21:01.871587",
+                    "primary_scenario": true
+                    }
+                ]
+                ```
+
+                If there is no scenario, the response is an empty list as follows:
+                ```
+                <Response [200]>
+                []
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_READER` role.
-
-        Code example:
-
-        ```shell
-          curl -X GET http://localhost:5000/api/v1/scenarios
-        ```
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_READER` role.
 
       responses:
         200:
@@ -157,18 +317,71 @@ class ScenarioList(Resource):
     post:
       tags:
         - api
-      summary: Create a scenario.
       description: |
-        Create a new scenario from its *config_id*. If the config does not exist, a 404 error is returned.
+        Creates a new scenario from the  *config_id*. If the config does not exist, a 404 error is returned.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X POST http://localhost:5000/api/v1/scenarios?config_id=my_scenario_config
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                In this example the *config_id* value ("my_scenario_config") is given as parameter directly in the
+                url. A corresponding `ScenarioConfig^` must exist and must have been configured before.
+
+                Here is the output message example:
+                ```
+                {"msg": "scenario created.",
+                "scenario": {
+                    "cycle": "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
+                    "id": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
+                    "properties": {},
+                    "tags": [],
+                    "pipelines": [
+                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "subscribers": [],
+                    "creation_date": "2022-08-15T19:21:01.871587",
+                    "primary_scenario": true}
+                }
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                import requests
+                    response = requests.post("http://localhost:5000/api/v1/scenarios?config_id=my_scenario_config")
+                    print(response)
+                    print(response.json())
+                ```
+                In this example the *config_id* value ("my_scenario_config") is given as parameter directly in the
+                url. A corresponding `ScenarioConfig^` must exist and must have been configured before.
+
+                Here is the output example:
+                ```
+                <Response [201]>
+                {"msg": "scenario created.",
+                "scenario": {
+                    "cycle": "CYCLE_863418_fdd1499a-8925-4540-93fd-9dbfb4f0846d",
+                    "id": "SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c",
+                    "properties": {},
+                    "tags": [],
+                    "pipelines": [
+                        "PIPELINE_mean_baseline_5af317c9-34df-48b4-8a8a-bf4007e1de99",
+                        "PIPELINE_arima_90aef6b9-8922-4a0c-b625-b2c6f3d19fa4"],
+                    "subscribers": [],
+                    "creation_date": "2022-08-15T19:21:01.871587",
+                    "primary_scenario": true}
+                }
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EDITOR` role.
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_EDITOR` role.
 
-        Code example:
-
-        ```shell
-          curl -X POST http://localhost:5000/api/v1/scenarios?config_id=my_scenario_config
-        ```
       parameters:
         - in: query
           name: config_id
@@ -231,26 +444,55 @@ class ScenarioExecutor(Resource):
     post:
       tags:
         - api
-      summary: Execute a scenario.
       description: |
-        Execute a scenario by *scenario_id*. If the scenario does not exist, a 404 error is returned.
+        Executes a scenario by *scenario_id*. If the scenario does not exist, a 404 error is returned.
+
+        !!! Example
+
+            === "Curl"
+                ```shell
+                    curl -X POST http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c
+                ```
+                In this example the REST API is served on port 5000 on localhost. We are using curl command line
+                client.
+
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                represents the identifier of the Scenario we want to submit.
+
+                Here is the output message example:
+                ```
+                {"message": "Executed scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c."}
+                ```
+
+            === "Python"
+                This Python example requires the 'requests' package to be installed (`pip install requests`).
+                ```python
+                    import requests
+                        response = requests.post("http://localhost:5000/api/v1/scenarios/submit/SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c")
+                        print(response)
+                        print(response.json())
+                ```
+                `SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c` is the value of the *scenario_id* parameter. It
+                represents the identifier of the Scenario we want to submit.
+
+                Here is the output example:
+                ```
+                <Response [202]>
+                {"message": "Executed scenario SCENARIO_63cb358d-5834-4d73-84e4-a6343df5e08c."}
+                ```
 
         !!! Note
-          When the authorization feature is activated (available in the **Enterprise** edition only), this endpoint requires `TAIPY_EXECUTOR` role.
-
-        Code example:
-
-        ```shell
-          curl -X POST http://localhost:5000/api/v1/scenarios/submit/SCENARIO_my_config_75750ed8-4e09-4e00-958d-e352ee426cc9
-        ```
+            When the authorization feature is activated (available in Taipy Enterprise edition only), this endpoint
+            requires the `TAIPY_EXECUTOR` role.
 
       parameters:
         - in: path
           name: scenario_id
           schema:
             type: string
+          description: The identifier of the scenario to submit.
       responses:
-        204:
+        202:
           content:
             application/json:
               schema:
@@ -273,3 +515,4 @@ class ScenarioExecutor(Resource):
         manager = _ScenarioManagerFactory._build_manager()
         manager._submit(scenario_id)
         return {"message": f"Scenario {scenario_id} was submitted."}
+

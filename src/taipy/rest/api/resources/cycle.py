@@ -49,7 +49,7 @@ class CycleResource(Resource):
 
             === "Curl"
                 ```shell
-                    curl -X GET https://localhost:5000/api/v1/cycles/CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a
+                    curl -X GET http://localhost:5000/api/v1/cycles/CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a
                 ```
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
@@ -136,7 +136,7 @@ class CycleResource(Resource):
 
             === "Curl"
                 ```shell
-                    curl -X DELETE https://localhost:5000/api/v1/cycles/CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a
+                    curl -X DELETE http://localhost:5000/api/v1/cycles/CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a
                 ```
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
@@ -233,7 +233,7 @@ class CycleList(Resource):
 
             === "Curl"
                 ```shell
-                    curl -X GET https://localhost:5000/api/v1/cycles
+                    curl -X GET http://localhost:5000/api/v1/cycles
                 ```
                 In this example the REST API is served on port 5000 on localhost. We are using curl command line
                 client.
@@ -266,8 +266,6 @@ class CycleList(Resource):
                     print(response)
                     print(response.json())
                 ```
-                `CYCLE_223894_e0fab919-b50b-4b9f-ac09-52f77474fa7a` is the value of the  *cycle_id* parameter. It
-                represents the identifier of the Cycle we want to retrieve.
 
                 In case of success here is an output example:
                 ```
