@@ -853,7 +853,7 @@ class _Builder:
                 if update_main:
                     self.__set_update_var_name(hash_name)
                 else:
-                    self.__update_vars.append(f"{name}={hash_name}")
+                    self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
     
     def __set_dynamic_property_without_default(self, name: str, property_type: PropertyType):
         hash_name = self.__hashes.get(name)
@@ -861,7 +861,7 @@ class _Builder:
             warnings.warn(f"{self.__element_name}.{name} should be binded.")
         else:
             hash_name = self.__get_typed_hash_name(hash_name, property_type)
-            self.__set_update_var_name(hash_name)
+            self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")
             self.__set_react_attribute(_to_camel_case(name), _get_client_var_name(hash_name))
         return self
 
