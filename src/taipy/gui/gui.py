@@ -70,7 +70,7 @@ from .utils import (
     _TaipyLovValue,
     _variable_decode,
 )
-from .utils.types import _HOLDER_PREFIX_START, _HOLDER_PREFIXES
+from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
@@ -436,7 +436,7 @@ class Gui:
         if not var_name:
             return (var_name, var_name)
         # Handle holder prefix if needed
-        if var_name.startswith(_HOLDER_PREFIX_START):
+        if var_name.startswith(_HOLDER_PREFIX):
             for hp in _HOLDER_PREFIXES:
                 if var_name.startswith(hp):
                     var_name = var_name[len(hp):]
@@ -452,7 +452,7 @@ class Gui:
             var_name = var_name_decode
         else:
             if var_name not in self.__var_dir._var_head:
-                raise NameError(f"Can't find matching variable for {var_name} on {current_context} context")
+                raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
             _found = False
             for k, v in self.__var_dir._var_head[var_name]:
                 if v == current_context:
@@ -460,7 +460,7 @@ class Gui:
                     _found = True
                     break
             if not _found:
-                raise NameError(f"Can't find matching variable for {var_name} on {current_context} context")
+                raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
         return f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name, current_context
 
 
