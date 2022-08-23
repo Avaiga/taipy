@@ -16,7 +16,6 @@ import json
 import os
 import pathlib
 import re
-import ssl
 import tempfile
 import typing as t
 import warnings
@@ -28,6 +27,8 @@ import markdown as md_lib
 import tzlocal
 from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
+
+from src.taipy.gui.utils.types import HOLDER_PREFIX_START, HOLDER_PREFIXES
 
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
@@ -70,7 +71,6 @@ from .utils import (
     _TaipyLov,
     _TaipyLovValue,
     _variable_decode,
-    _variable_encode,
 )
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
@@ -433,7 +433,13 @@ class Gui:
         if derived_modified is not None:
             self.__send_var_list_update(list(derived_modified), var_name)
 
-    def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
+    def __get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
+        # Handle holder prefix if needed
+        if var_name.startswith(HOLDER_PREFIX_START):
+            for hp in HOLDER_PREFIXES:
+                if var_name.startswith(hp):
+                    var_name = var_name[len(hp):]
+                    break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
@@ -445,8 +451,7 @@ class Gui:
             var_name = var_name_decode
         else:
             if var_name not in self.__var_dir._var_head:
-                warnings.warn(f"Can't find matching variable for {var_name} on {current_context} context")
-                return
+                raise NameError(f"Can't find matching variable for {var_name} on {current_context} context")
             _found = False
             for k, v in self.__var_dir._var_head[var_name]:
                 if v == current_context:
@@ -454,9 +459,16 @@ class Gui:
                     _found = True
                     break
             if not _found:
-                warnings.warn(f"Can't find matching variable for {var_name} on {current_context} context")
-                return
-        var_name = f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name
+                raise NameError(f"Can't find matching variable for {var_name} on {current_context} context")
+        return f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name, current_context
+
+
+    def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
+        try:
+            var_name, current_context = self.__get_real_var_name(var_name)
+        except Exception as e:
+            warnings.warn(f"{e}")
+            return
         on_change_fn = self._get_user_function(on_change) if on_change else None
         if not callable(on_change_fn):
             on_change_fn = self._get_user_function("on_change")
@@ -785,7 +797,10 @@ class Gui:
                 if argcount > 0:
                     args[0] = self.__get_state()
                 if argcount > 1:
-                    args[1] = id
+                    try:
+                        args[1] = self.__get_real_var_name(id)[0]
+                    except Exception:
+                        args[1] = id
                 if argcount > 2:
                     args[2] = payload if action is None else action
                 if argcount > 3 and action is not None:
