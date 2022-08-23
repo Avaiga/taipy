@@ -51,7 +51,7 @@ class _TaipyBase(ABC):
 class _TaipyData(_TaipyBase):
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "D"
+        return _HOLDER_PREFIX_START + "D"
 
 
 class _TaipyBool(_TaipyBase):
@@ -63,7 +63,7 @@ class _TaipyBool(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "B"
+        return _HOLDER_PREFIX_START + "B"
 
 
 class _TaipyNumber(_TaipyBase):
@@ -84,7 +84,7 @@ class _TaipyNumber(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "N"
+        return _HOLDER_PREFIX_START + "N"
 
 
 class _TaipyDate(_TaipyBase):
@@ -103,31 +103,31 @@ class _TaipyDate(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "Dt"
+        return _HOLDER_PREFIX_START + "Dt"
 
 
 class _TaipyLovValue(_TaipyBase):
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "Lv"
+        return _HOLDER_PREFIX_START + "Lv"
 
 
 class _TaipyLov(_TaipyBase):
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "L"
+        return _HOLDER_PREFIX_START + "L"
 
 
 class _TaipyContent(_TaipyBase):
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "C"
+        return _HOLDER_PREFIX_START + "C"
 
 
 class _TaipyContentImage(_TaipyBase):
     @staticmethod
     def get_hash():
-        return HOLDER_PREFIX_START + "Ci"
+        return _HOLDER_PREFIX_START + "Ci"
 
-HOLDER_PREFIX_START = "_Tp"
-HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]
+_HOLDER_PREFIX_START = "_Tp"
+_HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]

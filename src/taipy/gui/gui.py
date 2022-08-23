@@ -28,8 +28,6 @@ import tzlocal
 from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
-from src.taipy.gui.utils.types import HOLDER_PREFIX_START, HOLDER_PREFIXES
-
 if util.find_spec("pyngrok"):
     from pyngrok import ngrok
 
@@ -72,6 +70,7 @@ from .utils import (
     _TaipyLovValue,
     _variable_decode,
 )
+from .utils.types import _HOLDER_PREFIX_START, _HOLDER_PREFIXES
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
@@ -435,8 +434,8 @@ class Gui:
 
     def __get_real_var_name(self, var_name: str) -> t.Tuple[str, str]:
         # Handle holder prefix if needed
-        if var_name.startswith(HOLDER_PREFIX_START):
-            for hp in HOLDER_PREFIXES:
+        if var_name.startswith(_HOLDER_PREFIX_START):
+            for hp in _HOLDER_PREFIXES:
                 if var_name.startswith(hp):
                     var_name = var_name[len(hp):]
                     break
