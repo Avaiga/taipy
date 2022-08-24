@@ -1,6 +1,19 @@
+import { Type } from "apache-arrow";
+
 export enum DataFormat {
     JSON = "JSON",
     APACHE_ARROW = "ARROW",
+}
+
+const coerceBigInt = (val: unknown) => {
+    if (typeof val == "bigint") {
+        try {
+            val = Number(val);
+        } catch (e) {
+            console.warn("Cannot coerce bigint value to number", val, e);
+        }
+    }
+    return val;
 }
 
 export const parseData = (data: Record<string, unknown>): Promise<Record<string, unknown>> => {
@@ -9,17 +22,16 @@ export const parseData = (data: Record<string, unknown>): Promise<Record<string,
         const orient = data.orient;
         const pData = multi ? (data.data as Array<unknown>) : [data.data];
         return new Promise((resolve, reject) => {
-            import("apache-arrow").then(({Table}) => {
+            import("apache-arrow").then(({tableFromIPC}) => {
                 const res = pData.map((d) => {
-                    const arrowData = Table.from(new Uint8Array(d as ArrayBuffer));
+                    const arrowData = tableFromIPC(new Uint8Array(d as ArrayBuffer));
                     const tableHeading = arrowData.schema.fields.map((f) => f.name);
-                    const len = arrowData.count();
                     if (orient === "records") {
                         const convertedData: Array<unknown> = [];
-                        for (let i = 0; i < len; i++) {
+                        for (const row of arrowData) {
                             const dataRow: Record<string, unknown> = {};
-                            for (let j = 0; j < tableHeading.length; j++) {
-                                dataRow[tableHeading[j]] = arrowData.getColumnAt(j)?.get(i).valueOf();
+                            for (const cell of row) {
+                                dataRow[cell[0]] = coerceBigInt(cell[1]);
                             }
                             convertedData.push(dataRow);
                         }
@@ -27,14 +39,8 @@ export const parseData = (data: Record<string, unknown>): Promise<Record<string,
                     } else if (orient === "list") {
                         const convertedData: Record<string, unknown> = {};
                         for (let i = 0; i < tableHeading.length; i++) {
-                            const dataRow: Array<unknown> = [];
-                            const col = arrowData.getColumnAt(i);
-                            if (col) {
-                                for (let j = 0; j < len; j++) {
-                                    dataRow.push(col.get(j).valueOf());
-                                }
-                            }
-                            convertedData[tableHeading[i]] = dataRow;
+                            const col = arrowData.getChildAt(i);
+                            convertedData[tableHeading[i]] = col?.type.typeId === Type.Int ? Array.from(col).map(coerceBigInt) : col?.toArray();
                         }
                         return convertedData;
                     }

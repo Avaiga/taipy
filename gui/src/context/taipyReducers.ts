@@ -653,11 +653,6 @@ export const createModuleContextAction = (context: string): TaipyModuleContextAc
     context: context,
 });
 
-const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
-    type: Types.MultipleMessages,
-    actions: messages.map(messageToAction),
-});
-
 type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR";
 
 interface WsMessage {
