@@ -45,13 +45,13 @@ class _TaipyBase(ABC):
 
     @staticmethod
     def get_hash():
-        return "TaipyBase"
+        return NotImplemented
 
 
 class _TaipyData(_TaipyBase):
     @staticmethod
     def get_hash():
-        return "_TpD"
+        return _HOLDER_PREFIX + "D"
 
 
 class _TaipyBool(_TaipyBase):
@@ -63,7 +63,7 @@ class _TaipyBool(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return "_TpB"
+        return _HOLDER_PREFIX + "B"
 
 
 class _TaipyNumber(_TaipyBase):
@@ -84,7 +84,7 @@ class _TaipyNumber(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return "_TpN"
+        return _HOLDER_PREFIX + "N"
 
 
 class _TaipyDate(_TaipyBase):
@@ -103,28 +103,31 @@ class _TaipyDate(_TaipyBase):
 
     @staticmethod
     def get_hash():
-        return "_TpDt"
+        return _HOLDER_PREFIX + "Dt"
 
 
 class _TaipyLovValue(_TaipyBase):
     @staticmethod
     def get_hash():
-        return "_TpLv"
+        return _HOLDER_PREFIX + "Lv"
 
 
 class _TaipyLov(_TaipyBase):
     @staticmethod
     def get_hash():
-        return "_TpL"
+        return _HOLDER_PREFIX + "L"
 
 
 class _TaipyContent(_TaipyBase):
     @staticmethod
     def get_hash():
-        return "_TpC"
+        return _HOLDER_PREFIX + "C"
 
 
 class _TaipyContentImage(_TaipyBase):
     @staticmethod
     def get_hash():
-        return "_TpCi"
+        return _HOLDER_PREFIX + "Ci"
+
+_HOLDER_PREFIX = "_Tp"
+_HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]
