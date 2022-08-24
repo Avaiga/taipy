@@ -11,7 +11,6 @@
 import threading
 from abc import abstractmethod
 from multiprocessing import Lock
-from time import sleep
 from typing import Any, Dict, List
 
 from taipy.config._toml_serializer import _TomlSerializer
@@ -76,7 +75,6 @@ class _JobDispatcher(threading.Thread):
             _JobManagerFactory._build_manager()._set(job)
             self._dispatch(job)
         else:
-            print("hi??")
             self.scheduler._unlock_edit_on_outputs(job)
             job.skipped()
             _JobManagerFactory._build_manager()._set(job)

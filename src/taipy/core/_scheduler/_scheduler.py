@@ -115,7 +115,6 @@ class _Scheduler(_AbstractScheduler):
             job.pending()
             with cls.lock:
                 cls.jobs_to_run.put(job)
-            # cls.__check_and_execute_jobs_if_development_mode()
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -140,7 +139,7 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def _on_status_change(cls, job: Job):
-        if job.is_completed():
+        if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
             cls.__check_and_execute_jobs_if_development_mode()
         elif job.is_canceled():
