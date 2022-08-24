@@ -216,7 +216,7 @@ class _Scheduler(_AbstractScheduler):
         with cls.lock:
             for job in to_fail_jobs:
                 job.abandoned()
-            cls.__remove_blocked_jobs(job)
+            cls.__remove_blocked_jobs(to_fail_jobs)
             cls.__remove_jobs_to_run(to_fail_jobs)
             cls._unlock_edit_on_outputs(to_fail_jobs)
 
