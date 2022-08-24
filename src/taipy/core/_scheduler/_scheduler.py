@@ -140,12 +140,12 @@ class _Scheduler(_AbstractScheduler):
         start = datetime.now()
         jobs = jobs if isinstance(jobs, Iterable) else [jobs]
 
-        while __check_if_timeout(start, timeout):
+        while __check_if_timeout(start, timeout) and jobs:
             try:
-                if all([job._is_finished() for job in jobs]):
-                    return
-                sleep(0.1)  # Limit CPU usage
-            except:
+                if jobs[0]._is_finished():
+                    jobs.pop(0)
+                sleep(0.5)  # Limit CPU usage
+            except Exception:
                 pass
 
     @staticmethod
