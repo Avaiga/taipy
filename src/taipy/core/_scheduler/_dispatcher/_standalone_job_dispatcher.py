@@ -42,12 +42,12 @@ class _StandaloneJobDispatcher(_JobDispatcher):
         )
 
         self._set_dispatched_processes(job.id, future)  # type: ignore
-        future.add_done_callback(self.__release_worker)
-        future.add_done_callback(partial(self.__update_job_status_from_future, job))
+        future.add_done_callback(self._release_worker)
+        future.add_done_callback(partial(self._update_job_status_from_future, job))
 
-    def __release_worker(self, _):
+    def _release_worker(self, _):
         self._nb_available_workers += 1
 
-    def __update_job_status_from_future(self, job: Job, ft):
+    def _update_job_status_from_future(self, job: Job, ft):
         self._pop_dispatched_process(job.id)  # type: ignore
         self._update_job_status(job, ft.result())

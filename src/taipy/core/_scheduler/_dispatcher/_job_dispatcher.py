@@ -32,7 +32,7 @@ from .._abstract_scheduler import _AbstractScheduler
 class _JobDispatcher(threading.Thread):
     """Manages job dispatching (instances of `Job^` class) on executors."""
 
-    __STOP_FLAG = False
+    _STOP_FLAG = False
     _dispatched_processes: Dict = {}
     __logger = _TaipyLogger._get_logger()
     lock = Lock()
@@ -53,10 +53,10 @@ class _JobDispatcher(threading.Thread):
 
     def stop(self):
         """Stop the dispatcher"""
-        self.__STOP_FLAG = True
+        self._STOP_FLAG = True
 
     def run(self):
-        while not self.__STOP_FLAG:
+        while not self._STOP_FLAG:
             try:
                 if self._can_execute():
                     job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)

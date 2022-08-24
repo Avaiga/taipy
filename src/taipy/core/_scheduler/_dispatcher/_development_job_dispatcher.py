@@ -44,11 +44,4 @@ class _DevelopmentJobDispatcher(_JobDispatcher):
         config_as_string = _TomlSerializer()._serialize(Config._applied_config)
 
         rs = self._run_wrapped_function(Config.job_config.mode, config_as_string, job.id, job.task)
-
-        self.__update_job_status(job, rs)
-
-    def __release_worker(self):
-        self._nb_available_workers += 1
-
-    def __update_job_status(self, job: Job, rs):
         self._update_job_status(job, rs)
