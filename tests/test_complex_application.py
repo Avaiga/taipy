@@ -91,6 +91,7 @@ def test_skipped_jobs():
     pipeline.submit()
     assert len(tp.get_jobs()) == 4
     skipped = []
+    print([job.status for job in tp.get_jobs()])
     for job in tp.get_jobs():
         if job.status != Status.COMPLETED:
             assert job.status == Status.SKIPPED

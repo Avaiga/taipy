@@ -271,7 +271,10 @@ class Job(_Entity):
     def update_status(self, exceptions):
         """Update the job status based on the success or the failure of its execution."""
         if exceptions:
-            self.failed()
+            from .._scheduler._scheduler_factory import _SchedulerFactory
+
+            _SchedulerFactory._scheduler._fail_job(self)
+            # self.failed()
             self.__logger.error(f" {len(exceptions)} errors occurred during execution of job {self.id}")
             for e in exceptions:
                 st = "".join(traceback.format_exception(type(e), value=e, tb=e.__traceback__))

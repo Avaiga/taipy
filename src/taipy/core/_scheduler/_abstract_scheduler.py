@@ -32,7 +32,12 @@ class _AbstractScheduler:
     @classmethod
     @abstractmethod
     def submit_task(
-        cls, task: Task, submit_id: str = None, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
+        cls,
+        task: Task,
+        submit_id: str = None,
+        callbacks: Optional[Iterable[Callable]] = None,
+        force: bool = False,
+        run=True,
     ) -> Job:
         return NotImplemented
 

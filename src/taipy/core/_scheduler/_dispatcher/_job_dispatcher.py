@@ -76,6 +76,7 @@ class _JobDispatcher(threading.Thread):
             _JobManagerFactory._build_manager()._set(job)
             self._dispatch(job)
         else:
+            print("hi??")
             self.scheduler._unlock_edit_on_outputs(job)
             job.skipped()
             _JobManagerFactory._build_manager()._set(job)
