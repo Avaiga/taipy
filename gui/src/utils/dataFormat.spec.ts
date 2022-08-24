@@ -13,15 +13,15 @@ const arrowListData = { format: DataFormat.APACHE_ARROW, orient: "list", data: T
 
 describe("does nothing", () => {
     it("returns straight", async () => {
-        expect(parseData(straightData)).toBe(straightData);
+        expect(await parseData(straightData)).toBe(straightData);
     });
     it("returns with data extraction", async () => {
-        expect(parseData(extractData)).toBe(extractData.data);
+        expect(await parseData(extractData)).toBe(extractData.data);
     });
     it("returns records from arrow", async () => {
-        expect(parseData(arrowRecordsData)).toStrictEqual({ data: [], format: "ARROW", orient: "records" });
+        expect(await parseData(arrowRecordsData)).toStrictEqual({ data: [], format: "ARROW", orient: "records" });
     });
     it("returns list from arrow", async () => {
-        expect(parseData(arrowListData)).toStrictEqual({ data: {}, format: "ARROW", orient: "list" });
+        expect(await parseData(arrowListData)).toStrictEqual({ data: {}, format: "ARROW", orient: "list" });
     });
 });
