@@ -144,7 +144,9 @@ class _Scheduler(_AbstractScheduler):
             try:
                 if jobs[0]._is_finished():
                     jobs.pop(0)
-                sleep(0.5)  # Limit CPU usage
+                else:
+                    sleep(0.5)  # Limit CPU usage
+                
             except Exception:
                 pass
 
