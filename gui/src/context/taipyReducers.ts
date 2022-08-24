@@ -185,8 +185,6 @@ const messageToAction = (message: WsMessage) => {
     if (message.type) {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             return createMultipleUpdateAction(message.payload as NamePayload[]);
-        } else if (message.type === "MS" && Array.isArray(message.payload)) {
-            return createMultipleMessagesAction(message.payload as WsMessage[]);
         } else if (message.type === "AL") {
             return createAlertAction(message as unknown as AlertMessage);
         } else if (message.type === "BL") {
@@ -204,6 +202,24 @@ const messageToAction = (message: WsMessage) => {
     return {} as TaipyBaseAction;
 };
 
+const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
+    const dispatchWsMessage = (message: WsMessage) => {
+        if (message.type === "MU" && Array.isArray(message.payload)) {
+            const payloads = message.payload as NamePayload[];
+            Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>))).then(vals => {
+                vals.forEach((val, idx) => payloads[idx].payload.value = val);
+                dispatch(messageToAction(message));
+            }).catch(console.warn);
+            return;
+        } else if (message.type === "MS" && Array.isArray(message.payload)) {
+            (message.payload as WsMessage[]).forEach(msg => dispatchWsMessage(msg));
+            return;
+        }
+        dispatch(messageToAction(message));
+    }
+    return dispatchWsMessage;
+};
+
 export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispatch<TaipyBaseAction>): void => {
     if (socket) {
         // Websocket confirm successful initialization
@@ -213,7 +229,7 @@ export const initializeWebSocket = (socket: Socket | undefined, dispatch: Dispat
             dispatch({ type: Types.SocketConnected });
         });
         // handle message data from backend
-        socket.on("message", (message: WsMessage) => dispatch(messageToAction(message)));
+        socket.on("message", getWsMessageListener(dispatch));
     }
 };
 
@@ -253,7 +269,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
         case Types.SocketConnected:
             return !!state.isSocketConnected ? state : { ...state, isSocketConnected: true };
         case Types.Update:
-            const newValue = parseData(action.payload.value as Record<string, unknown>);
+            const newValue = action.payload.value as Record<string, unknown>;
             const oldValue = (state.data[action.name] as Record<string, unknown>) || {};
             if (typeof action.payload.infinite === "boolean" && action.payload.infinite) {
                 const start = newValue.start;
@@ -449,12 +465,19 @@ export const createRequestChartUpdateAction = (
     columns: string[],
     pageKey: string,
     width?: number,
-    decimator?: string,
+    decimator?: string
 ): TaipyAction =>
-    createRequestDataUpdateAction(name, id, columns, pageKey, {
-        width: width,
-        decimator: decimator,
-    }, true);
+    createRequestDataUpdateAction(
+        name,
+        id,
+        columns,
+        pageKey,
+        {
+            width: width,
+            decimator: decimator,
+        },
+        true
+    );
 
 export const createRequestTableUpdateAction = (
     name: string | undefined,
@@ -469,7 +492,7 @@ export const createRequestTableUpdateAction = (
     applies?: Record<string, unknown>,
     styles?: Record<string, unknown>,
     handleNan?: boolean,
-    filters?: Array<FilterDesc>,
+    filters?: Array<FilterDesc>
 ): TaipyAction =>
     createRequestDataUpdateAction(name, id, columns, pageKey, {
         start: start,
@@ -496,7 +519,7 @@ export const createRequestInfiniteTableUpdateAction = (
     applies?: Record<string, unknown>,
     styles?: Record<string, unknown>,
     handleNan?: boolean,
-    filters?: Array<FilterDesc>,
+    filters?: Array<FilterDesc>
 ): TaipyAction =>
     createRequestDataUpdateAction(name, id, columns, pageKey, {
         infinite: true,
@@ -518,7 +541,7 @@ export const createRequestDataUpdateAction = (
     pageKey: string,
     payload: Record<string, unknown>,
     allData = false,
-    library?: string,
+    library?: string
 ) => {
     payload = payload || {};
     if (id !== undefined) {
@@ -530,7 +553,7 @@ export const createRequestDataUpdateAction = (
         payload.library = library;
     }
     if (allData) {
-        payload.alldata = true
+        payload.alldata = true;
     }
     return {
         type: Types.RequestDataUpdate,
@@ -628,11 +651,6 @@ export const createPartialAction = (name: string, create: boolean): TaipyPartial
 export const createModuleContextAction = (context: string): TaipyModuleContextAction => ({
     type: Types.ModuleContext,
     context: context,
-});
-
-const createMultipleMessagesAction = (messages: WsMessage[]): TaipyMultipleMessageAction => ({
-    type: Types.MultipleMessages,
-    actions: messages.map(messageToAction),
 });
 
 type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR";

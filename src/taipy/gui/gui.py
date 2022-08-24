@@ -623,7 +623,11 @@ class Gui:
                     lib = self.__extensions.get(lib_name)
                     if isinstance(lib, ElementLibrary):
                         try:
-                            # TODO need the "real" var name
+                            try:
+                                var_name = self.__get_real_var_name(var_name)[0]
+                            except NameError:
+                                # ignore name error and keep var_name
+                                pass
                             ret_payload = lib.get_data(lib_name, payload, var_name, newvalue)
                         except Exception as e:
                             warnings.warn(f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}")

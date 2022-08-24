@@ -140,23 +140,24 @@ class _PandasDataAccessor(_DataAccessor):
             ret["start"] = start
         if data_extraction is not None:
             ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
-        if data_format == _DataFormat.APACHE_ARROW and _has_arrow_module:
-            # Convert from pandas to Arrow
-            table = pa.Table.from_pandas(data)
-            # Create sink buffer stream
-            sink = pa.BufferOutputStream()
-            # Create Stream writer
-            writer = pa.ipc.new_stream(sink, table.schema)
-            # Write data to table
-            writer.write_table(table)
-            writer.close()
-            # end buffer stream
-            buf = sink.getvalue()
-            # convert buffer to python bytes and return
-            ret["data"] = buf.to_pybytes()
-            ret["orient"] = orient
-        elif data_format == _DataFormat.APACHE_ARROW:
-            raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
+        if data_format == _DataFormat.APACHE_ARROW:
+            if _has_arrow_module:
+                # Convert from pandas to Arrow
+                table = pa.Table.from_pandas(data)
+                # Create sink buffer stream
+                sink = pa.BufferOutputStream()
+                # Create Stream writer
+                writer = pa.ipc.new_stream(sink, table.schema)
+                # Write data to table
+                writer.write_table(table)
+                writer.close()
+                # end buffer stream
+                buf = sink.getvalue()
+                # convert buffer to python bytes and return
+                ret["data"] = buf.to_pybytes()
+                ret["orient"] = orient
+            else:
+                raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
         else:
             # workaround for python built in json encoder that does not yet support ignore_nan
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)  # type: ignore
