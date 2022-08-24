@@ -144,6 +144,8 @@ class _Scheduler(_AbstractScheduler):
             cls.__check_and_execute_jobs_if_development_mode()
         elif job.is_canceled():
             cls.__check_and_execute_jobs_if_development_mode()
+        elif job.is_failed():
+            cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
@@ -160,24 +162,6 @@ class _Scheduler(_AbstractScheduler):
             cls.blocked_jobs.remove(job)
         except Exception:
             cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
-
-    @classmethod
-    def _fail_job(cls, job: Job):
-        to_fail_jobs = set([job])
-        to_fail_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
-        with cls.lock:
-            cls.__remove_blocked_jobs(to_fail_jobs)
-            cls.__remove_jobs_to_run(to_fail_jobs)
-            cls.__fail_jobs(job.id, to_fail_jobs)
-            cls._unlock_edit_on_outputs(to_fail_jobs)
-
-    @classmethod
-    def __fail_jobs(cls, job_id_to_fail: JobId, jobs: Set[Job]):
-        for job in jobs:
-            if job_id_to_fail == job.id:
-                job.failed()
-            else:
-                job.abandoned()
 
     @classmethod
     def cancel_job(cls, job: Job):
@@ -224,6 +208,17 @@ class _Scheduler(_AbstractScheduler):
             if current_job not in jobs:
                 new_jobs_to_run.put(current_job)
         cls.jobs_to_run = new_jobs_to_run
+
+    @classmethod
+    def _fail_subsequent_jobs(cls, failed_job: Job):
+        to_fail_jobs = set()
+        to_fail_jobs.update(cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys())))
+        with cls.lock:
+            for job in to_fail_jobs:
+                job.abandoned()
+            cls.__remove_blocked_jobs(job)
+            cls.__remove_jobs_to_run(to_fail_jobs)
+            cls._unlock_edit_on_outputs(to_fail_jobs)
 
     @classmethod
     def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):

@@ -247,8 +247,7 @@ def test_update_status_fail_job_in_parallel():
     job_0, job_3, job_1, job_2 = _Scheduler.submit(pipeline)
     assert_true_after_1_minute_max(job_0.is_failed)
     assert_true_after_1_minute_max(job_3.is_completed)
-    # TODO: the test below is unstable due to couldn't remove jobs from blocked_jobs in fail_job function
-    # assert_true_after_1_minute_max(lambda: all([job.is_abandoned() for job in [job_1, job_2]]))
+    assert_true_after_1_minute_max(lambda: all([job.is_abandoned() for job in [job_1, job_2]]))
 
 
 def test_submit_task_in_parallel():
