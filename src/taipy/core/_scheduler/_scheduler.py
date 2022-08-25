@@ -52,7 +52,7 @@ class _Scheduler(_AbstractScheduler):
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[int] = None,
+        timeout: Optional[Union[float, int]] = None,
     ) -> List[Job]:
         """Submit the given `Pipeline^` for an execution.
 
@@ -62,7 +62,7 @@ class _Scheduler(_AbstractScheduler):
              force (bool) : Enforce execution of the pipeline's tasks even if their output data
                 nodes are cached.
              wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous mode.
-             timeout (int): The optional maximum number of seconds to wait for the jobs to be finished before returning.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before returning.
         Returns:
             The created Jobs.
         """
@@ -86,7 +86,7 @@ class _Scheduler(_AbstractScheduler):
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
         wait=False,
-        timeout=None,
+        timeout: Optional[Union[float, int]] = None,
     ) -> Job:
         """Submit the given `Task^` for an execution.
 
@@ -96,7 +96,7 @@ class _Scheduler(_AbstractScheduler):
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
              wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous mode.
-             timeout (int): The optional maximum number of seconds to wait for the job to be finished before returning.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished before returning.
         Returns:
             The created `Job^`.
         """
@@ -131,7 +131,7 @@ class _Scheduler(_AbstractScheduler):
             cls.__check_and_execute_jobs_if_development_mode()
 
     @classmethod
-    def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[int] = None):
+    def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
         def __check_if_timeout(start, timeout):
             if timeout:
                 return (datetime.now() - start).seconds < timeout

@@ -238,7 +238,7 @@ def test_submit_fail_task_synchronously_in_parallel():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
-    sleep_period = 1
+    sleep_period = 1.0
     start_time = datetime.now()
     task = Task("sleep_task", function=partial(sleep_and_raise_error_fct, sleep_period))
     job = _Scheduler.submit_task(task, "submit_id", wait=True)
@@ -250,7 +250,7 @@ def test_submit_task_synchronously_in_parallel_with_timeout():
     Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
-    sleep_period = 2
+    sleep_period = 2.2
     start_time = datetime.now()
     task = Task("sleep_task", function=partial(sleep, sleep_period))
     job = _Scheduler.submit_task(task, "submit_id", wait=True, timeout=sleep_period - 1)

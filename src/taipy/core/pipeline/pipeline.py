@@ -235,7 +235,7 @@ class Pipeline(_Entity):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[int] = None,
+        timeout: Optional[Union[float, int]] = None,
     ):
         """Submit the pipeline for execution.
 
@@ -246,7 +246,7 @@ class Pipeline(_Entity):
                 change.
             force (bool): Force execution even if the data nodes are in cache.
             wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous mode.
-            timeout (int): The maximum number of seconds to wait for the jobs to be finished before returning.
+            timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before returning.
 
         """
         from ._pipeline_manager_factory import _PipelineManagerFactory

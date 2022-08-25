@@ -111,7 +111,7 @@ class _TaskManager(_Manager[Task]):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[int] = None,
+        timeout: Optional[Union[float, int]] = None,
     ):
         task_id = task.id if isinstance(task, Task) else task
         task = cls._get(task_id)

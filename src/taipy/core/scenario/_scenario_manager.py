@@ -123,7 +123,7 @@ class _ScenarioManager(_Manager[Scenario]):
         scenario: Union[Scenario, ScenarioId],
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[int] = None,
+        timeout: Optional[Union[float, int]] = None,
     ):
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         scenario = cls._get(scenario_id)

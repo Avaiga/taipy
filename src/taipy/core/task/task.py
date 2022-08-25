@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Dict, Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.data_node.scope import Scope
@@ -113,7 +113,7 @@ class Task(_Entity):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[int] = None,
+        timeout: Optional[Union[float, int]] = None,
     ):
         """Submit the task for execution.
 
@@ -122,7 +122,7 @@ class Task(_Entity):
                 change.
             force (bool): Force execution even if the data nodes are in cache.
             wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous mode.
-            timeout (int): The maximum number of seconds to wait for the job to be finished before returning.
+            timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before returning.
         """
         from ._task_manager_factory import _TaskManagerFactory
 

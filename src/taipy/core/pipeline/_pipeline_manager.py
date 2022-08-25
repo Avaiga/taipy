@@ -95,7 +95,7 @@ class _PipelineManager(_Manager[Pipeline]):
         callbacks: Optional[List[Callable]] = None,
         force: bool = False,
         wait: bool = False,
-        timeout: Optional[int] = None,
+        timeout: Optional[Union[float, int]] = None,
     ):
         callbacks = callbacks or []
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
