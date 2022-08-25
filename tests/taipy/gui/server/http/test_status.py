@@ -13,7 +13,7 @@ import inspect
 from flask import g
 import pytest
 
-from src.taipy.gui import Gui
+from taipy.gui import Gui
 
 
 def test_get_status(gui: Gui):
