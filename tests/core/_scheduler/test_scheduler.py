@@ -222,6 +222,7 @@ def test_update_status_fail_job():
     assert job_0.is_failed()
     assert all([job.is_abandoned() for job in [job_1, job_2]])
     assert job_3.is_completed()
+    assert all(not _Scheduler._is_blocked(job) for job in [job_0, job_1, job_2, job_3])
 
 
 def test_update_status_fail_job_in_parallel():
@@ -248,6 +249,7 @@ def test_update_status_fail_job_in_parallel():
     assert_true_after_1_minute_max(job_0.is_failed)
     assert_true_after_1_minute_max(job_3.is_completed)
     assert_true_after_1_minute_max(lambda: all([job.is_abandoned() for job in [job_1, job_2]]))
+    assert_true_after_1_minute_max(lambda: all(not _Scheduler._is_blocked(job) for job in [job_0, job_1, job_2, job_3]))
 
 
 def test_submit_task_in_parallel():

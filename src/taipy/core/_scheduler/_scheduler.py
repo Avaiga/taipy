@@ -221,6 +221,7 @@ class _Scheduler(_AbstractScheduler):
             to_fail_jobs.update(cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys())))
             for job in to_fail_jobs:
                 job.abandoned()
+            to_fail_jobs.update([failed_job])
             cls.__remove_blocked_jobs(to_fail_jobs)
             cls.__remove_jobs_to_run(to_fail_jobs)
             cls._unlock_edit_on_outputs(to_fail_jobs)
