@@ -62,9 +62,10 @@ class _Scheduler(_AbstractScheduler):
         submit_id = cls.__generate_submit_id()
         res = []
         tasks = pipeline._get_sorted_tasks()
-        for ts in tasks:
-            for task in ts:
-                res.append(cls.submit_task(task, submit_id, callbacks=callbacks, force=force, run=False))
+        with cls.lock:
+            for ts in tasks:
+                for task in ts:
+                    res.append(cls.submit_task(task, submit_id, callbacks=callbacks, force=force, run=False))
         cls.__check_and_execute_jobs_if_development_mode()
         return res
 
@@ -95,9 +96,12 @@ class _Scheduler(_AbstractScheduler):
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id
         )
-        cls._schedule_job_to_run_or_block(job)
         if run:
+            with cls.lock:
+                cls._schedule_job_to_run_or_block(job)
             cls.__check_and_execute_jobs_if_development_mode()
+        else:
+            cls._schedule_job_to_run_or_block(job)
 
         return job
 
@@ -109,12 +113,10 @@ class _Scheduler(_AbstractScheduler):
     def _schedule_job_to_run_or_block(cls, job: Job):
         if cls._is_blocked(job):
             job.blocked()
-            with cls.lock:
-                cls.blocked_jobs.append(job)
+            cls.blocked_jobs.append(job)
         else:
             job.pending()
-            with cls.lock:
-                cls.jobs_to_run.put(job)
+            cls.jobs_to_run.put(job)
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -172,9 +174,9 @@ class _Scheduler(_AbstractScheduler):
         elif job.is_failed():
             cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
         else:
-            to_cancel_jobs = set([job])
-            to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
             with cls.lock:
+                to_cancel_jobs = set([job])
+                to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
                 cls.__remove_blocked_jobs(to_cancel_jobs)
                 cls.__remove_jobs_to_run(to_cancel_jobs)
                 cls._cancel_jobs(job.id, to_cancel_jobs)
@@ -211,9 +213,9 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def _fail_subsequent_jobs(cls, failed_job: Job):
-        to_fail_jobs = set()
-        to_fail_jobs.update(cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys())))
         with cls.lock:
+            to_fail_jobs = set()
+            to_fail_jobs.update(cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys())))
             for job in to_fail_jobs:
                 job.abandoned()
             cls.__remove_blocked_jobs(to_fail_jobs)
