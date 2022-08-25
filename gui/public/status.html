@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <title>Taipy GUI Status</title>
+  </head>
+  <body>
+    <h1>Taipy Gui Status</h1>
+    <div id="taipy_status" style="display:grid;grid-template-columns:auto 1fr;gap:1.5rem">
+    <div>backend version:</div><div id="be_ver">{{version}}</div>
+    <div>frontend version:</div><div id="fe_ver"><%= htmlWebpackPlugin.options.VERSION %></div>
+    <div>Flask version:</div><div id="flask_ver">{{flask_version}}</div>
+    <div>listening on:</div><div id="host_port">{{host}}</div>
+    <div>Python version:</div><div id="py_ver">{{python_version}}</div>
+  </div>
+    {%- if user_status -%}
+    <h1>User Status</h1>
+    <div id="user_status">
+    {{user_status}}
+    </div>
+    {% endif %}
+  </body>
+</html>

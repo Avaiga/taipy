@@ -97,7 +97,7 @@ class _Server:
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
-            if path == "" or "." not in path:
+            if path == "" or path == "index.html" or "." not in path:
                 return render_template(
                     "index.html",
                     app_css=f"/{self.css_file}.css",
@@ -110,6 +110,8 @@ class _Server:
                     styles=styles,
                     version=version,
                 )
+            if path == "status.html":
+                return self._gui._serve_status(path)
             if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
             ) and os.path.isfile(file_path):

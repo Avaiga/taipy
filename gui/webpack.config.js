@@ -142,6 +142,12 @@ module.exports = (env, options) => {
                     hash: true,
                     ...getEnvVariables()
                 }),
+                new HtmlWebpackPlugin({
+                    template: "../public/status.html",
+                    filename: "status.html",
+                    inject: false,
+                    ...getEnvVariables()
+                }),
                 new ESLintPlugin({
                     extensions: [`ts`, `tsx`],
                     exclude: [`/node_modules/`],
