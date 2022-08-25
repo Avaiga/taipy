@@ -26,7 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory, render_template, __version__ as flask_version
+from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory, render_template, __version__ as flask_version # type: ignore
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -524,14 +524,19 @@ class Gui:
     def __get_version(self) -> str:
         return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
 
-    def _serve_status(self, template: str) -> t.Any:
-        return render_template(template,
-                               user_status=str(self.__call_on_status() or ""),
-                               version=self.__get_version(), 
-                               flask_version=flask_version, 
-                               python_version=sys.version,
-                               host=f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
-                            )
+    def _serve_status(self, template: pathlib.Path) -> t.Dict[str, str]:
+        base_json = {}
+        try:
+            base_json = json.loads(template.read_text())
+        except Exception as e:
+            warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
+        base_json.update({"user_status": str(self.__call_on_status() or ""),
+                               "backend_version": self.__get_version(), 
+                               "flask_version": str(flask_version or ""),
+                               "python_version": sys.version,
+                               "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
+        })
+        return base_json
 
     def __upload_files(self):
         self.__set_client_id_in_context()
@@ -1280,7 +1285,7 @@ class Gui:
             try:
                 return self.on_status(self.__get_state())
             except Exception as e:
-                if not self.__call_on_exception("on_status"):
+                if not self.__call_on_exception("on_status", e):
                     warnings.warn(f"Exception raised in on_status\n{e}")
         return None
 

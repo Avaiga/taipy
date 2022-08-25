@@ -18,6 +18,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
 const ESLintPlugin = require("eslint-webpack-plugin");
+const GenerateJsonPlugin = require('generate-json-webpack-plugin');
 
 const resolveApp = relativePath => path.resolve(__dirname, relativePath);
 
@@ -142,12 +143,7 @@ module.exports = (env, options) => {
                     hash: true,
                     ...getEnvVariables()
                 }),
-                new HtmlWebpackPlugin({
-                    template: "../public/status.html",
-                    filename: "status.html",
-                    inject: false,
-                    ...getEnvVariables()
-                }),
+                new GenerateJsonPlugin("status.json", {frontend_version: getEnvVariables().VERSION}),
                 new ESLintPlugin({
                     extensions: [`ts`, `tsx`],
                     exclude: [`/node_modules/`],

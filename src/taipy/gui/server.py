@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import re
 import socket
 import time
@@ -110,8 +111,8 @@ class _Server:
                     styles=styles,
                     version=version,
                 )
-            if path == "status.html":
-                return self._gui._serve_status(path)
+            if path == "status.json":
+                return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))
             if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
             ) and os.path.isfile(file_path):
