@@ -143,9 +143,6 @@ class _Scheduler(_AbstractScheduler):
     def _on_status_change(cls, job: Job):
         if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
-            cls.__check_and_execute_jobs_if_development_mode()
-        elif job.is_canceled():
-            cls.__check_and_execute_jobs_if_development_mode()
         elif job.is_failed():
             cls._fail_subsequent_jobs(job)
 
