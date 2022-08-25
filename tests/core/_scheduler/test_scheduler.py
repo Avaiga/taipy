@@ -27,6 +27,7 @@ from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
+from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config import Config, JobConfig
@@ -74,6 +75,10 @@ def nothing():
 
 def concat(a, b):
     return a + b
+
+
+def _error():
+    raise Exception
 
 
 # ################################  TEST METHODS    ##################################
@@ -191,6 +196,60 @@ def test_data_node_not_written_due_to_wrong_result_nb():
     assert task.output[f"{task.config_id}_output0"].read() == 0
     assert job.is_failed()
     assert len(_SchedulerFactory._dispatcher._dispatched_processes) == 0
+
+
+def test_update_status_fail_job():
+    Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
+    _SchedulerFactory._build_dispatcher()
+
+    dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    task_0 = Task("task_config_0", _error, output=[dn_0], id="task_0")
+    task_1 = Task("task_config_1", print, input=[dn_0], output=[dn_1], id="task_1")
+    task_2 = Task("task_config_2", print, input=[dn_1], id="task_2")
+    task_3 = Task("task_config_3", print, input=[dn_2], id="task_3")
+    pipeline = Pipeline("pipeline", {}, [task_0, task_1, task_2, task_3], pipeline_id="pipeline")
+
+    _DataManager._set(dn_0)
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+
+    job = _Scheduler.submit_task(task_0, "submit_id")
+    assert job.is_failed()
+
+    job_0, job_3, job_1, job_2 = _Scheduler.submit(pipeline)
+    assert job_0.is_failed()
+    assert all([job.is_abandoned() for job in [job_1, job_2]])
+    assert job_3.is_completed()
+    assert all(not _Scheduler._is_blocked(job) for job in [job_0, job_1, job_2, job_3])
+
+
+def test_update_status_fail_job_in_parallel():
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    _SchedulerFactory._build_dispatcher()
+
+    dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
+    dn_1 = InMemoryDataNode("dn_config_1", Scope.PIPELINE, properties={"default_data": 1})
+    dn_2 = InMemoryDataNode("dn_config_2", Scope.PIPELINE, properties={"default_data": 2})
+    task_0 = Task("task_config_0", _error, output=[dn_0], id="task_0")
+    task_1 = Task("task_config_1", print, input=[dn_0], output=[dn_1], id="task_1")
+    task_2 = Task("task_config_2", print, input=[dn_1], id="task_2")
+    task_3 = Task("task_config_3", print, input=[dn_2], id="task_3")
+    pipeline = Pipeline("pipeline", {}, [task_0, task_1, task_2, task_3], pipeline_id="pipeline")
+
+    _DataManager._set(dn_0)
+    _DataManager._set(dn_1)
+    _DataManager._set(dn_2)
+
+    job = _Scheduler.submit_task(task_0, "submit_id")
+    assert_true_after_1_minute_max(job.is_failed)
+
+    job_0, job_3, job_1, job_2 = _Scheduler.submit(pipeline)
+    assert_true_after_1_minute_max(job_0.is_failed)
+    assert_true_after_1_minute_max(job_3.is_completed)
+    assert_true_after_1_minute_max(lambda: all([job.is_abandoned() for job in [job_1, job_2]]))
+    assert_true_after_1_minute_max(lambda: all(not _Scheduler._is_blocked(job) for job in [job_0, job_1, job_2, job_3]))
 
 
 def test_submit_task_in_parallel():

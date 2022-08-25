@@ -335,6 +335,11 @@ def test_cancel_subsequent_jobs():
     assert_true_after_1_minute_max(job_4.is_canceled)
     assert_true_after_1_minute_max(job_5.is_abandoned)
     assert_true_after_1_minute_max(job_6.is_abandoned)
+    assert_true_after_1_minute_max(
+        lambda: all(
+            not _SchedulerFactory._scheduler._is_blocked(job) for job in [job_1, job_2, job_3, job_4, job_5, job_6]
+        )
+    )
     assert_true_after_1_minute_max(lambda: _SchedulerFactory._scheduler.jobs_to_run.qsize() == 0)
 
 

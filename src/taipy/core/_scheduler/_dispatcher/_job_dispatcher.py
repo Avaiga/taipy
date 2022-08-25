@@ -11,7 +11,6 @@
 import threading
 from abc import abstractmethod
 from multiprocessing import Lock
-from time import sleep
 from typing import Any, Dict, List
 
 from taipy.config._toml_serializer import _TomlSerializer
@@ -59,7 +58,8 @@ class _JobDispatcher(threading.Thread):
         while not self._STOP_FLAG:
             try:
                 if self._can_execute():
-                    job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
+                    with self.lock:
+                        job = self.scheduler.jobs_to_run.get(block=True, timeout=0.1)
                     self._execute_job(job)
             except:  # In case the last job of the queue has been removed.
                 pass
