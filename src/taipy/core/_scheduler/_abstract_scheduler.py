@@ -37,7 +37,6 @@ class _AbstractScheduler:
         submit_id: str = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
-        run=True,
     ) -> Job:
         return NotImplemented
 

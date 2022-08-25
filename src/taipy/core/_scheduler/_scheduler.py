@@ -65,7 +65,7 @@ class _Scheduler(_AbstractScheduler):
         with cls.lock:
             for ts in tasks:
                 for task in ts:
-                    res.append(cls.submit_task(task, submit_id, callbacks=callbacks, force=force, run=False))
+                    res.append(cls._submit_task(task, submit_id, callbacks=callbacks, force=force))
         cls.__check_and_execute_jobs_if_development_mode()
         return res
 
@@ -76,7 +76,6 @@ class _Scheduler(_AbstractScheduler):
         submit_id: str = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
-        run: bool = True,
     ) -> Job:
         """Submit the given `Task^` for an execution.
 
@@ -89,6 +88,19 @@ class _Scheduler(_AbstractScheduler):
         Returns:
             The created `Job^`.
         """
+        with cls.lock:
+            job = cls._submit_task(task, submit_id, callbacks, force)
+        cls.__check_and_execute_jobs_if_development_mode()
+        return job
+
+    @classmethod
+    def _submit_task(
+        cls,
+        task: Task,
+        submit_id: str = None,
+        callbacks: Optional[Iterable[Callable]] = None,
+        force: bool = False,
+    ) -> Job:
         submit_id = submit_id if submit_id else cls.__generate_submit_id()
 
         for dn in task.output.values():
@@ -96,13 +108,7 @@ class _Scheduler(_AbstractScheduler):
         job = _JobManagerFactory._build_manager()._create(
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id
         )
-        if run:
-            with cls.lock:
-                cls._schedule_job_to_run_or_block(job)
-            cls.__check_and_execute_jobs_if_development_mode()
-        else:
-            cls._schedule_job_to_run_or_block(job)
-
+        cls._schedule_job_to_run_or_block(job)
         return job
 
     @staticmethod

@@ -819,9 +819,9 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False, run=True):
+        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False):
             cls.submit_calls.append(task.id)
-            return super().submit_task(task, submit_id, callbacks, force, run)
+            return super()._submit_task(task, submit_id, callbacks, force)
 
     _TaskManager._scheduler = MockScheduler
 
