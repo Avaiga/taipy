@@ -147,7 +147,7 @@ module.exports = (env, options) => {
                     hash: true,
                     ...envVariables
                 }),
-                new GenerateJsonPlugin("status.json", envVariables),
+                new GenerateJsonPlugin("taipy.status.json", envVariables),
                 new ESLintPlugin({
                     extensions: [`ts`, `tsx`],
                     exclude: [`/node_modules/`],

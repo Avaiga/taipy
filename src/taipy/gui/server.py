@@ -111,7 +111,7 @@ class _Server:
                     styles=styles,
                     version=version,
                 )
-            if path == "status.json":
+            if path == "taipy.status.json":
                 return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))
             if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
