@@ -73,7 +73,7 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
 };
 const VALID_BOOLEAN_STRINGS = ["true", "1", "t", "y", "yes", "yeah", "sure"];
 
-const isBooleanTrue = (val: RowValue) => typeof val == "string" ? VALID_BOOLEAN_STRINGS.some(s => s == val) : !!val;
+const isBooleanTrue = (val: RowValue) => typeof val == "string" ? VALID_BOOLEAN_STRINGS.some(s => s == val.trim().toLowerCase()) : !!val;
 
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
