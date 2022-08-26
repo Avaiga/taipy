@@ -305,7 +305,7 @@ export const EditableCell = (props: EditableCellProps) => {
                         }
                     />
                 ) : onDeletion ? (
-                    <IconButton onClick={onDeleteClick} size="small">
+                    <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
                         <DeleteIcon fontSize="inherit" />
                     </IconButton>
                 ) : null
