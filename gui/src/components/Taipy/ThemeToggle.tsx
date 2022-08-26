@@ -33,7 +33,7 @@ const ThemeToggle = (props: ThemeToggleProps) => {
     const { state, dispatch } = useContext(TaipyContext);
 
     const changeMode = useCallback(
-        (evt: MouseEvent, mode: PaletteMode) => dispatch(createThemeAction(mode === "dark")),
+        (evt: MouseEvent, mode: PaletteMode) => mode !== null && dispatch(createThemeAction(mode === "dark")),
         [dispatch]
     );
 

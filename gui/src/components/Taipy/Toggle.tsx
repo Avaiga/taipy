@@ -18,6 +18,7 @@ interface ToggleProps extends LovProps<string> {
     label?: string;
     kind?: string;
     unselectedValue?: string;
+    allowUnselect?: boolean;
 }
 
 const Toggle = (props: ToggleProps) => {
@@ -43,7 +44,10 @@ const Toggle = (props: ToggleProps) => {
     const lovList = useLovListMemo(lov, defaultLov);
 
     const changeValue = useCallback(
-        (evt: MouseEvent, val: string) =>
+        (evt: MouseEvent, val: string) => {
+            if (!props.allowUnselect && val === null ) {
+                return;
+            }
             dispatch(
                 createSendUpdateAction(
                     updateVarName,
@@ -52,8 +56,8 @@ const Toggle = (props: ToggleProps) => {
                     propagate,
                     valueById ? undefined : getUpdateVar(updateVars, "lov")
                 )
-            ),
-        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById, props.tp_onChange]
+            )},
+        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById, props.tp_onChange, props.allowUnselect]
     );
 
     useEffect(() => {props.value !== undefined && setValue(props.value)}, [props.value]);
