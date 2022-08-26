@@ -262,17 +262,19 @@ class Scenario(_Entity):
 
         return tp.unsubscribe_scenario(callback, params, self)
 
-    def submit(self, force: bool = False):
+    def submit(self, force: bool = False, wait: bool = False, timeout: Optional[Union[float, int]] = None):
         """Submit this scenario for execution.
 
         All the `Task^`s of the scenario will be submitted for execution.
 
         Parameters:
             force (bool): Force execution even if the data nodes are in cache.
+            wait (bool): Wait for the scheduled jobs created from the scenario submission to be finished in asynchronous mode.
+            timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before returning.
         """
         from ... import core as tp
 
-        return tp.submit(self, force)
+        return tp.submit(self, force, wait, timeout)
 
     def set_primary(self):
         """Promote the scenario as the primary scenario of its cycle.

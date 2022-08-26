@@ -118,7 +118,13 @@ class _ScenarioManager(_Manager[Scenario]):
         return scenario
 
     @classmethod
-    def _submit(cls, scenario: Union[Scenario, ScenarioId], force: bool = False):
+    def _submit(
+        cls,
+        scenario: Union[Scenario, ScenarioId],
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
+    ):
         scenario_id = scenario.id if isinstance(scenario, Scenario) else scenario
         scenario = cls._get(scenario_id)
         if scenario is None:
@@ -127,7 +133,7 @@ class _ScenarioManager(_Manager[Scenario]):
         jobs_in_pipelines = {}
         for pipeline in scenario.pipelines.values():
             jobs_in_pipelines[pipeline.id] = _PipelineManagerFactory._build_manager()._submit(
-                pipeline, callbacks=callbacks, force=force
+                pipeline, callbacks=callbacks, force=force, wait=wait, timeout=timeout
             )
         return jobs_in_pipelines
 

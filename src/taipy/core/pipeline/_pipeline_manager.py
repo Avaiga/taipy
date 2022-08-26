@@ -90,7 +90,12 @@ class _PipelineManager(_Manager[Pipeline]):
 
     @classmethod
     def _submit(
-        cls, pipeline: Union[PipelineId, Pipeline], callbacks: Optional[List[Callable]] = None, force: bool = False
+        cls,
+        pipeline: Union[PipelineId, Pipeline],
+        callbacks: Optional[List[Callable]] = None,
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
     ):
         callbacks = callbacks or []
         pipeline_id = pipeline.id if isinstance(pipeline, Pipeline) else pipeline
@@ -101,7 +106,7 @@ class _PipelineManager(_Manager[Pipeline]):
         return (
             _TaskManagerFactory._build_manager()
             ._scheduler()
-            .submit(pipeline, callbacks=pipeline_subscription_callback, force=force)
+            .submit(pipeline, callbacks=pipeline_subscription_callback, force=force, wait=wait, timeout=timeout)
         )
 
     @staticmethod

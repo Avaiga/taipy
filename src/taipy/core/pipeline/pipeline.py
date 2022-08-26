@@ -230,7 +230,13 @@ class Pipeline(_Entity):
 
         return tp.unsubscribe_pipeline(callback, params, self)
 
-    def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
+    def submit(
+        self,
+        callbacks: Optional[List[Callable]] = None,
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
+    ):
         """Submit the pipeline for execution.
 
         All the `Task^`s of the pipeline will be submitted for execution.
@@ -239,7 +245,10 @@ class Pipeline(_Entity):
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
+            wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous mode.
+            timeout (Union[float, int]): The maximum number of seconds to wait for the jobs to be finished before returning.
+
         """
         from ._pipeline_manager_factory import _PipelineManagerFactory
 
-        return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force)
+        return _PipelineManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)

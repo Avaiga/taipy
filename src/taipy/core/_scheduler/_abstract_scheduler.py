@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 from abc import abstractmethod
-from typing import Callable, Iterable, List, Optional
+from typing import Callable, Iterable, List, Optional, Union
 
 from ..job.job import Job
 from ..task.task import Task
@@ -26,7 +26,14 @@ class _AbstractScheduler:
 
     @classmethod
     @abstractmethod
-    def submit(cls, pipeline, callbacks: Optional[Iterable[Callable]], force: bool = False) -> List[Job]:
+    def submit(
+        cls,
+        pipeline,
+        callbacks: Optional[Iterable[Callable]],
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
+    ) -> List[Job]:
         return NotImplemented
 
     @classmethod
@@ -37,6 +44,8 @@ class _AbstractScheduler:
         submit_id: str = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
+        wait=False,
+        timeout: Optional[Union[float, int]] = None,
     ) -> Job:
         return NotImplemented
 

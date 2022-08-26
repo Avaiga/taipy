@@ -54,7 +54,12 @@ def set(entity: Union[DataNode, Task, Pipeline, Scenario, Cycle]):
         return _DataManagerFactory._build_manager()._set(entity)
 
 
-def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
+def submit(
+    entity: Union[Scenario, Pipeline, Task],
+    force: bool = False,
+    wait: bool = False,
+    timeout: Optional[Union[float, int]] = None,
+):
     """Submit an entity for execution.
 
     If the entity is a pipeline or a scenario, all the tasks of the entity are
@@ -63,13 +68,16 @@ def submit(entity: Union[Scenario, Pipeline, Task], force: bool = False):
     Parameters:
         entity (Union[Scenario^, Pipeline^, Task^]): The entity to submit.
         force (bool): If True, the execution is forced even if the data nodes are in cache.
+        wait (bool): Wait for the scheduled jobs created from the submission to be finished in asynchronous mode.
+        timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before returning.
+
     """
     if isinstance(entity, Scenario):
-        return _ScenarioManagerFactory._build_manager()._submit(entity, force=force)
+        return _ScenarioManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
     if isinstance(entity, Pipeline):
-        return _PipelineManagerFactory._build_manager()._submit(entity, force=force)
+        return _PipelineManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
     if isinstance(entity, Task):
-        return _TaskManagerFactory._build_manager()._submit(entity, force=force)
+        return _TaskManagerFactory._build_manager()._submit(entity, force=force, wait=wait, timeout=timeout)
 
 
 def get(

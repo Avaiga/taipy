@@ -284,7 +284,7 @@ def test_submit_scenario():
     with mock.patch("src.taipy.core.submit") as mock_submit:
         scenario = Scenario("foo", [], {})
         scenario.submit(False)
-        mock_submit.assert_called_once_with(scenario, False)
+        mock_submit.assert_called_once_with(scenario, False, False, None)
 
 
 def test_subscribe_scenario():

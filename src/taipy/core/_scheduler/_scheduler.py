@@ -11,8 +11,10 @@
 
 import itertools
 import uuid
+from datetime import datetime
 from multiprocessing import Lock
 from queue import Queue
+from time import sleep
 from typing import Callable, Iterable, List, Optional, Set, Union
 
 from taipy.config.config import Config
@@ -46,7 +48,12 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def submit(
-        cls, pipeline: Pipeline, callbacks: Optional[Iterable[Callable]] = None, force: bool = False
+        cls,
+        pipeline: Pipeline,
+        callbacks: Optional[Iterable[Callable]] = None,
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
     ) -> List[Job]:
         """Submit the given `Pipeline^` for an execution.
 
@@ -55,7 +62,8 @@ class _Scheduler(_AbstractScheduler):
              callbacks: The optional list of functions that should be executed on jobs status change.
              force (bool) : Enforce execution of the pipeline's tasks even if their output data
                 nodes are cached.
-
+             wait (bool): Wait for the scheduled jobs created from the pipeline submission to be finished in asynchronous mode.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the jobs to be finished before returning.
         Returns:
             The created Jobs.
         """
@@ -66,7 +74,12 @@ class _Scheduler(_AbstractScheduler):
             for ts in tasks:
                 for task in ts:
                     res.append(cls._submit_task(task, submit_id, callbacks=callbacks, force=force))
-        cls.__check_and_execute_jobs_if_development_mode()
+
+        if Config.job_config.is_development:
+            cls.__check_and_execute_jobs_if_development_mode()
+        else:
+            if wait:
+                cls.__wait_until_job_finished(res, timeout=timeout)
         return res
 
     @classmethod
@@ -76,6 +89,8 @@ class _Scheduler(_AbstractScheduler):
         submit_id: str = None,
         callbacks: Optional[Iterable[Callable]] = None,
         force: bool = False,
+        wait=False,
+        timeout: Optional[Union[float, int]] = None,
     ) -> Job:
         """Submit the given `Task^` for an execution.
 
@@ -84,13 +99,19 @@ class _Scheduler(_AbstractScheduler):
              submit_id (str): The optional id to differentiate each submission.
              callbacks: The optional list of functions that should be executed on job status change.
              force (bool): Enforce execution of the task even if its output data nodes are cached.
-
+             wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous mode.
+             timeout (Union[float, int]): The optional maximum number of seconds to wait for the job to be finished before returning.
         Returns:
             The created `Job^`.
         """
         with cls.lock:
             job = cls._submit_task(task, submit_id, callbacks, force)
-        cls.__check_and_execute_jobs_if_development_mode()
+
+        if Config.job_config.is_development:
+            cls.__check_and_execute_jobs_if_development_mode()
+        else:
+            if wait:
+                cls.__wait_until_job_finished(job, timeout=timeout)
         return job
 
     @classmethod
@@ -106,9 +127,10 @@ class _Scheduler(_AbstractScheduler):
         for dn in task.output.values():
             dn.lock_edit()
         job = _JobManagerFactory._build_manager()._create(
-            task, itertools.chain([cls._on_status_change], callbacks or []), submit_id
+            task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, force=force
         )
         cls._schedule_job_to_run_or_block(job)
+
         return job
 
     @staticmethod
@@ -123,6 +145,26 @@ class _Scheduler(_AbstractScheduler):
         else:
             job.pending()
             cls.jobs_to_run.put(job)
+
+    @classmethod
+    def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
+        def __check_if_timeout(start, timeout):
+            if timeout:
+                return (datetime.now() - start).seconds < timeout
+            return True
+
+        start = datetime.now()
+        jobs = jobs if isinstance(jobs, Iterable) else [jobs]
+
+        while __check_if_timeout(start, timeout) and jobs:
+            try:
+                if jobs[0]._is_finished():
+                    jobs.pop(0)
+                else:
+                    sleep(0.5)  # Limit CPU usage
+
+            except Exception:
+                pass
 
     @staticmethod
     def _is_blocked(obj: Union[Task, Job]) -> bool:
@@ -247,7 +289,7 @@ class _Scheduler(_AbstractScheduler):
 
     @staticmethod
     def __check_and_execute_jobs_if_development_mode():
-        if Config.job_config.is_development:
-            from ._scheduler_factory import _SchedulerFactory
 
-            _SchedulerFactory._build_dispatcher()._execute_jobs_synchronously()
+        from ._scheduler_factory import _SchedulerFactory
+
+        _SchedulerFactory._build_dispatcher()._execute_jobs_synchronously()

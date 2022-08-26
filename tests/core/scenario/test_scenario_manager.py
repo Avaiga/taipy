@@ -819,7 +819,7 @@ def test_submit():
         submit_calls = []
 
         @classmethod
-        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False):
+        def _submit_task(cls, task: Task, submit_id: str, callbacks=None, force=False, wait=False, timeout=None):
             cls.submit_calls.append(task.id)
             return super()._submit_task(task, submit_id, callbacks, force)
 

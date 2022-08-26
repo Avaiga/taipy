@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Dict, Iterable, List, Optional
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.data_node.scope import Scope
@@ -108,14 +108,22 @@ class Task(_Entity):
         scope = min(dn.scope for dn in data_nodes) if len(data_nodes) != 0 else Scope.GLOBAL
         return Scope(scope)
 
-    def submit(self, callbacks: Optional[List[Callable]] = None, force: bool = False):
+    def submit(
+        self,
+        callbacks: Optional[List[Callable]] = None,
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
+    ):
         """Submit the task for execution.
 
         Parameters:
             callbacks (List[Callable]): The list of callable functions to be called on status
                 change.
             force (bool): Force execution even if the data nodes are in cache.
+            wait (bool): Wait for the scheduled job created from the task submission to be finished in asynchronous mode.
+            timeout (Union[float, int]): The maximum number of seconds to wait for the job to be finished before returning.
         """
         from ._task_manager_factory import _TaskManagerFactory
 
-        _TaskManagerFactory._build_manager()._submit(self, callbacks, force)
+        _TaskManagerFactory._build_manager()._submit(self, callbacks, force, wait, timeout)

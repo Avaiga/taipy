@@ -105,10 +105,16 @@ class _TaskManager(_Manager[Task]):
         return entity_ids
 
     @classmethod
-    def _submit(cls, task: Union[TaskId, Task], callbacks: Optional[List[Callable]] = None, force: bool = False):
+    def _submit(
+        cls,
+        task: Union[TaskId, Task],
+        callbacks: Optional[List[Callable]] = None,
+        force: bool = False,
+        wait: bool = False,
+        timeout: Optional[Union[float, int]] = None,
+    ):
         task_id = task.id if isinstance(task, Task) else task
         task = cls._get(task_id)
         if task is None:
             raise NonExistingTask(task_id)
-
-        return cls._scheduler().submit_task(task, callbacks=callbacks, force=force)
+        return cls._scheduler().submit_task(task, callbacks=callbacks, force=force, wait=wait, timeout=timeout)
