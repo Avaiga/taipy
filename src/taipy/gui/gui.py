@@ -26,7 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory, render_template, __version__ as flask_version # type: ignore
+from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory, render_template, __version__ as flask_version  # type: ignore
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -531,12 +531,14 @@ class Gui:
         except Exception as e:
             warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
         base_json.update({"user_status": str(self.__call_on_status() or ""),
-                               "backend_version": self.__get_version(), 
-                               "flask_version": str(flask_version or ""),
-                               "python_version": sys.version,
-                               "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
-        })
-        return base_json
+                          "backend_version": self.__get_version(),
+                          "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
+                          })
+        if self._get_config("extended_status", False):
+            base_json.update({"flask_version": str(flask_version or ""),
+                              "python_version": sys.version, })
+
+        return {"gui": base_json}
 
     def __upload_files(self):
         self.__set_client_id_in_context()
