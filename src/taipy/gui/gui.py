@@ -524,7 +524,7 @@ class Gui:
     def __get_version(self) -> str:
         return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
 
-    def _serve_status(self, template: pathlib.Path) -> t.Dict[str, str]:
+    def _serve_status(self, template: pathlib.Path) -> t.Dict[str, t.Dict[str, str]]:
         base_json = {"user_status": str(self.__call_on_status() or "")}
         if self._get_config("extended_status", False):
             base_json.update({"flask_version": str(flask_version or ""),
