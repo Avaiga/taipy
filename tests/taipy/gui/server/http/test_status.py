@@ -19,7 +19,7 @@ from taipy.gui import Gui
 def test_get_status(gui: Gui):
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
-    ret = flask_client.get("/status.json")
+    ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
     assert ret.json, "json is not defined"
@@ -40,7 +40,7 @@ def test_get_status_with_user_status(gui: Gui):
 
     gui.run(run_server=False)
     flask_client = gui._server.test_client()
-    ret = flask_client.get("/status.json")
+    ret = flask_client.get("/taipy.status.json")
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.json, "json is not defined"
     assert "user_status" in ret.json, f"json has no key user_status"
