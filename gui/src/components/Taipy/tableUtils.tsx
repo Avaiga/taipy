@@ -224,7 +224,7 @@ export const EditableCell = (props: EditableCellProps) => {
             }
         onValidation && onValidation(castedVal, rowIndex, colDesc.dfid, val as string);
         setEdit((e) => !e);
-    }, [onValidation, val, rowIndex, colDesc.dfid]);
+    }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type]);
 
     const onEditClick = useCallback(() => {
         onValidation && setEdit((e) => !e);
