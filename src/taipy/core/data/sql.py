@@ -18,11 +18,12 @@ from typing import Any, Collection, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine, table, text
+
 from taipy.config.data_node.scope import Scope
 
-from .data_node import DataNode
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
+from .data_node import DataNode
 
 
 class SQLDataNode(DataNode):
@@ -53,6 +54,7 @@ class SQLDataNode(DataNode):
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
+    __DB_EXTRA_ARGS_KEY = "db_extra_args"
     _REQUIRED_PROPERTIES: List[str] = [
         "db_username",
         "db_password",
@@ -111,24 +113,32 @@ class SQLDataNode(DataNode):
             self.properties.get("db_name"),
             self.properties.get("db_port", 1433),
             self.properties.get("db_driver", "ODBC Driver 17 for SQL Server"),
+            self.properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
             self.properties.get("path", ""),
         )
 
     @staticmethod
-    def __build_conn_string(engine, username, host, password, database, port, driver, path) -> str:
+    def __build_conn_string(
+        engine, username, host, password, database, port, driver, extra_args: Dict[str, str], path
+    ) -> str:
         # TODO: Add support to other SQL engines, the engine value should be checked.
         if engine == "mssql":
-            driver = re.sub(r"\s+", "+", driver)
             username = urllib.parse.quote_plus(username)
             password = urllib.parse.quote_plus(password)
             database = urllib.parse.quote_plus(database)
-            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?driver={driver}"
+
+            extra_args = {**extra_args, "driver": driver}
+            for k, v in extra_args.items():
+                extra_args[k] = re.sub(r"\s+", "+", v)
+            extra_args_str = "&".join(f"{k}={str(v)}" for k, v in extra_args.items())
+
+            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
         elif engine == "sqlite":
             return os.path.join("sqlite:///", path, f"{database}.sqlite3")
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
 
-    def __create_engine(self, engine, username, host, password, database, port, driver, path):
-        conn_str = self.__build_conn_string(engine, username, host, password, database, port, driver, path)
+    def __create_engine(self, engine, username, host, password, database, port, driver, extra_args, path):
+        conn_str = self.__build_conn_string(engine, username, host, password, database, port, driver, extra_args, path)
         return create_engine(conn_str)
 
     @classmethod

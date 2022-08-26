@@ -14,11 +14,11 @@ from unittest import mock
 
 import pandas as pd
 import pytest
-from taipy.config.data_node.scope import Scope
 
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data.sql import SQLDataNode
 from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
+from taipy.config.data_node.scope import Scope
 
 if not util.find_spec("pyodbc"):
     pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
@@ -33,12 +33,19 @@ class TestSQLDataNode:
             "db_engine": "mssql",
             "read_query": "SELECT * from daily_min_example",
             "write_table": "foo",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+            },
         },
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
             "read_query": "SELECT * from daily_min_example",
             "write_table": "foo",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+                "other": "value",
+            },
         },
     ]
 
