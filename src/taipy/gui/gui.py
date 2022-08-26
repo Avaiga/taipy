@@ -525,19 +525,16 @@ class Gui:
         return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
 
     def _serve_status(self, template: pathlib.Path) -> t.Dict[str, str]:
-        base_json = {}
-        try:
-            base_json = json.loads(template.read_text())
-        except Exception as e:
-            warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
-        base_json.update({"user_status": str(self.__call_on_status() or ""),
-                          "backend_version": self.__get_version(),
-                          "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
-                          })
+        base_json = {"user_status": str(self.__call_on_status() or "")}
         if self._get_config("extended_status", False):
             base_json.update({"flask_version": str(flask_version or ""),
+                              "backend_version": self.__get_version(),
+                              "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
                               "python_version": sys.version, })
-
+            try:
+                base_json.update(json.loads(template.read_text()))
+            except Exception as e:
+                warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
         return {"gui": base_json}
 
     def __upload_files(self):
