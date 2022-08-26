@@ -20,6 +20,7 @@ from typing import Callable, Iterable, List, Optional, Set, Union
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ..common.alias import JobId
 from ..data._data_manager_factory import _DataManagerFactory
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
@@ -69,13 +70,16 @@ class _Scheduler(_AbstractScheduler):
         submit_id = cls.__generate_submit_id()
         res = []
         tasks = pipeline._get_sorted_tasks()
-        for ts in tasks:
-            for task in ts:
-                res.append(cls.submit_task(task, submit_id, callbacks=callbacks, force=force))
+        with cls.lock:
+            for ts in tasks:
+                for task in ts:
+                    res.append(cls._submit_task(task, submit_id, callbacks=callbacks, force=force))
 
-        if wait:
-            cls.__wait_until_job_finished(res, timeout=timeout)
-
+        if Config.job_config.is_development:
+            cls.__check_and_execute_jobs_if_development_mode()
+        else:
+            if wait:
+                cls.__wait_until_job_finished(res, timeout=timeout)
         return res
 
     @classmethod
@@ -100,6 +104,24 @@ class _Scheduler(_AbstractScheduler):
         Returns:
             The created `Job^`.
         """
+        with cls.lock:
+            job = cls._submit_task(task, submit_id, callbacks, force)
+
+        if Config.job_config.is_development:
+            cls.__check_and_execute_jobs_if_development_mode()
+        else:
+            if wait:
+                cls.__wait_until_job_finished(job, timeout=timeout)
+        return job
+
+    @classmethod
+    def _submit_task(
+        cls,
+        task: Task,
+        submit_id: str = None,
+        callbacks: Optional[Iterable[Callable]] = None,
+        force: bool = False,
+    ) -> Job:
         submit_id = submit_id if submit_id else cls.__generate_submit_id()
 
         for dn in task.output.values():
@@ -108,9 +130,6 @@ class _Scheduler(_AbstractScheduler):
             task, itertools.chain([cls._on_status_change], callbacks or []), submit_id, force=force
         )
         cls._schedule_job_to_run_or_block(job)
-
-        if wait:
-            cls.__wait_until_job_finished(job, timeout=timeout)
 
         return job
 
@@ -122,13 +141,10 @@ class _Scheduler(_AbstractScheduler):
     def _schedule_job_to_run_or_block(cls, job: Job):
         if cls._is_blocked(job):
             job.blocked()
-            with cls.lock:
-                cls.blocked_jobs.append(job)
+            cls.blocked_jobs.append(job)
         else:
             job.pending()
-            with cls.lock:
-                cls.jobs_to_run.put(job)
-            cls.__check_and_execute_jobs_if_development_mode()
+            cls.jobs_to_run.put(job)
 
     @classmethod
     def __wait_until_job_finished(cls, jobs: Union[List[Job], Job], timeout: Optional[Union[float, int]] = None):
@@ -146,7 +162,7 @@ class _Scheduler(_AbstractScheduler):
                     jobs.pop(0)
                 else:
                     sleep(0.5)  # Limit CPU usage
-                
+
             except Exception:
                 pass
 
@@ -173,11 +189,10 @@ class _Scheduler(_AbstractScheduler):
 
     @classmethod
     def _on_status_change(cls, job: Job):
-        if job.is_completed():
+        if job.is_completed() or job.is_skipped():
             cls.__unblock_jobs()
-            cls.__check_and_execute_jobs_if_development_mode()
-        elif job.is_canceled():
-            cls.__check_and_execute_jobs_if_development_mode()
+        elif job.is_failed():
+            cls._fail_subsequent_jobs(job)
 
     @classmethod
     def __unblock_jobs(cls):
@@ -192,7 +207,7 @@ class _Scheduler(_AbstractScheduler):
     def __remove_blocked_job(cls, job):
         try:  # In case the job has been removed from the list of blocked_jobs.
             cls.blocked_jobs.remove(job)
-        except:
+        except Exception:
             cls.__logger.warning(f"{job.id} is not in the blocked list anymore.")
 
     @classmethod
@@ -204,13 +219,13 @@ class _Scheduler(_AbstractScheduler):
         elif job.is_failed():
             cls.__logger.info(f"{job.id} has already failed and cannot be canceled.")
         else:
-            to_cancel_jobs = set([job])
-            to_cancel_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
             with cls.lock:
-                cls.__remove_blocked_jobs(to_cancel_jobs)
-                cls.__remove_jobs_to_run(to_cancel_jobs)
-                cls._cancel_jobs(job.id, to_cancel_jobs)
-                cls._unlock_edit_on_outputs(to_cancel_jobs)
+                to_cancel_or_abandon_jobs = set([job])
+                to_cancel_or_abandon_jobs.update(cls.__find_subsequent_jobs(job.submit_id, set(job.task.output.keys())))
+                cls.__remove_blocked_jobs(to_cancel_or_abandon_jobs)
+                cls.__remove_jobs_to_run(to_cancel_or_abandon_jobs)
+                cls._cancel_jobs(job.id, to_cancel_or_abandon_jobs)
+                cls._unlock_edit_on_outputs(to_cancel_or_abandon_jobs)
 
     @classmethod
     def __find_subsequent_jobs(cls, submit_id, output_dn_config_ids: Set) -> Set[Job]:
@@ -242,11 +257,25 @@ class _Scheduler(_AbstractScheduler):
         cls.jobs_to_run = new_jobs_to_run
 
     @classmethod
-    def _cancel_jobs(cls, job_id_to_cancel, jobs):
+    def _fail_subsequent_jobs(cls, failed_job: Job):
+        with cls.lock:
+            to_fail_or_abandon_jobs = set()
+            to_fail_or_abandon_jobs.update(
+                cls.__find_subsequent_jobs(failed_job.submit_id, set(failed_job.task.output.keys()))
+            )
+            for job in to_fail_or_abandon_jobs:
+                job.abandoned()
+            to_fail_or_abandon_jobs.update([failed_job])
+            cls.__remove_blocked_jobs(to_fail_or_abandon_jobs)
+            cls.__remove_jobs_to_run(to_fail_or_abandon_jobs)
+            cls._unlock_edit_on_outputs(to_fail_or_abandon_jobs)
+
+    @classmethod
+    def _cancel_jobs(cls, job_id_to_cancel: JobId, jobs: Set[Job]):
         from ._scheduler_factory import _SchedulerFactory
 
         for job in jobs:
-            if job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():
+            if job.id in _SchedulerFactory._dispatcher._dispatched_processes.keys():  # type: ignore
                 cls.__logger.info(f"{job.id} is running and cannot be canceled.")
             elif job.is_completed() or job.is_skipped():
                 cls.__logger.info(f"{job.id} has already been completed and cannot be canceled.")
@@ -260,7 +289,7 @@ class _Scheduler(_AbstractScheduler):
 
     @staticmethod
     def __check_and_execute_jobs_if_development_mode():
-        if Config.job_config.is_development:
-            from ._scheduler_factory import _SchedulerFactory
 
-            _SchedulerFactory._build_dispatcher()._execute_jobs_synchronously()
+        from ._scheduler_factory import _SchedulerFactory
+
+        _SchedulerFactory._build_dispatcher()._execute_jobs_synchronously()
