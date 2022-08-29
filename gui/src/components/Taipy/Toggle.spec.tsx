@@ -101,12 +101,12 @@ describe("Toggle Component", () => {
             type: "SEND_UPDATE_ACTION",
         });
     });
-    it("dispatch unselected_value on deselection", async () => {
+    it("dispatch unselected_value on deselection when allowUnselect", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Toggle lov={lov} updateVarName="varname" unselectedValue="uv" value="id2" />
+                <Toggle lov={lov} updateVarName="varname" unselectedValue="uv" value="id2" allowUnselect={true} />
             </TaipyContext.Provider>
         );
         const elt = getByText("Item 2");
@@ -117,5 +117,17 @@ describe("Toggle Component", () => {
             propagate: true,
             type: "SEND_UPDATE_ACTION",
         });
+    });
+    it("dispatch nothing on deselection by default", async () => {
+        const dispatch = jest.fn();
+        const state: TaipyState = INITIAL_STATE;
+        const { getByText } = render(
+            <TaipyContext.Provider value={{ state, dispatch }}>
+                <Toggle lov={lov} updateVarName="varname" unselectedValue="uv" value="id2" />
+            </TaipyContext.Provider>
+        );
+        const elt = getByText("Item 2");
+        await userEvent.click(elt);
+        expect(dispatch).not.toHaveBeenCalled();
     });
 });
