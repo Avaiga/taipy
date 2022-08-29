@@ -12,10 +12,10 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
-from .data_node import DataNode
 from ..common.alias import DataNodeId, JobId
+from .data_node import DataNode
 
 in_memory_storage: Dict[str, Any] = {}
 

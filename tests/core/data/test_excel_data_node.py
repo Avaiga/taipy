@@ -26,8 +26,8 @@ from src.taipy.core.exceptions.exceptions import (
     NonExistingExcelSheet,
     NotMatchSheetNameAndCustomObject,
 )
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 
 
 @pytest.fixture(scope="function", autouse=True)

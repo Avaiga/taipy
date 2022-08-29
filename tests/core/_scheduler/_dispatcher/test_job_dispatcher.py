@@ -25,10 +25,10 @@ from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _D
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import DataNodeId, JobId, TaskId
+from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.task.task import Task
-from taipy.config import JobConfig
 from taipy.config.config import Config
 
 

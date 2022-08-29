@@ -13,7 +13,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict
 
-from taipy.config.scenario.frequency import Frequency
+from taipy.config.common.frequency import Frequency
 
 from ..common._entity import _Entity
 from ..common._get_valid_filename import _get_valid_filename

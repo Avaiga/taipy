@@ -13,7 +13,7 @@ import calendar
 from datetime import datetime, time, timedelta
 from typing import Optional
 
-from taipy.config.scenario.frequency import Frequency
+from taipy.config.common.frequency import Frequency
 
 from .._manager._manager import _Manager
 from ..common._entity_ids import _EntityIds

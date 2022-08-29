@@ -13,11 +13,11 @@ from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.config.config import Config
-from taipy.config.pipeline.pipeline_config import PipelineConfig
-from taipy.config.scenario.scenario_config import ScenarioConfig
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
+from .config.pipeline_config import PipelineConfig
+from .config.scenario_config import ScenarioConfig
 from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle
 from .data._data_manager_factory import _DataManagerFactory

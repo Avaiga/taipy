@@ -13,7 +13,7 @@ import uuid
 from typing import Callable, Dict, Iterable, List, Optional, Union
 
 from taipy.config.common._validate_id import _validate_id
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter

@@ -14,11 +14,11 @@ from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
 from taipy.config.config import Config
-from taipy.config.scenario.scenario_config import ScenarioConfig
 
 from .._manager._manager import _Manager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import ScenarioId
+from ..config.scenario_config import ScenarioConfig
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
 from ..exceptions.exceptions import (

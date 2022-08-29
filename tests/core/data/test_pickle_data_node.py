@@ -17,8 +17,8 @@ import pytest
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import NoData
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 

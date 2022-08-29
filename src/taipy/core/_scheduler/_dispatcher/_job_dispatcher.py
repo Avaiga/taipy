@@ -15,10 +15,10 @@ from typing import Any, Dict, List
 
 from taipy.config._toml_serializer import _TomlSerializer
 from taipy.config.config import Config
-from taipy.config.job_execution.job_config import JobConfig
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ...common.alias import JobId
+from ...config.job_config import JobConfig
 from ...data._data_manager_factory import _DataManagerFactory
 from ...data.data_node import DataNode
 from ...exceptions.exceptions import DataNodeWritingError

@@ -23,7 +23,7 @@ from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task.task import Task
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 

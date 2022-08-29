@@ -17,10 +17,9 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 import pandas as pd
 from openpyxl import load_workbook
 
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 from ..common._reload import _self_reload
-from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import MissingRequiredProperty, NonExistingExcelSheet, NotMatchSheetNameAndCustomObject
 from .data_node import DataNode

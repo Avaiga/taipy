@@ -18,9 +18,20 @@ from queue import Queue
 import pandas as pd
 import pytest
 
-from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import CycleId, PipelineId, ScenarioId
+from src.taipy.core.config import (
+    DataNodeConfig,
+    JobConfig,
+    PipelineConfig,
+    ScenarioConfig,
+    TaskConfig,
+    _DataNodeConfigChecker,
+    _JobConfigChecker,
+    _PipelineConfigChecker,
+    _ScenarioConfigChecker,
+    _TaskConfigChecker,
+)
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.cycle._cycle_model import _CycleModel
 from src.taipy.core.cycle.cycle import Cycle
@@ -36,9 +47,12 @@ from src.taipy.core.scenario.scenario import Scenario
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
 from taipy.config._config import _Config
+from taipy.config._toml_serializer import _TomlSerializer
+from taipy.config.checker._checker import _Checker
+from taipy.config.checker.issue_collector import IssueCollector
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
-from taipy.config.scenario.frequency import Frequency
 
 current_time = datetime.now()
 _SchedulerFactory._build_scheduler()
@@ -192,13 +206,65 @@ def setup():
     delete_everything()
 
 
-def delete_everything():
-    if _SchedulerFactory._scheduler is None:
-        _SchedulerFactory._build_scheduler()
-    _SchedulerFactory._build_dispatcher()
+@pytest.fixture(scope="function", autouse=True)
+def teardown():
+    delete_everything()
 
-    _SchedulerFactory._scheduler.jobs_to_run = Queue()
-    _SchedulerFactory._scheduler.blocked_jobs = []
+
+def delete_everything():
+    init_scheduler()
+    init_managers()
+    init_config()
+
+
+def init_config():
+    Config._default_config = _Config()._default_config()
+    Config._python_config = _Config()
+    Config._file_config = None
+    Config._env_file_config = None
+    Config._applied_config = _Config._default_config()
+    Config._collector = IssueCollector()
+    Config._serializer = _TomlSerializer()
+
+    Config._register_default(JobConfig("development"))
+    Config.job_config = Config.unique_sections[JobConfig.name]
+    _Checker.add_checker(_JobConfigChecker)
+    Config.configure_job_executions = JobConfig._configure
+
+    Config._register_default(DataNodeConfig.default_config())
+    Config.data_nodes = Config.sections[DataNodeConfig.name]
+    _Checker.add_checker(_DataNodeConfigChecker)
+    Config.configure_data_node = DataNodeConfig._configure
+    Config.configure_default_data_node = DataNodeConfig._configure_default
+    Config.configure_csv_data_node = DataNodeConfig._configure_csv
+    Config.configure_json_data_node = DataNodeConfig._configure_json
+    Config.configure_sql_data_node = DataNodeConfig._configure_sql
+    Config.configure_in_memory_data_node = DataNodeConfig._configure_in_memory
+    Config.configure_pickle_data_node = DataNodeConfig._configure_pickle
+    Config.configure_excel_data_node = DataNodeConfig._configure_excel
+    Config.configure_generic_data_node = DataNodeConfig._configure_generic
+
+    Config._register_default(TaskConfig.default_config())
+    Config.tasks = Config.sections[TaskConfig.name]
+    _Checker.add_checker(_TaskConfigChecker)
+    Config.configure_task = TaskConfig._configure
+    Config.configure_default_task = TaskConfig._configure_default
+
+    Config._register_default(PipelineConfig.default_config())
+    _Checker.add_checker(_PipelineConfigChecker)
+    Config.pipelines = Config.sections[PipelineConfig.name]
+    Config.configure_pipeline = PipelineConfig._configure
+    Config.configure_default_pipeline = PipelineConfig._configure_default
+
+    Config._register_default(ScenarioConfig.default_config())
+    Config.scenarios = Config.sections[ScenarioConfig.name]
+    _Checker.add_checker(_ScenarioConfigChecker)
+    Config.configure_scenario = ScenarioConfig._configure
+    Config.configure_default_scenario = ScenarioConfig._configure_default
+    Config.configure_scenario_from_tasks = ScenarioConfig._configure_from_tasks
+
+
+def init_managers():
     _ScenarioManager._delete_all()
     _PipelineManager._delete_all()
     _DataManager._delete_all()
@@ -206,12 +272,10 @@ def delete_everything():
     _JobManager._delete_all()
     _CycleManager._delete_all()
 
-    Config._python_config = _Config()
-    Config._file_config = None
-    Config._env_file_config = None
-    Config._applied_config = _Config._default_config()
 
-
-@pytest.fixture(scope="function", autouse=True)
-def teardown():
-    delete_everything()
+def init_scheduler():
+    if _SchedulerFactory._scheduler is None:
+        _SchedulerFactory._build_scheduler()
+    _SchedulerFactory._build_dispatcher()
+    _SchedulerFactory._scheduler.jobs_to_run = Queue()
+    _SchedulerFactory._scheduler.blocked_jobs = []

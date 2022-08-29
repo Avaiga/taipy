@@ -13,7 +13,7 @@ from datetime import datetime
 
 from src.taipy.core.cycle._cycle_repository_factory import _CycleRepositoryFactory
 from src.taipy.core.cycle.cycle import Cycle
-from taipy.config.scenario.frequency import Frequency
+from taipy.config.common.frequency import Frequency
 
 
 def test_save_and_load(tmpdir, cycle):

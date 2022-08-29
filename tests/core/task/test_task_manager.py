@@ -20,8 +20,8 @@ from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import ModelNotFound, NonExistingTask
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 
 
 def test_create_and_save():

@@ -15,10 +15,9 @@ import pickle
 from datetime import datetime, timedelta
 from typing import Any, List, Optional
 
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 from ..common._reload import _self_reload
-from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, JobId
 from .data_node import DataNode
 

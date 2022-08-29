@@ -12,7 +12,7 @@
 from datetime import datetime
 from typing import Any, Callable, Iterable, List, Optional
 
-from taipy.config.scenario.frequency import Frequency
+from taipy.config.common.frequency import Frequency
 
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter

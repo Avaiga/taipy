@@ -13,7 +13,8 @@ from src.taipy.core import Core
 from src.taipy.core._scheduler._dispatcher import _DevelopmentJobDispatcher, _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from taipy.config import Config, JobConfig
+from src.taipy.core.config.job_config import JobConfig
+from taipy.config import Config
 
 
 def test_run_core_as_a_service():

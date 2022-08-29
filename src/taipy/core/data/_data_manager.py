@@ -12,11 +12,11 @@
 import os
 from typing import Dict, Iterable, Optional, Set, Union
 
-from taipy.config.data_node.data_node_config import DataNodeConfig
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from ..common.alias import DataNodeId, PipelineId, ScenarioId
+from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import InvalidDataNodeType
 from ._data_repository_factory import _DataRepositoryFactory
 from .data_node import DataNode

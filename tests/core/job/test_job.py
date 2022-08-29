@@ -19,15 +19,15 @@ from src.taipy.core._scheduler._dispatcher._development_job_dispatcher import _D
 from src.taipy.core._scheduler._dispatcher._standalone_job_dispatcher import _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common.alias import JobId, TaskId
+from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.job._job_manager import _JobManager
 from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
-from taipy.config import JobConfig
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 
 
 @pytest.fixture

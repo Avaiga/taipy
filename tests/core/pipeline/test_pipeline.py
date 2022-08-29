@@ -21,7 +21,7 @@ from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 

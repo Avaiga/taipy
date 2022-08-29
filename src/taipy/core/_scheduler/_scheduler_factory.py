@@ -12,10 +12,9 @@ from importlib import util
 from typing import Optional, Type
 
 from taipy.config.config import Config
-from taipy.config.exceptions.exceptions import ModeNotAvailable
 
 from ..common._utils import _load_fct
-from ..exceptions.exceptions import SchedulerNotBuilt
+from ..exceptions.exceptions import ModeNotAvailable, SchedulerNotBuilt
 from ._abstract_scheduler import _AbstractScheduler
 from ._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
 from ._scheduler import _Scheduler

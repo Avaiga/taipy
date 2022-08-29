@@ -19,6 +19,7 @@ from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common import _utils
 from src.taipy.core.common._utils import Subscriber
 from src.taipy.core.common.alias import PipelineId, TaskId
+from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.exceptions.exceptions import NonExistingPipeline, NonExistingTask
@@ -28,9 +29,8 @@ from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.scenario._scenario_manager import _ScenarioManager
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
-from taipy.config import JobConfig
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 from tests.core.utils.NotifyMock import NotifyMock
 
 

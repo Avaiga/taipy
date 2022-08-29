@@ -16,8 +16,9 @@ import pytest
 from src.taipy.core._scheduler._dispatcher import _DevelopmentJobDispatcher, _JobDispatcher, _StandaloneJobDispatcher
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.exceptions.exceptions import SchedulerNotBuilt
-from taipy.config import Config, JobConfig
+from taipy.config import Config
 
 
 def test_build_scheduler():

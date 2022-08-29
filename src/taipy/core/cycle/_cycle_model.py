@@ -13,7 +13,7 @@ import dataclasses
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from taipy.config.scenario.frequency import Frequency
+from taipy.config.common.frequency import Frequency
 
 from ..common.alias import CycleId
 

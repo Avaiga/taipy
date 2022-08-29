@@ -19,8 +19,7 @@ import numpy as np
 import pandas as pd
 
 from taipy.config.common._validate_id import _validate_id
-from taipy.config.data_node.data_node_config import DataNodeConfig
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 from taipy.logger._taipy_logger import _TaipyLogger
 
 from ..common._entity import _Entity
@@ -29,6 +28,7 @@ from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, JobId
+from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import NoData
 from ._filter import _FilterDataNode
 from .operator import JoinOperator, Operator

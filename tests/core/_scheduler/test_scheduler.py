@@ -24,15 +24,16 @@ import pytest
 from src.taipy.core import taipy
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
+from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.pipeline._pipeline_manager import _PipelineManager
 from src.taipy.core.pipeline.pipeline import Pipeline
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
-from taipy.config import Config, JobConfig
+from taipy.config import Config
 from taipy.config._config import _Config
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 from tests.core.utils import assert_true_after_1_minute_max
 
 

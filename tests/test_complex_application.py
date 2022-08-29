@@ -18,7 +18,8 @@ import pandas as pd
 import src.taipy.core.taipy as tp
 from src.taipy.core import Status
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
-from taipy.config import Config, JobConfig
+from src.taipy.core.config.job_config import JobConfig
+from taipy.config import Config
 
 # ################################  USER FUNCTIONS  ##################################
 

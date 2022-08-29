@@ -20,7 +20,7 @@ from src.taipy.core.exceptions.exceptions import NonExistingDataNode
 from src.taipy.core.task._task_model import _TaskModel
 from src.taipy.core.task._task_repository_factory import _TaskRepositoryFactory
 from src.taipy.core.task.task import Task
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 data_node = CSVDataNode(
     "test_data_node",

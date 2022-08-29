@@ -20,8 +20,8 @@ from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.exceptions.exceptions import MissingRequiredProperty, NoData
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.scope import Scope
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
 
 

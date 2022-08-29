@@ -11,14 +11,14 @@
 
 from typing import Callable, List, Optional, Type, Union
 
-from taipy.config.data_node.scope import Scope
-from taipy.config.task.task_config import TaskConfig
+from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from .._scheduler._abstract_scheduler import _AbstractScheduler
 from .._scheduler._scheduler_factory import _SchedulerFactory
 from ..common._entity_ids import _EntityIds
 from ..common.alias import PipelineId, ScenarioId, TaskId
+from ..config.task_config import TaskConfig
 from ..data._data_manager_factory import _DataManagerFactory
 from ..exceptions.exceptions import NonExistingTask
 from ..job._job_manager_factory import _JobManagerFactory

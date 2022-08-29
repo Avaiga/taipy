@@ -12,12 +12,12 @@
 from functools import partial
 from typing import Any, Callable, List, Optional, Union
 
-from taipy.config.data_node.scope import Scope
-from taipy.config.pipeline.pipeline_config import PipelineConfig
+from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import PipelineId, ScenarioId
+from ..config.pipeline_config import PipelineConfig
 from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job

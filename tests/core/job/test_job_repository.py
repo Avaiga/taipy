@@ -25,7 +25,7 @@ from src.taipy.core.job.job import Job
 from src.taipy.core.job.status import Status
 from src.taipy.core.task._task_manager import _TaskManager
 from src.taipy.core.task.task import Task
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 data_node = CSVDataNode(
     "test_data_node",

@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, JobId

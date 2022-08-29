@@ -15,14 +15,14 @@ import pathlib
 import pytest
 
 from src.taipy.core.common.alias import DataNodeId
+from src.taipy.core.config.data_node_config import DataNodeConfig
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
 from src.taipy.core.data.pickle import PickleDataNode
 from src.taipy.core.exceptions.exceptions import InvalidDataNodeType, ModelNotFound
+from taipy.config.common.scope import Scope
 from taipy.config.config import Config
-from taipy.config.data_node.data_node_config import DataNodeConfig
-from taipy.config.data_node.scope import Scope
 
 
 def file_exists(file_path: str) -> bool:
@@ -213,19 +213,19 @@ class TestDataManager:
     def test_create_uses_overridden_attributes_in_config_file(self):
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
-        csv_dn = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
-        csv = _DataManager._create_and_set(csv_dn, None)
-        assert csv.config_id == "foo"
-        assert isinstance(csv, CSVDataNode)
-        assert csv._path == "path_from_config_file"
-        assert csv.has_header
+        csv_dn_cfg = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
+        csv_dn = _DataManager._create_and_set(csv_dn_cfg, None)
+        assert csv_dn.config_id == "foo"
+        assert isinstance(csv_dn, CSVDataNode)
+        assert csv_dn._path == "path_from_config_file"
+        assert csv_dn.has_header
 
-        csv_dn = Config.configure_data_node(id="baz", storage_type="csv", path="bar", has_header=True)
-        csv = _DataManager._create_and_set(csv_dn, None)
-        assert csv.config_id == "baz"
-        assert isinstance(csv, CSVDataNode)
-        assert csv._path == "bar"
-        assert csv.has_header
+        csv_dn_cfg = Config.configure_data_node(id="baz", storage_type="csv", path="bar", has_header=True)
+        csv_dn = _DataManager._create_and_set(csv_dn_cfg, None)
+        assert csv_dn.config_id == "baz"
+        assert isinstance(csv_dn, CSVDataNode)
+        assert csv_dn._path == "bar"
+        assert csv_dn.has_header
 
     def test_get_if_not_exists(self):
         with pytest.raises(ModelNotFound):
@@ -296,7 +296,7 @@ class TestDataManager:
             id="test_data_node2", storage_type="in_memory", scope=Scope.SCENARIO, data="In memory scenario"
         )
         pipeline_dn_config = Config.configure_data_node(
-            id="test_data_node2", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
+            id="test_data_node3", storage_type="in_memory", scope=Scope.PIPELINE, data="In memory pipeline"
         )
 
         assert len(_DataManager._get_all()) == 0

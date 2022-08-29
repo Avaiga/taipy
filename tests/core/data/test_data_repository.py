@@ -18,7 +18,7 @@ from src.taipy.core.data._data_model import _DataNodeModel
 from src.taipy.core.data._data_repository_factory import _DataRepositoryFactory
 from src.taipy.core.data.csv import CSVDataNode
 from src.taipy.core.data.data_node import DataNode
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.scope import Scope
 
 
 class TestDataRepository:
