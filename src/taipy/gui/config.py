@@ -50,6 +50,7 @@ ConfigParameter = t.Literal[
     "force_https",
     "watermark",
     "change_delay",
+    "extended_status"
 ]
 
 Config = t.TypedDict(
@@ -81,6 +82,7 @@ Config = t.TypedDict(
         "force_https": bool,
         "watermark": t.Union[str, None],
         "change_delay": t.Union[int, None],
+        "extended_status": bool,
     },
     total=False,
 )

@@ -5,6 +5,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { isValid } from "date-fns";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendUpdateAction } from "../../context/taipyReducers";
@@ -12,6 +13,7 @@ import { getSuffixedClassNames, TaipyActiveProps, TaipyChangeProps } from "./uti
 import { getDateTime, getClientServerTimeZoneOffset } from "../../utils";
 import { useDynamicProperty, useFormatConfig } from "../../utils/hooks";
 import Field from "./Field";
+import ErrorFallback from "../../utils/ErrorBoundary";
 
 interface DateSelectorProps extends TaipyActiveProps, TaipyChangeProps {
     withTime?: boolean;
@@ -73,38 +75,40 @@ const DateSelector = (props: DateSelectorProps) => {
     }, [props.date, tz]);
 
     return (
-        <Tooltip title={hover || ""}>
-            <Box id={id} className={className} sx={boxSx}>
-                {editable ? (
-                    withTime ? (
-                        <DateTimePicker
-                            value={value}
-                            onChange={handleChange}
-                            renderInput={renderInput}
-                            className={getSuffixedClassNames(className, "-picker")}
-                            disabled={!active}
-                        />
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Tooltip title={hover || ""}>
+                <Box id={id} className={className} sx={boxSx}>
+                    {editable ? (
+                        withTime ? (
+                            <DateTimePicker
+                                value={value}
+                                onChange={handleChange}
+                                renderInput={renderInput}
+                                className={getSuffixedClassNames(className, "-picker")}
+                                disabled={!active}
+                            />
+                        ) : (
+                            <DatePicker
+                                value={value}
+                                onChange={handleChange}
+                                renderInput={renderInput}
+                                className={getSuffixedClassNames(className, "-picker")}
+                                disabled={!active}
+                            />
+                        )
                     ) : (
-                        <DatePicker
-                            value={value}
-                            onChange={handleChange}
-                            renderInput={renderInput}
-                            className={getSuffixedClassNames(className, "-picker")}
-                            disabled={!active}
+                        <Field
+                            dataType="datetime.datetime"
+                            defaultValue={props.defaultDate}
+                            value={props.date}
+                            format={props.format}
+                            id={id + "-field"}
+                            className={getSuffixedClassNames(className, "-text")}
                         />
-                    )
-                ) : (
-                    <Field
-                        dataType="datetime.datetime"
-                        defaultValue={props.defaultDate}
-                        value={props.date}
-                        format={props.format}
-                        id={id + "-field"}
-                        className={getSuffixedClassNames(className, "-text")}
-                    />
-                )}
-            </Box>
-        </Tooltip>
+                    )}
+                </Box>
+            </Tooltip>
+        </ErrorBoundary>
     );
 };
 

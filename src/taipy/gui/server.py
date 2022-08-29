@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import re
 import socket
 import time
@@ -97,7 +98,7 @@ class _Server:
         @taipy_bp.route("/", defaults={"path": ""})
         @taipy_bp.route("/<path:path>")
         def my_index(path):
-            if path == "" or "." not in path:
+            if path == "" or path == "index.html" or "." not in path:
                 return render_template(
                     "index.html",
                     app_css=f"/{self.css_file}.css",
@@ -110,6 +111,8 @@ class _Server:
                     styles=styles,
                     version=version,
                 )
+            if path == "taipy.status.json":
+                return self._direct_render_json(self._gui._serve_status(pathlib.Path(template_folder) / path))
             if str(os.path.normpath(file_path := ((base_path := static_folder + os.path.sep) + path))).startswith(
                 base_path
             ) and os.path.isfile(file_path):
