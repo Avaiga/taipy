@@ -34,7 +34,7 @@ export const DEFAULT_SIZE = "small";
 
 export type Order = "asc" | "desc";
 
-export type RowValue = string | number | null;
+export type RowValue = string | number | boolean | null;
 
 export type RowType = Record<string, RowValue>;
 
@@ -71,6 +71,9 @@ const formatValue = (val: RowValue, col: ColumnDesc, formatConf: FormatConfig, n
             return val as string;
     }
 };
+const VALID_BOOLEAN_STRINGS = ["true", "1", "t", "y", "yes", "yeah", "sure"];
+
+const isBooleanTrue = (val: RowValue) => typeof val == "string" ? VALID_BOOLEAN_STRINGS.some(s => s == val.trim().toLowerCase()) : !!val;
 
 const renderCellValue = (val: RowValue | boolean, col: ColumnDesc, formatConf: FormatConfig, nanValue?: string) => {
     if (val !== null && val !== undefined && col.type && col.type.startsWith("bool")) {
@@ -136,7 +139,7 @@ export const tableSx = { minWidth: 250 };
 export const headBoxSx = { display: "flex", alignItems: "flex-start" };
 
 export interface OnCellValidation {
-    (value: RowValue, rowIndex: number, colName: string): void;
+    (value: RowValue, rowIndex: number, colName: string, userValue: string): void;
 }
 
 export interface OnRowDeletion {
@@ -199,9 +202,29 @@ export const EditableCell = (props: EditableCellProps) => {
     const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setVal(e.target.value), []);
 
     const onCheckClick = useCallback(() => {
-        onValidation && onValidation(val, rowIndex, colDesc.dfid);
+        let castedVal = val;
+        switch (colDesc.type) {
+            case "bool": 
+                castedVal = isBooleanTrue(val);
+                break;
+            case "int":
+                try {
+                    castedVal = parseInt(val as string, 10);
+                } catch (e) {
+                    // ignore
+                }
+                break;
+            case "float":
+                try {
+                    castedVal = parseFloat(val as string);
+                } catch (e) {
+                    // ignore
+                }
+                break;
+            }
+        onValidation && onValidation(castedVal, rowIndex, colDesc.dfid, val as string);
         setEdit((e) => !e);
-    }, [onValidation, val, rowIndex, colDesc.dfid]);
+    }, [onValidation, val, rowIndex, colDesc.dfid, colDesc.type]);
 
     const onEditClick = useCallback(() => {
         onValidation && setEdit((e) => !e);
@@ -282,7 +305,7 @@ export const EditableCell = (props: EditableCellProps) => {
                         }
                     />
                 ) : onDeletion ? (
-                    <IconButton onClick={onDeleteClick} size="small">
+                    <IconButton onClick={onDeleteClick} size="small" sx={iconInRowSx}>
                         <DeleteIcon fontSize="inherit" />
                     </IconButton>
                 ) : null
