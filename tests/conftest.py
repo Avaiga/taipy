@@ -20,8 +20,8 @@ from dotenv import load_dotenv
 
 from src.taipy.rest.app import create_app
 from taipy.config import Config
-from taipy.config.scenario.frequency import Frequency
-from taipy.config.data_node.scope import Scope
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
 from taipy.core import Cycle, Job, Pipeline, Scenario, Task
 from taipy.core.common.alias import DataNodeId, JobId
 from taipy.core.cycle._cycle_manager import _CycleManager
