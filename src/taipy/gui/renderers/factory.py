@@ -482,6 +482,7 @@ class _Factory:
                 ("label",),
                 ("value_by_id", PropertyType.boolean),
                 ("unselected_value", PropertyType.string, ""),
+                ("allow_unselect", PropertyType.boolean),
                 ("on_change", PropertyType.function),
             ]
         )

@@ -12,13 +12,18 @@
 from taipy.gui import Gui
 
 
-def test_toggle_md_1(gui: Gui, helpers):
+def test_toggle_md(gui: Gui, helpers):
     md_string = "<|toggle|theme|>"
     expected_list = ["<Toggle", 'kind="theme"', 'unselectedValue=""']
     helpers.test_control_md(gui, md_string, expected_list)
 
 
-def test_toggle_md_2(gui: Gui, test_client, helpers):
+def test_toggle_allow_unselected_md(gui: Gui, helpers):
+    md_string = "<|toggle|lov=1;2|allow_unselect|>"
+    expected_list = ["<Toggle", 'unselectedValue=""', "allowUnselect={true}"]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+def test_toggle_lov_md(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", "l1")
     gui._bind_var_val("lov", [("l1", "v1"), ("l2", "v2")])
     md_string = "<|{x}|toggle|lov={lov}|label=Label|>"
