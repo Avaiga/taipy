@@ -208,7 +208,7 @@ class _Config(object):
 
             try:
                 section = TaipyConfig.sections["gui"]
-                self.config.update(section._to_dict())
+                self.config.update(section)
             except KeyError:
                 warnings.warn("taipy-config section for taipy-gui is not initialized")
 
