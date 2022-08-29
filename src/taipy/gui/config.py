@@ -228,7 +228,7 @@ def _register_gui_config():
 
             def __init__(self, property_list: t.Optional[t.List] = None, **properties):
                 self._property_list = property_list
-                super().__init__(**properties)
+                super().__init__(id=_GuiSection.name, **properties)
 
             def __copy__(self):
                 return _GuiSection(property_list=copy(self._property_list), **copy(self._properties))
