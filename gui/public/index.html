@@ -10,9 +10,9 @@
     <script>{%- if config -%}
     window.taipyConfig={{config|tojson|safe}};{% endif %}
     {%- if version -%}
-    window.taipyVersion="{{version}}"
+    window.taipyVersion="{{version}}";
     {% endif %}</script>
-    <!-- Taipy Gui js version <%= htmlWebpackPlugin.options.VERSION %> -->
+    <!-- Taipy Gui js <%= htmlWebpackPlugin.options.frontend_version %> <%= htmlWebpackPlugin.options.frontend_build_date %> <%= htmlWebpackPlugin.options.frontend_build_mode %> -->
   </head>
   <body >
     {% for script in scripts %}

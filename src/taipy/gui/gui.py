@@ -16,6 +16,7 @@ import json
 import os
 import pathlib
 import re
+import sys
 import tempfile
 import typing as t
 import warnings
@@ -25,7 +26,7 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory
+from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory, render_template, __version__ as flask_version  # type: ignore
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -104,6 +105,10 @@ class Gui:
             It defaults to the `on_exception()` global function defined in the Python
             application. If there is no such function, exceptions will not trigger
             anything.
+        on_status (Callable): The function that is called when the status page is shown.<br/>
+            It should return raw and valid HTML as a string.<br/>
+            It defaults to the `on_status()` global function defined in the Python
+            application. If there is no such function, status page content shows only the status of the server.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the interface in real-time.
@@ -214,6 +219,7 @@ class Gui:
         self.on_init: t.Optional[t.Callable] = None
         self.on_navigate: t.Optional[t.Callable] = None
         self.on_exception: t.Optional[t.Callable] = None
+        self.on_status: t.Optional[t.Callable] = None
 
         # sid from client_id
         self.__client_id_2_sid: t.Dict[str, t.Set[str]] = {}
@@ -444,7 +450,7 @@ class Gui:
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1 :]
+            suffix_var_name = var_name[first_dot_index + 1:]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -462,7 +468,6 @@ class Gui:
             if not _found:
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
         return f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name, current_context
-
 
     def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         try:
@@ -515,6 +520,22 @@ class Gui:
                 if resource_name:
                     return send_file(resource_name)
         return ("", 404)
+
+    def __get_version(self) -> str:
+        return f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}'
+
+    def _serve_status(self, template: pathlib.Path) -> t.Dict[str, t.Dict[str, str]]:
+        base_json = {"user_status": str(self.__call_on_status() or "")}
+        if self._get_config("extended_status", False):
+            base_json.update({"flask_version": str(flask_version or ""),
+                              "backend_version": self.__get_version(),
+                              "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
+                              "python_version": sys.version, })
+            try:
+                base_json.update(json.loads(template.read_text()))
+            except Exception as e:
+                warnings.warn(f"Exception raised in json reading in '{template}':\n{e}")
+        return {"gui": base_json}
 
     def __upload_files(self):
         self.__set_client_id_in_context()
@@ -630,7 +651,8 @@ class Gui:
                                 pass
                             ret_payload = lib.get_data(lib_name, payload, var_name, newvalue)
                         except Exception as e:
-                            warnings.warn(f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}")
+                            warnings.warn(
+                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}")
             if not isinstance(ret_payload, dict):
                 ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})
@@ -1257,6 +1279,15 @@ class Gui:
             return True
         return False
 
+    def __call_on_status(self) -> t.Optional[str]:
+        if hasattr(self, "on_status") and callable(self.on_status):
+            try:
+                return self.on_status(self.__get_state())
+            except Exception as e:
+                if not self.__call_on_exception("on_status", e):
+                    warnings.warn(f"Exception raised in on_status\n{e}")
+        return None
+
     def __render_page(self, page_name: str) -> t.Any:
         self.__set_client_id_in_context()
         nav_page = page_name
@@ -1505,6 +1536,7 @@ class Gui:
             self.__bind_local_func("on_action")
             self.__bind_local_func("on_navigate")
             self.__bind_local_func("on_exception")
+            self.__bind_local_func("on_status")
 
         # base global ctx is TaipyHolder classes + script modules and callables
         glob_ctx = {t.__name__: t for t in _TaipyBase.__subclasses__()}
@@ -1557,7 +1589,7 @@ class Gui:
                 root_margin=self._get_config("margin", None),
                 scripts=scripts,
                 styles=styles,
-                version=f'{self.__version.get("major", 0)}.{self.__version.get("minor", 0)}.{self.__version.get("patch", 0)}',
+                version=self.__get_version(),
                 client_config=self.__get_client_config(),
                 watermark=self._get_config("watermark", None),
             )
