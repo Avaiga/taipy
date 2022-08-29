@@ -47,7 +47,8 @@ This dictionary has the following keys:
 <ul>
 <li>index (int): the row index.</li>
 <li>col (str): the column name.</li>
-<li>value (any): the new cell value.</li>
+<li>value (any): the new cell value cast to the type of the column.</li>
+<li>user_value (str): the new cell value as entered by the user.</li>
 </ul>
 </li>
 </ul>
