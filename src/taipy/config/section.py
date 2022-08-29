@@ -2,11 +2,15 @@ from abc import abstractmethod
 from typing import Any, Dict, Optional
 
 from .common._template_handler import _TemplateHandler as _tpl
+from .common._validate_id import _validate_id
 
 
 class Section:
+    _DEFAULT_KEY = "default"
+    _ID_KEY = "id"
 
-    def __init__(self, **properties):
+    def __init__(self, id, **properties):
+        self.id = _validate_id(id)
         self._properties = properties
 
     @abstractmethod
@@ -24,11 +28,11 @@ class Section:
 
     @classmethod
     @abstractmethod
-    def _from_dict(cls, config_as_dict: Dict[str, Any]):
+    def _from_dict(cls, config_as_dict: Dict[str, Any], id, config):
         raise NotImplemented
 
     @abstractmethod
-    def _update(self, config_as_dict):
+    def _update(self, config_as_dict, default_section=None):
         raise NotImplemented
 
     def __getattr__(self, item: str) -> Optional[Any]:

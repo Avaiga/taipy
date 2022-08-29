@@ -9,8 +9,14 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from typing import Any, Dict
+from src.taipy.config._config import _Config
+from src.taipy.config.checker._checker import _Checker
 
 
-class _DefaultJobConfig:
-    _DEFAULT_CONFIG: Dict[str, Any] = {}
+class TestDefaultConfigChecker:
+    def test_check_default_config(self):
+        config = _Config._default_config()
+        collector = _Checker._check(config)
+        assert len(collector._errors) == 0
+        assert len(collector._infos) == 0
+        assert len(collector._warnings) == 0

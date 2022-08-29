@@ -8,6 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import logging
+from unittest import mock
 
 from src.taipy.config._config import _Config
 from src.taipy.config.checker._checkers._config_checker import _ConfigChecker
@@ -21,22 +23,23 @@ class MyCustomChecker(_ConfigChecker):
 
 
 def test__error():
-    collector = IssueCollector()
-    assert len(collector.all) == 0
-    _ConfigChecker(_Config(), collector)._error("field", 17, "my message")
-    assert len(collector.all) == 1
-    assert len(collector.errors) == 1
-    assert len(collector.warnings) == 0
-    assert len(collector.infos) == 0
-    assert collector.errors[0] == Issue(IssueCollector._ERROR_LEVEL, "field", 17, "my message", "_ConfigChecker")
+    with mock.patch.object(logging.Logger, 'error') as error_message:
+        collector = IssueCollector()
+        assert len(collector.all) == 0
+        _ConfigChecker(_Config(), collector)._error("field", 17, "my message")
+        assert len(collector.all) == 1
+        assert len(collector.errors) == 1
+        assert len(collector.warnings) == 0
+        assert len(collector.infos) == 0
+        assert collector.errors[0] == Issue(IssueCollector._ERROR_LEVEL, "field", 17, "my message", "_ConfigChecker")
 
-    MyCustomChecker(_Config(), collector)._error("foo", "bar", "baz")
-    assert len(collector.all) == 2
-    assert len(collector.errors) == 2
-    assert len(collector.warnings) == 0
-    assert len(collector.infos) == 0
-    assert collector.errors[0] == Issue(IssueCollector._ERROR_LEVEL, "field", 17, "my message", "_ConfigChecker")
-    assert collector.errors[1] == Issue(IssueCollector._ERROR_LEVEL, "foo", "bar", "baz", "MyCustomChecker")
+        MyCustomChecker(_Config(), collector)._error("foo", "bar", "baz")
+        assert len(collector.all) == 2
+        assert len(collector.errors) == 2
+        assert len(collector.warnings) == 0
+        assert len(collector.infos) == 0
+        assert collector.errors[0] == Issue(IssueCollector._ERROR_LEVEL, "field", 17, "my message", "_ConfigChecker")
+        assert collector.errors[1] == Issue(IssueCollector._ERROR_LEVEL, "foo", "bar", "baz", "MyCustomChecker")
 
 
 def test__warning():

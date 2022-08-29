@@ -19,7 +19,7 @@ from src.taipy.config.global_app.global_app_config import GlobalAppConfig
 from src.taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 
 
-def test_scenario_config_with_env_variable_value():
+def test_global_config_with_env_variable_value():
     with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         Config.configure_global_app(root_folder="ENV[FOO]", storage_folder="ENV[BAZ]")
         assert Config.global_config.root_folder == "bar"
@@ -41,3 +41,14 @@ def test_clean_entities_enabled_default():
         with pytest.raises(InconsistentEnvVariableError):
             Config.configure_global_app()
             assert Config.global_config.clean_entities_enabled is False
+
+
+def test_default_global_app_config():
+    global_config = Config.global_config
+    assert global_config is not None
+    assert not global_config.notification
+    assert global_config.root_folder == "./taipy/"
+    assert global_config.storage_folder == ".data/"
+    assert global_config._clean_entities_enabled is GlobalAppConfig._CLEAN_ENTITIES_ENABLED_TEMPLATE
+    assert global_config.clean_entities_enabled is False
+    assert len(global_config.properties) == 0

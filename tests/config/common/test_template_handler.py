@@ -15,8 +15,8 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.config.scenario.frequency import Frequency
-from src.taipy.config.data_node.scope import Scope
+from src.taipy.config.common.frequency import Frequency
+from src.taipy.config.common.scope import Scope
 from src.taipy.config.common._template_handler import _TemplateHandler
 from src.taipy.config.exceptions.exceptions import InconsistentEnvVariableError
 

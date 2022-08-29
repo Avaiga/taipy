@@ -16,46 +16,36 @@ import pytest
 
 from src.taipy.config.config import Config
 from src.taipy.config.exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
-from tests.config.named_temporary_file import NamedTemporaryFile
+from tests.config.utils.named_temporary_file import NamedTemporaryFile
 
 
 def test_override_default_configuration_with_code_configuration():
     assert not Config.global_config.root_folder == "foo"
-    assert len(Config.data_nodes) == 1
-    assert len(Config.tasks) == 1
-    assert len(Config.pipelines) == 1
-    assert len(Config.scenarios) == 1
 
-    Config.configure_job_executions(nb_of_workers=-1)
+    assert len(Config.unique_sections) == 1
+    assert Config.unique_sections["unique_section_name"] is not None
+    assert Config.unique_sections["unique_section_name"].attribute == "default_attribute"
+    assert Config.unique_sections["unique_section_name"].prop is None
+
+    assert len(Config.sections) == 1
+    assert len(Config.sections["section_name"]) == 1
+    assert Config.sections["section_name"] is not None
+    assert Config.sections["section_name"]["default"].attribute == "default_attribute"
+
     Config.configure_global_app(root_folder="foo")
-    foo_config = Config.configure_data_node("foo", "in_memory")
-    bar_config = Config.configure_task("bar", print, [foo_config], [])
-    baz_config = Config.configure_pipeline("baz", [bar_config])
-    qux_config = Config.configure_scenario("qux", [baz_config])
-
-    assert Config.job_config.nb_of_workers == -1
     assert Config.global_config.root_folder == "foo"
-    assert len(Config.data_nodes) == 2
-    assert "default" in Config.data_nodes
-    assert foo_config.id in Config.data_nodes
-    assert Config.data_nodes[foo_config.id].storage_type == "in_memory"
-    assert len(Config.tasks) == 2
-    assert "default" in Config.tasks
-    assert bar_config.id in Config.tasks
-    assert len(Config.tasks[bar_config.id].input_configs) == 1
-    assert Config.tasks[bar_config.id].input_configs[0].id == foo_config.id
-    assert len(Config.tasks[bar_config.id].output_configs) == 0
-    assert Config.tasks[bar_config.id].function == print
-    assert len(Config.pipelines) == 2
-    assert "default" in Config.pipelines
-    assert baz_config.id in Config.pipelines
-    assert len(Config.pipelines[baz_config.id].task_configs) == 1
-    assert Config.pipelines[baz_config.id].task_configs[0].id == bar_config.id
-    assert len(Config.scenarios) == 2
-    assert "default" in Config.scenarios
-    assert qux_config.id in Config.scenarios
-    assert len(Config.scenarios[qux_config.id].pipeline_configs) == 1
-    assert Config.scenarios[qux_config.id].pipeline_configs[0].id == baz_config.id
+
+    Config.configure_unique_section_for_tests("foo", prop="bar")
+    assert len(Config.unique_sections) == 1
+    assert Config.unique_sections["unique_section_name"] is not None
+    assert Config.unique_sections["unique_section_name"].attribute == "foo"
+    assert Config.unique_sections["unique_section_name"].prop == "bar"
+
+    Config.configure_section_for_tests("my_id", "baz", prop="qux")
+    assert len(Config.unique_sections) == 1
+    assert Config.sections["section_name"] is not None
+    assert Config.sections["section_name"]["my_id"].attribute == "baz"
+    assert Config.sections["section_name"]["my_id"].prop == "qux"
 
 
 def test_override_default_config_with_code_config_including_env_variable_values():
@@ -84,194 +74,145 @@ def test_override_default_configuration_with_file_configuration():
 [TAIPY]
 clean_entities_enabled = true
 
-[JOB]
-nb_of_workers = -1
-
-[DATA_NODE.foo]
-
-[TASK.bar]
-
-[PIPELINE.baz]
-
-[SCENARIO.qux]
 """
     )
-    Config.configure_global_app()
-    assert Config.job_config.nb_of_workers is 1
     assert not Config.global_config.clean_entities_enabled
-    assert len(Config.data_nodes) == 1
-    assert len(Config.tasks) == 1
-    assert len(Config.pipelines) == 1
-    assert len(Config.scenarios) == 1
 
     Config.load(tf.filename)
 
-    assert Config.job_config.nb_of_workers == -1
     assert Config.global_config.clean_entities_enabled
-    assert len(Config.data_nodes) == 2
-    assert "default" in Config.data_nodes
-    assert "foo" in Config.data_nodes
-    assert len(Config.tasks) == 2
-    assert "default" in Config.tasks
-    assert "bar" in Config.tasks
-    assert len(Config.pipelines) == 2
-    assert "default" in Config.pipelines
-    assert "default" in Config.scenarios
-    assert len(Config.scenarios) == 2
-    assert "baz" in Config.pipelines
-    assert "qux" in Config.scenarios
 
 
 def test_override_default_config_with_file_config_including_env_variable_values():
     tf = NamedTemporaryFile(
         """
-[JOB]
-nb_of_workers = "ENV[FOO]:int"
-start_executor = "ENV[BAR]"
+[TAIPY]
+foo_attribute = "ENV[FOO]:int"
+bar_attribute = "ENV[BAR]:bool"
 """
     )
-    assert Config.job_config.nb_of_workers is 1
-    assert not Config.job_config.start_executor
-
-    with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
-        Config.load(tf.filename)
-        assert Config.job_config.nb_of_workers == 6
-        assert Config.job_config.start_executor
+    assert Config.global_config.foo_attribute is None
+    assert Config.global_config.bar_attribute is None
 
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
         with pytest.raises(InconsistentEnvVariableError):
             Config.load(tf.filename)
+            Config.global_config.foo_attribute
 
     with mock.patch.dict(os.environ, {"FOO": "5"}):
         with pytest.raises(MissingEnvVariableError):
             Config.load(tf.filename)
+            Config.global_config.bar_attribute
+
+    with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
+        Config.load(tf.filename)
+        assert Config.global_config.foo_attribute == 6
+        assert Config.global_config.bar_attribute
 
 
-def test_code_configuration_do_not_override_file_configuration():
+def test_code_configuration_does_not_override_file_configuration():
     config_from_filename = NamedTemporaryFile(
         """
-[JOB]
-nb_of_workers = 2
+[TAIPY]
+foo = 2
     """
     )
     Config.load(config_from_filename.filename)
 
-    Config.configure_job_executions(nb_of_workers=21)
+    Config.configure_global_app(foo=21)
 
-    assert Config.job_config.nb_of_workers == 2  # From file config
+    assert Config.global_config.foo == 2  # From file config
 
 
-def test_code_configuration_do_not_override_file_configuration_including_env_variable_values():
+def test_code_configuration_does_not_override_file_configuration_including_env_variable_values():
     config_from_filename = NamedTemporaryFile(
         """
-[JOB]
-nb_of_workers = 2
+[TAIPY]
+foo = 2
     """
     )
     Config.load(config_from_filename.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "21"}):
-        Config.configure_job_executions(nb_of_workers="ENV[FOO]")
-        assert Config.job_config.nb_of_workers == 2  # From file config
+        Config.configure_global_app(foo="ENV[FOO]")
+        assert Config.global_config.foo == 2  # From file config
 
 
-def test_file_configuration_override_code_configuration():
+def test_file_configuration_overrides_code_configuration():
     config_from_filename = NamedTemporaryFile(
         """
-[JOB]
-nb_of_workers = 2
+[TAIPY]
+foo = 2
     """
     )
-    Config.configure_job_executions(nb_of_workers=21)
+    Config.configure_global_app(foo=21)
     Config.load(config_from_filename.filename)
 
-    assert Config.job_config.nb_of_workers == 2  # From file config
+    assert Config.global_config.foo == 2  # From file config
 
 
-def test_file_configuration_override_code_configuration_including_env_variable_values():
+def test_file_configuration_overrides_code_configuration_including_env_variable_values():
     config_from_filename = NamedTemporaryFile(
         """
-[JOB]
-nb_of_workers = "ENV[FOO]:int"
+[TAIPY]
+foo = "ENV[FOO]:int"
     """
     )
-    Config.configure_job_executions(nb_of_workers=21)
+    Config.configure_global_app(foo=21)
 
     with mock.patch.dict(os.environ, {"FOO": "2"}):
         Config.load(config_from_filename.filename)
-        assert Config.job_config.nb_of_workers == 2  # From file config
+        assert Config.global_config.foo == 2  # From file config
 
 
 def test_override_default_configuration_with_multiple_configurations():
     file_config = NamedTemporaryFile(
         """
-[DATA_NODE.default]
-has_header = true
-[DATA_NODE.my_datanode]
-path = "/data/csv"
-
-[JOB]
-nb_of_workers = 10
-
 [TAIPY]
 clean_entities_enabled = false
+foo = 10
     """
     )
+    # Default config is applied
+    assert Config.global_config.foo is None
+    assert Config.global_config.clean_entities_enabled is False
 
     Config.configure_global_app()
-    # Default config is applied
-    assert Config.job_config.nb_of_workers is 1
+    assert Config.global_config.foo is None
     assert Config.global_config.clean_entities_enabled is False
 
     # Code config is applied
-    Config.configure_job_executions(nb_of_workers=-1)
     Config.configure_global_app(clean_entities_enabled=True)
+    Config.configure_global_app(foo=-1)
     assert Config.global_config.clean_entities_enabled is True
-    assert Config.job_config.nb_of_workers == -1
+    assert Config.global_config.foo == -1
 
     # File config is applied
     Config.load(file_config.filename)
     assert Config.global_config.clean_entities_enabled is False
-    assert Config.job_config.nb_of_workers == 10
-    assert Config.data_nodes["my_datanode"].has_header
-    assert Config.data_nodes["my_datanode"].path == "/data/csv"
-    assert Config.data_nodes["my_datanode"].not_defined is None
+    assert Config.global_config.foo == 10
 
 
-def test_override_default_configuration_with_multiple_configurations_including_environment_varaible_values():
+def test_override_default_configuration_with_multiple_configurations_including_environment_variable_values():
     file_config = NamedTemporaryFile(
         """
-[DATA_NODE.default]
-has_header = true
-[DATA_NODE.my_datanode]
-path = "ENV[FOO]"
-
-[JOB]
-nb_of_workers = 10
-
 [TAIPY]
 clean_entities_enabled = false
+att = "ENV[BAZ]"
     """
     )
 
-    Config.configure_global_app()
-    with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
+    with mock.patch.dict(os.environ, {"FOO": "bar", "BAZ": "qux"}):
         # Default config is applied
-        assert Config.job_config.nb_of_workers is 1
         assert Config.global_config.clean_entities_enabled is False
+        assert Config.global_config.att is None
 
         # Code config is applied
-        Config.configure_job_executions(nb_of_workers=-1)
-        Config.configure_global_app(clean_entities_enabled=True)
-        Config.configure_data_node("my_datanode", path="ENV[BAR]")
+        Config.configure_global_app(clean_entities_enabled=True, att="ENV[FOO]")
         assert Config.global_config.clean_entities_enabled is True
-        assert Config.job_config.nb_of_workers == -1
-        assert Config.data_nodes["my_datanode"].path == "/baz/data/csv"
+        assert Config.global_config.att == "bar"
 
         # File config is applied
         Config.load(file_config.filename)
         assert Config.global_config.clean_entities_enabled is False
-        assert Config.job_config.nb_of_workers == 10
-        assert Config.data_nodes["my_datanode"].has_header
-        assert Config.data_nodes["my_datanode"].path == "/data/csv"
-        assert Config.data_nodes["my_datanode"].not_defined is None
+        assert Config.global_config.att == "qux"

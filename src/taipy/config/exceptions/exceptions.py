@@ -28,7 +28,3 @@ class MissingEnvVariableError(Exception):
 
 class InvalidConfigurationId(Exception):
     """Configuration id is not valid."""
-
-
-class ModeNotAvailable(Exception):
-    """Raised if the mode in JobConfig is not supported."""

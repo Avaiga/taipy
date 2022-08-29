@@ -12,56 +12,41 @@
 from copy import copy
 from typing import Dict
 
-from .section import Section
-from .data_node.data_node_config import DataNodeConfig
 from .global_app.global_app_config import GlobalAppConfig
-from .job_execution.job_config import JobConfig
-from .pipeline.pipeline_config import PipelineConfig
-from .scenario.scenario_config import ScenarioConfig
-from .task.task_config import TaskConfig
+from .section import Section
+from .unique_section import UniqueSection
 
 
 class _Config:
     DEFAULT_KEY = "default"
 
     def __init__(self):
-        self._sections: Dict[str, Section] = {}
-        # TO REFACTOR
+        self._sections: Dict[str, Dict[str, Section]] = {}
+        self._unique_sections: Dict[str, UniqueSection] = {}
         self._global_config: GlobalAppConfig = GlobalAppConfig()
-        self._job_config: JobConfig = JobConfig()
-        self._data_nodes: Dict[str, DataNodeConfig] = {}
-        self._tasks: Dict[str, TaskConfig] = {}
-        self._pipelines: Dict[str, PipelineConfig] = {}
-        self._scenarios: Dict[str, ScenarioConfig] = {}
 
     @classmethod
     def _default_config(cls):
         config = _Config()
-        # TO REFACTOR
         config._global_config = GlobalAppConfig.default_config()
-        config._job_config = JobConfig().default_config()
-        config._data_nodes = {cls.DEFAULT_KEY: DataNodeConfig.default_config(cls.DEFAULT_KEY)}
-        config._tasks = {cls.DEFAULT_KEY: TaskConfig.default_config(cls.DEFAULT_KEY)}
-        config._pipelines = {cls.DEFAULT_KEY: PipelineConfig.default_config(cls.DEFAULT_KEY)}
-        config._scenarios = {cls.DEFAULT_KEY: ScenarioConfig.default_config(cls.DEFAULT_KEY)}
         return config
 
     def _update(self, other_config):
-        if other_config._sections:
-            for section_name, other_section in other_config._sections.items():
-                if section := self._sections.get(section_name, None):
+        self._global_config._update(other_config._global_config._to_dict())
+        if other_config._unique_sections:
+            for section_name, other_section in other_config._unique_sections.items():
+                if section := self._unique_sections.get(section_name, None):
                     section._update(other_section._to_dict())
                 else:
-                    self._sections[section_name] = other_config._sections[section_name]
-        # TO REFACTOR
-        self._global_config._update(other_config._global_config._to_dict())
-        self._job_config._update(other_config._job_config._to_dict())
-        self.__update_entity_configs(self._data_nodes, other_config._data_nodes, DataNodeConfig)
-        self.__update_entity_configs(self._tasks, other_config._tasks, TaskConfig)
-        self.__update_entity_configs(self._pipelines, other_config._pipelines, PipelineConfig)
-        self.__update_entity_configs(self._scenarios, other_config._scenarios, ScenarioConfig)
+                    self._unique_sections[section_name] = other_config._unique_sections[section_name]
+        if other_config._sections:
+            for section_name, other_non_unique_sections in other_config._sections.items():
+                if non_unique_sections := self._sections.get(section_name, None):
+                    self.__update_sections(non_unique_sections, other_non_unique_sections, None)
+                else:
+                    self._sections[section_name] = other_non_unique_sections
 
-    def __update_entity_configs(self, entity_config, other_entity_configs, _class):
+    def __update_sections(self, entity_config, other_entity_configs, _class):
         if self.DEFAULT_KEY in other_entity_configs:
             if self.DEFAULT_KEY in entity_config:
                 entity_config[self.DEFAULT_KEY]._update(other_entity_configs[self.DEFAULT_KEY]._to_dict())

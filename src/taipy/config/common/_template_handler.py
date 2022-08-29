@@ -13,9 +13,9 @@ import os
 import re
 from collections import UserDict
 
-from ..data_node.scope import Scope
+from .frequency import Frequency
+from .scope import Scope
 from ..exceptions.exceptions import InconsistentEnvVariableError, MissingEnvVariableError
-from ..scenario.frequency import Frequency
 
 
 class _TemplateHandler:
