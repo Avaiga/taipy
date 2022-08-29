@@ -3,11 +3,13 @@ import axios from "axios";
 import JsxParser from "react-jsx-parser";
 import { useLocation } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { TaipyContext } from "../../context/taipyContext";
 import { getRegisteredComponents } from "../Taipy";
 import { unregisteredRender, renderError } from "../Taipy/Unregistered";
 import { createModuleContextAction, createPartialAction } from "../../context/taipyReducers";
+import ErrorFallback from "../../utils/ErrorBoundary";
 
 interface TaipyRenderedProps {
     path?: string;
@@ -76,7 +78,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
     }, [path, state.id, dispatch, partial, fromBlock]);
 
     return (
-        <>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
             {head.length ? <Helmet>{head.map((v) => React.createElement(v.tag, v.props, v.content))}</Helmet> : null}
             <JsxParser
                 disableKeyGeneration={true}
@@ -87,7 +89,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 allowUnknownElements={false}
                 renderError={renderError}
             />
-        </>
+        </ErrorBoundary>
     );
 };
 

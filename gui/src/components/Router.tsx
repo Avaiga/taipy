@@ -1,15 +1,15 @@
 import React, { useEffect, useReducer, useState, ComponentType } from "react";
 import axios from "axios";
-import type {} from "@mui/lab/themeAugmentation";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/system";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider } from "@mui/x-date-pickers";
 import { SnackbarProvider } from "notistack";
 import { HelmetProvider } from "react-helmet-async";
 import JsxParser from "react-jsx-parser";
 import { BrowserRouter } from "react-router-dom";
+import { ErrorBoundary } from "react-error-boundary";
 
 import { TaipyContext } from "../context/taipyContext";
 import {
@@ -27,6 +27,7 @@ import UIBlocker from "./Taipy/UIBlocker";
 import Navigate from "./Taipy/Navigate";
 import Menu from "./Taipy/Menu";
 import GuiDownload from "./Taipy/GuiDownload";
+import ErrorFallback from "../utils/ErrorBoundary";
 
 interface AxiosRouter {
     router: string;
@@ -34,7 +35,7 @@ interface AxiosRouter {
     blockUI: boolean;
 }
 
-const mainSx = { flexGrow: 1, bgcolor: "background.default"};
+const mainSx = { flexGrow: 1, bgcolor: "background.default" };
 const containerSx = { display: "flex" };
 
 const Router = () => {
@@ -55,7 +56,7 @@ const Router = () => {
         }
         // Fetch Flask Rendered JSX React Router
         axios
-            .get<AxiosRouter>("/taipy-init", {params: {client_id:state.id || "", v: window.taipyVersion}})
+            .get<AxiosRouter>("/taipy-init", { params: { client_id: state.id || "", v: window.taipyVersion } })
             .then((result) => {
                 setJSX(result.data.router);
                 dispatch(createSetLocationsAction(result.data.locations));
@@ -81,19 +82,25 @@ const Router = () => {
                             <BrowserRouter>
                                 <Box style={containerSx} className={themeClass}>
                                     <CssBaseline />
-                                    <Menu {...state.menu} />
+                                    <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                        <Menu {...state.menu} />
+                                    </ErrorBoundary>
                                     <Box component="main" sx={mainSx}>
-                                        <JsxParser
-                                            disableKeyGeneration={true}
-                                            components={JSXReactRouterComponents as Record<string, ComponentType>}
-                                            jsx={JSX}
-                                        />
+                                        <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                            <JsxParser
+                                                disableKeyGeneration={true}
+                                                components={JSXReactRouterComponents as Record<string, ComponentType>}
+                                                jsx={JSX}
+                                            />
+                                        </ErrorBoundary>
                                     </Box>
                                 </Box>
-                                <Alert alert={state.alert} />
-                                <UIBlocker block={state.block} />
-                                <Navigate to={state.to} />
-                                <GuiDownload download={state.download} />
+                                <ErrorBoundary FallbackComponent={ErrorFallback}>
+                                    <Alert alert={state.alert} />
+                                    <UIBlocker block={state.block} />
+                                    <Navigate to={state.to} />
+                                    <GuiDownload download={state.download} />
+                                </ErrorBoundary>
                             </BrowserRouter>
                         </LocalizationProvider>
                     </SnackbarProvider>
