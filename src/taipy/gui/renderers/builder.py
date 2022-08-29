@@ -782,7 +782,8 @@ class _Builder:
         if value := self.__attributes.get(var_name):
             if _is_boolean_true(value):
                 return self.__set_react_attribute(_to_camel_case(var_name), True)
-            return self.__set_dict_attribute(var_name)
+            elif isinstance(value, (dict, _MapDict)):
+                return self.__set_dict_attribute(var_name)
         return self
 
     def set_partial(self):

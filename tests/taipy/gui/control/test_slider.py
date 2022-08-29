@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import inspect
 from taipy.gui import Gui
 
 
@@ -28,6 +29,22 @@ def test_slider_with_min_max(gui: Gui, test_client, helpers):
     gui._bind_var_val("x", 0)
     md_string = "<|{x}|slider|min=-10|max=10|>"
     expected_list = ["<Slider", "min={-10.0}", "max={10.0}", "defaultValue={0}"]
+    helpers.test_control_md(gui, md_string, expected_list)
+
+
+def test_slider_with_dict_labels_md(gui: Gui, helpers):
+    sel = "Item 1"
+    labels = {"Item 1": "Label Start", "Item 3": "Label End"}
+    gui._set_frame(inspect.currentframe())
+    md_string = "<|{sel}|slider|lov=Item 1;Item 2;Item 3|labels={labels}|>"
+    expected_list = ["<Slider", 'labels="{&quot;Item 1&quot;: &quot;Label Start&quot;, &quot;Item 3&quot;: &quot;Label End&quot;}"']
+    helpers.test_control_md(gui, md_string, expected_list)
+
+def test_slider_with_boolean_labels_md(gui: Gui, helpers):
+    sel = "Item 1"
+    gui._set_frame(inspect.currentframe())
+    md_string = "<|{sel}|slider|lov=Item 1;Item 2;Item 3|labels|>"
+    expected_list = ["<Slider", "labels={true}"]
     helpers.test_control_md(gui, md_string, expected_list)
 
 
