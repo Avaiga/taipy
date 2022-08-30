@@ -78,18 +78,19 @@ class ExcelDataNode(DataNode):
             raise MissingRequiredProperty(
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
-        if self.__SHEET_NAME_PROPERTY not in properties.keys():
-            properties[self.__SHEET_NAME_PROPERTY] = None
-        if self.__HAS_HEADER_PROPERTY not in properties.keys():
-            properties[self.__HAS_HEADER_PROPERTY] = True
-        if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
-            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties, config_id)
 
         self._path = properties.get(self.__PATH_KEY, properties.get(self.__DEFAULT_PATH_KEY))
         if self._path is None:
             raise MissingRequiredProperty("default_path is required in a Excel data node config")
         else:
             properties[self.__PATH_KEY] = self._path
+
+        if self.__SHEET_NAME_PROPERTY not in properties.keys():
+            properties[self.__SHEET_NAME_PROPERTY] = None
+        if self.__HAS_HEADER_PROPERTY not in properties.keys():
+            properties[self.__HAS_HEADER_PROPERTY] = True
+        if self.__EXPOSED_TYPE_PROPERTY in properties.keys():
+            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__exposed_types_to_dict(properties, config_id)
 
         super().__init__(
             config_id,
