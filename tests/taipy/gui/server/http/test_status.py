@@ -10,8 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
-from flask import g
+
 import pytest
+from flask import g
 
 from taipy.gui import Gui
 
@@ -29,6 +30,7 @@ def test_get_status(gui: Gui):
     assert "user_status" in gui, f"json.gui has no key user_status"
     assert gui.get("user_status") == "", f"json.gui.user_status is not empty"
 
+
 def test_get_extended_status(gui: Gui):
     gui.run(run_server=False, extended_status=True)
     flask_client = gui._server.test_client()
@@ -45,10 +47,12 @@ def test_get_extended_status(gui: Gui):
     assert "user_status" in gui, f"json.gui has no key user_status"
     assert gui.get("user_status") == "", f"json.gui.user_status is not empty"
 
+
 def test_get_status_with_user_status(gui: Gui):
     user_status = "user_status"
+
     def on_status(state):
-        return user_status 
+        return user_status
 
     gui._set_frame(inspect.currentframe())
 

@@ -10,6 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import inspect
+
 from taipy.gui import Gui
 
 
@@ -37,8 +38,12 @@ def test_slider_with_dict_labels_md(gui: Gui, helpers):
     labels = {"Item 1": "Label Start", "Item 3": "Label End"}
     gui._set_frame(inspect.currentframe())
     md_string = "<|{sel}|slider|lov=Item 1;Item 2;Item 3|labels={labels}|>"
-    expected_list = ["<Slider", 'labels="{&quot;Item 1&quot;: &quot;Label Start&quot;, &quot;Item 3&quot;: &quot;Label End&quot;}"']
+    expected_list = [
+        "<Slider",
+        'labels="{&quot;Item 1&quot;: &quot;Label Start&quot;, &quot;Item 3&quot;: &quot;Label End&quot;}"',
+    ]
     helpers.test_control_md(gui, md_string, expected_list)
+
 
 def test_slider_with_boolean_labels_md(gui: Gui, helpers):
     sel = "Item 1"

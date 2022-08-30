@@ -28,7 +28,11 @@ class ElementAttribute:
     """
 
     def __init__(
-        self, name: str, attribute_type: PropertyType, default_value: t.Optional[t.Any] = None, js_name: t.Optional[str] = None
+        self,
+        name: str,
+        attribute_type: PropertyType,
+        default_value: t.Optional[t.Any] = None,
+        js_name: t.Optional[str] = None,
     ) -> None:
         self.name = name
         self.attribute_type = attribute_type
@@ -110,14 +114,14 @@ class Element:
                 attributes=properties,
                 hash_names=hash_names,
                 lib_name=lib_name,
-                default_value=default_value
+                default_value=default_value,
             )
             if default_attr is not None:
                 elt_built.set_value_and_default(
                     var_name=default_attr.name,
                     var_type=default_attr.attribute_type,
                     default_val=default_attr.default_value,
-                    with_default=default_attr.attribute_type != PropertyType.data
+                    with_default=default_attr.attribute_type != PropertyType.data,
                 )
             elt_built.set_attributes(attrs)
             return elt_built.build_to_string() if is_html else elt_built.el
@@ -125,7 +129,11 @@ class Element:
             return res
 
     def render(
-        self, gui: "Gui", properties: t.Dict[str, t.Any], hash_names: t.Dict[str, str], is_html: t.Optional[bool] = False
+        self,
+        gui: "Gui",
+        properties: t.Dict[str, t.Any],
+        hash_names: t.Dict[str, str],
+        is_html: t.Optional[bool] = False,
     ) -> t.Union[None, t.Any, t.Tuple[str, str]]:
         """
         TODO

@@ -34,7 +34,7 @@ repos:
         - --license-filepath
         - .license-header
     -   id: insert-license
-        files: \.(js|css)$
+        files: \.(js|css|ts|tsx)$
         args:
         - --license-filepath
         - .license-header
