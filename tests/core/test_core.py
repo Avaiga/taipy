@@ -35,7 +35,7 @@ def test_run_core_as_a_service():
     assert isinstance(core._dispatcher, _DevelopmentJobDispatcher)
     assert isinstance(_SchedulerFactory._dispatcher, _DevelopmentJobDispatcher)
 
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     core.run()
     assert core._dispatcher is not None
     assert isinstance(core._dispatcher, _StandaloneJobDispatcher)

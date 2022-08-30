@@ -25,17 +25,17 @@ class TestJobConfigChecker:
 
         Config.configure_data_node(id="foo", storage_type="in_memory")
 
-        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE, nb_of_workers=2)
+        Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE, max_nb_of_workers=2)
         collector = IssueCollector()
         _JobConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
 
-        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
         collector = IssueCollector()
         _JobConfigChecker(config, collector)._check()
         assert len(collector.errors) == 1
 
-        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+        Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
         collector = IssueCollector()
         _JobConfigChecker(config, collector)._check()
         assert len(collector.errors) == 1

@@ -25,7 +25,7 @@ class _StandaloneJobDispatcher(_JobDispatcher):
 
     def __init__(self, scheduler: _AbstractScheduler):
         super().__init__(scheduler)
-        self._executor = ProcessPoolExecutor(Config.job_config.nb_of_workers or 1)  # type: ignore
+        self._executor = ProcessPoolExecutor(Config.job_config.max_nb_of_workers or 1)  # type: ignore
         self._nb_available_workers = self._executor._max_workers  # type: ignore
 
     def _dispatch(self, job: Job):
