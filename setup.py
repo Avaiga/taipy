@@ -40,7 +40,6 @@ requirements = [
     "simple-websocket>=0.3,<0.6",
     "tzlocal>=3.0,<5.0",
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
-    "flask-talisman>=1.0,<2.0",
     "gevent>=21.12.0,<22.0",
     "gevent-websocket>=0.10.1,<0.11",
     "kthread>=0.2.3,<0.3",

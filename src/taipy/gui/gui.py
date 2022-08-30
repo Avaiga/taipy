@@ -1490,8 +1490,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                content_security_policy=self._get_config("content_security_policy", None),
-                force_https=self._get_config("force_https", False),
                 async_mode=async_mode,
             )
 
@@ -1504,8 +1502,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                content_security_policy=self._get_config("content_security_policy", None),
-                force_https=self._get_config("force_https", False),
                 async_mode=async_mode,
             )
             self._bindings()._new_scopes()

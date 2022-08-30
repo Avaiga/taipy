@@ -24,7 +24,6 @@ import __main__
 from flask import Blueprint, Flask, json, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 from flask_socketio import SocketIO
-from flask_talisman import Talisman
 from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
@@ -48,8 +47,6 @@ class _Server:
         flask: t.Optional[Flask] = None,
         css_file: str = "",
         path_mapping: t.Optional[dict] = {},
-        content_security_policy: t.Optional[dict] = None,
-        force_https: bool = False,
         async_mode: t.Optional[str] = None,
     ):
         self._gui = gui
@@ -65,9 +62,6 @@ class _Server:
         )
 
         CORS(self._flask)
-
-        if force_https or content_security_policy:
-            Talisman(self._flask, content_security_policy=content_security_policy, force_https=force_https)
 
         self.__path_mapping = path_mapping
 
