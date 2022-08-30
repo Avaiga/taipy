@@ -26,7 +26,9 @@ from types import FrameType
 import __main__
 import markdown as md_lib
 import tzlocal
-from flask import Blueprint, Flask, g, jsonify, request, send_file, send_from_directory, render_template, __version__ as flask_version  # type: ignore
+from flask import Blueprint, Flask
+from flask import __version__ as flask_version  # type: ignore
+from flask import g, jsonify, render_template, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):
@@ -71,11 +73,11 @@ from .utils import (
     _TaipyLovValue,
     _variable_decode,
 )
-from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 from .utils._adapter import _Adapter
 from .utils._bindings import _Bindings
 from .utils._evaluator import _Evaluator
 from .utils._variable_directory import _RE_TPMDL_DECODE, _VariableDirectory
+from .utils.types import _HOLDER_PREFIX, _HOLDER_PREFIXES
 
 
 class Gui:
@@ -445,12 +447,12 @@ class Gui:
         if var_name.startswith(_HOLDER_PREFIX):
             for hp in _HOLDER_PREFIXES:
                 if var_name.startswith(hp):
-                    var_name = var_name[len(hp):]
+                    var_name = var_name[len(hp) :]
                     break
         suffix_var_name = ""
         if "." in var_name:
             first_dot_index = var_name.index(".")
-            suffix_var_name = var_name[first_dot_index + 1:]
+            suffix_var_name = var_name[first_dot_index + 1 :]
             var_name = var_name[:first_dot_index]
         var_name_decode, module_name = _variable_decode(self._get_expr_from_hash(var_name))
         current_context = self._get_locals_context()
@@ -527,10 +529,14 @@ class Gui:
     def _serve_status(self, template: pathlib.Path) -> t.Dict[str, t.Dict[str, str]]:
         base_json = {"user_status": str(self.__call_on_status() or "")}
         if self._get_config("extended_status", False):
-            base_json.update({"flask_version": str(flask_version or ""),
-                              "backend_version": self.__get_version(),
-                              "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
-                              "python_version": sys.version, })
+            base_json.update(
+                {
+                    "flask_version": str(flask_version or ""),
+                    "backend_version": self.__get_version(),
+                    "host": f'{self._get_config("host", "localhost")}:{self._get_config("port", "default")}',
+                    "python_version": sys.version,
+                }
+            )
             try:
                 base_json.update(json.loads(template.read_text()))
             except Exception as e:
@@ -652,7 +658,8 @@ class Gui:
                             ret_payload = lib.get_data(lib_name, payload, var_name, newvalue)
                         except Exception as e:
                             warnings.warn(
-                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}")
+                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}"
+                            )
             if not isinstance(ret_payload, dict):
                 ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
             self.__send_ws_update_with_dict({var_name: ret_payload})
@@ -1483,8 +1490,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                content_security_policy=self._get_config("content_security_policy", None),
-                force_https=self._get_config("force_https", False),
                 async_mode=async_mode,
             )
 
@@ -1497,8 +1502,6 @@ class Gui:
                 path_mapping=self._path_mapping,
                 flask=self._flask,
                 css_file=self._css_file,
-                content_security_policy=self._get_config("content_security_policy", None),
-                force_https=self._get_config("force_https", False),
                 async_mode=async_mode,
             )
             self._bindings()._new_scopes()
