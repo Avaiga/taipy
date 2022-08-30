@@ -40,10 +40,10 @@ class MyLibrary(ElementLibrary):
         return []
 
     def get_styles(self) -> t.List[str]:
-        return None
+        return []
 
     def get_resource(self, name: str) -> Path:
-        return None
+        return Path(name)
 
     def get_register_js_function(self) -> str:
         return "testRegister"
@@ -67,7 +67,7 @@ def test_lib_input_md(gui: Gui, test_client, helpers):
 
 
 def test_lib_input_html_1(gui: Gui, test_client, helpers):
-    val = ""
+    val = ""  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = '<testlib:testinput value="{val}" multiline="true" />'
     expected_list = ["<Input", "multiline={true}", 'defaultValue=""', "value={tpec_TpExPr_val_TPMDL_0}"]
@@ -75,7 +75,7 @@ def test_lib_input_html_1(gui: Gui, test_client, helpers):
 
 
 def test_lib_input_html_2(gui: Gui, test_client, helpers):
-    val = ""
+    val = ""  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = '<testlib:testinput multiline="true">{val}</testlib:testinput>'
     expected_list = ["<Input", "multiline={true}", 'defaultValue=""', "value={tpec_TpExPr_val_TPMDL_0}"]

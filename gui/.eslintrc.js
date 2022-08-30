@@ -19,7 +19,8 @@ module.exports =  {
     ],
     plugins: [
       "@typescript-eslint",
-      "react-hooks"
+      "react-hooks",
+      "eslint-plugin-tsdoc"
     ],
     parserOptions:  {
       ecmaVersion:  2018,  // Allows for the parsing of modern ECMAScript features
@@ -33,7 +34,8 @@ module.exports =  {
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
-      "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies
+      "react-hooks/exhaustive-deps": "error", // Checks effect dependencies
+      "tsdoc/syntax": "off", // "warn" to check tsdoc syntax
     },
     settings:  {
       react:  {

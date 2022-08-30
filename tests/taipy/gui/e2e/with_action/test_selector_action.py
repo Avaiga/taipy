@@ -26,7 +26,7 @@ def test_selector_action(page: "Page", gui: Gui, helpers):
     page_md = """
 <|{x}|selector|lov=Item 1;Item 2;Item 3|id=selector1|>
 """
-    x = "Item 1"
+    x = "Item 1"  # noqa: F841
 
     def on_init(state: State):
         assert state.x == "Item 1"

@@ -28,7 +28,7 @@ def test_unbind_variable_in_expression(gui: Gui):
 
 
 def test_evaluate_same_expression_multiple_times(gui: Gui):
-    x = 10
+    x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
@@ -38,7 +38,7 @@ def test_evaluate_same_expression_multiple_times(gui: Gui):
 
 
 def test_evaluate_expressions_same_variable(gui: Gui):
-    x = 10
+    x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
     with gui.get_flask_app().app_context():
@@ -48,10 +48,10 @@ def test_evaluate_expressions_same_variable(gui: Gui):
 
 
 def test_evaluate_holder(gui: Gui, test_client):
-    x = 10
+    x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
-    with warnings.catch_warnings(record=True) as w:
+    with warnings.catch_warnings(record=True):
         with gui.get_flask_app().app_context():
             gui._evaluate_expr("{x + 10}")
             hash = gui._evaluate_bind_holder(_TaipyNumber, "TpExPr_x + 10_TPMDL_0")

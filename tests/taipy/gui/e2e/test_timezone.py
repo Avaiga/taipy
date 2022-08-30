@@ -50,7 +50,7 @@ def _timezone_test_template(page: "Page", gui: Gui, helpers, time_zone, text):
     page_md = """
 <|{t}|id=text1|>
 """
-    t = _ISO_to_date("2022-03-03T00:00:00.000Z")
+    t = _ISO_to_date("2022-03-03T00:00:00.000Z")  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui, time_zone=time_zone)

@@ -20,7 +20,7 @@ def test_invoke_state_callback(gui: Gui, helpers):
     name = "World!"  # noqa: F841
     btn_id = "button1"  # noqa: F841
 
-    val = 1
+    val = 1  # noqa: F841
 
     def user_callback(state: State):
         state.val = 10

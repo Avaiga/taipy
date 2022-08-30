@@ -17,7 +17,7 @@ from taipy.gui import Gui, Markdown
 
 
 def test_state(gui: Gui):
-    a = 10
+    a = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
     state = gui._Gui__state

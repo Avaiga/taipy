@@ -24,11 +24,11 @@ def test_get_status(gui: Gui):
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
     assert ret.json, "json is not defined"
-    assert "gui" in ret.json, f"json has no key gui"
+    assert "gui" in ret.json, "json has no key gui"
     gui = ret.json.get("gui")
-    assert isinstance(gui, dict), f"json.gui is not a dict"
-    assert "user_status" in gui, f"json.gui has no key user_status"
-    assert gui.get("user_status") == "", f"json.gui.user_status is not empty"
+    assert isinstance(gui, dict), "json.gui is not a dict"
+    assert "user_status" in gui, "json.gui has no key user_status"
+    assert gui.get("user_status") == "", "json.gui.user_status is not empty"
 
 
 def test_get_extended_status(gui: Gui):
@@ -39,13 +39,13 @@ def test_get_extended_status(gui: Gui):
     assert ret.mimetype == "application/json", f"mimetype => {ret.mimetype} != application/json"
     assert ret.json, "json is not defined"
     gui = ret.json.get("gui")
-    assert "backend_version" in gui, f"json.gui has no key backend_version"
-    assert "flask_version" in gui, f"json.gui has no key flask_version"
-    assert "frontend_version" in gui, f"json.gui has no key frontend_version"
-    assert "host" in gui, f"json.gui has no key host"
-    assert "python_version" in gui, f"json.gui has no key python_version"
-    assert "user_status" in gui, f"json.gui has no key user_status"
-    assert gui.get("user_status") == "", f"json.gui.user_status is not empty"
+    assert "backend_version" in gui, "json.gui has no key backend_version"
+    assert "flask_version" in gui, "json.gui has no key flask_version"
+    assert "frontend_version" in gui, "json.gui has no key frontend_version"
+    assert "host" in gui, "json.gui has no key host"
+    assert "python_version" in gui, "json.gui has no key python_version"
+    assert "user_status" in gui, "json.gui has no key user_status"
+    assert gui.get("user_status") == "", "json.gui.user_status is not empty"
 
 
 def test_get_status_with_user_status(gui: Gui):
@@ -62,5 +62,5 @@ def test_get_status_with_user_status(gui: Gui):
     assert ret.status_code == 200, f"status_code => {ret.status_code} != 200"
     assert ret.json, "json is not defined"
     gui = ret.json.get("gui")
-    assert "user_status" in gui, f"json.gui has no key user_status"
+    assert "user_status" in gui, "json.gui has no key user_status"
     assert gui.get("user_status") == user_status, f'json.gui.user_status => {gui.get("user_status")} != {user_status}'

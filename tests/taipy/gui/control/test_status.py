@@ -15,7 +15,7 @@ from taipy.gui import Gui
 
 
 def test_status_md(gui: Gui, helpers):
-    status = [{"status": "info", "message": "Info Message"}]
+    status = [{"status": "info", "message": "Info Message"}]  # noqa: F841
     md_string = "<|{status}|status|>"
     expected_list = [
         "<Status",
@@ -27,7 +27,7 @@ def test_status_md(gui: Gui, helpers):
 
 
 def test_status_html(gui: Gui, helpers):
-    status = [{"status": "info", "message": "Info Message"}]
+    status = [{"status": "info", "message": "Info Message"}]  # noqa: F841
     html_string = '<taipy:status value="{status}" />'
     expected_list = [
         "<Status",

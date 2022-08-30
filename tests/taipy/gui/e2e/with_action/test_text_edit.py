@@ -28,7 +28,7 @@ def test_text_edit(page: "Page", gui: Gui, helpers):
 
 <|{x}|input|id=input1|>
 """
-    x = "Hey"
+    x = "Hey"  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
@@ -58,7 +58,7 @@ def test_number_edit(page: "Page", gui: Gui, helpers):
 <|{x}|number|id=number1|>
 
 """
-    x = 10
+    x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)

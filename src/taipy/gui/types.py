@@ -45,6 +45,11 @@ NumberTypes = {"int", "int64", "float", "float64"}
 
 
 class PropertyType(Enum):
+    """
+    TODO
+    The enumn describes the possible element attribute types.
+    """
+
     boolean = "boolean"
     content = _TaipyContent
     data = _TaipyData

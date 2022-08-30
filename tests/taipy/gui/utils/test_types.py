@@ -27,14 +27,14 @@ def test_taipy_base():
 
 
 def test_taipy_bool():
-    assert _TaipyBool(0, "v").get() == False
-    assert _TaipyBool(1, "v").get() == True
-    assert _TaipyBool(False, "v").get() == False
-    assert _TaipyBool(True, "v").get() == True
-    assert _TaipyBool("", "v").get() == False
-    assert _TaipyBool("hey", "v").get() == True
-    assert _TaipyBool([], "v").get() == False
-    assert _TaipyBool(["an item"], "v").get() == True
+    assert _TaipyBool(0, "v").get() is False
+    assert _TaipyBool(1, "v").get() is True
+    assert _TaipyBool(False, "v").get() is False
+    assert _TaipyBool(True, "v").get() is True
+    assert _TaipyBool("", "v").get() is False
+    assert _TaipyBool("hey", "v").get() is True
+    assert _TaipyBool([], "v").get() is False
+    assert _TaipyBool(["an item"], "v").get() is True
 
 
 def test_taipy_number():

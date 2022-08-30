@@ -22,7 +22,7 @@ from taipy.gui import Gui
 
 @pytest.mark.teste2e
 def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
-    table_data = csvdata
+    table_data = csvdata  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.add_page(
         name="test",
@@ -38,7 +38,7 @@ def test_accessor_json(page: "Page", gui: Gui, csvdata, helpers):
 @pytest.mark.teste2e
 def test_accessor_arrow(page: "Page", gui: Gui, csvdata, helpers):
     if util.find_spec("pyarrow"):
-        table_data = csvdata
+        table_data = csvdata  # noqa: F841
         gui._set_frame(inspect.currentframe())
         gui.add_page(
             name="test",
