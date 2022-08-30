@@ -447,7 +447,7 @@ class _Factory:
                 ("nan_value",),
                 ("filter", PropertyType.boolean),
                 ("hover_text", PropertyType.dynamic_string),
-                ("size",)
+                ("size",),
             ]
         )
         .set_propagate()
@@ -509,7 +509,7 @@ class _Factory:
                 ("on_change", PropertyType.function),
                 ("select_leafs_only", PropertyType.boolean),
                 ("row_height", PropertyType.string),
-                ("lov", PropertyType.lov)
+                ("lov", PropertyType.lov),
             ]
         )
         .set_propagate(),

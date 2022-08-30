@@ -44,7 +44,7 @@ module.exports = (env, options) => {
     return [{
             mode: options.mode, //'development', //'production',
             name: reactBundleName,
-            entry: ["react", "react-dom", 
+            entry: ["react", "react-dom",
             "@emotion/react","@emotion/styled",
             "@mui/icons-material","@mui/lab","@mui/material","@mui/x-date-pickers"],
             output: {
@@ -54,7 +54,7 @@ module.exports = (env, options) => {
             },
             plugins: [
                 new webpack.DllPlugin({
-                    name: reactBundleName, 
+                    name: reactBundleName,
                     path: reactManifestPath
                 })
             ]
@@ -134,7 +134,7 @@ module.exports = (env, options) => {
                     },
                 ]
             },
-    
+
             plugins: [
                 new CopyWebpackPlugin({
                     patterns: [

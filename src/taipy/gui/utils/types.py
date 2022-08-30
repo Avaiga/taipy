@@ -129,5 +129,6 @@ class _TaipyContentImage(_TaipyBase):
     def get_hash():
         return _HOLDER_PREFIX + "Ci"
 
+
 _HOLDER_PREFIX = "_Tp"
 _HOLDER_PREFIXES = [cls.get_hash() + "_" for cls in _TaipyBase.__subclasses__()]
