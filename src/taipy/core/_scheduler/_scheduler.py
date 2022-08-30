@@ -155,11 +155,12 @@ class _Scheduler(_AbstractScheduler):
 
         start = datetime.now()
         jobs = jobs if isinstance(jobs, Iterable) else [jobs]
+        index = 0
 
-        while __check_if_timeout(start, timeout) and jobs:
+        while __check_if_timeout(start, timeout) and index < len(jobs):
             try:
-                if jobs[0]._is_finished():
-                    jobs.pop(0)
+                if jobs[index]._is_finished():
+                    index = index + 1
                 else:
                     sleep(0.5)  # Limit CPU usage
 
