@@ -12,6 +12,7 @@
 from importlib import util
 from unittest import mock
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -196,19 +197,25 @@ class TestSQLDataNode:
         assert len(data_2) == 0
 
     @pytest.mark.parametrize(
-        "data",
+        "data,written_data,called_func",
         [
-            pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}]),
-            [{"a": 1, "b": 2}, {"a": 3, "b": 4}],
-            {"a": 1, "b": 2},
-            [(1, 2), (3, 4)],
-            (1, 2),
-            [1, 2, 3, 4],
-            "foo",
-            None,
+            (pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}]), [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "_insert_dicts"),
+            ([{"a": 1, "b": 2}, {"a": 3, "b": 4}], [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "_insert_dicts"),
+            ({"a": 1, "b": 2}, [{"a": 1, "b": 2}], "_insert_dicts"),
+            ([(1, 2), (3, 4)], [(1, 2), (3, 4)], "_insert_tuples"),
+            ([[1, 2], [3, 4]], [[1, 2], [3, 4]], "_insert_tuples"),
+            ((1, 2), [(1, 2)], "_insert_tuples"),
+            ([1, 2, 3, 4], [(1,), (2,), (3,), (4,)], "_insert_tuples"),
+            ("foo", [("foo",)], "_insert_tuples"),
+            (None, [(None,)], "_insert_tuples"),
+            (np.array([1, 2, 3, 4]), [(1,), (2,), (3,), (4,)], "_insert_tuples"),
+            (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "_insert_tuples"),
+            ([], None, None),
+            (pd.DataFrame([]), None, None),
+            (np.array([]), None, None),
         ],
     )
-    def test_write(self, data):
+    def test_write(self, data, written_data, called_func):
         dn = SQLDataNode(
             "foo",
             Scope.PIPELINE,
@@ -233,8 +240,28 @@ class TestSQLDataNode:
             },
         )
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+            "src.taipy.core.data.sql.SQLDataNode._create_table"
+        ) as create_table_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
-            dn._write(data)
-            dn2._write(data)
+
+            # Test write empty list
+            if called_func is None:
+                with mock.patch("src.taipy.core.data.sql.SQLDataNode._insert_dicts") as insert_dicts_mock, mock.patch(
+                    "src.taipy.core.data.sql.SQLDataNode._insert_tuples"
+                ) as insert_tuples_mock:
+                    dn._write(data)
+                    dn2._write(data)
+                    insert_dicts_mock.assert_not_called()
+                    insert_tuples_mock.assert_not_called()
+                    engine_mock.assert_not_called()
+                    create_table_mock.assert_not_called()
+                return
+
+            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as insert_mock:
+                dn._write(data)
+                insert_mock.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
+            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as insert_mock:
+                dn2._write(data)
+                insert_mock.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)

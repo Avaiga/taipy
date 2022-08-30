@@ -13,11 +13,11 @@ import os
 import re
 import urllib.parse
 from datetime import datetime, timedelta
-from typing import Any, Collection, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import create_engine, table, text
+from sqlalchemy import MetaData, Table, create_engine, text
 
 from taipy.config.common.scope import Scope
 from ..common.alias import DataNodeId, JobId
@@ -164,33 +164,41 @@ class SQLDataNode(DataNode):
             return pd.read_sql_query(self.read_query, con=self.__engine())[columns]
         return pd.read_sql_query(self.read_query, con=self.__engine())
 
+    def _create_table(self, engine) -> Table:
+        return Table(
+            self.write_table,
+            MetaData(),
+            autoload=True,
+            autoload_with=engine,
+        )
+
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database."""
-        with self.__engine().connect() as connection:
-            write_table = table(self.write_table)
-            if isinstance(data, pd.DataFrame):
-                self.__insert_dicts(data.to_dict(orient="records"), write_table, connection)
-            elif isinstance(data, dict):
-                self.__insert_dicts([data], write_table, connection)
-            elif isinstance(data, tuple):
-                self.__insert_tuples([data], write_table, connection)
-            elif isinstance(data, list) or isinstance(data, np.ndarray):
-                if isinstance(data[0], tuple):
-                    self.__insert_tuples(data, write_table, connection)
-                elif isinstance(data[0], dict):
-                    self.__insert_dicts(data, write_table, connection)
-                else:
-                    self.__insert_list(data, write_table, connection)
-                    return
+
+        engine = self.__engine()
+
+        if isinstance(data, pd.DataFrame):
+            data = data.to_dict(orient="records")
+        elif isinstance(data, np.ndarray):
+            data = data.tolist()
+        if not isinstance(data, list):
+            data = [data]
+        if len(data) == 0:
+            return
+        with engine.connect() as connection:
+            table = self._create_table(engine)
+            if isinstance(data[0], (tuple, list)):
+                self._insert_tuples(data, table, connection)
+            elif isinstance(data[0], dict):
+                self._insert_dicts(data, table, connection)
+            # If data is a primitive type, it will be inserted as a tuple of one element.
             else:
-                # if data is a single primitive value (int, str, etc), pass it as a list of tuples
-                # with only one value
-                self.__insert_tuples([(data,)], write_table, connection)
+                self._insert_tuples([(x,) for x in data], table, connection)
 
     @staticmethod
-    def __insert_list(data: Collection[List], write_table: Any, connection: Any) -> None:
+    def _insert_tuples(data: List[Union[Tuple, List]], write_table: Any, connection: Any) -> None:
         """
-        :param data: a list of values
+        :param data: a list of tuples or lists
         :param write_table: a SQLAlchemy object that represents a table
         :param connection: a SQLAlchemy connection to write the data
 
@@ -200,35 +208,9 @@ class SQLDataNode(DataNode):
         """
         with connection.begin() as transaction:
             try:
-                markers = ",".join(["(?)"] * len(data))
-                markers = markers
-                ins = "INSERT INTO {tablename} VALUES {markers}"
-                ins = ins.format(tablename=write_table.name, markers=markers)
-                connection.execute(ins, list(data))
-            except:
-                transaction.rollback()
-                raise
-            else:
-                transaction.commit()
-
-    @staticmethod
-    def __insert_tuples(data: Collection[Tuple], write_table: Any, connection: Any) -> None:
-        """
-        :param data: a list of tuples
-        :param write_table: a SQLAlchemy object that represents a table
-        :param connection: a SQLAlchemy connection to write the data
-
-        This method will lookup the length of the first object of the list and build the insert through
-        creation of a string of '?' equivalent to the length of the element. The '?' character is used as
-        placeholder for a tuple of same size.
-        """
-        with connection.begin() as transaction:
-            try:
-                markers = ",".join([f'({",".join("?" * len(data[0]))})'] * len(data))  # type: ignore
-                markers = markers
+                markers = ",".join("?" * len(data[0]))
                 ins = "INSERT INTO {tablename} VALUES ({markers})"
                 ins = ins.format(tablename=write_table.name, markers=markers)
-
                 connection.execute(ins, data)
             except:
                 transaction.rollback()
@@ -237,9 +219,9 @@ class SQLDataNode(DataNode):
                 transaction.commit()
 
     @staticmethod
-    def __insert_dicts(data: Collection[Dict], write_table: Any, connection: Any) -> None:
+    def _insert_dicts(data: List[Dict], write_table: Any, connection: Any) -> None:
         """
-        :param data: a list of tuples
+        :param data: a list of dictionaries
         :param write_table: a SQLAlchemy object that represents a table
         :param connection: a SQLAlchemy connection to write the data
 
