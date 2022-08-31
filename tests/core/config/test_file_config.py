@@ -28,7 +28,7 @@ clean_entities_enabled = "True:bool"
 
 [JOB]
 mode = "standalone"
-nb_of_workers = "2:int"
+max_nb_of_workers = "2:int"
 
 [DATA_NODE.default]
 storage_type = "in_memory"
@@ -90,7 +90,7 @@ owner = "Raymond Kopa"
         os.environ, {"FOO": "in_memory", "QUX": "qux", "QUUZ": "true", "GARPLY": "garply", "WALDO": "17"}
     ):
         Config.configure_global_app(clean_entities_enabled=True)
-        Config.configure_job_executions(mode="standalone", nb_of_workers=2)
+        Config.configure_job_executions(mode="standalone", max_nb_of_workers=2)
         Config.configure_default_data_node(storage_type="in_memory", custom="default_custom_prop")
         dn1_cfg_v2 = Config.configure_data_node(
             "dn1", storage_type="pickle", scope=Scope.PIPELINE, default_data="dn1", custom="custom property"

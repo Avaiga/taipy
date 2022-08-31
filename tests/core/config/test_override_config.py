@@ -26,14 +26,14 @@ def test_override_default_configuration_with_code_configuration():
     assert len(Config.pipelines) == 1
     assert len(Config.scenarios) == 1
 
-    Config.configure_job_executions(nb_of_workers=-1)
+    Config.configure_job_executions(max_nb_of_workers=-1)
     Config.configure_global_app(root_folder="foo")
     foo_config = Config.configure_data_node("foo", "in_memory")
     bar_config = Config.configure_task("bar", print, [foo_config], [])
     baz_config = Config.configure_pipeline("baz", [bar_config])
     qux_config = Config.configure_scenario("qux", [baz_config])
 
-    assert Config.job_config.nb_of_workers == -1
+    assert Config.job_config.max_nb_of_workers == -1
     assert Config.global_config.root_folder == "foo"
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
@@ -85,7 +85,7 @@ def test_override_default_configuration_with_file_configuration():
 clean_entities_enabled = true
 
 [JOB]
-nb_of_workers = -1
+max_nb_of_workers = -1
 
 [DATA_NODE.foo]
 
@@ -97,7 +97,7 @@ nb_of_workers = -1
 """
     )
     Config.configure_global_app()
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.max_nb_of_workers == 1
     assert not Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 1
     assert len(Config.tasks) == 1
@@ -106,7 +106,7 @@ nb_of_workers = -1
 
     Config.load(tf.filename)
 
-    assert Config.job_config.nb_of_workers == -1
+    assert Config.job_config.max_nb_of_workers == -1
     assert Config.global_config.clean_entities_enabled
     assert len(Config.data_nodes) == 2
     assert "default" in Config.data_nodes
@@ -126,16 +126,16 @@ def test_override_default_config_with_file_config_including_env_variable_values(
     tf = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = "ENV[FOO]:int"
+max_nb_of_workers = "ENV[FOO]:int"
 start_executor = "ENV[BAR]"
 """
     )
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.max_nb_of_workers == 1
     assert not Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "6", "BAR": "TRUe"}):
         Config.load(tf.filename)
-        assert Config.job_config.nb_of_workers == 6
+        assert Config.job_config.max_nb_of_workers == 6
         assert Config.job_config.start_executor
 
     with mock.patch.dict(os.environ, {"FOO": "foo", "BAR": "true"}):
@@ -151,55 +151,55 @@ def test_code_configuration_do_not_override_file_configuration():
     config_from_filename = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = 2
+max_nb_of_workers = 2
     """
     )
     Config.load(config_from_filename.filename)
 
-    Config.configure_job_executions(nb_of_workers=21)
+    Config.configure_job_executions(max_nb_of_workers=21)
 
-    assert Config.job_config.nb_of_workers == 2  # From file config
+    assert Config.job_config.max_nb_of_workers == 2  # From file config
 
 
 def test_code_configuration_do_not_override_file_configuration_including_env_variable_values():
     config_from_filename = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = 2
+max_nb_of_workers = 2
     """
     )
     Config.load(config_from_filename.filename)
 
     with mock.patch.dict(os.environ, {"FOO": "21"}):
-        Config.configure_job_executions(nb_of_workers="ENV[FOO]")
-        assert Config.job_config.nb_of_workers == 2  # From file config
+        Config.configure_job_executions(max_nb_of_workers="ENV[FOO]")
+        assert Config.job_config.max_nb_of_workers == 2  # From file config
 
 
 def test_file_configuration_override_code_configuration():
     config_from_filename = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = 2
+max_nb_of_workers = 2
     """
     )
-    Config.configure_job_executions(nb_of_workers=21)
+    Config.configure_job_executions(max_nb_of_workers=21)
     Config.load(config_from_filename.filename)
 
-    assert Config.job_config.nb_of_workers == 2  # From file config
+    assert Config.job_config.max_nb_of_workers == 2  # From file config
 
 
 def test_file_configuration_override_code_configuration_including_env_variable_values():
     config_from_filename = NamedTemporaryFile(
         """
 [JOB]
-nb_of_workers = "ENV[FOO]:int"
+max_nb_of_workers = "ENV[FOO]:int"
     """
     )
-    Config.configure_job_executions(nb_of_workers=21)
+    Config.configure_job_executions(max_nb_of_workers=21)
 
     with mock.patch.dict(os.environ, {"FOO": "2"}):
         Config.load(config_from_filename.filename)
-        assert Config.job_config.nb_of_workers == 2  # From file config
+        assert Config.job_config.max_nb_of_workers == 2  # From file config
 
 
 def test_override_default_configuration_with_multiple_configurations():
@@ -211,7 +211,7 @@ has_header = true
 path = "/data/csv"
 
 [JOB]
-nb_of_workers = 10
+max_nb_of_workers = 10
 
 [TAIPY]
 clean_entities_enabled = false
@@ -220,19 +220,19 @@ clean_entities_enabled = false
 
     Config.configure_global_app()
     # Default config is applied
-    assert Config.job_config.nb_of_workers == 1
+    assert Config.job_config.max_nb_of_workers == 1
     assert Config.global_config.clean_entities_enabled is False
 
     # Code config is applied
-    Config.configure_job_executions(nb_of_workers=-1)
+    Config.configure_job_executions(max_nb_of_workers=-1)
     Config.configure_global_app(clean_entities_enabled=True)
     assert Config.global_config.clean_entities_enabled is True
-    assert Config.job_config.nb_of_workers == -1
+    assert Config.job_config.max_nb_of_workers == -1
 
     # File config is applied
     Config.load(file_config.filename)
     assert Config.global_config.clean_entities_enabled is False
-    assert Config.job_config.nb_of_workers == 10
+    assert Config.job_config.max_nb_of_workers == 10
     assert Config.data_nodes["my_datanode"].has_header
     assert Config.data_nodes["my_datanode"].path == "/data/csv"
     assert Config.data_nodes["my_datanode"].not_defined is None
@@ -247,7 +247,7 @@ has_header = true
 path = "ENV[FOO]"
 
 [JOB]
-nb_of_workers = 10
+max_nb_of_workers = 10
 
 [TAIPY]
 clean_entities_enabled = false
@@ -257,21 +257,21 @@ clean_entities_enabled = false
     Config.configure_global_app()
     with mock.patch.dict(os.environ, {"FOO": "/data/csv", "BAR": "/baz/data/csv"}):
         # Default config is applied
-        assert Config.job_config.nb_of_workers == 1
+        assert Config.job_config.max_nb_of_workers == 1
         assert Config.global_config.clean_entities_enabled is False
 
         # Code config is applied
-        Config.configure_job_executions(nb_of_workers=-1)
+        Config.configure_job_executions(max_nb_of_workers=-1)
         Config.configure_global_app(clean_entities_enabled=True)
         Config.configure_data_node("my_datanode", path="ENV[BAR]")
         assert Config.global_config.clean_entities_enabled is True
-        assert Config.job_config.nb_of_workers == -1
+        assert Config.job_config.max_nb_of_workers == -1
         assert Config.data_nodes["my_datanode"].path == "/baz/data/csv"
 
         # File config is applied
         Config.load(file_config.filename)
         assert Config.global_config.clean_entities_enabled is False
-        assert Config.job_config.nb_of_workers == 10
+        assert Config.job_config.max_nb_of_workers == 10
         assert Config.data_nodes["my_datanode"].has_header
         assert Config.data_nodes["my_datanode"].path == "/data/csv"
         assert Config.data_nodes["my_datanode"].not_defined is None

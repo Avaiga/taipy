@@ -227,7 +227,7 @@ def test_update_status_fail_job():
 
 
 def test_update_status_fail_job_in_parallel():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     dn_0 = InMemoryDataNode("dn_config_0", Scope.PIPELINE, properties={"default_data": 0})
@@ -257,7 +257,7 @@ def test_submit_task_in_parallel():
     m = multiprocessing.Manager()
     lock = m.Lock()
 
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     task = _create_task(partial(lock_multiply, lock))
@@ -283,7 +283,7 @@ def sleep_and_raise_error_fct(seconds):
 
 
 def test_submit_task_synchronously_in_parallel():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     sleep_period = 1
@@ -295,7 +295,7 @@ def test_submit_task_synchronously_in_parallel():
 
 
 def test_submit_fail_task_synchronously_in_parallel():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     sleep_period = 1.0
@@ -307,7 +307,7 @@ def test_submit_fail_task_synchronously_in_parallel():
 
 
 def test_submit_task_synchronously_in_parallel_with_timeout():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     sleep_period = 2.2
@@ -320,7 +320,7 @@ def test_submit_task_synchronously_in_parallel_with_timeout():
 
 
 def test_submit_task_multithreading_multiple_task():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
@@ -354,7 +354,7 @@ def test_submit_task_multithreading_multiple_task():
 
 
 def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_status():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
@@ -403,7 +403,7 @@ def test_submit_task_multithreading_multiple_task_in_sync_way_to_check_job_statu
 
 
 def test_blocked_task():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     m = multiprocessing.Manager()
@@ -456,7 +456,7 @@ def test_task_scheduler_create_synchronous_dispatcher():
 
 
 def test_task_scheduler_create_standalone_dispatcher():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=42)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=42)
     _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher._executor, ProcessPoolExecutor)
     assert _SchedulerFactory._dispatcher._nb_available_workers == 42
@@ -471,7 +471,7 @@ def modified_config_task(n):
 
 
 def test_can_exec_task_with_modified_config():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
     Config.configure_global_app(
         storage_folder=".my_data/", clean_entities_enabled=True, custom_property="custom_property"

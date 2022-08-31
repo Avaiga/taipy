@@ -15,6 +15,7 @@ from taipy.config import Config
 from taipy.config.common._template_handler import _TemplateHandler as _tpl
 from taipy.config.unique_section import UniqueSection
 
+from ..common._warnings import _warn_deprecated
 from ..exceptions.exceptions import ModeNotAvailable
 
 
@@ -72,21 +73,29 @@ class JobConfig(UniqueSection):
             self._update_config(as_dict)
 
     @staticmethod
-    def _configure(mode: str = None, nb_of_workers: Union[int, str] = None, **properties):
+    def _configure(
+        mode: str = None, nb_of_workers: Union[int, str] = None, max_nb_of_workers: Union[int, str] = None, **properties
+    ):
         """Configure job execution.
         Parameters:
             mode (Optional[str]): The job execution mode.
                 Possible values are: _"standalone"_ (the default value) or
                 _"development"_.
-            nb_of_workers (Optional[int, str]): Parameter used only in default _"standalone"_ mode. The maximum
+            max_nb_of_workers (Optional[int, str]): Parameter used only in default _"standalone"_ mode. The maximum
                 number of jobs able to run in parallel. The default value is 1.<br/>
                 A string can be provided to dynamically set the value using an environment
                 variable. The string must follow the pattern: `ENV[&lt;env_var&gt;]` where
                 `&lt;env_var&gt;` is the name of environment variable.
+            nb_of_workers (Optional[int, str]): Deprecated. Use max_nb_of_workers instead.
         Returns:
             JobConfig^: The job execution configuration.
         """
-        section = JobConfig(mode, nb_of_workers=nb_of_workers, **properties)
+        if nb_of_workers:
+            _warn_deprecated("nb_or_workers", suggest="max_nb_of_workers")
+            if not max_nb_of_workers:
+                max_nb_of_workers = nb_of_workers
+
+        section = JobConfig(mode, max_nb_of_workers=max_nb_of_workers, **properties)
         Config._register(section)
         return Config.unique_sections[JobConfig.name]
 
@@ -110,7 +119,7 @@ class JobConfig(UniqueSection):
     @classmethod
     def get_default_config(cls, mode: str) -> Dict[str, Any]:
         if cls.is_standalone:
-            return {"nb_of_workers": 1}
+            return {"max_nb_of_workers": 1}
         if cls.is_development:
             return {}
         raise ModeNotAvailable(mode)

@@ -67,7 +67,7 @@ def test_build_dispatcher():
     _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher, _DevelopmentJobDispatcher)
 
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
     assert isinstance(_SchedulerFactory._dispatcher, _StandaloneJobDispatcher)
     assert not isinstance(_SchedulerFactory._dispatcher, _DevelopmentJobDispatcher)

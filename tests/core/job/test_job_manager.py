@@ -158,7 +158,7 @@ def inner_lock_multiply(nb1: float, nb2: float):
 
 
 def test_raise_when_trying_to_delete_unfinished_job():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
     with lock:
@@ -175,7 +175,7 @@ def test_raise_when_trying_to_delete_unfinished_job():
 
 
 def test_force_deleting_unfinished_job():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="delete_unfinished_job")
@@ -189,7 +189,7 @@ def test_force_deleting_unfinished_job():
 
 
 def test_cancel_single_job():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
     _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
@@ -211,7 +211,7 @@ def test_cancel_single_job():
 )
 @mock.patch("src.taipy.core._scheduler._scheduler._Scheduler._cancel_jobs")
 def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
     _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
@@ -246,7 +246,7 @@ def test_cancel_canceled_abandoned_failed_jobs(cancel_jobs, schedule_job):
 )
 @mock.patch("src.taipy.core.job.job.Job.canceled")
 def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
     _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
@@ -277,7 +277,7 @@ def test_cancel_completed_skipped_jobs(cancel_jobs, schedule_job):
 
 
 def test_cancel_single_running_job():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=2)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=2)
     _SchedulerFactory._build_dispatcher()
 
     task = _create_task(inner_lock_multiply, name="cancel_single_job")
@@ -298,7 +298,7 @@ def test_cancel_single_running_job():
 
 
 def test_cancel_subsequent_jobs():
-    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, nb_of_workers=1)
+    Config.configure_job_executions(mode=JobConfig._STANDALONE_MODE, max_nb_of_workers=1)
     _SchedulerFactory._build_dispatcher()
 
     lock_0 = m.Lock()
