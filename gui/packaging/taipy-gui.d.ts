@@ -14,7 +14,7 @@
 /**
  * This extracts the backend name of a given property identified by `name`.
  * @param {string} updateVars - The value held by the property `updateVars`.
- * @param {string} name - The name of a binded property.
+ * @param {string} name - The name of a bound property.
  * @returns {string | undefined} The backend generated variable name.
  */
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
@@ -61,8 +61,8 @@ export declare type LoVElt = [
  */
 export declare type LoV = LoVElt[];
 /**
- * This React hook returns a lov list from the lov default value and the lov binded value.
- * @param {LoV | undefined} lov - The binded lov value.
+ * This React hook returns a lov list from the lov default value and the lov bound value.
+ * @param {LoV | undefined} lov - The bound lov value.
  * @param {string} defaultLov - The json stringify default lov value.
  * @param {boolean | undefined} [tree] - This flag indicates if the LoV list is a tree or a flat list (default is false).
  * @returns {LovItem[]} A list of items.
@@ -164,9 +164,9 @@ export interface TaipyAction {
   */
  export declare const TaipyContext: import("react").Context<TaipyStore>;
  /**
-  * This react hook helps manage a dynamic scalar property (defined by a default property and a binded property).
+  * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
   * @typeparam T - The dynamic property type.
-  * @param {T} value - The binded value
+  * @param {T} value - The bound value
   * @param {T} defaultValue - The default value
   * @param {T} defaultStatic - The default static value
   * @returns {T} The latest updated value.

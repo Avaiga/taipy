@@ -656,7 +656,7 @@ class _Builder:
         if hash_name := self.__hashes.get(var_name):
             self.__set_update_var_name(hash_name)
         else:
-            warnings.warn("{self.element_name} {var_name} should be binded")
+            warnings.warn("{self.element_name} {var_name} should be bound")
         return self
 
     def set_content(self, var_name: str = "content", image=True):
@@ -862,7 +862,7 @@ class _Builder:
     def __set_dynamic_property_without_default(self, name: str, property_type: PropertyType):
         hash_name = self.__hashes.get(name)
         if hash_name is None:
-            warnings.warn(f"{self.__element_name}.{name} should be binded.")
+            warnings.warn(f"{self.__element_name}.{name} should be bound.")
         else:
             hash_name = self.__get_typed_hash_name(hash_name, property_type)
             self.__update_vars.append(f"{_to_camel_case(name)}={hash_name}")

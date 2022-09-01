@@ -166,7 +166,7 @@ class Element:
 
             gui (Gui): The current instance of Gui.
             properties (t.Dict[str, t.Any]): The dict containing a value for each defined attribute.
-            hash_names (t.Dict[str, str]): The dict containing the internal variable name for each binded attribute.
+            hash_names (t.Dict[str, str]): The dict containing the internal variable name for each bound attribute.
             is_html (t.Optional[bool]): The flag indicating if the method is called in the context of HTML or MarkDown rendering (default is False).
 
         Returns: (None | xtree.Element | t.Tuple[str, str])

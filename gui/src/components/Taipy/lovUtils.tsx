@@ -76,8 +76,8 @@ export const paperBaseSx = { width: "100%", mb: 2, display: "grid", gridTemplate
 export const treeSelBaseSx = { width: "100%", bgcolor: "background.paper", overflowY: "auto" } as CSSProperties;
 
 /**
- * This React hook returns a lov list from the lov default value and the lov binded value.
- * @param {LoV | undefined} lov - The binded lov value.
+ * This React hook returns a lov list from the lov default value and the lov bound value.
+ * @param {LoV | undefined} lov - The bound lov value.
  * @param {string} defaultLov - The json stringify default lov value.
  * @param {boolean | undefined} [tree] - This flag indicates if the LoV list is a tree or a flat list (default is false).
  * @returns {LovItem[]} A list of items.

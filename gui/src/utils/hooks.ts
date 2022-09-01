@@ -20,9 +20,9 @@ import { createRequestUpdateAction, FormatConfig, TaipyBaseAction } from "../con
 import { TIMEZONE_CLIENT } from "../utils";
 
 /**
- * This react hook helps manage a dynamic scalar property (defined by a default property and a binded property).
+ * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
  * @typeparam T - The dynamic property type.
- * @param {T} value - The binded value
+ * @param {T} value - The bound value
  * @param {T} defaultValue - The default value
  * @param {T} defaultStatic - The default static value
  * @returns {T} The latest updated value.
