@@ -32,7 +32,7 @@ def test_table_md_1(gui: Gui, helpers, csvdata):
 
 
 def test_table_md_2(gui: Gui, helpers, csvdata):
-    table_properties = {
+    table_properties = {  # noqa: F841
         "page_size": 10,
         "page_size_options": [10, 50, 100, 500],
         "allow_all_rows": True,
@@ -84,7 +84,7 @@ def test_table_html_1(gui: Gui, helpers, csvdata):
 
 
 def test_table_html_2(gui: Gui, helpers, csvdata):
-    table_properties = {
+    table_properties = {  # noqa: F841
         "page_size": 10,
         "page_size_options": [10, 50, 100, 500],
         "allow_all_rows": True,

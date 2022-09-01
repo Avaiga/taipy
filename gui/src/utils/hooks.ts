@@ -19,6 +19,14 @@ import { TaipyContext } from "../context/taipyContext";
 import { createRequestUpdateAction, FormatConfig, TaipyBaseAction } from "../context/taipyReducers";
 import { TIMEZONE_CLIENT } from "../utils";
 
+/**
+ * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
+ * @typeparam T - The dynamic property type.
+ * @param {T} value - The bound value
+ * @param {T} defaultValue - The default value
+ * @param {T} defaultStatic - The default static value
+ * @returns {T} The latest updated value.
+ */
 export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T): T => {
     return useMemo(() => {
         if (value !== undefined) {
@@ -31,6 +39,13 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
     }, [value, defaultValue, defaultStatic]);
 };
 
+/**
+ * This React hook requests an update for every dynamic property of the element.
+ * @param {React.Dispatch} dispatch - The react dispatcher associated to `TaipyContext`.
+ * @param {string | undefined} id - The optional id of the element.
+ * @param {string} updateVars - The content of the property `updateVars`.
+ * @param {string | undefined} varName - The default property backend provided variable (through property `updateVarName`).
+ */
 export const useDispatchRequestUpdateOnFirstRender = (
     dispatch: Dispatch<TaipyBaseAction>,
     id?: string,

@@ -38,7 +38,7 @@ def test_default_on_change(gui: Gui, helpers):
     # fake var update
     ws_client.emit("message", {"client_id": sid, "type": "U", "name": "x", "payload": {"value": "20"}})
     assert ws_client.get_received()
-    assert st["d"] == True
+    assert st["d"] is True
 
 
 def test_specific_on_change(gui: Gui, helpers):
@@ -69,5 +69,5 @@ def test_specific_on_change(gui: Gui, helpers):
         {"client_id": sid, "type": "U", "name": "x", "payload": {"value": "20", "on_change": "on_input_change"}},
     )
     assert ws_client.get_received()
-    assert st["s"] == True
-    assert st["d"] == False
+    assert st["s"] is True
+    assert st["d"] is False

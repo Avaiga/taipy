@@ -15,7 +15,7 @@ from taipy.gui import Gui
 
 
 def test_input_md(gui: Gui, helpers):
-    x = "Hello World!"
+    x = "Hello World!"  # noqa: F841
     gui._set_frame(inspect.currentframe())
     md_string = "<|{x}|input|>"
     expected_list = [
@@ -29,7 +29,7 @@ def test_input_md(gui: Gui, helpers):
 
 
 def test_password_md(gui: Gui, helpers):
-    x = "Hello World!"
+    x = "Hello World!"  # noqa: F841
     gui._set_frame(inspect.currentframe())
     md_string = "<|{x}|input|password|>"
     expected_list = [
@@ -43,7 +43,7 @@ def test_password_md(gui: Gui, helpers):
 
 
 def test_input_html_1(gui: Gui, helpers):
-    x = "Hello World!"
+    x = "Hello World!"  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = '<taipy:input value="{x}" />'
     expected_list = [
@@ -57,7 +57,7 @@ def test_input_html_1(gui: Gui, helpers):
 
 
 def test_password_html(gui: Gui, helpers):
-    x = "Hello World!"
+    x = "Hello World!"  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = '<taipy:input value="{x}" password="True" />'
     expected_list = [
@@ -71,7 +71,7 @@ def test_password_html(gui: Gui, helpers):
 
 
 def test_input_html_2(gui: Gui, helpers):
-    x = "Hello World!"
+    x = "Hello World!"  # noqa: F841
     gui._set_frame(inspect.currentframe())
     html_string = "<taipy:input>{x}</taipy:input>"
     expected_list = [

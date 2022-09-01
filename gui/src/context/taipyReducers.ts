@@ -44,6 +44,9 @@ enum Types {
     ModuleContext = "MODULE_CONTEXT",
 }
 
+/**
+ * TaipyState The State of the Taipy Application.
+ */
 export interface TaipyState {
     socket?: Socket;
     isSocketConnected?: boolean;
@@ -62,7 +65,7 @@ export interface TaipyState {
     moduleContext: string;
 }
 
-export interface TaipyBaseAction {
+ export interface TaipyBaseAction {
     type: Types;
 }
 
@@ -78,7 +81,10 @@ export interface AlertMessage {
     duration: number;
 }
 
-interface TaipyAction extends NamePayload, TaipyBaseAction {
+/**
+ * TaipyAction The object used by the reducer.
+ */
+ interface TaipyAction extends NamePayload, TaipyBaseAction {
     propagate?: boolean;
 }
 
@@ -219,17 +225,19 @@ const getWsMessageListener = (dispatch: Dispatch<TaipyBaseAction>) => {
     const dispatchWsMessage = (message: WsMessage) => {
         if (message.type === "MU" && Array.isArray(message.payload)) {
             const payloads = message.payload as NamePayload[];
-            Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>))).then(vals => {
-                vals.forEach((val, idx) => payloads[idx].payload.value = val);
-                dispatch(messageToAction(message));
-            }).catch(console.warn);
+            Promise.all(payloads.map((pl) => parseData(pl.payload.value as Record<string, unknown>)))
+                .then((vals) => {
+                    vals.forEach((val, idx) => (payloads[idx].payload.value = val));
+                    dispatch(messageToAction(message));
+                })
+                .catch(console.warn);
             return;
         } else if (message.type === "MS" && Array.isArray(message.payload)) {
-            (message.payload as WsMessage[]).forEach(msg => dispatchWsMessage(msg));
+            (message.payload as WsMessage[]).forEach((msg) => dispatchWsMessage(msg));
             return;
         }
         dispatch(messageToAction(message));
-    }
+    };
     return dispatchWsMessage;
 };
 
@@ -435,6 +443,16 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
     payload: payload,
 });
 
+/**
+ * Creates a `TaipyAction` that will be used to update `TaipyContext`.
+ * This action will update the variable `name` (if `propagate` === true) and provoke the invocation of the on_change python function on the backend.
+ * @param {string | undefined} [name] - The name of the variable holding the requested data as received as a property (default is "").
+ * @param {unknown} value - The new value for the variable named `name`.
+ * @param {string | undefined} onChange - The name of the on_change python function to invoke on the backend (default to "on_change" on the backend).
+ * @param {boolean | undefined} [propagate] - A flag indicating that the variable should be automatically updated on the backend (default is true).
+ * @param {string | undefined} [relName] - The name of the optional related variable (for example the lov when a lov value is updated).
+ * @returns {TaipyAction} The action fed to the reducer.
+ */
 export const createSendUpdateAction = (
     name = "",
     value: unknown,
@@ -459,6 +477,14 @@ const getPayload = (value: unknown, onChange?: string, relName?: string) => {
     return ret;
 };
 
+/**
+ * Creates a `TaipyAction` that will be used to update `TaipyContext`.
+ * This action will provoke the invocation of an on_action python function on the backend with all parameters as a payload.
+ * @param {string | undefined} name - The name of the backend action.
+ * @param {unknown} value - The value associated with the action, this can be an object or any type of value.
+ * @param {unknown[]} args - Additional informations associated to the action.
+ * @returns {TaipyAction}  The action fed to the reducer.
+ */
 export const createSendActionNameAction = (
     name: string | undefined,
     value: unknown,
@@ -547,7 +573,19 @@ export const createRequestInfiniteTableUpdateAction = (
         filters: filters,
     });
 
-export const createRequestDataUpdateAction = (
+/**
+ * Creates a `TaipyAction` that will be used to update `TaipyContext`.
+ * This action will provoke the invocation of the get_data python function on the backend that will generate an update of the elements holding data named `name` on the frontend.
+ * @param {string} name - The name of the variable holding the requested data as received as a property.
+ * @param {string | undefined} id - The id of the visual element.
+ * @param {string[]} columns - The list of the columns needed by the element emitting this action.
+ * @param {string} pageKey - The unique identifier to the data that will be received from this action.
+ * @param {Record<string, unknown>} payload - The payload (specific to the type of component ie table, chart ...).
+ * @param {boolean | undefined} [allData] - The flag indicating if all the data is requested (default is false).
+ * @param {string | undefined} library - The optional name of the library {@link extension}.
+ * @returns {TaipyAction} The action fed to the reducer.
+ */
+ export const createRequestDataUpdateAction = (
     name: string | undefined,
     id: string | undefined,
     columns: string[],
@@ -555,7 +593,7 @@ export const createRequestDataUpdateAction = (
     payload: Record<string, unknown>,
     allData = false,
     library?: string
-) => {
+): TaipyAction => {
     payload = payload || {};
     if (id !== undefined) {
         payload.id = id;

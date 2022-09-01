@@ -14,11 +14,19 @@
 import React from "react";
 import Avatar from "@mui/material/Avatar";
 
+/**
+ * An Icon representation.
+ */
 export interface Icon {
+    /** {string} The URL to the image. */
     path: string;
+    /** {string} The text. */
     text: string;
 }
 
+/**
+ * A String or icon.
+ */
 export type stringIcon = string | Icon;
 
 interface IconProps {

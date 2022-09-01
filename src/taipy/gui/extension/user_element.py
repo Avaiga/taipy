@@ -25,6 +25,7 @@ if t.TYPE_CHECKING:
 class ElementAttribute:
     """
     TODO
+    This is instantiated to describe an element attribute.
     """
 
     def __init__(
@@ -34,6 +35,16 @@ class ElementAttribute:
         default_value: t.Optional[t.Any] = None,
         js_name: t.Optional[str] = None,
     ) -> None:
+        """
+        Arguments:
+
+            name (str): The attribute name.
+            attribute_type (PropertyType): The attribute type.
+            default_value (optional Any): The attribute's default value (default is None).
+            js_name (optional str): The name of the attribute on the frontend (default to Camel Case of `name`).
+                Attribute starting with `on_<action name>` will be translated into `tp_on<CamelCase(action name)>`.
+
+        """
         self.name = name
         self.attribute_type = attribute_type
         self.default_value = default_value
@@ -56,11 +67,21 @@ class ElementAttribute:
 class Element:
     """
     TODO
+    This is instantiated to describe an element.
+
     """
 
     def __init__(
         self, name: str, default_attribute: str, attributes: t.List[ElementAttribute], js_name: t.Optional[str] = None
     ) -> None:
+        """
+        Arguments:
+
+            name (str): The element name.
+            default_attribute (str): the default attribute for the element.
+            attributes (List[ElementAttribute]): A list of attributes.
+            js_name (optional str): The name of the element on the frontend (default to Camel Case of `name`).
+        """
         self.name = name
         self.default_attribute = default_attribute
         self.attributes = attributes
@@ -137,9 +158,18 @@ class Element:
     ) -> t.Union[None, t.Any, t.Tuple[str, str]]:
         """
         TODO
-        returns a tuple of string with the full React component instanciation and the component name if is_html
-        else an xtree Element in markdown context
-        returns None to let taipy render the component
+        - returns a tuple of string with the full React component instanciation and the component name if is_html
+            else an xtree Element in markdown context
+        - returns None to let taipy render the component
+
+        Arguments:
+
+            gui (Gui): The current instance of Gui.
+            properties (t.Dict[str, t.Any]): The dict containing a value for each defined attribute.
+            hash_names (t.Dict[str, str]): The dict containing the internal variable name for each bound attribute.
+            is_html (t.Optional[bool]): The flag indicating if the method is called in the context of HTML or MarkDown rendering (default is False).
+
+        Returns: (None | xtree.Element | t.Tuple[str, str])
         """
         return None
 
@@ -147,13 +177,15 @@ class Element:
 class ElementLibrary(ABC):
     """
     TODO
+    This class needs to be inherited to define a new library.
+
     """
 
     @abstractmethod
     def get_elements(self) -> t.List[Element]:
         """
         TODO
-        list of visual elements
+        Returns the list of visual elements.
         """
         return NotImplemented
 
@@ -161,7 +193,7 @@ class ElementLibrary(ABC):
     def get_name(self) -> str:
         """
         TODO
-        library name
+        Returns the library name.
         """
         return NotImplemented
 
@@ -169,7 +201,7 @@ class ElementLibrary(ABC):
     def get_scripts(self) -> t.List[str]:
         """
         TODO
-        list of resources names for the scripts
+        Returns the list of resources names for the scripts.
         """
         return NotImplemented
 
@@ -177,7 +209,7 @@ class ElementLibrary(ABC):
     def get_styles(self) -> t.List[str]:
         """
         TODO
-        list of resources names for the css stylesheets
+        Returns the list of resources names for the css stylesheets.
 
         """
         return NotImplemented
@@ -186,7 +218,11 @@ class ElementLibrary(ABC):
     def get_resource(self, name: str) -> Path:
         """
         TODO
-        returns a path for a resource name
+        Returns a path for a resource name.
+
+        Arguments:
+
+            name (str): The name of the resource for which a local Path should be returned.
         """
         return NotImplemented
 
@@ -194,14 +230,21 @@ class ElementLibrary(ABC):
     def get_register_js_function(self) -> str:
         """
         TODO
-        returns the name of the function that will register new js components
-        signature (libName: string) => Record<string, ComponentType>
+        Returns the name of the function that will register new js components.
+            signature (libName: string) => Record<string, ComponentType>
         """
         return NotImplemented
 
     def get_data(self, library_name: str, payload: t.Dict, var_name: str, value: t.Any) -> t.Optional[t.Dict]:
         """
         TODO
-        called if implemented
+        Called if implemented (ie returns a dict).
+
+        Arguments:
+
+            library_name (str): The name of this library.
+            payload (t.Dict): The payload send by the `createRequestDataUpdateAction` frontend function.
+            var_name (str): The name of the variable holding the data.
+            value (t.Any): The current value of the variable identified by `var_name`.
         """
         return None

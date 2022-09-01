@@ -26,19 +26,35 @@ import { FormatConfig } from "../../context/taipyReducers";
 import { getDateTimeString, getNumberString } from "../../utils/index";
 import { TaipyActiveProps, TaipyMultiSelectProps } from "./utils";
 
+/**
+ * The Column description as received by the backend.
+ */
 export interface ColumnDesc {
+    /** {string} The unique column identifier. */
     dfid: string;
+    /** {string} The column type. */
     type: string;
-    format: string;
+    /** {string} The optional value format. */
+    format?: string;
+    /** {string | undefined} The optional column title. */
     title?: string;
+    /** {number} The order of the column. */
     index: number;
+    /** {number | string | undefined} The optional width. */
     width?: number | string;
+    /** {boolean | undefined} If set to true, the column should not be editable. */
     notEditable?: boolean;
+    /** {string | undefined} The optional column name that would hold the css classname to apply to the cell. */
     style?: string;
+    /** {string | undefined} The optional value that would replace a NaN value. */
     nanValue?: string;
+    /** {string | undefined} The optional TimeZone identifier used if the type is Date. */
     tz?: string;
+    /** {boolean | undefined} The flag that allows filtering. */
     filter?: boolean;
+    /** {string | undefined} The optional identifier for the aggregation function. */
     apply?: string;
+    /** {boolean | undefined} The optional flag that would allow the user to aggregate the column. */
     groupBy?: boolean;
     widthHint?: number;
 }
@@ -47,8 +63,14 @@ export const DEFAULT_SIZE = "small";
 
 export type Order = "asc" | "desc";
 
+/**
+ * A cell value type.
+ */
 export type RowValue = string | number | boolean | null;
 
+/**
+ * The row definition composed of a key/value string/`RowValue`.
+ */
 export type RowType = Record<string, RowValue>;
 
 export const EDIT_COL = "taipy_edit";

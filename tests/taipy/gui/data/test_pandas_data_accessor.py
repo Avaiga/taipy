@@ -49,7 +49,7 @@ def test_get_all_simple_data(gui: Gui, helpers, small_dataframe):
     pd = pandas.DataFrame(data=small_dataframe)
     ret_data = accessor.get_data(gui, "x", pd, {"alldata": True}, _DataFormat.JSON)
     assert ret_data
-    assert ret_data["alldata"] == True
+    assert ret_data["alldata"] is True
     value = ret_data["value"]
     assert value
     data = value["data"]

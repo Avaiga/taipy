@@ -28,7 +28,7 @@ def test_button_action(page: "Page", gui: Gui, helpers):
 
 <|Action|button|on_action=do_something_fn|id=button1|>
 """
-    x = 10
+    x = 10  # noqa: F841
 
     def do_something_fn(state):
         state.x = state.x * 2

@@ -13,9 +13,15 @@
 
 import { stringIcon } from "./icon";
 
+/**
+ * An item of lov.
+ */
 export interface LovItem {
+    /** {string} The unique identifier. */
     id: string;
+    /** {StringIcon} The label (string and/or icon). */
     item: stringIcon;
+    /** {LovItem[] | undefined} The optional array of children. */
     children?: LovItem[];
 }
 

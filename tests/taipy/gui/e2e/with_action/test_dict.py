@@ -30,7 +30,7 @@ def test_dict(page: "Page", gui: Gui, helpers):
 <|test|button|on_action=on_action_2|id=btn2|>
 """
     a_key = "key"
-    a_dict = {a_key: "Taipy"}
+    a_dict = {a_key: "Taipy"}  # noqa: F841
 
     def on_action_1(state):
         state.a_dict.key = "Hello"

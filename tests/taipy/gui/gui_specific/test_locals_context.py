@@ -34,5 +34,5 @@ def test_locals_context(gui: Gui):
         lc.reset_locals_context()
         assert lc.get_context() is None
         assert lc.get_locals() == current_locals
-        assert lc.is_default() == True
+        assert lc.is_default() is True
         assert "__main__" in lc.get_all_keys()

@@ -28,7 +28,7 @@ def test_slider_action(page: "Page", gui: Gui, helpers):
 
 <|{x}|slider|id=slider1|>
 """
-    x = 10
+    x = 10  # noqa: F841
     gui._set_frame(inspect.currentframe())
     gui.add_page(name="test", page=page_md)
     helpers.run_e2e(gui)
@@ -52,7 +52,7 @@ def test_slider_action(page: "Page", gui: Gui, helpers):
 
 @pytest.mark.teste2e
 def test_slider_action_on_change(page: "Page", gui: Gui, helpers):
-    d = {"v1": 10, "v2": 10}
+    d = {"v1": 10, "v2": 10}  # noqa: F841
 
     def on_change(state, var, val):
         if var == "d.v2":

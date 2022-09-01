@@ -15,6 +15,7 @@
 
 # docs
 /generateddoc
+/docs
 
 # misc
 .DS_Store
