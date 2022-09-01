@@ -21,7 +21,6 @@ from src.taipy.core.data.sql import SQLDataNode
 from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
-
 if not util.find_spec("pyodbc"):
     pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
 
@@ -199,7 +198,6 @@ class TestSQLDataNode:
     @pytest.mark.parametrize(
         "data,written_data,called_func",
         [
-            (pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}]), [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "_insert_dicts"),
             ([{"a": 1, "b": 2}, {"a": 3, "b": 4}], [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "_insert_dicts"),
             ({"a": 1, "b": 2}, [{"a": 1, "b": 2}], "_insert_dicts"),
             ([(1, 2), (3, 4)], [(1, 2), (3, 4)], "_insert_tuples"),
@@ -210,9 +208,6 @@ class TestSQLDataNode:
             (None, [(None,)], "_insert_tuples"),
             (np.array([1, 2, 3, 4]), [(1,), (2,), (3,), (4,)], "_insert_tuples"),
             (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "_insert_tuples"),
-            ([], None, None),
-            (pd.DataFrame([]), None, None),
-            (np.array([]), None, None),
         ],
     )
     def test_write(self, data, written_data, called_func):
@@ -246,22 +241,65 @@ class TestSQLDataNode:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            # Test write empty list
-            if called_func is None:
-                with mock.patch("src.taipy.core.data.sql.SQLDataNode._insert_dicts") as insert_dicts_mock, mock.patch(
-                    "src.taipy.core.data.sql.SQLDataNode._insert_tuples"
-                ) as insert_tuples_mock:
-                    dn._write(data)
-                    dn2._write(data)
-                    insert_dicts_mock.assert_not_called()
-                    insert_tuples_mock.assert_not_called()
-                    engine_mock.assert_not_called()
-                    create_table_mock.assert_not_called()
-                return
-
-            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as insert_mock:
+            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as mck:
                 dn._write(data)
-                insert_mock.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
-            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as insert_mock:
+                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
+            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as mck:
                 dn2._write(data)
-                insert_mock.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
+                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
+
+    def test_write_dataframe(self):
+        dn = SQLDataNode(
+            "foo",
+            Scope.PIPELINE,
+            properties={
+                "db_username": "sa",
+                "db_password": "foobar",
+                "db_name": "datanode",
+                "db_engine": "mssql",
+                "read_query": "SELECT * from foo",
+                "write_table": "foo",
+            },
+        )
+
+        df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+            "src.taipy.core.data.sql.SQLDataNode._create_table"
+        ) as create_table_mock:
+            cursor_mock = engine_mock.return_value.__enter__.return_value
+            cursor_mock.execute.side_effect = None
+
+            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode._insert_dataframe") as mck:
+                dn._write(df)
+                assert mck.call_args[0][0].equals(df)
+
+    @pytest.mark.parametrize(
+        "data",
+        [
+            [],
+            np.array([]),
+        ],
+    )
+    def test_write_empty_list(self, data):
+        dn = SQLDataNode(
+            "foo",
+            Scope.PIPELINE,
+            properties={
+                "db_username": "sa",
+                "db_password": "foobar",
+                "db_name": "datanode",
+                "db_engine": "mssql",
+                "read_query": "SELECT * from foo",
+                "write_table": "foo",
+            },
+        )
+
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
+            "src.taipy.core.data.sql.SQLDataNode._create_table"
+        ) as create_table_mock:
+            cursor_mock = engine_mock.return_value.__enter__.return_value
+            cursor_mock.execute.side_effect = None
+
+            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode._delete_all_rows") as mck:
+                dn._write(data)
+                mck.assert_called_once_with(create_table_mock.return_value, cursor_mock)
