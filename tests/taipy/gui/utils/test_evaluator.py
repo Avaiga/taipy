@@ -12,6 +12,8 @@
 import inspect
 import warnings
 
+from flask import g
+
 from taipy.gui import Gui
 from taipy.gui.utils.types import _TaipyNumber
 
@@ -68,3 +70,16 @@ def test_evaluate_not_expression_type(gui: Gui):
     gui.run(run_server=False)
     with gui.get_flask_app().app_context():
         assert "x + 10" == gui._evaluate_expr("x + 10")
+
+
+def test_evaluate_expression_2_clients(gui: Gui):
+    x = 10  # noqa: F841
+    y = 20  # noqa: F841
+    gui._set_frame(inspect.currentframe())
+    gui.run(run_server=False)
+    with gui.get_flask_app().app_context():
+        g.client_id = "A"
+        gui._evaluate_expr("x + y = {x + y}")
+        g.client_id = "B"
+        gui._evaluate_expr("x")
+        gui._re_evaluate_expr("x")

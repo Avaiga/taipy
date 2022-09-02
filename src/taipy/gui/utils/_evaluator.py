@@ -33,6 +33,7 @@ from . import (
     _variable_decode,
     _variable_encode,
 )
+from .types import _HOLDER_PREFIX
 
 
 class _Evaluator:
@@ -265,12 +266,12 @@ class _Evaluator:
         for expr in self.__var_to_expr_list[var_name]:
             expr_decoded, _ = _variable_decode(expr)
             hash_expr = self.__expr_to_hash.get(expr, "UnknownExpr")
-            if expr != var_name and not expr.startswith("_Taipy"):
+            if expr != var_name and not expr.startswith(_HOLDER_PREFIX):
                 expr_var_map = self.__expr_to_var_map.get(expr)  # ["x", "y"]
                 if expr_var_map is None:
                     warnings.warn(f"Something is amiss with expression list for {expr}")
                 else:
-                    eval_dict = {k: _getscopeattr_drill(gui, v) for k, v in expr_var_map.items()}
+                    eval_dict = {k: _getscopeattr_drill(gui, gui._bind_var(v)) for k, v in expr_var_map.items()}
                     if self._is_expression(expr_decoded):
                         expr_string = 'f"' + _variable_decode(expr)[0].replace('"', '\\"') + '"'
                     else:
