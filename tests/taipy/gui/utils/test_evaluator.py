@@ -78,6 +78,8 @@ def test_evaluate_expression_2_clients(gui: Gui):
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False)
     with gui.get_flask_app().app_context():
+        gui._bindings()._get_or_create_scope("A")
+        gui._bindings()._get_or_create_scope("B")
         g.client_id = "A"
         gui._evaluate_expr("x + y = {x + y}")
         g.client_id = "B"
