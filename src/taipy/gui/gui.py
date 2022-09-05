@@ -47,7 +47,7 @@ from .partial import Partial
 from .renderers import _EmptyPage
 from .renderers._markdown import _TaipyMarkdownExtension
 from .renderers.factory import _Factory
-from .renderers.jsonencoder import _TaipyJsonEncoder
+from .renderers.json import _TaipyJsonEncoder
 from .server import _Server
 from .state import State
 from .types import _WsType

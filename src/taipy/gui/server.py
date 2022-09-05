@@ -27,7 +27,7 @@ from flask_socketio import SocketIO
 from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
-from .renderers.jsonencoder import _TaipyJsonEncoder
+from .renderers.json import _TaipyJsonProvider
 from .utils import _is_in_notebook, _RuntimeManager
 
 if t.TYPE_CHECKING:
@@ -55,7 +55,8 @@ class _Server:
         if "SECRET_KEY" not in self._flask.config or not self._flask.config["SECRET_KEY"]:
             self._flask.config["SECRET_KEY"] = "TaIpY"
         # set json encoder (for Taipy specific types)
-        self._flask.json_encoder = _TaipyJsonEncoder
+        self._flask.json_provider_class = _TaipyJsonProvider
+        self._flask.json = self._flask.json_provider_class(self._flask)
         # Add cors for frontend access
         self._ws = SocketIO(
             self._flask, cors_allowed_origins="*", ping_timeout=10, ping_interval=5, json=json, async_mode=async_mode

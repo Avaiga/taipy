@@ -33,7 +33,7 @@ from ..utils import (
     _MapDict,
 )
 from ..utils.types import _TaipyData
-from .jsonencoder import _TaipyJsonEncoder
+from .json import _TaipyJsonEncoder
 from .utils import (
     _add_to_dict_and_get,
     _get_col_from_indexed,

@@ -30,20 +30,18 @@ with open(f"src{os.sep}taipy{os.sep}gui{os.sep}version.json") as version_file:
         version_string = f"{version_string}.{vext}"
 
 requirements = [
-    "flask>=2.1,<2.2",
+    "flask>=2.2,<2.3",
     "flask-cors>=3.0.10,<4.0",
-    "flask-socketio>=5.1.1,<6.0",
-    "markdown>=3.3.4,<4.0",
-    "pandas>=1.3.4,<2.0",
+    "flask-socketio>=5.3.0,<6.0",
+    "markdown>=3.4.1,<4.0",
+    "pandas>=1.4.4,<2.0",
     "python-dotenv>=0.19,<0.21",
     "pytz>=2021.3,<2022.2",
-    "simple-websocket>=0.3,<0.6",
     "tzlocal>=3.0,<5.0",
     "backports.zoneinfo>=0.2.1,<0.3;python_version<'3.9'",
     "gevent>=21.12.0,<22.0",
     "gevent-websocket>=0.10.1,<0.11",
     "kthread>=0.2.3,<0.3",
-    "werkzeug>=2.0,<2.1",
     "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
 ]
 
@@ -55,7 +53,8 @@ extras_require = {
         "python-magic>=0.4.24,<0.5;platform_system!='Windows'",
         "python-magic-bin>=0.4.14,<0.5;platform_system=='Windows'",
     ],
-    "arrow": ["pyarrow>=7.0,<9.0"],
+    "arrow": ["pyarrow>=9.0,<10.0"],
+    "simple-websocket": ["simple-websocket>=0.8,<1.0"],
 }
 
 
