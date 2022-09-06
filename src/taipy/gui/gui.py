@@ -1191,7 +1191,7 @@ class Gui:
         if bind_context is None:
             encoded_var_name = self.__var_dir.add_var(var_name, self._get_locals_context(), var_name)
         else:
-            encoded_var_name = self.__var_dir.add_var(var_name, self._get_locals_context())
+            encoded_var_name = self.__var_dir.add_var(var_name, bind_context)
         if not hasattr(self._bindings(), encoded_var_name):
             bind_locals = self._get_locals_bind_from_context(bind_context)
             if var_name in bind_locals.keys():

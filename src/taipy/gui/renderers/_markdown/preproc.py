@@ -16,7 +16,7 @@ from typing import Any, List, Tuple
 
 from markdown.preprocessors import Preprocessor as MdPreprocessor
 
-from ..builder import _Builder
+from ..builder import Builder
 from .factory import _MarkdownFactory
 
 
@@ -114,7 +114,7 @@ class _Preprocessor(MdPreprocessor):
             last_index = 0
             for m in _Preprocessor.__LINK_RE.finditer(line):
                 new_line += line[last_index : m.end()]
-                new_line += "{: key=" + _Builder._get_key("link") + "}"
+                new_line += "{: key=" + Builder._get_key("link") + "}"
                 last_index = m.end()
             new_line = line if last_index == 0 else new_line + line[last_index:]
             # Look for a closing tag
