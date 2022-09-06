@@ -56,6 +56,16 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_GENERIC,
         _STORAGE_TYPE_VALUE_JSON,
     ]
+
+    _EXPOSED_TYPE_KEY = "exposed_type"
+    _EXPOSED_TYPE_PANDAS = "pandas"
+    _EXPOSED_TYPE_NUMPY = "numpy"
+    _DEFAULT_EXPOSED_TYPE = _EXPOSED_TYPE_PANDAS
+
+    _ALL_EXPOSED_TYPES = [
+        _EXPOSED_TYPE_PANDAS,
+        _EXPOSED_TYPE_NUMPY,
+    ]
     # Generic
     _REQUIRED_READ_FUNCTION_GENERIC_PROPERTY = "read_fct"
     _OPTIONAL_READ_FUNCTION_PARAMS_GENERIC_PROPERTY = "read_fct_params"
@@ -247,13 +257,21 @@ class DataNodeConfig(Section):
         return Config.sections[DataNodeConfig.name][id]
 
     @staticmethod
-    def _configure_csv(id: str, default_path: str = None, has_header: bool = True, scope=_DEFAULT_SCOPE, **properties):
+    def _configure_csv(
+        id: str,
+        default_path: str = None,
+        has_header: bool = True,
+        exposed_type=_EXPOSED_TYPE_PANDAS,
+        scope=_DEFAULT_SCOPE,
+        **properties,
+    ):
         """Configure a new CSV data node configuration.
 
         Parameters:
             id (str): The unique identifier of the new CSV data node configuration.
             default_path (str): The default path of the CSV file.
             has_header (bool): If True, indicates that the CSV file has a header.
+            exposed_type: The exposed type of the data read from CSV file. The default value is `pandas`.
             scope (Scope^): The scope of the CSV data node configuration. The default value
                 is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
@@ -267,6 +285,7 @@ class DataNodeConfig(Section):
             scope=scope,
             default_path=default_path,
             has_header=has_header,
+            exposed_type=exposed_type,
             **properties,
         )
         Config._register(section)
@@ -313,6 +332,7 @@ class DataNodeConfig(Section):
         default_path: str = None,
         has_header: bool = True,
         sheet_name: Union[List[str], str] = None,
+        exposed_type=_EXPOSED_TYPE_PANDAS,
         scope: Scope = _DEFAULT_SCOPE,
         **properties,
     ):
@@ -324,6 +344,7 @@ class DataNodeConfig(Section):
             has_header (bool): If True, indicates that the Excel file has a header.
             sheet_name (Union[List[str], str]): The list of sheet names to be used. This
                 can be a unique name.
+            exposed_type: The exposed type of the data read from Excel file. The default value is `pandas`.
             scope (Scope^): The scope of the Excel data node configuration. The default
                 value is `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
@@ -338,6 +359,7 @@ class DataNodeConfig(Section):
             default_path=default_path,
             has_header=has_header,
             sheet_name=sheet_name,
+            exposed_type=exposed_type,
             **properties,
         )
         Config._register(section)
@@ -440,6 +462,7 @@ class DataNodeConfig(Section):
         db_host: str = "localhost",
         db_driver: str = "ODBC Driver 17 for SQL Server",
         db_extra_args: Dict[str, Any] = None,
+        exposed_type=_EXPOSED_TYPE_PANDAS,
         scope: Scope = _DEFAULT_SCOPE,
         **properties,
     ):
@@ -459,6 +482,7 @@ class DataNodeConfig(Section):
                 _"ODBC Driver 17 for SQL Server"_.
             db_extra_args (Dict[str, Any]): A dictionary of additional arguments to be passed into database
                 connection string.
+            exposed_type: The exposed type of the data read from SQL query. The default value is `pandas`.
             scope (Scope^): The scope of the SQL data node configuration. The default value is
                 `Scope.SCENARIO`.
             **properties (Dict[str, Any]): A keyworded variable length list of additional
@@ -480,6 +504,7 @@ class DataNodeConfig(Section):
             write_table=write_table,
             db_port=db_port,
             db_extra_args=db_extra_args,
+            exposed_type=exposed_type,
             **properties,
         )
         Config._register(section)

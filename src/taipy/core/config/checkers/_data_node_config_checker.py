@@ -30,6 +30,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
             self._check_required_properties(data_node_config_id, data_node_config)
             self._check_generic_read_write_fct(data_node_config_id, data_node_config)
             self._check_generic_read_write_fct_params(data_node_config_id, data_node_config)
+            self._check_exposed_type(data_node_config_id, data_node_config)
         return self._collector
 
     def _check_storage_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -103,3 +104,13 @@ class _DataNodeConfigChecker(_ConfigChecker):
                         prop_value,
                         f"`{prop_key}` of DataNode `{data_node_config_id}` must be populated with a Callable function.",
                     )
+
+    def _check_exposed_type(self, data_node_config_id: str, data_node_config: DataNodeConfig):
+        if not isinstance(data_node_config.exposed_type, str):
+            return
+        if data_node_config.exposed_type not in DataNodeConfig._ALL_EXPOSED_TYPES:
+            self._error(
+                data_node_config._EXPOSED_TYPE_KEY,
+                data_node_config.exposed_type,
+                f'The `{data_node_config._EXPOSED_TYPE_KEY}` of the DataNodeConfig `{data_node_config_id}` must be either "pandas", "numpy" or a custom type.',
+            )

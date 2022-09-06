@@ -19,7 +19,7 @@ import pytest
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data._data_manager import _DataManager
 from src.taipy.core.data.csv import CSVDataNode
-from src.taipy.core.exceptions.exceptions import MissingRequiredProperty, NoData
+from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, NoData
 from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.exceptions.exceptions import InvalidConfigurationId
@@ -56,6 +56,7 @@ class TestCSVDataNode:
         assert not dn.is_ready_for_reading
         assert dn.path == path
         assert dn.has_header is False
+        assert dn.exposed_type == "pandas"
 
         with pytest.raises(InvalidConfigurationId):
             dn = CSVDataNode(
@@ -197,3 +198,13 @@ class TestCSVDataNode:
             dn.read()
         dn.write(read_data)
         assert dn.read().equals(read_data)
+
+    def test_pandas_exposed_type(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "exposed_type": "pandas"})
+        assert isinstance(dn.read(), pd.DataFrame)
+
+    def test_raise_error_invalid_exposed_type(self):
+        path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
+        with pytest.raises(InvalidExposedType):
+            CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "exposed_type": "foo"})

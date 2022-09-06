@@ -11,11 +11,17 @@
 
 from copy import copy
 
+import pytest
+
 from src.taipy.core.config.checkers._data_node_config_checker import _DataNodeConfigChecker
 from src.taipy.core.config.data_node_config import DataNodeConfig
 from taipy import Config
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.scope import Scope
+
+
+class MyCustomClass:
+    pass
 
 
 class TestDataNodeConfigChecker:
@@ -299,5 +305,28 @@ class TestDataNodeConfigChecker:
             "read_fct_params": tuple("foo"),
         }
         collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+    def test_check_exposed_types(self):
+        config = Config._default_config
+
+        config._sections[DataNodeConfig.name]["default"].storage_type = "csv"
+        config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": "foo"}
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 1
+
+        config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": "pandas"}
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": "numpy"}
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        config._sections[DataNodeConfig.name]["default"].properties = {"exposed_type": MyCustomClass}
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0

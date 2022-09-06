@@ -68,10 +68,11 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn.id).is_ready_for_reading
         assert _DataManager._get(csv_dn.id).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert len(_DataManager._get(csv_dn.id).properties) == 3
+        assert len(_DataManager._get(csv_dn.id).properties) == 4
         assert not _DataManager._get(csv_dn.id).properties["cacheable"]
         assert _DataManager._get(csv_dn.id).properties.get("path") == "bar"
-        assert _DataManager._get(csv_dn.id).properties.get("has_header")
+        assert _DataManager._get(csv_dn.id).properties.get("has_header") is True
+        assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
         assert _DataManager._get(csv_dn.id).properties == csv_dn.properties
 
         assert _DataManager._get(csv_dn) is not None
@@ -88,10 +89,11 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn).is_ready_for_reading
         assert _DataManager._get(csv_dn).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert len(_DataManager._get(csv_dn).properties) == 3
+        assert len(_DataManager._get(csv_dn).properties) == 4
         assert not _DataManager._get(csv_dn.id).properties["cacheable"]
         assert _DataManager._get(csv_dn).properties.get("path") == "bar"
-        assert _DataManager._get(csv_dn).properties.get("has_header")
+        assert _DataManager._get(csv_dn).properties.get("has_header") is True
+        assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
         assert _DataManager._get(csv_dn).properties == csv_dn.properties
 
     def test_create_and_get_in_memory_data_node(self):

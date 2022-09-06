@@ -16,12 +16,12 @@ from taipy.config.common.scope import Scope
 class TestConfig:
     def test_configure_csv_data_node(self):
         a, b, c, d, e = "foo", "path", True, Scope.PIPELINE, "numpy"
-        Config.configure_csv_data_node(a, b, c, d, exposed_type=e)
+        Config.configure_csv_data_node(a, b, c, d, e)
         assert len(Config.data_nodes) == 2
 
     def test_configure_excel_data_node(self):
         a, b, c, d, e, f = "foo", "path", True, "Sheet1", Scope.PIPELINE, "numpy"
-        Config.configure_excel_data_node(a, b, c, d, e, exposed_type=f)
+        Config.configure_excel_data_node(a, b, c, d, e, f)
         assert len(Config.data_nodes) == 2
 
     def test_configure_generic_data_node(self):
@@ -45,7 +45,7 @@ class TestConfig:
         assert len(Config.data_nodes) == 2
 
     def test_configure_sql_data_node(self):
-        a, b, c, d, e, f, g, h, i, j, extra_args, scope, k = (
+        a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope, k = (
             "foo",
             "user",
             "pwd",
@@ -57,8 +57,9 @@ class TestConfig:
             "host",
             "driver",
             {"foo": "bar"},
+            "exposed_type",
             Scope.PIPELINE,
             "qux",
         )
-        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, extra_args, scope=scope, property=k)
+        Config.configure_sql_data_node(a, b, c, d, e, f, g, h, i, j, extra_args, exposed_type, scope=scope, property=k)
         assert len(Config.data_nodes) == 2

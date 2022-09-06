@@ -20,7 +20,7 @@ from taipy.config.common.scope import Scope
 
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, JobId
-from ..exceptions.exceptions import MissingRequiredProperty
+from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from .data_node import DataNode
 
 
@@ -49,6 +49,8 @@ class CSVDataNode(DataNode):
     __STORAGE_TYPE = "csv"
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"
+    __EXPOSED_TYPE_PANDAS = "pandas"
+    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
     __PATH_KEY = "path"
     __DEFAULT_PATH_KEY = "default_path"
     __HAS_HEADER_PROPERTY = "has_header"
@@ -83,6 +85,10 @@ class CSVDataNode(DataNode):
         else:
             properties[self.__PATH_KEY] = self._path
 
+        if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
+            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+
         super().__init__(
             config_id,
             scope,
@@ -112,14 +118,21 @@ class CSVDataNode(DataNode):
         self._path = value
         self.properties[self.__PATH_KEY] = value
 
-    def _read(self):
-        if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-            if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
-                return self._read_as_numpy()
-            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
-        return self._read_as_pandas_dataframe()
+    def _check_exposed_type(self, exposed_type):
+        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
+            raise InvalidExposedType(
+                f"Invalid string exposed type {exposed_type}. Supported values are {', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
+            )
 
-    def _read_as(self, custom_class):
+    def _read(self):
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe()
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy()
+        return self._read_as()
+
+    def _read_as(self):
+        custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         with open(self._path) as csvFile:
             res = list()
             if self.properties[self.__HAS_HEADER_PROPERTY]:

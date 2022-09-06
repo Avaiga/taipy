@@ -33,7 +33,7 @@ class TestDataRepository:
         [JobId("job_id")],
         None,
         False,
-        {"path": "/path", "has_header": True, "prop": "ENV[FOO]"},
+        {"path": "/path", "has_header": True, "prop": "ENV[FOO]", "exposed_type": "pandas"},
     )
 
     data_node_model = _DataNodeModel(
@@ -48,7 +48,7 @@ class TestDataRepository:
         None,
         None,
         False,
-        {"path": "/path", "has_header": True, "prop": "ENV[FOO]"},
+        {"path": "/path", "has_header": True, "prop": "ENV[FOO]", "exposed_type": "pandas"},
     )
 
     def test_save_and_load(self, tmpdir):

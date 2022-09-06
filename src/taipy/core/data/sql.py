@@ -22,7 +22,7 @@ from sqlalchemy import MetaData, Table, create_engine, text
 from taipy.config.common.scope import Scope
 
 from ..common.alias import DataNodeId, JobId
-from ..exceptions.exceptions import MissingRequiredProperty, UnknownDatabaseEngine
+from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, UnknownDatabaseEngine
 from .data_node import DataNode
 
 
@@ -53,6 +53,8 @@ class SQLDataNode(DataNode):
 
     __STORAGE_TYPE = "sql"
     __EXPOSED_TYPE_NUMPY = "numpy"
+    __EXPOSED_TYPE_PANDAS = "pandas"
+    __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
     _REQUIRED_PROPERTIES: List[str] = [
@@ -89,6 +91,10 @@ class SQLDataNode(DataNode):
                 f"The following properties " f"{', '.join(x for x in missing)} were not informed and are required"
             )
 
+        if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
+            properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
+        self._check_exposed_type(properties[self.__EXPOSED_TYPE_PROPERTY])
+
         super().__init__(
             config_id,
             scope,
@@ -116,6 +122,12 @@ class SQLDataNode(DataNode):
             self.properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
             self.properties.get("path", ""),
         )
+
+    def _check_exposed_type(self, exposed_type):
+        if isinstance(exposed_type, str) and exposed_type not in self.__VALID_STRING_EXPOSED_TYPES:
+            raise InvalidExposedType(
+                f"Invalid string exposed type {exposed_type}. Supported values are {', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
+            )
 
     @staticmethod
     def __build_conn_string(
@@ -146,15 +158,16 @@ class SQLDataNode(DataNode):
         return cls.__STORAGE_TYPE
 
     def _read(self):
-        if self.__EXPOSED_TYPE_PROPERTY in self.properties:
-            if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
-                return self._read_as_numpy()
-            return self._read_as(self.properties[self.__EXPOSED_TYPE_PROPERTY])
-        return self._read_as_pandas_dataframe()
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
+            return self._read_as_pandas_dataframe()
+        if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_NUMPY:
+            return self._read_as_numpy()
+        return self._read_as()
 
-    def _read_as(self, query, custom_class):
+    def _read_as(self):
+        custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
         with self.__engine().connect() as connection:
-            query_result = connection.execute(text(query))
+            query_result = connection.execute(text(self.read_query))
         return list(map(lambda row: custom_class(**row), query_result))
 
     def _read_as_numpy(self):

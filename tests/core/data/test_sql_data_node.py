@@ -18,11 +18,19 @@ import pytest
 
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data.sql import SQLDataNode
-from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
+from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
 if not util.find_spec("pyodbc"):
     pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
+
+
+class MyCustomObject:
+    def __init__(self, foo=None, bar=None, *args, **kwargs):
+        self.foo = foo
+        self.bar = bar
+        self.args = args
+        self.kwargs = kwargs
 
 
 class TestSQLDataNode:
@@ -66,6 +74,7 @@ class TestSQLDataNode:
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.read_query != ""
+        assert dn.exposed_type == "pandas"
 
     @pytest.mark.parametrize(
         "properties",
@@ -108,7 +117,7 @@ class TestSQLDataNode:
                 "db_engine": "mssql",
                 "read_query": "SELECT * from table_name",
                 "write_table": "foo",
-                "exposed_type": "Whatever",
+                "exposed_type": MyCustomObject,
             },
         )
         assert sql_data_node_as_custom_object._read() == "custom"
@@ -132,12 +141,6 @@ class TestSQLDataNode:
 
     @pytest.mark.parametrize("properties", __properties)
     def test_read_as(self, properties):
-        class MyCustomObject:
-            def __init__(self, foo=None, bar=None, *args, **kwargs):
-                self.foo = foo
-                self.bar = bar
-                self.args = args
-                self.kwargs = kwargs
 
         sql_data_node = SQLDataNode(
             "foo",
@@ -149,6 +152,7 @@ class TestSQLDataNode:
                 "db_engine": "mssql",
                 "read_query": "SELECT * from table_name",
                 "write_table": "foo",
+                "exposed_type": MyCustomObject,
             },
         )
 
@@ -162,7 +166,7 @@ class TestSQLDataNode:
                 {"KWARGS_KEY": "KWARGS_VALUE"},
                 {},
             ]
-            data = sql_data_node._read_as("fake query", MyCustomObject)
+            data = sql_data_node._read_as()
 
         assert isinstance(data, list)
         assert isinstance(data[0], MyCustomObject)
@@ -191,7 +195,7 @@ class TestSQLDataNode:
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.return_value = []
-            data_2 = sql_data_node._read_as("fake query", MyCustomObject)
+            data_2 = sql_data_node._read_as()
         assert isinstance(data_2, list)
         assert len(data_2) == 0
 
@@ -247,6 +251,20 @@ class TestSQLDataNode:
             with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as mck:
                 dn2._write(data)
                 mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
+
+    def test_raise_error_invalid_exposed_type(self):
+        with pytest.raises(InvalidExposedType):
+            SQLDataNode(
+                "foo",
+                Scope.PIPELINE,
+                properties={
+                    "db_name": "datanode",
+                    "db_engine": "sqlite",
+                    "read_query": "SELECT * from foo",
+                    "write_table": "foo",
+                    "exposed_type": "foo",
+                },
+            )
 
     def test_write_dataframe(self):
         dn = SQLDataNode(
