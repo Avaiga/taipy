@@ -14,7 +14,7 @@ import warnings
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from ..renderers.builder import _Builder
+from ..renderers.builder import Builder
 from ..renderers.utils import _to_camel_case
 from ..types import PropertyType
 
@@ -95,7 +95,7 @@ class Element:
         if not isinstance(self.name, str) or not self.name or not self.name.isidentifier():
             warnings.warn(f"Element should have a valid name '{self.name}'")
         default_found = False
-        for attr in self.attributes:
+        for attr in self.attributes or []:
             if isinstance(attr, ElementAttribute):
                 attr.check(self.name)
                 if not default_found:
@@ -115,63 +115,51 @@ class Element:
         is_html: t.Optional[bool] = False,
     ) -> t.Union[t.Any, t.Tuple[str, str]]:
         attributes = properties or {}
-        hash_names = _Builder._get_variable_hash_names(gui, attributes)
-        res = self.render(gui, attributes, hash_names, is_html)
-        if res is None:
-            default_attr: t.Optional[ElementAttribute] = None
-            default_value = None
-            attrs = []
-            for ua in self.attributes:
-                if isinstance(ua, ElementAttribute):
-                    if self.default_attribute == ua.name:
-                        default_attr = ua
-                        default_value = ua.default_value
-                    else:
-                        attrs.append(ua._get_tuple())
-            elt_built = _Builder(
-                gui=gui,
-                control_type=self.name,
-                element_name=self._get_js_name(),
-                attributes=properties,
-                hash_names=hash_names,
-                lib_name=lib_name,
-                default_value=default_value,
+        hash_names = Builder._get_variable_hash_names(gui, attributes)
+        default_attr: t.Optional[ElementAttribute] = None
+        default_value = None
+        attrs = []
+        for ua in self.attributes or []:
+            if isinstance(ua, ElementAttribute):
+                if self.default_attribute == ua.name:
+                    default_attr = ua
+                    default_value = ua.default_value
+                else:
+                    attrs.append(ua._get_tuple())
+        elt_built = Builder(
+            gui=gui,
+            control_type=self.name,
+            element_name=self._get_js_name(),
+            attributes=properties,
+            hash_names=hash_names,
+            lib_name=lib_name,
+            default_value=default_value,
+        )
+        if default_attr is not None:
+            elt_built.set_value_and_default(
+                var_name=default_attr.name,
+                var_type=default_attr.attribute_type,
+                default_val=default_attr.default_value,
+                with_default=default_attr.attribute_type != PropertyType.data,
             )
-            if default_attr is not None:
-                elt_built.set_value_and_default(
-                    var_name=default_attr.name,
-                    var_type=default_attr.attribute_type,
-                    default_val=default_attr.default_value,
-                    with_default=default_attr.attribute_type != PropertyType.data,
-                )
-            elt_built.set_attributes(attrs)
-            return elt_built.build_to_string() if is_html else elt_built.el
-        else:
-            return res
+        elt_built.set_attributes(attrs)
+        # call user render
+        self.render(gui, attributes, hash_names, elt_built)
+        return elt_built._build_to_string() if is_html else elt_built.el
 
-    def render(
-        self,
-        gui: "Gui",
-        properties: t.Dict[str, t.Any],
-        hash_names: t.Dict[str, str],
-        is_html: t.Optional[bool] = False,
-    ) -> t.Union[None, t.Any, t.Tuple[str, str]]:
+    def render(self, gui: "Gui", properties: t.Dict[str, t.Any], hash_names: t.Dict[str, str], builder: Builder):
         """
         TODO
-        - returns a tuple of string with the full React component instanciation and the component name if is_html
-            else an xtree Element in markdown context
-        - returns None to let taipy render the component
+        Uses the builder to update the xml node
 
         Arguments:
 
             gui (Gui): The current instance of Gui.
             properties (t.Dict[str, t.Any]): The dict containing a value for each defined attribute.
             hash_names (t.Dict[str, str]): The dict containing the internal variable name for each bound attribute.
-            is_html (t.Optional[bool]): The flag indicating if the method is called in the context of HTML or MarkDown rendering (default is False).
 
-        Returns: (None | xtree.Element | t.Tuple[str, str])
+        Returns: (void)
         """
-        return None
 
 
 class ElementLibrary(ABC):
