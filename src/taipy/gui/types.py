@@ -39,6 +39,7 @@ class _WsType(Enum):
     MULTIPLE_MESSAGE = "MS"
     DOWNLOAD_FILE = "DF"
     PARTIAL = "PR"
+    ACKNOWLEDGEMENT = "ACK"
 
 
 NumberTypes = {"int", "int64", "float", "float64"}

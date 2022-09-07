@@ -15,6 +15,7 @@ import { Dispatch } from "react";
 import { PaletteMode } from "@mui/material";
 import { createTheme, Theme } from "@mui/material/styles";
 import { io, Socket } from "socket.io-client";
+import { v4 as uuidv4 } from 'uuid';
 import merge from "lodash/merge";
 
 import { TIMEZONE_CLIENT } from "../utils";
@@ -42,6 +43,7 @@ enum Types {
     DownloadFile = "DOWNLOAD_FILE",
     Partial = "PARTIAL",
     ModuleContext = "MODULE_CONTEXT",
+    Acknowledgement = "ACKNOWLEDGEMENT"
 }
 
 /**
@@ -63,6 +65,7 @@ export interface TaipyState {
     menu: MenuProps;
     download?: FileDownloadProps;
     moduleContext: string;
+    ackList: string[];
 }
 
  export interface TaipyBaseAction {
@@ -127,6 +130,8 @@ export interface FileDownloadProps {
 
 interface TaipyIdAction extends TaipyBaseAction, IdMessage {}
 
+interface TaipyAckAction extends TaipyBaseAction, IdMessage {}
+
 interface TaipyModuleContextAction extends TaipyBaseAction {
     context: string;
 }
@@ -190,6 +195,7 @@ export const INITIAL_STATE: TaipyState = {
     id: getLocalStorageValue("TaipyClientId", ""),
     menu: {},
     moduleContext: "",
+    ackList: [],
 };
 
 export const taipyInitialize = (initialState: TaipyState): TaipyState => ({
@@ -216,6 +222,8 @@ const messageToAction = (message: WsMessage) => {
             return createDownloadAction(message as unknown as FileDownloadProps);
         } else if (message.type === "PR") {
             return createPartialAction((message as unknown as Record<string, string>).name, true);
+        } else if (message.type === "ACK") {
+            return createAckAction((message as unknown as IdMessage).id);
         }
     }
     return {} as TaipyBaseAction;
@@ -286,6 +294,7 @@ export const retreiveBlockUi = (): BlockMessage => {
 
 export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): TaipyState => {
     const action = baseAction as TaipyAction;
+    let ackId = "";
     switch (action.type) {
         case Types.SocketConnected:
             return !!state.isSocketConnected ? state : { ...state, isSocketConnected: true };
@@ -351,6 +360,9 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const id = (action as unknown as TaipyIdAction).id;
             storeClientId(id);
             return { ...state, id: id };
+        case Types.Acknowledgement:
+            const ackActionId = (action as unknown as TaipyAckAction).id;
+            return { ...state, ackList: state.ackList.filter(v => v !== ackActionId)}
         case Types.SetTheme: {
             let mode = action.payload.value as PaletteMode;
             if (action.payload.fromBackend) {
@@ -415,7 +427,7 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             const msgAction = baseAction as TaipyMultipleMessageAction;
             return msgAction.actions.reduce((pState, act) => taipyReducer(pState, act), state);
         case Types.SendUpdate:
-            sendWsMessage(
+            ackId = sendWsMessage(
                 state.socket,
                 "U",
                 action.name,
@@ -426,15 +438,17 @@ export const taipyReducer = (state: TaipyState, baseAction: TaipyBaseAction): Ta
             );
             break;
         case Types.Action:
-            sendWsMessage(state.socket, "A", action.name, action.payload, state.id, state.moduleContext);
+            ackId = sendWsMessage(state.socket, "A", action.name, action.payload, state.id, state.moduleContext);
             break;
         case Types.RequestDataUpdate:
-            sendWsMessage(state.socket, "DU", action.name, action.payload, state.id, state.moduleContext);
+            ackId = sendWsMessage(state.socket, "DU", action.name, action.payload, state.id, state.moduleContext);
             break;
         case Types.RequestUpdate:
-            sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, state.moduleContext);
+            ackId = sendWsMessage(state.socket, "RU", action.name, action.payload, state.id, state.moduleContext);
             break;
     }
+    if (ackId)
+        return { ...state, ackList: [...state.ackList, ackId] };
     return state;
 };
 
@@ -681,6 +695,11 @@ export const createIdAction = (id: string): TaipyIdAction => ({
     id: id,
 });
 
+export const createAckAction = (id: string): TaipyAckAction => ({
+    type: Types.Acknowledgement,
+    id: id,
+});
+
 export const createDownloadAction = (dMessage?: FileDownloadProps): TaipyDownloadAction => ({
     type: Types.DownloadFile,
     content: dMessage?.content,
@@ -704,7 +723,7 @@ export const createModuleContextAction = (context: string): TaipyModuleContextAc
     context: context,
 });
 
-type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR";
+type WsMessageType = "A" | "U" | "DU" | "MU" | "RU" | "AL" | "BL" | "NA" | "ID" | "MS" | "DF" | "PR" | "ACK";
 
 interface WsMessage {
     type: WsMessageType;
@@ -713,6 +732,7 @@ interface WsMessage {
     propagate: boolean;
     client_id: string;
     module_context: string;
+    ack_id?: string;
 }
 
 const sendWsMessage = (
@@ -723,14 +743,17 @@ const sendWsMessage = (
     id: string,
     moduleContext = "",
     propagate = true
-): void => {
+): string => {
+    const ackId = uuidv4()
     const msg: WsMessage = {
         type: type,
         name: name,
         payload: payload,
         propagate: propagate,
         client_id: id,
+        ack_id: ackId,
         module_context: moduleContext,
     };
     socket?.emit("message", msg);
+    return ackId;
 };

@@ -357,6 +357,7 @@ class Gui:
         try:
             self.__set_client_id_in_context(message.get("client_id"))
             self._set_locals_context(message.get("module_context") or None)
+            self._set_ack_id(message.get("ack_id"))
             if msg_type == _WsType.UPDATE.value:
                 payload = message.get("payload", {})
                 self.__front_end_update(
@@ -677,6 +678,8 @@ class Gui:
                     payload,
                     to=self.__get_ws_receiver(),
                 )
+                if ack_id := self._get_ack_id():
+                    self._server._ws.emit("message", {"type": _WsType.ACKNOWLEDGEMENT.value, "id": ack_id})
             except Exception as e:
                 warnings.warn(f"Exception raised in Web Socket communication in '{self.__frame.f_code.co_name}':\n{e}")
         else:
@@ -950,6 +953,12 @@ class Gui:
 
     def _reset_locals_context(self) -> None:
         self.__locals_context.reset_locals_context()
+
+    def _set_ack_id(self, ack_id: t.Optional[str]) -> None:
+        setattr(g, "ack_id", ack_id)
+
+    def _get_ack_id(self) -> t.Optional[str]:
+        return getattr(g, "ack_id", None)
 
     @staticmethod
     def _get_root_page_name():
