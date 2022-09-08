@@ -11,8 +11,8 @@
 
 from typing import Dict, List
 
+import modin.pandas as pd
 import numpy as np
-import pandas as pd
 
 from src.taipy.core.data._filter import _FilterDataNode
 from src.taipy.core.data.data_node import DataNode

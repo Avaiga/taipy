@@ -16,8 +16,8 @@ from datetime import datetime, timedelta
 from functools import reduce
 from typing import Any, List, Optional, Set, Tuple, Union
 
+import modin.pandas as pd
 import numpy as np
-import pandas as pd
 
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope

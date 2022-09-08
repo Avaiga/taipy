@@ -14,7 +14,8 @@ from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set
 
-import pandas as pd
+import modin.pandas as pd
+import pandas
 
 from taipy.config.common.scope import Scope
 
@@ -170,7 +171,7 @@ class CSVDataNode(DataNode):
                 if usecols:
                     return pd.read_csv(self._path, header=None, usecols=usecols)
                 return pd.read_csv(self._path, header=None)
-        except pd.errors.EmptyDataError:
+        except pandas.errors.EmptyDataError:
             return pd.DataFrame()
 
     def _write(self, data: Any):

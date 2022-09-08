@@ -15,7 +15,7 @@ import shutil
 from datetime import datetime
 from queue import Queue
 
-import pandas as pd
+import modin.pandas as pd
 import pytest
 
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory

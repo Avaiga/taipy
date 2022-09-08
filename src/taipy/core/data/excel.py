@@ -14,7 +14,8 @@ from datetime import datetime, timedelta
 from os.path import isfile
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-import pandas as pd
+import modin.pandas as pd
+import pandas
 from openpyxl import load_workbook
 
 from taipy.config.common.scope import Scope
@@ -235,13 +236,14 @@ class ExcelDataNode(DataNode):
             kwargs = {}
             if not self.properties[self.__HAS_HEADER_PROPERTY]:
                 kwargs["header"] = None
-            return pd.read_excel(
+            pandas_df =  pandas.read_excel(
                 self._path,
                 sheet_name=sheet_names,
                 **kwargs,
             )
+            return pd.DataFrame(pandas_df)
 
-        except pd.errors.EmptyDataError:
+        except pandas.errors.EmptyDataError:
             return pd.DataFrame()
 
     def _write(self, data: Any):

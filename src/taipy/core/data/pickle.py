@@ -125,7 +125,9 @@ class PickleDataNode(DataNode):
         return pickle.load(open(self._path, "rb"))
 
     def _write(self, data):
+
         pickle.dump(data, open(self._path, "wb"))
+        # TODO: add a breakpoint here to load the pickle file again for testing
 
     def __build_path(self):
 

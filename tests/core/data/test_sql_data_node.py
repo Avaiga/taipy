@@ -12,7 +12,7 @@
 from importlib import util
 from unittest import mock
 
-import pandas as pd
+import modin.pandas as pd
 import pytest
 
 from src.taipy.core.common.alias import DataNodeId

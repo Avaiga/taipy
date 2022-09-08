@@ -14,8 +14,8 @@ import pathlib
 from datetime import datetime
 from time import sleep
 
+import modin.pandas as pd
 import numpy as np
-import pandas as pd
 import pytest
 
 from src.taipy.core.common.alias import DataNodeId

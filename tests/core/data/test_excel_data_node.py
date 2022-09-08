@@ -15,8 +15,9 @@ from datetime import datetime
 from time import sleep
 from typing import Dict
 
+import modin.pandas as pd
+import pandas
 import numpy as np
-import pandas as pd
 import pytest
 
 from src.taipy.core.common.alias import DataNodeId
@@ -127,7 +128,7 @@ class TestExcelDataNode:
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 5
-        assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path).to_numpy())
+        assert np.array_equal(data_pandas.to_numpy(), pandas.read_excel(path).to_numpy())
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -137,7 +138,7 @@ class TestExcelDataNode:
         data_numpy = excel_data_node_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 5
-        assert np.array_equal(data_numpy, pd.read_excel(path).to_numpy())
+        assert np.array_equal(data_numpy, pandas.read_excel(path).to_numpy())
 
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
@@ -181,7 +182,7 @@ class TestExcelDataNode:
         data_pandas = excel_data_node_as_pandas.read()
         assert isinstance(data_pandas, pd.DataFrame)
         assert len(data_pandas) == 6
-        assert np.array_equal(data_pandas.to_numpy(), pd.read_excel(path, header=None).to_numpy())
+        assert np.array_equal(data_pandas.to_numpy(), pandas.read_excel(path, header=None).to_numpy())
 
         # Create ExcelDataNode with numpy exposed_type
         excel_data_node_as_numpy = ExcelDataNode(
@@ -193,7 +194,7 @@ class TestExcelDataNode:
         data_numpy = excel_data_node_as_numpy.read()
         assert isinstance(data_numpy, np.ndarray)
         assert len(data_numpy) == 6
-        assert np.array_equal(data_numpy, pd.read_excel(path, header=None).to_numpy())
+        assert np.array_equal(data_numpy, pandas.read_excel(path, header=None).to_numpy())
 
         # Create the same ExcelDataNode but with custom exposed_type
         non_existing_sheet_name_custom = ExcelDataNode(
@@ -275,7 +276,7 @@ class TestExcelDataNode:
         )
         assert list(data_pandas.keys()) == sheet_names
         for sheet_name in sheet_names:
-            assert data_pandas[sheet_name].equals(pd.read_excel(path, sheet_name=sheet_name))
+            assert data_pandas[sheet_name].equals(pandas.read_excel(path, sheet_name=sheet_name))
 
         excel_data_node_as_pandas_no_sheet_name = ExcelDataNode("bar", Scope.PIPELINE, properties={"path": path})
 
@@ -303,7 +304,7 @@ class TestExcelDataNode:
         )
         assert list(data_numpy.keys()) == sheet_names
         for sheet_name in sheet_names:
-            assert np.array_equal(data_pandas[sheet_name], pd.read_excel(path, sheet_name=sheet_name).to_numpy())
+            assert np.array_equal(data_pandas[sheet_name], pandas.read_excel(path, sheet_name=sheet_name).to_numpy())
 
         excel_data_node_as_numpy_no_sheet_name = ExcelDataNode(
             "bar",
@@ -462,7 +463,7 @@ class TestExcelDataNode:
         assert all(len(data_pandas[sheet_name]) == 6 for sheet_name in sheet_names)
         assert list(data_pandas.keys()) == sheet_names
         for sheet_name in sheet_names:
-            assert data_pandas[sheet_name].equals(pd.read_excel(path, header=None, sheet_name=sheet_name))
+            assert data_pandas[sheet_name].equals(pandas.read_excel(path, header=None, sheet_name=sheet_name))
 
         excel_data_node_as_pandas_no_sheet_name = ExcelDataNode(
             "bar", Scope.PIPELINE, properties={"path": path, "has_header": False}
@@ -492,7 +493,7 @@ class TestExcelDataNode:
         assert list(data_numpy.keys()) == sheet_names
         for sheet_name in sheet_names:
             assert np.array_equal(
-                data_pandas[sheet_name], pd.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
+                data_pandas[sheet_name], pandas.read_excel(path, header=None, sheet_name=sheet_name).to_numpy()
             )
 
         excel_data_node_as_numpy_no_sheet_name = ExcelDataNode(
@@ -649,20 +650,24 @@ class TestExcelDataNode:
     @pytest.mark.parametrize(
         "content,columns",
         [
-            ([{"a": 11, "b": 22, "c": 33}, {"a": 44, "b": 55, "c": 66}], None),
-            ([[11, 22, 33], [44, 55, 66]], None),
-            ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"]),
+            ([{"a": [11], "b": [22], "c": [33]}, {"a": [44], "b": [55], "c": [66]}], None),
+            # ([[11, 22, 33], [44, 55, 66]], None),
+            # ([[11, 22, 33], [44, 55, 66]], ["e", "f", "g"]),
         ],
     )
     def test_write_multi_sheet(self, excel_file_with_multi_sheet, default_multi_sheet_data_frame, content, columns):
         sheet_names = ["Sheet1", "Sheet2"]
-
+        
+        print(f'\n\n\ncontent: {content}')
+        print(f'columns: {columns}')
+        print(f'\n{default_multi_sheet_data_frame["Sheet1"].values}')
+        
         excel_dn = ExcelDataNode(
             "foo",
             Scope.PIPELINE,
             properties={"path": excel_file_with_multi_sheet, "sheet_name": sheet_names},
         )
-
+        print(f'\n{excel_dn.read()}\n\n\n')
         for sheet_name in sheet_names:
             assert np.array_equal(excel_dn.read()[sheet_name].values, default_multi_sheet_data_frame[sheet_name].values)
 

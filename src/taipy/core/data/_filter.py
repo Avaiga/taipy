@@ -12,7 +12,7 @@
 from collections.abc import Hashable
 from typing import Dict, Iterable, List, Union
 
-import pandas as pd
+import modin.pandas as pd
 from pandas.core.common import is_bool_indexer
 
 

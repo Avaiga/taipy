@@ -13,7 +13,7 @@ import os
 import pathlib
 from time import sleep
 
-import pandas as pd
+import modin.pandas as pd
 
 import src.taipy.core.taipy as tp
 from src.taipy.core import Status

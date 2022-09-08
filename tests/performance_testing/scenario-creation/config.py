@@ -11,8 +11,8 @@
 
 import datetime as dt
 
+import modin.pandas as pd
 import numpy as np
-import pandas as pd
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from taipy.config import Config
