@@ -22,7 +22,7 @@ from ..types import PropertyType
 from ..utils import _RE_PD_TYPE, _get_date_col_str_name
 from .data_accessor import _DataAccessor
 from .data_format import _DataFormat
-from .utils import _df_data_filter
+from .utils import _df_data_filter, _df_relayout
 
 _has_arrow_module = False
 if util.find_spec("pyarrow"):
@@ -266,21 +266,29 @@ class _PandasDataAccessor(_DataAccessor):
             )
         else:
             ret_payload["alldata"] = True
-            decimator = payload.get("decimator", None)
+            decimatorPayload: t.Dict[str, t.Any] = payload.get("decimatorPayload", {})
+            decimator = decimatorPayload.get("decimator")
             decimator_instance = (
                 gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
             )
-            nb_rows_max = payload.get("width")
-            if (
-                nb_rows_max
-                and isinstance(decimator_instance, PropertyType.decimator.value)
-                and decimator_instance._is_applicable(value, nb_rows_max)
-            ):
-                try:
-                    x_column, y_column = columns[1] if len(columns) > 1 else None, columns[0]
-                    value = _df_data_filter(value, x_column, y_column, decimator=decimator_instance)
-                except Exception as e:
-                    warnings.warn(f"Limit rows error for dataframe: {e}")
+            if isinstance(decimator_instance, PropertyType.decimator.value):
+                x_column, y_column = decimatorPayload.get("xAxis", ""), decimatorPayload.get("yAxis", "")
+                if decimator_instance._chart_zooming and "relayoutData" in decimatorPayload:
+                    chart_modes = decimatorPayload.get("chartModes", [])
+                    relayoutData = decimatorPayload.get("relayoutData", {})
+                    x0 = relayoutData.get("xaxis.range[0]")
+                    x1 = relayoutData.get("xaxis.range[1]")
+                    y0 = relayoutData.get("yaxis.range[0]")
+                    y1 = relayoutData.get("yaxis.range[1]")
+
+                    value = _df_relayout(value, x_column, y_column, chart_modes, x0, x1, y0, y1)
+
+                nb_rows_max = decimatorPayload.get("width")
+                if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max):
+                    try:
+                        value = _df_data_filter(value, x_column, y_column, decimator=decimator_instance)
+                    except Exception as e:
+                        warnings.warn(f"Limit rows error for dataframe: {e}")
             value = self.__build_transferred_cols(gui, columns, value)
             dictret = self.__format_data(value, data_format, "list", data_extraction=True)
         ret_payload["value"] = dictret

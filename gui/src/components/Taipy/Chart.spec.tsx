@@ -138,6 +138,7 @@ describe("Chart Component", () => {
                 alldata: true,
                 pagekey: "Day-Daily hospital occupancy",
                 columns: ["Day", "Daily hospital occupancy"],
+                decimatorPayload: undefined,
                 id: "chart",
             },
             type: "REQUEST_DATA_UPDATE",

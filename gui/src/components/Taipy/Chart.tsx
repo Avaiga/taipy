@@ -131,8 +131,8 @@ const Chart = (props: ChartProp) => {
         updateVarName,
         updateVars,
         id,
-        data = {},
         tp_onRangeChange,
+        data = {},
         propagate = true,
         decimator,
     } = props;
@@ -212,6 +212,12 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+            const decimatorPayload = decimator ? {
+                width: plotRef.current?.clientWidth,
+                xAxis: config.traces.length && config.traces[0].length && config.traces[0][0] && config.columns[config.traces[0][0]].dfid,
+                yAxis: config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]] && config.columns[config.traces[0][1]].dfid,
+                decimator: decimator
+              } : undefined;
             dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "");
             dispatch(
                 createRequestChartUpdateAction(
@@ -219,13 +225,12 @@ const Chart = (props: ChartProp) => {
                     id,
                     backCols,
                     dataKey.current,
-                    decimator ? plotRef.current?.clientWidth : undefined,
-                    decimator
+                    decimatorPayload,
                 )
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refresh, dispatch, config.columns, updateVarName, id, decimator]);
+    }, [refresh, dispatch, config.columns, config.traces, updateVarName, id, decimator]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
@@ -355,9 +360,32 @@ const Chart = (props: ChartProp) => {
     }, [active, props.plotConfig]);
 
     const onRelayout = useCallback(
-        (eventData: PlotRelayoutEvent) =>
-            tp_onRangeChange && dispatch(createSendActionNameAction(id, { action: tp_onRangeChange, ...eventData })),
-        [dispatch, tp_onRangeChange, id]
+        (eventData: PlotRelayoutEvent) => {
+            tp_onRangeChange && dispatch(createSendActionNameAction(id, { action: tp_onRangeChange, ...eventData }));
+            if (decimator) {
+                const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
+                const eventDataKey = Object.keys(eventData).map(v => v + "=" + eventData[v as keyof typeof eventData]).join("-");
+                dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "") + "--" + eventDataKey;
+                const decimatorPayload = {
+                    width: plotRef.current?.clientWidth,
+                    xAxis: config.traces.length && config.traces[0].length && config.traces[0][0] && config.columns[config.traces[0][0]].dfid,
+                    yAxis: config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]] && config.columns[config.traces[0][1]].dfid,
+                    decimator: decimator,
+                    relayoutData: eventData,
+                    chartModes: config.modes,
+                }
+                dispatch(
+                    createRequestChartUpdateAction(
+                        updateVarName,
+                        id,
+                        backCols,
+                        dataKey.current,
+                        decimatorPayload,
+                    )
+                );
+            }
+        },
+        [dispatch, tp_onRangeChange, id, config.modes, config.columns, config.traces, updateVarName, decimator]
     );
 
     const onAfterPlot = useCallback(() => {
