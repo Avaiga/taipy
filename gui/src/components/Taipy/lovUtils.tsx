@@ -44,7 +44,7 @@ export interface LovProps<T = string | string[], U = string> extends TaipyActive
 /**
  * A lov element.
  */
-type LoVElt = [
+export type LoVElt = [
     /** {string} The identifier. */
     string,
     /** {stringIcon} The label. */

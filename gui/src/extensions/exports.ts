@@ -13,12 +13,18 @@
 
 import Input from "../components/Taipy/Input";
 import Router from "../components/Router";
-import { useLovListMemo, LoV } from "../components/Taipy/lovUtils";
+import { useLovListMemo, LoV, LoVElt } from "../components/Taipy/lovUtils";
+import { LovItem } from "../utils/lov";
 import { getUpdateVar } from "../components/Taipy/utils";
 import { ColumnDesc, RowType, RowValue } from "../components/Taipy/tableUtils";
-import { TaipyContext } from "../context/taipyContext";
+import { TaipyContext, TaipyStore } from "../context/taipyContext";
+import { TaipyBaseAction, TaipyState } from "../context/taipyReducers";
 import { useDynamicProperty, useDispatchRequestUpdateOnFirstRender } from "../utils/hooks";
-import { createSendActionNameAction, createSendUpdateAction, createRequestDataUpdateAction } from "../context/taipyReducers";
+import {
+    createSendActionNameAction,
+    createSendUpdateAction,
+    createRequestDataUpdateAction,
+} from "../context/taipyReducers";
 
 export {
     Router,
@@ -33,4 +39,14 @@ export {
     useDispatchRequestUpdateOnFirstRender,
 };
 
-export type {ColumnDesc, RowType, RowValue, LoV};
+export type {
+    ColumnDesc,
+    RowType,
+    RowValue,
+    LoV,
+    LoVElt,
+    LovItem,
+    TaipyStore as Store,
+    TaipyState as State,
+    TaipyBaseAction as Action
+};
