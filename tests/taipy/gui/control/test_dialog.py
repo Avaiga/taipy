@@ -20,7 +20,7 @@ def test_dialog_md_1(gui: Gui, helpers):
     md_string = "<|dialog|title=This is a Dialog|open={dialog_open}|page=page_test|on_action=validate_action|>"
     expected_list = [
         "<Dialog",
-        'tp_onAction="validate_action"',
+        'onAction="validate_action"',
         'page="page_test"',
         'title="This is a Dialog"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
@@ -38,7 +38,7 @@ def test_dialog_md_2(gui: Gui, helpers):
         "<Dialog",
         'page="TaiPy_partials',
         'title="Another Dialog"',
-        'tp_onAction="validate_action"',
+        'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
     ]
@@ -73,7 +73,7 @@ def test_dialog_html_1(gui: Gui, helpers):
         "<Dialog",
         'page="page1"',
         'title="This is a Dialog"',
-        'tp_onAction="validate_action"',
+        'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
     ]
@@ -91,7 +91,7 @@ def test_dialog_html_2(gui: Gui, helpers):
         "<Dialog",
         'page="TaiPy_partials',
         'title="Another Dialog"',
-        'tp_onAction="validate_action"',
+        'onAction="validate_action"',
         'updateVarName="_TpB_tpec_TpExPr_dialog_open_TPMDL_0"',
         "open={_TpB_tpec_TpExPr_dialog_open_TPMDL_0}",
     ]

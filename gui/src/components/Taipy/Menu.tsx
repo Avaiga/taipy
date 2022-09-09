@@ -34,7 +34,7 @@ const avatarSx = { bgcolor: (theme: Theme) => theme.palette.text.primary };
 const baseTitleProps = { noWrap: true, variant: "h6" } as const;
 
 const Menu = (props: MenuProps) => {
-    const { label, tp_onAction = "", lov, width, inactiveIds = [], active = true, className } = props;
+    const { label, onAction = "", lov, width, inactiveIds = [], active = true, className } = props;
     const [selectedValue, setSelectedValue] = useState("");
     const [opened, setOpened] = useState(false);
     const { dispatch } = useContext(TaipyContext);
@@ -45,12 +45,12 @@ const Menu = (props: MenuProps) => {
             if (active) {
                 const { id: key = "" } = evt.currentTarget.dataset;
                 setSelectedValue(() => {
-                    dispatch(createSendActionNameAction("menu", tp_onAction, key));
+                    dispatch(createSendActionNameAction("menu", onAction, key));
                     return key;
                 });
             }
         },
-        [tp_onAction, dispatch, active]
+        [onAction, dispatch, active]
     );
 
     const openHandler = useCallback((evt: MouseEvent<HTMLElement>) => {

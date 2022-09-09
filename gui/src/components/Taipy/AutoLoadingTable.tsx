@@ -152,9 +152,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         selected = [],
         pageSize = 100,
         defaultKey = "",
-        tp_onEdit = "",
-        tp_onDelete = "",
-        tp_onAdd = "",
+        onEdit = "",
+        onDelete = "",
+        onAdd = "",
         size = DEFAULT_SIZE,
     } = props;
     const [rows, setRows] = useState<RowType[]>([]);
@@ -247,7 +247,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                     }
                 });
                 addDeleteColumn(
-                    (!!(active && editable && (tp_onAdd || tp_onDelete)) ? 1 : 0) + (active && filter ? 1 : 0),
+                    (!!(active && editable && (onAdd || onDelete)) ? 1 : 0) + (active && filter ? 1 : 0),
                     columns
                 );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
@@ -267,7 +267,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             }
         }
         return [[], {}, {}, hNan, false];
-    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
+    }, [active, editable, onAdd, onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     const boxBodySx = useMemo(() => ({ height: height }), [height]);
 
@@ -340,11 +340,11 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         () =>
             dispatch(
                 createSendActionNameAction(updateVarName, {
-                    action: tp_onAdd,
+                    action: onAdd,
                     index: visibleStartIndex,
                 })
             ),
-        [visibleStartIndex, dispatch, updateVarName, tp_onAdd]
+        [visibleStartIndex, dispatch, updateVarName, onAdd]
     );
 
     const isItemLoaded = useCallback((index: number) => index < rows.length && !!rows[index], [rows]);
@@ -353,25 +353,25 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
         (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, {
-                    action: tp_onEdit,
+                    action: onEdit,
                     value: value,
                     index: rowIndex,
                     col: colName,
                     user_value: userValue,
                 })
             ),
-        [dispatch, updateVarName, tp_onEdit]
+        [dispatch, updateVarName, onEdit]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
                 createSendActionNameAction(updateVarName, {
-                    action: tp_onDelete,
+                    action: onDelete,
                     index: rowIndex,
                 })
             ),
-        [dispatch, updateVarName, tp_onDelete]
+        [dispatch, updateVarName, onDelete]
     );
 
     const onTaipyItemsRendered = useCallback(
@@ -398,8 +398,8 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             isItemLoaded: isItemLoaded,
             selection: selected,
             formatConfig: formatConfig,
-            onValidation: active && editable && tp_onEdit ? onCellValidation : undefined,
-            onDeletion: active && editable && tp_onDelete ? onRowDeletion : undefined,
+            onValidation: active && editable && onEdit ? onCellValidation : undefined,
+            onDeletion: active && editable && onDelete ? onRowDeletion : undefined,
             lineStyle: props.lineStyle,
             nanValue: props.nanValue,
         }),
@@ -412,9 +412,9 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
             columns,
             selected,
             formatConfig,
-            tp_onEdit,
+            onEdit,
             onCellValidation,
-            tp_onDelete,
+            onDelete,
             onRowDeletion,
             props.lineStyle,
             props.nanValue,
@@ -446,7 +446,7 @@ const AutoLoadingTable = (props: TaipyTableProps) => {
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && editable && tp_onAdd ? (
+                                                    active && editable && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}

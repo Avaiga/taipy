@@ -23,7 +23,7 @@ import { useDynamicProperty } from "../../utils/hooks";
 import { TaipyActiveProps } from "./utils";
 
 interface ImageProps extends TaipyActiveProps {
-    tp_onAction?: string;
+    onAction?: string;
     label?: string;
     defaultLabel?: string;
     width?: string | number;
@@ -97,7 +97,7 @@ const ImageMarked = styled("span")(({ theme }) => ({
 }));
 
 const Image = (props: ImageProps) => {
-    const { className, id, tp_onAction, width = 300, height } = props;
+    const { className, id, onAction, width = 300, height } = props;
     const [label, setLabel] = useState(props.defaultLabel);
     const [content, setContent] = useState(props.defaultContent);
     const { dispatch } = useContext(TaipyContext);
@@ -106,10 +106,10 @@ const Image = (props: ImageProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleClick = useCallback(() => {
-        if (tp_onAction) {
-            dispatch(createSendActionNameAction(id, tp_onAction));
+        if (onAction) {
+            dispatch(createSendActionNameAction(id, onAction));
         }
-    }, [id, tp_onAction, dispatch]);
+    }, [id, onAction, dispatch]);
 
     useEffect(() => {
         setLabel((val) => {

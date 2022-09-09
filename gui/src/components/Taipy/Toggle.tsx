@@ -65,12 +65,12 @@ const Toggle = (props: ToggleProps) => {
                 createSendUpdateAction(
                     updateVarName,
                     val === null ? unselectedValue : val,
-                    props.tp_onChange,
+                    props.onChange,
                     propagate,
                     valueById ? undefined : getUpdateVar(updateVars, "lov")
                 )
             )},
-        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById, props.tp_onChange, props.allowUnselect]
+        [unselectedValue, updateVarName, propagate, dispatch, updateVars, valueById, props.onChange, props.allowUnselect]
     );
 
     useEffect(() => {props.value !== undefined && setValue(props.value)}, [props.value]);

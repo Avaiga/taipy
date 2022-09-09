@@ -24,7 +24,7 @@ import { noDisplayStyle, TaipyActiveProps } from "./utils";
 import { uploadFile } from "../../workers/fileupload";
 
 interface FileSelectorProps extends TaipyActiveProps {
-    tp_onAction?: string;
+    onAction?: string;
     defaultLabel?: string;
     label?: string;
     multiple?: boolean;
@@ -44,7 +44,7 @@ const FileSelector = (props: FileSelectorProps) => {
     const {
         className,
         id,
-        tp_onAction,
+        onAction,
         defaultLabel = "",
         updateVarName = "",
         multiple = false,
@@ -71,7 +71,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 uploadFile(updateVarName, files, setProgress, state.id).then(
                     (value) => {
                         setUpload(false);
-                        tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
+                        onAction && dispatch(createSendActionNameAction(id, onAction));
                         dispatch(
                             createAlertAction({ atype: "success", message: value, system: false, duration: 3000 })
                         );
@@ -85,7 +85,7 @@ const FileSelector = (props: FileSelectorProps) => {
                 );
             }
         },
-        [state.id, id, tp_onAction, updateVarName, dispatch]
+        [state.id, id, onAction, updateVarName, dispatch]
     );
 
     const handleChange = useCallback(

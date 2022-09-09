@@ -42,7 +42,6 @@ class ElementAttribute:
             attribute_type (PropertyType): The attribute type.
             default_value (optional Any): The attribute's default value (default is None).
             js_name (optional str): The name of the attribute on the frontend (default to Camel Case of `name`).
-                Attribute starting with `on_<action name>` will be translated into `tp_on<CamelCase(action name)>`.
 
         """
         self.name = name
@@ -72,7 +71,12 @@ class Element:
     """
 
     def __init__(
-        self, name: str, default_attribute: str, attributes: t.List[ElementAttribute], js_name: t.Optional[str] = None
+        self,
+        name: str,
+        default_attribute: str,
+        attributes: t.List[ElementAttribute],
+        js_name: t.Optional[str] = None,
+        render: t.Optional[t.Callable] = None,
     ) -> None:
         """
         Arguments:
@@ -81,11 +85,14 @@ class Element:
             default_attribute (str): the default attribute for the element.
             attributes (List[ElementAttribute]): A list of attributes.
             js_name (optional str): The name of the element on the frontend (default to Camel Case of `name`).
+            render (optional callable): A function that has the same signature as `Element.render` and that will replace it if defined.
         """
         self.name = name
         self.default_attribute = default_attribute
         self.attributes = attributes
         self.js_name = js_name
+        if callable(render):
+            self._render = render
         super().__init__()
 
     def _get_js_name(self) -> str:
@@ -150,16 +157,19 @@ class Element:
     def render(self, gui: "Gui", properties: t.Dict[str, t.Any], hash_names: t.Dict[str, str], builder: Builder):
         """
         TODO
-        Uses the builder to update the xml node
+        Uses the builder to update the xml node.
 
         Arguments:
 
             gui (Gui): The current instance of Gui.
             properties (t.Dict[str, t.Any]): The dict containing a value for each defined attribute.
             hash_names (t.Dict[str, str]): The dict containing the internal variable name for each bound attribute.
+            builder (Builder): the Builder instance that has been initialized and used by Taipy to start the rendering.
 
         Returns: (void)
         """
+        if hasattr(self, "_render") and callable(self._render):
+            self._render(gui, properties, hash_names, builder)
 
 
 class ElementLibrary(ABC):
@@ -207,6 +217,9 @@ class ElementLibrary(ABC):
         """
         TODO
         Returns a path for a resource name.
+        Resource URL should be formed as /taipy-extensions/<library_name>/<resource virtual path> with
+        - <resource virtual path> being the `name` parameter
+        - <library_name> the value returned by `get_name()`
 
         Arguments:
 

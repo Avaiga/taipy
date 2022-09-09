@@ -77,7 +77,7 @@ describe("Input Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Input value="Val" type="text" updateVarName="varname" tp_onAction="on_action" />
+                <Input value="Val" type="text" updateVarName="varname" onAction="on_action" />
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");
@@ -95,7 +95,7 @@ describe("Input Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByDisplayValue } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Input value="Val" type="text" updateVarName="varname" tp_onAction="on_action" />
+                <Input value="Val" type="text" updateVarName="varname" onAction="on_action" />
             </TaipyContext.Provider>
         );
         const elt = getByDisplayValue("Val");

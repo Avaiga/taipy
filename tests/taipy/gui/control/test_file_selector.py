@@ -19,7 +19,7 @@ def test_file_selector_md(gui: Gui, test_client, helpers):
         "<FileSelector",
         'updateVarName="tpec_TpExPr_content_TPMDL_0"',
         'label="label"',
-        'tp_onAction="action"',
+        'onAction="action"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)
 
@@ -31,6 +31,6 @@ def test_file_selector_html(gui: Gui, test_client, helpers):
         "<FileSelector",
         'updateVarName="tpec_TpExPr_content_TPMDL_0"',
         'label="label"',
-        'tp_onAction="action"',
+        'onAction="action"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

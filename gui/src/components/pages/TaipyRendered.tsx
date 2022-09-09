@@ -60,6 +60,7 @@ const setStyle = (id: string, styleString: string): void => {
     }
 };
 
+const emptyArray:string[] = [];
 
 const TaipyRendered = (props: TaipyRenderedProps) => {
     const {partial, fromBlock} = props;
@@ -101,6 +102,7 @@ const TaipyRendered = (props: TaipyRenderedProps) => {
                 renderUnrecognized={unregisteredRender}
                 allowUnknownElements={false}
                 renderError={renderError}
+                blacklistedAttrs={emptyArray}
             />
         </ErrorBoundary>
     );

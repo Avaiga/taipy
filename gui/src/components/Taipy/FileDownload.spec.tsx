@@ -56,7 +56,7 @@ describe("FileDownload Component", () => {
         expect(elt).not.toHaveClass("Mui-disabled");
     });
     it("is enabled by active", async () => {
-        const { getByRole } = render(<FileDownload defaultContent="/url/toto.png" active={true} tp_onAction="tp" />);
+        const { getByRole } = render(<FileDownload defaultContent="/url/toto.png" active={true} onAction="tp" />);
         const elt = getByRole("button");
         expect(elt).not.toHaveClass("Mui-disabled");
     });
@@ -65,7 +65,7 @@ describe("FileDownload Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <FileDownload defaultContent="/url/toto.png" tp_onAction="on_action" />
+                <FileDownload defaultContent="/url/toto.png" onAction="on_action" />
             </TaipyContext.Provider>
         );
         const elt = getByRole("button");

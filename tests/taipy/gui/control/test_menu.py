@@ -20,7 +20,7 @@ def test_menu_md(gui: Gui, test_client, helpers):
         'className="taipy-menu"',
         'defaultLov="[&quot;Item 1&quot;, &quot;Item 2&quot;, &quot;Item 3&quot;, &quot;Item 4&quot;]"',
         "lov={_TpL_tpec_TpExPr_lov_TPMDL_0}",
-        'tp_onAction="on_menu_action"',
+        'onAction="on_menu_action"',
         'updateVars="lov=_TpL_tpec_TpExPr_lov_TPMDL_0"',
     ]
     helpers.test_control_md(gui, md_string, expected_list)

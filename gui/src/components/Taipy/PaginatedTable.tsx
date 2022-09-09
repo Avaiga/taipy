@@ -85,9 +85,9 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         height,
         selected = [],
         updateVars,
-        tp_onEdit = "",
-        tp_onDelete = "",
-        tp_onAdd = "",
+        onEdit = "",
+        onDelete = "",
+        onAdd = "",
         width = "100vw",
         size = DEFAULT_SIZE,
     } = props;
@@ -129,7 +129,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                     }
                 });
                 addDeleteColumn(
-                    (!!active && editable && (tp_onAdd || tp_onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
+                    (!!active && editable && (onAdd || onDelete) ? 1 : 0) + (active && filter ? 1 : 0),
                     columns
                 );
                 const colsOrder = Object.keys(columns).sort(getsortByIndex(columns));
@@ -149,7 +149,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
             }
         }
         return [[], {}, {}, hNan, false];
-    }, [active, editable, tp_onAdd, tp_onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
+    }, [active, editable, onAdd, onDelete, props.columns, props.lineStyle, props.nanValue, props.filter]);
 
     useDispatchRequestUpdateOnFirstRender(dispatch, id, updateVars);
 
@@ -275,36 +275,36 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
         () =>
             dispatch(
                 createSendActionNameAction(updateVarName, {
-                    action: tp_onAdd,
+                    action: onAdd,
                     index: startIndex,
                 })
             ),
-        [startIndex, dispatch, updateVarName, tp_onAdd]
+        [startIndex, dispatch, updateVarName, onAdd]
     );
 
     const onCellValidation: OnCellValidation = useCallback(
         (value: RowValue, rowIndex: number, colName: string, userValue: string) =>
             dispatch(
                 createSendActionNameAction(updateVarName, {
-                    action: tp_onEdit,
+                    action: onEdit,
                     value: value,
                     index: rowIndex,
                     col: colName,
                     user_value: userValue,
                 })
             ),
-        [dispatch, updateVarName, tp_onEdit]
+        [dispatch, updateVarName, onEdit]
     );
 
     const onRowDeletion: OnRowDeletion = useCallback(
         (rowIndex: number) =>
             dispatch(
                 createSendActionNameAction(updateVarName, {
-                    action: tp_onDelete,
+                    action: onDelete,
                     index: rowIndex,
                 })
             ),
-        [dispatch, updateVarName, tp_onDelete]
+        [dispatch, updateVarName, onDelete]
     );
 
     const tableContainerSx = useMemo(() => ({ maxHeight: height }), [height]);
@@ -361,7 +361,7 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                         >
                                             {columns[col].dfid === EDIT_COL ? (
                                                 [
-                                                    active && editable && tp_onAdd ? (
+                                                    active && editable && onAdd ? (
                                                         <Tooltip title="Add a row" key="addARow">
                                                             <IconButton
                                                                 onClick={onAddRowClick}
@@ -453,10 +453,10 @@ const PaginatedTable = (props: TaipyPaginatedTableProps) => {
                                                     formatConfig={formatConfig}
                                                     rowIndex={index}
                                                     onValidation={
-                                                        active && editable && tp_onEdit ? onCellValidation : undefined
+                                                        active && editable && onEdit ? onCellValidation : undefined
                                                     }
                                                     onDeletion={
-                                                        active && editable && tp_onDelete ? onRowDeletion : undefined
+                                                        active && editable && onDelete ? onRowDeletion : undefined
                                                     }
                                                     nanValue={columns[col].nanValue || props.nanValue}
                                                 />

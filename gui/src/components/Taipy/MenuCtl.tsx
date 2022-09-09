@@ -23,7 +23,7 @@ interface MenuCtlProps extends LovProps<string> {
     label?: string;
     width?: string;
     width_Mobile_?: string;
-    tp_onAction?: string;
+    onAction?: string;
     inactiveIds?: string[];
     defaultInactiveIds?: string;
 }
@@ -32,7 +32,7 @@ const MenuCtl = (props: MenuCtlProps) => {
     const {
         id,
         label,
-        tp_onAction,
+        onAction,
         defaultLov = "",
         width = "15vw",
         className,
@@ -65,7 +65,7 @@ const MenuCtl = (props: MenuCtlProps) => {
         dispatch(
             createSetMenuAction({
                 label: label,
-                tp_onAction: tp_onAction,
+                onAction: onAction,
                 active: active,
                 lov: lovList,
                 inactiveIds: inactiveIds,
@@ -76,7 +76,7 @@ const MenuCtl = (props: MenuCtlProps) => {
         return () => dispatch(createSetMenuAction({}));
     }, [
         label,
-        tp_onAction,
+        onAction,
         active,
         lovList,
         inactiveIds,

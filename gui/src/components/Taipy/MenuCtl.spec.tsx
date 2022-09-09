@@ -52,7 +52,7 @@ describe("MenuCtl Component", () => {
         const {} = render(
             <ThemeProvider theme={createTheme()}>
                 <TaipyContext.Provider value={{ state, dispatch }}>
-                    <MenuCtl label="MenuCtl" tp_onAction="on_action" lov={lov} defaultInactiveIds={defiids} />
+                    <MenuCtl label="MenuCtl" onAction="on_action" lov={lov} defaultInactiveIds={defiids} />
                 </TaipyContext.Provider>
             </ThemeProvider>
         );
@@ -85,7 +85,7 @@ describe("MenuCtl Component", () => {
                             item: "Item 4",
                         },
                     ],
-                    tp_onAction: "on_action",
+                    onAction: "on_action",
                     width: "15vw",
                 },
                 type: "SET_MENU",

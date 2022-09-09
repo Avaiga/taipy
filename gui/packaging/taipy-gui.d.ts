@@ -69,36 +69,36 @@ export declare type LoV = LoVElt[];
  */
 export declare const useLovListMemo: (lov: LoV | undefined, defaultLov: string, tree?: boolean) => LovItem[];
 /**
- * TaipyState The State of the Taipy Application.
+ * State The State of the Taipy Application.
  */
- export interface TaipyState {}
+ export interface State {}
  /**
- * TaipyAction The object used by the reducer.
+ * Action The object used by the reducer.
  */
-export interface TaipyAction {
+export interface Action {
 }
 /**
- * Creates a `TaipyAction` that will be used to update `TaipyContext`.
+ * Creates a `Action` that will be used to update `Context`.
  * This action will update the variable `name` (if `propagate` === true) and provoke the invocation of the on_change python function on the backend.
  * @param {string | undefined} [name] - The name of the variable holding the requested data as received as a property (default is "").
  * @param {unknown} value - The new value for the variable named `name`.
  * @param {string | undefined} onChange - The name of the on_change python function to invoke on the backend (default to "on_change" on the backend).
  * @param {boolean | undefined} [propagate] - A flag indicating that the variable should be automatically updated on the backend (default is true).
  * @param {string | undefined} [relName] - The name of the optional related variable (for example the lov when a lov value is updated).
- * @returns {TaipyAction} The action fed to the reducer.
+ * @returns {Action} The action fed to the reducer.
  */
- export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => TaipyAction;
+ export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => Action;
  /**
-  * Creates a `TaipyAction` that will be used to update `TaipyContext`.
+  * Creates a `Action` that will be used to update `Context`.
   * This action will provoke the invocation of an on_action python function on the backend with all parameters as a payload.
   * @param {string | undefined} name - The name of the backend action.
   * @param {unknown} value - The value associated with the action, this can be an object or any type of value.
   * @param {unknown[]} args - Additional informations associated to the action.
-  * @returns {TaipyAction}  The action fed to the reducer.
+  * @returns {Action}  The action fed to the reducer.
   */
- export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => TaipyAction;
+ export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => Action;
  /**
-  * Creates a `TaipyAction` that will be used to update `TaipyContext`.
+  * Creates a `Action` that will be used to update `Context`.
   * This action will provoke the invocation of the get_data python function on the backend that will generate an update of the elements holding data named `name` on the frontend.
   * @param {string} name - The name of the variable holding the requested data as received as a property.
   * @param {string | undefined} id - The id of the visual element.
@@ -107,9 +107,9 @@ export interface TaipyAction {
   * @param {Record<string, unknown>} payload - The payload (specific to the type of component ie table, chart ...).
   * @param {boolean | undefined} [allData] - The flag indicating if all the data is requested (default is false).
   * @param {string | undefined} library - The optional name of the library {@link extension}.
-  * @returns {TaipyAction} The action fed to the reducer.
+  * @returns {Action} The action fed to the reducer.
   */
- export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => TaipyAction;
+ export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
  /**
   * The Column description as received by the backend.
   */
@@ -153,16 +153,16 @@ export interface TaipyAction {
  /**
   * The Taipy Store.
   */
- export interface TaipyStore {
-     /** {TaipyState} The State of the Taipy Application. */
-     state: TaipyState;
-     /** {React.Dispatch<TaipyAction>} The react dispatch function. */
-     dispatch: import("react").Dispatch<TaipyAction>;
+ export interface Store {
+     /** {State} The State of the Taipy Application. */
+     state: State;
+     /** {React.Dispatch<Action>} The react dispatch function. */
+     dispatch: import("react").Dispatch<Action>;
  }
  /**
-  * {React.Context<TaipyStore>} Taipy specific react context.
+  * {React.Context<Store>} Taipy specific react context.
   */
- export declare const TaipyContext: import("react").Context<TaipyStore>;
+ export declare const Context: import("react").Context<Store>;
  /**
   * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
   * @typeparam T - The dynamic property type.
@@ -174,9 +174,9 @@ export interface TaipyAction {
  export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
  /**
   * This React hook requests an update for every dynamic property of the element.
-  * @param {React.Dispatch} dispatch - The react dispatcher associated to `TaipyContext`.
+  * @param {React.Dispatch} dispatch - The react dispatcher associated to `Context`.
   * @param {string | undefined} id - The optional id of the element.
   * @param {string} updateVars - The content of the property `updateVars`.
   * @param {string | undefined} varName - The default property backend provided variable (through property `updateVarName`).
   */
- export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: import("react").Dispatch<TaipyAction>, id?: string, updateVars?: string, varName?: string) => void;
+ export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: import("react").Dispatch<Action>, id?: string, updateVars?: string, varName?: string) => void;

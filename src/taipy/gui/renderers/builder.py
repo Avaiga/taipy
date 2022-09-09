@@ -989,15 +989,12 @@ class Builder:
         """
         TODO
         Sets an attribute.
-        if the attribute name matches on<suffix>, the react attribute is set to tp_on<suffix>.
 
         Arguments:
 
             name (str): The name of the attribute.
             value (Any): The value of the attribute (must be json serializable).
         """
-        if name.startswith("on"):
-            name = f"tp_{name}"
         self.el.set(name, value)
         return self
 

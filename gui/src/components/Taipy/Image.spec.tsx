@@ -44,17 +44,17 @@ describe("Image Component", () => {
         getByText("titi");
     });
     it("is disabled", async () => {
-        const { getByRole } = render(<Image defaultContent="/url/toto.png" active={false} tp_onAction="tp" />);
+        const { getByRole } = render(<Image defaultContent="/url/toto.png" active={false} onAction="tp" />);
         const elt = getByRole("button");
         expect(elt).toBeDisabled();
     });
     it("is enabled by default", async () => {
-        const { getByRole } = render(<Image defaultContent="/url/toto.png" tp_onAction="tp" />);
+        const { getByRole } = render(<Image defaultContent="/url/toto.png" onAction="tp" />);
         const elt = getByRole("button");
         expect(elt).not.toBeDisabled();
     });
     it("is enabled by active", async () => {
-        const { getByRole } = render(<Image defaultContent="/url/toto.png" active={true} tp_onAction="tp" />);
+        const { getByRole } = render(<Image defaultContent="/url/toto.png" active={true} onAction="tp" />);
         const elt = getByRole("button");
         expect(elt).not.toBeDisabled();
     });
@@ -63,7 +63,7 @@ describe("Image Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Image defaultContent="/url/toto.png" tp_onAction="on_action" />
+                <Image defaultContent="/url/toto.png" onAction="on_action" />
             </TaipyContext.Provider>
         );
         const elt = getByRole("button");

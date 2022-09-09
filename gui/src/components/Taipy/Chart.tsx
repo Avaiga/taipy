@@ -57,7 +57,7 @@ interface ChartProp extends TaipyActiveProps, TaipyChangeProps {
     data?: Record<string, TraceValueType>;
     layout?: string;
     plotConfig?: string;
-    tp_onRangeChange?: string;
+    onRangeChange?: string;
     testId?: string;
     render?: boolean;
     defaultRender?: boolean;
@@ -131,8 +131,8 @@ const Chart = (props: ChartProp) => {
         updateVarName,
         updateVars,
         id,
-        tp_onRangeChange,
         data = {},
+        onRangeChange,
         propagate = true,
         decimator,
     } = props;
@@ -361,7 +361,7 @@ const Chart = (props: ChartProp) => {
 
     const onRelayout = useCallback(
         (eventData: PlotRelayoutEvent) => {
-            tp_onRangeChange && dispatch(createSendActionNameAction(id, { action: tp_onRangeChange, ...eventData }));
+            onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
             if (decimator) {
                 const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
                 const eventDataKey = Object.keys(eventData).map(v => v + "=" + eventData[v as keyof typeof eventData]).join("-");
@@ -385,7 +385,7 @@ const Chart = (props: ChartProp) => {
                 );
             }
         },
-        [dispatch, tp_onRangeChange, id, config.modes, config.columns, config.traces, updateVarName, decimator]
+        [dispatch, onRangeChange, id, config.modes, config.columns, config.traces, updateVarName, decimator]
     );
 
     const onAfterPlot = useCallback(() => {
@@ -412,12 +412,12 @@ const Chart = (props: ChartProp) => {
                 traces.forEach((tr, idx) => {
                     const upvar = getUpdateVar(updateVars, `selected${idx}`);
                     if (upvar && tr && tr.length) {
-                        dispatch(createSendUpdateAction(upvar, tr, props.tp_onChange, propagate));
+                        dispatch(createSendUpdateAction(upvar, tr, props.onChange, propagate));
                     }
                 });
             }
         },
-        [getRealIndex, dispatch, updateVars, propagate, props.tp_onChange]
+        [getRealIndex, dispatch, updateVars, propagate, props.onChange]
     );
 
     return render ? (

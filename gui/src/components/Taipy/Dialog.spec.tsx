@@ -180,7 +180,7 @@ describe("Dialog Component", () => {
                         page="page"
                         open={true}
                         active={true}
-                        tp_onAction="testValidateAction"
+                        onAction="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
@@ -205,7 +205,7 @@ describe("Dialog Component", () => {
                         open={true}
                         active={true}
                         labels={JSON.stringify(["testValidate", "testCancel"])}
-                        tp_onAction="testValidateAction"
+                        onAction="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
@@ -230,7 +230,7 @@ describe("Dialog Component", () => {
                         open={true}
                         active={true}
                         labels={JSON.stringify(["testValidate", "testCancel", "Another One"])}
-                        tp_onAction="testValidateAction"
+                        onAction="testValidateAction"
                     />
                 </HelmetProvider>
             </TaipyContext.Provider>
