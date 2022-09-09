@@ -63,7 +63,7 @@ describe("Button Component", () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(<TaipyContext.Provider value={{ state, dispatch }}>
-                <Button label="Button" tp_onAction="on_action" />
+                <Button label="Button" onAction="on_action" />
             </TaipyContext.Provider>);
         const elt = getByText("Button");
         await userEvent.click(elt);

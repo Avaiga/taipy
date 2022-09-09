@@ -39,7 +39,7 @@ export interface TaipyMultiSelectProps {
 }
 
 export interface TaipyChangeProps {
-    tp_onChange?: string;
+    onChange?: string;
 }
 
 export interface TaipyFieldProps extends TaipyBaseProps, TaipyHoverProps {
@@ -54,7 +54,7 @@ export interface TaipyInputProps extends TaipyActiveProps, TaipyChangeProps, Tai
     value: string;
     defaultValue?: string;
     changeDelay?: number;
-    tp_onAction?: string;
+    onAction?: string;
     actionKeys?: string;
     multiline?: boolean;
     linesShown?: number;

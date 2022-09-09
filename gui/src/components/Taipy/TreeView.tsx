@@ -228,13 +228,13 @@ const TreeView = (props: TreeViewProps) => {
                     createSendUpdateAction(
                         updateVarName,
                         Array.isArray(nodeIds) ? nodeIds : [nodeIds],
-                        props.tp_onChange,
+                        props.onChange,
                         propagate,
                         valueById ? undefined : getUpdateVar(updateVars, "lov")
                     )
                 );
         },
-        [updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
+        [updateVarName, dispatch, propagate, updateVars, valueById, props.onChange]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);
@@ -249,18 +249,18 @@ const TreeView = (props: TreeViewProps) => {
                         nodeIds = nodeIds.filter((n, i) => i == 0 || isLovParent(lovList, n, nodeIds[0]));
                     }
                     if (refreshExpanded) {
-                        dispatch(createSendUpdateAction(expVar, nodeIds, props.tp_onChange, propagate));
+                        dispatch(createSendUpdateAction(expVar, nodeIds, props.onChange, propagate));
                     }
                     return nodeIds;
                 });
             } else {
                 setExpandedNodes(nodeIds);
                 if (refreshExpanded) {
-                    dispatch(createSendUpdateAction(expVar, nodeIds, props.tp_onChange, propagate));
+                    dispatch(createSendUpdateAction(expVar, nodeIds, props.onChange, propagate));
                 }
             }
         },
-        [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch, props.tp_onChange]
+        [oneExpanded, refreshExpanded, lovList, propagate, updateVars, dispatch, props.onChange]
     );
 
     const treeProps = useMemo(

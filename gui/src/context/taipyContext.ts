@@ -25,7 +25,7 @@ export interface TaipyStore {
 }
 
 /**
- * {React.Context<TaipyStore>} Taipy specific react context.
+ * {React.Context} Taipy specific react context.
  */
 export const TaipyContext = createContext<TaipyStore>({state: {data: {}} as TaipyState, dispatch: () => null});
 TaipyContext.displayName = 'Taipy Context';

@@ -84,7 +84,7 @@ describe("Pane Component", () => {
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane page="page" open={true} active={false} tp_onClose="testCloseAction" />
+                    <Pane page="page" open={true} active={false} onClose="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -99,7 +99,7 @@ describe("Pane Component", () => {
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane page="page" open={true} tp_onClose="testCloseAction" />
+                    <Pane page="page" open={true} onClose="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -114,7 +114,7 @@ describe("Pane Component", () => {
         render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane page="page" open={true} active={true} tp_onClose="testCloseAction" />
+                    <Pane page="page" open={true} active={true} onClose="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -129,7 +129,7 @@ describe("Pane Component", () => {
         const { getByRole } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane page="page" open={true} active={false} persistent={true} tp_onClose="testCloseAction" />
+                    <Pane page="page" open={true} active={false} persistent={true} onClose="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );
@@ -144,7 +144,7 @@ describe("Pane Component", () => {
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
                 <HelmetProvider>
-                    <Pane id="testId" page="page" open={true} tp_onClose="testCloseAction" />
+                    <Pane id="testId" page="page" open={true} onClose="testCloseAction" />
                 </HelmetProvider>
             </TaipyContext.Provider>
         );

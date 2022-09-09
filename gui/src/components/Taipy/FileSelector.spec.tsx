@@ -57,7 +57,7 @@ describe("FileSelector Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <FileSelector label="FileSelector" tp_onAction="on_action" />
+                <FileSelector label="FileSelector" onAction="on_action" />
             </TaipyContext.Provider>
         );
         const elt = getByText("FileSelector");

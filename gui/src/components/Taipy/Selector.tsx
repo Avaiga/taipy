@@ -152,7 +152,7 @@ const Selector = (props: SelTreeProps) => {
                             createSendUpdateAction(
                                 updateVarName,
                                 newKeys,
-                                props.tp_onChange,
+                                props.onChange,
                                 propagate,
                                 valueById ? undefined : getUpdateVar(updateVars, "lov")
                             )
@@ -163,7 +163,7 @@ const Selector = (props: SelTreeProps) => {
                             createSendUpdateAction(
                                 updateVarName,
                                 key,
-                                props.tp_onChange,
+                                props.onChange,
                                 propagate,
                                 valueById ? undefined : getUpdateVar(updateVars, "lov")
                             )
@@ -173,7 +173,7 @@ const Selector = (props: SelTreeProps) => {
                 });
             }
         },
-        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.tp_onChange]
+        [active, updateVarName, dispatch, multiple, propagate, updateVars, valueById, props.onChange]
     );
 
     const handleChange = useCallback(
@@ -186,13 +186,13 @@ const Selector = (props: SelTreeProps) => {
                 createSendUpdateAction(
                     updateVarName,
                     value,
-                    props.tp_onChange,
+                    props.onChange,
                     propagate,
                     valueById ? undefined : getUpdateVar(updateVars, "lov")
                 )
             );
         },
-        [dispatch, updateVarName, propagate, updateVars, valueById, props.tp_onChange]
+        [dispatch, updateVarName, propagate, updateVars, valueById, props.onChange]
     );
 
     const handleDelete = useCallback(
@@ -205,7 +205,7 @@ const Selector = (props: SelTreeProps) => {
                         createSendUpdateAction(
                             updateVarName,
                             keys,
-                            props.tp_onChange,
+                            props.onChange,
                             propagate,
                             valueById ? undefined : getUpdateVar(updateVars, "lov")
                         )
@@ -213,7 +213,7 @@ const Selector = (props: SelTreeProps) => {
                     return keys;
                 });
         },
-        [updateVarName, propagate, dispatch, updateVars, valueById, props.tp_onChange]
+        [updateVarName, propagate, dispatch, updateVars, valueById, props.onChange]
     );
 
     const handleInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => setSearchValue(e.target.value), []);

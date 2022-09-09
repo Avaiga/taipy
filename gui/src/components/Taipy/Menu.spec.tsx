@@ -79,7 +79,7 @@ describe("Menu Component", () => {
         const state: TaipyState = INITIAL_STATE;
         const { getByText } = render(
             <TaipyContext.Provider value={{ state, dispatch }}>
-                <Menu lov={lov} tp_onAction="action" />
+                <Menu lov={lov} onAction="action" />
             </TaipyContext.Provider>
         );
         const elt = getByText(lov[0].item as string);

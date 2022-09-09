@@ -32,11 +32,11 @@ interface FileDownloadProps extends TaipyActiveProps {
     render?: boolean;
     defaultRender?: boolean;
     bypassPreview?: boolean;
-    tp_onAction?: string;
+    onAction?: string;
 }
 
 const FileDownload = (props: FileDownloadProps) => {
-    const { id, className, auto, name, bypassPreview, tp_onAction, label, defaultLabel = "" } = props;
+    const { id, className, auto, name, bypassPreview, onAction, label, defaultLabel = "" } = props;
     const aRef = useRef<HTMLAnchorElement>(null);
     const { dispatch } = useContext(TaipyContext);
 
@@ -47,16 +47,16 @@ const FileDownload = (props: FileDownloadProps) => {
     useEffect(() => {
         if (auto && aRef.current && active && render) {
             aRef.current.click();
-            tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
+            onAction && dispatch(createSendActionNameAction(id, onAction));
         }
-    }, [active, render, auto, dispatch, id, tp_onAction]);
+    }, [active, render, auto, dispatch, id, onAction]);
 
     const clickHandler = useCallback(() => {
         if (aRef.current) {
             aRef.current.click();
-            tp_onAction && dispatch(createSendActionNameAction(id, tp_onAction));
+            onAction && dispatch(createSendActionNameAction(id, onAction));
         }
-    }, [dispatch, id, tp_onAction]);
+    }, [dispatch, id, onAction]);
 
     const [url, download] = useMemo(() => {
         const url = props.content || props.defaultContent || "";

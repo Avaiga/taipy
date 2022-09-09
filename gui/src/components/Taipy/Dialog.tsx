@@ -31,7 +31,7 @@ import { useDynamicProperty } from "../../utils/hooks";
 
 interface DialogProps extends TaipyActiveProps {
     title: string;
-    tp_onAction?: string;
+    onAction?: string;
     closeLabel?: string;
     labels?: string;
     page?: string;
@@ -57,7 +57,7 @@ const Dialog = (props: DialogProps) => {
         title,
         defaultOpen,
         open,
-        tp_onAction = "",
+        onAction = "",
         closeLabel = "Close",
         page,
         partial,
@@ -73,9 +73,9 @@ const Dialog = (props: DialogProps) => {
     const handleAction = useCallback(
         (evt: MouseEvent<HTMLElement>) => {
             const { idx = "-1" } = evt.currentTarget.dataset;
-            dispatch(createSendActionNameAction(id, tp_onAction, parseInt(idx, 10)));
+            dispatch(createSendActionNameAction(id, onAction, parseInt(idx, 10)));
         },
-        [dispatch, id, tp_onAction]
+        [dispatch, id, onAction]
     );
 
     const labels = useMemo(() => {

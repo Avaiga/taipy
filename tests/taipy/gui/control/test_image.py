@@ -69,6 +69,6 @@ def test_image_url_html(gui: Gui, test_client, helpers):
     expected_list = [
         "<Image",
         'defaultContent="some_url"',
-        'tp_onAction="action"',
+        'onAction="action"',
     ]
     helpers.test_control_html(gui, html_string, expected_list)

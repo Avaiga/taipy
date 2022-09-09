@@ -40,15 +40,15 @@ const Input = (props: TaipyInputProps) => {
         updateVarName,
         propagate = true,
         defaultValue = "",
-        tp_onAction,
-        tp_onChange,
+        onAction: onAction,
+        onChange: onChange,
         multiline = false,
         linesShown = 5,
     } = props;
     const [value, setValue] = useState(defaultValue);
     const { dispatch } = useContext(TaipyContext);
     const delayCall = useRef(-1);
-    const [actionKeys] = useState(() => (tp_onAction ? getActionKeys(props.actionKeys) : []));
+    const [actionKeys] = useState(() => (onAction ? getActionKeys(props.actionKeys) : []));
 
     const changeDelay = typeof props.changeDelay === "number" && props.changeDelay >= 0 ? props.changeDelay : 300;
     const active = useDynamicProperty(props.active, props.defaultActive, true);
@@ -64,29 +64,29 @@ const Input = (props: TaipyInputProps) => {
                 }
                 delayCall.current = window.setTimeout(() => {
                     delayCall.current = -1;
-                    dispatch(createSendUpdateAction(updateVarName, val, tp_onChange, propagate));
+                    dispatch(createSendUpdateAction(updateVarName, val, onChange, propagate));
                 }, changeDelay);
             } else {
-                dispatch(createSendUpdateAction(updateVarName, val, tp_onChange, propagate));
+                dispatch(createSendUpdateAction(updateVarName, val, onChange, propagate));
             }
         },
-        [updateVarName, dispatch, propagate, tp_onChange, changeDelay]
+        [updateVarName, dispatch, propagate, onChange, changeDelay]
     );
 
     const handleAction = useCallback(
         (evt: KeyboardEvent<HTMLDivElement>) => {
-            if (tp_onAction && actionKeys.includes(evt.key)) {
+            if (onAction && actionKeys.includes(evt.key)) {
                 const val = evt.currentTarget.querySelector("input")?.value;
                 if (changeDelay && delayCall.current > 0) {
                     clearTimeout(delayCall.current);
                     delayCall.current = -1;
-                    dispatch(createSendUpdateAction(updateVarName, val, tp_onChange, propagate));
+                    dispatch(createSendUpdateAction(updateVarName, val, onChange, propagate));
                 }
-                dispatch(createSendActionNameAction(id, tp_onAction, evt.key, updateVarName, val));
+                dispatch(createSendActionNameAction(id, onAction, evt.key, updateVarName, val));
                 evt.preventDefault();
             }
         },
-        [actionKeys, updateVarName, tp_onAction, id, dispatch, tp_onChange, changeDelay, propagate]
+        [actionKeys, updateVarName, onAction, id, dispatch, onChange, changeDelay, propagate]
     );
 
     useEffect(() => {
@@ -107,7 +107,7 @@ const Input = (props: TaipyInputProps) => {
                 label={props.label}
                 onChange={handleInput}
                 disabled={!active}
-                onKeyDown={tp_onAction ? handleAction : undefined}
+                onKeyDown={onAction ? handleAction : undefined}
                 multiline={multiline}
                 minRows={linesShown}
             />

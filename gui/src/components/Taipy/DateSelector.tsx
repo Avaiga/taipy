@@ -69,10 +69,10 @@ const DateSelector = (props: DateSelectorProps) => {
                     newDate.setHours(hours);
                     newDate.setMinutes(minutes);
                 }
-                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), props.tp_onChange, propagate));
+                dispatch(createSendUpdateAction(updateVarName, newDate.toISOString(), props.onChange, propagate));
             }
         },
-        [updateVarName, dispatch, withTime, propagate, tz, props.tp_onChange]
+        [updateVarName, dispatch, withTime, propagate, tz, props.onChange]
     );
 
     const renderInput = useCallback(

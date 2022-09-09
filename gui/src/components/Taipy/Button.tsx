@@ -22,13 +22,13 @@ import { useDynamicProperty } from "../../utils/hooks";
 import { stringIcon, Icon, IconAvatar } from "../../utils/icon";
 
 interface ButtonProps extends TaipyActiveProps {
-    tp_onAction?: string;
+    onAction?: string;
     label: string;
     defaultLabel?: string;
 }
 
 const Button = (props: ButtonProps) => {
-    const { className, id, tp_onAction = "", defaultLabel } = props;
+    const { className, id, onAction = "", defaultLabel } = props;
     const [value, setValue] = useState<stringIcon>("");
     const { dispatch } = useContext(TaipyContext);
 
@@ -36,8 +36,8 @@ const Button = (props: ButtonProps) => {
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
 
     const handleClick = useCallback(() => {
-        dispatch(createSendActionNameAction(id, tp_onAction));
-    }, [id, tp_onAction, dispatch]);
+        dispatch(createSendActionNameAction(id, onAction));
+    }, [id, onAction, dispatch]);
 
     useEffect(() => {
         setValue((val) => {

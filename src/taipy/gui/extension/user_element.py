@@ -42,7 +42,6 @@ class ElementAttribute:
             attribute_type (PropertyType): The attribute type.
             default_value (optional Any): The attribute's default value (default is None).
             js_name (optional str): The name of the attribute on the frontend (default to Camel Case of `name`).
-                Attribute starting with `on_<action name>` will be translated into `tp_on<CamelCase(action name)>`.
 
         """
         self.name = name

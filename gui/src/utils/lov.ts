@@ -28,7 +28,7 @@ export interface LovItem {
 export interface MenuProps {
     label?: string;
     width?: string;
-    tp_onAction?: string;
+    onAction?: string;
     inactiveIds?: string[];
     lov?: LovItem[];
     active?: boolean;

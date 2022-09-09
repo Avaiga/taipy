@@ -76,17 +76,17 @@ const Slider = (props: SliderProps) => {
                 if (changeDelay) {
                     if (delayCall.current < 0) {
                         delayCall.current = window.setTimeout(() => {
-                            dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                            dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
                             delayCall.current = -1;
                         }, changeDelay);
                     }
                 } else {
-                    dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.tp_onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
+                    dispatch(createSendUpdateAction(updateVarName, lastVal.current, props.onChange, propagate, valueById ? undefined : getUpdateVar(updateVars, "lov")));
                 }
                 delayCall.current = 0;
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange, changeDelay]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange, changeDelay]
     );
 
     const handleRangeCommitted = useCallback(
@@ -98,14 +98,14 @@ const Slider = (props: SliderProps) => {
                     createSendUpdateAction(
                         updateVarName,
                         value,
-                        props.tp_onChange,
+                        props.onChange,
                         propagate,
                         valueById ? undefined : getUpdateVar(updateVars, "lov")
                     )
                 );
             }
         },
-        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.tp_onChange]
+        [lovList, update, updateVarName, dispatch, propagate, updateVars, valueById, props.onChange]
     );
 
     const getLabel = useCallback(
