@@ -650,16 +650,17 @@ class Gui:
                 if isinstance(lib_name, str):
                     lib = self.__extensions.get(lib_name)
                     if isinstance(lib, ElementLibrary):
+                        user_var_name = var_name
                         try:
                             try:
-                                var_name = self.__get_real_var_name(var_name)[0]
+                                user_var_name = self.__get_real_var_name(var_name)[0]
                             except NameError:
                                 # ignore name error and keep var_name
                                 pass
-                            ret_payload = lib.get_data(lib_name, payload, var_name, newvalue)
+                            ret_payload = lib.get_data(lib_name, payload, user_var_name, newvalue)
                         except Exception as e:
                             warnings.warn(
-                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {var_name}, value)':\n{e}"
+                                f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)':\n{e}"
                             )
             if not isinstance(ret_payload, dict):
                 ret_payload = self._accessors._get_data(self, var_name, newvalue, payload)
