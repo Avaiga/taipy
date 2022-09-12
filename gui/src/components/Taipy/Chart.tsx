@@ -81,6 +81,7 @@ interface ChartConfig {
     texts: string[];
     textAnchors: string[];
     options: Record<string, unknown>[];
+    bases: string[];
 }
 
 export type TraceValueType = Record<string, (string | number)[]>;
@@ -206,6 +207,7 @@ const Chart = (props: ChartProp) => {
             texts: [],
             textAnchors: [],
             options: [],
+            bases: [],
         } as ChartConfig;
     }, [props.config]);
 
@@ -330,6 +332,7 @@ const Chart = (props: ChartProp) => {
                 ret.orientation = getArrayValue(config.orientations, idx);
                 ret.line = getArrayValue(config.lines, idx);
                 ret.textposition = getArrayValue(config.textAnchors, idx);
+                ret.base = getValue(datum, config.bases, idx);
             }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {

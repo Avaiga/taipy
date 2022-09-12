@@ -11,6 +11,8 @@ lon,indexed(str),,Column name for the <i>longitude</i> value. Synonym for <i>x</
 lat,indexed(str),,Column name for the <i>latitude</i> value. Synonym for <i>y</i>.
 text,indexed(str),,"Column name for the text associated to the point for the indicated trace.
 This is meaningful only when _mode_ has the <i>text</i> option."
+base,indexed(str),,"Column name for the <i>base</i> value. Used in bar charts only.
+See the Plotly <a href=""https://plotly.com/javascript/reference/bar/#bar-base""">bar chart base</a> documentation for details."
 title,str,,The title of this chart control.
 render,bool,TRUE,"If True, this chart is visible on the page."
 on_range_change,Callback,,"Callback function called when the visible part of the x axis changes.
