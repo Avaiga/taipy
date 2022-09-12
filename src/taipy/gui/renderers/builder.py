@@ -489,7 +489,7 @@ class Builder:
                 warnings.warn(f"{self.__element_name} {names[index]} should be a dict")
                 values[index] = None
 
-    def _get_chart_config(self, default_type="scatter", default_mode="lines+markers"):
+    def _get_chart_config(self, default_type="scatter", default_mode="lines+markers"):  # noqa: C901
         names = (
             "x",  # 0
             "y",
@@ -511,6 +511,7 @@ class Builder:
             "options",
             "lon",  # 18
             "lat",
+            "base",  # 20
         )
         trace = self.__get_multiple_indexed_attributes(names)
         if not trace[0] and trace[18]:
@@ -557,6 +558,8 @@ class Builder:
         columns = set()
         for trace in traces:
             columns.update([t for t in trace[:5] if t])
+            if trace[20]:
+                columns.add(trace[20])
         # add optionnal column if any
         markers = [t[11] or ({"color": t[7]} if t[7] else None) for t in traces]
         opt_cols = set()
@@ -600,6 +603,7 @@ class Builder:
                 "lines": [t[15] if isinstance(t[15], dict) else {"dash": t[15]} for t in traces],
                 "textAnchors": [t[16] for t in traces],
                 "options": [t[17] for t in traces],
+                "bases": [reverse_cols.get(t[20], (t[20] or "")) for t in traces],
             }
 
             self.__set_json_attribute("config", ret_dict)
