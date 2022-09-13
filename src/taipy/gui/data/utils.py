@@ -21,22 +21,22 @@ if t.TYPE_CHECKING:
 
 
 class Decimator(ABC):
-    def __init__(self, applied_threshold: t.Optional[int], chart_zooming: t.Optional[bool]) -> None:
+    def __init__(self, threshold: t.Optional[int], zoom: t.Optional[bool]) -> None:
         """TODO: Decimator class description"""
         super().__init__()
-        self.applied_threshold = applied_threshold
-        self._chart_zooming = chart_zooming if chart_zooming is not None else True
+        self.threshold = threshold
+        self._zoom = zoom if zoom is not None else True
 
     def _is_applicable(self, data: t.Any, nb_rows_max: int):
-        if self.applied_threshold is None:
+        if self.threshold is None:
             if nb_rows_max < len(data):
                 return True
-        elif self.applied_threshold < len(data):
+        elif self.threshold < len(data):
             return True
         return False
 
     @abstractmethod
-    def decimate(self, data: np.ndarray) -> np.ndarray:
+    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         """Decimate function for decimator. This function will be executed during runtime when the appropriate conditions
         are met.
         TODO: Further explanation
@@ -52,7 +52,11 @@ class Decimator(ABC):
 
 
 def _df_data_filter(
-    dataframe: pd.DataFrame, x_column_name: t.Union[None, str], y_column_name: str, decimator: Decimator
+    dataframe: pd.DataFrame,
+    x_column_name: t.Union[None, str],
+    y_column_name: str,
+    decimator: Decimator,
+    payload: t.Dict[str, t.Any],
 ):
     df = dataframe.copy()
     if not x_column_name:
@@ -62,7 +66,7 @@ def _df_data_filter(
         x_column_name = f"tAiPy_index_{index}"
         df[x_column_name] = df.index
     points = df[[x_column_name, y_column_name]].to_numpy()
-    mask = decimator.decimate(points)
+    mask = decimator.decimate(points, payload)
     return df[mask]
 
 

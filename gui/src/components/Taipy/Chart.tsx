@@ -216,6 +216,7 @@ const Chart = (props: ChartProp) => {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
             const decimatorPayload = decimator ? {
                 width: plotRef.current?.clientWidth,
+                height: plotRef.current?.clientHeight,
                 xAxis: config.traces.length && config.traces[0].length && config.traces[0][0] && config.columns[config.traces[0][0]].dfid,
                 yAxis: config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]] && config.columns[config.traces[0][1]].dfid,
                 decimator: decimator

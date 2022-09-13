@@ -17,10 +17,8 @@ from ..utils import Decimator
 
 
 class LTTB(Decimator):
-    def __init__(
-        self, n_out: int, applied_threshold: t.Optional[int] = None, chart_zooming: t.Optional[bool] = True
-    ) -> None:
-        super().__init__(applied_threshold, chart_zooming)
+    def __init__(self, n_out: int, threshold: t.Optional[int] = None, zoom: t.Optional[bool] = True) -> None:
+        super().__init__(threshold, zoom)
         self._n_out = n_out
 
     @staticmethod
@@ -29,7 +27,7 @@ class LTTB(Decimator):
         a_minus_bs = a - bs
         return 0.5 * abs((a[0] - c[0]) * (bs_minus_a[:, 1]) - (a_minus_bs[:, 0]) * (c[1] - a[1]))
 
-    def decimate(self, data: np.ndarray) -> np.ndarray:
+    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         n_out = self._n_out
         if n_out >= data.shape[0]:
             return np.full(len(data), True)

@@ -266,16 +266,16 @@ class _PandasDataAccessor(_DataAccessor):
             )
         else:
             ret_payload["alldata"] = True
-            decimatorPayload: t.Dict[str, t.Any] = payload.get("decimatorPayload", {})
-            decimator = decimatorPayload.get("decimator")
+            decimator_payload: t.Dict[str, t.Any] = payload.get("decimatorPayload", {})
+            decimator = decimator_payload.get("decimator")
             decimator_instance = (
                 gui._get_user_instance(decimator, PropertyType.decimator.value) if decimator is not None else None
             )
             if isinstance(decimator_instance, PropertyType.decimator.value):
-                x_column, y_column = decimatorPayload.get("xAxis", ""), decimatorPayload.get("yAxis", "")
-                if decimator_instance._chart_zooming and "relayoutData" in decimatorPayload:
-                    chart_modes = decimatorPayload.get("chartModes", [])
-                    relayoutData = decimatorPayload.get("relayoutData", {})
+                x_column, y_column = decimator_payload.get("xAxis", ""), decimator_payload.get("yAxis", "")
+                if decimator_instance._zoom and "relayoutData" in decimator_payload:
+                    chart_modes = decimator_payload.get("chartModes", [])
+                    relayoutData = decimator_payload.get("relayoutData", {})
                     x0 = relayoutData.get("xaxis.range[0]")
                     x1 = relayoutData.get("xaxis.range[1]")
                     y0 = relayoutData.get("yaxis.range[0]")
@@ -283,10 +283,12 @@ class _PandasDataAccessor(_DataAccessor):
 
                     value = _df_relayout(value, x_column, y_column, chart_modes, x0, x1, y0, y1)
 
-                nb_rows_max = decimatorPayload.get("width")
+                nb_rows_max = decimator_payload.get("width")
                 if nb_rows_max and decimator_instance._is_applicable(value, nb_rows_max):
                     try:
-                        value = _df_data_filter(value, x_column, y_column, decimator=decimator_instance)
+                        value = _df_data_filter(
+                            value, x_column, y_column, decimator=decimator_instance, payload=decimator_payload
+                        )
                     except Exception as e:
                         warnings.warn(f"Limit rows error for dataframe: {e}")
             value = self.__build_transferred_cols(gui, columns, value)

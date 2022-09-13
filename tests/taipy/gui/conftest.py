@@ -25,6 +25,7 @@ def pytest_configure(config):
         import src.taipy.gui.data.decimator.lttb
         import src.taipy.gui.data.decimator.minmax
         import src.taipy.gui.data.decimator.rdp
+        import src.taipy.gui.data.decimator.scatter_decimator
         import src.taipy.gui.extension
         import src.taipy.gui.renderers.builder
         import src.taipy.gui.utils._map_dict
@@ -39,6 +40,9 @@ def pytest_configure(config):
         sys.modules["taipy.gui.data.decimator.lttb"] = sys.modules["src.taipy.gui.data.decimator.lttb"]
         sys.modules["taipy.gui.data.decimator.rdp"] = sys.modules["src.taipy.gui.data.decimator.rdp"]
         sys.modules["taipy.gui.data.decimator.minmax"] = sys.modules["src.taipy.gui.data.decimator.minmax"]
+        sys.modules["taipy.gui.data.decimator.scatter_decimator"] = sys.modules[
+            "src.taipy.gui.data.decimator.scatter_decimator"
+        ]
         sys.modules["taipy.gui"] = sys.modules["src.taipy.gui"]
 
 

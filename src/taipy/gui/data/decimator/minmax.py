@@ -17,11 +17,11 @@ from ..utils import Decimator
 
 
 class MinMaxDecimator(Decimator):
-    def __init__(self, n_out: int, applied_threshold: t.Optional[int] = None, chart_zooming: t.Optional[bool] = True):
-        super().__init__(applied_threshold, chart_zooming)
+    def __init__(self, n_out: int, threshold: t.Optional[int] = None, zoom: t.Optional[bool] = True):
+        super().__init__(threshold, zoom)
         self._n_out = n_out // 2
 
-    def decimate(self, data: np.ndarray) -> np.ndarray:
+    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         if self._n_out >= data.shape[0]:
             return np.full(len(data), False)
         # Create a boolean mask

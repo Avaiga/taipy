@@ -28,7 +28,7 @@ import markdown as md_lib
 import tzlocal
 from flask import Blueprint, Flask
 from flask import __version__ as flask_version  # type: ignore
-from flask import g, jsonify, render_template, request, send_file, send_from_directory
+from flask import g, jsonify, request, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 
 if util.find_spec("pyngrok"):

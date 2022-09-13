@@ -12,3 +12,4 @@
 from .lttb import LTTB
 from .minmax import MinMaxDecimator
 from .rdp import RDP
+from .scatter_decimator import ScatterDecimator

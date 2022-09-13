@@ -21,10 +21,10 @@ class RDP(Decimator):
         self,
         epsilon: t.Optional[int] = None,
         n_out: t.Optional[int] = None,
-        applied_threshold: t.Optional[int] = None,
-        chart_zooming: t.Optional[bool] = True,
+        threshold: t.Optional[int] = None,
+        zoom: t.Optional[bool] = True,
     ):
-        super().__init__(applied_threshold, chart_zooming)
+        super().__init__(threshold, zoom)
         self._epsilon = epsilon
         self._n_out = n_out
 
@@ -112,7 +112,7 @@ class RDP(Decimator):
 
         return weights >= maxTolerance
 
-    def decimate(self, data: np.ndarray) -> np.ndarray:
+    def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
         if self._epsilon:
             return RDP.__rdp_epsilon(data, self._epsilon)
         elif self._n_out:
