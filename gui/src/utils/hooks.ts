@@ -41,7 +41,7 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
 
 /**
  * This React hook requests an update for every dynamic property of the element.
- * @param {React.Dispatch} dispatch - The react dispatcher associated to `TaipyContext`.
+ * @param {React.Dispatch<Action>} dispatch - The react dispatcher associated to `TaipyContext`.
  * @param {string | undefined} id - The optional id of the element.
  * @param {string} updateVars - The content of the property `updateVars`.
  * @param {string | undefined} varName - The default property backend provided variable (through property `updateVarName`).
@@ -78,6 +78,16 @@ export const useIsMobile = () => {
     const theme = useTheme();
     return useMediaQuery(theme.breakpoints.down("sm"));
 };
+
+
+/**
+ * This React hook returns the dispatch function that allows to send Action to the Store and initiates backend communications.
+ * @returns {React.Dispatch<Action>}
+ */
+export const useDispatch = () => {
+    const {dispatch} = useContext(TaipyContext);
+    return dispatch;
+}
 
 export const useWhyDidYouUpdate = (name: string, props: Record<string, unknown>): void => {
     // Get a mutable ref object where we can store props ...

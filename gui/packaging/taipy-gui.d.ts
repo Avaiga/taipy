@@ -11,6 +11,8 @@
  * specific language governing permissions and limitations under the License.
  */
 
+import * as React from "react";
+
 /**
  * This extracts the backend name of a given property identified by `name`.
  * @param {string} updateVars - The value held by the property `updateVars`.
@@ -71,12 +73,11 @@ export declare const useLovListMemo: (lov: LoV | undefined, defaultLov: string, 
 /**
  * State The State of the Taipy Application.
  */
- export interface State {}
- /**
+export interface State {}
+/**
  * Action The object used by the reducer.
  */
-export interface Action {
-}
+export interface Action {}
 /**
  * Creates a `Action` that will be used to update `Context`.
  * This action will update the variable `name` (if `propagate` === true) and provoke the invocation of the on_change python function on the backend.
@@ -87,8 +88,8 @@ export interface Action {
  * @param {string | undefined} [relName] - The name of the optional related variable (for example the lov when a lov value is updated).
  * @returns {Action} The action fed to the reducer.
  */
- export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => Action;
- /**
+export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => Action;
+/**
   * Creates a `Action` that will be used to update `Context`.
   * This action will provoke the invocation of an on_action python function on the backend with all parameters as a payload.
   * @param {string | undefined} name - The name of the backend action.
@@ -96,8 +97,8 @@ export interface Action {
   * @param {unknown[]} args - Additional informations associated to the action.
   * @returns {Action}  The action fed to the reducer.
   */
- export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => Action;
- /**
+export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => Action;
+/**
   * Creates a `Action` that will be used to update `Context`.
   * This action will provoke the invocation of the get_data python function on the backend that will generate an update of the elements holding data named `name` on the frontend.
   * @param {string} name - The name of the variable holding the requested data as received as a property.
@@ -109,11 +110,11 @@ export interface Action {
   * @param {string | undefined} library - The optional name of the library {@link extension}.
   * @returns {Action} The action fed to the reducer.
   */
- export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
- /**
+export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
+/**
   * The Column description as received by the backend.
   */
- export interface ColumnDesc {
+export interface ColumnDesc {
      /** {string} The unique column identifier. */
      dfid: string;
      /** {string} The column type. */
@@ -157,12 +158,12 @@ export interface Action {
      /** {State} The State of the Taipy Application. */
      state: State;
      /** {React.Dispatch<Action>} The react dispatch function. */
-     dispatch: import("react").Dispatch<Action>;
+     dispatch:React.Dispatch<Action>;
  }
  /**
   * {React.Context<Store>} Taipy specific react context.
   */
- export declare const Context: import("react").Context<Store>;
+ export declare const Context: React.Context<Store>;
  /**
   * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
   * @typeparam T - The dynamic property type.
@@ -174,9 +175,14 @@ export interface Action {
  export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
  /**
   * This React hook requests an update for every dynamic property of the element.
-  * @param {React.Dispatch} dispatch - The react dispatcher associated to `Context`.
+  * @param {React.Dispatch<Action>} dispatch - The react dispatcher associated to `Context`.
   * @param {string | undefined} id - The optional id of the element.
   * @param {string} updateVars - The content of the property `updateVars`.
   * @param {string | undefined} varName - The default property backend provided variable (through property `updateVarName`).
   */
- export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: import("react").Dispatch<Action>, id?: string, updateVars?: string, varName?: string) => void;
+ export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: React.Dispatch<Action>, id?: string, updateVars?: string, varName?: string) => void;
+/**
+ * This React hook returns the dispatch function that allows to send Action to the Store and initiates backend communications.
+ * @returns {React.Dispatch<Action>}
+ */
+ export declare const useDispatch: () => React.Dispatch<Action>;
