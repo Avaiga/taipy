@@ -14,7 +14,7 @@ jobs:
       matrix:
         node-version: [16.x]
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -49,7 +49,7 @@ jobs:
           tox -p all
 
       - name: Code coverage
-        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
+        if: matrix.os == 'ubuntu-20.04' && github.event_name == 'pull_request' && matrix.python-versions == '3.9'
         uses: orgoro/coverage@v2
         with:
           coverageFile: coverage.xml
@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         node-version: [16.x]
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     defaults:
@@ -84,7 +84,7 @@ jobs:
       - run: npm test
 
       - name: Code coverage
-        if: matrix.os == 'ubuntu-18.04' && github.event_name == 'pull_request'
+        if: matrix.os == 'ubuntu-20.04' && github.event_name == 'pull_request'
         uses: artiomtr/jest-coverage-report-action@v2.0-rc.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

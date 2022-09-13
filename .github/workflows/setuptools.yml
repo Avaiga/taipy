@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -53,7 +53,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-latest, macos-latest]
 
     runs-on: ${{ matrix.os }}
 
