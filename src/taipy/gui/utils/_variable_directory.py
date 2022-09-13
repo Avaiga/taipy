@@ -45,7 +45,7 @@ class _VariableDirectory:
             if name == "*" and asname == "*":
                 continue
             imported_module_name = _get_module_name_from_imported_var(
-                name, self._locals_context.get_locals()[asname], module
+                name, self._locals_context.get_locals().get(asname, None), module
             )
             temp_var_name = self.add_var(asname, self._default_module)
             self.add_var(name, imported_module_name, temp_var_name)
@@ -57,7 +57,7 @@ class _VariableDirectory:
                 if name == "*" and asname == "*":
                     continue
                 imported_module_name = _get_module_name_from_imported_var(
-                    name, self._locals_context.get_locals()[asname], module
+                    name, self._locals_context.get_locals().get(asname, None), module
                 )
                 var_name = self.get_var(name, imported_module_name)
                 var_asname = self.get_var(asname, k)
