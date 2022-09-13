@@ -65,7 +65,7 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium --with-deps
+          playwright install chromium
           pytest
 
   publish-to-pypi:
@@ -129,7 +129,7 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium --with-deps
+          playwright install chromium
 
       - name: Install and test package
         run: |

@@ -39,7 +39,7 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium --with-deps
+          playwright install chromium
 
           echo "running pytest"
           pytest -s
@@ -85,7 +85,7 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium --with-deps
+          playwright install chromium
 
           echo "running pytest"
           pytest -s | tee pytest_res
