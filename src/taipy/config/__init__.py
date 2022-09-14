@@ -15,3 +15,5 @@ from .section import Section
 from .unique_section import UniqueSection
 from .config import Config
 from .global_app.global_app_config import GlobalAppConfig
+from .common.scope import Scope
+from .common.frequency import Frequency
