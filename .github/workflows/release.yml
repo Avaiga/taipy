@@ -10,7 +10,7 @@ on:
 jobs:
   test-package:
     timeout-minutes: 20
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -66,14 +66,14 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium
+          playwright install chromium --with-deps
           pytest
 
   release:
     needs: [test-package]
     timeout-minutes: 20
     name: Release package
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2

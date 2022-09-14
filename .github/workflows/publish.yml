@@ -10,7 +10,7 @@ on:
 jobs:
   test-package:
     timeout-minutes: 20
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -65,14 +65,14 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium
+          playwright install chromium --with-deps
           pytest
 
   publish-to-pypi:
     needs: [test-package]
     timeout-minutes: 20
     environment: publish
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -105,7 +105,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8','3.9','3.10']
-        os: [ubuntu-18.04,windows-latest,macos-latest]
+        os: [ubuntu-20.04,windows-latest,macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -129,7 +129,7 @@ jobs:
           pip install pytest pytest-mock pytest-playwright pytest-timeout testbook
           pip install ipython ipykernel
           ipython kernel install --name "python3" --user
-          playwright install chromium
+          playwright install chromium --with-deps
 
       - name: Install and test package
         run: |
