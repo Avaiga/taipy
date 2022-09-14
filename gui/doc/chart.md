@@ -3,7 +3,7 @@ Displays data sets in a chart or a group of charts.
 The chart control is based on the [plotly.js](https://plotly.com/javascript/)
 graphs library.
 
-A chart control can hold several traces, that can display individual data sets.  
+A chart control can hold several traces, that can display individual data sets.
 
 To indicate properties for a given trace, you will use the indexed properties
 (using the *property_name[index]* syntax, with the indices starting at index 1) to
@@ -28,4 +28,5 @@ separate sections.
 - [Line charts](charts/line.md)
 - [Bar charts](charts/bar.md)
 - [Scatter charts](charts/scatter.md)
+- [Gantt charts](charts/gantt.md)
 - [Other features](charts/others.md)
