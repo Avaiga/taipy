@@ -57,6 +57,7 @@ class DataNode(_Entity):
             None.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
+        cacheable (bool): True if a data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
             always up-to-date.
@@ -80,6 +81,7 @@ class DataNode(_Entity):
         parent_id: Optional[str] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
+        cacheable: bool = False,
         validity_period: Optional[timedelta] = None,
         edit_in_progress: bool = False,
         **kwargs,
@@ -93,6 +95,7 @@ class DataNode(_Entity):
         self._edit_in_progress = edit_in_progress
         self._job_ids = _ListAttributes(self, job_ids or list())
 
+        self._cacheable = cacheable
         self._validity_period = validity_period
 
         self._properties = _Properties(self, **kwargs)
@@ -157,6 +160,16 @@ class DataNode(_Entity):
     @_self_setter(_MANAGER_NAME)
     def name(self, val):
         self._name = val
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def cacheable(self):
+        return self._cacheable
+
+    @cacheable.setter  # type: ignore
+    @_self_setter(_MANAGER_NAME)
+    def cacheable(self, val):
+        self._cacheable = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -428,7 +441,7 @@ class DataNode(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def _is_in_cache(self):
-        if not self._properties.get(DataNodeConfig._IS_CACHEABLE_KEY):
+        if not self._cacheable:
             return False
         if not self._last_edit_date:
             # Never been written so it is not up-to-date

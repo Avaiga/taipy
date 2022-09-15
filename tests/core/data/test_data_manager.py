@@ -68,8 +68,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn.id).is_ready_for_reading
         assert _DataManager._get(csv_dn.id).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert len(_DataManager._get(csv_dn.id).properties) == 4
-        assert not _DataManager._get(csv_dn.id).properties["cacheable"]
+        assert not _DataManager._get(csv_dn.id).cacheable
+        assert len(_DataManager._get(csv_dn.id).properties) == 3
         assert _DataManager._get(csv_dn.id).properties.get("path") == "bar"
         assert _DataManager._get(csv_dn.id).properties.get("has_header") is True
         assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
@@ -89,8 +89,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).job_ids == csv_dn.job_ids
         assert not _DataManager._get(csv_dn).is_ready_for_reading
         assert _DataManager._get(csv_dn).is_ready_for_reading == csv_dn.is_ready_for_reading
-        assert len(_DataManager._get(csv_dn).properties) == 4
-        assert not _DataManager._get(csv_dn.id).properties["cacheable"]
+        assert not _DataManager._get(csv_dn.id).cacheable
+        assert len(_DataManager._get(csv_dn).properties) == 3
         assert _DataManager._get(csv_dn).properties.get("path") == "bar"
         assert _DataManager._get(csv_dn).properties.get("has_header") is True
         assert _DataManager._get(csv_dn.id).properties.get("exposed_type") == "pandas"
@@ -129,8 +129,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn.id).job_ids == in_mem_dn.job_ids
         assert _DataManager._get(in_mem_dn.id).is_ready_for_reading
         assert _DataManager._get(in_mem_dn.id).is_ready_for_reading == in_mem_dn.is_ready_for_reading
-        assert len(_DataManager._get(in_mem_dn.id).properties) == 2
-        assert _DataManager._get(in_mem_dn.id).properties["cacheable"]
+        assert _DataManager._get(in_mem_dn.id).cacheable
+        assert len(_DataManager._get(in_mem_dn.id).properties) == 1
         assert _DataManager._get(in_mem_dn.id).properties.get("other_data") == "foo"
         assert _DataManager._get(in_mem_dn.id).properties == in_mem_dn.properties
 
@@ -148,8 +148,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn).job_ids == in_mem_dn.job_ids
         assert _DataManager._get(in_mem_dn).is_ready_for_reading
         assert _DataManager._get(in_mem_dn).is_ready_for_reading == in_mem_dn.is_ready_for_reading
-        assert len(_DataManager._get(in_mem_dn).properties) == 2
-        assert _DataManager._get(in_mem_dn.id).properties["cacheable"]
+        assert _DataManager._get(in_mem_dn.id).cacheable
+        assert len(_DataManager._get(in_mem_dn).properties) == 1
         assert _DataManager._get(in_mem_dn).properties.get("other_data") == "foo"
         assert _DataManager._get(in_mem_dn).properties == in_mem_dn.properties
 
@@ -179,8 +179,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn.id).job_ids == pickle_dn.job_ids
         assert not _DataManager._get(pickle_dn.id).is_ready_for_reading
         assert _DataManager._get(pickle_dn.id).is_ready_for_reading == pickle_dn.is_ready_for_reading
-        assert len(_DataManager._get(pickle_dn.id).properties) == 2
-        assert not _DataManager._get(pickle_dn.id).properties["cacheable"]
+        assert not _DataManager._get(pickle_dn.id).cacheable
+        assert len(_DataManager._get(pickle_dn.id).properties) == 1
         assert _DataManager._get(pickle_dn.id).properties == pickle_dn.properties
 
         assert _DataManager._get(pickle_dn) is not None
@@ -197,8 +197,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn).job_ids == pickle_dn.job_ids
         assert not _DataManager._get(pickle_dn).is_ready_for_reading
         assert _DataManager._get(pickle_dn).is_ready_for_reading == pickle_dn.is_ready_for_reading
-        assert len(_DataManager._get(pickle_dn).properties) == 2
-        assert not _DataManager._get(pickle_dn.id).properties["cacheable"]
+        assert not _DataManager._get(pickle_dn.id).cacheable
+        assert len(_DataManager._get(pickle_dn).properties) == 1
         assert _DataManager._get(pickle_dn).properties == pickle_dn.properties
 
     def test_create_raises_exception_with_wrong_type(self):
