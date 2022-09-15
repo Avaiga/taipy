@@ -35,6 +35,7 @@ Config.configure_data_node = DataNodeConfig._configure
 Config.configure_default_data_node = DataNodeConfig._configure_default
 Config.configure_csv_data_node = DataNodeConfig._configure_csv
 Config.configure_json_data_node = DataNodeConfig._configure_json
+Config.configure_sql_table_data_node = DataNodeConfig._configure_sql_table
 Config.configure_sql_data_node = DataNodeConfig._configure_sql
 Config.configure_in_memory_data_node = DataNodeConfig._configure_in_memory
 Config.configure_pickle_data_node = DataNodeConfig._configure_pickle

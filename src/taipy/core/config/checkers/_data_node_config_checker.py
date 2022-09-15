@@ -39,7 +39,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 data_node_config._STORAGE_TYPE_KEY,
                 data_node_config.storage_type,
                 f"`{data_node_config._STORAGE_TYPE_KEY}` field of DataNode `{data_node_config_id}` must be either csv, "
-                f"sql, pickle, excel, generic, json or in_memory.",
+                f"sql_table, sql, pickle, excel, generic, json or in_memory.",
             )
 
     def _check_scope(self, data_node_config_id: str, data_node_config: DataNodeConfig):
@@ -62,7 +62,15 @@ class _DataNodeConfigChecker(_ConfigChecker):
                                 DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
                                 DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
                                 DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
-                                DataNodeConfig._REQUIRED_WRITE_TABLE_SQL_PROPERTY,
+                                DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
+                            ]
+                if storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_SQL_TABLE:
+                    if engine := data_node_config.properties.get(DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY):
+                        if engine == DataNodeConfig._REQUIRED_DB_ENGINE_SQLITE:
+                            required_properties = [
+                                DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
+                                DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
+                                DataNodeConfig._REQUIRED_TABLE_NAME_PROPERTY,
                             ]
                 for required_property in required_properties:
                     if required_property not in data_node_config.properties:

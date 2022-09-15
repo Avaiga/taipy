@@ -15,7 +15,7 @@ import pytest
 
 from src.taipy.core.config.checkers._data_node_config_checker import _DataNodeConfigChecker
 from src.taipy.core.config.data_node_config import DataNodeConfig
-from taipy import Config
+from taipy.config import Config
 from taipy.config.checker.issue_collector import IssueCollector
 from taipy.config.common.scope import Scope
 
@@ -77,6 +77,11 @@ class TestDataNodeConfigChecker:
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 2
+
+        config._sections[DataNodeConfig.name]["default"].storage_type = "sql_table"
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 5
 
         config._sections[DataNodeConfig.name]["default"].storage_type = "sql"
         collector = IssueCollector()
@@ -141,12 +146,31 @@ class TestDataNodeConfigChecker:
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 0
 
+        config._sections[DataNodeConfig.name]["default"].storage_type = "sql_table"
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 5
+
         config._sections[DataNodeConfig.name]["default"].storage_type = "sql"
         collector = IssueCollector()
         _DataNodeConfigChecker(config, collector)._check()
         assert len(collector.errors) == 6
 
-        required_properties = ["db_username", "db_password", "db_name", "db_engine", "read_query", "write_table"]
+        required_properties = ["db_username", "db_password", "db_name", "db_engine", "table_name"]
+        config._sections[DataNodeConfig.name]["default"].storage_type = "sql_table"
+        config._sections[DataNodeConfig.name]["default"].properties = {key: f"the_{key}" for key in required_properties}
+        collector = IssueCollector()
+        _DataNodeConfigChecker(config, collector)._check()
+        assert len(collector.errors) == 0
+
+        required_properties = [
+            "db_username",
+            "db_password",
+            "db_name",
+            "db_engine",
+            "read_query",
+            "write_query_builder",
+        ]
         config._sections[DataNodeConfig.name]["default"].storage_type = "sql"
         config._sections[DataNodeConfig.name]["default"].properties = {key: f"the_{key}" for key in required_properties}
         collector = IssueCollector()
