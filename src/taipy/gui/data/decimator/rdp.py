@@ -17,6 +17,9 @@ from ..utils import Decimator
 
 
 class RDP(Decimator):
+
+    _CHART_MODES = ["lines+markers"]
+
     def __init__(
         self,
         epsilon: t.Optional[int] = None,

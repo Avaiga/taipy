@@ -111,7 +111,7 @@ const Router = () => {
                                     </Box>
                                     {state.ackList.length ? (
                                         <Box sx={progressSx}>
-                                            <CircularProgress size="1em" />
+                                            <CircularProgress size="1em" disableShrink/>
                                         </Box>
                                     ) : null}
                                 </Box>

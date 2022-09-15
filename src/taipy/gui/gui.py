@@ -432,7 +432,7 @@ class Gui:
         # if the variable has been evaluated then skip updating to prevent infinite loop
         var_modified = self.__is_var_modified_in_context(hash_expr, derived_vars)
         if not var_modified:
-            self.__call_on_change(
+            self._call_on_change(
                 var_name,
                 value.get() if isinstance(value, _TaipyBase) else value._dict if isinstance(value, _MapDict) else value,
                 on_change,
@@ -472,7 +472,7 @@ class Gui:
                 raise NameError(f"Can't find matching variable for {var_name} on context: {current_context}")
         return f"{var_name}.{suffix_var_name}" if suffix_var_name else var_name, current_context
 
-    def __call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
+    def _call_on_change(self, var_name: str, value: t.Any, on_change: t.Optional[str] = None):
         try:
             var_name, current_context = self.__get_real_var_name(var_name)
         except Exception as e:

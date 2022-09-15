@@ -17,6 +17,9 @@ from ..utils import Decimator
 
 
 class ScatterDecimator(Decimator):
+
+    _CHART_MODES = ["markers"]
+
     def __init__(
         self,
         binning_ratio: t.Optional[float] = None,

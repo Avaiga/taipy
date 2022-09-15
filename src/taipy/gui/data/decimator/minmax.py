@@ -17,6 +17,9 @@ from ..utils import Decimator
 
 
 class MinMaxDecimator(Decimator):
+
+    _CHART_MODES = ["lines+markers"]
+
     def __init__(self, n_out: int, threshold: t.Optional[int] = None, zoom: t.Optional[bool] = True):
         super().__init__(threshold, zoom)
         self._n_out = n_out // 2
