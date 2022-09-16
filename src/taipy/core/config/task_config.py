@@ -33,7 +33,7 @@ class TaskConfig(Section):
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
             (exposed_type field) of the input data nodes and returning results compatible with the exposed types
             (exposed_type field) of the outputs list. The default value is None.
-        **properties: A dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     name = "TASK"

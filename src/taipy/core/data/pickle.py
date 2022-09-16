@@ -35,7 +35,7 @@ class PickleDataNode(DataNode):
             `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
-        cacheable (bool): True if a data node is cacheable. False otherwise.
+        cacheable (bool): True if this data node is cacheable. False otherwise.
         validity_period (Optional[timedelta]): The validity period of a cacheable data node.
             Implemented as a timedelta. If _validity_period_ is set to None, the data_node is
             always up-to-date.
