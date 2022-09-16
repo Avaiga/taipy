@@ -26,7 +26,7 @@ class PipelineConfig(Section):
 
     Attributes:
         id (str): Identifier of the pipeline configuration. It must be a valid Python variable name.
-        task_configs (`TaskConfig^` or List[`TaskConfig^`]): List of task configs. The default value is [].
+        task_configs (Union[TaskConfig, List[TaskConfig]]): List of task configs. The default value is [].
         **properties (dict[str, Any]): A dictionary of additional properties.
     """
 

@@ -37,9 +37,9 @@ from .operator import JoinOperator, Operator
 class DataNode(_Entity):
     """Reference to a dataset.
 
-    A Data Node holds metadata related to the dataset it refers to. In particular, a data node
-    holds the name, the scope, the parent identifier, the last edit date, and some additional
-    properties of the data.<br/>
+    A Data Node is an abstract class that holds metadata related to the dataset it refers to.
+    In particular, a data node holds the name, the scope, the parent identifier, the last
+    edit date, and some additional properties of the data.<br/>
     A Data Node also contains information and methods needed to access the dataset. This
     information depends on the type of storage, and it is held by subclasses (such as
     SQL Data Node, CSV Data Node, ...).

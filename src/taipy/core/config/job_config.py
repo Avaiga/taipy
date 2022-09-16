@@ -26,7 +26,7 @@ class JobConfig(UniqueSection):
     Parameters:
         mode (str): The Taipy operating mode. By default, the "standalone" mode is set. A "development" mode is also
             available for testing and debugging the executions of jobs.
-        **properties: A dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     name = "JOB"

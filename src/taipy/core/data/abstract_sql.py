@@ -27,6 +27,8 @@ from .data_node import DataNode
 
 
 class AbstractSQLDataNode(DataNode):
+    """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
+
     __STORAGE_TYPE = None
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PANDAS = "pandas"
