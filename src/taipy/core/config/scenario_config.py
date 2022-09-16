@@ -32,7 +32,7 @@ class ScenarioConfig(Section):
         id (str): Identifier of the scenario config. It must be a valid Python variable name.
         pipeline_configs (`PipelineConfig^` or List[`PipelineConfig^`]): List of pipeline configs. The default value
             is [].
-        **properties: A dictionary of additional properties.
+        **properties (dict[str, Any]): A dictionary of additional properties.
     """
 
     name = "SCENARIO"

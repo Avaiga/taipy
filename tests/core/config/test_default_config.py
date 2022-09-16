@@ -30,7 +30,7 @@ def _test_default_data_node_config(dn_config: DataNodeConfig):
     assert dn_config.storage_type == "pickle"
     assert dn_config.scope == Scope.SCENARIO
     assert not dn_config.cacheable
-    assert len(dn_config.properties) == 1
+    assert len(dn_config.properties) == 0
 
 
 def _test_default_task_config(task_config: TaskConfig):

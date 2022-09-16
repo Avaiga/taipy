@@ -65,6 +65,7 @@ class _DataManager(_Manager[DataNode]):
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 parent_id=parent_id,
+                cacheable=data_node_config.cacheable,
                 validity_period=validity_period,
                 properties=props,
             )

@@ -199,7 +199,7 @@ class TestDataNode:
 
     def test_is_in_cache_no_validity_period_cacheable_true(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", None, properties={"cacheable": True})
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, DataNodeId("id"), "name", None, cacheable=True)
         assert dn._is_in_cache is False
 
         # test has been writen
@@ -224,9 +224,7 @@ class TestDataNode:
 
     def test_is_in_cache_with_30_min_validity_period_cacheable_true(self):
         # Test Never been writen
-        dn = InMemoryDataNode(
-            "foo", Scope.PIPELINE, properties={"cacheable": True}, validity_period=timedelta(minutes=30)
-        )
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, cacheable=True, validity_period=timedelta(minutes=30))
         assert dn._is_in_cache is False
 
         # Has been writen less than 30 minutes ago
@@ -240,7 +238,7 @@ class TestDataNode:
 
     def test_is_in_cache_with_5_days_validity_period_cacheable_true(self):
         # Test Never been writen
-        dn = InMemoryDataNode("foo", Scope.PIPELINE, properties={"cacheable": True}, validity_period=timedelta(days=5))
+        dn = InMemoryDataNode("foo", Scope.PIPELINE, cacheable=True, validity_period=timedelta(days=5))
         assert dn._is_in_cache is False
 
         # Has been writen less than 30 minutes ago
@@ -459,6 +457,7 @@ class TestDataNode:
             parent_id=None,
             last_edit_date=current_datetime,
             job_ids=[JobId("a_job_id")],
+            cacheable=False,
             edit_in_progress=False,
             validity_period=None,
         )
@@ -496,6 +495,11 @@ class TestDataNode:
         assert dn_1.edition_in_progress
         assert dn_2.edition_in_progress
 
+        assert not dn_1.cacheable
+        dn_1.cacheable = True
+        assert dn_1.cacheable
+        assert dn_2.cacheable
+
         time_period = timedelta(1)
 
         assert dn_1.validity_period is None
@@ -526,6 +530,7 @@ class TestDataNode:
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
+            assert dn_1.cacheable
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 0
             assert dn._is_in_context
@@ -536,6 +541,7 @@ class TestDataNode:
             dn.last_edition_date = new_datetime_2
             dn.name = "abc"
             dn.edition_in_progress = False
+            dn_1.cacheable = False
             dn.validity_period = None
             dn.job_ids = ["a_job_id"]
 
@@ -545,6 +551,7 @@ class TestDataNode:
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
+            assert dn_1.cacheable
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 0
 
@@ -554,6 +561,7 @@ class TestDataNode:
         assert dn_1.last_edition_date == new_datetime_2
         assert dn_1.name == "abc"
         assert not dn_1.edition_in_progress
+        assert not dn_1.cacheable
         assert dn_1.validity_period is None
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
