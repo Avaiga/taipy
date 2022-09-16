@@ -33,6 +33,18 @@ class MyCustomObject:
         self.kwargs = kwargs
 
 
+def my_write_query_builder(data: pd.DataFrame):
+    insert_data = list(data.itertuples(index=False, name=None))
+    return [
+        "DELETE FROM foo",
+        ("INSERT INTO foo VALUES (?,?)", insert_data)
+    ]
+
+
+def single_write_query_builder(data):
+    return "DELETE FROM foo"
+
+
 class TestSQLDataNode:
     __properties = [
         {
@@ -40,8 +52,8 @@ class TestSQLDataNode:
             "db_password": "Passw0rd",
             "db_name": "taipy",
             "db_engine": "mssql",
-            "read_query": "SELECT * from daily_min_example",
-            "write_table": "foo",
+            "read_query": "SELECT * FROM foo",
+            "write_query_builder": my_write_query_builder,
             "db_extra_args": {
                 "TrustServerCertificate": "yes",
             },
@@ -49,8 +61,8 @@ class TestSQLDataNode:
         {
             "db_name": "taipy",
             "db_engine": "sqlite",
-            "read_query": "SELECT * from daily_min_example",
-            "write_table": "foo",
+            "read_query": "SELECT * FROM foo",
+            "write_query_builder": my_write_query_builder,
             "db_extra_args": {
                 "TrustServerCertificate": "yes",
                 "other": "value",
@@ -73,8 +85,9 @@ class TestSQLDataNode:
         assert dn.parent_id is None
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
-        assert dn.read_query != ""
         assert dn.exposed_type == "pandas"
+        assert dn.read_query == "SELECT * FROM foo"
+        assert dn.write_query_builder == my_write_query_builder
 
     @pytest.mark.parametrize(
         "properties",
@@ -91,233 +104,35 @@ class TestSQLDataNode:
         with pytest.raises(MissingRequiredProperty):
             SQLDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
 
-    @mock.patch("src.taipy.core.data.sql.SQLDataNode._read_as", return_value="custom")
-    @mock.patch("src.taipy.core.data.sql.SQLDataNode._read_as_pandas_dataframe", return_value="pandas")
-    @mock.patch("src.taipy.core.data.sql.SQLDataNode._read_as_numpy", return_value="numpy")
-    @pytest.mark.parametrize("properties", __properties)
-    def test_read(self, mock_read_as, mock_read_as_pandas_dataframe, mock_read_as_numpy, properties):
-
-        # Create SQLDataNode without exposed_type (Default is pandas.DataFrame)
-        sql_data_node_as_pandas = SQLDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties=properties,
-        )
-
-        assert sql_data_node_as_pandas._read() == "pandas"
-
-        # Create the same SQLDataNode but with custom exposed_type
-        sql_data_node_as_custom_object = SQLDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "db_username": "a",
-                "db_password": "a",
-                "db_name": "a",
-                "db_engine": "mssql",
-                "read_query": "SELECT * from table_name",
-                "write_table": "foo",
-                "exposed_type": MyCustomObject,
-            },
-        )
-        assert sql_data_node_as_custom_object._read() == "custom"
-
-        # Create the same SQLDataSource but with numpy exposed_type
-        sql_data_source_as_numpy_object = SQLDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "db_username": "a",
-                "db_password": "a",
-                "db_name": "a",
-                "db_engine": "mssql",
-                "read_query": "SELECT * from table_name",
-                "write_table": "foo",
-                "exposed_type": "numpy",
-            },
-        )
-
-        assert sql_data_source_as_numpy_object._read() == "numpy"
-
-    @pytest.mark.parametrize("properties", __properties)
-    def test_read_as(self, properties):
-
-        sql_data_node = SQLDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "read_query": "SELECT * from table_name",
-                "write_table": "foo",
-                "exposed_type": MyCustomObject,
-            },
-        )
-
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
-            cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = [
-                {"foo": "baz", "bar": "qux"},
-                {"foo": "quux", "bar": "quuz"},
-                {"foo": "corge"},
-                {"bar": "grault"},
-                {"KWARGS_KEY": "KWARGS_VALUE"},
-                {},
-            ]
-            data = sql_data_node._read_as()
-
-        assert isinstance(data, list)
-        assert isinstance(data[0], MyCustomObject)
-        assert isinstance(data[1], MyCustomObject)
-        assert isinstance(data[2], MyCustomObject)
-        assert isinstance(data[3], MyCustomObject)
-        assert isinstance(data[4], MyCustomObject)
-        assert isinstance(data[5], MyCustomObject)
-
-        assert data[0].foo == "baz"
-        assert data[0].bar == "qux"
-        assert data[1].foo == "quux"
-        assert data[1].bar == "quuz"
-        assert data[2].foo == "corge"
-        assert data[2].bar is None
-        assert data[3].foo is None
-        assert data[3].bar == "grault"
-        assert data[4].foo is None
-        assert data[4].bar is None
-        assert data[4].kwargs["KWARGS_KEY"] == "KWARGS_VALUE"
-        assert data[5].foo is None
-        assert data[5].bar is None
-        assert len(data[5].args) == 0
-        assert len(data[5].kwargs) == 0
-
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
-            cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.return_value = []
-            data_2 = sql_data_node._read_as()
-        assert isinstance(data_2, list)
-        assert len(data_2) == 0
-
-    @pytest.mark.parametrize(
-        "data,written_data,called_func",
-        [
-            ([{"a": 1, "b": 2}, {"a": 3, "b": 4}], [{"a": 1, "b": 2}, {"a": 3, "b": 4}], "_insert_dicts"),
-            ({"a": 1, "b": 2}, [{"a": 1, "b": 2}], "_insert_dicts"),
-            ([(1, 2), (3, 4)], [(1, 2), (3, 4)], "_insert_tuples"),
-            ([[1, 2], [3, 4]], [[1, 2], [3, 4]], "_insert_tuples"),
-            ((1, 2), [(1, 2)], "_insert_tuples"),
-            ([1, 2, 3, 4], [(1,), (2,), (3,), (4,)], "_insert_tuples"),
-            ("foo", [("foo",)], "_insert_tuples"),
-            (None, [(None,)], "_insert_tuples"),
-            (np.array([1, 2, 3, 4]), [(1,), (2,), (3,), (4,)], "_insert_tuples"),
-            (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "_insert_tuples"),
-        ],
-    )
-    def test_write(self, data, written_data, called_func):
+    def test_write_query_builder(self):
         dn = SQLDataNode(
-            "foo",
+            "foo_bar",
             Scope.PIPELINE,
             properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "read_query": "SELECT * from foo",
-                "write_table": "foo",
-            },
-        )
-
-        dn2 = SQLDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "db_name": "datanode",
+                "db_name": "taipy",
                 "db_engine": "sqlite",
-                "read_query": "SELECT * from foo",
-                "write_table": "foo",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder,
             },
         )
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+            # mock connection execute
+            dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+            assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")
+            assert engine_mock.mock_calls[5] == mock.call().__enter__().execute(
+                "INSERT INTO foo VALUES (?,?)", [(1, 4), (2, 5), (3, 6)])
 
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
-            "src.taipy.core.data.sql.SQLDataNode._create_table"
-        ) as create_table_mock:
-            cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.side_effect = None
-
-            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as mck:
-                dn._write(data)
-                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
-            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode.{called_func}") as mck:
-                dn2._write(data)
-                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
-
-    def test_raise_error_invalid_exposed_type(self):
-        with pytest.raises(InvalidExposedType):
-            SQLDataNode(
-                "foo",
-                Scope.PIPELINE,
-                properties={
-                    "db_name": "datanode",
-                    "db_engine": "sqlite",
-                    "read_query": "SELECT * from foo",
-                    "write_table": "foo",
-                    "exposed_type": "foo",
-                },
-            )
-
-    def test_write_dataframe(self):
         dn = SQLDataNode(
-            "foo",
+            "foo_bar",
             Scope.PIPELINE,
             properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "read_query": "SELECT * from foo",
-                "write_table": "foo",
+                "db_name": "taipy",
+                "db_engine": "sqlite",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": single_write_query_builder,
             },
         )
-
-        df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
-            "src.taipy.core.data.sql.SQLDataNode._create_table"
-        ) as create_table_mock:
-            cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.side_effect = None
-
-            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode._insert_dataframe") as mck:
-                dn._write(df)
-                assert mck.call_args[0][0].equals(df)
-
-    @pytest.mark.parametrize(
-        "data",
-        [
-            [],
-            np.array([]),
-        ],
-    )
-    def test_write_empty_list(self, data):
-        dn = SQLDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "read_query": "SELECT * from foo",
-                "write_table": "foo",
-            },
-        )
-
-        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
-            "src.taipy.core.data.sql.SQLDataNode._create_table"
-        ) as create_table_mock:
-            cursor_mock = engine_mock.return_value.__enter__.return_value
-            cursor_mock.execute.side_effect = None
-
-            with mock.patch(f"src.taipy.core.data.sql.SQLDataNode._delete_all_rows") as mck:
-                dn._write(data)
-                mck.assert_called_once_with(create_table_mock.return_value, cursor_mock)
+        with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
+            # mock connection execute
+            dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
+            assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")
