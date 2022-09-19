@@ -9,7 +9,6 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import os
 import shutil
 from datetime import datetime
 from pathlib import Path
@@ -490,7 +489,7 @@ def export_scenario(
     entity_ids.add(scenario.cycle.id)
 
     # Copy storage folder to the export folder
-    if os.path.exists(folder):
+    if Path(folder).exists():
         shutil.rmtree(folder)
     shutil.copytree(Config.global_config.storage_folder, folder, dirs_exist_ok=True)
 
