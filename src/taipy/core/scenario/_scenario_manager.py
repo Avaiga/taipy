@@ -34,6 +34,8 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
+from ..task._task_manager_factory import _TaskManagerFactory
+from ..task.task import Task
 from ._scenario_repository_factory import _ScenarioRepositoryFactory
 from .scenario import Scenario
 
@@ -275,6 +277,8 @@ class _ScenarioManager(_Manager[Scenario]):
             if pipeline.parent_id in (pipeline.id, scenario.id):
                 entity_ids.pipeline_ids.add(pipeline.id)
             for task in pipeline.tasks.values():
+                if not isinstance(task, Task):
+                    task = _TaskManagerFactory._build_manager()._get(task)
                 if task.parent_id in (pipeline.id, scenario.id):
                     entity_ids.task_ids.add(task.id)
                 for data_node in task.data_nodes.values():

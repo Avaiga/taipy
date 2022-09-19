@@ -93,6 +93,7 @@ class _TaskManager(_Manager[Task]):
         task = cls._get(task_id)
         entity_ids_to_delete = cls._get_owned_entity_ids(task)
         entity_ids_to_delete.task_ids.add(task.id)
+        entity_ids_to_delete.data_node_ids = set()
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod

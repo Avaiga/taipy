@@ -26,7 +26,7 @@ from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
-from .exceptions.exceptions import ModelNotFound
+from .exceptions.exceptions import InvalidExportPath, ModelNotFound
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .pipeline._pipeline_manager_factory import _PipelineManagerFactory
@@ -469,40 +469,34 @@ def clean_all_entities() -> bool:
     return True
 
 
-def export(
-    entity_id: Union[DataNodeId, TaskId, PipelineId, ScenarioId, CycleId],
+def export_scenario(
+    scenario_id: ScenarioId,
     folder: str,
 ):
-    """Export all related entities of an entity to a folder.
+    """Export all related entities of a scenario to a folder.
 
     Parameters:
-        entity_id (Union[DataNodeId, TaskId, PipelineId, ScenarioId, CycleId]): The
-            entity to export.
+        scenario_id: The id of the scenario to export.
         folder (str): The folder to export. This folder must not be the storage folder.
+
     """
     if Path(folder).resolve() == Path(Config.global_config.storage_folder).resolve():
-        __logger.warning("Exporting to storage folder is not allowed.")
-        return
+        raise InvalidExportPath("The export folder must not be the storage folder.")
 
-    manager = _get_manager_by_entity_id(entity_id)
-    entity = manager._get(entity_id)
-    entity_ids = manager._get_owned_entity_ids(entity)._union_all  # type: ignore
-    entity_ids.add(entity_id)
+    manager = _ScenarioManagerFactory._build_manager()
+    scenario = manager._get(scenario_id)
+    entity_ids = manager._get_owned_entity_ids(scenario)._union_all  # type: ignore
+    entity_ids.add(scenario_id)
+    entity_ids.add(scenario.cycle.id)
 
     # Copy storage folder to the export folder
     if os.path.exists(folder):
         shutil.rmtree(folder)
     shutil.copytree(Config.global_config.storage_folder, folder, dirs_exist_ok=True)
 
-    # Delete all entities that are not related to the entity
     for f in Path(folder).rglob("*"):
         if f.is_file() and f.stem not in entity_ids:
             f.unlink()
-
-    # Remove empty subfolders
-    for f in Path(folder).rglob("*"):
-        if f.is_dir() and not list(f.iterdir()):
-            f.rmdir()
 
 
 def _get_manager_by_entity_id(entity_id: str) -> Type[_Manager]:
