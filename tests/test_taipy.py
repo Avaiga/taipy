@@ -344,6 +344,9 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/data_nodes")) == sorted(
             [f"{scenario_1.i1.id}.json", f"{scenario_1.o1.id}.json"]
         )
+        assert sorted(os.listdir("./tmp/exp_scenario_1/pickles")) == sorted(
+            [f"{scenario_1.i1.id}.p", f"{scenario_1.o1.id}.p"]
+        )
         assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_1.p1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/scenarios")) == sorted([f"{scenario_1.id}.json"])
@@ -354,6 +357,9 @@ class TestTaipy:
         tp.export_scenario(scenario_2.id, "./tmp/exp_scenario_2")
         assert sorted(os.listdir("./tmp/exp_scenario_2/data_nodes")) == sorted(
             [f"{scenario_2.i2.id}.json", f"{scenario_2.o2.id}.json"]
+        )
+        assert sorted(os.listdir("./tmp/exp_scenario_2/pickles")) == sorted(
+            [f"{scenario_2.i2.id}.p", f"{scenario_2.o2.id}.p"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
