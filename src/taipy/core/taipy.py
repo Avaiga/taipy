@@ -478,7 +478,7 @@ def export(
     Parameters:
         entity_id (Union[DataNodeId, TaskId, PipelineId, ScenarioId, CycleId]): The
             entity to export.
-        folder (str): The folder to export
+        folder (str): The folder to export. This folder must not be the storage folder.
     """
     if Path(folder).resolve() == Path(Config.global_config.storage_folder).resolve():
         __logger.warning("Exporting to storage folder is not allowed.")
