@@ -270,7 +270,7 @@ class TestTaipy:
             tp.create_pipeline(pipeline_config)
             mck.assert_called_once_with(pipeline_config)
 
-    def test_export(self, cycle):
+    def test_clean_all_entities(self, cycle):
         data_node_1_config = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
         data_node_2_config = Config.configure_data_node(
             id="d2", storage_type="pickle", default_data="abc", scope=Scope.SCENARIO
