@@ -11,6 +11,7 @@
 
 import datetime
 import os
+import shutil
 from unittest import mock
 
 import pytest
@@ -363,3 +364,5 @@ class TestTaipy:
         # Export to storage folder
         with pytest.raises(InvalidExportPath):
             tp.export_scenario(scenario_1.id, Config.global_config.storage_folder)
+
+        shutil.rmtree("./tmp", ignore_errors=True)
