@@ -44,3 +44,27 @@ class TestEntityIds:
         assert entity_ids_1.pipeline_ids == {"pipeline_id_1", "pipeline_id_2", "pipeline_id_3"}
         assert entity_ids_1.scenario_ids == {"scenario_id_1", "scenario_id_2", "scenario_id_3"}
         assert entity_ids_1.cycle_ids == {"cycle_id_1", "cycle_id_2", "cycle_id_3"}
+
+    def test_union_all(self):
+        entity_ids = _EntityIds()
+        entity_ids.data_node_ids.update(["data_node_id_1", "data_node_id_2"])
+        entity_ids.task_ids.update(["task_id_1", "task_id_2"])
+        entity_ids.job_ids.update(["job_id_1", "job_id_2"])
+        entity_ids.pipeline_ids.update(["pipeline_id_1", "pipeline_id_2"])
+        entity_ids.scenario_ids.update(["scenario_id_1", "scenario_id_2"])
+        entity_ids.cycle_ids.update(["cycle_id_1", "cycle_id_2"])
+
+        assert entity_ids._union_all == {
+            "data_node_id_1",
+            "data_node_id_2",
+            "task_id_1",
+            "task_id_2",
+            "job_id_1",
+            "job_id_2",
+            "pipeline_id_1",
+            "pipeline_id_2",
+            "scenario_id_1",
+            "scenario_id_2",
+            "cycle_id_1",
+            "cycle_id_2",
+        }

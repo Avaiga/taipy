@@ -27,6 +27,7 @@ from .taipy import (
     delete,
     delete_job,
     delete_jobs,
+    export,
     get,
     get_cycles,
     get_data_nodes,

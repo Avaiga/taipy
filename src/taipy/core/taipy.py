@@ -9,12 +9,16 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
+import shutil
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from ._manager._manager import _Manager
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from .config.pipeline_config import PipelineConfig
 from .config.scenario_config import ScenarioConfig
@@ -463,3 +467,55 @@ def clean_all_entities() -> bool:
     _CycleManagerFactory._build_manager()._delete_all()
     _JobManagerFactory._build_manager()._delete_all()
     return True
+
+
+def export(
+    entity_id: Union[DataNodeId, TaskId, PipelineId, ScenarioId, CycleId],
+    folder: str,
+):
+    """Export all related entities of an entity to a folder.
+
+    Parameters:
+        entity_id (Union[DataNodeId, TaskId, PipelineId, ScenarioId, CycleId]): The
+            entity to export.
+        folder (str): The folder to export
+    """
+    if Path(folder).resolve() == Path(Config.global_config.storage_folder).resolve():
+        __logger.warning("Exporting to storage folder is not allowed.")
+        return
+
+    manager = _get_manager_by_entity_id(entity_id)
+    entity = manager._get(entity_id)
+    entity_ids = manager._get_owned_entity_ids(entity)._union_all  # type: ignore
+    entity_ids.add(entity_id)
+
+    # Copy storage folder to the export folder
+    if os.path.exists(folder):
+        shutil.rmtree(folder)
+    shutil.copytree(Config.global_config.storage_folder, folder, dirs_exist_ok=True)
+
+    # Delete all entities that are not related to the entity
+    for f in Path(folder).rglob("*"):
+        if f.is_file() and f.stem not in entity_ids:
+            f.unlink()
+
+    # Remove empty subfolders
+    for f in Path(folder).rglob("*"):
+        if f.is_dir() and not list(f.iterdir()):
+            f.rmdir()
+
+
+def _get_manager_by_entity_id(entity_id: str) -> Type[_Manager]:
+    if entity_id.startswith(DataNode._ID_PREFIX):
+        return _DataManagerFactory._build_manager()
+    if entity_id.startswith(Task._ID_PREFIX):
+        return _TaskManagerFactory._build_manager()
+    if entity_id.startswith(Pipeline._ID_PREFIX):
+        return _PipelineManagerFactory._build_manager()
+    if entity_id.startswith(Scenario._ID_PREFIX):
+        return _ScenarioManagerFactory._build_manager()
+    if entity_id.startswith(Cycle._ID_PREFIX):
+        return _CycleManagerFactory._build_manager()
+    if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
+        return _JobManagerFactory._build_manager()
+    raise ValueError(f"Unknown entity id: {entity_id}")

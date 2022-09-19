@@ -33,3 +33,9 @@ class _EntityIds:
     def __iadd__(self, other: _EntityIds):
         self.__add__(other)
         return self
+
+    @property
+    def _union_all(self) -> set:
+        return set().union(
+            self.data_node_ids, self.task_ids, self.scenario_ids, self.pipeline_ids, self.job_ids, self.cycle_ids
+        )
