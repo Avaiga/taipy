@@ -317,7 +317,7 @@ class TestTaipy:
         assert len(_JobManager._get_all()) == 0
         assert success
 
-    def test_export(self):
+    def test_export_scenario(self):
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.PIPELINE)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.PIPELINE)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)

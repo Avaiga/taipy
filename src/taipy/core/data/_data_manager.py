@@ -15,7 +15,6 @@ from typing import Dict, Iterable, Optional, Set, Union
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
-from ..common._entity_ids import _EntityIds
 from ..common.alias import DataNodeId, PipelineId, ScenarioId
 from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import InvalidDataNodeType
@@ -100,10 +99,3 @@ class _DataManager(_Manager[DataNode]):
     def _delete_all(cls):
         cls._clean_pickle_files(cls._get_all())
         super()._delete_all()
-
-    @classmethod
-    def _get_owned_entity_ids(cls, data_node: DataNode) -> _EntityIds:
-        entity_ids = _EntityIds()
-        entity_ids.data_node_ids.add(data_node.id)
-
-        return entity_ids

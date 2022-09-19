@@ -476,7 +476,7 @@ def export_scenario(
     """Export all related entities of a scenario to a folder.
 
     Parameters:
-        scenario_id: The id of the scenario to export.
+        scenario_id (ScenarioId): The id of the scenario to export.
         folder (str): The folder to export. This folder must not be the storage folder.
 
     """
@@ -494,22 +494,7 @@ def export_scenario(
         shutil.rmtree(folder)
     shutil.copytree(Config.global_config.storage_folder, folder, dirs_exist_ok=True)
 
+    # Remove all entities that are not related to the scenario
     for f in Path(folder).rglob("*"):
         if f.is_file() and f.stem not in entity_ids:
             f.unlink()
-
-
-def _get_manager_by_entity_id(entity_id: str) -> Type[_Manager]:
-    if entity_id.startswith(DataNode._ID_PREFIX):
-        return _DataManagerFactory._build_manager()
-    if entity_id.startswith(Task._ID_PREFIX):
-        return _TaskManagerFactory._build_manager()
-    if entity_id.startswith(Pipeline._ID_PREFIX):
-        return _PipelineManagerFactory._build_manager()
-    if entity_id.startswith(Scenario._ID_PREFIX):
-        return _ScenarioManagerFactory._build_manager()
-    if entity_id.startswith(Cycle._ID_PREFIX):
-        return _CycleManagerFactory._build_manager()
-    if entity_id.startswith(_JobManagerFactory._build_manager()._ID_PREFIX):
-        return _JobManagerFactory._build_manager()
-    raise ValueError(f"Unknown entity id: {entity_id}")
