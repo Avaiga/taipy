@@ -477,7 +477,9 @@ def export_scenario(
     Parameters:
         scenario_id (ScenarioId): The id of the scenario to export.
         folder (str): The folder to export. This folder must not be the storage folder.
-
+    
+    Raises:
+        InvalidExportPath^: If the folder path is invalid or reserved by Taipy.
     """
     if Path(folder).resolve() == Path(Config.global_config.storage_folder).resolve():
         raise InvalidExportPath("The export folder must not be the storage folder.")
