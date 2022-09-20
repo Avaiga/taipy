@@ -74,6 +74,9 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
     def _search(self, attribute: str, value: Any) -> Optional[Task]:
         return self.repo._search(attribute, value)
 
+    def _export(self, entity_id: str, **kwargs):
+        return self.repo._export(entity_id, **kwargs)
+
     @staticmethod
     def __to_ids(data_nodes):
         return [i.id for i in data_nodes]

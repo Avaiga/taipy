@@ -94,6 +94,9 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
     def _search(self, attribute: str, value: Any) -> Optional[Pipeline]:
         return self.repo._search(attribute, value)
 
+    def _export(self, entity_id: str, **kwargs):
+        return self.repo._export(entity_id, **kwargs)
+
     @staticmethod
     def __to_task_ids(tasks):
         return [t.id if isinstance(t, Task) else t for t in tasks]

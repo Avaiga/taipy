@@ -317,7 +317,9 @@ class TestTaipy:
         assert len(_JobManager._get_all()) == 0
         assert success
 
-    def test_export_scenario(self):
+    def test_export_scenario_filesystem(self):
+        shutil.rmtree("./tmp", ignore_errors=True)
+
         input_cfg_1 = Config.configure_data_node(id="i1", storage_type="pickle", default_data=1, scope=Scope.PIPELINE)
         output_cfg_1 = Config.configure_data_node(id="o1", storage_type="pickle", scope=Scope.PIPELINE)
         task_cfg_1 = Config.configure_task("t1", print, input_cfg_1, output_cfg_1)
@@ -340,12 +342,9 @@ class TestTaipy:
         job_2 = job_2[scenario_2.p2.id][0]
 
         # Export scenario 1
-        tp.export_scenario(scenario_1.id, "./tmp/exp_scenario_1")
+        tp.export_scenario(scenario_1.id, folder="./tmp/exp_scenario_1")
         assert sorted(os.listdir("./tmp/exp_scenario_1/data_nodes")) == sorted(
             [f"{scenario_1.i1.id}.json", f"{scenario_1.o1.id}.json"]
-        )
-        assert sorted(os.listdir("./tmp/exp_scenario_1/pickles")) == sorted(
-            [f"{scenario_1.i1.id}.p", f"{scenario_1.o1.id}.p"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_1/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_1/pipelines")) == sorted([f"{scenario_1.p1.id}.json"])
@@ -354,12 +353,9 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
         # Export scenario 2
-        tp.export_scenario(scenario_2.id, "./tmp/exp_scenario_2")
+        tp.export_scenario(scenario_2.id, folder="./tmp/exp_scenario_2")
         assert sorted(os.listdir("./tmp/exp_scenario_2/data_nodes")) == sorted(
             [f"{scenario_2.i2.id}.json", f"{scenario_2.o2.id}.json"]
-        )
-        assert sorted(os.listdir("./tmp/exp_scenario_2/pickles")) == sorted(
-            [f"{scenario_2.i2.id}.p", f"{scenario_2.o2.id}.p"]
         )
         assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_2.t2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/pipelines")) == sorted([f"{scenario_2.p2.id}.json"])
@@ -367,8 +363,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
 
-        # Export to storage folder
         with pytest.raises(InvalidExportPath):
-            tp.export_scenario(scenario_1.id, Config.global_config.storage_folder)
+            tp.export_scenario(scenario_1.id, folder=Config.global_config.storage_folder)
 
         shutil.rmtree("./tmp", ignore_errors=True)

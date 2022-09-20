@@ -97,3 +97,10 @@ class _Manager(Generic[EntityType]):
         _TaskManagerFactory._build_manager()._delete_many(_entity_ids.task_ids)
         _JobManagerFactory._build_manager()._delete_many(_entity_ids.job_ids)
         _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)
+
+    @classmethod
+    def _export(cls, id, **kwargs):
+        """
+        Export an entity.
+        """
+        return cls._repository._export(id, **kwargs)

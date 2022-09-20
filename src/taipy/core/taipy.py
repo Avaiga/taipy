@@ -470,32 +470,30 @@ def clean_all_entities() -> bool:
 
 def export_scenario(
     scenario_id: ScenarioId,
-    folder: str,
+    **kwargs,
 ):
     """Export all related entities of a scenario to a folder.
 
     Parameters:
         scenario_id (ScenarioId): The id of the scenario to export.
-        folder (str): The folder to export. This folder must not be the storage folder.
-    
-    Raises:
-        InvalidExportPath^: If the folder path is invalid or reserved by Taipy.
+        **kwargs: Additional keyword arguments.
     """
-    if Path(folder).resolve() == Path(Config.global_config.storage_folder).resolve():
-        raise InvalidExportPath("The export folder must not be the storage folder.")
 
     manager = _ScenarioManagerFactory._build_manager()
     scenario = manager._get(scenario_id)
-    entity_ids = manager._get_owned_entity_ids(scenario)._union_all  # type: ignore
-    entity_ids.add(scenario_id)
-    entity_ids.add(scenario.cycle.id)
+    entity_ids = manager._get_owned_entity_ids(scenario)  # type: ignore
+    entity_ids.scenario_ids = {scenario_id}
+    entity_ids.cycle_ids = {scenario.cycle.id}
 
-    # Copy storage folder to the export folder
-    if Path(folder).exists():
-        shutil.rmtree(folder)
-    shutil.copytree(Config.global_config.storage_folder, folder, dirs_exist_ok=True)
-
-    # Remove all entities that are not related to the scenario
-    for f in Path(folder).rglob("*"):
-        if f.is_file() and f.stem not in entity_ids:
-            f.unlink()
+    for data_node_id in entity_ids.data_node_ids:
+        _DataManagerFactory._build_manager()._export(data_node_id, **kwargs)
+    for task_id in entity_ids.task_ids:
+        _TaskManagerFactory._build_manager()._export(task_id, **kwargs)
+    for pipeline_id in entity_ids.pipeline_ids:
+        _PipelineManagerFactory._build_manager()._export(pipeline_id, **kwargs)
+    for cycle_id in entity_ids.cycle_ids:
+        _CycleManagerFactory._build_manager()._export(cycle_id, **kwargs)
+    for scenario_id in entity_ids.scenario_ids:
+        _ScenarioManagerFactory._build_manager()._export(scenario_id, **kwargs)
+    for job_id in entity_ids.job_ids:
+        _JobManagerFactory._build_manager()._export(job_id, **kwargs)
