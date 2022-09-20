@@ -476,7 +476,10 @@ def export_scenario(
 
     Parameters:
         scenario_id (ScenarioId): The id of the scenario to export.
-        **kwargs: Additional keyword arguments.
+        kwargs: Additional keyword arguments.
+        Currently the following keyword arguments are supported:
+            - folder (str): The folder to export the scenario to.
+
     """
 
     manager = _ScenarioManagerFactory._build_manager()
