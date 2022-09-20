@@ -216,8 +216,8 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
         export_dir = folder / self._dir_name
         if not export_dir.exists():
             export_dir.mkdir(parents=True)
-        export_path = export_dir / f"{entity_id}.json"
 
+        export_path = export_dir / f"{entity_id}.json"
         # Delete if exists.
         if export_path.exists():
             export_path.unlink()
