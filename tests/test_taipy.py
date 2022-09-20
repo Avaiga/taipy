@@ -363,6 +363,15 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_2.id}.json"])
         assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_2.cycle.id}.json"])
 
+        # Export scenario 1 into the folder containing scenario 2 files
+        tp.export_scenario(scenario_1.id, folder="./tmp/exp_scenario_2")
+        # Should have the files as scenario 1 only
+        assert sorted(os.listdir("./tmp/exp_scenario_2/tasks")) == sorted([f"{scenario_1.t1.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_2/pipelines")) == sorted([f"{scenario_1.p1.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_2/scenarios")) == sorted([f"{scenario_1.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_2/jobs")) == sorted([f"{job_1.id}.json"])
+        assert sorted(os.listdir("./tmp/exp_scenario_2/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
+
         with pytest.raises(InvalidExportPath):
             tp.export_scenario(scenario_1.id, folder=Config.global_config.storage_folder)
 

@@ -488,6 +488,9 @@ def export_scenario(
     entity_ids.scenario_ids = {scenario_id}
     entity_ids.cycle_ids = {scenario.cycle.id}
 
+    if folder := kwargs.get("folder"):
+        shutil.rmtree(folder, ignore_errors=True)
+
     for data_node_id in entity_ids.data_node_ids:
         _DataManagerFactory._build_manager()._export(data_node_id, **kwargs)
     for task_id in entity_ids.task_ids:
