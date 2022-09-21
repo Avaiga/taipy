@@ -15,9 +15,9 @@ from .config import Config
 default_config: Config = {
     "port": 5000,
     "dark_mode": True,
-    "debug": True,
+    "debug": False,
     "host": "127.0.0.1",
-    "use_reloader": True,
+    "use_reloader": False,
     "time_zone": None,
     "propagate": True,
     "favicon": None,

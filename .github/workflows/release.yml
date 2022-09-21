@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 20
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install npm
         uses: actions/setup-node@v1
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Extract commit hash
         shell: bash
