@@ -1635,7 +1635,6 @@ class Gui:
             use_reloader=app_config["use_reloader"],
             flask_log=app_config["flask_log"],
             run_in_thread=run_in_thread,
-            ssl_context=None,  # ssl_context,
         )
 
     def stop(self):

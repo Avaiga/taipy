@@ -180,7 +180,7 @@ class _Server:
         sock.close()
         return result == 0
 
-    def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread, ssl_context):
+    def runWithWS(self, host, port, debug, use_reloader, flask_log, run_in_thread):
         host_value = host if host != "0.0.0.0" else "localhost"
         if _is_in_notebook() or run_in_thread:
             runtime_manager = _RuntimeManager()

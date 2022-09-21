@@ -45,7 +45,7 @@ jobs:
         env:
           TOX_PARALLEL_NO_SPINNER: 1
         run: |
-          pip install tox
+          pip install tox==3.25.1
           tox -p all
 
       - name: Code coverage

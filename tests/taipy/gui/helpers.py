@@ -133,7 +133,6 @@ class Helpers:
                 use_reloader=False,
                 flask_log=False,
                 run_in_thread=True,
-                ssl_context=None,
             )
         while not Helpers.port_check():
             time.sleep(0.1)
