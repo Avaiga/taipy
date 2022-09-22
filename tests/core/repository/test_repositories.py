@@ -119,6 +119,10 @@ class TestRepositoriesStorage:
         r._export("uuid", "tmp")
         assert pathlib.Path("tmp/foo/uuid.json").exists()
 
+        # Export to same location again should work
+        r._export("uuid", "tmp")
+        assert pathlib.Path("tmp/foo/uuid.json").exists()
+
         with pytest.raises(InvalidExportPath):
             r._export("uuid", Config.global_config.storage_folder)
 

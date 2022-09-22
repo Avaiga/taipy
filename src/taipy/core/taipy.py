@@ -11,13 +11,11 @@
 
 import shutil
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
-from ._manager._manager import _Manager
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from .config.pipeline_config import PipelineConfig
 from .config.scenario_config import ScenarioConfig
@@ -25,7 +23,7 @@ from .cycle._cycle_manager_factory import _CycleManagerFactory
 from .cycle.cycle import Cycle
 from .data._data_manager_factory import _DataManagerFactory
 from .data.data_node import DataNode
-from .exceptions.exceptions import InvalidExportPath, ModelNotFound
+from .exceptions.exceptions import ModelNotFound
 from .job._job_manager_factory import _JobManagerFactory
 from .job.job import Job
 from .pipeline._pipeline_manager_factory import _PipelineManagerFactory
