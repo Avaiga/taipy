@@ -195,11 +195,7 @@ class _Server:
             log = logging.getLogger("werkzeug")
             log.disabled = True
             print(f" * Server starting on http://{host_value}:{port}")
-        if (
-            not is_running_from_reloader()
-            and self._gui._get_config("run_browser", False)
-            and self._gui._get_config("debug", False)
-        ):
+        if not is_running_from_reloader() and self._gui._get_config("run_browser", False):
             webbrowser.open(f"http://{host_value}{f':{port}' if port else ''}", new=2)
         if _is_in_notebook() or run_in_thread:
             self._host = host
