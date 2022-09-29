@@ -80,5 +80,6 @@ from .page import Page
 from .partial import Partial
 from .renderers import Html, Markdown
 from .state import State
+from .utils import is_debugging
 
 _register_gui_config()

@@ -31,6 +31,7 @@ from .filter_locals import _filter_locals
 from .get_imported_var import _get_imported_var
 from .get_module_name import _get_module_name_from_frame, _get_module_name_from_imported_var
 from .getdatecolstrname import _RE_PD_TYPE, _get_date_col_str_name
+from .is_debugging import is_debugging
 from .isnotebook import _is_in_notebook
 from .types import (
     _TaipyBase,
