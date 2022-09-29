@@ -13,7 +13,8 @@ from importlib.util import find_spec
 
 if find_spec("taipy"):
     if find_spec("taipy.config"):
-        pass
+        from taipy.config import *
+        from taipy.logger import *
 
     if find_spec("taipy.core"):
         from taipy.core import *
@@ -27,7 +28,7 @@ if find_spec("taipy"):
             _init_gui_enterprise(Gui)
 
     if find_spec("taipy.rest"):
-        pass
+        from taipy.rest import Rest
 
     if find_spec("taipy._run"):
-        pass
+        from taipy._run import _run as run
