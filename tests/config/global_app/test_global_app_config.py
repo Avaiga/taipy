@@ -51,4 +51,7 @@ def test_default_global_app_config():
     assert global_config.storage_folder == ".data/"
     assert global_config._clean_entities_enabled is GlobalAppConfig._CLEAN_ENTITIES_ENABLED_TEMPLATE
     assert global_config.clean_entities_enabled is False
+    
+    assert global_config.repository_type == "filesystem"
+    assert global_config.repository_properties == {}
     assert len(global_config.properties) == 0
