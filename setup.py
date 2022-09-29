@@ -49,6 +49,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-config",
-    version="1.0.0.dev",
+    version="2.1.0.dev",
     zip_safe=False,
 )
