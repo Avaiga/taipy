@@ -141,23 +141,22 @@ class _PandasDataAccessor(_DataAccessor):
         if data_extraction is not None:
             ret["dataExtraction"] = data_extraction  # Extract data out of dictionary on frontend
         if data_format == _DataFormat.APACHE_ARROW:
-            if _has_arrow_module:
-                # Convert from pandas to Arrow
-                table = pa.Table.from_pandas(data)
-                # Create sink buffer stream
-                sink = pa.BufferOutputStream()
-                # Create Stream writer
-                writer = pa.ipc.new_stream(sink, table.schema)
-                # Write data to table
-                writer.write_table(table)
-                writer.close()
-                # end buffer stream
-                buf = sink.getvalue()
-                # convert buffer to python bytes and return
-                ret["data"] = buf.to_pybytes()
-                ret["orient"] = orient
-            else:
+            if not _has_arrow_module:
                 raise RuntimeError("Cannot use Arrow as pyarrow package is not installed")
+            # Convert from pandas to Arrow
+            table = pa.Table.from_pandas(data)
+            # Create sink buffer stream
+            sink = pa.BufferOutputStream()
+            # Create Stream writer
+            writer = pa.ipc.new_stream(sink, table.schema)
+            # Write data to table
+            writer.write_table(table)
+            writer.close()
+            # end buffer stream
+            buf = sink.getvalue()
+            # convert buffer to python bytes and return
+            ret["data"] = buf.to_pybytes()
+            ret["orient"] = orient
         else:
             # workaround for python built in json encoder that does not yet support ignore_nan
             ret["data"] = data.replace([np.nan], ["NaN" if handle_nan else None]).to_dict(orient=orient)  # type: ignore
@@ -301,8 +300,8 @@ class _PandasDataAccessor(_DataAccessor):
         self, gui: Gui, var_name: str, value: t.Any, payload: t.Dict[str, t.Any], data_format: _DataFormat
     ) -> t.Dict[str, t.Any]:
         if isinstance(value, list):
-            is_chart = payload.get("alldata", False)
-            if is_chart:
+            # If is_chart data
+            if payload.get("alldata", False):
                 ret_payload = {
                     "alldata": True,
                     "value": {"multi": True},

@@ -207,44 +207,45 @@ class _Config(object):
 
 
 def _register_gui_config():
-    if find_spec("taipy") and find_spec("taipy.config"):
-        from copy import copy
+    if not find_spec("taipy") or not find_spec("taipy.config"):
+        return
+    from copy import copy
 
-        from taipy.config import Config as TaipyConfig
-        from taipy.config import UniqueSection
+    from taipy.config import Config as TaipyConfig
+    from taipy.config import UniqueSection
 
-        from ._default_config import default_config
+    from ._default_config import default_config
 
-        class _GuiSection(UniqueSection):
+    class _GuiSection(UniqueSection):
 
-            name = "gui"
+        name = "gui"
 
-            def __init__(self, property_list: t.Optional[t.List] = None, **properties):
-                self._property_list = property_list
-                super().__init__(**properties)
+        def __init__(self, property_list: t.Optional[t.List] = None, **properties):
+            self._property_list = property_list
+            super().__init__(**properties)
 
-            def __copy__(self):
-                return _GuiSection(property_list=copy(self._property_list), **copy(self._properties))
+        def __copy__(self):
+            return _GuiSection(property_list=copy(self._property_list), **copy(self._properties))
 
-            def _to_dict(self):
-                as_dict = {}
-                as_dict.update(self._properties)
-                return as_dict
+        def _to_dict(self):
+            as_dict = {}
+            as_dict.update(self._properties)
+            return as_dict
 
-            @classmethod
-            def _from_dict(cls, as_dict: t.Dict[str, t.Any]):
-                return _GuiSection(property_list=list(default_config), **as_dict)
+        @classmethod
+        def _from_dict(cls, as_dict: t.Dict[str, t.Any]):
+            return _GuiSection(property_list=list(default_config), **as_dict)
 
-            def _update(self, as_dict: t.Dict[str, t.Any]):
-                if self._property_list:
-                    as_dict = {k: v for k, v in as_dict.items() if k in self._property_list}
-                self._properties.update(as_dict)
+        def _update(self, as_dict: t.Dict[str, t.Any]):
+            if self._property_list:
+                as_dict = {k: v for k, v in as_dict.items() if k in self._property_list}
+            self._properties.update(as_dict)
 
-            @staticmethod
-            def _configure(**properties):
-                section = _GuiSection(property_list=list(default_config), **properties)
-                TaipyConfig._register(section)
-                return TaipyConfig.unique_sections[_GuiSection.name]
+        @staticmethod
+        def _configure(**properties):
+            section = _GuiSection(property_list=list(default_config), **properties)
+            TaipyConfig._register(section)
+            return TaipyConfig.unique_sections[_GuiSection.name]
 
-        TaipyConfig._register_default(_GuiSection(property_list=list(default_config)))
-        TaipyConfig.configure_gui = _GuiSection._configure
+    TaipyConfig._register_default(_GuiSection(property_list=list(default_config)))
+    TaipyConfig.configure_gui = _GuiSection._configure

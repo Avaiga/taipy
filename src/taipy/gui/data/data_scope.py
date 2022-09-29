@@ -21,8 +21,7 @@ class _DataScopes:
     _GLOBAL_ID = "global"
 
     def __init__(self) -> None:
-        self.__scopes: t.Dict[str, SimpleNamespace] = {}
-        self.__scopes[_DataScopes._GLOBAL_ID] = SimpleNamespace()
+        self.__scopes: t.Dict[str, SimpleNamespace] = {_DataScopes._GLOBAL_ID: SimpleNamespace()}
         self.__single_client = True
 
     def set_single_client(self, value: bool) -> None:

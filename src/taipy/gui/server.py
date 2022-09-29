@@ -185,12 +185,10 @@ class _Server:
         if _is_in_notebook() or run_in_thread:
             runtime_manager = _RuntimeManager()
             runtime_manager.add_gui(self._gui, port)
-        if debug and not is_running_from_reloader():
-            # Check that the port is not already opened
-            if self._is_port_open(host_value, port):
-                raise ConnectionError(
-                    f"Port {port} is already opened on {host_value}. You have another server application running on the same port."
-                )
+        if debug and not is_running_from_reloader() and self._is_port_open(host_value, port):
+            raise ConnectionError(
+                f"Port {port} is already opened on {host_value}. You have another server application running on the same port."
+            )
         if not flask_log:
             log = logging.getLogger("werkzeug")
             log.disabled = True

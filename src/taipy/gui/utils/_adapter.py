@@ -42,9 +42,7 @@ class _Adapter:
 
     def _run_for_var(self, var_name: str, value: t.Any, id_only=False) -> t.Any:
         ret = self._run(self.__get_for_var(var_name, value), value, var_name, id_only)
-        if ret is not None:
-            return ret
-        return value
+        return ret if ret is not None else value
 
     def __get_for_var(self, var_name: str, value: t.Any) -> t.Optional[t.Callable]:
         adapter = None
@@ -54,9 +52,7 @@ class _Adapter:
             type_name = var_name if callable(adapter) else type(value).__name__
         if adapter is None:
             adapter = self.__adapter_for_type.get(type_name)
-        if callable(adapter):
-            return adapter
-        return None
+        return adapter if callable(adapter) else None
 
     def _get_elt_per_ids(self, var_name: str, lov: t.List[t.Any]) -> t.Dict[str, t.Any]:
         dict_res = {}

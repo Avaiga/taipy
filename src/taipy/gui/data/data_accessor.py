@@ -69,29 +69,27 @@ class _DataAccessors(object):
         self._register(_NumpyDataAccessor)
 
     def _register(self, cls: t.Type[_DataAccessor]) -> None:
-        if inspect.isclass(cls):
-            if issubclass(cls, _DataAccessor):
-                names = cls.get_supported_classes()
-                if not names:
-                    raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
-                # check existence
-                inst: t.Optional[_DataAccessor] = None
-                for name in names:
-                    inst = self.__access_4_type.get(name)
-                    if inst:
-                        break
-                if inst is None:
-                    try:
-                        inst = cls()
-                    except Exception as e:
-                        raise TypeError(f"Class {cls.__name__} cannot be instanciated") from e
-                    if inst:
-                        for name in names:
-                            self.__access_4_type[name] = inst  # type: ignore
-            else:
-                raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
-        else:
+        if not inspect.isclass(cls):
             raise AttributeError("The argument of 'DataAccessors.register' should be a class")
+        if not issubclass(cls, _DataAccessor):
+            raise TypeError(f"Class {cls.__name__} is not a subclass of DataAccessor")
+        names = cls.get_supported_classes()
+        if not names:
+            raise TypeError(f"method {cls.__name__}.get_supported_classes returned an invalid value")
+        # check existence
+        inst: t.Optional[_DataAccessor] = None
+        for name in names:
+            inst = self.__access_4_type.get(name)
+            if inst:
+                break
+        if inst is None:
+            try:
+                inst = cls()
+            except Exception as e:
+                raise TypeError(f"Class {cls.__name__} cannot be instanciated") from e
+            if inst:
+                for name in names:
+                    self.__access_4_type[name] = inst  # type: ignore
 
     def __get_instance(self, value: _TaipyData) -> _DataAccessor:  # type: ignore
         value = value.get()

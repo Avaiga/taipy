@@ -71,8 +71,8 @@ class _Evaluator:
     def get_hash_from_expr(self, expr: str) -> str:
         return self.__expr_to_hash.get(expr, expr)
 
-    def get_expr_from_hash(self, hash: str) -> str:
-        return self.__hash_to_expr.get(hash, hash)
+    def get_expr_from_hash(self, hash_val: str) -> str:
+        return self.__hash_to_expr.get(hash_val, hash_val)
 
     def _is_expression(self, expr: str) -> bool:
         return len(_Evaluator.__EXPR_IS_EXPR.findall(expr)) != 0
@@ -159,9 +159,9 @@ class _Evaluator:
     def evaluate_holders(self, gui: Gui, expr: str) -> t.List[str]:
         lst = []
         for hld in self.__expr_to_holders.get(expr, []):
-            hash = self.__get_holder_hash(hld, self.__expr_to_hash.get(expr, ""))
+            hash_val = self.__get_holder_hash(hld, self.__expr_to_hash.get(expr, ""))
             self.__evaluate_holder(gui, hld, expr)
-            lst.append(hash)
+            lst.append(hash_val)
         return lst
 
     @staticmethod

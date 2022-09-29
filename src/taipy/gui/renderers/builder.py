@@ -168,7 +168,7 @@ class _Builder:
     def __get_list_of_(self, name: str):
         lof = self.__attributes.get(name)
         if isinstance(lof, str):
-            lof = [s for s in lof.split(";")]
+            lof = list(lof.split(";"))
         return lof
 
     def get_name_indexed_property(self, name: str) -> t.Dict[str, t.Any]:
@@ -217,14 +217,10 @@ class _Builder:
         Arguments:
             name (str): The property name.
         """
-        dict_attr = self.__attributes.get(name)
-        if dict_attr:
+        if dict_attr := self.__attributes.get(name):
             if isinstance(dict_attr, str):
                 vals = [x.strip().split(":") for x in dict_attr.split(";")]
-                dict_attr = {}
-                for val in vals:
-                    if len(val) > 1:
-                        dict_attr[val[0].strip()] = val[1].strip()
+                dict_attr = {val[0].strip(): val[1].strip() for val in vals if len(val) > 1}
             if isinstance(dict_attr, (dict, _MapDict)):
                 self.__set_json_attribute(_to_camel_case(name), dict_attr)
             else:
@@ -666,7 +662,7 @@ class _Builder:
         if varname is None:
             list_val = self.__attributes.get(name)
             if isinstance(list_val, str):
-                list_val = [s for s in list_val.split(";")]
+                list_val = list(list_val.split(";"))
             if isinstance(list_val, list):
                 # TODO catch the cast exception
                 if list_type.value == PropertyType.number.value:
@@ -847,8 +843,7 @@ class _Builder:
         if self.__control_type not in _Builder.__BLOCK_CONTROLS:
             return self
         if partial := self.__attributes.get("partial"):
-            page = self.__attributes.get("page")
-            if page:
+            if self.__attributes.get("page"):
                 warnings.warn(
                     f"{self.__element_name} control: page and partial should not be defined at the same time."
                 )
@@ -859,9 +854,7 @@ class _Builder:
 
     def _set_propagate(self):
         val = self.__get_boolean_attribute("propagate", self.__gui._config.config.get("propagate"))
-        if not val:
-            return self.set_boolean_attribute("propagate", False)
-        return self
+        return self if val else self.set_boolean_attribute("propagate", False)
 
     def __set_refresh_on_update(self):
         if self.__update_vars:
@@ -887,8 +880,7 @@ class _Builder:
         return self.set_attribute("type", type_name)
 
     def _set_kind(self):
-        theme = self.__attributes.get("theme", False)
-        if theme:
+        if self.__attributes.get("theme", False):
             self.set_attribute("kind", "theme")
         return self
 
