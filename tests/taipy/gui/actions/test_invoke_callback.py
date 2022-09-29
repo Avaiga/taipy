@@ -13,10 +13,10 @@ import inspect
 
 from flask import g
 
-from taipy.gui import Gui, Markdown, State, get_context_id, invoke_state_callback
+from taipy.gui import Gui, Markdown, State, invoke_callback
 
 
-def test_invoke_state_callback(gui: Gui, helpers):
+def test_invoke_callback(gui: Gui, helpers):
     name = "World!"  # noqa: F841
     btn_id = "button1"  # noqa: F841
 
@@ -37,5 +37,5 @@ def test_invoke_state_callback(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
-        invoke_state_callback(gui, cid, user_callback, [])
+        invoke_callback(gui, cid, user_callback, [])
         assert gui._Gui__state.val == 10

@@ -19,7 +19,7 @@ import warnings
 from types import FrameType
 
 from taipy.gui import Gui, Html, Markdown
-from taipy.gui.renderers.builder import Builder
+from taipy.gui.renderers.builder import _Builder
 from taipy.gui.utils._variable_directory import _reset_name_map
 from taipy.gui.utils.expr_var_name import _reset_expr_var_name
 
@@ -27,7 +27,7 @@ from taipy.gui.utils.expr_var_name import _reset_expr_var_name
 class Helpers:
     @staticmethod
     def test_cleanup():
-        Builder._reset_key()
+        _Builder._reset_key()
         _reset_name_map()
         _reset_expr_var_name()
 

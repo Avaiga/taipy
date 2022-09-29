@@ -11,7 +11,7 @@
 
 """# Taipy Graphical User Interface generator.
 
-The Taipy Gui package provides User Interface generation based on
+The Taipy GUI package provides User Interface generation based on
 page templates. It can run a Web server that a Web browser can connect
 to.
 
@@ -67,15 +67,17 @@ from .config import _register_gui_config
 from .gui import Gui
 from .gui_actions import (
     download,
-    get_context_id,
+    get_state_id,
     get_module_name_from_state,
     hold_control,
-    invoke_state_callback,
+    invoke_callback,
     navigate,
     notify,
     resume_control,
 )
 from .icon import Icon
+from .page import Page
+from .partial import Partial
 from .renderers import Html, Markdown
 from .state import State
 

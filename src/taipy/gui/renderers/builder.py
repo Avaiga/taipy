@@ -47,12 +47,11 @@ if t.TYPE_CHECKING:
     from ..gui import Gui
 
 
-class Builder:
+class _Builder:
     """
-    TODO
-    The builder that helps construct an xml node that will be rendered as a React node.
-    Every public method returns this.
-    This class can only be instantiated by Taipy.
+    Constructs an XML node that can be rendered as a React node.
+
+    This class can only be instantiated internally by Taipy.
     """
 
     __keys: t.Dict[str, int] = {}
@@ -91,7 +90,7 @@ class Builder:
 
         # Bind properties dictionary to attributes if condition is matched (will leave the binding for function at the builder )
         if "properties" in self.__attributes:
-            (prop_dict, prop_hash) = Builder.__parse_attribute_value(gui, self.__attributes["properties"])
+            (prop_dict, prop_hash) = _Builder.__parse_attribute_value(gui, self.__attributes["properties"])
             if prop_hash is None:
                 prop_hash = prop_dict
                 prop_hash = self.__gui._bind_var(prop_hash)
@@ -100,18 +99,18 @@ class Builder:
             if isinstance(prop_dict, _MapDict):
                 # Iterate through prop_dict and append to self.attributes
                 for k, v in prop_dict.items():
-                    (val, key_hash) = Builder.__parse_attribute_value(gui, v)
+                    (val, key_hash) = _Builder.__parse_attribute_value(gui, v)
                     self.__attributes[k] = f"{{{prop_hash}['{k}']}}" if key_hash is None else v
             else:
                 warnings.warn(f"{self.__control_type}.properties ({prop_hash}) must be a dict.")
 
         # Bind potential function and expressions in self.attributes
-        self.__hashes.update(Builder._get_variable_hash_names(gui, self.__attributes, hash_names))
+        self.__hashes.update(_Builder._get_variable_hash_names(gui, self.__attributes, hash_names))
 
         # set classname
         self.__set_class_names()
         # define a unique key
-        self.set_attribute("key", Builder._get_key(self.__element_name))
+        self.set_attribute("key", _Builder._get_key(self.__element_name))
 
     @staticmethod
     def __parse_attribute_value(gui: "Gui", value) -> t.Tuple:
@@ -144,7 +143,7 @@ class Builder:
                         hashname = _get_expr_var_name(v.__name__)
                 elif isinstance(v, str):
                     # need to unescape the double quotes that were escaped during preprocessing
-                    (val, hashname) = Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
+                    (val, hashname) = _Builder.__parse_attribute_value(gui, v.replace('\\"', '"'))
 
                 if val is not None or hashname:
                     attributes[k] = val
@@ -158,13 +157,13 @@ class Builder:
 
     @staticmethod
     def _get_key(name: str) -> str:
-        key_index = Builder.__keys.get(name, 0)
-        Builder.__keys[name] = key_index + 1
+        key_index = _Builder.__keys.get(name, 0)
+        _Builder.__keys[name] = key_index + 1
         return f"{name}.{key_index}"
 
     @staticmethod
     def _reset_key() -> None:
-        Builder.__keys = {}
+        _Builder.__keys = {}
 
     def __get_list_of_(self, name: str):
         lof = self.__attributes.get(name)
@@ -201,10 +200,9 @@ class Builder:
     def set_boolean_attribute(self, name: str, value: bool):
         """
         TODO
-        Defines a react boolean attribute (attr={true|false}).
+        Defines a React Boolean attribute (attr={true|false}).
 
         Arguments:
-
             name (str): The property name.
             value (bool): the boolean value.
         """
@@ -213,11 +211,10 @@ class Builder:
     def set_dict_attribute(self, name: str):
         """
         TODO
-        Defines a react attribute as stringified json dict.
+        Defines a React attribute as a stringified json dict.
         The original property can be a dict or a string formed as <key 1>:<value 1>;<key 2>:<value 2>.
 
         Arguments:
-
             name (str): The property name.
         """
         dict_attr = self.__attributes.get(name)
@@ -248,7 +245,7 @@ class Builder:
     def set_number_attribute(self, name: str, default_value: t.Optional[str] = None, optional: t.Optional[bool] = True):
         """
         TODO
-        Defines a react number attribute (attr={<number>}).
+        Defines a React number attribute (attr={<number>}).
 
         Arguments:
 
@@ -578,7 +575,7 @@ class Builder:
         icols = [[c for c in [_get_col_from_indexed(c, i) for c in columns.keys()] if c] for i in range(len(traces))]
 
         for i, tr in enumerate(traces):
-            if not tr[0] or tr[6] in Builder.__ONE_COLUMN_CHART or not tr[1]:
+            if not tr[0] or tr[6] in _Builder.__ONE_COLUMN_CHART or not tr[1]:
                 traces[i] = tuple(
                     v or (icols[i].pop(0) if j < 3 and j < len(icols[i]) else v) for j, v in enumerate(tr)
                 )
@@ -847,7 +844,7 @@ class Builder:
         return self
 
     def _set_partial(self):
-        if self.__control_type not in Builder.__BLOCK_CONTROLS:
+        if self.__control_type not in _Builder.__BLOCK_CONTROLS:
             return self
         if partial := self.__attributes.get("partial"):
             page = self.__attributes.get("page")
@@ -1001,6 +998,13 @@ class Builder:
         """
         self.el.set(name, value)
         return self
+
+    def get_element(self):
+        """
+        TODO
+        Returns the xml.etree.ElementTree.Element
+        """
+        return self.el
 
     def _build_to_string(self):
         el_str = str(etree.tostring(self.el, encoding="utf8").decode("utf8"))

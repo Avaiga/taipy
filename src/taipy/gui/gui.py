@@ -41,7 +41,7 @@ from .data.content_accessor import _ContentAccessor
 from .data.data_accessor import _DataAccessor, _DataAccessors
 from .data.data_format import _DataFormat
 from .data.data_scope import _DataScopes
-from .extension.user_element import ElementLibrary
+from .extension.library import Element, ElementLibrary
 from .page import Page
 from .partial import Partial
 from .renderers import _EmptyPage
@@ -89,34 +89,40 @@ class Gui:
             triggers an action, as the result of an interaction with the end-user.<br/>
             It defaults to the `on_action()` global function defined in the Python
             application. If there is no such function, actions will not trigger anything.
+            TODO: function signature
         on_change (Callable): The function that is called when a control
             modifies variables it is bound to, as the result of an interaction with the
             end-user.<br/>
             It defaults to the `on_change()` global function defined in the Python
             application. If there is no such function, user interactions will not trigger
             anything.
-        on_init (Callable): The function that is called on the first connection of a new user.<br/>
+            TODO: function signature
+        on_init (Callable): The function that is called on the first connection of a new client.<br/>
             It defaults to the `on_init()` global function defined in the Python
             application. If there is no such function, the first connection will not trigger
             anything.
+            TODO: function signature
         on_navigate (Callable): The function that is called when a page is requested.<br/>
             It defaults to the `on_navigate()` global function defined in the Python
             application. If there is no such function, page requests will not trigger
             anything.
+            TODO: function signature
         on_exception (Callable): The function that is called an exception occurs on user code.<br/>
             It defaults to the `on_exception()` global function defined in the Python
             application. If there is no such function, exceptions will not trigger
             anything.
+            TODO: function signature
         on_status (Callable): The function that is called when the status page is shown.<br/>
             It should return raw and valid HTML as a string.<br/>
             It defaults to the `on_status()` global function defined in the Python
             application. If there is no such function, status page content shows only the status of the server.
+            TODO: function signature
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
-            directly, potentially impacting the interface in real-time.
+            directly, potentially impacting the user interface in real-time.
 
     !!! note
-        This class belong to and is documented in the `taipy.gui` package but it is
+        This class belongs to and is documented in the `taipy.gui` package but it is
         accessible from the top `taipy` package to simplify its access, allowing to
         use:
         ```py
@@ -131,7 +137,7 @@ class Gui:
     __ON_INIT_NAME = "TaipyOnInit"
     __CONTENT_ROOT = "/taipy-content/"
     __UPLOAD_URL = "/taipy-uploads"
-    __EXTENSION_ROOT = "/taipy-extensions/"
+    _EXTENSION_ROOT = "/taipy-extension/"
 
     __RE_HTML = re.compile(r"(.*?)\.html")
     __RE_MD = re.compile(r"(.*?)\.md")
@@ -142,7 +148,7 @@ class Gui:
 
     __LOCAL_TZ = str(tzlocal.get_localzone())
 
-    __extensions: t.Dict[str, ElementLibrary] = {}
+    __extensions: t.Dict[str, t.List[ElementLibrary]] = {}
 
     def __init__(
         self,
@@ -175,9 +181,9 @@ class Gui:
                 file defining the `main` function, sitting next to this Python file,
                 with the `.css` extension.
             path_mapping (Optional[dict]): A dictionary that associates a URL prefix to
-                a path in the server filesystem.</br>
+                a path in the server file system.</br>
                 If the assets of your application are located in _/home/me/app_assets_ and
-                you want to access them with just _assets_ in your application, you can
+                you want to access them using only '_assets_' in your application, you can
                 set _path_mapping={"assets": "/home/me/app_assets"}_. If your application
                 then requests the file _"/assets/images/logo.png"_, the server searches
                 for the file  _"/home/me/app_assets/images/logo.png"_.
@@ -265,12 +271,22 @@ class Gui:
 
     @staticmethod
     def add_library(library: ElementLibrary):
+        """Add a custom visual element library to this Gui instance.
+
+        Arguments:
+            library: The custom visual element library to add to this library.
+
+        TODO: What if we add two libraries with the same name?
         """
-        TODO
-        """
-        _Factory.set_library(library)
-        if len(library.get_scripts()) != 0:
-            Gui.__extensions[library.get_name()] = library
+        if isinstance(library, ElementLibrary):
+            _Factory.set_library(library)
+            libs = Gui.__extensions.get(library.get_name())
+            if libs is None:
+                Gui.__extensions[library.get_name()] = [library]
+            else:
+                libs.append(library)
+        else:
+            warnings.warn(f"add_library argument should be a subclass of ElementLibrary instead of '{type(library)}'")
 
     def __get_content_accessor(self):
         if self.__content_accessor is None:
@@ -516,12 +532,19 @@ class Gui:
 
     def __serve_extension(self, path: str) -> t.Any:
         parts = path.split("/")
+        last_error = None
         if len(parts) > 1:
-            library = Gui.__extensions.get(parts[0])
-            if library is not None:
-                resource_name = library.get_resource("/".join(parts[1:]))
-                if resource_name:
-                    return send_file(resource_name)
+            libs = Gui.__extensions.get(parts[0], [])
+            for library in libs:
+                try:
+                    resource_name = library.get_resource("/".join(parts[1:]))
+                    if resource_name:
+                        return send_file(resource_name)
+                except Exception as e:
+                    last_error = e  # Check if the resource is served by another library with the same name
+        warnings.warn(
+            f"Resource '{resource_name}' not accessible for library '{parts[0]}':\n{last_error if last_error else ''}"
+        )
         return ("", 404)
 
     def __get_version(self) -> str:
@@ -648,8 +671,8 @@ class Gui:
             if isinstance(payload, dict):
                 lib_name = payload.get("library")
                 if isinstance(lib_name, str):
-                    lib = self.__extensions.get(lib_name)
-                    if isinstance(lib, ElementLibrary):
+                    libs = self.__extensions.get(lib_name, [])
+                    for lib in libs:
                         user_var_name = var_name
                         try:
                             try:
@@ -658,6 +681,8 @@ class Gui:
                                 # ignore name error and keep var_name
                                 pass
                             ret_payload = lib.get_data(lib_name, payload, user_var_name, newvalue)
+                            if ret_payload:
+                                break
                         except Exception as e:
                             warnings.warn(
                                 f"Exception raised in '{lib_name}.get_data({lib_name}, payload, {user_var_name}, value)':\n{e}"
@@ -859,13 +884,13 @@ class Gui:
             args = args[:arg_count]
         return user_function(*args)
 
-    def _call_user_callback(self, context_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
+    def _call_user_callback(self, state_id: t.Optional[str], user_callback: t.Callable, args: t.List[t.Any]) -> t.Any:
         try:
             with self.get_flask_app().app_context():
-                self.__set_client_id_in_context(context_id)
+                self.__set_client_id_in_context(state_id)
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
-            warnings.warn(f"Exception raised in invoke_state_callback: '{user_callback.__name__}':\n{e}")
+            warnings.warn(f"Exception raised in invoke_callback: '{user_callback.__name__}':\n{e}")
         return None
 
     # Proxy methods for Evaluator
@@ -986,15 +1011,15 @@ class Gui:
         page: t.Union[str, Page],
         style: t.Optional[str] = "",
     ) -> None:
-        """Add a page to the graphical User Interface.
+        """Add a page to the Graphical User Interface.
 
         Arguments:
             name: The name of the page.
             page (Union[str, Page^]): The content of the page.<br/>
                 It can be an instance of `Markdown^` or `Html^`.<br/>
-                If _page_ is a string, then:
+                If *page* is a string, then:
 
-                - If _page_ is set to the pathname of a readable file, the page
+                - If *page* is set to the pathname of a readable file, the page
                   content is read as Markdown input text.
                 - If it is not, the page content is read from this string as
                   Markdown text.
@@ -1009,21 +1034,23 @@ class Gui:
         """
         # Validate name
         if name is None:
-            raise Exception("name is required for add_page function!")
+            raise Exception("name is required for add_page() function.")
         if not Gui.__RE_PAGE_NAME.match(name):
             raise SyntaxError(
                 f'Page name "{name}" is invalid. It must only contain letters, digits, dash (-), underscore (_), and forward slash (/) characters.'
             )
         if name.startswith("/"):
-            raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character')
+            raise SyntaxError(f'Page name "{name}" cannot start with forward slash (/) character.')
         if name in self._config.routes:
-            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined')
+            raise Exception(f'Page name "{name if name != Gui.__root_page_name else "/"}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page, frame=None)
         elif not isinstance(page, Page):
-            raise Exception(f'"page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}')
+            raise Exception(
+                f'Parameter "page" is invalid for page name "{name if name != Gui.__root_page_name else "/"}.'
+            )
         # Init a new page
         new_page = _Page()
         new_page._route = name
@@ -1038,7 +1065,7 @@ class Gui:
         self.__var_dir.add_frame(page._frame)
 
     def add_pages(self, pages: t.Union[t.Dict[str, t.Union[str, Page]], str] = None) -> None:
-        """Add several pages to the graphical User Interface.
+        """Add several pages to the Graphical User Interface.
 
         Arguments:
             pages (Union[dict[str, Union[str, Page^]], str]): The pages to add.<br/>
@@ -1055,7 +1082,7 @@ class Gui:
                         - If it is not, the page content is read from this string as
                           Markdown text.
 
-                If _pages_ is a string that contains the path to a directory, then
+                If *pages* is a string that contains the path to a directory, then
                 this directory is traversed, looking for filenames that have the
                 _.md_ extention, TODO
 
@@ -1071,9 +1098,9 @@ class Gui:
             For every file that is found:
 
             - If the filename extention is _.md_, it is read as Markdown content and
-             a new page is created with the base name of this filename.
+              a new page is created with the base name of this filename.
             - If the filename extention is _.html_, it is read as HTML content and
-             a new page is created with the base name of this filename.
+              a new page is created with the base name of this filename.
 
             For example, say you have the following directory structure:
             ```
@@ -1141,26 +1168,26 @@ class Gui:
         Arguments:
             page (Union[str, Page^]): The page to create a new Partial from.<br/>
                 It can be an instance of `Markdown^` or `Html^`.<br/>
-                If _page_ is a string, then:
+                If *page* is a string, then:
 
-                - If _page_ is set to the pathname of a readable file, the content of
+                - If *page* is set to the pathname of a readable file, the content of
                   the new `Partial` is read as Markdown input text.
                 - If it is not, the content of the new `Partial` is read from this string
                   as Markdown text.
 
         Returns:
-            Partial: The new `Partial` object defined by _page_.
+            The new `Partial` object defined by *page*.
         """
         new_partial = Partial()
         # Validate name
         if new_partial._route in self._config.partial_routes or new_partial._route in self._config.routes:
-            warnings.warn(f'Partial name "{new_partial._route}" is already defined')
+            warnings.warn(f'Partial name "{new_partial._route}" is already defined.')
         if isinstance(page, str):
             from .renderers import Markdown
 
             page = Markdown(page, frame=None)
         elif not isinstance(page, Page):
-            raise Exception(f'Partial name "{new_partial._route}" has invalid Page')
+            raise Exception(f'Partial name "{new_partial._route}" has an invalid Page.')
         new_partial._renderer = page
         # Append partial to _config
         self._config.partials.append(new_partial)
@@ -1199,7 +1226,7 @@ class Gui:
                 self._bind(encoded_var_name, bind_locals[var_name])
             else:
                 warnings.warn(
-                    f"Variable '{var_name}' is not available in either '{self._get_locals_context()}' module and '__main__' module"
+                    f"Variable '{var_name}' is not available in either the '{self._get_locals_context()}' or '__main__' modules."
                 )
         return encoded_var_name
 
@@ -1224,7 +1251,7 @@ class Gui:
             if callable(func):
                 setattr(self, name, func)
             else:
-                warnings.warn(f"{name}: {func} should be a function")
+                warnings.warn(f"{name}: {func} should be a function.")
 
     def load_config(self, config: Config) -> None:
         self._config._load(config)
@@ -1271,7 +1298,7 @@ class Gui:
     def _navigate(self, to: t.Optional[str] = ""):
         to = to or Gui.__root_page_name
         if to not in self._config.routes:
-            warnings.warn(f'cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
+            warnings.warn(f'Cannot navigate to "{to if to != Gui.__root_page_name else "/"}": unknown page.')
             return
         self.__send_ws_navigate(to)
 
@@ -1284,7 +1311,7 @@ class Gui:
                     self._call_function_with_state(self.on_init, [])
                 except Exception as e:
                     if not self.__call_on_exception("on_init", e):
-                        warnings.warn(f"Exception raised in on_init\n{e}")
+                        warnings.warn(f"Exception raised in on_init.\n{e}")
         return self._render_route()
 
     def __call_on_exception(self, function_name: str, exception: Exception) -> bool:
@@ -1292,7 +1319,7 @@ class Gui:
             try:
                 self.on_exception(self.__get_state(), str(function_name), exception)
             except Exception as e:
-                warnings.warn(f"Exception raised in on_exception\n{e}")
+                warnings.warn(f"Exception raised in on_exception.\n{e}")
             return True
         return False
 
@@ -1302,7 +1329,7 @@ class Gui:
                 return self.on_status(self.__get_state())
             except Exception as e:
                 if not self.__call_on_exception("on_status", e):
-                    warnings.warn(f"Exception raised in on_status\n{e}")
+                    warnings.warn(f"Exception raised in on_status.\n{e}")
         return None
 
     def __render_page(self, page_name: str) -> t.Any:
@@ -1312,11 +1339,11 @@ class Gui:
             try:
                 nav_page = self.on_navigate(self.__get_state(), page_name)
                 if not isinstance(nav_page, str):
-                    warnings.warn(f"on_navigate returned a invalid page name '{nav_page}'")
+                    warnings.warn(f"on_navigate() returned a invalid page name '{nav_page}'.")
                     nav_page = page_name
             except Exception as e:
                 if not self.__call_on_exception("on_navigate", e):
-                    warnings.warn(f"Exception raised in on_navigate\n{e}")
+                    warnings.warn(f"Exception raised in on_navigate.\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
 
         # try partials
@@ -1325,7 +1352,7 @@ class Gui:
         # Make sure that there is a page instance found
         if page is None:
             return (
-                jsonify({"error": f"Page '{nav_page}' doesn't exist!"}),
+                jsonify({"error": f"Page '{nav_page}' doesn't exist."}),
                 400,
                 {"Content-Type": "application/json; charset=utf-8"},
             )
@@ -1391,7 +1418,7 @@ class Gui:
         """Get the internal Flask application.
 
         Returns:
-            the Flask instance used.
+            The Flask instance used.
         """
         return self._server.get_flask()
 
@@ -1413,10 +1440,14 @@ class Gui:
         if themes := self._get_themes():
             config["themes"] = themes
         if len(self.__extensions):
-            config["extensions"] = {
-                f".{Gui.__EXTENSION_ROOT}{k}/{v.get_scripts()[0]}": v.get_register_js_function()
-                for k, v in self.__extensions.items()
-            }
+            config["extensions"] = {}
+            for libs in self.__extensions.values():
+                for lib in libs:
+                    config["extensions"][f".{Gui._EXTENSION_ROOT}{lib.get_js_module_name()}"] = [  # type: ignore
+                        e._get_js_name(n)
+                        for n, e in lib.get_elements().items()
+                        if isinstance(e, Element) and not e._is_server_only()
+                    ]
         return config
 
     def run(
@@ -1466,7 +1497,7 @@ class Gui:
                 section in the User Manual for more information.
 
         Returns:
-            The Flask instance if _run_server_ is _False_ else _None_.
+            The Flask instance if *run_server* is False else None.
         """
         # --------------------------------------------------------------------------------
         # The ssl_context argument was removed just after 1.1. It was defined as:
@@ -1528,7 +1559,7 @@ class Gui:
 
         if run_server and app_config["ngrok_token"]:  # pragma: no cover
             if not util.find_spec("pyngrok"):
-                raise RuntimeError("Cannot use ngrok as pyngrok package is not installed")
+                raise RuntimeError("Cannot use ngrok as pyngrok package is not installed.")
             ngrok.set_auth_token(app_config["ngrok_token"])
             http_tunnel = ngrok.connect(app_config["port"], "http")
             app_config["use_reloader"] = False
@@ -1585,15 +1616,17 @@ class Gui:
 
         # server URL for extension resources
         extension_bp = Blueprint("taipy_extensions", __name__)
-        extension_bp.add_url_rule(f"{Gui.__EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
+        extension_bp.add_url_rule(f"{Gui._EXTENSION_ROOT}<path:path>", view_func=self.__serve_extension)
         scripts = [
-            f"{Gui.__EXTENSION_ROOT}{name}/{s}"
-            for name, lib in Gui.__extensions.items()
+            f"{Gui._EXTENSION_ROOT}{name}/{s}"
+            for name, libs in Gui.__extensions.items()
+            for lib in libs
             for s in (lib.get_scripts() or [])
         ]
         styles = [
-            f"{Gui.__EXTENSION_ROOT}{name}/{s}"
-            for name, lib in Gui.__extensions.items()
+            f"{Gui._EXTENSION_ROOT}{name}/{s}"
+            for name, libs in Gui.__extensions.items()
+            for lib in libs
             for s in (lib.get_styles() or [])
         ]
         self._flask_blueprint.append(extension_bp)
@@ -1645,7 +1678,7 @@ class Gui:
 
     def stop(self):
         """
-        Stops the Web server.
+        Stop the Web server.
 
         This function stops the underlying Web server only in the situation where
         it was run in a separated thread: the _run_in_thread_ parameter to the
@@ -1654,4 +1687,4 @@ class Gui:
         """
         if hasattr(self, "_server") and hasattr(self._server, "_thread"):
             self._server.stop_thread()
-            print("Gui server has been stopped")
+            print("Gui server has been stopped.")

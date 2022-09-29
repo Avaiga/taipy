@@ -21,7 +21,7 @@ declare global {
             darkMode: boolean;
             themes: Record<string, Record<string, unknown>>;
             timeZone: string;
-            extensions: Record<string, string>;
+            extensions: Record<string, string[]>;
         };
         taipyVersion: string;
         [key: string]: unknown;

@@ -4,24 +4,24 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+"backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
 flask = "==2.2.2"
 flask-cors = "==3.0.10"
 flask-socketio = "==5.3.0"
+gevent = "==21.12.0"
+gevent-websocket = "==0.10.1"
+kthread = "==0.2.3"
 markdown = "==3.4.1"
 pandas = "==1.4.4"
 pyarrow = "==9.0"
+pyngrok = "==5.1"
 python-dotenv = "==0.19"
 python-magic = {version = "==0.4.24", sys_platform = "!= 'win32'"}
 python-magic-bin = {version = "==0.4.14", sys_platform = "== 'win32'"}
 pytz = "==2021.3"
 simple-websocket = "==0.3"
-tzlocal = "==3.0"
-"backports.zoneinfo" = {version="==0.2.1", markers="python_version < '3.9'", extras=["tzdata"]}
-pyngrok = "==5.1"
-gevent = "==21.12.0"
-gevent-websocket = "==0.10.1"
 taipy-config = {git = "https://git@github.com/avaiga/taipy-config.git@develop"}
-kthread = "==0.2.3"
+tzlocal = "==3.0"
 
 [dev-packages]
 black = "*"

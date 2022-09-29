@@ -103,11 +103,11 @@ def _get_idx_from_col(col_name) -> int:
     return 0
 
 
-def _to_camel_case(value: str) -> str:
+def _to_camel_case(value: str, upcase_first=False) -> str:
     if not isinstance(value, str):
         raise Exception("_to_camel_case allows only string parameter")
 
     if len(value) <= 1:
         return value.lower()
     value = value.replace("_", " ").title().replace(" ", "").replace("[", "_").replace("]", "_")
-    return value[0].lower() + value[1:]
+    return value[0].lower() + value[1:] if not upcase_first else value

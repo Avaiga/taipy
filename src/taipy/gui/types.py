@@ -47,28 +47,70 @@ NumberTypes = {"int", "int64", "float", "float64"}
 
 class PropertyType(Enum):
     """
-    TODO
-    The enumn describes the possible element attribute types.
+    All the possible element property types.
+
+    This is used when creating custom visual elements, where you have
+    to indicate the type of each property.
+
+    Some types are 'dynamic', meaning that if the property value is modified, it
+    is automatically handled by Taipy and propagated to the entire application.
+
+    See `ElementProperty^` for more details.
     """
 
     boolean = "boolean"
+    """
+    The property holds a Boolean value.
+    """
     content = _TaipyContent
     data = _TaipyData
     date = _TaipyDate
     dict = "dict"
+    """
+    The property holds a dictionary.
+    """
     dynamic_number = _TaipyNumber
+    """
+    The property holds a dynamic number.
+    """
     dynamic_boolean = _TaipyBool
+    """
+    The property holds a dynamic Boolean value.
+    """
     dynamic_list = "dynamiclist"
     dynamic_string = "dynamicstring"
+    """
+    The property holds a dynamic string.
+    """
     function = "function"
+    """
+    The property holds a reference to a function.
+    """
     image = _TaipyContentImage
     json = "json"
     lov = _TaipyLov
+    """
+    The property holds a LoV (list of values).
+    """
     lov_value = _TaipyLovValue
+    """
+    The property holds a value in a LoV (list of values).
+    """
     number = "number"
+    """
+    The property holds a number.
+    """
     react = "react"
     string = "string"
+    """
+    The property holds a string.
+    """
     string_or_number = "string|number"
+    """
+    The property holds a string or a number.
+
+    This is typically used to handle CSS dimension values, where a unit can be used.
+    """
     boolean_or_list = "boolean|list"
     number_or_lov_value = "number|lovValue"
     string_list = "stringlist"

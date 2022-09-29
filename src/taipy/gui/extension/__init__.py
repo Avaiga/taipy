@@ -10,4 +10,4 @@
 # specific language governing permissions and limitations under the License.
 
 from ..types import PropertyType
-from .user_element import Element, ElementAttribute, ElementLibrary
+from .library import Element, ElementLibrary, ElementProperty

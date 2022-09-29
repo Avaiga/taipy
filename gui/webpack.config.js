@@ -22,10 +22,10 @@ const GenerateJsonPlugin = require('generate-json-webpack-plugin');
 
 const resolveApp = relativePath => path.resolve(__dirname, relativePath);
 
-const reactBundle = "taipy-vendor"
+const reactBundle = "taipy-gui-deps"
 const taipyBundle = "taipy-gui"
 
-const reactBundleName = "TaipyVendor"
+const reactBundleName = "TaipyGuiDependencies"
 const taipyBundleName = "TaipyGui"
 
 const basePath = "../src/taipy/gui/webapp";

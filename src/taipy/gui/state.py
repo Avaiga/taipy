@@ -29,7 +29,7 @@ class State:
     the set of these the application variables the application _state_, as seen
     by a given client.
 
-    Each callback (see [Callbacks](../gui/callbacks.md))) receives a specific
+    Each callback (see [Callbacks](../gui/callbacks.md)) receives a specific
     instance of the `State` class, where you can find all the variables bound to
     visual elements in your application.
 
@@ -51,9 +51,9 @@ class State:
     receives, so you can work around this limitation:
 
     Here is how you could define a button that changes the value of a variable
-    directly in the Markdown code:
+    directly in a page expressed using Markdown:
     ```
-       <|Set variable|button|on_action={lambda s: s.assign("var_name", new_value}|>
+       <|Set variable|button|on_action={lambda s: s.assign("var_name", new_value)}|>
     ```
     This would be strictly similar to the Markdown line:
     ```

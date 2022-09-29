@@ -22,11 +22,18 @@ if t.TYPE_CHECKING:
 
 
 class Decimator(ABC):
+    """Decimate chart data.
+
+    TODO
+    """
 
     _CHART_MODES: t.List[str] = []
 
     def __init__(self, threshold: t.Optional[int], zoom: t.Optional[bool]) -> None:
-        """TODO: Decimator class description"""
+        """Initialize a new Decimator.
+
+        TODO
+        """
         super().__init__()
         self.threshold = threshold
         self._zoom = zoom if zoom is not None else True
@@ -44,16 +51,16 @@ class Decimator(ABC):
 
     @abstractmethod
     def decimate(self, data: np.ndarray, payload: t.Dict[str, t.Any]) -> np.ndarray:
-        """Decimate function for decimator. This function will be executed during runtime when the appropriate conditions
-        are met.
+        """Decimate function for decimator.
+
+        This function is executed when the appropriate conditions are met.
         TODO: Further explanation
 
         Arguments:
-            data (numpy.array): A 2-dimensional array. This will be provided by taipy
-            during runtime
+            data (numpy.array): A 2-dimensional array....
 
         Returns:
-            A boolean mask array for the original data
+            A Boolean mask array for the original data.
         """
         return NotImplemented
 

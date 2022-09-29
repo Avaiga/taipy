@@ -13,10 +13,10 @@ import inspect
 
 from flask import g
 
-from taipy.gui import Gui, Markdown, get_context_id
+from taipy.gui import Gui, Markdown, get_state_id
 
 
-def test_get_context_id(gui: Gui, helpers):
+def test_get_state_id(gui: Gui, helpers):
     name = "World!"  # noqa: F841
     btn_id = "button1"  # noqa: F841
 
@@ -31,4 +31,4 @@ def test_get_context_id(gui: Gui, helpers):
     flask_client.get(f"/taipy-jsx/test?client_id={cid}")
     with gui.get_flask_app().app_context():
         g.client_id = cid
-        assert cid == get_context_id(gui._Gui__state)
+        assert cid == get_state_id(gui._Gui__state)
