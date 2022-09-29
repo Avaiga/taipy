@@ -24,7 +24,7 @@ requirements = [
     "pandas>=1.3.4,<2.0",
     "sqlalchemy>=1.4,<2.0",
     "toml>=0.10,<0.11",
-    "taipy-config>=2.0,<2.1",
+    "taipy-config@git+https://git@github.com/Avaiga/taipy-config.git@develop",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -58,7 +58,7 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/avaiga/taipy-core",
-    version="2.0.0",
+    version="2.1.0.dev",
     zip_safe=False,
     extras_require=extras_require,
 )
