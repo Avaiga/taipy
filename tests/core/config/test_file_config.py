@@ -25,6 +25,7 @@ def test_write_configuration_file():
 root_folder = "./taipy/"
 storage_folder = ".data/"
 clean_entities_enabled = "True:bool"
+repository_type = "filesystem"
 
 [JOB]
 mode = "standalone"
