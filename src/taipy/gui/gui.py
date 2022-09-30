@@ -531,6 +531,7 @@ class Gui:
     def __serve_extension(self, path: str) -> t.Any:
         parts = path.split("/")
         last_error = None
+        resource_name = None
         if len(parts) > 1:
             libs = Gui.__extensions.get(parts[0], [])
             for library in libs:
@@ -541,7 +542,7 @@ class Gui:
                 except Exception as e:
                     last_error = e  # Check if the resource is served by another library with the same name
         warnings.warn(
-            f"Resource '{resource_name}' not accessible for library '{parts[0]}':\n{last_error if last_error else ''}"
+            f"Resource '{resource_name or path}' not accessible for library '{parts[0]}':\n{last_error if last_error else ''}"
         )
         return ("", 404)
 
