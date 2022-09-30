@@ -19,7 +19,7 @@ class DataNodeSchema(Schema):
     id = fields.String()
     storage_type = fields.String()
     name = fields.String()
-    parent_id = fields.String()
+    owner_id = fields.String()
     last_edit_date = fields.String()
     job_ids = fields.List(fields.String)
     validity_days = fields.Float()

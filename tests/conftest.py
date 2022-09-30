@@ -116,7 +116,7 @@ def default_datanode():
         Scope.SCENARIO,
         DataNodeId("f"),
         "my name",
-        "parent_id",
+        "owner_id",
         properties={"default_data": [1, 2, 3, 4, 5, 6]},
     )
 
@@ -128,7 +128,7 @@ def default_df_datanode():
         Scope.SCENARIO,
         DataNodeId("id_uio2"),
         "my name",
-        "parent_id",
+        "owner_id",
         properties={"default_data": pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}])},
     )
 
@@ -152,7 +152,7 @@ def __default_task():
         Scope.SCENARIO,
         DataNodeId("id_uio"),
         "my name",
-        "parent_id",
+        "owner_id",
         properties={"default_data": "In memory Data Source"},
     )
 
@@ -161,7 +161,7 @@ def __default_task():
         Scope.SCENARIO,
         DataNodeId("id_uio"),
         "my name",
-        "parent_id",
+        "owner_id",
         properties={"default_data": "In memory Data Source"},
     )
     return Task(

@@ -89,7 +89,7 @@ class DataNodeResource(Resource):
                     "scope": "<Scope.SCENARIO: 2>",
                     "storage_type": "csv",
                     "name": "Name of my historical data node",
-                    "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                    "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                     "last_edit_date": "2022-08-10T16:03:40.855082",
                     "job_ids": [],
                     "validity_days": null,
@@ -128,7 +128,7 @@ class DataNodeResource(Resource):
                     "scope": "<Scope.SCENARIO: 2>",
                     "storage_type": "csv",
                     "name": "Name of my historical data node",
-                    "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                    "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                     "last_edit_date": "2022-08-10T16:03:40.855082",
                     "job_ids": [],
                     "validity_days": null,
@@ -292,7 +292,7 @@ class DataNodeList(Resource):
                         "scope": "<Scope.SCENARIO: 2>",
                         "storage_type": "csv",
                         "name": "Name of my historical data node",
-                        "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                        "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                         "last_edit_date": "2022-08-10T16:03:40.855082",
                         "job_ids": [],
                         "validity_days": null,
@@ -330,7 +330,7 @@ class DataNodeList(Resource):
                         "scope": "<Scope.SCENARIO: 2>",
                         "storage_type": "csv",
                         "name": "Name of my historical data node",
-                        "parent_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
+                        "owner_id": "SCENARIO_my_awesome_scenario_97f3fd67-8556-4c62-9b3b-ef189a599a38",
                         "last_edit_date": "2022-08-10T16:03:40.855082",
                         "job_ids": [],
                         "validity_days": null,
@@ -467,7 +467,6 @@ class DataNodeList(Resource):
 
         if not config_id:
             raise ConfigIdMissingException
-
 
         config = self.fetch_config(config_id)
         schema = ds_schema_map.get(config.storage_type)()
