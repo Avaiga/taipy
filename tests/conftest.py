@@ -240,6 +240,7 @@ def init_config():
     Config.configure_json_data_node = DataNodeConfig._configure_json
     Config.configure_sql_table_data_node = DataNodeConfig._configure_sql_table
     Config.configure_sql_data_node = DataNodeConfig._configure_sql
+    Config.configure_mongo_collection_data_node = DataNodeConfig._configure_mongo_collection
     Config.configure_in_memory_data_node = DataNodeConfig._configure_in_memory
     Config.configure_pickle_data_node = DataNodeConfig._configure_pickle
     Config.configure_excel_data_node = DataNodeConfig._configure_excel

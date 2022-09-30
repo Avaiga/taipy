@@ -33,6 +33,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
     _JSON_DECODER_NAME_KEY = "decoder_name"
     _JSON_DECODER_MODULE_KEY = "decoder_module"
     _EXPOSED_TYPE_KEY = "exposed_type"
+    _CUSTOM_DOCUMENT_KEY = "custom_document"
     _WRITE_QUERY_BUILDER_NAME_KEY = "write_query_builder_name"
     _WRITE_QUERY_BUILDER_MODULE_KEY = "write_query_builder_module"
     _VALID_STRING_EXPOSED_TYPES = ["numpy", "pandas"]
@@ -95,6 +96,11 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
                     properties[
                         self._EXPOSED_TYPE_KEY
                     ] = f"{properties[self._EXPOSED_TYPE_KEY].__module__}.{properties[self._EXPOSED_TYPE_KEY].__qualname__}"
+
+        if self._CUSTOM_DOCUMENT_KEY in properties.keys():
+            properties[
+                self._CUSTOM_DOCUMENT_KEY
+            ] = f"{properties[self._CUSTOM_DOCUMENT_KEY].__module__}.{properties[self._CUSTOM_DOCUMENT_KEY].__qualname__}"
 
         return _DataNodeModel(
             data_node.id,
@@ -185,6 +191,12 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
                         v if v in self._VALID_STRING_EXPOSED_TYPES else locate(v)
                         for v in model.data_node_properties[self._EXPOSED_TYPE_KEY]
                     ]
+
+        if self._CUSTOM_DOCUMENT_KEY in model.data_node_properties.keys():
+            if isinstance(model.data_node_properties[self._CUSTOM_DOCUMENT_KEY], str):
+                model.data_node_properties[self._CUSTOM_DOCUMENT_KEY] = locate(
+                    model.data_node_properties[self._CUSTOM_DOCUMENT_KEY]
+                )
 
         validity_period = None
         if model.validity_seconds is not None and model.validity_days is not None:
