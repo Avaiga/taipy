@@ -89,35 +89,60 @@ class Gui:
         on_action (Callable): The function that is called when a control
             triggers an action, as the result of an interaction with the end-user.<br/>
             It defaults to the `on_action()` global function defined in the Python
-            application. If there is no such function, actions will not trigger anything.
-            TODO: function signature
+            application. If there is no such function, actions will not trigger anything.<br/>
+            The signature of the *on_action* callback function must be:
+
+            - *state*: the `State^` instance of the caller.
+            - *id* (optional): a string representing the identifier of the caller.
+            - *payload* (optional): an optional payload from the caller.
         on_change (Callable): The function that is called when a control
             modifies variables it is bound to, as the result of an interaction with the
             end-user.<br/>
             It defaults to the `on_change()` global function defined in the Python
             application. If there is no such function, user interactions will not trigger
-            anything.
-            TODO: function signature
+            anything.<br/>
+            The signature of the *on_change* callback function must be:
+
+            - *state*: the `State^` instance of the caller.
+            - *var_name* (str): The name of the variable that triggered this callback.
+            - *var_value* (any): The new value for this variable.
         on_init (Callable): The function that is called on the first connection of a new client.<br/>
             It defaults to the `on_init()` global function defined in the Python
             application. If there is no such function, the first connection will not trigger
-            anything.
-            TODO: function signature
+            anything.<br/>
+
+            The signature of the *on_init* callback function must be:
+
+            - *state*: the `State^` instance of the caller.
         on_navigate (Callable): The function that is called when a page is requested.<br/>
             It defaults to the `on_navigate()` global function defined in the Python
             application. If there is no such function, page requests will not trigger
-            anything.
-            TODO: function signature
+            anything.<br/>
+            The signature of the *on_navigate* callback function must be:
+
+            - *state*: the `State^` instance of the caller.
+            - *page_name*: the name of the page the user is navigating to.
+
+            The *on_navigate* callback function must return the name of the page the user should be
+            directed to.
         on_exception (Callable): The function that is called an exception occurs on user code.<br/>
             It defaults to the `on_exception()` global function defined in the Python
             application. If there is no such function, exceptions will not trigger
-            anything.
-            TODO: function signature
+            anything.<br/>
+            The signature of the *on_exception* callback function must be:
+
+            - *state*: the `State^` instance of the caller.
+            - *function_name*: the name of the function that raised the exception.
+            - *exception*: the exception object that was raised.
         on_status (Callable): The function that is called when the status page is shown.<br/>
-            It should return raw and valid HTML as a string.<br/>
             It defaults to the `on_status()` global function defined in the Python
-            application. If there is no such function, status page content shows only the status of the server.
-            TODO: function signature
+            application. If there is no such function, status page content shows only the status of the
+            server.<br/>
+            The signature of the *on_status* callback function must be:
+
+            - *state*: the `State^` instance of the caller.
+
+            It must return raw and valid HTML content as a string.
         state (State^): **Only defined when running in an IPython notebook context.**<br/>
             The unique instance of `State^` that you can use to change bound variables
             directly, potentially impacting the user interface in real-time.
@@ -272,12 +297,16 @@ class Gui:
 
     @staticmethod
     def add_library(library: ElementLibrary):
-        """Add a custom visual element library to this Gui instance.
+        """Add a custom visual element library.
+
+        This application will be able to use custom visual elements defined in this library.
 
         Arguments:
-            library: The custom visual element library to add to this library.
+            library: The custom visual element library to add to this application.
 
-        TODO: What if we add two libraries with the same name?
+        Multiple libraries with the same name can be added. This allows to split multiple custom visual elements
+        in several `ElementLibrary^` instances, but still refer to these elements with the same prefix in the page
+        definitions.
         """
         if isinstance(library, ElementLibrary):
             _Factory.set_library(library)
@@ -1077,11 +1106,6 @@ class Gui:
                         - If it is not, the page content is read from this string as
                           Markdown text.
 
-                If *pages* is a string that contains the path to a directory, then
-                this directory is traversed, looking for filenames that have the
-                _.md_ extention, TODO
-
-
         !!! note "Reading pages from a directory"
             If _pages_ is a string that holds the path to a readable directory, then
             this directory is traversed, recursively, to find files that Taipy can build
@@ -1471,24 +1495,28 @@ class Gui:
             async_mode (Optional[str]): The asynchronous model to use for the Flask-SocketIO.
                 Valid values are:</br>
 
-                - `"threading"`: Use the Flask Development Server. This allows the application to use
-                  the Flask reloader and Debug mode.
-                - `"eventlet"`: Use eventlet server.
-                - `"gevent"`: Use gevent server.
-                - `"gevent_uwsgi"`: Use uwsgi server.
+                - "threading": Use the Flask Development Server. This allows the application to use
+                  the Flask reloader (the *use_reloader* option) and Debug mode (the *debug* option).
+                - "eventlet": Use eventlet server.
+                - "gevent": Use gevent server.
+                - "gevent_uwsgi": Use uwsgi server.
 
                 If this argument is not set, Taipy uses, in that order: `"eventlet"`, `"gevent_uwsgi"`,
                 `"gevent"`, and finally `"threading"`. The first async mode value that can be used
                 (that is all the relevant dependencies are installed) is used.<br/>
-                See [SocketIO Deployment Strategies](https://python-socketio.readthedocs.io/en/latest/server.html#deployment-strategies)
+                See
+                [SocketIO Deployment Strategies](https://python-socketio.readthedocs.io/en/latest/server.html#deployment-strategies)
                 for more information.</br>
-                Note that only the `"threading"` value provides support for the development reloader
-                functionality. All the other values make the *use_reloader* configuration
-                element ignored.
-            **kwargs (Dict[str, Any]): Additional keyword arguments that configure how this `Gui` is run.
+                Taipy GUI comes with the [gevent package](https://pypi.org/project/gevent/) preinstalled so "gevent"
+                would be the default option out-of-the-box.<br/>
+                Note that only the "threading" value provides support for the development reloader
+                functionality (*use_reloader* option). Any other value makes the *use_reloader* configuration parameter
+                ignored.<br/>
+                Also note that setting the *debug* argument to True forces *async_mode* to "threading".
+            **kwargs (dict[str, any]): Additional keyword arguments that configure how this `Gui` is run.
                 Please refer to the
-                [Configuration](../gui/configuration.md#configuring-the-gui-instance)
-                section in the User Manual for more information.
+                [Configuration section](../gui/configuration.md#configuring-the-gui-instance)
+                of the User Manual for more information.
 
         Returns:
             The Flask instance if *run_server* is False else None.
