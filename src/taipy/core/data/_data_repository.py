@@ -227,5 +227,5 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
     def _search(self, attribute: str, value: Any) -> Optional[DataNode]:
         return self.repo._search(attribute, value)
 
-    def _export(self, entity_id: str, **kwargs):
-        return self.repo._export(entity_id, **kwargs)
+    def _export(self, entity_id: str, folder_path: str):
+        return self.repo._export(entity_id, folder_path)

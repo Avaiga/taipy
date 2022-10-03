@@ -87,8 +87,8 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
     def _search(self, attribute: str, value: Any) -> Optional[Scenario]:
         return self.repo._search(attribute, value)
 
-    def _export(self, entity_id: str, **kwargs):
-        return self.repo._export(entity_id, **kwargs)
+    def _export(self, entity_id: str, folder_path: str):
+        return self.repo._export(entity_id, folder_path)
 
     @staticmethod
     def __to_pipeline_ids(pipelines) -> List[PipelineId]:

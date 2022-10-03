@@ -116,13 +116,13 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _export(self, entity_id: str, **kwargs):
+    def _export(self, entity_id: str, folder_path: str):
         """
         Export an entity from the repository.
 
         Args:
             entity_id: The id of the entity to be exported.
-            **kwargs: Additional arguments to be passed to the export function.
+            folder_path (str): The folder path to export the entity to.
 
         """
         raise NotImplementedError

@@ -86,12 +86,12 @@ class _CycleManager(_Manager[Cycle]):
     @classmethod
     def _hard_delete(cls, cycle_id: CycleId):
         cycle = cls._get(cycle_id)
-        entity_ids_to_delete = cls._get_owned_entity_ids(cycle)
+        entity_ids_to_delete = cls._get_children_entity_ids(cycle)
         entity_ids_to_delete.cycle_ids.add(cycle.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_owned_entity_ids(cls, cycle: Cycle) -> _EntityIds:
+    def _get_children_entity_ids(cls, cycle: Cycle) -> _EntityIds:
         from ..scenario._scenario_manager_factory import _ScenarioManagerFactory
 
         entity_ids = _EntityIds()

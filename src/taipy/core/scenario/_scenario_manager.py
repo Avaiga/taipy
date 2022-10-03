@@ -265,12 +265,12 @@ class _ScenarioManager(_Manager[Scenario]):
                 )
             _CycleManagerFactory._build_manager()._hard_delete(scenario.cycle.id)
             return
-        entity_ids_to_delete = cls._get_owned_entity_ids(scenario)
+        entity_ids_to_delete = cls._get_children_entity_ids(scenario)
         entity_ids_to_delete.scenario_ids.add(scenario.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_owned_entity_ids(cls, scenario: Scenario) -> _EntityIds:
+    def _get_children_entity_ids(cls, scenario: Scenario) -> _EntityIds:
         entity_ids = _EntityIds()
 
         for pipeline in scenario.pipelines.values():

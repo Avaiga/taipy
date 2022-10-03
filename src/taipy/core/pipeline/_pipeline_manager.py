@@ -118,12 +118,12 @@ class _PipelineManager(_Manager[Pipeline]):
     @classmethod
     def _hard_delete(cls, pipeline_id: PipelineId):
         pipeline = cls._get(pipeline_id)
-        entity_ids_to_delete = cls._get_owned_entity_ids(pipeline)
+        entity_ids_to_delete = cls._get_children_entity_ids(pipeline)
         entity_ids_to_delete.pipeline_ids.add(pipeline.id)
         cls._delete_entities_of_multiple_types(entity_ids_to_delete)
 
     @classmethod
-    def _get_owned_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:
+    def _get_children_entity_ids(cls, pipeline: Pipeline) -> _EntityIds:
         entity_ids = _EntityIds()
         for task in pipeline.tasks.values():
             if not isinstance(task, Task):

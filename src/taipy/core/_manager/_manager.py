@@ -99,8 +99,8 @@ class _Manager(Generic[EntityType]):
         _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)
 
     @classmethod
-    def _export(cls, id, **kwargs):
+    def _export(cls, id: str, folder_path: str):
         """
         Export an entity.
         """
-        return cls._repository._export(id, **kwargs)
+        return cls._repository._export(id, folder_path)
