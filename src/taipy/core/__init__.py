@@ -11,6 +11,7 @@
 
 from ._core import Core
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
+from .common.default_custom_document import DefaultCustomDocument
 from .cycle.cycle import Cycle
 from .data.data_node import DataNode
 from .exceptions import exceptions

@@ -51,7 +51,6 @@ class MongoCollectionDataNode(DataNode):
     _REQUIRED_PROPERTIES: List[str] = [
         "db_name",
         "collection_name",
-        __CUSTOM_DOCUMENT_PROPERTY,
     ]
 
     def __init__(
@@ -119,7 +118,7 @@ class MongoCollectionDataNode(DataNode):
     def _check_custom_document(self, custom_document):
         if not isclass(custom_document):
             raise InvalidCustomDocument(
-                f"Invalid exposed type of {custom_document}. Only custom object class are supported."
+                f"Invalid custom document of {custom_document}. Only custom class are supported."
             )
 
     @classmethod

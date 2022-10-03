@@ -18,6 +18,8 @@ from taipy.config.common.scope import Scope
 from taipy.config.config import Config
 from taipy.config.section import Section
 
+from ..common.default_custom_document import DefaultCustomDocument
+
 
 class DataNodeConfig(Section):
     """
@@ -102,9 +104,9 @@ class DataNodeConfig(Section):
     _REQUIRED_READ_QUERY_SQL_PROPERTY = "read_query"
     _REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY = "write_query_builder"
     # MONGO
-    _REQUIRED_CUSTOM_DOCUMENT_MONGO_PROPERTY = "custom_document"
     _REQUIRED_DB_NAME_MONGO_PROPERTY = "db_name"
     _REQUIRED_COLLECTION_NAME_MONGO_PROPERTY = "collection_name"
+    _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY = "custom_document"
     _OPTIONAL_DB_USERNAME_MONGO_PROPERTY = "db_username"
     _OPTIONAL_DB_PASSWORD_MONGO_PROPERTY = "db_password"
     _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY = "db_extra_args"
@@ -136,7 +138,6 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_MONGO_COLLECTION: [
             _REQUIRED_DB_NAME_MONGO_PROPERTY,
             _REQUIRED_COLLECTION_NAME_MONGO_PROPERTY,
-            _REQUIRED_CUSTOM_DOCUMENT_MONGO_PROPERTY,
         ],
         _STORAGE_TYPE_VALUE_CSV: [],
         _STORAGE_TYPE_VALUE_EXCEL: [],
@@ -168,6 +169,7 @@ class DataNodeConfig(Section):
         _STORAGE_TYPE_VALUE_SQL_TABLE: [_OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY, _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY],
         _STORAGE_TYPE_VALUE_SQL: [_OPTIONAL_EXPOSED_TYPE_SQL_PROPERTY, _OPTIONAL_DB_EXTRA_ARGS_SQL_PROPERTY],
         _STORAGE_TYPE_VALUE_MONGO_COLLECTION: [
+            _OPTIONAL_CUSTOM_DOCUMENT_MONGO_PROPERTY,
             _OPTIONAL_DB_USERNAME_MONGO_PROPERTY,
             _OPTIONAL_DB_PASSWORD_MONGO_PROPERTY,
             _OPTIONAL_DB_EXTRA_ARGS_MONGO_PROPERTY,
@@ -664,7 +666,7 @@ class DataNodeConfig(Section):
         id: str,
         db_name: str,
         collection_name: str,
-        custom_document: Any,
+        custom_document: Any = DefaultCustomDocument,
         db_username: str = "",
         db_password: str = "",
         db_host: str = "localhost",

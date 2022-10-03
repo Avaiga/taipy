@@ -16,21 +16,14 @@ from datetime import datetime
 import mongomock
 import pymongo
 import pytest
+from bson import ObjectId
 from bson.errors import InvalidDocument
 
+from src.taipy.core import DefaultCustomDocument
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data.mongo import MongoCollectionDataNode
 from src.taipy.core.exceptions.exceptions import InvalidCustomDocument, MissingRequiredProperty
 from taipy.config.common.scope import Scope
-
-
-@dataclass
-class CustomObjectWithArgs:
-    def __init__(self, foo=None, bar=None, *args, **kwargs):
-        self.foo = foo
-        self.bar = bar
-        self.args = args
-        self.kwargs = kwargs
 
 
 @dataclass
@@ -64,7 +57,7 @@ class TestMongoCollectionDataNode:
             "db_password": "",
             "db_name": "taipy",
             "collection_name": "foo",
-            "custom_document": CustomObjectWithArgs,
+            "custom_document": DefaultCustomDocument,
             "db_extra_args": {
                 "ssl": "true",
                 "retrywrites": "false",
@@ -88,7 +81,7 @@ class TestMongoCollectionDataNode:
         assert mongo_dn.parent_id is None
         assert mongo_dn.job_ids == []
         assert mongo_dn.is_ready_for_reading
-        assert mongo_dn.custom_document == CustomObjectWithArgs
+        assert mongo_dn.custom_document == DefaultCustomDocument
 
     @pytest.mark.parametrize(
         "properties",
@@ -118,7 +111,7 @@ class TestMongoCollectionDataNode:
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
-    def test_read_as(self, properties):
+    def test_read(self, properties):
         mock_client = pymongo.MongoClient("localhost")
         mock_client[properties["db_name"]][properties["collection_name"]].insert_many(
             [
@@ -140,28 +133,26 @@ class TestMongoCollectionDataNode:
         data = mongo_dn.read()
 
         assert isinstance(data, list)
-        assert isinstance(data[0], CustomObjectWithArgs)
-        assert isinstance(data[1], CustomObjectWithArgs)
-        assert isinstance(data[2], CustomObjectWithArgs)
-        assert isinstance(data[3], CustomObjectWithArgs)
-        assert isinstance(data[4], CustomObjectWithArgs)
-        assert isinstance(data[5], CustomObjectWithArgs)
+        assert isinstance(data[0], DefaultCustomDocument)
+        assert isinstance(data[1], DefaultCustomDocument)
+        assert isinstance(data[2], DefaultCustomDocument)
+        assert isinstance(data[3], DefaultCustomDocument)
+        assert isinstance(data[4], DefaultCustomDocument)
+        assert isinstance(data[5], DefaultCustomDocument)
 
+        assert isinstance(data[0]._id, ObjectId)
         assert data[0].foo == "baz"
         assert data[0].bar == "qux"
+        assert isinstance(data[1]._id, ObjectId)
         assert data[1].foo == "quux"
         assert data[1].bar == "quuz"
+        assert isinstance(data[2]._id, ObjectId)
         assert data[2].foo == "corge"
-        assert data[2].bar is None
-        assert data[3].foo is None
+        assert isinstance(data[3]._id, ObjectId)
         assert data[3].bar == "grault"
-        assert data[4].foo is None
-        assert data[4].bar is None
-        assert data[4].kwargs["KWARGS_KEY"] == "KWARGS_VALUE"
-        assert data[5].foo is None
-        assert data[5].bar is None
-        assert len(data[5].args) == 0
-        assert len(data[5].kwargs) == 1  # The _id of mongo document
+        assert isinstance(data[4]._id, ObjectId)
+        assert data[4].KWARGS_KEY == "KWARGS_VALUE"
+        assert isinstance(data[5]._id, ObjectId)
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
@@ -210,10 +201,12 @@ class TestMongoCollectionDataNode:
         mongo_dn = MongoCollectionDataNode("foo", Scope.PIPELINE, properties=properties)
         mongo_dn.write(data)
 
-        written_objects = [CustomObjectWithArgs(**document) for document in written_data]
         read_objects = mongo_dn.read()
 
-        assert all([read_objects[i] == written_objects[i] for i in range(len(written_data))])
+        for read_object, written_dict in zip(read_objects, written_data):
+            assert isinstance(read_object._id, ObjectId)
+            assert read_object.foo == written_dict["foo"]
+            assert read_object.bar == written_dict["bar"]
 
     @mongomock.patch(servers=(("localhost", 27017),))
     @pytest.mark.parametrize("properties", __properties)
