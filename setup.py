@@ -19,8 +19,8 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    "taipy-gui@git+https://git@github.com/Avaiga/taipy-gui.git@develop",
-    "taipy-rest@git+https://git@github.com/Avaiga/taipy-rest.git@develop",
+    "taipy-gui>=2.0,<2.1",
+    "taipy-rest>=2.0,<2.1",
 ]
 
 test_requirements = ["pytest>=3.8"]
@@ -57,7 +57,7 @@ setup(
     packages=find_namespace_packages(where="src") + find_packages(include=["taipy"]),
     test_suite="tests",
     url="https://github.com/avaiga/taipy",
-    version="1.2.0.dev",
+    version="2.0.0",
     zip_safe=False,
     extras_require=extras_require,
 )
