@@ -10,9 +10,11 @@
 # specific language governing permissions and limitations under the License.
 
 import pathlib
+import shutil
 
 import pytest
 
+from src.taipy.core.exceptions.exceptions import InvalidExportPath
 from taipy.config.config import Config
 
 from .mocks import MockFSRepository, MockModel, MockObj
@@ -102,6 +104,29 @@ class TestRepositoriesStorage:
 
         assert m1 is None
         assert m == m2
+
+    @pytest.mark.parametrize(
+        "mock_repo,params",
+        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+    )
+    def test_export(self, mock_repo, params):
+        shutil.rmtree("./tmp", ignore_errors=True)
+        r = mock_repo(**params)
+
+        m = MockObj("uuid", "foo")
+        r._save(m)
+
+        r._export("uuid", "tmp")
+        assert pathlib.Path("tmp/foo/uuid.json").exists()
+
+        # Export to same location again should work
+        r._export("uuid", "tmp")
+        assert pathlib.Path("tmp/foo/uuid.json").exists()
+
+        with pytest.raises(InvalidExportPath):
+            r._export("uuid", Config.global_config.storage_folder)
+
+        shutil.rmtree("./tmp", ignore_errors=True)
 
     def test_config_override(self):
         storage_folder = pathlib.Path("/tmp") / "fodo"

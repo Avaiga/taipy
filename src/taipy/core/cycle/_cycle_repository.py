@@ -75,6 +75,9 @@ class _CycleRepository(_AbstractRepository[_CycleModel, Cycle]):  # type: ignore
     def _search(self, attribute: str, value: Any) -> Optional[Cycle]:
         return self.repo._search(attribute, value)
 
+    def _export(self, entity_id: str, folder_path: str):
+        return self.repo._export(entity_id, folder_path)
+
     def get_cycles_by_frequency_and_start_date(self, frequency: Frequency, start_date: datetime) -> List[Cycle]:
         return self.__get_cycles_cdt(lambda cycle: cycle.frequency == frequency and cycle.start_date == start_date)
 

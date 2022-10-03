@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
 
@@ -463,3 +464,36 @@ def clean_all_entities() -> bool:
     _CycleManagerFactory._build_manager()._delete_all()
     _JobManagerFactory._build_manager()._delete_all()
     return True
+
+
+def export_scenario(
+    scenario_id: ScenarioId,
+    folder_path: str,
+):
+    """Export all related entities of a scenario to a folder.
+
+    Parameters:
+        scenario_id (ScenarioId): The id of the scenario to export.
+        folder_path (str): The folder path to export the scenario to.
+    """
+
+    manager = _ScenarioManagerFactory._build_manager()
+    scenario = manager._get(scenario_id)
+    entity_ids = manager._get_children_entity_ids(scenario)  # type: ignore
+    entity_ids.scenario_ids = {scenario_id}
+    entity_ids.cycle_ids = {scenario.cycle.id}
+
+    shutil.rmtree(folder_path, ignore_errors=True)
+
+    for data_node_id in entity_ids.data_node_ids:
+        _DataManagerFactory._build_manager()._export(data_node_id, folder_path)
+    for task_id in entity_ids.task_ids:
+        _TaskManagerFactory._build_manager()._export(task_id, folder_path)
+    for pipeline_id in entity_ids.pipeline_ids:
+        _PipelineManagerFactory._build_manager()._export(pipeline_id, folder_path)
+    for cycle_id in entity_ids.cycle_ids:
+        _CycleManagerFactory._build_manager()._export(cycle_id, folder_path)
+    for scenario_id in entity_ids.scenario_ids:
+        _ScenarioManagerFactory._build_manager()._export(scenario_id, folder_path)
+    for job_id in entity_ids.job_ids:
+        _JobManagerFactory._build_manager()._export(job_id, folder_path)

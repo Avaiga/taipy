@@ -226,3 +226,7 @@ class SchedulerNotBuilt(Exception):
 
 class ModeNotAvailable(Exception):
     """Raised if the mode in JobConfig is not supported."""
+
+
+class InvalidExportPath(Exception):
+    """Raised if the export path is not valid."""

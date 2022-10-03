@@ -115,6 +115,18 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def _export(self, entity_id: str, folder_path: str):
+        """
+        Export an entity from the repository.
+
+        Args:
+            entity_id: The id of the entity to be exported.
+            folder_path (str): The folder path to export the entity to.
+
+        """
+        raise NotImplementedError
+
 
 class _CustomEncoder(json.JSONEncoder):
     def default(self, o: Any) -> Json:

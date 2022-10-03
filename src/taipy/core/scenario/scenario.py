@@ -276,6 +276,19 @@ class Scenario(_Entity):
 
         return tp.submit(self, force, wait, timeout)
 
+    def export(
+        self,
+        folder_path: str,
+    ):
+        """Export all related entities of this scenario to a folder.
+
+        Parameters:
+            folder_path (str): The folder path to export the scenario to.
+        """
+        from ... import core as tp
+
+        return tp.export_scenario(self.id, folder_path)
+
     def set_primary(self):
         """Promote the scenario as the primary scenario of its cycle.
 
