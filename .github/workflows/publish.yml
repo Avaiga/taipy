@@ -96,12 +96,12 @@ jobs:
       - name: Prepare tests on unix
         if: matrix.os != 'windows-latest'
         run: |
-          rm -rf taipy
+          rm -rf src
 
       - name: Prepare tests on windows
         if: matrix.os == 'windows-latest'
         run: |
-          rmdir -Recurse -Force taipy
+          rmdir -Recurse -Force src
 
       - name: Install and test package
         run: |
