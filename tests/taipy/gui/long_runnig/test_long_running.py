@@ -36,5 +36,6 @@ def test_long_running(gui: Gui):
     with gui.get_flask_app().app_context():
         assert state.status is None
         invoke_long_running(state, heavy_function)
-        invoke_long_running(state, heavy_function_with_exception)
+        with pytest.warns(UserWarning):
+            invoke_long_running(state, heavy_function_with_exception)
         invoke_long_running(state, heavy_function, (), heavy_function_status)
