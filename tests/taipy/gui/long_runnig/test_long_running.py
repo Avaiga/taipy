@@ -16,14 +16,9 @@ import pytest
 
 from taipy.gui import Gui, State, invoke_long_running
 
-statuses = [0, True, False, -1]
-status_index = 0
-
 
 def test_long_running(gui: Gui):
     status = None  # noqa: F841
-    global status_index
-    status_index = 0
 
     def heavy_function(delay=1):
         sleep(delay)
@@ -37,13 +32,6 @@ def test_long_running(gui: Gui):
 
     def on_exception(state: State, function_name: str, e: Exception):
         state.status = -1
-
-    def on_change(state: State, var_name: str, value: int):
-        global status_index, statuses
-        if var_name == "status":
-            if status_index < len(statuses):
-                assert value == statuses[status_index]
-            status_index = status_index + 1
 
     gui._set_frame(inspect.currentframe())
     gui.run(run_server=False, single_client=True)
