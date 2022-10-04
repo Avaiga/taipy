@@ -230,7 +230,9 @@ def invoke_long_running(
                 if not this_gui._call_on_exception(function_name, e):
                     warnings.warn(f"invoke_long_running: Exception raised in function {function_name}.\n{e}")
 
-            def callback_on_status(status: t.Union[int, bool], e: t.Optional[Exception] = None):
+            def callback_on_status(
+                status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None
+            ):
                 if callable(user_status_function):
                     invoke_callback(
                         this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args)
@@ -241,9 +243,7 @@ def invoke_long_running(
                         str(state_id),
                         callback_on_exception,
                         (
-                            user_status_function.__name__
-                            if callable(user_status_function)
-                            else str(user_status_function),
+                            str(function_name),
                             e,
                         ),
                     )
@@ -253,7 +253,7 @@ def invoke_long_running(
                     user_function(*uf_args)
                     callback_on_status(True)
                 except Exception as e:
-                    callback_on_status(False, e)
+                    callback_on_status(False, e, user_function.__name__)
 
             def thread_status(name: str, delay: int, count: int):
                 active_thread = next((t for t in threading.enumerate() if t.name == name), None)
