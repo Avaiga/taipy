@@ -32,6 +32,8 @@ test_requirements = ["pytest>=3.8"]
 
 extras_require = {
     "mssql": ["pyodbc>=4,<4.1"],
+    "mysql": ["pymysql>1,<1.1"],
+    "postgresql": ["psycopg2>2.9,<2.10"]
 }
 
 setup(

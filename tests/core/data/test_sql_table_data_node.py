@@ -21,9 +21,6 @@ from src.taipy.core.data.sql_table import SQLTableDataNode
 from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
-if not util.find_spec("pyodbc"):
-    pytest.skip("skipping tests because PyODBC is not installed", allow_module_level=True)
-
 
 class MyCustomObject:
     def __init__(self, foo=None, bar=None, *args, **kwargs):
@@ -36,16 +33,6 @@ class MyCustomObject:
 class TestSQLTableDataNode:
     __properties = [
         {
-            "db_username": "sa",
-            "db_password": "Passw0rd",
-            "db_name": "taipy",
-            "db_engine": "mssql",
-            "table_name": "foo",
-            "db_extra_args": {
-                "TrustServerCertificate": "yes",
-            },
-        },
-        {
             "db_name": "taipy",
             "db_engine": "sqlite",
             "table_name": "foo",
@@ -55,6 +42,41 @@ class TestSQLTableDataNode:
             },
         },
     ]
+    if util.find_spec("pyodbc"):
+        __properties.append({
+            "db_username": "sa",
+            "db_password": "Passw0rd",
+            "db_name": "taipy",
+            "db_engine": "mssql",
+            "table_name": "foo",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+            },
+        },)
+    if util.find_spec("pymysql"):
+        __properties.append({
+            "db_username": "sa",
+            "db_password": "Passw0rd",
+            "db_name": "taipy",
+            "db_engine": "mysql",
+            "table_name": "foo",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+            },
+        },)
+        
+    if util.find_spec("psycopg2"):
+        __properties.append({
+            "db_username": "sa",
+            "db_password": "Passw0rd",
+            "db_name": "taipy",
+            "db_engine": "postgresql",
+            "table_name": "foo",
+            "db_extra_args": {
+                "TrustServerCertificate": "yes",
+            },
+        },)
+    
 
     @pytest.mark.parametrize("properties", __properties)
     def test_create(self, properties):
@@ -95,6 +117,7 @@ class TestSQLTableDataNode:
     @mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._read_as_numpy", return_value="numpy")
     @pytest.mark.parametrize("properties", __properties)
     def test_read(self, mock_read_as, mock_read_as_pandas_dataframe, mock_read_as_numpy, properties):
+        custom_properties=properties.copy()
 
         # Create SQLTableDataNode without exposed_type (Default is pandas.DataFrame)
         sql_data_node_as_pandas = SQLTableDataNode(
@@ -104,52 +127,38 @@ class TestSQLTableDataNode:
         )
 
         assert sql_data_node_as_pandas._read() == "pandas"
-
+        
+        custom_properties.pop("db_extra_args")
+        custom_properties["exposed_type"] = MyCustomObject
         # Create the same SQLTableDataNode but with custom exposed_type
         sql_data_node_as_custom_object = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={
-                "db_username": "a",
-                "db_password": "a",
-                "db_name": "a",
-                "db_engine": "mssql",
-                "table_name": "foo",
-                "exposed_type": MyCustomObject,
-            },
+            properties=custom_properties
         )
         assert sql_data_node_as_custom_object._read() == "custom"
 
         # Create the same SQLDataSource but with numpy exposed_type
+        custom_properties["exposed_type"] = "numpy"
         sql_data_source_as_numpy_object = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={
-                "db_username": "a",
-                "db_password": "a",
-                "db_name": "a",
-                "db_engine": "mssql",
-                "table_name": "foo",
-                "exposed_type": "numpy",
-            },
+            properties=custom_properties
         )
 
         assert sql_data_source_as_numpy_object._read() == "numpy"
+        
 
     @pytest.mark.parametrize("properties", __properties)
     def test_read_as(self, properties):
-
+        custom_properties=properties.copy()
+        
+        custom_properties.pop("db_extra_args")
+        custom_properties["exposed_type"] = MyCustomObject
         sql_data_node = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "table_name": "foo",
-                "exposed_type": MyCustomObject,
-            },
+            properties=custom_properties
         )
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
@@ -210,27 +219,14 @@ class TestSQLTableDataNode:
             (np.array([np.array([1, 2]), np.array([3, 4])]), [[1, 2], [3, 4]], "_insert_tuples"),
         ],
     )
-    def test_write(self, data, written_data, called_func):
+    @pytest.mark.parametrize("properties", __properties)
+    def test_write(self, data, written_data, called_func,properties):
+        custom_properties=properties.copy()
+        custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "table_name": "foo",
-            },
-        )
-
-        dn2 = SQLTableDataNode(
-            "foo",
-            Scope.PIPELINE,
-            properties={
-                "db_name": "datanode",
-                "db_engine": "sqlite",
-                "table_name": "foo",
-            },
+            properties=custom_properties
         )
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
@@ -242,34 +238,27 @@ class TestSQLTableDataNode:
             with mock.patch(f"src.taipy.core.data.sql_table.SQLTableDataNode.{called_func}") as mck:
                 dn._write(data)
                 mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
-            with mock.patch(f"src.taipy.core.data.sql_table.SQLTableDataNode.{called_func}") as mck:
-                dn2._write(data)
-                mck.assert_called_once_with(written_data, create_table_mock.return_value, cursor_mock)
 
-    def test_raise_error_invalid_exposed_type(self):
+    @pytest.mark.parametrize("properties", __properties)
+    def test_raise_error_invalid_exposed_type(self, properties):
+        custom_properties=properties.copy()
+        custom_properties.pop("db_extra_args")
+        custom_properties["exposed_type"] = "foo"
         with pytest.raises(InvalidExposedType):
             SQLTableDataNode(
                 "foo",
                 Scope.PIPELINE,
-                properties={
-                    "db_name": "datanode",
-                    "db_engine": "sqlite",
-                    "table_name": "foo",
-                    "exposed_type": "foo",
-                },
+                properties=custom_properties
             )
 
-    def test_write_dataframe(self):
+    @pytest.mark.parametrize("properties", __properties)
+    def test_write_dataframe(self, properties):
+        custom_properties=properties.copy()
+        custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "table_name": "foo",
-            },
+            properties=custom_properties
         )
 
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
@@ -290,17 +279,14 @@ class TestSQLTableDataNode:
             np.array([]),
         ],
     )
-    def test_write_empty_list(self, data):
+    @pytest.mark.parametrize("properties", __properties)
+    def test_write_empty_list(self, data, properties):
+        custom_properties= properties.copy()
+        custom_properties.pop("db_extra_args")
         dn = SQLTableDataNode(
             "foo",
             Scope.PIPELINE,
-            properties={
-                "db_username": "sa",
-                "db_password": "foobar",
-                "db_name": "datanode",
-                "db_engine": "mssql",
-                "table_name": "foo",
-            },
+            properties=custom_properties
         )
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(

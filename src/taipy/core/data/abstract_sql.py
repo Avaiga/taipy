@@ -37,9 +37,13 @@ class AbstractSQLDataNode(DataNode):
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
     __ENGINE_MSSQL = "mssql"
     __ENGINE_SQLITE = "sqlite"
+    __ENGINE_MYSQL = "mysql"
+    __ENGINE_POSTGRESQL = "postgresql"
 
     _ENGINE_REQUIRED_PROPERTIES: Dict[str, List[str]] = {
         __ENGINE_MSSQL: ["db_username", "db_password", "db_name"],
+        __ENGINE_MYSQL: ["db_username", "db_password", "db_name"],
+        __ENGINE_POSTGRESQL: ["db_username", "db_password", "db_name"],
         __ENGINE_SQLITE: ["db_name", "path"],
     }
 
@@ -117,7 +121,7 @@ class AbstractSQLDataNode(DataNode):
         engine, username, host, password, database, port, driver, extra_args: Dict[str, str], path
     ) -> str:
         # TODO: Add support to other SQL engines, the engine value should be checked.
-        if engine == "mssql":
+        if engine in ["mssql", "mysql", "postgresql"]:
             username = urllib.parse.quote_plus(username)
             password = urllib.parse.quote_plus(password)
             database = urllib.parse.quote_plus(database)
@@ -126,8 +130,12 @@ class AbstractSQLDataNode(DataNode):
             for k, v in extra_args.items():
                 extra_args[k] = re.sub(r"\s+", "+", v)
             extra_args_str = "&".join(f"{k}={str(v)}" for k, v in extra_args.items())
-
-            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
+            if engine == "mssql":
+                return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
+            elif engine == "mysql":
+                return f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
+            else:
+                return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
         elif engine == "sqlite":
             return os.path.join("sqlite:///", path, f"{database}.sqlite3")
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
