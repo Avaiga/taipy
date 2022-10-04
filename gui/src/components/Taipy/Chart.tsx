@@ -98,8 +98,17 @@ const getColNameFromIndexed = (colName: string): string => {
     return colName;
 };
 
-const getValue = <T,>(values: TraceValueType | undefined, arr: T[], idx: number): (string | number)[] => {
-    return getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
+const getValue = <T,>(
+    values: TraceValueType | undefined,
+    arr: T[],
+    idx: number,
+    returnUndefined = false
+): (string | number)[] | undefined => {
+    const value = getValueFromCol(values, getArrayValue(arr, idx) as unknown as string);
+    if (!returnUndefined || value.length) {
+        return value;
+    }
+    return undefined;
 };
 
 const getValueFromCol = (values: TraceValueType | undefined, col: string): (string | number)[] => {
@@ -214,24 +223,26 @@ const Chart = (props: ChartProp) => {
     useEffect(() => {
         if (refresh || !data[dataKey.current]) {
             const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-            const decimatorPayload = decimator ? {
-                width: plotRef.current?.clientWidth,
-                height: plotRef.current?.clientHeight,
-                xAxis: config.traces.length && config.traces[0].length && config.traces[0][0] && config.columns[config.traces[0][0]].dfid,
-                yAxis: config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]] && config.columns[config.traces[0][1]].dfid,
-                decimator: decimator,
-                chartMode: config.modes[0],
-              } : undefined;
+            const decimatorPayload = decimator
+                ? {
+                      width: plotRef.current?.clientWidth,
+                      height: plotRef.current?.clientHeight,
+                      xAxis:
+                          config.traces.length &&
+                          config.traces[0].length &&
+                          config.traces[0][0] &&
+                          config.columns[config.traces[0][0]].dfid,
+                      yAxis:
+                          config.traces.length == 1 &&
+                          config.traces[0].length > 1 &&
+                          config.columns[config.traces[0][1]] &&
+                          config.columns[config.traces[0][1]].dfid,
+                      decimator: decimator,
+                      chartMode: config.modes[0],
+                  }
+                : undefined;
             dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "");
-            dispatch(
-                createRequestChartUpdateAction(
-                    updateVarName,
-                    id,
-                    backCols,
-                    dataKey.current,
-                    decimatorPayload,
-                )
-            );
+            dispatch(createRequestChartUpdateAction(updateVarName, id, backCols, dataKey.current, decimatorPayload));
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [refresh, dispatch, config.columns, config.traces, updateVarName, id, decimator]);
@@ -293,19 +304,22 @@ const Chart = (props: ChartProp) => {
             } as Record<string, unknown>;
             if (ONE_COLUMN_CHART.includes(config.types[idx])) {
                 ret.values = getValue(datum, trace, 0);
-                const lbl = getValue(datum, config.labels, idx);
-                if (lbl.length) {
-                    ret.labels = lbl;
-                }
+                ret.labels = getValue(datum, config.labels, idx, true);
             } else {
                 ret.marker = getArrayValue(config.markers, idx, {});
-                if ((ret.marker as PlotMarker).color !== undefined && typeof (ret.marker as PlotMarker).color === "string") {
+                if (
+                    (ret.marker as PlotMarker).color !== undefined &&
+                    typeof (ret.marker as PlotMarker).color === "string"
+                ) {
                     const arr = getValueFromCol(datum, (ret.marker as PlotMarker).color as string);
                     if (arr.length) {
                         (ret.marker as PlotMarker).color = arr as Color[];
                     }
                 }
-                if ((ret.marker as PlotMarker).size !== undefined && typeof (ret.marker as PlotMarker).size === "string") {
+                if (
+                    (ret.marker as PlotMarker).size !== undefined &&
+                    typeof (ret.marker as PlotMarker).size === "string"
+                ) {
                     const arr = getValueFromCol(datum, (ret.marker as PlotMarker).size as unknown as string);
                     if (arr.length) {
                         (ret.marker as PlotMarker).size = arr as number[];
@@ -317,24 +331,24 @@ const Chart = (props: ChartProp) => {
                     ret.lon = xs;
                     ret.lat = ys;
                 } else {
-                    if (ys.length) {
+                    if (ys && ys.length) {
                         ret.x = xs;
                         ret.y = ys;
                     } else {
-                        ret.x = Array.from(Array(xs.length).keys());
+                        ret.x = Array.from(Array(xs && xs.length).keys());
                         ret.y = xs;
                     }
                 }
-                ret.z = getValue(datum, trace, 2);
-                ret.text = getValue(datum, config.texts, idx);
+                ret.z = getValue(datum, trace, 2, true);
+                ret.text = getValue(datum, config.texts, idx, true);
                 ret.xaxis = config.xaxis[idx];
                 ret.yaxis = config.yaxis[idx];
-                ret.hovertext = getValue(datum, config.labels, idx);
+                ret.hovertext = getValue(datum, config.labels, idx, true);
                 ret.selectedpoints = getArrayValue(selected, idx, []);
                 ret.orientation = getArrayValue(config.orientations, idx);
                 ret.line = getArrayValue(config.lines, idx);
                 ret.textposition = getArrayValue(config.textAnchors, idx);
-                ret.base = getValue(datum, config.bases, idx);
+                ret.base = getValue(datum, config.bases, idx, true);
             }
             const selectedMarker = getArrayValue(config.selectedMarkers, idx);
             if (selectedMarker) {
@@ -352,9 +366,9 @@ const Chart = (props: ChartProp) => {
             } catch (e) {
                 console.info(`Error while parsing Chart.plot_config\n${(e as Error).message || e}`);
             }
-            if (typeof plconf !== 'object' || plconf === null || Array.isArray(plconf)) {
+            if (typeof plconf !== "object" || plconf === null || Array.isArray(plconf)) {
                 console.info("Error Chart.plot_config is not a dictionnary");
-                plconf = {}
+                plconf = {};
             }
         }
         if (active) {
@@ -369,25 +383,29 @@ const Chart = (props: ChartProp) => {
             onRangeChange && dispatch(createSendActionNameAction(id, { action: onRangeChange, ...eventData }));
             if (decimator) {
                 const backCols = Object.keys(config.columns).map((col) => config.columns[col].dfid);
-                const eventDataKey = Object.keys(eventData).map(v => v + "=" + eventData[v as keyof typeof eventData]).join("-");
+                const eventDataKey = Object.keys(eventData)
+                    .map((v) => v + "=" + eventData[v as keyof typeof eventData])
+                    .join("-");
                 dataKey.current = backCols.join("-") + (decimator ? `--${decimator}` : "") + "--" + eventDataKey;
                 const decimatorPayload = {
                     width: plotRef.current?.clientWidth,
                     height: plotRef.current?.clientHeight,
-                    xAxis: config.traces.length && config.traces[0].length && config.traces[0][0] && config.columns[config.traces[0][0]].dfid,
-                    yAxis: config.traces.length == 1 && config.traces[0].length > 1 && config.columns[config.traces[0][1]] && config.columns[config.traces[0][1]].dfid,
+                    xAxis:
+                        config.traces.length &&
+                        config.traces[0].length &&
+                        config.traces[0][0] &&
+                        config.columns[config.traces[0][0]].dfid,
+                    yAxis:
+                        config.traces.length == 1 &&
+                        config.traces[0].length > 1 &&
+                        config.columns[config.traces[0][1]] &&
+                        config.columns[config.traces[0][1]].dfid,
                     decimator: decimator,
                     relayoutData: eventData,
                     chartMode: config.modes[0],
-                }
+                };
                 dispatch(
-                    createRequestChartUpdateAction(
-                        updateVarName,
-                        id,
-                        backCols,
-                        dataKey.current,
-                        decimatorPayload,
-                    )
+                    createRequestChartUpdateAction(updateVarName, id, backCols, dataKey.current, decimatorPayload)
                 );
             }
         },
