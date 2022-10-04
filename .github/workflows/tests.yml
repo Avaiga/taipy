@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -31,7 +31,7 @@ jobs:
         run: tox -p all
 
       - name: Ensure no usage of manager or repository classes without factory
-        if: matrix.python-versions == '3.10' && matrix.os == 'ubuntu-18.04'
+        if: matrix.python-versions == '3.10' && matrix.os == 'ubuntu-latest'
         run: |
           ! grep -rP '_ScenarioManager(?!Factory)' taipy --exclude="_scenario_manager*.py" --exclude-dir="__pycache__"
           ! grep -rP '_DataManager(?!Factory)' taipy --exclude="_data_manager*.py" --exclude-dir="__pycache__"

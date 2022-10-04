@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         python-versions: [3.9]
-        os: [ubuntu-18.04]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
