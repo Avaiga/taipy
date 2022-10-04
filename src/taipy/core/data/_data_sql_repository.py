@@ -9,7 +9,18 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-from ._filesystem_repository import _FileSystemRepository
-from ._repository import _AbstractRepository, _CustomDecoder, _CustomEncoder
-from ._repository_factory import _RepositoryFactory
-from ._sql_repository import _SQLRepository
+from typing import Optional
+
+from ._data_model import _DataNodeModel
+from ._data_repository import _DataRepository
+
+
+class _DataSQLRepository(_DataRepository):
+    def __init__(self):
+        super().__init__(model=_DataNodeModel, model_name="data")
+
+    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]):
+        super().repository._get_by_config_and_parent_id(config_id, parent_id)
+
+    def _get_by_configs_and_parent_ids(self, configs_and_parent_ids):
+        return super().repository._get_by_configs_and_parent_ids(configs_and_parent_ids)

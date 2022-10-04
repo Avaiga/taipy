@@ -14,7 +14,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from src.taipy.core._repository import _FileSystemRepository
+from src.taipy.core._repository import _FileSystemRepository, _SQLRepository
 from taipy.config.config import Config
 
 
@@ -51,3 +51,15 @@ class MockFSRepository(_FileSystemRepository):
     @property
     def _storage_folder(self) -> pathlib.Path:
         return pathlib.Path(Config.global_config.storage_folder)  # type: ignore
+
+
+class MockSQLRepository(_SQLRepository):
+    def __init__(self, **kwargs):
+        kwargs.update({"model_name": "mock_model", "to_model_fct": self._to_model, "from_model_fct": self._from_model})
+        super().__init__(**kwargs)
+
+    def _to_model(self, obj: MockObj):
+        return MockModel(obj.id, obj.name)
+
+    def _from_model(self, model: MockModel):
+        return MockObj(model.id, model.name)
