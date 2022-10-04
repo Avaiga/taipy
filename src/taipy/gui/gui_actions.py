@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import threading
 import typing as t
 import warnings
 
@@ -195,3 +196,74 @@ def invoke_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union
 def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
     warnings.warn("'invoke_state_callback()' was deprecated in Taipy GUI 2.0. Use 'invoke_callback()' instead.")
     return invoke_callback(gui, state_id, callback, args)
+
+
+def invoke_long_running(
+    state: State,
+    user_function: t.Callable,
+    user_function_args: t.Union[t.Tuple, t.List] = [],
+    user_status_function: t.Optional[t.Callable] = None,
+    user_status_function_args: t.Union[t.Tuple, t.List] = [],
+    delay=0,
+):
+    """Invoke a long running user callback (uses Threads).
+
+    See the [User Manual section on Long Running Callbacks](../../gui/callbacks/#long-running-callbacks)
+    for details on when and how this function can be used.
+
+    Arguments:
+        state (State^): The `State^` instance, which is an argument of the callback function.
+        user_function (Callable[[...], None]): The function that will be run independently of taipy gui (cannot use `State^`).
+        user_function_args (Optional[List|Tuple]): The remaining arguments, as a List.
+        user_status_function (Optional(Callable[[State^, bool, ...], None])): The optional user-defined status function that is invoked at the end (of and possibly during) the runtime of the user_function.<br/>
+            The first parameter of this function **must** be a `State^`. The second parameter of this function **must** be a Union[`bool`, `int`] that will indicate a progression (`int`) or the final status (`bool`)
+        user_status_function_args (Optional[List|Tuple]): The remaining arguments ot the user status function, as a List.
+        delay (int): The interval in seconds at which the user_status_function is called (default value is 0).</br>
+            When set to 0, the user_status_fucntion is called only when the user_function is terminated.
+    """
+    if state and isinstance(state._gui, Gui):
+        state_id = get_state_id(state)
+        if isinstance(state_id, str):
+            this_gui = state._gui
+
+            def callback_on_exception(state: State, function_name: str, e: Exception):
+                if not this_gui._call_on_exception(function_name, e):
+                    warnings.warn(f"invoke_long_running: Exception raised in function {function_name}.\n{e}")
+
+            def callback_on_status(status: t.Union[int, bool], e: t.Optional[Exception] = None):
+                if callable(user_status_function):
+                    invoke_callback(
+                        this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args)
+                    )
+                if e:
+                    invoke_callback(
+                        this_gui,
+                        str(state_id),
+                        callback_on_exception,
+                        (
+                            user_status_function.__name__
+                            if callable(user_status_function)
+                            else str(user_status_function),
+                            e,
+                        ),
+                    )
+
+            def user_function_in_thread(*uf_args):
+                try:
+                    user_function(*uf_args)
+                    callback_on_status(True)
+                except Exception as e:
+                    callback_on_status(False, e)
+
+            def thread_status(name: str, delay: int, count: int):
+                active_thread = next((t for t in threading.enumerate() if t.name == name), None)
+                if active_thread:
+                    callback_on_status(count)
+                    threading.Timer(delay, thread_status, (name, delay, count + 1)).start()
+
+            thread = threading.Thread(target=user_function_in_thread, args=user_function_args)
+            thread.start()
+            if delay and isinstance(delay, int) and callable(user_status_function):
+                thread_status(thread.name, delay, 0)
+    else:
+        warnings.warn("'invoke_long_running()' must be called in the context of a callback")
