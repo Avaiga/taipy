@@ -189,8 +189,7 @@ def invoke_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union
     """
     if isinstance(gui, Gui):
         return gui._call_user_callback(state_id, callback, list(args))
-    else:
-        warnings.warn("'invoke_callback()' must be called with a valid Gui instance")
+    warnings.warn("'invoke_callback()' must be called with a valid Gui instance")
 
 
 def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t.Union[t.Tuple, t.List]) -> t.Any:
@@ -221,49 +220,50 @@ def invoke_long_callback(
         period (int): The interval in milli-seconds at which the user_status_function is called (default value is 0).</br>
             When set to a value < 500, the user_status_function is called only when the user_function is terminated.
     """
-    if state and isinstance(state._gui, Gui):
-        state_id = get_state_id(state)
-        if isinstance(state_id, str):
-            this_gui = state._gui
-
-            def callback_on_exception(state: State, function_name: str, e: Exception):
-                if not this_gui._call_on_exception(function_name, e):
-                    warnings.warn(f"invoke_long_callback: Exception raised in function {function_name}.\n{e}")
-
-            def callback_on_status(
-                status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None
-            ):
-                if callable(user_status_function):
-                    invoke_callback(
-                        this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args)
-                    )
-                if e:
-                    invoke_callback(
-                        this_gui,
-                        str(state_id),
-                        callback_on_exception,
-                        (
-                            str(function_name),
-                            e,
-                        ),
-                    )
-
-            def user_function_in_thread(*uf_args):
-                try:
-                    user_function(*uf_args)
-                    callback_on_status(True)
-                except Exception as e:
-                    callback_on_status(False, e, user_function.__name__)
-
-            def thread_status(name: str, period_s: float, count: int):
-                active_thread = next((t for t in threading.enumerate() if t.name == name), None)
-                if active_thread:
-                    callback_on_status(count)
-                    threading.Timer(period_s, thread_status, (name, period_s, count + 1)).start()
-
-            thread = threading.Thread(target=user_function_in_thread, args=user_function_args)
-            thread.start()
-            if isinstance(period, int) and period >= 500 and callable(user_status_function):
-                thread_status(thread.name, period / 1000.0, 0)
-    else:
+    if not state or not isinstance(state._gui, Gui):
         warnings.warn("'invoke_long_callback()' must be called in the context of a callback.")
+        return
+
+    state_id = get_state_id(state)
+    if not isinstance(state_id, str):
+        return
+
+    this_gui = state._gui
+
+    def callback_on_exception(state: State, function_name: str, e: Exception):
+        if not this_gui._call_on_exception(function_name, e):
+            warnings.warn(f"invoke_long_callback: Exception raised in function {function_name}.\n{e}")
+
+    def callback_on_status(
+        status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None
+    ):
+        if callable(user_status_function):
+            invoke_callback(this_gui, str(state_id), user_status_function, [status] + list(user_status_function_args))
+        if e:
+            invoke_callback(
+                this_gui,
+                str(state_id),
+                callback_on_exception,
+                (
+                    str(function_name),
+                    e,
+                ),
+            )
+
+    def user_function_in_thread(*uf_args):
+        try:
+            user_function(*uf_args)
+            callback_on_status(True)
+        except Exception as e:
+            callback_on_status(False, e, user_function.__name__)
+
+    def thread_status(name: str, period_s: float, count: int):
+        active_thread = next((t for t in threading.enumerate() if t.name == name), None)
+        if active_thread:
+            callback_on_status(count)
+            threading.Timer(period_s, thread_status, (name, period_s, count + 1)).start()
+
+    thread = threading.Thread(target=user_function_in_thread, args=user_function_args)
+    thread.start()
+    if isinstance(period, int) and period >= 500 and callable(user_status_function):
+        thread_status(thread.name, period / 1000.0, 0)
