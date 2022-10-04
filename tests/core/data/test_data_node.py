@@ -94,6 +94,7 @@ class TestDataNode:
         assert dn.id is not None
         assert dn.name == dn.id
         assert dn.owner_id is None
+        assert dn.parent_ids is None
         assert dn.last_edition_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
@@ -107,6 +108,7 @@ class TestDataNode:
             DataNodeId("an_id"),
             "a name",
             "a_scenario_id",
+            {"a_parent_id"},
             a_date,
             [JobId("a_job_id")],
             edit_in_progress=False,
@@ -117,6 +119,7 @@ class TestDataNode:
         assert dn.id == "an_id"
         assert dn.name == "a name"
         assert dn.owner_id == "a_scenario_id"
+        assert dn.parent_ids == {"a_parent_id"}
         assert dn.last_edition_date == a_date
         assert dn.job_ids == ["a_job_id"]
         assert dn.is_ready_for_reading
@@ -455,6 +458,7 @@ class TestDataNode:
             id=DataNodeId("an_id"),
             name="foo",
             owner_id=None,
+            parent_ids=None,
             last_edit_date=current_datetime,
             job_ids=[JobId("a_job_id")],
             cacheable=False,
@@ -526,6 +530,7 @@ class TestDataNode:
         with dn_1 as dn:
             assert dn.config_id == "foo"
             assert dn.owner_id is None
+            assert dn.parent_ids is None
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
@@ -547,6 +552,7 @@ class TestDataNode:
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
+            assert dn.parent_ids is None
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
@@ -557,6 +563,7 @@ class TestDataNode:
 
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
+        assert dn.parent_ids is None
         assert dn_1.scope == Scope.CYCLE
         assert dn_1.last_edition_date == new_datetime_2
         assert dn_1.name == "abc"

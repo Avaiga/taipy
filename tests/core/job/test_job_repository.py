@@ -33,6 +33,7 @@ data_node = CSVDataNode(
     DataNodeId("dn_id"),
     "name",
     "owner_id",
+    "task_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
     False,

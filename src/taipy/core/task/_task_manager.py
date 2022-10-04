@@ -72,14 +72,20 @@ class _TaskManager(_Manager[Task]):
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:
             if task := tasks_by_config.get((task_config, owner_id)):
+                # task found with owner_id, created by calling a certain pipeline
+                # task.parent_ids.update({pipeline_id})
                 tasks.append(task)
             else:
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
+                # assigning parent id with the current pipeline id of the pipeline that raised the creation of this task
+                # task = Task(task_config.id, task_config.function, inputs, outputs, owner_id=owner_id, parent_ids={pipeline_id})
                 task = Task(task_config.id, task_config.function, inputs, outputs, owner_id=owner_id)
                 cls._set(task)
                 tasks.append(task)
-
+            # updating the parent_ids of datanodes with task_id
+            # for dn in {inputs, outputs}:
+            #     dn.parent_ids.update({task.id})
         return tasks
 
     @classmethod

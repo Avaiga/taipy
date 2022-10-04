@@ -43,6 +43,7 @@ class ExcelDataNode(DataNode):
         name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
             `None`.
+        parent_ids (Optional[Set[str]]): The identifier of the parent (task_id) or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         cacheable (bool): True if this data node is cacheable. False otherwise.
@@ -74,6 +75,7 @@ class ExcelDataNode(DataNode):
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         owner_id: Optional[str] = None,
+        parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         cacheable: bool = False,
@@ -108,6 +110,7 @@ class ExcelDataNode(DataNode):
             id,
             name,
             owner_id,
+            parent_ids,
             last_edit_date,
             job_ids,
             cacheable,
