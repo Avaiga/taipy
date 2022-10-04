@@ -14,10 +14,10 @@ from time import sleep
 
 import pytest
 
-from taipy.gui import Gui, State, invoke_long_running
+from taipy.gui import Gui, State, invoke_long_callback
 
 
-def test_long_running(gui: Gui):
+def test_long_callback(gui: Gui):
     status = None  # noqa: F841
 
     def heavy_function(delay=1):
@@ -39,8 +39,8 @@ def test_long_running(gui: Gui):
 
     with gui.get_flask_app().app_context():
         assert state.status is None
-        invoke_long_running(state, heavy_function)
-        invoke_long_running(state, heavy_function_with_exception)
-        invoke_long_running(state, heavy_function, (), heavy_function_status)
-        invoke_long_running(state, heavy_function, (2), heavy_function_status, (), 1)
-        invoke_long_running(state, heavy_function_with_exception, (), heavy_function_status)
+        invoke_long_callback(state, heavy_function)
+        invoke_long_callback(state, heavy_function_with_exception)
+        invoke_long_callback(state, heavy_function, (), heavy_function_status)
+        invoke_long_callback(state, heavy_function, (2), heavy_function_status, (), 1000)
+        invoke_long_callback(state, heavy_function_with_exception, (), heavy_function_status)

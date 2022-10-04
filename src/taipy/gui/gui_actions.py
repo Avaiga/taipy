@@ -198,13 +198,13 @@ def invoke_state_callback(gui: Gui, state_id: str, callback: t.Callable, args: t
     return invoke_callback(gui, state_id, callback, args)
 
 
-def invoke_long_running(
+def invoke_long_callback(
     state: State,
     user_function: t.Callable,
     user_function_args: t.Union[t.Tuple, t.List] = [],
     user_status_function: t.Optional[t.Callable] = None,
     user_status_function_args: t.Union[t.Tuple, t.List] = [],
-    delay=0,
+    period=0,
 ):
     """Invoke a long running user callback (uses Threads).
 
@@ -218,8 +218,8 @@ def invoke_long_running(
         user_status_function (Optional(Callable[[State^, bool, ...], None])): The optional user-defined status function that is invoked at the end (of and possibly during) the runtime of the user_function.<br/>
             The first parameter of this function **must** be a `State^`. The second parameter of this function **must** be a Union[`bool`, `int`] that will indicate a progression (`int`) or the final status (`bool`)
         user_status_function_args (Optional[List|Tuple]): The remaining arguments ot the user status function, as a List.
-        delay (int): The interval in seconds at which the user_status_function is called (default value is 0).</br>
-            When set to 0, the user_status_fucntion is called only when the user_function is terminated.
+        period (int): The interval in milli-seconds at which the user_status_function is called (default value is 0).</br>
+            When set to a value < 500, the user_status_function is called only when the user_function is terminated.
     """
     if state and isinstance(state._gui, Gui):
         state_id = get_state_id(state)
@@ -228,7 +228,7 @@ def invoke_long_running(
 
             def callback_on_exception(state: State, function_name: str, e: Exception):
                 if not this_gui._call_on_exception(function_name, e):
-                    warnings.warn(f"invoke_long_running: Exception raised in function {function_name}.\n{e}")
+                    warnings.warn(f"invoke_long_callback: Exception raised in function {function_name}.\n{e}")
 
             def callback_on_status(
                 status: t.Union[int, bool], e: t.Optional[Exception] = None, function_name: t.Optional[str] = None
@@ -255,15 +255,15 @@ def invoke_long_running(
                 except Exception as e:
                     callback_on_status(False, e, user_function.__name__)
 
-            def thread_status(name: str, delay: int, count: int):
+            def thread_status(name: str, period_s: float, count: int):
                 active_thread = next((t for t in threading.enumerate() if t.name == name), None)
                 if active_thread:
                     callback_on_status(count)
-                    threading.Timer(delay, thread_status, (name, delay, count + 1)).start()
+                    threading.Timer(period_s, thread_status, (name, period_s, count + 1)).start()
 
             thread = threading.Thread(target=user_function_in_thread, args=user_function_args)
             thread.start()
-            if delay and isinstance(delay, int) and callable(user_status_function):
-                thread_status(thread.name, delay, 0)
+            if isinstance(period, int) and period >= 500 and callable(user_status_function):
+                thread_status(thread.name, period / 1000.0, 0)
     else:
-        warnings.warn("'invoke_long_running()' must be called in the context of a callback")
+        warnings.warn("'invoke_long_callback()' must be called in the context of a callback.")

@@ -76,7 +76,7 @@ from .gui_actions import (
     get_state_id,
     hold_control,
     invoke_callback,
-    invoke_long_running,
+    invoke_long_callback,
     navigate,
     notify,
     resume_control,
