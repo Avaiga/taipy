@@ -30,7 +30,7 @@ def test_long_running(gui: Gui):
         sleep(1)
         raise Exception("Heavy function Exception")
 
-    def heavy_function_status(state: State, status: bool | int):
+    def heavy_function_status(state: State, status: int):
         state.status = status
 
     with gui.get_flask_app().app_context():
