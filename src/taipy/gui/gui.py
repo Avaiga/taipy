@@ -538,7 +538,7 @@ class Gui:
                     args[3] = current_context
                 on_change_fn(*args)
             except Exception as e:
-                if not self.__call_on_exception(on_change or "on_change", e):
+                if not self._call_on_exception(on_change or "on_change", e):
                     warnings.warn(f"{on_change or 'on_change'}: callback function raised an exception:\n{e}")
 
     def _get_content(self, var_name: str, value: t.Any, image: bool) -> t.Any:
@@ -895,7 +895,7 @@ class Gui:
                 action_function(*args)
                 return True
             except Exception as e:
-                if not self.__call_on_exception(action_function.__name__, e):
+                if not self._call_on_exception(action_function.__name__, e):
                     warnings.warn(f"on_action: Exception raised in function '{action_function.__name__}':\n{e}")
         return False
 
@@ -914,7 +914,8 @@ class Gui:
                 self.__set_client_id_in_context(state_id)
                 return self._call_function_with_state(user_callback, args)
         except Exception as e:
-            warnings.warn(f"Exception raised in invoke_callback: '{user_callback.__name__}':\n{e}")
+            if not self._call_on_exception(user_callback.__name__, e):
+                warnings.warn(f"invoke_callback: Exception raised in function '{user_callback.__name__}'.\n{e}")
         return None
 
     # Proxy methods for Evaluator
@@ -1328,11 +1329,11 @@ class Gui:
             try:
                 self._call_function_with_state(self.on_init, [])
             except Exception as e:
-                if not self.__call_on_exception("on_init", e):
+                if not self._call_on_exception("on_init", e):
                     warnings.warn(f"Exception raised in on_init.\n{e}")
         return self._render_route()
 
-    def __call_on_exception(self, function_name: str, exception: Exception) -> bool:
+    def _call_on_exception(self, function_name: str, exception: Exception) -> bool:
         if hasattr(self, "on_exception") and callable(self.on_exception):
             try:
                 self.on_exception(self.__get_state(), str(function_name), exception)
@@ -1346,7 +1347,7 @@ class Gui:
             try:
                 return self.on_status(self.__get_state())
             except Exception as e:
-                if not self.__call_on_exception("on_status", e):
+                if not self._call_on_exception("on_status", e):
                     warnings.warn(f"Exception raised in on_status.\n{e}")
         return None
 
@@ -1360,7 +1361,7 @@ class Gui:
                     warnings.warn(f"on_navigate() returned a invalid page name '{nav_page}'.")
                     nav_page = page_name
             except Exception as e:
-                if not self.__call_on_exception("on_navigate", e):
+                if not self._call_on_exception("on_navigate", e):
                     warnings.warn(f"Exception raised in on_navigate.\n{e}")
         page = next((page_i for page_i in self._config.pages if page_i._route == nav_page), None)
 
