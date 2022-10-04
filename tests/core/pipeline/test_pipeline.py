@@ -32,7 +32,7 @@ def test_create_pipeline():
 
     pipeline = Pipeline("name_1", {"description": "description"}, [task])
     assert pipeline.id is not None
-    assert pipeline.parent_id is None
+    assert pipeline.owner_id is None
     assert pipeline.config_id == "name_1"
     assert pipeline.description == "description"
     assert pipeline.foo == input
@@ -47,9 +47,9 @@ def test_create_pipeline():
     input_1 = InMemoryDataNode("input", Scope.SCENARIO)
     output_1 = InMemoryDataNode("output", Scope.SCENARIO)
     task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
-    pipeline_1 = Pipeline("name_1", {"description": "description"}, [task_1], parent_id="parent_id")
+    pipeline_1 = Pipeline("name_1", {"description": "description"}, [task_1], owner_id="owner_id")
     assert pipeline_1.id is not None
-    assert pipeline_1.parent_id == "parent_id"
+    assert pipeline_1.owner_id == "owner_id"
     assert pipeline_1.config_id == "name_1"
     assert pipeline_1.description == "description"
     assert pipeline_1.input == input_1
@@ -60,15 +60,29 @@ def test_create_pipeline():
 
     assert pipeline_1.id is not None
     with pytest.raises(InvalidConfigurationId):
-        Pipeline("name 1", {"description": "description"}, [task_1], parent_id="parent_id")
+        Pipeline("name 1", {"description": "description"}, [task_1], owner_id="owner_id")
 
-    pipeline_2 = Pipeline("name_2", {"description": "description"}, [task, task_1], parent_id="parent_id")
+    pipeline_2 = Pipeline("name_2", {"description": "description"}, [task, task_1], owner_id="owner_id")
     assert pipeline_2.id is not None
-    assert pipeline_2.parent_id == "parent_id"
+    assert pipeline_2.owner_id == "owner_id"
     assert pipeline_2.config_id == "name_2"
     assert pipeline_2.description == "description"
     assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
     assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
+
+
+def test_parent_id_deprecated():
+    pipeline = Pipeline("foo", {}, [], owner_id="owner_id")
+
+    with pytest.warns(DeprecationWarning):
+        pipeline.parent_id
+
+    assert pipeline.owner_id == pipeline.parent_id
+    with pytest.warns(DeprecationWarning):
+        pipeline.parent_id = "owner_id_2"
+
+    assert pipeline.owner_id == pipeline.parent_id
+    assert pipeline.owner_id == "owner_id_2"
 
 
 def test_check_consistency():
@@ -233,7 +247,7 @@ def test_get_sorted_tasks():
 
 
 def test_auto_set_and_reload(task):
-    pipeline_1 = Pipeline("foo", {}, [], parent_id=None, subscribers=None)
+    pipeline_1 = Pipeline("foo", {}, [], owner_id=None, subscribers=None)
 
     _TaskManager._set(task)
     _PipelineManager._set(pipeline_1)
@@ -250,8 +264,8 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_2.tasks) == 1
     assert pipeline_2.tasks[task.config_id].id == task.id
 
-    assert pipeline_1.parent_id is None
-    assert pipeline_2.parent_id is None
+    assert pipeline_1.owner_id is None
+    assert pipeline_2.owner_id is None
 
     assert pipeline_1.properties == {}
     pipeline_1.properties["qux"] = 5
@@ -287,24 +301,24 @@ def test_auto_set_and_reload(task):
         assert pipeline.config_id == "foo"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
-        assert pipeline.parent_id is None
+        assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
 
         pipeline.tasks = []
-        pipeline.parent_id = None
+        pipeline.owner_id = None
         pipeline.subscribers = [print]
 
         assert pipeline.config_id == "foo"
         assert len(pipeline.tasks) == 1
         assert pipeline.tasks[task.config_id].id == task.id
-        assert pipeline.parent_id is None
+        assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
 
     assert pipeline_1.config_id == "foo"
     assert len(pipeline_1.tasks) == 0
-    assert pipeline_1.parent_id is None
+    assert pipeline_1.owner_id is None
     assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
 

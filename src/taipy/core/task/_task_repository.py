@@ -32,7 +32,7 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
     def _to_model(self, task: Task) -> _TaskModel:
         return _TaskModel(
             id=task.id,
-            parent_id=task.parent_id,
+            owner_id=task.owner_id,
             config_id=task.config_id,
             input_ids=self.__to_ids(task.input.values()),
             function_name=task._function.__name__,
@@ -43,7 +43,7 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
     def _from_model(self, model: _TaskModel) -> Task:
         return Task(
             id=TaskId(model.id),
-            parent_id=model.parent_id,
+            owner_id=model.owner_id,
             config_id=model.config_id,
             function=_load_fct(model.function_module, model.function_name),
             input=self.__to_data_nodes(model.input_ids),

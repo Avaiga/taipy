@@ -80,13 +80,12 @@ class _PipelineManager(_Manager[Pipeline]):
         tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, scenario_id, pipeline_id)
 
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
-        parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
+        owner_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
 
-        # type: ignore
-        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(pipeline_config.id, parent_id):
-            return pipelines_from_parent
+        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(pipeline_config.id, owner_id):  # type: ignore
+            return pipelines_from_owner
 
-        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)
+        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, owner_id)
         cls._set(pipeline)
         return pipeline
 
@@ -128,10 +127,10 @@ class _PipelineManager(_Manager[Pipeline]):
         for task in pipeline.tasks.values():
             if not isinstance(task, Task):
                 task = _TaskManagerFactory._build_manager()._get(task)
-            if task.parent_id == pipeline.id:
+            if task.owner_id == pipeline.id:
                 entity_ids.task_ids.add(task.id)
             for data_node in task.data_nodes.values():
-                if data_node.parent_id == pipeline.id:
+                if data_node.owner_id == pipeline.id:
                     entity_ids.data_node_ids.add(data_node.id)
         jobs = _JobManagerFactory._build_manager()._get_all()
         for job in jobs:

@@ -32,7 +32,7 @@ data_node = CSVDataNode(
     Scope.PIPELINE,
     DataNodeId("dn_id"),
     "name",
-    "parent_id",
+    "owner_id",
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
     False,
@@ -41,7 +41,7 @@ data_node = CSVDataNode(
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_id", print, [data_node], [], TaskId("task_id"), parent_id="parent_id")
+task = Task("config_id", print, [data_node], [], TaskId("task_id"), owner_id="owner_id")
 
 
 def f():

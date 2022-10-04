@@ -25,7 +25,7 @@ class TestInMemoryDataNodeEntity:
             Scope.SCENARIO,
             DataNodeId("id_uio"),
             "my name",
-            "parent_id",
+            "owner_id",
             properties={"default_data": "In memory Data Node"},
         )
         assert isinstance(dn, InMemoryDataNode)
@@ -34,7 +34,7 @@ class TestInMemoryDataNodeEntity:
         assert dn.scope == Scope.SCENARIO
         assert dn.id == "id_uio"
         assert dn.name == "my name"
-        assert dn.parent_id == "parent_id"
+        assert dn.owner_id == "owner_id"
         assert dn.last_edition_date is not None
         assert dn.job_ids == []
         assert dn.is_ready_for_reading

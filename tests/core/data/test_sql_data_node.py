@@ -35,10 +35,7 @@ class MyCustomObject:
 
 def my_write_query_builder(data: pd.DataFrame):
     insert_data = list(data.itertuples(index=False, name=None))
-    return [
-        "DELETE FROM foo",
-        ("INSERT INTO foo VALUES (?,?)", insert_data)
-    ]
+    return ["DELETE FROM foo", ("INSERT INTO foo VALUES (?,?)", insert_data)]
 
 
 def single_write_query_builder(data):
@@ -82,7 +79,7 @@ class TestSQLDataNode:
         assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
-        assert dn.parent_id is None
+        assert dn.owner_id is None
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "pandas"
@@ -120,7 +117,8 @@ class TestSQLDataNode:
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
             assert engine_mock.mock_calls[4] == mock.call().__enter__().execute("DELETE FROM foo")
             assert engine_mock.mock_calls[5] == mock.call().__enter__().execute(
-                "INSERT INTO foo VALUES (?,?)", [(1, 4), (2, 5), (3, 6)])
+                "INSERT INTO foo VALUES (?,?)", [(1, 4), (2, 5), (3, 6)]
+            )
 
         dn = SQLDataNode(
             "foo_bar",

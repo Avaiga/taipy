@@ -36,35 +36,35 @@ class _DataManager(_Manager[DataNode]):
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
-        dn_configs_and_parent_id = []
+        dn_configs_and_owner_id = []
 
         for dn_config in data_node_configs:
             scope = dn_config.scope
-            parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
-            dn_configs_and_parent_id.append((dn_config, parent_id))
+            owner_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+            dn_configs_and_owner_id.append((dn_config, owner_id))
 
-        data_nodes = cls._repository._get_by_configs_and_parent_ids(dn_configs_and_parent_id)  # type: ignore
+        data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
 
         return {
-            dn_config: data_nodes.get((dn_config, parent_id)) or cls._create_and_set(dn_config, parent_id)
-            for dn_config, parent_id in dn_configs_and_parent_id
+            dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id)
+            for dn_config, owner_id in dn_configs_and_owner_id
         }
 
     @classmethod
-    def _create_and_set(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
-        data_node = cls.__create(data_node_config, parent_id)
+    def _create_and_set(cls, data_node_config: DataNodeConfig, owner_id: Optional[str]) -> DataNode:
+        data_node = cls.__create(data_node_config, owner_id)
         cls._set(data_node)
         return data_node
 
     @classmethod
-    def __create(cls, data_node_config: DataNodeConfig, parent_id: Optional[str]) -> DataNode:
+    def __create(cls, data_node_config: DataNodeConfig, owner_id: Optional[str]) -> DataNode:
         try:
             props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
             return cls.__DATA_NODE_CLASS_MAP[data_node_config.storage_type](  # type: ignore
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
-                parent_id=parent_id,
+                owner_id=owner_id,
                 cacheable=data_node_config.cacheable,
                 validity_period=validity_period,
                 properties=props,

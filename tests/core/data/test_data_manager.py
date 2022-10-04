@@ -47,7 +47,7 @@ class TestDataManager:
         # Test we can instantiate a CsvDataNode from DataNodeConfig with :
         # - a csv type
         # - a default scenario scope
-        # - No parent_id
+        # - No owner_id
         csv_dn_config = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
         csv_dn = _DataManager._create_and_set(csv_dn_config, None)
 
@@ -60,8 +60,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).config_id == csv_dn.config_id
         assert _DataManager._get(csv_dn.id).scope == Scope.SCENARIO
         assert _DataManager._get(csv_dn.id).scope == csv_dn.scope
-        assert _DataManager._get(csv_dn.id).parent_id is None
-        assert _DataManager._get(csv_dn.id).parent_id == csv_dn.parent_id
+        assert _DataManager._get(csv_dn.id).owner_id is None
+        assert _DataManager._get(csv_dn.id).owner_id == csv_dn.owner_id
         assert _DataManager._get(csv_dn.id).last_edition_date is None
         assert _DataManager._get(csv_dn.id).last_edition_date == csv_dn.last_edition_date
         assert _DataManager._get(csv_dn.id).job_ids == []
@@ -81,8 +81,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).config_id == csv_dn.config_id
         assert _DataManager._get(csv_dn).scope == Scope.SCENARIO
         assert _DataManager._get(csv_dn).scope == csv_dn.scope
-        assert _DataManager._get(csv_dn).parent_id is None
-        assert _DataManager._get(csv_dn).parent_id == csv_dn.parent_id
+        assert _DataManager._get(csv_dn).owner_id is None
+        assert _DataManager._get(csv_dn).owner_id == csv_dn.owner_id
         assert _DataManager._get(csv_dn).last_edition_date is None
         assert _DataManager._get(csv_dn).last_edition_date == csv_dn.last_edition_date
         assert _DataManager._get(csv_dn).job_ids == []
@@ -100,7 +100,7 @@ class TestDataManager:
         # Test we can instantiate an InMemoryDataNode from DataNodeConfig with :
         # - an in_memory type
         # - a scenario scope
-        # - a parent id
+        # - an owner id
         # - some default data
         in_memory_dn_config = Config.configure_data_node(
             id="baz",
@@ -121,8 +121,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn.id).config_id == in_mem_dn.config_id
         assert _DataManager._get(in_mem_dn.id).scope == Scope.SCENARIO
         assert _DataManager._get(in_mem_dn.id).scope == in_mem_dn.scope
-        assert _DataManager._get(in_mem_dn.id).parent_id == "Scenario_id"
-        assert _DataManager._get(in_mem_dn.id).parent_id == in_mem_dn.parent_id
+        assert _DataManager._get(in_mem_dn.id).owner_id == "Scenario_id"
+        assert _DataManager._get(in_mem_dn.id).owner_id == in_mem_dn.owner_id
         assert _DataManager._get(in_mem_dn.id).last_edition_date is not None
         assert _DataManager._get(in_mem_dn.id).last_edition_date == in_mem_dn.last_edition_date
         assert _DataManager._get(in_mem_dn.id).job_ids == []
@@ -140,8 +140,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn).config_id == in_mem_dn.config_id
         assert _DataManager._get(in_mem_dn).scope == Scope.SCENARIO
         assert _DataManager._get(in_mem_dn).scope == in_mem_dn.scope
-        assert _DataManager._get(in_mem_dn).parent_id == "Scenario_id"
-        assert _DataManager._get(in_mem_dn).parent_id == in_mem_dn.parent_id
+        assert _DataManager._get(in_mem_dn).owner_id == "Scenario_id"
+        assert _DataManager._get(in_mem_dn).owner_id == in_mem_dn.owner_id
         assert _DataManager._get(in_mem_dn).last_edition_date is not None
         assert _DataManager._get(in_mem_dn).last_edition_date == in_mem_dn.last_edition_date
         assert _DataManager._get(in_mem_dn).job_ids == []
@@ -157,7 +157,7 @@ class TestDataManager:
         # Test we can instantiate a PickleDataNode from DataNodeConfig with :
         # - an in_memory type
         # - a business cycle scope
-        # - No parent id
+        # - No owner id
         # - no default data
         dn_config = Config.configure_data_node(id="plop", storage_type="pickle", scope=Scope.CYCLE)
         pickle_dn = _DataManager._create_and_set(dn_config, None)
@@ -171,8 +171,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn.id).config_id == pickle_dn.config_id
         assert _DataManager._get(pickle_dn.id).scope == Scope.CYCLE
         assert _DataManager._get(pickle_dn.id).scope == pickle_dn.scope
-        assert _DataManager._get(pickle_dn.id).parent_id is None
-        assert _DataManager._get(pickle_dn.id).parent_id == pickle_dn.parent_id
+        assert _DataManager._get(pickle_dn.id).owner_id is None
+        assert _DataManager._get(pickle_dn.id).owner_id == pickle_dn.owner_id
         assert _DataManager._get(pickle_dn.id).last_edition_date is None
         assert _DataManager._get(pickle_dn.id).last_edition_date == pickle_dn.last_edition_date
         assert _DataManager._get(pickle_dn.id).job_ids == []
@@ -189,8 +189,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn).config_id == pickle_dn.config_id
         assert _DataManager._get(pickle_dn).scope == Scope.CYCLE
         assert _DataManager._get(pickle_dn).scope == pickle_dn.scope
-        assert _DataManager._get(pickle_dn).parent_id is None
-        assert _DataManager._get(pickle_dn).parent_id == pickle_dn.parent_id
+        assert _DataManager._get(pickle_dn).owner_id is None
+        assert _DataManager._get(pickle_dn).owner_id == pickle_dn.owner_id
         assert _DataManager._get(pickle_dn).last_edition_date is None
         assert _DataManager._get(pickle_dn).last_edition_date == pickle_dn.last_edition_date
         assert _DataManager._get(pickle_dn).job_ids == []
@@ -250,7 +250,7 @@ class TestDataManager:
             "config_id",
             Scope.PIPELINE,
             id=DataNodeId("id"),
-            parent_id=None,
+            owner_id=None,
             last_edit_date=None,
             job_ids=[],
             edit_in_progress=False,

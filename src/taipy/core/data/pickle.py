@@ -31,7 +31,7 @@ class PickleDataNode(DataNode):
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+        owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
             `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
@@ -62,7 +62,7 @@ class PickleDataNode(DataNode):
         scope: Scope,
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
-        parent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         cacheable: bool = False,
@@ -83,7 +83,7 @@ class PickleDataNode(DataNode):
             scope,
             id,
             name,
-            parent_id,
+            owner_id,
             last_edit_date,
             job_ids,
             cacheable,

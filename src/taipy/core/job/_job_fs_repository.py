@@ -27,11 +27,11 @@ class _JobFSRepository(_JobRepository):
     def _storage_folder(self) -> pathlib.Path:
         return super().repo._storage_folder
 
-    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]):
-        return super().repo._get_by_config_and_parent_id(config_id, parent_id)
+    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]):
+        return super().repo._get_by_config_and_owner_id(config_id, owner_id)
 
-    def _get_by_configs_and_parent_ids(self, configs_and_parent_ids):
-        return super().repo._get_by_configs_and_parent_ids(configs_and_parent_ids)
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
+        return super().repo._get_by_configs_and_owner_ids(configs_and_owner_ids)
 
-    def __match_file_and_get_entity(self, filepath, config_and_parent_ids, retry: Optional[int] = 0):
-        return super().repo.__match_file_and_get_entity(filepath, config_and_parent_ids, retry)
+    def __match_file_and_get_entity(self, filepath, config_and_owner_ids, retry: Optional[int] = 0):
+        return super().repo.__match_file_and_get_entity(filepath, config_and_owner_ids, retry)

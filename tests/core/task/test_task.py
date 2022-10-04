@@ -59,7 +59,7 @@ def test_create_task():
     task = Task("name_1", print, [foo_dn], [])
     assert task.config_id == "name_1"
     assert task.id is not None
-    assert task.parent_id is None
+    assert task.owner_id is None
     assert task.foo == foo_dn
     assert task.foo.path == path
     with pytest.raises(AttributeError):
@@ -67,14 +67,28 @@ def test_create_task():
 
     path = "my/csv/path"
     abc_dn = InMemoryDataNode("name_1ea", Scope.SCENARIO, properties={"path": path})
-    task = Task("name_1ea", print, [abc_dn], [], parent_id="parent_id")
+    task = Task("name_1ea", print, [abc_dn], [], owner_id="owner_id")
     assert task.config_id == "name_1ea"
     assert task.id is not None
-    assert task.parent_id == "parent_id"
+    assert task.owner_id == "owner_id"
     assert task.name_1ea == abc_dn
     assert task.name_1ea.path == path
     with pytest.raises(AttributeError):
         task.bar
+
+
+def test_parent_id_deprecated():
+    task = Task("foo", print, owner_id="owner_id")
+
+    with pytest.warns(DeprecationWarning):
+        task.parent_id
+
+    assert task.owner_id == task.parent_id
+    with pytest.warns(DeprecationWarning):
+        task.parent_id = "owner_id_2"
+
+    assert task.owner_id == task.parent_id
+    assert task.owner_id == "owner_id_2"
 
 
 def test_can_not_change_task_output(output):
@@ -137,7 +151,7 @@ def mock_func():
 
 
 def test_auto_set_and_reload(data_node):
-    task_1 = Task(config_id="foo", function=print, input=None, output=None, parent_id=None)
+    task_1 = Task(config_id="foo", function=print, input=None, output=None, owner_id=None)
 
     _DataManager._set(data_node)
     _TaskManager._set(task_1)
@@ -151,19 +165,19 @@ def test_auto_set_and_reload(data_node):
 
     with task_1 as task:
         assert task.config_id == "foo"
-        assert task.parent_id is None
+        assert task.owner_id is None
         assert task.function == mock_func
         assert task._is_in_context
 
         task.function = print
 
         assert task.config_id == "foo"
-        assert task.parent_id is None
+        assert task.owner_id is None
         assert task.function == mock_func
         assert task._is_in_context
 
     assert task_1.config_id == "foo"
-    assert task_1.parent_id is None
+    assert task_1.owner_id is None
     assert task_1.function == print
     assert not task_1._is_in_context
 

@@ -17,6 +17,7 @@ from taipy.config.common.scope import Scope
 
 from ..common._entity import _Entity
 from ..common._reload import _self_reload, _self_setter
+from ..common._warnings import _warn_deprecated
 from ..common.alias import TaskId
 from ..data.data_node import DataNode
 
@@ -34,7 +35,7 @@ class Task(_Entity):
         input (Union[DataNode^, List[DataNode^]]): The list of inputs.
         output (Union[DataNode^, List[DataNode^]]): The list of outputs.
         id (str): The unique identifier of the task.
-        parent_id (str):  The identifier of the parent (pipeline_id, scenario_id, cycle_id) or None.
+        owner_id (str):  The identifier of the owner (pipeline_id, scenario_id, cycle_id) or None.
     """
 
     _ID_PREFIX = "TASK"
@@ -48,14 +49,30 @@ class Task(_Entity):
         input: Optional[Iterable[DataNode]] = None,
         output: Optional[Iterable[DataNode]] = None,
         id: TaskId = None,
-        parent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
-        self.parent_id = parent_id
+        self.owner_id = owner_id
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
         self._function = function
+
+    @property  # type: ignore
+    def parent_id(self):
+        """
+        Deprecated. Use owner_id instead.
+        """
+        _warn_deprecated("parent_id", suggest="owner_id")
+        return self.owner_id
+
+    @parent_id.setter  # type: ignore
+    def parent_id(self, val):
+        """
+        Deprecated. Use owner_id instead.
+        """
+        _warn_deprecated("parent_id", suggest="owner_id")
+        self.owner_id = val
 
     def __hash__(self):
         return hash(self.id)

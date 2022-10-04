@@ -28,7 +28,6 @@ from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._warnings import _warn_deprecated
 from ..common.alias import DataNodeId, JobId
-from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import NoData
 from ._filter import _FilterDataNode
 from .operator import JoinOperator, Operator
@@ -38,7 +37,7 @@ class DataNode(_Entity):
     """Reference to a dataset.
 
     A Data Node is an abstract class that holds metadata related to the dataset it refers to.
-    In particular, a data node holds the name, the scope, the parent identifier, the last
+    In particular, a data node holds the name, the scope, the owner identifier, the last
     edit date, and some additional properties of the data.<br/>
     A Data Node also contains information and methods needed to access the dataset. This
     information depends on the type of storage, and it is held by subclasses (such as
@@ -53,7 +52,7 @@ class DataNode(_Entity):
         scope (Scope^): The scope of this data node.
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
-        parent_id (str): The identifier of the parent (pipeline_id, scenario_id, cycle_id) or
+        owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
             None.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
@@ -78,7 +77,7 @@ class DataNode(_Entity):
         scope: Scope = Scope(Scope.PIPELINE),
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
-        parent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         cacheable: bool = False,
@@ -88,7 +87,7 @@ class DataNode(_Entity):
     ):
         self.config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
-        self.parent_id = parent_id
+        self.owner_id = owner_id
         self._scope = scope
         self._last_edit_date = last_edit_date
         self._name = name or self.id
@@ -99,6 +98,22 @@ class DataNode(_Entity):
         self._validity_period = validity_period
 
         self._properties = _Properties(self, **kwargs)
+
+    @property  # type: ignore
+    def parent_id(self):
+        """
+        Deprecated. Use owner_id instead.
+        """
+        _warn_deprecated("parent_id", suggest="owner_id")
+        return self.owner_id
+
+    @parent_id.setter  # type: ignore
+    def parent_id(self, val):
+        """
+        Deprecated. Use owner_id instead.
+        """
+        _warn_deprecated("parent_id", suggest="owner_id")
+        self.owner_id = val
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

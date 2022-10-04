@@ -24,6 +24,7 @@ from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
 from ..common._utils import Subscriber
+from ..common._warnings import _warn_deprecated
 from ..common.alias import PipelineId, TaskId
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
@@ -40,7 +41,7 @@ class Pipeline(_Entity):
         properties (dict[str, Any]): A dictionary of additional properties.
         tasks (List[Task^]): The list of `Task`s.
         pipeline_id (str): The Unique identifier of the pipeline.
-        parent_id (str):  The identifier of the parent (scenario_id, cycle_id) or None.
+        owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
     """
 
     _ID_PREFIX = "PIPELINE"
@@ -53,16 +54,32 @@ class Pipeline(_Entity):
         properties: Dict[str, Any],
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
         pipeline_id: PipelineId = None,
-        parent_id: Optional[str] = None,
+        owner_id: Optional[str] = None,
         subscribers: List[Subscriber] = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
-        self.parent_id = parent_id
+        self.owner_id = owner_id
         self._tasks = tasks
 
         self._subscribers = _ListAttributes(self, subscribers or list())
         self._properties = _Properties(self, **properties)
+
+    @property  # type: ignore
+    def parent_id(self):
+        """
+        Deprecated. Use owner_id instead.
+        """
+        _warn_deprecated("parent_id", suggest="owner_id")
+        return self.owner_id
+
+    @parent_id.setter  # type: ignore
+    def parent_id(self, val):
+        """
+        Deprecated. Use owner_id instead.
+        """
+        _warn_deprecated("parent_id", suggest="owner_id")
+        self.owner_id = val
 
     def __getstate__(self):
         return self.id

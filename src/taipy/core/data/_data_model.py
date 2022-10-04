@@ -26,7 +26,7 @@ class _DataNodeModel:
     scope: Scope
     storage_type: str
     name: str
-    parent_id: Optional[str]
+    owner_id: Optional[str]
     last_edit_date: Optional[str]
     job_ids: List[JobId]
     cacheable: bool
@@ -46,7 +46,7 @@ class _DataNodeModel:
             scope=Scope._from_repr(data["scope"]),
             storage_type=data["storage_type"],
             name=data["name"],
-            parent_id=data["parent_id"],
+            owner_id=data.get("owner_id", data.get("parent_id")),
             last_edit_date=data.get("last_edit_date", data.get("last_edition_date")),
             job_ids=data["job_ids"],
             cacheable=data["cacheable"],

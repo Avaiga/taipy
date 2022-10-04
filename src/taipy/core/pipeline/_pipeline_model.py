@@ -20,7 +20,7 @@ from ..common.alias import PipelineId, TaskId
 class _PipelineModel:
 
     id: PipelineId
-    parent_id: Optional[str]
+    owner_id: Optional[str]
     config_id: str
     properties: Dict[str, Any]
     tasks: List[TaskId]
@@ -34,7 +34,7 @@ class _PipelineModel:
         return _PipelineModel(
             id=data["id"],
             config_id=data["config_id"],
-            parent_id=data["parent_id"],
+            owner_id=data.get("owner_id", data.get("parent_id")),
             properties=data["properties"],
             tasks=data["tasks"],
             subscribers=data["subscribers"],

@@ -29,9 +29,9 @@ class InvalidDataNodeType(Exception):
     """Raised if a data node storage type does not exist."""
 
 
-class MultipleDataNodeFromSameConfigWithSameParent(Exception):
+class MultipleDataNodeFromSameConfigWithSameOwner(Exception):
     """
-    Raised if there are multiple data nodes from the same data node configuration and the same parent identifier.
+    Raised if there are multiple data nodes from the same data node configuration and the same owner identifier.
     """
 
 
@@ -126,8 +126,8 @@ class NonExistingPipelineConfig(Exception):
         self.message = f"Pipeline config: {pipeline_config_id} does not exist."
 
 
-class MultiplePipelineFromSameConfigWithSameParent(Exception):
-    """Raised if it exists multiple pipelines from the same pipeline config and with the same _parent_id_."""
+class MultiplePipelineFromSameConfigWithSameOwner(Exception):
+    """Raised if it exists multiple pipelines from the same pipeline config and with the same _owner_id_."""
 
 
 class ModelNotFound(Exception):
@@ -216,8 +216,8 @@ class NonExistingTaskConfig(Exception):
         self.message = f"Task config: {id} does not exist."
 
 
-class MultipleTaskFromSameConfigWithSameParent(Exception):
-    """Raised if there are multiple tasks from the same task configuration and the same parent identifier."""
+class MultipleTaskFromSameConfigWithSameOwner(Exception):
+    """Raised if there are multiple tasks from the same task configuration and the same owner identifier."""
 
 
 class SchedulerNotBuilt(Exception):

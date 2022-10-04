@@ -68,7 +68,7 @@ class TestSQLTableDataNode:
         assert dn.config_id == "foo_bar"
         assert dn.scope == Scope.PIPELINE
         assert dn.id is not None
-        assert dn.parent_id is None
+        assert dn.owner_id is None
         assert dn.job_ids == []
         assert dn.is_ready_for_reading
         assert dn.exposed_type == "pandas"

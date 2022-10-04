@@ -57,26 +57,26 @@ class _TaskManager(_Manager[Task]):
             data_node_configs, scenario_id, pipeline_id
         )
 
-        tasks_configs_and_parent_id = []
+        tasks_configs_and_owner_id = []
         for task_config in task_configs:
             task_dn_configs = task_config.output_configs + task_config.input_configs
             task_config_data_nodes = [data_nodes[dn_config] for dn_config in task_dn_configs]
 
             scope = min(dn.scope for dn in task_config_data_nodes) if len(task_config_data_nodes) != 0 else Scope.GLOBAL
-            parent_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
+            owner_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
 
-            tasks_configs_and_parent_id.append((task_config, parent_id))
+            tasks_configs_and_owner_id.append((task_config, owner_id))
 
-        tasks_by_config = cls._repository._get_by_configs_and_parent_ids(tasks_configs_and_parent_id)  # type: ignore
+        tasks_by_config = cls._repository._get_by_configs_and_owner_ids(tasks_configs_and_owner_id)  # type: ignore
 
         tasks = []
-        for task_config, parent_id in tasks_configs_and_parent_id:
-            if task := tasks_by_config.get((task_config, parent_id)):
+        for task_config, owner_id in tasks_configs_and_owner_id:
+            if task := tasks_by_config.get((task_config, owner_id)):
                 tasks.append(task)
             else:
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
-                task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
+                task = Task(task_config.id, task_config.function, inputs, outputs, owner_id=owner_id)
                 cls._set(task)
                 tasks.append(task)
 

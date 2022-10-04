@@ -77,9 +77,9 @@ def test_create_scenario(cycle, current_datetime):
     task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
     task_2 = Task("task_2", print, [input_2], [output_2], TaskId("task_id_2"))
 
-    pipeline_2 = Pipeline("pipeline_2", {"description": "description"}, [task_1], parent_id="parent_id")
-    pipeline_3 = Pipeline("pipeline_3", {"description": "description"}, [task_2], parent_id="parent_id")
-    pipeline_4 = Pipeline("pipeline_4", {"description": "description"}, [task_1, task_2], parent_id="parent_id")
+    pipeline_2 = Pipeline("pipeline_2", {"description": "description"}, [task_1], owner_id="owner_id")
+    pipeline_3 = Pipeline("pipeline_3", {"description": "description"}, [task_2], owner_id="owner_id")
+    pipeline_4 = Pipeline("pipeline_4", {"description": "description"}, [task_1, task_2], owner_id="owner_id")
 
     scenario_5 = Scenario("scenario_5", [pipeline_2], {})
     assert scenario_5.id is not None

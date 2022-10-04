@@ -78,7 +78,7 @@ class TestMongoCollectionDataNode:
         assert mongo_dn.config_id == "foo_bar"
         assert mongo_dn.scope == Scope.PIPELINE
         assert mongo_dn.id is not None
-        assert mongo_dn.parent_id is None
+        assert mongo_dn.owner_id is None
         assert mongo_dn.job_ids == []
         assert mongo_dn.is_ready_for_reading
         assert mongo_dn.custom_document == DefaultCustomDocument

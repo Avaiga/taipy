@@ -274,15 +274,15 @@ class _ScenarioManager(_Manager[Scenario]):
         entity_ids = _EntityIds()
 
         for pipeline in scenario.pipelines.values():
-            if pipeline.parent_id in (pipeline.id, scenario.id):
+            if pipeline.owner_id in (pipeline.id, scenario.id):
                 entity_ids.pipeline_ids.add(pipeline.id)
             for task in pipeline.tasks.values():
                 if not isinstance(task, Task):
                     task = _TaskManagerFactory._build_manager()._get(task)
-                if task.parent_id in (pipeline.id, scenario.id):
+                if task.owner_id in (pipeline.id, scenario.id):
                     entity_ids.task_ids.add(task.id)
                 for data_node in task.data_nodes.values():
-                    if data_node.parent_id in (pipeline.id, scenario.id):
+                    if data_node.owner_id in (pipeline.id, scenario.id):
                         entity_ids.data_node_ids.add(data_node.id)
 
         jobs = _JobManagerFactory._build_manager()._get_all()
