@@ -1,6 +1,6 @@
 {
     "id": "TASK_evaluate_task_31f1ecdf-2b75-4cd8-9509-9e70eddc6973",
-    "parent_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
+    "owner_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
     "config_id": "evaluate_task",
     "input_ids": [
         "DATANODE_historical_temperature_5525cf20-c3a3-42ce-a1c9-88e988bb49f9",
