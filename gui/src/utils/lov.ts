@@ -14,14 +14,14 @@
 import { stringIcon } from "./icon";
 
 /**
- * An item of lov.
+ * An item in a List of Values (LoV).
  */
 export interface LovItem {
-    /** {string} The unique identifier. */
+    /** The unique identifier of this item. */
     id: string;
-    /** {StringIcon} The label (string and/or icon). */
+    /** The items label (string and/or icon). */
     item: stringIcon;
-    /** {LovItem[] | undefined} The optional array of children. */
+    /** The array of child items. */
     children?: LovItem[];
 }
 

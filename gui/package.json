@@ -44,7 +44,8 @@
     "coverage": "npm test -- --coverage",
     "types": "dts-bundle-generator -o packaging/taipy-gui.gen.d.ts src/extensions/exports.ts",
     "doc": "typedoc --plugin typedoc-plugin-markdown --excludeNotDocumented --disableSources src/extensions/exports.ts",
-    "doc.json": "typedoc --json docs/taipy-gui.json src/extensions/exports.ts"
+    "doc.json": "typedoc --json docs/taipy-gui.json src/extensions/exports.ts",
+    "mkdocs": "typedoc --options typedoc-mkdocs.json"
   },
   "husky": {
     "hooks": {
@@ -109,7 +110,7 @@
     "mock-socket": "^9.0.7",
     "ts-jest": "^29.0.0",
     "ts-loader": "^9.2.6",
-    "typedoc": "^0.23.11",
+    "typedoc": "0.23.14",
     "typedoc-plugin-markdown": "^3.13.4",
     "typescript": "^4.4.4",
     "webpack": "^5.61.0",

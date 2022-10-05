@@ -20,12 +20,14 @@ import { createRequestUpdateAction, FormatConfig, TaipyBaseAction } from "../con
 import { TIMEZONE_CLIENT } from "../utils";
 
 /**
- * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
- * @typeparam T - The dynamic property type.
- * @param {T} value - The bound value
- * @param {T} defaultValue - The default value
- * @param {T} defaultStatic - The default static value
- * @returns {T} The latest updated value.
+ * A React hook to manage a dynamic scalar property.
+ *
+ * A dynamic scalar property  is defined by a default property and a bound property.
+ * @typeParam T - The dynamic property type.
+ * @param value - The bound value.
+ * @param defaultValue - The default value.
+ * @param defaultStatic - The default static value.
+ * @returns The latest updated value.
  */
 export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: T): T => {
     return useMemo(() => {
@@ -40,11 +42,11 @@ export const useDynamicProperty = <T>(value: T, defaultValue: T, defaultStatic: 
 };
 
 /**
- * This React hook requests an update for every dynamic property of the element.
- * @param {React.Dispatch<Action>} dispatch - The react dispatcher associated to `TaipyContext`.
- * @param {string | undefined} id - The optional id of the element.
- * @param {string} updateVars - The content of the property `updateVars`.
- * @param {string | undefined} varName - The default property backend provided variable (through property `updateVarName`).
+ * A React hook that requests an update for every dynamic property of the element.
+ * @param dispatch - The React dispatcher associated to `TaipyContext`.
+ * @param id - The identifier of the element.
+ * @param updateVars - The content of the property `updateVars`.
+ * @param varName - The default property backend provided variable (through property `updateVarName`).
  */
 export const useDispatchRequestUpdateOnFirstRender = (
     dispatch: Dispatch<TaipyBaseAction>,
@@ -81,8 +83,11 @@ export const useIsMobile = () => {
 
 
 /**
- * This React hook returns the dispatch function that allows to send Action to the Store and initiates backend communications.
- * @returns {React.Dispatch<Action>}
+ * A React hook that returns the *dispatch* function.
+ *
+ * The *dispatch* function allows to send Actions to the Store and initiate backend\
+ * communications.
+ * @returns The *dispatch* function.
  */
 export const useDispatch = () => {
     const {dispatch} = useContext(TaipyContext);

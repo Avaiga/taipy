@@ -18,14 +18,14 @@ import Avatar from "@mui/material/Avatar";
  * An Icon representation.
  */
 export interface Icon {
-    /** {string} The URL to the image. */
+    /** The URL to the image. */
     path: string;
-    /** {string} The text. */
+    /** The text. */
     text: string;
 }
 
 /**
- * A String or icon.
+ * A string or an icon.
  */
 export type stringIcon = string | Icon;
 

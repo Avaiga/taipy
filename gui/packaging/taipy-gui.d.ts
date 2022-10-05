@@ -14,10 +14,11 @@
 import * as React from "react";
 
 /**
- * This extracts the backend name of a given property identified by `name`.
- * @param {string} updateVars - The value held by the property `updateVars`.
- * @param {string} name - The name of a bound property.
- * @returns {string | undefined} The backend generated variable name.
+ * Extracts the backend name of a property.
+ *
+ * @param updateVars - The value held by the property *updateVars*.
+ * @param name - The name of a bound property.
+ * @returns The backend-generated variable name.
  */
 export declare const getUpdateVar: (updateVars: string, name: string) => string | undefined;
 
@@ -27,162 +28,193 @@ export declare const Router: () => JSX.Element;
  * An Icon representation.
  */
 export interface Icon {
-    /** {string} The URL to the image. */
+    /** The URL to the image. */
     path: string;
-    /** {string} The text. */
+    /** The text. */
     text: string;
 }
 /**
- * A String or icon.
+ * A string or an icon.
  */
 export declare type stringIcon = string | Icon;
 /**
- * An item of lov.
+ * An item in a List of Values (LoV).
  */
 export interface LovItem {
-    /** {string} The unique identifier. */
+    /** The unique identifier of this item. */
     id: string;
-    /** {StringIcon} The label (string and/or icon). */
+    /** The items label (string and/or icon). */
     item: stringIcon;
-    /** {LovItem[] | undefined} The optional array of children. */
+    /** The array of child items. */
     children?: LovItem[];
 }
 /**
- * A lov element.
+ * A LoV (list of value) element.
+ *
+ * Each `LoVElt` holds:
+ *
+ * - Its identifier as a string;
+ * - Its label (or icon) as a `stringIcon`;
+ * - Potential child elements as an array of `LoVElt`s.
  */
 export declare type LoVElt = [
-    /** {string} The identifier. */
+    /** The identifier. */
     string,
-    /** {stringIcon} The label. */
+    /** The label or icon. */
     stringIcon,
-    /** {LoVElt[] | undefined} The optional list of children. */
+    /** The list of children. */
     LoVElt[]?
 ];
 /**
- * The list of lov elements.
+ * A series of LoV elements.
  */
 export declare type LoV = LoVElt[];
 /**
- * This React hook returns a lov list from the lov default value and the lov bound value.
- * @param {LoV | undefined} lov - The bound lov value.
- * @param {string} defaultLov - The json stringify default lov value.
- * @param {boolean | undefined} [tree] - This flag indicates if the LoV list is a tree or a flat list (default is false).
- * @returns {LovItem[]} A list of items.
+ * A React hook that returns a LoV list from the LoV default value and the LoV bound value.
+ * @param lov - The bound lov value.
+ * @param defaultLov - The JSON-stringified default LoV value.
+ * @param tree - This flag indicates if the LoV list is a tree or a flat list (default is false).
+ * @returns A list of LoV items.
  */
 export declare const useLovListMemo: (lov: LoV | undefined, defaultLov: string, tree?: boolean) => LovItem[];
 /**
- * State The State of the Taipy Application.
+ * The state of the underlying Taipy application.
  */
 export interface State {}
 /**
- * Action The object used by the reducer.
+ * Application actions as used by the application reducer.
  */
 export interface Action {}
 /**
- * Creates a `Action` that will be used to update `Context`.
- * This action will update the variable `name` (if `propagate` === true) and provoke the invocation of the on_change python function on the backend.
- * @param {string | undefined} [name] - The name of the variable holding the requested data as received as a property (default is "").
- * @param {unknown} value - The new value for the variable named `name`.
- * @param {string | undefined} onChange - The name of the on_change python function to invoke on the backend (default to "on_change" on the backend).
- * @param {boolean | undefined} [propagate] - A flag indicating that the variable should be automatically updated on the backend (default is true).
- * @param {string | undefined} [relName] - The name of the optional related variable (for example the lov when a lov value is updated).
- * @returns {Action} The action fed to the reducer.
+ * Creates a *send update* `Action` that will be used to update `Context`.
+ *
+ * This action will update the variable *name* (if *propagate* is true) and trigger the
+ * invocation of the `on_change` Python function on the backend.
+ * @param name - The name of the variable holding the requested data
+ *    as received as a property.
+ * @param value - The new value for the variable named *name*.
+ * @param onChange - The name of the `on_change` Python function to
+ *   invoke on the backend (default is "on_change").
+ * @param propagate - A flag indicating that the variable should be
+ *   automatically updated on the backend.
+ * @param relName - The name of the related variable (for
+ *   example the lov when a lov value is updated).
+ * @returns The action fed to the reducer.
  */
 export declare const createSendUpdateAction: (name: string | undefined, value: unknown, onChange?: string, propagate?: boolean, relName?: string) => Action;
 /**
-  * Creates a `Action` that will be used to update `Context`.
-  * This action will provoke the invocation of an on_action python function on the backend with all parameters as a payload.
-  * @param {string | undefined} name - The name of the backend action.
-  * @param {unknown} value - The value associated with the action, this can be an object or any type of value.
-  * @param {unknown[]} args - Additional informations associated to the action.
-  * @returns {Action}  The action fed to the reducer.
-  */
+ * Creates an *action* `Action` that will be used to update `Context`.
+ *
+ * This action will trigger the invocation of the `on_action` Python function on the backend,
+ * providing all the parameters as a payload.
+ * @param name - The name of the action function on the backend.
+ * @param value - The value associated with the action. This can be an object or
+ *   any type of value.
+ * @param args - Additional information associated to the action.
+ * @returns The action fed to the reducer.
+ */
 export declare const createSendActionNameAction: (name: string | undefined, value: unknown, ...args: unknown[]) => Action;
 /**
-  * Creates a `Action` that will be used to update `Context`.
-  * This action will provoke the invocation of the get_data python function on the backend that will generate an update of the elements holding data named `name` on the frontend.
-  * @param {string} name - The name of the variable holding the requested data as received as a property.
-  * @param {string | undefined} id - The id of the visual element.
-  * @param {string[]} columns - The list of the columns needed by the element emitting this action.
-  * @param {string} pageKey - The unique identifier to the data that will be received from this action.
-  * @param {Record<string, unknown>} payload - The payload (specific to the type of component ie table, chart ...).
-  * @param {boolean | undefined} [allData] - The flag indicating if all the data is requested (default is false).
-  * @param {string | undefined} library - The optional name of the library {@link extension}.
-  * @returns {Action} The action fed to the reducer.
-  */
+ * Creates a *request data update* `Action` that will be used to update the `Context`.
+ *
+ * This action will provoke the invocation of the `get_data()` method of the backend
+ * library. That invocation generates an update of the elements holding the data named
+ * *name* on the frontend.
+ * @param name - The name of the variable holding the requested data as received as
+ *   a property.
+ * @param id - The identifier of the visual element.
+ * @param columns - The list of the columns needed by the element that emitted this
+ *   action.
+ * @param pageKey - The unique identifier of the data that will be received from
+ *   this action.
+ * @param payload - The payload (specific to the type of component
+ *  ie table, chart...).
+ * @param allData - The flag indicating if all the data is requested.
+ * @param library - The name of the {@link extension} library.
+ * @returns The action fed to the reducer.
+ */
 export declare const createRequestDataUpdateAction: (name: string | undefined, id: string | undefined, columns: string[], pageKey: string, payload: Record<string, unknown>, allData?: boolean, library?: string) => Action;
 /**
-  * The Column description as received by the backend.
-  */
+ * A column description as received by the backend.
+ */
 export interface ColumnDesc {
-     /** {string} The unique column identifier. */
+     /** The unique column identifier. */
      dfid: string;
-     /** {string} The column type. */
+     /** The column type. */
      type: string;
-     /** {string} The optional value format. */
+     /** The value format. */
      format?: string;
-     /** {string | undefined} The optional column title. */
+     /** The column title. */
      title?: string;
-     /** {number} The order of the column. */
+     /** The order of the column. */
      index: number;
-     /** {number | string | undefined} The optional width. */
+     /** The width. */
      width?: number | string;
-     /** {boolean | undefined} If set to true, the column should not be editable. */
+     /** If set to true, the column should not be editable. */
      notEditable?: boolean;
-     /** {string | undefined} The optional column name that would hold the css classname to apply to the cell. */
+     /** The column name that would hold the css classname to apply to the cell. */
      style?: string;
-     /** {string | undefined} The optional value that would replace a NaN value. */
+     /** The value that would replace a NaN value. */
      nanValue?: string;
-     /** {string | undefined} The optional TimeZone identifier used if the type is Date. */
+     /** The TimeZone identifier used if the type is Date. */
      tz?: string;
-     /** {boolean | undefined} The flag that allows filtering. */
+     /** The flag that allows filtering. */
      filter?: boolean;
-     /** {string | undefined} The optional identifier for the aggregation function. */
+     /** The identifier for the aggregation function. */
      apply?: string;
-     /** {boolean | undefined} The optional flag that would allow the user to aggregate the column. */
+     /** The flag that would allow the user to aggregate the column. */
      groupBy?: boolean;
      widthHint?: number;
  }
- /**
-  * A cell value type.
-  */
+/**
+ * A cell value type.
+ */
  export declare type RowValue = string | number | boolean | null;
- /**
-  * The row definition composed of a key/value string/`RowValue`.
-  */
+/**
+ * The definition of a table row.
+ *
+ * A row definition associates a name (a string) to a type (a {@link RowValue}).
+ */
  export declare type RowType = Record<string, RowValue>;
- /**
-  * The Taipy Store.
-  */
+/**
+ * The Taipy Store.
+ */
  export interface Store {
-     /** {State} The State of the Taipy Application. */
+     /** The State of the Taipy application. */
      state: State;
-     /** {React.Dispatch<Action>} The react dispatch function. */
+     /** The React *dispatch* function. */
      dispatch:React.Dispatch<Action>;
  }
- /**
-  * {React.Context<Store>} Taipy specific react context.
-  */
+/**
+ * The Taipy-specific React context.
+ *
+ * The type of this variable is `React.Context<Store>`.
+ */
  export declare const Context: React.Context<Store>;
- /**
-  * This react hook helps manage a dynamic scalar property (defined by a default property and a bound property).
-  * @typeparam T - The dynamic property type.
-  * @param {T} value - The bound value
-  * @param {T} defaultValue - The default value
-  * @param {T} defaultStatic - The default static value
-  * @returns {T} The latest updated value.
-  */
+/**
+ * A React hook to manage a dynamic scalar property.
+ *
+ * A dynamic scalar property  is defined by a default property and a bound property.
+ * @typeParam T - The dynamic property type.
+ * @param value - The bound value.
+ * @param defaultValue - The default value.
+ * @param defaultStatic - The default static value.
+ * @returns The latest updated value.
+ */
  export declare const useDynamicProperty: <T>(value: T, defaultValue: T, defaultStatic: T) => T;
- /**
-  * This React hook requests an update for every dynamic property of the element.
-  * @param {React.Dispatch<Action>} dispatch - The react dispatcher associated to `Context`.
-  * @param {string | undefined} id - The optional id of the element.
-  * @param {string} updateVars - The content of the property `updateVars`.
-  * @param {string | undefined} varName - The default property backend provided variable (through property `updateVarName`).
-  */
+/**
+ * A React hook that requests an update for every dynamic property of the element.
+ * @param dispatch - The React dispatcher associated to `TaipyContext`.
+ * @param id - The identifier of the element.
+ * @param updateVars - The content of the property `updateVars`.
+ * @param varName - The default property backend provided variable (through property `updateVarName`).
+ */
  export declare const useDispatchRequestUpdateOnFirstRender: (dispatch: React.Dispatch<Action>, id?: string, updateVars?: string, varName?: string) => void;
 /**
- * This React hook returns the dispatch function that allows to send Action to the Store and initiates backend communications.
- * @returns {React.Dispatch<Action>}
+ * A React hook that returns the *dispatch* function.
+ *
+ * The *dispatch* function allows to send Actions to the Store and initiate backend\
+ * communications.
+ * @returns The *dispatch* function.
  */
  export declare const useDispatch: () => React.Dispatch<Action>;

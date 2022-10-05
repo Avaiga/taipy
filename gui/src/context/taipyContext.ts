@@ -18,14 +18,16 @@ import { TaipyBaseAction, TaipyState } from "./taipyReducers";
  * The Taipy Store.
  */
 export interface TaipyStore {
-    /** {TaipyState} The State of the Taipy Application. */
+    /** The State of the Taipy application. */
     state: TaipyState;
-    /** {React.Dispatch<TaipyAction>} The react dispatch function. */
+    /** The React *dispatch* function. */
     dispatch: Dispatch<TaipyBaseAction>;
 }
 
 /**
- * {React.Context} Taipy specific react context.
+ * The Taipy-specific React context.
+ * 
+ * The type of this variable is `React.Context<Store>`.
  */
 export const TaipyContext = createContext<TaipyStore>({state: {data: {}} as TaipyState, dispatch: () => null});
 TaipyContext.displayName = 'Taipy Context';

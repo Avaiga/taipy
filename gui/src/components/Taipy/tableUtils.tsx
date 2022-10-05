@@ -27,34 +27,35 @@ import { getDateTimeString, getNumberString } from "../../utils/index";
 import { TaipyActiveProps, TaipyMultiSelectProps } from "./utils";
 
 /**
- * The Column description as received by the backend.
+ * A column description as received by the backend.
  */
 export interface ColumnDesc {
-    /** {string} The unique column identifier. */
+    /** The unique column identifier. */
     dfid: string;
-    /** {string} The column type. */
+    /** The column type. */
     type: string;
-    /** {string} The optional value format. */
+    /** The value format. */
     format?: string;
-    /** {string | undefined} The optional column title. */
+    /** The column title. */
     title?: string;
-    /** {number} The order of the column. */
+    /** The order of the column. */
     index: number;
-    /** {number | string | undefined} The optional width. */
+    /** The column width. */
     width?: number | string;
-    /** {boolean | undefined} If set to true, the column should not be editable. */
+    /** If true, the column cannot be edited. */
     notEditable?: boolean;
-    /** {string | undefined} The optional column name that would hold the css classname to apply to the cell. */
+    /** The name of the column that holds the CSS classname to
+     *  apply to the cells. */
     style?: string;
-    /** {string | undefined} The optional value that would replace a NaN value. */
+    /** The value that would replace a NaN value. */
     nanValue?: string;
-    /** {string | undefined} The optional TimeZone identifier used if the type is Date. */
+    /** The TimeZone identifier used if the type is `date`. */
     tz?: string;
-    /** {boolean | undefined} The flag that allows filtering. */
+    /** The flag that allows filtering. */
     filter?: boolean;
-    /** {string | undefined} The optional identifier for the aggregation function. */
+    /** The name of the aggregation function. */
     apply?: string;
-    /** {boolean | undefined} The optional flag that would allow the user to aggregate the column. */
+    /** The flag that allows the user to aggregate the column. */
     groupBy?: boolean;
     widthHint?: number;
 }
@@ -69,7 +70,9 @@ export type Order = "asc" | "desc";
 export type RowValue = string | number | boolean | null;
 
 /**
- * The row definition composed of a key/value string/`RowValue`.
+ * The definition of a table row.
+ *
+ * A row definition associates a name (a string) to a type (a {@link RowValue}).
  */
 export type RowType = Record<string, RowValue>;
 

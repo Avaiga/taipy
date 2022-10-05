@@ -277,8 +277,8 @@ class ElementLibrary(ABC):
         Arguments:
 
             library_name (str): The name of this library.
-            payload (t.Dict): The payload send by the `createRequestDataUpdateAction` frontend function.
+            payload (dict): The payload send by the `createRequestDataUpdateAction()` frontend function.
             var_name (str): The name of the variable holding the data.
-            value (t.Any): The current value of the variable identified by `var_name`.
+            value (any): The current value of the variable identified by *var_name*.
         """
         return None

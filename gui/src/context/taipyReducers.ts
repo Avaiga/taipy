@@ -47,7 +47,7 @@ enum Types {
 }
 
 /**
- * TaipyState The State of the Taipy Application.
+ * The state of the underlying Taipy application.
  */
 export interface TaipyState {
     socket?: Socket;
@@ -68,7 +68,10 @@ export interface TaipyState {
     ackList: string[];
 }
 
- export interface TaipyBaseAction {
+/**
+ * Application actions as used by the application reducer.
+ */
+export interface TaipyBaseAction {
     type: Types;
 }
 
@@ -84,9 +87,6 @@ export interface AlertMessage {
     duration: number;
 }
 
-/**
- * TaipyAction The object used by the reducer.
- */
  interface TaipyAction extends NamePayload, TaipyBaseAction {
     propagate?: boolean;
 }
@@ -458,14 +458,20 @@ const createMultipleUpdateAction = (payload: NamePayload[]): TaipyMultipleAction
 });
 
 /**
- * Creates a `TaipyAction` that will be used to update `TaipyContext`.
- * This action will update the variable `name` (if `propagate` === true) and provoke the invocation of the on_change python function on the backend.
- * @param {string | undefined} [name] - The name of the variable holding the requested data as received as a property (default is "").
- * @param {unknown} value - The new value for the variable named `name`.
- * @param {string | undefined} onChange - The name of the on_change python function to invoke on the backend (default to "on_change" on the backend).
- * @param {boolean | undefined} [propagate] - A flag indicating that the variable should be automatically updated on the backend (default is true).
- * @param {string | undefined} [relName] - The name of the optional related variable (for example the lov when a lov value is updated).
- * @returns {TaipyAction} The action fed to the reducer.
+ * Creates a *send update* `Action` that will be used to update `Context`.
+ *
+ * This action will update the variable *name* (if *propagate* is true) and trigger the
+ * invocation of the `on_change` Python function on the backend.
+ * @param name - The name of the variable holding the requested data
+ *    as received as a property.
+ * @param value - The new value for the variable named *name*.
+ * @param onChange - The name of the `on_change` Python function to
+ *   invoke on the backend (default is "on_change").
+ * @param propagate - A flag indicating that the variable should be
+ *   automatically updated on the backend.
+ * @param relName - The name of the related variable (for
+ *   example the lov when a lov value is updated).
+ * @returns The action fed to the reducer.
  */
 export const createSendUpdateAction = (
     name = "",
@@ -492,12 +498,15 @@ const getPayload = (value: unknown, onChange?: string, relName?: string) => {
 };
 
 /**
- * Creates a `TaipyAction` that will be used to update `TaipyContext`.
- * This action will provoke the invocation of an on_action python function on the backend with all parameters as a payload.
- * @param {string | undefined} name - The name of the backend action.
- * @param {unknown} value - The value associated with the action, this can be an object or any type of value.
- * @param {unknown[]} args - Additional informations associated to the action.
- * @returns {TaipyAction}  The action fed to the reducer.
+ * Creates an *action* `Action` that will be used to update `Context`.
+ *
+ * This action will trigger the invocation of the `on_action` Python function on the backend,
+ * providing all the parameters as a payload.
+ * @param name - The name of the action function on the backend.
+ * @param value - The value associated with the action. This can be an object or
+ *   any type of value.
+ * @param args - Additional information associated to the action.
+ * @returns The action fed to the reducer.
  */
 export const createSendActionNameAction = (
     name: string | undefined,
@@ -586,16 +595,23 @@ export const createRequestInfiniteTableUpdateAction = (
     });
 
 /**
- * Creates a `TaipyAction` that will be used to update `TaipyContext`.
- * This action will provoke the invocation of the get_data python function on the backend that will generate an update of the elements holding data named `name` on the frontend.
- * @param {string} name - The name of the variable holding the requested data as received as a property.
- * @param {string | undefined} id - The id of the visual element.
- * @param {string[]} columns - The list of the columns needed by the element emitting this action.
- * @param {string} pageKey - The unique identifier to the data that will be received from this action.
- * @param {Record<string, unknown>} payload - The payload (specific to the type of component ie table, chart ...).
- * @param {boolean | undefined} [allData] - The flag indicating if all the data is requested (default is false).
- * @param {string | undefined} library - The optional name of the library {@link extension}.
- * @returns {TaipyAction} The action fed to the reducer.
+ * Creates a *request data update* `Action` that will be used to update the `Context`.
+ *
+ * This action will provoke the invocation of the `get_data()` method of the backend
+ * library. That invocation generates an update of the elements holding the data named
+ * *name* on the frontend.
+ * @param name - The name of the variable holding the requested data as received as
+ *   a property.
+ * @param id - The identifier of the visual element.
+ * @param columns - The list of the columns needed by the element that emitted this
+ *   action.
+ * @param pageKey - The unique identifier of the data that will be received from
+ *   this action.
+ * @param payload - The payload (specific to the type of component
+ *  ie table, chart...).
+ * @param allData - The flag indicating if all the data is requested.
+ * @param library - The name of the {@link extension} library.
+ * @returns The action fed to the reducer.
  */
  export const createRequestDataUpdateAction = (
     name: string | undefined,

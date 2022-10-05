@@ -1,0 +1,15 @@
+{
+  "plugin": [
+    "typedoc-plugin-markdown"
+  ],
+  "entryPoints": [
+    "src/extensions/exports.ts"
+  ],
+  "name": "taipy-gui JS module API",
+  "out": "reference_guiext",
+  "excludeNotDocumented": true,
+  "disableSources": true,
+  "entryDocument": "index.md",
+  "readme": "extension-index.md",
+  "githubPages": false
+}
