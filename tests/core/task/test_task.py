@@ -60,17 +60,22 @@ def test_create_task():
     assert task.config_id == "name_1"
     assert task.id is not None
     assert task.owner_id is None
+    assert task.parent_ids == set()
     assert task.foo == foo_dn
     assert task.foo.path == path
     with pytest.raises(AttributeError):
         task.bar
 
+    task = Task("name_1", print, [foo_dn], [], parent_ids={"parent_id"})
+    assert task.parent_ids == {"parent_id"}
+
     path = "my/csv/path"
     abc_dn = InMemoryDataNode("name_1ea", Scope.SCENARIO, properties={"path": path})
-    task = Task("name_1ea", print, [abc_dn], [], owner_id="owner_id")
+    task = Task("name_1ea", print, [abc_dn], [], owner_id="owner_id", parent_ids={"parent_id_1", "parent_id_2"})
     assert task.config_id == "name_1ea"
     assert task.id is not None
     assert task.owner_id == "owner_id"
+    assert task.parent_ids == {"parent_id_1", "parent_id_2"}
     assert task.name_1ea == abc_dn
     assert task.name_1ea.path == path
     with pytest.raises(AttributeError):

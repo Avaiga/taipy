@@ -19,6 +19,7 @@ class _TaskModel:
 
     id: str
     owner_id: Optional[str]
+    parent_ids: Optional[List[str]]
     config_id: str
     input_ids: List[str]
     function_name: str
@@ -33,6 +34,7 @@ class _TaskModel:
         return _TaskModel(
             id=data["id"],
             owner_id=data.get("owner_id", data.get("parent_id")),
+            parent_ids=data["parent_ids"],
             config_id=data["config_id"],
             input_ids=data["input_ids"],
             function_name=data["function_name"],

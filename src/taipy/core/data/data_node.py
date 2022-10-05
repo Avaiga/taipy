@@ -54,7 +54,7 @@ class DataNode(_Entity):
         name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
             `None`.
-        parent_ids (Optional[Set[str]]): The identifier of the parent (task_id) or `None`.
+        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         cacheable (bool): True if this data node is cacheable. False otherwise.
@@ -90,7 +90,7 @@ class DataNode(_Entity):
         self.config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.owner_id = owner_id
-        self.parent_ids = set(parent_ids) if parent_ids else set()
+        self.parent_ids = parent_ids or set()
         self._scope = scope
         self._last_edit_date = last_edit_date
         self._name = name or self.id

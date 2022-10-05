@@ -208,7 +208,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
             id=model.id,
             name=model.name,
             owner_id=model.owner_id,
-            parent_ids=model.parent_ids,
+            parent_ids=set(model.parent_ids),
             last_edit_date=datetime.fromisoformat(model.last_edit_date) if model.last_edit_date else None,
             job_ids=model.job_ids,
             cacheable=model.cacheable,
