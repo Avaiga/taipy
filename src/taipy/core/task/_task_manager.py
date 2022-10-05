@@ -83,9 +83,10 @@ class _TaskManager(_Manager[Task]):
                 task = Task(task_config.id, task_config.function, inputs, outputs, owner_id=owner_id)
                 cls._set(task)
                 tasks.append(task)
-            # updating the parent_ids of datanodes with task_id
-            # for dn in {inputs, outputs}:
-            #     dn.parent_ids.update({task.id})
+
+                for dn in set(inputs + outputs):
+                    dn.parent_ids.update([task.id])
+                cls.__save_data_nodes(inputs + outputs)
         return tasks
 
     @classmethod

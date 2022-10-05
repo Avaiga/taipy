@@ -90,7 +90,7 @@ class DataNode(_Entity):
         self.config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.owner_id = owner_id
-        self.parent_ids = parent_ids
+        self.parent_ids = set(parent_ids) if parent_ids else set()
         self._scope = scope
         self._last_edit_date = last_edit_date
         self._name = name or self.id

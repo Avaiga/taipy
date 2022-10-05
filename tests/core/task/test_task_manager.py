@@ -54,12 +54,30 @@ def test_do_not_recreate_existing_data_node():
     input_config = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     output_config = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
 
-    _DataManager._create_and_set(input_config, "pipeline_id")
+    _DataManager._create_and_set(input_config, "pipeline_id", "task_id")
     assert len(_DataManager._get_all()) == 1
 
     task_config = Config.configure_task("foo", print, input_config, output_config)
     _create_task_from_config(task_config, pipeline_id="pipeline_id")
     assert len(_DataManager._get_all()) == 2
+
+
+def test_assign_task_as_parent_of_datanode():
+    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.PIPELINE)
+    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.PIPELINE)
+    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.PIPELINE)
+    task_config_1 = Config.configure_task("task_1", print, dn_config_1, dn_config_2)
+    task_config_2 = Config.configure_task("task_2", print, dn_config_2, dn_config_3)
+    tasks = _TaskManager._bulk_get_or_create([task_config_1, task_config_2], "scenario_id", "pipeline_id")
+
+    assert len(_DataManager._get_all()) == 3
+    assert len(_TaskManager._get_all()) == 2
+    assert len(tasks) == 2
+
+    dns = {dn.config_id: dn for dn in _DataManager._get_all()}
+    assert dns["dn_1"].parent_ids == {tasks[0].id}
+    assert dns["dn_2"].parent_ids == set([tasks[0].id, tasks[1].id])
+    assert dns["dn_3"].parent_ids == {tasks[1].id}
 
 
 def test_do_not_recreate_existing_task():

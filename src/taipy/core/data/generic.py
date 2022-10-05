@@ -32,7 +32,7 @@ class GenericDataNode(DataNode):
         name (str): A user-readable name of the data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
             `None`.
-        parent_ids (Optional[Set[str]]): The identifier of the parent (task_id) or `None`.
+        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         cacheable (bool): True if this data node is cacheable. False otherwise.

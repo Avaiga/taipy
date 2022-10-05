@@ -62,7 +62,7 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).scope == csv_dn.scope
         assert _DataManager._get(csv_dn.id).owner_id is None
         assert _DataManager._get(csv_dn.id).owner_id == csv_dn.owner_id
-        assert _DataManager._get(csv_dn.id).parent_ids is None
+        assert _DataManager._get(csv_dn.id).parent_ids == set()
         assert _DataManager._get(csv_dn.id).parent_ids == csv_dn.parent_ids
         assert _DataManager._get(csv_dn.id).last_edition_date is None
         assert _DataManager._get(csv_dn.id).last_edition_date == csv_dn.last_edition_date
@@ -85,7 +85,7 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).scope == csv_dn.scope
         assert _DataManager._get(csv_dn).owner_id is None
         assert _DataManager._get(csv_dn).owner_id == csv_dn.owner_id
-        assert _DataManager._get(csv_dn).parent_ids is None
+        assert _DataManager._get(csv_dn).parent_ids == set()
         assert _DataManager._get(csv_dn).parent_ids == csv_dn.parent_ids
         assert _DataManager._get(csv_dn).last_edition_date is None
         assert _DataManager._get(csv_dn).last_edition_date == csv_dn.last_edition_date

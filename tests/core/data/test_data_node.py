@@ -94,7 +94,7 @@ class TestDataNode:
         assert dn.id is not None
         assert dn.name == dn.id
         assert dn.owner_id is None
-        assert dn.parent_ids is None
+        assert dn.parent_ids == set()
         assert dn.last_edition_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
@@ -503,7 +503,6 @@ class TestDataNode:
         dn_1.cacheable = True
         assert dn_1.cacheable
         assert dn_2.cacheable
-
         time_period = timedelta(1)
 
         assert dn_1.validity_period is None
@@ -530,12 +529,12 @@ class TestDataNode:
         with dn_1 as dn:
             assert dn.config_id == "foo"
             assert dn.owner_id is None
-            assert dn.parent_ids is None
+            assert dn.parent_ids == set()
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
-            assert dn_1.cacheable
+            assert dn.cacheable
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 0
             assert dn._is_in_context
@@ -546,24 +545,24 @@ class TestDataNode:
             dn.last_edition_date = new_datetime_2
             dn.name = "abc"
             dn.edition_in_progress = False
-            dn_1.cacheable = False
+            dn.cacheable = False
             dn.validity_period = None
             dn.job_ids = ["a_job_id"]
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
-            assert dn.parent_ids is None
+            assert dn.parent_ids == set()
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
             assert dn.edition_in_progress
-            assert dn_1.cacheable
+            assert dn.cacheable
             assert dn.validity_period == time_period
             assert len(dn.job_ids) == 0
 
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
-        assert dn.parent_ids is None
+        assert dn.parent_ids == set()
         assert dn_1.scope == Scope.CYCLE
         assert dn_1.last_edition_date == new_datetime_2
         assert dn_1.name == "abc"
