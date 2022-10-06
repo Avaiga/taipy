@@ -76,7 +76,7 @@ class _TaskManager(_Manager[Task]):
             else:
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
-                task = Task(task_config.id, task_config.function, inputs, outputs, parent_id=parent_id)
+                task = Task(str(task_config.id), task_config.function, inputs, outputs, parent_id=parent_id)
                 cls._set(task)
                 tasks.append(task)
 

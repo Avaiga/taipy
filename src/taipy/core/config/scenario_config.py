@@ -91,9 +91,9 @@ class ScenarioConfig(Section):
         }
 
     @classmethod
-    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):
+    def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):  # type: ignore
         as_dict.pop(cls._ID_KEY, id)
-        p_configs = config._sections[PipelineConfig.name]
+        p_configs = config._sections[PipelineConfig.name]  # type: ignore
         pipelines = []
         if pipeline_ids := as_dict.pop(cls._PIPELINE_KEY, None):
             pipelines = [p_configs[p_id] for p_id in pipeline_ids if p_id in p_configs]

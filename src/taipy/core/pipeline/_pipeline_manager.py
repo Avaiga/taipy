@@ -14,6 +14,8 @@ from typing import Any, Callable, List, Optional, Union
 
 from taipy.config.common.scope import Scope
 
+from ._pipeline_repository_factory import _PipelineRepositoryFactory
+from .pipeline import Pipeline
 from .._manager._manager import _Manager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import PipelineId, ScenarioId
@@ -22,8 +24,6 @@ from ..exceptions.exceptions import NonExistingPipeline
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..task._task_manager_factory import _TaskManagerFactory
-from ._pipeline_repository_factory import _PipelineRepositoryFactory
-from .pipeline import Pipeline
 
 
 class _PipelineManager(_Manager[Pipeline]):
@@ -73,7 +73,7 @@ class _PipelineManager(_Manager[Pipeline]):
 
     @classmethod
     def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
-        pipeline_id = Pipeline._new_id(pipeline_config.id)
+        pipeline_id = Pipeline._new_id(str(pipeline_config.id))
 
         task_manager = _TaskManagerFactory._build_manager()
         tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, scenario_id, pipeline_id)
@@ -81,10 +81,10 @@ class _PipelineManager(_Manager[Pipeline]):
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         parent_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
 
-        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(pipeline_config.id, parent_id):  # type: ignore
+        if pipelines_from_parent := cls._repository._get_by_config_and_parent_id(str(pipeline_config.id), parent_id):
             return pipelines_from_parent
 
-        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)
+        pipeline = Pipeline(str(pipeline_config.id), dict(**pipeline_config._properties), tasks, pipeline_id, parent_id)
         cls._set(pipeline)
         return pipeline
 

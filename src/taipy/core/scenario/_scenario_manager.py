@@ -15,6 +15,8 @@ from typing import Any, Callable, List, Optional, Union
 
 from taipy.config.config import Config
 
+from ._scenario_repository_factory import _ScenarioRepositoryFactory
+from .scenario import Scenario
 from .._manager._manager import _Manager
 from ..common._entity_ids import _EntityIds
 from ..common.alias import ScenarioId
@@ -34,8 +36,6 @@ from ..exceptions.exceptions import (
 from ..job._job_manager_factory import _JobManagerFactory
 from ..job.job import Job
 from ..pipeline._pipeline_manager_factory import _PipelineManagerFactory
-from ._scenario_repository_factory import _ScenarioRepositoryFactory
-from .scenario import Scenario
 
 
 class _ScenarioManager(_Manager[Scenario]):
@@ -91,7 +91,7 @@ class _ScenarioManager(_Manager[Scenario]):
         creation_date: datetime.datetime = None,
         name: str = None,
     ) -> Scenario:
-        scenario_id = Scenario._new_id(config.id)
+        scenario_id = Scenario._new_id(str(config.id))
         pipelines = [
             _PipelineManagerFactory._build_manager()._get_or_create(p_config, scenario_id)
             for p_config in config.pipeline_configs
@@ -106,7 +106,7 @@ class _ScenarioManager(_Manager[Scenario]):
         if name:
             props["name"] = name
         scenario = Scenario(
-            config.id,
+            str(config.id),
             pipelines,  # type: ignore
             props,
             scenario_id,

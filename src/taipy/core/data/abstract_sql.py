@@ -18,18 +18,17 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 from sqlalchemy import create_engine, text
-
 from taipy.config.common.scope import Scope
 
+from .data_node import DataNode
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty, UnknownDatabaseEngine
-from .data_node import DataNode
 
 
 class AbstractSQLDataNode(DataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
-    __STORAGE_TYPE = None
+    __STORAGE_TYPE = "NOT_IMPLEMENTED"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PANDAS = "pandas"
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
