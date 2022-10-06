@@ -29,7 +29,6 @@ from .data_node import DataNode
 class AbstractSQLDataNode(DataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
-    __STORAGE_TYPE = None
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PANDAS = "pandas"
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
@@ -137,10 +136,6 @@ class AbstractSQLDataNode(DataNode):
     def __create_engine(self, engine, username, host, password, database, port, driver, extra_args, path):
         conn_str = self.__build_conn_string(engine, username, host, password, database, port, driver, extra_args, path)
         return create_engine(conn_str)
-
-    @classmethod
-    def storage_type(cls) -> str:
-        return cls.__STORAGE_TYPE
 
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:

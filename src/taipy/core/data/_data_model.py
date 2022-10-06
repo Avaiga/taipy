@@ -27,7 +27,7 @@ class _DataNodeModel:
     storage_type: str
     name: str
     owner_id: Optional[str]
-    parent_ids: Optional[List[str]]
+    parent_ids: List[str]
     last_edit_date: Optional[str]
     job_ids: List[JobId]
     cacheable: bool

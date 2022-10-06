@@ -11,9 +11,9 @@
 
 from typing import Type
 
-from ._pipeline_manager import _PipelineManager
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._pipeline_manager import _PipelineManager
 
 
 class _PipelineManagerFactory(_ManagerFactory):

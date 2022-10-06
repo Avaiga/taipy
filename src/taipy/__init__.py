@@ -32,4 +32,3 @@ if find_spec("taipy"):
 
     if find_spec("taipy._run"):
         from taipy._run import _run as run
-

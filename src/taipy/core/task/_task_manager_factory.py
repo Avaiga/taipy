@@ -11,9 +11,9 @@
 
 from typing import Type
 
-from ._task_manager import _TaskManager
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._task_manager import _TaskManager
 
 
 class _TaskManagerFactory(_ManagerFactory):

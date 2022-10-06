@@ -21,7 +21,7 @@ class _PipelineModel:
 
     id: PipelineId
     owner_id: Optional[str]
-    parent_ids: Optional[List[str]]
+    parent_ids: List[str]
     config_id: str
     properties: Dict[str, Any]
     tasks: List[TaskId]

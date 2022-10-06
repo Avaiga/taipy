@@ -41,14 +41,16 @@ def test_create_pipeline():
     assert pipeline.tasks == {task.config_id: task}
     assert pipeline.data_nodes == {"foo": input, "bar": output}
     assert pipeline.parent_ids == set()
-    
+
     with pytest.raises(AttributeError):
         pipeline.qux
 
     input_1 = InMemoryDataNode("input", Scope.SCENARIO)
     output_1 = InMemoryDataNode("output", Scope.SCENARIO)
     task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
-    pipeline_1 = Pipeline("name_1", {"description": "description"}, [task_1], owner_id="owner_id", parent_ids={"scenario_id"})
+    pipeline_1 = Pipeline(
+        "name_1", {"description": "description"}, [task_1], owner_id="owner_id", parent_ids={"scenario_id"}
+    )
     assert pipeline_1.id is not None
     assert pipeline_1.owner_id == "owner_id"
     assert pipeline_1.config_id == "name_1"
@@ -59,12 +61,18 @@ def test_create_pipeline():
     assert pipeline_1.tasks == {task_1.config_id: task_1}
     assert pipeline_1.data_nodes == {"input": input_1, "output": output_1}
     assert pipeline_1.parent_ids == {"scenario_id"}
-    
+
     assert pipeline_1.id is not None
     with pytest.raises(InvalidConfigurationId):
         Pipeline("name 1", {"description": "description"}, [task_1], owner_id="owner_id")
 
-    pipeline_2 = Pipeline("name_2", {"description": "description"}, [task, task_1], owner_id="owner_id", parent_ids={"parent_id_1", "parent_id_2"})
+    pipeline_2 = Pipeline(
+        "name_2",
+        {"description": "description"},
+        [task, task_1],
+        owner_id="owner_id",
+        parent_ids={"parent_id_1", "parent_id_2"},
+    )
     assert pipeline_2.id is not None
     assert pipeline_2.owner_id == "owner_id"
     assert pipeline_2.config_id == "name_2"
@@ -72,6 +80,7 @@ def test_create_pipeline():
     assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
     assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
     assert pipeline_2.parent_ids == {"parent_id_1", "parent_id_2"}
+
 
 def test_parent_id_deprecated():
     pipeline = Pipeline("foo", {}, [], owner_id="owner_id")

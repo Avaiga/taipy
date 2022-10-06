@@ -19,7 +19,7 @@ class _TaskModel:
 
     id: str
     owner_id: Optional[str]
-    parent_ids: Optional[List[str]]
+    parent_ids: List[str]
     config_id: str
     input_ids: List[str]
     function_name: str
