@@ -14,7 +14,7 @@ import json
 from datetime import date, datetime, timedelta
 from enum import Enum
 from os.path import isfile
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from taipy.config.common.scope import Scope
 
@@ -34,6 +34,7 @@ class JSONDataNode(DataNode):
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or `None`.
+        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         cacheable (bool): True if this data node is cacheable. False otherwise.
@@ -63,6 +64,7 @@ class JSONDataNode(DataNode):
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         owner_id: Optional[str] = None,
+        parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         cacheable: bool = False,
@@ -89,6 +91,7 @@ class JSONDataNode(DataNode):
             id,
             name,
             owner_id,
+            parent_ids,
             last_edit_date,
             job_ids,
             cacheable,

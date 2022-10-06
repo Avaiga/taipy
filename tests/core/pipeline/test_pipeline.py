@@ -40,6 +40,7 @@ def test_create_pipeline():
     assert pipeline.baz.id == task.id
     assert pipeline.tasks == {task.config_id: task}
     assert pipeline.data_nodes == {"foo": input, "bar": output}
+    assert pipeline.parent_ids == set()
 
     with pytest.raises(AttributeError):
         pipeline.qux
@@ -47,7 +48,9 @@ def test_create_pipeline():
     input_1 = InMemoryDataNode("input", Scope.SCENARIO)
     output_1 = InMemoryDataNode("output", Scope.SCENARIO)
     task_1 = Task("task_1", print, [input_1], [output_1], TaskId("task_id_1"))
-    pipeline_1 = Pipeline("name_1", {"description": "description"}, [task_1], owner_id="owner_id")
+    pipeline_1 = Pipeline(
+        "name_1", {"description": "description"}, [task_1], owner_id="owner_id", parent_ids={"scenario_id"}
+    )
     assert pipeline_1.id is not None
     assert pipeline_1.owner_id == "owner_id"
     assert pipeline_1.config_id == "name_1"
@@ -57,18 +60,26 @@ def test_create_pipeline():
     assert pipeline_1.task_1 == task_1
     assert pipeline_1.tasks == {task_1.config_id: task_1}
     assert pipeline_1.data_nodes == {"input": input_1, "output": output_1}
+    assert pipeline_1.parent_ids == {"scenario_id"}
 
     assert pipeline_1.id is not None
     with pytest.raises(InvalidConfigurationId):
         Pipeline("name 1", {"description": "description"}, [task_1], owner_id="owner_id")
 
-    pipeline_2 = Pipeline("name_2", {"description": "description"}, [task, task_1], owner_id="owner_id")
+    pipeline_2 = Pipeline(
+        "name_2",
+        {"description": "description"},
+        [task, task_1],
+        owner_id="owner_id",
+        parent_ids={"parent_id_1", "parent_id_2"},
+    )
     assert pipeline_2.id is not None
     assert pipeline_2.owner_id == "owner_id"
     assert pipeline_2.config_id == "name_2"
     assert pipeline_2.description == "description"
     assert pipeline_2.tasks == {task.config_id: task, task_1.config_id: task_1}
     assert pipeline_2.data_nodes == {"foo": input, "bar": output, "input": input_1, "output": output_1}
+    assert pipeline_2.parent_ids == {"parent_id_1", "parent_id_2"}
 
 
 def test_parent_id_deprecated():
@@ -257,6 +268,9 @@ def test_auto_set_and_reload(task):
     assert pipeline_1.config_id == "foo"
     assert pipeline_2.config_id == "foo"
 
+    assert pipeline_1.parent_ids == set()
+    assert pipeline_2.parent_ids == set()
+
     assert len(pipeline_1.tasks) == 0
     pipeline_1.tasks = [task]
     assert len(pipeline_1.tasks) == 1
@@ -304,6 +318,7 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
+        assert pipeline.parent_ids == set()
 
         pipeline.tasks = []
         pipeline.owner_id = None
@@ -315,12 +330,14 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
+        assert pipeline.parent_ids == set()
 
     assert pipeline_1.config_id == "foo"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.owner_id is None
     assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
+    assert pipeline.parent_ids == set()
 
 
 def test_subscribe_pipeline():

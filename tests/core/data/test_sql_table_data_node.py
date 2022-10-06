@@ -264,11 +264,11 @@ class TestSQLTableDataNode:
         df = pd.DataFrame({"a": [1, 2, 3, 4], "b": [5, 6, 7, 8]})
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock, mock.patch(
             "src.taipy.core.data.sql_table.SQLTableDataNode._create_table"
-        ) as create_table_mock:
+        ):
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with mock.patch(f"src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
+            with mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._insert_dataframe") as mck:
                 dn._write(df)
                 assert mck.call_args[0][0].equals(df)
 
@@ -295,6 +295,6 @@ class TestSQLTableDataNode:
             cursor_mock = engine_mock.return_value.__enter__.return_value
             cursor_mock.execute.side_effect = None
 
-            with mock.patch(f"src.taipy.core.data.sql_table.SQLTableDataNode._delete_all_rows") as mck:
+            with mock.patch("src.taipy.core.data.sql_table.SQLTableDataNode._delete_all_rows") as mck:
                 dn._write(data)
                 mck.assert_called_once_with(create_table_mock.return_value, cursor_mock)

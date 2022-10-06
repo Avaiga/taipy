@@ -11,7 +11,7 @@
 
 from datetime import datetime, timedelta
 from inspect import isclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 import pymongo
 
@@ -33,6 +33,7 @@ class MongoCollectionDataNode(DataNode):
         name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
             None.
+        parent_ids (Optional[Set[str]]): The identifiers of the parent tasks or `None`.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         cacheable (bool): True if this data node is cacheable. False otherwise.
@@ -60,6 +61,7 @@ class MongoCollectionDataNode(DataNode):
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         owner_id: Optional[str] = None,
+        parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         cacheable: bool = False,
@@ -83,6 +85,7 @@ class MongoCollectionDataNode(DataNode):
             id,
             name,
             owner_id,
+            parent_ids,
             last_edit_date,
             job_ids,
             cacheable,

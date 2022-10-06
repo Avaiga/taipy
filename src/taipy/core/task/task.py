@@ -10,7 +10,7 @@
 # specific language governing permissions and limitations under the License.
 
 import uuid
-from typing import Callable, Dict, Iterable, List, Optional, Union
+from typing import Callable, Dict, Iterable, List, Optional, Set, Union
 
 from taipy.config.common._validate_id import _validate_id
 from taipy.config.common.scope import Scope
@@ -36,6 +36,7 @@ class Task(_Entity):
         output (Union[DataNode^, List[DataNode^]]): The list of outputs.
         id (str): The unique identifier of the task.
         owner_id (str):  The identifier of the owner (pipeline_id, scenario_id, cycle_id) or None.
+        parent_ids (Optional[Set[str]]): The set of identifiers of the parent pipelines.
     """
 
     _ID_PREFIX = "TASK"
@@ -50,10 +51,12 @@ class Task(_Entity):
         output: Optional[Iterable[DataNode]] = None,
         id: TaskId = None,
         owner_id: Optional[str] = None,
+        parent_ids: Optional[Set[str]] = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.owner_id = owner_id
+        self.parent_ids = parent_ids or set()
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
         self._function = function

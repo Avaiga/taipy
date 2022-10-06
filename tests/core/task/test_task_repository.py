@@ -28,6 +28,7 @@ data_node = CSVDataNode(
     DataNodeId("dn_id"),
     "name",
     "owner_id",
+    {"task_id"},
     datetime.datetime(1985, 10, 14, 2, 30, 0),
     [JobId("job_id")],
     False,
@@ -36,11 +37,12 @@ data_node = CSVDataNode(
     {"path": "/path", "has_header": True},
 )
 
-task = Task("config_id", print, [data_node], [], TaskId("id"), owner_id="owner_id")
+task = Task("config_id", print, [data_node], [], TaskId("id"), owner_id="owner_id", parent_ids={"parent_id"})
 
 task_model = _TaskModel(
     id="id",
     owner_id="owner_id",
+    parent_ids=["parent_id"],
     config_id="config_id",
     input_ids=["dn_id"],
     function_name=print.__name__,

@@ -15,7 +15,7 @@ from typing import Dict, Iterable, Optional, Set, Union
 from taipy.config.common.scope import Scope
 
 from .._manager._manager import _Manager
-from ..common.alias import DataNodeId, PipelineId, ScenarioId
+from ..common.alias import DataNodeId, PipelineId, ScenarioId, TaskId
 from ..config.data_node_config import DataNodeConfig
 from ..exceptions.exceptions import InvalidDataNodeType
 from ._data_repository_factory import _DataRepositoryFactory
@@ -35,6 +35,7 @@ class _DataManager(_Manager[DataNode]):
         data_node_configs: Set[DataNodeConfig],
         scenario_id: Optional[ScenarioId] = None,
         pipeline_id: Optional[PipelineId] = None,
+        task_id: Optional[TaskId] = None,
     ) -> Dict[DataNodeConfig, DataNode]:
         dn_configs_and_owner_id = []
 
@@ -43,21 +44,31 @@ class _DataManager(_Manager[DataNode]):
             owner_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
             dn_configs_and_owner_id.append((dn_config, owner_id))
 
-        data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
+        created_data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
 
-        return {
-            dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id)
-            for dn_config, owner_id in dn_configs_and_owner_id
-        }
+        data_nodes = {}
+        for dn_config, owner_id in dn_configs_and_owner_id:
+            if dn := created_data_nodes.get((dn_config, owner_id)):
+                if dn.parent_ids:
+                    dn.parent_ids.update([task_id])
+            else:
+                dn = cls._create_and_set(dn_config, owner_id, {task_id} if task_id else None)
+            data_nodes[dn_config] = dn
+
+        return data_nodes
 
     @classmethod
-    def _create_and_set(cls, data_node_config: DataNodeConfig, owner_id: Optional[str]) -> DataNode:
-        data_node = cls.__create(data_node_config, owner_id)
+    def _create_and_set(
+        cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
+    ) -> DataNode:
+        data_node = cls.__create(data_node_config, owner_id, parent_ids)
         cls._set(data_node)
         return data_node
 
     @classmethod
-    def __create(cls, data_node_config: DataNodeConfig, owner_id: Optional[str]) -> DataNode:
+    def __create(
+        cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
+    ) -> DataNode:
         try:
             props = data_node_config._properties.copy()
             validity_period = props.pop("validity_period", None)
@@ -65,6 +76,7 @@ class _DataManager(_Manager[DataNode]):
                 config_id=data_node_config.id,
                 scope=data_node_config.scope or DataNodeConfig._DEFAULT_SCOPE,
                 owner_id=owner_id,
+                parent_ids=parent_ids,
                 cacheable=data_node_config.cacheable,
                 validity_period=validity_period,
                 properties=props,

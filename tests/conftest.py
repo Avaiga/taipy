@@ -180,7 +180,14 @@ def cycle():
 
 @pytest.fixture(scope="class")
 def pipeline():
-    return Pipeline("pipeline", {}, [], PipelineId("pipeline_id"))
+    return Pipeline(
+        "pipeline",
+        {},
+        [],
+        PipelineId("pipeline_id"),
+        owner_id="owner_id",
+        parent_ids=set(["parent_id_1", "parent_id_2"]),
+    )
 
 
 @pytest.fixture(scope="function")
@@ -198,7 +205,9 @@ def cycle_model():
 
 @pytest.fixture(scope="class")
 def pipeline_model():
-    return _PipelineModel(PipelineId("pipeline_id"), None, "pipeline", {}, [], [])
+    return _PipelineModel(
+        PipelineId("pipeline_id"), "owner_id", list({"parent_id_1", "parent_id_2"}), "pipeline", {}, [], []
+    )
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -32,7 +32,7 @@ def file_exists(file_path: str) -> bool:
 class TestDataManager:
     def test_create_data_node_and_modify_properties_does_not_modify_config(self):
         dn_config = Config.configure_data_node(id="name", foo="bar")
-        dn = _DataManager._create_and_set(dn_config, None)
+        dn = _DataManager._create_and_set(dn_config, None, None)
         assert dn_config.properties.get("foo") == "bar"
         assert dn_config.properties.get("baz") is None
 
@@ -49,7 +49,7 @@ class TestDataManager:
         # - a default scenario scope
         # - No owner_id
         csv_dn_config = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
-        csv_dn = _DataManager._create_and_set(csv_dn_config, None)
+        csv_dn = _DataManager._create_and_set(csv_dn_config, None, None)
 
         assert isinstance(csv_dn, CSVDataNode)
         assert isinstance(_DataManager._get(csv_dn.id), CSVDataNode)
@@ -62,6 +62,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn.id).scope == csv_dn.scope
         assert _DataManager._get(csv_dn.id).owner_id is None
         assert _DataManager._get(csv_dn.id).owner_id == csv_dn.owner_id
+        assert _DataManager._get(csv_dn.id).parent_ids == set()
+        assert _DataManager._get(csv_dn.id).parent_ids == csv_dn.parent_ids
         assert _DataManager._get(csv_dn.id).last_edition_date is None
         assert _DataManager._get(csv_dn.id).last_edition_date == csv_dn.last_edition_date
         assert _DataManager._get(csv_dn.id).job_ids == []
@@ -83,6 +85,8 @@ class TestDataManager:
         assert _DataManager._get(csv_dn).scope == csv_dn.scope
         assert _DataManager._get(csv_dn).owner_id is None
         assert _DataManager._get(csv_dn).owner_id == csv_dn.owner_id
+        assert _DataManager._get(csv_dn).parent_ids == set()
+        assert _DataManager._get(csv_dn).parent_ids == csv_dn.parent_ids
         assert _DataManager._get(csv_dn).last_edition_date is None
         assert _DataManager._get(csv_dn).last_edition_date == csv_dn.last_edition_date
         assert _DataManager._get(csv_dn).job_ids == []
@@ -110,7 +114,7 @@ class TestDataManager:
             other_data="foo",
             cacheable=True,
         )
-        in_mem_dn = _DataManager._create_and_set(in_memory_dn_config, "Scenario_id")
+        in_mem_dn = _DataManager._create_and_set(in_memory_dn_config, "Scenario_id", {"task_id"})
 
         assert isinstance(in_mem_dn, InMemoryDataNode)
         assert isinstance(_DataManager._get(in_mem_dn.id), InMemoryDataNode)
@@ -123,6 +127,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn.id).scope == in_mem_dn.scope
         assert _DataManager._get(in_mem_dn.id).owner_id == "Scenario_id"
         assert _DataManager._get(in_mem_dn.id).owner_id == in_mem_dn.owner_id
+        assert _DataManager._get(in_mem_dn.id).parent_ids == {"task_id"}
+        assert _DataManager._get(in_mem_dn.id).parent_ids == in_mem_dn.parent_ids
         assert _DataManager._get(in_mem_dn.id).last_edition_date is not None
         assert _DataManager._get(in_mem_dn.id).last_edition_date == in_mem_dn.last_edition_date
         assert _DataManager._get(in_mem_dn.id).job_ids == []
@@ -142,6 +148,8 @@ class TestDataManager:
         assert _DataManager._get(in_mem_dn).scope == in_mem_dn.scope
         assert _DataManager._get(in_mem_dn).owner_id == "Scenario_id"
         assert _DataManager._get(in_mem_dn).owner_id == in_mem_dn.owner_id
+        assert _DataManager._get(in_mem_dn).parent_ids == {"task_id"}
+        assert _DataManager._get(in_mem_dn).parent_ids == in_mem_dn.parent_ids
         assert _DataManager._get(in_mem_dn).last_edition_date is not None
         assert _DataManager._get(in_mem_dn).last_edition_date == in_mem_dn.last_edition_date
         assert _DataManager._get(in_mem_dn).job_ids == []
@@ -160,7 +168,7 @@ class TestDataManager:
         # - No owner id
         # - no default data
         dn_config = Config.configure_data_node(id="plop", storage_type="pickle", scope=Scope.CYCLE)
-        pickle_dn = _DataManager._create_and_set(dn_config, None)
+        pickle_dn = _DataManager._create_and_set(dn_config, None, {"task_id_1", "task_id_2"})
 
         assert isinstance(pickle_dn, PickleDataNode)
         assert isinstance(_DataManager._get(pickle_dn.id), PickleDataNode)
@@ -173,6 +181,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn.id).scope == pickle_dn.scope
         assert _DataManager._get(pickle_dn.id).owner_id is None
         assert _DataManager._get(pickle_dn.id).owner_id == pickle_dn.owner_id
+        assert _DataManager._get(pickle_dn.id).parent_ids == {"task_id_1", "task_id_2"}
+        assert _DataManager._get(pickle_dn.id).parent_ids == pickle_dn.parent_ids
         assert _DataManager._get(pickle_dn.id).last_edition_date is None
         assert _DataManager._get(pickle_dn.id).last_edition_date == pickle_dn.last_edition_date
         assert _DataManager._get(pickle_dn.id).job_ids == []
@@ -191,6 +201,8 @@ class TestDataManager:
         assert _DataManager._get(pickle_dn).scope == pickle_dn.scope
         assert _DataManager._get(pickle_dn).owner_id is None
         assert _DataManager._get(pickle_dn).owner_id == pickle_dn.owner_id
+        assert _DataManager._get(pickle_dn).parent_ids == {"task_id_1", "task_id_2"}
+        assert _DataManager._get(pickle_dn).parent_ids == pickle_dn.parent_ids
         assert _DataManager._get(pickle_dn).last_edition_date is None
         assert _DataManager._get(pickle_dn).last_edition_date == pickle_dn.last_edition_date
         assert _DataManager._get(pickle_dn).job_ids == []
@@ -204,26 +216,26 @@ class TestDataManager:
     def test_create_raises_exception_with_wrong_type(self):
         wrong_type_dn_config = DataNodeConfig(id="foo", storage_type="bar", scope=DataNodeConfig._DEFAULT_SCOPE)
         with pytest.raises(InvalidDataNodeType):
-            _DataManager._create_and_set(wrong_type_dn_config, None)
+            _DataManager._create_and_set(wrong_type_dn_config, None, None)
 
     def test_create_from_same_config_generates_new_data_node_and_new_id(self):
         dn_config = Config.configure_data_node(id="foo", storage_type="in_memory")
-        dn = _DataManager._create_and_set(dn_config, None)
-        dn_2 = _DataManager._create_and_set(dn_config, None)
+        dn = _DataManager._create_and_set(dn_config, None, None)
+        dn_2 = _DataManager._create_and_set(dn_config, None, None)
         assert dn_2.id != dn.id
 
     def test_create_uses_overridden_attributes_in_config_file(self):
         Config.load(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/config.toml"))
 
         csv_dn_cfg = Config.configure_data_node(id="foo", storage_type="csv", path="bar", has_header=True)
-        csv_dn = _DataManager._create_and_set(csv_dn_cfg, None)
+        csv_dn = _DataManager._create_and_set(csv_dn_cfg, None, None)
         assert csv_dn.config_id == "foo"
         assert isinstance(csv_dn, CSVDataNode)
         assert csv_dn._path == "path_from_config_file"
         assert csv_dn.has_header
 
         csv_dn_cfg = Config.configure_data_node(id="baz", storage_type="csv", path="bar", has_header=True)
-        csv_dn = _DataManager._create_and_set(csv_dn_cfg, None)
+        csv_dn = _DataManager._create_and_set(csv_dn_cfg, None, None)
         assert csv_dn.config_id == "baz"
         assert isinstance(csv_dn, CSVDataNode)
         assert csv_dn._path == "bar"
@@ -236,11 +248,11 @@ class TestDataManager:
     def test_get_all(self):
         assert len(_DataManager._get_all()) == 0
         dn_config_1 = Config.configure_data_node(id="foo", storage_type="in_memory")
-        _DataManager._create_and_set(dn_config_1, None)
+        _DataManager._create_and_set(dn_config_1, None, None)
         assert len(_DataManager._get_all()) == 1
         dn_config_2 = Config.configure_data_node(id="baz", storage_type="in_memory")
-        _DataManager._create_and_set(dn_config_2, None)
-        _DataManager._create_and_set(dn_config_2, None)
+        _DataManager._create_and_set(dn_config_2, None, None)
+        _DataManager._create_and_set(dn_config_2, None, None)
         assert len(_DataManager._get_all()) == 3
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "foo"]) == 1
         assert len([dn for dn in _DataManager._get_all() if dn.config_id == "baz"]) == 2
@@ -251,6 +263,7 @@ class TestDataManager:
             Scope.PIPELINE,
             id=DataNodeId("id"),
             owner_id=None,
+            parent_ids={"task_id_1"},
             last_edit_date=None,
             job_ids=[],
             edit_in_progress=False,

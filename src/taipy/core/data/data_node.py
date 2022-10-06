@@ -13,7 +13,7 @@ import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from functools import reduce
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -53,7 +53,8 @@ class DataNode(_Entity):
         id (str): The unique identifier of this data node.
         name (str): A user-readable name of this data node.
         owner_id (str): The identifier of the owner (pipeline_id, scenario_id, cycle_id) or
-            None.
+            `None`.
+        parent_ids (Optional[Set[str]]): The set of identifiers of the parent tasks.
         last_edit_date (datetime): The date and time of the last modification.
         job_ids (List[str]): The ordered list of jobs that have written this data node.
         cacheable (bool): True if this data node is cacheable. False otherwise.
@@ -78,6 +79,7 @@ class DataNode(_Entity):
         id: Optional[DataNodeId] = None,
         name: Optional[str] = None,
         owner_id: Optional[str] = None,
+        parent_ids: Optional[Set[str]] = None,
         last_edit_date: Optional[datetime] = None,
         job_ids: List[JobId] = None,
         cacheable: bool = False,
@@ -88,6 +90,7 @@ class DataNode(_Entity):
         self.config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.owner_id = owner_id
+        self.parent_ids = parent_ids or set()
         self._scope = scope
         self._last_edit_date = last_edit_date
         self._name = name or self.id

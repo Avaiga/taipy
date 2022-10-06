@@ -11,9 +11,9 @@
 
 from typing import Type
 
-from ._scenario_manager import _ScenarioManager
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._scenario_manager import _ScenarioManager
 
 
 class _ScenarioManagerFactory(_ManagerFactory):

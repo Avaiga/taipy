@@ -44,6 +44,7 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
         return _PipelineModel(
             pipeline.id,
             pipeline.owner_id,
+            list(pipeline.parent_ids),
             pipeline.config_id,
             pipeline._properties.data,
             self.__to_task_ids(pipeline._tasks),
@@ -58,6 +59,7 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
                 model.tasks,
                 model.id,
                 model.owner_id,
+                set(model.parent_ids),
                 [
                     Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                     for it in model.subscribers

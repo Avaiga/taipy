@@ -11,8 +11,6 @@
 
 from __future__ import annotations
 
-from typing import Set
-
 
 class _EntityIds:
     def __init__(self):

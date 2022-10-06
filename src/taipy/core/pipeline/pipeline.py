@@ -12,7 +12,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 import networkx as nx
 
@@ -42,6 +42,7 @@ class Pipeline(_Entity):
         tasks (List[Task^]): The list of `Task`s.
         pipeline_id (str): The Unique identifier of the pipeline.
         owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
+        parent_ids (Optional[Set[str]]): The set of identifiers of the parent scenarios.
     """
 
     _ID_PREFIX = "PIPELINE"
@@ -55,11 +56,13 @@ class Pipeline(_Entity):
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
         pipeline_id: PipelineId = None,
         owner_id: Optional[str] = None,
+        parent_ids: Optional[Set[str]] = None,
         subscribers: List[Subscriber] = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
         self.owner_id = owner_id
+        self.parent_ids = parent_ids or set()
         self._tasks = tasks
 
         self._subscribers = _ListAttributes(self, subscribers or list())

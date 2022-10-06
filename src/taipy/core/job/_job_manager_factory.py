@@ -11,9 +11,9 @@
 
 from typing import Type
 
-from ._job_manager import _JobManager
 from .._manager._manager_factory import _ManagerFactory
 from ..common._utils import _load_fct
+from ._job_manager import _JobManager
 
 
 class _JobManagerFactory(_ManagerFactory):

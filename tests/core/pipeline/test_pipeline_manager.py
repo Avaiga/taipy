@@ -182,6 +182,43 @@ def test_submit():
     _TaskManager._scheduler = _SchedulerFactory._build_scheduler
 
 
+def test_assign_scenario_as_parent_of_pipeline():
+    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
+    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
+    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.SCENARIO)
+    task_config_1 = Config.configure_task("task_1", print, [dn_config_1], [dn_config_2])
+    task_config_2 = Config.configure_task("task_2", print, [dn_config_2], [dn_config_3])
+    task_config_3 = Config.configure_task("task_3", print, [dn_config_2], [dn_config_3])
+    pipeline_config_1 = Config.configure_pipeline("pipeline_1", [task_config_1, task_config_2])
+    pipeline_config_2 = Config.configure_pipeline("pipeline_2", [task_config_1, task_config_3])
+
+    scenario_config_1 = Config.configure_scenario("scenario_1", [pipeline_config_1])
+    scenario_config_2 = Config.configure_scenario("scenario_2", [pipeline_config_1, pipeline_config_2])
+
+    pipeline = _PipelineManager._get_or_create(pipeline_config_1, "scenario_id")
+
+    assert pipeline.parent_ids == {"scenario_id"}
+    assert all([task.parent_ids == {pipeline.id} for task in pipeline.tasks.values()])
+
+    _PipelineManager._delete_all()
+
+    scenario = _ScenarioManager._create(scenario_config_1)
+    pipelines = scenario.pipelines.values()
+    assert all([pipeline.parent_ids == {scenario.id} for pipeline in pipelines])
+    for pipeline in pipelines:
+        assert all([task.parent_ids == {pipeline.id} for task in pipeline.tasks.values()])
+
+    scenario = _ScenarioManager._create(scenario_config_2)
+    pipelines = scenario.pipelines
+    assert all([pipeline.parent_ids == {scenario.id} for pipeline in pipelines.values()])
+    tasks = {}
+    for pipeline in pipelines.values():
+        tasks.update(pipeline.tasks)
+    assert tasks["task_1"].parent_ids == {pipelines["pipeline_1"].id, pipelines["pipeline_2"].id}
+    assert tasks["task_2"].parent_ids == {pipelines["pipeline_1"].id}
+    assert tasks["task_3"].parent_ids == {pipelines["pipeline_2"].id}
+
+
 g = 0
 
 
