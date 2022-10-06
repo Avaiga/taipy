@@ -27,11 +27,9 @@ class TaskConfig(Section):
     Attributes:
         id (str): Identifier of the task config. Must be a valid Python variable name.
         inputs (Union[DataNodeConfig, List[DataNodeConfig]]): The optional list of `DataNodeConfig^` inputs. The
-        default
-            value is [].
+            default value is [].
         outputs (Union[DataNodeConfig, List[DataNodeConfig]]): The optional list of `DataNodeConfig^` outputs. The
-        default
-            value is [].
+            default value is [].
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
             (exposed_type field) of the input data nodes and returning results compatible with the exposed types
             (exposed_type field) of the outputs list. The default value is None.
