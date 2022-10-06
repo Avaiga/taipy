@@ -36,7 +36,7 @@ class Task(_Entity):
         output (Union[DataNode^, List[DataNode^]]): The list of outputs.
         id (str): The unique identifier of the task.
         owner_id (str):  The identifier of the owner (pipeline_id, scenario_id, cycle_id) or None.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent pipelines or `None`.
+        parent_ids (Optional[Set[str]]): The set of identifiers of the parent pipelines.
     """
 
     _ID_PREFIX = "TASK"

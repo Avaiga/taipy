@@ -42,7 +42,7 @@ class Pipeline(_Entity):
         tasks (List[Task^]): The list of `Task`s.
         pipeline_id (str): The Unique identifier of the pipeline.
         owner_id (str):  The identifier of the owner (scenario_id, cycle_id) or None.
-        parent_ids (Optional[Set[str]]): The identifiers of the parent scenarios or `None`.
+        parent_ids (Optional[Set[str]]): The set of identifiers of the parent scenarios.
     """
 
     _ID_PREFIX = "PIPELINE"
