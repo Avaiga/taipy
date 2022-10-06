@@ -21,6 +21,7 @@ class _PipelineModel:
 
     id: PipelineId
     owner_id: Optional[str]
+    parent_ids: Optional[List[str]]
     config_id: str
     properties: Dict[str, Any]
     tasks: List[TaskId]
@@ -35,6 +36,7 @@ class _PipelineModel:
             id=data["id"],
             config_id=data["config_id"],
             owner_id=data.get("owner_id", data.get("parent_id")),
+            parent_ids=data["parent_ids"],
             properties=data["properties"],
             tasks=data["tasks"],
             subscribers=data["subscribers"],

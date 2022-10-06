@@ -85,7 +85,7 @@ class _PipelineManager(_Manager[Pipeline]):
         if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(pipeline_config.id, owner_id):  # type: ignore
             return pipelines_from_owner
 
-        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, owner_id)
+        pipeline = Pipeline(pipeline_config.id, dict(**pipeline_config._properties), tasks, pipeline_id, owner_id, {scenario_id} if scenario_id else None)
         cls._set(pipeline)
         return pipeline
 
