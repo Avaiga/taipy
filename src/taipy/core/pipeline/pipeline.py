@@ -93,6 +93,9 @@ class Pipeline(_Entity):
         p = tp.get(id)
         self.__dict__ = p.__dict__
 
+    def __hash__(self):
+        return hash(self.id)
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def tasks(self):

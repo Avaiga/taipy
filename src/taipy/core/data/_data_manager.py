@@ -49,7 +49,7 @@ class _DataManager(_Manager[DataNode]):
         data_nodes = {}
         for dn_config, owner_id in dn_configs_and_owner_id:
             if dn := created_data_nodes.get((dn_config, owner_id)):
-                if dn.parent_ids:
+                if task_id:
                     dn.parent_ids.update([task_id])
             else:
                 dn = cls._create_and_set(dn_config, owner_id, {task_id} if task_id else None)
