@@ -488,6 +488,13 @@ class TestDataNode:
         assert dn_1.name == "def"
         assert dn_2.name == "def"
 
+        assert dn_1.parent_ids == set()
+        assert dn_2.parent_ids == set()
+        dn_1._parent_ids.update(["t1"])
+        _DataManager._set(dn_1)
+        assert dn_1.parent_ids == {"t1"}
+        assert dn_2.parent_ids == {"t1"}
+
         assert not dn_1.edition_in_progress
         dn_1.edition_in_progress = True
         assert dn_1.edition_in_progress
@@ -529,7 +536,6 @@ class TestDataNode:
         with dn_1 as dn:
             assert dn.config_id == "foo"
             assert dn.owner_id is None
-            assert dn.parent_ids == set()
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
@@ -551,7 +557,6 @@ class TestDataNode:
 
             assert dn.config_id == "foo"
             assert dn.owner_id is None
-            assert dn.parent_ids == set()
             assert dn.scope == Scope.PIPELINE
             assert dn.last_edition_date == new_datetime
             assert dn.name == "def"
@@ -562,7 +567,6 @@ class TestDataNode:
 
         assert dn_1.config_id == "foo"
         assert dn_1.owner_id is None
-        assert dn.parent_ids == set()
         assert dn_1.scope == Scope.CYCLE
         assert dn_1.last_edition_date == new_datetime_2
         assert dn_1.name == "abc"
