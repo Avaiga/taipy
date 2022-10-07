@@ -576,6 +576,11 @@ class TestDataNode:
         assert not dn_1._is_in_context
         assert len(dn_1.job_ids) == 1
 
+    def test_get_parents(self, data_node):
+        with mock.patch("src.taipy.core.get_parents") as mck:
+            data_node.get_parents()
+            mck.assert_called_once_with(data_node)
+
     def test_unlock_edition_deprecated(self):
         dn = FakeDataNode("foo")
 

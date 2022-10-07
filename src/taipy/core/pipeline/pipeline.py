@@ -226,6 +226,12 @@ class Pipeline(_Entity):
         dag.remove_nodes_from(remove)
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
 
+    def get_parents(self):
+        """Get parents of the pipeline entity"""
+        from ... import core as tp
+
+        return tp.get_parents(self)
+
     def subscribe(
         self,
         callback: Callable[[Pipeline, Job], None],

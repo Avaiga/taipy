@@ -341,6 +341,12 @@ def test_auto_set_and_reload(task):
     assert not pipeline_1._is_in_context
 
 
+def test_get_parents(pipeline):
+    with mock.patch("src.taipy.core.get_parents") as mck:
+        pipeline.get_parents()
+        mck.assert_called_once_with(pipeline)
+
+
 def test_subscribe_pipeline():
     with mock.patch("src.taipy.core.subscribe_pipeline") as mck:
         pipeline = Pipeline("id", {}, [])

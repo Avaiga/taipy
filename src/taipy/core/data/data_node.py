@@ -120,6 +120,12 @@ class DataNode(_Entity):
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
 
+    def get_parents(self):
+        """Get parents of the Data Node entity"""
+        from ... import core as tp
+
+        return tp.get_parents(self)
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def parent_ids(self):

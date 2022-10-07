@@ -194,6 +194,12 @@ def test_auto_set_and_reload(data_node):
     assert not task_1._is_in_context
 
 
+def test_get_parents(task):
+    with mock.patch("src.taipy.core.get_parents") as mck:
+        task.get_parents()
+        mck.assert_called_once_with(task)
+
+
 def test_submit_task(task: Task):
     with mock.patch("src.taipy.core.task._task_manager._TaskManager._submit") as mock_submit:
         task.submit([], True)
