@@ -62,7 +62,7 @@ class Pipeline(_Entity):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
         self.owner_id = owner_id
-        self.parent_ids = parent_ids or set()
+        self._parent_ids = parent_ids or set()
         self._tasks = tasks
 
         self._subscribers = _ListAttributes(self, subscribers or list())
@@ -83,6 +83,11 @@ class Pipeline(_Entity):
         """
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def parent_ids(self):
+        return self._parent_ids
 
     def __getstate__(self):
         return self.id

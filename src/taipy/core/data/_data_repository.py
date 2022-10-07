@@ -110,7 +110,7 @@ class _DataRepository(_AbstractRepository[_DataNodeModel, DataNode]):  # type: i
             data_node.storage_type(),
             data_node._name,
             data_node.owner_id,
-            list(data_node.parent_ids),
+            list(data_node._parent_ids),
             data_node._last_edit_date.isoformat() if data_node._last_edit_date else None,
             data_node._job_ids.data,
             data_node._cacheable,

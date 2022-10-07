@@ -116,8 +116,17 @@ class _ScenarioManager(_Manager[Scenario]):
             is_primary=is_primary_scenario,
             cycle=cycle,
         )
+        for pipeline in pipelines:
+            pipeline._parent_ids.update([scenario_id])
+        cls.__save_pipelines(pipelines)
         cls._set(scenario)
         return scenario
+
+    @classmethod
+    def __save_pipelines(cls, pipelines):
+        pipeline_manager = _PipelineManagerFactory._build_manager()
+        for i in pipelines:
+            pipeline_manager._set(i)
 
     @classmethod
     def _submit(

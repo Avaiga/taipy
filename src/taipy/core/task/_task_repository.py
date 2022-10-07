@@ -35,7 +35,7 @@ class _TaskRepository(_AbstractRepository[_TaskModel, Task]):  # type: ignore
         return _TaskModel(
             id=task.id,
             owner_id=task.owner_id,
-            parent_ids=list(task.parent_ids),
+            parent_ids=list(task._parent_ids),
             config_id=task.config_id,
             input_ids=self.__to_ids(task.input.values()),
             function_name=task._function.__name__,

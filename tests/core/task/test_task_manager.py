@@ -82,27 +82,6 @@ def test_assign_task_as_parent_of_datanode():
     assert dns["dn_3"].parent_ids == {tasks[1].id}
 
 
-def test_assign_pipeline_as_parent_of_task():
-    dn_config_1 = Config.configure_data_node("dn_1", "in_memory", scope=Scope.SCENARIO)
-    dn_config_2 = Config.configure_data_node("dn_2", "in_memory", scope=Scope.SCENARIO)
-    dn_config_3 = Config.configure_data_node("dn_3", "in_memory", scope=Scope.SCENARIO)
-    task_config_1 = Config.configure_task("task_1", print, [dn_config_1], [dn_config_2])
-    task_config_2 = Config.configure_task("task_2", print, [dn_config_2], [dn_config_3])
-    task_config_3 = Config.configure_task("task_3", print, [dn_config_2], [dn_config_3])
-    tasks_1 = _TaskManager._bulk_get_or_create([task_config_1, task_config_2], "scenario_id", "pipeline_id_1")
-    tasks_2 = _TaskManager._bulk_get_or_create([task_config_1, task_config_3], "scenario_id", "pipeline_id_2")
-
-    assert len(tasks_1) == 2
-    assert len(tasks_2) == 2
-
-    # TODO: This test is currently failing due to persistency
-    # The feature of parent_ids still works but doesn't have persistency in it
-    # assert tasks_1[0].parent_ids == {"pipeline_id_1", "pipeline_id_2"}
-    assert tasks_2[0].parent_ids == {"pipeline_id_1", "pipeline_id_2"}
-    assert tasks_1[1].parent_ids == {"pipeline_id_1"}
-    assert tasks_2[1].parent_ids == {"pipeline_id_2"}
-
-
 def test_do_not_recreate_existing_task():
     input_config_scope_pipeline = Config.configure_data_node("my_input", "in_memory", scope=Scope.PIPELINE)
     output_config_scope_pipeline = Config.configure_data_node("my_output", "in_memory", scope=Scope.PIPELINE)
