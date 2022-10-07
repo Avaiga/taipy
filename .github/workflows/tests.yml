@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-18.04, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -34,7 +34,7 @@ jobs:
           tox -e tests
 
       - name: Ensure no usage of manager classes without factory
-        if: matrix.python-versions == '3.10' && matrix.os == 'ubuntu-18.04'
+        if: matrix.python-versions == '3.10' && matrix.os == 'ubuntu-latest'
         run: |
           ! grep -rP '_ScenarioManager(?!Factory)' src
           ! grep -rP '_DataManager(?!Factory)' src

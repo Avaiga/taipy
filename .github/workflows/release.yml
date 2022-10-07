@@ -10,7 +10,7 @@ on:
 jobs:
   test-package:
     timeout-minutes: 20
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -53,7 +53,7 @@ jobs:
     needs: [test-package]
     timeout-minutes: 20
     name: Release taipy-core Package
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
