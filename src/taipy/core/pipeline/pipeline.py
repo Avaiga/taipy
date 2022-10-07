@@ -23,7 +23,7 @@ from ..common._entity import _Entity
 from ..common._listattributes import _ListAttributes
 from ..common._properties import _Properties
 from ..common._reload import _reload, _self_reload, _self_setter
-from ..common._utils import Subscriber
+from ..common._utils import _Subscriber
 from ..common.alias import PipelineId, TaskId
 from ..data.data_node import DataNode
 from ..exceptions.exceptions import NonExistingTask
@@ -54,7 +54,7 @@ class Pipeline(_Entity):
         tasks: Union[List[TaskId], List[Task], List[Union[TaskId, Task]]],
         pipeline_id: PipelineId = None,
         parent_id: Optional[str] = None,
-        subscribers: List[Subscriber] = None,
+        subscribers: List[_Subscriber] = None,
     ):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
@@ -181,11 +181,11 @@ class Pipeline(_Entity):
 
     def _add_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         params = [] if params is None else params
-        self._subscribers.append(Subscriber(callback=callback, params=params))
+        self._subscribers.append(_Subscriber(callback=callback, params=params))
 
     def _remove_subscriber(self, callback: Callable, params: Optional[List[Any]] = None):
         if params is not None:
-            self._subscribers.remove(Subscriber(callback, params))
+            self._subscribers.remove(_Subscriber(callback, params))
         else:
             elem = [x for x in self._subscribers if x.callback == callback]
             if not elem:

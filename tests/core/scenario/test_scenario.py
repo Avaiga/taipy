@@ -14,7 +14,7 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import ScenarioId, TaskId
 from src.taipy.core.cycle._cycle_manager import _CycleManager
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -202,7 +202,7 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert scenario_2.is_primary
 
     assert len(scenario_1.subscribers) == 0
-    scenario_1.subscribers.append(Subscriber(print, []))
+    scenario_1.subscribers.append(_Subscriber(print, []))
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
 
@@ -210,11 +210,11 @@ def test_auto_set_and_reload(cycle, current_datetime, pipeline):
     assert len(scenario_1.subscribers) == 0
     assert len(scenario_2.subscribers) == 0
 
-    scenario_1.subscribers.extend([Subscriber(print, []), Subscriber(map, [])])
+    scenario_1.subscribers.extend([_Subscriber(print, []), _Subscriber(map, [])])
     assert len(scenario_1.subscribers) == 2
     assert len(scenario_2.subscribers) == 2
 
-    scenario_1.subscribers.remove(Subscriber(print, []))
+    scenario_1.subscribers.remove(_Subscriber(print, []))
     assert len(scenario_1.subscribers) == 1
     assert len(scenario_2.subscribers) == 1
 

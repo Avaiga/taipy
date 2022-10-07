@@ -13,7 +13,7 @@ from unittest import mock
 
 import pytest
 
-from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.data.data_node import DataNode
 from src.taipy.core.data.in_memory import InMemoryDataNode
@@ -271,7 +271,7 @@ def test_auto_set_and_reload(task):
     assert len(pipeline_1.subscribers) == 2
     assert len(pipeline_2.subscribers) == 2
 
-    pipeline_1.subscribers.remove(Subscriber(print, []))
+    pipeline_1.subscribers.remove(_Subscriber(print, []))
     assert len(pipeline_1.subscribers) == 1
     assert len(pipeline_2.subscribers) == 1
 

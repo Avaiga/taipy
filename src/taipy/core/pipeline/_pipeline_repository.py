@@ -15,7 +15,7 @@ from typing import Any, Iterable, List, Optional
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
-from ..common._utils import Subscriber
+from ..common._utils import _Subscriber
 from ..exceptions.exceptions import NonExistingPipeline, NonExistingTask
 from ..task.task import Task
 from ._pipeline_model import _PipelineModel
@@ -59,7 +59,7 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
                 model.id,
                 model.parent_id,
                 [
-                    Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                    _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                     for it in model.subscribers
                 ],  # type: ignore
             )
