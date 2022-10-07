@@ -18,10 +18,10 @@ from typing import Any, Dict, List, Optional
 
 from taipy.config.common.scope import Scope
 
-from .data_node import DataNode
 from ..common._reload import _self_reload
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import MissingRequiredProperty
+from .data_node import DataNode
 
 
 class JSONDataNode(DataNode):
