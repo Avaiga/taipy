@@ -20,7 +20,7 @@ import Tooltip from "@mui/material/Tooltip";
 import { TaipyContext } from "../../context/taipyContext";
 import { createSendActionNameAction } from "../../context/taipyReducers";
 import { useDynamicProperty } from "../../utils/hooks";
-import { TaipyActiveProps } from "./utils";
+import { getSuffixedClassNames, TaipyActiveProps } from "./utils";
 
 interface ImageProps extends TaipyActiveProps {
     onAction?: string;
@@ -98,36 +98,18 @@ const ImageMarked = styled("span")(({ theme }) => ({
 
 const Image = (props: ImageProps) => {
     const { className, id, onAction, width = 300, height } = props;
-    const [label, setLabel] = useState(props.defaultLabel);
-    const [content, setContent] = useState(props.defaultContent);
     const { dispatch } = useContext(TaipyContext);
 
     const active = useDynamicProperty(props.active, props.defaultActive, true);
     const hover = useDynamicProperty(props.hoverText, props.defaultHoverText, undefined);
+    const label = useDynamicProperty(props.label, props.defaultLabel, undefined);
+    const content = useDynamicProperty(props.content, props.defaultContent, "");
 
     const handleClick = useCallback(() => {
         if (onAction) {
             dispatch(createSendActionNameAction(id, onAction));
         }
     }, [id, onAction, dispatch]);
-
-    useEffect(() => {
-        setLabel((val) => {
-            if (props.label !== undefined && val !== props.label) {
-                return props.label;
-            }
-            return val;
-        });
-    }, [props.label]);
-
-    useEffect(() => {
-        setContent((val) => {
-            if (props.content !== undefined && val !== props.content) {
-                return props.content;
-            }
-            return val;
-        });
-    }, [props.content]);
 
     const style = useMemo(() => ({ width: width, height: height }), [width, height]);
 
@@ -147,18 +129,18 @@ const Image = (props: ImageProps) => {
     return (
         <Tooltip title={hover || ""}>
             <ImageButton
-                focusRipple
+                focusRipple={!!onAction}
                 style={style}
                 onClick={handleClick}
-                disabled={!active}
+                disabled={!active || !onAction}
                 className={className}
                 id={id}
             >
                 <ImageSrc style={imgStyle} />
-                <ImageBackdrop className="MuiImageBackdrop-root" />
+                {onAction ? <ImageBackdrop className="MuiImageBackdrop-root" /> : null}
                 {label === undefined ? null : (
                     <ImageSpan>
-                        <Typography component="span" variant="subtitle1" color="inherit" sx={imgSx}>
+                        <Typography component="span" variant="subtitle1" color="inherit" sx={imgSx} className={getSuffixedClassNames(className, "-label")}>
                             {label}
                             <ImageMarked className="MuiImageMarked-root" />
                         </Typography>
