@@ -12,13 +12,12 @@
 from importlib import util
 from unittest import mock
 
-import numpy as np
 import pandas as pd
 import pytest
 
 from src.taipy.core.common.alias import DataNodeId
 from src.taipy.core.data.sql import SQLDataNode
-from src.taipy.core.exceptions.exceptions import InvalidExposedType, MissingRequiredProperty
+from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
 class MyCustomObject:

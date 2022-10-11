@@ -29,21 +29,48 @@ from .data_node import DataNode
 class AbstractSQLDataNode(DataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
+    __STORAGE_TYPE = None
+
+    __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"
     __EXPOSED_TYPE_PANDAS = "pandas"
     __VALID_STRING_EXPOSED_TYPES = [__EXPOSED_TYPE_PANDAS, __EXPOSED_TYPE_NUMPY]
-    __EXPOSED_TYPE_PROPERTY = "exposed_type"
+
+    __DB_NAME_KEY = "db_name"
+    __DB_USERNAME_KEY = "db_username"
+    __DB_PASSWORD_KEY = "db_password"
+    __DB_HOST_KEY = "db_host"
+    __DB_PORT_KEY = "db_port"
+    __DB_ENGINE_KEY = "db_engine"
+    __DB_DRIVER_KEY = "db_driver"
     __DB_EXTRA_ARGS_KEY = "db_extra_args"
+    __SQLITE_PATH_KEY = "path"
+
+    __ENGINE_PROPERTIES: List[str] = [
+        __DB_NAME_KEY,
+        __DB_USERNAME_KEY,
+        __DB_PASSWORD_KEY,
+        __DB_HOST_KEY,
+        __DB_PORT_KEY,
+        __DB_DRIVER_KEY,
+        __DB_EXTRA_ARGS_KEY,
+        __SQLITE_PATH_KEY,
+    ]
+
+    __DB_HOST_DEFAULT = "localhost"
+    __DB_PORT_DEFAULT = 1433
+    __DB_DRIVER_DEFAULT = "ODBC Driver 17 for SQL Server"
+
     __ENGINE_MSSQL = "mssql"
     __ENGINE_SQLITE = "sqlite"
     __ENGINE_MYSQL = "mysql"
     __ENGINE_POSTGRESQL = "postgresql"
 
     _ENGINE_REQUIRED_PROPERTIES: Dict[str, List[str]] = {
-        __ENGINE_MSSQL: ["db_username", "db_password", "db_name"],
-        __ENGINE_MYSQL: ["db_username", "db_password", "db_name"],
-        __ENGINE_POSTGRESQL: ["db_username", "db_password", "db_name"],
-        __ENGINE_SQLITE: ["db_name", "path"],
+        __ENGINE_MSSQL: [__DB_USERNAME_KEY, __DB_PASSWORD_KEY, __DB_NAME_KEY],
+        __ENGINE_MYSQL: [__DB_USERNAME_KEY, __DB_PASSWORD_KEY, __DB_NAME_KEY],
+        __ENGINE_POSTGRESQL: [__DB_USERNAME_KEY, __DB_PASSWORD_KEY, __DB_NAME_KEY],
+        __ENGINE_SQLITE: [__DB_NAME_KEY],
     }
 
     def __init__(
@@ -63,6 +90,7 @@ class AbstractSQLDataNode(DataNode):
     ):
         if properties is None:
             properties = {}
+        self._check_required_properties(properties)
 
         if self.__EXPOSED_TYPE_PROPERTY not in properties.keys():
             properties[self.__EXPOSED_TYPE_PROPERTY] = self.__EXPOSED_TYPE_PANDAS
@@ -82,26 +110,14 @@ class AbstractSQLDataNode(DataNode):
             edit_in_progress,
             **properties,
         )
+        self._engine = None
         if not self._last_edit_date:
             self.unlock_edit()
 
-    def __engine(self):
-        return self.__create_engine(
-            self.properties.get("db_engine"),
-            self.properties.get("db_username"),
-            self.properties.get("db_host", "localhost"),
-            self.properties.get("db_password"),
-            self.properties.get("db_name"),
-            self.properties.get("db_port", 1433),
-            self.properties.get("db_driver", "ODBC Driver 17 for SQL Server"),
-            self.properties.get(self.__DB_EXTRA_ARGS_KEY, {}),
-            self.properties.get("path", ""),
-        )
-
     def _check_required_properties(self, properties: Dict):
-        db_engine = properties.get("db_engine")
+        db_engine = properties.get(self.__DB_ENGINE_KEY)
         if not db_engine:
-            raise MissingRequiredProperty("db_engine is required.")
+            raise MissingRequiredProperty(f"{self.__DB_ENGINE_KEY} is required.")
         if db_engine not in self._ENGINE_REQUIRED_PROPERTIES.keys():
             raise UnknownDatabaseEngine(f"Unknown engine: {db_engine}")
         required = self._ENGINE_REQUIRED_PROPERTIES[db_engine]
@@ -117,33 +133,47 @@ class AbstractSQLDataNode(DataNode):
                 f"Invalid string exposed type {exposed_type}. Supported values are {', '.join(self.__VALID_STRING_EXPOSED_TYPES)}"
             )
 
-    @staticmethod
-    def __build_conn_string(
-        engine, username, host, password, database, port, driver, extra_args: Dict[str, str], path
-    ) -> str:
-        # TODO: Add support to other SQL engines, the engine value should be checked.
-        if engine in ["mssql", "mysql", "postgresql"]:
+    def _get_engine(self):
+        if self._engine is None:
+            self._engine = create_engine(self._conn_string())
+        return self._engine
+
+    def _conn_string(self) -> str:
+        engine = self.properties.get(self.__DB_ENGINE_KEY)
+
+        if self.__DB_USERNAME_KEY in self._ENGINE_REQUIRED_PROPERTIES[engine]:
+            username = self.properties.get(self.__DB_USERNAME_KEY)
             username = urllib.parse.quote_plus(username)
+
+        if self.__DB_PASSWORD_KEY in self._ENGINE_REQUIRED_PROPERTIES[engine]:
+            password = self.properties.get(self.__DB_PASSWORD_KEY)
             password = urllib.parse.quote_plus(password)
-            database = urllib.parse.quote_plus(database)
 
-            extra_args = {**extra_args, "driver": driver}
-            for k, v in extra_args.items():
-                extra_args[k] = re.sub(r"\s+", "+", v)
-            extra_args_str = "&".join(f"{k}={str(v)}" for k, v in extra_args.items())
-            if engine == "mssql":
-                return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
-            elif engine == "mysql":
-                return f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
-            else:
-                return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{database}?{extra_args_str}"
-        elif engine == "sqlite":
-            return os.path.join("sqlite:///", path, f"{database}.sqlite3")
+        if self.__DB_NAME_KEY in self._ENGINE_REQUIRED_PROPERTIES[engine]:
+            db_name = self.properties.get(self.__DB_NAME_KEY)
+            db_name = urllib.parse.quote_plus(db_name)
+
+        host = self.properties.get(self.__DB_HOST_KEY, self.__DB_HOST_DEFAULT)
+        port = self.properties.get(self.__DB_PORT_KEY, self.__DB_PORT_DEFAULT)
+        driver = self.properties.get(self.__DB_DRIVER_KEY, self.__DB_DRIVER_DEFAULT)
+        extra_args = self.properties.get(self.__DB_EXTRA_ARGS_KEY, {})
+
+        extra_args = {**extra_args, "driver": driver}
+        for k, v in extra_args.items():
+            extra_args[k] = re.sub(r"\s+", "+", v)
+        extra_args_str = "&".join(f"{k}={str(v)}" for k, v in extra_args.items())
+
+        if engine == self.__ENGINE_MSSQL:
+            return f"mssql+pyodbc://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
+        elif engine == self.__ENGINE_MYSQL:
+            return f"mysql+pymysql://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
+        elif engine == self.__ENGINE_POSTGRESQL:
+            return f"postgresql+psycopg2://{username}:{password}@{host}:{port}/{db_name}?{extra_args_str}"
+        elif engine == self.__ENGINE_SQLITE:
+            path = self.properties.get(self.__SQLITE_PATH_KEY, "")
+            return os.path.join("sqlite:///", path, f"{db_name}.sqlite3")
+
         raise UnknownDatabaseEngine(f"Unknown engine: {engine}")
-
-    def __create_engine(self, engine, username, host, password, database, port, driver, extra_args, path):
-        conn_str = self.__build_conn_string(engine, username, host, password, database, port, driver, extra_args, path)
-        return create_engine(conn_str)
 
     def _read(self):
         if self.properties[self.__EXPOSED_TYPE_PROPERTY] == self.__EXPOSED_TYPE_PANDAS:
@@ -154,7 +184,7 @@ class AbstractSQLDataNode(DataNode):
 
     def _read_as(self):
         custom_class = self.properties[self.__EXPOSED_TYPE_PROPERTY]
-        with self.__engine().connect() as connection:
+        with self._get_engine().connect() as connection:
             query_result = connection.execute(text(self._get_read_query()))
         return list(map(lambda row: custom_class(**row), query_result))
 
@@ -163,8 +193,8 @@ class AbstractSQLDataNode(DataNode):
 
     def _read_as_pandas_dataframe(self, columns: Optional[List[str]] = None):
         if columns:
-            return pd.read_sql_query(self._get_read_query(), con=self.__engine())[columns]
-        return pd.read_sql_query(self._get_read_query(), con=self.__engine())
+            return pd.read_sql_query(self._get_read_query(), con=self._get_engine())[columns]
+        return pd.read_sql_query(self._get_read_query(), con=self._get_engine())
 
     @abstractmethod
     def _get_read_query(self):
@@ -176,7 +206,7 @@ class AbstractSQLDataNode(DataNode):
 
     def _write(self, data) -> None:
         """Check data against a collection of types to handle insertion on the database."""
-        engine = self.__engine()
+        engine = self._get_engine()
         with engine.connect() as connection:
             with connection.begin() as transaction:
                 try:
@@ -186,3 +216,8 @@ class AbstractSQLDataNode(DataNode):
                     raise
                 else:
                     transaction.commit()
+
+    def __setattr__(self, key: str, value) -> None:
+        if key in self.__ENGINE_PROPERTIES:
+            self._engine = None
+        return super().__setattr__(key, value)
