@@ -142,8 +142,8 @@ class TestPickleDataNodeEntity:
         dn.write({"other": "stuff"})
         assert dn.read() == {"other": "stuff"}
 
-    def test_get_system_modified_date_instead_of_last_edit_date(self):
-        temp_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.pickle")
+    def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+        temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.pickle"))
         pd.DataFrame([]).to_pickle(temp_file_path)
         dn = PickleDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
@@ -162,5 +162,3 @@ class TestPickleDataNodeEntity:
 
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
-
-        os.unlink(temp_file_path)
