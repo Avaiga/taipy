@@ -65,7 +65,7 @@ class PipelineConfig(Section):
     @classmethod
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):
         as_dict.pop(cls._ID_KEY, id)
-        t_configs = config._sections[TaskConfig.name]
+        t_configs = config._sections[TaskConfig.name]  # type: ignore
         tasks = []
         if tasks_ids := as_dict.pop(cls._TASK_KEY, None):
             tasks = [t_configs[task_id] for task_id in tasks_ids if task_id in t_configs]

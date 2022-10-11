@@ -17,7 +17,7 @@ import pytest
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common import _utils
-from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import PipelineId, ScenarioId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.cycle._cycle_manager import _CycleManager
@@ -467,12 +467,12 @@ def test_notification_unsubscribe_multi_param():
     # if no params are passed, removes the first occurrence of the subscriber when theres more than one copy
     scenario.unsubscribe(notify_multi_param)
     assert len(scenario.subscribers) == 2
-    assert Subscriber(notify_multi_param, ["foobar", 123, 0]) not in scenario.subscribers
+    assert _Subscriber(notify_multi_param, ["foobar", 123, 0]) not in scenario.subscribers
 
     # If params are passed, find the corresponding pair of callback and params to remove
     scenario.unsubscribe(notify_multi_param, ["foobar", 123, 2])
     assert len(scenario.subscribers) == 1
-    assert Subscriber(notify_multi_param, ["foobar", 123, 2]) not in scenario.subscribers
+    assert _Subscriber(notify_multi_param, ["foobar", 123, 2]) not in scenario.subscribers
 
     # If params are passed but is not on the list of subscribers, throws a ValueErrors
     with pytest.raises(ValueError):

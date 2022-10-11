@@ -15,7 +15,7 @@ from typing import Any, Iterable, List, Optional
 from .._repository._repository import _AbstractRepository
 from .._repository._repository_adapter import _RepositoryAdapter
 from ..common import _utils
-from ..common._utils import Subscriber
+from ..common._utils import _Subscriber
 from ..common.alias import CycleId, PipelineId
 from ..cycle._cycle_manager_factory import _CycleManagerFactory
 from ..cycle.cycle import Cycle
@@ -57,7 +57,7 @@ class _ScenarioRepository(_AbstractRepository[_ScenarioModel, Scenario]):  # typ
             tags=set(model.tags),
             cycle=self.__to_cycle(model.cycle),
             subscribers=[
-                Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
+                _Subscriber(_utils._load_fct(it["fct_module"], it["fct_name"]), it["fct_params"])
                 for it in model.subscribers
             ],
         )

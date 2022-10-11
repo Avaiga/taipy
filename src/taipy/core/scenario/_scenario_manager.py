@@ -93,7 +93,7 @@ class _ScenarioManager(_Manager[Scenario]):
         creation_date: datetime.datetime = None,
         name: str = None,
     ) -> Scenario:
-        scenario_id = Scenario._new_id(config.id)  # type: ignore
+        scenario_id = Scenario._new_id(str(config.id))  # type: ignore
         pipelines = [
             _PipelineManagerFactory._build_manager()._get_or_create(p_config, scenario_id)
             for p_config in config.pipeline_configs
@@ -108,7 +108,7 @@ class _ScenarioManager(_Manager[Scenario]):
         if name:
             props["name"] = name
         scenario = Scenario(
-            config.id,  # type: ignore
+            str(config.id),  # type: ignore
             pipelines,
             props,
             scenario_id,

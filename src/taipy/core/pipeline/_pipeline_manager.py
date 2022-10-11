@@ -74,7 +74,7 @@ class _PipelineManager(_Manager[Pipeline]):
 
     @classmethod
     def _get_or_create(cls, pipeline_config: PipelineConfig, scenario_id: Optional[ScenarioId] = None) -> Pipeline:
-        pipeline_id = Pipeline._new_id(pipeline_config.id)  # type: ignore
+        pipeline_id = Pipeline._new_id(str(pipeline_config.id))  # type: ignore
 
         task_manager = _TaskManagerFactory._build_manager()
         tasks = task_manager._bulk_get_or_create(pipeline_config.task_configs, scenario_id, pipeline_id)
@@ -82,11 +82,11 @@ class _PipelineManager(_Manager[Pipeline]):
         scope = min(task.scope for task in tasks) if len(tasks) != 0 else Scope.GLOBAL
         owner_id = scenario_id if scope == Scope.SCENARIO else pipeline_id if scope == Scope.PIPELINE else None
 
-        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(pipeline_config.id, owner_id):  # type: ignore
+        if pipelines_from_owner := cls._repository._get_by_config_and_owner_id(str(pipeline_config.id), owner_id):
             return pipelines_from_owner
 
         pipeline = Pipeline(
-            pipeline_config.id,  # type: ignore
+            str(pipeline_config.id),  # type: ignore
             dict(**pipeline_config._properties),
             tasks,
             pipeline_id,

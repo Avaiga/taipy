@@ -17,7 +17,7 @@ import pytest
 from src.taipy.core._scheduler._scheduler import _Scheduler
 from src.taipy.core._scheduler._scheduler_factory import _SchedulerFactory
 from src.taipy.core.common import _utils
-from src.taipy.core.common._utils import Subscriber
+from src.taipy.core.common._utils import _Subscriber
 from src.taipy.core.common.alias import PipelineId, TaskId
 from src.taipy.core.config.job_config import JobConfig
 from src.taipy.core.data._data_manager import _DataManager
@@ -529,11 +529,11 @@ def test_pipeline_notification_unsubscribe_multi_param():
 
     pipeline.unsubscribe(notify_multi_param)
     assert len(pipeline.subscribers) == 2
-    assert Subscriber(notify_multi_param, ["foobar", 123, 0]) not in pipeline.subscribers
+    assert _Subscriber(notify_multi_param, ["foobar", 123, 0]) not in pipeline.subscribers
 
     pipeline.unsubscribe(notify_multi_param, ["foobar", 123, 2])
     assert len(pipeline.subscribers) == 1
-    assert Subscriber(notify_multi_param, ["foobar", 123, 2]) not in pipeline.subscribers
+    assert _Subscriber(notify_multi_param, ["foobar", 123, 2]) not in pipeline.subscribers
 
     with pytest.raises(ValueError):
         pipeline.unsubscribe(notify_multi_param, ["foobar", 123, 10000])

@@ -27,11 +27,9 @@ class TaskConfig(Section):
     Attributes:
         id (str): Identifier of the task config. Must be a valid Python variable name.
         inputs (Union[DataNodeConfig, List[DataNodeConfig]]): The optional list of `DataNodeConfig^` inputs. The
-        default
-            value is [].
+            default value is [].
         outputs (Union[DataNodeConfig, List[DataNodeConfig]]): The optional list of `DataNodeConfig^` outputs. The
-        default
-            value is [].
+            default value is [].
         function (Callable): User function taking as inputs some parameters compatible with the exposed types
             (exposed_type field) of the input data nodes and returning results compatible with the exposed types
             (exposed_type field) of the outputs list. The default value is None.
@@ -101,7 +99,7 @@ class TaskConfig(Section):
     def _from_dict(cls, as_dict: Dict[str, Any], id: str, config: Optional[_Config]):
         as_dict.pop(cls._ID_KEY, id)
         funct = as_dict.pop(cls._FUNCTION, None)
-        dn_configs = config._sections[DataNodeConfig.name]
+        dn_configs = config._sections[DataNodeConfig.name]  # type: ignore
         inputs = []
         if inputs_as_str := as_dict.pop(cls._INPUT_KEY, None):
             inputs = [dn_configs[dn_id] for dn_id in inputs_as_str if dn_id in dn_configs]

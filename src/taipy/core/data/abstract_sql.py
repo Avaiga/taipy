@@ -29,7 +29,7 @@ from .data_node import DataNode
 class AbstractSQLDataNode(DataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
-    __STORAGE_TYPE = None
+    __STORAGE_TYPE = "NOT_IMPLEMENTED"
 
     __EXPOSED_TYPE_PROPERTY = "exposed_type"
     __EXPOSED_TYPE_NUMPY = "numpy"

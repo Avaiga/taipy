@@ -37,6 +37,9 @@ class Status(_ReprEnum):
     - `COMPLETED`: A `COMPLETED` job has successfully been executed.
 
     - `SKIPPED`: A `SKIPPED` job has not been executed because its outputs were already computed.
+
+    - `ABANDONED`: An `ABANDONED` job has not been executed because it depends on a job that could not complete (
+        cancelled, failed, or abandoned).
     """
 
     SUBMITTED = 1
