@@ -11,6 +11,9 @@
 
 from taipy.config.checker._checker import _Checker
 from taipy.config.config import Config
+from taipy.config.common.frequency import Frequency
+from taipy.config.common.scope import Scope
+from taipy.config.global_app.global_app_config import GlobalAppConfig
 
 from .checkers._data_node_config_checker import _DataNodeConfigChecker
 from .checkers._job_config_checker import _JobConfigChecker
