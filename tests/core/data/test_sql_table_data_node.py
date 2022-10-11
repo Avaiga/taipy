@@ -56,7 +56,6 @@ class TestSQLTableDataNode:
                 },
             },
         )
-
     if util.find_spec("pymysql"):
         __properties.append(
             {

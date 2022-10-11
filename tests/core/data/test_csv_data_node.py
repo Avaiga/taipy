@@ -231,3 +231,4 @@ class TestCSVDataNode:
 
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
+        os.unlink(temp_file_path)
