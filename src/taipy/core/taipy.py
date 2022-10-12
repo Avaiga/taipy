@@ -504,14 +504,15 @@ def export_scenario(
 def get_parents(
     entity: Union[TaskId, DataNodeId, PipelineId, Task, DataNode, Pipeline], parent_dict=None
 ) -> Dict[str, Set[_Entity]]:
-    """Get parents of the entity from the entity or its identifier.
+    """Get the parents of an entity from itself or its identifier.
 
     Parameters:
-        entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity of its identifier
-            to get the parent.<br/>
+        entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity or its identifier
+            to get the parents.<br/>
     Returns:
-        Dict[str, Set[_Entity]]: The dictionary of parents
-        matching the corresponding entity. An empty dictionary if the entity does not have parents.
+        Dict[str, Set[_Entity]]: The dictionary of parents matching the corresponding entity with the key
+        is the level of the parent for example 'scenarios', 'pipelines', 'tasks' and the value is a list
+        of the parent entities. An empty dictionary if the entity does not have parents.
     Raises:
         ModelNotFound^: If _entity_ does not match a correct entity pattern.
     """
