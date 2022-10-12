@@ -507,12 +507,16 @@ def get_parents(
     """Get the parents of an entity from itself or its identifier.
 
     Parameters:
-        entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity or its identifier
-            to get the parents.<br/>
+        entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity or its
+            identifier to get the parents.<br/>
     Returns:
-        Dict[str, Set[_Entity]]: The dictionary of parents matching the corresponding entity with the key
-        is the level of the parent for example 'scenarios', 'pipelines', 'tasks' and the value is a list
-        of the parent entities. An empty dictionary if the entity does not have parents.
+        Dict[str, Set[_Entity]]: The dictionary of all parent entities.
+            They are grouped by their type (Scenario^, Pipelines^, or tasks^) so each key corresponds
+            to a level of the parents and the value is a set of the parent entities.
+            An empty dictionary is returned if the entity does not have parents.<br/>
+            Example: The following instruction returns all the pipelines that include the
+            datanode identified by "my_datanode_id".
+            `taipy.get_parents("id_of_my_datanode")["pipelines"]`
     Raises:
         ModelNotFound^: If _entity_ does not match a correct entity pattern.
     """
