@@ -16,7 +16,7 @@ class Section:
 
     def __init__(self, id, **properties):
         self.id = _validate_id(id)
-        self._properties = properties
+        self._properties = properties or dict()
 
     @abstractmethod
     def __copy__(self):
