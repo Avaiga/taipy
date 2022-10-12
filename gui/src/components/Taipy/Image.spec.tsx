@@ -58,6 +58,11 @@ describe("Image Component", () => {
         const elt = getByRole("button");
         expect(elt).not.toBeDisabled();
     });
+    it("is disabled when no action", async () => {
+        const { getByRole } = render(<Image defaultContent="/url/toto.png" active={false} />);
+        const elt = getByRole("button");
+        expect(elt).toBeDisabled();
+    });
     it("dispatch a well formed message", async () => {
         const dispatch = jest.fn();
         const state: TaipyState = INITIAL_STATE;
