@@ -116,7 +116,7 @@ def _df_relayout(
         df = df.loc[(df[x_column] > x0) & (df[x_column] < x1)]
     else:
         # filter by both x and y columns
-        df = df.loc[(df[x_column] > x0) & (df[x_column] < x1) & (df[y_column] > y0) & (df[y_column] < y1)]
+        df = df.loc[(df[x_column] > x0) & (df[x_column] < x1) & (df[y_column] > y0) & (df[y_column] < y1)]  # noqa
     if not has_x_col:
         df.drop(x_column, axis=1, inplace=True)
     return df
