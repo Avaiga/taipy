@@ -6,6 +6,11 @@ from .common._validate_id import _validate_id
 
 
 class Section:
+    """ A Section as a consistent part of the Config.
+
+    A section is defined by the section name (representing the type of objects that are configured) and a section id.
+    """
+
     _DEFAULT_KEY = "default"
     _ID_KEY = "id"
 
