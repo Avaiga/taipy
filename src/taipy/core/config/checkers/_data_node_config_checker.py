@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Dict
+
 from taipy.config._config import _Config
 from taipy.config.checker._checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -22,7 +24,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        data_node_configs = self._config._sections[DataNodeConfig.name]
+        data_node_configs: Dict[str, DataNodeConfig] = self._config._sections[DataNodeConfig.name]
         for data_node_config_id, data_node_config in data_node_configs.items():
             self._check_existing_config_id(data_node_config)
             self._check_storage_type(data_node_config_id, data_node_config)
