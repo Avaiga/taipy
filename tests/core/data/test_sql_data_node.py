@@ -20,6 +20,7 @@ from src.taipy.core.data.sql import SQLDataNode
 from src.taipy.core.exceptions.exceptions import MissingRequiredProperty
 from taipy.config.common.scope import Scope
 
+
 class MyCustomObject:
     def __init__(self, foo=None, bar=None, *args, **kwargs):
         self.foo = foo
@@ -50,42 +51,48 @@ class TestSQLDataNode:
             },
         },
     ]
-    if  util.find_spec("pyodbc"):
-        __properties.append({
-            "db_username": "sa",
-            "db_password": "Passw0rd",
-            "db_name": "taipy",
-            "db_engine": "mssql",
-            "read_query": "SELECT * FROM foo",
-            "write_query_builder": my_write_query_builder,
-            "db_extra_args": {
-                "TrustServerCertificate": "yes",
+    if util.find_spec("pyodbc"):
+        __properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "mssql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder,
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
             },
-        },)
-    if  util.find_spec("pymysql"):
-        __properties.append({
-            "db_username": "sa",
-            "db_password": "Passw0rd",
-            "db_name": "taipy",
-            "db_engine": "mysql",
-            "read_query": "SELECT * FROM foo",
-            "write_query_builder": my_write_query_builder,
-            "db_extra_args": {
-                "TrustServerCertificate": "yes",
+        )
+    if util.find_spec("pymysql"):
+        __properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "mysql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder,
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
             },
-        },)
+        )
     if util.find_spec("psycopg2"):
-        __properties.append( {
-            "db_username": "sa",
-            "db_password": "Passw0rd",
-            "db_name": "taipy",
-            "db_engine": "postgresql",
-            "read_query": "SELECT * FROM foo",
-            "write_query_builder": my_write_query_builder,
-            "db_extra_args": {
-                "TrustServerCertificate": "yes",
+        __properties.append(
+            {
+                "db_username": "sa",
+                "db_password": "Passw0rd",
+                "db_name": "taipy",
+                "db_engine": "postgresql",
+                "read_query": "SELECT * FROM foo",
+                "write_query_builder": my_write_query_builder,
+                "db_extra_args": {
+                    "TrustServerCertificate": "yes",
+                },
             },
-        },)
+        )
 
     @pytest.mark.parametrize("properties", __properties)
     def test_create(self, properties):
@@ -122,14 +129,10 @@ class TestSQLDataNode:
             SQLDataNode("foo", Scope.PIPELINE, DataNodeId("dn_id"), properties=properties)
 
     @pytest.mark.parametrize("properties", __properties)
-    def test_write_query_builder(self,properties):
-        custom_properties= properties.copy()
+    def test_write_query_builder(self, properties):
+        custom_properties = properties.copy()
         custom_properties.pop("db_extra_args")
-        dn = SQLDataNode(
-            "foo_bar",
-            Scope.PIPELINE,
-            properties= custom_properties
-        )
+        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute
             dn.write(pd.DataFrame({"foo": [1, 2, 3], "bar": [4, 5, 6]}))
@@ -139,11 +142,7 @@ class TestSQLDataNode:
             )
 
         custom_properties["write_query_builder"] = single_write_query_builder
-        dn = SQLDataNode(
-            "foo_bar",
-            Scope.PIPELINE,
-            properties=custom_properties
-        )
+        dn = SQLDataNode("foo_bar", Scope.PIPELINE, properties=custom_properties)
 
         with mock.patch("sqlalchemy.engine.Engine.connect") as engine_mock:
             # mock connection execute

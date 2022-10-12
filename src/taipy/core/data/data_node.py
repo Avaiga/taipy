@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
 import uuid
 from abc import abstractmethod
 from datetime import datetime, timedelta
@@ -71,6 +72,7 @@ class DataNode(_Entity):
     __logger = _TaipyLogger._get_logger()
     _REQUIRED_PROPERTIES: List[str] = []
     _MANAGER_NAME = "data"
+    __PATH_KEY = "path"
 
     def __init__(
         self,
@@ -121,7 +123,11 @@ class DataNode(_Entity):
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self):
-        return self._last_edit_date
+        last_modified_datetime = self.__get_last_modified_datetime()
+        if last_modified_datetime and last_modified_datetime > self._last_edit_date:
+            return last_modified_datetime
+        else:
+            return self._last_edit_date
 
     @last_edit_date.setter  # type: ignore
     @_self_setter(_MANAGER_NAME)
@@ -248,6 +254,12 @@ class DataNode(_Entity):
         if protected_attribute_name in self._properties:
             return self._properties[protected_attribute_name]
         raise AttributeError(f"{attribute_name} is not an attribute of data node {self.id}")
+
+    def __get_last_modified_datetime(self) -> Optional[datetime]:
+        path = self._properties.get(self.__PATH_KEY, None)
+        if path and os.path.exists(path):
+            return datetime.fromtimestamp(os.path.getmtime(path))
+        return None
 
     @classmethod
     @abstractmethod

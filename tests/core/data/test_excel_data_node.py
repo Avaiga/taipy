@@ -11,6 +11,8 @@
 
 import os
 import pathlib
+from datetime import datetime
+from time import sleep
 from typing import Dict
 
 import numpy as np
@@ -88,7 +90,7 @@ class TestExcelDataNode:
         assert dn.id is not None
         assert dn.owner_id is None
         assert dn.parent_ids == set()
-        assert dn.last_edition_date is None
+        assert dn.last_edit_date is None
         assert dn.job_ids == []
         assert not dn.is_ready_for_reading
         assert dn.path == path
@@ -871,3 +873,26 @@ class TestExcelDataNode:
                     "sheet_name": "Sheet1",
                 },
             )
+
+    def test_get_system_modified_date_instead_of_last_edit_date(self):
+        temp_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.xlsx")
+        pd.DataFrame([]).to_excel(temp_file_path)
+        dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+
+        dn.write(pd.DataFrame([1, 2, 3]))
+        previous_edit_date = dn.last_edit_date
+
+        sleep(0.1)
+
+        pd.DataFrame([4, 5, 6]).to_excel(temp_file_path)
+        new_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+
+        assert previous_edit_date < dn.last_edit_date
+        assert new_edit_date == dn.last_edit_date
+
+        sleep(0.1)
+
+        dn.write(pd.DataFrame([7, 8, 9]))
+        assert new_edit_date < dn.last_edit_date
+
+        os.unlink(temp_file_path)

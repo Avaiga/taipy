@@ -11,6 +11,8 @@
 
 import os
 import pathlib
+from datetime import datetime
+from time import sleep
 
 import numpy as np
 import pandas as pd
@@ -208,3 +210,26 @@ class TestCSVDataNode:
         path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv")
         with pytest.raises(InvalidExposedType):
             CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "exposed_type": "foo"})
+
+    def test_get_system_modified_date_instead_of_last_edit_date(self):
+        temp_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.csv")
+        pd.DataFrame([]).to_csv(temp_file_path)
+        dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
+
+        dn.write(pd.DataFrame([1, 2, 3]))
+        previous_edit_date = dn.last_edit_date
+
+        sleep(0.1)
+
+        pd.DataFrame([4, 5, 6]).to_csv(temp_file_path)
+        new_edit_date = datetime.fromtimestamp(os.path.getmtime(temp_file_path))
+
+        assert previous_edit_date < dn.last_edit_date
+        assert new_edit_date == dn.last_edit_date
+
+        sleep(0.1)
+
+        dn.write(pd.DataFrame([7, 8, 9]))
+        assert new_edit_date < dn.last_edit_date
+
+        os.unlink(temp_file_path)

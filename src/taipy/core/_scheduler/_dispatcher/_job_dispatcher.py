@@ -68,17 +68,15 @@ class _JobDispatcher(threading.Thread):
         """Returns True if the dispatcher have resources to execute a new job."""
         return self._nb_available_workers > 0
 
-    def _execute_job(self, job):
+    def _execute_job(self, job: Job):
         if job.force or self._needs_to_run(job.task):
             if job.force:
                 self.__logger.info(f"job {job.id} is forced to be executed.")
             job.running()
-            _JobManagerFactory._build_manager()._set(job)
             self._dispatch(job)
         else:
             self.scheduler._unlock_edit_on_outputs(job)
             job.skipped()
-            _JobManagerFactory._build_manager()._set(job)
             self.__logger.info(f"job {job.id} is skipped.")
 
     def _execute_jobs_synchronously(self):
@@ -177,7 +175,7 @@ class _JobDispatcher(threading.Thread):
         return _results
 
     @staticmethod
-    def _update_job_status(job, exceptions):
+    def _update_job_status(job: Job, exceptions):
         job.update_status(exceptions)
         _JobManagerFactory._build_manager()._set(job)
 
