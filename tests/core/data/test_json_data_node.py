@@ -52,6 +52,18 @@ class MyCustomObject2:
         self.text = text
 
 
+class MyEnum(Enum):
+    A = 1
+    B = 2
+    C = 3
+
+
+@dataclass
+class CustomDataclass:
+    integer: int
+    string: str
+
+
 class MyCustomEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, MyCustomObject):
@@ -161,35 +173,24 @@ class TestJSONDataNode:
     def test_write_date(self, json_file):
         json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
         now = datetime.datetime.now()
-        now_str = now.isoformat()
         data = {"date": now}
         json_dn.write(data)
         read_data = json_dn.read()
-        assert read_data["date"] == now_str
+        assert read_data["date"] == now
 
     def test_write_enum(self, json_file):
-        class MyEnum(Enum):
-            A = 1
-            B = 2
-            C = 3
-
         json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
         data = [MyEnum.A, MyEnum.B, MyEnum.C]
         json_dn.write(data)
         read_data = json_dn.read()
-        assert read_data == [1, 2, 3]
+        assert read_data == [MyEnum.A, MyEnum.B, MyEnum.C]
 
     def test_write_dataclass(self, json_file):
-        @dataclass
-        class CustomDataclass:
-            integer: int
-            string: str
-
         json_dn = JSONDataNode("foo", Scope.PIPELINE, properties={"default_path": json_file})
         json_dn.write(CustomDataclass(integer=1, string="foo"))
         read_data = json_dn.read()
-        assert read_data["integer"] == 1
-        assert read_data["string"] == "foo"
+        assert read_data.integer == 1
+        assert read_data.string == "foo"
 
     def test_write_custom_encoder(self, json_file):
         json_dn = JSONDataNode(

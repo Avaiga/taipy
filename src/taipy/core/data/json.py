@@ -14,6 +14,7 @@ import json
 from datetime import date, datetime, timedelta
 from enum import Enum
 from os.path import isfile
+from pydoc import locate
 from typing import Any, Dict, List, Optional, Set
 
 from taipy.config.common.scope import Scope
@@ -149,13 +150,40 @@ class JSONDataNode(DataNode):
 class _DefaultJSONEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Enum):
-            return o.value
+            return {
+                "__type__": f"Enum-{o.__class__.__module__}-{o.__class__.__qualname__}-{o.name}",
+                "__value__": o.value,
+            }
+
         if isinstance(o, (datetime, date)):
-            return o.isoformat()
+            return {"__type__": "Datetime", "__value__": o.isoformat()}
+
         if dataclasses.is_dataclass(o):
-            return dataclasses.asdict(o)
+            return {
+                "__type__": f"dataclass-{o.__class__.__module__}-{o.__class__.__qualname__}",
+                "__value__": dataclasses.asdict(o),
+            }
+
         return super().default(o)
 
 
 class _DefaultJSONDecoder(json.JSONDecoder):
-    pass
+    def __init__(self, *args, **kwargs):
+        json.JSONDecoder.__init__(self, object_hook=self.object_hook, *args, **kwargs)
+
+    def object_hook(self, source):
+        if _type := source.get("__type__"):
+            if _type.startswith("Enum"):
+                _, module, classname, name = _type.split("-")
+                _enum_class = locate(f"{module}.{classname}")
+                return _enum_class[name]
+
+            if _type == "Datetime":
+                return datetime.fromisoformat(source.get("__value__"))
+
+            if _type.startswith("dataclass"):
+                _, module, classname = _type.split("-")
+                _data_class = locate(f"{module}.{classname}")
+                return _data_class(**source.get("__value__"))
+
+        return source
