@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pathlib
 import shutil
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Union
@@ -468,13 +469,13 @@ def clean_all_entities() -> bool:
 
 def export_scenario(
     scenario_id: ScenarioId,
-    folder_path: str,
+    folder_path: Union[str, pathlib.Path],
 ):
     """Export all related entities of a scenario to a folder.
 
     Parameters:
         scenario_id (ScenarioId): The id of the scenario to export.
-        folder_path (str): The folder path to export the scenario to.
+        folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
     """
 
     manager = _ScenarioManagerFactory._build_manager()

@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import os
+import json
 import pathlib
 import shutil
 
@@ -17,7 +19,7 @@ import pytest
 from src.taipy.core.exceptions.exceptions import InvalidExportPath
 from taipy.config.config import Config
 
-from .mocks import MockFSRepository, MockModel, MockObj
+from .mocks import MockFSRepository, MockSQLRepository, MockModel, MockObj
 
 
 class TestRepositoriesStorage:
@@ -107,26 +109,37 @@ class TestRepositoriesStorage:
 
     @pytest.mark.parametrize(
         "mock_repo,params",
-        [(MockFSRepository, {"model": MockModel, "dir_name": "foo"})],
+        [
+            (MockFSRepository, {"model": MockModel, "dir_name": "mock_model"}),
+            (MockSQLRepository, {"model": MockModel}),
+        ],
     )
-    def test_export(self, mock_repo, params):
-        shutil.rmtree("./tmp", ignore_errors=True)
+    @pytest.mark.parametrize("export_path", ["tmp"])
+    def test_export(self, mock_repo, params, tmp_sqlite, export_path):
+        if mock_repo == MockSQLRepository:
+            Config.global_config.repository_properties = {"db_location": tmp_sqlite}
+
         r = mock_repo(**params)
 
         m = MockObj("uuid", "foo")
         r._save(m)
 
-        r._export("uuid", "tmp")
-        assert pathlib.Path("tmp/foo/uuid.json").exists()
+        r._export("uuid", export_path)
+        assert pathlib.Path(os.path.join(export_path, f"mock_model/uuid.json")).exists()
+        with open(os.path.join(export_path, f"mock_model/uuid.json"), "r") as exported_file:
+            exported_data = json.load(exported_file)
+            assert exported_data["id"] == "uuid"
+            assert exported_data["name"] == "foo"
 
         # Export to same location again should work
-        r._export("uuid", "tmp")
-        assert pathlib.Path("tmp/foo/uuid.json").exists()
+        r._export("uuid", export_path)
+        assert pathlib.Path(os.path.join(export_path, f"mock_model/uuid.json")).exists()
 
-        with pytest.raises(InvalidExportPath):
-            r._export("uuid", Config.global_config.storage_folder)
+        if mock_repo == MockFSRepository:
+            with pytest.raises(InvalidExportPath):
+                r._export("uuid", Config.global_config.storage_folder)
 
-        shutil.rmtree("./tmp", ignore_errors=True)
+        shutil.rmtree(export_path, ignore_errors=True)
 
     def test_config_override(self):
         storage_folder = pathlib.Path("/tmp") / "fodo"

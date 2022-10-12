@@ -208,8 +208,12 @@ class _FileSystemRepository(_AbstractRepository[ModelType, Entity]):
 
         return None, None, None
 
-    def _export(self, entity_id: str, folder_path: str):
-        folder: pathlib.Path = pathlib.Path(folder_path)
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
+        if isinstance(folder_path, str):
+            folder: pathlib.Path = pathlib.Path(folder_path)
+        else:
+            folder = folder_path
+
         if folder.resolve() == self._storage_folder.resolve():
             raise InvalidExportPath("The export folder must not be the storage folder.")
 

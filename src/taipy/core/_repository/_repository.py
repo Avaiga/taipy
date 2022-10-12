@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 import json
+import pathlib
 from abc import abstractmethod
 from datetime import datetime
 from enum import Enum
@@ -116,13 +117,13 @@ class _AbstractRepository(Generic[ModelType, Entity]):
         raise NotImplementedError
 
     @abstractmethod
-    def _export(self, entity_id: str, folder_path: str):
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         """
         Export an entity from the repository.
 
         Args:
-            entity_id: The id of the entity to be exported.
-            folder_path (str): The folder path to export the entity to.
+            entity_id (str): The id of the entity to be exported.
+            folder_path (Union[str, pathlib.Path]): The folder path to export the entity to.
 
         """
         raise NotImplementedError

@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pathlib
 from typing import Generic, Iterable, List, TypeVar, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
@@ -99,7 +100,7 @@ class _Manager(Generic[EntityType]):
         _DataManagerFactory._build_manager()._delete_many(_entity_ids.data_node_ids)
 
     @classmethod
-    def _export(cls, id: str, folder_path: str):
+    def _export(cls, id: str, folder_path: Union[str, pathlib.Path]):
         """
         Export an entity.
         """

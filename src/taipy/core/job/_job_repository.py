@@ -9,8 +9,9 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import pathlib
 from datetime import datetime
-from typing import Any, Iterable, List, Optional
+from typing import Any, Iterable, List, Optional, Union
 
 from taipy.logger._taipy_logger import _TaipyLogger
 
@@ -86,7 +87,7 @@ class _JobRepository(_AbstractRepository[_JobModel, Job]):  # type: ignore
     def _search(self, attribute: str, value: Any) -> Optional[Job]:
         return self.repo._search(attribute, value)
 
-    def _export(self, entity_id: str, folder_path: str):
+    def _export(self, entity_id: str, folder_path: Union[str, pathlib.Path]):
         return self.repo._export(entity_id, folder_path)
 
     @staticmethod

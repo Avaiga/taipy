@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import pathlib
 import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Set, Union
@@ -278,12 +279,12 @@ class Scenario(_Entity):
 
     def export(
         self,
-        folder_path: str,
+        folder_path: Union[str, pathlib.Path],
     ):
         """Export all related entities of this scenario to a folder.
 
         Parameters:
-            folder_path (str): The folder path to export the scenario to.
+            folder_path (Union[str, pathlib.Path]): The folder path to export the scenario to.
         """
         from ... import core as tp
 

@@ -11,6 +11,7 @@
 
 import datetime
 import os
+import pathlib
 import shutil
 from unittest import mock
 
@@ -353,7 +354,7 @@ class TestTaipy:
         assert sorted(os.listdir("./tmp/exp_scenario_1/cycles")) == sorted([f"{scenario_1.cycle.id}.json"])
 
         # Export scenario 2
-        scenario_2.export("./tmp/exp_scenario_2")
+        scenario_2.export(pathlib.Path.cwd() / "./tmp/exp_scenario_2")
         assert sorted(os.listdir("./tmp/exp_scenario_2/data_nodes")) == sorted(
             [f"{scenario_2.i2.id}.json", f"{scenario_2.o2.id}.json"]
         )
