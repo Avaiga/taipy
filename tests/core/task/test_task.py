@@ -168,6 +168,13 @@ def test_auto_set_and_reload(data_node):
     assert task_1.function == mock_func
     assert task_2.function == mock_func
 
+    assert task_1.parent_ids == set()
+    assert task_2.parent_ids == set()
+    task_1._parent_ids.update(["p1"])
+    _TaskManager._set(task_1)
+    assert task_1.parent_ids == {"p1"}
+    assert task_2.parent_ids == {"p1"}
+
     with task_1 as task:
         assert task.config_id == "foo"
         assert task.owner_id is None
@@ -185,6 +192,12 @@ def test_auto_set_and_reload(data_node):
     assert task_1.owner_id is None
     assert task_1.function == print
     assert not task_1._is_in_context
+
+
+def test_get_parents(task):
+    with mock.patch("src.taipy.core.get_parents") as mck:
+        task.get_parents()
+        mck.assert_called_once_with(task)
 
 
 def test_submit_task(task: Task):

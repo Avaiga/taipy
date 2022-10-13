@@ -270,6 +270,10 @@ def test_auto_set_and_reload(task):
 
     assert pipeline_1.parent_ids == set()
     assert pipeline_2.parent_ids == set()
+    pipeline_1._parent_ids.update(["sc1"])
+    _PipelineManager._set(pipeline_1)
+    assert pipeline_1.parent_ids == {"sc1"}
+    assert pipeline_2.parent_ids == {"sc1"}
 
     assert len(pipeline_1.tasks) == 0
     pipeline_1.tasks = [task]
@@ -318,7 +322,6 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
-        assert pipeline.parent_ids == set()
 
         pipeline.tasks = []
         pipeline.owner_id = None
@@ -330,14 +333,18 @@ def test_auto_set_and_reload(task):
         assert pipeline.owner_id is None
         assert len(pipeline.subscribers) == 0
         assert pipeline._is_in_context
-        assert pipeline.parent_ids == set()
 
     assert pipeline_1.config_id == "foo"
     assert len(pipeline_1.tasks) == 0
     assert pipeline_1.owner_id is None
     assert len(pipeline_1.subscribers) == 1
     assert not pipeline_1._is_in_context
-    assert pipeline.parent_ids == set()
+
+
+def test_get_parents(pipeline):
+    with mock.patch("src.taipy.core.get_parents") as mck:
+        pipeline.get_parents()
+        mck.assert_called_once_with(pipeline)
 
 
 def test_subscribe_pipeline():

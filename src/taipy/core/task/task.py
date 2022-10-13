@@ -56,7 +56,7 @@ class Task(_Entity):
         self.config_id = _validate_id(config_id)
         self.id = id or TaskId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.owner_id = owner_id
-        self.parent_ids = parent_ids or set()
+        self._parent_ids = parent_ids or set()
         self.__input = {dn.config_id: dn for dn in input or []}
         self.__output = {dn.config_id: dn for dn in output or []}
         self._function = function
@@ -76,6 +76,17 @@ class Task(_Entity):
         """
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
+
+    def get_parents(self):
+        """Get parents of the task entity"""
+        from ... import core as tp
+
+        return tp.get_parents(self)
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def parent_ids(self):
+        return self._parent_ids
 
     def __hash__(self):
         return hash(self.id)

@@ -93,8 +93,17 @@ class _PipelineManager(_Manager[Pipeline]):
             owner_id,
             {scenario_id} if scenario_id else None,
         )
+        for task in tasks:
+            task._parent_ids.update([pipeline_id])
+        cls.__save_tasks(tasks)
         cls._set(pipeline)
         return pipeline
+
+    @classmethod
+    def __save_tasks(cls, tasks):
+        task_manager = _TaskManagerFactory._build_manager()
+        for i in tasks:
+            task_manager._set(i)
 
     @classmethod
     def _submit(

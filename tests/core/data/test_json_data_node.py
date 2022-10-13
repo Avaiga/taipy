@@ -242,8 +242,8 @@ class TestJSONDataNode:
         dn.write({"other": "stuff"})
         assert dn.read() == {"other": "stuff"}
 
-    def test_get_system_modified_date_instead_of_last_edit_date(self):
-        temp_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.json")
+    def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+        temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.json"))
         pd.DataFrame([]).to_json(temp_file_path)
         dn = JSONDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
@@ -262,5 +262,3 @@ class TestJSONDataNode:
 
         dn.write([1, 2, 3])
         assert new_edit_date < dn.last_edit_date
-
-        os.unlink(temp_file_path)

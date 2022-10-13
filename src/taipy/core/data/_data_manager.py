@@ -44,18 +44,12 @@ class _DataManager(_Manager[DataNode]):
             owner_id = pipeline_id if scope == Scope.PIPELINE else scenario_id if scope == Scope.SCENARIO else None
             dn_configs_and_owner_id.append((dn_config, owner_id))
 
-        created_data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
+        data_nodes = cls._repository._get_by_configs_and_owner_ids(dn_configs_and_owner_id)  # type: ignore
 
-        data_nodes = {}
-        for dn_config, owner_id in dn_configs_and_owner_id:
-            if dn := created_data_nodes.get((dn_config, owner_id)):
-                if dn.parent_ids:
-                    dn.parent_ids.update([task_id])
-            else:
-                dn = cls._create_and_set(dn_config, owner_id, {task_id} if task_id else None)
-            data_nodes[dn_config] = dn
-
-        return data_nodes
+        return {
+            dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
+            for dn_config, owner_id in dn_configs_and_owner_id
+        }
 
     @classmethod
     def _create_and_set(

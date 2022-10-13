@@ -72,7 +72,7 @@ class _TaskManager(_Manager[Task]):
         tasks = []
         for task_config, owner_id in tasks_configs_and_owner_id:
             if task := tasks_by_config.get((task_config, owner_id)):
-                task.parent_ids.update([pipeline_id])
+                tasks.append(task)
             else:
                 inputs = [data_nodes[input_config] for input_config in task_config.input_configs]
                 outputs = [data_nodes[output_config] for output_config in task_config.output_configs]
@@ -82,12 +82,12 @@ class _TaskManager(_Manager[Task]):
                     inputs,
                     outputs,
                     owner_id=owner_id,
-                    parent_ids={pipeline_id} if pipeline_id else None,
+                    parent_ids=set(),
                 )
                 for dn in set(inputs + outputs):
-                    dn.parent_ids.update([task.id])
-            cls._set(task)
-            tasks.append(task)
+                    dn._parent_ids.update([task.id])
+                cls._set(task)
+                tasks.append(task)
         return tasks
 
     @classmethod

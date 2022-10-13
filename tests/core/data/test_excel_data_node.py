@@ -874,8 +874,8 @@ class TestExcelDataNode:
                 },
             )
 
-    def test_get_system_modified_date_instead_of_last_edit_date(self):
-        temp_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.xlsx")
+    def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+        temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.xlsx"))
         pd.DataFrame([]).to_excel(temp_file_path)
         dn = ExcelDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
@@ -894,5 +894,3 @@ class TestExcelDataNode:
 
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
-
-        os.unlink(temp_file_path)

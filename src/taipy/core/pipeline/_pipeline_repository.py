@@ -45,7 +45,7 @@ class _PipelineRepository(_AbstractRepository[_PipelineModel, Pipeline]):  # typ
         return _PipelineModel(
             pipeline.id,
             pipeline.owner_id,
-            list(pipeline.parent_ids),
+            list(pipeline._parent_ids),
             pipeline.config_id,
             pipeline._properties.data,
             self.__to_task_ids(pipeline._tasks),

@@ -62,7 +62,7 @@ class Pipeline(_Entity):
         self.config_id = _validate_id(config_id)
         self.id: PipelineId = pipeline_id or self._new_id(self.config_id)
         self.owner_id = owner_id
-        self.parent_ids = parent_ids or set()
+        self._parent_ids = parent_ids or set()
         self._tasks = tasks
 
         self._subscribers = _ListAttributes(self, subscribers or list())
@@ -84,6 +84,11 @@ class Pipeline(_Entity):
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
 
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def parent_ids(self):
+        return self._parent_ids
+
     def __getstate__(self):
         return self.id
 
@@ -92,6 +97,9 @@ class Pipeline(_Entity):
 
         p = tp.get(id)
         self.__dict__ = p.__dict__
+
+    def __hash__(self):
+        return hash(self.id)
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
@@ -217,6 +225,12 @@ class Pipeline(_Entity):
         remove = [node for node, degree in dict(dag.in_degree).items() if degree == 0 and isinstance(node, DataNode)]
         dag.remove_nodes_from(remove)
         return list(nodes for nodes in nx.topological_generations(dag) if (Task in (type(node) for node in nodes)))
+
+    def get_parents(self):
+        """Get parents of the pipeline entity"""
+        from ... import core as tp
+
+        return tp.get_parents(self)
 
     def subscribe(
         self,

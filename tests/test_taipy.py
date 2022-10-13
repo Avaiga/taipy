@@ -377,3 +377,69 @@ class TestTaipy:
             tp.export_scenario(scenario_1.id, Config.global_config.storage_folder)
 
         shutil.rmtree("./tmp", ignore_errors=True)
+
+    def test_get_parents(self):
+        def assert_result_parents_and_expected_parents(parents, expected_parents):
+            for key, items in expected_parents.items():
+                assert len(parents[key]) == len(expected_parents[key])
+                parent_ids = [parent.id for parent in parents[key]]
+                assert all([item.id in parent_ids for item in items])
+
+        dn_config_1 = Config.configure_data_node(id="d1", storage_type="in_memory", scope=Scope.SCENARIO)
+        dn_config_2 = Config.configure_data_node(id="d2", storage_type="in_memory", scope=Scope.SCENARIO)
+        dn_config_3 = Config.configure_data_node(id="d3", storage_type="in_memory", scope=Scope.SCENARIO)
+        task_config_1 = Config.configure_task("t1", print, dn_config_1, dn_config_2)
+        task_config_2 = Config.configure_task("t2", print, dn_config_2, dn_config_3)
+        pipeline_config_1 = Config.configure_pipeline("p1", task_config_1)
+        pipeline_config_2 = Config.configure_pipeline("p2", [task_config_1, task_config_2])
+        scenario_cfg_1 = Config.configure_scenario("s1", [pipeline_config_1, pipeline_config_2], Frequency.DAILY)
+
+        scenario = tp.create_scenario(scenario_cfg_1)
+        pipelines = scenario.pipelines
+        tasks = {}
+        for pipeline in pipelines.values():
+            tasks.update(pipeline.tasks)
+
+        expected_parents = {
+            "scenarios": {scenario},
+            "pipelines": {pipelines["p1"], pipelines["p2"]},
+            "tasks": {tasks["t1"]},
+        }
+        parents = tp.get_parents(scenario.pipelines["p1"].tasks["t1"].data_nodes["d1"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {
+            "scenarios": {scenario},
+            "pipelines": {pipelines["p1"], pipelines["p2"]},
+            "tasks": {tasks["t1"], tasks["t2"]},
+        }
+        parents = tp.get_parents(scenario.pipelines["p1"].tasks["t1"].data_nodes["d2"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p2"]}, "tasks": {tasks["t2"]}}
+        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t2"].data_nodes["d3"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p1"], pipelines["p2"]}}
+        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t1"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {"scenarios": {scenario}, "pipelines": {pipelines["p2"]}}
+        parents = tp.get_parents(scenario.pipelines["p2"].tasks["t2"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {"scenarios": {scenario}}
+        parents = tp.get_parents(scenario.pipelines["p1"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {"scenarios": {scenario}}
+        parents = tp.get_parents(scenario.pipelines["p2"])
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {}
+        parents = tp.get_parents(scenario)
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {}
+        parents = tp.get_parents(scenario.cycle)
+        assert_result_parents_and_expected_parents(parents, expected_parents)

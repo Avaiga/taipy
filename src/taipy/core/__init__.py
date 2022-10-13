@@ -34,6 +34,7 @@ from .taipy import (
     get_data_nodes,
     get_jobs,
     get_latest_job,
+    get_parents,
     get_pipelines,
     get_primary,
     get_primary_scenarios,

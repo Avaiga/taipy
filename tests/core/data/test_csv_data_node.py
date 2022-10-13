@@ -211,8 +211,8 @@ class TestCSVDataNode:
         with pytest.raises(InvalidExposedType):
             CSVDataNode("foo", Scope.PIPELINE, properties={"path": path, "exposed_type": "foo"})
 
-    def test_get_system_modified_date_instead_of_last_edit_date(self):
-        temp_file_path = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/temp.csv")
+    def test_get_system_modified_date_instead_of_last_edit_date(self, tmpdir_factory):
+        temp_file_path = str(tmpdir_factory.mktemp("data").join("temp.csv"))
         pd.DataFrame([]).to_csv(temp_file_path)
         dn = CSVDataNode("foo", Scope.PIPELINE, properties={"path": temp_file_path, "exposed_type": "pandas"})
 
@@ -231,5 +231,3 @@ class TestCSVDataNode:
 
         dn.write(pd.DataFrame([7, 8, 9]))
         assert new_edit_date < dn.last_edit_date
-
-        os.unlink(temp_file_path)

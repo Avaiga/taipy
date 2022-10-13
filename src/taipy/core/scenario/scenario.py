@@ -87,6 +87,9 @@ class Scenario(_Entity):
         sc = tp.get(id)
         self.__dict__ = sc.__dict__
 
+    def __hash__(self):
+        return hash(self.id)
+
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)
     def pipelines(self):

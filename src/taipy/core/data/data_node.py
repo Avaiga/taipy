@@ -92,7 +92,7 @@ class DataNode(_Entity):
         self.config_id = _validate_id(config_id)
         self.id = id or DataNodeId(self.__ID_SEPARATOR.join([self._ID_PREFIX, self.config_id, str(uuid.uuid4())]))
         self.owner_id = owner_id
-        self.parent_ids = parent_ids or set()
+        self._parent_ids = parent_ids or set()
         self._scope = scope
         self._last_edit_date = last_edit_date
         self._name = name or self.id
@@ -119,6 +119,17 @@ class DataNode(_Entity):
         """
         _warn_deprecated("parent_id", suggest="owner_id")
         self.owner_id = val
+
+    def get_parents(self):
+        """Get parents of the Data Node entity"""
+        from ... import core as tp
+
+        return tp.get_parents(self)
+
+    @property  # type: ignore
+    @_self_reload(_MANAGER_NAME)
+    def parent_ids(self):
+        return self._parent_ids
 
     @property  # type: ignore
     @_self_reload(_MANAGER_NAME)

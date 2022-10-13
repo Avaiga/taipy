@@ -12,11 +12,12 @@
 import pathlib
 import shutil
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from taipy.config.config import Config
 from taipy.logger._taipy_logger import _TaipyLogger
 
+from .common._entity import _Entity
 from .common.alias import CycleId, DataNodeId, JobId, PipelineId, ScenarioId, TaskId
 from .config.pipeline_config import PipelineConfig
 from .config.scenario_config import ScenarioConfig
@@ -498,3 +499,58 @@ def export_scenario(
         _ScenarioManagerFactory._build_manager()._export(scenario_id, folder_path)
     for job_id in entity_ids.job_ids:
         _JobManagerFactory._build_manager()._export(job_id, folder_path)
+
+
+def get_parents(
+    entity: Union[TaskId, DataNodeId, PipelineId, Task, DataNode, Pipeline], parent_dict=None
+) -> Dict[str, Set[_Entity]]:
+    """Get the parents of an entity from itself or its identifier.
+
+    Parameters:
+        entity (Union[TaskId^, DataNodeId^, PipelineId^, Task, DataNode, Pipeline]): The entity or its
+            identifier to get the parents.<br/>
+    Returns:
+        Dict[str, Set[_Entity]]: The dictionary of all parent entities.
+            They are grouped by their type (Scenario^, Pipelines^, or tasks^) so each key corresponds
+            to a level of the parents and the value is a set of the parent entities.
+            An empty dictionary is returned if the entity does not have parents.<br/>
+            Example: The following instruction returns all the pipelines that include the
+            datanode identified by "my_datanode_id".
+            `taipy.get_parents("id_of_my_datanode")["pipelines"]`
+    Raises:
+        ModelNotFound^: If _entity_ does not match a correct entity pattern.
+    """
+
+    def update_parent_dict(parents_set, parent_dict, key):
+        if key in parent_dict.keys():
+            parent_dict[key].update(parents_set)
+        else:
+            parent_dict[key] = parents_set
+
+    if isinstance(entity, str):
+        entity = get(entity)  # type: ignore
+
+    parent_dict = parent_dict or dict()
+
+    if isinstance(entity, (Scenario, Cycle)):
+        return parent_dict
+
+    parents = {get(parent) for parent in entity.parent_ids}  # type: ignore
+
+    if isinstance(entity, Pipeline):
+        parent_entity_key = "scenarios"
+        update_parent_dict(parents, parent_dict, parent_entity_key)
+
+    if isinstance(entity, Task):
+        parent_entity_key = "pipelines"
+        update_parent_dict(parents, parent_dict, parent_entity_key)
+        for parent in parent_dict[parent_entity_key]:
+            get_parents(parent, parent_dict)
+
+    if isinstance(entity, DataNode):
+        parent_entity_key = "tasks"
+        update_parent_dict(parents, parent_dict, parent_entity_key)
+        for parent in parent_dict[parent_entity_key]:
+            get_parents(parent, parent_dict)
+
+    return parent_dict
