@@ -530,8 +530,10 @@ def get_parents(
     if isinstance(entity, str):
         entity = get(entity)  # type: ignore
 
-    if not parent_dict:
-        parent_dict = {}
+    parent_dict = parent_dict or dict()
+
+    if isinstance(entity, (Scenario, Cycle)):
+        return parent_dict
 
     parents = {get(parent) for parent in entity.parent_ids}  # type: ignore
 

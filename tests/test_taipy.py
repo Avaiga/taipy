@@ -435,3 +435,11 @@ class TestTaipy:
         expected_parents = {"scenarios": {scenario}}
         parents = tp.get_parents(scenario.pipelines["p2"])
         assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {}
+        parents = tp.get_parents(scenario)
+        assert_result_parents_and_expected_parents(parents, expected_parents)
+
+        expected_parents = {}
+        parents = tp.get_parents(scenario.cycle)
+        assert_result_parents_and_expected_parents(parents, expected_parents)
