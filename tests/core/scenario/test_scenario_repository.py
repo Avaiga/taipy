@@ -10,7 +10,9 @@
 # specific language governing permissions and limitations under the License.
 
 from src.taipy.core.scenario._scenario_repository_factory import _ScenarioRepositoryFactory
+from src.taipy.core.scenario._scenario_sql_repository import _ScenarioSQLRepository
 from src.taipy.core.scenario.scenario import Scenario
+from taipy.config.config import Config
 
 
 def test_save_and_load(tmpdir, scenario):
@@ -25,5 +27,34 @@ def test_save_and_load(tmpdir, scenario):
 
 def test_from_and_to_model(scenario, scenario_model):
     repository = _ScenarioRepositoryFactory._build_repository()
+    assert repository._to_model(scenario) == scenario_model
+    assert repository._from_model(scenario_model) == scenario
+
+
+def test_save_and_load_with_sql_repo(tmpdir, scenario):
+    # TODO: Test failing due to ScenarioRepositoryFactory is building the ScenarioFSRepository
+    # by default but loaded the SQLRepository to self.repo and then passing the dir_name params to it.
+    # SQLRepository doesn't understand the dir_name params => test failed
+
+    Config.global_config.repository_type = "sql"
+    # repository = _ScenarioSQLRepository() # NOTE: this works
+    repository = _ScenarioRepositoryFactory._build_repository()
+
+    repository.base_path = tmpdir
+    repository._save(scenario)
+    sc = repository.load(scenario.id)
+
+    assert isinstance(sc, Scenario)
+    assert scenario.id == sc.id
+
+
+def test_from_and_to_model_with_sql_repo(scenario, scenario_model):
+    # TODO: test is failing with the same reason as above
+
+    Config.global_config.repository_type = "sql"
+
+    # repository = _ScenarioSQLRepository() # NOTE: this works
+    repository = _ScenarioRepositoryFactory._build_repository()
+
     assert repository._to_model(scenario) == scenario_model
     assert repository._from_model(scenario_model) == scenario

@@ -123,34 +123,34 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
             return None
         return self.__to_entity(entry)
 
-    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]) -> Optional[Entity]:
-        entities = iter(self.__get_entities_by_config_and_parent(config_id, parent_id))
+    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
+        entities = iter(self.__get_entities_by_config_and_owner(config_id, owner_id))
         return next(entities, None)
 
-    def _get_by_configs_and_parent_ids(self, configs_and_parent_ids):
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
         # Maintainability and readability were impacted.
         res = {}
-        configs_and_parent_ids = set(configs_and_parent_ids)
+        configs_and_owner_ids = set(configs_and_owner_ids)
 
-        for config, parent in configs_and_parent_ids:
-            entry = self.__get_entities_by_config_and_parent(config, parent, only_first=True)
+        for config, owner in configs_and_owner_ids:
+            entry = self.__get_entities_by_config_and_owner(config, owner, only_first=True)
             if entry:
                 entity = self.__to_entity(entry)
-                key = config, parent
+                key = config, owner
                 res[key] = entity
-                configs_and_parent_ids.remove(key)
+                configs_and_owner_ids.remove(key)
 
         return res
 
-    def __get_entities_by_config_and_parent(
-        self, config_id: str, parent_id: Optional[str] = "", only_first: bool = False
+    def __get_entities_by_config_and_owner(
+        self, config_id: str, owner_id: Optional[str] = "", only_first: bool = False
     ):
         query = (
             self.session.query(_TaipyModel)
             .filter_by(model_name=self.model_name)
             .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
-            .filter(_TaipyModel.document.contains(f'"parent_id": "{parent_id}"'))
+            .filter(_TaipyModel.document.contains(f'"owner_id": "{owner_id}"'))
         )
         if only_first:
             return query.first()

@@ -19,8 +19,8 @@ class _ScenarioSQLRepository(_ScenarioRepository):
     def __init__(self):
         super().__init__(model=_ScenarioModel, model_name="scenario")
 
-    def _get_by_config_and_parent_id(self, config_id: str, parent_id: Optional[str]):
-        return super().repository._get_by_config_and_parent_id(config_id, parent_id)
+    def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]):
+        return super().repository._get_by_config_and_owner_id(config_id, owner_id)
 
-    def _get_by_configs_and_parent_ids(self, configs_and_parent_ids):
-        return super().repository._get_by_configs_and_parent_ids(configs_and_parent_ids)
+    def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
+        return super().repository._get_by_configs_and_owner_ids(configs_and_owner_ids)
