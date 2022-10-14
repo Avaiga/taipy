@@ -291,3 +291,7 @@ class Job(_Entity):
 
     def __hash__(self):
         return hash(self.id)
+
+    def _unlock_edit_on_outputs(self):
+        for dn in self.task.output.values():
+            dn.unlock_edit(at=dn.last_edit_date)

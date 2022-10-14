@@ -9,6 +9,8 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+from typing import Dict
+
 from taipy.config._config import _Config
 from taipy.config.checker._checker import _ConfigChecker
 from taipy.config.checker.issue_collector import IssueCollector
@@ -22,7 +24,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
         super().__init__(config, collector)
 
     def _check(self) -> IssueCollector:
-        data_node_configs = self._config._sections[DataNodeConfig.name]
+        data_node_configs: Dict[str, DataNodeConfig] = self._config._sections[DataNodeConfig.name]
         for data_node_config_id, data_node_config in data_node_configs.items():
             self._check_existing_config_id(data_node_config)
             self._check_storage_type(data_node_config_id, data_node_config)
@@ -56,24 +58,26 @@ class _DataNodeConfigChecker(_ConfigChecker):
             if storage_type in DataNodeConfig._REQUIRED_PROPERTIES:
                 required_properties = DataNodeConfig._REQUIRED_PROPERTIES[storage_type]
                 if storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_SQL:
-                    if engine := data_node_config.properties.get(DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY):
-                        if engine == DataNodeConfig._REQUIRED_DB_ENGINE_SQLITE:
-                            required_properties = [
-                                DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
-                                DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
-                                DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
-                                DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
-                            ]
+                    if data_node_config.properties:
+                        if engine := data_node_config.properties.get(DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY):
+                            if engine == DataNodeConfig._REQUIRED_DB_ENGINE_SQLITE:
+                                required_properties = [
+                                    DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
+                                    DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
+                                    DataNodeConfig._REQUIRED_READ_QUERY_SQL_PROPERTY,
+                                    DataNodeConfig._REQUIRED_WRITE_QUERY_BUILDER_SQL_PROPERTY,
+                                ]
                 if storage_type == DataNodeConfig._STORAGE_TYPE_VALUE_SQL_TABLE:
-                    if engine := data_node_config.properties.get(DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY):
-                        if engine == DataNodeConfig._REQUIRED_DB_ENGINE_SQLITE:
-                            required_properties = [
-                                DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
-                                DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
-                                DataNodeConfig._REQUIRED_TABLE_NAME_PROPERTY,
-                            ]
+                    if data_node_config.properties:
+                        if engine := data_node_config.properties.get(DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY):
+                            if engine == DataNodeConfig._REQUIRED_DB_ENGINE_SQLITE:
+                                required_properties = [
+                                    DataNodeConfig._REQUIRED_DB_NAME_SQL_PROPERTY,
+                                    DataNodeConfig._REQUIRED_DB_ENGINE_SQL_PROPERTY,
+                                    DataNodeConfig._REQUIRED_TABLE_NAME_PROPERTY,
+                                ]
                 for required_property in required_properties:
-                    if required_property not in data_node_config.properties:
+                    if not data_node_config.properties or required_property not in data_node_config.properties:
                         self._error(
                             "properties",
                             required_property,
@@ -88,7 +92,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 DataNodeConfig._OPTIONAL_WRITE_FUNCTION_PARAMS_GENERIC_PROPERTY,
             ]
             for prop_key in properties_to_check:
-                if prop_key in data_node_config.properties:
+                if data_node_config.properties and prop_key in data_node_config.properties:
                     prop_value = data_node_config.properties[prop_key]
                     if not isinstance(prop_value, tuple):  # type: ignore
                         self._error(
@@ -105,7 +109,7 @@ class _DataNodeConfigChecker(_ConfigChecker):
                 DataNodeConfig._REQUIRED_WRITE_FUNCTION_GENERIC_PROPERTY,
             ]
             for prop_key in properties_to_check:
-                prop_value = data_node_config.properties.get(prop_key)
+                prop_value = data_node_config.properties.get(prop_key) if data_node_config.properties else None
                 if prop_value and not callable(prop_value):
                     self._error(
                         prop_key,

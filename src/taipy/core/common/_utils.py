@@ -52,4 +52,4 @@ def _fcts_to_dict(objs):
     return [d for obj in objs if (d := _fct_to_dict(obj)) is not None]
 
 
-_Subscriber = namedtuple("Subscriber", "callback params")
+_Subscriber = namedtuple("_Subscriber", "callback params")
