@@ -1,6 +1,7 @@
 {
-    "id": "PIPELINE_pipeline_0e1c5dd3-9896-4221-bfc8-6924acd11147",
+    "id": "PIPELINE_pipeline_0e1c5dd3-9896-4221-bfc8-6924pjg11147",
     "owner_id": "SCENARIO_scenario_a9c3eea2-2af3-4a85-a0c3-ef98ff5bd586",
+    "parent_ids": [],
     "config_id": "pipeline",
     "properties": {},
     "tasks": [

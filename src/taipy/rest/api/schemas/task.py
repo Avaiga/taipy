@@ -17,6 +17,7 @@ class TaskSchema(Schema):
     config_id = fields.String()
     id = fields.String()
     owner_id = fields.String()
+    parent_ids = fields.List(fields.String)
     input_ids = fields.List(fields.String)
     function_name = fields.String()
     function_module = fields.String()
