@@ -125,7 +125,7 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
 
     def _get_by_config_and_owner_id(self, config_id: str, owner_id: Optional[str]) -> Optional[Entity]:
         entities = iter(self.__get_entities_by_config_and_owner(config_id, owner_id))
-        return next(entities, None)
+        return self.__to_entity(next(entities, None))
 
     def _get_by_configs_and_owner_ids(self, configs_and_owner_ids):
         # Design in order to optimize performance on Entity creation.
@@ -146,12 +146,20 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
     def __get_entities_by_config_and_owner(
         self, config_id: str, owner_id: Optional[str] = "", only_first: bool = False
     ):
-        query = (
-            self.session.query(_TaipyModel)
-            .filter_by(model_name=self.model_name)
-            .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
-            .filter(_TaipyModel.document.contains(f'"owner_id": "{owner_id}"'))
-        )
+        if owner_id:
+            query = (
+                self.session.query(_TaipyModel)
+                .filter_by(model_name=self.model_name)
+                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
+                .filter(_TaipyModel.document.contains(f'"owner_id": "{owner_id}"'))
+            )
+        else:
+            query = (
+                self.session.query(_TaipyModel)
+                .filter_by(model_name=self.model_name)
+                .filter(_TaipyModel.document.contains(f'"config_id": "{config_id}"'))
+                .filter(_TaipyModel.document.contains('"owner_id": null'))
+            )
         if only_first:
             return query.first()
         return query.all()
@@ -181,8 +189,8 @@ class _SQLRepository(_AbstractRepository[ModelType, Entity]):
         )
         self.session.commit()
 
-    def __to_entity(self, entry: _TaipyModel) -> Entity:
-        return self.__model_to_entity(entry.document)
+    def __to_entity(self, entry: _TaipyModel) -> Optional[Entity]:
+        return self.__model_to_entity(entry.document) if entry else None
 
     def __model_to_entity(self, file_content):
         data = json.loads(file_content, cls=_CustomDecoder)

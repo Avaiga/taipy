@@ -304,6 +304,8 @@ def test_do_not_recreate_existing_pipeline_except_same_config():
     assert len(_PipelineManager._get_all()) == 14
     assert pipeline_19.id != pipeline_20.id
 
+    _PipelineManager._delete_all()
+
 
 def test_hard_delete_one_single_pipeline_with_pipeline_data_nodes():
     Config.configure_job_executions(mode=JobConfig._DEVELOPMENT_MODE)
