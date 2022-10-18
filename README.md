@@ -1,4 +1,7 @@
 # Taipy
+[![tests](https://github.com/Avaiga/taipy-core/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy/actions/workflows/tests.yml)
+[![Python](https://img.shields.io/pypi/pyversions/taipy)](https://pypi.org/project/taipy)
+[![PyPI](https://img.shields.io/pypi/v/taipy.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy)
 
 ## License
 Copyright 2022 Avaiga Private Limited
@@ -12,14 +15,14 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 
 ## Usage
-- [License](#license)
-- [Usage](#usage)
-- [Taipy](#what-is-taipy)
-- [Installation](#installation)
-- [Contributing](#contributing)
-- [Code of conduct](#code-of-conduct)
-- [Directory Structure](#directory-structure)
-- 
+  - [Taipy](#taipy)
+  - [License](#license)
+  - [Usage](#usage)
+  - [What is Taipy](#what-is-taipy)
+  - [Installation](#installation)
+  - [Contributing](#contributing)
+  - [Code of conduct](#code-of-conduct)
+  - [Directory Structure](#directory-structure)
 ## What is Taipy
 
 Taipy is a Python library for creating Business Applications. More information on our [website](https://www.taipy.io).
