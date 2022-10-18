@@ -1,4 +1,8 @@
 # Taipy-REST
+[![tests](https://github.com/Avaiga/taipy-rest/actions/workflows/tests.yml/badge.svg)](https://github.com/Avaiga/taipy-rest/actions/workflows/tests.yml)
+[![Python](https://img.shields.io/pypi/pyversions/taipy-rest)](https://pypi.org/project/taipy-rest)
+[![PyPI](https://img.shields.io/pypi/v/taipy-rest.svg?label=pip&logo=PyPI&logoColor=white)](https://pypi.org/project/taipy-rest)
+
 
 ## License
 Copyright 2022 Avaiga Private Limited
@@ -12,7 +16,7 @@ an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express o
 specific language governing permissions and limitations under the License.
 
 ## Usage
-- [Taipy-REST](#taipy-rest)
+  -  [Taipy-REST](#taipy-rest)
   - [License](#license)
   - [Usage](#usage)
   - [What is Taipy REST](#what-is-taipy-rest)
