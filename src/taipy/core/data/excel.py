@@ -54,7 +54,13 @@ class ExcelDataNode(DataNode):
             and not completed yet. False otherwise.
         path (str): The path to the Excel file.
         properties (dict[str, Any]): A dictionary of additional properties. The _properties_
-            must have a _"default_path"_ or _"path"_ entry with the path of the Excel file.
+            must have a _"default_path"_ or _"path"_ entry with the path of the Excel file:
+
+            - _"default_path"_ `(str)`: The path of the Excel file.\n
+            - _"has_header"_ `(bool)`: If True, indicates that the Excel file has a header.\n
+            - _"sheet_name"_ `(Union[List[str], str])`: The list of sheet names to be used. This
+                can be a unique name.\n
+            - _"exposed_type"_: The exposed type of the data read from Excel file. The default value is `pandas`.\n
     """
 
     __STORAGE_TYPE = "excel"

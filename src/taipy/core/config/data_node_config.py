@@ -561,7 +561,7 @@ class DataNodeConfig(Section):
             db_password (str): The database password.
             db_name (str): The database name.
             db_host (str): The database host. The default value is _"localhost"_.
-            db_engine (str): The database engine. Possible values are _"sqlite"_ or _"mssql"_.
+            db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or _"postgresql"_.
             db_driver (str): The database driver. The default value is
                 _"ODBC Driver 17 for SQL Server"_.
             db_port (int): The database port. The default value is 1433.
@@ -622,7 +622,7 @@ class DataNodeConfig(Section):
             db_username (str): The database username.
             db_password (str): The database password.
             db_name (str): The database name.
-            db_engine (str): The database engine. Possible values are _"sqlite"_ or _"mssql"_.
+            db_engine (str): The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or _"postgresql"_.
             db_port (int): The database port. The default value is 1433.
             db_host (str): The database host. The default value is _"localhost"_.
             db_driver (str): The database driver. The default value is

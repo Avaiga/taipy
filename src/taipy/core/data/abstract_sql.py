@@ -26,7 +26,7 @@ from ..exceptions.exceptions import InvalidExposedType, MissingRequiredProperty,
 from .data_node import DataNode
 
 
-class AbstractSQLDataNode(DataNode):
+class _AbstractSQLDataNode(DataNode):
     """Abstract base class for data node implementations (SQLDataNode and SQLTableDataNode) that use SQL."""
 
     __STORAGE_TYPE = "NOT_IMPLEMENTED"

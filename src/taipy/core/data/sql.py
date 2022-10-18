@@ -16,10 +16,10 @@ from taipy.config.common.scope import Scope
 
 from ..common.alias import DataNodeId, JobId
 from ..exceptions.exceptions import MissingRequiredProperty
-from .abstract_sql import AbstractSQLDataNode
+from .abstract_sql import _AbstractSQLDataNode
 
 
-class SQLDataNode(AbstractSQLDataNode):
+class SQLDataNode(_AbstractSQLDataNode):
     """Data Node stored in a SQL database.
 
     Attributes:
@@ -41,9 +41,19 @@ class SQLDataNode(AbstractSQLDataNode):
             and not completed yet. False otherwise.
         properties (dict[str, Any]): A dictionary of additional properties. Note that the
             _properties_ parameter must at least contain an entry for _"db_username"_,
-            _"db_password"_, _"db_name"_, _"db_engine"_, _"read_query"_, and _"write_query_builder"_.
-            For now, the accepted values for the _"db_engine"_ property are _"mssql"_ and
-            _"sqlite"_.
+            _"db_password"_, _"db_name"_, _"db_engine"_, _"read_query"_, and _"write_query_builder"_:
+
+            - _"db_username"_ `(str)`: The database username.
+            - _"db_password"_ `(str)`: The database password.
+            - _"db_name"_ `(str)`: The database name.
+            - _"db_engine"_ `(str)`: The database engine. Possible values are _"sqlite"_, _"mssql"_, _"mysql"_, or _"postgresql"_.
+            - _"db_port"_ `(int)`: The database port. The default value is 1433.
+            - _"db_host"_ `(str)`: The database host. The default value is _"localhost"_.
+            - _"db_driver"_ `(str)`: The database driver. The default value is _"ODBC Driver 17 for SQL Server"_.
+            - _"db_extra_args"_ `(Dict[str, Any])`: A dictionary of additional arguments to be passed into database connection string.
+            - _"read_query"_ `(str)`: The SQL query string used to read the data from the database.
+            - _"write_query_builder"_ `(Callable)`: A callback function that takes the data as an input parameter and returns a list of SQL queries.
+            - _"exposed_type"_: The exposed type of the data read from SQL query. The default value is `pandas`.
     """
 
     __STORAGE_TYPE = "sql"
